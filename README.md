@@ -15,3 +15,8 @@ C# is designed by the C# Language Design Team (LDT).
 ## Language Specification
 
 It is our plan to move the C# Language Specification into Markdown, and draft it in the `spec` folder. The spec drafts will eventually be standardized and published by ECMA.
+
+## Implementation
+
+The reference implementation of the C# language can be found in the [Roslyn repository](https://github.com/dotnet/roslyn). Until recently, that was also where language design artifacts were tracked. Please allow a little time as we move over active proposals.
+
