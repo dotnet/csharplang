@@ -2,7 +2,7 @@
 
 Language proposals are living documents describing the current thinking about a give language feature.
 
-Proposals can be either *active*, *inactive*, *rejected* or *done*. *Active* proposals are stored directly in the proposals folder, *inactive* and *rejected* proposals are stored in the [inactive](https://github.com/dotnet/csharplang/tree/master/proposals/inactive) and [rejected](https://github.com/dotnet/csharplang/tree/master/proposals/rejected) subfolders, and *done* proposals are archived in a folder corresponding to the language version they are part of.
+Proposals can be either *active*, *inactive*, *rejected* or *done*. *Active* proposals are stored directly in the proposals folder, *inactive* and *rejected* proposals are stored in the [inactive](proposals/inactive) and [rejected](proposals/rejected) subfolders, and *done* proposals are archived in a folder corresponding to the language version they are part of.
 
 ## Lifetime of a proposal
 
