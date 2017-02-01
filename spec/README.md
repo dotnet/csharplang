@@ -4,8 +4,9 @@ __Version 6__
 
 *Microsoft has not yet released an official copy of the C#6 spec. This is an unofficial draft. __When Microsoft does release its official copy, before end 2016 at the latest, then this current repository will be deleted__. That's because I wouldn't want to have two copies of the C#6 spec floating around.*
 
+<!--
 (This document is also available for download: [csharp.pdf](CSharp%20Language%20Specification.pdf?raw=true) and [csharp.docx](CSharp%20Language%20Specification.docx?raw=true))
-
+-->
 
 * [Introduction](introduction.md)
     * [Hello world](introduction.md#hello-world)
@@ -165,4 +166,7 @@ __Version 6__
     * [Recommended tags](documentation-comments.md#recommended-tags)
     * [Processing the documentation file](documentation-comments.md#processing-the-documentation-file)
     * [An example](documentation-comments.md#an-example)
+
+<!--
 * Grammar: [csharp.html](http://ljw1004.github.io/csharpspec/csharp.html). Or download in ANTLR format: [csharp.g4](csharp.g4?raw=true). 
+-->
