@@ -14,7 +14,7 @@ C# is designed by the C# Language Design Team (LDT).
 
 ## Language Specification
 
-It is our plan to move the C# Language Specification into Markdown, and draft it in the `spec` folder. The spec drafts will eventually be standardized and published by ECMA.
+It is our plan to move the C# Language Specification into Markdown, and draft it in the [spec](spec) folder. The spec drafts will eventually be standardized and published by ECMA. The folder currently contains an unofficial Markdown version of the C# 6.0 specification for convenience.
 
 ## Implementation
 
