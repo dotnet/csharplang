@@ -16,7 +16,7 @@ single_line_doc_comment
     ;
 
 delimited_doc_comment
-    : '/**' delimited_comment_section* asterisk* '/'
+    : '/**' delimited_comment_section* asterisk+ '/'
     ;
 ```
 
