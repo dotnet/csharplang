@@ -5,7 +5,7 @@ Welcome to the official repo for C# language design.
 * Full Language Specification: [Markdown](spec)
 * List of [Active](proposals), [Adopted](proposals/adopted), and [Rejected](proposals/rejected) proposals can be found in the [proposals folder](proposals).
 * Archives of mailing lists discussions can be found [here](http://lists.dot.net/pipermail/vblang/).
-* Archives of notes from design meetings, etc., can be found in the [notes folder](notes).
+* Archives of notes from design meetings, etc., can be found in the [meetings folder](meetings).
 
 ## Design Process
 
