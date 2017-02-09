@@ -64,45 +64,45 @@ System.UIntPtr operator ~(System.UIntPtr)
 #### Cast Operators
 
 ```C#
-operator sbyte(System.IntPtr)               // Truncate
-operator short(System.IntPtr)               // Truncate
-operator int(System.IntPtr)                 // Truncate
-operator long(System.IntPtr)                // Sign Extend
+explicit operator sbyte(System.IntPtr)               // Truncate
+explicit operator short(System.IntPtr)               // Truncate
+explicit operator int(System.IntPtr)                 // Truncate
+explicit operator long(System.IntPtr)                // Sign Extend
 
-operator byte(System.IntPtr)                // Truncate
-operator ushort(System.IntPtr)              // Truncate
-operator uint(System.IntPtr)                // Truncate
-operator ulong(System.IntPtr)               // Zero Extend
+explicit operator byte(System.IntPtr)                // Truncate
+explicit operator ushort(System.IntPtr)              // Truncate
+explicit operator uint(System.IntPtr)                // Truncate
+explicit operator ulong(System.IntPtr)               // Zero Extend
 
-operator System.IntPtr(int)                 // Sign Extend
-operator System.IntPtr(long)                // Truncate
+explicit operator System.IntPtr(int)                 // Sign Extend
+explicit operator System.IntPtr(long)                // Truncate
 
-operator System.IntPtr(uint)                // Sign Extend
-operator System.IntPtr(ulong)               // Truncate
+explicit operator System.IntPtr(uint)                // Sign Extend
+explicit operator System.IntPtr(ulong)               // Truncate
 
-operator System.IntPtr(System.IntPtr)
-operator System.IntPtr(System.UIntPtr)
+explicit operator System.IntPtr(System.IntPtr)
+explicit operator System.IntPtr(System.UIntPtr)
 ```
 
 ```C#
-operator sbyte(System.UIntPtr)               // Truncate
-operator short(System.UIntPtr)               // Truncate
-operator int(System.UIntPtr)                 // Truncate
-operator long(System.UIntPtr)                // Sign Extend
+explicit operator sbyte(System.UIntPtr)               // Truncate
+explicit operator short(System.UIntPtr)               // Truncate
+explicit operator int(System.UIntPtr)                 // Truncate
+explicit operator long(System.UIntPtr)                // Sign Extend
 
-operator byte(System.UIntPtr)                // Truncate
-operator ushort(System.UIntPtr)              // Truncate
-operator uint(System.UIntPtr)                // Truncate
-operator ulong(System.UIntPtr)               // Zero Extend
+explicit operator byte(System.UIntPtr)                // Truncate
+explicit operator ushort(System.UIntPtr)              // Truncate
+explicit operator uint(System.UIntPtr)                // Truncate
+explicit operator ulong(System.UIntPtr)               // Zero Extend
 
-operator System.UIntPtr(int)                 // Sign Extend
-operator System.UIntPtr(long)                // Truncate
+explicit operator System.UIntPtr(int)                 // Sign Extend
+explicit operator System.UIntPtr(long)                // Truncate
 
-operator System.UIntPtr(uint)                // Sign Extend
-operator System.UIntPtr(ulong)               // Truncate
+explicit operator System.UIntPtr(uint)                // Sign Extend
+explicit operator System.UIntPtr(ulong)               // Truncate
 
-operator System.UIntPtr(System.IntPtr)
-operator System.UIntPtr(System.UUIntPtr)
+explicit operator System.UIntPtr(System.IntPtr)
+explicit operator System.UIntPtr(System.UIntPtr)
 ```
 
 #### Multiplication Operator
@@ -114,7 +114,7 @@ System.IntPtr operator *(System.IntPtr, System.IntPtr)
 ```
 
 ```C#
-System.UIntPtr operator *(uint, USystem.IntPtr)
+System.UIntPtr operator *(uint, System.UIntPtr)
 System.UIntPtr operator *(System.UIntPtr, uint)
 System.UIntPtr operator *(System.UIntPtr, System.UIntPtr)
 ```
@@ -128,7 +128,7 @@ System.IntPtr operator /(System.IntPtr, System.IntPtr)
 ```
 
 ```C#
-System.UIntPtr operator /(uint, USystem.IntPtr)
+System.UIntPtr operator /(uint, System.UIntPtr)
 System.UIntPtr operator /(System.UIntPtr, uint)
 System.UIntPtr operator /(System.UIntPtr, System.UIntPtr)
 ```
@@ -142,7 +142,7 @@ System.IntPtr operator %(System.IntPtr, System.IntPtr)
 ```
 
 ```C#
-System.UIntPtr operator %(uint, USystem.IntPtr)
+System.UIntPtr operator %(uint, System.UIntPtr)
 System.UIntPtr operator %(System.UIntPtr, uint)
 System.UIntPtr operator %(System.UIntPtr, System.UIntPtr)
 ```
@@ -156,7 +156,7 @@ System.IntPtr operator +(System.IntPtr, System.IntPtr)
 ```
 
 ```C#
-System.UIntPtr operator +(uint, USystem.IntPtr)
+System.UIntPtr operator +(uint, System.UIntPtr)
 System.UIntPtr operator +(System.UIntPtr, uint)
 System.UIntPtr operator +(System.UIntPtr, System.UIntPtr)
 ```
@@ -170,7 +170,7 @@ System.IntPtr operator -(System.IntPtr, System.IntPtr)
 ```
 
 ```C#
-System.UIntPtr operator -(uint, USystem.IntPtr)
+System.UIntPtr operator -(uint, System.UIntPtr)
 System.UIntPtr operator -(System.UIntPtr, uint)
 System.UIntPtr operator -(System.UIntPtr, System.UIntPtr)
 ```
