@@ -1135,7 +1135,7 @@ Exception in F: G
 Exception in Main: G
 ```
 
-If the first catch block had thrown `e` instead of rethrowing the current exception, the output produced is would be as follows:
+If the first catch block had thrown `e` instead of rethrowing the current exception, the output produced would be as follows:
 ```csharp
 Exception in F: G
 Exception in Main: F
