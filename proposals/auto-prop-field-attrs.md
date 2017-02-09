@@ -56,7 +56,10 @@ public class Foo {
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-Currently attempting to apply an attribute to the field of an auto-implemented property produces a compiler warning that the attributes in that block will be ignored.  There is a chance that there is existing code containing these ignored attribute blocks which will result in a potential change in behavior if the feature is properly supported.
+There are two potential drawbacks to implementing this change:
+
+1. Attempting to apply an attribute to the field of an auto-implemented property produces a compiler warning that the attributes in that block will be ignored.  If the compiler were changed to support those attributes they would be applied to the backing field on a subsequent recompilation which could alter the behavior of the program at runtime.
+1. The compiler does not currently validate the AttributeUsage targets of the attributes when attempting to apply them to the field of the auto-implemented property.  If the compiler were changed to support field-targetted attributes and the attribute in question cannot be applied to a field the compiler would emit an error instead of a warning, breaking the build.
 
 ## Alternatives
 [alternatives]: #alternatives
