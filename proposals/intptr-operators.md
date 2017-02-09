@@ -30,7 +30,245 @@ As such, the language should begin to support these operators to help advance th
 ## Detailed design
 [design]: #detailed-design
 
-The full set of operators supported are defined in `III.1.5` of the Common Language Infrastructure specification (`ECMA-335`). The specification is available here: [https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf)
+The full set of operators supported are defined in `III.1.5` of the Common Language Infrastructure specification (`ECMA-335`). The specification is available here: [https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf).
+* A summary of the operators is provided below for convenience.
+* The unverifiable operators defined by the CLI spec are not listed and are not currently part of this proposal (although it may be worth considering these as well).
+* Providing a keyword (such as `nint` and `nuint`) nor providing a way to for literals to be declared for `System.IntPtr` and `System.UIntPtr` (such as 0n) is part of this proposal (although it may be worth considering these as well).
+
+#### Unary Plus Operator
+
+```C#
+System.IntPtr operator +(System.IntPtr)
+```
+
+```C#
+System.UIntPtr operator +(System.UIntPtr)
+```
+
+#### Unary Minus Operator
+
+```C#
+System.IntPtr operator -(System.IntPtr)
+```
+
+#### Bitwise Complement Operator
+
+```C#
+System.IntPtr operator ~(System.IntPtr)
+```
+
+```C#
+System.UIntPtr operator ~(System.UIntPtr)
+```
+
+#### Cast Operators
+
+```C#
+operator sbyte(System.IntPtr)               // Truncate
+operator short(System.IntPtr)               // Truncate
+operator int(System.IntPtr)                 // Truncate
+operator long(System.IntPtr)                // Sign Extend
+
+operator byte(System.IntPtr)                // Truncate
+operator ushort(System.IntPtr)              // Truncate
+operator uint(System.IntPtr)                // Truncate
+operator ulong(System.IntPtr)               // Zero Extend
+
+operator System.IntPtr(int)                 // Sign Extend
+operator System.IntPtr(long)                // Truncate
+
+operator System.IntPtr(uint)                // Sign Extend
+operator System.IntPtr(ulong)               // Truncate
+
+operator System.IntPtr(System.IntPtr)
+operator System.IntPtr(System.UIntPtr)
+```
+
+```C#
+operator sbyte(System.UIntPtr)               // Truncate
+operator short(System.UIntPtr)               // Truncate
+operator int(System.UIntPtr)                 // Truncate
+operator long(System.UIntPtr)                // Sign Extend
+
+operator byte(System.UIntPtr)                // Truncate
+operator ushort(System.UIntPtr)              // Truncate
+operator uint(System.UIntPtr)                // Truncate
+operator ulong(System.UIntPtr)               // Zero Extend
+
+operator System.UIntPtr(int)                 // Sign Extend
+operator System.UIntPtr(long)                // Truncate
+
+operator System.UIntPtr(uint)                // Sign Extend
+operator System.UIntPtr(ulong)               // Truncate
+
+operator System.UIntPtr(System.IntPtr)
+operator System.UIntPtr(System.UUIntPtr)
+```
+
+#### Multiplication Operator
+
+```C#
+System.IntPtr operator *(int, System.IntPtr)
+System.IntPtr operator *(System.IntPtr, int)
+System.IntPtr operator *(System.IntPtr, System.IntPtr)
+```
+
+```C#
+System.UIntPtr operator *(uint, USystem.IntPtr)
+System.UIntPtr operator *(System.UIntPtr, uint)
+System.UIntPtr operator *(System.UIntPtr, System.UIntPtr)
+```
+
+#### Division Operator
+
+```C#
+System.IntPtr operator /(int, System.IntPtr)
+System.IntPtr operator /(System.IntPtr, int)
+System.IntPtr operator /(System.IntPtr, System.IntPtr)
+```
+
+```C#
+System.UIntPtr operator /(uint, USystem.IntPtr)
+System.UIntPtr operator /(System.UIntPtr, uint)
+System.UIntPtr operator /(System.UIntPtr, System.UIntPtr)
+```
+
+#### Remainder Operator
+
+```C#
+System.IntPtr operator %(int, System.IntPtr)
+System.IntPtr operator %(System.IntPtr, int)
+System.IntPtr operator %(System.IntPtr, System.IntPtr)
+```
+
+```C#
+System.UIntPtr operator %(uint, USystem.IntPtr)
+System.UIntPtr operator %(System.UIntPtr, uint)
+System.UIntPtr operator %(System.UIntPtr, System.UIntPtr)
+```
+
+#### Addition Operator
+
+```C#
+System.IntPtr operator +(int, System.IntPtr)
+System.IntPtr operator +(System.IntPtr, int)
+System.IntPtr operator +(System.IntPtr, System.IntPtr)
+```
+
+```C#
+System.UIntPtr operator +(uint, USystem.IntPtr)
+System.UIntPtr operator +(System.UIntPtr, uint)
+System.UIntPtr operator +(System.UIntPtr, System.UIntPtr)
+```
+
+#### Subtraction Operator
+
+```C#
+System.IntPtr operator -(int, System.IntPtr)
+System.IntPtr operator -(System.IntPtr, int)
+System.IntPtr operator -(System.IntPtr, System.IntPtr)
+```
+
+```C#
+System.UIntPtr operator -(uint, USystem.IntPtr)
+System.UIntPtr operator -(System.UIntPtr, uint)
+System.UIntPtr operator -(System.UIntPtr, System.UIntPtr)
+```
+
+#### Shift Operators
+
+```C#
+System.IntPtr operator <<(System.IntPtr, int)
+System.IntPtr operator >>(System.IntPtr, int)
+```
+
+```C#
+System.UIntPtr operator <<(System.UIntPtr, int)
+System.UIntPtr operator >>(System.UIntPtr, int)
+```
+
+#### Integer Comparison Operators
+```C#
+bool operator ==(int, System.IntPtr)
+bool operator ==(System.IntPtr, int)
+bool operator ==(System.IntPtr, System.IntPtr)
+
+bool operator !=(int, System.IntPtr)
+bool operator !=(System.IntPtr, int)
+bool operator !=(System.IntPtr, System.IntPtr)
+
+bool operator  <(int, System.IntPtr)
+bool operator  <(System.IntPtr, int)
+bool operator  <(System.IntPtr, System.IntPtr)
+
+bool operator  >(int, System.IntPtr)
+bool operator  >(System.IntPtr, int)
+bool operator  >(System.IntPtr, System.IntPtr)
+
+bool operator <=(int, System.IntPtr)
+bool operator <=(System.IntPtr, int)
+bool operator <=(System.IntPtr, System.IntPtr)
+
+bool operator >=(int, System.IntPtr)
+bool operator >=(System.IntPtr, int)
+bool operator >=(System.IntPtr, System.IntPtr)
+```
+
+```C#
+bool operator ==(uint, System.UIntPtr)
+bool operator ==(System.UIntPtr, uint)
+bool operator ==(System.UIntPtr, System.UIntPtr)
+
+bool operator !=(uint, System.UIntPtr)
+bool operator !=(System.UIntPtr, uint)
+bool operator !=(System.UIntPtr, System.UIntPtr)
+
+bool operator  <(uint, System.UIntPtr)
+bool operator  <(System.UIntPtr, uint)
+bool operator  <(System.UIntPtr, System.UIntPtr)
+
+bool operator  >(uint, System.UIntPtr)
+bool operator  >(System.UIntPtr, uint)
+bool operator  >(System.UIntPtr, System.UIntPtr)
+
+bool operator <=(uint, System.UIntPtr)
+bool operator <=(System.UIntPtr, uint)
+bool operator <=(System.UIntPtr, System.UIntPtr)
+
+bool operator >=(uint, System.UIntPtr)
+bool operator >=(System.UIntPtr, uint)
+bool operator >=(System.UIntPtr, System.UIntPtr)
+```
+
+#### Integer Logical Operators
+
+```C#
+System.IntPtr operator &(int, System.IntPtr)
+System.IntPtr operator &(System.IntPtr, int)
+System.IntPtr operator &(System.IntPtr, System.IntPtr)
+
+System.IntPtr operator |(int, System.IntPtr)
+System.IntPtr operator |(System.IntPtr, int)
+System.IntPtr operator |(System.IntPtr, System.IntPtr)
+
+System.IntPtr operator ^(int, System.IntPtr)
+System.IntPtr operator ^(System.IntPtr, int)
+System.IntPtr operator ^(System.IntPtr, System.IntPtr)
+```
+
+```C#
+System.UIntPtr operator &(uint, System.UIntPtr)
+System.UIntPtr operator &(System.UIntPtr, uint)
+System.UIntPtr operator &(System.UIntPtr, System.UIntPtr)
+
+System.UIntPtr operator |(uint, System.UIntPtr)
+System.UIntPtr operator |(System.UIntPtr, uint)
+System.UIntPtr operator |(System.UIntPtr, System.UIntPtr)
+
+System.UIntPtr operator ^(uint, System.UIntPtr)
+System.UIntPtr operator ^(System.UIntPtr, uint)
+System.UIntPtr operator ^(System.UIntPtr, System.UIntPtr)
+```
 
 ## Drawbacks
 [drawbacks]: #drawbacks
