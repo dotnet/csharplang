@@ -52,7 +52,7 @@ Overview of meetings and agendas for 2014
 
 ## May 21, 2014
 
-[C# Language Design Notes for May 21, 2014](LDM-2014-01-06.md)
+[C# Language Design Notes for May 21, 2014](LDM-2014-05-21.md)
 
 1.	Limit the nameof feature? <_keep current design_>
 2.	Extend params IEnumerable? <_keep current design_>
@@ -94,7 +94,7 @@ Overview of meetings and agendas for 2014
 
 ## Oct 15, 2014
 
-[C# Language Design Notes for Oct 15, 2014](LDM-2014-10-1506.md)
+[C# Language Design Notes for Oct 15, 2014](LDM-2014-10-15.md)
 
 1. # nameof operator: spec v5
 2. # [String Interpolation for C#](http://1drv.ms/1tFUvbq)
