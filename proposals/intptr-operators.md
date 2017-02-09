@@ -95,10 +95,10 @@ explicit operator ushort(System.UIntPtr)              // Truncate
 explicit operator uint(System.UIntPtr)                // Truncate
 explicit operator ulong(System.UIntPtr)               // Zero Extend
 
-explicit operator System.UIntPtr(int)                 // Sign Extend
+explicit operator System.UIntPtr(int)                 // Zero Extend
 explicit operator System.UIntPtr(long)                // Truncate
 
-explicit operator System.UIntPtr(uint)                // Sign Extend
+explicit operator System.UIntPtr(uint)                // Zero Extend
 explicit operator System.UIntPtr(ulong)               // Truncate
 
 explicit operator System.UIntPtr(System.IntPtr)
