@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-One para explanation of the feature.
+One paragraph explanation of the feature.
 
 ## Motivation
 [motivation]: #motivation
@@ -33,7 +33,7 @@ What other designs have been considered? What is the impact of not doing this?
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-What parts of the design are still TBD?
+What parts of the design are still to be discussed?
 
 ## Design meetings
 
