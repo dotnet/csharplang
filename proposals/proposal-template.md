@@ -33,7 +33,7 @@ What other designs have been considered? What is the impact of not doing this?
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-What parts of the design are still to be discussed?
+What parts of the design are still undecided?
 
 ## Design meetings
 
