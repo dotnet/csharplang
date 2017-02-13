@@ -53,6 +53,7 @@ The programmer can write `(x = x ?? y)` or `if (x == null) x = y;` by hand.
 [unresolved]: #unresolved-questions
 
 - [ ] Requires LDM review
+- [ ] Should we also support `&&=` and `||=` operators?
 
 ## Design meetings
 
