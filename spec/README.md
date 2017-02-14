@@ -1,5 +1,6 @@
 C# Language Specification
 ===========================
+
 __Version 6__
 
 This is an unofficial draft, posted here for convenience. When we submit a C# 6.0 spec proposal to ECMA (who is currently finalizing the C# 5.0 Standard), it will be shared here.
