@@ -53,7 +53,9 @@ Invocation of the callback would be implemented by the `calli` instruction.
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-TBD
+Static Delegates would not work with existing APIs that use regular delegates (one would need to wrap said static delegate in a regular delegate of the same signature).
+
+Additional work would be needed to make Static Delegate readily usable in the core framework.
 
 ## Alternatives
 [alternatives]: #alternatives
