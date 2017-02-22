@@ -87,7 +87,7 @@ The token `with` is a new context-sensitive keyword.
 
 Each *identifier* on the left of a *with_initilaizer* must bind to an accessible instance field or property of the type of the *primary_expression* of the *with_expression*. There may be no duplicated name among these identifiers of a given *with_expression*.
 
- A *with_expression* of the form
+A *with_expression* of the form
 
 > *e1* `with` `{` *identifier* = *e2*, ... `}`
 
