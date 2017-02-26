@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-There are two circumstances in which the current common-type algorithm results are counter-intuitive, and result in the programmer adding what feels like a redundant cast to the code. With this change, an expression such as `condition ? 1 : null` would result in a value of type `int?`, and an expression of the form `condition ? new Dog() : new Cat()` would result in a value of their common base type `Animal`.
+There is a situation in which the current common-type algorithm results are counter-intuitive, and results in the programmer adding what feels like a redundant cast to the code. With this change, an expression such as `condition ? 1 : null` would result in a value of type `int?`.
 
 ## Motivation
 [motivation]: #motivation
@@ -18,10 +18,9 @@ This is a common cause of what feels to the programmer like needless boilerplate
 ## Detailed design
 [design]: #detailed-design
 
-We modify the specification for [finding the best common type of a set of expressions](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions) to affect the following two circumstances:
+We modify the specification for [finding the best common type of a set of expressions](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions) to affect the following situation:
 
 - If one expression is of a non-nullable value type `T` and the other is a null literal, the result is of type `T?`.
-- If the two operands are class types and have a common base type other than `object`, the most specific such type is the result.
 
 This is expected to affect the following aspects of the language:
 
@@ -43,7 +42,6 @@ None.
 [unresolved]: #unresolved-questions
 
 - [ ] What is the severity of incompatibility introduced by this proposal, and how can it be moderated?
-- [ ] Should we handle reference types other than class types?
 
 ## Design meetings
 
