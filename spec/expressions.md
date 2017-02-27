@@ -3505,8 +3505,7 @@ bool? operator |(bool? x, bool? y);
 
 The following table lists the results produced by these operators for all combinations of the values `true`, `false`, and `null`.
 
-
-| `x`     | `y`     | `x & y` | `x | y` |
+| `x`     | `y`     | `x & y` | <code>x &#124; y</code> |
 |:-------:|:-------:|:-------:|:-------:|
 | `true`  | `true`  | `true`  | `true`  | 
 | `true`  | `false` | `false` | `true`  | 
