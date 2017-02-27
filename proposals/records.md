@@ -148,7 +148,7 @@ record_parameters
 
 record_parameter_list
     : record_parameter
-    | record_parameter record_parameter_list
+    | record_parameter ',' record_parameter_list
     ;
 
 record_parameter
