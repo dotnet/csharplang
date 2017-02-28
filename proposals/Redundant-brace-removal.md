@@ -8,12 +8,12 @@
 ## Summary
 [summary]: #summary
 
-There are numerous places within the C# syntax where braces must be used, but where they could be made optional:
+There are a few places within the C# syntax where braces must be used, but where they could be made optional:
 
 1. Single namespace in a file declarations
 2. Empty interface declarations
 3. Constructors that just call `this` or `base`
-4. Read-only auto-properties 
+
 
 ## Motivation
 [motivation]: #motivation
@@ -85,27 +85,6 @@ class C
 }
 ````
 
-### Read-only auto-properties ###
-The original syntax for get-only properties was:
-````cs
-SomeType P
-{
-    get
-    {
-        return _someValue;
-    }
-}
-````
-The syntax has been greatly improved with auto-properties, such that it can now be expressed as:
-````cs
-SomeType P { get; } 
-````
-
-The `{}` are not need to disambiguate `P` and `get` from field declarations and the syntax could be further simplified to:
-````cs
-SomeType P get; 
-````
-
 ## Drawbacks
 [drawbacks]: #drawbacks
 
@@ -128,7 +107,6 @@ No other alternatives identified.
 [unresolved]: #unresolved-questions
 
 - [ ] Is the design guidelines' advice to use attributes instead of marker interfaces still valid? One of the main arguments centres on inheritance, which has numerous problems of its own. The argument (that sub-types may not want to support the attribute) has more than of a whiff of Liskov substitution principle violation about it, too. Further there is a large performance overhead with using attributes, rather than interfaces. Both weaken the argument against marker interfaces.
-- [ ] This proposal focuses on read-only auto-properties. Should it be expanded to include auto properties with setters?
 
 ## Design meetings
 
