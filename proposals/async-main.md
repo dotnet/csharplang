@@ -79,8 +79,28 @@ The main drawback is simply the additional complexity of supporting additional e
 [alternatives]: #alternatives
 
 Other variants considered:
-- Allowing `async void`.  This is problematic as to track the operation's completion we would need to do complicated work with SynchronizationContext (or else change the return type to be Task, but that would break code expecting this specific signature).
-- Using "MainAsync" instead of "Main" as the name.  While the async suffix is recommended for Task-returning methods, that's primarily about library functionality, which Main is not, and supporting additional entrypoint names beyond "Main" is not worth it.
+
+Allowing `async void`.  We need to keep the semantics the same for code calling it directly, which would then make it difficult for a generated entrypoint to call it (no Task returned).  We could solve this by generating two other methods, e.g.
+```C#
+public static async void Main()
+{
+   ... // await code
+}
+```
+becomes
+```C#
+public static async void Main() => await $MainTask();
+
+private static void $EntrypointMain() => Main().GetAwaiter().GetResult();
+
+private static async Task $MainTask()
+{
+    ... // await code
+}
+```
+There are also concerns around encouraging usage of `async void`.
+
+Using "MainAsync" instead of "Main" as the name.  While the async suffix is recommended for Task-returning methods, that's primarily about library functionality, which Main is not, and supporting additional entrypoint names beyond "Main" is not worth it.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
