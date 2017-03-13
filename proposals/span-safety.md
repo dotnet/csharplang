@@ -4,7 +4,7 @@ The main reason for the additional safety rules when dealing with types like `Sp
  
 There are three reasons why `Span<T>` must be a stack-only type.
 
-1. `Span<T>` is basically a struct containing `{reference to data, offset limit}`. Concurrent "tearing" of such struct would lead to the possibility of out of range accesses and type-safety violations, which basically means "GC heap corruption".
+1. `Span<T>` is semantically a struct containing a reference and a range - `(ref T data, int length)`. Regardless of actual implementation, writes to such struct would not be atomic. Concurrent "tearing" of such struct would lead to the possibility of `length` not matching the `data`, causing out-of-range accesses and type-safety violations, which ultimately could result in GC heap corruption in seemingly "safe" code.
 2. Some implementations of `Span<T>` literally contain a managed pointer in one of its fields. Managed pointers are not supported as fields of heap objects and code that manages to put a managed pointer on the GC heap typically crashes at JIT time.
 3. It is permitted for a `Span<T>` to refer to data in the local stack frame - individual local variables or `stackalloc`-ed arrays. A scenario when an instance of a `Span<T>` outlives the referred data to would lead to undefined behavior, including type-safety violations and heap corruptions.
 
@@ -18,7 +18,7 @@ At the minimum the restrictions described below would need to apply to `Span<T>`
 
 C# compiler already has a concept of a restricted types that covers special platform types such as TypedReference. In some cases those types are referred as ref-like types as well. We should probably use some different term to refer to `TypedReference` and similar types - like `restricted types` to avoid confusion.
 
-In this document the "ref like" types include only `Span<T>` and related types. And a ref-like variables mean a variable of a "ref-like" type.  
+In this document the "ref like" types include only `Span<T>` and related types. And the ref-like variables mean variables of "ref-like" types.  
 
 In order to force ref-like variables to be stack only,we need the following restrictions: 
 
@@ -66,7 +66,9 @@ void Callee(ref Span<int> arg1)
 
 ```
 
-Note: returning by a ordinary writeable reference appears to be ok.
+Note: returning by a ordinary writeable reference appears to be ok by itself, but with values on heap being impossible, values in local frame being not returnable and variables passed from the caller being readonly, it may not matter.
+
+Another way to look at this is that writeable references to a ref-like variable would never be exposed outside of the containing method, except, of course, if that method is a constructor which has to take `this` by a writeable ref.
 
 ## `ref-like` types must be readonly structs. ##
 
