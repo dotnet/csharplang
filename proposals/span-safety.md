@@ -20,7 +20,7 @@ C# compiler already has a concept of a restricted types that covers special plat
 
 In this document the "ref like" types include only `Span<T>` and related types. And the ref-like variables mean variables of "ref-like" types.  
 
-In order to force ref-like variables to be stack only,we need the following restrictions: 
+In order to force ref-like variables to be stack only, we need the following restrictions: 
 
 - ref-like type cannot be a type of an array element
 - ref-like type cannot be used as a generic type argument
@@ -45,7 +45,7 @@ Example:
 
 Span<T> Caller()
 {
-	Span<T> safeToReturn Span<T> safeToReturn;
+	Span<T> safeToReturn;
 
 	if (TodaIsNotFriday())
 	{
