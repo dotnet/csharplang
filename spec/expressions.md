@@ -4843,7 +4843,7 @@ class C {
     const object str = "hello"; // error: implicit reference conversion
 }
 ```
-the initialization of iis an error because a boxing conversion is required. The initialization of str is an error because an implicit reference conversion from a non-null value is required.
+the initialization of i is an error because a boxing conversion is required. The initialization of str is an error because an implicit reference conversion from a non-null value is required.
 
 Whenever an expression fulfills the requirements listed above, the expression is evaluated at compile-time. This is true even if the expression is a sub-expression of a larger expression that contains non-constant constructs.
 
