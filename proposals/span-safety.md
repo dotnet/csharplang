@@ -6,7 +6,7 @@ There are three reasons why `Span<T>` must be a stack-only type.
 
 1. `Span<T>` is semantically a struct containing a reference and a range - `(ref T data, int length)`. Regardless of actual implementation, writes to such struct would not be atomic. Concurrent "tearing" of such struct would lead to the possibility of `length` not matching the `data`, causing out-of-range accesses and type-safety violations, which ultimately could result in GC heap corruption in seemingly "safe" code.
 2. Some implementations of `Span<T>` literally contain a managed pointer in one of its fields. Managed pointers are not supported as fields of heap objects and code that manages to put a managed pointer on the GC heap typically crashes at JIT time.
-3. It is permitted for a `Span<T>` to refer to data in the local stack frame - individual local variables or `stackalloc`-ed arrays. A scenario when an instance of a `Span<T>` outlives the referred data to would lead to undefined behavior, including type-safety violations and heap corruptions.
+3. It is permitted for a `Span<T>` to refer to data in the local stack frame - individual local variables or `stackalloc`-ed arrays. A scenario when an instance of a `Span<T>` outlives the referred data would lead to undefined behavior, including type-safety violations and heap corruptions.
 
 All the above problems would be alleviated if instances of `Span<T>` would be allowed as stack data types only. In fact for the `#3` we need a stronger guarantee. Details on that to follow below.
 
@@ -16,7 +16,7 @@ At the minimum the restrictions described below would need to apply to `Span<T>`
 
 ## `ref-like` types must be stack-only. ##
 
-C# compiler already has a concept of a restricted types that covers special platform types such as TypedReference. In some cases those types are referred as ref-like types as well. We should probably use some different term to refer to `TypedReference` and similar types - like `restricted types` to avoid confusion.
+C# compiler already has a concept of a restricted types that covers special platform types such as `TypedReference`. In some cases those types are referred as ref-like types as well. We should probably use some different term to refer to `TypedReference` and similar types - like `restricted types` to avoid confusion.
 
 In this document the "ref like" types include only `Span<T>` and related types. And the ref-like variables mean variables of "ref-like" types.  
 
@@ -25,7 +25,7 @@ In order to force ref-like variables to be stack only,we need the following rest
 - ref-like type cannot be a type of an array element
 - ref-like type cannot be used as a generic type argument
 - ref-like variable cannot be boxed
-- ref-like type cannot be a field type
+- ref-like type cannot be a field of ordinary not ref-like type
 - indirect restrictions, such as disallowed use of ref-like types in async methods, which are really a result of disallowing ref-like typed fields.
 
 Note:
