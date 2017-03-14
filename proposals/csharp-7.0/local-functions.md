@@ -62,3 +62,9 @@ return type.
 Unless you convert a local function to a delegate, capturing is done into
 frames that are value types. That means you don't get any GC pressure from
 using local functions with capturing.
+
+### Reachability
+
+We add to the spec
+
+> The body of a statement-bodied lambda expression or local function is considered reachable.
