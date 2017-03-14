@@ -45,11 +45,11 @@ Example:
 
 Span<T> Caller()
 {
-	Span<T> safeToReturn;
+	Span<T> safeToReturn = GetSafeToReturnSpan(array);
 
 	if (TodaIsNotFriday())
 	{
-		// callee can "poison" any assumption that we can made about safeToReturn
+		// callee can "poison" any assumption that we have made about safeToReturn
 		Callee(ref safeToReturn);
 	}
 
@@ -59,7 +59,7 @@ Span<T> Caller()
 
 void Callee(ref Span<int> arg1)
 {
-	// local refernces are escaping. 
+	// local references are escaping. 
 	// what rule would disallow this?
 	arg1 = new Span<T>(localloc(...));
 }
@@ -74,7 +74,7 @@ Another way to look at this is that writeable references to a ref-like variable 
 
 - ref-like types must be readonly. 
 
-This is basically follows from the previous "only pass by read-only references" rule when applied to "this" inside members of ref-like types.
+This basically follows from the previous "only pass by read-only references" rule when applied to "this" inside members of ref-like types.
 
 ## not all `ref-like` variables are safe to return. ##
 
