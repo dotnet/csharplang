@@ -27,15 +27,39 @@ Virtual extension methods enable an API author to add methods to an interface in
 The syntax for an interface is extended to permit
 - a method *body* for a method (i.e. a "default" implementation)
 - a body for a property accessor
-- static methods
-- `private` methods (the default access is `public`)
-- `override` methods
+- static methods and properties
+- `private` methods and properties (the default access is `public`)
+- `override` methods and properties
 
-Methods and accesors with bodies permit the interface to provide a "default" implementation for the method in classes that do not provide an overriding implementation. Auto-properties are not supported in interfaces.
+Methods and accessors with bodies permit the interface to provide a "default" implementation for the method in classes that do not provide an overriding implementation. Auto-properties are not supported in interfaces.
 
 Static and private methods permit useful refactoring and organization of code used to implement the interface's public API.
 
-Override declarations allow the programmer to provide a most specific implementation of a virtual member where the compiler would not otherwise find one. It also allows turning an abstract method in a super-interface into a default method in a derived interface.
+Override declarations allow the programmer to provide a most specific implementation of a virtual member where the compiler would not otherwise find one. It also allows turning an abstract method from a super-interface into a default method in a derived interface. An override declaration is permitted to *explicitly* override a particular base interface method.
+
+Code in a type that derives from an interface with a default method can explicitly invoke that interface's "base" implementation.
+
+
+``` c#
+interface I0
+{
+   void M() { Console.WriteLine("I0"); }
+}
+interface I1 : I0
+{
+   override void M() { Console.WriteLine("I1"); }
+}
+interface I2 : I0
+{
+   override void M() { Console.WriteLine("I2"); }
+}
+interface I3 : I0
+{
+   // an explicit override that invoke's a base interface's default method
+   void I0.M() { I2.base.M(); }
+}
+
+```
 
 The detailed specification will describe the resolution mechanism used at runtime to select the precise method to be invoked.
 
