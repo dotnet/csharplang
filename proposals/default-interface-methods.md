@@ -53,7 +53,7 @@ interface I2 : I0
 {
    override void M() { Console.WriteLine("I2"); }
 }
-interface I3 : I1. I2
+interface I3 : I1, I2
 {
    // an explicit override that invoke's a base interface's default method
    void I0.M() { I2.base.M(); }
