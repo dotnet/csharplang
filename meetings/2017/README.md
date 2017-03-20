@@ -28,14 +28,23 @@ Overview of meetings and agendas for 2017
 
 1. Async streams (visit from Oren Novotny)
 
-## Feb 14, 2017
+## Feb 21, 2017
 
-[C# Language Design Notes for Feb 14, 2017](LDM-2017-02-14.md)
+[# C# Language Design Notes for Feb 21, 2017](LDM-2017-02-21.md)
 
-1. Meet with Unity to discuss language features relevant to game developers
+We triaged some of the [championed features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22), to give them a tentative milestone and ensure they had a champion.
 
-## Feb 15, 2017
+As part of this we revisited potential 7.1 features and pushed several out.
 
-[C# Language Design Notes for Feb 15, 2017](LDM-2017-02-15.md)
-
-1. Design Review
+1. Implicit interface implementation in Visual Basic *(VB 16)*
+2. Delegate and enum constraints *(C# X.X)*
+3. Generic attributes *(C# X.0 if even practical)*
+4. Replace/original *(C# X.0 if and when relevant)*
+5. Bestest betterness *(C# 7.X)*
+6. Null-coalescing assignments and awaits *(C# 7.X)*
+7. Deconstruction in from and let clauses *(C# 7.X)*
+8. Target-typed `new` expressions *(C# 7.X)*
+9. Mixing fresh and existing variables in deconstruction *(C# 7.1)*
+10. Implementing `==` and `!=` on tuple types *(C# 7.X)*
+11. Declarations in embedded statements *(No)*
+12. Field targeted attributes on auto-properties *(C# 7.1)*
