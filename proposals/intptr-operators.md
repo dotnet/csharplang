@@ -33,7 +33,7 @@ As such, the language should begin to support these operators to help advance th
 The full set of operators supported are defined in `III.1.5` of the Common Language Infrastructure specification (`ECMA-335`). The specification is available here: [https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf).
 * A summary of the operators is provided below for convenience.
 * The unverifiable operators defined by the CLI spec are not listed and are not currently part of this proposal (although it may be worth considering these as well).
-* Providing a keyword (such as `nint` and `nuint`) nor providing a way to for literals to be declared for `System.IntPtr` and `System.UIntPtr` (such as 0n) is part of this proposal (although it may be worth considering these as well).
+* Providing a keyword (such as `nint` and `nuint`) nor providing a way to for literals to be declared for `System.IntPtr` and `System.UIntPtr` (such as 0n) is not part of this proposal (although it may be worth considering these as well).
 
 #### Unary Plus Operator
 
