@@ -17,7 +17,9 @@ These are similar to Java's ["Default Methods"](http://docs.oracle.com/javase/tu
 ## Motivation
 [motivation]: #motivation
 
-Virtual extension methods enable an API author to add methods to an interface in future versions without breaking source or binary compatibility with existing implementations of that interface. It also enables many programming patterns that require multiple inheritance without the issues of multiply inherited state.
+Virtual extension methods enable an API author to add methods to an interface in future versions without breaking source or binary compatibility with existing implementations of that interface. It also enables [many programming patterns that require multiple inheritance without the issues of multiply inherited state](http://scg.unibe.ch/archive/papers/Scha03aTraits.pdf).
+
+The feature also enables C# to interoperate with APIs targeting [Android (Java)](http://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html) and [iOs (Swift)](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Protocols.html#//apple_ref/doc/uid/TP40014097-CH25-ID267), which support similar features.
 
 ## Detailed design
 [design]: #detailed-design
