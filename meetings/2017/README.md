@@ -30,7 +30,7 @@ Overview of meetings and agendas for 2017
 
 ## Feb 21, 2017
 
-[# C# Language Design Notes for Feb 21, 2017](LDM-2017-02-21.md)
+[C# Language Design Notes for Feb 21, 2017](LDM-2017-02-21.md)
 
 We triaged some of the [championed features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22), to give them a tentative milestone and ensure they had a champion.
 
@@ -48,3 +48,10 @@ As part of this we revisited potential 7.1 features and pushed several out.
 10. Implementing `==` and `!=` on tuple types *(C# 7.X)*
 11. Declarations in embedded statements *(No)*
 12. Field targeted attributes on auto-properties *(C# 7.1)*
+
+## Feb 22, 2017
+
+[C# Language Design Notes for Feb 22, 2017](LDM-2017-02-22.md)
+
+We went over the proposal for `ref readonly`: [Champion "Readonly ref"](https://github.com/dotnet/csharplang/issues/38).
+
