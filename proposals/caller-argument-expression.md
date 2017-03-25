@@ -62,7 +62,7 @@ public static class Debug
 }
 ```
 
-The source code in the above example would stay the same. However, if it were compiled into IL then decompiled, it would look like
+The source code in the above example would stay the same. However, the code the compiler actually emits would correspond to
 
 ```cs
 T Single<T>(this T[] array)
@@ -136,7 +136,7 @@ A proposal to add such a helper class to the framework is underway at https://gi
 ### Extra details
 
 - Like the other `Caller*` attributes, such as `CallerMemberName`, this attribute may only be used on parameters with default values.
-- Multiple parameters marked with `CallerArgumentExpression` will be allowed.
+- Multiple parameters marked with `CallerArgumentExpression` are permitted, as shown above.
 - The attribute's namespace will be `System.Runtime.CompilerServices`.
 - In the case `null` or a string that does not correspond to a parameter name (e.g. `"cnodition"`) is provided, an error will be raised during compilation.
 
@@ -156,19 +156,21 @@ A proposal to add such a helper class to the framework is underway at https://gi
 ```cs
 // Assembly1
 
-void Foo(string bar, [CallerArgumentExpression("bar")] string barExpression = "not provided");
+void Foo(string bar); // V1
+void Foo(string bar, string barExpression = "not provided"); // V2
+void Foo(string bar, [CallerArgumentExpression("bar")] string barExpression = "not provided"); // V3
 
 // Assembly2
 
-Foo(a); // => Foo(a, "not provided");
-Foo(a, "provided"); // => Foo(a, "provided");
+Foo(a); // V1: Compiles to Foo(a), V2, V3: Compiles to Foo(a, "not provided")
+Foo(a, "provided"); // V2, V3: Compiles to Foo(a, "provided")
 
 // Assembly3
 
 [assembly: EnableCallerArgumentExpression]
 
-Foo(a); // => Foo(a, "a");
-Foo(a, "provided"); // => Foo(a, "provided");
+Foo(a); // V1: Compiles to Foo(a), V2: Compiles to Foo(a, "not provided"), V3: Compiles to Foo(a, "a")
+Foo(a, "provided"); // V2, V3: Compiles to Foo(a, "provided")
 ```
 
 - To prevent the [binary compatibility problem][drawbacks] from occurring every time we want to add new caller info to `Debug.Assert`, an alternative solution would be to add a `CallerInfo` struct to the framework that contains all the necessary information about the caller.
