@@ -227,6 +227,8 @@ class Bar
 }
 ```
 
+This was originally proposed at https://github.com/dotnet/csharplang/issues/87.
+
 There are a few disadvantages of this approach:
 
 - Despite being pay-for-play friendly by allowing you to specify which properties you need, it could still hurt perf significantly by allocating an array for the expressions/calling `MethodBase.GetCurrentMethod` even when the assert passes.
