@@ -55,3 +55,10 @@ As part of this we revisited potential 7.1 features and pushed several out.
 
 We went over the proposal for `ref readonly`: [Champion "Readonly ref"](https://github.com/dotnet/csharplang/issues/38).
 
+## Feb 28, 2017
+
+[C# Language Design Notes for Feb 28, 2017](LDM-2017-02-28.md)
+
+1. Conditional operator over refs (*Yes, but no decision on syntax*)
+2. Async Main (*Allow Task-returning Main methods*)
+
