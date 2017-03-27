@@ -137,7 +137,7 @@ The condition of the `if` statement is `true` at runtime and the variable `v` ho
 
 #### Constant Pattern
 
-A constant pattern tests the value of an expression against a constant value. The constant may be any constant expression, such as a literal, the name of a declared `const` variable, or an enumeration constant, or a `typeof` expression. The constant is implicitly converted to the type of the matched expression. If no suitable implicit conversion exists, or the result is not a constant, the pattern-matching operation is an error. Otherwise the pattern *c* is considered matching the expression *e* if `object.Equals(c, e)` would return `true`.
+A constant pattern tests the value of an expression against a constant value. The constant may be any constant expression, such as a literal, the name of a declared `const` variable, or an enumeration constant, or a `typeof` expression. The expression is implicitly converted to the type of the matched expression. If no suitable implicit conversion exists, or the result is not a constant, the pattern-matching operation is an error. Otherwise the pattern *c* is considered matching the expression *e* if `object.Equals(c, e)` would return `true`.
 
 ```antlr
 constant_pattern
