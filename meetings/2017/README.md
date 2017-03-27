@@ -62,3 +62,8 @@ We went over the proposal for `ref readonly`: [Champion "Readonly ref"](https://
 1. Conditional operator over refs (*Yes, but no decision on syntax*)
 2. Async Main (*Allow Task-returning Main methods*)
 
+## Mar 1, 2017
+[C# Language Design Notes for Mar 1, 2017](LDM-2017-03-01.md)
+
+1. Shapes and extensions (*exploration*)
+2. Conditional refs (*original design adopted*)
