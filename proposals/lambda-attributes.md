@@ -79,6 +79,11 @@ private U Process(T item) { ... }
 ([FirstAttribute] [SecondAttribute] i) => { ... } // Ok
 ```
 
+- `return`-targeted attributes may also be used on lambdas, e.g.
+```C#
+([return: SomeAttribute] (i) => { ... }) // Ok
+```
+
 - The compiler outputs the attributes onto the generated method and arguments to those methods as it would for any other method.
 
 ## Drawbacks
