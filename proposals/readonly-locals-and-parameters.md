@@ -9,8 +9,7 @@ In the name of Allah
 
 ## Summary
 [summary]: #summary
-
-The "readonly locals and parameters" feature is actually a group or features that declare local variables and method parameters without permit the state (objects or primitives) to modifications.
+eThe "readonly locals and parameters" feature is actually a group or features that declare local variables and method parameters without permit the state (objects or primitives) to modifications.
 
 # Prevoius work
 
@@ -29,9 +28,33 @@ constraint isn’t violated.
 
 In this scope C# has some features like readonly/const member, but has many missing features to help programmer to gain maximum immutability in program easily. One of these missing features has ability to declare local variables and method parameters without permit any modification after initialization. 
 
-## Solution
+## Detailed design
+[design]: #detailed-design
+We add new form to declaration statements: 
+``` antlr
+declaration_statement:
+    local-variable-declaration
+    | local-constant-declaration
+    | local-readonly-declaration
+    ;
+```
+### Local readonly declarations
+A *local-readonly-declaration* declares one or more local readonly variables.
+``` antlr
+local-readonly-declaration:
+    readonly   type   readonly-declarators
+    ;
+    
+readonly-declarators:
+    readonly-declarator
+    | readonly-declarators   ,   readonly-declarator
+    ;
 
-## Syntax
+readonly-declarator:
+    identifier   =   local-variable-initializer
+    ;
+```
+Direct assignments to a local readonly variable are permitted only in `readonly-declarator` with `local-variable-initializer`. Attempting to assign to a local readonly variable is a compile-time error elsewhere.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
