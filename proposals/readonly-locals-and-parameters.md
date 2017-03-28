@@ -11,7 +11,7 @@ In the name of Allah
 [summary]: #summary
 eThe "readonly locals and parameters" feature is actually a group or features that declare local variables and method parameters without permit the state (objects or primitives) to modifications.
 
-# Prevoius work
+# Related work
 
 There is an existing proposal that touches this topics https://github.com/dotnet/roslyn/issues/115 and https://github.com/dotnet/csharplang/issues/188.
 Here I just want to acknowledge that the idea by itself is not new anyway.
@@ -30,7 +30,10 @@ In this scope C# has some features like readonly/const member, but has many miss
 
 ## Detailed design
 [design]: #detailed-design
-We add new form to declaration statements: 
+
+### Readonly locals
+We add new part to declaration statements:
+
 ``` antlr
 declaration_statement:
     local-variable-declaration
@@ -38,8 +41,10 @@ declaration_statement:
     | local-readonly-declaration
     ;
 ```
-### Local readonly declarations
+
+#### Local readonly declarations
 A *local-readonly-declaration* declares one or more local readonly variables.
+
 ``` antlr
 local-readonly-declaration:
     readonly   type   readonly-declarators
@@ -47,14 +52,35 @@ local-readonly-declaration:
     
 readonly-declarators:
     readonly-declarator
-    | readonly-declarators   ,   readonly-declarator
+    | readonly-declarators   ','   readonly-declarator
     ;
 
 readonly-declarator:
-    identifier   =   local-variable-initializer
+    identifier   '='   local-variable-initializer
     ;
 ```
 Direct assignments to a local readonly variable are permitted only in `readonly-declarator` with `local-variable-initializer`. Attempting to assign to a local readonly variable is a compile-time error elsewhere.
+
+### Readonly parameters
+We add new parts to parameter modifier:
+
+``` antlr
+parameter_modifier:
+    'ref'
+    | 'out'
+    | 'this'
+    | 'readonly'    // new
+    | 'readonly ref'    // new
+    | 'readonly this'   // new
+    ;
+```
+`readonly` modifier for parameter means that this parameter's state does not permit to change. So attempting to assign to a this parameter in method body is a compile-time error.
+
+`readonly` parameter can have *default-argument*.
+
+The `readonly`, `readonly ref` and `readonly this` are part of a method's signature.
+
+**Note:** `readonly ref` and `readonly this` are describe at [Readonly references proposal](readonly-ref.md).
 
 ## Drawbacks
 [drawbacks]: #drawbacks
