@@ -10,7 +10,7 @@ In the name of Allah
 ## Summary
 [summary]: #summary
 
-The "readonly locals and parameters" feature is actually a group or features that declare local variables and method parameters without exposing the state to modifications.
+The "readonly locals and parameters" feature is actually a group or features that declare local variables and method parameters without permit the state (objects or primitives) to modifications.
 
 # Prevoius work
 
