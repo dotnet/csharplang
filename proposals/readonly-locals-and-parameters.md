@@ -14,7 +14,7 @@ The "readonly locals and parameters" feature is actually a group or features tha
 
 # Prevoius work
 
-There is an existing proposal that touches this topics https://github.com/dotnet/roslyn/issues/115 and #188.
+There is an existing proposal that touches this topics https://github.com/dotnet/roslyn/issues/115 and https://github.com/dotnet/csharplang/issues/188.
 Here I just want to acknowledge that the idea by itself is not new anyway.
 
 ## Motivation
