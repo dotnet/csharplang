@@ -14,7 +14,7 @@ The "readonly locals and parameters" feature is actually a group or features tha
 
 # Prevoius work
 
-There is an existing proposal that touches this topic https://github.com/dotnet/roslyn/issues/115 as a special case of readonly parameters without going into many details. 
+There is an existing proposal that touches this topic https://github.com/dotnet/roslyn/issues/115.
 Here I just want to acknowledge that the idea by itself is not new anyway.
 
 ## Motivation
