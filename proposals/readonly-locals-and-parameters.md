@@ -62,7 +62,7 @@ readonly-declarator:
 Direct assignments to a local readonly variable are permitted only in `readonly-declarator` with `local-variable-initializer`. Attempting to assign to a local readonly variable is a compile-time error elsewhere.
 
 ### Readonly parameters
-We add new parts to parameter modifier:
+We add new part to parameter modifier:
 
 ``` antlr
 parameter_modifier:
@@ -70,15 +70,13 @@ parameter_modifier:
     | 'out'
     | 'this'
     | 'readonly'    // new
-    | 'readonly ref'    // new
-    | 'readonly this'   // new
     ;
 ```
 `readonly` modifier for parameter means that this parameter's state does not permit to change. So attempting to assign to a this parameter in method body is a compile-time error.
 
 `readonly` parameter can have *default-argument*.
 
-The `readonly`, `readonly ref` and `readonly this` are part of a method's signature.
+The `readonly` is part of a method's signature.
 
 **Note:** `readonly ref` and `readonly this` are describe at [Readonly references proposal](readonly-ref.md).
 
