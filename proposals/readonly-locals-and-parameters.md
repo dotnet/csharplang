@@ -1,5 +1,3 @@
-In the name of Allah
-
 # Readonly locals and parameters
 
 * [x] Proposed
