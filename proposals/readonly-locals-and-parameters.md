@@ -17,7 +17,7 @@ Here I just want to acknowledge that the idea by itself is not new anyway.
 
 ## Motivation
 
-Maximizing data and state immutability in any program has value which causes improvements in readability, predictability, and maintainability. So many languages have some concepts and features to provide some facilities about it and because above benefits these features are many uses in programs and master programmers recommended to use them, for example [Scott Meyers in Effective C++ book third edition](https://en.wikipedia.org/wiki/Scott_Meyers) says:
+Maximizing data and state immutability in any program has value which causes improvements in readability, predictability, and maintainability. So many languages have some concepts and features which provide facilities about them, and because of mentioned benefits, these features have many uses in programs, and master programmers have recommended using them, for example [Scott Meyers in Effective C++ book third edition](https://en.wikipedia.org/wiki/Scott_Meyers) says:
 > Use const whenever possible
 
 And when he wants to describe it says:
