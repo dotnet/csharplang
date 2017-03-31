@@ -3227,7 +3227,7 @@ class X
     }
 }
 ```
-Within the class `X`, references to `Ev` on` the left-hand side of the `+=` and `-=` operators cause the add and remove accessors to be invoked. All other references to `Ev` are compiled to reference the hidden field `__Ev` instead ([Member access](expressions.md#member-access)). The name "`__Ev`" is arbitrary; the hidden field could have any name or no name at all.
+Within the class `X`, references to `Ev` on the left-hand side of the `+=` and `-=` operators cause the add and remove accessors to be invoked. All other references to `Ev` are compiled to reference the hidden field `__Ev` instead ([Member access](expressions.md#member-access)). The name "`__Ev`" is arbitrary; the hidden field could have any name or no name at all.
 
 ### Event accessors
 
