@@ -1,8 +1,8 @@
 # Target-typed "default" literal
 
 * [x] Proposed
-* [ ] Prototype
-* [ ] Implementation
+* [x] Prototype
+* [x] Implementation
 * [ ] Specification
 
 ## Summary
@@ -55,8 +55,9 @@ There are a couple of alternatives to consider:
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- [ ] Should *default* be allowed as the operand of the *is* or *as* operators?
+- [x] Should *default* be allowed as the operand of the *is* or *as* operators? Answer:  disallow `default is T`, allow `x is default`, allow `default as RefType` (with always-null warning)
 
 ## Design meetings
 
-n/a
+- [LDM 3/7/2017](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-03-07.md)
+- [LDM 3/28/2017](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-03-28.md)
