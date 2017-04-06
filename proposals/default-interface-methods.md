@@ -76,13 +76,17 @@ The syntax for an interface is relaxed to permit modifiers on its members. The f
 
 > ***TODO***: check what other modifiers exist.
 
-An interface member whose declaration includes a body is a `virtual` member unless the `sealed` modifier is used, whether or not the `virtual` modifier is present. Similarly, although `abstract` is the default on interface members without bodies, that modifier may be given explicitly.  A non-virtual member may be declared using the `sealed` keyword.
+An interface member whose declaration includes a body is a `virtual` member unless the `sealed` or `private` modifier is used. The `virtual` modifier may be used on a function member that would otherwise be implicitly `virtual`. Similarly, although `abstract` is the default on interface members without bodies, that modifier may be given explicitly.  A non-virtual member may be declared using the `sealed` keyword.
 
-Access modifiers may be used on interface members. The access level `public` is the default but it may be given explicitly.
+It is an error for a `private` or `sealed` function member of an interface to have no body. A `private` function member may not have the modifier `sealed`.
 
-> ***Open Issue:*** We need to specify the precise meaning of the access modifiers such as `protected`.
+Access modifiers may be used on interface members of all kinds of members that are permitted. The access level `public` is the default but it may be given explicitly.
 
-Interfaces may declare `static` members, including nested types, methods, indexers, properties, and events. The default access level is `public`.
+> ***Open Issue:*** We need to specify the precise meaning of the access modifiers such as `protected` and `internal`, and which declarations do and do not override them (in a derived interface) or implement them (in a class that implements the interface).
+
+Interfaces may declare `static` members, including nested types, methods, indexers, properties, and events. The default access level for all interface members is `public`.
+
+Interfaces may not declare constructors, destructors, or fields.
 
 > ***Open Issue:*** Should operator declarations be permitted in an interface? Probably not conversion operators, but what about others?
 
@@ -90,7 +94,7 @@ Interfaces may declare `static` members, including nested types, methods, indexe
 
 > ***Open Issue:*** Should `const` declarations be permitted in an interface?
 
-
+> ***Open Issue:*** We do not currently permit `partial` on an interface or its members. That would require a separate proposal.
 
 
 ### Overrides in interfaces
@@ -164,6 +168,8 @@ We require that every interface and class have a *most specific override* for ev
 One override `M1` is considered *more specific* than another override `M2` if `M1` is declared on type `T1`, `M2` is declared on type `T2`, and either
 1. `T1` contains `T2` among its direct or indirect interfaces, or
 2. `T2` is an interface type but `T1` is not an interface type.
+
+For example:
 
 ``` c#
 interface IA
@@ -322,6 +328,10 @@ class Derived: IA // OK, all interface members have a concrete most specific ove
 ```
 
 > ***Open issue***: confirm that this is an intended consequence of the specification. **YES**
+
+### Runtime method resolution
+
+> ***Open Issue:*** The spec should describe the runtime method resolution algorithm in the face of interface default methods. We need to ensure that the semantics are consistent with the language semantics, e.g. which declared methods do and do not override or implement an `internal` method.
 
 ### Further areas to be specified
 
