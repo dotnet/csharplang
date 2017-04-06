@@ -67,3 +67,12 @@ We went over the proposal for `ref readonly`: [Champion "Readonly ref"](https://
 
 1. Shapes and extensions (*exploration*)
 2. Conditional refs (*original design adopted*)
+
+# Mar 7, 2017
+[C# Language Design Notes for Mar 7, 2017](LDM-2017-03-07.md)
+
+We continued to flesh out the designs for features currently considered for C# 7.1.
+
+1. Default expressions (*design adopted*)
+2. Field target on auto-properties (*yes*)
+3. private protected (*yes, if things work as expected*)
