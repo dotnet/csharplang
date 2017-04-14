@@ -25,6 +25,7 @@ We modify the specification for [finding the best common type of a set of expres
 This is expected to affect the following aspects of the language:
 
 - the [ternary expression](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#conditional-operator)
+- the [null coalescing expression](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#the-null-coalescing-operator)
 - implicitly types [array creation expression](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#array-creation-expressions)
 - inferring the [return type of a lambda](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#inferred-return-type) for type inference
 
