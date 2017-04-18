@@ -1,4 +1,4 @@
-# FEATURE_NAME
+# pattern-matching with generics
 
 * [x] Proposed
 * [ ] Prototype:
