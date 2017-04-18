@@ -25,8 +25,9 @@ We modify the specification for [finding the best common type of a set of expres
 This is expected to affect the following aspects of the language:
 
 - the [ternary expression](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#conditional-operator)
-- implicitly types [array creation expression](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#array-creation-expressions)
+- implicitly typed [array creation expression](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#array-creation-expressions)
 - inferring the [return type of a lambda](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#inferred-return-type) for type inference
+- cases involving generics, such as invoking `M<T>(T a, T b)` as `M(1, null)`.
 
 More precisely, we change the following sections of the specification (insertions in bold, deletions in strikethrough):
 
