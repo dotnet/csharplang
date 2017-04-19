@@ -138,6 +138,11 @@ interface IB : IA
 
 Override declarations in interfaces may not be declared `sealed`.
 
+Public `virtual` function members in an interface may be overriden in a derived interface either implicitly (by using the `override` modifier in a public declaration in the derived interface) or explicitly (by qualifying the name in the override declaration with the interface type that originally declared the method, and omitting an access modifier).
+
+`virtual` function members in an interface that are not `public` may only be overridden explicitly (not implicitly) in derived interfaces, and may only be implemented in a class or struct explicitly (not implicitly). In either case, the overridden or implemented member must be *accessible* where it is overridden.
+
+> ***Open Issue:*** Should we relax that to allow implicit override or implementation of a non-public function member? It would require a detailed proposal.
 
 ### Reabstraction
 
@@ -163,7 +168,7 @@ This is useful in derived interfaces where the default implementation of a metho
 
 ### The most specific override rule
 
-We require that every interface and class have a *most specific override* for every interface method among the overrides appearing in the type or its direct and indirect interfaces. The *most specific override* is a unique override that is more specific than every other override. If there is no override, the method itself is considered the most specific override.
+We require that every interface and class have a *most specific override* for every virtual member among the overrides appearing in the type or its direct and indirect interfaces. The *most specific override* is a unique override that is more specific than every other override. If there is no override, the member itself is considered the most specific override.
 
 One override `M1` is considered *more specific* than another override `M2` if `M1` is declared on type `T1`, `M2` is declared on type `T2`, and either
 1. `T1` contains `T2` among its direct or indirect interfaces, or
@@ -215,6 +220,8 @@ interface IF
 }
 abstract class F : IF { } // error: 'F' does not implement 'IF.M'
 ```
+
+It is possible for a virtual property declared in an interface to have a most specific override for its `get` accessor in one interface and a most specific override for its `set` accessor in a different interface. This is considered a violation of the *most specific override* rule.
 
 ### `static` and `private` methods
 
@@ -279,6 +286,8 @@ class D : IA, IB, IC
 > ***Open issue:*** what syntax should we use for base invocation? Alternatives:
 > 1. Interface.base.M()
 > 2. base<Interface>.M()
+
+It is an error for an unqualified `base` (i.e. not specifying the base interface type) to appear in an interface.
 
 ### Effect on existing programs
 
