@@ -1,4 +1,4 @@
-# improved common type
+# Nullable-Enhanced Common Type
 
 * [x] Proposed
 * [ ] Prototype: None
