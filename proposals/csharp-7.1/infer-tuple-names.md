@@ -25,9 +25,9 @@ var result = list.Select(c => (c.f1, c.f2)).Where(t => t.f2 == 1);
 There are two parts to the change:
 
 1.	Try to infer a candidate name for each tuple element which does not have an explicit name:
-    -	Using same rules as name inference for anonymous types
-        - in C#, this allows three cases `y` (identifier), `x.y` (simple member access) and `x?.y` (conditional access),
-        - in VB, TODO.
+    -	Using same rules as name inference for anonymous types.
+        - In C#, this allows three cases: `y` (identifier), `x.y` (simple member access) and `x?.y` (conditional access).
+        - In VB, this allows for additional cases, such as `x.y()`.
     -	Rejecting reserved tuple names (case-sensitive in C#, case-insensitive in VB), as they are either forbidden or already implicit. For instance, such as `ItemN`, `Rest`, and `ToString`.
     -	If any candidate names are duplicates (case-sensitive in C#, case-insensitive in VB) within the entire tuple, we drop those candidates,
 2.	During conversions (which check and warn about dropping names from tuple literals), inferred names would not produce any warnings. This avoids breaking existing tuple code.
