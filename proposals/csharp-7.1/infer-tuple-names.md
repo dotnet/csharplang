@@ -48,12 +48,12 @@ The same would also apply to VB tuples, using the VB-specific rules for inferrin
 The main drawback is that this introduces a compatibility break from C# 7.0:
 
 ```C#
-Action y = () => ();
+Action y = () => M();
 var t = (x: x, y);
 t.y(); // this might have previously picked up and extension method called “y”, but would now call the lambda.
 ```
 
-The compat council found this break acceptable, given that it is limited and the time window since tuples shipped (in C# 7.0) is small.
+The compatibility council found this break acceptable, given that it is limited and the time window since tuples shipped (in C# 7.0) is short.
 
 ## References
 - [LDM April 4th 2017](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-05.md#tuple-names)
