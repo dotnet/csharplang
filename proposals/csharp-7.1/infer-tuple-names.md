@@ -3,11 +3,9 @@
 ## Summary
 [summary]: #summary
 
-This feature allows the tuple element names to be omitted in the code and inferred by the compiler in a number of simple case. 
+In a number of common cases, this feature allows the tuple element names to be omitted and instead be inferred. For instance, instead of typing `(f1: x.f1, f2: x?.f2)`, the element names "f1" and "f2" can be inferred from `(x.f1, x?.f2)`.
 
-For instance, instead of typing `(f1: x.f1, f2: x?.f2)`, the element names "f1" and "f2" can be inferred from `(x.f1, x?.f2)`.
-
-It parallels the behavior of  anonymous types, which allow inferring member names during creation (`new { x.f1, y?.f2 }` declares members "f1" and "f2").
+This parallels the behavior of  anonymous types, which allow inferring member names during creation. For instance, `new { x.f1, y?.f2 }` declares members "f1" and "f2".
 
 This is particularily handy when using tuples in LINQ:
 
