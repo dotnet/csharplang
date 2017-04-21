@@ -45,7 +45,7 @@ The main drawback is that this introduces a compatibility break from C# 7.0:
 ```C#
 Action y = () => M();
 var t = (x: x, y);
-t.y(); // this might have previously picked up and extension method called “y”, but would now call the lambda.
+t.y(); // this might have previously picked up an extension method called “y”, but would now call the lambda.
 ```
 
 The compatibility council found this break acceptable, given that it is limited and the time window since tuples shipped (in C# 7.0) is short.
