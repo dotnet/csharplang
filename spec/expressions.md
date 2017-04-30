@@ -3184,7 +3184,7 @@ The operators compare the operands according to the rules of the IEEE 754 standa
 *  When neither operand is NaN, the operators compare the values of the two floating-point operands with respect to the ordering
 
    ```
-   -inf < -max < ... < -min < -0.0 == +0.0 < +min < ... < +max < +inf`
+   -inf < -max < ... < -min < -0.0 == +0.0 < +min < ... < +max < +inf
    ```
 
    where `min` and `max` are the smallest and largest positive finite values that can be represented in the given floating-point format. Notable effects of this ordering are:
