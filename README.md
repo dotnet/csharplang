@@ -8,7 +8,8 @@ You can find:
 
 - Active C# language feature proposals in the [proposals folder](proposals)
 - Notes from C# language design meetings in the [meetings folder](meetings)
-- Full language specification (draft) in the [spec folder](spec)
+- Full C# 6 language specification (draft) in the [spec folder](spec)
+- Summary of the [language version history here](Language-Version-History.md).
 
 If you discover bugs or deficiencies in the above, please leave an issue to raise them, or even better: a pull request to fix them.
 
