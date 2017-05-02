@@ -37,6 +37,57 @@ Note:
 *Possible incremental relaxations*
 - It may be possible to allow span locals be defined and used in a block inside an async method as long as the block does not contain `await` expressions. 
 
+## Generalized `ref-like` types in source code.
+
+`ref-like` structs will have to be explicitly marked in the source code using `ref` modifier:
+
+```c#
+ref struct TwoSpans<T>
+{
+	// can have ref-like instance fields
+	public Span<T> first;
+	public Span<T> second;
+} 
+
+// error: arrays of ref-like types are not allowed. 
+TwoSpans<T>[] arr = null;
+
+``` 
+
+Designating a struct as ref-like will allow the struct to have ref-like instance fields and will also make all the requirements of ref-like types applicable to the struct. 
+
+An alternative proposal of "inferring" the ref-like property from the fact that a struct contains ref-like fields was also considered and rejected for the following reasons:
+
+1) Implicit cascading of ref-like through containing structs appears to be dangerous. 
+Since the implicit ref-like would work recursively, it would be too easy to turn multiple structs, possibly not in the current project, to become ref-like with one change.  
+
+1) Span<T> and ReadOnlySpan<T> themselves do not contain ref-like fields. These types will have to be special-cased, which will be an issue if another trivial ref-like type needs to be added in the future.  
+
+## Metadata representation or ref-like structs.
+
+Ref-like structs will be marked with **System.Runtime.CompilerServices.IsRefLikeAttribute** attribute.
+
+The attribute will be added to common base libraries such as `mscorlib`. In a case if the attribute is not available, compiler will generate an internal one similarly to other embedded-on-demand attributes such as `IsReadOnlyAttribute`.
+
+An additional measure will be taken to prevent the use of ref-like structs in compilers not familiar with the safety rules (this includes C# compilers prior to the one in which this feature is implemented). 
+
+Having no other good alternatives that work in old compilers without servicing, an `Obsolete` attribute with a known string will be added to all ref-like structs. Compilers that know how to use ref-like types will ignore this particular form of `Obsolete`.
+
+A typical matadata representation: 
+
+```C#
+    [IsRefLike]
+    [Obsolete("Types with embedded references are not supported in this version of your compiler.")]
+    public struct TwoSpans<T>
+    {
+       . . . . 
+    }
+```
+
+NOTE: it is not the goal to make it so that any use of ref-like types on old compilers fails 100%. That is hard to achieve and is not strictly necessary. For example there would always be away to get around the `Obsolete` using dynamic code or, for example, creating an array of ref-like types through reflection.
+
+In particular, if user wants to actually put an `Obsolete` attribute on a ref-like type, we will have no choice other than not emitting the predefined one since `Obsolete` attribute cannot be applied more than once..  
+(TODO: We should consider giving a warning in such scenario, informing user of the danger.)
 
 ## Stack-referring spans
 
@@ -48,7 +99,6 @@ The design goal here is to make rules for stack-referring spans "pay-for-play".
 **A person who does not intend to trade in stack-referring spans should be able to stop reading right here.**
  
 NOTE: nothing will prevent a possibility to use Spans that wrap pointers to stack-allocated arrays in _unsafe_ code as long as it is possible to wrap a pointer in a span. As per usual rules of _unsafe_, it would be responsibility of the user to not cause GC holes.
-
 
 ## Stack-referring spans in safe code.
 
