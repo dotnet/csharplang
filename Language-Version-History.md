@@ -35,7 +35,7 @@ Features Added in C# Language Versions
 - Caller info attributes
 
 # [C# 6](https://github.com/dotnet/roslyn/wiki/New-Language-Features-in-C%23-6) (VS 2015)
-- [Specification online](https://github.com/dotnet/csharplang/blob/master/spec/README.md)
+- [Draft Specification online](https://github.com/dotnet/csharplang/blob/master/spec/README.md)
 - Compiler-as-a-service (Roslyn)
 - Import of static type members into namespace
 - Exception filters
@@ -52,17 +52,19 @@ Features Added in C# Language Versions
 - [Out variables](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/out-var.md)
 - [Pattern matching](https://github.com/dotnet/csharplang/blob/master/proposals/patterns.md)
 - [Tuples](https://github.com/dotnet/roslyn/blob/master/docs/features/tuples.md)
-- [Deconstruction](https://github.com/dotnet/roslyn/blob/master/docs/features/deconstruction.md) and [Discards](https://github.com/dotnet/roslyn/blob/master/docs/features/discards.md)
+- [Deconstruction](https://github.com/dotnet/roslyn/blob/master/docs/features/deconstruction.md)
+- [Discards](https://github.com/dotnet/roslyn/blob/master/docs/features/discards.md)
 - [Local Functions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/local-functions.md)
-- [Binary Literals](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/binary-literals.md) and [Digit Separators](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/digit-separators.md)
+- [Binary Literals](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/binary-literals.md)
+- [Digit Separators](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/digit-separators.md)
 - Ref returns and locals
 - [Generalized async return types](https://github.com/dotnet/roslyn/blob/master/docs/features/task-types.md)
 - More expression-bodied members
 - [Throw expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/throw-expression.md)
 
 # [C# 7.1 (tentative)](https://github.com/dotnet/roslyn/blob/master/docs/Language%20Feature%20Status.md) (VS 2017 Update 3)
-- [async main](https://github.com/dotnet/csharplang/blob/master/proposals/async-main.md)
-- [default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/target-typed-default.md)
-- [reference assemblies](https://github.com/dotnet/roslyn/blob/features/refout/docs/features/refout.md)
-- [inferred tuple element names](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/infer-tuple-names.md)
-- [pattern-matching with generics](https://github.com/dotnet/csharplang/blob/master/proposals/generics-pattern-match.md)
+- [Async main](https://github.com/dotnet/csharplang/blob/master/proposals/async-main.md)
+- [Default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/target-typed-default.md)
+- [Reference assemblies](https://github.com/dotnet/roslyn/blob/features/refout/docs/features/refout.md)
+- [Inferred tuple element names](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/infer-tuple-names.md)
+- [Pattern-matching with generics](https://github.com/dotnet/csharplang/blob/master/proposals/generics-pattern-match.md)
