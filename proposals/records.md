@@ -16,7 +16,7 @@ Records are a new, simplified declaration form for C# class and struct types tha
 
 A significant number of type declarations in C# are little more than aggregate collections of typed data. Unfortunately, declaring such types requires a great deal of boilerplate code. *Records* provide a mechanism for declaring a datatype by describing the members of the aggregate along with additional code or deviations from the usual boilerplate, if any.
 
-See [Examples](#Examples), below.
+See [Examples](#examples), below.
 
 ## Detailed design
 [design]: #detailed-design
@@ -278,7 +278,7 @@ In an `abstract` record class, the compiler-provided `With` method is abstract. 
 >     p = p with { X = 5 };
 > ```
 
-### 5. Examples
+### Examples
 
 #### Compatibility of record types
 
