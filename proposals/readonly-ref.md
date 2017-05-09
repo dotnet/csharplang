@@ -1,8 +1,8 @@
 # Readonly references
 
 * [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
+* [x] Prototype
+* [ ] Implementation: Started
 * [ ] Specification: Not Started
 
 ## Summary
@@ -24,11 +24,11 @@ The examples are numerous - vector/matrix math operators in graphics libraries l
 
 ## Solution
 
-`readonly ref` parameters. 
-Similarly to the `out` parameters, `readonly ref` parameters are passed as managed references with additional guarantee from the callee. The guarantee in this case is that callee will not make any assignments through the parameter nor it will create a writeable reference aliases to the data referenced by the parameter.
+`ref readonly` parameters. 
+Similarly to the `out` parameters, `ref readonly` parameters are passed as managed references with additional guarantee from the callee. The guarantee in this case is that callee will not make any assignments through the parameter nor it will create a writeable reference aliases to the data referenced by the parameter.
 
 ```C#
-        static Vector3 Add (readonly ref Vector3 v1, readonly ref Vector3 v2)
+        static Vector3 Add (ref readonly Vector3 v1, ref readonly Vector3 v2)
         {
             // not OK!!
             v1 = default(Vector3);
@@ -46,9 +46,9 @@ Similarly to the `out` parameters, `readonly ref` parameters are passed as manag
 
 ## Syntax
 
-One of proposed syntaxes is to use existing `in` keyword as a shorter form of `readonly ref`. It could be that both syntaxes are allowed or that we pick just one of them.
+One of proposed syntaxes is to use existing `in` keyword as a shorter form of `ref readonly`. It could be that both syntaxes are allowed or that we pick just one of them.
 
-While syntax is TBD, I will use `in` as it is significantly shorter than `readonly ref`.
+While syntax is TBD, I will use `in` as it is significantly shorter than `ref readonly`.
 
 ```C# 
         static Vector3 Add (in Vector3 v1, in Vector3 v2)
@@ -96,7 +96,7 @@ In cases of variables without a home a temporary variable will be used for a sho
 
 `in` parameters are not writeable and rules similar to readonly fields apply. - I.E. fields of a readonly ref parameter of a struct type are recursively not writeable as well.
 
-It is permitted to use `in` parameters for passing further or recursively as `in` parameters, or for other `readonly ref` purposes as discussed further.
+It is permitted to use `in` parameters for passing further or recursively as `in` parameters, or for other `ref readonly` purposes as discussed further.
 
 (*) The notion of [LValue/RValue](https://en.wikipedia.org/wiki/Value_(computer_science)#lrvalue) vary between languages.  
 Here, by LValue I mean an expression that can be assigned to or passed by reference.
@@ -107,7 +107,7 @@ And RValue means an expression that yields a temporary result which does not per
 
 When passing `readonly` fields (outside of a ctor) we have two choices - pass through a local copy or pass a direct reference. For the purpose of just `in` parameters the difference is semantically unobservable. However the direct reference is more efficient. We will work with CLR to allow the latter.
 
-NOTE: adding `readonly ref` _returns_ as a feature makes copying of `readonly refs` at the call sites observable, thus further cementing the requirement that `readonly` fields are _not_ passed by copy.
+NOTE: adding `ref readonly` _returns_ as a feature makes copying of `ref readonlys` at the call sites observable, thus further cementing the requirement that `readonly` fields are _not_ passed by copy.
 
 ## `in` parameters and capturing of stack variables.
 
@@ -179,35 +179,33 @@ However, since there is no backward compatibility considerations and there are w
 
 ## Metadata representaion.
 
-CLR provides several mechanisms for augmenting signatures - custom attributes, pseudo custom attributes and custom modifiers (modreq/modopt).   
-Either would work, in theory, but we need to decide on one or another.
+We're using a combination of attributes and modifiers on signatures:
 
-Historically `out` uses pseudo custom attribute `[out]`.
-There is a corresponding `[in]` pseudo custom attribute, that could be used.
-
-Attributes can be more attractive for parameters if it is a goal to make a change from ordinary `ref`
-parameter to a `readonly ref` one  nonbreaking to existing callers (in binary, no recompile sense).
-
-`modreq` could be more suitable for `readonly ref` returns if we want to block misuse by the downlevel callers.
+1) `IsReadOnlyAttribute` is added to the framework, to be used on parameters and return types, to indicate that they are `ref readonly`. For older frameworks, the compiler will generate an embedded (hidden) attribute with the same name into the module being built, and we will have a mechanism for disallowing using this attribute in source code.
+2) We will use a `modreq` with the framework type `IsConst`, to prevent other compilers and older versions of the C# compiler to read such signatures. This might not be needed on some cases like parameters of non-virtual methods, as downlevel use is safe. For tools and other compilers reading these metadata, they should always rely on the attribute, as it is mandatory.
 
 # Readonly ref returns
 
 "Readonly ref returns" is an augmentation of ref returns that allows returning references to variables without exposing them to modification.
 
+# Readonly ref locals
+
+Locals are not supported for now. No plans to support them in this proposal.
+
 ## Motivation
 The motivation for this sub-feature is roughly symmetrical to the reasons for the `in` parameters - avoiding copying, but on the returning side. A method or an indexer of a nontrivial struct type has currently two options -return by reference and be exposed to possible mutations or copy the value.
 
 ## Solution
-`readonly ref` _returns_. (a more concise modifier like `in` so far has been elusive for this case).
+`ref readonly` _returns_. (a more concise modifier like `in` so far has been elusive for this case).
 
 ```C#
         struct ImmutableArray<T>
         {
             private readonly T[] array;
 
-            public readonly ref T RefAt(int i)
+            public ref readonly T RefAt(int i)
             {
-                // returning a readonly ref 
+                // returning a ref readonly 
                 return ref this.r1;
             }
         }
@@ -217,25 +215,25 @@ The motivation for this sub-feature is roughly symmetrical to the reasons for th
 
 ## Syntax
  
-`readonly ref` will be used to modify member signatures to indicate the return is passed as a readonly ref.
+`ref readonly` will be used to modify member signatures to indicate the return is passed as a readonly ref.
 
 It seems unnecessary to use `readonly` in the return statement. Just `ref` would be sufficient. 
-We could require the whole `return readonly ref foo`, but it seems it would only add the requirement that all the returns within a given method must agree on the `readonly` part and agree with the signature of the member. Omitting `readonly` at the return site makes `readonly` implicit on all returns in a method/lambda.
+We could require the whole `return ref readonly foo`, but it seems it would only add the requirement that all the returns within a given method must agree on the `readonly` part and agree with the signature of the member. Omitting `readonly` at the return site makes `readonly` implicit on all returns in a method/lambda.
  
 We should, however, require `ref` for consistency with other scenarios where something is passed via an alias vs. by value.
 
 
-## Use of `readonly ref' returns in signatures
+## Use of `ref readonly' returns in signatures
 
-`readonly ref` will be allowed in the same places were `ref` returns are allowed. For all the OHI purposes it will behave as another RefKind on the return. I.E. `readonly` would need to match exactly when overriding, it will not be possible to overload just on `readonly` difference, etc...
+`ref readonly` will be allowed in the same places were `ref` returns are allowed. For all the OHI purposes it will behave as another RefKind on the return. I.E. `readonly` would need to match exactly when overriding, it will not be possible to overload just on `readonly` difference, etc...
  
 From the point of implementation it would be essentially the same RefKind as for `in` parameters applicable to returns as well.
 
 For the purpose of variance, readonly ref will work as non-variant.
 
-## Returning `readonly` fields as `readonly ref`s.
+## Returning `readonly` fields as `ref readonly`s.
 
-Unlike the requirements of `in`, where pass-by-copy is possible, while not the most efficient, returning a `readonly` field as a `readonly ref` requires that it is a true reference.  
+Unlike the requirements of `in`, where pass-by-copy is possible, while not the most efficient, returning a `readonly` field as a `ref readonly` requires that it is a true reference.  
 In particular, the requirements of the ref returns have indirect effect on requirements of `in`. As long as `in` parameters and `readonly` fields are both returnable, the copying would be: 
 
 1. observable and 
@@ -257,7 +255,7 @@ Here is an ugly, but legal and very explicit example where copying would be obse
                 v = Vector3.UnitZ);   // can assign since we are in a ctor            
         }
 
-        readonly ref Vector3 FetchRef()
+        ref readonly Vector3 FetchRef()
         {
             // making a copy here would be observable
             return ref v;
@@ -276,13 +274,13 @@ Here is an ugly, but legal and very explicit example where copying would be obse
     }
 ```
 
-Note: Since CLR does not differentiate readonly and writeable references. The distinction may not be required for general scenarios like JIT-compilation. However, some work will be needed to introduce `readonly ref` notion within the Verification infrastructure. At least if we want pasing references to `readonly` fields be formally verifiable.
+Note: Since CLR does not differentiate readonly and writeable references. The distinction may not be required for general scenarios like JIT-compilation. However, some work will be needed to introduce `ref readonly` notion within the Verification infrastructure. At least if we want passing references to `readonly` fields be formally verifiable.
 
 ## Aliasing behavior.
 
 A care must be made to preserve the aliasing behavior and not allow capturing by-value. As a result, readonly refs should be treated the same as other refs for the purpose of capturing in lambdas, async, iterators, stack spilling etc... - I.E. most scenarios would be disallowed.
 
-It would be ok to make a copy when `readonly ref` return is a receiver of regular struct methods, which take `this` as an ordinary writeable refs. Historically we would make an invocation on a copy. 
+It would be ok to make a copy when `ref readonly` return is a receiver of regular struct methods, which take `this` as an ordinary writeable refs. Historically we would make an invocation on a copy. 
 
 In theory we could produce a warning when making a copy of the receiver since there are no backward compat considerations here. The options for fixing the warning are limited though, so it is debatable whether a warning is desirable.
 
@@ -290,17 +288,17 @@ In theory we could produce a warning when making a copy of the receiver since th
 
 Normal safe to return rules for references will apply to readonly references as well. 
 
-Note that a `readonly ref` can be obtained through a regular ref, but not the other way around. Otherwise the safety of `readonly ref`s is inferred the same way as for the regular refs.
+Note that a `ref readonly` can be obtained through a regular ref, but not the other way around. Otherwise the safety of `ref readonly`s is inferred the same way as for the regular refs.
 
 Considering that RValues can be passed as `in` parameter we need one more rule - **RValues are not safe-to-return by reference**.
 
-We also must consider the situation of RValues passed as `in` parameters via a copy and then coming back in a form of a `readonly ref` and thus the result of the invocation is clearly unsafe to return.
+We also must consider the situation of RValues passed as `in` parameters via a copy and then coming back in a form of a `ref readonly` and thus the result of the invocation is clearly unsafe to return.
 Once RValues are not safe to return, the existing rule `#6` already handles this case.
 
 
 Example:
 ```C#
-        readonly ref Vector3 Test1()
+        ref readonly Vector3 Test1()
         {
             // can pass an RValue as "in" (via a temp copy)
             // but the result is not safe to return
@@ -308,7 +306,7 @@ Example:
             return ref Test2(default(Vector3));
         }
 
-        readonly ref Vector3 Test2(in Vector3 r)
+        ref readonly Vector3 Test2(in Vector3 r)
         {
             // this is ok, r is returnable
             return ref r;
@@ -337,7 +335,7 @@ As a last resort the temps could be method-wide. We currently do it already in v
 
 # ref/in extension methods
 There is actually existing proposal (https://github.com/dotnet/roslyn/issues/165) and corresponding PR (https://github.com/dotnet/roslyn/pull/15650). 
-I just want to acknowledge that this idea is not entirely new. It is, however, relevant here since `readonly ref` elegantly removes the most contentious issue about such method - what to do with RValue receivers.
+I just want to acknowledge that this idea is not entirely new. It is, however, relevant here since `ref readonly` elegantly removes the most contentious issue about such method - what to do with RValue receivers.
 
 The general idea of the proposal is to allow extension methods to take the `this` parameter by reference, as long as the type is known to be a struct type (I.E. struct or a generic type with `struct` constraint).
 
@@ -387,7 +385,7 @@ In addition it would also be allowed to have `in` extension methods that would n
 
 # Readonly structs
 
-In short - a feature that makes all members of a struct, except constructors to have `this` parameter as a `readonly ref`.
+In short - a feature that makes all members of a struct, except constructors to have `this` parameter as a `ref readonly`.
 
 ## Motivation
 
@@ -446,7 +444,7 @@ This feature does not sacrifice any of the existing strengths such as type-safet
 
 We have similar trust when using `out`. Incorrect implementation of `out` can cause unspecified behavior, but in reality it rarely happens.  
 
-Making the formal verification rules familiar with `readonly ref` would further mitigate the trust issue.
+Making the formal verification rules familiar with `ref readonly` would further mitigate the trust issue.
 
 ## Alternatives
 [alternatives]: #alternatives
