@@ -21,7 +21,7 @@ When writing cross-platform code, it is often necessary to write interop code th
 
 This interop code often has to deal with handles, unmanaged memory, or even just platform-specific sized integers.
 
-The runtime provides support for this by defining a set of operators that can be used on the `native int` (`System.IntPtr`) and `native unsigned int` (`System.UIntPtr`) primtive types.
+The runtime provides support for this by defining a set of operators that can be used on the `native int` (`System.IntPtr`) and `native unsigned int` (`System.UIntPtr`) primitive types.
 
 C# has never supported these operators and so users have to workaround the issue. This often increases code complexity and lowers code maintainability.
 
