@@ -492,7 +492,7 @@ As with any language feature, we must question whether the additional complexity
 ## Alternatives
 [alternatives]: #alternatives
 
-We considered adding *primary constructors* in C# 6. Although they occupy the same syntactic surface as this proposal, we found that they fell short of the advantages offeed by records.
+We considered adding *primary constructors* in C# 6. Although they occupy the same syntactic surface as this proposal, we found that they fell short of the advantages offered by records.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
