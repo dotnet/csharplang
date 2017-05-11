@@ -37,6 +37,8 @@ var tuple = ((x.f1, x?.f2) = (1, 2));
 
 The same would also apply to VB tuples, using the VB-specific rules for inferring name from expression and case-insensitive name comparisons.
 
+When using the C# 7.1 compiler (or later) with language version "7.0", the element names will be inferred (despite the feature not being available), but there will be a use-site error for trying to access them. This will limit additions of new code that would later face the compatibility issue (described below).
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 
