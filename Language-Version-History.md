@@ -1,6 +1,19 @@
 Features Added in C# Language Versions
 ====================
 
+# [C# 1.0](https://en.wikipedia.org/wiki/Microsoft_Visual_Studio#.NET_.282002.29) (Visual Studio.NET)
+
+- Classes
+- Structs
+- Interfaces
+- Events
+- Properties
+- Delegates
+- Expressions
+- Statements
+- Attributes
+- Literals
+
 # [C# 2](https://msdn.microsoft.com/en-us/library/7cz8t42e(v=vs.80).aspx) (VS 2005)
 - Generics
 - Partial types
