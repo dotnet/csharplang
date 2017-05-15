@@ -342,6 +342,24 @@ class Derived: IA // OK, all interface members have a concrete most specific ove
 
 > ***Open Issue:*** The spec should describe the runtime method resolution algorithm in the face of interface default methods. We need to ensure that the semantics are consistent with the language semantics, e.g. which declared methods do and do not override or implement an `internal` method.
 
+### CLR support API
+
+In order for compilers to detect when they are compiling for a runtime that supports this feature, libraries for such runtimes are modified to advertise that fact through the API discussed in https://github.com/dotnet/corefx/issues/17116. We add
+
+``` c#
+namespace System.Runtime.CompilerServices
+{
+    public static class RuntimeFeature
+    {
+        // Presence of the field indicates runtime support
+        public const string DefaultInterfaceImplementation = nameof(DefaultInterfaceImplementation);
+    }
+}
+```
+
+> ***Open issue***: Is that the best name for the *CLR* feature? The CLR feature does much more than just that (e.g. relaxes protection constraints, supports overrides in interfaces, etc). Perhaps it should be called something like "concrete methods in interfaces", or "traits"?
+
+
 ### Further areas to be specified
 
 - [ ] It would be useful to catalog the kinds of source and binary compatibility effects caused by adding default interface methods and overrides to existing interfaces.
