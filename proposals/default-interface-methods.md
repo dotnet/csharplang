@@ -383,6 +383,7 @@ None.
 - See also https://github.com/dotnet/csharplang/issues/406 for a list of open questions.
 - The detailed specification must describe the resolution mechanism used at runtime to select the precise method to be invoked.
 - The interaction of metadata produced by new compilers and consumed by older compilers needs to be worked out in detail. For example, we need to ensure that the metadata representation that we use does not cause the addition of a default implementation in an interface to break an existing class that implements that interface when compiled by an older compiler. This may affect the metadata representation that we can use.
+- The design must consider interoperation with other languages and existing compilers for other languages.
 
 ## Resolved Questions
 
@@ -498,8 +499,10 @@ but `C` is not recompiled. What happens when the program is run? An invocation o
 
 ## Design meetings
 
-2017-03-08 LDM Meeting Notes (not published yet)
+[2017-03-08 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-03-08.md)
 [2017-03-21 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-03-21.md)
 [2017-03-23 meeting "CLR Behavior for Default Interface Methods"](https://github.com/dotnet/csharplang/blob/master/meetings/2017/CLR-2017-03-23.md)
 [2017-04-05 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-05.md)
-2017-04-11 LDM Meeting Notes (not published yet)
+[2017-04-11 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-11.md)
+[2017-04-18 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-18.md)
+[2017-04-19 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-19.md)
