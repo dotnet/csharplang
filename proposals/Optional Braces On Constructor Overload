@@ -1,0 +1,21 @@
+As the title states is it possible to make the brackets optional on constructors with no body.
+For example
+class Person {
+
+    string _name, _gender;
+    int _age;
+
+    public Person(string name, int age, string gender) {
+        _name = name;
+        _age = age;
+        _gender = gender;
+    }
+
+    //Instead of this
+    public Person(string name) : this(name, 0, "unknown") 
+    {
+    }
+
+    //Just this
+    public Person(string name) : this(name, 0, "unknown"); 
+}
