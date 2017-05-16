@@ -78,6 +78,6 @@ Features Added in C# Language Versions
 # [C# 7.1 (tentative)](https://github.com/dotnet/roslyn/blob/master/docs/Language%20Feature%20Status.md) (VS 2017 Update 3)
 - [Async main](https://github.com/dotnet/csharplang/blob/master/proposals/async-main.md)
 - [Default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/target-typed-default.md)
-- [Reference assemblies](https://github.com/dotnet/roslyn/blob/features/refout/docs/features/refout.md)
+- [Reference assemblies](https://github.com/dotnet/roslyn/blob/master/docs/features/refout.md)
 - [Inferred tuple element names](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/infer-tuple-names.md)
 - [Pattern-matching with generics](https://github.com/dotnet/csharplang/blob/master/proposals/generics-pattern-match.md)
