@@ -256,7 +256,7 @@ And now we can operate on `Cartesian` values using polar coordinates
 
 ```cs
 var c = Cartesian(3, 4);
-if (c is Polar(var R, *)) Console.WriteLine(R);
+if (c is Polar(var R, _)) Console.WriteLine(R);
 ```
 
 Which prints `5`.
@@ -468,7 +468,7 @@ Expr Deriv(Expr e)
 {
   switch (e) {
     case X(): return Const(1);
-    case Const(*): return Const(0);
+    case Const(_): return Const(0);
     case Add(var Left, var Right):
       return Add(Deriv(Left), Deriv(Right));
     case Mult(var Left, var Right):
@@ -485,8 +485,8 @@ An expression simplifier demonstrates positional patterns:
 Expr Simplify(Expr e)
 {
   switch (e) {
-    case Mult(Const(0), *): return Const(0);
-    case Mult(*, Const(0)): return Const(0);
+    case Mult(Const(0), _): return Const(0);
+    case Mult(_, Const(0)): return Const(0);
     case Mult(Const(1), var x): return Simplify(x);
     case Mult(var x, Const(1)): return Simplify(x);
     case Mult(Const(var l), Const(var r)): return Const(l*r);
@@ -508,7 +508,7 @@ var areas =
         case Line l: 0,
         case Rectangle r: r.Width * r.Height,
         case Circle c: Math.PI * c.Radius * c.Radius,
-        case *: throw new ApplicationException()
+        case _: throw new ApplicationException()
     )
     select new { Primitive = primitive, Area = area };
 ```
