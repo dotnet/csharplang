@@ -30,6 +30,11 @@ The null-conditional `await` operator awaits its operand only if that operand is
 
 The type of the result is computed using the [rules for the null-conditional operator](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#null-conditional-operator).
 
+> **NOTE:**
+> If `e` is of type `Task`, then `await? e;` would do nothing if `e` is `null`, and await `e` if it is not `null`.
+> 
+> If `e` is of type `Task<K>` where `K` is a value type, then `await? e` would yield a value of type `K?`.
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 

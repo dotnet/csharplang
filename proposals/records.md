@@ -16,7 +16,7 @@ Records are a new, simplified declaration form for C# class and struct types tha
 
 A significant number of type declarations in C# are little more than aggregate collections of typed data. Unfortunately, declaring such types requires a great deal of boilerplate code. *Records* provide a mechanism for declaring a datatype by describing the members of the aggregate along with additional code or deviations from the usual boilerplate, if any.
 
-See [Examples](#Examples), below.
+See [Examples](#examples), below.
 
 ## Detailed design
 [design]: #detailed-design
@@ -75,7 +75,7 @@ with_expression
 
 with_initializer_list
     : with_initializer
-    | with_initiaizer ',' with_initializer_list
+    | with_initializer ',' with_initializer_list
     ;
 
 with_initializer
@@ -85,7 +85,7 @@ with_initializer
 
 The token `with` is a new context-sensitive keyword.
 
-Each *identifier* on the left of a *with_initilaizer* must bind to an accessible instance field or property of the type of the *primary_expression* of the *with_expression*. There may be no duplicated name among these identifiers of a given *with_expression*.
+Each *identifier* on the left of a *with_initializer* must bind to an accessible instance field or property of the type of the *primary_expression* of the *with_expression*. There may be no duplicated name among these identifiers of a given *with_expression*.
 
 A *with_expression* of the form
 
@@ -148,7 +148,7 @@ record_parameters
 
 record_parameter_list
     : record_parameter
-    | record_parameter record_parameter_list
+    | record_parameter ',' record_parameter_list
     ;
 
 record_parameter
@@ -197,7 +197,7 @@ At runtime the primary constructor
 * executes the body of each *primary_constructor_body*, if any, in source order.
 
 - [ ] **Open issue**: We need to specify that order, particularly across compilation units for partials.
-- [ ] **Open Issue**: We need to specify that every explicitly declared constructor must chain to the primry constructor.
+- [ ] **Open Issue**: We need to specify that every explicitly declared constructor must chain to the primary constructor.
 - [ ] **Open issue**: Should it be allowed to change the access modifier on the primary constructor?
 - [ ] **Open issue**: In a record struct, it is an error for there to be no record parameters?
 
@@ -278,7 +278,7 @@ In an `abstract` record class, the compiler-provided `With` method is abstract. 
 >     p = p with { X = 5 };
 > ```
 
-### 5. Examples
+### Examples
 
 #### Compatibility of record types
 
@@ -492,7 +492,7 @@ As with any language feature, we must question whether the additional complexity
 ## Alternatives
 [alternatives]: #alternatives
 
-We considered adding *primary constructors* in C# 6. Although they occupy the same syntactic surface as this proposal, we found that they fell short of the advantages offeed by records.
+We considered adding *primary constructors* in C# 6. Although they occupy the same syntactic surface as this proposal, we found that they fell short of the advantages offered by records.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions

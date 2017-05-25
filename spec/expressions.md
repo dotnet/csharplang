@@ -125,12 +125,12 @@ The following table summarizes all operators in order of precedence from highest
 | [Relational and type-testing operators](expressions.md#relational-and-type-testing-operators) | Equality                    | `==`  `!=`    | 
 | [Logical operators](expressions.md#logical-operators)                                         | Logical AND                 | `&`           | 
 | [Logical operators](expressions.md#logical-operators)                                         | Logical XOR                 | `^`           | 
-| [Logical operators](expressions.md#logical-operators)                                         | Logical OR                  | `|`           | 
+| [Logical operators](expressions.md#logical-operators)                                         | Logical OR                  | `\|`          |
 | [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional AND             | `&&`          | 
-| [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional OR              | `||`          | 
+| [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional OR              | `\|\|`        | 
 | [The null coalescing operator](expressions.md#the-null-coalescing-operator)                   | Null coalescing             | `??`          | 
 | [Conditional operator](expressions.md#conditional-operator)                                   | Conditional                 | `?:`          | 
-| [Assignment operators](expressions.md#assignment-operators), [Anonymous function expressions](expressions.md#anonymous-function-expressions)  | Assignment and lambda expression | `=`  `*=`  `/=`  `%=`  `+=`  `-=`  `<<=`  `>>=`  `&=`  `^=`  `|=`  `=>` | 
+| [Assignment operators](expressions.md#assignment-operators), [Anonymous function expressions](expressions.md#anonymous-function-expressions)  | Assignment and lambda expression | `=`  `*=`  `/=`  `%=`  `+=`  `-=`  `<<=`  `>>=`  `&=`  `^=`  `\|=`  `=>` | 
 
 When an operand occurs between two operators with the same precedence, the associativity of the operators controls the order in which the operations are performed:
 
@@ -3184,7 +3184,7 @@ The operators compare the operands according to the rules of the IEEE 754 standa
 *  When neither operand is NaN, the operators compare the values of the two floating-point operands with respect to the ordering
 
    ```
-   -inf < -max < ... < -min < -0.0 == +0.0 < +min < ... < +max < +inf`
+   -inf < -max < ... < -min < -0.0 == +0.0 < +min < ... < +max < +inf
    ```
 
    where `min` and `max` are the smallest and largest positive finite values that can be represented in the given floating-point format. Notable effects of this ordering are:
@@ -3505,8 +3505,7 @@ bool? operator |(bool? x, bool? y);
 
 The following table lists the results produced by these operators for all combinations of the values `true`, `false`, and `null`.
 
-
-| `x`     | `y`     | `x & y` | `x | y` |
+| `x`     | `y`     | `x & y` | `x \| y`|
 |:-------:|:-------:|:-------:|:-------:|
 | `true`  | `true`  | `true`  | `true`  | 
 | `true`  | `false` | `false` | `true`  | 
@@ -4844,7 +4843,7 @@ class C {
     const object str = "hello"; // error: implicit reference conversion
 }
 ```
-the initialization of iis an error because a boxing conversion is required. The initialization of str is an error because an implicit reference conversion from a non-null value is required.
+the initialization of i is an error because a boxing conversion is required. The initialization of str is an error because an implicit reference conversion from a non-null value is required.
 
 Whenever an expression fulfills the requirements listed above, the expression is evaluated at compile-time. This is true even if the expression is a sub-expression of a larger expression that contains non-constant constructs.
 
