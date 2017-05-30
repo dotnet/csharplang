@@ -2,16 +2,16 @@
 
 ## Summary
 [summary]: #summary
-Allow named parameters to be used in non-trailing position, as long as they are used in their correct position. For example: `DoSomething(isEmployed:true, name, age);`.
+Allow named arguments to be used in non-trailing position, as long as they are used in their correct position. For example: `DoSomething(isEmployed:true, name, age);`.
 
 ## Motivation
 [motivation]: #motivation
 
-The main motivation is to avoid typing redundant information. It is common to name a parameter that is a literal (such as `null`, `true`) for the purpose of clarifying the code, rather than of passing parameters out-of-order.
-That is currently disallowed (`CS1738`) unless all the following parameters are also named.
+The main motivation is to avoid typing redundant information. It is common to name an argument that is a literal (such as `null`, `true`) for the purpose of clarifying the code, rather than of passing arguments out-of-order.
+That is currently disallowed (`CS1738`) unless all the following arguments are also named.
 
 ```C#
-DoSomething(isEmployed:true, name, age); // currently disallowed, even though all parameters are in position
+DoSomething(isEmployed:true, name, age); // currently disallowed, even though all arguments are in position
 // CS1738 "Named argument specifications must appear after all fixed arguments have been specified"
 ```
 
@@ -60,9 +60,9 @@ In other words, non-trailing named arguments are only allowed when the name and 
 There are a couple of alternatives to consider:
 
 - The status quo
-- Providing IDE assistance to fill-in all the names of trailing parameters when you type specific a name in the middle.
+- Providing IDE assistance to fill-in all the names of trailing arguments when you type specific a name in the middle.
 
-Both of those suffer from more verbosity, as they introduce multiple named parameters even if you just need one name of a literal at the beginning of the parameter list.
+Both of those suffer from more verbosity, as they introduce multiple named arguments even if you just need one name of a literal at the beginning of the argument list.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
