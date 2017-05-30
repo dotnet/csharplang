@@ -103,3 +103,22 @@ Triage of championed features
 6. Zero and one element tuples
 7. Deconstruction in lambda parameters
 8. Private protected
+
+## Mar 21, 2017
+[C# Language Design Notes for Mar 21, 2017](LDM-2017-03-21.md)
+
+Discussion of default interface member implementations, based on [this guided tour](https://github.com/dotnet/csharplang/issues/288).
+
+1. Concerns raised on GitHub and elsewhere
+2. Inheritance?
+3. # Breaking name lookup on `this`
+4. Events
+5. Modifiers
+6. Methods
+7. Properties
+8. Overrides
+9. Reabstraction
+10. Most specific override
+11. Static non-virtual members
+12. Accessibility levels
+13. Existing programs
