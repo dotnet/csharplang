@@ -54,6 +54,8 @@ In other words, non-trailing named arguments are only allowed when the name and 
 ## Detailed design (VB)
 [design]: #detailed-design-vb
 
+TODO
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 
@@ -70,6 +72,7 @@ Both of those suffer from more verbosity, as they introduce multiple named argum
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
+- implications for F#
 
 ## Design meetings
 [ldm]: #ldm
