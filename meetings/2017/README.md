@@ -68,7 +68,7 @@ We went over the proposal for `ref readonly`: [Champion "Readonly ref"](https://
 1. Shapes and extensions (*exploration*)
 2. Conditional refs (*original design adopted*)
 
-# Mar 7, 2017
+## Mar 7, 2017
 [C# Language Design Notes for Mar 7, 2017](LDM-2017-03-07.md)
 
 We continued to flesh out the designs for features currently considered for C# 7.1.
@@ -76,3 +76,30 @@ We continued to flesh out the designs for features currently considered for C# 7
 1. Default expressions (*design adopted*)
 2. Field target on auto-properties (*yes*)
 3. private protected (*yes, if things work as expected*)
+
+## Mar 8, 2017
+[C# Language Design Notes for Mar 8, 2017](LDM-2017-03-08.md)
+
+We looked at default interface member implementations.
+
+1. Xamarin interop scenario
+2. Proposal
+3. Inheritance from interface to class
+4. Overriding and base calls
+5. The diamond problem
+6. Binary compatibility
+7. Other semantic challenges
+
+## Mar 15, 2017
+[C# Language Design Notes for Mar 8, 2017](LDM-2017-03-15.md)
+
+Triage of championed features
+
+1. JSON literals
+2. Fixing of captured locals
+3. Allow shadowing of parameters
+4. Weak delegates
+5. Protocols/duck typing/concepts/type classes
+6. Zero and one element tuples
+7. Deconstruction in lambda parameters
+8. Private protected
