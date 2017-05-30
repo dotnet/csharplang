@@ -111,7 +111,7 @@ Discussion of default interface member implementations, based on [this guided to
 
 1. Concerns raised on GitHub and elsewhere
 2. Inheritance?
-3. # Breaking name lookup on `this`
+3. Breaking name lookup on `this`
 4. Events
 5. Modifiers
 6. Methods
