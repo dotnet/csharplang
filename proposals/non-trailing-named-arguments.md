@@ -35,7 +35,7 @@ public class Task
 Task.When(all: TaskStatus.RanToCompletion, any: TaskStatus.Faulted, task1, task2)
 ```
 
-## Detailed design (C#)
+## Detailed design
 [design]: #detailed-design
 
 In §7.5.1 (Argument lists), the spec currently says:
@@ -50,11 +50,6 @@ A function member is said to be an applicable function member with respect to an
 In particular, this prevents invoking `void M(bool a = true, bool b = true, bool c = true, );` with `M(c: false, valueB);`. The first argument is used non-positionally (the argument is used in first position, but the parameter named "c" is in third position), so the following arguments should be named.
 
 In other words, non-trailing named arguments are only allowed when the name and the position result in finding the same corresponding parameter.
-
-## Detailed design (VB)
-[design]: #detailed-design-vb
-
-TODO
 
 ## Drawbacks
 [drawbacks]: #drawbacks
