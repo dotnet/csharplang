@@ -130,3 +130,11 @@ Design some remaining 7.1 features
 
 1. Fix pattern matching restriction with generics
 2. Better best common type
+
+## Mar 29, 2017
+
+[C# Language Design Notes for Mar 29, 2017](LDM-2017-03-29.md)
+
+1. Nullable scenarios
+2. `Span<T>` safety
+
