@@ -122,3 +122,11 @@ Discussion of default interface member implementations, based on [this guided to
 11. Static non-virtual members
 12. Accessibility levels
 13. Existing programs
+
+## Mar 28, 2017
+[C# Language Design Notes for Mar 28, 2017](LDM-2017-03-28.md)
+
+Design some remaining 7.1 features
+
+1. Fix pattern matching restriction with generics
+2. Better best common type
