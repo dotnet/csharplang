@@ -138,3 +138,10 @@ Design some remaining 7.1 features
 1. Nullable scenarios
 2. `Span<T>` safety
 
+## Apr 5, 2017
+[C# Language Design Notes for Apr 5, 2017](LDM-2017-04-05.md)
+
+1. Non-virtual members in interfaces
+2. Inferred tuple element names
+3. Tuple element names in generic constraints
+
