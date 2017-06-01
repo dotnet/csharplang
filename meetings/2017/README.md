@@ -145,3 +145,7 @@ Design some remaining 7.1 features
 2. Inferred tuple element names
 3. Tuple element names in generic constraints
 
+## Apr 11, 2017
+[C# Language Design Notes for Apr 11, 2017](LDM-2017-04-11.md)
+
+1. Runtime behavior of ambiguous default implementation
