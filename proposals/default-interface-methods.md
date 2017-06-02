@@ -374,7 +374,9 @@ This proposal requires a coordinated update to the CLR specification (to support
 ## Alternatives
 [alternatives]: #alternatives
 
-None.
+Continue using the current extension method + optional interface design pattern. Under this design pattern, the extension method checks for an optionally implemented interface. If it is avaible on the object in question, that interface is called instead of the main part of the extension method.
+
+For example, the `Enumerable.Count()` extension method checks for `ICollection<T>` for an alternative implemention of the `Count` function.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
