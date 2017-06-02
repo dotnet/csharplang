@@ -161,3 +161,11 @@ Design some remaining 7.1 features
 6. Implicitly implementing non-public interface members
 7. Not quite implementing a member
 8. asynchronous `Main`
+
+## Apr 19, 2017
+[C# Language Design Notes for Apr 19, 2017](LDM-2017-04-19.md)
+
+1. Improved best common type
+2. Diamonds with classes
+3. Structs and default implementations
+4. Base invocation
