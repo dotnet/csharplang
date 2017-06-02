@@ -149,3 +149,15 @@ Design some remaining 7.1 features
 [C# Language Design Notes for Apr 11, 2017](LDM-2017-04-11.md)
 
 1. Runtime behavior of ambiguous default implementation
+
+## Apr 18, 2017
+[C# Language Design Notes for Apr 18, 2017](LDM-2017-04-18.md)
+
+1. Default implementations for event accessors in interfaces
+2. Reabstraction in a class of default-implemented member
+3. `sealed override` with default implementations
+4. Use of `sealed` keyword for non-virtual interface members
+5. Implementing inaccessible interface members
+6. Implicitly implementing non-public interface members
+7. Not quite implementing a member
+8. asynchronous `Main`
