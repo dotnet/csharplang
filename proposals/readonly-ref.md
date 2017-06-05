@@ -460,6 +460,7 @@ The main competing design is really "do nothing".
 * Conversions at 'in' call sites.
 * Need to agree on metadata representation.
 * Changes to the Verification rules
+* Spec 7.5.3.1 would have to change to reflect that ref extension methods arguments are now passed without using a 'ref' keyword.
 
 ## Design meetings
 
