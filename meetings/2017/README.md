@@ -169,3 +169,11 @@ Design some remaining 7.1 features
 2. Diamonds with classes
 3. Structs and default implementations
 4. Base invocation
+
+## May 16, 2017
+[C# Language Design Notes for May 16, 2017](LDM-2017-05-16.md)
+
+1. Triage C# 7.1 features that didn't make it
+2. Look at C# 7.2 features
+3. GitHub procedure around new design notes and proposals
+4. Triage of championed features
