@@ -61,7 +61,7 @@ Features Added in C# Language Versions
 - nameof operator
 - Dictionary initializer
 
-# [C# 7.0](https://blogs.msdn.microsoft.com/dotnet/2017/03/09/new-features-in-c-7-0/) (VS 2017)
+# [C# 7.0](https://blogs.msdn.microsoft.com/dotnet/2017/03/09/new-features-in-c-7-0/) (Visual Studio 2017)
 - [Out variables](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/out-var.md)
 - [Pattern matching](https://github.com/dotnet/csharplang/blob/master/proposals/patterns.md)
 - [Tuples](https://github.com/dotnet/roslyn/blob/master/docs/features/tuples.md)
@@ -75,7 +75,7 @@ Features Added in C# Language Versions
 - More expression-bodied members
 - [Throw expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/throw-expression.md)
 
-# [C# 7.1 (tentative)](https://github.com/dotnet/roslyn/blob/master/docs/Language%20Feature%20Status.md) (VS 2017 Update 3)
+# [C# 7.1](https://github.com/dotnet/roslyn/blob/master/docs/Language%20Feature%20Status.md) (Visual Studio 2017 version 15.3)
 - [Async main](https://github.com/dotnet/csharplang/blob/master/proposals/async-main.md)
 - [Default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/target-typed-default.md)
 - [Reference assemblies](https://github.com/dotnet/roslyn/blob/master/docs/features/refout.md)
