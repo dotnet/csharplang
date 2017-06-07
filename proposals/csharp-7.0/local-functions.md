@@ -67,4 +67,5 @@ using local functions with capturing.
 
 We add to the spec
 
-> The body of a statement-bodied lambda expression or local function is considered reachable.
+> The body of a local function is considered reachable if and only if it is
+> the target of an invocation or delegate conversion in a reachable expression.
