@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-The "readonly references" feature is actually a group or features that leverage the efficiency of passing variables by reference, but without exposing the data to modifications.
+The "readonly references" feature is actually a group of features that leverage the efficiency of passing variables by reference, but without exposing the data to modifications.
 
 # Readonly ref parameters. (aka `in` parameters)
 
