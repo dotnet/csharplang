@@ -67,6 +67,8 @@ Both of those suffer from more verbosity, as they introduce multiple named argum
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
+- Confirm whether such non-trailing named arguments should be allowed in params position. For example, invoking `M(x: 1, 2)` on `M(params int[] x)`.
+
 ## Design meetings
 [ldm]: #ldm
 The feature was briefly discussed in LDM on May 16th 2017, with approval in principle (ok to move to proposal/prototype).
