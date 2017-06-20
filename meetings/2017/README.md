@@ -177,3 +177,45 @@ Design some remaining 7.1 features
 2. Look at C# 7.2 features
 3. GitHub procedure around new design notes and proposals
 4. Triage of championed features
+
+## May 17, 2017
+[C# Language Design Notes for May 17, 2017](LDM-2017-05-17.md)
+
+More questions about default interface member implementations
+
+1. Conflicting override of default implementations
+2. Can the Main entry point method be in an interface?
+3. Static constructors in interfaces?
+4. Virtual properties with private accessors
+5. Does an override introduce a member?
+6. Parameter names
+
+## May 26, 2017
+[C# Language Design Notes for May 26, 2017](LDM-2017-05-26.md)
+
+1. Native ints
+
+## May 31, 2017
+[C# Language Design Notes for May 31, 2017](LDM-2017-05-31.md)
+
+1. Default interface members: overriding or implementing?
+2. Downlevel poisoning of ref readonly in signatures
+3. Extension methods with ref this and generics
+4. Default in operators
+
+## Jun 13, 2017
+[C# Language Design Notes for Jun 13, 2017](LDM-2017-06-13.md)
+
+1. Native-size ints
+2. Native-size floats
+
+## Jun 14, 2017
+[C# Language Design Notes for Jun 14, 2017](LDM-2017-06-14.md)
+
+Several issues related to default implementations of interface members
+
+1. Virtual properties with private accessors
+2. Requiring interfaces to have a most specific implementation of all members
+3. Member declaration syntax revisited
+4. Base calls
+
