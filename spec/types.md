@@ -74,7 +74,7 @@ enum_type
     ;
 ```
 
-Unlike a variable of a reference type, a variable of a value type can contain the value `null` only if the value type is a nullable type.  For every non-nullable value type there is a corresponding nullable value type denoting the same set of values plus the value `null`.
+Unlike a variable of a reference type, a variable of a value type *can not* contain the value `null` only if the value type is a nullable type.  For every non-nullable value type there is a corresponding nullable value type denoting the same set of values plus the value `null`.
 
 Assignment to a variable of a value type creates a copy of the value being assigned. This differs from assignment to a variable of a reference type, which copies the reference but not the object identified by the reference.
 
