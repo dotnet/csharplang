@@ -41,13 +41,13 @@ Task.When(all: TaskStatus.RanToCompletion, any: TaskStatus.Faulted, task1, task2
 In §7.5.1 (Argument lists), the spec currently says:
 > An *argument* with an *argument-name* is referred to as a __named argument__, whereas an *argument* without an *argument-name* is a __positional argument__. It is an error for a positional argument to appear after a named argument in an *argument-list*.
 
-The proposal is to remove this error and update the rules for checking if a function member is applicable (§7.5.3.1):
+The proposal is to remove this error and update the rules for finding the corresponding parameter for an argument (§7.5.1.1):
 
-A function member is said to be an applicable function member with respect to an argument list A when all of the following are true:
-* [... existing rules ...]
-* For each named argument in A, if its corresponding parameter (as described in §7.5.1.1) does not have the same position as that argument, then all the following arguments must be named.
+Arguments in the argument-list of instance constructors, methods, indexers and delegates:
+- [existing rules]
+- An unnamed argument corresponds to no parameter when it is after an out-of-position named argument or a named params argument.
 
-In particular, this prevents invoking `void M(bool a = true, bool b = true, bool c = true, );` with `M(c: false, valueB);`. The first argument is used non-positionally (the argument is used in first position, but the parameter named "c" is in third position), so the following arguments should be named.
+In particular, this prevents invoking `void M(bool a = true, bool b = true, bool c = true, );` with `M(c: false, valueB);`. The first argument is used out-of-position (the argument is used in first position, but the parameter named "c" is in third position), so the following arguments should be named.
 
 In other words, non-trailing named arguments are only allowed when the name and the position result in finding the same corresponding parameter.
 
@@ -67,11 +67,9 @@ Both of those suffer from more verbosity, as they introduce multiple named argum
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- Confirm whether such non-trailing named arguments should be allowed in params position. For example, invoking `M(x: 1, 2)` on `M(params int[] x)`.
-
 ## Design meetings
 [ldm]: #ldm
-The feature was briefly discussed in LDM on May 16th 2017, with approval in principle (ok to move to proposal/prototype).
+The feature was briefly discussed in LDM on May 16th 2017, with approval in principle (ok to move to proposal/prototype). It was also briefly discussed on June 28th 2017.
 
 Relates to initial discussion https://github.com/dotnet/csharplang/issues/518
 Relates to championed issue https://github.com/dotnet/csharplang/issues/570
