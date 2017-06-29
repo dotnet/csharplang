@@ -54,6 +54,34 @@ In other words, non-trailing named arguments are only allowed when the name and 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
+This proposal exacerbates existing subtleties with named arguments in overload resolution. For instance:
+```
+void M(int x, int y) { }
+void M<T>(T y, int x) { }
+
+void M2()
+{
+    M(3, 4);
+    M(y: 3, x: 4); // Invokes M(int, int)
+    M(y: 3, 4); // Invokes M<T>(T, int)
+}
+```
+
+You could get this situation today by swapping the parameters:
+```
+void M(int y, int x) { }
+void M<T>(int x, T y) { }
+
+void M2()
+{
+    M(3, 4);
+    M(x: 3, y: 4); // Invokes M(int, int)
+    M(3, y: 4); // Invokes M<T>(int, T)
+}
+```
+
+Similarly, if you have two methods `void M(int a, int b)` and `void M(int x, string y)`, the mistaken invocation `M(x: 1, 2)` will produce a diagnostic based on the second overload ("cannot convert from 'int' to 'string'"). This problem already exists when the named argument is used in a trailing position.
+
 ## Alternatives
 [alternatives]: #alternatives
 
