@@ -133,6 +133,20 @@ T ElementAt(this T[] array, int index)
 
 A proposal to add such a helper class to the framework is underway at https://github.com/dotnet/corefx/issues/17068. If this language feature was implemented, the proposal could be updated to take advantage of this feature.
 
+### Extension methods
+
+The `this` parameter in an extension method may be referenced by `CallerArgumentExpression`. For example:
+
+```cs
+public static void ShouldBe<T>(this T @this, T expected, [CallerArgumentExpression("this")] string thisExpression = null) {}
+
+contestant.Points.ShouldBe(1337); // thisExpression: "contestant.Points"
+```
+
+`thisExpression` will receive the expression corresponding to the object before the dot. If it's called with static method syntax, e.g. `Ext.ShouldBe(contestant.Points, 1337)`, it will behave as if first parameter wasn't marked `this`.
+
+There should always be an expression corresponding to the `this` parameter. Even if an instance of a class calls an extension method on itself, e.g. `this.Single()` from inside a collection type, the `this` is mandated by the compiler so `"this"` will get passed. If this rule is changed in the future, we can consider passing `null` or the empty string.
+
 ### Extra details
 
 - Like the other `Caller*` attributes, such as `CallerMemberName`, this attribute may only be used on parameters with default values.
