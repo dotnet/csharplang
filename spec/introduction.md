@@ -283,7 +283,7 @@ The following table summarizes C#'s operators, listing the operator categories i
 | Null coalescing                  | `X ?? y`          | Evaluates to `y` if `x` is `null`, to `x` otherwise |
 | Conditional                      | `x ? y : z`       | Evaluates `y` if `x` is `true`, `z` if `x` is `false` |
 | Assignment or anonymous function | `x = y`           | Assignment |
-|                                  | `x op= y`         | Compound assignment; supported operators are `*=` `/=` `%=` `+=` `-=` `<<=` `>>=` `&=` `^=` `|=` |
+|                                  | `x op= y`         | Compound assignment; supported operators are `*=` `/=` `%=` `+=` `-=` `<<=` `>>=` `&=` `^=` <code>&#124;=</code> |
 |                                  | `(T x) => y`      | Anonymous function (lambda expression) |
 
 ## Statements
