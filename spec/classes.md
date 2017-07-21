@@ -1723,6 +1723,7 @@ method_modifier
     | 'override'
     | 'abstract'
     | 'extern'
+    | 'async'
     | method_modifier_unsafe
     ;
 
@@ -1756,7 +1757,7 @@ A declaration has a valid combination of modifiers if all of the following are t
 *  If the declaration includes the `sealed` modifier, then the declaration also includes the `override` modifier.
 *  If the declaration includes the `partial` modifier, then it does not include any of the following modifiers: `new`, `public`, `protected`, `internal`, `private`, `virtual`, `sealed`, `override`, `abstract`, or `extern`.
 
-A method that has the async modifier is an async function and follows the rules described in [Iterators](classes.md#iterators).
+A method that has the `async` modifier is an async function and follows the rules described in [Async functions](classes.md#async-functions).
 
 The *return_type* of a method declaration specifies the type of the value computed and returned by the method. The *return_type* is `void` if the method does not return a value. If the declaration includes the `partial` modifier, then the return type must be `void`.
 
