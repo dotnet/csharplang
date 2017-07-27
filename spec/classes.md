@@ -2579,7 +2579,7 @@ property_body
     ;
 
 property_initializer
-    : '=' variable_initializer
+    : '=' variable_initializer ';'
     ;
 ```
 
