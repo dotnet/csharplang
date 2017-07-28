@@ -249,3 +249,23 @@ Several issues related to default implementations of interface members
 2. Deconstruction without `ValueTuple`
 3. Non-trailing named arguments
 
+
+## Jul 5, 2017
+[C# Language Design Notes for Jul 5, 2017](LDM-2017-07-05.md)
+
+Triage of features in the C# 7.2 milestone. They don't all fit: which should be dropped, which should be kept, and which should be pushed out?
+
+1. Static delegates *(8.0)*
+2. Native int and IntPtr operators *(7.X)*
+3. Field target *(anytime)*
+4. Utf8 strings *(8.0)*
+5. Slicing *(7.X)*
+6. Blittable *(7.2)*
+7. Ref structs *(7.2)*
+8. Ref readonly *(7.2)*
+9. Conditional ref *(7.2)*
+10. Ref extensions on structs *(7.2)*
+11. Readonly locals and params *(X.X)*
+12. ref structs in tuples *(don't)*
+13. Overload resolution tie breakers with long tuples *(use underlying generics)*
+
