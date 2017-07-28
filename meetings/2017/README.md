@@ -268,4 +268,3 @@ Triage of features in the C# 7.2 milestone. They don't all fit: which should be 
 11. Readonly locals and params *(X.X)*
 12. ref structs in tuples *(don't)*
 13. Overload resolution tie breakers with long tuples *(use underlying generics)*
-
