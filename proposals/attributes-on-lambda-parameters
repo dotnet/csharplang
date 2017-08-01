@@ -1,0 +1,77 @@
+# Attributes on anonymous lambda parameters
+
+* [x] Proposed
+* [ ] Prototype
+* [ ] Implementation
+* [ ] Specification
+
+## Summary
+[summary]: #summary
+
+Allow attributes on anonymous lambda parameters.
+
+## Motivation
+[motivation]: #motivation
+
+People working on MSIL love to add metadata to everything (in order to ease decompilation, add hints to their own backends and so on). 
+Today it's impossible to write the following code [dump example code]: 
+
+```C#
+[AttributeUsage(AttributeTargets.Parameter)]
+public class WriteOnlyAttribute: Attribute {}
+[AttributeUsage(AttributeTargets.Parameter)]
+public class ReadOnlyAttribute: Attribute {}
+
+Parallel.For(0, N, (int i, [WriteOnly] double[] dst, [ReadOnly] double[] src) => {dst[i] += src[i];});
+```
+
+## Detailed design
+[design]: #detailed-design
+
+When generating parsing a lambda, compiler should check parameter attributes and add them to the parameters of the generated method: 
+
+```MSIL
+.method assembly hidebysig 
+		instance void '<MyType>b__0' (
+			int32 i
+		) cil managed 
+	{
+    // added section
+	  .param [1]
+	  .custom instance void MyNamespace.MyCustomAttribute::.ctor() = (
+		  01 00 00 00
+	  )
+		// Method begins at RVA 0x2209
+		// Code size 25 (0x19)
+		.maxstack 8
+
+		IL_0000: ldarg.0
+		IL_0018: ret
+	} // end of method '<>c__DisplayClass0_0'::'<MyType>b__0'
+```
+
+Example usage:
+```C#
+using System;
+using System.Net.Http;
+
+class Test
+{
+    public void Main() {
+        Parallel.For(0, N, ([MyCustomAttribute] int i) => { /* some method body */ });
+    }
+}
+```
+
+## Drawbacks
+[drawbacks]: #drawbacks
+
+I don't see any drawback. MSIL supports that entirely and it would come at no cost at runtime. 
+
+## Alternatives
+[alternatives]: #alternatives
+With current version of C# compiler, the only alternative is to write a static method somewhere, on which we put the attributes. 
+All this boilerplate/dupe code could be remove with this proposal. 
+
+## Unresolved questions
+[unresolved]: #unresolved-questions
