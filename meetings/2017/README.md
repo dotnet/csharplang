@@ -268,3 +268,14 @@ Triage of features in the C# 7.2 milestone. They don't all fit: which should be 
 11. Readonly locals and params *(X.X)*
 12. ref structs in tuples *(don't)*
 13. Overload resolution tie breakers with long tuples *(use underlying generics)*
+
+
+## Jul 26, 2017
+[C# Language Design Notes for Jul 24 and 26, 2017](LDM-2017-07-26.md)
+
+We started putting a series of stakes in the ground for nullable reference types, based on the evolving strawman proposal [here](https://github.com/dotnet/csharplang/issues/790). We're doing our first implementation of the feature based on this, and can then refine as we learn things from usage.
+
+1. Goals
+2. Nullable reference types
+3. Rarely-null members
+
