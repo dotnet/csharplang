@@ -279,3 +279,12 @@ We started putting a series of stakes in the ground for nullable reference types
 2. Nullable reference types
 3. Rarely-null members
 
+
+## Aug 7, 2017
+[C# Language Design Notes for Aug 7, 2017](LDM-2017-08-07.md)
+
+We continued refining the nullable reference types feature set with the aim of producing a public prototype for experimentation and learning.
+
+1. Warnings
+2. Local variables revisited
+3. Opt-in mechanisms
