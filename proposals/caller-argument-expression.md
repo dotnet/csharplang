@@ -138,7 +138,7 @@ A proposal to add such a helper class to the framework is underway at https://gi
 - Like the other `Caller*` attributes, such as `CallerMemberName`, this attribute may only be used on parameters with default values.
 - Multiple parameters marked with `CallerArgumentExpression` are permitted, as shown above.
 - The attribute's namespace will be `System.Runtime.CompilerServices`.
-- If `null` or a string that is not a parameter name (e.g. `"notAParameterName"`) is provided, the compiler will raise an error.
+- If `null` or a string that is not a parameter name (e.g. `"notAParameterName"`) is provided, the compiler will pass in an empty string.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
