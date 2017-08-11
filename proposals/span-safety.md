@@ -412,7 +412,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 
 > ***Open Issue:*** Should the *ref-safe-to-escape* of a value parameter be the same as the *ref-safe-to-escape* of a non-ref local variable, even though they are separated by an open curly-brace? The spec above says they are in the same scope. This is observable:
 > ``` c#
-> void M(ref int x)
+> void M(int x)
 > {
 >   var rx = new Span<int>(ref x);
 >   int y = 1;
