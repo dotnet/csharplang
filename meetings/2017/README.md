@@ -592,4 +592,17 @@ We continued refining the nullable reference types feature set with the aim of p
 1. Warnings
 2. Local variables revisited
 3. Opt-in mechanisms
->>>>>>> origin/master
+
+
+## Aug 9, 2017
+
+[C# Language Design Notes for Aug 9, 2017](LDM-2017-08-09.md)
+
+We discussed how nullable reference types should work in a number of different situations.
+
+1. Default expressions
+2. Array creation
+3. Struct fields
+4. Unconstrained type parameters
+
+
