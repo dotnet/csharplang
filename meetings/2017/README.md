@@ -606,3 +606,12 @@ We discussed how nullable reference types should work in a number of different s
 4. Unconstrained type parameters
 
 
+## Aug 14, 2017
+
+[C# Language Design Notes for Aug 14, 2017](LDM-2017-08-14.md)
+
+We looked at the interaction between generics and nullable reference types
+
+1. Unconstrained type parameters
+2. Nullable constraints
+3. Conversions between constructed types
