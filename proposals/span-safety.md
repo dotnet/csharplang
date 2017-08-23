@@ -289,9 +289,10 @@ An expression whose type is not a `ref struct` type is *safe-to-return* from the
 ## Parameters
 
 An lvalue designating a formal parameter is *ref-safe-to-escape* (by reference) as follows:
+- If the parameter has `ref struct` type, it is *ref-safe-to-escape* to the top-level scope of the method (but not from the entire method itself); otherwise
 - If the parameter is a ref or out parameter, it is *ref-safe-to-escape* from the entire method (e.g. by a `return ref` statement); otherwise
 - If the parameter is the `this` parameter of a struct type, it is *ref-safe-to-escape* to the top-level scope of the method (but not from the entire method itself);
-- Otherwise the parameter is a value parameter, and it is *ref-safe-to-escape* to the top-level scope of the method (but not from the method itself). This includes parameters of `ref struct` type.
+- Otherwise the parameter is a value parameter, and it is *ref-safe-to-escape* to the top-level scope of the method (but not from the method itself).
 
 An expression that is an rvalue designating the use of a formal parameter is *safe-to-escape* (by value) from the entire method (e.g. by a `return` statement). This applies to the `this` parameter as well.
 
@@ -324,7 +325,7 @@ For an operator with multiple operands that yields an lvalue, such as `c ? ref e
 
 An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 - The entire enclosing method
-- the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver)
+- the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver and arguments of `ref struct` types)
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
 > Note: the last bullet is necessary to handle code such as
@@ -339,7 +340,7 @@ An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *r
 
 An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 - The entire enclosing method
-- the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver)
+- the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver arguments of `ref struct` types)
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
 > Note that these rules are identical to the above rules for *ref-safe-to-escape*, but apply only when the return type is a `ref struct` type.
@@ -396,7 +397,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 
 - In a method invocation, the following constraints apply:
   - If there is a `ref` or `out` argument to a `ref struct` type (including the receiver), with *safe-to-escape* E1, then
-    - no `ref` or `out` argument (excluding the receiver) may have a narrower *ref-safe-to-escape* than E1; and
+    - no `ref` or `out` argument (excluding the receiver and arguments of `ref struct` types) may have a narrower *ref-safe-to-escape* than E1; and
     - no argument (including the receiver) may have a narrower *safe-to-escape* than E1.
 
 > ***Open Issue:*** We need some rule that permits us to produce an error when needing to spill a stack value of a `ref struct` type at an await expression, for example in the code
