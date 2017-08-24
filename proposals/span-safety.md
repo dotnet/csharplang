@@ -304,8 +304,8 @@ An lvalue designating a local variable is *ref-safe-to-escape* (by reference) as
 
 An expression that is an rvalue designating the use of a local variable is *safe-to-escape* (by value) as follows:
 - But the general rule above, a local whose type is not a `ref struct` type is *safe-to-return* from the entire enclosing method.
-- If the variable is an iteration variable of a `foreach` loop, then the variable's *safe-to-escape* scope is the same as the *safe-to-escape* of the `foreach` loop's expressio
-- If the variable's type is a `ref struct` type, then the variable's declaration requires an initializer, and the variable's *safe-to-escape* scope is the same as the *safe-to-escape* of its initializer.
+- If the variable is an iteration variable of a `foreach` loop, then the variable's *safe-to-escape* scope is the same as the *safe-to-escape* of the `foreach` loop's expression.
+- Otherwise the variable's type is a `ref struct` type, and the variable's declaration requires an initializer. The variable's *safe-to-escape* scope is the same as the *safe-to-escape* of its initializer.
 
 > ***Open Issue:*** can we permit locals of `ref struct` type to be uninitialized at the point of declaration? If so, what would we record as the variable's *safe-to-escape* scope?
 
