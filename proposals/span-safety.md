@@ -1,5 +1,7 @@
 # Compile time enforcement of safety for ref-like types #
 
+## Introduction
+
 The main reason for the additional safety rules when dealing with types like `Span<T>` and `ReadonlySpan<T>` is that such types must be confined to the execution stack.
  
 There are two reasons why `Span<T>` and similar types must be a stack-only types.
@@ -11,35 +13,11 @@ All the above problems would be alleviated if instances of `Span<T>` are constra
 
 An additional problem arises due to composition. It would be generally desirable to build more complex data types that would embed `Span<T>` and `ReadonlySpan<T>` instances. Such composite types would have to be structs and would share all the hazards and requirements of `Span<T>`. As a result the safety rules described here should be viewed as applicable to the whole range of **_ref-like types_**
 
-## `ref-like` types must be stack-only. ##
-
-C# compiler already has a concept of types with stack-only requirements that covers special platform types such as `TypedReference`. In some cases those types are referred as ref-like types as well. We should probably use some different term to refer to `TypedReference` and similar types - like `restricted types` to avoid confusion.
-
-In this document the "ref-like" types include only `Span<T>` and related types. And the ref-like variables mean variables of "ref-like" types.  
-
-In order to force ref-like variables to be stack only, we need the following restrictions: 
-
-- ref-like type cannot be a type of an array element
-- ref-like type cannot be used as a generic type argument
-- ref-like variable cannot be boxed
-- ref-like type cannot be a static field
-- ref-like type cannot be an instance field of ordinary not ref-like type
-- indirect restrictions, such as disallowed use of ref-like typed parameters and locals in async methods, which are really a result of disallowing ref-like typed fields.
-
-Note:
-
-- it is ok to return ref-like values from methods/lambdas, including by reference.
-- it is ok to pass ref-like values to methods/lambdas, including by reference.
-- it is ok for a ref-like type be a field of another struct as long as the struct itself is ref-like.
-- it is ok for an intermediate span values to be used in lambdas/async methods. 
-
-
-*Possible incremental relaxations*
-- It may be possible to allow span locals be defined and used in a block inside an async method as long as the block does not contain `await` expressions. 
+The <a href="#draft-language-specification">draft language specification</a> is intended to ensure that values of a ref-like type occurs only on the stack.
 
 ## Generalized `ref-like` types in source code.
 
-`ref-like` structs will have to be explicitly marked in the source code using `ref` modifier:
+`ref-like` structs are explicitly marked in the source code using `ref` modifier:
 
 ```c#
 ref struct TwoSpans<T>
@@ -55,13 +33,6 @@ TwoSpans<T>[] arr = null;
 ``` 
 
 Designating a struct as ref-like will allow the struct to have ref-like instance fields and will also make all the requirements of ref-like types applicable to the struct. 
-
-An alternative proposal of "inferring" the ref-like property from the fact that a struct contains ref-like fields was also considered and rejected for the following reasons:
-
-1) Implicit cascading of ref-like through containing structs appears to be dangerous. 
-Since the implicit ref-like would work recursively, it would be too easy to turn multiple structs, possibly not in the current project, to become ref-like with one change.  
-
-1) Span<T> and ReadOnlySpan<T> themselves do not contain ref-like fields. These types will have to be special-cased, which will be an issue if another trivial ref-like type needs to be added in the future.  
 
 ## Metadata representation or ref-like structs.
 
@@ -89,84 +60,9 @@ NOTE: it is not the goal to make it so that any use of ref-like types on old com
 In particular, if user wants to actually put an `Obsolete` attribute on a ref-like type, we will have no choice other than not emitting the predefined one since `Obsolete` attribute cannot be applied more than once..  
 (TODO: We should consider giving a warning in such scenario, informing user of the danger.)
 
-## Stack-referring spans
+## Examples:
 
-An additional desirable enhancement for `Span<T>` is to allow referring to data in the local stack frame - individual local variables or `stackalloc`-ed arrays.
-
-The tricky part here is that a scenario when an instance of a `Span<T>` outlives the referred data would lead to undefined behavior, including type-safety violations and heap corruptions. Therefore, in order to allow stack-referring spans in safe code, we need additional rules. 
-
-The design goal here is to make rules for stack-referring spans "pay-for-play".  
-**A person who does not intend to trade in stack-referring spans should be able to stop reading right here.**
- 
-NOTE: nothing will prevent a possibility to use Spans that wrap pointers to stack-allocated arrays in _unsafe_ code as long as it is possible to wrap a pointer in a span. As per usual rules of _unsafe_, it would be responsibility of the user to not cause GC holes.
-
-## Stack-referring spans in safe code.
-
-There are two main scenarios where stack-referring spans could come into being.  
-- Stackalloc spans.
-  To enable safe wrapping of stack allocated memory in a span, we will need a special syntax that would not allow intermediate pointer to escape.
-  A preliminary solution is to use target-typing.
-
-```cs
-  //This usage of stackalloc does not require unsafe 
-  Span<int> sp = stackalloc int[100]; 
-```
-  
-- Spans wrapping individual locals or parameters. [Suggest disallowing]
- 
-```cs
-  int x = 42;
-
-  //This is currently not possible
-  Span<int> sp = new Span<int>(ref x);
-```
-
-  This is currently not possible in Span API. I suggest to never allow. 
-
-  While in theory possible, one-element spans are not as practically appealing as stackalloc ones.
-
-  One problem is that in addition to being tied to the stack frame, local variables have scopes, so we would need extra rules to prevent mixing locals of different life-times when passing by reference or assigning to other locals.
- 
-  The main problem is the "pay-for-play" rule. If we have to assume that any span value returned from a member that takes `ref/out/in` parameters, including `this` in struct members might be stack-referring. People that do not use stack-referring spans will be affected by this.
-
-```cs
-  int x = 42; 
-
-  //Do I really have a stack-referring span here?
-  Span<int> sp = SomeMethod(ref x); 
-
-```
-
-## Safety rules for stack-referring spans.
-Note: all these rules equally apply to ref-like types in general. I just use span for brevity.
-
-- stack-referring span values cannot be returned from a method.
-
-- local variable initialized using a stack-referring expression is considered a stack-referring local.
-
-- stack-referring local is conservatively considered as always returning a stack-referring value.
-
-- stack-referring values cannot be assigned to any variable with exception of stack-referring locals.
-
-- "What comes in is what comes out" rule for span-returning expressions:
-  If any operand of an expression is a stack-referring value, the result is a stack-referring value.
-  This applies equally to ternary expressions, indexers, method calls, and so on. 
-  Receiver of an invocation/property/indexer is considered an operand here.
- 
-  In particular: _Slice of a stack-referring value is a stack-referring value._  
-
-- "No Mixing with refs to ordinary" rule: 
-  Stack-referring spans can be passed as an argument as long as no other argument is an ordinary span variable (not a stack-referring local), and:
-  a) is passed via a writeable reference `ref/out` or 
-  b) is a receiver, and the containing span-like struct is not a readonly struct. 
-
-
-==
-- [_only if allow referring to regular locals_] stack-referring value cannot be passed via a writeable reference.
-- [_only if allow referring to regular locals_] stack-referring value cannot be assigned to a local except at initialization.
-
-
-Examples:
+***The following example may need to be revised based on the latest revision to the span safety rules.***
 
 ```c#
 
@@ -237,10 +133,10 @@ ref SpanLikeType Test2(ref SpanLikeType param1, Span<byte> param2)
 
 ----------------
 
-Draft language specification
+<a name="draft-language-specification"></a>Draft language specification
 ==========================
 
-Below we describe a set of safety rules for ref-like types (`ref struct`s), which includes the ability to pass locals by reference to constructors or instance methods of the type, suitable for use in the language specification. A different, simpler set of safety rules are possible if locals cannot be passed by reference. This specification would also permit the safe reassignment of `ref` locals.
+Below we describe a set of safety rules for ref-like types (`ref struct`s) to ensure that values of these types occur only on the stack. A different, simpler set of safety rules would be possible if locals cannot be passed by reference. This specification would also permit the safe reassignment of ref locals.
 
 Overview
 ========
@@ -328,8 +224,7 @@ For an operator with multiple operands that yields an lvalue, such as `c ? ref e
 An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 - The entire enclosing method
 - the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver and arguments of `ref struct` types)
-- the *ref-safe-to-escape* of all argument expressions that are lvalues corresponding to an `in` parameter(excluding the receiver and arguments of `ref struct` types)
-- if any arguments are rvalues corresponding to an `in` parameter, or there are `in` parameters for which no corresponding argument has been provided, the immediately enclosing scope.
+- For each `in` parameter of the method, if there is a corresponding expression that is an lvalue, its *ref-safe-to-escape*, otherwise the nearest enclosing scope
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
 > Note: the last bullet is necessary to handle code such as
@@ -345,9 +240,16 @@ An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *r
 An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 - The entire enclosing method
 - the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver arguments of `ref struct` types)
+- For each `in` parameter of the method, if there is a corresponding expression that is an lvalue, its *ref-safe-to-escape*, otherwise the nearest enclosing scope
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
 > Note that these rules are identical to the above rules for *ref-safe-to-escape*, but apply only when the return type is a `ref struct` type.
+
+***Open issue: we need a rule something like** An rvalue is *ref-safe-to-escape* from the nearest enclosing scope. This occurs for example in an invocation such as `M(ref d.Length)` where `d` is of type `dynamic`. It is also consistent with (and perhaps subsumes) our handling of arguments corresponding to `in` parameters.*
+
+## Operator invocations
+
+The application of a user-defined operator is treated as a method invocation.
 
 ## Property invocations
 
@@ -365,15 +267,11 @@ A `new` expression that invokes a constructor obeys the same rules as a method i
 
 A `default` expression is *safe-to-escape* from the entire enclosing method.
 
-## Other operators
-
-***TODO: What others need to be handled? Should survey the language syntactic forms that are capable of producing a `ref struct` type.***
-
 # Language Constraints
 
 We wish to ensure that no `ref` local variable, and no variable of `ref struct` type, refers to stack memory or variables that are no longer alive. We therefore have the following language constraints:
 
-- Neither a ref parameter, nor a ref local, nor a parameter or local of a `ref struct` type can be lifted into a lambda.
+- Neither a ref parameter, nor a ref local, nor a parameter or local of a `ref struct` type can be lifted into a lambda or local function.
 
 - Neither a ref parameter nor a parameter of a `ref struct` type may be an argument on an iterator method or an `async` method.
 
@@ -411,5 +309,3 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 > ``` c#
 > Foo(new Span<int>(...), await e2);
 > ```
-
-> ***Open Issue:*** This treatment does not yet consider an argument expression of the form `ref d.F` where d is of type dynamic. The required rule may be similar to the treatment of `in` parameters.
