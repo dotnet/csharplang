@@ -275,7 +275,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 
 - Neither a ref parameter nor a parameter of a `ref struct` type may be an argument on an iterator method or an `async` method.
 
-- A ref local may not be in scope at the point of a `yield return` statement or an `await` expression.
+- Neither a ref local, nor a local of a `ref struct` type may be in scope at the point of a `yield return` statement or an `await` expression.
 
 - A `ref struct` type may not be used as a type argument, or as an element type in a tuple type.
 
