@@ -392,8 +392,11 @@ namespace System.Threading.Tasks
             private readonly IAsyncEnumerable<T> _enumerable;
             private readonly bool _continueOnCapturedContext;
 
-            internal ConfiguredAsyncEnumerable(IAsyncEnumerable<T> enumerable) =>
+            internal ConfiguredAsyncEnumerable(IAsyncEnumerable<T> enumerable, bool continueOnCapturedContext)
+            {
                 _enumerable = enumerable;
+                _continueOnCapturedContext = continueOnCapturedContext;
+            }
 
             public ConfiguredAsyncEnumerator<T> GetAsyncEnumerator() =>
                 new ConfiguredAsyncEnumerator<T>(_enumerable.GetAsyncEnumerator(), _continueOnCapturedContext);
