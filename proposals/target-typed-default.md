@@ -15,7 +15,7 @@ The target-typed `default` feature is a shorter form variation of the `default(T
 
 The main motivation is to avoid typing redundant information.
 
-For instance, when invoking `void Method(ImmutableArray<SomeType> array)`, the *default* literal allows `M(default)` in place of `M(default(ImmutableArray<SomeType>))`.
+For instance, when invoking `void Method(ImmutableArray<SomeType> array)`, the *default* literal allows `Method(default)` in place of `Method(default(ImmutableArray<SomeType>))`.
 
 This is applicable in a number of scenarios, such as:
 
