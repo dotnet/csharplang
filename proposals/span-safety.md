@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The main reason for the additional safety rules when dealing with types like `Span<T>` and `ReadonlySpan<T>` is that such types must be confined to the execution stack.
+The main reason for the additional safety rules when dealing with types like `Span<T>` and `ReadOnlySpan<T>` is that such types must be confined to the execution stack.
  
 There are two reasons why `Span<T>` and similar types must be a stack-only types.
 
@@ -11,7 +11,7 @@ There are two reasons why `Span<T>` and similar types must be a stack-only types
 
 All the above problems would be alleviated if instances of `Span<T>` are constrained to exist only on the execution stack. 
 
-An additional problem arises due to composition. It would be generally desirable to build more complex data types that would embed `Span<T>` and `ReadonlySpan<T>` instances. Such composite types would have to be structs and would share all the hazards and requirements of `Span<T>`. As a result the safety rules described here should be viewed as applicable to the whole range of **_ref-like types_**
+An additional problem arises due to composition. It would be generally desirable to build more complex data types that would embed `Span<T>` and `ReadOnlySpan<T>` instances. Such composite types would have to be structs and would share all the hazards and requirements of `Span<T>`. As a result the safety rules described here should be viewed as applicable to the whole range of **_ref-like types_**
 
 The <a href="#draft-language-specification">draft language specification</a> is intended to ensure that values of a ref-like type occurs only on the stack.
 
