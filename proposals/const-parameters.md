@@ -119,6 +119,16 @@ argument_value
     ;        
 ```
 
+### Examples
+
+```C#
+// Method declaration with constant parameter
+public static Vector256<float> Shuffle(Vector256<float> value, Vector256<float> right, const byte control);
+
+// Method invocation with constant parameter
+var result = Avx2.Shuffle(value1, value2, const ((1 << 3) | (1 << 7));
+ ```
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 
@@ -132,7 +142,7 @@ There are no reasonably fully functional alternatives using compile time type sa
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- Should Constant Parameter be treated differently from other parameters like 'ref' and 'out' parameters and consequently participate in overload resolution? (In my opinion YES)
+- Should Constant Parameter be treated similarly like 'ref' and 'out' parameters and consequently participate in overload resolution? (In my opinion YES)
 
 - How Constant Parameter should be represented in CLI? (Current proposal `modreq`'s)
 
