@@ -1,0 +1,47 @@
+# implicit-ctor-func-conversion
+
+* [x] Proposed
+* [ ] Prototype: [Complete](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
+* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/BRANCH_NAME)
+* [ ] Specification: [Not Started](pr/1)
+
+## Summary
+[summary]: #summary
+
+Wherever the paramter required is a Func<T, T2> you can supply a T2 constructor that requires T as a parameter
+
+## Motivation
+[motivation]: #motivation
+
+for example you can do something like that 
+```csharp
+new []{5}.Select(new List<object>);
+```
+which is the same as :
+```csharp
+new []{5}.Select(num => new List<object>(num));
+```
+
+## Detailed design
+[design]: #detailed-design
+
+This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement,  and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented.
+
+## Drawbacks
+[drawbacks]: #drawbacks
+
+its a small change , might be a little unclear
+
+## Alternatives
+[alternatives]: #alternatives
+show the alternative in the Motivation section
+
+## Unresolved questions
+[unresolved]: #unresolved-questions
+
+none
+
+## Design meetings
+
+none
+
