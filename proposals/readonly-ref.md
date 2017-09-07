@@ -28,20 +28,20 @@ The examples are numerous - vector/matrix math operators in graphics libraries l
 Similarly to the `out` parameters, `ref readonly` parameters are passed as managed references with additional guarantee from the callee. The guarantee in this case is that callee will not make any assignments through the parameter nor it will create a writeable reference aliases to the data referenced by the parameter.
 
 ```C#
-        static Vector3 Add (ref readonly Vector3 v1, ref readonly Vector3 v2)
-        {
-            // not OK!!
-            v1 = default(Vector3);
+static Vector3 Add (ref readonly Vector3 v1, ref readonly Vector3 v2)
+{
+    // not OK!!
+    v1 = default(Vector3);
 
-            // not OK!!
-            v1.X = 0;
+    // not OK!!
+    v1.X = 0;
 
-            // not OK!!
-            foo(ref v1.X);
+    // not OK!!
+    foo(ref v1.X);
 
-            // OK
-            return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
-        }
+    // OK
+    return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
+}
 ```
 
 ## Syntax
@@ -51,11 +51,11 @@ One of proposed syntaxes is to use existing `in` keyword as a shorter form of `r
 While syntax is TBD, I will use `in` as it is significantly shorter than `ref readonly`.
 
 ```C# 
-        static Vector3 Add (in Vector3 v1, in Vector3 v2)
-        {
-            // OK
-            return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
-        }
+static Vector3 Add (in Vector3 v1, in Vector3 v2)
+{
+    // OK
+    return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
+}
 ```
 
 ## Use of `in` in signatures.
@@ -79,17 +79,17 @@ Notice that there are no `in` modifiers at the call.
 Also note that passing an RValue(*) is acceptable.
 
 ```C#
-        static Vector3 ShiftRightTwice(in Vector3 v1)
-        {
-	    // + UnitX  twice		
-            return Add(Add(v1, Vector3.UnitX), Vector3.UnitX);
-        }
+static Vector3 ShiftRightTwice(in Vector3 v1)
+{
+    // + UnitX  twice        
+    return Add(Add(v1, Vector3.UnitX), Vector3.UnitX);
+}
 
-        static Vector3 Add (in Vector3 v1, in Vector3 v2)
-        {
-            // OK
-            return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
-        }
+static Vector3 Add (in Vector3 v1, in Vector3 v2)
+{
+    // OK
+    return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
+}
 ```
 
 In cases of variables without a home a temporary variable will be used for a short term capturing of the value.
@@ -118,21 +118,21 @@ We can, alternatively, allow capturing of copied temps (by ref or by value), but
 Example of observable aliasing/copying if capture via copying would be allowed:
 
 ```C#
-        static Vector3 v;
+static Vector3 v;
 
-        static void Main()
-        {
-            Test(v);
-        }
+static void Main()
+{
+    Test(v);
+}
 
-        static void Test(in Vector3 v1)
-        {
-            v = Vector3.UnitX;
-            Debug.Assert(v1 == Vector3.UnitX);
+static void Test(in Vector3 v1)
+{
+    v = Vector3.UnitX;
+    Debug.Assert(v1 == Vector3.UnitX);
 
-            // uncomment this to see behavior of code above change
-            // Func<Vector3> f = () => v1;
-        }
+    // uncomment this to see behavior of code above change
+    // Func<Vector3> f = () => v1;
+}
 ```
 
 ## Aliasing behavior in general
@@ -143,25 +143,25 @@ While callee is not allowed to write into them, there should not be an assumptio
 Example:
 
 ```C#
-        static Vector3 v = Vector3.UnitY;
+static Vector3 v = Vector3.UnitY;
 
-        static void Main()
-        {
-            Test(v);
-        }
+static void Main()
+{
+    Test(v);
+}
 
-        static void Test(in Vector3 v1)
-        {
-            Debug.Assert(v1 == Vector3.UnitY);
-            // changes v1 deterministically (no races required)
-            ChangeV();
-            Debug.Assert(v1 == Vector3.UnitX);
-        }
+static void Test(in Vector3 v1)
+{
+    Debug.Assert(v1 == Vector3.UnitY);
+    // changes v1 deterministically (no races required)
+    ChangeV();
+    Debug.Assert(v1 == Vector3.UnitX);
+}
 
-        static void ChangeV()
-        {
-            v = Vector3.UnitX;
-        }
+static void ChangeV()
+{
+    v = Vector3.UnitX;
+}
 ```
 
 ## Conversions at the call site.
@@ -199,16 +199,16 @@ The motivation for this sub-feature is roughly symmetrical to the reasons for th
 `ref readonly` _returns_. (a more concise modifier like `in` so far has been elusive for this case).
 
 ```C#
-        struct ImmutableArray<T>
-        {
-            private readonly T[] array;
+struct ImmutableArray<T>
+{
+    private readonly T[] array;
 
-            public ref readonly T RefAt(int i)
-            {
-                // returning a ref readonly 
-                return ref this.r1;
-            }
-        }
+    public ref readonly T RefAt(int i)
+    {
+        // returning a ref readonly 
+        return ref this.r1;
+    }
+}
 ```
 
 `readonly` on the ref return will prevent the caller from using the result for indirect writing or for obtaining writeable references.
@@ -242,36 +242,36 @@ In particular, the requirements of the ref returns have indirect effect on requi
 Here is an ugly, but legal and very explicit example where copying would be observable:
 
 ```C#
-    class Program
+class Program
+{
+    private readonly Vector3 v = Vector3.UnitY;
+
+    public Program()
     {
-        private readonly Vector3 v = Vector3.UnitY;
-
-        public Program()
-        {
-            CompareFirstLast(
-                FetchRef(), 
-                v = Vector3.UnitX,    // can assign since we are in a ctor
-                v,                    // making a copy here would be observable
-                v = Vector3.UnitZ);   // can assign since we are in a ctor            
-        }
-
-        ref readonly Vector3 FetchRef()
-        {
-            // making a copy here would be observable
-            return ref v;
-        }
-
-        bool CompareFirstLast(
-            in Vector3 first, 
-            Vector3 dummy1, 
-            in Vector3 last, 
-            Vector3 dummy2)
-        {
-            // should be the same value regardless of assignments
-            // since these are refs to the same variable
-            Debug.Assert(first == last);
-        }
+        CompareFirstLast(
+            FetchRef(), 
+            v = Vector3.UnitX,    // can assign since we are in a ctor
+            v,                    // making a copy here would be observable
+            v = Vector3.UnitZ);   // can assign since we are in a ctor            
     }
+
+    ref readonly Vector3 FetchRef()
+    {
+        // making a copy here would be observable
+        return ref v;
+    }
+
+    bool CompareFirstLast(
+        in Vector3 first, 
+        Vector3 dummy1, 
+        in Vector3 last, 
+        Vector3 dummy2)
+    {
+        // should be the same value regardless of assignments
+        // since these are refs to the same variable
+        Debug.Assert(first == last);
+    }
+}
 ```
 
 Note: Since CLR does not differentiate readonly and writeable references. The distinction may not be required for general scenarios like JIT-compilation. However, some work will be needed to introduce `ref readonly` notion within the Verification infrastructure. At least if we want passing references to `readonly` fields be formally verifiable.
@@ -298,19 +298,19 @@ Once RValues are not safe to return, the existing rule `#6` already handles this
 
 Example:
 ```C#
-        ref readonly Vector3 Test1()
-        {
-            // can pass an RValue as "in" (via a temp copy)
-            // but the result is not safe to return
-            // because the RValue argument was not safe to return by reference
-            return ref Test2(default(Vector3));
-        }
+ref readonly Vector3 Test1()
+{
+    // can pass an RValue as "in" (via a temp copy)
+    // but the result is not safe to return
+    // because the RValue argument was not safe to return by reference
+    return ref Test2(default(Vector3));
+}
 
-        ref readonly Vector3 Test2(in Vector3 r)
-        {
-            // this is ok, r is returnable
-            return ref r;
-        }
+ref readonly Vector3 Test2(in Vector3 r)
+{
+    // this is ok, r is returnable
+    return ref r;
+}
 ```
 
 Updated `safe to return` rules:
@@ -340,10 +340,10 @@ I just want to acknowledge that this idea is not entirely new. It is, however, r
 The general idea of the proposal is to allow extension methods to take the `this` parameter by reference, as long as the type is known to be a struct type (I.E. struct or a generic type with `struct` constraint).
 
 ```C#
-        public static void Extension(ref this Guid self)
-        {
-            // do something
-        }
+public static void Extension(ref this Guid self)
+{
+    // do something
+}
 ```
 
 The reasons for writing such extension methods are primarily:  
@@ -368,19 +368,19 @@ Now, assuming availability of `in` parameters, it feels reasonable to assume tha
 In addition it would also be allowed to have `in` extension methods that would not have such restriction, while naturally would not be able to mutate `this`.
 
 ```C#
-        // this can be called on either RValue or an LValue
-        public static void Reader(in this Guid self)
-        {
-            // do something nonmutating.
-            WriteLine(self == default(Guid));
-        }
+// this can be called on either RValue or an LValue
+public static void Reader(in this Guid self)
+{
+    // do something nonmutating.
+    WriteLine(self == default(Guid));
+}
 
-        // this can be called only on an LValue
-        public static void Mutator(ref this Guid self)
-        {
-            // can mutate self
-            self = new Guid();
-        }
+// this can be called only on an LValue
+public static void Mutator(ref this Guid self)
+{
+    // can mutate self
+    self = new Guid();
+}
 ```
 
 # Readonly structs
@@ -397,25 +397,25 @@ The problem will get worse since the implicit copying will be happening when inv
 Allow `readonly` modifier on struct declarations which would result in `this` being an `in` parameter on all struct instance methods except for constructors.
 
 ```C#
-        static void Test(in Vector3 v1)
-        {
-            // no need to make a copy of v1 since Vector3 is a readonly struct 
-            System.Console.WriteLine(v1.ToString());
-        }
+static void Test(in Vector3 v1)
+{
+    // no need to make a copy of v1 since Vector3 is a readonly struct 
+    System.Console.WriteLine(v1.ToString());
+}
 
-        readonly struct Vector3
-        {
-            . . .
+readonly struct Vector3
+{
+    . . .
 
-            public override string ToString()
-            {
-                // not OK!!  "this" is an `in` parameter
-                foo(ref this.X);
+    public override string ToString()
+    {
+        // not OK!!  "this" is an `in` parameter
+        foo(ref this.X);
 
-                // OK
-                return $"X: {X}, Y: {Y}, Z: {Z}";
-            }
-        }
+        // OK
+        return $"X: {X}, Y: {Y}, Z: {Z}";
+    }
+}
 ```
 
 The feature is surprisingly uncontroversial. The only obvious question is whether there is a need for an option to `opt out` some of the methods as mutators.
