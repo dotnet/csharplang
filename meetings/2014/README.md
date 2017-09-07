@@ -44,10 +44,10 @@ Overview of meetings and agendas for 2014
 
 [C# Language Design Notes for May 7, 2014](LDM-2014-05-07.md)
 
-1.	protected and internal <_feature cut ñ not worth the confusion_>
-2.	Field parameters in primary constructors <_feature cut ñ we want to keep the design space open_>
+1.	protected and internal <_feature cut ‚Äì not worth the confusion_>
+2.	Field parameters in primary constructors <_feature cut ‚Äì we want to keep the design space open_>
 3.	Property declarations in primary constructors <_interesting but not now_>
-4.	Typeswitch <_Not now ñ more likely as part of a future more general matching feature_>
+4.	Typeswitch <_Not now ‚Äì more likely as part of a future more general matching feature_>
 
 
 ## May 21, 2014
@@ -79,8 +79,8 @@ Overview of meetings and agendas for 2014
 
 [C# Language Design Notes for Sep 3, 2014](LDM-2014-09-03.md)
 
-1.	Removing ìspill outî from declaration expressions in simple statements <_yes, remove_>
-2.	Same name declared in subsequent else-ifís <_condition decls out of scope in else-branch_>
+1.	Removing ‚Äúspill out‚Äù from declaration expressions in simple statements <_yes, remove_>
+2.	Same name declared in subsequent else-if‚Äôs <_condition decls out of scope in else-branch_>
 3.	Add semicolon expressions <_not in this version_>
 4.	Make variables in declaration expressions readonly <_no_>
 
@@ -96,5 +96,5 @@ Overview of meetings and agendas for 2014
 
 [C# Language Design Notes for Oct 15, 2014](LDM-2014-10-15.md)
 
-1. # nameof operator: spec v5
-2. # [String Interpolation for C#](http://1drv.ms/1tFUvbq)
+1. nameof operator: spec v5
+2. [String Interpolation for C#](http://1drv.ms/1tFUvbq)
