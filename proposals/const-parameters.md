@@ -9,20 +9,20 @@
 ## Summary
 [summary]: #summary
 
-Const Parameters proposal aims to provide missing in C# language synatx (and other .NET languages too) allowing to enforce passing of compile time constant values as method (delegates, constructors) parameters. It translates into formal proposal Issue #744 [Expand const keyword usage to enable compile time enforcement of const semantics](https://github.com/dotnet/csharplang/issues/744).
+Const Parameters proposal aims to provide missing in C# language synatx (and other .NET languages too) allowing to enforce passing of compile time constant values as a method, delegate, constructor, lambda expression, anonymous and local method parameters. It translates into formal proposal Issue #744 [Expand const keyword usage to enable compile time enforcement of const semantics](https://github.com/dotnet/csharplang/issues/744).
 
 ## Motivation
 [motivation]: #motivation
 
-An inability to implement several SIMD intrinsics functions which require compile time constant values passed as arguments due to processor instruction implementation with language syntax enforcing this invocation pattern was main motivation behind the proposal. In particular some of the x86 SIMD instructions require immediate parameters which are encoded as part of instruction and do not have variants accepting register or memory parameters i.e. pshufd, vpshufd, pshufhw, vpshufhw, pshuflw, vpshuflw. 
+An inability to implement several SIMD intrinsics functions which require compile time constant values passed as arguments due to processor instruction implementation with language syntax enforcing this invocation pattern was main motivation behind the proposal. In particular some of the x86 SIMD instructions require immediate parameters which are encoded as part of instruction and do not have variants accepting register or memory parameters i.e. `pshufd, vpshufd, pshufhw, vpshufhw, pshuflw, vpshuflw`. 
 
-Encoding of `pshufd xmm1, xmm2/m128, imm8` where `imm8` is an immediate 8-bit wide integral parameter requires passing compile time constants to every invocation of runtime intrinsic function which is later translated to this instruction by Jit compiler. Corresponding intrinsics function is as follows:
+Encoding of `vpshufd ymm1, ymm2/m256, imm8` where `imm8` is an immediate 8-bit wide integral parameter requires passing compile time constants to every invocation of intrinsic function which is later translated to required by processor `vpshufd` instruction encoding by Jit compiler. Corresponding intrinsics function signature is as follows:
 ```C#
 public static Vector256<float> Shuffle(Vector256<float> value, Vector256<float> right, const byte control);
 ```
-Obviously in world of .NET managed languages source code is compiled twice: (i) once by Roslyn language compiler which produces CIL assemblies (ii) which are later compiled during runtime by Jit compiler to native code. Therefore support of the Const Parameters feature requires support on both levels, however, this proposal is concerned only with support at C# and to some extent at CIL level and affects only Roslyn compiler and runtime interface to CIL. AOT scenarios supported by CoreRT are outside of the scope of this proposal as well.
+Obviously in world of .NET managed languages source code is compiled twice (except for AOT scenarios): (i) once by Roslyn language compiler which produces CIL assemblies (ii) which are later compiled during runtime by Jit compiler to native code. Therefore, support of the `const parameters` feature requires support on both levels, however, this proposal is concerned only with support for C# language and to some extent with support at CIL level and affects only Roslyn compiler and runtime interface to CIL. Runtime support for `const parameters` and AOT scenarios supported by CoreRT are outside of the scope of this proposal.
 
-Proposing Const Parameters feature due to direct need for compiler support of one of coding patterns for SIMD intrinsic implementation does not mean that developers will not find some other smart and creative uses for Const Parameters. 
+Proposing `const parameters` feature due to direct need for compiler support of one of coding patterns needed for SIMD intrinsic implementation does not mean that developers will not find some other smart and creative uses for `const parameters`. 
 
 More details regarding SIMD intrinsics cen be found under the following links:
 
@@ -40,22 +40,92 @@ Discussion relevant for Const Parameters starts after 38:30
 ## Detailed design
 [design]: #detailed-design
 
-Design is based on existing semantic meaning of the 'const' keyword where scope of it's use is extended to modifying parameters semantics. Parameter semantics is modified by 'const' modifier in a way that invocation of 'const' parameter containing function requires passing in the place of 'const' parameter 'const' keyword followed by constant expression (this can be achieved by using named arguments as well). Constant expression type must match parameter type or be implicitly convertible to it during compilation. Use of constant expression as argument value allows to easily access constant folding optimizations implemented in Roslyn. Supported 'const' parameter types are identical to the types supported by constant expressions: 
+Design is based on existing semantic meaning of the C# `const keyword` with usage scope extended to to context dependent modification of parameters declaration semantics. Allowing for modification of parameter declaration by proceeding it with `const keyword` requiring that invocation of `const parameters` containing function requires passing in the place of `const parameters` 'const' keyword followed by `constant expression`.
+
+```C#
+// Declaration
+public void Method(const byte value);
+
+// Usage
+var x = Foo();
+this.Method(const 1);           // OK  
+this.Method(const 3 * 2 << 1);  // OK
+this.Method(const x);           // Error - x is not a compile time constant or constant expression
+```
+
+Constant expression type must match parameter type or be implicitly convertible to it during compilation. Use of constant expression as argument value allows to easily access constant folding optimizations implemented in Roslyn. Types allowed in `const parameters` declarations are identical to the types supported by constant expressions: 
 
 ```
 a constant expression must be the null literal or a value with one of the following types: 
 sbyte, byte, short, ushort, int, uint, long, ulong, char, float, double, decimal, bool, 
 object, string, or any enumeration type.
 ```
-As a result for developers intuitively 'const' meaning is not changing besides the scope where 'const' keyword is syntactically valid. Additionally if 'const' keyword located before parameter type declaration is treated similarly to 'ref', 'out' and 'this' modifiers it's usage should be easy to understand for developers as well. 
+Developers should intuitively grasp `const parameters` meaning as it does not change `const keyword` meaning except for the scope where `const keyword` is syntactically valid. Additionally since 'const' keyword located before parameter type declaration is treated similarly to 'ref', 'out' and 'this' modifiers it's new usage should be easy to understand as well.
 
-Applying parameter modifiers restrictions to 'const' modifier would mean that it can not be used neither with other parameters modifiers nor with params keyword. Furthermore 'const' modifier should have identical effects to 'out' and 'ref' modifiers during overload resolution and all parameter modifiers except 'this' should be used identically during function invocation.
+```C#
+// Declarations with const parameters
+public delegate void DelegateWithConst(const string message);
 
+class A
+{
+    public long Error { get; private set; }
+    public long Warning { get; private set; }
+    public event DelegateWithConst SendMessageEvent = (const string message) => 
+    { 
+        Console.Write(message); 
+    }
 
-Design proposal is detailed below in the form of BNF syntax adn main points are as follows:
+    public ulong Method(const byte value)
+    {
+        return LocalMethod(const 3 * 19);
+
+        ulong LocalMethod(const uint localValue)
+        {
+            return value * localValue << 8;
+        }
+    }
+
+    public A(const long errorId)
+    {
+        Error = errorId;
+    }
+
+    public A(long warningId) 
+    {
+        Warning = warningId;
+    }
+}
+
+// Usage
+int i = Foo();
+var x = new A(i);               // OK 
+var x = new A(2017);            // OK
+x.Warning == 2017;              // True
+x.Error == 2017;                // False
+
+var y = new A(const i);         // Error - i is not const
+var y = new A(const 2017);      // OK
+y.Warning == 2017;              // False
+y.Error = 2017;                 // True
+``` 
+
+Applying parameter modifiers restrictions to 'const' modifier would mean that it can not be used together with other parameters modifiers ('ref', 'out', 'this', 'params'). Furthermore 'const' modifier should have identical effects to 'out'/'ref' modifiers during overload resolution meaning that parameter with 'const' modifier will be resolved as a different from identical parameters declared without 'const' modifier or declared with 'ref'/'out' or 'this' modifiers. 'Const' parameter modifier should be used identically to 'ref'/'out' modifiers during function invocation by placing it before passed argument.
+
+```C#
+
+public class C
+{
+    public void TestConstant(ref int value) { return; }
+    public void TestConstant(const int value) { return; }
+    public void TestConstant(int value) { return; }
+    public void M() { TestConstant(const 1); }              // Calls TestConst(const int value)
+}
+```
+
+Design proposal is detailed below in the form of BNF syntax and main points are as follows:
 - 'const' keyword is used to modify parameter declaration;
 - constant parameter declaration may be proceeded by attributes;
-- constant parameter cannot have default value;
+- constant parameter can have default value;
 - invocation of function with 'const' parameters requires passing 'const' keyowrd followed by constant expression
 - 'const' parameter modifier similarly to 'ref' and 'out' modifiers participates in overload resolution
 - 'const' argument value can not be modified inside function body  
@@ -137,16 +207,16 @@ None.
 ## Alternatives
 [alternatives]: #alternatives
 
-There are no reasonably fully functional alternatives using compile time type safety. It is possible to implement similar functionality using attributes and compiler / analyzer support but with inferior user experiance. 
+There are no reasonably fully functional alternatives which would be based on compile time type safety. It is possible to implement similar functionality using attributes and compiler / analyzer support but with inferior user experiance. 
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- Should Constant Parameter be treated similarly like 'ref' and 'out' parameters and consequently participate in overload resolution? (In my opinion YES)
+- Should Constant Parameter be treated similarly like 'ref' and 'out' parameters and consequently participate in overload resolution?
 
 - How Constant Parameter should be represented in CLI? (Current proposal `modreq`'s)
 
-- Should Constant Parameter accept default argument? (In my opinion YES - not yet implemented in prototype)
+- Should Constant Parameter accept default argument?
 
 - In which C# language / Visual Studio version it could be shipped? - ETA (Feature conditional support in prototype is a WIP which depends on this decision)
 
