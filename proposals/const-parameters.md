@@ -207,18 +207,23 @@ None.
 ## Alternatives
 [alternatives]: #alternatives
 
-There are no reasonably fully functional alternatives which would be based on compile time type safety. It is possible to implement similar functionality using attributes and compiler / analyzer support but with inferior user experiance. 
+There are no reasonably fully functional alternatives which would be based on compile time type safety. It is possible to implement similar functionality using attributes and compiler / analyzer support but with inferior user experiance - errors during method invocation will be raised due to the fact that parameter is marked with attribute. As a consequence there will be no overload resolution due to parameters difference being an attribute or overload resolution would be based on parameters attribute differences. 
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
 - Should Constant Parameter be treated similarly like 'ref' and 'out' parameters and consequently participate in overload resolution?
 
-- How Constant Parameter should be represented in CLI? (Current proposal `modreq`'s)
+- If above is true should invocation require passing 'const' keyword before value of const parameter? 
+- How Constant Parameters should be represented in CLI? (Current proposal `modreq`'s)
 
-- Should Constant Parameter accept default argument?
+- Should Constant Parameters accept default argument?
 
-- In which C# language / Visual Studio version it could be shipped? - ETA (Feature conditional support in prototype is a WIP which depends on this decision)
+- Which member declarations should accept const parameters?
+
+- Should const parameters not be allowed in operator overloads?
+
+- In which C# language / Visual Studio version const parameters feature could be shipped?
 
 ## Design meetings
 
