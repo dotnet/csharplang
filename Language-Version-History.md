@@ -76,8 +76,8 @@ Features Added in C# Language Versions
 - [Throw expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/throw-expression.md)
 
 # [C# 7.1](https://github.com/dotnet/roslyn/blob/master/docs/Language%20Feature%20Status.md) (Visual Studio 2017 version 15.3)
-- [Async main](https://github.com/dotnet/csharplang/blob/master/proposals/async-main.md)
-- [Default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/target-typed-default.md)
+- [Async main](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/async-main.md)
+- [Default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/target-typed-default.md)
 - [Reference assemblies](https://github.com/dotnet/roslyn/blob/master/docs/features/refout.md)
 - [Inferred tuple element names](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/infer-tuple-names.md)
-- [Pattern-matching with generics](https://github.com/dotnet/csharplang/blob/master/proposals/generics-pattern-match.md)
+- [Pattern-matching with generics](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/generics-pattern-match.md)
