@@ -16,9 +16,9 @@ The right operand must be definitely assigned at the point of the ref assignment
 
 When the left operand binds to an `out` parameter, it is an error if that `out` parameter has not been definitely assigned at at the beginning of the ref assignment operator.
 
-If the left operand is a writeable ref (i.e. it designates anything other than a `ref readonly` local or parameter), then the right operand may not be a `ref readonly` local or parameter.
+If the left operand is a writeable ref (i.e. it designates anything other than a `ref readonly` local or  `in` parameter), then the right operand may not be a `ref readonly` local or parameter.
 
-The ref assignment operator yields an lvalue of the assigned type. It is writeable if the left operand is writeable (i.e. not `ref readonly`).
+The ref assignment operator yields an lvalue of the assigned type. It is writeable if the left operand is writeable (i.e. not `ref readonly` or `in`).
 
 The safety rules for this operator are:
 
