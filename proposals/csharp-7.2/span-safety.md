@@ -57,12 +57,9 @@ A typical matadata representation:
 
 NOTE: it is not the goal to make it so that any use of ref-like types on old compilers fails 100%. That is hard to achieve and is not strictly necessary. For example there would always be away to get around the `Obsolete` using dynamic code or, for example, creating an array of ref-like types through reflection.
 
-In particular, if user wants to actually put an `Obsolete` attribute on a ref-like type, we will have no choice other than not emitting the predefined one since `Obsolete` attribute cannot be applied more than once..  
-(TODO: We should consider giving a warning in such scenario, informing user of the danger.)
+In particular, if user wants to actually put an `Obsolete` or `Deprecated` attribute on a ref-like type, we will have no choice other than not emitting the predefined one since `Obsolete` attribute cannot be applied more than once..  
 
 ## Examples:
-
-***The following example may need to be revised based on the latest revision to the span safety rules.***
 
 ```c#
 
@@ -145,30 +142,7 @@ We associate with each expression at compile-time the concept of what scope that
 
 These are analogous to the "safe to return" of the ref locals feature, but it is more fine-grained. Where the "safe-to-return" of an expression records only whether (or not) it may escape the enclosing method as a whole, the safe-to-escape records which scope it may escape to (which scope it may not escape beyond). The basic safety mechanism is enforced as follows. Given an assignment from an expression E1 with a safe-to-escape scope S1, to an (lvalue) expression E2 with safe-to-escape scope S2, it is an error if S2 is a wider scope than S1. By construction, the two scopes S1 and S2 are in a nesting relationship, because a legal expression is always safe-to-return from some scope enclosing the expression.
 
-The reason the safe-to-escape needs to be a scope rather than a boolean is to handle situations such as the following
-
-``` c#
-{
-    int i = 0;
-
-    // make a span wrapping local variable i
-    var s1 = new Span<int>(ref i);
-
-    {
-        int j = 0;
-
-        // make a span wrapping a further nested local variable j
-        var s2 = new Span<int>(ref j);
-
-        // error: captures a reference to j into an enclosing scope
-        s1 = s2;
-    }
-
-    // If permitted, here is where a problem would occur, as we'd be assigning into
-    // a local whose lifetime has ended.
-    s1[0] = 12; // assign to whichever local the span references
-}
-```
+For the time being it is sufficient, for the purpose of the analysis, to support just two scopes - external to the method, and top-level scope of the method. That is because ref-like values with inner scopes cannot be created and ref locals do not support re-assignment. The rules, however, can support more than two scope levels.
 
 The precise rules for computing the *safe-to-return* status of an expression, and the rules governing the legality of expressions, follow.
 
@@ -185,7 +159,6 @@ An expression whose type is not a `ref struct` type is *safe-to-return* from the
 ## Parameters
 
 An lvalue designating a formal parameter is *ref-safe-to-escape* (by reference) as follows:
-- If the parameter has `ref struct` type, it is *ref-safe-to-escape* to the top-level scope of the method (but not from the entire method itself); otherwise
 - If the parameter is a `ref`, `out`, or `in` parameter, it is *ref-safe-to-escape* from the entire method (e.g. by a `return ref` statement); otherwise
 - If the parameter is the `this` parameter of a struct type, it is *ref-safe-to-escape* to the top-level scope of the method (but not from the entire method itself);
 - Otherwise the parameter is a value parameter, and it is *ref-safe-to-escape* to the top-level scope of the method (but not from the method itself).
@@ -201,9 +174,8 @@ An lvalue designating a local variable is *ref-safe-to-escape* (by reference) as
 An expression that is an rvalue designating the use of a local variable is *safe-to-escape* (by value) as follows:
 - But the general rule above, a local whose type is not a `ref struct` type is *safe-to-return* from the entire enclosing method.
 - If the variable is an iteration variable of a `foreach` loop, then the variable's *safe-to-escape* scope is the same as the *safe-to-escape* of the `foreach` loop's expression.
+- A local of `ref struct` type and uninitialized at the point of declaration is *safe-to-return* from the entire enclosing method.
 - Otherwise the variable's type is a `ref struct` type, and the variable's declaration requires an initializer. The variable's *safe-to-escape* scope is the same as the *safe-to-escape* of its initializer.
-
-> ***Open Issue:*** can we permit locals of `ref struct` type to be uninitialized at the point of declaration? If so, what would we record as the variable's *safe-to-escape* scope?
 
 ## Field reference
 
@@ -217,13 +189,15 @@ An rvalue designating a reference to a field, `e.F`, has a *safe-to-escape* scop
 
 For an operator with multiple operands that yields an rvalue, such as `e1 + e2` or `c ? e1 : e2`, the *safe-to-escape* of the result is the narrowest scope among the *safe-to-escape* of the operands of the operator.
 
-For an operator with multiple operands that yields an lvalue, such as `c ? ref e1 : ref e2`, the *ref-safe-to-escape* of the operands must agree, and that is the *ref-safe-to-escape* of the resulting lvalue.
+For an operator with multiple operands that yields an lvalue, such as `c ? ref e1 : ref e2`, the *ref-safe-to-escape* of the result is the narrowest scope among the *ref-safe-to-escape* of the operands of the operator.
+
+For an operator with multiple operands that yields an lvalue, such as `c ? ref e1 : ref e2`, the *safe-to-escape* of the operands must agree, and that is the *safe-to-escape* of the resulting lvalue.
 
 ## Method invocation
 
 An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 - The entire enclosing method
-- the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver and arguments of `ref struct` types)
+- the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver)
 - For each `in` parameter of the method, if there is a corresponding expression that is an lvalue, its *ref-safe-to-escape*, otherwise the nearest enclosing scope
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
@@ -239,13 +213,10 @@ An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *r
 
 An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 - The entire enclosing method
-- the *ref-safe-to-escape* of all `ref` and `out` argument expressions (excluding the receiver arguments of `ref struct` types)
-- For each `in` parameter of the method, if there is a corresponding expression that is an lvalue, its *ref-safe-to-escape*, otherwise the nearest enclosing scope
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
-> Note that these rules are identical to the above rules for *ref-safe-to-escape*, but apply only when the return type is a `ref struct` type.
-
-***Open issue: we need a rule something like** An rvalue is *ref-safe-to-escape* from the nearest enclosing scope. This occurs for example in an invocation such as `M(ref d.Length)` where `d` is of type `dynamic`. It is also consistent with (and perhaps subsumes) our handling of arguments corresponding to `in` parameters.*
+## An Rvalue
+An rvalue is *ref-safe-to-escape* from the nearest enclosing scope. This occurs for example in an invocation such as `M(ref d.Length)` where `d` is of type `dynamic`. It is also consistent with (and perhaps subsumes) our handling of arguments corresponding to `in` parameters.*
 
 ## Operator invocations
 
@@ -262,6 +233,8 @@ A stackalloc expression is an rvalue that is *safe-to-escape* to the top-level s
 ## Constructor invocations
 
 A `new` expression that invokes a constructor obeys the same rules as a method invocation that is considered to return the type being constructed.
+
+In addition *safe-to-escape* is no wider than the smallest of the *safe-to-escape* of all arguments/operands of the object initializer expressons, recursively, if initializer is present. 
 
 ## `default` expressions
 
@@ -299,9 +272,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 
 - In a method invocation, the following constraints apply:
   - If there is a `ref` or `out` argument to a `ref struct` type (including the receiver), with *safe-to-escape* E1, then
-    - no `ref` or `out` argument (excluding the receiver and arguments of `ref struct` types) may have a narrower *ref-safe-to-escape* than E1; and
-    - no argument (including the receiver) may have a narrower *safe-to-escape* than E1.
-
+  - no argument (including the receiver) may have a narrower *safe-to-escape* than E1.
 
 - A local function or anonymous function may not refer to a local or parameter of `ref struct` type declared in an enclosing scope.
 
