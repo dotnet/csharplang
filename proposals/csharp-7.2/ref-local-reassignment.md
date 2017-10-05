@@ -10,13 +10,13 @@ assignment_operator
     ;
 ```
 
-The `=ref` operator is called the ***ref assignment operator***. It is not a *compound assignment operator*. The left operand must be an expression that binds to a ref local variable, a ref parameter, or an out parameter. The right operand must be an expression that yields an lvalue designating a value of the same type as the left operand.
+The `=ref` operator is called the ***ref assignment operator***. It is not a *compound assignment operator*. The left operand must be an expression that binds to a ref local variable, a ref parameter (other than `this`), or an out parameter. The right operand must be an expression that yields an lvalue designating a value of the same type as the left operand.
 
 The right operand must be definitely assigned at the point of the ref assignment.
 
 When the left operand binds to an `out` parameter, it is an error if that `out` parameter has not been definitely assigned at at the beginning of the ref assignment operator.
 
-If the left operand is a writeable ref (i.e. it designates anything other than a `ref readonly` local or  `in` parameter), then the right operand may not be a `ref readonly` local or parameter.
+If the left operand is a writeable ref (i.e. it designates anything other than a `ref readonly` local or  `in` parameter), then the right operand must be a writeable lvalue.
 
 The ref assignment operator yields an lvalue of the assigned type. It is writeable if the left operand is writeable (i.e. not `ref readonly` or `in`).
 
