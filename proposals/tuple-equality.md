@@ -18,6 +18,17 @@ When a tuple literal is used as operand (on either side), it receives a converte
 
 For instance, in `(1L, 2, "hello") == (1, 2L, null)`, the converted type for both tuple literals is `(long, long, string)` and the second literal has no natural type.
 
+## Evaluation order
+The left-hand-side value is evaluated first (including conversions), then the right-hand-side value (also including conversions), then the element-wise comparisons from left to right (with early exit based on existing rules for conditional AND/OR operators).
+
+For instance, if there is a conversion from type `A` to type `B` and `(A, A) GetTuple()`, evaluating `(new A(1), (new B(2), new B(3))) == (new B(4), GetTuple())` means:
+- `new A(1)` and convert to `B`
+- `new B(2)`
+- `new B(3)`
+- `new A(1)` and convert to `B`
+- `GetTuple()` and convert to `(B, B)`
+- then the element-wise comparisons and conditional logic is evaluated
+
 ## Compatibility
 
 If someone wrote their own `ValueTuple` types, including an implementation of the comparison operator, the proposed rule would cause their operator to be ignored.
