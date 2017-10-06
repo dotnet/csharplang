@@ -614,3 +614,21 @@ We looked at the interaction between generics and nullable reference types
 1. Unconstrained type parameters
 2. Nullable constraints
 3. Conversions between constructed types
+
+
+## Oct 4, 2017
+
+[C# Language Design Review, Oct 4, 2017](LDM-2017-10-04.md)
+
+We looked at nullable reference types with the reviewers, Anders Hejlsberg and Kevin Pilch.
+
+1. Overall philosophy
+2. Switches
+3. Libraries
+4. Dotted names
+5. Type narrowing
+6. The dammit operator
+7. Array covariance
+8. Null warnings
+9. Special methods
+10. Conclusion
