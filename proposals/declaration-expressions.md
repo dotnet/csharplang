@@ -1,27 +1,19 @@
 # Declaration expressions
 
-* [ ] Proposed
-* [ ] Prototype
-* [ ] Implementation
-* [ ] Specification: see below
-
-## Summary
-[summary]: #summary
-
 Support declaration assignments as expressions.
 
 ## Motivation
 [motivation]: #motivation
 
 Allow initialization at the point of declaration in more cases, simplifying code, and allowing `var` to be used.
-```c#
-SpecialType SpecialType =>
-    (var st = type.SpecialType).IsValueType() ? SpecialType.None : st;
+```C#
+SpecialType ReferenceType =>
+    (var st = _type.SpecialType).IsValueType() ? SpecialType.None : st;
 ```
 
-Extend `out var` declarations to allow `ref` values.
-```c#
-Convert(source, destination, ref HashSet<Diagnostic> diagnostics = null);
+Allow declarations for `ref` arguments, similar to `out var`.
+```C#
+Convert(source, destination, ref List<Diagnostic> diagnostics = null);
 ```
 
 ## Detailed design
@@ -44,11 +36,6 @@ declaration_expression // C# 7.0
 ```
 
 The declaration assignment is of a single local.
-```c#
-F(var x, y = 2);        // error
-F(var (x, y) = (1, 2)); // error
-F(var x = (1, 2));      // ok
-```
 
 The type of a declaration assignment expression is the type of the declaration.
 If the type is `var`, the inferred type is the type of the initializing expression. 
@@ -57,6 +44,14 @@ The declaration assignment expression may be an l-value, for `ref` argument valu
 
 If the declaration assignment expression declares a value type, and the expression is an r-value, the value of
 the expression is a copy.
+
+The declaration assignment expression may declare a `ref` local.
+There is an ambiguity when `ref` is used for a declaration expression in a `ref` argument.
+The local variable initializer determines whether the declaration is a `ref` local.
+```C#
+F(ref int x = IntFunc());    // int x;
+F(ref int y = RefIntFunc()); // ref int y;
+```
 
 The scope of locals declared in declaration assignment expressions is the same the scope of corresponding declaration expressions from C#7.0.
 
