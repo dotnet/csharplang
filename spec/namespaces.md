@@ -18,7 +18,7 @@ A C# program consists of one or more compilation units, each contained in a sepa
 
 The *using_directive*s of a compilation unit affect the *global_attributes* and *namespace_member_declaration*s of that compilation unit, but have no effect on other compilation units.
 
-The *global_attributes* ([Attributes](attributes.md#attributes)) of a compilation unit permit the specification of attributes for the target assembly and module. Assemblies and modules act as physical containers for types. An assembly may consist of several physically separate modules.
+The *global_attributes* ([Attributes](attributes.md)) of a compilation unit permit the specification of attributes for the target assembly and module. Assemblies and modules act as physical containers for types. An assembly may consist of several physically separate modules.
 
 The *namespace_member_declaration*s of each compilation unit of a program contribute members to a single declaration space called the global namespace. For example:
 
