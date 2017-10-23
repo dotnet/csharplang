@@ -22,7 +22,16 @@ A flow analysis tracks nullable reference variables. Where the analysis deems th
 
 A nullable reference can also explicitly be treated as non-null with the postfix `x!` operator (the "dammit" operator), for when flow analysis cannot establish a non-null situation that the developer knows is there.
 
-Otherwise, a warning is given if a nullable reference is dereferenced, or is converted to a non-null type.
+An error is given if a nullable reference is dereferenced, or is converted to a non-null type without explicit check for `null` refernce.
+
+``` c#
+function foo(string? n){
+   string x;
+   x = n; // error
+   if(n != null) x = n; // way to go
+}
+```
+
 
 A warning is given when converting from `S[]` to `T?[]` and from `S?[]` to `T[]`.
 
