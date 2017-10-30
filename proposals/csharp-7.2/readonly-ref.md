@@ -177,7 +177,7 @@ Since all regular instance methods of a struct can potentially mutate the instan
 
 However, since there is no backward compatibility considerations and there are workarounds, compiler should give a warning to ensure the implicit copying is noted by the user.
 
-## Metadata representaion.
+## Metadata representation.
 
 We're using a combination of attributes and modifiers on signatures:
 
