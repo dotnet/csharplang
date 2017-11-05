@@ -152,7 +152,7 @@ There should always be an expression corresponding to the `this` parameter. Even
 - Like the other `Caller*` attributes, such as `CallerMemberName`, this attribute may only be used on parameters with default values.
 - Multiple parameters marked with `CallerArgumentExpression` are permitted, as shown above.
 - The attribute's namespace will be `System.Runtime.CompilerServices`.
-- In the case of `null` or a string that does not correspond to a parameter name (e.g. `"condition"`) is provided, an error will be raised during compilation.
+- If `null` or a string that is not a parameter name (e.g. `"notAParameterName"`) is provided, the compiler will pass in an empty string.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
