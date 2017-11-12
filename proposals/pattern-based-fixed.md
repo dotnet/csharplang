@@ -24,7 +24,7 @@ fixed(byte* ptr = byteArray)
 
 ```
 
-The set of types that can participate in `foreach` is hardcoded and limited to arrays and `System.String`. Hardcoding "special" types does not scale when new primitives such as `ImmutableArray<T>`, `Span<T>`, `Utf8String` are introduced. 
+The set of types that can participate in `fixed` is hardcoded and limited to arrays and `System.String`. Hardcoding "special" types does not scale when new primitives such as `ImmutableArray<T>`, `Span<T>`, `Utf8String` are introduced. 
 
 In addition, the current solution for `System.String` relies on a fairly rigid API. The shape of the API implies that `System.String` is a contiguous object that embeds UTF16 encoded data at a fixed offset from the object header. Such approach has been found problematic in several proposals that could require changes to the underlying layout. 
 It would be desirable to be able to switch to something more flexible that decouples `System.String` object from its internal representation for the purpose of unmanaged interop. 
@@ -43,7 +43,7 @@ A viable pattern-based “fixed” need to:
 I think the above could be satisfied by recognizing a specially named ref-returning member:
  `ref [readonly] T DangerousGetPinnableReference()`.
 
-In order to be used by the `foreach` statement the following conditions must be met:
+In order to be used by the `fixed` statement the following conditions must be met:
 
 1)	There is only one such member provided for a type.
 1)	Returns by `ref` or `ref readonly`. 
@@ -127,6 +127,8 @@ There is no solution for `System.String` if alternative solution is desired.
 [unresolved]: #unresolved-questions
 
 - [ ] Behavior in "empty" state. - `nullptr` or `undefined` ? 
+- [ ] Should the extension methods be considered ? 
+- [ ] If a pattern is detected on `System.String`, should it win over ? 
 
 ## Design meetings
 
