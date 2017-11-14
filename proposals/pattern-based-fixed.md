@@ -39,7 +39,6 @@ A viable pattern-based “fixed” need to:
 -	Prescribe the behavior in "empty" case when there is nothing to refer to. 
 -	Should not push API authors toward design decisions that hurt the use of the type outside of `fixed`.
 
-
 I think the above could be satisfied by recognizing a specially named ref-returning member:
  `ref [readonly] T DangerousGetPinnableReference()`.
 
@@ -47,18 +46,16 @@ In order to be used by the `fixed` statement the following conditions must be me
 
 1)	There is only one such member provided for a type.
 1)	Returns by `ref` or `ref readonly`. 
-(readonly is permitted so that authors of immutable/readonly types could implement the pattern)
+(`readonly` is permitted so that authors of immutable/readonly types could implement the pattern without adding writeable API that could be used in safe code)
 1)  T is an unmanaged type.
-(since `T*` becomes the pointer type)
+(since `T*` becomes the pointer type. The restriction will naturally expand if/when the notion of "unmanaged" is expanded)
 1)	Returns managed `nullptr` when there is no data to pin – probably the cheapest way to convey emptiness.
-(note that “” string returns a ref to “\0” since strings are zero-terminated)
-
+(note that “” string returns a ref to '\0' since strings are null-terminated)
 
 Alternatively for the `#3` we can allow the result in empty cases be undefined or implementation-specific. 
 That, however, may make the API more dangerous and prone to abuse and unintended compatibility burdens. 
 
 ## *Translation* ##
-
 
 ```C#
     fixed(byte* ptr = thing)
@@ -121,7 +118,6 @@ Users can introduce DangerousGetPinnableReference or similar member and use it a
 ```
 
 There is no solution for `System.String` if alternative solution is desired.
-
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
