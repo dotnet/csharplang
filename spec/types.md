@@ -309,7 +309,7 @@ A reference type value is a reference to an ***instance*** of the type, the latt
 
 A class type defines a data structure that contains data members (constants and fields), function members (methods, properties, events, indexers, operators, instance constructors, destructors and static constructors), and nested types. Class types support inheritance, a mechanism whereby derived classes can extend and specialize base classes. Instances of class types are created using *object_creation_expression*s ([Object creation expressions](expressions.md#object-creation-expressions)).
 
-Class types are described in [Classes](classes.md#classes).
+Class types are described in [Classes](classes.md).
 
 Certain predefined class types have special meaning in the C# language, as described in the table below.
 
@@ -319,10 +319,10 @@ Certain predefined class types have special meaning in the C# language, as descr
 | `System.Object`    | The ultimate base class of all other types. See [The object type](types.md#the-object-type). | 
 | `System.String`    | The string type of the C# language. See [The string type](types.md#the-string-type).         |
 | `System.ValueType` | The base class of all value types. See [The System.ValueType type](types.md#the-systemvaluetype-type).          |
-| `System.Enum`      | The base class of all enum types. See [Enums](enums.md#enums).              |
-| `System.Array`     | The base class of all array types. See [Arrays](arrays.md#arrays).             |
-| `System.Delegate`  | The base class of all delegate types. See [Delegates](delegates.md#delegates).          |
-| `System.Exception` | The base class of all exception types. See [Exceptions](exceptions.md#exceptions).         |
+| `System.Enum`      | The base class of all enum types. See [Enums](enums.md).              |
+| `System.Array`     | The base class of all array types. See [Arrays](arrays.md).             |
+| `System.Delegate`  | The base class of all delegate types. See [Delegates](delegates.md).          |
+| `System.Exception` | The base class of all exception types. See [Exceptions](exceptions.md).         |
 
 ### The object type
 
@@ -361,13 +361,13 @@ The keyword `string` is simply an alias for the predefined class `System.String`
 
 An interface defines a contract. A class or struct that implements an interface must adhere to its contract. An interface may inherit from multiple base interfaces, and a class or struct may implement multiple interfaces.
 
-Interface types are described in [Interfaces](interfaces.md#interfaces).
+Interface types are described in [Interfaces](interfaces.md).
 
 ### Array types
 
 An array is a data structure that contains zero or more variables which are accessed through computed indices. The variables contained in an array, also called the elements of the array, are all of the same type, and this type is called the element type of the array.
 
-Array types are described in [Arrays](arrays.md#arrays).
+Array types are described in [Arrays](arrays.md).
 
 ### Delegate types
 
@@ -375,7 +375,7 @@ A delegate is a data structure that refers to one or more methods. For instance 
 
 The closest equivalent of a delegate in C or C++ is a function pointer, but whereas a function pointer can only reference static functions, a delegate can reference both static and instance methods. In the latter case, the delegate stores not only a reference to the method's entry point, but also a reference to the object instance on which to invoke the method.
 
-Delegate types are described in [Delegates](delegates.md#delegates).
+Delegate types are described in [Delegates](delegates.md).
 
 ## Boxing and unboxing
 
@@ -541,7 +541,7 @@ type_argument
     ;
 ```
 
-In unsafe code ([Unsafe code](unsafe-code.md#unsafe-code)), a *type_argument* may not be a pointer type. Each type argument must satisfy any constraints on the corresponding type parameter ([Type parameter constraints](classes.md#type-parameter-constraints)).
+In unsafe code ([Unsafe code](unsafe-code.md)), a *type_argument* may not be a pointer type. Each type argument must satisfy any constraints on the corresponding type parameter ([Type parameter constraints](classes.md#type-parameter-constraints)).
 
 ### Open and closed types
 

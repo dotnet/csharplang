@@ -2,7 +2,7 @@ The pattern of binding a ref variable to one or another expression conditionally
 
 The typical workaround is to introduce a method like:
 ```CS
-ref T Choice(bool condition, ref T consequence, ref alternative)
+ref T Choice(bool condition, ref T consequence, ref T alternative)
 {
     if (condition)
     {

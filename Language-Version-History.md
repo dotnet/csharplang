@@ -22,7 +22,6 @@ Features Added in C# Language Versions
 - Nullable types
 - Getter/setter separate accessibility
 - Method group conversions (delegates)
-- Co- and Contra-variance for delegates and interfaces
 - Static classes
 - Delegate inference
 
@@ -40,7 +39,7 @@ Features Added in C# Language Versions
 # [C# 4](https://msdn.microsoft.com/en-us/magazine/ff796223.aspx) (VS 2010)
 - Dynamic binding
 - Named and optional arguments
-- Generic co- and contravariance
+- Co- and Contra-variance for generic delegates and interfaces
 - Embedded interop types ("NoPIA")
 
 # [C# 5](https://blogs.msdn.microsoft.com/mvpawardprogram/2012/03/26/an-introduction-to-new-features-in-c-5-0/) (VS 2012)
@@ -76,8 +75,8 @@ Features Added in C# Language Versions
 - [Throw expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/throw-expression.md)
 
 # [C# 7.1](https://github.com/dotnet/roslyn/blob/master/docs/Language%20Feature%20Status.md) (Visual Studio 2017 version 15.3)
-- [Async main](https://github.com/dotnet/csharplang/blob/master/proposals/async-main.md)
-- [Default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/target-typed-default.md)
+- [Async main](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/async-main.md)
+- [Default expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/target-typed-default.md)
 - [Reference assemblies](https://github.com/dotnet/roslyn/blob/master/docs/features/refout.md)
 - [Inferred tuple element names](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/infer-tuple-names.md)
-- [Pattern-matching with generics](https://github.com/dotnet/csharplang/blob/master/proposals/generics-pattern-match.md)
+- [Pattern-matching with generics](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.1/generics-pattern-match.md)

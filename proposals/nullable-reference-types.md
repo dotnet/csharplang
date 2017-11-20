@@ -1,9 +1,10 @@
 Nullable reference types in C#
 ==============================
 
-This feature is intended to:
+The goal of this feature is to:
+
 * Allow developers to express whether a variable, parameter or result of a reference type is intended to be null or not.
-* Provide optional warnings when such variables, parameters and results are not used according to their intent.
+* Provide warnings when such variables, parameters and results are not used according to that intent.
 
 
 Expression of intent

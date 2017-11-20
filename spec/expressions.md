@@ -300,7 +300,7 @@ decimal AddPercent(decimal x, double percent) {
 
 A member lookup is the process whereby the meaning of a name in the context of a type is determined. A member lookup can occur as part of evaluating a *simple_name* ([Simple names](expressions.md#simple-names)) or a *member_access* ([Member access](expressions.md#member-access)) in an expression. If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression* ([Method invocations](expressions.md#method-invocations)), the member is said to be invoked.
 
-If a member is a method or event, or if it is a constant, field or property of either a delegate type ([Delegates](delegates.md#delegates)) or the type `dynamic` ([The dynamic type](types.md#the-dynamic-type)), then the member is said to be *invocable*.
+If a member is a method or event, or if it is a constant, field or property of either a delegate type ([Delegates](delegates.md)) or the type `dynamic` ([The dynamic type](types.md#the-dynamic-type)), then the member is said to be *invocable*.
 
 Member lookup considers not only the name of a member but also the number of type parameters the member has and whether the member is accessible. For the purposes of member lookup, generic methods and nested generic types have the number of type parameters indicated in their respective declarations and all other members have zero type parameters.
 
@@ -4859,7 +4859,7 @@ Constant expressions occur in the contexts listed below. In these contexts, a co
 *  `case` labels of a `switch` statement ([The switch statement](statements.md#the-switch-statement)).
 *  `goto case` statements ([The goto statement](statements.md#the-goto-statement)).
 *  Dimension lengths in an array creation expression ([Array creation expressions](expressions.md#array-creation-expressions)) that includes an initializer.
-*  Attributes ([Attributes](attributes.md#attributes)).
+*  Attributes ([Attributes](attributes.md)).
 
 An implicit constant expression conversion ([Implicit constant expression conversions](conversions.md#implicit-constant-expression-conversions)) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
 
