@@ -22,7 +22,6 @@ Features Added in C# Language Versions
 - Nullable types
 - Getter/setter separate accessibility
 - Method group conversions (delegates)
-- Co- and Contra-variance for delegates and interfaces
 - Static classes
 - Delegate inference
 
@@ -40,7 +39,7 @@ Features Added in C# Language Versions
 # [C# 4](https://msdn.microsoft.com/en-us/magazine/ff796223.aspx) (VS 2010)
 - Dynamic binding
 - Named and optional arguments
-- Generic co- and contravariance
+- Co- and Contra-variance for generic delegates and interfaces
 - Embedded interop types ("NoPIA")
 
 # [C# 5](https://blogs.msdn.microsoft.com/mvpawardprogram/2012/03/26/an-introduction-to-new-features-in-c-5-0/) (VS 2012)
