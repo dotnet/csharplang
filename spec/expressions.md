@@ -971,7 +971,7 @@ primary_expression
 
 primary_no_array_creation_expression
     : literal
-    | interpolated_string
+    | interpolated_string_expression
     | simple_name
     | parenthesized_expression
     | member_access
