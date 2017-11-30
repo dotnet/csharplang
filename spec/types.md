@@ -626,11 +626,11 @@ As a type, type parameters are purely a compile-time construct. At run-time, eac
 
 If a conversion exists from a lambda expression to a delegate type `D`, a conversion also exists to the expression tree type `Expression<D>`. Whereas the conversion of a lambda expression to a delegate type generates a delegate that references executable code for the lambda expression, conversion to an expression tree type creates an expression tree representation of the lambda expression.
 
-Expression trees are efficient in-memory data representations of lambda expressionsand make the structure of the lambda expressiontransparent and explicit.
+Expression trees are efficient in-memory data representations of lambda expressions and make the structure of the lambda expression transparent and explicit.
 
 Just like a delegate type `D`, `Expression<D>` is said to have parameter and return types, which are the same as those of `D`.
 
-The following example represents a lambda expressionboth as executable code and as an expression tree. Because a conversion exists to `Func<int,int>`, a conversion also exists to `Expression<Func<int,int>>`:
+The following example represents a lambda expression both as executable code and as an expression tree. Because a conversion exists to `Func<int,int>`, a conversion also exists to `Expression<Func<int,int>>`:
 
 ```csharp
 Func<int,int> del = x => x + 1;                    // Code
@@ -640,7 +640,7 @@ Expression<Func<int,int>> exp = x => x + 1;        // Data
 
 Following these assignments, the delegate `del` references a method that returns `x + 1`, and the expression tree `exp` references a data structure that describes the expression `x => x + 1`.
 
-The exact definition of the generic type `Expression<D>` as well as the precise rules for constructing an expression tree when a lambda expressionis converted to an expression tree type, are both outside the scope of this specification.
+The exact definition of the generic type `Expression<D>` as well as the precise rules for constructing an expression tree when a lambda expression is converted to an expression tree type, are both outside the scope of this specification.
 
 Two things are important to make explicit:
 
