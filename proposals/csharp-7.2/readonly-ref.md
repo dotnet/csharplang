@@ -435,11 +435,11 @@ readonly struct Vector3
 ```
 
 ## Restrictions on members of readonly struct
-- Instance fields of a readonly struct must be readonly.
+- Instance fields of a readonly struct must be readonly.  
 **Motivation:** can only be written to externally, but not through members.
-- Instance autoproperties of a readonly struct must be get-only.
+- Instance autoproperties of a readonly struct must be get-only.  
 **Motivation:** consequence of restriction on instance fields.
-- Readonly struct may not declare field-like events.
+- Readonly struct may not declare field-like events.  
 **Motivation:** consequence of restriction on instance fields.
 
 ## Metadata representation.
@@ -502,7 +502,7 @@ public static void Mutator(ref this Guid self)
 ## `in` extensions and generics.
 The purpose of `ref` extension methods is to mutate the receiver directly or by invoking mutating members. Therefore `ref this T` extensions are allowed as long as `T` is constrained to be a struct.
 
-On the other hand `in` extension methods exist specifically to reduce implicit copying. However any use of an `in T` parameter will have to be done through an interface member. Since all interface members are considered mutating, any such use would require a copy. - Instead of reducing copying, the effect would be the opposite. Therefore `in this T` are not allowed when `T` is a generic type parameter regardless of constraints.
+On the other hand `in` extension methods exist specifically to reduce implicit copying. However any use of an `in T` parameter will have to be done through an interface member. Since all interface members are considered mutating, any such use would require a copy. - Instead of reducing copying, the effect would be the opposite. Therefore `in this T` is not allowed when `T` is a generic type parameter regardless of constraints.
 
 ## Valid kinds of extension methods (recap):
 The following forms of `this` declaration in an extension method are now allowed:
@@ -597,7 +597,7 @@ The following will not work as expected:
 ```
 
 ## Solution
-Allow special kind of conditional expression that evaluates to a reference to one or another LValue argument based on a condition.
+Allow special kind of conditional expression that evaluates to a reference to one of LValue argument based on a condition.
 
 ## Using `ref` ternary expression.
 
@@ -610,8 +610,8 @@ Unlike ordinary conditional expression, `ref` conditional expression:
 - `ref` conditional expression itself is an LValue and
 - `ref` conditional expression is writeable if both `<consequence>` and `<alternative>` are writeable LValues
 
-Examples:
-Ref ternary is an LValue and as such it can be passed/assigned/returned by reference;
+Examples:  
+`ref` ternary is an LValue and as such it can be passed/assigned/returned by reference;
 ```C#
      // pass by reference
      foo(ref (arr != null ? ref arr[0]: ref otherArr[0]));
