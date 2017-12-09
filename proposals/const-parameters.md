@@ -9,7 +9,7 @@
 ## Summary
 [summary]: #summary
 
-Const Parameters proposal aims to provide missing in C# language synatx (and other .NET languages too) allowing to enforce passing of compile time constant values as a method, delegate, constructor, lambda expression, anonymous and local method parameters. It translates into formal proposal Issue #744 [Expand const keyword usage to enable compile time enforcement of const semantics](https://github.com/dotnet/csharplang/issues/744).
+Const Parameters proposal aims to provide missing in C# language syntax (and other .NET languages too) allowing to enforce passing of compile time constant values as a method, delegate, constructor, lambda expression, anonymous and local method parameters. It translates into formal proposal Issue #744 [Expand const keyword usage to enable compile time enforcement of const semantics](https://github.com/dotnet/csharplang/issues/744).
 
 ## Motivation
 [motivation]: #motivation
@@ -40,7 +40,7 @@ Discussion relevant for Const Parameters starts after 38:30
 ## Detailed design
 [design]: #detailed-design
 
-Design is based on existing semantic meaning of the C# `const keyword` with usage scope extended to to context dependent modification of parameters declaration semantics. Allowing for modification of parameter declaration by proceeding it with `const keyword` requiring that invocation of `const parameters` containing function requires passing in the place of `const parameters` 'const' keyword followed by `constant expression`.
+Design is based on existing semantic meaning of the C# `const keyword` with scope of its use extended to context dependent modification of parameters declaration semantics. Allowing for modification of parameter declaration by proceeding it with `const keyword` requiring that invocation of `const parameters` containing function requires passing in the place of `const parameters` 'const' keyword followed by `constant expression`.
 
 ```C#
 // Declaration
@@ -53,7 +53,7 @@ this.Method(const 3 * 2 << 1);  // OK
 this.Method(const x);           // Error - x is not a compile time constant or constant expression
 ```
 
-Constant expression type must match parameter type or be implicitly convertible to it during compilation. Use of constant expression as argument value allows to easily access constant folding optimizations implemented in Roslyn. Types allowed in `const parameters` declarations are identical to the types supported by constant expressions: 
+Constant expression type must match parameter type or be implicitly convertible to it during compilation. Use of constant expression as argument value allows easy access to constant folding optimizations implemented in Roslyn. Types allowed in `const parameters` declarations are identical to the types supported by constant expressions: 
 
 ```
 a constant expression must be the null literal or a value with one of the following types: 
