@@ -53,14 +53,14 @@ this.Method(const 3 * 2 << 1);  // OK
 this.Method(const x);           // Error - x is not a compile time constant or constant expression
 ```
 
-Constant expression type must match parameter type or be implicitly convertible to it during compilation. Use of constant expression as argument value allows easy access to constant folding optimizations implemented in Roslyn. Types allowed in `const parameters` declarations are identical to the types supported by constant expressions: 
+Constant expression type must match parameter type or be implicitly convertible to it during compilation. Use of constant expression as argument value allows to easily access constant folding optimizations implemented in Roslyn. Types allowed in `const parameters` declarations are identical to the types supported by constant expressions: 
 
 ```
 a constant expression must be the null literal or a value with one of the following types: 
 sbyte, byte, short, ushort, int, uint, long, ulong, char, float, double, decimal, bool, 
 object, string, or any enumeration type.
 ```
-Developers should intuitively grasp `const parameters` meaning as it does not change `const keyword` meaning except for the scope where `const keyword` is syntactically valid. Additionally since 'const' keyword located before parameter type declaration is treated similarly to 'ref', 'out' and 'this' modifiers it's new usage should be easy to understand as well.
+Developers should intuitively grasp `const parameters` meaning as `const keyword` meaning is not changing except for the scope where `const keyword` is syntactically valid. Additionally since `const keyword` located before parameter type declaration is treated similarly to `ref`, `out` and `this` modifiers its new usage should be easy to understand as well.
 
 ```C#
 // Declarations with const parameters
