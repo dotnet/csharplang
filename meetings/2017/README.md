@@ -313,6 +313,25 @@ We looked at the interaction between generics and nullable reference types
 3. Conversions between constructed types
 
 
+## Aug 16, 2017
+
+[C# Language Design Notes for Aug 16, 2017](LDM-2017-08-16.md)
+
+1. The null-forgiving operator
+
+
+## Aug 23, 2017
+
+[C# Language Design Notes for Aug 23, 2017](LDM-2017-08-23.md)
+
+We discussed various aspects of nullable reference types
+
+1. How does flow analysis silence the warning
+2. Problems with dotted names
+3. Type inference
+4. Structs with fields of non-nullable type
+
+
 ## Oct 4, 2017
 
 [C# Language Design Review, Oct 4, 2017](LDM-2017-10-04.md)
@@ -329,3 +348,50 @@ We looked at nullable reference types with the reviewers, Anders Hejlsberg and K
 8. Null warnings
 9. Special methods
 10. Conclusion
+
+
+## Oct 11, 2017
+
+[C# Language Design Notes for Oct 11, 2017](LDM-2017-10-11.md)
+
+We looked at the Oct 4 design review feedback for nullable reference types, and considered how to react to it.
+
+1. Philosophy
+2. Switches
+3. Dotted names
+4. Type narrowing
+5. Dammit operator type narrowing
+6. Dammit operator stickiness
+7. Array covariance
+8. Null warnings
+
+
+## Nov 8, 2017
+
+[C# Language Design Notes for Nov 8, 2017](LDM-2017-11-08.md)
+
+We went over the status of the prototype for nullable reference types, to address outstanding questions and make any last minute calls before release.
+
+1. Constructors
+2. Dotted names
+3. Default expressions
+4. Should we track null state for nonnullable ref types?
+5. Inferred types for method type inference
+6. Inferred nullability in hover tips
+7. Smaller things not yet done
+8. Unconstrained generics
+9. Other issues
+
+
+## Nov 27, 2017
+
+[C# Language Design Notes for Nov 27, 2017](LDM-2017-11-27.md)
+
+We went over the feedback on the nullable reference types prototype, and discussed how to address the top issues that people had found using the feature on their own source code.
+
+1. Interacting with existing, unannotated APIs
+2. Accommodating alternative initialization patterns
+3. Tracking nullable value types
+4. Tracking dotted names
+5. Special methods
+6. Filtering out nulls
