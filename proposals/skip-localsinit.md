@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-Allow user to suppress emitting of `localsinit` flag by applying an attribute. 
+Allow suppressing emit of `localsinit` flag via `SkipLocalsInitAttribute` attribute. 
 
 ## Motivation
 [motivation]: #motivation
