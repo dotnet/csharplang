@@ -24,14 +24,6 @@ Overview of meetings and agendas for 2013
 2. Expression-bodied function members <*details decided*>
 3. Lightweight dynamic <*member access model and syntax discussed*>
 
-## Nov 4, 2013
-
-[C# Language Design Notes for Nov 4, 2013](LDM-2013-11-04.md)
-
-1. Initialized and getter-only auto-properties <*details decided*>
-2. Expression-bodied function members <*details decided*>
-3. Lightweight dynamic <*member access model and syntax discussed*>
-
 ## Dec 16, 2013
 
 [C# Language Design Notes for Dec 16, 2013](LDM-2013-12-16.md)
