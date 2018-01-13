@@ -72,7 +72,7 @@ try
         Use(enumerator.Current);
     }
 }
-finally { await ((IAsyncDisposable)enumerator).DisposeAsync(); }
+finally { await enumerator.DisposeAsync(); }
 ```
 
 Discarded options considered:
@@ -103,7 +103,7 @@ namespace System.Collections.Generic
 ```
 TryGetNext is used in an inner loop to consume items with a single interface call as long as they're available synchronously.  When the next item can't be retrieved synchronously, it returns false, and any time it returns false, a caller must subsequently invoke WaitForNextAsync to either wait for the next item to be available or to determine that there will never be another item. Typical consumption (without additional language features) would look like:
 ```C#
-IAsyncEnumerator<T> enumerator = enumerable.GetAsyncEnumerator();;
+IAsyncEnumerator<T> enumerator = enumerable.GetAsyncEnumerator();
 try
 {
     while (await enumerator.WaitForNextAsync())
@@ -116,7 +116,7 @@ try
         }
     }
 }
-finally { await ((IAsyncDisposable)enumerator).DisposeAsync(); }
+finally { await enumerator.DisposeAsync(); }
 ```
 Consumption of this interface is obviously more complex. However, the advantage of this is two-fold, one minor and one major:
 - _Minor: Allows for an enumerator to support multiple consumers_. There may be scenarios where it's valuable for an enumerator to support multiple concurrent consumers.  That can't be achieved when `MoveNextAsync` and `Current` are separate such that an implementation can't make their usage atomic.  In contrast, this approach provides a single method `TryGetNext` that supports pushing the enumerator forward and getting the next item, so the enumerator can enable atomicity if desired.  However, it's likely that such scenarios could also be enabled by giving each consumer its own enumerator from a shared enumerable.  Further, we don't want to enforce that every enumerator support concurrent usage, as that would add non-trivial overheads to the majority case that doesn't require it, which means a consumer of the interface generally couldn't rely on this any way.
