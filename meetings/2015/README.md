@@ -81,7 +81,7 @@ In this meeting we looked over the top [C# language feature requests on UserVoic
 8. XML comments (*Not a language request*) 
 9. Unmanaged constraint (*requires CLR support*)
 10. Compilable strings (*this is what nameof is for*)
-11. Mulitple returns (*working on it, via tuples*)
+11. Multiple returns (*working on it, via tuples*)
 12. ISupportInitialize (*too specific; hooks on object initializers?*)
 13. ToNullable (*potentially part of nullability support*)
 14. Statement lambdas in expression trees (*fair request, big feature!*)
