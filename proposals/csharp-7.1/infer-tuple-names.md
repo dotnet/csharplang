@@ -7,7 +7,7 @@ In a number of common cases, this feature allows the tuple element names to be o
 
 This parallels the behavior of  anonymous types, which allow inferring member names during creation. For instance, `new { x.f1, y?.f2 }` declares members "f1" and "f2".
 
-This is particularily handy when using tuples in LINQ:
+This is particularly handy when using tuples in LINQ:
 
 ```
 // "c" and "result" have element names "f1" and "f2"

@@ -44,7 +44,7 @@ An additional measure will be taken to prevent the use of ref-like structs in co
 
 Having no other good alternatives that work in old compilers without servicing, an `Obsolete` attribute with a known string will be added to all ref-like structs. Compilers that know how to use ref-like types will ignore this particular form of `Obsolete`.
 
-A typical matadata representation: 
+A typical metadata representation:
 
 ```C#
     [IsRefLike]
@@ -234,7 +234,7 @@ A stackalloc expression is an rvalue that is *safe-to-escape* to the top-level s
 
 A `new` expression that invokes a constructor obeys the same rules as a method invocation that is considered to return the type being constructed.
 
-In addition *safe-to-escape* is no wider than the smallest of the *safe-to-escape* of all arguments/operands of the object initializer expressons, recursively, if initializer is present. 
+In addition *safe-to-escape* is no wider than the smallest of the *safe-to-escape* of all arguments/operands of the object initializer expressions, recursively, if initializer is present. 
 
 ## `default` expressions
 

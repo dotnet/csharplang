@@ -105,7 +105,7 @@ In the case there is a type named `unmanaged` and it is available without qualif
 
 The primary drawback of this feature is that it serves a small number of developers: typically low level library authors or frameworks.  Hence it's spending precious language time for a small number of developers. 
 
-Yet these frameworks are are often the basis for the majority of .NET applications out there.  Hence performance / correctness wins at this level can have a riple effect on the .NET ecosystem.  This makes the feature worth considering even with the limited audience. 
+Yet these frameworks are often the basis for the majority of .NET applications out there.  Hence performance / correctness wins at this level can have a ripple effect on the .NET ecosystem.  This makes the feature worth considering even with the limited audience.
 
 ## Alternatives
 [alternatives]: #alternatives
@@ -128,7 +128,7 @@ The F# language has a very [similar feature](https://docs.microsoft.com/en-us/do
 
 ### Verifier
 
-Does the verifier / runtime need to be updated to understad the use of pointers to generic type parameters?  Or can it simply work as is without changes. 
+Does the verifier / runtime need to be updated to understand the use of pointers to generic type parameters?  Or can it simply work as is without changes?
 
 **Resolution** No changes needed. All pointer types are simply unverifiable. 
 
