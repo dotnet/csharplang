@@ -218,7 +218,7 @@ The *attributes*, *return_type*, *identifier*, and *formal_parameter_list* of an
 
 Each formal parameter type of an interface method must be input-safe ([Variance safety](interfaces.md#variance-safety)), and the return type must be either `void` or output-safe. Furthermore, each class type constraint, interface type constraint and type parameter constraint on any type parameter of the method must be input-safe.
 
-These rules ensure that any covariant or contravariant usage of the interface remains typesafe. For example,
+These rules ensure that any covariant or contravariant usage of the interface remains type-safe. For example,
 ```csharp
 interface I<out T> { void M<U>() where U : T; }
 ```
@@ -287,7 +287,7 @@ The *attributes*, *type*, and *formal_parameter_list* of an interface indexer de
 
 The accessors of an interface indexer declaration correspond to the accessors of a class indexer declaration ([Indexers](classes.md#indexers)), except that the accessor body must always be a semicolon. Thus, the accessors simply indicate whether the indexer is read-write, read-only, or write-only.
 
-All the formal parameter types of an interface indexer must be input-safe . In addition, any `out` or `ref` formal parameter types must also be output-safe. Note that even `out` parameters are required to be input-safe, due to a limitiation of the underlying execution platform.
+All the formal parameter types of an interface indexer must be input-safe . In addition, any `out` or `ref` formal parameter types must also be output-safe. Note that even `out` parameters are required to be input-safe, due to a limitation of the underlying execution platform.
 
 The type of an interface indexer must be output-safe if there is a get accessor, and must be input-safe if there is a set accessor.
 

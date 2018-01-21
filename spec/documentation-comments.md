@@ -292,7 +292,7 @@ __Example:__
 ```csharp
 /// <summary>This is the entry point of the Point class testing program.
 /// <para>This program tests each method and operator, and
-/// is intended to be run after any non-trvial maintenance has
+/// is intended to be run after any non-trivial maintenance has
 /// been performed on the Point class.</para></summary>
 public static void Main() {
     // ...
@@ -994,7 +994,7 @@ public class Point
     /// <summary>This is the entry point of the Point class testing
     /// program.
     /// <para>This program tests each method and operator, and
-    /// is intended to be run after any non-trvial maintenance has
+    /// is intended to be run after any non-trivial maintenance has
     /// been performed on the Point class.</para></summary>
     public static void Main() {
         // class test code goes here
@@ -1121,7 +1121,7 @@ Here is the output produced by one documentation generator when given the source
             <summary>This is the entry point of the Point class testing
             program.
             <para>This program tests each method and operator, and
-            is intended to be run after any non-trvial maintenance has
+            is intended to be run after any non-trivial maintenance has
             been performed on the Point class.</para></summary>
         </member>
 

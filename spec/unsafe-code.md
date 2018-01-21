@@ -908,7 +908,7 @@ The buffer element type is followed by a list of fixed size buffer declarators, 
 
 The elements of a fixed size buffer are guaranteed to be laid out sequentially in memory.
 
-A fixed size buffer declaration that declares multiple fixed size buffers is equivalent to multiple declarations of a single fixed size buffer declation with the same attributes, and element types. For example
+A fixed size buffer declaration that declares multiple fixed size buffers is equivalent to multiple declarations of a single fixed size buffer declaration with the same attributes, and element types. For example
 
 ```csharp
 unsafe struct A
