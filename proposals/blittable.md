@@ -44,7 +44,7 @@ Type parameters with the unmanaged constraint can use all the features available
 void Hash<T>(T value) where T : unmanaged
 {
     // Okay
-    using (T* p = &value) { 
+    fixed (T* p = &value) { 
         ...
     }
 }
@@ -88,6 +88,11 @@ struct Student {
 }
 ``` 
 
+The `unmanaged` constraint cannot be combined with `struct`, `class` or `new()`. This restriction derives from the fact that `unmanaged` implies `struct` hence the other constraints do not make sense.
+
+The `unmanaged` constraint is not enforced by CLR, only by the language. To prevent mis-use by other languages, methods which have this constraint will be protected by a mod-req. This will 
+prevent other languages from using type arguments which are not unmanaged types.
+
 The token `unmanaged` in the constraint is not a keyword, nor a contextual keyword. Instead it is like `var` in that it is evaluated at that location and will either:
 
 - Bind to user defined or referenced type named `unmanaged`: This will be treated just as any other named type constraint is treated. 
@@ -109,8 +114,12 @@ There are a couple of alternatives to consider:
 
 - The status quo:  The feature is not justified on its own merits and developers continue to use the implicit opt in behavior.
 
-## Resolved questions
-[resolved]: #resolved-questions
+## Questions
+[quesions]: #questions
+
+### Metadata Representation
+
+The F# language encodes the constraint in the signature file which means C# cannot re-use their representation. A new attribute will need to be chosen for this constraint. Additionally a method which has this constraint must be protected by a mod-req.
 
 ### Blittable vs. Unmanaged
 The F# language has a very [similar feature](https://docs.microsoft.com/en-us/dotnet/articles/fsharp/language-reference/generics/constraints) which uses the keyword unmanaged. The blittable name comes from the use in Midori.  May want to look to precedence here and use unmanaged instead. 
