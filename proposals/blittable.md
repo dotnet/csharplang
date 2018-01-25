@@ -65,7 +65,7 @@ Such routines are advantageous because they are provably safe at compile time an
 
 The language will introduce a new constraint named `unmanaged`. In order to satisfy this constraint a type must be a struct and all the fields of the type must fall into one of the following categories:
 
-- Have the type `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, `decimal`, or `bool`.
+- Have the type `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool`, `IntPtr` or `UIntPtr`.
 - Be any `enum` type.
 - Be a pointer type.
 - Be a user defined struct that satsifies the `unmanaged` constraint.
@@ -121,7 +121,7 @@ The F# language has a very [similar feature](https://docs.microsoft.com/en-us/do
 
 Does the verifier / runtime need to be updated to understad the use of pointers to generic type parameters?  Or can it simply work as is without changes. 
 
-**Resolution** The new IL verification spec will need to be updated to account for this.
+**Resolution** No changes needed. All pointer types are simply unverifiable. 
 
 ## Design meetings
 
