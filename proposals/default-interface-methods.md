@@ -138,7 +138,7 @@ interface IB : IA
 
 Override declarations in interfaces may not be declared `sealed`.
 
-Public `virtual` function members in an interface may be overriden in a derived interface either implicitly (by using the `override` modifier in a public declaration in the derived interface) or explicitly (by qualifying the name in the override declaration with the interface type that originally declared the method, and omitting an access modifier).
+Public `virtual` function members in an interface may be overridden in a derived interface either implicitly (by using the `override` modifier in a public declaration in the derived interface) or explicitly (by qualifying the name in the override declaration with the interface type that originally declared the method, and omitting an access modifier).
 
 `virtual` function members in an interface that are not `public` may only be overridden explicitly (not implicitly) in derived interfaces, and may only be implemented in a class or struct explicitly (not implicitly). In either case, the overridden or implemented member must be *accessible* where it is overridden.
 

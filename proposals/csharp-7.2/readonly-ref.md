@@ -31,7 +31,7 @@ The examples are numerous - vector/matrix math operators in graphics libraries l
 Similarly to the `out` parameters, `in` parameters are passed as managed references with additional guarantees from the callee.  
 Unlike `out` parameters which _must_ be assigned by the callee before any other use, `in` parameters cannot be assigned by the callee at all.
 
-As a result `in` parameters allow for effectiveness of indirect argument passing without exposing arguments to mutations by the calee.  
+As a result `in` parameters allow for effectiveness of indirect argument passing without exposing arguments to mutations by the callee.
 
 ## Declaring `in` parameters
 
@@ -407,7 +407,7 @@ In short - a feature that makes `this` parameter of all instance members of a st
 Compiler must assume that any method call on a struct instance may modify the instance. Indeed a writeable reference is passed to the method as `this` parameter and fully enables this behavior. To allow such invocations on `readonly` variables, the invocations are applied to temp copies. That could be unintuitive and sometimes forces people to abandon `readonly` for performance reasons.  
 Example: https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/
 
-After adding support for `in` parameters and `ref redonly` returns the problem of defensive copying will get worse since readonly variables will become more common.
+After adding support for `in` parameters and `ref readonly` returns the problem of defensive copying will get worse since readonly variables will become more common.
 
 ## Solution
 Allow `readonly` modifier on struct declarations which would result in `this` being treated as `in` parameter on all struct instance methods except for constructors.
@@ -566,7 +566,7 @@ static readonly ref Vector3 M1_Trace()
 Except for their `readonly` nature, `ref readonly` locals behave like ordinary `ref` locals and are subject to exactly same restrictions.  
 For example restrictions related to capturing in closures, declaring in `async` methods or the `safe-to-return` analysis equally applies to `ref readonly` locals.
 
-# Ternary `ref` expressons. (aka "Conditional LValues")
+# Ternary `ref` expressions. (aka "Conditional LValues")
 
 ## Motivation
 Use of `ref` and `ref readonly` locals exposed a need to ref-initialize such locals with one or another target variable based on a condition.
@@ -654,7 +654,7 @@ Can be used as a receiver of a method call and skip copying if necessary.
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-I can see two major arguments against enhanced support for references and readonly refernces:
+I can see two major arguments against enhanced support for references and readonly references:
 
 1) The problems that are solved here are very old. Why suddenly solve them now, especially since it would not help existing code?
 
