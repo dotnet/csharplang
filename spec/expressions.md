@@ -44,7 +44,7 @@ The following operations in C# are subject to binding:
 
 *  Member access: `e.M`
 *  Method invocation: `e.M(e1, ..., eN)`
-*  Delegate invocaton:`e(e1, ..., eN)`
+*  Delegate invocation:`e(e1, ..., eN)`
 *  Element access: `e[e1, ..., eN]`
 *  Object creation: `new C(e1, ..., eN)`
 *  Overloaded unary operators: `+`, `-`, `!`, `~`, `++`, `--`, `true`, `false`
@@ -879,7 +879,7 @@ interface I2<T> {...}
 
 class G1<U>
 {
-    int F1(U u);                  // Overload resulotion for G<int>.F1
+    int F1(U u);                  // Overload resolution for G<int>.F1
     int F1(int i);                // will pick non-generic
 
     void F2(I1<U> a);             // Valid overload
@@ -1093,7 +1093,7 @@ A *simple_name* is either of the form `I` or of the form `I<A1,...,Ak>`, where `
       * Otherwise, the *namespace_or_type_name* refers to the type constructed with the given type arguments.
    *  Otherwise, if the location where the *simple_name* occurs is enclosed by a namespace declaration for `N`:
       * If `K` is zero and the namespace declaration contains an *extern_alias_directive* or *using_alias_directive* that associates the name `I` with an imported namespace or type, then the *simple_name* refers to that namespace or type.
-      * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_static_directive*s of the namespace declaration contain exactly one accessible type or non-extension static membre having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.
+      * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_static_directive*s of the namespace declaration contain exactly one accessible type or non-extension static member having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.
       * Otherwise, if the namespaces and types imported by the *using_namespace_directive*s of the namespace declaration contain more than one accessible type or non-extension-method static member having name `I` and `K` type parameters, then the *simple_name* is ambiguous and an error occurs.
 
    Note that this entire step is exactly parallel to the corresponding step in the processing of a *namespace_or_type_name* ([Namespace and type names](basic-concepts.md#namespace-and-type-names)).
@@ -1407,7 +1407,7 @@ E.F(1)
 D.G(2)
 C.H(3)
 ```
-`D.G` takes precendece over `C.G`, and `E.F` takes precedence over both `D.F` and `C.F`.
+`D.G` takes precedence over `C.G`, and `E.F` takes precedence over both `D.F` and `C.F`.
 
 #### Delegate invocations
 
@@ -2769,7 +2769,7 @@ The predefined division operators are listed below. The operators all compute th
    decimal operator /(decimal x, decimal y);
    ```
 
-   If the value of the right operand is zero, a `System.DivideByZeroException` is thrown. If the resulting value is too large to represent in the `decimal` format, a `System.OverflowException` is thrown. If the result value is too small to represent in the `decimal` format, the result is zero. The scale of the result is the smallest scale that will preserve a result equal to the nearest representantable decimal value to the true mathematical result.
+   If the value of the right operand is zero, a `System.DivideByZeroException` is thrown. If the resulting value is too large to represent in the `decimal` format, a `System.OverflowException` is thrown. If the result value is too small to represent in the `decimal` format, the result is zero. The scale of the result is the smallest scale that will preserve a result equal to the nearest representable decimal value to the true mathematical result.
 
    Decimal division is equivalent to using the division operator of type `System.Decimal`.
 
@@ -3864,7 +3864,7 @@ static void F() {
 }
 ```
 
-When not captured, there is no way to observe exactly how often a local variable is instantiated—because the lifetimes of the instantiations are disjoint, it is possible for each instantation to simply use the same storage location. However, when an anonymous function captures a local variable, the effects of instantiation become apparent.
+When not captured, there is no way to observe exactly how often a local variable is instantiated—because the lifetimes of the instantiations are disjoint, it is possible for each instantiation to simply use the same storage location. However, when an anonymous function captures a local variable, the effects of instantiation become apparent.
 
 The example
 ```csharp
@@ -4070,7 +4070,7 @@ A query expression begins with a `from` clause and ends with either a `select` o
 
 Query expressions contain a number of "contextual keywords", i.e., identifiers that have special meaning in a given context. Specifically these are `from`, `where`, `join`, `on`, `equals`, `into`, `let`, `orderby`, `ascending`, `descending`, `select`, `group` and `by`. In order to avoid ambiguities in query expressions caused by mixed use of these identifiers as keywords or simple names, these identifiers are considered keywords when occurring anywhere within a query expression.
 
-For this purpose, a query expression is any expression that starts with "`from dentifier`" followed by any token except "`;`", "`=`" or "`,`".
+For this purpose, a query expression is any expression that starts with "`from identifier`" followed by any token except "`;`", "`=`" or "`,`".
 
 In order to use these words as identifiers within a query expression, they can be prefixed with "`@`" ([Identifiers](lexical-structure.md#identifiers)).
 

@@ -39,7 +39,7 @@ However, dynamic conversions ([Implicit dynamic conversions](conversions.md#impl
 
 An identity conversion converts from any type to the same type. This conversion exists such that an entity that already has a required type can be said to be convertible to that type.
 
-*  Because object and dynamic are considered equivalent there is an identity conversion between `object` and `dynamic`, and between constructed types that are the same when replacing all occurences of `dynamic` with `object`.
+*  Because object and dynamic are considered equivalent there is an identity conversion between `object` and `dynamic`, and between constructed types that are the same when replacing all occurrences of `dynamic` with `object`.
 
 ### Implicit numeric conversions
 

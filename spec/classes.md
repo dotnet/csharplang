@@ -120,7 +120,7 @@ Having the declaration of a class distributed over separate segments of program 
 
 ### Type parameters
 
-A type parameter is a simple identifier that denotes a placeholder for a type argument supplied to create a constructed type. A type parameter is a formal placeholder for a type that will be supplied later. By constrast, a type argument ([Type arguments](types.md#type-arguments)) is the actual type that is substituted for the type parameter when a constructed type is created.
+A type parameter is a simple identifier that denotes a placeholder for a type argument supplied to create a constructed type. A type parameter is a formal placeholder for a type that will be supplied later. By contrast, a type argument ([Type arguments](types.md#type-arguments)) is the actual type that is substituted for the type parameter when a constructed type is created.
 
 ```antlr
 type_parameter_list
@@ -2651,8 +2651,8 @@ The accessor declarations consist of a *get_accessor_declaration*, a *set_access
 The use of *accessor_modifier*s is governed by the following restrictions:
 
 *  An *accessor_modifier* may not be used in an interface or in an explicit interface member implementation.
-*  For a property or indexer that has no `override` modifer, an *accessor_modifier* is permitted only if the property or indexer has both a `get` and `set` accessor, and then is permitted only on one of those accessors.
-*  For a property or indexer that includes an `override` modifer, an accessor must match the *accessor_modifier*, if any, of the accessor being overridden.
+*  For a property or indexer that has no `override` modifier, an *accessor_modifier* is permitted only if the property or indexer has both a `get` and `set` accessor, and then is permitted only on one of those accessors.
+*  For a property or indexer that includes an `override` modifier, an accessor must match the *accessor_modifier*, if any, of the accessor being overridden.
 *  The *accessor_modifier* must declare an accessibility that is strictly more restrictive than the declared accessibility of the property or indexer itself. To be precise:
    * If the property or indexer has a declared accessibility of `public`, the *accessor_modifier* may be either `protected internal`, `internal`, `protected`, or `private`.
    * If the property or indexer has a declared accessibility of `protected internal`, the *accessor_modifier* may be either `internal`, `protected`, or `private`.
