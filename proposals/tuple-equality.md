@@ -33,7 +33,7 @@ For instance, if there is a conversion from type `A` to type `B` and a method `(
 
 ## Compatibility
 
-If someone wrote their own `ValueTuple` types, including an implementation of the comparison operator, the proposed rule would cause their operator to be ignored.
+Although the initial proposal had a compatiblity issue if someone wrote their own `ValueTuple` types with  an implementation of the comparison operator, the current proposal maintains the existing behavior because the new rule comes into play last.
 
 ----
 
