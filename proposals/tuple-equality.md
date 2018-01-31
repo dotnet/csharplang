@@ -27,7 +27,7 @@ For instance, if there is a conversion from type `A` to type `B` and a method `(
 - `new A(1)`
 - `new B(2)`
 - `new B(3)`
-- `new A(1)`
+- `new B(4)`
 - `GetTuple()`
 - then the element-wise conversions and comparisons and conditional logic is evaluated (convert `new A(1)` to type `B`, then compare it with `new B(4)`, and so on).
 
