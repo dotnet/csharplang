@@ -22,7 +22,12 @@ When a tuple literal is used as operand (on either side), it receives a converte
 
 For instance, in `(1L, 2, "hello") == (1, 2L, null)`, the converted type for both tuple literals is `(long, long, string)` and the second literal has no natural type.
 
-TODO add more details on conversion back to `bool` when a non-bool user-defined `operator ==` or a `dynamic` operand is involed in one of the element-wise comparisons.
+__TODO__ add more details on conversion back to `bool` when a non-bool user-defined `operator ==` or a `dynamic` operand is involed in one of the element-wise comparisons.
+
+### Deconstruction and conversions to tuple
+In `(a, b) == x`, the fact that `x` can deconstruct into two elements does not play a role. That could conceivably be in a future proposal, although it would raise questions about `x == y` (is this a simple comparison or an element-wise comparison, and if so using what cardinality?).
+Similarly, conversions to tuple play no role.
+
 
 ## Evaluation order
 The left-hand-side value is evaluated first, then the right-hand-side value, then the element-wise comparisons from left to right (including conversions, and with early exit based on existing rules for conditional AND/OR operators).
