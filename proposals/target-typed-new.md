@@ -43,7 +43,7 @@ The type of the expression would be inferred from the target-type which would be
 - **Any reference type**
 - **Any type parameter** with a constructor constraint
 
-The following types do not contribute to the conversion:
+with the following exceptions:
 
 - **Enum types:** not all enum types contain the constant zero, so it should be desirable to use the explicit enum member.
 - **Delegate types:** if the type is inferrable, an anonymous function can already be used.
@@ -51,14 +51,13 @@ The following types do not contribute to the conversion:
 - **Tuple types:** tuple literals should be used for such expressions.
 - **Array types:** arrays need a special syntax to provide the length.
 
-
 All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.
 
->**Open Issue:** What other types should be excluded?
+The default constructor for a value type (unless appeared explicitly in metadata) should be excluded as well. That would have the effect of excluding the primitive types and the default constructor or most value types as well. If you wanted to use the default value of such types you could write `default`.
 
+> **Open Issue:** What other types should be excluded?
 
-
-Note that any restriction on permitted types would raise the success rate of the overload resolution. For example, if we exclude primitive types, the following would successfully compile.
+Note that any restriction on permitted types would raise the success rate of the overload resolution. For example:
 ```cs
 class C {}
 void M(C c) {}
@@ -66,7 +65,7 @@ void M(int i) {}
 
 M(new());
 ```
-Otherwise, it would fail with a `CS0121` error.
+This would fail with a `CS0121` error, considering the restriction on the default constructor for value types.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
