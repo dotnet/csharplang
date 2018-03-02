@@ -2,7 +2,7 @@
 # Target-typed `new` expressions
 
 * [x] Proposed
-* [x] [Prototype](https://github.com/alrz/roslyn/tree/features/implicit-new)
+* [x] [Prototype](https://github.com/alrz/roslyn/tree/features/target-typed-new)
 * [ ] Implementation
 * [ ] Specification
 
