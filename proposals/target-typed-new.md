@@ -53,7 +53,7 @@ with the following exceptions:
 
 All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.
 
-The default constructor for a value type (unless appeared explicitly in metadata) should be excluded as well. That would have the effect of excluding the primitive types and the default constructor or most value types as well. If you wanted to use the default value of such types you could write `default`.
+The default constructor for a value type (unless appeared explicitly in metadata) is ought to be excluded, which would have the effect of excluding the primitive types and the default constructor for most value types. If you wanted to use the default value of such types you could write `default`.
 
 > **Open Issue:** What other types should be excluded?
 
