@@ -41,7 +41,7 @@ The type of the expression would be inferred from the target-type which would be
 
 - **Any struct type**
 - **Any reference type**
-- **Any type parameter** with a constructor constraint
+- **Any type parameter** with a constructor or a `struct` constraint
 
 with the following exceptions:
 
@@ -53,7 +53,7 @@ with the following exceptions:
 
 All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.
 
-The default constructor for a value type (unless appeared explicitly in metadata) is ought to be excluded, which would have the effect of excluding the primitive types and the default constructor for most value types. If you wanted to use the default value of such types you could write `default`.
+The default constructor for a value type (unless appeared explicitly in metadata) is excluded, which has the effect of excluding the primitive types and the default constructor for most value types. If you wanted to use the default value of such types you could write `default`.
 
 > **Open Issue:** What other types should be excluded?
 
