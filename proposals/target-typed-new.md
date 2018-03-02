@@ -57,7 +57,7 @@ The default constructor for a value type (unless appeared explicitly in metadata
 
 > **Open Issue:** What other types should be excluded?
 
-Note that any restriction on permitted types would raise the success rate of the overload resolution. For example:
+Note that any restriction on permitted types would raise the success rate of the overload resolution. For example, the following would successfully compile considering the restriction on the default constructor for value types.
 ```cs
 class C {}
 void M(C c) {}
@@ -65,7 +65,7 @@ void M(int i) {}
 
 M(new());
 ```
-This would fail with a `CS0121` error, considering the restriction on the default constructor for value types.
+Otherwise it would fail with an ambiguous call error.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
