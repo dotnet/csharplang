@@ -12,7 +12,8 @@ As of C# 7.2, such code produces an error (`error CS0019: Operator '==' cannot b
 
 ## Details
 
-When binding the `==` (or `!=`) operator and existing binding rules failed, then if both operands of a comparison operator are tuples (have tuple types or are tuple literals) and have matching cardinality, then the comparison is performed element-wise. If either or both sides are nullable, then whether the nullables have values is checked before comparing elements.
+When binding the `==` (or `!=`) operator, the existing rules are: (1) dynamic case, (2) overload resolution, and (3) fail.
+This proposal adds a tuple case between (1) and (2): if both operands of a comparison operator are tuples (have tuple types or are tuple literals) and have matching cardinality, then the comparison is performed element-wise. This tuple equality is also lifted onto nullable tuples.
 
 Both operands (and, in the case of tuple literals, their elements) are evaluated in order from left to right. Each pair of elements is then used as operands to bind the operator `==` (or `!=`), recursively. Any elements with compile-time type `dynamic` cause an error. The results of those element-wise comparisons are used as operands in a chain of conditional AND (or OR) operators.
 
@@ -42,7 +43,7 @@ For instance, if there is a conversion from type `A` to type `B` and a method `(
 
 ## Compatibility
 
-Although the initial proposal had a compatiblity issue if someone wrote their own `ValueTuple` types with  an implementation of the comparison operator, the current proposal maintains the existing behavior because the new rule comes into play last.
+If someone wrote their own `ValueTuple` types with  an implementation of the comparison operator, it would have previously been picked up by overload resolution. But since the new tuple case comes before overload resolution, we would handle this case with tuple comparison instead of relying on the user-defined comparison.
 
 ----
 
