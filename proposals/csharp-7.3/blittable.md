@@ -29,7 +29,7 @@ void Hash<T>(T value) where T : unmanaged
 }
 ```
 
-This constraint can only be met by types which fit into the unmanaged type definition in the C# language spec. Another way of looking at it is that a type satisfies the unmanaged constraint iff it can also be used as a pointer. 
+This constraint can only be met by types which fit into the unmanaged type definition in the C# language spec. Another way of looking at it is that a type satisfies the unmanaged constraint if it can also be used as a pointer. 
 
 ``` c#
 Hash(new Point()); // Okay 
