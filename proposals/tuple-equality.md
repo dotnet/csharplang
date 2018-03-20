@@ -8,7 +8,7 @@ In the nullable case, additional checks for `temp1.HasValue` and `temp2.HasValue
 
 When an element-wise comparison returns a non-bool result (for instance, when a non-bool user-defined `operator ==` or `operator !=` is used, or in a dynamic comparison), then that result will be either converted to `bool` or run through `operator true` or `operator false` to get a `bool`. The tuple comparison always ends up returning a `bool`.
 
-As of C# 7.2, such code produces an error (`error CS0019: Operator '==' cannot be applied to operands of type '(...)' and '(...)'`).
+As of C# 7.2, such code produces an error (`error CS0019: Operator '==' cannot be applied to operands of type '(...)' and '(...)'`), unless there is a user-defined `operator==`.
 
 ## Details
 
@@ -23,14 +23,29 @@ When a tuple literal is used as operand (on either side), it receives a converte
 
 For instance, in `(1L, 2, "hello") == (1, 2L, null)`, the converted type for both tuple literals is `(long, long, string)` and the second literal has no natural type.
 
-__TODO__ add more details on conversion back to `bool` when a non-bool user-defined `operator ==` or a `dynamic` operand is involed in one of the element-wise comparisons.
 
 ### Deconstruction and conversions to tuple
 In `(a, b) == x`, the fact that `x` can deconstruct into two elements does not play a role. That could conceivably be in a future proposal, although it would raise questions about `x == y` (is this a simple comparison or an element-wise comparison, and if so using what cardinality?).
 Similarly, conversions to tuple play no role.
 
+### Tuple element names
 
-## Evaluation order
+When converting a tuple literal, we warn when an explicit tuple element name was provided in the literal, but it doesn't match the target tuple element name.
+We use the same rule in tuple comparison, so that assuming `(int a, int b) t` we warn on `d` in `t == (c, d: 0)`.
+
+### Non-bool element-wise comparison results
+
+If an element-wise comparison is dynamic in a tuple equality, we use a dynamic invocation of the operator `false` and negate that to get a `bool` and continue with further element-wise comparisons. 
+
+If an element-wise comparison returns some other non-bool type in a tuple equality, there are two cases:
+- if the non-bool type converts to `bool`, we apply that conversion,
+- if there is no such conversion, but the type has an operator `false`, we'll use that and negate the result.
+
+In a tuple inequality, the same rules apply except that we'll use the operator `true` (without negation) instead of the operator `true`.
+
+Those rules are similar the rules involved for using a non-bool type in an `if` statement and some other existing contexts.
+
+## Evaluation order and special cases
 The left-hand-side value is evaluated first, then the right-hand-side value, then the element-wise comparisons from left to right (including conversions, and with early exit based on existing rules for conditional AND/OR operators).
 
 For instance, if there is a conversion from type `A` to type `B` and a method `(A, A) GetTuple()`, evaluating `(new A(1), (new B(2), new B(3))) == (new B(4), GetTuple())` means:
@@ -40,6 +55,17 @@ For instance, if there is a conversion from type `A` to type `B` and a method `(
 - `new B(4)`
 - `GetTuple()`
 - then the element-wise conversions and comparisons and conditional logic is evaluated (convert `new A(1)` to type `B`, then compare it with `new B(4)`, and so on).
+
+### Comparing `null` to `null`
+
+This is a special case from regular comparisons, that carries over to tuple comparisons. The `null == null` comparison is allowed, and the `null` literals do not get any type.
+In tuple equality, this means, `(0, null) == (0, null)` is also allowed and the `null` and tuple literals don't get a type either.
+
+### Comparing a nullable struct to `null` without `operator==`
+
+This is another special case from regular comparisons, that carries over to tuple comparisons.
+If you have a `struct S` without `operator==`, the `(S?)x == null` comparison is allowed, and it is interpreted as `((S?).x).HasValue`.
+In tuple equality, the same rule is applied, so `(0, (S?)x) == (0, null)` is allowed.
 
 ## Compatibility
 
