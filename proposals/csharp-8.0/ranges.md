@@ -24,9 +24,9 @@ var multiDimensional = list[3, ^2]      // list[3, Index.CreateFromEnd(2)]
 
 #### System.Range
 
-C# has no syntactical way to access "ranges" or "slices" of collections. Usually users are forced to implement complex structures to filter/operate on slices of memory, or resort to LINQ methods like `list.Skip(5).Take(2)`. With the addition of `System.Span<T>` and other similar types, it becomes more important to have this kind of operations supported on a deeper level in the language/runtime, and have the interface unified.
+C# has no syntactical way to access "ranges" or "slices" of collections. Usually users are forced to implement complex structures to filter/operate on slices of memory, or resort to LINQ methods like `list.Skip(5).Take(2)`. With the addition of `System.Span<T>` and other similar types, it becomes more important to have this kind of operation supported on a deeper level in the language/runtime, and have the interface unified.
 
-The language will introduce a new range operator `x..y`. It is a binary infix operator that accepts two expressions. Either operands can be ommited (examples below), and they have to be convertible to `System.Index`. It will be lowered to the appropriate `System.Range` factory method call.
+The language will introduce a new range operator `x..y`. It is a binary infix operator that accepts two expressions. Either operands can be omitted (examples below), and they have to be convertible to `System.Index`. It will be lowered to the appropriate `System.Range` factory method call.
 
 ```csharp
 var slice1 = list[2..^3];               // list[Range.Create(2, Index.CreateFromEnd(3))]
@@ -49,7 +49,7 @@ Moreover, `System.Index` should have an implicit conversion from `System.Int32`,
 
 ## Alternatives
 
-If we decide not to implement the feature (which is majorly a syntactic sugar), developers can still define such interfaces/operations explicitly, but it will result in a lot more boilerplate code that can be avoided, and harder to unify types/experience across the many collection types in .NET.
+The new operators (`^` and `..`) are syntactic sugar. The functionality can be implemented by explicit calls to `System.Index` and `System.Range` factory methods, but it will result in a lot more boilerplate code, and the experience will be unintuitive.
 
 ## IL Representation
 
