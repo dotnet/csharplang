@@ -1,10 +1,5 @@
 # Ranges
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
-
 ## Summary
 
 This feature is about delivering two new operators that allow constructing `System.Index` and `System.Range` objects, and using them to index/slice collections at runtime.
@@ -24,7 +19,7 @@ var multiDimensional = list[3, ^2]      // list[3, Index.CreateFromEnd(2)]
 
 #### System.Range
 
-C# has no syntactical way to access "ranges" or "slices" of collections. Usually users are forced to implement complex structures to filter/operate on slices of memory, or resort to LINQ methods like `list.Skip(5).Take(2)`. With the addition of `System.Span<T>` and other similar types, it becomes more important to have this kind of operation supported on a deeper level in the language/runtime, and have the interface unified.
+C# has no syntactic way to access "ranges" or "slices" of collections. Usually users are forced to implement complex structures to filter/operate on slices of memory, or resort to LINQ methods like `list.Skip(5).Take(2)`. With the addition of `System.Span<T>` and other similar types, it becomes more important to have this kind of operation supported on a deeper level in the language/runtime, and have the interface unified.
 
 The language will introduce a new range operator `x..y`. It is a binary infix operator that accepts two expressions. Either operands can be omitted (examples below), and they have to be convertible to `System.Index`. It will be lowered to the appropriate `System.Range` factory method call.
 
@@ -56,3 +51,5 @@ The new operators (`^` and `..`) are syntactic sugar. The functionality can be i
 These two operators will be lowered to regular indexer/method calls, with no change in subsequent compiler layers.
 
 ## Questions
+
+* Should `System.Index` throw when constructed with negative values?
