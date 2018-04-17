@@ -376,7 +376,6 @@ static void Main(string[] args) {
         default:
             Console.WriteLine("{0} arguments", n);
             break;
-        }
     }
 }
 ```
