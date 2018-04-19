@@ -4821,6 +4821,7 @@ A constant expression must be the `null` literal or a value with one of  the fol
 *  References to `const` parameters or local variables
 *  Parenthesized sub-expressions, which are themselves constant expressions.
 *  Cast expressions, provided the target type is one of the types listed above.
+*  Null literal conversions
 *  `checked` and `unchecked` expressions
 *  Default value expressions
 *  Nameof expressions
