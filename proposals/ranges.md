@@ -32,6 +32,8 @@ var slice4 = list[..];                  // list[Range.All]
 var multiDimensional = list[1..2, ..]   // list[Range.Create(1, 2), Range.All]
 ```
 
+Moreover, `System.Index` should have an implicit conversion from `System.Int32`, in order not to need to overload for mixing integers and indexes over multi-dimensional signatures.
+
 ## Workarounds
 
 For prototyping reasons, and since runtime/framework collections will not have support for such indexers, the compiler will finally look for the following extension method when doing overload resolution:
@@ -39,8 +41,6 @@ For prototyping reasons, and since runtime/framework collections will not have s
 * `op_Indexer_Extension(this TCollection<TItem> collection, ...arguments supplied to the indexer)`
 
 This workaround will be removed once contract with runtime/framework is finalized, and before the feature is declared complete.
-
-Moreover, `System.Index` should have an implicit conversion from `System.Int32`, in order not to need to overload for mixing integers and indexes over multi-dimensional signatures.
 
 ## Alternatives
 
@@ -50,6 +50,11 @@ The new operators (`^` and `..`) are syntactic sugar. The functionality can be i
 
 These two operators will be lowered to regular indexer/method calls, with no change in subsequent compiler layers.
 
-## Questions
+## Runtime behaviour
 
-* Should `System.Index` throw when constructed with negative values?
+* Compiler can optimize indexers for built-in types like arrays and strings, and lower the indexing to the appropriate existing methods.
+* `System.Index` will throw if constructed with a negative value.
+* `^0` does not throw, but it translates to the length of the collection/enumerable it is supplied to.
+* `Range.All` is semantically equivalent to `0..^0`, and can be deconstructed to these indices.
+
+## Questions
