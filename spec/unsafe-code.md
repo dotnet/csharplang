@@ -151,7 +151,7 @@ Here, because `F`'s signature includes a pointer type, it can only be written in
 
 ## Pointer types
 
-In an unsafe context, a *type* ([Types](types.md#types)) may be a *pointer_type* as well as a *value_type* or a *reference_type*. However, a *pointer_type* may also be used in a `typeof` expression ([Anonymous object creation expressions](expressions.md#anonymous-object-creation-expressions)) outside of an unsafe context as such usage is not unsafe.
+In an unsafe context, a *type* ([Types](types.md)) may be a *pointer_type* as well as a *value_type* or a *reference_type*. However, a *pointer_type* may also be used in a `typeof` expression ([Anonymous object creation expressions](expressions.md#anonymous-object-creation-expressions)) outside of an unsafe context as such usage is not unsafe.
 
 ```antlr
 type_unsafe
@@ -679,7 +679,7 @@ When applied to an operand that has struct type, the result is the total number 
 
 ## The fixed statement
 
-In an unsafe context, the *embedded_statement* ([Statements](statements.md#statements)) production permits an additional construct, the `fixed` statement, which is used to "fix" a moveable variable such that its address remains constant for the duration of the statement.
+In an unsafe context, the *embedded_statement* ([Statements](statements.md)) production permits an additional construct, the `fixed` statement, which is used to "fix" a moveable variable such that its address remains constant for the duration of the statement.
 
 ```antlr
 fixed_statement
@@ -898,7 +898,7 @@ fixed_size_buffer_declarator
     ;
 ```
 
-A fixed size buffer declaration may include a set of attributes ([Attributes](attributes.md#attributes)), a `new` modifier ([Modifiers](classes.md#modifiers)), a valid combination of the four access modifiers ([Type parameters and constraints](classes.md#type-parameters-and-constraints)) and an `unsafe` modifier ([Unsafe contexts](unsafe-code.md#unsafe-contexts)). The attributes and modifiers apply to all of the members declared by the fixed size buffer declaration. It is an error for the same modifier to appear multiple times in a fixed size buffer declaration.
+A fixed size buffer declaration may include a set of attributes ([Attributes](attributes.md)), a `new` modifier ([Modifiers](classes.md#modifiers)), a valid combination of the four access modifiers ([Type parameters and constraints](classes.md#type-parameters-and-constraints)) and an `unsafe` modifier ([Unsafe contexts](unsafe-code.md#unsafe-contexts)). The attributes and modifiers apply to all of the members declared by the fixed size buffer declaration. It is an error for the same modifier to appear multiple times in a fixed size buffer declaration.
 
 A fixed size buffer declaration is not permitted to include the `static` modifier.
 
@@ -908,7 +908,7 @@ The buffer element type is followed by a list of fixed size buffer declarators, 
 
 The elements of a fixed size buffer are guaranteed to be laid out sequentially in memory.
 
-A fixed size buffer declaration that declares multiple fixed size buffers is equivalent to multiple declarations of a single fixed size buffer declation with the same attributes, and element types. For example
+A fixed size buffer declaration that declares multiple fixed size buffers is equivalent to multiple declarations of a single fixed size buffer declaration with the same attributes, and element types. For example
 
 ```csharp
 unsafe struct A

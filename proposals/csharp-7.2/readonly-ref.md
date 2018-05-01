@@ -2,33 +2,49 @@
 
 * [x] Proposed
 * [x] Prototype
-* [ ] Implementation: Started
+* [x] Implementation: Started
 * [ ] Specification: Not Started
 
 ## Summary
 [summary]: #summary
 
-The "readonly references" feature is actually a group of features that leverage the efficiency of passing variables by reference, but without exposing the data to modifications.
+The "readonly references" feature is actually a group of features that leverage the efficiency of passing variables by reference, but without exposing the data to modifications:  
+- `in` parameters
+- `ref readonly` returns
+- `readonly` structs
+- `ref`/`in` extension methods
+- `ref readonly` locals
+- `ref` conditional expressions
 
-# Readonly ref parameters. (aka `in` parameters)
+# Passing arguments as readonly references.
 
-There is an existing proposal that touches this topic https://github.com/dotnet/roslyn/issues/115 as a special case of readonly parameters without going into many details. 
+There is an existing proposal that touches this topic https://github.com/dotnet/roslyn/issues/115 as a special case of readonly parameters without going into many details.
 Here I just want to acknowledge that the idea by itself is not very new.
-
 
 ## Motivation
 
-C# lacks an efficient way of expressing a desire to pass struct variables into method calls for readonly purposes with no intention of modifying. Regular by-value argument passing implies copying, which adds unnecessary costs.  That drives users to use by-ref argument passing and rely on comments/documentation to indicate that the data is not supposed to be mutated by the callee. It is not a good solution for many reasons.
+Prior to this feature C# did not have an efficient way of expressing a desire to pass struct variables into method calls for readonly purposes with no intention of modifying. Regular by-value argument passing implies copying, which adds unnecessary costs.  That drives users to use by-ref argument passing and rely on comments/documentation to indicate that the data is not supposed to be mutated by the callee. It is not a good solution for many reasons.  
 The examples are numerous - vector/matrix math operators in graphics libraries like [XNA](https://msdn.microsoft.com/en-us/library/bb194944.aspx) are known to have ref operands purely because of performance considerations. There is code in Roslyn compiler itself that uses structs to avoid allocations and then passes them by reference to avoid copying costs.
 
+## Solution (`in` parameters).
 
-## Solution
+Similarly to the `out` parameters, `in` parameters are passed as managed references with additional guarantees from the callee.  
+Unlike `out` parameters which _must_ be assigned by the callee before any other use, `in` parameters cannot be assigned by the callee at all.
 
-`ref readonly` parameters. 
-Similarly to the `out` parameters, `ref readonly` parameters are passed as managed references with additional guarantee from the callee. The guarantee in this case is that callee will not make any assignments through the parameter nor it will create a writeable reference aliases to the data referenced by the parameter.
+As a result `in` parameters allow for effectiveness of indirect argument passing without exposing arguments to mutations by the callee.
+
+## Declaring `in` parameters
+
+`in` parameters are declared by using `in` keyword as a modifier in the parameter signature.
+
+For all purposes the `in` parameter is treated as a `readonly` variable. Most of the restrictions on the use of `in` parameters inside the method are the same as with `readonly` fields.
+
+> Indeed an `in` parameter may represent a `readonly` field. Similarity of restrictions is not a coincidence.
+
+For example fields of an `in` parameter which has a struct type are all recursively classified as `readonly` variables .   
 
 ```C#
-static Vector3 Add (ref readonly Vector3 v1, ref readonly Vector3 v2)
+static Vector3 Add (in Vector3 v1, in Vector3 v2)
 {
     // not OK!!
     v1 = default(Vector3);
@@ -40,105 +56,162 @@ static Vector3 Add (ref readonly Vector3 v1, ref readonly Vector3 v2)
     foo(ref v1.X);
 
     // OK
-    return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
+    return new Vector3(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
 }
 ```
 
-## Syntax
+- `in` parameters are allowed anywhere where ordinary byval parameters are allowed. This includes indexers, operators (including conversions), delegates, lambdas, local functions.
 
-One of proposed syntaxes is to use existing `in` keyword as a shorter form of `ref readonly`. It could be that both syntaxes are allowed or that we pick just one of them.
+> ```C#
+>  (in int x) => x                                                     // lambda expression  
+>  TValue this[in TKey index];                                         // indexer
+>  public static Vector3 operator +(in Vector3 x, in Vector3 y) => ... // operator
+>  ```
 
-While syntax is TBD, I will use `in` as it is significantly shorter than `ref readonly`.
+- `in` is not allowed in combination with `out` or with anything that `out` does not combine with.
 
-```C# 
-static Vector3 Add (in Vector3 v1, in Vector3 v2)
-{
-    // OK
-    return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
-}
-```
+- It is not permitted to overload on `ref`/`out`/`in` differences.
 
-## Use of `in` in signatures.
+- It is permitted to overload on ordinary byval and `in` differences.
 
-`in` will be allowed everywhere where `out` is allowed - methods, delegates, lambdas... 
-(What about indexers, operators? - TBD) 
+- For the purpose of OHI (Overloading, Hiding, Implementing), `in` behaves similarly to an `out` parameter.
+All the same rules apply.
+For example the overriding method will have to match `in` parameters with `in` parameters of an identity-convertible type.
 
-`in` would not be allowed in combination with `out` or with anything that `out` does not combine with.
-For the purpose of OHI (Overloading, Hiding, Implementing), `in` will behave similarly to an `out` parameter. All the same rules apply, in particular it is not permitted to overload on `ref/out/in` differences.
+- For the purpose of delegate/lambda/method group conversions, `in` behaves similarly to an `out` parameter.
+Lambdas and applicable method group conversion candidates will have to match `in` parameters of the target delegate with `in` parameters of an identity-convertible type.
 
-For the purpose of binding and overload resolution `in` behaves similarly to `out` as well. `in` is basically just a new element of `RefKind` enum, in addition to current `{None, Ref, Out}`.
+- For the purpose of generic variance, `in` parameters are nonvariant.
 
-For the purpose of generic variance, `in` is nonvariant.
+> NOTE: There are no warnings on `in` parameters that have reference or primitives types.
+It may be pointless in general, but in some cases user must/want to pass primitives as `in`. Examples - overriding a generic method like `Method(in T param)` when `T` was substituted to be `int`, or when having methods like `Volatile.Read(in int location)`
+>
+> It is conceivable to have an analyzer that warns in cases of inefficient use of `in` parameters, but the rules for such analysis would be too fuzzy to be a part of a language specification.
 
-## Use of `in` at call sites.
+## Use of `in` at call sites. (`in` arguments)
 
-Unlike `out` parameters, `in` does not need to be matched with an LValue(*) argument. At the call-site `in` parameters are no different from regular by-value parameters.
+There are two ways to pass arguments to `in` parameters.
 
-Example: 
-Notice that there are no `in` modifiers at the call. 
-Also note that passing an RValue(*) is acceptable.
+### `in` arguments can match `in` parameters:
+
+An argument with an `in` modifier at the call site can match `in` parameters.
 
 ```C#
-static Vector3 ShiftRightTwice(in Vector3 v1)
+int x = 1;
+
+void M1<T>(in T x)
 {
-    // + UnitX  twice        
-    return Add(Add(v1, Vector3.UnitX), Vector3.UnitX);
+  . . .
 }
 
-static Vector3 Add (in Vector3 v1, in Vector3 v2)
+var x = M1(in x);  // in argument to a method
+
+class D
 {
-    // OK
-    return new Vector3(v1.X +v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
+    public string this[in Guid index];
 }
+
+D dictionary = . . . ;
+var y = dictionary[in Guid.Empty]; // in argument to an indexer
 ```
 
-In cases of variables without a home a temporary variable will be used for a short term capturing of the value.
+- `in` argument must be a _readable_ LValue(*).
+Example: `M1(in 42)` is invalid
 
-`in` parameters are not writeable and rules similar to readonly fields apply. - I.E. fields of a readonly ref parameter of a struct type are recursively not writeable as well.
-
-It is permitted to use `in` parameters for passing further or recursively as `in` parameters, or for other `ref readonly` purposes as discussed further.
-
-(*) The notion of [LValue/RValue](https://en.wikipedia.org/wiki/Value_(computer_science)#lrvalue) vary between languages.  
-Here, by LValue I mean an expression that can be assigned to or passed by reference.
+> (*) The notion of [LValue/RValue](https://en.wikipedia.org/wiki/Value_(computer_science)#lrvalue) vary between languages.  
+Here, by LValue I mean an expression that represent a location that can be referred to directly.
 And RValue means an expression that yields a temporary result which does not persist on its own.  
 
+- In particular it is valid to pass `readonly` fields, `in` parameters or other formally `readonly` variables as `in` arguments.
+Example: `dictionary[in Guid.Empty]` is legal. `Guid.Empty` is a static readonly field.
 
-## Passing `readonly` fields as `in` parameters.
+- `in` argument must have type _identity-convertible_ to the type of the parameter.
+Example: `M1<object>(in Guid.Empty)` is invalid. `Guid.Empty` is not _identity-convertible_ to `object`
 
-When passing `readonly` fields (outside of a ctor) we have two choices - pass through a local copy or pass a direct reference. For the purpose of just `in` parameters the difference is semantically unobservable. However the direct reference is more efficient. We will work with CLR to allow the latter.
+The motivation for the above rules is that `in` arguments guarantee _aliasing_ of the argument variable. The callee always receives a direct reference to the same location as represented by the argument.
 
-NOTE: adding `ref readonly` _returns_ as a feature makes copying of `ref readonlys` at the call sites observable, thus further cementing the requirement that `readonly` fields are _not_ passed by copy.
+- in rare situations when `in` arguments must be stack-spilled due to `await` expressions used as operands of the same call, the behavior is the same as with `out` and `ref` arguments - if the variable cannot be spilled in referentially-transparent manner, an error is reported.
 
-## `in` parameters and capturing of stack variables.
+Examples:
+1) `M1(in staticField, await SomethingAsync())`  is valid.
+`staticField` is a static field which can be accessed more than once without observable side effects. Therefore both the order of side effects and aliasing requirements can be provided.   
 
-For the purpose of lambda/async capturing `in` will behave the same as `out` - i.e. no capturing allowed.
- 
-We can, alternatively, allow capturing of copied temps (by ref or by value), but that would break the aliasing behavior of `in` and would result in subtle changes in behavior based on whether variables are captured or not, which by itself is not a stable guarantee and may depend on various factors including debug vs. release. Besides, copying would defeat the purpose of the feature that is to reduce copying. As such it is advisable to not allow capturing of `in` parameters.
+2) `M1(in RefReturningMethod(), await SomethingAsync())`  will produce an error.
+`RefReturningMethod()` is a `ref` returning method. A method call may have observable side effects, therefore it must be evaluated before the `SomethingAsync()` operand. However the result of the invocation is a reference that cannot be preserved across the `await` suspension point which make the direct reference requirement impossible.
 
-Example of observable aliasing/copying if capture via copying would be allowed:
+> NOTE: the stack spilling errors are considered to be implementation-specific limitations. Therefore they do not have effect on overload resolution or lambda inference.         
 
+### Ordinary byval arguments can match `in` parameters:
+
+Regular arguments without modifiers can match `in` parameters. In such case the arguments have the same relaxed constraints as an ordinary byval arguments would have.
+
+The motivation for this scenario is that `in` parameters in APIs may result in inconveniences for the user when arguments cannot be passed as a direct reference - ex: literals, computed or `await`-ed results or arguments that happen to have more specific types.  
+All these cases have a trivial solution of storing the argument value in a temporary local of appropriate type and passing that local as an `in` argument.  
+To reduce the need for such boilerplate code compiler can perform the same transformation, if needed, when `in` modifier is not present at the call site.  
+
+In addition, in some cases, such as invocation of operators, or `in` extension methods, there is no syntactical way to specify `in` at all. That alone requires specifying the behavior of ordinary byval arguments when they match `in` parameters.
+
+In particular:
+
+- it is valid to pass RValues.
+A reference to a temporary is passed in such case.
+Example:
 ```C#
-static Vector3 v;
+Print("hello");      // not an error.
 
-static void Main()
+void Print<T>(in T x)
 {
-    Test(v);
-}
-
-static void Test(in Vector3 v1)
-{
-    v = Vector3.UnitX;
-    Debug.Assert(v1 == Vector3.UnitX);
-
-    // uncomment this to see behavior of code above change
-    // Func<Vector3> f = () => v1;
+  . . .
 }
 ```
 
-## Aliasing behavior in general
+- implicit conversions are allowed.
 
-Just like `out` variables, `in` variables are aliases. 
-While callee is not allowed to write into them, there should not be an assumption that they cannot change (deterministically or not) between reads. As such creating a copy of an `in` parameter can be observable.
+> This is actually a special case of passing an RValue  
+
+A reference to a temporary holding converted value is passed in such case.
+Example:
+```C#
+Print<int>(Short.MaxValue)     // not an error.
+```
+
+- in a case of a receiver of an `in` extension method (as opposed to `ref` extension methods), RValues or implicit _this-argument-conversions_ are allowed.
+A reference to a temporary holding converted value is passed in such case.
+Example:
+```C#
+public static IEnumerable<T> Concat<T>(in this (IEnumerable<T>, IEnumerable<T>) arg)  => . . .;
+
+("aa", "bb").Concat<char>()    // not an error.
+```
+More information on `ref`/`in` extension methods is provided further in this document.
+
+- argument spilling due to `await` operands could spill "by-value", if necessary.
+In scenarios where providing a direct reference to the argument is not possible due to intervening `await` a copy of the argument's value is spilled instead.  
+Example:
+```C#
+M1(RefReturningMethod(), await SomethingAsync())   // not an error.
+```
+Since the result of a side-effecting invocation is a reference that cannot be preserved across `await` suspension, a temporary containing the actual value will be preserved instead (as it would in an ordinary byval parameter case).
+
+### Omitted optional arguments.
+It is permitted for an `in` parameter to specify a default value. That makes the corresponding argument optional.
+
+Omitting optional argument at the call site results in passing the default value via a temporary.
+
+```C#
+Print("hello");      // not an error, same as
+Print("hello", c: Color.Black);
+
+void Print(string s, in Color c = Color.Black)
+{
+    . . .
+}
+```
+
+## Aliasing behavior in general  
+Just like `ref` and `out` variables, `in` variables are references/aliases to existing locations.
+
+While callee is not allowed to write into them, reading an `in` parameter can observe different values as a side effect of other evaluations.
 
 Example:
 
@@ -164,137 +237,122 @@ static void ChangeV()
 }
 ```
 
-## Conversions at the call site.
+## `in` parameters and capturing of local variables.  
+For the purpose of lambda/async capturing `in` parameters behave the same as `out` and `ref` parameters.
 
-Aliasing indirectly affects what conversions are allowed at the call-site. 
-While explicit and identity conversions are ok, it is not clear whether implicit conversions are ok since they only can be allowed via implicit copying. 
-For starters, let's assume implicit conversions are _not_ ok, but may consider alternatives.
+- `in` parameters cannot be captured in a closure
+- `in` parameters are not allowed in iterator methods
+- `in` parameters are not allowed in async methods
 
-Not allowing implicit conversions would at least be consistent with `out` parameters, although less intuitive since `in` is not spelled out at the call site. It would also be simpler in terms of impact on overload resolution and betterness analysis.
+## Temporary variables.  
+Some uses of `in` parameter passing may require indirect use of a temporary local variable:  
+- `in` arguments are always passed as direct aliases when call-site uses `in`. Temporary is never used in such case.
+- `in` arguments are not required to be direct aliases when call-site does not use `in`. When argument is not an LValue, a temporary may be used.
+- `in` parameter may have default value. When corresponding argument is omitted at the call site, the default value are passed via a temporary.
+- `in` arguments may have implicit conversions, including those that do not preserve identity. A temporary is used in those cases.
+- receivers of ordinary struct calls may not be writeable LValues (**existing case!**). A temporary is used in those cases.
 
-## Invoking instance struct methods on `in` parameters.
-Since all regular instance methods of a struct can potentially mutate the instance or ref-expose `this`, an intermediate copy must be created, as already a case when receiver is a readonly field.
+The life time of the argument temporaries matches the closest encompassing scope of the call-site.
 
-However, since there is no backward compatibility considerations and there are workarounds, compiler should give a warning to ensure the implicit copying is noted by the user.
+The formal life time of temporary variables is semantically significant in scenarios involving escape analysis of variables returned by reference.
 
-## Metadata representaion.
+## Metadata representation of `in` parameters.
+When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a byref parameter, it means that the the parameter is an `in` parameter.
 
-We're using a combination of attributes and modifiers on signatures:
+In addition, if the method is *abstract* or *virtual*, then the signature of such parameters (and only such parameters) must have `modreq[System.Runtime.CompilerServices.IsReadOnlyAttribute]`.
 
-1) `IsReadOnlyAttribute` is added to the framework, to be used on parameters and return types, to indicate that they are `ref readonly`. For older frameworks, the compiler will generate an embedded (hidden) attribute with the same name into the module being built, and we will have a mechanism for disallowing using this attribute in source code.
-2) We will use a `modreq` with the framework type `IsConst`, to prevent other compilers and older versions of the C# compiler to read such signatures. This might not be needed on some cases like parameters of non-virtual methods, as downlevel use is safe. For tools and other compilers reading these metadata, they should always rely on the attribute, as it is mandatory.
+**Motivation**: this is done to ensure that in a case of method overriding/implementing the `in` parameters match.
 
-# Readonly ref returns
+Same requirements apply to `Invoke` methods in delegates.
 
-"Readonly ref returns" is an augmentation of ref returns that allows returning references to variables without exposing them to modification.
+**Motivation**: this is to ensure that existing compilers cannot simply ignore `readonly` when creating or assigning delegates.
 
-# Readonly ref locals
-
-Locals are not supported for now. No plans to support them in this proposal.
+# Returning by readonly reference.
 
 ## Motivation
-The motivation for this sub-feature is roughly symmetrical to the reasons for the `in` parameters - avoiding copying, but on the returning side. A method or an indexer of a nontrivial struct type has currently two options -return by reference and be exposed to possible mutations or copy the value.
+The motivation for this sub-feature is roughly symmetrical to the reasons for the `in` parameters - avoiding copying, but on the returning side. Prior to this feature, a method or an indexer had two options: 1) return by reference and be exposed to possible mutations or 2) return by value which results in copying.
 
-## Solution
-`ref readonly` _returns_. (a more concise modifier like `in` so far has been elusive for this case).
+## Solution (`ref readonly` returns)  
+The feature allows a member to return variables by reference without exposing them to mutations.
+
+## Declaring `ref readonly` returning members
+
+A combination of modifiers `ref readonly` on the return signature is used to to indicate that the member returns a readonly reference.
+
+For all purposes a `ref readonly` member is treated as a `readonly` variable - similar to `readonly` fields and `in` parameters.
+
+For example fields of `ref readonly` member which has a struct type are all recursively classified as `readonly` variables. - It is permitted to pass them as `in` arguments, but not as `ref` or `out` arguments.
+
+```C#
+
+ref readonly Guid Method1()
+{
+}
+
+Method2(in Method1()); // valid. Can pass as `in` argument.
+
+Method3(ref Method1()); // not valid. Cannot pass as `ref` argument
+
+```
+
+- `ref readonly` returns are allowed in the same places were `ref` returns are allowed.
+This includes indexers, delegates, lambdas, local functions.
+
+- It is not permitted to overload on `ref`/`ref readonly` /  differences.
+
+- It is permitted to overload on ordinary byval and `ref readonly` return differences.
+
+- For the purpose of OHI (Overloading, Hiding, Implementing), `ref readonly` is similar but distinct from `ref`.
+For example the a method that overrides `ref readonly` one, must itself be `ref readonly` and have identity-convertible type.
+
+- For the purpose of delegate/lambda/method group conversions, `ref readonly` is similar but distinct from `ref`.
+Lambdas and applicable method group conversion candidates have to match `ref readonly` return of the target delegate with `ref readonly` return of the type that is identity-convertible.
+
+- For the purpose of generic variance, `ref readonly` returns are nonvariant.
+
+> NOTE: There are no warnings on `ref readonly` returns that have reference or primitives types.
+It may be pointless in general, but in some cases user must/want to pass primitives as `in`. Examples - overriding a generic method like `ref readonly T Method()` when `T` was substituted to be `int`.
+>
+>It is conceivable to have an analyzer that warns in cases of inefficient use of `ref readonly` returns, but the rules for such analysis would be too fuzzy to be a part of a language specification.
+
+## Returning from `ref readonly` members
+Inside the method body the syntax is the same as with regular ref returns. The `readonly` will be inferred from the containing method.
+
+The motivation is that `return ref readonly <expression>` is unnecessary long and only allows for mismatches on the `readonly` part that would always result in errors.
+The `ref` is, however, required for consistency with other scenarios where something is passed via strict aliasing vs. by value.
+
+> Unlike the case with `in` parameters, `ref readonly` returns never return via a local copy. Considering that the copy would cease to exist immediately upon returning such practice would be pointless and dangerous. Therefore `ref readonly` returns are always direct references.
+
+Example:
 
 ```C#
 struct ImmutableArray<T>
 {
     private readonly T[] array;
 
-    public ref readonly T RefAt(int i)
+    public ref readonly T ItemRef(int i)
     {
-        // returning a ref readonly 
+        // returning a readonly reference to an array element
         return ref this.r1;
     }
 }
+
 ```
 
-`readonly` on the ref return will prevent the caller from using the result for indirect writing or for obtaining writeable references.
-
-## Syntax
- 
-`ref readonly` will be used to modify member signatures to indicate the return is passed as a readonly ref.
-
-It seems unnecessary to use `readonly` in the return statement. Just `ref` would be sufficient. 
-We could require the whole `return ref readonly foo`, but it seems it would only add the requirement that all the returns within a given method must agree on the `readonly` part and agree with the signature of the member. Omitting `readonly` at the return site makes `readonly` implicit on all returns in a method/lambda.
- 
-We should, however, require `ref` for consistency with other scenarios where something is passed via an alias vs. by value.
-
-
-## Use of `ref readonly' returns in signatures
-
-`ref readonly` will be allowed in the same places were `ref` returns are allowed. For all the OHI purposes it will behave as another RefKind on the return. I.E. `readonly` would need to match exactly when overriding, it will not be possible to overload just on `readonly` difference, etc...
- 
-From the point of implementation it would be essentially the same RefKind as for `in` parameters applicable to returns as well.
-
-For the purpose of variance, readonly ref will work as non-variant.
-
-## Returning `readonly` fields as `ref readonly`s.
-
-Unlike the requirements of `in`, where pass-by-copy is possible, while not the most efficient, returning a `readonly` field as a `ref readonly` requires that it is a true reference.  
-In particular, the requirements of the ref returns have indirect effect on requirements of `in`. As long as `in` parameters and `readonly` fields are both returnable, the copying would be: 
-
-1. observable and 
-2. would go against the goals of the feature to reduce copying.
-
-Here is an ugly, but legal and very explicit example where copying would be observable:
-
-```C#
-class Program
-{
-    private readonly Vector3 v = Vector3.UnitY;
-
-    public Program()
-    {
-        CompareFirstLast(
-            FetchRef(), 
-            v = Vector3.UnitX,    // can assign since we are in a ctor
-            v,                    // making a copy here would be observable
-            v = Vector3.UnitZ);   // can assign since we are in a ctor            
-    }
-
-    ref readonly Vector3 FetchRef()
-    {
-        // making a copy here would be observable
-        return ref v;
-    }
-
-    bool CompareFirstLast(
-        in Vector3 first, 
-        Vector3 dummy1, 
-        in Vector3 last, 
-        Vector3 dummy2)
-    {
-        // should be the same value regardless of assignments
-        // since these are refs to the same variable
-        Debug.Assert(first == last);
-    }
-}
-```
-
-Note: Since CLR does not differentiate readonly and writeable references. The distinction may not be required for general scenarios like JIT-compilation. However, some work will be needed to introduce `ref readonly` notion within the Verification infrastructure. At least if we want passing references to `readonly` fields be formally verifiable.
-
-## Aliasing behavior.
-
-A care must be made to preserve the aliasing behavior and not allow capturing by-value. As a result, readonly refs should be treated the same as other refs for the purpose of capturing in lambdas, async, iterators, stack spilling etc... - I.E. most scenarios would be disallowed.
-
-It would be ok to make a copy when `ref readonly` return is a receiver of regular struct methods, which take `this` as an ordinary writeable refs. Historically we would make an invocation on a copy. 
-
-In theory we could produce a warning when making a copy of the receiver since there are no backward compat considerations here. The options for fixing the warning are limited though, so it is debatable whether a warning is desirable.
+- An argument of `return ref` must be an LValue (**existing rule**)
+- An argument of `return ref` must be "safe to return" (**existing rule**)
+- In a `ref readonly` member an argument of `return ref` is _not required to be writeable_ .
+For example such member can ref-return a readonly field or one of its `in` parameters.
 
 ## Safe to Return rules.
+Normal safe to return rules for references will apply to readonly references as well.
 
-Normal safe to return rules for references will apply to readonly references as well. 
+Note that a `ref readonly` can be obtained from a regular `ref` local/parameter/return, but not the other way around. Otherwise the safety of `ref readonly` returns is inferred the same way as for regular `ref` returns.
 
-Note that a `ref readonly` can be obtained through a regular ref, but not the other way around. Otherwise the safety of `ref readonly`s is inferred the same way as for the regular refs.
+Considering that RValues can be passed as `in` parameter and returned as `ref readonly` we need one more rule - **RValues are not safe-to-return by reference**.
 
-Considering that RValues can be passed as `in` parameter we need one more rule - **RValues are not safe-to-return by reference**.
-
-We also must consider the situation of RValues passed as `in` parameters via a copy and then coming back in a form of a `ref readonly` and thus the result of the invocation is clearly unsafe to return.
-Once RValues are not safe to return, the existing rule `#6` already handles this case.
-
+> Consider the situation when an RValue is passed to an `in` parameter via a copy and then returned back in a form of a `ref readonly`. In the context of the caller the result of such invocation is a reference to local data and as such is unsafe to return.
+> Once RValues are not safe to return, the existing rule `#6` already handles this case.
 
 Example:
 ```C#
@@ -324,20 +382,77 @@ Updated `safe to return` rules:
 6.	**a ref, returned from another method is safe to return if all refs/outs passed to that method as formal parameters were safe to return.**
 *Specifically it is irrelevant if receiver is safe to return, regardless whether receiver is a struct, class or typed as a generic type parameter.*
 7.	**RValues are not safe to return by reference.**
-*Specifically RValues are safe to pass as readonly ref / in parameters.*
+*Specifically RValues are safe to pass as in parameters.*
 
+> NOTE: There are additional rules regarding safety of returns that come into play when ref-like types and ref-reassignments are involved.
+> The rules equally apply to `ref` and `ref readonly` members and therefore are not mentioned here.
 
-A special note must be made about the life time of the temps used as an implementation detail of passing RValue as an `in` parameter. The temp must exist as long as any reference to it can possibly exist. 
-Considering that readonly refs cannot be persisted into regular ref locals, the duration of the encompassing expression could be sufficient. (encompassing expression is the one that is not an operand/argument/receiver to another one)
-For simplicity, the extent of the temps could be widened to the nearest encompassing Block/Sequence.
+## Aliasing behavior.
+`ref readonly` members provide the same aliasing behavior as ordinary `ref` members (except for being readonly).
+Therefore for the purpose of capturing in lambdas, async, iterators, stack spilling etc... the same restrictions apply. - I.E. due to inability to capture the actual references and due to side-effecting nature of member evaluation such scenarios are disallowed.
 
-As a last resort the temps could be method-wide. We currently do it already in very rare cases (see comment in `EmitAssignmentValue` and testcase `IncrementPropertyOfTypeParameterReturnValue`), but I'd rather tighten the existing case since the pattern of taking a ref off an RValue by the means of spilling into a temp will now be more common.
+> It is permitted and required to make a copy when `ref readonly` return is a receiver of regular struct methods, which take `this` as an ordinary writeable reference. Historically in all cases where such invocations are applied to readonly variable a local copy is made.
 
-# ref/in extension methods
-There is actually existing proposal (https://github.com/dotnet/roslyn/issues/165) and corresponding PR (https://github.com/dotnet/roslyn/pull/15650). 
-I just want to acknowledge that this idea is not entirely new. It is, however, relevant here since `ref readonly` elegantly removes the most contentious issue about such method - what to do with RValue receivers.
+## Metadata representation.
+When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to the return of a byref returning method, it means that the method returns a readonly reference.
 
-The general idea of the proposal is to allow extension methods to take the `this` parameter by reference, as long as the type is known to be a struct type (I.E. struct or a generic type with `struct` constraint).
+In addition, the result signature of such methods (and only those methods) must have `modreq[System.Runtime.CompilerServices.IsReadOnlyAttribute]`.
+
+**Motivation**: this is to ensure that existing compilers cannot simply ignore `readonly` when invoking methods with `ref readonly` returns
+
+# Readonly structs
+In short - a feature that makes `this` parameter of all instance members of a struct, except for constructors, an `in` parameter.
+
+## Motivation
+Compiler must assume that any method call on a struct instance may modify the instance. Indeed a writeable reference is passed to the method as `this` parameter and fully enables this behavior. To allow such invocations on `readonly` variables, the invocations are applied to temp copies. That could be unintuitive and sometimes forces people to abandon `readonly` for performance reasons.  
+Example: https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/
+
+After adding support for `in` parameters and `ref readonly` returns the problem of defensive copying will get worse since readonly variables will become more common.
+
+## Solution
+Allow `readonly` modifier on struct declarations which would result in `this` being treated as `in` parameter on all struct instance methods except for constructors.
+
+```C#
+static void Test(in Vector3 v1)
+{
+    // no need to make a copy of v1 since Vector3 is a readonly struct
+    System.Console.WriteLine(v1.ToString());
+}
+
+readonly struct Vector3
+{
+    . . .
+
+    public override string ToString()
+    {
+        // not OK!!  `this` is an `in` parameter
+        foo(ref this.X);
+
+        // OK
+        return $"X: {X}, Y: {Y}, Z: {Z}";
+    }
+}
+```
+
+## Restrictions on members of readonly struct
+- Instance fields of a readonly struct must be readonly.  
+**Motivation:** can only be written to externally, but not through members.
+- Instance autoproperties of a readonly struct must be get-only.  
+**Motivation:** consequence of restriction on instance fields.
+- Readonly struct may not declare field-like events.  
+**Motivation:** consequence of restriction on instance fields.
+
+## Metadata representation.
+When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a value type, it means that the the type is a `readonly struct`.
+
+In particular:
+-  The identity of the `IsReadOnlyAttribute` type is unimportant. In fact it can be embedded by the compiler in the containing assembly if needed.
+
+# `ref`/`in` extension methods
+There is actually an existing proposal (https://github.com/dotnet/roslyn/issues/165) and corresponding prototype PR (https://github.com/dotnet/roslyn/pull/15650).
+I just want to acknowledge that this idea is not entirely new. It is, however, relevant here since `ref readonly` elegantly removes the most contentious issue about such methods - what to do with RValue receivers.
+
+The general idea is allowing extension methods to take the `this` parameter by reference, as long as the type is known to be a struct type.
 
 ```C#
 public static void Extension(ref this Guid self)
@@ -351,21 +466,22 @@ The reasons for writing such extension methods are primarily:
 2.	Allow mutating extension methods on structs
 
 The reasons why we do not want to allow this on classes  
-1.	It would be of very limited purpose
-2.	It would be hard to reconcile with "evaluate once" semantics of null-conditional accesses.
-
+1.	It would be of very limited purpose.
+2.	It would break long standing invariant that a method call cannot turn non-`null` receiver to become `null` after invocation.
+> In fact, currently a non-`null` variable cannot become `null` unless _explicitly_ assigned or passed by `ref` or `out`.
+> That greatly aids readability or other forms of "can this be a null here" analysis.
+3.	It would be hard to reconcile with "evaluate once" semantics of null-conditional accesses.
 Example:
+`obj.stringField?.RefExtension(...)` - need to capture a copy of `stringField` to make the null check meaningful, but then assignments to `this` inside RefExtension would not be reflected back to the field.
 
-`obj.stringField?.RefExtension(...)`  -  need to make a copy of stringField for the null check, but then assignments to `this` inside RefExtension would not be reflected back to the field...
+An ability to declare extension methods on **structs** that take the first argument by reference was a long-standing request. One of the blocking consideration was "what happens if receiver is not an LValue?".
 
-An ability to declare extension methods on structs that take the first argument by reference was a long-standing request. One of the blocking consideration was "what happens if receiver is not an LValue". 
+- There is a precedent that any extension method could also be called as a static method (sometimes it is the only way to resolve ambiguity). It would dictate that RValue receivers should be disallowed.
+- On the other hand there is a practice of making invocation on a copy in similar situations when struct instance methods are involved.
 
-An analogy with static methods would dictate that it is disallowed, but it would not be consistent with the practice of making invocation on a copy in similar situations when instance methods are involved. In addition, many of the calls for allowing ref extension methods on structs were motivated by the performance and implicit copying would diminish the benefit.
+The reason why the "implicit copying" exists is because the majority of struct methods do not actually modify the struct while not being able to indicate that. Therefore the most practical solution was to just make the invocation on a copy, but this practice is known for harming performance and causing bugs.
 
-The reason why the "implicit copying" exists is because the majority of struct methods do not actually modify the struct while not being able to indicate that. Historically the most practical solution was to just make the invocation on a copy, but this practice is known for harming performance and causing bugs.
-
-Now, assuming availability of `in` parameters, it feels reasonable to assume that ref extension methods are introduced specifically to apply mutations to `this` and thus require that the receiver is writeable. 
-In addition it would also be allowed to have `in` extension methods that would not have such restriction, while naturally would not be able to mutate `this`.
+Now, with availability of `in` parameters, it is possible for an extension to signal the intent. Therefore the conundrum can be resolved by requiring `ref` extensions to be called with writeable receivers while `in` extensions permit implicit copying if necessary.
 
 ```C#
 // this can be called on either RValue or an LValue
@@ -383,53 +499,164 @@ public static void Mutator(ref this Guid self)
 }
 ```
 
-# Readonly structs
+## `in` extensions and generics.
+The purpose of `ref` extension methods is to mutate the receiver directly or by invoking mutating members. Therefore `ref this T` extensions are allowed as long as `T` is constrained to be a struct.
 
-In short - a feature that makes all members of a struct, except constructors to have `this` parameter as a `ref readonly`.
+On the other hand `in` extension methods exist specifically to reduce implicit copying. However any use of an `in T` parameter will have to be done through an interface member. Since all interface members are considered mutating, any such use would require a copy. - Instead of reducing copying, the effect would be the opposite. Therefore `in this T` is not allowed when `T` is a generic type parameter regardless of constraints.
 
-## Motivation
+## Valid kinds of extension methods (recap):
+The following forms of `this` declaration in an extension method are now allowed:
+1) `this T arg` - regular byval extension. (**existing case**)
+- T can be any type, including reference types or type parameters.
+Instance will be the same variable after the call.
+Allows implicit conversions of _this-argument-conversion_ kind.
+Can be called on RValues.
 
-Compiler must assume that any method call on a struct instance may modify the instance. Indeed a writeable reference is passed to the method as `this` parameter that fully enables this behavior. To allow such invocations on `readonly` variables, the invocation are applied to temp copies. That could be unintuitive and sometimes forces people to abandon `readonly` for performance reasons. (Example: https://codeblog.jonskeet.uk/2014/07/16/micro-optimization-the-surprising-inefficiency-of-readonly-fields/ )
+- `in this T self` - `in` extension.
+T must be an actual struct type.
+Instance will be the same variable after the call.
+Allows implicit conversions of _this-argument-conversion_ kind.
+Can be called on RValues (may be invoked on a temp if needed).
 
-The problem will get worse since the implicit copying will be happening when invoking struct methods on `in` variables. - We can give warnings, but we must make defensive copies and that might force users into choosing between performance and more control over sideeffects.
+- `ref this T self` - `ref` extension.
+T must be a struct type or a generic type parameter constrained to be a struct.
+Instance may be written to by the invocation.
+Allows only identity conversions.
+Must be called on writeable LValue. (never invoked via a temp).
 
-## Solution
-Allow `readonly` modifier on struct declarations which would result in `this` being an `in` parameter on all struct instance methods except for constructors.
+# Readonly ref locals.
+
+## Motivation.
+Once `ref readonly` members were introduced, it was clear from the use that they need to be paired with appropriate kind of local. Evaluation of a member may produce or observe side effects, therefore if the result must be used more than once, it needs to be stored. Ordinary `ref` locals do not help here since they cannot be assigned a `readonly` reference.   
+
+## Solution.
+Allow declaring `ref readonly` locals. This is a new kind of `ref` locals that is not writeable. As a result `ref readonly` locals can accept references to readonly variables without exposing these variables to writes.
+
+## Declaring and using `ref readonly` locals.
+
+The syntax of such locals uses `ref readonly` modifiers at declaration site (in that specific order). Similarly to ordinary `ref` locals, `ref readonly` locals must be ref-initialized at declaration. Unlike regular `ref` locals, `ref readonly` locals can refer to `readonly` LValues like `in` parameters, `readonly` fields, `ref readonly` methods.
+
+For all purposes a `ref readonly` local is treated as a `readonly` variable. Most of the restrictions on the use are the same as with `readonly` fields or `in` parameters.
+
+For example fields of an `in` parameter which has a struct type are all recursively classified as `readonly` variables .   
 
 ```C#
-static void Test(in Vector3 v1)
+static readonly ref Vector3 M1() => . . .
+
+static readonly ref Vector3 M1_Trace()
 {
-    // no need to make a copy of v1 since Vector3 is a readonly struct 
-    System.Console.WriteLine(v1.ToString());
+    // OK
+    ref readonly var r1 = ref M1();
+
+    // Not valid. Need an LValue
+    ref readonly Vector3 r2 = ref default(Vector3);
+
+    // Not valid. r1 is readonly.
+    Mutate(ref r1);
+
+    // OK.
+    Print(in r1);
+
+    // OK.
+    return ref r1;
 }
+```
 
-readonly struct Vector3
+## Restrictions on use of `ref readonly` locals
+Except for their `readonly` nature, `ref readonly` locals behave like ordinary `ref` locals and are subject to exactly same restrictions.  
+For example restrictions related to capturing in closures, declaring in `async` methods or the `safe-to-return` analysis equally applies to `ref readonly` locals.
+
+# Ternary `ref` expressions. (aka "Conditional LValues")
+
+## Motivation
+Use of `ref` and `ref readonly` locals exposed a need to ref-initialize such locals with one or another target variable based on a condition.
+
+A typical workaround is to introduce a method like:
+
+```C#
+ref T Choice(bool condition, ref T consequence, ref T alternative)
 {
-    . . .
-
-    public override string ToString()
+    if (condition)
     {
-        // not OK!!  "this" is an `in` parameter
-        foo(ref this.X);
-
-        // OK
-        return $"X: {X}, Y: {Y}, Z: {Z}";
+         return ref consequence;
+    }
+    else
+    {
+         return ref alternative;
     }
 }
 ```
 
-The feature is surprisingly uncontroversial. The only obvious question is whether there is a need for an option to `opt out` some of the methods as mutators.
+Note that `Choice` is not an exact replacement of a ternary since _all_ arguments must be evaluated at the call site, which was leading to unintuitive behavior and bugs.
 
-So far it feels like per-member control over `readonly` is an unnecessary complication, which also can be added later if found to be necessary.   
-Current assumptions are that "Mixed" mutable/immutable structs are not common. Besides even partially mutable struct variables would generally need to be LValues and thus would not impacted by the implicit copying.
+The following will not work as expected:
 
+```C#
+       // will crash with NRE because 'arr[0]' will be executed unconditionally
+      ref var r = ref Choice(arr != null, ref arr[0], ref otherArr[0]);
+```
+
+## Solution
+Allow special kind of conditional expression that evaluates to a reference to one of LValue argument based on a condition.
+
+## Using `ref` ternary expression.
+
+The syntax for the `ref` flavor of a conditional expression is ` <condition> ? ref <consequence> : ref <alternative>;`
+
+Just like with the ordinary conditional expression only `<consequence>` or `<alternative>` is evaluated depending on result of the boolean condition expression.
+
+Unlike ordinary conditional expression, `ref` conditional expression:
+- requires that `<consequence>` and `<alternative>` are LValues.
+- `ref` conditional expression itself is an LValue and
+- `ref` conditional expression is writeable if both `<consequence>` and `<alternative>` are writeable LValues
+
+Examples:  
+`ref` ternary is an LValue and as such it can be passed/assigned/returned by reference;
+```C#
+     // pass by reference
+     foo(ref (arr != null ? ref arr[0]: ref otherArr[0]));
+
+     // return by reference
+     return ref (arr != null ? ref arr[0]: ref otherArr[0]);
+```
+
+Being an LValue, it can also be assigned to.
+```C#
+     // assign to
+     (arr != null ? ref arr[0]: ref otherArr[0]) = 1;
+
+     // error. readOnlyField is readonly and thus conditional expression is readonly
+     (arr != null ? ref arr[0]: ref obj.readOnlyField) = 1;
+```
+
+Can be used as a receiver of a method call and skip copying if necessary.
+```C#
+     // no copies
+     (arr != null ? ref arr[0]: ref otherArr[0]).StructMethod();
+
+     // invoked on a copy.
+     // The receiver is `readonly` because readOnlyField is readonly.
+     (arr != null ? ref arr[0]: ref obj.readOnlyField).StructMethod();
+
+     // no copies. `ReadonlyStructMethod` is a method on a `readonly` struct
+     // and can be invoked directly on a readonly receiver
+     (arr != null ? ref arr[0]: ref obj.readOnlyField).ReadonlyStructMethod();
+```
+
+
+`ref` ternary can be used in a regular (not ref) context as well.
+```C#
+     // only an example
+     // a regular ternary could work here just the same
+     int x = (arr != null ? ref arr[0]: ref otherArr[0]);
+```
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-I can see two major arguments against:
+I can see two major arguments against enhanced support for references and readonly references:
 
-1) The problems that are solved here are very old. Why suddenly solve them now, especially since it would not help existing code? 
+1) The problems that are solved here are very old. Why suddenly solve them now, especially since it would not help existing code?
 
 As we find C# and .Net used in new domains, some problems become more prominent.  
 As examples of environments that are more critical than average about computation overheads, I can list
@@ -438,7 +665,6 @@ As examples of environments that are more critical than average about computatio
 * Games/VR/AR with soft-realtime requirements on latencies     
 
 This feature does not sacrifice any of the existing strengths such as type-safety, while allowing to lower overheads in some common scenarios.
-
 
 2) Can we reasonably guarantee that the callee will play by the rules when it opts into `readonly` contracts?
 
@@ -454,16 +680,10 @@ The main competing design is really "do nothing".
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-* Actual syntax need to be vetted.
-* Applicability beyond methods - indexers, operators . . .
-* Diagnostics related to implicit copying of `this`
-* Conversions at 'in' call sites.
-* Need to agree on metadata representation.
-* Changes to the Verification rules
-* Spec 7.5.3.1 would have to change to reflect that ref extension methods arguments are now passed without using a 'ref' keyword.
-
 ## Design meetings
 
-Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to.
-
-
+https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-02-22.md
+https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-03-01.md
+https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-08-28.md
+https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-09-25.md
+https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-09-27.md

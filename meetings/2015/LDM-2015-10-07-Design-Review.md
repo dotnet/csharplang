@@ -44,7 +44,7 @@ resort.
 - One issue around user-defined conversions to switchable types is
 resolved (https://github.com/dotnet/roslyn/issues/4944). In the draft spec,
 a conversion will be applied on the `case`s, not on the control-expression unilaterally.
-Instead of converting only to `swithable` types, each
+Instead of converting only to `switchable` types, each
 `case` arm will consider any conversions that allow the `case` to be applied.
 Any given conversion would be applied at most once. 
 

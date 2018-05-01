@@ -41,7 +41,7 @@ The optional *variant_type_parameter_list* ([Variant type parameter lists](inter
 
 The return type of a delegate type must be either `void`, or output-safe ([Variance safety](interfaces.md#variance-safety)).
 
-All the formal parameter types of a delegate type must be input-safe. Additionally, any `out` or `ref` parameter types must also be output-safe. Note that even `out` parameters are required to be input-safe, due to a limitiation of the underlying execution platform.
+All the formal parameter types of a delegate type must be input-safe. Additionally, any `out` or `ref` parameter types must also be output-safe. Note that even `out` parameters are required to be input-safe, due to a limitation of the underlying execution platform.
 
 Delegate types in C# are name equivalent, not structurally equivalent. Specifically, two different delegate types that have the same parameter lists and return type are considered different delegate types. However, instances of two distinct but structurally equivalent delegate types may compare as equal ([Delegate equality operators](expressions.md#delegate-equality-operators)).
 
