@@ -6,7 +6,8 @@ Add a keyword for declaring singletons.
 
 ## Motivation
 
-Write less and less code.
+Write less and less code. 
+This keyword is a simple syntaxic sugar.
 
 ## Detailed design
 
