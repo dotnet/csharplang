@@ -1,8 +1,8 @@
 # Pattern-based `fixed` statement
 
 * [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
+* [x] Prototype: Done
+* [x] Implementation: Shipped (15.7) 
 * [ ] Specification: Not Started
 
 ## Summary
@@ -33,9 +33,9 @@ It would be desirable to be able to switch to something more flexible that decou
 [design]: #detailed-design
 
 ## *Pattern* ##
-A viable pattern-based ìfixedî need to:
+A viable pattern-based ‚Äúfixed‚Äù need to:
 -	Provide the managed references to pin the instance and to initialize the pointer (preferably this is the same reference)
--	Convey unambiguously the type of the unmanaged element   (i.e. ìcharî for ìstringî)
+-	Convey unambiguously the type of the unmanaged element   (i.e. ‚Äúchar‚Äù for ‚Äústring‚Äù)
 -	Prescribe the behavior in "empty" case when there is nothing to refer to. 
 -	Should not push API authors toward design decisions that hurt the use of the type outside of `fixed`.
 
@@ -49,8 +49,8 @@ In order to be used by the `fixed` statement the following conditions must be me
 (`readonly` is permitted so that authors of immutable/readonly types could implement the pattern without adding writeable API that could be used in safe code)
 1)  T is an unmanaged type.
 (since `T*` becomes the pointer type. The restriction will naturally expand if/when the notion of "unmanaged" is expanded)
-1)	Returns managed `nullptr` when there is no data to pin ñ probably the cheapest way to convey emptiness.
-(note that ìî string returns a ref to '\0' since strings are null-terminated)
+1)	Returns managed `nullptr` when there is no data to pin ‚Äì probably the cheapest way to convey emptiness.
+(note that ‚Äú‚Äù string returns a ref to '\0' since strings are null-terminated)
 
 Alternatively for the `#3` we can allow the result in empty cases be undefined or implementation-specific. 
 That, however, may make the API more dangerous and prone to abuse and unintended compatibility burdens. 
