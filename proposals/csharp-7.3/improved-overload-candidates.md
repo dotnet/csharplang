@@ -1,10 +1,5 @@
 # Improved overload candidates
 
-* [x] Proposed
-* [x] Prototype
-* [x] Implementation
-* [ ] Specification
-
 ## Summary
 [summary]: #summary
 

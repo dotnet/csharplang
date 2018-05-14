@@ -1,10 +1,5 @@
 # Auto-Implemented Property Field-Targeted Attributes
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 

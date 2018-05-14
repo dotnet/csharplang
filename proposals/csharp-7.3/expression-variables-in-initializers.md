@@ -1,10 +1,5 @@
 # expression variables in initializers
 
-* [x] Proposed
-* [ ] Prototype: None
-* [ ] Implementation: None
-* [ ] Specification: See below
-
 ## Summary
 [summary]: #summary
 
