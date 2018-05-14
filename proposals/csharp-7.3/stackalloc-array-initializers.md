@@ -1,10 +1,5 @@
 # Stackalloc array initializers.
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 
