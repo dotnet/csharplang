@@ -1,10 +1,5 @@
 # Unmanaged type constraint
 
-* [x] Proposed
-* [ ] Prototype
-* [ ] Implementation
-* [ ] Specification
-
 ## Summary
 [summary]: #summary
 
