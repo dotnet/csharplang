@@ -1,10 +1,5 @@
 # Pattern-based `fixed` statement
 
-* [x] Proposed
-* [x] Prototype: Done
-* [x] Implementation: Shipped (15.7) 
-* [ ] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 
