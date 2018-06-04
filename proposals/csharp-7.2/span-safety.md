@@ -55,7 +55,7 @@ A typical metadata representation:
     }
 ```
 
-NOTE: it is not the goal to make it so that any use of ref-like types on old compilers fails 100%. That is hard to achieve and is not strictly necessary. For example there would always be away to get around the `Obsolete` using dynamic code or, for example, creating an array of ref-like types through reflection.
+NOTE: it is not the goal to make it so that any use of ref-like types on old compilers fails 100%. That is hard to achieve and is not strictly necessary. For example there would always be a way to get around the `Obsolete` using dynamic code or, for example, creating an array of ref-like types through reflection.
 
 In particular, if user wants to actually put an `Obsolete` or `Deprecated` attribute on a ref-like type, we will have no choice other than not emitting the predefined one since `Obsolete` attribute cannot be applied more than once..  
 
@@ -236,6 +236,20 @@ A `new` expression that invokes a constructor obeys the same rules as a method i
 
 In addition *safe-to-escape* is no wider than the smallest of the *safe-to-escape* of all arguments/operands of the object initializer expressions, recursively, if initializer is present. 
 
+## Span constructor
+The language relies on `Span<T>` not having a constructor of the following form:
+
+``` csharp
+void Example(ref int x)
+{
+    // Create a span of length one
+    var span = new Span<int>(ref x); 
+}
+```
+
+Such a constructor makes `Span<T>` which are used as fields indistinguishable from a `ref` field. The safety rules described in this document
+depend on `ref` fields not being a valid construct in C#, or .NET.
+
 ## `default` expressions
 
 A `default` expression is *safe-to-escape* from the entire enclosing method.
@@ -280,3 +294,37 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 > ``` c#
 > Foo(new Span<int>(...), await e2);
 > ```
+
+# Future Considerations
+
+## Length one Span<T> over ref values
+Though not legal today there are cases where creating a length one `Span<T>` instance over a value would be beneficial:
+
+``` csharp
+void RefExample()
+{
+    int x = ...;
+
+    // Today creating a length one Span<int> requires a stackalloc and a new 
+    // local
+    Span<int> span1 = stackalloc [] { x };
+    Use(span1);
+    x = span1[0]; 
+
+    // Simpler to just allow length one span
+    var span2 = new Span<int>(ref x);
+    Use(span2);
+}
+```
+
+This feature gets more compelling if we lift the restrictions on (fixed sized buffers)[https://github.com/dotnet/csharplang/blob/master/proposals/fixed-sized-buffers.md] as it would
+allow for `Span<T>` instances of even greater length. 
+
+If there is ever a need to go down this path then the language could accommodate this by ensuring such `Span<T>` instances
+were downward facing only. That is they were only ever *safe-to-escape* to the scope in which they were created. This ensure
+the language never had to consider a `ref` value escaping a method via a `ref struct` return or field of `ref struct`. This
+would likely also require further changes to recognize such constructors as capturing a `ref` parameter in this way though.
+
+
+
+
