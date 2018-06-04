@@ -35,7 +35,7 @@ A viable pattern-based “fixed” need to:
 -	Should not push API authors toward design decisions that hurt the use of the type outside of `fixed`.
 
 I think the above could be satisfied by recognizing a specially named ref-returning member:
- `ref [readonly] T DangerousGetPinnableReference()`.
+ `ref [readonly] T GetPinnableReference()`.
 
 In order to be used by the `fixed` statement the following conditions must be met:
 
@@ -74,7 +74,7 @@ becomes the following pseudocode (not all expressible in C#)
         if (thing != null)
         {
             // obtain and "pin" the reference
-            _pinned = ref thing.DangerousGetPinnableReference();
+            _pinned = ref thing.GetPinnableReference();
 
             // unsafe cast in IL
             ptr = (byte*)_pinned;
@@ -98,15 +98,15 @@ becomes the following pseudocode (not all expressible in C#)
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-- DangerousGetPinnableReference is intended to be used only in `fixed`, but nothing prevents its use in safe code, so implementor must keep that in mind.
+- GetPinnableReference is intended to be used only in `fixed`, but nothing prevents its use in safe code, so implementor must keep that in mind.
 
 ## Alternatives
 [alternatives]: #alternatives
 
-Users can introduce DangerousGetPinnableReference or similar member and use it as
+Users can introduce GetPinnableReference or similar member and use it as
  
 ```C#
-    fixed(byte* ptr = thing.DangerousGetPinnableReference())
+    fixed(byte* ptr = thing.GetPinnableReference())
     { 
 		// <BODY>
     }
