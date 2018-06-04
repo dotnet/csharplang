@@ -55,7 +55,7 @@ A typical metadata representation:
     }
 ```
 
-NOTE: it is not the goal to make it so that any use of ref-like types on old compilers fails 100%. That is hard to achieve and is not strictly necessary. For example there would always be away to get around the `Obsolete` using dynamic code or, for example, creating an array of ref-like types through reflection.
+NOTE: it is not the goal to make it so that any use of ref-like types on old compilers fails 100%. That is hard to achieve and is not strictly necessary. For example there would always be a way to get around the `Obsolete` using dynamic code or, for example, creating an array of ref-like types through reflection.
 
 In particular, if user wants to actually put an `Obsolete` or `Deprecated` attribute on a ref-like type, we will have no choice other than not emitting the predefined one since `Obsolete` attribute cannot be applied more than once..  
 
@@ -298,7 +298,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 # Future Considerations
 
 ## Length one Span<T> over ref values
-Though legal today there are cases where creating a length one `Span<T>` instance over a value would be beneficial:
+Though not legal today there are cases where creating a length one `Span<T>` instance over a value would be beneficial:
 
 ``` csharp
 void RefExample()
