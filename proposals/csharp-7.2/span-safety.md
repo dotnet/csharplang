@@ -317,7 +317,7 @@ void RefExample()
 }
 ```
 
-This feature gets more compelling if we lift the restrictions on (fixed sized buffers)[https://github.com/dotnet/csharplang/blob/master/proposals/fixed-sized-buffers.md] as it would
+This feature gets more compelling if we lift the restrictions on [fixed sized buffers](https://github.com/dotnet/csharplang/blob/master/proposals/fixed-sized-buffers.md) as it would
 allow for `Span<T>` instances of even greater length. 
 
 If there is ever a need to go down this path then the language could accommodate this by ensuring such `Span<T>` instances
