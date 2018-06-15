@@ -17,7 +17,8 @@ In short, the following would be legal C# and not produce a warning:
 
 ```cs
 [Serializable]
-public class Foo {
+public class Foo 
+{
     [field: NonSerialized]
     public string MySecret { get; set; }
 }
@@ -27,13 +28,15 @@ This would result in the field-targeted attributes being applied to the compiler
 
 ```cs
 [Serializable]
-public class Foo {
+public class Foo 
+{
     [NonSerialized]
-    private string MySecret_backingField;
+    private string _mySecretBackingField;
     
-    public string MySecret {
-        get { return MySecret_backingField; }
-        set { MySecret_backingField = value; }
+    public string MySecret
+    {
+        get { return _mySecretBackingField; }
+        set { _mySecretBackingField = value; }
     }
 }
 ```
@@ -42,7 +45,8 @@ As mentioned, this brings parity with event syntax from C# 1.0 as the following 
 
 ```cs
 [Serializable]
-public class Foo {
+public class Foo
+{
     [field: NonSerialized]
     public event EventHandler MyEvent;
 }
