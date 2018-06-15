@@ -39,7 +39,8 @@ Type parameters with the unmanaged constraint can use all the features available
 void Hash<T>(T value) where T : unmanaged
 {
     // Okay
-    fixed (T* p = &value) { 
+    fixed (T* p = &value) 
+    { 
         ...
     }
 }
@@ -48,7 +49,8 @@ void Hash<T>(T value) where T : unmanaged
 This constraint will also make it possible to have efficient conversions between structured data and streams of bytes. This is an operation that is common in networking stacks and serialization layers:
 
 ``` c#
-Span<byte> Convert<T>(ref T value) where T : unmanaged {
+Span<byte> Convert<T>(ref T value) where T : unmanaged 
+{
     ...
 }
 ```
@@ -71,13 +73,15 @@ For example:
 
 ``` c# 
 // Unmanaged type
-struct Point { 
+struct Point 
+{ 
     int X;
     int Y {get; set;}
 }
 
 // Not an unmanaged type
-struct Student { 
+struct Student 
+{ 
     string FirstName;
     string LastName;
 }
