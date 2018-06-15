@@ -1,4 +1,4 @@
-# FEATURE_NAME
+# !?. operator
 
 * [x] Proposed
 * [ ] Prototype: [Complete](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
@@ -6,37 +6,37 @@
 * [ ] Specification: [Not Started](pr/1)
 
 ## Summary
-[summary]: #summary
+[summary]: short form of (b==null)?null:b.c would become b!?.c
 
-One paragraph explanation of the feature.
+More or less in analogy with ther double question mark
 
 ## Motivation
-[motivation]: #motivation
+[motivation]: handy notation for frequently occurring expression
 
-Why are we doing this? What use cases does it support? What is the expected outcome?
+
 
 ## Detailed design
 [design]: #detailed-design
 
-This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement,  and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented.
+Because of the equivalent expansion of b!?.c  to (b==null)?null:b.c , the design is evident.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-Why should we *not* do this?
+No real drawbacks
 
 ## Alternatives
-[alternatives]: #alternatives
+[alternatives]: An alternative notation could be "???.",  or "!!." but that last one doesn't have a question mark, which is confusing as it doesn't refer to the ternary operator at all.
 
-What other designs have been considered? What is the impact of not doing this?
+
 
 ## Unresolved questions
-[unresolved]: #unresolved-questions
+none
 
-What parts of the design are still undecided?
+
 
 ## Design meetings
 
-Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to.
+none yet.
 
 
