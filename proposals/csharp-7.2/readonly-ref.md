@@ -257,9 +257,9 @@ The life time of the argument temporaries matches the closest encompassing scope
 The formal life time of temporary variables is semantically significant in scenarios involving escape analysis of variables returned by reference.
 
 ## Metadata representation of `in` parameters.
-When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a byref parameter, it means that the the parameter is an `in` parameter.
+When `System.Runtime.InteropServices.InAttribute` is applied to a byref parameter, it means that the the parameter is an `in` parameter.
 
-In addition, if the method is *abstract* or *virtual*, then the signature of such parameters (and only such parameters) must have `modreq[System.Runtime.CompilerServices.IsReadOnlyAttribute]`.
+In addition, if the method is *abstract* or *virtual*, then the signature of such parameters (and only such parameters) must have `modreq[System.Runtime.InteropServices.InAttribute]`.
 
 **Motivation**: this is done to ensure that in a case of method overriding/implementing the `in` parameters match.
 
