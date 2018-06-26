@@ -308,7 +308,7 @@ the method `Equals` is tried according to overload resolution rules (st. an
 `Equals` method with an identity conversion to the target type is preferred
 over the virtual `Equals(object)` method).
 
-There is also one hidden data member, `EqualityContractOrigin`, that is
+There is also one hidden data member, `protected virtual Type EqualityContractOrigin { get; }`, that is
 always considered in equality. By default this member always returns the
 static type of its containing type, i.e. `typeof(Containing)`. This means
 that sub-classes are not, by default, considered equal to their base classes,
@@ -318,8 +318,7 @@ overridden, but then it is the user's responsibility to ensure that they
 abide by the appropriate contract.
 
 `GetHashCode` would be implemented by calling `GetHashCode` on each of
-the data members and these would be combined using a symmetric operation
-(like `+`) to prevent ordering from affecting the results.
+the data members.
 
 ### Readonly initialization
 
