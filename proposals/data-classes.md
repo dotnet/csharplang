@@ -172,14 +172,14 @@ following things:
 Data classes or structs represent unordered, *named* data, like the simple
 `LoginResource` class that people write today.
 
-The LoginResource class would now be defined as
+The LoginResource class now could be defined as
 
 ```C#
 public data class LoginResource
 {
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public bool RememberMe { get; set; }
+    public string Username { get; }
+    public string Password { get; }
+    public bool RememberMe { get; } = false;
 }
 ```
 
@@ -189,17 +189,27 @@ and the use would be identical:
 var x = new LoginResource {
     Username = "andy",
     Password = password
-}
+};
 ```
+
+Note that `RememberMe` must have an initializer to avoid a warning in the
+object initializer about an unset read-only property.
 
 However, the generated class code would look like:
 
 ```C#
 public class LoginResource : IEquatable<LoginResource>
 {
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public bool RememberMe { get; set; }
+    public string <>Backing_Username;
+    public string Username => <>Backing_Username;
+    public string <>Backing_Password;
+    public string Password => <>Backing_Password;
+    public string <>Backing_RememberMe = false;
+    public bool RememberMe => <>Backing_RememberMe;
+
+    protected LoginResource() { }
+
+    public static LoginResource Init() => new LoginResource();
 
     public override bool Equals(object obj)
         => obj is LoginResource resource && Equals(resource);
@@ -342,8 +352,8 @@ what will be a meaningless restriction for the user, only mandated by
 implementation difficulties. Property substition will never be a perfect
 abstraction (reflection will be able to see properties, for example) but the
 solution would probably be able to match user expectations for the vast
-majority of cases. The properties would also be `ref-readonly` returning, so
-even uses of `in` or `ref-readonly` would function as expected.
+majority of cases. The properties would also be `ref readonly` returning, so
+even uses of `in` or `ref readonly` would function as expected.
 
 If data classes contain any `readonly` members that do not have initializers,
 they also do not define a default public constructor like other classes.
