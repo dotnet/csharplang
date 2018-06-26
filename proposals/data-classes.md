@@ -77,7 +77,7 @@ public class LoginResource
 {
     public string Username { get; set; }
     public string Password { get; set; }
-    public bool RememberMe { get; set; } = false;
+    public bool RememberMe { get; set; }
 }
 ```
 
@@ -95,8 +95,53 @@ var x = new LoginResource {
 
 Unfortunately, there are still serious problems. There is no piecewise
 comparer implicitly defined for C# classes, so if you want simple data
-comparison, the real example looks like
-[this](https://gist.github.com/agocke/6ba6e64f77f1212ba7292bfd1f1000e5)
+comparison, the real example looks like this:
+
+```C#
+using System;
+
+public class LoginResource : IEquatable<LoginResource>
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public bool RememberMe { get; set; } = false;
+
+    public override bool Equals(object obj)
+        => obj is LoginResource resource && Equals(resource);
+
+    public bool Equals(LoginResource other)
+    {
+        return other != null &&
+               Username == other.Username &&
+               Password == other.Password &&
+               RememberMe == other.RememberMe;
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = -736459255;
+        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Username);
+        hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Password);
+        hashCode = hashCode * -1521134295 + RememberMe.GetHashCode();
+        return hashCode;
+    }
+
+    public override string ToString()
+    {
+        return $"{{{nameof(Username)} = {Username}, {nameof(Password)} = {Password}, {nameof(RememberMe)} = {RememberMe}}}";
+    }
+
+    public static bool operator ==(LoginResource resource1, LoginResource resource2)
+    {
+        return EqualityComparer<LoginResource>.Default.Equals(resource1, resource2);
+    }
+
+    public static bool operator !=(LoginResource resource1, LoginResource resource2)
+    {
+        return !(resource1 == resource2);
+    }
+}
+```
 
 Immutable data is also a problem. The object initializer syntax provides
 a simple name-based mechanism to create a data type. With `readonly`
@@ -107,14 +152,16 @@ another set of problems:
 1. The constructor parameters are ordered, while the fields are not.
    Consumers have now taken a dependency on the parameter ordering.
 1. The constructor must be maintained with any field changes.
+1. Constructor parameter names don't necessarily line up with field/property
+names hence named argument passing doesn't have the same ease of use as
+object initializers.
 
 There is also no way to create a copy of a data structure with readonly
 fields with only one item changed. A new type must be constructed manually.
 
-
 ## Proposal
 
-To resolve many of these issues, I propse a new modifier for classes and structs: `data`.
+To resolve many of these issues, I propose a new modifier for classes and structs: `data`.
 `data` classes or structs are meant to satisfy the goals listed above by doing the
 following things:
 
@@ -122,15 +169,88 @@ following things:
    based on the member data of the type.
 1. Allow object initializers to also initialize readonly members.
 
+Data classes or structs represent unordered, *named* data, like the simple
+`LoginResource` class that people write today.
+
+The LoginResource class would now be defined as
+
+```C#
+public data class LoginResource
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public bool RememberMe { get; set; }
+}
+```
+
+and the use would be identical:
+
+```C#
+var x = new LoginResource {
+    Username = "andy",
+    Password = password
+}
+```
+
+However, the generated class code would look like:
+
+```C#
+public class LoginResource : IEquatable<LoginResource>
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public bool RememberMe { get; set; }
+
+    public override bool Equals(object obj)
+        => obj is LoginResource resource && Equals(resource);
+
+    public bool Equals(LoginResource other)
+    {
+        return other != null &&
+               EqualityContractOrigin == other.EqualityContractOrigin &&
+               Username == other.Username &&
+               Password == other.Password &&
+               RememberMe == other.RememberMe;
+    }
+
+    protected virtual Type EqualityContractOrigin => typeof(LoginResource);
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            return EqualityComparer<string>.Default.GetHashCode(Username) +
+                EqualityComparer<string>.Default.GetHashCode(Password) +
+                RememberMe.GetHashCode();
+        }
+    }
+
+    public override string ToString()
+    {
+        return $"{{{nameof(Username)} = {Username}, {nameof(Password)} = {Password}, {nameof(RememberMe)} = {RememberMe}}}";
+    }
+
+    public static bool operator ==(LoginResource resource1, LoginResource resource2)
+    {
+        return EqualityComparer<LoginResource>.Default.Equals(resource1, resource2);
+    }
+
+    public static bool operator !=(LoginResource resource1, LoginResource resource2)
+    {
+        return !(resource1 == resource2);
+    }
+}
+```
+
 ### Equality
 
 First, the generation of equality support. Data members are only public
 fields and auto-properties. This allows data classes to have private
-implementation details for things like caching without giving up simple
-equality semantics. There are a few places this could be problematic. For
-instance, only auto-properties are considered data members by default, but
-it's not uncommon to have some simple validation included in a property
-getter that does not meaningfully change the semantics, e.g.
+implementation details without giving up simple equality semantics. There are
+a few places this could be problematic. For instance, only auto-properties
+are considered data members by default, but it's not uncommon to have some
+simple validation included in a property getter that does not meaningfully
+change the semantics, e.g.
 
 ```C#
 {
@@ -143,6 +263,7 @@ getter that does not meaningfully change the semantics, e.g.
             Debug.Assert(_field >= 0);
             return _field;
         }
+        set { ... }
     }
 }
 ```
@@ -177,17 +298,18 @@ the method `Equals` is tried according to overload resolution rules (st. an
 `Equals` method with an identity conversion to the target type is preferred
 over the virtual `Equals(object)` method).
 
-Note that the equality defined in this manner is not symmetric in the case
-of record subtyping. This topic will be addressed in more detail later, but
-it's important to note for equality that `a.Equals(b)` may be true if `B`
-is a subtype of `A` (and therefore has an implicit conversion) and all of
-the shared members between `A` and `B` are equal. In contrast, `A` would
-likely not have an implicit conversion to `B`, so they would not be
-considered equal.
+There is also one hidden data member, `EqualityContractOrigin`, that is
+always considered in equality. By default this member always returns the
+static type of its containing type, i.e. `typeof(Containing)`. This means
+that sub-classes are not, by default, considered equal to their base classes,
+or vice versa. This also ensures that equality is commutative and `GetHashCode`
+matches the results of `Equals`. These methods are virtual, so they can be
+overridden, but then it is the user's responsibility to ensure that they
+abide by the appropriate contract.
 
 `GetHashCode` would be implemented by calling `GetHashCode` on each of
 the data members and these would be combined using a symmetric operation
-(like `xor`) to prevent ordering from affecting the results.
+(like `+`) to prevent ordering from affecting the results.
 
 ### Readonly initialization
 
@@ -206,7 +328,7 @@ One way to remove dependence on a constructor is simply not make the members
 `readonly` in metadata. The CLR treats `readonly` mostly as guidance -- it
 can easily be overriden using reflection anyway. Most of the safety of
 `readonly` members in C# is not provided by the runtime, but by C# safety
-rules. One way we could enfore compiler rules would be to generate public
+rules. One way we could enforce compiler rules would be to generate public
 `get`-only properties and make the backing field public and mutable. Object
 initializers would be able to set the properties, but user code wouldn't be
 able to because the backing properties are unspeakable.
@@ -234,8 +356,17 @@ are initialized, or an error is produced.
 ## Extensible data classes (data class subtyping)
 
 Like normal C# classes, data classes are not sealed by default and can be
-inherited from in base classes. If there are any readonly members without
+inherited from in sub-classes. 
+
+In non-`data` sub-classes, if there are any readonly members without
 default initialization in the base class, the subclass is required to
 define a protected constructor. The constructor must assign all readonly
 members of the base class before the constructor ends, or an error is
 produced.
+
+In `data` sub-classes, the requirements of the base become requirements
+of the sub-class, such that initialization of the sub-class must also
+initialize all of the required members of the base.
+
+
+## TODO: "With"-ers
