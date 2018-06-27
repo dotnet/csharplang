@@ -21,7 +21,7 @@ This is generally the point where most users will want to evolve their tuple typ
 named type. Unfortunately, this is extremely laborious. Now the following must be defined manually:
 
     1. `ItemX` properties for each positional member of the type
-    2. Optionally, custom properties for each positional member of the type
+    2. Optionally, custom named properties for each positional member of the type
     3. A constructor to assign each of the input parameters
     4. A deconstructor to support pattern matching
     4. Memberwise equality, including `GetHashCode` and `IEquatable`
