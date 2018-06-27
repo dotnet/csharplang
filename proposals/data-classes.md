@@ -260,6 +260,9 @@ x.<>Backing_Username = "andy";
 x.<>Backing_Password = password;
 ```
 
+If any of the generated members conflict with user-written members, the user written
+members take precedence and those generated members are skipped.
+
 ### Equality
 
 First, the generation of equality support. Data members are only public
