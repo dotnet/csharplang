@@ -20,11 +20,11 @@ typing becomes a problem and the desire for traditional C# nominal typing become
 This is generally the point where most users will want to evolve their tuple type into a proper
 named type. Unfortunately, this is extremely laborious. Now the following must be defined manually:
 
-    1. `ItemX` properties for each positional member of the type
-    2. Optionally, custom named properties for each positional member of the type
-    3. A constructor to assign each of the input parameters
-    4. A deconstructor to support pattern matching
-    4. Memberwise equality, including `GetHashCode` and `IEquatable`
+  1. `ItemX` properties for each positional member of the type
+  2. Optionally, custom named properties for each positional member of the type
+  3. A constructor to assign each of the input parameters
+  4. A deconstructor to support pattern matching
+  4. Memberwise equality, including `GetHashCode` and `IEquatable`
 
 While the associated `data` named types makes some of this easier, the positionality and tuple
 characteristics are not addressed and are orthogonal to the former proposal.
