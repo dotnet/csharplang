@@ -57,7 +57,7 @@ all have fundamental problems.
 can read it, and you can compare it easily (equality is automatically
 defined). You can't modify it, though -- anonymous types are always immutable
 and you can't easily create a copy with only one change. The real problem
-is composibility. You can't use it as a real type anywhere outside the
+is composability. You can't use it as a real type anywhere outside the
 current method and you can't nest it in other data structures, except as
 an object.
 
@@ -82,7 +82,7 @@ public class LoginResource
 ```
 
 This feature provides names, for both the members and the data structure, it
-provides easy nominal composition, and is easily composible with all other
+provides easy nominal composition, and is easily composable with all other
 data structures. It also provides a convenient syntax for creation by
 interacting directly with the named data, e.g.
 
@@ -209,7 +209,7 @@ public class LoginResource : IEquatable<LoginResource>
 
     protected LoginResource() { }
 
-    public static LoginResource Init() => new LoginResource();
+    public static LoginResource <>Init() => new LoginResource();
 
     public override bool Equals(object obj)
         => obj is LoginResource resource && Equals(resource);
@@ -250,6 +250,14 @@ public class LoginResource : IEquatable<LoginResource>
         return !(resource1 == resource2);
     }
 }
+```
+
+The above usage would translate into:
+
+```C#
+var x = LoginResource.<>Init();
+x.<>Backing_Username = "andy";
+x.<>Backing_Password = password;
 ```
 
 ### Equality
@@ -335,7 +343,7 @@ be irrelevant to `readonly` semantics.
 
 One way to remove dependence on a constructor is simply not make the members
 `readonly` in metadata. The CLR treats `readonly` mostly as guidance -- it
-can easily be overriden using reflection anyway. Most of the safety of
+can easily be overridden using reflection anyway. Most of the safety of
 `readonly` members in C# is not provided by the runtime, but by C# safety
 rules. One way we could enforce compiler rules would be to generate public
 `get`-only properties and make the backing field public and mutable. Object
@@ -348,7 +356,7 @@ to forbid public `readonly` fields and require properties. The second is
 to make all fields into properties automatically. This is strange because
 we would be generating a property from a field syntax. However, it removes
 what will be a meaningless restriction for the user, only mandated by
-implementation difficulties. Property substition will never be a perfect
+implementation difficulties. Property substitution will never be a perfect
 abstraction (reflection will be able to see properties, for example) but the
 solution would probably be able to match user expectations for the vast
 majority of cases. The properties would also be `ref readonly` returning, so
