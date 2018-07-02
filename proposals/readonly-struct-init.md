@@ -8,7 +8,7 @@
 ## Summary
 
 This feature will allow for assigning of `readonly` fields and get only auto-implemented properties
-in object initialezrs when the type being constructed is a `struct` or `ref struct`.
+in object initializers when the type being constructed is a `struct` or `ref struct`.
 
 ## Motivation
 
