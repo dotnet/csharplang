@@ -2,8 +2,8 @@
 
 ## Summary
 
-The language will add two need capabilities around the `using` statement in order to make resoure
-managemente simpler: recognize a `using` pattern in addition to `IDisposable` and add a `using`
+The language will add two need capabilities around the `using` statement in order to make resource
+management simpler: recognize a `using` pattern in addition to `IDisposable` and add a `using`
 declaration to the language.
 
 ## Motivation
@@ -14,8 +14,8 @@ down with a series of `using` statements. This syntax burden is enough that most
 guidelines explicitly have an exception around braces for this scenario. 
 
 The `using` declaration removes much of the ceremony here and gets C# on par with other languages
-that include resource management blocks. Additionally the `using` pattern lets a developers expand
-the set of tyse that can participate here. In many cases removing the need to create wrapper types 
+that include resource management blocks. Additionally the `using` pattern lets developers expand
+the set of types that can participate here. In many cases removing the need to create wrapper types 
 that only exist to allow for a values use in a `using` statement. 
 
 Together these features allow developers to simplify and expand the scenarios where `using` can
@@ -56,8 +56,8 @@ The lifetime of a `using` local will extend to the end of the scope in which it 
 }
 ```
 
-There are no restrictions around `goto`, are any other control flow construct in the face of 
-`using` declaration. Instead the code acts just as it would for the equivalent `using` statement:
+There are no restrictions around `goto`, or any other control flow construct in the face of 
+a `using` declaration. Instead the code acts just as it would for the equivalent `using` statement:
 
 ``` csharp
 {
@@ -120,12 +120,12 @@ statements.
 in `using` statements.
 
 In the situation where a type can be implicitly converted to `IDisposable` and also fits the
-`using` pattern, then `IDisposable` will be prefered. While this takes the opposite of approach
-of `foreach` (pattern prefered over interface) it is necessary for backwards compatibility.
+`using` pattern, then `IDisposable` will be preferred. While this takes the opposite approach
+of `foreach` (pattern preferred over interface) it is necessary for backwards compatibility.
 
 The same restrictions from a traditional `using` statement apply here as well: local variables 
 declared in the `using` are read-only, a `null` value will not cause an exception to be thrown, 
-etc ... The code geneartion will be different only in that there will not be a cast to 
+etc ... The code generation will be different only in that there will not be a cast to 
 `IDisposable` before calling Dispose:
 
 ``` csharp
@@ -148,7 +148,7 @@ can be used here.
 
 ### case labels without blocks
 
-A `using declaration` is illegal directly inside a `case` label due to complications around it's 
+A `using declaration` is illegal directly inside a `case` label due to complications around its 
 actual lifetime. One potential solution is to simply give it the same lifetime as an `out var` 
 in the same location. It was deemed the extra complexity to the feature implementation and the 
 ease of the work around (just add a block to the `case` label) didn't justify taking this route.
