@@ -23,6 +23,79 @@ be applied.
 
 ## Detailed Design 
 
+### using declaration
+
+The language will allow for `using` to be added to a local variable declaration. Such a declaration
+will have the same effect as declarating the variable in a `using` statement at the same location.
+
+``` csharp
+if (...) { 
+   using FileStream f = new FileStream(@"C:\users\jaredpar\using.md");
+   // statements
+}
+
+// Equivalent to 
+if (...) { 
+   using (FileStream f = new FileStream(@"C:\users\jaredpar\using.md")) {
+    // statements
+   }
+}
+```
+
+The lifetime of a `using` local will extend to the end of the scope in which it is declared. The 
+`using` locals will then be disposed in the reverse order in which they are declared. 
+
+``` csharp
+{ 
+    using var f1 = new FileStream("...");
+    using var f2 = new FileStream("..."), f3 = new FileStream("...");
+    ...
+    // Dispose f3
+    // Dispose f2 
+    // Dispose f1
+}
+```
+
+There are no restrictions around `goto`, are any other control flow construct in the face of 
+`using` declaration. Instead the code acts just as it would for the equivalent `using` statement:
+
+``` csharp
+{
+    using var f1 = new FileStream("...");
+  target:
+    using var f2 = new FileStream("...");
+    if (someCondition) {
+        // Causes f2 to be disposed but has no effect on f1
+        goto target;
+    }
+}
+```
+
+A local declared in a `using` local declaration will be implicitly read-only. This matches the 
+behavior of locals declared in a `using` statement. 
+
+The language grammar for `using` declarations will be the following:
+
+```
+local-using-declaration:
+  using type using-declarators
+
+using-declarators:
+  using-declarator
+  using-declarators , using-declarator
+  
+using-declarator:
+  identifier = expression
+```
+
+Restrictions around `using` declaration:
+
+- May not appear directly inside a `case` label but instead must be within a block inside the
+ `case` label.
+- May not appear as part of an `out` variable declaration. 
+- Must have an initializer for each declarator.
+- The local type must be implicitly convertible to `IDisposable` or fulfill the `using` pattern.
+
 ### using pattern
 
 The language will add the notion of a disposable pattern: that is a type which has an accessible 
@@ -70,8 +143,6 @@ etc ... The code geneartion will be different only in that there will not be a c
 In order to fit the `using` pattern the Dispose method must be accessible, parameterless and have 
 a `void` return type. There are no other restrictions. This explicitly means that extension methods
 can be used here.
-
-### using declaration
 
 ## Considerations
 
