@@ -52,3 +52,15 @@ We continued to discuss the range operator in C# and the underlying types for it
 3. Target typed stackalloc initializers
 4. Deconstruct as ref extension method
 
+## July 9, 2018
+[C# Language Design Notes for July 9, 2018](LDM-2018-07-09.md)
+
+1. `using var` feature
+  a. Overview
+  b. Tuple deconstruction grammar form
+  c. `using expr;` grammar form
+  d. Flow control safety
+
+2. Pattern-based Dispose in the `using` statement
+
+3. Relax Multiline interpolated string syntax (`$@`)
