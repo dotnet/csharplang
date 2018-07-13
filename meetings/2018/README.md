@@ -56,11 +56,18 @@ We continued to discuss the range operator in C# and the underlying types for it
 [C# Language Design Notes for July 9, 2018](LDM-2018-07-09.md)
 
 1. `using var` feature
-  a. Overview
-  b. Tuple deconstruction grammar form
-  c. `using expr;` grammar form
-  d. Flow control safety
-
+   1. Overview
+   2. Tuple deconstruction grammar form
+   3. `using expr;` grammar form
+   4. Flow control safety
 2. Pattern-based Dispose in the `using` statement
-
 3. Relax Multiline interpolated string syntax (`$@`)
+
+# July 11, 2018
+[C# Language Design Notes for July 11, 2018](LDM-2018-07-11.md)
+
+1. Controlling nullable reference types with feature flags
+1. Interaction with NonNullTypesAttribute
+1. Feature flag and 'warning waves'
+1. How 'oblivious' null types interact with generics
+1. Nullable and interface generic constraints
