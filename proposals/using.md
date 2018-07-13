@@ -1,9 +1,9 @@
-# using patterns and locals
+# "pattern-based using" and "using declarations"
 
 ## Summary
 
 The language will add two need capabilities around the `using` statement in order to make resource
-management simpler: recognize a `using` pattern in addition to `IDisposable` and add a `using`
+management simpler: `using` should recognize a disposable pattern in addition to `IDisposable` and add a `using`
 declaration to the language.
 
 ## Motivation
@@ -14,7 +14,7 @@ down with a series of `using` statements. This syntax burden is enough that most
 guidelines explicitly have an exception around braces for this scenario. 
 
 The `using` declaration removes much of the ceremony here and gets C# on par with other languages
-that include resource management blocks. Additionally the `using` pattern lets developers expand
+that include resource management blocks. Additionally the pattern-based `using` lets developers expand
 the set of types that can participate here. In many cases removing the need to create wrapper types 
 that only exist to allow for a values use in a `using` statement. 
 
@@ -96,10 +96,10 @@ Restrictions around `using` declaration:
 - Must have an initializer for each declarator.
 - The local type must be implicitly convertible to `IDisposable` or fulfill the `using` pattern.
 
-### using pattern
+### pattern-based using
 
 The language will add the notion of a disposable pattern: that is a type which has an accessible 
-Dispose instance method. Types which fit the disposable pattern can participate in a `using` 
+`Dispose` instance method. Types which fit the disposable pattern can participate in a `using` 
 statement or declaration without being required to implement `IDisposable`. 
 
 ``` csharp
@@ -120,7 +120,7 @@ statements.
 in `using` statements.
 
 In the situation where a type can be implicitly converted to `IDisposable` and also fits the
-`using` pattern, then `IDisposable` will be preferred. While this takes the opposite approach
+disposable pattern, then `IDisposable` will be preferred. While this takes the opposite approach
 of `foreach` (pattern preferred over interface) it is necessary for backwards compatibility.
 
 The same restrictions from a traditional `using` statement apply here as well: local variables 
@@ -140,7 +140,7 @@ etc ... The code generation will be different only in that there will not be a c
 }
 ```
 
-In order to fit the `using` pattern the Dispose method must be accessible, parameterless and have 
+In order to fit the disposable pattern the `Dispose` method must be accessible, parameterless and have 
 a `void` return type. There are no other restrictions. This explicitly means that extension methods
 can be used here.
 
