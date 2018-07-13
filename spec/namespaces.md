@@ -408,7 +408,7 @@ namespace N1
 
 class C
 {
-	public static int A
+	public static int A;
 }
 
 namespace N2
@@ -422,6 +422,7 @@ namespace N2
 		{ 
 			A a = new A();   // Ok, A is unambiguous as a type-name
 			A.Equals(2);     // Error, A is ambiguous as a simple-name
+		}
 	}
 }
 ```
