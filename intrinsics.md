@@ -1,10 +1,5 @@
 # Compiler Intrinsics
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Below
-
 ## Summary
 
 This proposal provides language constructs that expose low level IL opcodes that cannot currently
@@ -14,7 +9,7 @@ them.
 
 ## Motivation
 
-The motivations and background for this feature are described in the following isssue (as is a 
+The motivations and background for this feature are described in the following issue (as is a 
 potential implementation of the feature): 
 
 https://github.com/dotnet/csharplang/issues/191
@@ -61,8 +56,8 @@ unsafe {
 
 The addressof expression in this context will be implemented in the following manner:
 
-- ldftn: when the method is static 
-- ldvirtftn: when the method is an instance method.
+- ldftn: when the method is non-virtual.
+- ldvirtftn: when the method is virtual.
 
 Restrictions of this feature:
 
@@ -74,7 +69,12 @@ exactly what signature they are emitted with.
 ### handleof
 
 The `handleof` contextual keyword will translate a field, member or type into their equivalent 
-`RuntimeHandle` using the `ldtoken` instruction.
+`RuntimeHandle` type using the `ldtoken` instruction. The exact type of the expression will 
+depend on the kind of the name in `handleof`:
+
+- field: `RuntimeFieldHandle`
+- type: `RuntimeTypeHandle`
+- method: `RuntimeMethodHandle`
 
 The arguments to `handleof` are identical to `nameof`. It must be a simple name, qualified name, 
 member access, base access with a specified member, or this access with a specified member. The 
@@ -90,20 +90,20 @@ RuntimeHandle stringHandle = handleof(string);
 Restrictions of this feature:
 
 - Properties cannot be used in a `handleof` expression.
-- The `handleof` expression cannot be used when there is an existing `handelof` name in scope. For 
+- The `handleof` expression cannot be used when there is an existing `handleof` name in scope. For 
 example a type, namespace, etc ...
 
 ### calli
 
-The compiler will add support for a new type of `extern` function that efficients translates into
-a `.calli` instruction. The exten attribute will be marked with an attribute of the following
+The compiler will add support for a new type of `extern` function that efficiently translates into
+a `.calli` instruction. The extern attribute will be marked with an attribute of the following
 shape:
 
 ``` csharp
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class CallIndirectAttribute : Attribute
 {
-    public CallingConvention CallingConvention { get; set; }
+    public CallingConvention CallingConvention { get; }
     public CallIndirectAttribute(CallingConvention callingConvention)
     {
         CallingConvention = callingConvention;
@@ -123,12 +123,25 @@ unsafe {
 }
 ```
 
+Restrictions on the method which has the `CallIndirect` attribute applied:
+
+- Cannot have a `DllImport` attribute.
+- Cannot be generic.
+
+## Open Issuess
+
+### CallingConvention
+
+The `CallIndirectAttribute` as designed uses the `CallingConvention` enum which lacks an entry for
+managed calling conventions. The enum either needs to be extended to include this calling convention
+or the attribute needs to take a different approach.
+
 ## Considerations
 
 ### Disambiguating method groups
 
 There was some discussion around features that would make it easier to disambiguate method groups
-passed to an addressof expression. For instance potentially adding signature elements to the 
+passed to an address-of expression. For instance potentially adding signature elements to the 
 syntax:
 
 ``` csharp
@@ -148,13 +161,24 @@ unsafe {
 
 This was rejected because a compelling case could not be made nor could a simple syntax be 
 envisioned here. Also there is a fairly straight forward work around: simple define another 
-method, possible local function, that is unambiguous and uses C# code to call into the 
-desired function. 
+method that is unambiguous and uses C# code to call into the desired function. 
+
+``` csharp
+class Workaround {
+    public static void LocalLog() => Util.Log();
+}
+unsafe { 
+    void* ptr = &Workaround.LocalLog;
+}
+```
+
+This becomes even simpler if `static` local functions enter the language. Then the work around
+could be defined in the same function that used the ambiguous address-of operation:
 
 ``` csharp
 unsafe { 
     static void LocalLog() => Util.Log();
-    void* ptr = &LocalLog;
+    void* ptr = &Workaround.LocalLog;
 }
 ```
 
@@ -180,4 +204,21 @@ This refers to [the proposal](https://github.com/dotnet/csharplang/issues/1565) 
 `static` modifier on local functions. Such a function would be guaranteed to be emitted as 
 `static` and with the exact signature specified in source code. Such a function should be a valid
 argument to `&` as it contains none of the problems local functions have today.
+
+### NativeCallableAttribute
+
+The CLR has a feature that allows for managed methods to be emitted in such a way that they are 
+directly callabe from native code. This is done by adding the `NativeCallableAttribute` to 
+methods. Such a method is only callable from native code and hence must contain only blittable 
+types in the signature. Calling from managed code results in a runtime error. 
+
+This feature would pattern well with this proposal as it would allow:
+
+- Passing a funtion defined in managed code to native code as a function pointer (via address-of)
+with no overhead in managed or native code. 
+- Runtime can introduce use site errors for such functions in managed code to prevent them from
+being invoked at compile time.
+
+
+
 
