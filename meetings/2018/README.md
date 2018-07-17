@@ -71,3 +71,14 @@ We continued to discuss the range operator in C# and the underlying types for it
 1. Feature flag and 'warning waves'
 1. How 'oblivious' null types interact with generics
 1. Nullable and interface generic constraints
+
+# July 16, 2018
+[C# Language Design Notes for July 16, 2018](LDM-2018-07-16.md)
+
+1. Null-coalescing assignment
+   1. User-defined operators
+   1. Unconstrained type parameters
+   1. Throw expression the right-hand side
+1. Nullable await
+1. Nullable pointer access
+1. Non-nullable reference types feature flag follow-up
