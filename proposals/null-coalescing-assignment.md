@@ -10,7 +10,7 @@
 
 Simplifies a common coding pattern where a variable is assigned a value if it is null.
 
-As part of this proposal, we will also loosen the type requirements on `??` to allow variables typed with the unconstrained type parameter to be used on the left-hand side.
+As part of this proposal, we will also loosen the type requirements on `??` to allow an expression whose type is the unconstrained type parameter to be used on the left-hand side.
 
 ## Motivation
 [motivation]: #motivation
@@ -41,13 +41,12 @@ assignment_operator
 
 Which follows the [existing semantic rules for compound assignment operators](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#compound-assignment), except that we elide the assignment if the left-hand side is non-null. The rules for this feature are as follows.
 
-Given `a ??= b`, where `A` is the type of `a`, `B` is the type of `b`, and `A0` is the underlying value type of `A` if `A` is the nullable type.
+Given `a ??= b`, where `A` is the type of `a`, `B` is the type of `b`:
+
 1. If `A` does not exist or is a non-nullable value type, a compile-time error occurs.
-2. If `B` is not implicitly convertible to `A` or `A0`, a compile-time error occurs.
+2. If `B` is not implicitly convertible to `A`, a compile-time error occurs.
 3. The type of `a ??= b` is `A`.
 4. `a ??= b` is evaluated at runtime as `a ?? (a = b)`, except that `a` is only evaluated once.
-
-Note that rule 4 means that if `B` is implicitly convertible to both `A` and `A0`, we will prefer the conversion to `A` over `A0`.
 
 For the relaxation of the type requirements of `??`, we update the spec where it currently states that, given `a ?? b`, where `A` is the type of `a`:
 
@@ -65,7 +64,7 @@ As with any language feature, we must question whether the additional complexity
 ## Alternatives
 [alternatives]: #alternatives
 
-The programmer can write `(x = x ?? y)` or `if (x == null) x = y;` by hand.
+The programmer can write `(x = x ?? y)`, `if (x == null) x = y;`, or `x ?? (x = y)` by hand.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
