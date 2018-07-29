@@ -14,7 +14,7 @@ The `=ref` operator is called the ***ref assignment operator***. It is not a *co
 
 The right operand must be definitely assigned at the point of the ref assignment.
 
-When the left operand binds to an `out` parameter, it is an error if that `out` parameter has not been definitely assigned at at the beginning of the ref assignment operator.
+When the left operand binds to an `out` parameter, it is an error if that `out` parameter has not been definitely assigned at the beginning of the ref assignment operator.
 
 If the left operand is a writeable ref (i.e. it designates anything other than a `ref readonly` local or  `in` parameter), then the right operand must be a writeable lvalue.
 
