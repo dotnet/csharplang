@@ -192,7 +192,7 @@ __Example:__
 If the source code contained a declaration like:
 
 ```csharp
-/// <include file="docs.xml" *path=*'extradoc/class[@name="IntList"]/*' />
+/// <include file="docs.xml" path='extradoc/class[@name="IntList"]/*' />
 public class IntList { ... }
 ```
 
