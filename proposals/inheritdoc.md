@@ -1,7 +1,7 @@
 ﻿# inheritdoc
 
 * [x] Proposed
-* [ ] Prototype: [Complete](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
+* [ ] Prototype: [Complete](https://github.com/sharwell/roslyn/inheritdoc)
 * [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/BRANCH_NAME)
 * [ ] Specification: [Not Started](pr/1)
 
