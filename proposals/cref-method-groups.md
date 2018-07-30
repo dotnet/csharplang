@@ -15,10 +15,81 @@
 
 <!-- Why are we doing this? What use cases does it support? What is the expected outcome? -->
 
+Currently the following works. It compiles without warning and the documentation comment contains a reference to the `Foo()` method.
+
+``` csharp
+/// <summary>
+/// Reference to a method group with one item: <see cref="Foo"/>
+/// </summary>
+void Foo() { }
+```
+
+However, the following does not work:
+
+``` csharp
+/// <summary>
+/// Reference to a method group with two items: <see cref="Foo"/>
+/// </summary>
+void Foo() { }
+void Foo(int x) { }
+```
+
+The specific warning produced is:
+
+> warning CS0419: Ambiguous reference in cref attribute: 'Foo'. Assuming 'TypeName.Foo()', but could have also matched other overloads including 'TypeName.Foo(int)'.
+
+To reference a method group, the following syntax is required:
+
+``` csharp
+/// <summary>
+/// Reference to a method group with two items:
+/// <see cref="O:Full.Declaring.Namespace.TypeName.Foo"/>
+/// </summary>
+void Foo() { }
+void Foo(int x) { }
+```
+
+This is problematic for the following reasons:
+1. The syntax is not validated during the build. Errors made while typing are not reported until if/when Sandcastle Help File Builder processes the comments.
+2. The syntax is extremely verbose.
+3. The syntax *only* works if there are more than one method with the same name. (This limitation needs to be resolved by tooling, and is not addressed by this proposal specifically.)
+4. There is no editor support for this syntax, including the following features:
+    * The reference has no syntax highlighting
+    * The reference will not be located by Find All References
+    * Go To Definition does not work on the reference
+    * QuickInfo does not work on the reference
+
+I propose the following modification to the way parameterless method references are resolved:
+1. If no argument list is provided and the method group contains exactly one method, compile the comment as a direct reference to that method. This is how the compiler already behaves for this case.
+2. If no parameter list is provided and the method group contains more than one method, compile the comment as a reference to the overloads of the method, with the `O:` form listed above.
+
 ## Detailed design
 [design]: #detailed-design
 
 <!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement,  and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented. -->
+
+Processing of documentation comments during the compilation process behaves as a source-to-source transformation. The C# Language Specification is not clear with respect to the syntax and/or limitations of referencing code elements from a `cref` attribute. However, the structure of the compiled output is more clear.
+
+### Changes to input form
+
+There are no changes to the lexical structure of the input or to symbol resolution when building the semantic model. When generating documentation comment IDs for the purpose of writing resolved references to the output, a new special case is provided for references which do not specify parameters or type parameters. In this case, when the reference resolves to more than one candidate symbol, all of which are methods, the compiler will no longer report CS0419.
+
+Open questions:
+
+* Is it possible to resolve multiple candidates in otherwise-valid code where one or more references resolve to non-method symbols?
+* Does resolution of documentation comment references treat extension methods as extension methods, or only as static methods? If the former, are the results mixed with non-extension methods? If extension methods are included we likely need to limit resolution to overloaded members of the object type or report a warning if only extension members exist and they appear in more than one type.
+
+### Changes to output form
+
+The ID string format defined in the language specification is amended to include the following member kind:
+
+> | Character | Description |
+> | --- | --- |
+> | O | Overloaded method group (containing one or more methods) |
+
+In addition, the description of the format for methods and properties is modified to read as follows:
+
+> For **single** methods and properties with arguments, the argument list follows, enclosed in parentheses. **For groups of more than one method, and for single methods** without arguments, the parentheses **and arguments** are omitted. The arguments are separated by commas. The encoding of each argument is the same as a CLI signature, as follows:
 
 ## Drawbacks
 [drawbacks]: #drawbacks
