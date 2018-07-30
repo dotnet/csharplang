@@ -10,10 +10,14 @@
 
 <!-- One paragraph explanation of the feature. -->
 
+This feature allows members to inherit documentation from other members, either in whole or in part.
+
 ## Motivation
 [motivation]: #motivation
 
 <!-- Why are we doing this? What use cases does it support? What is the expected outcome? -->
+
+This feature reduces the need to copy/paste documentation comments over time. The primary advantages of the feature relate to overall maintainability of software. With fewer duplicates of documentation, the process for updating documentation in response to a change in the source code is simplified.
 
 ## Detailed design
 [design]: #detailed-design
@@ -153,15 +157,42 @@ class WithSelectAttribute { }
 
 <!-- Why should we *not* do this? -->
 
+This feature may result in a change in compilation behavior for users already working with external tools that process `inheritdoc` elements. While the language implementation is simplified by not providing a switch to enable/disable the new feature, it may produce a barrier to adoption for users observing semantic changes between the external tools and the new compiler support.
+
 ## Alternatives
 [alternatives]: #alternatives
 
 <!-- What other designs have been considered? What is the impact of not doing this? -->
 
+### Alternatives to `inheritdoc` in the compiler
+
+The primary current alternative is the `include` documentation element. Documentation included from external files is already fully-supported by the language. In cases where documentation needs to be shared across multiple code elements, the content can be placed in a separate XML file which all locations reference in the same manner.
+
+A second alternative comes in the form of external tooling, such as [Sandcastle Help File Builder](https://github.com/EWSoftware/SHFB/). External tools operating on documentation files produced by the C# compiler already recognize `inheritdoc` elements, and can resolve the referenced content at the time documentation is rendered (e.g. to a web site).
+
+### Alternatives to specific design items
+
+The first design for this feature required the compiler operate in "pass-through" mode, preserving the `inheritdoc` elements in the documentation output. This behavior reduced the ability of the compiler to report warnings related to the content of documentation comments, and placed additional demands on tools that process documentation comments. The updated design encourages the compile-time evaluation and replacement of `inheritdoc` elements.
+
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
 <!-- What parts of the design are still undecided? -->
+
+* Syntax
+    * Should the `select` attribute be supported?
+* Inheritance candidates
+    * Should the inheritance candidate for constructors only look at the immediate base type, or at all inherited types?
+    * How are inheritance candidates disambiguated when a member implicitly implements an interface member and overrides a member from a base class?
+    * How are inheritance candidates disambiguated when a member implicitly implements multiple interface member?
+    * How are inheritance candidates disambiguated when a type has both a base class and implements one or more interfaces?
+* Inherited documentation
+    * How should inherited documentation behave when it includes an `inheritdoc` element? This situation is especially possible since earlier versions of the C# compiler produced documentation files that preserved `inheritdoc` elements.
+    * How should the compiler handle inherited documentation with a verbatim `cref`?
+    * How will localization be handled?
+* Conditional behavior
+    * Should the C# compiler support "pass-through" mode for `inheritdoc` elements (i.e. provide a compiler switch to disable evaluation)?
+    * Should the `inheritdoc` feature be tied to a specific language version?
 
 ## Design meetings
 
