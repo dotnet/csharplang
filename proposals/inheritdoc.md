@@ -33,7 +33,7 @@ I believe a good way to start here would be examining the features currently pro
 I believe it's reasonable to use the same form as defined by SHFB:
 
 ```xml
-<inheritdoc [cref="member"] [select="xpath-filter-expr"] />
+<inheritdoc [cref="member"] [path="xpath-filter-expr"] />
 ```
 
 This element may be placed either as a top-level element or as an inline element in a documentation comment.
@@ -46,7 +46,7 @@ The compiler is updated in the following ways to account for this element:
 * The compiler MUST allow the use of an `inheritdoc` element as an inline element in XML documentation comments.
 * The compiler SHOULD report a warning if the `inheritdoc` element appears without a `cref` attribute, and no candidate for inheriting documentation exists.
 * The compiler SHOULD emit the documentation file with `inheritdoc` elements replaced by their inherited content. The compiler MAY support emitting the documentation file with `inheritdoc` elements not replaced; in this case the compiler SHOULD preserve the placement and form of the `inheritdoc` element in the XML documentation file, except with the `cref` attribute expanded to the documentation ID of the referenced member.
-* The compiler MAY report a warning if the `select` attribute is specified, but the value is not a syntactically valid XPath expression.
+* The compiler MAY report a warning if the `path` attribute is specified, but the value is not a syntactically valid XPath expression.
 
 #### Candidate for inheritance
 
@@ -118,7 +118,7 @@ The inheritance rules determine the element(s) from which documentation is inher
 
 The search order is defined under the **Top-Level Inheritance Rules** section of [inheritdoc](http://ewsoftware.github.io/XMLCommentsGuide/html/86453FFB-B978-4A2A-9EB5-70E118CA8073.htm). However, the rules for determining which elements to ignore are generalized to the following:
 
-* The `overloads` element is never inherited when the `select` attribute is omitted. In other words, the default value for the `select` attribute is `*[not(self::overloads)]`.
+* The `overloads` element is never inherited when the `path` attribute is omitted. In other words, the default value for the `path` attribute is `*[not(self::overloads)]`.
 * If an element includes a `cref` attribute, it is only omitted if the matching existing element has a `cref` attribute that resolves to the same documentation ID is already included
 * If an element includes a `href` attribute, it is only omitted if the matching existing element has an `href` attribute with an equivalent URI
 * If an element includes a `name`, `vref`, and/or `xref` attribute, it is only omitted if the matching existing element has the corresponding attribute(s) with the same value(s)
@@ -126,7 +126,7 @@ The search order is defined under the **Top-Level Inheritance Rules** section of
 
 #### Inline `inheritdoc` elements
 
-When an `inheritdoc` element appears inline (as opposed to the top level), the base node from which the `select` query is evaluated changes to the parent element of the `inheritdoc` element. The path to the matching node is identified by all of the following:
+When an `inheritdoc` element appears inline (as opposed to the top level), the base node from which the `path` query is evaluated changes to the parent element of the `inheritdoc` element. The path to the matching node is identified by all of the following:
 
 * The element name
 * The values of attributes of the element
@@ -147,7 +147,7 @@ class WithoutSelectAttribute { }
 /// <list type="number"><item></item></list>
 /// <list type="bullet">
 /// <item></item>
-/// <item><inheritdoc select="/summary[0]/list[@type='bullet'][0]/item[1]/*[not(self::overloads)]"/></item>
+/// <item><inheritdoc path="/summary[0]/list[@type='bullet'][0]/item[1]/*[not(self::overloads)]"/></item>
 /// </list>
 class WithSelectAttribute { }
 ```
@@ -180,7 +180,8 @@ The first design for this feature required the compiler operate in "pass-through
 <!-- What parts of the design are still undecided? -->
 
 * Syntax
-    * Should the `select` attribute be supported?
+    * Should the `path` attribute be supported?
+    * Should the `path` attribute be named `select` instead (to match SHFB), and/or account for the fact that existing documentation may already use `select` attributes for this?
 * Inheritance candidates
     * Should the inheritance candidate for constructors only look at the immediate base type, or at all inherited types?
     * How are inheritance candidates disambiguated when a member implicitly implements an interface member and overrides a member from a base class?
