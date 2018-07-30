@@ -1,7 +1,7 @@
 ﻿# `cref` method groups
 
 * [x] Proposed
-* [ ] Prototype: [Complete](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
+* [ ] Prototype: [Complete](https://github.com/sharwell/roslyn/features/overload-cref)
 * [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/BRANCH_NAME)
 * [ ] Specification: [Not Started](pr/1)
 
@@ -9,6 +9,8 @@
 [summary]: #summary
 
 <!-- One paragraph explanation of the feature. -->
+
+This feature allows users to reference method groups within documentation comments by omitting the argument list from references to a method.
 
 ## Motivation
 [motivation]: #motivation
@@ -96,15 +98,24 @@ In addition, the description of the format for methods and properties is modifie
 
 <!-- Why should we *not* do this? -->
 
+* This feature would result in certain code which compiles with a warning today producing no warnings and instead producing different output. Prior to this feature, a `cref` reference to a method group with multiple overloads would produce a warning, and the output documentation file would include a reference to one of the overloads.
+* If this feature ignores the number of overloads when choosing between the use of `O:` and `M:`, some code which compiles today and produces `M:` outputs will instead compile with `O:` outputs. This is a form of breaking change, even though the breaking change is only visible in the presence of post-processing developer tools.
+
 ## Alternatives
 [alternatives]: #alternatives
 
 <!-- What other designs have been considered? What is the impact of not doing this? -->
 
+* Currently, [Sandcastle Help File Builder](https://github.com/EWSoftware/SHFB/) provides this functionality as a post-processing step for documentation. By including the `autoUpgrade="true"` attribute on `see` or `seealso` references, the tool will convert references to methods with references to the method group when multiple overloads exist.
+
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
 <!-- What parts of the design are still undecided? -->
+
+* Should the `O:` prefix always be used when the parameter list is omitted from a `cref` reference, or should it only be used when multiple overloads exist?
+* How do overloads with restricted accessibility play into the use of `O:` vs. other prefixes?
+* How do extension methods play into the use of `O:` vs. other prefixes?
 
 ## Design meetings
 
