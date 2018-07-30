@@ -41,9 +41,8 @@ The compiler is updated in the following ways to account for this element:
 * The compiler MUST allow the use of an `inheritdoc` element as a top-level element in XML documentation comments.
 * The compiler MUST allow the use of an `inheritdoc` element as an inline element in XML documentation comments.
 * The compiler SHOULD report a warning if the `inheritdoc` element appears without a `cref` attribute, and no candidate for inheriting documentation exists.
-* The compiler MUST evaluate the `cref` attribute value in the same manner as it does for the `see` element, and include the resolved documentation ID as the value of the attribute in the output documentation file.
+* The compiler SHOULD emit the documentation file with `inheritdoc` elements replaced by their inherited content. The compiler MAY support emitting the documentation file with `inheritdoc` elements not replaced; in this case the compiler SHOULD preserve the placement and form of the `inheritdoc` element in the XML documentation file, except with the `cref` attribute expanded to the documentation ID of the referenced member.
 * The compiler MAY report a warning if the `select` attribute is specified, but the value is not a syntactically valid XPath expression.
-* The compiler SHOULD preserve the placement and form of the `inheritdoc` element in the XML documentation file. It MUST NOT replace the `inheritdoc` element with inherited documentation when writing the documentation file.
 
 #### Candidate for inheritance
 
