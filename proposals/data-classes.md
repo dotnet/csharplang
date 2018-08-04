@@ -162,15 +162,14 @@ fields with only one item changed. A new type must be constructed manually.
 ## Proposal
 
 To resolve many of these issues, I propose a new modifier for classes and structs: `data`.
-`data` classes or structs are meant to satisfy the goals listed above by doing the
-following things:
+Since this proposal focuses on unorderd, *named* data, I'll refer to this feature as 
+*nominal records*, in contrast to the existing [records proposal](https://github.com/dotnet/csharplang/blob/master/proposals/records.md), which I'll
+refer to as *positional records*. Nominal records are meant to satisfy the
+goals listed above by doing the following things:
 
 1. Automatically generating `Equals`, `GetHashCode`, `ToString`, `==`, `!=`, and `IEquatable<T>`
    based on the member data of the type.
 1. Allow object initializers to also initialize readonly members.
-
-Data classes or structs represent unordered, *named* data, like the simple
-`LoginResource` class that people write today.
 
 The LoginResource class now could be defined as
 
@@ -195,21 +194,66 @@ var x = new LoginResource {
 Note that `RememberMe` must have an initializer to avoid a warning in the
 object initializer about an unset read-only property.
 
-However, the generated class code would look like:
+**Why have nominal records?**
+
+Nominal records provide two major use cases that are not addressed by positional
+records. The first is adoption convenience. The most common use of a
+record-like type in C# today is a simple class with an object initializer.
+Transforming this into a positional record would require replacing all fields
+with parameters on the primary constructor, replacing all uses of object
+initializers with constructor calls, and explicitly providing default values
+for all parameters which are optional (where this may have been implicitly
+supplied before by simply not putting an initializer on a field or property).
+
+The second, more important use case is API evolution. Positional records make
+it difficult to add or re-order members without producing a breaking change.
+Reordering is essentially impossible for positional records without
+introducing a binary breaking change. Adding new members is difficult and
+requires manual intervention to create constructor overloads with the old
+members which must be carefully maintained. For many uses of records, like
+"options containers" (see
+[Roslyn](http://source.roslyn.io/#Microsoft.CodeAnalysis/Compilation/CompilationOptions.cs,29a3818343614151),
+[Benchmark.NET](https://github.com/dotnet/BenchmarkDotNet/blob/master/src/BenchmarkDotNet/ConsoleArguments/CommandLineOptions.cs)
+for examples), this is a headache. Often data should not have positional
+dependence, and retrofitting independence later is quite difficult.
+
+### Code generation
+
+Aside from places where semantics are underspecified, this section is mostly
+for edification. The implementation of the feature is irrelevant to the
+language design itself. The implementation may change significantly as it is
+actually developed.
+
+That being said, the current proposal is that the generated class code would
+look like:
 
 ```C#
 public class LoginResource : IEquatable<LoginResource>
 {
-    public string <>Backing_Username;
-    public string Username => <>Backing_Username;
-    public string <>Backing_Password;
-    public string Password => <>Backing_Password;
-    public string <>Backing_RememberMe = false;
-    public bool RememberMe => <>Backing_RememberMe;
+    public struct <>Initializer
+    {
+        public string Username;
+        public string Password;
+        public bool RememberMe;
 
-    protected LoginResource() { }
+        public static <>Initializer Create()
+        {
+            var init = new <>Initializer();
+            init.RememberMe = false;
+            return init;
+        }
+    }
 
-    public static LoginResource <>Init() => new LoginResource();
+    private readonly <>Initializer _init;
+
+    public string Username => _init.Username;
+    public string Password => _init.Password;
+    public bool RememberMe => _init.RememberMe;
+
+    public LoginResource(<>Initializer init)
+    {
+        _init = init;
+    }
 
     public override bool Equals(object obj)
         => obj is LoginResource resource && Equals(resource);
@@ -252,16 +296,19 @@ public class LoginResource : IEquatable<LoginResource>
 }
 ```
 
-The above usage would translate into:
+If any of the generated members listed here conflict with user-written
+members, the user written members take precedence and those generated members
+are skipped. However, the default constructor allowing object initializer usage
+will always be created.
+
+The above usage of the positional record would translate into:
 
 ```C#
-var x = LoginResource.<>Init();
-x.<>Backing_Username = "andy";
-x.<>Backing_Password = password;
+var init = LoginResource.<>Initializer().Create();
+init.Username = "andy";
+init.Password = password;
+var x = new LoginResource(init);
 ```
-
-If any of the generated members conflict with user-written members, the user written
-members take precedence and those generated members are skipped.
 
 ### Equality
 
@@ -333,16 +380,11 @@ the data members.
 
 ### Readonly initialization
 
-Support for `readonly` members in object initializers may seem like a small
-feature, but it's important that making a `data` type readonly not come with
-a lot of extra ceremony. The essence of a `data` type is a set of named fields
-and that should stay true regardless of whether or not the fields are 
-`readonly`. It may be tempting for implementation simplicity to try to use
-constructors instead, but this is a design smell that conflates positional
-semantics with `readonly` semantics. Requiring initialization via constructor
-means that field order becomes a public API and requires careful versioning,
-which is not true of mutable `data` types and is a constraint that should
-be irrelevant to `readonly` semantics.
+There are two reasonable implementations: making backing fields public,
+mutable, but unspeakable, or using a struct initializer type in a generated
+constructor.
+
+** Mutable unspeakable backing fields **
 
 One way to remove dependence on a constructor is simply not make the members
 `readonly` in metadata. The CLR treats `readonly` mostly as guidance -- it
@@ -372,6 +414,27 @@ unspeakable public "initialization" method. This method is called when using
 an object initializer and the compiler verifies that all `readonly` members
 are initialized, or an error is produced.
 
+** Struct initializer type **
+
+Another design, the one currently preferred, allows `readonly` members to be
+initialized via the unspeakable `<>Initializer` struct. Making the struct
+unspeakable allows compilers to enforce rules about readonly initialization.
+Default values for read-only members would be lowered into the static
+`Create` function on the initializer, since past JIT bugs have sometimes
+caused no-argument struct constructors to be skipped. This also affects all
+writes to the read-only members in user-written constructorsOnly read-only
+members would be present in the <>Initializer struct -- mutable members would
+be compiled directly onto the class, as they are today. Support for
+`readonly` members in object initializers may seem like a small feature, but
+it's important that making a `data` type readonly not come with a lot of
+extra ceremony. The essence of a `data` type is a set of named fields and
+that should stay true regardless of whether or not the fields are `readonly`.
+It may be tempting for implementation simplicity to try to use constructors
+instead, but this is a design smell that conflates positional semantics with
+`readonly` semantics. Requiring initialization via constructor means that
+field order becomes a public API and requires careful versioning, which is
+not true of mutable `data` types and is a constraint that should be
+irrelevant to `readonly` semantics.
 
 ## Extensible data classes (data class subtyping)
 
@@ -380,7 +443,7 @@ inherited from in sub-classes.
 
 In non-`data` sub-classes, if there are any readonly members without
 default initialization in the base class, the subclass is required to
-define a protected constructor. The constructor must assign all readonly
+define at least one constructor. The constructor must assign all readonly
 members of the base class before the constructor ends, or an error is
 produced.
 
