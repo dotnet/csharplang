@@ -190,34 +190,34 @@ Other cases are errors for other reasons (e.g. in a parameter's default value or
 There are situations involving generics where the C# grammar is ambiguous, and the language spec says how to resolve those ambiguities:
 
 > #### 7.6.5.2 Grammar ambiguities
-The productions for *simple-name* (§7.6.3) and *member-access* (§7.6.5) can give rise to ambiguities in the grammar for expressions. For example, the statement:
-```cs
-F(G<A,B>(7));
-```
-could be interpreted as a call to `F` with two arguments, `G < A` and `B > (7)`. Alternatively, it could be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument.
->
-If a sequence of tokens can be parsed (in context) as a *simple-name* (§7.6.3), *member-access* (§7.6.5), or *pointer-member-access* (§18.5.2) ending with a *type-argument-list* (§4.4.1), the token immediately following the closing `>` token is examined. If it is one of
-```none
-(  )  ]  }  :  ;  ,  .  ?  ==  !=  |  ^
-```
-then the *type-argument-list* is retained as part of the *simple-name*, *member-access* or *pointer-member-access* and any other possible parse of the sequence of tokens is discarded. Otherwise, the *type-argument-list* is not considered to be part of the *simple-name*, *member-access* or *pointer-member-access*, even if there is no other possible parse of the sequence of tokens. Note that these rules are not applied when parsing a *type-argument-list* in a *namespace-or-type-name* (§3.8). The statement
-```cs
-F(G<A,B>(7));
-```
-will, according to this rule, be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument. The statements
-```cs
-F(G < A, B > 7);
-F(G < A, B >> 7);
-```
-will each be interpreted as a call to `F` with two arguments. The statement
-```cs
-x = F < A > +y;
-```
-will be interpreted as a less than operator, greater than operator, and unary plus operator, as if the statement had been written `x = (F < A) > (+y)`, instead of as a *simple-name* with a *type-argument-list* followed by a binary plus operator. In the statement
-```cs
-x = y is C<T> + z;
-```
-the tokens `C<T>` are interpreted as a *namespace-or-type-name* with a *type-argument-list*.
+> The productions for *simple-name* (§7.6.3) and *member-access* (§7.6.5) can give rise to ambiguities in the grammar for expressions. For example, the statement:
+> ```cs
+> F(G<A,B>(7));
+> ```
+> could be interpreted as a call to `F` with two arguments, `G < A` and `B > (7)`. Alternatively, it could be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument.
+
+> If a sequence of tokens can be parsed (in context) as a *simple-name* (§7.6.3), *member-access* (§7.6.5), or *pointer-member-access* (§18.5.2) ending with a *type-argument-list* (§4.4.1), the token immediately following the closing `>` token is examined. If it is one of
+> ```none
+> (  )  ]  }  :  ;  ,  .  ?  ==  !=  |  ^
+> ```
+> then the *type-argument-list* is retained as part of the *simple-name*, *member-access* or *pointer-member-access* and any other possible parse of the sequence of tokens is discarded. Otherwise, the *type-argument-list* is not considered to be part of the *simple-name*, *member-access* or > *pointer-member-access*, even if there is no other possible parse of the sequence of tokens. Note that these rules are not applied when parsing a *type-argument-list* in a *namespace-or-type-name* (§3.8). The statement
+> ```cs
+> F(G<A,B>(7));
+> ```
+> will, according to this rule, be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument. The statements
+> ```cs
+> F(G < A, B > 7);
+> F(G < A, B >> 7);
+> ```
+> will each be interpreted as a call to `F` with two arguments. The statement
+> ```cs
+> x = F < A > +y;
+> ```
+> will be interpreted as a less than operator, greater than operator, and unary plus operator, as if the statement had been written `x = (F < A) > (+y)`, instead of as a *simple-name* with a *type-argument-list* followed by a binary plus operator. In the statement
+> ```cs
+> x = y is C<T> + z;
+> ```
+> the tokens `C<T>` are interpreted as a *namespace-or-type-name* with a *type-argument-list*.
 
 There are a number of changes being introduced in C# 7 that make these disambiguation rules no longer sufficient to handle the complexity of the language.
 
@@ -315,8 +315,6 @@ The revised disambiguation rule would be something like this
 > - In certain contexts, we treat *identifier* as a disambiguating token. Those contexts are where the sequence of tokens being disambiguated is immediately preceded by one of the keywords `is`, `case` or `out`, or arises while parsing the first element of a tuple literal (in which case the tokens are preceded by `(` or `:` and the identifier is followed by a `,`) or a subsequent element of a tuple literal.
 > 
 > If the following token is among this list, or an identifier in such a context, then the *type-argument-list* is retained as part of the *simple-name*, *member-access* or  *pointer-member-access* and any other possible parse of the sequence of tokens is discarded.  Otherwise, the *type-argument-list* is not considered to be part of the *simple-name*, *member-access* or *pointer-member-access*, even if there is no other possible parse of the sequence of tokens. Note that these rules are not applied when parsing a *type-argument-list* in a *namespace-or-type-name* (§3.8).
-
-Question: should we also include the 
 
 ### breaking changes due to this proposal
 
