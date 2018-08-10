@@ -1,3 +1,5 @@
+**Disclaimer**: This document is maintained by the C# community and not in anyway the responsibility of the C# Language Design Team (LDT), you may not contact the LDT for any errors in this document, however, PRs are welcome. 
+
 **Channels:**
 
 - [Gitter](https://gitter.im/dotnet/csharplang) - Any discussion related to the C# language but mostly design discussions.
