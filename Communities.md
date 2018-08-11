@@ -6,9 +6,9 @@
 
     [![Join the chat at https://gitter.im/dotnet/csharplang](https://badges.gitter.im/dotnet/csharplang.svg)](https://gitter.im/dotnet/csharplang?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-- [Discord](https://discord.gg/ccyrDKv) - Any discussion related to the C# language up to the application level.
+- [Discord](https://aka.ms/csharp-discord) - Any discussion related to the C# language up to the application level.
 
-    [![Join the chat at https://discord.gg/ccyrDKv](https://img.shields.io/discord/102860784329052160.svg)](https://discord.gg/ccyrDKv)
+    [![Join the chat at https://aka.ms/csharp-discord](https://img.shields.io/discord/102860784329052160.svg)](https://aka.ms/csharp-discord)
 
 - IRC - Any discussion related to the C# language up to the application level.
 
