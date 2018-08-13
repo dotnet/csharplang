@@ -59,7 +59,7 @@ All the other types that are not permitted in the *object_creation_expression* a
 
 > **Open Issue:** should we allow delegates and tuples as the target-type?
 
-Although both types are constructible, if the type is inferrable, an anonymous function or a tuple literal can already be used.
+The above rules include delegates (a reference type) and tuples (a struct type). Although both types are constructible, if the type is inferrable, an anonymous function or a tuple literal can already be used.
 ```cs
 (int a, int b) t = new(1, 2); // "new" is redundant
 Action a = new(() => {}); // "new" is redundant
@@ -74,9 +74,9 @@ var x = new(1, 2) == (1, 2) // "new" is redundant
 
 > **Open Issue:** should we allow `throw new()` with `Exception` as the target-type?
 
-We have `throw null` today, but not `throw default` (though it would have the same effect). On the other hand, `throw new()` could be actually useful as a shorthand for `throw new Exception(...)`.
+We have `throw null` today, but not `throw default` (though it would have the same effect). On the other hand, `throw new()` could be actually useful as a shorthand for `throw new Exception(...)`. Note that it is already allowed by the current specification. `Exception` is a reference type, and the specification for the throw statement says that the expression is converted to `Exception`.
 
-> **Open Issue:** should we allow usages of a target-typed `new` with comparison and arithmetic operators?
+> **Open Issue:** should we allow usages of a target-typed `new` with user-defined comparison and arithmetic operators?
 
 For comparison, `default` only supports equality (user-defined and built-in) operators. Would it make sense to support other operators for `new()` as well?
 
