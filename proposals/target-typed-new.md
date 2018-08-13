@@ -24,7 +24,10 @@ Allow omitting the type when it can be inferred from usage.
 ```cs
 XmlReader.Create(reader, new() { IgnoreWhitespace = true });
 ```
-
+Instantiate an object without spelling out the type.
+```cs
+private readonly static object s_syncObj = new();
+```
 ## Detailed design
 [design]: #detailed-design
 
@@ -35,7 +38,9 @@ object_creation_expression
     | 'new' type object_or_collection_initializer
     ;
 ```
-The target-type is resolved through a conversion that only exists if and only if there exists a single best accessible constructor with regard to provided arguments. Target of the initialization is determined after the conversion succeeded.
+A target-typed `new` is convertible to any type. As a result, it does not contribute to overload resolution. This is mainly to avoid unpredictable breaking changes.
+
+The argument list and the initializer expressions will be bound after the type is determined.
 
 The type of the expression would be inferred from the target-type which would be required to be one of the following:
 
@@ -46,54 +51,51 @@ The type of the expression would be inferred from the target-type which would be
 with the following exceptions:
 
 - **Enum types:** not all enum types contain the constant zero, so it should be desirable to use the explicit enum member.
-- **Delegate types:** if the type is inferrable, an anonymous function can already be used.
 - **Interface types:** this is a niche feature and it should be preferable to explicitly mention the type.
-- **Tuple types:** tuple literals should be used for such expressions.
 - **Array types:** arrays need a special syntax to provide the length.
+- **Struct default constructor**: this rules out all primitive types and most value types. If you wanted to use the default value of such types you could write `default` instead.
 
 All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.
 
-The default constructor for a value type (unless appeared explicitly in metadata) is excluded, which has the effect of excluding the primitive types and the default constructor for most value types. If you wanted to use the default value of such types you could write `default`.
+> **Open Issue:** should we allow delegates and tuples as the target-type?
 
-> **Open Issue:** What other types should be excluded?
-
-Note that any restriction on permitted types would raise the success rate of the overload resolution. For example, the following would successfully compile considering the restriction on the default constructor for value types.
+Although both types are constructible, if the type is inferrable, an anonymous function or a tuple literal can already be used.
 ```cs
-class C {}
-void M(C c) {}
-void M(int i) {}
+(int a, int b) t = new(1, 2); // "new" is redundant
+Action a = new(() => {}); // "new" is redundant
 
-M(new());
+(int a, int b) t = new(); // ruled out by "use of struct default constructor"
+Action a = new(); // no constructor found
+
+var x = new() == (1, 2); // ruled out by "use of struct default constructor"
+var x = new(1, 2) == (1, 2) // "new" is redundant
 ```
-Otherwise it would fail with an ambiguous call error.
+
+
+> **Open Issue:** should we allow `throw new()` with `Exception` as the target-type?
+
+We have `throw null` today, but not `throw default` (though it would have the same effect). On the other hand, `throw new()` could be actually useful as a shorthand for `throw new Exception(...)`.
+
+> **Open Issue:** should we allow usages of a target-typed `new` with comparison and arithmetic operators?
+
+For comparison, `default` only supports equality (user-defined and built-in) operators. Would it make sense to support other operators for `new()` as well?
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-Since we're relying on overload resolution of the target-type members, there is a high chance that any change in one of the participating members (target-type's constructors or call-site method overloads, if any) would result in breaking the compilation. For instance,
-```cs
-class Foo { }
-class Bar { }
-
-void M(Foo foo) {}
-
-M(new());
-```
-The invocation compiles until an overload like `void M(Bar bar) {}` is added alongside of the existing method.
+None.
 
 ## Alternatives
 [alternatives]: #alternatives
 
-Most of complaints about types being too long to duplicate in field initialization is about *type arguments* not the type itself, we could infer only type arguments like `new Dictionary(...)` (or similar) instead of the whole type, in which case, it would be a lot less likely to break the compilation with adding a constructor or an overloaded member, because we're not relying on the target-type, rather, we infer type arguments locally from arguments or the collection initializer.
+Most of complaints about types being too long to duplicate in field initialization is about *type arguments* not the type itself, we could infer only type arguments like `new Dictionary(...)` (or similar) and infer type arguments locally from arguments or the collection initializer.
 
 ## Questions
 [quesions]: #questions
 
-- Should we forbid usages in expression trees?
-- How the feature interacts with `dynamic` arguments?
-- It's not clear how IntelliSense should behave when there are multiple target-types, specially in the nested case `M(new(new()));`.
-
-
+- Should we forbid usages in expression trees? (no)
+- How the feature interacts with `dynamic` arguments? (no special treatment)
+- How IntelliSense should work with `new()`? (only when there is a single target-type)
 ## Design meetings
 
 - [LDM-2017-10-18](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-10-18.md#100)
