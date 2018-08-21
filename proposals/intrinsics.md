@@ -128,7 +128,7 @@ Restrictions on the method which has the `CallIndirect` attribute applied:
 - Cannot have a `DllImport` attribute.
 - Cannot be generic.
 
-## Open Issuess
+## Open Issues
 
 ### CallingConvention
 
