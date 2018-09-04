@@ -82,3 +82,15 @@ We continued to discuss the range operator in C# and the underlying types for it
 1. Nullable await
 1. Nullable pointer access
 1. Non-nullable reference types feature flag follow-up
+
+#  July 20, 2018
+
+[C# Language Design Notes for July 20, 2018](LDM-2018-07-20.md)
+
+1. Remaining questions on [suppression operator](https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fgithub.com%2Fdotnet%2Froslyn%2Fissues%2F28271&data=02%7C01%7C%7C6defe1e21ab54cce8d0008d606be5d23%7C72f988bf86f141af91ab2d7cd011db47%7C1%7C0%7C636703812006445395&sdata=DAdh5dev1mnr%2F5zxtvuJVcHP%2Bzewrzz4z9iuGkl%2BUHg%3D&reserved=0) (and possibly cast)
+2. Does a dereference update the null-state?
+3. Null contract attributes
+4. Expanding the feature
+5. Is T? where T : class? allowed or meaningful?
+6. Confirm that oblivious should be ephemeral
+7. Unconstrained T in List<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
