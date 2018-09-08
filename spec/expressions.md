@@ -125,12 +125,12 @@ The following table summarizes all operators in order of precedence from highest
 | [Relational and type-testing operators](expressions.md#relational-and-type-testing-operators) | Equality                    | `==`  `!=`    | 
 | [Logical operators](expressions.md#logical-operators)                                         | Logical AND                 | `&`           | 
 | [Logical operators](expressions.md#logical-operators)                                         | Logical XOR                 | `^`           | 
-| [Logical operators](expressions.md#logical-operators)                                         | Logical OR                  | `|`           |
+| [Logical operators](expressions.md#logical-operators)                                         | Logical OR                  | `\|`           |
 | [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional AND             | `&&`          | 
-| [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional OR              | `||`          | 
+| [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional OR              | `\|\|`          | 
 | [The null coalescing operator](expressions.md#the-null-coalescing-operator)                   | Null coalescing             | `??`          | 
 | [Conditional operator](expressions.md#conditional-operator)                                   | Conditional                 | `?:`          | 
-| [Assignment operators](expressions.md#assignment-operators), [Anonymous function expressions](expressions.md#anonymous-function-expressions)  | Assignment and lambda expression | `=`  `*=`  `/=`  `%=`  `+=`  `-=`  `<<=`  `>>=`  `&=`  `^=`  `|=`  `=>` | 
+| [Assignment operators](expressions.md#assignment-operators), [Anonymous function expressions](expressions.md#anonymous-function-expressions)  | Assignment and lambda expression | `=`  `*=`  `/=`  `%=`  `+=`  `-=`  `<<=`  `>>=`  `&=`  `^=`  `\|=`  `=>` | 
 
 When an operand occurs between two operators with the same precedence, the associativity of the operators controls the order in which the operations are performed:
 
