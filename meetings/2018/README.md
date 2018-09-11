@@ -94,3 +94,10 @@ We continued to discuss the range operator in C# and the underlying types for it
 5. Is T? where T : class? allowed or meaningful?
 6. Confirm that oblivious should be ephemeral
 7. Unconstrained T in List<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
+
+# August 22, 2018
+
+[C# Language Design Notes for August 22, 2018](LDM-2018-08-22.md)
+
+1. Target-typed new
+1. Clarification on constraints with nullable reference types enabled
