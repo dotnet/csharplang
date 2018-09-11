@@ -101,3 +101,10 @@ We continued to discuss the range operator in C# and the underlying types for it
 
 1. Target-typed new
 1. Clarification on constraints with nullable reference types enabled
+
+# September 5, 2018
+
+[C# Language Design Notes for September 5, 2018](LDM-2018-09-05.md)
+
+1. Index operator: is it a unary operator?
+1. Compiler intrinsics
