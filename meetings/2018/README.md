@@ -63,7 +63,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 2. Pattern-based Dispose in the `using` statement
 3. Relax Multiline interpolated string syntax (`$@`)
 
-# July 11, 2018
+## July 11, 2018
 [C# Language Design Notes for July 11, 2018](LDM-2018-07-11.md)
 
 1. Controlling nullable reference types with feature flags
@@ -72,7 +72,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 1. How 'oblivious' null types interact with generics
 1. Nullable and interface generic constraints
 
-# July 16, 2018
+## July 16, 2018
 [C# Language Design Notes for July 16, 2018](LDM-2018-07-16.md)
 
 1. Null-coalescing assignment
@@ -83,7 +83,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 1. Nullable pointer access
 1. Non-nullable reference types feature flag follow-up
 
-#  August 20, 2018
+##  August 20, 2018
 
 [C# Language Design Notes for August 20, 2018](LDM-2018-08-20.md)
 
@@ -95,14 +95,14 @@ We continued to discuss the range operator in C# and the underlying types for it
 6. Confirm that oblivious should be ephemeral
 7. Unconstrained T in List<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
 
-# August 22, 2018
+## August 22, 2018
 
 [C# Language Design Notes for August 22, 2018](LDM-2018-08-22.md)
 
 1. Target-typed new
 1. Clarification on constraints with nullable reference types enabled
 
-# September 5, 2018
+## September 5, 2018
 
 [C# Language Design Notes for September 5, 2018](LDM-2018-09-05.md)
 
