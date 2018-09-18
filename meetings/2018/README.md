@@ -108,3 +108,45 @@ We continued to discuss the range operator in C# and the underlying types for it
 
 1. Index operator: is it a unary operator?
 1. Compiler intrinsics
+
+
+# Upcoming meetings
+
+## Sep 19, 2018
+
+- *Triage championed features*
+- *Triage milestones*
+
+## Sep 24, 2018
+
+- C#/F# interactions (Don Syme, Phillip Carter)
+
+## Sep 26, 2018
+
+- Nullable type inference with respect to null-oblivious types (Chuck, Fred)
+
+## Oct 1, 2018
+
+
+## Oct 3, 2018
+
+
+## Oct 10, 2018
+
+
+## Schedule ASAP
+
+- Pattern matching open questions (Neal)
+
+## Schedule when convenient
+
+- Readonly methods in structs (Jared)
+- Discussion of refreshing language spec (Neal)
+- [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods (Aleksey, David) 
+- Discussion of records (Andy)
+
+## Recurring topics
+
+- *Triage championed features*
+- *Triage milestones*
+- *Design review*
