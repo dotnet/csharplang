@@ -116,12 +116,20 @@ We continued to discuss the range operator in C# and the underlying types for it
 1. Nullability of constraints in inheritance and interface implementation
 2. Static local functions
 
-# Upcoming meetings
-
 ## Sep 19, 2018
 
-- *Triage championed features*
-- *Triage milestones*
+[C# Language Design Notes for September 19, 2018](LDM-2018-09-19.md)
+
+Triage:
+
+1. XML doc comment features
+2. New `foreach` pattern using `Length` and indexer
+3. Object initializers for `readonly` members
+4. `readonly` struct methods
+5. `params Span<T>`
+6. Nullable reference type features on `Nullable<T>`
+
+# Upcoming meetings
 
 ## Sep 24, 2018
 
