@@ -123,7 +123,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 
 ## Sep 26, 2018
 
-- Pattern matching open questions (Neal)
+- Warning waves (Jason, Tom)
 
 ## Oct 1, 2018
 
@@ -137,6 +137,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 
 ## Schedule ASAP
 
+- Pattern matching open questions (Neal)
 
 ## Schedule when convenient
 
