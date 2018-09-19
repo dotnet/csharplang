@@ -128,6 +128,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 ## Oct 1, 2018
 
 - Nullable type inference with respect to null-oblivious types (Chuck, Fred)
+- Pattern matching open questions (Neal)
 
 ## Oct 3, 2018
 
@@ -137,7 +138,6 @@ We continued to discuss the range operator in C# and the underlying types for it
 
 ## Schedule ASAP
 
-- Pattern matching open questions (Neal)
 - Async streams (Steve, Immo)
 - target typed new with default constructors on structs (Julien, Neal)
 
