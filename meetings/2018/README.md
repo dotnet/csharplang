@@ -138,6 +138,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 ## Schedule ASAP
 
 - Pattern matching open questions (Neal)
+- Async streams (Steve, Immo)
 
 ## Schedule when convenient
 
