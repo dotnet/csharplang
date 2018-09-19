@@ -109,6 +109,12 @@ We continued to discuss the range operator in C# and the underlying types for it
 1. Index operator: is it a unary operator?
 1. Compiler intrinsics
 
+## September 10, 2018
+
+[C# Language Design Notes for September 10, 2018](LDM-2018-09-10.md)
+
+1. Nullability of constraints in inheritance and interface implementation
+2. Static local functions
 
 # Upcoming meetings
 
