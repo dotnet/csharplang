@@ -139,6 +139,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 
 - Pattern matching open questions (Neal)
 - Async streams (Steve, Immo)
+- target typed new with default constructors on structs (Julien, Neal)
 
 ## Schedule when convenient
 
