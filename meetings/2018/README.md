@@ -144,6 +144,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 ## Schedule when convenient
 
 - Readonly methods in structs (Jared)
+- Intrinsics update with function pointers (Jared)
 - Discussion of refreshing language spec (Neal)
 - [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods (Aleksey, David) 
 - Discussion of records (Andy)
