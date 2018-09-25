@@ -142,6 +142,18 @@ We continued to discuss the range operator in C# and the underlying types for it
 ## Oct 10, 2018
 
 
+## Oct 15, 2018
+
+
+## Oct 17, 2018
+
+
+## Oct 22, 2018
+
+
+## Oct 24, 2018
+
+
 ## Schedule ASAP
 
 - Async streams (Steve, Immo)
