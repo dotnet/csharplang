@@ -146,6 +146,8 @@ Triage:
 
 ## Oct 3, 2018
 
+- Async streams (Steve, Immo)
+- target typed new with default constructors on structs (Julien, Neal)
 
 ## Oct 10, 2018
 
@@ -164,8 +166,6 @@ Triage:
 
 ## Schedule ASAP
 
-- Async streams (Steve, Immo)
-- target typed new with default constructors on structs (Julien, Neal)
 
 ## Schedule when convenient
 
@@ -174,6 +174,7 @@ Triage:
 - Discussion of refreshing language spec (Neal)
 - [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods (Aleksey, David) 
 - Discussion of records (Andy)
+- [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865) (mads)
 
 ## Recurring topics
 
