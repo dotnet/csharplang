@@ -151,15 +151,22 @@ Triage:
 
 ## Oct 10, 2018
 
+- Discussion of records (Andy)
 
 ## Oct 15, 2018
 
+- Readonly methods in structs (Jared)
+- Intrinsics update with function pointers (Jared)
 
 ## Oct 17, 2018
 
+- [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods (Aleksey, David) 
+- [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865) (mads)
 
 ## Oct 22, 2018
 
+- Discussion of refreshing language spec (Neal)
+- *Triage milestones*
 
 ## Oct 24, 2018
 
@@ -169,12 +176,6 @@ Triage:
 
 ## Schedule when convenient
 
-- Readonly methods in structs (Jared)
-- Intrinsics update with function pointers (Jared)
-- Discussion of refreshing language spec (Neal)
-- [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods (Aleksey, David) 
-- Discussion of records (Andy)
-- [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865) (mads)
 
 ## Recurring topics
 
