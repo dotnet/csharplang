@@ -142,16 +142,17 @@ Triage:
 ## Oct 1, 2018
 
 - Nullable type inference with respect to null-oblivious types (Chuck, Fred)
-- Pattern matching open questions (Neal)
+- Null toggle syntax
 
 ## Oct 3, 2018
 
+- Null toggle syntax
 - Async streams (Steve, Immo)
-- target typed new with default constructors on structs (Julien, Neal)
 
 ## Oct 10, 2018
 
-- Discussion of records (Andy)
+- Pattern matching open questions (Neal)
+- target typed new with default constructors on structs (Julien, Neal)
 
 ## Oct 15, 2018
 
@@ -165,11 +166,18 @@ Triage:
 
 ## Oct 22, 2018
 
-- Discussion of refreshing language spec (Neal)
-- *Triage milestones*
+- Discussion of records (Andy)
 
 ## Oct 24, 2018
 
+- Discussion of refreshing language spec (Neal)
+- *Triage milestones*
+
+## Oct 29, 2018
+
+## Oct 31, 2018
+
+- *Design review*
 
 ## Schedule ASAP
 
