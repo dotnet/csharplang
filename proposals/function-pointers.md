@@ -1,8 +1,18 @@
 # Function Pointers
 
 ## Summary
+This proposal provides language constructs that expose low level IL opcodes that cannot currently
+be accessed efficiently, or at all: `ldftn`, `ldvirtftn`, and `calli`. These low level op 
+codes can be important in high performance code and developers need an efficient way to access 
+them.
 
 ## Motivation
+The motivations and background for this feature are described in the following issue (as is a 
+potential implementation of the feature): 
+
+https://github.com/dotnet/csharplang/issues/191
+
+This is an alternate design propsoal to [compiler intrinsics](https://github.com/dotnet/csharplang/blob/master/proposals/intrinsics.md)
 
 ## Detailed Design 
 
