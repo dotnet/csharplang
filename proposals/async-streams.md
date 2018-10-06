@@ -1,7 +1,7 @@
 # Async Streams
 
 * [x] Proposed
-* [ ] Prototype
+* [x] Prototype
 * [ ] Implementation
 * [ ] Specification
 
