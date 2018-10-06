@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-C# has support for iterator methods and async methods, but no support for a method that is both an iterator and an async method.  We should rectify this by allowing for `await` to be used in a new form of `async` iterator, one that returns an `IAsyncEnumerable<T>` or `IAsyncEnumerator<T>` rather than an `IEnumerable<T>` or `IEnumerator<T>`, with `IAsyncEnumerable<T>` consumable in a new `foreach await`.  An `IAsyncDisposable` interface is also used to enable asynchronous cleanup.
+C# has support for iterator methods and async methods, but no support for a method that is both an iterator and an async method.  We should rectify this by allowing for `await` to be used in a new form of `async` iterator, one that returns an `IAsyncEnumerable<T>` or `IAsyncEnumerator<T>` rather than an `IEnumerable<T>` or `IEnumerator<T>`, with `IAsyncEnumerable<T>` consumable in a new `foreach async`.  An `IAsyncDisposable` interface is also used to enable asynchronous cleanup.
 
 ## Related discussion
 - https://github.com/dotnet/roslyn/issues/261
@@ -23,13 +23,13 @@ C# has support for iterator methods and async methods, but no support for a meth
 
 There has been much discussion of `IAsyncDisposable` (e.g. https://github.com/dotnet/roslyn/issues/114) and whether it's a good idea.  However, it's a required concept to add in support of async iterators.  Since `finally` blocks may contain `await`s, and since `finally` blocks need to be run as part of disposing of iterators, we need async disposal.  It's also just generally useful any time cleaning up of resources might take any period of time, e.g. closing files (requiring flushes), deregistering callbacks and providing a way to know when deregistration has completed, etc.
 
-The following interface is added to the core .NET libraries (e.g. mscorlib, System.Runtime):
+The following interface is added to the core .NET libraries (e.g. System.Private.CoreLib / System.Runtime):
 ```C#
 namespace System
 {
     public interface IAsyncDisposable
     {
-        Task DisposeAsync();
+        ValueTask DisposeAsync();
     }
 }
 ```
@@ -38,9 +38,9 @@ As with `Dispose`, invoking `DisposeAsync` multiple times is acceptable, and sub
 (I'm leaving discussion of how `IAsyncDisposable` interacts with `using` to a separate discussion.  And coverage of how it interacts with `foreach` is handled later in this proposal.)
 
 Alternatives considered:
-- _`DisposeAsync` accepting a `CancellationToken`_: while in theory it makes sense that anything async can be canceled, disposal is about cleanup, closing things out, free'ing resources, etc., which is generally not something that should be canceled; cleanup is still important for work that's canceled.  The same `CancellationToken` that caused the actual work to be canceled would typically be the same token passed to `DisposeAsync`, making `DisposeAsync` worthless because cancellation of the work would cause `DisposeAsync` to be a nop.  If someone wants to avoid being blocked waiting for disposal, they can avoid waiting on the resulting `Task`, or wait on it only for some period of time.
-- _`DisposeAsync` returning a value task_: There's no non-generic `ValueTask<T>` because there's no need.  If `DisposeAsync` completes synchronously, it can return `Task.CompletedTask`.
-- _Configuring `DisposeAsync` with a `bool continueOnCapturedContext` (`ConfigureAwait`)_: While there may be issues related to how such a concept is exposed to `using`, `foreach`, and other language constructs that consume this, from an interface perspective it's not actually doing any `await`'ing and there's nothing to configure... consumers of the `Task` can consume it however they wish.
+- _`DisposeAsync` accepting a `CancellationToken`_: while in theory it makes sense that anything async can be canceled, disposal is about cleanup, closing things out, free'ing resources, etc., which is generally not something that should be canceled; cleanup is still important for work that's canceled.  The same `CancellationToken` that caused the actual work to be canceled would typically be the same token passed to `DisposeAsync`, making `DisposeAsync` worthless because cancellation of the work would cause `DisposeAsync` to be a nop.  If someone wants to avoid being blocked waiting for disposal, they can avoid waiting on the resulting `ValueTask`, or wait on it only for some period of time.
+- _`DisposeAsync` returning a `Task`_: Now that a non-generic `ValueTask` exists and can be constructed from an `IValueTaskSource`, returning `ValueTask` from `DisposeAsync` allows an existing object to be reused as the promise representing the eventual async completion of `DisposeAsync`, saving a `Task` allocation in the case where `DisposeAsync` completes asynchronously.
+- _Configuring `DisposeAsync` with a `bool continueOnCapturedContext` (`ConfigureAwait`)_: While there may be issues related to how such a concept is exposed to `using`, `foreach`, and other language constructs that consume this, from an interface perspective it's not actually doing any `await`'ing and there's nothing to configure... consumers of the `ValueTask` can consume it however they wish.
 - _`IAsyncDisposable` inheriting `IDisposable`_:  Since only one or the other should be used, it doesn't make sense to force types to implement both.
 - _`IDisposableAsync` instead of `IAsyncDisposable`_: We've been following the naming that things/types are an "async something" whereas operations are "done async", so types have "Async" as a prefix and methods have "Async" as a suffix.
 
@@ -57,7 +57,7 @@ namespace System.Collections.Generic
 
     public interface IAsyncEnumerator<out T> : IAsyncDisposable
     {
-        Task<bool> MoveNextAsync();
+        ValueTask<bool> MoveNextAsync();
         T Current { get; }
     }
 }
@@ -76,14 +76,14 @@ finally { await enumerator.DisposeAsync(); }
 ```
 
 Discarded options considered:
-- _`ValueTask<bool> MoveNextAsync(); T current { get; }`_: There's no benefit to using `ValueTask<bool>` instead of `Task<bool>`, as all possible `Task<bool>` values for synchronous completion can be cached, for asynchronous completion a `Task<bool>` is allocated anyway to back the `ValueTask<bool>`, and `ValueTask<bool>` adds additional overheads not present with `Task<bool>` (e.g. it has both a `T` and `Task<T>` field, which means its builder does, too, which means it increases the size of state machine types that await it).
+- _`Task<bool> MoveNextAsync(); T current { get; }`_: Using `Task<bool>` would support using a cached task object to represent synchronous, successful `MoveNextAsync` calls, but an allocation would still be required for asynchronous completion.  By returning `ValueTask<bool>`, we enable the enumerator object to itself implement `IValueTaskSource<bool>` and be used as the backing for the `ValueTask<bool>` returned from `MoveNextAsync`, which in turn allows for significantly reduced overheads.
 - _`ValueTask<(bool, T)> MoveNextAsync();`_: It's not only harder to consume, but it means that `T` can no longer be covariant.
 - _`ValueTask<T?> TryMoveNextAsync();`_: Not covariant.
 - _`Task<T?> TryMoveNextAsync();`_: Not covariant, allocations on every call, etc.
 - _`ITask<T?> TryMoveNextAsync();`_: Not covariant, allocations on every call, etc.
 - _`ITask<(bool,T)> TryMoveNextAsync();`_: Not covariant, allocations on every call, etc.
 - _`Task<bool> TryMoveNextAsync(out T result);`_: The `out` result would need to be set when the operation returns synchronously, not when it asynchronously completes the task potentially sometime long in the future, at which point there'd be no way to communicate the result.
-- _`IAsyncEnumerator<T>` not implementing `IAsyncDisposable`_: We could choose to separate these.  However, doing so complicates certain other areas of the proposal, as code must then be able to deal with the possibility that an enumerator doesn't provide disposal, which makes it difficult to write pattern-based helpers.  Further, it will be common for enumerators to have a need for disposal (e.g. any C# async iterator that has a finally block, most things enumerating data from a network connection, etc.), and if one doesn't, it is simple to implement the method purely as `public Task DisposeAsync() => Task.CompletedTask;` with minimal additional overhead.
+- _`IAsyncEnumerator<T>` not implementing `IAsyncDisposable`_: We could choose to separate these.  However, doing so complicates certain other areas of the proposal, as code must then be able to deal with the possibility that an enumerator doesn't provide disposal, which makes it difficult to write pattern-based helpers.  Further, it will be common for enumerators to have a need for disposal (e.g. any C# async iterator that has a finally block, most things enumerating data from a network connection, etc.), and if one doesn't, it is simple to implement the method purely as `public ValueTask DisposeAsync() => default(ValueTask);` with minimal additional overhead.
 
 #### Viable alternative:
 ```C#
@@ -96,12 +96,12 @@ namespace System.Collections.Generic
 
     public interface IAsyncEnumerator<out T> : IAsyncDisposable
     {
-        Task<bool> WaitForNextAsync();
+        ValueTask<bool> WaitForNextAsync();
         T TryGetNext(out bool success);
     }
 }
 ```
-TryGetNext is used in an inner loop to consume items with a single interface call as long as they're available synchronously.  When the next item can't be retrieved synchronously, it returns false, and any time it returns false, a caller must subsequently invoke WaitForNextAsync to either wait for the next item to be available or to determine that there will never be another item. Typical consumption (without additional language features) would look like:
+`TryGetNext` is used in an inner loop to consume items with a single interface call as long as they're available synchronously.  When the next item can't be retrieved synchronously, it returns false, and any time it returns false, a caller must subsequently invoke `WaitForNextAsync` to either wait for the next item to be available or to determine that there will never be another item. Typical consumption (without additional language features) would look like:
 ```C#
 IAsyncEnumerator<T> enumerator = enumerable.GetAsyncEnumerator();
 try
@@ -118,277 +118,36 @@ try
 }
 finally { await enumerator.DisposeAsync(); }
 ```
-Consumption of this interface is obviously more complex. However, the advantage of this is two-fold, one minor and one major:
+The advantage of this is two-fold, one minor and one major:
 - _Minor: Allows for an enumerator to support multiple consumers_. There may be scenarios where it's valuable for an enumerator to support multiple concurrent consumers.  That can't be achieved when `MoveNextAsync` and `Current` are separate such that an implementation can't make their usage atomic.  In contrast, this approach provides a single method `TryGetNext` that supports pushing the enumerator forward and getting the next item, so the enumerator can enable atomicity if desired.  However, it's likely that such scenarios could also be enabled by giving each consumer its own enumerator from a shared enumerable.  Further, we don't want to enforce that every enumerator support concurrent usage, as that would add non-trivial overheads to the majority case that doesn't require it, which means a consumer of the interface generally couldn't rely on this any way.
-- _Major: Performance_. The `MoveNextAsync`/`Current` approach requires two interface calls per operation, whereas the best case for `WaitForNextAsync`/`TryGetNext` is that most iterations complete synchronously, enabling a tight inner loop with `TryGetNext`, such that we only have one interface call per operation.  This can have a measurable impact.
+- _Major: Performance_. The `MoveNextAsync`/`Current` approach requires two interface calls per operation, whereas the best case for `WaitForNextAsync`/`TryGetNext` is that most iterations complete synchronously, enabling a tight inner loop with `TryGetNext`, such that we only have one interface call per operation.  This can have a measurable impact in situations where the interface calls dominate the computation.
 
-From a performance perspective, here's a set of BenchmarkDotNet microbenchmarks just to highlight the best case impact (typical iterators probably wouldn't benefit as much).  The enumerator in use here simply returns integers counting up from 0 to some max value, and may asynchronously yield (i.e. not complete synchronously when getting an item) every N items.
-```C#
-using BenchmarkDotNet.Running;
-using BenchmarkDotNet.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections;
-
-public class Program
-{
-    public static void Main() => BenchmarkRunner.Run<Program>();
-
-    private CountingAsyncEnumerable _enumerable;
-
-    [Params(10_000_000)] public uint Items { get; set; }
-    [Params(4_294_967_295, 100)] public uint YieldEvery { get; set; }
-    [GlobalSetup] public void Init() => _enumerable = new CountingAsyncEnumerable(Items, YieldEvery);
-
-    [Benchmark]
-    public void MoveNext_Current()
-    {
-        _enumerable.Reset();
-        var e1 = ((IEnumerable<int>)_enumerable).GetEnumerator();
-        while (e1.MoveNext())
-        {
-            Use(e1.Current);
-        }
-    }
-
-    [Benchmark]
-    public async Task MoveNextAsync_Current()
-    {
-        _enumerable.Reset();
-        var e1 = ((IAsyncEnumerable1<int>)_enumerable).GetAsyncEnumerator();
-        while (await e1.MoveNextAsync())
-        {
-            Use(e1.Current);
-        }
-    }
-
-    [Benchmark]
-    public async Task WaitForNextAsync_TryGetNext()
-    {
-        _enumerable.Reset();
-        var e2 = ((IAsyncEnumerable2<int>)_enumerable).GetAsyncEnumerator();
-        while (await e2.WaitForNextAsync())
-        {
-            while (true)
-            {
-                int item = e2.TryGetNext(out bool success);
-                if (!success) break;
-                Use(item);
-            }
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void Use<T>(T item) { }
-
-    private sealed class CountingAsyncEnumerable : IAsyncEnumerable1<int>, IAsyncEnumerable2<int>, IAsyncEnumerator1<int>, IAsyncEnumerator2<int>, IEnumerable<int>, IEnumerator<int>
-    {
-        private static readonly Task<bool> s_falseTask = Task.FromResult(false);
-        private static readonly Task<bool> s_trueTask = Task.FromResult(true);
-        private readonly uint _items;
-        private readonly uint _yieldEvery;
-
-        private uint _remainingUntilYield;
-        private int _current;
-
-        public CountingAsyncEnumerable(uint items, uint yieldEvery)
-        {
-            if (items < 0) throw new ArgumentOutOfRangeException();
-            if (yieldEvery < 1) throw new ArgumentOutOfRangeException();
-            _items = items;
-            _yieldEvery = yieldEvery;
-            Reset();
-        }
-
-        public void Reset()
-        {
-            _remainingUntilYield = 0;
-            _current = -1;
-        }
-
-        // IAsyncEnumerable1<T>
-        IAsyncEnumerator1<int> IAsyncEnumerable1<int>.GetAsyncEnumerator() => this;
-        Task<bool> IAsyncEnumerator1<int>.MoveNextAsync()
-        {
-            if (_current >= _items - 1) return s_falseTask;
-            _current++;
-
-            if (_remainingUntilYield == 0)
-            {
-                _remainingUntilYield = _yieldEvery;
-                return Task.Run(() => true);
-            }
-            else
-            {
-                _remainingUntilYield--;
-                return s_trueTask;
-            }
-        }
-        int IAsyncEnumerator1<int>.Current => _current;
-
-        // IAsyncEnumerable2<T>
-        IAsyncEnumerator2<int> IAsyncEnumerable2<int>.GetAsyncEnumerator() => this;
-        Task<bool> IAsyncEnumerator2<int>.WaitForNextAsync()
-        {
-            if (_current >= _items - 1) return s_falseTask;
-
-            if (_remainingUntilYield == 0)
-            {
-                _remainingUntilYield = _yieldEvery;
-                return Task.Run(() => true);
-            }
-            else
-            {
-                return s_trueTask;
-            }
-        }
-        int IAsyncEnumerator2<int>.TryGetNext(out bool success)
-        {
-            if (_current >= _items - 1 || _remainingUntilYield == 0)
-            {
-                success = false;
-                return 0;
-            }
-
-            success = true;
-            _remainingUntilYield--;
-            return ++_current;
-        }
-
-        // IEnumerable<T>
-        IEnumerator<int> IEnumerable<int>.GetEnumerator() => this;
-        bool IEnumerator.MoveNext()
-        {
-            if (_current >= _items - 1) return false;
-            _current++;
-
-            if (_remainingUntilYield == 0)
-            {
-                _remainingUntilYield = _yieldEvery;
-                return Task.Run(() => true).GetAwaiter().GetResult();
-            }
-            else
-            {
-                _remainingUntilYield--;
-                return true;
-            }
-        }
-        int IEnumerator<int>.Current => _current;
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<int>)this).GetEnumerator();
-        object IEnumerator.Current => _current;
-        void IDisposable.Dispose() { }
-        void IEnumerator.Reset() { }
-    }
-}
-
-namespace System.Collections.Generic
-{
-    public interface IAsyncEnumerable1<out T>
-    {
-        IAsyncEnumerator1<T> GetAsyncEnumerator();
-    }
-    public interface IAsyncEnumerator1<out T>
-    {
-        Task<bool> MoveNextAsync();
-        T Current { get; }
-    }
-
-    public interface IAsyncEnumerable2<out T>
-    {
-        IAsyncEnumerator2<T> GetAsyncEnumerator();
-    }
-    public interface IAsyncEnumerator2<out T>
-    {
-        Task<bool> WaitForNextAsync();
-        T TryGetNext(out bool success);
-    }
-}
-```
-On my machine, I get output like the following:
-```
-                      Method |    Items | YieldEvery |      Mean |     Error |    StdDev |
----------------------------- |--------- |----------- |----------:|----------:|----------:|
-            MoveNext_Current | 10000000 |        100 | 277.45 ms | 3.6161 ms | 3.3825 ms |
-       MoveNextAsync_Current | 10000000 |        100 | 257.56 ms | 2.0816 ms | 1.9471 ms |
- WaitForNextAsync_TryGetNext | 10000000 |        100 | 205.45 ms | 1.4457 ms | 1.3523 ms |
-            MoveNext_Current | 10000000 | 4294967295 |  67.76 ms | 1.3948 ms | 1.3699 ms |
-       MoveNextAsync_Current | 10000000 | 4294967295 |  76.94 ms | 0.3676 ms | 0.3259 ms |
- WaitForNextAsync_TryGetNext | 10000000 | 4294967295 |  45.87 ms | 0.2139 ms | 0.1786 ms |
-```
-In these benchmarks, the enumerator hands back 10,000,000 integers.  In the first three lines, it's yielding (completing asynchronously) every 100 items, and in the second three lines, it's essentially just yielding once at the very beginning and then never again.
-
-Note that the difference becomes even more stark if `async` is used to implement `MoveNextAsync` and `WaitForNextAsync`, as async methods have more overhead associated with them than do normal methods.  If I change the methods accordingly:
-```C#
-async Task<bool> IAsyncEnumerator1<int>.MoveNextAsync()
-{
-    if (_current >= _items - 1) return false;
-    _current++;
-
-    if (_remainingUntilYield == 0)
-    {
-        _remainingUntilYield = _yieldEvery;
-        await Task.Yield();
-    }
-    else
-    {
-        _remainingUntilYield--;
-    }
-    return true;
-}
-
-async Task<bool> IAsyncEnumerator2<int>.WaitForNextAsync()
-{
-    if (_current >= _items - 1) return false;
-
-    if (_remainingUntilYield == 0)
-    {
-        _remainingUntilYield = _yieldEvery;
-        await Task.Yield();
-    }
-    return true;
-}
-```
-the difference is even more stark:
-```
-                      Method |    Items | YieldEvery |      Mean |     Error |    StdDev |
----------------------------- |--------- |----------- |----------:|----------:|----------:|
-            MoveNext_Current | 10000000 |        100 | 262.35 ms | 4.0718 ms | 3.4001 ms |
-       MoveNextAsync_Current | 10000000 |        100 | 785.74 ms | 4.9710 ms | 4.4066 ms |
- WaitForNextAsync_TryGetNext | 10000000 |        100 | 164.98 ms | 1.1382 ms | 1.0647 ms |
-            MoveNext_Current | 10000000 | 4294967295 |  64.39 ms | 0.9235 ms | 0.8639 ms |
-       MoveNextAsync_Current | 10000000 | 4294967295 | 669.31 ms | 4.6653 ms | 3.6423 ms |
- WaitForNextAsync_TryGetNext | 10000000 | 4294967295 |  48.88 ms | 0.5535 ms | 0.5177 ms |
-```
+However, there are non-trivial downsides, including significantly increased complexity when consuming these manually, and an increased chance of introducing bugs when using them.  And while the performance benefits show up in microbenchmarks, we don't believe they'll be impactful in the vast majority of real usage.  If it turns out they are, we can introduce a second set of interfaces in a light-up fashion.
 
 Discarded options considered:
-- `Task<bool> WaitForNextAsync(); bool TryGetNext(out T result);`: `out` parameters can't be covariant.  There's also a small impact here (an issue with the try pattern in general) that this likely incurs a runtime write barrier for reference type results.
-
-(The remainder of this proposal is written in terms of the `MoveNextAsync`/`Current`-based interface, but it could be changed to use the `WaitForNextAsync`/`TryGetNext` interface if desired.)
+- `ValueTask<bool> WaitForNextAsync(); bool TryGetNext(out T result);`: `out` parameters can't be covariant.  There's also a small impact here (an issue with the try pattern in general) that this likely incurs a runtime write barrier for reference type results.
 
 #### Cancellation
 
 There are several possible approaches to supporting cancellation:
 1. `IAsyncEnumerable<T>`/`IAsyncEnumerator<T>` are cancellation-agnostic: `CancellationToken` doesn't appear anywhere.  Cancellation is achieved by logically baking the `CancellationToken` into the enumerable and/or enumerator in whatever manner is appropriate, e.g. when calling an iterator, passing the `CancellationToken` as an argument to the iterator method and using it in the body of the iterator, as is done with any other parameter.
-2. `IAsyncEnumerator<T>.GetEnumerator(CancellationToken)`: You pass a `CancellationToken` to `GetEnumerator`, and subsequent `MoveNextAsync` operations respect it however it can.
+2. `IAsyncEnumerator<T>.GetAsyncEnumerator(CancellationToken)`: You pass a `CancellationToken` to `GetAsyncEnumerator`, and subsequent `MoveNextAsync` operations respect it however it can.
 3. `IAsyncEnumerator<T>.MoveNextAsync(CancellationToken)`: You pass a `CancellationToken` to each individual `MoveNextAsync` call.
-4. 1 && 2: You both embed `CancellationToken`s into your enumerable/enumerator and pass `CancellationToken`s into `GetEnumerator`.
+4. 1 && 2: You both embed `CancellationToken`s into your enumerable/enumerator and pass `CancellationToken`s into `GetAsyncEnumerator`.
 5. 1 && 3: You both embed `CancellationToken`s into your enumerable/enumerator and pass `CancellationToken`s into `MoveNextAsync`.
 
 From a purely theoretical perspective, (5) is the most robust, in that (a) `MoveNextAsync` accepting a `CancellationToken` enables the most fine-grained control over what's canceled, and (b) `CancellationToken` is just any other type that can passed as an argument into iterators, embedded in arbitrary types, etc.
 
 However, there are multiple problems with that approach:
-- How does a `CancellationToken` passed to `GetEnumerator` make it into the body of the iterator?  We could expose a new `iterator` keyword that you could dot off of to get access to the `CancellationToken` passed to `GetEnumerator`, but a) that's a lot of additional machinery, b) we're making it a very first-class citizen, and c) the 99% case would seem to be the same code both calling an iterator and calling `GetEnumerator` on it, in which case it can just pass the `CancellationToken` as an argument into the method.
+- How does a `CancellationToken` passed to `GetAsyncEnumerator` make it into the body of the iterator?  We could expose a new `iterator` keyword that you could dot off of to get access to the `CancellationToken` passed to `GetEnumerator`, but a) that's a lot of additional machinery, b) we're making it a very first-class citizen, and c) the 99% case would seem to be the same code both calling an iterator and calling `GetAsyncEnumerator` on it, in which case it can just pass the `CancellationToken` as an argument into the method.
 - How does a `CancellationToken` passed to `MoveNextAsync` get into the body of the method?  This is even worse, as if it's exposed off of an `iterator` local object, its value could change across awaits, which means any code that registered with the token would need to unregister from it prior to awaits and then re-register after; it's also potentially quite expensive to need to do such registering and unregistering in every `MoveNextAsync` call, regardless of whether implemented by the compiler in an iterator or by a developer manually.
-- How does a developer cancel a `foreach` loop?  If it's done by giving a `CancellationToken` to an enumerable/enumerator, then either a) we need to support `foreach`'ing over enumerators, which raises them to being first-class citizens, and now you need to start thinking about an ecosystem built up around enumerators (e.g. LINQ methods) or b) we need to embed the `CancellationToken` in the enumerable anyway by having some `WithCancellation` extension method off of `IAsyncEnumerable<T>` that would store the provided token and then pass it into  the wrapped enumerable's `GetEnumerator` when the `GetEnumerator` on the returned struct is invoked (ignoring that token).  Or, you can just use the `CancellationToken` you have in the body of the foreach.
-- If/when query comprehensions are supported, how would the `CancellationToken` supplied to `GetEnumerator` or `MoveNextAsync` be passed into each clause?  The easiest way would simply be for the clause to capture it, at which point whatever token is passed to `GetEnumerator`/`MoveNextAsync` is ignored.
+- How does a developer cancel a `foreach` loop?  If it's done by giving a `CancellationToken` to an enumerable/enumerator, then either a) we need to support `foreach`'ing over enumerators, which raises them to being first-class citizens, and now you need to start thinking about an ecosystem built up around enumerators (e.g. LINQ methods) or b) we need to embed the `CancellationToken` in the enumerable anyway by having some `WithCancellation` extension method off of `IAsyncEnumerable<T>` that would store the provided token and then pass it into  the wrapped enumerable's `GetAsyncEnumerator` when the `GetAsyncEnumerator` on the returned struct is invoked (ignoring that token).  Or, you can just use the `CancellationToken` you have in the body of the foreach.
+- If/when query comprehensions are supported, how would the `CancellationToken` supplied to `GetEnumerator` or `MoveNextAsync` be passed into each clause?  The easiest way would simply be for the clause to capture it, at which point whatever token is passed to `GetAsyncEnumerator`/`MoveNextAsync` is ignored.
 
 Due to all of this, the simplest and most consistent solution is simply to do (1): `IAsyncEnumerable<T>`/`IAsyncEnumerator<T>` are cancellation-agnostic.  If you want to cancel a `foreach` loop, you can use a `CancellationToken` in the body and in any methods you call:
 ```C#
 CancellationToken ct = ...;
-foreach await (var i in GetData())
+foreach async (var i in GetData())
 {
     ct.ThrowIfCancellationRequested();
     await UseAsync(i, ct);
@@ -407,7 +166,7 @@ static async IAsyncEnumerable<T> GetData(CancellationToken cancellationToken = d
     }
 }
 ...
-foreach await (T i in GetData(ct))
+foreach async (T i in GetData(ct))
 {
     ...
 }
@@ -436,19 +195,18 @@ C# will continue to treat `enumerable` as a synchronous enumerable, such that ev
 
 To force `foreach` to instead only consider the asynchronous APIs, `await` is inserted as follows:
 ```C#
-foreach await (var i in enumerable)
+foreach async (var i in enumerable)
 ```
 
 No syntax would be provided that would support using either the async or the sync APIs; the developer must choose based on the syntax used.
 
 Discarded options considered:
 - _`foreach (var i in await enumerable)`_: This is already valid syntax, and changing its meaning would be a breaking change.  This means to `await` the `enumerable`, get back something synchronously iterable from it, and then synchronously iterate through that.
-- _`foreach (var i await in enumerable)`, `foreach (var await i in enumerable)`, `foreach (await var i in enumerable)`_: These all suggest that we're awaiting the next item, but there are other awaits involved in foreach, in particular if the enumerable is an `IAsyncDisposable`, we will be `await`'ing its async disposal.  That await is as the scope of the foreach rather than for each individual element, and thus the `await` keyword deserves to be at the `foreach` level.  Further, having it associated with the `foreach` gives us a way to describe the `foreach` with a different term, e.g. a "foreach await".  But more importantly, there's value in considering `foreach` syntax at the same time as `using` syntax, so that they remain consistent with each other, and `using (await ...)` is already valid syntax.
+- _`foreach (var i await in enumerable)`, `foreach (var await i in enumerable)`, `foreach (await var i in enumerable)`_: These all suggest that we're awaiting the next item, but there are other awaits involved in foreach, in particular if the enumerable is an `IAsyncDisposable`, we will be `await`'ing its async disposal.  That await is as the scope of the foreach rather than for each individual element, and thus the `await` keyword deserves to be at the `foreach` level.  Further, having it associated with the `foreach` gives us a way to describe the `foreach` with a different term, e.g. a "foreach async".  But more importantly, there's value in considering `foreach` syntax at the same time as `using` syntax, so that they remain consistent with each other, and `using (await ...)` is already valid syntax.
 - _`await foreach (var i in enumerable)`_: This suggests that the entire `foreach` is somehow returning something that's being `await`'d, but it's not.
-- `async foreach (var i in enumerable)`_: This reads very nicely, but we've established it's important to have `await`s in async methods, yet with this you could have an async method that awaited but without the `await` keyword anywhere in site, making it potentially confusing.
 
 Still to consider:
-- `foreach` today does not support iterating through an enumerator.  We expect it will be more common to have `IAsyncEnumerator<T>`s handed around, and thus it's tempting to support `foreach await` with both `IAsyncEnumerable<T>` and `IAsyncEnumerator<T>`.  But once we add such support, it introduces the question of whether `IAsyncEnumerator<T>` is a first-class citizen, and whether we need to have overloads of combinators that operate on enumerators in addition to enumerables?    Do we want to encourage methods to return enumerators rather than enumerables? We should continue to discuss this.  If we decide we don't want to support it, we might want to introduce an extension method `public static IAsyncEnumerable<T> AsEnumerable<T>(this IAsyncEnumerator<T> enumerator);` that would allow an enumerator to still be `foreach`'d.  If we decide we do want to support it, we'll need to also decide on whether the `foreach await` would be responsible for calling `DisposeAsync` on the enumerator, and the answer is likely "no, control over disposal should be handled by whoever called `GetEnumerator`."
+- `foreach` today does not support iterating through an enumerator.  We expect it will be more common to have `IAsyncEnumerator<T>`s handed around, and thus it's tempting to support `foreach async` with both `IAsyncEnumerable<T>` and `IAsyncEnumerator<T>`.  But once we add such support, it introduces the question of whether `IAsyncEnumerator<T>` is a first-class citizen, and whether we need to have overloads of combinators that operate on enumerators in addition to enumerables?    Do we want to encourage methods to return enumerators rather than enumerables? We should continue to discuss this.  If we decide we don't want to support it, we might want to introduce an extension method `public static IAsyncEnumerable<T> AsEnumerable<T>(this IAsyncEnumerator<T> enumerator);` that would allow an enumerator to still be `foreach`'d.  If we decide we do want to support it, we'll need to also decide on whether the `foreach async` would be responsible for calling `DisposeAsync` on the enumerator, and the answer is likely "no, control over disposal should be handled by whoever called `GetEnumerator`."
 
 ### Pattern-based Compilation
 
@@ -461,7 +219,7 @@ The compiler will bind to the pattern-based APIs if they exist, preferring those
 This code:
 ```C#
 var enumerable = ...;
-foreach await (T item in enumerable)
+foreach async (T item in enumerable)
 {
    ...
 }
@@ -490,7 +248,7 @@ If the iterated type doesn't expose the right pattern, the interfaces will be us
 
 This pattern-based compilation will allow `ConfigureAwait` to be used on all of the awaits, via a `ConfigureAwait` extension method:
 ```C#
-foreach await (T item in enumerable.ConfigureAwait(false))
+foreach async (T item in enumerable.ConfigureAwait(false))
 {
    ...
 }
@@ -530,12 +288,12 @@ namespace System.Threading.Tasks
                     _continueOnCapturedContext = continueOnCapturedContext;
                 }
 
-                public ConfiguredTaskAwaitable<bool> MoveNextAsync() =>
+                public ConfiguredValueTaskAwaitable<bool> MoveNextAsync() =>
                     _enumerator.MoveNextAsync().ConfigureAwait(_continueOnCapturedContext);
 
                 public T Current => _enumerator.Current;
 
-                public ConfiguredTaskAwaitable DisposeAsync() =>
+                public ConfiguredValueTaskAwaitable DisposeAsync() =>
                     _enumerator.DisposeAsync().ConfigureAwait(_continueOnCapturedContext);
             }
         }
@@ -543,7 +301,7 @@ namespace System.Threading.Tasks
 }
 ```
 
-Note that this approach will not enable `ConfigureAwait` to be used with pattern-based enumerables, but then again it's already the case that the `ConfigureAwait` is only exposed as an extension on `Task`/`Task<T>`/`ValueTask<T>` and can't be applied to arbitrary awaitable things, as it only makes sense when applied to Tasks (it controls a behavior implemented in Task's continuation support), and thus doesn't make sense when using a pattern where the awaitable things may not be tasks.  Anyone returning awaitable things can provide their own custom behavior in such advanced scenarios.
+Note that this approach will not enable `ConfigureAwait` to be used with pattern-based enumerables, but then again it's already the case that the `ConfigureAwait` is only exposed as an extension on `Task`/`Task<T>`/`ValueTask`/`ValueTask<T>` and can't be applied to arbitrary awaitable things, as it only makes sense when applied to Tasks (it controls a behavior implemented in Task's continuation support), and thus doesn't make sense when using a pattern where the awaitable things may not be tasks.  Anyone returning awaitable things can provide their own custom behavior in such advanced scenarios.
 
 (If we can come up with some way to support a scope- or assembly-level `ConfigureAwait` solution, then this won't be necessary.)
 
@@ -597,141 +355,9 @@ Alternatives considered:
 - _Enabling custom builders for `IAsyncEnumerable<T>`_:  That's something we could look at for the future, but the machinery is complicated and we don't support that for the synchronous counterparts.
 - _Having an `iterator` keyword in the signature_: Async iterators would use `async iterator` in the signature, and `yield` could only be used in `async` methods that included `iterator`; `iterator` would then be made optional on synchronous iterators.  Depending on your perspective, this has the benefit of making it very clear by the signature of the method whether `yield` is allowed and whether the method is actually meant to return instances of type `IAsyncEnumerable<T>` rather than the compiler manufacturing one based on whether the code uses `yield` or not.  But it is different from synchronous iterators, which don't and can't be made to require one.  Plus some developers don't like the extra syntax.  If we were designing it from scratch, we'd probably make this required, but at this point there's much more value in keeping async iterators close to sync iterators.
 
-### Compilation
-
-While there may be alternative approaches, one approach for compilation is to logically treat the compilation as an iterator but generate the MoveNextAsync methods as async methods, e.g. the synchronous iterator above is compiled to something like the following:
-```C#
-int <>1__state;
-int <>2__current;
-int <>l__initialThreadId;
-int <i>5__1;
-
-bool MoveNext()
-{
-    try
-    {
-        int state = this.<>1__state;
-        if (state == 0)
-        {
-            this.<> 1__state = -3;
-            this.<i> 5__1 = 0;
-            while (this.<i>5__1 < 100)
-            {
-                Thread.Sleep(1000);
-                this.<> 2__current = this.<i>5__1;
-                this.<> 1__state = 1;
-                return true;
-
-            Label_004B:
-                this.<> 1__state = -3;
-                this.<i>5__1++
-            }
-            this.<>m__Finally1();
-            return false;
-        }
-        if (state != 1) return false;
-        goto Label_004B;
-    }
-    fault { this.System.IDisposable.Dispose(); }
-}
-
-void <>m__Finally1()
-{
-    this.<> 1__state = -1;
-    Thread.Sleep(200);
-    Console.WriteLine("finally");
-}
-
-void IDisposable.Dispose()
-{
-    switch (this.<> 1__state)
-    {
-        case -3:
-        case 1:
-            try { } finally
-            {
-                this.<> m__Finally1();
-            }
-    }
-    break;
-}
-```
-
-For the async iterator, it could similarly be compiled as something along the lines of (waving my hands a bit):
-```C#
-int <>1__state;
-int <>2__current;
-int <>l__initialThreadId;
-int <i>5__1;
-
-async Task<bool> MoveNextAsync()
-{
-    try
-    {
-        int state = this.<>1__state;
-        if (state == 0)
-        {
-            this.<> 1__state = -3;
-            this.<i> 5__1 = 0;
-            while (this.<i>5__1 < 100)
-            {
-                await Task.Delay(1000);
-                this.<> 2__current = this.<i>5__1;
-                this.<> 1__state = 1;
-                return true;
-
-            Label_004B:
-                this.<> 1__state = -3;
-                this.<i>5__1++
-            }
-
-            this.<> 1__state = -1; // unlike sync iterator, don't factor this out into a finally helper, to avoid introducing awaits
-            await Task.Delay(200);
-            Console.WriteLine("finally");
-
-            return false;
-        }
-        if (state != 1) return false;
-        goto Label_004B;
-    }
-    catch
-    {
-        switch (this.<>1__state)
-        {
-            case -3:
-            case 1:
-                try { } finally
-                {
-                    this.<> 1__state = -1;
-                    await Task.Delay(200);
-                    Console.WriteLine("finally");
-                }
-        }
-        throw;
-    }
-}
-
-async Task IAsyncDisposable.DisposeAsync()
-{
-    switch (this.<> 1__state)
-    {
-        case -3:
-        case 1:
-            try { } finally
-            {
-                this.<> 1__state = -1;
-                await Task.Delay(200);
-                Console.WriteLine("finally");
-            }
-    }
-    break;
-}
-```
-We will need to avoid introducing any `await`s that weren't in the written C# code, so as not to introduce any unexpected behaviors (e.g. introducing a continuation that may then be scheduled back to an undesired context).  And we will want to consider possible optimizations that could avoid various kinds of overhead involved in such a code generation approach.
-
 ## LINQ
 
-There are over ~200 overloads of methods on the `System.Linq.Enumerable` class, all of which work in terms of `IEnumerable<T>`; some of these accept `IEnumerable<T>`, some of them produce `IEnumerable<T>`, and many do both.  Adding LINQ support for `IAsyncEnumerable<T>` would likely entail duplicating all of these overloads for it, for another ~200.  And since `IAsyncEnumerator<T>` is likely to be more common as a standalone entity in the asynchronous world than `IEnumerator<T>` is in the synchronous world, we could potentially need another ~200 overloads that work with `IAsyncEnumerator<T>`.  Plus, a large number of the overloads deal with predicates (e.g. `Where` that takes a `Func<T, bool>`), and it may be desirable to have `IAsyncEnumerable<T>`-based overloads that deal with both synchronous and asynchronous predicates (e.g. `Func<T, Task<bool>>` in addition to `Func<T, bool>`).  While this isn't applicable to all of the now ~400 new overloads, a rough calculation is that it'd be applicable to half, which means another ~200 overloads, for a total of ~600 new methods.
+There are over ~200 overloads of methods on the `System.Linq.Enumerable` class, all of which work in terms of `IEnumerable<T>`; some of these accept `IEnumerable<T>`, some of them produce `IEnumerable<T>`, and many do both.  Adding LINQ support for `IAsyncEnumerable<T>` would likely entail duplicating all of these overloads for it, for another ~200.  And since `IAsyncEnumerator<T>` is likely to be more common as a standalone entity in the asynchronous world than `IEnumerator<T>` is in the synchronous world, we could potentially need another ~200 overloads that work with `IAsyncEnumerator<T>`.  Plus, a large number of the overloads deal with predicates (e.g. `Where` that takes a `Func<T, bool>`), and it may be desirable to have `IAsyncEnumerable<T>`-based overloads that deal with both synchronous and asynchronous predicates (e.g. `Func<T, ValueTask<bool>>` in addition to `Func<T, bool>`).  While this isn't applicable to all of the now ~400 new overloads, a rough calculation is that it'd be applicable to half, which means another ~200 overloads, for a total of ~600 new methods.
 
 That is a staggering number of APIs, with the potential for even more when extension libraries like Interactive Extensions (Ix) is considered.  But Ix already has an implementation of many of these, and there doesn't seem to be a great reason to duplicate that work; we should instead help the community improve Ix and recommend it for when developers want to use LINQ with `IAsyncEnumerable<T>`.
 
@@ -749,7 +375,7 @@ IAsyncEnumerable<int> result = from item in enumerable
 ```
 However, there is no query comprehension syntax that supports using `await` in the clauses, so if Ix added, for example:
 ```C#
-public static IAsyncEnumerable<TResult> Select<TSource, TResult>(this IAsyncEnumerable<TSource> source, Func<TSource, Task<TResult>> func);
+public static IAsyncEnumerable<TResult> Select<TSource, TResult>(this IAsyncEnumerable<TSource> source, Func<TSource, ValueTask<TResult>> func);
 ```
 then this would "just work":
 ```C#
@@ -757,7 +383,7 @@ IAsyncEnumerable<string> result = from url in urls
                                   where item % 2 == 0
                                   select SomeAsyncMethod(item);
 
-async Task<int> SomeAsyncMethod(int item)
+async ValueTask<int> SomeAsyncMethod(int item)
 {
     await Task.Yield();
     return item * 2;
@@ -777,4 +403,4 @@ or to enabling `await` to be used directly in expressions, such as by supporting
 
 ## Integration with other asynchronous frameworks
 
-Integration with `IObservable<T>` and other asynchronous frameworks (e.g. reactive streams) would be done at the library level rather than at the language level.  For example, all of the data from an `IAsyncEnumerator<T>` can be published to an `IObserver<T>` simply by `foreach`'ing over the enumerator and `OnNext`'ing the data to the observer, so an `AsObservable<T>` extension method is possible.  Consuming an `IObservable<T>` in a `foreach await` requires buffering the data (in case another item is pushed while the previous item is still being processing), but such a push-pull adapter can easily be implemented to enable an `IObservable<T>` to be pulled from with an `IAsyncEnumerator<T>`.  Etc.  Rx/Ix already provide prototypes of such implementations, and libraries like https://github.com/dotnet/corefxlab/tree/master/src/System.Threading.Tasks.Channels provide various kinds of buffering data structures as well as exposing both observable and async enumerable-based production and consumption.  The language need not be involved at this stage.
+Integration with `IObservable<T>` and other asynchronous frameworks (e.g. reactive streams) would be done at the library level rather than at the language level.  For example, all of the data from an `IAsyncEnumerator<T>` can be published to an `IObserver<T>` simply by `foreach async`'ing over the enumerator and `OnNext`'ing the data to the observer, so an `AsObservable<T>` extension method is possible.  Consuming an `IObservable<T>` in a `foreach async` requires buffering the data (in case another item is pushed while the previous item is still being processing), but such a push-pull adapter can easily be implemented to enable an `IObservable<T>` to be pulled from with an `IAsyncEnumerator<T>`.  Etc.  Rx/Ix already provide prototypes of such implementations, and libraries like https://github.com/dotnet/corefx/tree/master/src/System.Threading.Channels provide various kinds of buffering data structures.  The language need not be involved at this stage.
