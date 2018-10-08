@@ -3,8 +3,8 @@
 ## Summary
 
 This proposal provides language constructs that expose low level IL opcodes that cannot currently
-be accessed efficiently, or at all: `ldftn`, `ldvirtftn`, `ldtoken` and `calli`. These low level op 
-codes can be important in high performance code and developers need an efficient way to access 
+be accessed efficiently, or at all: `ldftn`, `ldvirtftn`, `ldtoken` and `calli`. These low level 
+opcodes can be important in high performance code and developers need an efficient way to access 
 them.
 
 ## Motivation
@@ -128,7 +128,7 @@ Restrictions on the method which has the `CallIndirect` attribute applied:
 - Cannot have a `DllImport` attribute.
 - Cannot be generic.
 
-## Open Issuess
+## Open Issues
 
 ### CallingConvention
 
@@ -208,7 +208,7 @@ argument to `&` as it contains none of the problems local functions have today.
 ### NativeCallableAttribute
 
 The CLR has a feature that allows for managed methods to be emitted in such a way that they are 
-directly callabe from native code. This is done by adding the `NativeCallableAttribute` to 
+directly callable from native code. This is done by adding the `NativeCallableAttribute` to 
 methods. Such a method is only callable from native code and hence must contain only blittable 
 types in the signature. Calling from managed code results in a runtime error. 
 
