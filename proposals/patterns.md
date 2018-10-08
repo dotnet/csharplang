@@ -222,7 +222,7 @@ The scope of a pattern variable is as follows:
 
 Other cases are errors for other reasons (e.g. in a parameter's default value or an attribute, both of which are an error because those contexts require a constant expression).
 
-The use of a pattern variables is a value, not a variable. In other words pattern variables are read-only.
+The use of a pattern variable is a value, not a variable. In other words pattern variables are read-only.
 
 ### User_defined operator is
 
@@ -395,7 +395,7 @@ A *let_statement* is a *block_statement* and not an *embedded_statement* because
 
 If a `when` clause is present, the expression following it must be of type `bool`.
 
-At runtime the expression to the right of `=` is evaluated and matched against the *pattern*. If the match fails control transfers to the `else` clause. If the match succeeds and there is a `when` clause, the expression following `when` is evaluated, and if its value is `false` control transfers to the `else` clause.
+At runtime the expression to the right of `=` is evaluated and matched against the *pattern*. If the match fails, control transfers to the `else` clause. If the match succeeds and there is a `when` clause, the expression following `when` is evaluated, and if its value is `false` control transfers to the `else` clause.
 
 ### Some Possible Optimizations
 
