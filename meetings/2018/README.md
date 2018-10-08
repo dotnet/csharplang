@@ -181,6 +181,7 @@ Triage:
 
 ## Schedule ASAP
 
+- Syntax and granularity of new directive (`#nonnull`?), metadata encoding
 
 ## Schedule when convenient
 
