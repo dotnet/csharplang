@@ -193,7 +193,7 @@ foreach (var i in enumerable)
 ```
 C# will continue to treat `enumerable` as a synchronous enumerable, such that even if it exposes the relevant APIs for async enumerables (exposing the pattern or implementing the interface), it will only consider the synchronous APIs.
 
-To force `foreach` to instead only consider the asynchronous APIs, `await` is inserted as follows:
+To force `foreach` to instead only consider the asynchronous APIs, `async` is inserted as follows:
 ```C#
 foreach async (var i in enumerable)
 ```
