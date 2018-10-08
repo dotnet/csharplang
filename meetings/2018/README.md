@@ -182,6 +182,7 @@ Triage:
 ## Schedule ASAP
 
 - Syntax and granularity of new directive (`#nonnull`?), metadata encoding
+- Finalize syntax for async-streams. Per [last notes](https://github.com/dotnet/csharplang/blob/95c9267d0d54a9984086ca327b1f892790e6c2cf/meetings/2017/LDM-2017-08-30.md#syntax-options), the current tentative syntax is `foreach await (var x in ...) ...`.
 
 ## Schedule when convenient
 
