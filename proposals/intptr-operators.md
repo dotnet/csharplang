@@ -23,7 +23,7 @@ This interop code often has to deal with handles, unmanaged memory, or even just
 
 The runtime provides support for this by defining a set of operators that can be used on the `native int` (`System.IntPtr`) and `native unsigned int` (`System.UIntPtr`) primitive types.
 
-C# has never supported these operators and so users have to workaround the issue. This often increases code complexity and lowers code maintainability.
+C# has never supported these operators and so users have to work around the issue. This often increases code complexity and lowers code maintainability.
 
 As such, the language should begin to support these operators to help advance the language to better support these requirements.
 
