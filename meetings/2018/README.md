@@ -129,6 +129,21 @@ Triage:
 5. `params Span<T>`
 6. Nullable reference type features on `Nullable<T>`
 
+## Oct 1, 2018
+
+[C# Language Design Notes for Oct 1, 2018](LDM-2018-10-01.md)
+
+1. Nullable type inference
+2. Type parameters and nullability context
+
+## Oct 3, 2018
+
+[C# Language Design Notes for Oct 3, 2018](LDM-2018-10-03.md)
+
+1. How is the nullable context expressed?
+2. Async streams - which interface shape?
+
+
 # Upcoming meetings
 
 ## Sep 24, 2018
@@ -138,16 +153,6 @@ Triage:
 ## Sep 26, 2018
 
 - Warning waves (Jason, Tom)
-
-## Oct 1, 2018
-
-- Nullable type inference with respect to null-oblivious types (Chuck, Fred)
-- Null toggle syntax
-
-## Oct 3, 2018
-
-- Null toggle syntax
-- Async streams (Steve, Immo)
 
 ## Oct 10, 2018
 
