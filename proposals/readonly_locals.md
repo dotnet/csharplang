@@ -43,9 +43,9 @@ readonly T data = arg1 ?? arg2;
 ```
 
 `readonly` on locals is particularly valuable when working with lambdas and closures.   When an anonymous method or lambda accesses local state from the enclosing scope,
-that state is captured into a closure by the compiler, which is represented by a 'display class.'  Each 'local' that's captured is a field in this class, yet
+that state is captured into a closure by the compiler, which is represented by a "display class."  Each "local" that's captured is a field in this class, yet
 because the compiler is generating this field on your behalf, you have no opportunity to annotate it as `readonly` in order to prevent the lambda from erroneously
-writing to the 'local' (in quotes because it's really not a local, at least not in the resulting MSIL).  With `readonly` locals, the compiler can prevent the lambda
+writing to the "local" (in quotes because it's really not a local, at least not in the resulting MSIL).  With `readonly` locals, the compiler can prevent the lambda
 from writing to local, which is particularly valuable in scenarios involving multithreading where an erroneous write could result in a dangerous but rare and
 hard-to-find concurrency bug.
 ``` C#
