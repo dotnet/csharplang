@@ -129,6 +129,15 @@ Triage:
 5. `params Span<T>`
 6. Nullable reference type features on `Nullable<T>`
 
+## Sep 24, 2018
+
+[C# Language Design Notes for September 24, 2018](LDM-2018-09-24.md)
+
+Combined C#/F# LDM
+
+1. What new C# features are going to require work to get F# support?
+2. How can the design of C# features play well with the broader .NET environment?
+
 ## Oct 1, 2018
 
 [C# Language Design Notes for Oct 1, 2018](LDM-2018-10-01.md)
@@ -145,10 +154,6 @@ Triage:
 
 
 # Upcoming meetings
-
-## Sep 24, 2018
-
-- C#/F# interactions (Don Syme, Phillip Carter)
 
 ## Sep 26, 2018
 
