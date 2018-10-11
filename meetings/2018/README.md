@@ -157,7 +157,6 @@ Triage:
 ## Oct 10, 2018
 
 - Pattern matching open questions (Neal)
-- target typed new with default constructors on structs (Julien, Neal)
 
 ## Oct 15, 2018
 
@@ -167,7 +166,7 @@ Triage:
 ## Oct 17, 2018
 
 - [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods (Aleksey, David) 
-- [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865) (mads)
+- target typed new with default constructors on structs (Julien, Neal)
 
 ## Oct 22, 2018
 
@@ -175,10 +174,12 @@ Triage:
 
 ## Oct 24, 2018
 
+- [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865) (Mads)
 - Discussion of refreshing language spec (Neal)
-- *Triage milestones*
 
 ## Oct 29, 2018
+
+- *Triage milestones*
 
 ## Oct 31, 2018
 
