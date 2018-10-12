@@ -175,7 +175,7 @@ Triage:
 ## Oct 24, 2018
 
 - [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865) (Mads)
-- Discussion of refreshing language spec (Neal)
+- Open issues with pattern matching (Neal)
 
 ## Oct 29, 2018
 
@@ -192,6 +192,7 @@ Triage:
 
 ## Schedule when convenient
 
+- Discussion of refreshing language spec (Neal)
 
 ## Recurring topics
 
