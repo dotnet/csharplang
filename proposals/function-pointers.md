@@ -1,10 +1,9 @@
 # Function Pointers
 
 ## Summary
-This proposal provides language constructs that expose low level IL opcodes that cannot currently
-be accessed efficiently, or at all: `ldftn`, `ldvirtftn`, and `calli`. These low level op 
-codes can be important in high performance code and developers need an efficient way to access 
-them.
+This proposal privodes language constructs that expose IL opcodes that cannot currently be accessed efficiently,
+or at all, in C# today: `ldftn` and `calli`. These IL opcodes can be important in high performance code and developers
+need an effecient way to access them.
 
 ## Motivation
 The motivations and background for this feature are described in the following issue (as is a 
@@ -17,8 +16,8 @@ This is an alternate design propsoal to [compiler intrinsics](https://github.com
 ## Detailed Design 
 
 ### funcptr
-The language will allow for the declaration of function pointers using the `funcptr` syntax. The declaration and usage
-of function pointers closely resemble that of `delegate`:
+The language will allow for the declaration of function pointers using the `funcptr` contextual keyword. The 
+declaration and usage of function pointers closely resemble that of `delegate`:
 
 ``` csharp
 unsafe class Example {
@@ -34,7 +33,7 @@ unsafe class Example {
 
 These types are represented using the function pointer type as outlined in ECMA-335. This means invocation
 of a `funcptr` will use `calli` where invocation of a `delegate` will use `callvirt` on the `Invoke` method.
-Syntactically though invocation looks no different:
+Syntactically though invocation is identical for both constructs.
 
 The `calli` instruction requires the calling convention be specified as a part of the invocation. The default 
 for `funcptr` will be managed. Alternate forms can be specified by adding the appropriate modifier after the 
@@ -42,39 +41,36 @@ for `funcptr` will be managed. Alternate forms can be specified by adding the ap
 
 ``` csharp
 // This method will be invoked using the cdecl calling convention
-funcptr cdecl int Square(int value);
+funcptr cdecl int F1(int value);
+
+// This method will be invoked using the stdcall calling convention
+funcptr stdcall int F2(int value);
 ```
 
-A `funcptr` type is a pointer type which means it has all of the capabilities and restrictions of a standard pointer
-type:
-- Only valid in an `unsafe` context.
-- Methods which contain a `funcptr` parameter or return type can only be called from an `unsafe` context.
-- Cannot be converted to `object`.
-- Cannot be used an a generic argument.
-- Can implicitly convert to and from `void*`
-
-Conversions between `funcptr` types is done based on their signature, not name. Hence when two `funcptr` 
-declarations have the same signature they have an identity conversion no matter what the name is:
+Conversions between `funcptr` types is done based on their signature, not name. When two `funcptr` declarations 
+have the same signature they have an identity conversion no matter what the name is. 
 
 ``` csharp
 unsafe class Example {
-    funcptr int Sum(int left, int right);
-    funcptr int Add(int x, int y);
-    funcptr int Echo(int x);
+    funcptr int Func1(int left, int right);
+    funcptr int Func2(int x);
+    funcptr int Func3(int x, int y);
+    funcptr cdecl int Func4(int x, int y);
 
     void Conversions() {
-        Sum s = ...;
-        Echo e = ...;
+        Func1 p1 = ...;
+        Func2 p2 = ...;
 
-        Add a1 = s; // okay
-        Add a1 = e; // error: incompatible signatures
-        Console.WriteLine(a1 == s); // True
+        Func3 p3 = p1; // okay Func1 and Func3 have compatible signatures
+        Console.WriteLine(p3 == p1); // True
+        Func3 p4 = p2; // error: Func3 and Func2 have incompatible signatures (parameter)
+        Func4 p5 = p1; // error: Func4 and Func1 have incompatible signatures (calling convention)
     }
 }
 ```
 
 In addition to declaring a named `funcptr` type, as you declare a `delegate`, it is possible to use an unnamed 
-`funcptr` type directly. This type can be used anywhere a type declaration would occur:
+`funcptr` type without first declaring it. This type can be used anywhere a type declaration would occur:
 
 ``` csharp
 unsafe struct Example {
@@ -87,8 +83,16 @@ unsafe struct Example {
 }
 ```
 
-Restrictions:
+A `funcptr` type is a pointer type which means it has all of the capabilities and restrictions of a standard pointer
+type:
+- Only valid in an `unsafe` context.
+- Methods which contain a `funcptr` parameter or return type can only be called from an `unsafe` context.
+- Cannot be converted to `object`.
+- Cannot be used an a generic argument.
+- Can implicitly convert `funcptr` to `void*`.
+- Can explicitly convert from `void*` to `funcptr`.
 
+Restrictions:
 - Cannot overload when the only difference in parameter types is the name of the function pointer. 
 - Custom attributes cannot be applied to a `funcptr` or any of its elements.
 - A `funcptr` parameter cannot be marked as `params`
@@ -97,7 +101,8 @@ Restrictions:
 ### Allow addresss-of to target methods
 
 Method groups will now be allowed as arguments to an address-of expression. The type of such an 
-expression will be an unnamed `funcptr` which has the equivalent signature of the target method:
+expression will be an unnamed `funcptr` which has the equivalent signature of the target method and a managed 
+calling convention:
 
 ``` csharp
 unsafe class Util { 
@@ -119,8 +124,11 @@ unsafe class Util {
 ```
 
 The conversion of an address-of method group to `funcptr` has roughly the same process as method group to `delegate`  
-conversion. The only additional restriction is that only members of the method group that are marked as `static` will
-be considered. This means developers can depend on overload resolution rules to work in conjunction with the 
+conversion. There are two additional restrictions to the existing process:
+- Only members of the method group that are marked as `static` will be considered. 
+- Only a `funcptr` with a managed calling convention can be the target of such a conversion.
+
+This means developers can depend on overload resolution rules to work in conjunction with the 
 address-of operator:
 
 ``` csharp
@@ -144,7 +152,6 @@ unsafe class Util {
 The address-of operator will be implemented using the `ldftn` instruction.
 
 Restrictions of this feature:
-
 - Only applies to methods marked as `static`.
 - Local functions cannot be used in `&`. The implementation details of these methods are
 deliberately not specified by the language. This includes whether they are static vs. instance or
@@ -162,6 +169,10 @@ This means that it is possible to overload on `void*` and a `funcptr` and still 
 - Round tripping function pointer names, as well as parameter names, through metadata will require additional work. The
 function pointer type itself is natively supported by CLI but that does not include any names. This is not anticipated
 to be a big issue, just needs design work.
+- The address-of operator is limited to `static` methods in this proposal. It can be made to work with instance methods 
+but the behavior can be confusing to developers. The `this` type becomes an explicit first parameter on the `funcptr` 
+type. This means the behavior and usage would differ significantly from `delegate`. This extra confusion was the main 
+reason it was not included in the design.
 
 ## Considerations
 
