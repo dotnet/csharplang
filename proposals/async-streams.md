@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-C# has support for iterator methods and async methods, but no support for a method that is both an iterator and an async method.  We should rectify this by allowing for `await` to be used in a new form of `async` iterator, one that returns an `IAsyncEnumerable<T>` or `IAsyncEnumerator<T>` rather than an `IEnumerable<T>` or `IEnumerator<T>`, with `IAsyncEnumerable<T>` consumable in a new `foreach await`.  An `IAsyncDisposable` interface is also used to enable asynchronous cleanup.
+C# has support for iterator methods and async methods, but no support for a method that is both an iterator and an async method.  We should rectify this by allowing for `await` to be used in a new form of `async` iterator, one that returns an `IAsyncEnumerable<T>` or `IAsyncEnumerator<T>` rather than an `IEnumerable<T>` or `IEnumerator<T>`, with `IAsyncEnumerable<T>` consumable in a new `await foreach`.  An `IAsyncDisposable` interface is also used to enable asynchronous cleanup.
 
 ## Related discussion
 - https://github.com/dotnet/roslyn/issues/261
@@ -147,7 +147,7 @@ However, there are multiple problems with that approach:
 Due to all of this, the simplest and most consistent solution is simply to do (1): `IAsyncEnumerable<T>`/`IAsyncEnumerator<T>` are cancellation-agnostic.  If you want to cancel a `foreach` loop, you can use a `CancellationToken` in the body and in any methods you call:
 ```C#
 CancellationToken ct = ...;
-foreach await (var i in GetData())
+await foreach (var i in GetData())
 {
     ct.ThrowIfCancellationRequested();
     await UseAsync(i, ct);
@@ -166,7 +166,7 @@ static async IAsyncEnumerable<T> GetData(CancellationToken cancellationToken = d
     }
 }
 ...
-foreach await (T i in GetData(ct))
+await foreach (T i in GetData(ct))
 {
     ...
 }
@@ -195,18 +195,18 @@ C# will continue to treat `enumerable` as a synchronous enumerable, such that ev
 
 To force `foreach` to instead only consider the asynchronous APIs, `await` is inserted as follows:
 ```C#
-foreach await (var i in enumerable)
+await foreach (var i in enumerable)
 ```
 
 No syntax would be provided that would support using either the async or the sync APIs; the developer must choose based on the syntax used.
 
 Discarded options considered:
 - _`foreach (var i in await enumerable)`_: This is already valid syntax, and changing its meaning would be a breaking change.  This means to `await` the `enumerable`, get back something synchronously iterable from it, and then synchronously iterate through that.
-- _`foreach (var i await in enumerable)`, `foreach (var await i in enumerable)`, `foreach (await var i in enumerable)`_: These all suggest that we're awaiting the next item, but there are other awaits involved in foreach, in particular if the enumerable is an `IAsyncDisposable`, we will be `await`'ing its async disposal.  That await is as the scope of the foreach rather than for each individual element, and thus the `await` keyword deserves to be at the `foreach` level.  Further, having it associated with the `foreach` gives us a way to describe the `foreach` with a different term, e.g. a "foreach await".  But more importantly, there's value in considering `foreach` syntax at the same time as `using` syntax, so that they remain consistent with each other, and `using (await ...)` is already valid syntax.
+- _`foreach (var i await in enumerable)`, `foreach (var await i in enumerable)`, `foreach (await var i in enumerable)`_: These all suggest that we're awaiting the next item, but there are other awaits involved in foreach, in particular if the enumerable is an `IAsyncDisposable`, we will be `await`'ing its async disposal.  That await is as the scope of the foreach rather than for each individual element, and thus the `await` keyword deserves to be at the `foreach` level.  Further, having it associated with the `foreach` gives us a way to describe the `foreach` with a different term, e.g. a "await foreach".  But more importantly, there's value in considering `foreach` syntax at the same time as `using` syntax, so that they remain consistent with each other, and `using (await ...)` is already valid syntax.
 - _`await foreach (var i in enumerable)`_: This suggests that the entire `foreach` is somehow returning something that's being `await`'d, but it's not.
 
 Still to consider:
-- `foreach` today does not support iterating through an enumerator.  We expect it will be more common to have `IAsyncEnumerator<T>`s handed around, and thus it's tempting to support `foreach await` with both `IAsyncEnumerable<T>` and `IAsyncEnumerator<T>`.  But once we add such support, it introduces the question of whether `IAsyncEnumerator<T>` is a first-class citizen, and whether we need to have overloads of combinators that operate on enumerators in addition to enumerables?    Do we want to encourage methods to return enumerators rather than enumerables? We should continue to discuss this.  If we decide we don't want to support it, we might want to introduce an extension method `public static IAsyncEnumerable<T> AsEnumerable<T>(this IAsyncEnumerator<T> enumerator);` that would allow an enumerator to still be `foreach`'d.  If we decide we do want to support it, we'll need to also decide on whether the `foreach await` would be responsible for calling `DisposeAsync` on the enumerator, and the answer is likely "no, control over disposal should be handled by whoever called `GetEnumerator`."
+- `foreach` today does not support iterating through an enumerator.  We expect it will be more common to have `IAsyncEnumerator<T>`s handed around, and thus it's tempting to support `await foreach` with both `IAsyncEnumerable<T>` and `IAsyncEnumerator<T>`.  But once we add such support, it introduces the question of whether `IAsyncEnumerator<T>` is a first-class citizen, and whether we need to have overloads of combinators that operate on enumerators in addition to enumerables?    Do we want to encourage methods to return enumerators rather than enumerables? We should continue to discuss this.  If we decide we don't want to support it, we might want to introduce an extension method `public static IAsyncEnumerable<T> AsEnumerable<T>(this IAsyncEnumerator<T> enumerator);` that would allow an enumerator to still be `foreach`'d.  If we decide we do want to support it, we'll need to also decide on whether the `await foreach` would be responsible for calling `DisposeAsync` on the enumerator, and the answer is likely "no, control over disposal should be handled by whoever called `GetEnumerator`."
 
 ### Pattern-based Compilation
 
@@ -219,7 +219,7 @@ The compiler will bind to the pattern-based APIs if they exist, preferring those
 This code:
 ```C#
 var enumerable = ...;
-foreach await (T item in enumerable)
+await foreach (T item in enumerable)
 {
    ...
 }
@@ -248,7 +248,7 @@ If the iterated type doesn't expose the right pattern, the interfaces will be us
 
 This pattern-based compilation will allow `ConfigureAwait` to be used on all of the awaits, via a `ConfigureAwait` extension method:
 ```C#
-foreach await (T item in enumerable.ConfigureAwait(false))
+await foreach (T item in enumerable.ConfigureAwait(false))
 {
    ...
 }
@@ -403,4 +403,4 @@ or to enabling `await` to be used directly in expressions, such as by supporting
 
 ## Integration with other asynchronous frameworks
 
-Integration with `IObservable<T>` and other asynchronous frameworks (e.g. reactive streams) would be done at the library level rather than at the language level.  For example, all of the data from an `IAsyncEnumerator<T>` can be published to an `IObserver<T>` simply by `foreach await`'ing over the enumerator and `OnNext`'ing the data to the observer, so an `AsObservable<T>` extension method is possible.  Consuming an `IObservable<T>` in a `foreach await` requires buffering the data (in case another item is pushed while the previous item is still being processing), but such a push-pull adapter can easily be implemented to enable an `IObservable<T>` to be pulled from with an `IAsyncEnumerator<T>`.  Etc.  Rx/Ix already provide prototypes of such implementations, and libraries like https://github.com/dotnet/corefx/tree/master/src/System.Threading.Channels provide various kinds of buffering data structures.  The language need not be involved at this stage.
+Integration with `IObservable<T>` and other asynchronous frameworks (e.g. reactive streams) would be done at the library level rather than at the language level.  For example, all of the data from an `IAsyncEnumerator<T>` can be published to an `IObserver<T>` simply by `await foreach`'ing over the enumerator and `OnNext`'ing the data to the observer, so an `AsObservable<T>` extension method is possible.  Consuming an `IObservable<T>` in a `await foreach` requires buffering the data (in case another item is pushed while the previous item is still being processing), but such a push-pull adapter can easily be implemented to enable an `IObservable<T>` to be pulled from with an `IAsyncEnumerator<T>`.  Etc.  Rx/Ix already provide prototypes of such implementations, and libraries like https://github.com/dotnet/corefx/tree/master/src/System.Threading.Channels provide various kinds of buffering data structures.  The language need not be involved at this stage.
