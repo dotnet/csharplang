@@ -172,12 +172,12 @@ Combined C#/F# LDM
 2. Intrinsics update with function pointers
 3. Finalize syntax for async-streams. Per [last notes](https://github.com/dotnet/csharplang/blob/95c9267d0d54a9984086ca327b1f892790e6c2cf/meetings/2017/LDM-2017-08-30.md#syntax-options), the current tentative syntax is `foreach await (var x in ...) ...`.
 
-# Upcoming meetings
-
 ## Oct 17, 2018
 
-- [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods (Aleksey, David) 
-- target typed new with default constructors on structs (Julien, Neal)
+1. [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods
+1. target typed new with default constructors on structs
+
+# Upcoming meetings
 
 ## Oct 22, 2018
 
