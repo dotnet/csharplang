@@ -167,6 +167,7 @@ Combined C#/F# LDM
 
 - Readonly methods in structs (Jared)
 - Intrinsics update with function pointers (Jared)
+- Finalize syntax for async-streams. Per [last notes](https://github.com/dotnet/csharplang/blob/95c9267d0d54a9984086ca327b1f892790e6c2cf/meetings/2017/LDM-2017-08-30.md#syntax-options), the current tentative syntax is `foreach await (var x in ...) ...`.
 
 ## Oct 17, 2018
 
@@ -184,16 +185,23 @@ Combined C#/F# LDM
 
 ## Oct 29, 2018
 
-- *Triage milestones*
+- Nullable switches, settings and directives, and their metadata encoding
 
 ## Oct 31, 2018
 
 - *Design review*
 
-## Schedule ASAP
+## Nov 5, 2018
 
-- Syntax and granularity of new directive (`#nonnull`?), metadata encoding
-- Finalize syntax for async-streams. Per [last notes](https://github.com/dotnet/csharplang/blob/95c9267d0d54a9984086ca327b1f892790e6c2cf/meetings/2017/LDM-2017-08-30.md#syntax-options), the current tentative syntax is `foreach await (var x in ...) ...`.
+- *Triage milestones*
+
+## Nov 7, 2018
+
+## Nov 14, 2018
+
+## Nov 19, 2018
+
+## Schedule ASAP
 
 ## Schedule when convenient
 
