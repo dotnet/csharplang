@@ -158,18 +158,21 @@ Combined C#/F# LDM
 1. How is the nullable context expressed?
 2. Async streams - which interface shape?
 
-
-# Upcoming meetings
-
 ## Oct 10, 2018
 
-- Pattern matching open questions (Neal)
+[C# Language Design Notes for Oct 10, 2018](LDM-2018-10-10.md)
+
+1. Pattern matching open questions
 
 ## Oct 15, 2018
 
-- Readonly methods in structs (Jared)
-- Intrinsics update with function pointers (Jared)
-- Finalize syntax for async-streams. Per [last notes](https://github.com/dotnet/csharplang/blob/95c9267d0d54a9984086ca327b1f892790e6c2cf/meetings/2017/LDM-2017-08-30.md#syntax-options), the current tentative syntax is `foreach await (var x in ...) ...`.
+[C# Language Design Notes for Oct 10, 2018](LDM-2018-10-15.md)
+
+1. Readonly methods in structs
+2. Intrinsics update with function pointers
+3. Finalize syntax for async-streams. Per [last notes](https://github.com/dotnet/csharplang/blob/95c9267d0d54a9984086ca327b1f892790e6c2cf/meetings/2017/LDM-2017-08-30.md#syntax-options), the current tentative syntax is `foreach await (var x in ...) ...`.
+
+# Upcoming meetings
 
 ## Oct 17, 2018
 
