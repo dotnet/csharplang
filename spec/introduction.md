@@ -277,13 +277,13 @@ The following table summarizes C#'s operators, listing the operator categories i
 |                                  | `x != y`          | Not equal |
 | Logical AND                      | `x & y`           | Integer bitwise AND, boolean logical AND |
 | Logical XOR                      | `x ^ y`           | Integer bitwise XOR, boolean logical XOR |
-| Logical OR                       | `x | y`           | Integer bitwise OR, boolean logical OR |
+| Logical OR                       | <code>x &#124; y</code> | Integer bitwise OR, boolean logical OR |
 | Conditional AND                  | `x && y`          | Evaluates `y` only if `x` is `true` |
-| Conditional OR                   | `x || y`          | Evaluates `y` only if `x` is `false` |
+| Conditional OR                   | <code>x &#124;&#124; y</code> | Evaluates `y` only if `x` is `false` |
 | Null coalescing                  | `X ?? y`          | Evaluates to `y` if `x` is `null`, to `x` otherwise |
 | Conditional                      | `x ? y : z`       | Evaluates `y` if `x` is `true`, `z` if `x` is `false` |
 | Assignment or anonymous function | `x = y`           | Assignment |
-|                                  | `x op= y`         | Compound assignment; supported operators are `*=` `/=` `%=` `+=` `-=` `<<=` `>>=` `&=` `^=` `|=` |
+|                                  | `x op= y`         | Compound assignment; supported operators are `*=` `/=` `%=` `+=` `-=` `<<=` `>>=` `&=` `^=` <code>&#124;=</code> |
 |                                  | `(T x) => y`      | Anonymous function (lambda expression) |
 
 ## Statements
