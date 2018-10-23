@@ -208,6 +208,8 @@ Combined C#/F# LDM
 
 ## Schedule ASAP
 
+- Base call syntax for default interface implementations
+
 ## Schedule when convenient
 
 - Discussion of refreshing language spec (Neal)
