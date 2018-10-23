@@ -1,7 +1,7 @@
 # Function Pointers
 
 ## Summary
-This proposal privodes language constructs that expose IL opcodes that cannot currently be accessed efficiently,
+This proposal provides language constructs that expose IL opcodes that cannot currently be accessed efficiently,
 or at all, in C# today: `ldftn` and `calli`. These IL opcodes can be important in high performance code and developers
 need an effecient way to access them.
 
