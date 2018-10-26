@@ -188,12 +188,12 @@ Discussion of records proposals:
 1. [The existing old one](https://github.com/dotnet/csharplang/blob/master/proposals/records.md)
 2. [The data classes proposal](https://github.com/dotnet/csharplang/pull/1667)
 
-# Upcoming meetings
-
 ## Oct 24, 2018
 
-- [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865) (Mads)
-- Open issues with pattern matching (Neal)
+- [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865)
+- Open issues with pattern matching
+
+# Upcoming meetings
 
 ## Oct 29, 2018
 
