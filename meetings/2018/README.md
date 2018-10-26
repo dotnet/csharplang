@@ -166,13 +166,15 @@ Combined C#/F# LDM
 
 ## Oct 15, 2018
 
-[C# Language Design Notes for Oct 10, 2018](LDM-2018-10-15.md)
+[C# Language Design Notes for Oct 15, 2018](LDM-2018-10-15.md)
 
 1. Readonly methods in structs
 2. Intrinsics update with function pointers
 3. Finalize syntax for async-streams. Per [last notes](https://github.com/dotnet/csharplang/blob/95c9267d0d54a9984086ca327b1f892790e6c2cf/meetings/2017/LDM-2017-08-30.md#syntax-options), the current tentative syntax is `foreach await (var x in ...) ...`.
 
 ## Oct 17, 2018
+
+[C# Language Design Notes for Oct 17, 2018](LDM-2018-10-17.md)
 
 1. [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods
 1. target typed new with default constructors on structs
