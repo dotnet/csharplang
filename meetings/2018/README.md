@@ -179,11 +179,16 @@ Combined C#/F# LDM
 1. [Open issues](https://github.com/dotnet/csharplang/issues/406) with default interface methods
 1. target typed new with default constructors on structs
 
-# Upcoming meetings
-
 ## Oct 22, 2018
 
-- Discussion of records (Andy)
+[C# Language Design Notes for Oct 22, 2018](LDM-2018-10-22.md)
+
+Discussion of records proposals:
+
+1. [The existing old one](https://github.com/dotnet/csharplang/blob/master/proposals/records.md)
+2. [The data classes proposal](https://github.com/dotnet/csharplang/pull/1667)
+
+# Upcoming meetings
 
 ## Oct 24, 2018
 
