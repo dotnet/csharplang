@@ -770,7 +770,7 @@ class Test
 
 The assignment to `d1` implicitly converts the method group `F` to a value of type `D1`.
 
-The assignment to `d2` shows how it is possible to create a delegate to a method that has less derived (contra-variant) parameter types and a more derived (covariant) return type.
+The assignment to `d2` shows how it is possible to create a delegate to a method that has less derived (contravariant) parameter types and a more derived (covariant) return type.
 
 The assignment to `d3` shows how no conversion exists if the method is not applicable.
 
