@@ -211,6 +211,7 @@ Combined C#/F# LDM
 ## Schedule ASAP
 
 - Base call syntax for default interface implementations
+- Range and Index indexers - where and why? (Immo)
 
 ## Schedule when convenient
 
