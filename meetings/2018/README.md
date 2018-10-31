@@ -193,11 +193,15 @@ Discussion of records proposals:
 - [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865)
 - Open issues with pattern matching
 
-# Upcoming meetings
-
 ## Oct 29, 2018
 
-- Nullable switches, settings and directives, and their metadata encoding
+[C# Language Design Notes for Oct 29, 2018](LDM-2018-10-29.md)
+
+### Agenda
+
+- [Source-level opt-in to nullable reference types](https://github.com/dotnet/csharplang/issues/1939)
+
+# Upcoming meetings
 
 ## Oct 31, 2018
 
