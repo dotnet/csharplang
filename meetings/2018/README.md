@@ -197,15 +197,15 @@ Discussion of records proposals:
 
 [C# Language Design Notes for Oct 29, 2018](LDM-2018-10-29.md)
 
-### Agenda
-
 - [Source-level opt-in to nullable reference types](https://github.com/dotnet/csharplang/issues/1939)
-
-# Upcoming meetings
 
 ## Oct 31, 2018
 
+[C# Language Design Notes for Oct 31, 2018](LDM-2018-10-31.md)
+
 - *Design review*
+
+# Upcoming meetings
 
 ## Nov 5, 2018
 
