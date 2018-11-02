@@ -212,6 +212,8 @@ Combined C#/F# LDM
 
 - Base call syntax for default interface implementations
 - Range and Index indexers - where and why? (Immo)
+- Where can `#nullable` go?
+- Open issues with pattern matching
 
 ## Schedule when convenient
 
