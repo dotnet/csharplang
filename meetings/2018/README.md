@@ -205,20 +205,32 @@ Discussion of records proposals:
 
 ## Nov 5, 2018
 
-- *Triage milestones*
-
-## Nov 7, 2018
+- Where can `#nullable` go? (Chuck, Fred)
+- Open issues with pattern matching (Neal)
 
 ## Nov 14, 2018
 
-## Nov 19, 2018
+- Base call syntax for default interface implementations (Aleksey, David, Michal)
+- Range and Index indexers - where and why? (Immo)
+
+## Nov 28, 2018
+
+- *Triage milestones*
+
+## Dec 3, 2018
+
+
+## Dec 5, 2018
+
+
+## Dec 10, 2018
+
+
+## Dec 12, 2018
+
 
 ## Schedule ASAP
 
-- Base call syntax for default interface implementations
-- Range and Index indexers - where and why? (Immo)
-- Where can `#nullable` go?
-- Open issues with pattern matching
 
 ## Schedule when convenient
 
