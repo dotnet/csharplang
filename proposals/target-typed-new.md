@@ -39,7 +39,7 @@ The target-type is resolved through a conversion that only exists if and only if
 
 The type of the expression would be inferred from the target-type which would be required to be one of the following:
 
-- **Any struct type**
+- **Any struct type** (including tuple types)
 - **Any reference type**
 - **Any type parameter** with a constructor or a `struct` constraint
 
@@ -48,14 +48,10 @@ with the following exceptions:
 - **Enum types:** not all enum types contain the constant zero, so it should be desirable to use the explicit enum member.
 - **Delegate types:** if the type is inferrable, an anonymous function can already be used.
 - **Interface types:** this is a niche feature and it should be preferable to explicitly mention the type.
-- **Tuple types:** tuple literals should be used for such expressions.
 - **Array types:** arrays need a special syntax to provide the length.
+- **dynamic:** we don't allow `new dynamic()`, so we don't allow `new()` with `dynamic` as a target type.
 
 All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.
-
-The default constructor for a value type (unless appeared explicitly in metadata) is excluded, which has the effect of excluding the primitive types and the default constructor for most value types. If you wanted to use the default value of such types you could write `default`.
-
-> **Open Issue:** What other types should be excluded?
 
 Note that any restriction on permitted types would raise the success rate of the overload resolution. For example, the following would successfully compile considering the restriction on the default constructor for value types.
 ```cs
@@ -66,6 +62,19 @@ void M(int i) {}
 M(new());
 ```
 Otherwise it would fail with an ambiguous call error.
+
+When the target type is a nullable value type, the target-typed `new` will be converted to the underlying type instead of the nullable type.
+
+### Overload resolution
+
+A target-typed `new` contributes nothing to the filtering of overload candidates. It behaves like `default`, even if it has named arguments (`new (arg1: 1)`) or initializers (`new () { property = 2 }`) that might have helped resolve ambiguities.
+We only start looking at the arguments and initializers once overload resolution is done and the target-typed `new` is given a type via conversion.
+
+### Miscellaneous
+
+`throw new()` is disallowed.
+
+Target-typed `new` is allowed with user-defined comparison and arithmetic operators.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
@@ -80,6 +89,7 @@ void M(Foo foo) {}
 M(new());
 ```
 The invocation compiles until an overload like `void M(Bar bar) {}` is added alongside of the existing method.
+This scenario already exists with `null` and `default`, but hasn't been a significant problem.
 
 ## Alternatives
 [alternatives]: #alternatives
@@ -89,11 +99,15 @@ Most of complaints about types being too long to duplicate in field initializati
 ## Questions
 [quesions]: #questions
 
-- Should we forbid usages in expression trees?
-- How the feature interacts with `dynamic` arguments?
+- Should we forbid usages in expression trees? `new(...)` is allowed in expression trees and represented like an object creation.
+- How the feature interacts with `dynamic` arguments? We disallow this
 - It's not clear how IntelliSense should behave when there are multiple target-types, specially in the nested case `M(new(new()));`.
 
 
 ## Design meetings
 
 - [LDM-2017-10-18](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-10-18.md#100)
+- [LDM-2018-05-21](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-05-21.md)
+- [LDM-2018-06-25](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-06-25.md)
+- [LDM-2018-08-22](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-08-22.md#target-typed-new)
+- [LDM-2018-10-17](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md)
