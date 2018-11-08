@@ -211,7 +211,7 @@ abstract class E : IA, IB, IC // ok
 
 > ***Open issue***: should we support explicit interface abstract overrides in classes?
 
-In addition, it is an error if in a class declaration the most specific override of some interface method is an an abstract override that was declared in an interface. This is an existing rule restated using the new terminology.
+In addition, it is an error if in a class declaration the most specific override of some interface method is an abstract override that was declared in an interface. This is an existing rule restated using the new terminology.
 
 ``` c#
 interface IF

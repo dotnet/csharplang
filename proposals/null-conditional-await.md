@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-Support an expression of the form `await? e`, which awaits e if it is non-null, otherwise it results in `null`.
+Support an expression of the form `await? e`, which awaits `e` if it is non-null, otherwise it results in `null`.
 
 ## Motivation
 [motivation]: #motivation
