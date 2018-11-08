@@ -67,11 +67,9 @@ When the target type is a nullable value type, the target-typed `new` will be co
 
 `throw new()` is disallowed.
 
-Target-typed `new` is allowed with user-defined comparison and arithmetic operators.
+Target-typed `new` is allowed with binary operators, where the target type is determined by overload resolution. This excludes tuple equality.
 
-It is allowed with binary operators (TODO is this correct?), where the target type is determined by overload resolution. This excludes tuple equality.
-
-It is disallowed when there is no type to target: unary operators, collection of a `foreach`, in a `using`, in a deconstruction, in an `await` expression, as an anonymous type property (`new { Prop = new() }`), in a `lock` statement, in a `sizeof`, in a `fixed` statement, in a member access (`new().field`), in a dynamically dispatched operation (`someDynamic.Method(new())`), in a LINQ query, as the operand of the `is` operator, ...
+It is disallowed when there is no type to target: unary operators, collection of a `foreach`, in a `using`, in a deconstruction, in an `await` expression, as an anonymous type property (`new { Prop = new() }`), in a `lock` statement, in a `sizeof`, in a `fixed` statement, in a member access (`new().field`), in a dynamically dispatched operation (`someDynamic.Method(new())`), in a LINQ query, as the operand of the `is` operator, as the left operand of the `??` operator,  ...
 
 It is also disallowed as a `ref`.
 
