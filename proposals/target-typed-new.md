@@ -20,14 +20,17 @@ Dictionary<string, List<int>> field = new() {
     { "item1", new() { 1, 2, 3 } }
 };
 ```
+
 Allow omitting the type when it can be inferred from usage.
 ```cs
 XmlReader.Create(reader, new() { IgnoreWhitespace = true });
 ```
+
 Instantiate an object without spelling out the type.
 ```cs
 private readonly static object s_syncObj = new();
 ```
+
 ## Detailed design
 [design]: #detailed-design
 
@@ -38,6 +41,7 @@ object_creation_expression
     | 'new' type object_or_collection_initializer
     ;
 ```
+
 A target-typed `new` is convertible to any type. As a result, it does not contribute to overload resolution. This is mainly to avoid unpredictable breaking changes.
 
 The argument list and the initializer expressions will be bound after the type is determined.
@@ -45,7 +49,7 @@ The argument list and the initializer expressions will be bound after the type i
 The type of the expression would be inferred from the target-type which would be required to be one of the following:
 
 - **Any struct type** (including tuple types)
-- **Any reference type**
+- **Any reference type** (including delegate types)
 - **Any type parameter** with a constructor or a `struct` constraint
 
 with the following exceptions:
@@ -57,21 +61,6 @@ with the following exceptions:
 
 All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.
 
-> **Open Issue:** should we allow delegates as the target-type?
-
-The above rules include delegates (a reference type) and tuples (a struct type). Although both types are constructible, if the type is inferrable, an anonymous function or a tuple literal can already be used.
-
-```cs
-(int a, int b) t = new(1, 2); // "new" is redundant
-Action a = new(() => {}); // "new" is redundant
-
-(int a, int b) t = new(); // ruled out by "use of struct default constructor"
-Action a = new(); // no constructor found
-
-var x = new() == (1, 2); // ruled out by "use of struct default constructor"
-var x = new(1, 2) == (1, 2) // "new" is redundant
-```
-
 When the target type is a nullable value type, the target-typed `new` will be converted to the underlying type instead of the nullable type.
 
 ### Miscellaneous
@@ -79,6 +68,12 @@ When the target type is a nullable value type, the target-typed `new` will be co
 `throw new()` is disallowed.
 
 Target-typed `new` is allowed with user-defined comparison and arithmetic operators.
+
+It is allowed with binary operators (TODO is this correct?), where the target type is determined by overload resolution. This excludes tuple equality.
+
+It is disallowed when there is no type to target: unary operators, collection of a `foreach`, in a `using`, in a deconstruction, in an `await` expression, as an anonymous type property (`new { Prop = new() }`), in a `lock` statement, in a `sizeof`, in a `fixed` statement, in a member access (`new().field`), in a dynamically dispatched operation (`someDynamic.Method(new())`), in a LINQ query, as the operand of the `is` operator, ...
+
+It is also disallowed as a `ref`.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
