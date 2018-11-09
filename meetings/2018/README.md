@@ -215,6 +215,9 @@ Discussion of records proposals:
 
 ## Nov 28, 2018
 
+- Are nullable annotations part of array specifiers?
+- Cancellation Tokens in async iterators
+- What exception occurs when a switch expression fails?
 - *Triage milestones*
 
 ## Dec 3, 2018
