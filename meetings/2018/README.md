@@ -231,6 +231,8 @@ Discussion of records proposals:
 
 ## Schedule ASAP
 
+- Cancellation of async-streams (Stephen, Julien)
+- Runtime exception for switch expressions (Neal)
 
 ## Schedule when convenient
 
