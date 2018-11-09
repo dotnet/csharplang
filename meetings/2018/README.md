@@ -216,8 +216,8 @@ Discussion of records proposals:
 ## Nov 28, 2018
 
 - Are nullable annotations part of array specifiers?
-- Cancellation Tokens in async iterators
-- What exception occurs when a switch expression fails?
+- Cancellation of async-streams (Stephen, Julien)
+- Runtime exception for switch expressions (Neal)
 - *Triage milestones*
 
 ## Dec 3, 2018
@@ -234,8 +234,6 @@ Discussion of records proposals:
 
 ## Schedule ASAP
 
-- Cancellation of async-streams (Stephen, Julien)
-- Runtime exception for switch expressions (Neal)
 
 ## Schedule when convenient
 
