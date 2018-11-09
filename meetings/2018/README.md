@@ -215,7 +215,7 @@ Discussion of records proposals:
 
 ## Nov 28, 2018
 
-- Are nullable annotations part of array specifiers?
+- Are nullable annotations part of array specifiers? (Neal, Chuck)
 - Cancellation of async-streams (Stephen, Julien)
 - Runtime exception for switch expressions (Neal)
 - *Triage milestones*
