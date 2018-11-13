@@ -53,6 +53,10 @@ Kotlin have something similar
 ## Alternatives
 [alternatives]: #alternatives
 
+I can write extention methods or methods to init fields inside the ``CLocation`` class but i'm following ECS principles and DOD, so no logic in components, and it'll just bloat my classes, i'll then have to have multiple init methods for different fields wich isn't C# way to doing things
+
+
+It is better to be a language feature
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
