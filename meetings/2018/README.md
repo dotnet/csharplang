@@ -205,12 +205,14 @@ Discussion of records proposals:
 
 - *Design review*
 
-# Upcoming meetings
-
 ## Nov 5, 2018
 
-- Where can `#nullable` go? (Chuck, Fred)
-- Open issues with pattern matching (Neal)
+[C# Language Design Notes for Nov 5, 2018](LDM-2018-11-05.md)
+
+1. Where can #nullable go?
+2. Open issues with pattern matching
+
+# Upcoming meetings
 
 ## Nov 14, 2018
 
