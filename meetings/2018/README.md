@@ -238,7 +238,7 @@ Discussion of records proposals:
 
 ## Schedule ASAP
 
-- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Julien)
+- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Neal/Julien)
 
 ## Schedule when convenient
 
