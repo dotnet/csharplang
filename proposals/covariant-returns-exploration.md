@@ -20,7 +20,7 @@
 ##### Support for covariant return types in derived classes.
 Note: I am referring to version 5.0 of the C# specification, as it is the last completed version.
 
-The aim of the [Covariant Returns Proposal](https://github.com/dotnet/csharplang/blob/master/proposals/covariant-returns.md) is to relax the constraint defined in 10.6.4 (override methods):
+The aim of the [Covariant Returns Proposal](https://github.com/dotnet/csharplang/blob/master/proposals/covariant-returns.md) is to relax the constraint defined in [10.6.4 (override methods)](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes#override-methods):
 >A compile-time error occurs unless all of the following are true for an override declaration: 
 >
 >...
