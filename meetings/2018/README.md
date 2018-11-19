@@ -244,6 +244,7 @@ Discussion of records proposals:
 ## Schedule when convenient
 
 - Discussion of refreshing language spec (Neal)
+- Generating null-check for `parameter!` (Jared)
 
 ## Recurring topics
 
