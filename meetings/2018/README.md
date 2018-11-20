@@ -222,7 +222,6 @@ Discussion of records proposals:
 - Are nullable annotations part of array specifiers? (Neal, Chuck)
 - Cancellation of async-streams (Stephen, Julien)
 - Runtime exception for switch expressions (Neal)
-- *Triage milestones*
 
 ## Dec 3, 2018
 
@@ -230,10 +229,10 @@ Discussion of records proposals:
 ## Dec 5, 2018
 
 
-## Dec 10, 2018
-
-
 ## Dec 12, 2018
+
+
+## Dec 17, 2018
 
 
 ## Schedule ASAP
