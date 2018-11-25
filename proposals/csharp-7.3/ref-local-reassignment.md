@@ -1,6 +1,6 @@
 # Ref Local Reassignment
 
-In C# 7.2, we add support for rebinding the referent of a ref local variable or a ref parameter.
+In C# 7.3, we add support for rebinding the referent of a ref local variable or a ref parameter.
 
 We add the following to the set of `assignment_operator`s.
 
