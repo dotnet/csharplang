@@ -667,6 +667,7 @@ The result of the `sizeof` operator is a value of type `int`. For certain predef
 | `sizeof(char)`   | `2`        |
 | `sizeof(float)`  | `4`        |
 | `sizeof(double)` | `8`        |
+| `sizeof(decimal)` | `16`        |
 | `sizeof(bool)`   | `1`        |
 
 For all other types, the result of the `sizeof` operator is implementation-defined and is classified as a value, not a constant.
