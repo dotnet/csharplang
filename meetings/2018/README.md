@@ -219,12 +219,14 @@ Discussion of records proposals:
 1. Base call syntax for default interface implementations
 2. Switch exhaustiveness and null
 
-# Upcoming meetings
-
 ## Nov 28, 2018
 
-- Are nullable annotations part of array specifiers? (Neal, Chuck)
-- Cancellation of async-streams (Stephen, Julien)
+[C# Language Design Notes for Nov 28, 2018](LDM-2018-11-28.md)
+
+1. Are nullable annotations part of array specifiers?
+2. Cancellation of async-streams
+
+# Upcoming meetings
 
 ## Dec 3, 2018
 
