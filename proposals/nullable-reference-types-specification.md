@@ -1,0 +1,266 @@
+﻿# Nullable Reference Types Specification
+
+*** This is a work in progress - several parts are missing or incomplete. ***
+
+# Syntax
+
+## Nullable reference types
+
+Nullable reference types have the same syntax `T?` as the short form of nullable value types, but do not have a corresponding long form.
+
+For the purposes of the specification, the current `nullable_type` production is renamed to `nullable_value_type`, and a `nullable_reference_type` production is added:
+
+```antlr
+reference_type
+    : ...
+    | nullable_reference_type
+    ;
+    
+nullable_reference_type
+    : non_nullable_reference_type '?'
+    ;
+    
+non_nullable_reference_type
+    : type
+    ;
+```
+
+The `non_nullable_reference_type` in a `nullable_reference_type` must be a non-nullable reference type (class, interface, delegate or array), or a type parameter that is constrained to be a non-nullable reference type (through the `class` constraint, or a class other than `object`).
+
+Nullable reference types cannot occur in the following positions:
+
+- as a base class or interface
+- as the receiver of a `member_access`
+- as the `type` in an `object_creation_expression`
+- as the `delegate_type` in a `delegate_creation_expression`
+- as the `type` in an `is_expression`, a `catch_clause` or a `type_pattern`
+- as the `interface` in a fully qualified interface member name
+
+A warning is given on a `nullable_reference_type` where the nullable annotation context is disabled.
+
+## Nullable class constraint
+
+The `class` constraint has a nullable counterpart `class?`:
+
+```antlr
+primary_constraint
+    : ...
+    | 'class' '?'
+    ;
+```
+
+## Null-forgiving expressions
+
+The post-fix `!` operator is called the null-forgiving operator.
+
+```antlr
+primary_expression
+    : ...
+    | null_forgiving_expression
+    ;
+    
+null_forgiving_expression
+    : primary_expression '!'
+    ;
+```
+
+The `primary_expression` must be of a reference type.  
+
+## Nullable compiler directives
+
+`#nullable` directives control the nullable annotation and warning contexts.
+
+```antlr
+pp_directive
+    : ...
+    | pp_nullable
+    ;
+    
+pp_nullable
+    : whitespace? '#' whitespace? 'nullable' whitespace nullable_action pp_new_line
+    ;
+    
+nullable_action
+    : 'disable'
+    | 'enable'
+    | 'restore'
+    | 'safeonly'
+    ;
+```
+
+`#pragma warning` directives are expanded to allow changing the nullable warning context, and to allow individual warnings to be enabled on even when they're disabled by default:
+
+```antlr
+pragma_warning_body
+    : ...
+    | 'warning' whitespace nullable_action whitespace 'nullable'
+    ;
+
+warning_action
+    : ...
+    | 'enable'
+    ;
+```
+
+Note that the new form of `pragma_warning_body` uses `nullable_action`, not `warning_action`.
+
+
+# Nullable contexts
+
+Every line of source code has a *nullable annotation context* and a *nullable warning context*. These control whether nullable annotations have effect, and whether nullability warnings are given. The annotation context of a given line is either *disabled* or *enabled*. The warning context of a given line is either *disabled*, *safeonly* or *enabled*.
+
+Both contexts can be specified at the project level (outside of C# source code), or anywhere within a source file via `#nullable` and `#pragma warning` pre-processor directives. If no project level settings are provided the default is for both contexts to be *disabled*.
+
+The `#nullable` directive controls both the annotation and warning contexts within the source text, and take precedence over the project-level settings. The `#pragma warning ... nullable` directives control only the warning context, leaving the annotation context unchanged.
+
+A directive sets the context(s) it controls for subsequent lines of code, until another directive overrides it, or until the end of the source file.
+
+The effect of the directives is as follows:
+
+- `#nullable disable`: Sets the nullable annotation and warning contexts to *disabled*
+- `#nullable enable`: Sets the nullable annotation and warning contexts to *enabled*
+- `#nullable restore`: Restores the nullable annotation and warning contexts to project settings
+- `#nullable safeonly`: Sets the nullable annotation context to *enabled* and the warning context to *safeonly*
+- `#pragma warning disable nullable`: Sets the nullable warning context to *disabled*
+- `#pragma warning enable nullable`: Sets the nullable warning context to *enabled*
+- `#pragma warning restore nullable`: Restores the nullable warning context to project settings
+- `#pragma warning safeonly nullable`: Sets the nullable warning context to *safeonly*
+
+
+# Nullability of types
+
+A `type` is deemed to occur in a given annotation context when the last token of the type is within that context.
+
+A given type can have one of four nullabilities: *Oblivious*, *nonnullable*, *nullable* and *unknown*. *Nonnullable* and *unknown* types may yield warnings if a potential `null` value is assigned to them. Values of *nullable* and *unknown* types may yield warnings when dereferenced without proper null checking.
+
+The kind of type and the nullable annotation context it occurs in determine its nullability:
+
+- A nonnullable value type `S` is always *nonnullable*
+- A nullable value type `S?` is always *nullable*
+- An unannotated reference type `C` in a *disabled* annotation context is *oblivious*
+- An unannotated reference type `C` in an *enabled* annotation context is *nonnullable*
+- A nullable reference type `C?` in a *disabled* annotation context is *nullable* (but a warning is yielded)
+- A nullable reference type `C?` in an *enabled* annotation context is *nullable*
+
+Type parameters additionally take their constraints into account:
+
+- An unconstrained type parameter `T` is *unknown*
+- A type parameter `T` where all constraints are *nullable*, *unknown* or the `class?` constraint is *unknown*
+- A type parameter `T` where at least one constraint is *oblivious* or *nonnullable* or one of the `struct` or `class` constraints is
+    - *oblivious* in a *disabled* annotation context
+    - *nonnullable* in an *enabled* annotation context
+- A nullable type parameter `T?` where at least one of `T`'s constraints is *oblivious* or *nonnullable* or one of the `struct` or `class` constraints, is
+    - *nullable* in a *disabled* annotation context (but a warning is yielded)
+    - *nullable* in an *enabled* annotation context
+
+For a type parameter `T`, `T?` is only allowed if `T` is known to be a value type or known to be a reference type.
+
+
+# Constraints
+
+Nullable reference types can be used as generic constraints. Furthermore `object` is now valid as an explicit constraint. Absence of a constraint is now equivalent to an `object?` constraint (instead of `object`), but (unlike `object` before) `object?` is not prohibited as an explicit constraint.
+
+`class?` is a new constraint denoting "possibly nullable reference type", whereas `class` denotes "nonnullable reference type".
+
+The nullability of a type argument or of a constraint does not impact whether the type satisfies the constraint, except where that is already the case today (nullable value types do not satisfy the `struct` constraint). However, if the type argument does not satisfy the nullability requirements of the constraint, a warning may be given.
+
+
+# Null state and null tracking
+
+Every expression in a given source location has a *null state*, which indicated whether it is believed to potentially evaluate to null. The null state is either "not null" or "maybe null". The null state is used to determine whether a warning should be given about null-unsafe conversions and dereferences.
+
+## Null tracking for variables
+
+For certain expressions denoting variables or properties, the null state is tracked between occurrences, based on assignments to them, tests performed on them and the control flow between them. This is similar to how definite assignment is tracked for variables. The tracked expressions are the ones of the following form:
+
+```antlr
+tracked_expression
+    : simple_name
+    | this
+    | base
+    | tracked_expression '.' identifier
+    ;
+```
+
+Where the identifiers denote fields or properties.
+
+***Describe null state transitions similar to definite assignment***
+
+## Null state for expressions
+
+The null state of an expression is derived from its form and type, and from the null state of variables involved in it.
+
+## Literals
+
+The null state of a `null` literal is "maybe null". The null state of a `default` literal that is being converted to a type that is known not to be a nonnullable value type is "maybe null". The null state of any other literal is "not null".
+
+## Simple names
+
+If a `simple_name` is not classified as a value, its null state is "not null". Otherwise it is a tracked expression, and its null state is its tracked null state at this source location.
+
+## Member access
+
+If a `member_access` is not classified as a value, its null state is "not null". Otherwise, if it is a tracked expression, its null state is its tracked null state at this source location. Otherwise, if the nullability of its type is nullable or unknown, the null state is "maybe null". Otherwise the null state is "not null".
+
+## Invocation expressions
+
+If an `invocation_expression` invokes a member that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise, if the nullability of the type of the expression is nullable or unknown, the null state is "maybe null". Otherwise the null state is "not null".
+
+## Element access
+
+If an `element_access` invokes an indexer that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise, if the nullability of the type of the expression is nullable or unknown, the null state is "maybe null". Otherwise the null state is "not null".
+
+## Base access
+
+If `B` denotes the base type of the enclosing type, `base.I` has the same null state as `((B)this).I` and `base[E]` has the same null state as `((B)this)[E]`.
+
+## Default expressions
+
+`default(T)` has the null state "non-null" if `T` is known to be a nonnullable value type. Otherwise it has the null state "maybe null".
+
+## Null-conditional expressions
+
+A `null_conditional_expression` has the null state "maybe null".
+
+## Cast expressions
+
+## Await expressions
+
+***More expressions***
+
+## Expressions that propagate null state
+
+`(E)`, `E++`, `E--`, `checked(E)`, `unchecked(E)`, `+E`, `-E`, `!E`, `~E`, `++E`, `--E`,  all have the same null state as `E`.
+
+
+## Other expressions
+
+The null state of the following expression forms is always "not null":
+
+- `this_access`
+- `interpolated_string_expression`
+- `object_creation_expression`
+- `delegate_creation_expression`
+- `anonymous_object_creation_expression`
+- `array_creation_expression`
+- `typeof_expression`
+- `nameof_expression`
+- `anonymous_method_expression`
+- `null_forgiving_expression`
+
+
+
+
+# The null-forgiving operator
+
+The postfix `!` operator has no runtime effect - it evaluates to the result of the underlying expression. Its only role is to change the null state of the expression, and to limit warnings given on its use.
+
+# Warnings
+
+
+# Type inference
+
+
+# Attributes for special null behavior
+
+
