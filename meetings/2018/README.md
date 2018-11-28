@@ -212,12 +212,14 @@ Discussion of records proposals:
 1. Where can #nullable go?
 2. Open issues with pattern matching
 
-# Upcoming meetings
-
 ## Nov 14, 2018
 
-- Base call syntax for default interface implementations (Aleksey, David, Michal)
-- Runtime exception for switch expressions (Neal)
+[C# Language Design Notes for Nov 14, 2018](LDM-2018-11-14.md)
+
+1. Base call syntax for default interface implementations
+2. Switch exhaustiveness and null
+
+# Upcoming meetings
 
 ## Nov 28, 2018
 
