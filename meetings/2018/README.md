@@ -224,25 +224,27 @@ Discussion of records proposals:
 
 ## Dec 3, 2018
 
+- Range indexers on arrays and strings (Immo, Andy)
+- Urgent topic of the week
 
 ## Dec 5, 2018
 
+- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Neal/Julien)
+- Generating null-check for `parameter!` (Jared)
 
 ## Dec 12, 2018
 
+- *Triage milestones*
 
 ## Dec 17, 2018
 
 
 ## Schedule ASAP
 
-- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Neal/Julien)
-- Range indexers on arrays (Andy)
 
 ## Schedule when convenient
 
 - Discussion of refreshing language spec (Neal)
-- Generating null-check for `parameter!` (Jared)
 
 ## Recurring topics
 
