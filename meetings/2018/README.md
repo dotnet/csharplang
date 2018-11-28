@@ -215,13 +215,12 @@ Discussion of records proposals:
 ## Nov 14, 2018
 
 - Base call syntax for default interface implementations (Aleksey, David, Michal)
-- Range and Index indexers - where and why? (Immo)
+- Runtime exception for switch expressions (Neal)
 
 ## Nov 28, 2018
 
 - Are nullable annotations part of array specifiers? (Neal, Chuck)
 - Cancellation of async-streams (Stephen, Julien)
-- Runtime exception for switch expressions (Neal)
 
 ## Dec 3, 2018
 
