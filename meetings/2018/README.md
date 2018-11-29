@@ -248,6 +248,7 @@ Discussion of records proposals:
 
 ## Schedule when convenient
 
+- Open issues with using-declarations (Chris)
 - Discussion of refreshing language spec (Neal)
 
 ## Recurring topics
