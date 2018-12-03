@@ -252,6 +252,7 @@ Discussion of records proposals:
 
 - Open issues with using-declarations (Chris)
 - Discussion of refreshing language spec (Neal)
+- Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
 
 ## Recurring topics
 
