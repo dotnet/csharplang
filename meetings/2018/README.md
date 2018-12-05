@@ -231,12 +231,12 @@ Discussion of records proposals:
 ## Dec 3, 2018
 
 - Range indexers on arrays and strings (Immo, Andy)
-- Urgent topic of the week
+- Open issues with using-declarations (Chris)
 
 ## Dec 5, 2018
 
 - Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Neal/Julien)
-- Generating null-check for `parameter!` (Jared)
+- ~~Generating null-check for `parameter!` (Jared, skipped)~~
 
 ## Dec 12, 2018
 
@@ -247,10 +247,11 @@ Discussion of records proposals:
 
 ## Schedule ASAP
 
+- Async-streams: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
+- Generating null-check for `parameter!` (Jared)
 
 ## Schedule when convenient
 
-- Open issues with using-declarations (Chris)
 - Discussion of refreshing language spec (Neal)
 - Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
 
