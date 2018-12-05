@@ -226,12 +226,14 @@ Discussion of records proposals:
 1. Are nullable annotations part of array specifiers?
 2. Cancellation of async-streams
 
-# Upcoming meetings
-
 ## Dec 3, 2018
 
-- Range indexers on arrays and strings (Immo, Andy)
-- Open issues with using-declarations (Chris)
+[C# Language Design Notes for Dec 3, 2018](LDM-2018-12-03.md)
+
+1. `using` declaration open issues
+2. Return type of `Range` indexer on array and FX types
+
+# Upcoming meetings
 
 ## Dec 5, 2018
 
