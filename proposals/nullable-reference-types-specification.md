@@ -49,7 +49,7 @@ primary_constraint
     ;
 ```
 
-## Null-forgiving expressions
+## The null-forgiving operator
 
 The post-fix `!` operator is called the null-forgiving operator.
 
@@ -65,6 +65,19 @@ null_forgiving_expression
 ```
 
 The `primary_expression` must be of a reference type.  
+
+The postfix `!` operator has no runtime effect - it evaluates to the result of the underlying expression. Its only role is to change the null state of the expression, and to limit warnings given on its use.
+
+## nullable implicitly typed local variables
+
+Alongside `var` it is now permitted to write `var?`.
+
+```antlr
+local_variable_type
+    : ...
+    | 'var' '?'
+    ;
+```
 
 ## Nullable compiler directives
 
@@ -129,9 +142,13 @@ The effect of the directives is as follows:
 
 # Nullability of types
 
-A `type` is deemed to occur in a given annotation context when the last token of the type is within that context.
+A given type can have one of four nullabilities: *Oblivious*, *nonnullable*, *nullable* and *unknown*. 
 
-A given type can have one of four nullabilities: *Oblivious*, *nonnullable*, *nullable* and *unknown*. *Nonnullable* and *unknown* types may yield warnings if a potential `null` value is assigned to them. Values of *nullable* and *unknown* types may yield warnings when dereferenced without proper null checking.
+*Nonnullable* and *unknown* types may cause warnings if a potential `null` value is assigned to them. *Oblivious* and *nullable* types, however, are "*null-assignable*" and can have `null` values assigned to them without warnings. 
+
+*Oblivious* and *nonnullable* types can be dereferenced or assigned without warnings. Values of *nullable* and *unknown* types, however, are "*null-yielding*" and may cause warnings when dereferenced or assigned without proper null checking. 
+
+The *default null state* of a null-yielding type is "maybe null". The default null state of a non-null-yielding type is "not null".
 
 The kind of type and the nullable annotation context it occurs in determine its nullability:
 
@@ -139,14 +156,12 @@ The kind of type and the nullable annotation context it occurs in determine its 
 - A nullable value type `S?` is always *nullable*
 - An unannotated reference type `C` in a *disabled* annotation context is *oblivious*
 - An unannotated reference type `C` in an *enabled* annotation context is *nonnullable*
-- A nullable reference type `C?` in a *disabled* annotation context is *nullable* (but a warning is yielded)
-- A nullable reference type `C?` in an *enabled* annotation context is *nullable*
+- A nullable reference type `C?` is *nullable* (but a warning may be yielded in a *disabled* annotation context)
 
 Type parameters additionally take their constraints into account:
 
-- An unconstrained type parameter `T` is *unknown*
-- A type parameter `T` where all constraints are *nullable*, *unknown* or the `class?` constraint is *unknown*
-- A type parameter `T` where at least one constraint is *oblivious* or *nonnullable* or one of the `struct` or `class` constraints is
+- A type parameter `T` where all constraints (if any) are either null-yielding types (*nullable* and *unknown*) or the `class?` constraint is *unknown*
+- A type parameter `T` where at least one constraint is either *oblivious* or *nonnullable* or one of the `struct` or `class` constraints is
     - *oblivious* in a *disabled* annotation context
     - *nonnullable* in an *enabled* annotation context
 - A nullable type parameter `T?` where at least one of `T`'s constraints is *oblivious* or *nonnullable* or one of the `struct` or `class` constraints, is
@@ -154,6 +169,12 @@ Type parameters additionally take their constraints into account:
     - *nullable* in an *enabled* annotation context
 
 For a type parameter `T`, `T?` is only allowed if `T` is known to be a value type or known to be a reference type.
+
+## Oblivious vs nonnullable
+
+A `type` is deemed to occur in a given annotation context when the last token of the type is within that context.
+
+Whether a given reference type `C` in source code is interpreted as oblivious or nonnullable depends on the annotation context of that source code. But once established, it is considered part of that type, and "travels with it" e.g. during subsitution of generic type arguments. It is as if there is an annotation like `?` on the type, but invisible.
 
 
 # Constraints
@@ -200,15 +221,16 @@ If a `simple_name` is not classified as a value, its null state is "not null". O
 
 ## Member access
 
-If a `member_access` is not classified as a value, its null state is "not null". Otherwise, if it is a tracked expression, its null state is its tracked null state at this source location. Otherwise, if the nullability of its type is nullable or unknown, the null state is "maybe null". Otherwise the null state is "not null".
+If a `member_access` is not classified as a value, its null state is "not null". Otherwise, if it is a tracked expression, its null state is its tracked null state at this source location. Otherwise its null state is the default null state of its type.
 
 ## Invocation expressions
 
-If an `invocation_expression` invokes a member that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise, if the nullability of the type of the expression is nullable or unknown, the null state is "maybe null". Otherwise the null state is "not null".
+If an `invocation_expression` invokes a member that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
 
 ## Element access
 
-If an `element_access` invokes an indexer that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise, if the nullability of the type of the expression is nullable or unknown, the null state is "maybe null". Otherwise the null state is "not null".
+If an `element_access` invokes an indexer that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
+
 
 ## Base access
 
@@ -224,41 +246,95 @@ A `null_conditional_expression` has the null state "maybe null".
 
 ## Cast expressions
 
+If a cast expression `(T)E` invokes a user-defined conversion, then the null state of the expression is the default null state for its type. Otherwise, if `T` is null-yielding (*nullable* or *unknown*) then the null state is "maybe null". Otherwise the null state is the same as the null state of `E`.
+
 ## Await expressions
 
-***More expressions***
+The null state of `await E` is the default null state of its type.
+
+## The `as` operator
+
+An `as` expression has the null state "maybe null".
+
+## The null-coalescing operator
+
+`E1 ?? E2` has the same null state as `E2`
+
+## The conditional operator
+
+The null state of `E1 ? E2 : E3` is "not null" if the null state of both `E2` and `E3` are "not null". Otherwise it is "maybe null".
+
+## Query expressions
+
+The null state of a query expression is the default null state of its type.
+
+## Assignment operators
+
+`E1 = E2` and `E1 op= E2` have the same null state as `E2` after any implicit conversions have been applied.
+
+## Unary and binary operators
+
+If a unary or binary operator invokes an user-defined operator that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
+
+***Something special to do for binary `+` over strings and delegates?***
 
 ## Expressions that propagate null state
 
-`(E)`, `E++`, `E--`, `checked(E)`, `unchecked(E)`, `+E`, `-E`, `!E`, `~E`, `++E`, `--E`,  all have the same null state as `E`.
+`(E)`, `checked(E)` and `unchecked(E)` all have the same null state as `E`.
 
 
-## Other expressions
+## Expressions that are never null
 
 The null state of the following expression forms is always "not null":
 
-- `this_access`
-- `interpolated_string_expression`
-- `object_creation_expression`
-- `delegate_creation_expression`
-- `anonymous_object_creation_expression`
-- `array_creation_expression`
-- `typeof_expression`
-- `nameof_expression`
-- `anonymous_method_expression`
-- `null_forgiving_expression`
+- `this` access
+- interpolated strings
+- `new` expressions (object, delegate, anonymous object and array creation expressions)
+- `typeof` expressions
+- `nameof` expressions
+- anonymous functions (anonymous methods and lambda expressions)
+- null-forgiving expressions
+- `is` expressions
 
+# Type inference
 
+## Type inference for `var`
 
+The type inferred for local variables declared with `var` is informed by the null state of the initializing expression.
 
-# The null-forgiving operator
+``` c#
+var x = E;
+```
 
-The postfix `!` operator has no runtime effect - it evaluates to the result of the underlying expression. Its only role is to change the null state of the expression, and to limit warnings given on its use.
+If the type of `E` is a nullable reference type `C?` and the null state of `E` is "not null" then the type inferred for `x` is `C`. Otherwise, the inferred type is the type of `E`.
+
+The nullability of the type inferred for `x` is determined as described above, based on the annotation context of the `var`, just as if the type had been given explicitly in that position.
+
+## Type inference for `var`
+
+The type inferred for local variables declared with `var?` is independent of the null state of the initializing expression.
+
+```c#
+var? x = E;
+```
+
+If the type `T` of `E` is a nullable value type or a nullable reference type then the type inferred for `x` is `T`. Otherwise, if `T` is a nonnullable value type `S` the type inferred is `S?`. Otherwise, if `T` is a nonnullable reference type `C` the type inferred is `C?`. Otherwise, the declaration is illegal.
+
+The nullability of the type inferred for `x` is always *nullable*.
+
+## Generic type inference
+
 
 # Warnings
 
+## Potential null assignment
 
-# Type inference
+## Potential null dereference
+
+## Constraint nullability mismatch
+
+## Nullable types in disabled annotation context
+
 
 
 # Attributes for special null behavior
