@@ -310,7 +310,7 @@ If the type of `E` is a nullable reference type `C?` and the null state of `E` i
 
 The nullability of the type inferred for `x` is determined as described above, based on the annotation context of the `var`, just as if the type had been given explicitly in that position.
 
-## Type inference for `var`
+## Type inference for `var?`
 
 The type inferred for local variables declared with `var?` is independent of the null state of the initializing expression.
 
