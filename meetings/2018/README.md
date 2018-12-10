@@ -233,12 +233,13 @@ Discussion of records proposals:
 1. `using` declaration open issues
 2. Return type of `Range` indexer on array and FX types
 
-# Upcoming meetings
-
 ## Dec 5, 2018
 
-- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Neal/Julien)
-- ~~Generating null-check for `parameter!` (Jared, skipped)~~
+[C# Language Design Notes for Dec 5, 2018](LDM-2018-12-05.md)
+
+- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis
+
+# Upcoming meetings
 
 ## Dec 12, 2018
 - Async-streams: misc questions, including: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
@@ -248,3 +249,19 @@ Discussion of records proposals:
 ## Dec 17, 2018
 
 - Review the [Nullable Reference Types Specification](https://github.com/dotnet/csharplang/blob/master/proposals/nullable-reference-types-specification.md)
+
+## Schedule ASAP
+
+- Async-streams: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
+- Generating null-check for `parameter!` (Jared)
+
+## Schedule when convenient
+
+- Discussion of refreshing language spec (Neal)
+- Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
+
+## Recurring topics
+
+- *Triage championed features*
+- *Triage milestones*
+- *Design review*
