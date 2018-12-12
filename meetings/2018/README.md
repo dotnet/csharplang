@@ -246,6 +246,7 @@ Discussion of records proposals:
 
 ## Dec 17, 2018
 
+- Review the [Nullable Reference Types Specification](https://github.com/dotnet/csharplang/blob/master/proposals/nullable-reference-types-specification.md)
 
 ## Schedule ASAP
 
