@@ -241,16 +241,16 @@ Discussion of records proposals:
 - ~~Generating null-check for `parameter!` (Jared, skipped)~~
 
 ## Dec 12, 2018
-
-- *Triage milestones*
+- Async-streams: misc questions, including: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
+- Compat issue with Dispose pattern in `foreach`
+- ~~*Triage milestones* (skipped)~~
 
 ## Dec 17, 2018
 
 - Review the [Nullable Reference Types Specification](https://github.com/dotnet/csharplang/blob/master/proposals/nullable-reference-types-specification.md)
 
 ## Schedule ASAP
-
-- Async-streams: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
+- Nullable: never null warning 
 - Generating null-check for `parameter!` (Jared)
 
 ## Schedule when convenient
