@@ -365,7 +365,7 @@ To handle this we add more phases to fixing, which is now:
 3. Eliminate candidates that do not have an implicit conversion to all the other candidates
 4. If the remaining candidates do not all have identity conversions to one another, then type inference fails
 5. *Merge* the remaining candidates as described below
-6. If the resulting candidate is a reference type and any of the *all* of the exact bounds or *any* of the lower bounds are nullable value types, nullable reference types, `null` or `default`, then `?` is added to the resulting candidate.
+6. If the resulting candidate is a reference type or a nonnullable value type and *all* of the exact bounds or *any* of the lower bounds are nullable value types, nullable reference types, `null` or `default`, then `?` is added to the resulting candidate, making it a nullable value type or reference type.
 
 (Describe merge rules)
 
