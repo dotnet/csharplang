@@ -324,6 +324,51 @@ The nullability of the type inferred for `x` is always *nullable*.
 
 ## Generic type inference
 
+Generic type inference is enhanced to help decide whether inferred reference types should be nullable or not. This is a best effort, and does not in and of itself yield warnings, but may lead to nullable warnings when the inferred types of the selected overload are applied to the arguments.
+
+The type inference does not rely on the annotation context of incoming types. Instead a `type` is inferred which acquires its own annotation context from where it "would have been" if it had been expressed explicitly. This underscores the role of type inference as a convenience for what you could have written yourself.
+
+More precisely, the annotation context for an inferred type argument is the context of the token that would have been followed by the `<...>` type parameter list, had there been one; i.e. the name of the generic method being called. For query expressions that translate to such calls, the context is taken from the initial contextual keyword of the query clause from which the call is generated.
+
+## The first phase
+
+Nullable reference types flow into the bounds from the initial expressions, as described below. In addition, two new kinds of bounds, namely `null` and `default` are introduced. Their purpose is to carry through occurrences of `null` or `default` in the input expressions, which may cause an inferred type to be nullable, even when it otherwise wouldn't. This works even for nullable *value* types, which are enhanced to pick up "nullness" in the inference process.
+
+The determination of what bounds to add in the first phase are enhanced as follows:
+
+If an argument `Ei` has a reference type, the type `U` used for inference depends on the null state of `Ei` as well as its declared type:
+- If the declared type is a nonnullable reference type `U0` or a nullable reference type `U0?` then
+    - if the null state of `Ei` is "not null" then `U` is `U0`
+    - if the null state of `Ei` is "maybe null" then `U` is `U0?`
+- Otherwise if `Ei` has a declared type, `U` is that type
+- Otherwise if `Ei` is `null` then `U` is the special bound `null`
+- Otherwise if `Ei` is `default` then `U` is the special bound `default`
+- Otherwise no inference is made.
+
+## Exact, upper-bound and lower-bound inferences
+
+In inferences *from* the type `U` *to* the type `V`, if `V` is a nullable reference type `V0?`, then `V0` is used instead of `V` in the following clauses.
+- If `V` is one of the unfixed type variables, `U` is added as an exact, upper or lower bound as before
+- Otherwise, if `U` is `null` or `default`, no inference is made
+- Otherwise, if `U` is a nullable reference type `U0?`, then `U0` is used instead of `U` in the subsequent clauses.
+
+The essence is that nullability that pertains directly to one of the unfixed type variables is preserved into its bounds. For the inferences that recurse further into the source and target types, on the other hand, nullability is ignored. It may or may not match, but if it doesn't, a warning will be issued later if the overload is chosen and applied.
+
+## Fixing
+
+The spec currently does not do a good job of describing what happens when multiple bounds are identity convertible to each other, but are different. This may happen between `object` and `dynamic`, between tuple types that differ only in element names, between types constructed thereof and now also between `C` and `C?` for reference types.
+
+To handle this we add more phases to fixing, which is now:
+
+1. Gather all the types in all the bounds as candidates, removing `?` from all that are nullable reference types
+2. Eliminate candidates based on requirements of exact, lower and upper bounds (ignoring `null` and `default` bounds)
+3. Eliminate candidates that do not have an implicit conversion to all the other candidates
+4. If the remaining candidates do not all have identity conversions to one another, then type inference fails
+5. *Merge* the remaining candidates as described below
+6. If the resulting candidate is a reference type or a nonnullable value type and *all* of the exact bounds or *any* of the lower bounds are nullable value types, nullable reference types, `null` or `default`, then `?` is added to the resulting candidate, making it a nullable value type or reference type.
+
+(Describe merge rules)
+
 
 # Warnings
 
