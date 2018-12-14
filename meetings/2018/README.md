@@ -197,52 +197,68 @@ Discussion of records proposals:
 
 [C# Language Design Notes for Oct 29, 2018](LDM-2018-10-29.md)
 
-### Agenda
-
 - [Source-level opt-in to nullable reference types](https://github.com/dotnet/csharplang/issues/1939)
 
-# Upcoming meetings
-
 ## Oct 31, 2018
+
+[C# Language Design Notes for Oct 31, 2018](LDM-2018-10-31.md)
 
 - *Design review*
 
 ## Nov 5, 2018
 
-- Where can `#nullable` go? (Chuck, Fred)
-- Open issues with pattern matching (Neal)
+[C# Language Design Notes for Nov 5, 2018](LDM-2018-11-05.md)
+
+1. Where can #nullable go?
+2. Open issues with pattern matching
 
 ## Nov 14, 2018
 
-- Base call syntax for default interface implementations (Aleksey, David, Michal)
-- Runtime exception for switch expressions (Neal)
+[C# Language Design Notes for Nov 14, 2018](LDM-2018-11-14.md)
+
+1. Base call syntax for default interface implementations
+2. Switch exhaustiveness and null
 
 ## Nov 28, 2018
 
-- Are nullable annotations part of array specifiers? (Neal, Chuck)
-- Cancellation of async-streams (Stephen, Julien)
+[C# Language Design Notes for Nov 28, 2018](LDM-2018-11-28.md)
+
+1. Are nullable annotations part of array specifiers?
+2. Cancellation of async-streams
 
 ## Dec 3, 2018
 
+[C# Language Design Notes for Dec 3, 2018](LDM-2018-12-03.md)
+
+1. `using` declaration open issues
+2. Return type of `Range` indexer on array and FX types
+
+# Upcoming meetings
 
 ## Dec 5, 2018
 
+- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Neal/Julien)
+- ~~Generating null-check for `parameter!` (Jared, skipped)~~
 
 ## Dec 12, 2018
-
+- Async-streams: misc questions, including: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
+- Compat issue with Dispose pattern in `foreach`
+- ~~*Triage milestones* (skipped)~~
 
 ## Dec 17, 2018
 
+- Review the [Nullable Reference Types Specification](https://github.com/dotnet/csharplang/blob/master/proposals/nullable-reference-types-specification.md)
 
 ## Schedule ASAP
-
-- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Neal/Julien)
-- Range indexers on arrays (Andy)
+- Nullable: never null warning 
+- Async-streams: re-discuss pattern-based `await foreach` (Stephen)
+- Generating null-check for `parameter!` (Jared)
+- Nullable: re-discuss uninitialized field warnings
 
 ## Schedule when convenient
 
 - Discussion of refreshing language spec (Neal)
-- Generating null-check for `parameter!` (Jared)
+- Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
 
 ## Recurring topics
 
