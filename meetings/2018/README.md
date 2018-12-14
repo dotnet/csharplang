@@ -253,6 +253,7 @@ Discussion of records proposals:
 - Nullable: never null warning 
 - Async-streams: re-discuss pattern-based `await foreach` (Stephen)
 - Generating null-check for `parameter!` (Jared)
+- Nullable: re-discuss uninitialized field warnings
 
 ## Schedule when convenient
 
