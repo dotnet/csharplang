@@ -251,6 +251,7 @@ Discussion of records proposals:
 
 ## Schedule ASAP
 - Nullable: never null warning 
+- Async-streams: re-discuss pattern-based `await foreach` (Stephen)
 - Generating null-check for `parameter!` (Jared)
 
 ## Schedule when convenient
