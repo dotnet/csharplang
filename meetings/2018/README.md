@@ -239,12 +239,14 @@ Discussion of records proposals:
 
 - Tracked nullable states, their correspondance to source and the rules they follow in flow analysis
 
-# Upcoming meetings
-
 ## Dec 12, 2018
-- Async-streams: misc questions, including: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
+
+[C# Language Design Notes for Dec 5, 2018](LDM-2018-12-12.md)
+
+- Async-streams misc. questions
 - Compat issue with Dispose pattern in `foreach`
-- ~~*Triage milestones* (skipped)~~
+
+# Upcoming meetings
 
 ## Dec 17, 2018
 
