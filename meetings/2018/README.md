@@ -254,6 +254,7 @@ Discussion of records proposals:
 - Async-streams: re-discuss pattern-based `await foreach` (Stephen)
 - Generating null-check for `parameter!` (Jared)
 - Nullable: re-discuss uninitialized field warnings
+- Nullable: What warnings if any should be reported about nullable mismatch for overrides/implements. What constitutes a mismatch. (https://github.com/dotnet/roslyn/issues/23268) (Aleksey)
 
 ## Schedule when convenient
 
