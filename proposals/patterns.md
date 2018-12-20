@@ -16,7 +16,6 @@ The `is` operator is extended to test an expression against a *pattern*.
 relational_expression
     : is_pattern_expression
     ;
-
 is_pattern_expression
     : relational_expression 'is' pattern
     ;
@@ -26,51 +25,55 @@ This form of *relational_expression* is in addition to the existing forms in the
 
 Every *identifier* of the pattern introduces a new local variable that is *definitely assigned* after the `is` operator is `true` (i.e. *definitely assigned when true*).
 
+> Note: There is technically an ambiguity between *type* in an `is-expression` and *constant_pattern*, either of which might be a valid parse of a qualified identifier. We try to bind it as a type for compatibility with previous versions of the language; only if that fails do we resolve it as we do an expression in other contexts, to the first thing found (which must be either a constant or a type). This ambiguity is only present on the right-hand-side of an `is` expression.
+
 ### Patterns
 
 Patterns are used in the *is_pattern* operator, in a *switch_statement*, and in a *switch_expression* to express the shape of data against which incoming data  (which we call the input value) is to be compared. Patterns may be recursive so that parts of the data may be matched against sub-patterns.
 
 ```antlr
 pattern
-	: declaration_pattern
-	| constant_pattern
+    : declaration_pattern
+    | constant_pattern
     | var_pattern
-	| deconstruction_pattern
-	| property_pattern
-	;
+    | deconstruction_pattern
+    | property_pattern
+    | discard_pattern
+    ;
 declaration_pattern
-	: type simple_designation
-	;
+    : type simple_designation
+    ;
 constant_pattern
-	: expression
-	;
+    : expression
+    ;
 var_pattern
     : 'var' designation
     ;
 deconstruction_pattern
-	: type? '(' subpatterns? ')' property_subpattern? simple_designation?
-	;
+    : type? '(' subpatterns? ')' property_subpattern? simple_designation?
+    ;
 subpatterns
-	: subpattern
-	| subpattern ',' subpatterns
-	;
+    : subpattern
+    | subpattern ',' subpatterns
+    ;
 subpattern
-	: pattern
-	| identifier ':' pattern
-	;
+    : pattern
+    | identifier ':' pattern
+    ;
 property_subpattern
-	: '{' subpatterns? '}'
-	;
+    : '{' subpatterns? '}'
+    ;
 property_pattern
-	: type? property_subpattern simple_designation?
-	;
+    : type? property_subpattern simple_designation?
+    ;
 simple_designation
-	: single_variable_designation
-	| discard_designation
-	;
+    : single_variable_designation
+    | discard_designation
+    ;
+discard_pattern
+    : '_'
+    ;
 ```
-
-> Note: There is technically an ambiguity between *type* in an `is-expression` and *constant_pattern*, either of which might be a valid parse of a qualified identifier. We try to bind it as a type for compatibility with previous versions of the language; only if that fails do we resolve it as we do an expression in other contexts, to the first thing found (which must be either a constant or a type). This ambiguity is only present on the right-hand-side of an `is` expression.
 
 #### Declaration Pattern
 
@@ -84,7 +87,7 @@ The *declaration_pattern* both tests that an expression is of a given type and c
 
 The runtime semantic of this expression is that it tests the runtime type of the left-hand *relational_expression* operand against the *type* in the pattern.  If it is of that runtime type (or some subtype) and not `null`, the result of the `is operator` is `true`.
 
-Certain combinations of static type of the left-hand-side and the given type are considered incompatible and result in compile-time error. A value of static type `E` is said to be *pattern compatible* with the type `T` if there exists an identity conversion, an implicit reference conversion, a boxing conversion, an explicit reference conversion, or an unboxing conversion from `E` to `T`, or if one of those types is an open type. It is a compile-time error if an input of type `E` is not pattern compatible with the type in a type pattern that it is matched with.
+Certain combinations of static type of the left-hand-side and the given type are considered incompatible and result in compile-time error. A value of static type `E` is said to be *pattern-compatible* with a type `T` if there exists an identity conversion, an implicit reference conversion, a boxing conversion, an explicit reference conversion, or an unboxing conversion from `E` to `T`, or if one of those types is an open type. It is a compile-time error if an input of type `E` is not *pattern-compatible* with the *type* in a type pattern that it is matched with.
 
 The type pattern is useful for performing run-time type tests of reference types, and replaces the idiom
 
@@ -118,9 +121,11 @@ constant_pattern
     ;
 ```
 
-A constant pattern tests the value of an expression against a constant value. The constant may be any constant expression, such as a literal, the name of a declared `const` variable, or an enumeration constant. When the input value is not an open type, the constant expression is implicitly converted to the type of the matched expression; if the type of the input value is not *pattern compatible* with the type of the constant expression, the pattern-matching operation is an error.
+A constant pattern tests the value of an expression against a constant value. The constant may be any constant expression, such as a literal, the name of a declared `const` variable, or an enumeration constant. When the input value is not an open type, the constant expression is implicitly converted to the type of the matched expression; if the type of the input value is not *pattern-compatible* with the type of the constant expression, the pattern-matching operation is an error.
 
 The pattern *c* is considered matching the converted input value *e* if `object.Equals(c, e)` would return `true`.
+
+We expect to see `e is null` as the most common way to test for `null` in newly written code, as it cannot invoke a user-defined `operator==`.
 
 #### Var Pattern
 
@@ -133,9 +138,9 @@ designation
     | tuple_designation
     ;
 simple_designation
-	: single_variable_designation
-	| discard_designation
-	;
+    : single_variable_designation
+    | discard_designation
+    ;
 single_variable_designation
     : identifier
     ;
@@ -143,7 +148,7 @@ discard_designation
     : _
     ;
 tuple_designation
-    : '(' desginations? ')'
+    : '(' designations? ')'
     ;
 designations
     : designation
@@ -159,6 +164,12 @@ It is an error if the name `var` binds to a type.
 
 #### Discard Pattern
 
+```antlr
+discard_pattern
+    : '_'
+    ;
+```
+
 An expression *e* matches the pattern `_` always. In other words, every expression matches the discard pattern.
 
 A discard pattern may not be used as the pattern of an *is_pattern_expression*.
@@ -169,16 +180,16 @@ A deconstruction pattern checks that the input value is not `null`, invokes an a
 
 ```antlr
 deconstruction_pattern
-	: type? '(' subpatterns? ')' property_subpattern? simple_designation?
-	;
+    : type? '(' subpatterns? ')' property_subpattern? simple_designation?
+    ;
 subpatterns
-	: subpattern
-	| subpattern ',' subpatterns
-	;
+    : subpattern
+    | subpattern ',' subpatterns
+    ;
 subpattern
-	: pattern
-	| identifier ':' pattern
-	;
+    : pattern
+    | identifier ':' pattern
+    ;
 ```
 
 If the *type* is omitted, we take it to be the static type of the input value.
@@ -189,11 +200,24 @@ It is an error if a *deconstruction_pattern* omits the type, has a single *subpa
 
 In order to extract the values to match against the patterns in the list,
 - If *type* was omitted and the input value's type is a tuple type, then the number of subpatterns is required to be the same as the cardinality of the tuple. Each tuple element is matched against the corresponding *subpattern*, and the match succeeds if all of these succeed. If any *subpattern* has an *identifier*, then that must name a tuple element at the corresponding position in the tuple type.
-- Otherwise, if a suitable `Deconstruct` exists as a member of *type*, it is a compile-time error if the type of the input value is not *pattern compatible* with *type*. At runtime the input value is tested against *type*. If this fails then the positional pattern match fails. If it succeeds,  the input value is converted to this type and `Deconstruct` is invoked with fresh compiler-generated variables to receive the `out` parameters. Each value that was received is matched against the corresponding *subpattern*, and the match succeeds if all of these succeed. If any *subpattern* has an *identifier*, then that must name a parameter at the corresponding position of `Deconstruct`.
+- Otherwise, if a suitable `Deconstruct` exists as a member of *type*, it is a compile-time error if the type of the input value is not *pattern-compatible* with *type*. At runtime the input value is tested against *type*. If this fails then the positional pattern match fails. If it succeeds,  the input value is converted to this type and `Deconstruct` is invoked with fresh compiler-generated variables to receive the `out` parameters. Each value that was received is matched against the corresponding *subpattern*, and the match succeeds if all of these succeed. If any *subpattern* has an *identifier*, then that must name a parameter at the corresponding position of `Deconstruct`.
 - Otherwise if *type* was omitted, and the input value is of type `object` or `ITuple` or some type that can be converted to `ITuple` by an implicit reference conversion, and no *identifier* appears among the subpatterns, then we match using `ITuple`.
 - Otherwise the pattern is a compile-time error.
 
 The order in which subpatterns are matched at runtime is unspecified, and a failed match may not attempt to match all subpatterns.
+
+##### Example
+
+This example uses many of the features described in this specification
+
+``` c#
+    var newState = (GetState(), action, hasKey) switch {
+        (DoorState.Closed, Action.Open, _) => DoorState.Opened,
+        (DoorState.Opened, Action.Close, _) => DoorState.Closed,
+        (DoorState.Closed, Action.Lock, true) => DoorState.Locked,
+        (DoorState.Locked, Action.Unlock, true) => DoorState.Closed,
+        (var state, _, _) => state };
+```
 
 #### Property Pattern
 
@@ -201,11 +225,11 @@ A property pattern checks that the input value is not `null` and recursively mat
 
 ```antlr
 property_pattern
-	: type? property_subpattern simple_designation?
-	;
+    : type? property_subpattern simple_designation?
+    ;
 property_subpattern
-	: '{' subpatterns? '}'
-	;
+    : '{' subpatterns? '}'
+    ;
 ```
 
 It is an error if any _subpattern_ of a _property_pattern_ does not contain an _identifier_ (it must be of the second form, which has an _identifier_).
@@ -219,15 +243,21 @@ if (s is {} x) ... // x is of type string
 if (s is {}) ...
 ```
 
-Given a match of an expression *e* to the pattern *type* `{` *property_pattern_list* `}`, it is a compile-time error if the expression *e* is not *pattern compatible* with the type *T* designated by *type*. If the type is absent, we take it to be the static type of *e*. If the *identifier* is present, it declares a pattern variable of type *type*. Each of the identifiers appearing on the left-hand-side of its *property_pattern_list* must designate an accessible readable property or field of *T*. If the *simple_designation* of the *property_pattern* is present, it defines a pattern variable of type *T*.
+Given a match of an expression *e* to the pattern *type* `{` *property_pattern_list* `}`, it is a compile-time error if the expression *e* is not *pattern-compatible* with the type *T* designated by *type*. If the type is absent, we take it to be the static type of *e*. If the *identifier* is present, it declares a pattern variable of type *type*. Each of the identifiers appearing on the left-hand-side of its *property_pattern_list* must designate an accessible readable property or field of *T*. If the *simple_designation* of the *property_pattern* is present, it defines a pattern variable of type *T*.
 
 At runtime, the expression is tested against *T*. If this fails then the property pattern match fails and the result is `false`. If it succeeds, then each *property_subpattern* field or property is read and its value matched against its corresponding pattern. The result of the whole match is `false` only if the result of any of these is `false`. The order in which subpatterns are matched is not specified, and a failed match may not match all subpatterns at runtime. If the match succeeds and the *simple_designation* of the *property_pattern* is a *single_variable_designation*, it defines a variable of type *T* that is assigned the matched value.
 
 > Note: The property pattern can be used to pattern-match with anonymous types.
 
-### Match Expression
+##### Example
 
-A *match_expression* is added to support `switch`-like semantics for an expression context.
+``` c#
+    if (o is string { Length: 5 } s)
+```
+
+### Switch Expression
+
+A *switch_expression* is added to support `switch`-like semantics for an expression context.
 
 The C# language syntax is augmented with the following syntactic productions:
 
@@ -235,20 +265,16 @@ The C# language syntax is augmented with the following syntactic productions:
 relational_expression
     : switch_expression
     ;
-
 switch_expression
     : relational_expression 'switch' '{' switch_expression_arms? '}'
     ;
-
 switch_expression_arms
-	: switch_expression_arm
-	| switch_expression_arm ',' switch_expression_arm
-	;
-
+    : switch_expression_arm
+    | switch_expression_arm ',' switch_expression_arm
+    ;
 switch_expression_arm
     : pattern case_guard? '=>' null_coalescing_expression
     ;
-
 case_guard
     : 'when' null_coalescing_expression
     ;
