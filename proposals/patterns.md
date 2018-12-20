@@ -16,7 +16,6 @@ The `is` operator is extended to test an expression against a *pattern*.
 relational_expression
     : is_pattern_expression
     ;
-
 is_pattern_expression
     : relational_expression 'is' pattern
     ;
@@ -34,43 +33,43 @@ Patterns are used in the *is_pattern* operator, in a *switch_statement*, and in 
 
 ```antlr
 pattern
-	: declaration_pattern
-	| constant_pattern
+    : declaration_pattern
+    | constant_pattern
     | var_pattern
-	| deconstruction_pattern
-	| property_pattern
+    | deconstruction_pattern
+    | property_pattern
     | discard_pattern
-	;
+    ;
 declaration_pattern
-	: type simple_designation
-	;
+    : type simple_designation
+    ;
 constant_pattern
-	: expression
-	;
+    : expression
+    ;
 var_pattern
     : 'var' designation
     ;
 deconstruction_pattern
-	: type? '(' subpatterns? ')' property_subpattern? simple_designation?
-	;
+    : type? '(' subpatterns? ')' property_subpattern? simple_designation?
+    ;
 subpatterns
-	: subpattern
-	| subpattern ',' subpatterns
-	;
+    : subpattern
+    | subpattern ',' subpatterns
+    ;
 subpattern
-	: pattern
-	| identifier ':' pattern
-	;
+    : pattern
+    | identifier ':' pattern
+    ;
 property_subpattern
-	: '{' subpatterns? '}'
-	;
+    : '{' subpatterns? '}'
+    ;
 property_pattern
-	: type? property_subpattern simple_designation?
-	;
+    : type? property_subpattern simple_designation?
+    ;
 simple_designation
-	: single_variable_designation
-	| discard_designation
-	;
+    : single_variable_designation
+    | discard_designation
+    ;
 discard_pattern
     : '_'
     ;
@@ -181,16 +180,16 @@ A deconstruction pattern checks that the input value is not `null`, invokes an a
 
 ```antlr
 deconstruction_pattern
-	: type? '(' subpatterns? ')' property_subpattern? simple_designation?
-	;
+    : type? '(' subpatterns? ')' property_subpattern? simple_designation?
+    ;
 subpatterns
-	: subpattern
-	| subpattern ',' subpatterns
-	;
+    : subpattern
+    | subpattern ',' subpatterns
+    ;
 subpattern
-	: pattern
-	| identifier ':' pattern
-	;
+    : pattern
+    | identifier ':' pattern
+    ;
 ```
 
 If the *type* is omitted, we take it to be the static type of the input value.
@@ -226,11 +225,11 @@ A property pattern checks that the input value is not `null` and recursively mat
 
 ```antlr
 property_pattern
-	: type? property_subpattern simple_designation?
-	;
+    : type? property_subpattern simple_designation?
+    ;
 property_subpattern
-	: '{' subpatterns? '}'
-	;
+    : '{' subpatterns? '}'
+    ;
 ```
 
 It is an error if any _subpattern_ of a _property_pattern_ does not contain an _identifier_ (it must be of the second form, which has an _identifier_).
@@ -266,20 +265,16 @@ The C# language syntax is augmented with the following syntactic productions:
 relational_expression
     : switch_expression
     ;
-
 switch_expression
     : relational_expression 'switch' '{' switch_expression_arms? '}'
     ;
-
 switch_expression_arms
-	: switch_expression_arm
-	| switch_expression_arm ',' switch_expression_arm
-	;
-
+    : switch_expression_arm
+    | switch_expression_arm ',' switch_expression_arm
+    ;
 switch_expression_arm
     : pattern case_guard? '=>' null_coalescing_expression
     ;
-
 case_guard
     : 'when' null_coalescing_expression
     ;
