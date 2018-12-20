@@ -280,15 +280,15 @@ case_guard
     ;
 ```
 
-The *match_expression* is not allowed as an *expression_statement*.
+The *switch_expression* is not allowed as an *expression_statement*.
 
 > We are looking at relaxing this in a future revision.
 
-The type of the *match_expression* is the *best common type* of the expressions appearing to the right of the `=>` tokens of the *switch_expression_arm*s.
+The type of the *switch_expression* is the *best common type* of the expressions appearing to the right of the `=>` tokens of the *switch_expression_arm*s.
 
 It is an error if the compiler proves (using a set of techniques that has not yet been specified) that some *switch_expression_arm*'s pattern cannot affect the result because some previous pattern will always match. The compiler shall produce a warning if it proves (using those techniques) that some possible input value might not match some *switch_expression_arm* at runtime.
 
-At runtime, the result of the *match_expression* is the value of the *expression* of the first *switch_expression_arm* for which the expression on the left-hand-side of the *match_expression* matches the *switch_expression_arm*'s pattern, and for which the *case_guard* of the *switch_expression_arm*, if present, evaluates to `true`. If there is no such *switch_expression_arm*, the *switch_expression* throws an instance of the exception `System.Runtime.CompilerServices.SwitchExpressionException`.
+At runtime, the result of the *switch_expression* is the value of the *expression* of the first *switch_expression_arm* for which the expression on the left-hand-side of the *switch_expression* matches the *switch_expression_arm*'s pattern, and for which the *case_guard* of the *switch_expression_arm*, if present, evaluates to `true`. If there is no such *switch_expression_arm*, the *switch_expression* throws an instance of the exception `System.Runtime.CompilerServices.SwitchExpressionException`.
 
 ### Optional parens which switching on a tuple literal
 
