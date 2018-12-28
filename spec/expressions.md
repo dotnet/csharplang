@@ -923,8 +923,8 @@ This section describes the process that takes place at run-time to invoke a part
 
 For purposes of describing the invocation process, function members are divided into two categories:
 
-*  Static function members. These are instance constructors, static methods, static property accessors, and user-defined operators. Static function members are always non-virtual.
-*  Instance function members. These are instance methods, instance property accessors, and indexer accessors. Instance function members are either non-virtual or virtual, and are always invoked on a particular instance. The instance is computed by an instance expression, and it becomes accessible within the function member as `this` ([This access](expressions.md#this-access)).
+*  Static function members. These are static methods, static property accessors, and user-defined operators. Static function members are always non-virtual.
+*  These are instance methods, instance constructors, instance property accessors, and indexer accessors. Instance function members are either non-virtual or virtual, and are always invoked on a particular instance. The instance is computed by an instance expression, and it becomes accessible within the function member `this` ([This access](expressions.md#this-access)). For an instance constructor, the instance expression is taken to be the newly allocated object.
 
 The run-time processing of a function member invocation consists of the following steps, where `M` is the function member and, if `M` is an instance member, `E` is the instance expression:
 
