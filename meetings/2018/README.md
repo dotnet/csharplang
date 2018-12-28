@@ -250,6 +250,7 @@ Discussion of records proposals:
 - Review the [Nullable Reference Types Specification](https://github.com/dotnet/csharplang/blob/master/proposals/nullable-reference-types-specification.md)
 
 ## Schedule ASAP
+- Recursive Patterns Open Language Issues https://github.com/dotnet/csharplang/issues/2095
 - Nullable: never null warning 
 - Async-streams: re-discuss pattern-based `await foreach` (Stephen)
 - Generating null-check for `parameter!` (Jared)
