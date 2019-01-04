@@ -4,13 +4,32 @@ Overview of meetings and agendas for 2019
 
 ## No meetings yet
 
-## Schedule ASAP
-- Recursive Patterns Open Language Issues https://github.com/dotnet/csharplang/issues/2095
+# Upcoming meetings
+
+## Jan 7, 2019
+
 - Nullable: never null warning 
-- Async-streams: re-discuss pattern-based `await foreach` (Stephen)
-- Generating null-check for `parameter!` (Jared)
 - Nullable: re-discuss uninitialized field warnings
 - Nullable: What warnings if any should be reported about nullable mismatch for overrides/implements. What constitutes a mismatch. (https://github.com/dotnet/roslyn/issues/23268, https://github.com/dotnet/roslyn/issues/30958) (Aleksey)
+
+## Jan 9, 2019
+
+- Async-streams: re-discuss pattern-based `await foreach` (Stephen)
+- Recursive Patterns Open Language Issues https://github.com/dotnet/csharplang/issues/2095
+
+## Jan 14, 2019
+
+- Generating null-check for `parameter!` (Jared)
+
+## Jan 16, 2019
+
+## Jan 23, 2019
+
+## Feb 11, 2019
+
+## Feb 13, 2019
+
+## Schedule ASAP
 
 ## Schedule when convenient
 
