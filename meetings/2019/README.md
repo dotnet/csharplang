@@ -36,6 +36,7 @@ Overview of meetings and agendas for 2019
 - Discussion of refreshing language spec (Neal)
 - Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
 - Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
+- Confirm shadowing rules for local functions (Chuck/Julien)
 
 ## Recurring topics
 
