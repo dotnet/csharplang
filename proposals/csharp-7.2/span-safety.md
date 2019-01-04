@@ -185,13 +185,15 @@ An lvalue designating a reference to a field, `e.F`, is *ref-safe-to-escape* (by
 
 An rvalue designating a reference to a field, `e.F`, has a *safe-to-escape* scope that is the same as the *safe-to-escape* of `e`.
 
-## ?: and other multi-operand operators
+## Operators including `?:`
 
-For an operator with multiple operands that yields an rvalue, such as `e1 + e2` or `c ? e1 : e2`, the *safe-to-escape* of the result is the narrowest scope among the *safe-to-escape* of the operands of the operator.
+The application of a user-defined operator is treated as a method invocation.
 
-For an operator with multiple operands that yields an lvalue, such as `c ? ref e1 : ref e2`, the *ref-safe-to-escape* of the result is the narrowest scope among the *ref-safe-to-escape* of the operands of the operator.
+For an operator that yields an rvalue, such as `e1 + e2` or `c ? e1 : e2`, the *safe-to-escape* of the result is the narrowest scope among the *safe-to-escape* of the operands of the operator.  As a consequence, for a unary operator that yields an rvalue, such as `+e`, the *safe-to-escape* of the result is the *safe-to-escape* of the operand.
 
-For an operator with multiple operands that yields an lvalue, such as `c ? ref e1 : ref e2`, the *safe-to-escape* of the operands must agree, and that is the *safe-to-escape* of the resulting lvalue.
+For an operator that yields an lvalue, such as `c ? ref e1 : ref e2`
+- the *ref-safe-to-escape* of the result is the narrowest scope among the *ref-safe-to-escape* of the operands of the operator.
+- the *safe-to-escape* of the operands must agree, and that is the *safe-to-escape* of the resulting lvalue.
 
 ## Method invocation
 
@@ -217,10 +219,6 @@ An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape*
 
 ## An Rvalue
 An rvalue is *ref-safe-to-escape* from the nearest enclosing scope. This occurs for example in an invocation such as `M(ref d.Length)` where `d` is of type `dynamic`. It is also consistent with (and perhaps subsumes) our handling of arguments corresponding to `in` parameters.*
-
-## Operator invocations
-
-The application of a user-defined operator is treated as a method invocation.
 
 ## Property invocations
 
