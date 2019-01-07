@@ -241,7 +241,7 @@ Discussion of records proposals:
 
 ## Dec 12, 2018
 
-[C# Language Design Notes for Dec 5, 2018](LDM-2018-12-12.md)
+[C# Language Design Notes for Dec 12, 2018](LDM-2018-12-12.md)
 
 - Async-streams misc. questions
 - Compat issue with Dispose pattern in `foreach`
