@@ -252,16 +252,6 @@ Discussion of records proposals:
 
 - Review the [Nullable Reference Types Specification](https://github.com/dotnet/csharplang/blob/master/proposals/nullable-reference-types-specification.md)
 
-## Schedule ASAP
-
-- Async-streams: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
-- Generating null-check for `parameter!` (Jared)
-
-## Schedule when convenient
-
-- Discussion of refreshing language spec (Neal)
-- Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
-
 ## Recurring topics
 
 - *Triage championed features*
