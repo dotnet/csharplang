@@ -11,6 +11,7 @@ Overview of meetings and agendas for 2019
 - Nullable: never null warning 
 - Nullable: re-discuss uninitialized field warnings
 - Nullable: What warnings if any should be reported about nullable mismatch for overrides/implements. What constitutes a mismatch. (https://github.com/dotnet/roslyn/issues/23268, https://github.com/dotnet/roslyn/issues/30958) (Aleksey)
+- Nullable: Breaking change in parsing array specifiers (https://github.com/dotnet/roslyn/issues/32141) (Neal)
 
 ## Jan 9, 2019
 
