@@ -543,7 +543,7 @@ type_argument
 
 In unsafe code ([Unsafe code](unsafe-code.md)), a *type_argument* may not be a pointer type. Each type argument must satisfy any constraints on the corresponding type parameter ([Type parameter constraints](classes.md#type-parameter-constraints)).
 
-### Open and closed types
+### Open and closed types (open generics)
 
 All types can be classified as either ***open types*** or ***closed types***. An open type is a type that involves type parameters. More specifically:
 
