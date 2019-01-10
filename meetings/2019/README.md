@@ -34,14 +34,17 @@
 -	Nullable: never null warning
 - Generating null-check for `parameter!` (Jared)
 
-## Jan 9, 2019
-
-- Async-streams: re-discuss pattern-based `await foreach` (Stephen)
-- Recursive Patterns Open Language Issues https://github.com/dotnet/csharplang/issues/2095
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Jan 9, 2019
+
+[C# Language Design Notes for Jan 9, 2019](LDM-2019-01-09.md)
+
+1. GetAsyncEnumerator signature
+2. Ambiguities in nullable array type syntax
+2. Recursive Patterns Open Language Issues https://github.com/dotnet/csharplang/issues/2095
 
 ## Jan 7, 2019
 
