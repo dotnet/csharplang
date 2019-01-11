@@ -1,5 +1,16 @@
 # Upcoming meetings for 2019
 
+## Schedule ASAP
+
+## Schedule when convenient
+
+- Discussion of refreshing language spec (Neal)
+- Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
+- Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
+- Confirm shadowing rules for local functions (Chuck/Julien)
+- Making a `CancellationToken` available in async-iterator method bodies; possibly reserving a keyword (Julien/Stephen) 
+- Confirm whether reachability should affect nullability analysis. (Fred/Chuck/Aleksey)
+
 ## Feb 13, 2019
 
 ## Feb 11, 2019
@@ -21,17 +32,6 @@
 
 - Async-streams: re-discuss pattern-based `await foreach` (Stephen)
 - Recursive Patterns Open Language Issues https://github.com/dotnet/csharplang/issues/2095
-
-## Schedule ASAP
-
-## Schedule when convenient
-
-- Discussion of refreshing language spec (Neal)
-- Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
-- Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
-- Confirm shadowing rules for local functions (Chuck/Julien)
-- Making a `CancellationToken` available in async-iterator method bodies; possibly reserving a keyword (Julien/Stephen) 
-- Confirm whether reachability should affect nullability analysis. (Fred/Chuck/Aleksey)
 
 ## Recurring topics
 
