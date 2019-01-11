@@ -31,6 +31,7 @@ Nullable:
 ## Feb 13, 2019
 
 ## Schedule ASAP
+- pattern-based disposal in `await foreach` (Julien/Stephen)
 
 ## Schedule when convenient
 
