@@ -358,7 +358,9 @@ The essence is that nullability that pertains directly to one of the unfixed typ
 
 The spec currently does not do a good job of describing what happens when multiple bounds are identity convertible to each other, but are different. This may happen between `object` and `dynamic`, between tuple types that differ only in element names, between types constructed thereof and now also between `C` and `C?` for reference types.
 
-To handle this we add more phases to fixing, which is now:
+In addition we need to propagate "nullness" from the input expressions to the result type. 
+
+To handle these we add more phases to fixing, which is now:
 
 1. Gather all the types in all the bounds as candidates, removing `?` from all that are nullable reference types
 2. Eliminate candidates based on requirements of exact, lower and upper bounds (ignoring `null` and `default` bounds)
@@ -367,8 +369,23 @@ To handle this we add more phases to fixing, which is now:
 5. *Merge* the remaining candidates as described below
 6. If the resulting candidate is a reference type or a nonnullable value type and *all* of the exact bounds or *any* of the lower bounds are nullable value types, nullable reference types, `null` or `default`, then `?` is added to the resulting candidate, making it a nullable value type or reference type.
 
-(Describe merge rules)
+*Merging* is described between two candidate types. It is transitive and commutative, so the candidates can be merged in any order with the same ultimate result.
 
+The *Merge* function takes two candidate types and a direction (*+* or *-*):
+
+- *Merge*(`T`, `T`, *d*) = T
+- *Merge*(`S`, `T?`, *+*) = *Merge*(`S?`, `T`, *+*) = *Merge*(`S`, `T`, *+*)`?`
+- *Merge*(`S`, `T?`, *-*) = *Merge*(`S?`, `T`, *-*) = *Merge*(`S`, `T`, *-*)
+- *Merge*(`C<S1,...,Sn>`, `C<T1,...,Tn>`, *+*) = `C<`*Merge*(`S1`, `T1`, *d1*)`,...,`*Merge*(`Sn`, `Tn`, *dn*)`>`, *where*
+    - `di` = *+* if the `i`'th type parameter of `C<...>` is covariant
+    - `di` = *-* if the `i`'th type parameter of `C<...>` is contra- or invariant
+- *Merge*(`C<S1,...,Sn>`, `C<T1,...,Tn>`, *-*) = `C<`*Merge*(`S1`, `T1`, *d1*)`,...,`*Merge*(`Sn`, `Tn`, *dn*)`>`, *where*
+    - `di` = *-* if the `i`'th type parameter of `C<...>` is covariant
+    - `di` = *+* if the `i`'th type parameter of `C<...>` is contra- or invariant
+- *Merge*(`(S1 s1,..., Sn sn)`, `(T1 t1,..., Tn tn)`, *d*) = `(`*Merge*(`S1`, `T1`, *d*)` n1,...,`*Merge*(`Sn`, `Tn`, *d*) `nn)`, *where*
+    - `ni` is absent if `si` and `ti` differ, or if both are absent
+    - `ni` is `si` if `si` and `ti` are the same
+- *Merge*(`object`, `dynamic`) = *Merge*(`dynamic`, `object`) = `dynamic`
 
 # Warnings
 
