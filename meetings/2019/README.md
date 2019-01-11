@@ -1,37 +1,28 @@
-# C# Language Design Notes for 2019
+# Upcoming meetings for 2019
 
-Overview of meetings and agendas for 2019
+## Feb 13, 2019
 
-## Jan 7, 2019
+## Feb 11, 2019
 
-[C# Language Design Notes for Jan 7, 2019](LDM-2019-01-07.md)
+## Jan 23, 2019
 
-Nullable:
+- Function pointers (Jared)
 
-1. Variance in overriding/interface implementation
-2. Breaking change in parsing array specifiers
+## Jan 16, 2019
 
-# Upcoming meetings
+- pattern-based disposal in `await foreach` (Julien/Stephen)
+
+## Jan 14, 2019
+
+-	Nullable: never null warning
+- Generating null-check for `parameter!` (Jared)
 
 ## Jan 9, 2019
 
 - Async-streams: re-discuss pattern-based `await foreach` (Stephen)
 - Recursive Patterns Open Language Issues https://github.com/dotnet/csharplang/issues/2095
 
-## Jan 14, 2019
-
-- Generating null-check for `parameter!` (Jared)
-
-## Jan 16, 2019
-
-## Jan 23, 2019
-
-## Feb 11, 2019
-
-## Feb 13, 2019
-
 ## Schedule ASAP
-- pattern-based disposal in `await foreach` (Julien/Stephen)
 
 ## Schedule when convenient
 
@@ -47,3 +38,17 @@ Nullable:
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+
+# C# Language Design Notes for 2019
+
+Overview of meetings and agendas for 2019
+
+## Jan 7, 2019
+
+[C# Language Design Notes for Jan 7, 2019](LDM-2019-01-07.md)
+
+Nullable:
+
+1. Variance in overriding/interface implementation
+2. Breaking change in parsing array specifiers
+
