@@ -13,7 +13,7 @@ anticipated to pair often with NRT the proposal is independent of it.
 
 ## Detailed Design 
 
-### Null validation
+### Null validation parameter syntax
 The bang operator, `!`, can be positioned after any identifier in a parameter list and this will 
 cause the C# compilet to emit standard `null` checking code for that parameter. For example:
 
@@ -79,6 +79,35 @@ class C {
 ```
 
 Note: this is not legal C# code but instead just an approximation of what the implementation does. 
+
+The `null` validation parameter syntax will also be valid on lambda parameter lists. This is valid even in the single
+parameter syntax that lacks parens.
+
+``` csharp
+void G() {
+    // An identity lambda which throws on a null input
+    Func<string, string> s = x! => x;
+}
+```
+
+The syntax is also valid on parameters to iterator methods. Unlike other code in the iterator the `null` validation will
+occur when the iterator method is invoked, not when the underlying enumerator is walked. This is true for traditional
+or `async` iterators.
+
+``` csharp
+class Iterators {
+    IEnumerable<char> GetCharacters(string s!) {
+        foreach (var c in s) {
+            yield return c;
+        }
+    }
+
+    void Use() {
+        // The invocation of GetCharacters will throw
+        IEnumerable<char> e = GetCharacters(null);
+    }
+}
+```
 
 The `!` operator can only be used for parameter lists which have an associated method body. This
 means it cannot be used in an `abstract` method, `interface`, `delegate` or `partial` method 
@@ -210,7 +239,3 @@ implicit `value` argument just won't work with this feature.
 
 ## Future Considerations
 None
-
-- iterators
-- ctors
-- lambda parameters
