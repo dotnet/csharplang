@@ -1,21 +1,24 @@
 # Simplified Null Argument Checking
 
 ## Summary
-This proposal provides a simplified syntax for validating method arguments are not `null` and 
-throwing `ArgumentNullException` appropriately.
+This proposal provides a simplified syntax for validating method arguments are not `null` and throwing 
+`ArgumentNullException` appropriately.
 
 ## Motivation
-The work on designing nullable reference types has caused us to examine the code necessary for 
-null argument validation. Given that NRT doesn't affect code execution developers still must 
-add `if (arg is null) throw` boiler plate code even in projects which are fully null clean. This
-gave us the desire to explore a minimal syntax for argument `null` validation in the language. While
-anticipated to pair often with NRT the proposal is independent of it. 
+The work on designing nullable reference types has caused us to examine the code necessary for `null` argument 
+validation. Given that NRT doesn't affect code execution developers still must add `if (arg is null) throw` boiler 
+plate code even in projects which are fully `null` clean. This gave us the desire to explore a minimal syntax for 
+argument `null` validation in the language. 
+
+While this `null` parameter validation syntax is expected to pair frequently with NRT the proposal is fully independent
+of it. The syntax can be used independent of `#nullable` directives.
 
 ## Detailed Design 
 
 ### Null validation parameter syntax
-The bang operator, `!`, can be positioned after any identifier in a parameter list and this will 
-cause the C# compilet to emit standard `null` checking code for that parameter. For example:
+The bang operator, `!`, can be positioned after a parameter name in a parameter list and this will cause the C# 
+compiler to emit standard `null` checking code for that parameter. This is referred to as `null` validation parameter
+syntax. For example:
 
 ``` csharp
 void M(string name!) {
@@ -26,7 +29,7 @@ void M(string name!) {
 Will be translated into:
 
 ``` csharp
-void M(string name!) {
+void M(string name) {
     if (name is null) {
         throw new ArgumentNullException(nameof(name));
     }
@@ -34,18 +37,28 @@ void M(string name!) {
 }
 ```
 
-The generated `null` check will occur before any user authored code in the method. When multiple 
-parameters contain the `!` operator then the checks will occur in the same order as the parameters
-are declared.
-
-The check will be specifically for reference equality to `null`, it does not invoke `==` or any user 
-defined operators. This also means the `!` operator can only be added to parameters whose type can
-have the value `null`. Value types and type parameters not constrained to `class` or `interface`
-cannot be used here. 
+The generated `null` check will occur before any developer authored code in the method. When multiple parameters contain
+the `!` operator then the checks will occur in the same order as the parameters are declared.
 
 ``` csharp
-// Errro: Cannot use ! on parameter of type T. 
-void G<T>(T arg!) {
+void M(string p1, string p2) {
+    if (p1 is null) {
+        throw new ArgumentNullException(nameof(p1));
+    }
+    if (p2 is null) {
+        throw new ArgumentNullException(nameof(p2));
+    }
+    ...
+}
+```
+
+The check will be specifically for reference equality to `null`, it does not invoke `==` or any user defined operators. 
+This also means the `!` operator can only be added to parameters whose type can be tested for equality against `null`. 
+This means it can't be used on a parameter whose type is known to be a value type.
+
+``` csharp
+// Errro: Cannot use ! on parameters who types derive from System.ValueType
+void G<T>(T arg!) where T : struct {
 
 }
 ```
@@ -54,6 +67,8 @@ In the case of a constructor the `null` validation will occur before any other c
 
 - Chaining to other constructors with `this` or `base` 
 - Field initializers which implicitly occur in the constructor
+
+For example:
 
 ``` csharp
 class C {
@@ -115,12 +130,13 @@ definition.
 
 ### Extending is null
 The types for which the expression `is null` is valid will be extended to include unconstrained type parameters. This 
-will allow it to fill the intent of checking for `null` on all types which a `null` check is valid. That is types 
-which are not definitely known to be value types. Type parameters which are constrained to `struct` cannot be 
-used with this syntax.
+will allow it to fill the intent of checking for `null` on all types which a `null` check is valid. Specifically that
+is types which are not definitely known to be value types. For example Type parameters which are constrained to 
+`struct` cannot be used with this syntax.
 
 ``` csharp
 void NullCheck<T1, T2>(T1 p1, T2 p2) where T2 : struct {
+    // Okay: T1 could be a class or struct here.
     if (p1 is null) {
         ...
     }
@@ -141,7 +157,7 @@ Any parameter which has a `!` operator applied to it's name will start with the 
 true even if the type of the parameter itself is potentially `null`. That can occur with an explicitly nullable type, 
 such as say `string?`, or with an unconstrained type parameter. 
 
-When a `!` operator on parameters is combined with an explicitly nullable type on the parameter then a warning will
+When a `!` syntax on parameters is combined with an explicitly nullable type on the parameter then a warning will
 be issued by the compiler:
 
 ``` csharp
