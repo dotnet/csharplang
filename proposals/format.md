@@ -90,21 +90,69 @@ parameter passed by `out` or `ref`. In such a case the compiler must allocate a 
 
 ### params IEnumerable
 The language will allow for `params` in a method signature to have the type `IEnumerable<T>`. The same rules will apply 
-to `params IEnumerable<T>` that apply to `params T[]`:
-
-- Can't overload where the only difference is a `params` keyword.
-- Can invoke by passing a series of `T` arguments or a single `Span<T>` argument.
-- Must be the last parameter in a method signature.
-- Etc ... 
+to `params IEnumerable<T>` that apply to `params T[]` (see above for listing of rules).
 
 The compiler will invoke a `params IEnumerable<T>` method exactly as it invokes a `params T[]` method. A new array will
 be allocated for every call site and passed to the callee.
 
 ### params VariantCollection
+The language will allow for `params` in a method signature to have the type `VariantCollection`. This elements of a 
+`VariantCollection` are considered to be of type `Variant`. The same rules will apply to `params VariantCollection` 
+that apply to `params Variant[]` (see above for listing of rules).
 
+The `Variant` value type is a [suggested addition](https://github.com/dotnet/corefxlab/pull/2595) to CoreFX that has a
+conversion from any type. For the majority of common framework types (`int`, `double`, `TimeSpan`, etc ..) the 
+conversion is allocation free.
+
+Methods which take a `params` of hetrogeneous data today must declare as `params object[]`. This means that every 
+value type passed to the method incurs a boxing allocation (in addition to the array the compiler must allocate). The
+`Variant` and `VariantCollection` type allow such methods to avoid allocations in the most common paths. Invocations
+like `Console.WriteLine("hello {0] {1}", someInt, DateTime.Now)` can be invoked without any boxing or array allocations
+here.
+
+When emitting the code for a `params VariantCollection` invocation the compiler will look for an overload of 
+`VariantCollection.Create(in Variant v1, in Variant v2, ..., in Variant vn)` where `n` matches the number of arguments 
+being passed to the parameter. Each argument will be passed exactly as if the developer wrote the
+`VariantCollection.Create` call with the arguments. For example:
+
+``` csharp
+class VariantCall { 
+    static void Write(params VariantCollection collection) { ... } 
+
+    static void Use() {
+        Write(1, DateTime.UtcNow)
+
+        // Compiler will evaluate as 
+        Write(VariantCollection.Create(1, DateTime.UtcNow))
+
+        // Compiler will eventually emit as 
+        Write(VariantCollection.Create((Variant)1, (Variant)DateTime.UtcNow))
+    }
+}
+```
+
+In the case a `VariantCollection.Create` method with the correct number of parameters does not exist the compiler will
+attempt to invoke `Create(Variant[] array)` instead. A fresh `Variant[]` will be allocated for every invocation in this
+case. In the case `Create(Variant[] array)` does not exist the compiler will issue an error.
 
 ### params overload resolution changes
-Prefer Variant, span, array, ienumerable. Efficiency here is more important. 
+This proposal means the language now has four variants of `params` where before it had one. It is also sensible for 
+methods to define overloads of methods that differ only on `params` declarations. 
+
+Consider that `StringBuilder.AppendFormat` would certainly add a `params VariantCollection` overload in addition to the
+`params object[]`. This would allow it to substantially improve performance by reducing boxing and collection 
+allocations without requiring any changes to the calling code. 
+
+To facilitate this the language will introduce the following overload resolution tie breaking rule. When the candidate
+methods differ only by the `params` parameter then the canditates will be preferred in the following order:
+
+1. `VariantCollection`
+1. `ReadOnlySpan<T>`
+1. `Span<T>`
+1. `T[]`
+1. `IEnumerable<T>`
+
+This order is the most to the least effecient for the general case.
 
 ### Customize interopolated strings
 existing behavior: interpolated strings have natural type of string but can target type to formattablestring
