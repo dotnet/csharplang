@@ -89,9 +89,25 @@ These cases are statically dectable though. It potentially occurs whenever there
 parameter passed by `out` or `ref`. In such a case the compiler must allocate a fresh `T[]` for every invocation. 
 
 ### params IEnumerable
+The language will allow for `params` in a method signature to have the type `IEnumerable<T>`. The same rules will apply 
+to `params IEnumerable<T>` that apply to `params T[]`:
+
+- Can't overload where the only difference is a `params` keyword.
+- Can invoke by passing a series of `T` arguments or a single `Span<T>` argument.
+- Must be the last parameter in a method signature.
+- Etc ... 
+
+The compiler will invoke a `params IEnumerable<T>` method exactly as it invokes a `params T[]` method. A new array will
+be allocated for every call site and passed to the callee.
+
+### params VariantCollection
+
+
+### params overload resolution changes
+Prefer Variant, span, array, ienumerable. Efficiency here is more important. 
 
 ### Customize interopolated strings
-existing behavior: interpolated strings have natural type of sttring but can target type to formattablestring
+existing behavior: interpolated strings have natural type of string but can target type to formattablestring
 
 change to ValueFormattableString
 
@@ -112,5 +128,5 @@ CLR helper for stack allocating arrays
 Related issues
 - https://github.com/dotnet/csharplang/issues/1757
 - https://github.com/dotnet/csharplang/issues/179
-
+- https://github.com/dotnet/corefxlab/pull/2595
 
