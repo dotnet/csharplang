@@ -154,14 +154,66 @@ methods differ only by the `params` parameter then the canditates will be prefer
 
 This order is the most to the least effecient for the general case.
 
-### Customize interopolated strings
-existing behavior: interpolated strings have natural type of string but can target type to formattablestring
+### Efficient interpolated strings
+Interpolated strings are a popular yet innefecient feature in C#. The most common syntax, using an interpolated string
+as a `string`, translates into a `string.Format` call. That will inccur boxing allocations for all value types, 
+intermediate `string` allocations as the implementation largely uses `object.ToString` for formatting as well as
+array allocations once the number of arguments exceeds the amount of parameters on the "fast" overloads of 
+`string.Format`. 
 
-change to ValueFormattableString
+Developers are able to customize the behavior of interpolated strings with `FormattableString`. This contains the data
+which goes into an interpolated string: the format strings and the arguments as an array. This though still has the 
+boxing and argument array allocation as well as the allocation for `FormattableString` (it's an `abstract class`). Hence
+it's of little use to applications which are allocation heavy in `string` formatting.
 
-### Variant type
+To make interopolated string formatting efficient the language will recognize a new type: 
+`System.ValueFormattableString`. All interpolated strings will have a target type conversion to this type. This will 
+be implemented by translating the interpolated string into the call `ValueFormattableString.Create` exactly as is done
+for `FormattableString.Create` today. The language will support all `params` options described in this document when
+looking for the most suitable `ValueFormattableString.Create` method. 
+
+``` csharp
+readonly struct ValueFormattableString {
+    public static ValueFormattableString Create(Variant v) { ... } 
+    public static ValueFormattableString Create(string s) { ... } 
+    public static ValueFormattableString Create(string s, params VariantCollection collection) { ... } 
+    public static ValueFormattableString Create(string s, Variant v) { ... }
+}
+
+class ConsoleEx { 
+    static void Write(ValueFormattableString f) { ... }
+}
+
+class Program { 
+    static void Main() { 
+        ConsoleEx.Write(42);
+        ConsoleEx.Write("hello {DateTime.UtcNow}");
+
+        // Translates into 
+        ConsoleEx.Write(ValueFormattableString.Create((Variant)42));
+        ConsoleEx.Write(ValueFormattableString.Create(
+            "hello {0}", 
+            VariantCollection.Create((Variant)DateTime.UtcNow));
+    }
+}
+```
+
+Overload resolution rules will be changed to prefer `ValueFormattableString` over `string` when the argument is an 
+interpolated string. This means it will be valuable to have overloads which differ only on `string` and 
+`ValueFormattableString`. Such an overload today with `FormattableString` is not valauble as the compiler will always
+prefer the `string` version (unless the developer uses an explicit cast). 
 
 ## Open Issuess
+
+### ValuableFormattableString breaking change
+The change to prefer `ValueFormattableString` during overload resolution over `string` is a breaking change. It is
+possible for a developer to have defined a type called `ValueFormattableString` today and use it in method overloads
+with `string`. This proposed change would cause the compiler to pick a different overload once this set of features
+was implemented. 
+
+The possibility of this seems reasonably low. The type would need the full name `System.ValueFormattableString` and it 
+would need to have `static` methods named `Create`. Given that developers are strongly discouraged from defining any
+type in the `System` namespace this break seems like a reasonable compromise.
 
 ### open issue1
 
