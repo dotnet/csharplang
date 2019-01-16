@@ -31,14 +31,16 @@
 - Confirm shadowing rules for local functions (Chuck/Julien)
 - pattern-based disposal in `await foreach` (Julien/Stephen)
 
-## Jan 14, 2019
-
--	Nullable: never null warning
-- Generating null-check for `parameter!` (Jared)
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Jan 14, 2019
+
+[C# Language Design Notes for Jan 14, 2019](LDM-2019-01-14.md)
+
+- Generating null-check for `parameter!`
+https://github.com/dotnet/csharplang/pull/2144
 
 ## Jan 9, 2019
 
