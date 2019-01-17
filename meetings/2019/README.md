@@ -10,6 +10,7 @@
 - Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
 - Making a `CancellationToken` available in async-iterator method bodies; possibly reserving a keyword (Julien/Stephen) 
 - Confirm whether reachability should affect nullability analysis. (Fred/Chuck/Aleksey)
+- Syntax of positional records/primary constructors (Andy)
 
 ## Recurring topics
 
