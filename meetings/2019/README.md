@@ -1,7 +1,7 @@
 # Upcoming meetings for 2019
 
 ## Schedule ASAP
-- Triage #2152: "Allow Obsolete attribute on getters and setters"
+- Triage [#2152](https://github.com/dotnet/csharplang/issues/2152): "Allow Obsolete attribute on getters and setters"
 
 ## Schedule when convenient
 
