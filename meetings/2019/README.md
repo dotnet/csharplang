@@ -27,14 +27,16 @@
 - Function pointers (Jared, Alexandre)
 - Any urgent outstanding topics before two week break
 
-## Jan 16, 2019
-
-- Confirm shadowing rules for local functions (Chuck/Julien)
-- pattern-based disposal in `await foreach` (Julien/Stephen)
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Jan 16, 2019
+
+[C# Language Design Notes for Jan 16, 2019](LDM-2019-01-16.md)
+
+1. Shadowing in lambdas
+2. Pattern-based disposal in `await foreach`
 
 ## Jan 14, 2019
 
