@@ -24,7 +24,8 @@
 
 ## Jan 23, 2019
 
-- Function pointers (Jared)
+- Function pointers (Jared, Alexandre)
+- Any urgent outstanding topics before two week break
 
 ## Jan 16, 2019
 
