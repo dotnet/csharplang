@@ -1,0 +1,2 @@
+- Remove new keyword when creating new objects so the code will look more consise and readable
+- First level function should be introduced to support modern deveolpment style
