@@ -247,19 +247,43 @@ must be different than the version defined in mscorlib.
 One option that was explored was emitting such a pointer as `mod_req(Func<int>) void*`. This doesn't 
 work though as a `mod_req` cannot bind to a `TypeSpec` and hence cannot target generic instantiations.
 
-### No names altogether
-Given that a `func*` can be used without names why even allow names at all? The underlying CLI primitive doesn't have
-names hence the use of names is purely a C# invention. That ends up being a leaky abstraction in some cases (like
-not allowing overloads when `func*` differ by only names). 
+### Named function pointers
+The function pointer syntax can be cumbersome, particlarly in complex cases like nested function pointers. Rather than
+have developers type out the signature every time the language could allow for named declarations of function pointers
+as is done with `delegate`. 
 
-At the same time, `func*` look and feel so much like `delegate` types, not allowing them to be named would be seen
-as an enormous gap by customers. The leaky abstraction is wort the trade offs here.
+``` csharp
+func* void Action();
 
-### Requiring names always
-Given that names are allowed for `func*` why not just require them always? Given that `func*` is an existing CLI
-type there are uses of it in the ecosystem today. None of those uses will have the metadata serialization format 
-chosen by the C# compiler. This means the feature would be using CLI function pointers but not interopting with any 
-existing usage.
+unsafe class NamedExample {
+    void M(Action a) {
+        a();
+    }
+}
+```
+
+Part of the problem here is the underlying CLI primitive doesn't have names hence this would be purely a C# invention 
+and require a bit of metadata work to enable. That is doable but is a significant about of work. It essentially requires
+C# to have a companion to the type def table purely for these names.
+
+Also when the arguments for named function pointers was examined we found they could apply equally well to a number of
+other scenarios. For example it would be just as convenient to declare named tuples to reduce the need to type out
+the full signature in all cases. 
+
+``` csharp
+(int x, int y) Point;
+
+class NamedTupleExample {
+    void M(Point p) {
+        Console.WriteLine(p.x);
+    }
+}
+```
+
+After discussion we decided to not allow named declaration of `func*` types. If we find there is significant need for
+this based on customer usage feedback then we will investigate a naming solution that works for function pointers, 
+tuples, generics, etc ... This is likely to be similar in form to other suggestions like full `typedef` support in
+the language.
 
 ## Future Considerations
 
