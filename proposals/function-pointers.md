@@ -195,6 +195,43 @@ This means that it is possible to overload on `void*` and a `func*` and still se
 
 ## Open Issuess
 
+### NativeCallback Attribute
+This is an attribute used by the CLR to avoid the managed to native prologue when invoking. Methods marked by this 
+attribute are only callable from native code, not managed (can’t call methods, create a delegate, etc …). The attribute
+is not special to mscorlib; the runtime will treat any attribute with this name with the same semantics. 
+
+It's possible for the runtime and language to work together to fully support this. The language could choose to treat
+address-of `static` members with a `NativeCallback` attribute as a `func*` with the specified calling convention.
+
+``` csharp
+unsafe class NativeCallbackExample {
+    [NativeCallback(CallingConvention.CDecl)]
+    static extern bool CloseHandle(IntPtr p);
+
+    void Use() {
+        func* bool(IntPtr) p1 = &CloseHandle; // Error: Invalid calling convention
+
+        func* cdecl bool(IntPtr) p2 = &CloseHandle; // Okay
+    }
+}
+
+```
+
+Additionally the language would likely also want to: 
+
+- Flag any managed calls to a method tagged with `NativeCallback` as an error. Given the function can't be invoked from
+managed code the compiler should prevent developers from attempting such an invocation.
+- Prevent method group conversions to `delegate` when the method is tagged with `NativeCallback`. 
+
+This is not necessary to support `NativeCallback` though. The compiler can support the `NativeCallback` attribute as is
+using the existing syntax. The runtime would simply need to cast to `void*` before casting to the corrcect `func*` 
+signature. That would be no worse than the support today.
+
+``` csharp
+void* v = &CloseHandle;
+func* cdecl bool(IntPtr) f1 = (func* cdecl bool(IntPtr))v;
+```
+
 ## Considerations
 
 ### Allow instance methods
