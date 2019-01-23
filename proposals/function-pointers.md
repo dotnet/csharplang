@@ -288,12 +288,29 @@ the language.
 ## Future Considerations
 
 ### static local functions
-
 This refers to [the proposal](https://github.com/dotnet/csharplang/issues/1565) to allow the 
 `static` modifier on local functions. Such a function would be guaranteed to be emitted as 
 `static` and with the exact signature specified in source code. Such a function should be a valid
 argument to `&` as it contains none of the problems local functions have today
 
+### static delegates
+This refers to [the proposal](https://github.com/dotnet/csharplang/issues/302) to allow for the declaration of 
+`delegate` types which can only refer to `static` members. The advantage being that such `delegate` instances can be 
+allocation free and better in performance sensitive scenarios.
 
-*** static delegates https://github.com/dotnet/csharplang/blob/master/proposals/static-delegates.md
-*** PR feedback needs to be gone through.
+If the function pointer feature is implemented the `static delegate` proposal will likely be closed out. The proposed
+advantage of that feature is the allocation free nature. However recent investigations have found that is not possible
+to achieve due to assembly unloading. There must be a strong handle from the `static delegate` to the method it refers
+to in order to keep the assembly from being unloaded out from under it.
+
+To maintain every `static delegate` instance would be required to allocate a new handle which runs counter to the goals
+of the proposal. There were some designs where the allocation could be amortized to a single allocation per call-site
+but that was a bit complex and didn't seem worth the trade off. 
+
+That means developers essentially have to decide between the following trade offs:
+
+1. Safety in the face of assembly unloading: this requires allocations and hence `delegate` is already a sufficient 
+option.
+1. No safety in face of assembly unloading: use a `func*`. This can be wrapped in a `struct` to allow usage outside 
+an `unsafe` context in the rest of the code. 
+
