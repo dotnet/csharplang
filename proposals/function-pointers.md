@@ -195,12 +195,36 @@ This means that it is possible to overload on `void*` and a `func*` and still se
 
 ## Open Issuess
 
-- The address-of operator is limited to `static` methods in this proposal. It can be made to work with instance methods 
-but the behavior can be confusing to developers. The `this` type becomes an explicit first parameter on the `func*` 
-type. This means the behavior and usage would differ significantly from `delegate`. This extra confusion was the main 
-reason it was not included in the design.
-
 ## Considerations
+
+### Allow instance methods
+The proposal could be extended to support instance methods by taking advantage of the `EXPLICITTHIS` CLI calling 
+convention (named `instance` in C# code). This form of CLI function pointers puts the `this` parameter as an explicit
+first parameter of the function pointer syntax. 
+
+``` csharp
+unsafe class Instance {
+    void Use() {
+        func* instance string(Instance) f = &ToString;
+        f(this);
+    }
+}
+```
+
+This is sound but adds some complication to the proposal. Particularly because function pointers which differed by the
+calling convention `instance` and `managed` would be incompatbile even though both cases are used to invoke managed 
+methods with the same C# signature. Also in every case considered where this would be valuable to have there was a 
+simple work around: use a `static` local function.
+
+``` csharp
+unsafe class Instance {
+    void Use() {
+        static string toString(Instance i) = i.ToString();
+        func* string(Instance) f = &toString;
+        f(this);
+    }
+}
+```
 
 ### Don't require unsafe at declaration
 Instead of requiring `unsafe` at every use of a `func*`, only require it at the point where a method group is
