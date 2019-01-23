@@ -87,12 +87,15 @@ funcptr_type =
 
 calling_convention = 
     'managed' |
+    'unmanaged' |
     'cdecl' |
     'winapi' | 
     'fastcall' | 
     'stdcall' | 
     'thiscall' ;
 ```
+
+The `unmanaged` calling convention represents the default calling convention for native code on the current platform.
 
 When there is a nested function pointer, a function pointer which has or returns a function pointer, parens can be 
 opitionally used to disambiguate the signature. Though they are not required and the resulting types are equivalent.
@@ -193,7 +196,7 @@ The better function member specification will be changed to include the followin
 
 This means that it is possible to overload on `void*` and a `func*` and still sensibly use the address-of operator.
 
-## Open Issuess
+## Open Issues
 
 ### NativeCallback Attribute
 This is an attribute used by the CLR to avoid the managed to native prologue when invoking. Methods marked by this 
