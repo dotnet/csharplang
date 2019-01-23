@@ -174,7 +174,7 @@ For a type parameter `T`, `T?` is only allowed if `T` is known to be a value typ
 
 A `type` is deemed to occur in a given annotation context when the last token of the type is within that context.
 
-Whether a given reference type `C` in source code is interpreted as oblivious or nonnullable depends on the annotation context of that source code. But once established, it is considered part of that type, and "travels with it" e.g. during subsitution of generic type arguments. It is as if there is an annotation like `?` on the type, but invisible.
+Whether a given reference type `C` in source code is interpreted as oblivious or nonnullable depends on the annotation context of that source code. But once established, it is considered part of that type, and "travels with it" e.g. during substitution of generic type arguments. It is as if there is an annotation like `?` on the type, but invisible.
 
 
 # Constraints
