@@ -2602,7 +2602,7 @@ await_expression
     ;
 ```
 
-An *await_expression* is only allowed in the body of an async function ([Iterators](classes.md#iterators)). Within the nearest enclosing async function, an *await_expression* may not occur in these places:
+An *await_expression* is only allowed in the body of an async function ([Async functions](classes.md#async-functions)). Within the nearest enclosing async function, an *await_expression* may not occur in these places:
 
 *  Inside a nested (non-async) anonymous function
 *  Inside the block of a *lock_statement*
@@ -2642,7 +2642,7 @@ At runtime, the expression `await t` is evaluated as follows:
 
 *  An awaiter `a` is obtained by evaluating the expression `(t).GetAwaiter()`.
 *  A `bool` `b` is obtained by evaluating the expression `(a).IsCompleted`.
-*  If `b` is `false` then evaluation depends on whether `a` implements the interface `System.Runtime.CompilerServices.ICriticalNotifyCompletion` (hereafter known as `ICriticalNotifyCompletion` for brevity). This check is done at binding time; i.e. at runtime if `a` has the compile time type `dynamic`, and at compile time otherwise. Let `r` denote the resumption delegate ([Iterators](classes.md#iterators)):
+*  If `b` is `false` then evaluation depends on whether `a` implements the interface `System.Runtime.CompilerServices.ICriticalNotifyCompletion` (hereafter known as `ICriticalNotifyCompletion` for brevity). This check is done at binding time; i.e. at runtime if `a` has the compile time type `dynamic`, and at compile time otherwise. Let `r` denote the resumption delegate ([Async functions](classes.md#async-functions)):
     * If `a` does not implement `ICriticalNotifyCompletion`, then the expression 
 `(a as (INotifyCompletion)).OnCompleted(r)` is evaluated.
     * If `a` does implement `ICriticalNotifyCompletion`, then the expression 
