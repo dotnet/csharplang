@@ -36,7 +36,7 @@ pattern
     : declaration_pattern
     | constant_pattern
     | var_pattern
-    | deconstruction_pattern
+    | positional_pattern
     | property_pattern
     | discard_pattern
     ;
@@ -49,7 +49,7 @@ constant_pattern
 var_pattern
     : 'var' designation
     ;
-deconstruction_pattern
+positional_pattern
     : type? '(' subpatterns? ')' property_subpattern? simple_designation?
     ;
 subpatterns
@@ -158,7 +158,7 @@ designations
 
 If the *designation* is a *simple_designation*, an expression *e* matches the pattern. In other words, a match to a *var pattern* always succeeds with a *simple_designation*. If the *simple_designation* is a *single_variable_designation*, the value of *e* is bounds to a newly introduced local variable. The type of the local variable is the static type of *e*.
 
-If the *designation* is a *tuple_designation*, then the pattern is equivalent to a *deconstruction_pattern* of the form `(var ` *designation*, ... `)` where the *designation*s are those found within the *tuple_designation*.  For example, the pattern `var (x, (y, z))` is equivalent to `(var x, (var y, var z))`.
+If the *designation* is a *tuple_designation*, then the pattern is equivalent to a *positional_pattern* of the form `(var ` *designation*, ... `)` where the *designation*s are those found within the *tuple_designation*.  For example, the pattern `var (x, (y, z))` is equivalent to `(var x, (var y, var z))`.
 
 It is an error if the name `var` binds to a type.
 
@@ -174,12 +174,12 @@ An expression *e* matches the pattern `_` always. In other words, every expressi
 
 A discard pattern may not be used as the pattern of an *is_pattern_expression*.
 
-#### Deconstruction Pattern
+#### Positional Pattern
 
-A deconstruction pattern checks that the input value is not `null`, invokes an appropriate `Deconstruct` method, and performs further pattern matching on the resulting values.  It also supports a tuple-like pattern syntax (without the type being provided) when the type of the input value is the same as the type containing `Deconstruct`, or if the type of the input value is a tuple type, or if the type of the input value is `object` or `ITuple` and the runtime type of the expression implements `ITuple`.
+A positional pattern checks that the input value is not `null`, invokes an appropriate `Deconstruct` method, and performs further pattern matching on the resulting values.  It also supports a tuple-like pattern syntax (without the type being provided) when the type of the input value is the same as the type containing `Deconstruct`, or if the type of the input value is a tuple type, or if the type of the input value is `object` or `ITuple` and the runtime type of the expression implements `ITuple`.
 
 ```antlr
-deconstruction_pattern
+positional_pattern
     : type? '(' subpatterns? ')' property_subpattern? simple_designation?
     ;
 subpatterns
@@ -196,7 +196,7 @@ If the *type* is omitted, we take it to be the static type of the input value.
 
 Given a match of an input value to the pattern *type* `(` *subpattern_list* `)`, a method is selected by searching in *type* for accessible declarations of `Deconstruct` and selecting one among them using the same rules as for the deconstruction declaration.
 
-It is an error if a *deconstruction_pattern* omits the type, has a single *subpattern* without an *identifier*, has no *property_subpattern* and has no *simple_designation*. This disamgibuates between a *constant_pattern* that is parenthesized and a *deconstruction_pattern*.
+It is an error if a *positional_pattern* omits the type, has a single *subpattern* without an *identifier*, has no *property_subpattern* and has no *simple_designation*. This disamgibuates between a *constant_pattern* that is parenthesized and a *positional_pattern*.
 
 In order to extract the values to match against the patterns in the list,
 - If *type* was omitted and the input value's type is a tuple type, then the number of subpatterns is required to be the same as the cardinality of the tuple. Each tuple element is matched against the corresponding *subpattern*, and the match succeeds if all of these succeed. If any *subpattern* has an *identifier*, then that must name a tuple element at the corresponding position in the tuple type.
@@ -228,11 +228,12 @@ property_pattern
     : type? property_subpattern simple_designation?
     ;
 property_subpattern
-    : '{' subpatterns? '}'
+    : '{' '}'
+    | '{' subpatterns ','? '}'
     ;
 ```
 
-It is an error if any _subpattern_ of a _property_pattern_ does not contain an _identifier_ (it must be of the second form, which has an _identifier_).
+It is an error if any _subpattern_ of a _property_pattern_ does not contain an _identifier_ (it must be of the second form, which has an _identifier_).  A trailing comma after the last subpattern is optional.
 
 Note that a null-checking pattern falls out of a trivial property pattern. To check if the string `s` is non-null, you can write any of the following forms
 
@@ -266,11 +267,12 @@ relational_expression
     : switch_expression
     ;
 switch_expression
-    : relational_expression 'switch' '{' switch_expression_arms? '}'
+    : relational_expression 'switch' '{' '}'
+    | relational_expression 'switch' '{' switch_expression_arms ','? '}'
     ;
 switch_expression_arms
     : switch_expression_arm
-    | switch_expression_arm ',' switch_expression_arm
+    | switch_expression_arms ',' switch_expression_arm
     ;
 switch_expression_arm
     : pattern case_guard? '=>' null_coalescing_expression
