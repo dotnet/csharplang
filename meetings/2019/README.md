@@ -22,14 +22,15 @@
 
 ## Feb 11, 2019
 
-## Jan 23, 2019
-
-- Function pointers (Jared, Alexandre)
-- Any urgent outstanding topics before two week break
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Jan 23, 2019
+
+[C# Language Design Notes for Jan 23, 2019](LDM-2019-01-23.md)
+
+Function pointers ([Updated proposal](https://github.com/dotnet/csharplang/blob/master/proposals/function-pointers.md))
 
 ## Jan 16, 2019
 
