@@ -27,9 +27,9 @@ Nullable:
 4. reset state with `is` https://github.com/dotnet/roslyn/issues/30297
 5. Do we want to have an analysis that can tell when a test against null would have a known result, so we can produce a hidden diagnostic?  [roslyn#29868](https://github.com/dotnet/roslyn/issues/29868) (Aleksey/Neal)
 6. Should reachability affect nullable analysis? [roslyn#28798](https://github.com/dotnet/roslyn/issues/28798) [roslyn#30949](https://github.com/dotnet/roslyn/issues/30949) [roslyn#32047](https://github.com/dotnet/roslyn/issues/32047) (Fred/Chuck/Aleksey)
-7. element-wise analysis of tuple conversions
-8. `MaybeNull` and other attributes, and the relation to unspeakable types. (Chuck)
-9. `var?`
+7. element-wise analysis of tuple conversions https://github.com/dotnet/roslyn/issues/33035
+8. `MaybeNull` and other attributes, and the relation to unspeakable types. https://github.com/dotnet/roslyn/issues/30953 (Chuck)
+9. `var?` https://github.com/dotnet/roslyn/issues/31874
 
 # C# Language Design Notes for 2019
 
