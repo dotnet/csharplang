@@ -20,7 +20,7 @@
 
 ## Feb 11, 2019
 
-Nullable Open Language Issues https://github.com/dotnet/csharplang/issues/2201
+Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 
 # C# Language Design Notes for 2019
 
