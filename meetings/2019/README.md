@@ -20,7 +20,8 @@
 
 ## Feb 11, 2019
 
-Nullable:
+Nullable Open Language Issues https://github.com/dotnet/csharplang/issues/2201
+
 1. Tracking assignments through refs and ref expressions (e.g. `(q ? ref x : ref y) = null;` or  `(q ? ref x : ref y) = "";`), and the state of a variable to which a ref has been taken.
 2. Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
 3. `!` on L-values https://github.com/dotnet/roslyn/issues/27522
