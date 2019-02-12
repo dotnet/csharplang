@@ -2,6 +2,7 @@
 
 ## Schedule ASAP
 - Triage [#2152](https://github.com/dotnet/csharplang/issues/2152): "Allow Obsolete attribute on getters and setters"
+- Open issues in default interface methods (https://github.com/dotnet/csharplang/issues/406). We currently have open issues around `protected`, `internal`, reabstraction, and `static` fields among others.
 
 ## Schedule when convenient
 
