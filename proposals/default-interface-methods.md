@@ -32,13 +32,14 @@ The syntax for an interface is extended to permit
 - a *body* for a method or indexer, property, or event accessor (i.e. a "default" implementation)
 - static methods, properties, indexers, and events.
 - Explicit access modifiers (the default access is `public`)
-- `override` modifiers
 
 Members with bodies permit the interface to provide a "default" implementation for the method in classes and structs that do not provide an overriding implementation.
 
 Interfaces may not contain instance state. While static fields are now permitted, instance fields are not permitted in interfaces. Instance auto-properties are not supported in interfaces, as they would implicitly declare a hidden field.
 
 Static and private methods permit useful refactoring and organization of code used to implement the interface's public API.
+
+A method override in an interface must use the explicit interface implementation syntax.
 
 
 ### Concrete methods in interfaces
@@ -72,7 +73,7 @@ Within an instance member of an interface, `this` has the type of the enclosing 
 
 ### Modifiers in interfaces
 
-The syntax for an interface is relaxed to permit modifiers on its members. The following are permitted: `private`, `protected`, `internal`, `public`, `virtual`, `abstract`, `override`, `sealed`, `static`, `extern`.
+The syntax for an interface is relaxed to permit modifiers on its members. The following are permitted: `private`, `protected`, `internal`, `public`, `virtual`, `abstract`, `sealed`, `static`, `extern`, and `partial`.
 
 > ***TODO***: check what other modifiers exist.
 
@@ -84,9 +85,9 @@ Access modifiers may be used on interface members of all kinds of members that a
 
 > ***Open Issue:*** We need to specify the precise meaning of the access modifiers such as `protected` and `internal`, and which declarations do and do not override them (in a derived interface) or implement them (in a class that implements the interface).
 
-Interfaces may declare `static` members, including nested types, methods, indexers, properties, and events. The default access level for all interface members is `public`.
+Interfaces may declare `static` members, including nested types, methods, indexers, properties, events, and static constructors. The default access level for all interface members is `public`.
 
-Interfaces may not declare constructors, destructors, or fields.
+Interfaces may not declare instance constructors, destructors, or fields.
 
 > ***Open Issue:*** Should operator declarations be permitted in an interface? Probably not conversion operators, but what about others?
 
@@ -94,12 +95,12 @@ Interfaces may not declare constructors, destructors, or fields.
 
 > ***Open Issue:*** Should `const` declarations be permitted in an interface?
 
-> ***Open Issue:*** We do not currently permit `partial` on an interface or its members. That would require a separate proposal.
+> ***Closed Issue:*** We do not currently permit `partial` on an interface or its members. That would require a separate proposal. ***Decision***: Yes. https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#permit-partial-in-interface
 
 
 ### Overrides in interfaces
 
-Override declarations (i.e. those containing the `override` modifier) allow the programmer to provide a most specific implementation of a virtual member in an interface where the compiler or runtime would not otherwise find one. It also allows turning an abstract member from a super-interface into a default member in a derived interface. An override declaration is permitted to *explicitly* override a particular base interface method by qualifying the declaration with the interface name (no access modifier is permitted in this case).
+Override declarations (i.e. those containing the `override` modifier) allow the programmer to provide a most specific implementation of a virtual member in an interface where the compiler or runtime would not otherwise find one. It also allows turning an abstract member from a super-interface into a default member in a derived interface. An override declaration is permitted to *explicitly* override a particular base interface method by qualifying the declaration with the interface name (no access modifier is permitted in this case).  Implicit overrides are not permitted.
 
 
 ``` c#
@@ -117,32 +118,11 @@ interface IC : IA
 }
 ```
 
-If the interface is not named in the override declaration, then all matching methods (from direct or indirect base interfaces) are overridden. There must be at least one such method or the override declaration is an error.
-
-> ***Open issue***: should that "direct and indirect" be "direct" here?
-
-Overrides in interfaces are useful to provide a more specific (e.g. more efficient) implementation of a base interface's method. For example, a new `First()` method on `IEnumerable` may have a much more efficient implementation on the interface `IList`.
-
-A method declared in an interface is never treated as an `override` of another method unless it contains he `override` modifier. This is necessary for compatibility.
-
-``` c#
-interface IA
-{
-    void M();
-}
-interface IB : IA
-{
-    void M(); // not related to 'IA.M'; not an override
-}
-```
-
 Override declarations in interfaces may not be declared `sealed`.
 
-Public `virtual` function members in an interface may be overridden in a derived interface either implicitly (by using the `override` modifier in a public declaration in the derived interface) or explicitly (by qualifying the name in the override declaration with the interface type that originally declared the method, and omitting an access modifier).
+Public `virtual` function members in an interface may be overridden in a derived interface explicitly (by qualifying the name in the override declaration with the interface type that originally declared the method, and omitting an access modifier).
 
-`virtual` function members in an interface that are not `public` may only be overridden explicitly (not implicitly) in derived interfaces, and may only be implemented in a class or struct explicitly (not implicitly). In either case, the overridden or implemented member must be *accessible* where it is overridden.
-
-> ***Open Issue:*** Should we relax that to allow implicit override or implementation of a non-public function member? It would require a detailed proposal.
+`virtual` function members in an interface may only be overridden explicitly (not implicitly) in derived interfaces, and members that are not `public` may only be implemented in a class or struct explicitly (not implicitly). In either case, the overridden or implemented member must be *accessible* where it is overridden.
 
 ### Reabstraction
 
@@ -155,7 +135,7 @@ interface IA
 }
 interface IB : IA
 {
-    override abstract void M();
+    abstract void IA.M();
 }
 class C : IB { } // error: class 'C' does not implement 'IA.M'.
 ```
@@ -183,11 +163,11 @@ interface IA
 }
 interface IB : IA
 {
-    override void IA.M() { WriteLine("IB.M"); }
+    void IA.M() { WriteLine("IB.M"); }
 }
 interface IC : IA
 {
-    override void IA.M() { WriteLine("IC.M"); }
+    void IA.M() { WriteLine("IC.M"); }
 }
 interface ID : IB, IC { } // error: no most specific override for 'IA.M'
 abstract class C : IB, IC { } // error: no most specific override for 'IA.M'
@@ -227,7 +207,7 @@ It is possible for a virtual property declared in an interface to have a most sp
 
 Because interfaces may now contain executable code, it is useful to abstract common code into private and static methods. We now permit these in interfaces.
 
-> ***Open issue***: Should we support private methods? Should we support static methods? **YES**
+> ***Closed issue***: Should we support private methods? Should we support static methods? **Decision: YES**
 
 > ***Open issue***: should we permit interface methods to be `protected` or `internal` or other access? If so, what are the semantics? Are they `virtual` by default? If so, is there a way to make them non-virtual?
 
@@ -261,7 +241,7 @@ interface I3 : I1, I2
 ```
 
 
-An instance (nonstatic) method is permitted to invoke an accessible instance method override in a direct base interface nonvirtually by naming it using the syntax `Type.base.M`. This is useful when an override that is required to be provided due to diamond inheritance is resolved by delegating to one particular base implementation.
+An instance (nonstatic) method is permitted to invoke an accessible instance method override in a direct base interface nonvirtually by naming it using the syntax `base(Type).M`. This is useful when an override that is required to be provided due to diamond inheritance is resolved by delegating to one particular base implementation.
 
 ``` c#
 interface IA
@@ -279,15 +259,9 @@ interface IC : IA
 
 class D : IA, IB, IC
 {
-    void IA.M() { IB.base.M(); } 
+    void IA.M() { base(IB).M(); } 
 }
 ```
-
-> ***Open issue:*** what syntax should we use for base invocation? Alternatives:
-> 1. Interface.base.M()
-> 2. base<Interface>.M()
-
-It is an error for an unqualified `base` (i.e. not specifying the base interface type) to appear in an interface.
 
 ### Effect on existing programs
 
@@ -336,11 +310,11 @@ class Derived: IA // OK, all interface members have a concrete most specific ove
 }
 ```
 
-> ***Open issue***: confirm that this is an intended consequence of the specification. **YES**
+> ***Closed issue***: confirm that this is an intended consequence of the specification. **Decision: YES**
 
 ### Runtime method resolution
 
-> ***Open Issue:*** The spec should describe the runtime method resolution algorithm in the face of interface default methods. We need to ensure that the semantics are consistent with the language semantics, e.g. which declared methods do and do not override or implement an `internal` method.
+> ***Closed Issue:*** The spec should describe the runtime method resolution algorithm in the face of interface default methods. We need to ensure that the semantics are consistent with the language semantics, e.g. which declared methods do and do not override or implement an `internal` method.
 
 ### CLR support API
 
@@ -497,6 +471,445 @@ but `C` is not recompiled. What happens when the program is run? An invocation o
 
 ***Decision:*** Made 2017-04-11: Runs `I2.M`, which is the unambiguously most specific override at runtime.
 
+### Event accessors (closed)
+
+> ***Closed Issue:*** Can an event be overridden "piecewise"?
+
+Consider this case:
+
+``` c#
+public interface I1
+{
+    event T e1;
+}
+public interface I2 : I1
+{
+    override event T
+    {
+        add { }
+        // error: "remove" accessor missing
+    } 
+}
+```
+
+This "partial" implementation of the event is not permitted because, as in a class, the syntax for an event declaration does not permit only one accessor; both (or neither) must be provided. You could accomplish the same thing by permitting the abstract remove accessor in the syntax to be implicitly abstract by the absence of a body:
+
+``` c#
+public interface I1
+{
+    event T e1;
+}
+public interface I2 : I1
+{
+    override event T
+    {
+        add { }
+        remove; // implicitly abstract
+    } 
+}
+```
+
+Note that *this is a new (proposed) syntax*. In the current grammar, event accessors have a mandatory body.
+
+> ***Closed Issue:*** Can an event accessor be (implicitly) abstract by the omission of a body, similarly to the way that methods in interfaces and property accessors are (implicitly) abstract by the omission of a body?
+
+***Decision:*** (2017-04-18) No, event declarations require both concrete accessors (or neither).
+
+### Reabstraction in a Class (closed)
+
+***Closed Issue:*** We should confirm that this is permitted (otherwise adding a default implementation would be a breaking change):
+
+``` c#
+interface I1
+{
+    void M() { }
+}
+abstract class C : I1
+{
+    public abstract void M(); // implement I1.M with an abstract method in C
+}
+```
+
+***Decision:*** (2017-04-18) Yes, adding a body to an interface member declaration shouldn't break C.
+
+### Sealed Override (closed)
+
+The previous question implicitly assumes that the `sealed` modifier can be applied to an `override` in an interface. This contradicts the draft specification. Do we want to permit sealing an override? Source and binary compatibility effects of sealing should be considered.
+
+> ***Closed Issue:*** Should we permit sealing an override?
+
+***Decision:*** (2017-04-18) Let's not allowed `sealed` on overrides in interfaces. The only use of `sealed` on interface members is to make them non-virtual in their initial declaration.
+
+### Diamond inheritance and classes (closed)
+
+The draft of the proposal prefers class overrides to interface overrides in diamond inheritance scenarios:
+
+> We require that every interface and class have a *most specific override* for every interface method among the overrides appearing in the type or its direct and indirect interfaces. The *most specific override* is a unique override that is more specific than every other override. If there is no override, the method itself is considered the most specific override.
+> 
+> One override `M1` is considered *more specific* than another override `M2` if `M1` is declared on type `T1`, `M2` is declared on type `T2`, and either
+> 1. `T1` contains `T2` among its direct or indirect interfaces, or
+> 2. `T2` is an interface type but `T1` is not an interface type.
+
+The scenario is this
+
+``` c#
+interface IA
+{
+    void M();
+}
+interface IB : IA
+{
+    override void M() { WriteLine("IB"); }
+}
+class Base : IA
+{
+    void IA.M() { WriteLine("Base"); }
+}
+class Derived : Base, IB // allowed?
+{
+    static void Main()
+    {
+        Ia a = new Derived();
+        a.M();           // what does it do?
+    }
+}
+```
+
+We should confirm this behavior (or decide otherwise)
+
+> ***Closed Issue:*** Confirm the draft spec, above, for *most specific override* as it applies to mixed classes and interfaces (a class takes priority over an interface). See https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-19.md#diamonds-with-classes
+
+
+### Interface methods vs structs (closed)
+
+There are some unfortunate interactions between default interface methods and structs.
+
+``` c#
+interface IA
+{
+    public void M() { }
+}
+struct S : IA
+{
+}
+```
+
+Note that interface members are not inherited:
+
+``` c#
+var s = default(S);
+s.M(); // error: 'S' does not contain a member 'M'
+```
+
+Consequently, the client must box the struct to invoke interface methods
+
+``` c#
+IA s = default(S); // an S, boxed
+s.M(); // ok
+```
+
+Boxing in this way defeats the principal benefits of a `struct` type. Moreover, any mutation methods will have no apparent effect, because they are operating on a *boxed copy* of the struct:
+
+``` c#
+interface IB
+{
+    public void Increment() { P += 1; }
+    public int P { get; set; }
+}
+struct T : IB
+{
+    public int P { get; set; } // auto-property
+}
+
+T t = default(T);
+Console.WriteLine(t.P); // prints 0
+(t as IB).Increment();
+Console.WriteLine(t.P); // prints 0
+```
+
+> ***Closed Issue:*** What can we do about this:
+> 1. Forbid a `struct` from inheriting a default implementation. All interface methods would be treated as abstract in a `struct`. Then we may take time later to decide how to make it work better.
+> 2. Come up with some kind of code generation strategy that avoids boxing. Inside a method like `IB.Increment`, the type of `this` would perhaps be akin to a type parameter constrained to `IB`. In conjunction with that, to avoid boxing in the caller, non-abstract methods would be inherited from interfaces. This may increase compiler and CLR implementation work substantially.
+> 3. Not worry about it and just leave it as a wart.
+> 4. Other ideas?
+
+***Decision:*** Not worry about it and just leave it as a wart. See https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-19.md#structs-and-default-implementations
+
+### Base interface invocations (closed)
+
+The draft spec suggests a syntax for base interface invocations inspired by Java: `Interface.base.M()`. We need to select a syntax, at least for the initial prototype. My favorite is `base<Interface>.M()`.
+
+> ***Closed Issue:*** What is the syntax for a base member invocation?
+
+***Decision:*** The syntax is `base(Interface).M()`. See https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-19.md#base-invocation. The interface so named must be a base interface, but does not need to be a direct base interface.
+
+> ***Open Issue:*** Should base interface invocations be permitted in class members?
+
+***Decision***: Yes. https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-19.md#base-invocation
+
+
+### Overriding non-public interface members (closed)
+
+In an interface, non-public members from base interfaces are overridden using the `override` modifier. If it is an "explicit" override that names the interface containing the member, the access modifier is omitted.
+
+> ***Closed Issue:*** If it is an "implicit" override that does not name the interface, does the access modifier have to match?
+
+***Decision:*** Only public members may be implicitly overridden, and the access must match. See https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-18.md#dim-implementing-a-non-public-interface-member-not-in-list
+
+> ***Open Issue:*** Is the access modifier required, optional, or omitted on an explicit override such as `override void IB.M() {}`? 
+
+> ***Open Issue:*** Is `override` required, optional, or omitted on an explicit override such as `void IB.M() {}`? 
+
+How does one implement a non-public interface member in a class? Perhaps it must be done explicitly?
+``` c#
+interface IA
+{
+    internal void MI();
+    protected void MP();
+}
+class C : IA
+{
+    // are these implementations?
+    internal void MI() {}
+    protected void MP() {}
+}
+```
+
+> ***Closed Issue:*** How does one implement a non-public interface member in a class? 
+
+***Decision:*** You can only implement non-public interface members explicitly. See https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-18.md#dim-implementing-a-non-public-interface-member-not-in-list
+
+***Decision***: No `override` keyword permitted on interface members.  https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#does-an-override-in-an-interface-introduce-a-new-member
+
+### Binary Compatibility 2 (closed)
+
+Consider the following code in which each type is in a separate assembly
+
+``` c#
+interface I1
+{
+    void M() { Impl1 }
+}
+interface I2 : I1
+{
+    override void M() { Impl2 }
+}
+interface I3 : I1
+{
+}
+class C : I2, I3
+{
+}
+```
+
+We understand that the implementation of `I1.M` in `C` is `I2.M`. What if the assembly containing `I3` is changed as follows and recompiled
+
+``` c#
+interface I3 : I1
+{
+    override void M() { Impl3 }
+}
+```
+
+but `C` is not recompiled. What happens when the program is run? An invocation of `(C as I1).M()`
+
+1. Runs `I1.M`
+2. Runs `I2.M`
+3. Runs `I3.M`
+4. Either 2 or 3, deterministically
+5. Throws some kind of runtime exception
+
+***Decision***: Throw an exception (5).  See https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#issues-in-default-interface-methods
+
+### Permit `partial` in interface? (closed)
+
+Given that interfaces may be used in ways analogous to the way abstract classes are used, it may be useful to declare them `partial`. This would be particularly useful in the face of generators.
+
+> ***Proposal:*** Remove the language restriction that interfaces and members of interfaces may not be declared `partial`.
+
+***Decision***: Yes.  See https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#permit-partial-in-interface
+
+### `Main` in an interface? (closed)
+
+> ***Open Issue:*** Is a `static Main` method in an interface a candidate to be the program's entry point?
+
+***Decision***: Yes.  See https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#main-in-an-interface
+
+### Confirm intent to support public non-virtual methods (closed)
+
+Can we please confirm (or reverse) our decision to permit non-virtual public methods in an interface?
+
+``` c#
+interface IA
+{
+    public sealed void M() { }
+}
+```
+
+> ***Semi-Closed Issue:*** (2017-04-18) We think it is going to be useful, but will come back to it. This is a mental model tripping block.
+
+***Decision***: Yes.  https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#confirm-that-we-support-public-non-virtual-methods
+
+### Does an `override` in an interface introduce a new member? (closed)
+
+There are a few ways to observe whether an override declaration introduces a new member or not.
+
+``` c#
+interface IA
+{
+    void M(int x) { }
+}
+interface IB
+{
+    override void M(int y) { }
+}
+interface IC
+{
+    static void M2()
+    {
+        M(y: 3); // permitted?
+    }
+    override void IB.M(int z) { } // permitted? What does it override?
+}
+```
+
+> ***Open Issue:*** Does an override declaration in an interface introduce a new member? (closed)
+
+In a class, an overriding method is "visible" in some senses. For example, the names of its parameters take precedence over the names of parameters in the overridden method. It may be possible to duplicate that behavior in interfaces, as there is always a most specific override. But do we want to duplicate that behavior?
+
+Also, it is possible to "override" an override method? [Moot]
+
+***Decision***: No `override` keyword permitted on interface members.  https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#does-an-override-in-an-interface-introduce-a-new-member
+
+### Properties with a private accessor (closed)
+
+We say that private members are not virtual, and the combination of virtual and private is disallowed. But what about a property with a private accessor?
+
+``` c#
+interface IA
+{
+    public virtual int P
+    {
+        get => 3;
+        private set => { } 
+    }
+}
+```
+
+Is this allowed? Is the `set` accessor here `virtual` or not? Can it be overridden where it is accessible? Does the following implicitly implement only the `get` accessor?
+
+``` c#
+class C : IA
+{
+    public int P
+    {
+        get => 4;
+        set { }
+    }
+}
+```
+
+Is the following presumably an error because IA.P.set isn't virtual and also because it isn't accessible?
+
+``` c#
+class C : IA
+{
+    int IA.P
+    {
+        get => 4;
+        set { }
+    }
+}
+```
+
+***Decision***: The first example looks valid, while the last does not. This is resolved analogously to how it already works in C#.  https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#properties-with-a-private-accessor
+
+
+### Base Interface Invocations, round 2 (closed)
+
+Our previous "resolution" to how to handle base invocations doesn't actually provide sufficient expressiveness. It turns out that in C# and the CLR, unlike Java, you need to specify both the interface containing the method declaration and the location of the implementation you want to invoke.
+
+I propose the following syntax for base calls in interfaces. I’m not in love with it, but it illustrates what any syntax must be able to express:
+
+``` c#
+interface I1 { void M(); }
+interface I2 { void M(); }
+interface I3 : I1, I2 { void I1.M() { } void I2.M() { } }
+interface I4 : I1, I2 { void I1.M() { } void I2.M() { } }
+interface I5 : I3, I4
+{
+    void I1.M()
+    {
+        base<I3>(I1).M(); // calls I3's implementation of I1.M
+        base<I4>(I1).M(); // calls I4's implementation of I1.M
+    }
+    void I2.M()
+    {
+        base<I3>(I2).M(); // calls I3's implementation of I2.M
+        base<I4>(I2).M(); // calls I4's implementation of I2.M
+    }
+}
+```
+If there is no ambiguity, you can write it more simply
+``` c#
+interface I1 { void M(); }
+interface I3 : I1 { void I1.M() { } }
+interface I4 : I1 { void I1.M() { } }
+interface I5 : I3, I4
+{
+    void I1.M()
+    {
+        base<I3>.M(); // calls I3's implementation of I1.M
+        base<I4>.M(); // calls I4's implementation of I1.M
+    }
+}
+```
+Or
+``` c#
+interface I1 { void M(); }
+interface I2 { void M(); }
+interface I3 : I1, I2 { void I1.M() { } void I2.M() { } }
+interface I5 : I3
+{
+    void I1.M()
+    {
+        base(I1).M(); // calls I3's implementation of I1.M
+    }
+    void I2.M()
+    {
+        base(I2).M(); // calls I3's implementation of I2.M
+    }
+}
+```
+Or
+``` c#
+interface I1 { void M(); }
+interface I3 : I1 { void I1.M() { } }
+interface I5 : I3
+{
+    void I1.M()
+    {
+        base.M(); // calls I3's implementation of I1.M
+    }
+}
+```
+
+***Decision***: Decided on `base(N.I1<T>).M(s)`, conceding that if we have an invocation binding there may be problem here later on.  https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-11-14.md#default-interface-implementations
+
+### Warning for struct not implementing default method? (closed)
+
+@vancem asserts that we should seriously consider producing a warning if a value type declaration fails to override some interface method, even if it would inherit an implementation of that method from an interface. Because it causes boxing and undermines constrained calls.
+
+***Decision***: This seems like something more suited for an analyzer. It also seems like this warning could be noisy, since it would fire even if the default interface method is never called and no boxing will ever occur.  https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#warning-for-struct-not-implementing-default-method
+
+### Interface static constructors (closed)
+
+When are interface static constructors run?  The current CLI draft proposes that it occurs when the first static method or field is accessed.  If there are neither of those then it might never be run??
+
+[2018-10-09 The CLR team proposes "Going to mirror what we do for valuetypes (cctor check on access to each instance method)"]
+
+***Decision***: Static constructors are also run on entry to instance methods, if the static constructor was not `beforefieldinit`, in which case static constructors are run before access to the first static field.  https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#when-are-interface-static-constructors-run
+
 ## Design meetings
 
 [2017-03-08 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-03-08.md)
@@ -506,3 +919,8 @@ but `C` is not recompiled. What happens when the program is run? An invocation o
 [2017-04-11 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-11.md)
 [2017-04-18 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-18.md)
 [2017-04-19 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-19.md)
+[2017-05-17 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-05-17.md)
+[2017-05-31 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-05-31.md)
+[2017-06-14 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-06-14.md)
+[2018-10-17 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md)
+[2018-11-14 LDM Meeting Notes](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-11-14.md)
