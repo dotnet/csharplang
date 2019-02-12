@@ -3,7 +3,7 @@
 ## Summary
 This proposal provides language constructs that expose IL opcodes that cannot currently be accessed efficiently,
 or at all, in C# today: `ldftn` and `calli`. These IL opcodes can be important in high performance code and developers
-need an effecient way to access them.
+need an efficient way to access them.
 
 ## Motivation
 The motivations and background for this feature are described in the following issue (as is a 
@@ -11,7 +11,7 @@ potential implementation of the feature):
 
 https://github.com/dotnet/csharplang/issues/191
 
-This is an alternate design propsoal to [compiler intrinsics]
+This is an alternate design proposal to [compiler intrinsics]
 (https://github.com/dotnet/csharplang/blob/master/proposals/intrinsics.md)
 
 ## Detailed Design 
@@ -98,7 +98,7 @@ calling_convention =
 The `unmanaged` calling convention represents the default calling convention for native code on the current platform.
 
 When there is a nested function pointer, a function pointer which has or returns a function pointer, parens can be 
-opitionally used to disambiguate the signature. Though they are not required and the resulting types are equivalent.
+optionally used to disambiguate the signature. Though they are not required and the resulting types are equivalent.
 
 ``` csharp
 delegate int Func1(string s);
@@ -125,18 +125,18 @@ When the calling convention is omitted from the syntax then `managed` will be us
 all of the forms of `Func1` and `Func2` defined above are equivalent signatures.
 
 The calling convention cannot be omitted when the return type of the function pointer has the same name as a calling 
-convention. Inthat case the parser would process the return type as a calling convention instead of a type. To resolve
+convention. In that case, the parser would process the return type as a calling convention instead of a type. To resolve
 this the developer must specify both the calling convention and the return type. 
 
 ``` csharp
 class cdecl { }
 
 // Function pointer which has a cdecl calling convention, a cdecl return type and takes a single 
-// paramater of type cdecl;
+// parameter of type cdecl;
 func* cdecl cdecl(cdecl);
 ```
 
-### Allow addresss-of to target methods
+### Allow address-of to target methods
 
 Method groups will now be allowed as arguments to an address-of expression. The type of such an 
 expression will be a `func*` which has the equivalent signature of the target method and a managed 
@@ -227,7 +227,7 @@ managed code the compiler should prevent developers from attempting such an invo
 - Prevent method group conversions to `delegate` when the method is tagged with `NativeCallback`. 
 
 This is not necessary to support `NativeCallback` though. The compiler can support the `NativeCallback` attribute as is
-using the existing syntax. The runtime would simply need to cast to `void*` before casting to the corrcect `func*` 
+using the existing syntax. The runtime would simply need to cast to `void*` before casting to the correct `func*` 
 signature. That would be no worse than the support today.
 
 ``` csharp
@@ -252,7 +252,7 @@ unsafe class Instance {
 ```
 
 This is sound but adds some complication to the proposal. Particularly because function pointers which differed by the
-calling convention `instance` and `managed` would be incompatbile even though both cases are used to invoke managed 
+calling convention `instance` and `managed` would be incompatible even though both cases are used to invoke managed 
 methods with the same C# signature. Also in every case considered where this would be valuable to have there was a 
 simple work around: use a `static` local function.
 
@@ -289,7 +289,7 @@ unsafe struct Action {
 ```
 
 ### Using delegates
-Instead of using a new syntax element, `func*`, simply use exisiting `delegate` types with a `*` following the type:
+Instead of using a new syntax element, `func*`, simply use existing `delegate` types with a `*` following the type:
 
 ``` csharp
 Func<object, object, bool>* ptr = &object.ReferenceEquals;
@@ -312,7 +312,7 @@ One option that was explored was emitting such a pointer as `mod_req(Func<int>) 
 work though as a `mod_req` cannot bind to a `TypeSpec` and hence cannot target generic instantiations.
 
 ### Named function pointers
-The function pointer syntax can be cumbersome, particlarly in complex cases like nested function pointers. Rather than
+The function pointer syntax can be cumbersome, particularly in complex cases like nested function pointers. Rather than
 have developers type out the signature every time the language could allow for named declarations of function pointers
 as is done with `delegate`. 
 

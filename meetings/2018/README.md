@@ -237,7 +237,7 @@ Discussion of records proposals:
 
 [C# Language Design Notes for Dec 5, 2018](LDM-2018-12-05.md)
 
-- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis
+- Tracked nullable states, their correspondence to source and the rules they follow in flow analysis
 
 ## Dec 12, 2018
 

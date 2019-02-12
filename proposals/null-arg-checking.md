@@ -57,7 +57,7 @@ This also means the `!` operator can only be added to parameters whose type can 
 This means it can't be used on a parameter whose type is known to be a value type.
 
 ``` csharp
-// Errro: Cannot use ! on parameters who types derive from System.ValueType
+// Error: Cannot use ! on parameters who types derive from System.ValueType
 void G<T>(T arg!) where T : struct {
 
 }
@@ -167,7 +167,7 @@ void WarnCase<T>(
 )
 ```
 
-## Open Issuess
+## Open Issues
 None
 
 ## Considerations
@@ -184,10 +184,10 @@ are discovered.
 
 ### Warning when mixing ? and !
 There was a lengthy discussion on whether or not a warning should be issued when the `!` syntax is applied to a
-parameter which is explicitly typed to a nullable type. On the surface it seems like a non-sensical declaration by 
+parameter which is explicitly typed to a nullable type. On the surface it seems like a nonsensical declaration by 
 the developer but there are cases where type hierarchies could force developers into such a situation. 
 
-Consider the following class hierarchy across a series of assemlbies (assuming all are compiled with `null` checking
+Consider the following class hierarchy across a series of assemblies (assuming all are compiled with `null` checking
 enabled):
 
 ``` csharp
