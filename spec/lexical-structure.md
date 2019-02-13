@@ -673,7 +673,7 @@ open_brace_escape_sequence
     : '{{'
     ;
 
-    close_brace_escape_sequence
+close_brace_escape_sequence
     : '}}'
     ;
     
