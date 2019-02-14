@@ -241,7 +241,7 @@ interface I3 : I1, I2
 ```
 
 
-An instance (nonstatic) method is permitted to invoke an accessible instance method override in a direct base interface nonvirtually by naming it using the syntax `base(Type).M`. This is useful when an override that is required to be provided due to diamond inheritance is resolved by delegating to one particular base implementation.
+An instance (nonstatic) method is permitted to invoke the implementation of an accessible instance method in a direct base interface nonvirtually by naming it using the syntax `base(Type).M`. This is useful when an override that is required to be provided due to diamond inheritance is resolved by delegating to one particular base implementation.
 
 ``` c#
 interface IA
@@ -262,6 +262,8 @@ class D : IA, IB, IC
     void IA.M() { base(IB).M(); } 
 }
 ```
+
+When a `virtual` or `abstract` member is accessed using the syntax `base(Type).M`, it is required that `Type` contains a unique *most specific override* for `M`.
 
 ### Effect on existing programs
 
