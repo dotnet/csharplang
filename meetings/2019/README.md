@@ -2,7 +2,9 @@
 
 ## Schedule ASAP
 - Triage [#2152](https://github.com/dotnet/csharplang/issues/2152): "Allow Obsolete attribute on getters and setters"
+- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 - Open issues in default interface methods (https://github.com/dotnet/csharplang/issues/406). We currently have open issues around `protected`, `internal`, reabstraction, and `static` fields among others.
+- Open issues in recursive pattern-matching https://github.com/dotnet/csharplang/issues/2095
 
 ## Schedule when convenient
 
