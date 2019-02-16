@@ -110,7 +110,7 @@ new_line_character
     ;
 
 delimited_comment
-    : '/*' delimited_comment_section* asterisk* '/'
+    : '/*' delimited_comment_section* asterisk+ '/'
     ;
 
 delimited_comment_section
