@@ -1,10 +1,6 @@
 # Upcoming meetings for 2019
 
 ## Schedule ASAP
-- Triage [#2152](https://github.com/dotnet/csharplang/issues/2152): "Allow Obsolete attribute on getters and setters"
-- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
-- Open issues in default interface methods (https://github.com/dotnet/csharplang/issues/406). We currently have open issues around `protected`, `internal`, reabstraction, and `static` fields among others.
-- Open issues in recursive pattern-matching https://github.com/dotnet/csharplang/issues/2095
 
 ## Schedule when convenient
 
@@ -18,6 +14,27 @@
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+
+## Mar 6, 2019
+
+## Mar 4, 2019
+
+- *Design review*?
+
+## Feb 27, 2019
+
+- Triage [#2152](https://github.com/dotnet/csharplang/issues/2152): "Allow Obsolete attribute on getters and setters"
+- Open issues in recursive pattern-matching https://github.com/dotnet/csharplang/issues/2095
+
+## Feb 25, 2019
+
+- Open issues in default interface methods (https://github.com/dotnet/csharplang/issues/406). 
+    - Base calls
+    - We currently have open issues around `protected`, `internal`, reabstraction, and `static` fields among others.
+
+## Feb 20, 2019
+
+- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 
 ## Feb 13, 2019
 
