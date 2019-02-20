@@ -209,7 +209,7 @@ Interface methods are declared using *interface_method_declaration*s:
 
 ```antlr
 interface_method_declaration
-    : attributes? 'new'? return_type identifier type_parameter_list
+    : attributes? 'new'? return_type identifier type_parameter_list?
       '(' formal_parameter_list? ')' type_parameter_constraints_clause* ';'
     ;
 ```
