@@ -11,8 +11,7 @@ potential implementation of the feature):
 
 https://github.com/dotnet/csharplang/issues/191
 
-This is an alternate design proposal to [compiler intrinsics]
-(https://github.com/dotnet/csharplang/blob/master/proposals/intrinsics.md)
+This is an alternate design proposal to [compiler intrinsics](https://github.com/dotnet/csharplang/blob/master/proposals/intrinsics.md)
 
 ## Detailed Design 
 
