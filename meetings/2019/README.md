@@ -36,13 +36,15 @@
 
 - Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 
-## Feb 13, 2019
-
-Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Feb 13, 2019
+
+[C# Language Design Notes for Feb 13, 2019](LDM-2019-02-13.md)
+
+- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 
 ## Jan 23, 2019
 
