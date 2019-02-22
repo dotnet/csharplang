@@ -44,13 +44,15 @@
     - Base calls
     - We currently have open issues around `protected`, `internal`, reabstraction, and `static` fields among others.
 
-## Feb 20, 2019
-
-- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Feb 20, 2019
+
+[C# Language Design Notes for Feb 20, 2019](LDM-2019-02-20.md)
+
+- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 
 ## Feb 13, 2019
 
