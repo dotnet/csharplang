@@ -31,7 +31,7 @@ public struct Vector2
     public float x;
     public float y;
 
-    public float GetLengthReadonly() readonly
+    public readonly float GetLengthReadonly()
     {
         return MathF.Sqrt(LengthSquared);
     }
@@ -41,7 +41,7 @@ public struct Vector2
         return MathF.Sqrt(LengthSquared);
     }
 
-    public float GetLengthIllegal() readonly
+    public readonly float GetLengthIllegal()
     {
         var tmp = MathF.Sqrt(LengthSquared);
 
@@ -53,7 +53,7 @@ public struct Vector2
 
     public float LengthSquared
     {
-        get readonly
+        readonly get
         {
             return (x * x) +
                    (y * y);
@@ -86,9 +86,67 @@ public static class MyClass
 }
 ```
 
+Readonly can be applied to property accessors to indicate that `this` will not be mutated in the accessor.
+```cs
+public int Prop1
+{
+    readonly get
+    {
+        return this._store["Prop1"];
+    }
+    readonly set
+    {
+        this._store["Prop1"] = value;
+    }
+}
+```
+
+When `readonly` is applied to the property syntax, it means that all accessors are `readonly`.
+```cs
+public readonly int Prop2
+{
+    get
+    {
+        return this._store["Prop2"];
+    }
+    set
+    {
+        this._store["Prop2"] = value;
+    }
+}
+```
+
+Readonly can only be applied to accessors which do not mutate the containing type.
+```cs
+public int Prop3
+{
+    readonly get
+    {
+        return this._prop3;
+    }
+    set
+    {
+        this._prop3 = value;
+    }
+}
+```
+
+Readonly can be applied to auto-implemented properties, but it won't have a meaningful effect. The compiler will treat all auto-implemented getters as readonly whether or not the `readonly` keyword is present.
+```cs
+// Allowed
+public readonly int Prop4 { get; }
+public int Prop5 { readonly get; }
+public int Prop6 { readonly get; set; }
+
+// Not allowed
+public readonly int Prop7 { get; set; }
+public int Prop8 { get; readonly set; }
+```
+
+
 Some other syntax examples:
-* Expression bodied members: `public float ExpressionBodiedMember readonly => (x * x) + (y * y);`
-* Generic constraints: `public static void GenericMethod<T>(T value) readonly where T : struct { }`
+* Expression bodied members: `public readonly float ExpressionBodiedMember => (x * x) + (y * y);`
+* Generic constraints: `public static readonly void GenericMethod<T>(T value) where T : struct { }`
 
 The compiler would emit the instance member, as usual, and would additionally emit a compiler recognized attribute indicating that the instance member does not modify state. This effectively causes the hidden `this` parameter to become `in T` instead of `ref T`.
 
