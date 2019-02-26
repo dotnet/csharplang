@@ -6,6 +6,64 @@ This feature is about delivering two new operators that allow constructing `Syst
 
 ## Overview
 
+### Well-known types and members
+
+To use the new syntactic forms for System.Index and System.Range, new well-known
+types and members may be necessary, depending on which syntactic forms are used.
+
+To use the "hat" operator (`^`), the following is required
+
+```C#
+namespace System
+{
+    public readonly struct Index
+    {
+        public Index(int value, bool fromEnd);
+    }
+}
+```
+
+To use the `System.Index` type as an argument in an array element access, the following
+member is required:
+
+```C#
+int System.Index.GetOffset(int length);
+```
+
+The `..` syntax for `System.Range` will require the `System.Range` type, as well as one
+or more of the following members:
+
+```C#
+namespace System
+{
+    public readonly struct Range
+    {
+        public Range(System.Index start, System.Index end);
+        public static Range StartAt(System.Index start);
+        public static Range EndAt(System.Index end);
+        public static Range All { get; }
+    }
+}
+```
+
+The `..` syntax allows for either, both, or none of it's arguments to be absent. Regardless
+of the number of arguments, the `Range` constructor is always sufficient for using the
+`Range` syntax. However, if any of the other members are present and one or more of the
+`..` arguments are missing, the appropriate member may be substituted.
+
+Finally, for a value of type `System.Range` to be used in an array element access expression,
+the following member must be present:
+
+```C#
+namespace System.Runtime.CompilerServices
+{
+    public static class RuntimeHelpers
+    {
+        public static T[] GetSubArray<T>(T[] array, System.Range range);
+    }
+}
+```
+
 ### System.Index
 
 C# has no way of indexing a collection from the end, but rather most indexers use the "from start" notion, or do a "length - i" expression. We introduce a new Index expression that means "from the end". The feature will introduce a new unary prefix "hat" operator. Its single operand must be convertible to `System.Int32`. It will be lowered into the appropriate `System.Index` factory method call.
