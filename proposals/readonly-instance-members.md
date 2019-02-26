@@ -154,6 +154,11 @@ public readonly event Action<EventArgs> Event1
 
 // Not allowed
 public readonly event Action<EventArgs> Event2;
+public event Action<EventArgs> Event3
+{
+    readonly add { }
+    readonly remove { }
+}
 ```
 
 Some other syntax examples:
