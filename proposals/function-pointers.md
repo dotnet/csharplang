@@ -58,7 +58,7 @@ unsafe class Example {
 
         p1 = p2; // okay Func1 and Func3 have compatible signatures
         Console.WriteLine(p2 == p1); // True
-        p2 = p2; // error: calling conventions are incompatible
+        p2 = p3; // error: calling conventions are incompatible
     }
 }
 ```
