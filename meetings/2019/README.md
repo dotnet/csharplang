@@ -25,13 +25,13 @@
 
 ## Mar 6, 2019
 
-- Interpolated string optimizations (Jared, Jeremy Kuhne)
+- Nullable sidecar files (Immo)
+- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 
 ## Mar 4, 2019
 
 - Nullable user studies (Phillip Carter)
-- Nullable sidecar files (Immo)
-- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
+- Interpolated string optimizations (Jared, Jeremy Kuhne)
 
 ## Feb 27, 2019
 
