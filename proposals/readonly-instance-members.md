@@ -131,7 +131,7 @@ public int Prop3
 }
 ```
 
-Readonly can be applied to auto-implemented properties, but it won't have a meaningful effect. The compiler will treat all auto-implemented getters as readonly whether or not the `readonly` keyword is present.
+Readonly can be applied to some auto-implemented properties, but it won't have a meaningful effect. The compiler will treat all auto-implemented getters as readonly whether or not the `readonly` keyword is present.
 ```cs
 // Allowed
 public readonly int Prop4 { get; }
@@ -143,6 +143,28 @@ public readonly int Prop7 { get; set; }
 public int Prop8 { get; readonly set; }
 ```
 
+Readonly can be applied to manually-implemented events, but not field-like events. Readonly cannot be applied to individual event accessors (add/remove).
+```cs
+// Allowed
+public readonly event Action<EventArgs> Event1
+{
+    add { }
+    remove { }
+}
+
+// Not allowed
+public readonly event Action<EventArgs> Event2;
+public event Action<EventArgs> Event3
+{
+    readonly add { }
+    readonly remove { }
+}
+public static readonly event Event4
+{
+    add { }
+    remove { }
+}
+```
 
 Some other syntax examples:
 * Expression bodied members: `public readonly float ExpressionBodiedMember => (x * x) + (y * y);`
