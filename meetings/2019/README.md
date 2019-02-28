@@ -40,15 +40,17 @@
 - Triage [#2152](https://github.com/dotnet/csharplang/issues/2152): "Allow Obsolete attribute on getters and setters"
 - Open issues in recursive pattern-matching https://github.com/dotnet/csharplang/issues/2095
 
+# C# Language Design Notes for 2019
+
+Overview of meetings and agendas for 2019
+
 ## Feb 25, 2019
+
+[C# Language Design Notes for Feb 20, 2019](LDM-2019-02-25.md)
 
 - Open issues in default interface methods (https://github.com/dotnet/csharplang/issues/406). 
     - Base calls
     - We currently have open issues around `protected`, `internal`, reabstraction, and `static` fields among others.
-
-# C# Language Design Notes for 2019
-
-Overview of meetings and agendas for 2019
 
 ## Feb 20, 2019
 
