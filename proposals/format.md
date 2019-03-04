@@ -195,7 +195,7 @@ interpolated string. This means it will be valuable to have overloads which diff
 `ValueFormattableString`. Such an overload today with `FormattableString` is not valauble as the compiler will always
 prefer the `string` version (unless the developer uses an explicit cast). 
 
-## Open Issuess
+## Open Issues
 
 ### ValuableFormattableString breaking change
 The change to prefer `ValueFormattableString` during overload resolution over `string` is a breaking change. It is
