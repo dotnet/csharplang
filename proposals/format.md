@@ -14,21 +14,34 @@ There are a set of features that will be used here to achieve these results:
 
 - Expanding `params` to support more effecient types than array. 
 - Allowing for developers to customize how `string` interpolation is achieved. 
+- Allowing for interpolated `string` to bind to more efficient `string.Format` overloads.
 
-### params Span
-The language will allow for `params` in a method signature to have the types `Span<T>` and `ReadOnlySpan<T>`. The same
-rules will apply to `params Span<T>` that apply to `params T[]`:
+### Extending params
+The language will allow for `params` in a method signature to have the types `Span<T>`, `ReadOnlySpan<T>` and 
+`IEnumerable<T>`. The same rules will apply to these new types that apply to `params T[]`:
 
 - Can't overload where the only difference is a `params` keyword.
-- Can invoke by passing a series of `T` arguments or a single `Span<T>` argument.
+- Can invoke by passing a series of arguments that are implicitly convertible to `T` or a single `Span<T>` / 
+`ReadOnlySpan<T>` / `IEnumerable<T>` argument.
 - Must be the last parameter in a method signature.
 - Etc ... 
 
-The advantage this variant of `params` provides is it gives the compiler great flexbility in how it allocations the
-backing storage for the `Span<T>` value. With a `params T[]` the compiler must allocate a new `T[]` for every 
-invocation of a `params` method because it must assume the callee stored and reused the parameter. Given the 
-`Span<T>` and `ReadOnlySpan<T>` types are `ref struct` the callee cannot store the argument. Hence the compiler can
-safely re-use the value. 
+The `Span<T>` and `ReadOnlySpa<T>` variants will be referred to as `Span<T>` below for simplicity. In cases where the 
+behavior of `ReadOnlySpan<T>` differs it will be called out. 
+
+The advantage the `Span<T>` variants of `params` provides is it gives the compiler great flexbility in how it allocates
+the backing storage for the `Span<T>` value. With a `params T[]` the compiler must allocate a new `T[]` for every 
+invocation of a `params` method because it must assume the callee stored and reused the parameter. This can lead to 
+a large inefficiency in methods with lots of `params` invocations.
+
+Given `Span<T>` variants are `ref struct` the callee cannot store the argument. Hence the compiler can optimize the 
+call sites by taking actions like re-using the argument. This can make repeated invocations very efficient. The 
+langauge though will make no specific guarantees about how such callsites are optimized. Only note that the compiler 
+is free to use values other than `T[]` when invoking a `Span<T>` method. 
+
+The `IEnumerable<T>` variant is a merely a covenience overload. It's useful in scenarios which have frequent uses of
+`IEnumeralbe<T>` but also have lots of `params` usage. When invoked in `T` argument form the backing storage will 
+be allocated as a `T[]` just as `params T[]` is done today.
 
 One such potential implementation is the following. Consider all `params` invocation of a given type in a method 
 body. The compiler could allocate an array which has a size equal to the largest `params` invocation and use that for
@@ -88,52 +101,7 @@ static class SneakyCapture {
 These cases are statically dectable though. It potentially occurs whenever there is a `ref` return or a `ref struct`
 parameter passed by `out` or `ref`. In such a case the compiler must allocate a fresh `T[]` for every invocation. 
 
-### params IEnumerable
-The language will allow for `params` in a method signature to have the type `IEnumerable<T>`. The same rules will apply 
-to `params IEnumerable<T>` that apply to `params T[]` (see above for listing of rules).
-
-The compiler will invoke a `params IEnumerable<T>` method exactly as it invokes a `params T[]` method. A new array will
-be allocated for every call site and passed to the callee.
-
-### params VariantCollection
-The language will allow for `params` in a method signature to have the type `VariantCollection`. This elements of a 
-`VariantCollection` are considered to be of type `Variant`. The same rules will apply to `params VariantCollection` 
-that apply to `params Variant[]` (see above for listing of rules).
-
-The `Variant` value type is a [suggested addition](https://github.com/dotnet/corefxlab/pull/2595) to CoreFX that has a
-conversion from any type. For the majority of common framework types (`int`, `double`, `TimeSpan`, etc ..) the 
-conversion is allocation free.
-
-Methods which take a `params` of hetrogeneous data today must declare as `params object[]`. This means that every 
-value type passed to the method incurs a boxing allocation (in addition to the array the compiler must allocate). The
-`Variant` and `VariantCollection` type allow such methods to avoid allocations in the most common paths. Invocations
-like `Console.WriteLine("hello {0] {1}", someInt, DateTime.Now)` can be invoked without any boxing or array allocations
-here.
-
-When emitting the code for a `params VariantCollection` invocation the compiler will look for an overload of 
-`VariantCollection.Create(in Variant v1, in Variant v2, ..., in Variant vn)` where `n` matches the number of arguments 
-being passed to the parameter. Each argument will be passed exactly as if the developer wrote the
-`VariantCollection.Create` call with the arguments. For example:
-
-``` csharp
-class VariantCall { 
-    static void Write(params VariantCollection collection) { ... } 
-
-    static void Use() {
-        Write(1, DateTime.UtcNow)
-
-        // Compiler will evaluate as 
-        Write(VariantCollection.Create(1, DateTime.UtcNow))
-
-        // Compiler will eventually emit as 
-        Write(VariantCollection.Create((Variant)1, (Variant)DateTime.UtcNow))
-    }
-}
-```
-
-In the case a `VariantCollection.Create` method with the correct number of parameters does not exist the compiler will
-attempt to invoke `Create(Variant[] array)` instead. A fresh `Variant[]` will be allocated for every invocation in this
-case. In the case `Create(Variant[] array)` does not exist the compiler will issue an error.
+Several other potential optimization strategies are discussed at the end of this document.
 
 ### params overload resolution changes
 This proposal means the language now has four variants of `params` where before it had one. It is also sensible for 
@@ -187,7 +155,7 @@ class ConsoleEx {
 class Program { 
     static void Main() { 
         ConsoleEx.Write(42);
-        ConsoleEx.Write("hello {DateTime.UtcNow}");
+        ConsoleEx.Write($"hello {DateTime.UtcNow}");
 
         // Translates into 
         ConsoleEx.Write(ValueFormattableString.Create((Variant)42));
@@ -202,6 +170,10 @@ Overload resolution rules will be changed to prefer `ValueFormattableString` ove
 interpolated string. This means it will be valuable to have overloads which differ only on `string` and 
 `ValueFormattableString`. Such an overload today with `FormattableString` is not valauble as the compiler will always
 prefer the `string` version (unless the developer uses an explicit cast). 
+
+### More efficient string.format
+
+Allow for interpolated strings to bind to more efficient `string.Format` overloads.
 
 ## Open Issuess
 
@@ -223,6 +195,10 @@ type in the `System` namespace this break seems like a reasonable compromise.
 ## Future Considerations
 
 CLR helper for stack allocating arrays 
+Lambdas and re-using arrays
+varargs won't work because of JIT and GC
+VariantCollection make it a ref struct and Span<Variant>
+Calling `Span<Variant>` more efficiently
 
 ## Misc
 Related issues
