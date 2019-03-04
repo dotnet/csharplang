@@ -1,4 +1,4 @@
-# Efficent Formatting
+# Efficent Params and String Formatting
 
 ## Summary
 This combination of features will increase the efficiency of formatting `string` values and passing of `params` style
