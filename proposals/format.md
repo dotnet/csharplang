@@ -107,14 +107,13 @@ Several other potential optimization strategies are discussed at the end of this
 This proposal means the language now has four variants of `params` where before it had one. It is also sensible for 
 methods to define overloads of methods that differ only on `params` declarations. 
 
-Consider that `StringBuilder.AppendFormat` would certainly add a `params VariantCollection` overload in addition to the
-`params object[]`. This would allow it to substantially improve performance by reducing boxing and collection 
+Consider that `StringBuilder.AppendFormat` would certainly add a `params ReadOnlySpan<Variant>` overload in addition to
+the `params object[]`. This would allow it to substantially improve performance by reducing boxing and collection 
 allocations without requiring any changes to the calling code. 
 
 To facilitate this the language will introduce the following overload resolution tie breaking rule. When the candidate
 methods differ only by the `params` parameter then the canditates will be preferred in the following order:
 
-1. `VariantCollection`
 1. `ReadOnlySpan<T>`
 1. `Span<T>`
 1. `T[]`
@@ -144,7 +143,7 @@ looking for the most suitable `ValueFormattableString.Create` method.
 readonly struct ValueFormattableString {
     public static ValueFormattableString Create(Variant v) { ... } 
     public static ValueFormattableString Create(string s) { ... } 
-    public static ValueFormattableString Create(string s, params VariantCollection collection) { ... } 
+    public static ValueFormattableString Create(string s, params ReadOnlySpan<Variant> collection) { ... } 
     public static ValueFormattableString Create(string s, Variant v) { ... }
 }
 
@@ -175,6 +174,7 @@ prefer the `string` version (unless the developer uses an explicit cast).
 
 Allow for interpolated strings to bind to more efficient `string.Format` overloads.
 
+
 ## Open Issuess
 
 ### ValuableFormattableString breaking change
@@ -191,8 +191,15 @@ type in the `System` namespace this break seems like a reasonable compromise.
 
 ## Considerations
 
-### consideration 1
-## Future Considerations
+### Variant2 and Variant3
+The CoreFX is introducing a new managed type `Variant`. This type is meant to be used in APIs which expect hetrogeneous
+values but don't want the boxing overhead brought on by using `object`. The type provides universal storage without the 
+overhead of boxing for the most commonly used types. Using this in places like `string.Format` can eliminate the boxing
+overhead in many circumstances. 
+
+The CoreFX team also has a non-allocating set of storage types for up to three `Variant` arguments. These are a single
+`Variant`, `Variant2` and `Variant3`. All have the methods 
+
 
 CLR helper for stack allocating arrays 
 Lambdas and re-using arrays
