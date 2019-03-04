@@ -205,19 +205,46 @@ The possibility of this seems reasonably low. The type would need the full name 
 would need to have `static` methods named `Create`. Given that developers are strongly discouraged from defining any
 type in the `System` namespace this break seems like a reasonable compromise.
 
-### open issue1
-
 ## Considerations
 
 ### Variant2 and Variant3
-The CoreFX is introducing a new managed type `Variant`. This type is meant to be used in APIs which expect hetrogeneous
-values but don't want the boxing overhead brought on by using `object`. The type provides universal storage without the 
-overhead of boxing for the most commonly used types. Using this in places like `string.Format` can eliminate the boxing
-overhead in many circumstances. 
-
 The CoreFX team also has a non-allocating set of storage types for up to three `Variant` arguments. These are a single
-`Variant`, `Variant2` and `Variant3`. All have the methods 
+`Variant`, `Variant2` and `Variant3`. All have a pair of methods for getting an allocation free `Span<Variant>` off of 
+them: `CreateSpan` and `KeepAlive`. This means for a `params Span<Variant>` of up to three arguments the call site 
+can be entirely allocation free.
 
+``` csharp
+static class ZeroAllocation {
+    static void Use(params Span<Variant> spans) {
+        ...
+    }
+
+    static void Go() {
+        Use("hello", "world");
+    }
+}
+```
+
+The `Go` method can be lowered to the following:
+
+``` csharp
+static class ZeroAllocation {
+    static void Go() {
+        Variant _v;
+        _v.Variant1 = new Variant("hello");
+        _v.Variant2 = new Variant("hello");
+        Use(_v.CreateSpan());
+        _v.KeepAlive();
+    }
+}
+```
+
+This requires very little work on top of the proposal to re-use `T[]` between `params Span<T>` calls. The compiler
+already needs to manage a temporary per call and do clean up work after (even if in one case it's just marking 
+an internal temp as free). 
+
+Note: the `KeepAlive` function is only necessary on desktop. On .NET Core the method will not be available and hence
+the compiler won't emit a call to it.
 
 CLR helper for stack allocating arrays 
 Lambdas and re-using arrays
