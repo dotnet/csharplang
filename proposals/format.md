@@ -1,4 +1,4 @@
-# Efficent Params and String Formatting
+# Efficient Params and String Formatting
 
 ## Summary
 This combination of features will increase the efficiency of formatting `string` values and passing of `params` style
@@ -10,10 +10,10 @@ from the boxing penalty of `struct` types, the `object[]` allocation for `params
 allocations during `string.Format` calls. In order to maintain efficiency such applications often need to abandon
 productivity features such as `params` and `string` interpolation and move to non-standard, hand coded solutions. 
 
-Consider MSBuild as an example. This is written using a lot of modern C# features by developers who are concious of 
+Consider MSBuild as an example. This is written using a lot of modern C# features by developers who are conscious of 
 performance. Yet in one representative build sample MSBuild will generate 262MB of `string` allocation
-using minimal verbosity. Of that 1/2 of the allocations are short lived alloctaions inside `string.Format`. These 
-features would remove much of that on .NET Desktop and get it down to nearly zero on .NET Core due to the 
+using minimal verbosity. Of that 1/2 of the allocations are short lived allocations inside `string.Format`. These 
+features would remove much of that on .NET Desktop and get it down to nearly zero on .NET Core due to the availability of `Span<T>`
 
 The set of language features described here will enable applications to continue using these features, with very
 little or no churn to their application code base, while removing the unintended allocation overhead in the majority of 
@@ -36,7 +36,7 @@ The language will allow for `params` in a method signature to have the types `Sp
 - Must be the last parameter in a method signature.
 - Etc ... 
 
-The `Span<T>` and `ReadOnlySpa<T>` variants will be referred to as `Span<T>` below for simplicity. In cases where the 
+The `Span<T>` and `ReadOnlySpan<T>` variants will be referred to as `Span<T>` below for simplicity. In cases where the 
 behavior of `ReadOnlySpan<T>` differs it will be explicitly called out. 
 
 The advantage the `Span<T>` variants of `params` provides is it gives the compiler great flexbility in how it allocates
@@ -46,7 +46,7 @@ parameter. This can lead to a large inefficiency in methods with lots of `params
 
 Given `Span<T>` variants are `ref struct` the callee cannot store the argument. Hence the compiler can optimize the 
 call sites by taking actions like re-using the argument. This can make repeated invocations very efficient as compared
-to `T[]`. The langauge though will make no specific guarantees about how such callsites are optimized. Only note that 
+to `T[]`. The language though will make no specific guarantees about how such callsites are optimized. Only note that 
 the compiler is free to use values other than `T[]` when invoking a `params Span<T>` method. 
 
 One such potential implementation is the following. Consider all `params` invocation in a method body. The compiler 
@@ -86,7 +86,7 @@ The compiler could choose to emit the body of `Go` as follows:
    }
 ```
 
-This can siginficantly reduce the number of arrays allocated in an application. Allocations can be even further 
+This can significantly reduce the number of arrays allocated in an application. Allocations can be even further 
 reduced if the runtime provides utilities for smarter stack allocation of arrays.
 
 This optimization cannot always be applied though. Even though the callee cannot capture the `params` argument it can 
@@ -104,13 +104,13 @@ static class SneakyCapture {
 }
 ```
 
-These cases are statically dectable though. It potentially occurs whenever there is a `ref` return or a `ref struct`
+These cases are statically detectable though. It potentially occurs whenever there is a `ref` return or a `ref struct`
 parameter passed by `out` or `ref`. In such a case the compiler must allocate a fresh `T[]` for every invocation. 
 
 Several other potential optimization strategies are discussed at the end of this document.
 
-The `IEnumerable<T>` variant is a merely a covenience overload. It's useful in scenarios which have frequent uses of
-`IEnumeralbe<T>` but also have lots of `params` usage. When invoked in `T` argument form the backing storage will 
+The `IEnumerable<T>` variant is a merely a convenience overload. It's useful in scenarios which have frequent uses of
+`IEnumerable<T>` but also have lots of `params` usage. When invoked in `T` argument form the backing storage will 
 be allocated as a `T[]` just as `params T[]` is done today.
 
 ### params overload resolution changes
@@ -122,18 +122,18 @@ the `params object[]`. This would allow it to substantially improve performance 
 without requiring any changes to the calling code. 
 
 To facilitate this the language will introduce the following overload resolution tie breaking rule. When the candidate
-methods differ only by the `params` parameter then the canditates will be preferred in the following order:
+methods differ only by the `params` parameter then the candidates will be preferred in the following order:
 
 1. `ReadOnlySpan<T>`
 1. `Span<T>`
 1. `T[]`
 1. `IEnumerable<T>`
 
-This order is the most to the least effecient for the general case.
+This order is the most to the least efficient for the general case.
 
 ### Variant
-The CoreFX is introducing a new managed type `Variant`. This type is meant to be used in APIs which expect hetrogeneous
-values but don't want the overhead brought on by using `object` as the parmeter. The `Variant` type provides universal 
+The CoreFX is introducing a new managed type `Variant`. This type is meant to be used in APIs which expect heterogeneous
+values but don't want the overhead brought on by using `object` as the parameter. The `Variant` type provides universal 
 storage but avoids the boxing allocation for the most commonly used types. Using this type in APIs like `string.Format`
 can eliminate the boxing overhead in the majority of cases.
 
@@ -141,13 +141,13 @@ This type itself is not necessarily special to the language. It is being introdu
 as it becomes an implementation detail of other parts of the proposal. 
 
 ### Efficient interpolated strings
-Interpolated strings are a popular yet innefecient feature in C#. The most common syntax, using an interpolated `string`
-as a `string`, translates into a `string.Format(string, params object[])` call. That will inccur boxing allocations for 
+Interpolated strings are a popular yet inefficient feature in C#. The most common syntax, using an interpolated `string`
+as a `string`, translates into a `string.Format(string, params object[])` call. That will incur boxing allocations for 
 all value types, intermediate `string` allocations as the implementation largely uses `object.ToString` for formatting
 as well as array allocations once the number of arguments exceeds the amount of parameters on the "fast" overloads of 
 `string.Format`. 
 
-The language will change it's interpolation lowering to consider alternate overloads of `string.Format`. It will
+The language will change its interpolation lowering to consider alternate overloads of `string.Format`. It will
 consider all forms of `string.Format(string, params)` and pick the "best" overload which satisfies the argument types.
 The "best" `params` overload will be determined by the rules discussed above. This means interpolated `string` can now
 bind to very efficient overloads like `string.Format(string format, params ReadOnlySpan<Variant> args)`. In many cases
@@ -159,7 +159,7 @@ which goes into an interpolated string: the format `string` and the arguments as
 boxing and argument array allocation as well as the allocation for `FormattableString` (it's an `abstract class`). Hence
 it's of little use to applications which are allocation heavy in `string` formatting.
 
-To make interopolated string formatting efficient the language will recognize a new type: 
+To make interpolated string formatting efficient the language will recognize a new type: 
 `System.ValueFormattableString`. All interpolated strings will have a target type conversion to this type. This will 
 be implemented by translating the interpolated string into the call `ValueFormattableString.Create` exactly as is done
 for `FormattableString.Create` today. The language will support all `params` options described in this document when
@@ -192,12 +192,12 @@ class Program {
 
 Overload resolution rules will be changed to prefer `ValueFormattableString` over `string` when the argument is an 
 interpolated string. This means it will be valuable to have overloads which differ only on `string` and 
-`ValueFormattableString`. Such an overload today with `FormattableString` is not valauble as the compiler will always
+`ValueFormattableString`. Such an overload today with `FormattableString` is not valuable as the compiler will always
 prefer the `string` version (unless the developer uses an explicit cast). 
 
 ## Open Issues
 
-### ValuableFormattableString breaking change
+### ValueFormattableString breaking change
 The change to prefer `ValueFormattableString` during overload resolution over `string` is a breaking change. It is
 possible for a developer to have defined a type called `ValueFormattableString` today and use it in method overloads
 with `string`. This proposed change would cause the compiler to pick a different overload once this set of features
@@ -251,12 +251,12 @@ the compiler won't emit a call to it.
 ### CLR stack allocation helpers
 The CLR only provides only 
 [localloc](https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.localloc?redirectedfrom=MSDN&view=netframework-4.7.2)
- for stack allocation of contiguous memory. This instruction is limited in that it it only works for `unmanaged` types. 
- This means it can't be used as a universal solution for efficientally allocating the backing storage for `params 
+ for stack allocation of contiguous memory. This instruction is limited in that it only works for `unmanaged` types. 
+ This means it can't be used as a universal solution for efficiently allocating the backing storage for `params 
  Span<T>`. 
 
 This limitation is not some fundamental restriction though but instead more an artifact of history. The CLR could choose
-to add new op codes / intrinsicts which provide universal stack allocation. These could then be used to allocate the
+to add new op codes / intrinsics which provide universal stack allocation. These could then be used to allocate the
 backing storage for most `params Span<T>` calls.
 
 ``` csharp
@@ -284,7 +284,7 @@ static class ZeroAllocation {
 }
 ```
 
-While this approach is very heap efficient it does cause extra stack usage. In an algorthim which has a deep stack and
+While this approach is very heap efficient it does cause extra stack usage. In an algorithm which has a deep stack and
 lots of `params` usage it's possible this could cause a `StackOverflowException` to be generated where a simple `T[]`
 allocation would succeed. 
 
