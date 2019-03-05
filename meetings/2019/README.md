@@ -30,14 +30,16 @@
 - ~~Nullable sidecar files (Immo)~~
 - Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 
-## Mar 4, 2019
-
-- Nullable user studies (Phillip Carter)
-- Interpolated string optimizations (Jared, Jeremy Kuhne)
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Mar 4, 2019
+
+[C# Language Design Notes for March 4, 2019](LDM-2019-03-04.md)
+
+1. Nullable user studies
+2. Interpolated string and string.Format optimizations
 
 ## Feb 27, 2019
 
