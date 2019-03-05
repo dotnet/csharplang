@@ -132,10 +132,10 @@ methods differ only by the `params` parameter then the candidates will be prefer
 This order is the most to the least efficient for the general case.
 
 ### Variant
-The CoreFX is introducing a new managed type `Variant`. This type is meant to be used in APIs which expect heterogeneous
-values but don't want the overhead brought on by using `object` as the parameter. The `Variant` type provides universal 
-storage but avoids the boxing allocation for the most commonly used types. Using this type in APIs like `string.Format`
-can eliminate the boxing overhead in the majority of cases.
+CoreFX is prototyping a new managed type named [Variant](https://github.com/dotnet/corefxlab/pull/2595). This type 
+is meant to be used in APIs which expect heterogeneous values but don't want the overhead brought on by using `object`
+as the parameter. The `Variant` type provides universal storage but avoids the boxing allocation for the most commonly
+used types. Using this type in APIs like `string.Format` can eliminate the boxing overhead in the majority of cases.
 
 This type itself is not necessarily special to the language. It is being introduced in this document separately though
 as it becomes an implementation detail of other parts of the proposal. 
@@ -185,7 +185,7 @@ class Program {
         ConsoleEx.Write(ValueFormattableString.Create((Variant)42));
         ConsoleEx.Write(ValueFormattableString.Create(
             "hello {0}", 
-            VariantCollection.Create((Variant)DateTime.UtcNow));
+            new Variant(DateTime.UtcNow));
     }
 }
 ```
@@ -206,6 +206,16 @@ was implemented.
 The possibility of this seems reasonably low. The type would need the full name `System.ValueFormattableString` and it 
 would need to have `static` methods named `Create`. Given that developers are strongly discouraged from defining any
 type in the `System` namespace this break seems like a reasonable compromise.
+
+### Expanding to more types
+Given we're in the area we sohuld consider adding `IList<T>`, `ICollection<T>` and `IReadOnlyList<T>` to the set of
+collections for which `params` is supported. In terms of implementation it will cost a small amount over the other
+work here.
+
+LDM needs to decide if the complication to the language is worth it though. The addition of `IEnumerable<T>` removes 
+a very specific friction point. Lacking this `params` solution many customers were forced to allocate `T[]` from an 
+`IEnumerable<T>` when calling a `params` method. The addition of `IEnumerable<T>` fixes this though. There is no
+specific friction point that the other interfaces fix here. 
 
 ## Considerations
 
@@ -232,7 +242,7 @@ The `Go` method can be lowered to the following:
 ``` csharp
 static class ZeroAllocation {
     static void Go() {
-        Variant _v;
+        Variant2 _v;
         _v.Variant1 = new Variant("hello");
         _v.Variant2 = new Variant("word");
         Use(_v.CreateSpan());
@@ -309,7 +319,11 @@ How we choose will likely require a deeper investigation and examination of real
 are available then it will give us this type of flexibility.
 
 ### Why not varargs? 
-!!! Will flesh this out in a bit. Have to track down my notes!!!
+The existing 
+[varargs](https://docs.microsoft.com/en-us/cpp/windows/variable-argument-lists-dot-dot-dot-cpp-cli?view=vs-2017)
+feature wsa considered here as a possible solution. This feature though is meant primarily for C++/CLI scenarios and
+has known holes for other scenarios. Additionally there is significant cost in porting this to Unix. Hence it wasn't
+seen as a viable solution.
 
 ## Related Issues
 This spec is related to the following issues: 
