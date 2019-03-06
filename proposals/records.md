@@ -103,7 +103,7 @@ Where, for each method named `With` that is an accessible instance member of *e1
 
 ### pattern-matching
 
-See the [Pattern Matching Specification](patterns.md) for a specification of `Deconstruct` and its relationship to pattern-matching.
+See the [Pattern Matching Specification](csharp-8.0/patterns.md#positional-pattern) for a specification of `Deconstruct` and its relationship to pattern-matching.
 
 > **Design Notes**: By virtue of the compiler-generated `Deconstruct` as specified herein, and the specification for pattern-matching, a record declaration
 > ```cs
@@ -246,7 +246,7 @@ For a *record struct* or a `sealed` *record class*, implementations of the metho
 
 A record type has a compiler-generated `public` method `void Deconstruct` unless one with any signature is provided by the user. Each parameter is an `out` parameter of the same name and type as the corresponding parameter of the record type. The compiler-provided implementation of this method shall assign each `out` parameter with the value of the corresponding property.
 
-See [the pattern-matching specification](patterns.md) for the semantics of `Deconstruct`.
+See [the pattern-matching specification](csharp-8.0/patterns.md#positional-pattern) for the semantics of `Deconstruct`.
 
 ##### `With` method
 
