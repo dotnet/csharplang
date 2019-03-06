@@ -1,4 +1,4 @@
-## Throw expression
+# Throw expression
 
 We extend the set of expression forms to include
 
