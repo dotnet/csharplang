@@ -171,7 +171,7 @@ In this case the scope of `z` is the embedded statement `M(y is var z);`.
 
 Other cases are errors for other reasons (e.g. in a parameter's default value or an attribute, both of which are an error because those contexts require a constant expression).
 
-> [In C# 7.3 we added the following contexts](../proposals/csharp-7.3/expression-variables-in-initializers.md) in which a pattern variable may be declared:
+> [In C# 7.3 we added the following contexts](../csharp-7.3/expression-variables-in-initializers.md) in which a pattern variable may be declared:
 > - If the expression is in a *constructor initializer*, its scope is the *constructor initializer* and the constructor's body.
 > - If the expression is in a field initializer, its scope is the *equals_value_clause* in which it appears.
 > - If the expression is in a query clause that is specified to be translated into the body of a lambda, its scope is just that expression.
