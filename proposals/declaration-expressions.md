@@ -6,13 +6,15 @@ Support declaration assignments as expressions.
 [motivation]: #motivation
 
 Allow initialization at the point of declaration in more cases, simplifying code, and allowing `var` to be used.
-```C#
+
+```csharp
 SpecialType ReferenceType =>
     (var st = _type.SpecialType).IsValueType() ? SpecialType.None : st;
 ```
 
 Allow declarations for `ref` arguments, similar to `out var`.
-```C#
+
+```csharp
 Convert(source, destination, ref List<Diagnostic> diagnostics = null);
 ```
 
@@ -48,7 +50,8 @@ the expression is a copy.
 The declaration assignment expression may declare a `ref` local.
 There is an ambiguity when `ref` is used for a declaration expression in a `ref` argument.
 The local variable initializer determines whether the declaration is a `ref` local.
-```C#
+
+```csharp
 F(ref int x = IntFunc());    // int x;
 F(ref int y = RefIntFunc()); // ref int y;
 ```
