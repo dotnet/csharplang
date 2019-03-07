@@ -4,7 +4,7 @@ In C# 7.3, we add support for rebinding the referent of a ref local variable or 
 
 We add the following to the set of `assignment_operator`s.
 
-``` antlr
+```antlr
 assignment_operator
     : '=' 'ref'
     ;
@@ -24,4 +24,4 @@ The safety rules for this operator are:
 
 - For a ref reassignment `e1 = ref e2`, the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
 
-Where *ref-safe-to-escape* is defined in https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md
+Where *ref-safe-to-escape* is defined in [Safety for ref-like types](../csharp-7.2/span-safety.md)

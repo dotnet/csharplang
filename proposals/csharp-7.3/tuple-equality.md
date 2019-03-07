@@ -73,5 +73,5 @@ If someone wrote their own `ValueTuple` types with  an implementation of the com
 
 ----
 
-Relates to https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#relational-and-type-testing-operators
-Relates to https://github.com/dotnet/csharplang/issues/190
+Relates to [relational and type testing operators](../../spec/expressions.md#relational-and-type-testing-operators)
+Relates to [#190](https://github.com/dotnet/csharplang/issues/190)
