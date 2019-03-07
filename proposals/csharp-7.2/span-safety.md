@@ -1,4 +1,4 @@
-# Compile time enforcement of safety for ref-like types #
+# Compile time enforcement of safety for ref-like types
 
 ## Introduction
 
@@ -11,15 +11,15 @@ There are two reasons why `Span<T>` and similar types must be a stack-only types
 
 All the above problems would be alleviated if instances of `Span<T>` are constrained to exist only on the execution stack. 
 
-An additional problem arises due to composition. It would be generally desirable to build more complex data types that would embed `Span<T>` and `ReadOnlySpan<T>` instances. Such composite types would have to be structs and would share all the hazards and requirements of `Span<T>`. As a result the safety rules described here should be viewed as applicable to the whole range of **_ref-like types_**
+An additional problem arises due to composition. It would be generally desirable to build more complex data types that would embed `Span<T>` and `ReadOnlySpan<T>` instances. Such composite types would have to be structs and would share all the hazards and requirements of `Span<T>`. As a result the safety rules described here should be viewed as applicable to the whole range of **_ref-like types_**.
 
 The <a href="#draft-language-specification">draft language specification</a> is intended to ensure that values of a ref-like type occurs only on the stack.
 
-## Generalized `ref-like` types in source code.
+## Generalized `ref-like` types in source code
 
 `ref-like` structs are explicitly marked in the source code using `ref` modifier:
 
-```c#
+```csharp
 ref struct TwoSpans<T>
 {
 	// can have ref-like instance fields
@@ -30,11 +30,11 @@ ref struct TwoSpans<T>
 // error: arrays of ref-like types are not allowed. 
 TwoSpans<T>[] arr = null;
 
-``` 
+```
 
 Designating a struct as ref-like will allow the struct to have ref-like instance fields and will also make all the requirements of ref-like types applicable to the struct. 
 
-## Metadata representation or ref-like structs.
+## Metadata representation or ref-like structs
 
 Ref-like structs will be marked with **System.Runtime.CompilerServices.IsRefLikeAttribute** attribute.
 
@@ -46,12 +46,12 @@ Having no other good alternatives that work in old compilers without servicing, 
 
 A typical metadata representation:
 
-```C#
+```csharp
     [IsRefLike]
     [Obsolete("Types with embedded references are not supported in this version of your compiler.")]
     public struct TwoSpans<T>
     {
-       . . . . 
+       // . . . .
     }
 ```
 
@@ -61,8 +61,7 @@ In particular, if user wants to actually put an `Obsolete` or `Deprecated` attri
 
 ## Examples:
 
-```c#
-
+```csharp
 SpanLikeType M1(ref SpanLikeType x, Span<byte> y)
 {
     // this is all valid, unconcerned with stack-referring stuff
@@ -130,13 +129,11 @@ ref SpanLikeType Test2(ref SpanLikeType param1, Span<byte> param2)
 
 ----------------
 
-<a name="draft-language-specification"></a>Draft language specification
-==========================
+## <a name="draft-language-specification"></a>Draft language specification
 
 Below we describe a set of safety rules for ref-like types (`ref struct`s) to ensure that values of these types occur only on the stack. A different, simpler set of safety rules would be possible if locals cannot be passed by reference. This specification would also permit the safe reassignment of ref locals.
 
-Overview
-========
+### Overview
 
 We associate with each expression at compile-time the concept of what scope that expression is permitted to escape to, "safe-to-escape". Similarly, for each lvalue we maintain a concept of what scope a reference to it is permitted to escape to, "ref-safe-to-escape". For a given lvalue expression, these may be different.
 
@@ -146,17 +143,17 @@ For the time being it is sufficient, for the purpose of the analysis, to support
 
 The precise rules for computing the *safe-to-return* status of an expression, and the rules governing the legality of expressions, follow.
 
-# ref-safe-to-escape
+### ref-safe-to-escape
 
 The *ref-safe-to-escape* is a scope, enclosing an lvalue expression, to which it is safe for a ref to the lvalue to escape to. If that scope is the entire method, we say that a ref to the lvalue is *safe to return* from the method.
 
-# safe-to-escape
+### safe-to-escape
 
 The *safe-to-escape* is a scope, enclosing an expression, to which it is safe for the value to escape to. If that scope is the entire method, we say that a the value is *safe to return* from the method.
 
 An expression whose type is not a `ref struct` type is *safe-to-return* from the entire enclosing method. Otherwise we refer to the rules below.
 
-## Parameters
+#### Parameters
 
 An lvalue designating a formal parameter is *ref-safe-to-escape* (by reference) as follows:
 - If the parameter is a `ref`, `out`, or `in` parameter, it is *ref-safe-to-escape* from the entire method (e.g. by a `return ref` statement); otherwise
@@ -165,7 +162,7 @@ An lvalue designating a formal parameter is *ref-safe-to-escape* (by reference) 
 
 An expression that is an rvalue designating the use of a formal parameter is *safe-to-escape* (by value) from the entire method (e.g. by a `return` statement). This applies to the `this` parameter as well.
 
-## Locals
+#### Locals
 
 An lvalue designating a local variable is *ref-safe-to-escape* (by reference) as follows:
 - If the variable is a `ref` variable, then its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of its initializing expression; otherwise
@@ -177,7 +174,7 @@ An expression that is an rvalue designating the use of a local variable is *safe
 - A local of `ref struct` type and uninitialized at the point of declaration is *safe-to-return* from the entire enclosing method.
 - Otherwise the variable's type is a `ref struct` type, and the variable's declaration requires an initializer. The variable's *safe-to-escape* scope is the same as the *safe-to-escape* of its initializer.
 
-## Field reference
+#### Field reference
 
 An lvalue designating a reference to a field, `e.F`, is *ref-safe-to-escape* (by reference) as follows:
 - If `e` is of a reference type, it is *ref-safe-to-escape* from the entire method; otherwise
@@ -185,7 +182,7 @@ An lvalue designating a reference to a field, `e.F`, is *ref-safe-to-escape* (by
 
 An rvalue designating a reference to a field, `e.F`, has a *safe-to-escape* scope that is the same as the *safe-to-escape* of `e`.
 
-## Operators including `?:`
+#### Operators including `?:`
 
 The application of a user-defined operator is treated as a method invocation.
 
@@ -195,7 +192,7 @@ For an operator that yields an lvalue, such as `c ? ref e1 : ref e2`
 - the *ref-safe-to-escape* of the result is the narrowest scope among the *ref-safe-to-escape* of the operands of the operator.
 - the *safe-to-escape* of the operands must agree, and that is the *safe-to-escape* of the resulting lvalue.
 
-## Method invocation
+#### Method invocation
 
 An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 - The entire enclosing method
@@ -204,12 +201,12 @@ An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *r
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
 > Note: the last bullet is necessary to handle code such as
-> ``` c#
+> ```csharp
 > var sp = new Span(...)
 > return ref sp[0];
 > ```
 > or
-> ``` c#
+> ```csharp
 > return ref M(sp, 0);
 > ```
 
@@ -217,27 +214,27 @@ An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape*
 - The entire enclosing method
 - the *safe-to-escape* of all argument expressions (including the receiver)
 
-## An Rvalue
+#### An Rvalue
 An rvalue is *ref-safe-to-escape* from the nearest enclosing scope. This occurs for example in an invocation such as `M(ref d.Length)` where `d` is of type `dynamic`. It is also consistent with (and perhaps subsumes) our handling of arguments corresponding to `in` parameters.*
 
-## Property invocations
+#### Property invocations
 
 A property invocation (either `get` or `set`) it treated as a method invocation of the underlying method by the above rules.
 
-## `stackalloc`
+#### `stackalloc`
 
 A stackalloc expression is an rvalue that is *safe-to-escape* to the top-level scope of the method (but not from the entire method itself).
 
-## Constructor invocations
+#### Constructor invocations
 
 A `new` expression that invokes a constructor obeys the same rules as a method invocation that is considered to return the type being constructed.
 
 In addition *safe-to-escape* is no wider than the smallest of the *safe-to-escape* of all arguments/operands of the object initializer expressions, recursively, if initializer is present. 
 
-## Span constructor
+#### Span constructor
 The language relies on `Span<T>` not having a constructor of the following form:
 
-``` csharp
+```csharp
 void Example(ref int x)
 {
     // Create a span of length one
@@ -248,11 +245,11 @@ void Example(ref int x)
 Such a constructor makes `Span<T>` which are used as fields indistinguishable from a `ref` field. The safety rules described in this document
 depend on `ref` fields not being a valid construct in C#, or .NET.
 
-## `default` expressions
+#### `default` expressions
 
 A `default` expression is *safe-to-escape* from the entire enclosing method.
 
-# Language Constraints
+## Language Constraints
 
 We wish to ensure that no `ref` local variable, and no variable of `ref struct` type, refers to stack memory or variables that are no longer alive. We therefore have the following language constraints:
 
@@ -289,16 +286,16 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 - A local function or anonymous function may not refer to a local or parameter of `ref struct` type declared in an enclosing scope.
 
 > ***Open Issue:*** We need some rule that permits us to produce an error when needing to spill a stack value of a `ref struct` type at an await expression, for example in the code
-> ``` c#
+> ```csharp
 > Foo(new Span<int>(...), await e2);
 > ```
 
-# Future Considerations
+## Future Considerations
 
-## Length one Span<T> over ref values
+### Length one Span<T> over ref values
 Though not legal today there are cases where creating a length one `Span<T>` instance over a value would be beneficial:
 
-``` csharp
+```csharp
 void RefExample()
 {
     int x = ...;
@@ -322,7 +319,3 @@ If there is ever a need to go down this path then the language could accommodate
 were downward facing only. That is they were only ever *safe-to-escape* to the scope in which they were created. This ensure
 the language never had to consider a `ref` value escaping a method via a `ref struct` return or field of `ref struct`. This
 would likely also require further changes to recognize such constructors as capturing a `ref` parameter in this way though.
-
-
-
-
