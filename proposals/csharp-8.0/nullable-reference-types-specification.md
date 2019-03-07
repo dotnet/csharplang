@@ -2,9 +2,9 @@
 
 *** This is a work in progress - several parts are missing or incomplete. ***
 
-# Syntax
+## Syntax
 
-## Nullable reference types
+### Nullable reference types
 
 Nullable reference types have the same syntax `T?` as the short form of nullable value types, but do not have a corresponding long form.
 
@@ -38,7 +38,7 @@ Nullable reference types cannot occur in the following positions:
 
 A warning is given on a `nullable_reference_type` where the nullable annotation context is disabled.
 
-## Nullable class constraint
+### Nullable class constraint
 
 The `class` constraint has a nullable counterpart `class?`:
 
@@ -49,7 +49,7 @@ primary_constraint
     ;
 ```
 
-## The null-forgiving operator
+### The null-forgiving operator
 
 The post-fix `!` operator is called the null-forgiving operator.
 
@@ -68,7 +68,7 @@ The `primary_expression` must be of a reference type.
 
 The postfix `!` operator has no runtime effect - it evaluates to the result of the underlying expression. Its only role is to change the null state of the expression, and to limit warnings given on its use.
 
-## nullable implicitly typed local variables
+### nullable implicitly typed local variables
 
 Alongside `var` it is now permitted to write `var?`.
 
@@ -79,7 +79,7 @@ local_variable_type
     ;
 ```
 
-## Nullable compiler directives
+### Nullable compiler directives
 
 `#nullable` directives control the nullable annotation and warning contexts.
 
@@ -117,8 +117,7 @@ warning_action
 
 Note that the new form of `pragma_warning_body` uses `nullable_action`, not `warning_action`.
 
-
-# Nullable contexts
+## Nullable contexts
 
 Every line of source code has a *nullable annotation context* and a *nullable warning context*. These control whether nullable annotations have effect, and whether nullability warnings are given. The annotation context of a given line is either *disabled* or *enabled*. The warning context of a given line is either *disabled*, *safeonly* or *enabled*.
 
@@ -139,8 +138,7 @@ The effect of the directives is as follows:
 - `#pragma warning restore nullable`: Restores the nullable warning context to project settings
 - `#pragma warning safeonly nullable`: Sets the nullable warning context to *safeonly*
 
-
-# Nullability of types
+## Nullability of types
 
 A given type can have one of four nullabilities: *Oblivious*, *nonnullable*, *nullable* and *unknown*. 
 
@@ -170,14 +168,13 @@ Type parameters additionally take their constraints into account:
 
 For a type parameter `T`, `T?` is only allowed if `T` is known to be a value type or known to be a reference type.
 
-## Oblivious vs nonnullable
+### Oblivious vs nonnullable
 
 A `type` is deemed to occur in a given annotation context when the last token of the type is within that context.
 
 Whether a given reference type `C` in source code is interpreted as oblivious or nonnullable depends on the annotation context of that source code. But once established, it is considered part of that type, and "travels with it" e.g. during substitution of generic type arguments. It is as if there is an annotation like `?` on the type, but invisible.
 
-
-# Constraints
+## Constraints
 
 Nullable reference types can be used as generic constraints. Furthermore `object` is now valid as an explicit constraint. Absence of a constraint is now equivalent to an `object?` constraint (instead of `object`), but (unlike `object` before) `object?` is not prohibited as an explicit constraint.
 
@@ -185,12 +182,11 @@ Nullable reference types can be used as generic constraints. Furthermore `object
 
 The nullability of a type argument or of a constraint does not impact whether the type satisfies the constraint, except where that is already the case today (nullable value types do not satisfy the `struct` constraint). However, if the type argument does not satisfy the nullability requirements of the constraint, a warning may be given.
 
-
-# Null state and null tracking
+## Null state and null tracking
 
 Every expression in a given source location has a *null state*, which indicated whether it is believed to potentially evaluate to null. The null state is either "not null" or "maybe null". The null state is used to determine whether a warning should be given about null-unsafe conversions and dereferences.
 
-## Null tracking for variables
+### Null tracking for variables
 
 For certain expressions denoting variables or properties, the null state is tracked between occurrences, based on assignments to them, tests performed on them and the control flow between them. This is similar to how definite assignment is tracked for variables. The tracked expressions are the ones of the following form:
 
@@ -207,83 +203,81 @@ Where the identifiers denote fields or properties.
 
 ***Describe null state transitions similar to definite assignment***
 
-## Null state for expressions
+### Null state for expressions
 
 The null state of an expression is derived from its form and type, and from the null state of variables involved in it.
 
-## Literals
+### Literals
 
 The null state of a `null` literal is "maybe null". The null state of a `default` literal that is being converted to a type that is known not to be a nonnullable value type is "maybe null". The null state of any other literal is "not null".
 
-## Simple names
+### Simple names
 
 If a `simple_name` is not classified as a value, its null state is "not null". Otherwise it is a tracked expression, and its null state is its tracked null state at this source location.
 
-## Member access
+### Member access
 
 If a `member_access` is not classified as a value, its null state is "not null". Otherwise, if it is a tracked expression, its null state is its tracked null state at this source location. Otherwise its null state is the default null state of its type.
 
-## Invocation expressions
+### Invocation expressions
 
 If an `invocation_expression` invokes a member that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
 
-## Element access
+### Element access
 
 If an `element_access` invokes an indexer that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
 
-
-## Base access
+### Base access
 
 If `B` denotes the base type of the enclosing type, `base.I` has the same null state as `((B)this).I` and `base[E]` has the same null state as `((B)this)[E]`.
 
-## Default expressions
+### Default expressions
 
 `default(T)` has the null state "non-null" if `T` is known to be a nonnullable value type. Otherwise it has the null state "maybe null".
 
-## Null-conditional expressions
+### Null-conditional expressions
 
 A `null_conditional_expression` has the null state "maybe null".
 
-## Cast expressions
+### Cast expressions
 
 If a cast expression `(T)E` invokes a user-defined conversion, then the null state of the expression is the default null state for its type. Otherwise, if `T` is null-yielding (*nullable* or *unknown*) then the null state is "maybe null". Otherwise the null state is the same as the null state of `E`.
 
-## Await expressions
+### Await expressions
 
 The null state of `await E` is the default null state of its type.
 
-## The `as` operator
+### The `as` operator
 
 An `as` expression has the null state "maybe null".
 
-## The null-coalescing operator
+### The null-coalescing operator
 
 `E1 ?? E2` has the same null state as `E2`
 
-## The conditional operator
+### The conditional operator
 
 The null state of `E1 ? E2 : E3` is "not null" if the null state of both `E2` and `E3` are "not null". Otherwise it is "maybe null".
 
-## Query expressions
+### Query expressions
 
 The null state of a query expression is the default null state of its type.
 
-## Assignment operators
+### Assignment operators
 
 `E1 = E2` and `E1 op= E2` have the same null state as `E2` after any implicit conversions have been applied.
 
-## Unary and binary operators
+### Unary and binary operators
 
 If a unary or binary operator invokes an user-defined operator that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
 
 ***Something special to do for binary `+` over strings and delegates?***
 
-## Expressions that propagate null state
+### Expressions that propagate null state
 
 `(E)`, `checked(E)` and `unchecked(E)` all have the same null state as `E`.
 
-
-## Expressions that are never null
+### Expressions that are never null
 
 The null state of the following expression forms is always "not null":
 
@@ -296,13 +290,13 @@ The null state of the following expression forms is always "not null":
 - null-forgiving expressions
 - `is` expressions
 
-# Type inference
+## Type inference
 
-## Type inference for `var`
+### Type inference for `var`
 
 The type inferred for local variables declared with `var` is informed by the null state of the initializing expression.
 
-``` c#
+```csharp
 var x = E;
 ```
 
@@ -310,11 +304,11 @@ If the type of `E` is a nullable reference type `C?` and the null state of `E` i
 
 The nullability of the type inferred for `x` is determined as described above, based on the annotation context of the `var`, just as if the type had been given explicitly in that position.
 
-## Type inference for `var?`
+### Type inference for `var?`
 
 The type inferred for local variables declared with `var?` is independent of the null state of the initializing expression.
 
-```c#
+```csharp
 var? x = E;
 ```
 
@@ -322,7 +316,7 @@ If the type `T` of `E` is a nullable value type or a nullable reference type the
 
 The nullability of the type inferred for `x` is always *nullable*.
 
-## Generic type inference
+### Generic type inference
 
 Generic type inference is enhanced to help decide whether inferred reference types should be nullable or not. This is a best effort, and does not in and of itself yield warnings, but may lead to nullable warnings when the inferred types of the selected overload are applied to the arguments.
 
@@ -330,7 +324,7 @@ The type inference does not rely on the annotation context of incoming types. In
 
 More precisely, the annotation context for an inferred type argument is the context of the token that would have been followed by the `<...>` type parameter list, had there been one; i.e. the name of the generic method being called. For query expressions that translate to such calls, the context is taken from the initial contextual keyword of the query clause from which the call is generated.
 
-## The first phase
+### The first phase
 
 Nullable reference types flow into the bounds from the initial expressions, as described below. In addition, two new kinds of bounds, namely `null` and `default` are introduced. Their purpose is to carry through occurrences of `null` or `default` in the input expressions, which may cause an inferred type to be nullable, even when it otherwise wouldn't. This works even for nullable *value* types, which are enhanced to pick up "nullness" in the inference process.
 
@@ -345,7 +339,7 @@ If an argument `Ei` has a reference type, the type `U` used for inference depend
 - Otherwise if `Ei` is `default` then `U` is the special bound `default`
 - Otherwise no inference is made.
 
-## Exact, upper-bound and lower-bound inferences
+### Exact, upper-bound and lower-bound inferences
 
 In inferences *from* the type `U` *to* the type `V`, if `V` is a nullable reference type `V0?`, then `V0` is used instead of `V` in the following clauses.
 - If `V` is one of the unfixed type variables, `U` is added as an exact, upper or lower bound as before
@@ -354,7 +348,7 @@ In inferences *from* the type `U` *to* the type `V`, if `V` is a nullable refere
 
 The essence is that nullability that pertains directly to one of the unfixed type variables is preserved into its bounds. For the inferences that recurse further into the source and target types, on the other hand, nullability is ignored. It may or may not match, but if it doesn't, a warning will be issued later if the overload is chosen and applied.
 
-## Fixing
+### Fixing
 
 The spec currently does not do a good job of describing what happens when multiple bounds are identity convertible to each other, but are different. This may happen between `object` and `dynamic`, between tuple types that differ only in element names, between types constructed thereof and now also between `C` and `C?` for reference types.
 
@@ -387,18 +381,16 @@ The *Merge* function takes two candidate types and a direction (*+* or *-*):
     - `ni` is `si` if `si` and `ti` are the same
 - *Merge*(`object`, `dynamic`) = *Merge*(`dynamic`, `object`) = `dynamic`
 
-# Warnings
+## Warnings
 
-## Potential null assignment
+### Potential null assignment
 
-## Potential null dereference
+### Potential null dereference
 
-## Constraint nullability mismatch
+### Constraint nullability mismatch
 
-## Nullable types in disabled annotation context
+### Nullable types in disabled annotation context
 
-
-
-# Attributes for special null behavior
+## Attributes for special null behavior
 
 
