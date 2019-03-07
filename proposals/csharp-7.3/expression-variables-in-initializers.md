@@ -1,4 +1,4 @@
-# expression variables in initializers
+# Expression variables in initializers
 
 ## Summary
 [summary]: #summary
