@@ -2,7 +2,7 @@
 
 C# (pronounced "See Sharp") is a simple, modern, object-oriented, and type-safe programming language. C# has its roots in the C family of languages and will be immediately familiar to C, C++, and Java programmers. C# is standardized by ECMA International as the ***ECMA-334*** standard and by ISO/IEC as the ***ISO/IEC 23270*** standard. Microsoft's C# compiler for the .NET Framework is a conforming implementation of both of these standards.
 
-C#（读作“See Sharp”）是一门简单、现代、面向对象且类型安全的编程语言。C#植根于C系语言家族，可以被C、C++和Java程序员迅速掌握。C#被ECMA International标准化为***ECMA-334***标准；被ISO/IEC标准化为***ISO/IEC 23270***标准。微软的C#编译器如实地实现了这两个标准。
+C#（读作“See Sharp”）是一门简单、现代、面向对象且类型安全的编程语言。C#植根于C系语言家族，可以被C、C++和Java程序员迅速掌握。C#被ECMA International标准化为<strong>*ECMA-334*</strong>标准；被ISO/IEC标准化为<strong>*ISO/IEC 23270*<strong>标准。微软的C#编译器如实地实现了这两个标准。
 
 <!--
 1. 广告做的不错！2. 直译“微软的C#编译器是符合这两个标准的一个实现”——过于欧化。3. 标准化还是很厉害的，比Java目光长远。
@@ -10,21 +10,23 @@ C#（读作“See Sharp”）是一门简单、现代、面向对象且类型安
 
 C# is an object-oriented language, but C# further includes support for ***component-oriented*** programming. Contemporary software design increasingly relies on software components in the form of self-contained and self-describing packages of functionality. Key to such components is that they present a programming model with properties, methods, and events; they have attributes that provide declarative information about the component; and they incorporate their own documentation. C# provides language constructs to directly support these concepts, making C# a very natural language in which to create and use software components.
 
-C#是面向对象的语言，但C#还进一步支持***面向组件***（component-oriented）编程。当今的软件设计越来越多地依赖在以自包含（self-contained）和自描述（self-describing）的功能包为形式的软件组件上。这些组件的关键之处在于，它们能够以属性（properties）、方法（methods）和事件（events）来呈现一个编程模型（programming model）；它们拥有用来提供与组件相关的声明性信息的特征（attributes）；并且它们还能囊括自己的文档???。C#提供了用以直接支持这些概念的语言结构，所以，C#是一门在创建和使用软件组件方面十分自然的语言。
+C#是面向对象的语言，但C#还进一步支持<strong>*面向组件*</strong>（component-oriented）编程。当今的软件设计越来越多地依赖在以自包含（self-contained）和自描述（self-describing）的功能包为形式的软件组件上。这些组件的关键之处在于，它们能够呈现为一个包含属性（properties）、方法（methods）和事件（events）的编程模型（programming model）；这些组件可以通过特征（attributes)提供与其相关的声明性信息；并且包含自己的文档。C#提供了用以直接支持这些概念的语言结构，所以，C#是一门在创建和使用软件组件方面十分自然的语言。
 
 <!--1. Contemporary，当今的。2. in the form of，以...的形式。3. 当今的软件设计越来越多地依赖软件组件，所谓“组件”，就是以自包含（self-contained）和自描述（self-describing）的功能包。4. present，呈现，表达，表示。5. 从单复数上来看，表示的意思应该是“一个编程模型是由多个组件构成的”，而且，一个组件看起来有点像一个类。或者说，C#中的类就是一个组件，是相对于其他编程语言中的类的升级品。6. incorporate???，包括？不好译。-->
 
 Several C# features aid in the construction of robust and durable applications: ***Garbage collection*** automatically reclaims memory occupied by unused objects; ***exception handling*** provides a structured and extensible approach to error detection and recovery; and the ***type-safe*** design of the language makes it impossible to read from uninitialized variables, to index arrays beyond their bounds, or to perform unchecked type casts.
 
-C#的一些功能有助于构建健壮和耐久的应用程序：***垃圾收集***（garbage collection）会自动回收那些被闲置对象所占用的内存；***异常处理***（exception handling）提供了一个结构化、可扩展的方式用来探测错误并从错误中恢复；***类型安全***（type-safe）这项语言设计使得我们不可能访问未初始化的变量或者访问超出数组边界的索引，也不可能进行不经检验的类型转换。
+C#的一些功能有助于构建健壮和耐久的应用程序：<strong>*垃圾收集*</strong>（garbage collection）会自动回收那些被闲置对象所占用的内存；<strong>*异常处理*</strong>（exception handling）提供了一个结构化、可扩展的方式用来探测错误并从错误中恢复；<strong>*类型安全*<strong>（type-safe）这项语言设计使得我们不可能访问未初始化的变量或者访问超出数组边界的索引，也不可能进行不经检验的类型转换。
 
 <!--1. unused，未被使用的==闲置的。2. 这个it经常不太好直译。3. cast里面有不少“文化意味”的。-->
 
 C# has a ***unified type system***. All C# types, including primitive types such as `int` and `double`, inherit from a single root `object` type. Thus, all types share a set of common operations, and values of any type can be stored, transported, and operated upon in a consistent manner. Furthermore, C# supports both user-defined reference types and value types, allowing dynamic allocation of objects as well as in-line storage of lightweight structures.
 
-C#拥有***统一类型系统***（unified type system）。所有C#的类型，包括诸如`int`和`double`等的原始类型（primitive types），都继承自单一的根——`object`类型。因此，所有类型都会享有一组共同的操作，以致于任何类型的值都可以以一种一致的方式来存储、传输和操作。此外，C#还支持用户定义的引用类型（reference types）和值类型（value types）——既允许动态地分配对象，也允许轻量级结构体的就地（in-line）存储???。
+C#拥有<strong>*统一类型系统*<strong>（unified type system）。所有C#的类型，包括诸如`int`和`double`等原始类型（primitive types），都继承自单一的根类型——`object`类型。因此，所有类型都共享同样的操作，以至于任何类型的值都可以以一种一致的方式来存储、传输和操作。此外，C#还支持用户定义的引用类型（reference types）和值类型（value types）——既允许动态地分配对象，也允许使用内嵌在代码中的轻量数据结构。
 
 <!--1. type，类型，口述的时候可以说“数据类型”，译的时候还是不要乱讲的好。2. 人家Java中的int和double才叫“原始”，C#里的已经太高级了好不好……这明显是带有广告意味。3. manner，方式，比较口语化的一个词。4. in-line，就地。5. 最后一句原文啥意思？得去跟作者确认……-->
+
+<!--我觉得in-line的例子是基于tuple的多返回值这种语法糖吧-->
 
 To ensure that C# programs and libraries can evolve over time in a compatible manner, much emphasis has been placed on ***versioning*** in C#'s design. Many programming languages pay little attention to this issue, and, as a result, programs written in those languages break more often than necessary when newer versions of dependent libraries are introduced. Aspects of C#'s design that were directly influenced by versioning considerations include the separate `virtual` and `override` modifiers, the rules for method overload resolution, and support for explicit interface member declarations.
 
