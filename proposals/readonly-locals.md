@@ -18,7 +18,7 @@ be written to during construction (static construction in the case of a static f
 which helps developers avoid mistakes by accidentally overwriting state which should not be modified. But fields aren't the only places developers
 want to ensure that values aren't mutated. In particular, it's common to create a local variable to store temporary state, and accidentally updating
 that temporary state can result in erroneous calculations and other such bugs, especially when such "locals" are captured in lambdas, at which point
-they are lifted to fields, but there's no way today to mark such lifted fields as 'readonly`.
+they are lifted to fields, but there's no way today to mark such lifted fields as `readonly`.
 
 ## Detailed design
 [design]: #detailed-design
