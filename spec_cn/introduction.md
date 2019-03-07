@@ -2,7 +2,7 @@
 
 C# (pronounced "See Sharp") is a simple, modern, object-oriented, and type-safe programming language. C# has its roots in the C family of languages and will be immediately familiar to C, C++, and Java programmers. C# is standardized by ECMA International as the ***ECMA-334*** standard and by ISO/IEC as the ***ISO/IEC 23270*** standard. Microsoft's C# compiler for the .NET Framework is a conforming implementation of both of these standards.
 
-C#（读作“See Sharp”）是一门简单、现代、面向对象且类型安全的编程语言。C#植根于C系语言家族，可以被C、C++和Java程序员迅速掌握。C#被ECMA International标准化为<strong>*ECMA-334*</strong>标准；被ISO/IEC标准化为<strong>*ISO/IEC 23270*<strong>标准。微软的C#编译器如实地实现了这两个标准。
+C#（读作“See Sharp”）是一门简单、现代、面向对象且类型安全的编程语言。C#植根于C系语言家族，可以被C、C++和Java程序员迅速掌握。C#被ECMA International标准化为<strong>*ECMA-334*</strong>标准；被ISO/IEC标准化为<strong>*ISO/IEC 23270*</strong>标准。微软的C#编译器如实地实现了这两个标准。
 
 <!--
 1. 广告做的不错！2. 直译“微软的C#编译器是符合这两个标准的一个实现”——过于欧化。3. 标准化还是很厉害的，比Java目光长远。
@@ -16,13 +16,13 @@ C#是面向对象的语言，但C#还进一步支持<strong>*面向组件*</stro
 
 Several C# features aid in the construction of robust and durable applications: ***Garbage collection*** automatically reclaims memory occupied by unused objects; ***exception handling*** provides a structured and extensible approach to error detection and recovery; and the ***type-safe*** design of the language makes it impossible to read from uninitialized variables, to index arrays beyond their bounds, or to perform unchecked type casts.
 
-C#的一些功能有助于构建健壮和耐久的应用程序：<strong>*垃圾收集*</strong>（garbage collection）会自动回收那些被闲置对象所占用的内存；<strong>*异常处理*</strong>（exception handling）提供了一个结构化、可扩展的方式用来探测错误并从错误中恢复；<strong>*类型安全*<strong>（type-safe）这项语言设计使得我们不可能访问未初始化的变量或者访问超出数组边界的索引，也不可能进行不经检验的类型转换。
+C#的一些功能有助于构建健壮和耐久的应用程序：<strong>*垃圾收集*</strong>（garbage collection）会自动回收那些被闲置对象所占用的内存；<strong>*异常处理*</strong>（exception handling）提供了一个结构化、可扩展的方式用来探测错误并从错误中恢复；<strong>*类型安全*</strong>（type-safe）这项语言设计使得我们不可能访问未初始化的变量或者访问超出数组边界的索引，也不可能进行不经检验的类型转换。
 
 <!--1. unused，未被使用的==闲置的。2. 这个it经常不太好直译。3. cast里面有不少“文化意味”的。-->
 
 C# has a ***unified type system***. All C# types, including primitive types such as `int` and `double`, inherit from a single root `object` type. Thus, all types share a set of common operations, and values of any type can be stored, transported, and operated upon in a consistent manner. Furthermore, C# supports both user-defined reference types and value types, allowing dynamic allocation of objects as well as in-line storage of lightweight structures.
 
-C#拥有<strong>*统一类型系统*<strong>（unified type system）。所有C#的类型，包括诸如`int`和`double`等原始类型（primitive types），都继承自单一的根类型——`object`类型。因此，所有类型都共享同样的操作，以至于任何类型的值都可以以一种一致的方式来存储、传输和操作。此外，C#还支持用户定义的引用类型（reference types）和值类型（value types）——既允许动态地分配对象，也允许使用内嵌在代码中的轻量数据结构。
+C#拥有<strong>*统一类型系统*</strong>（unified type system）。所有C#的类型，包括诸如`int`和`double`等原始类型（primitive types），都继承自单一的根类型——`object`类型。因此，所有类型都共享同样的操作，以至于任何类型的值都可以以一种一致的方式来存储、传输和操作。此外，C#还支持用户定义的引用类型（reference types）和值类型（value types）——既允许动态地分配对象，也允许使用内嵌在代码中的轻量数据结构。
 
 <!--1. type，类型，口述的时候可以说“数据类型”，译的时候还是不要乱讲的好。2. 人家Java中的int和double才叫“原始”，C#里的已经太高级了好不好……这明显是带有广告意味。3. manner，方式，比较口语化的一个词。4. in-line，就地。5. 最后一句原文啥意思？得去跟作者确认……-->
 
