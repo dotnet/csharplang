@@ -9,7 +9,7 @@ This parallels the behavior of  anonymous types, which allow inferring member na
 
 This is particularly handy when using tuples in LINQ:
 
-```
+```csharp
 // "c" and "result" have element names "f1" and "f2"
 var result = list.Select(c => (c.f1, c.f2)).Where(t => t.f2 == 1); 
 ```
@@ -30,7 +30,8 @@ There are two parts to the change:
 Note that the rule for handling duplicates is different than that for anonymous types. For instance, `new { x.f1, x.f1 }` produces an error, but `(x.f1, x.f1)` would still be allowed (just without any inferred names). This avoids breaking existing tuple code.
 
 For consistency, the same would apply to tuples produced by deconstruction-assignments (in C#):
-```C#
+
+```csharp
 // tuple has element names "f1" and "f2" 
 var tuple = ((x.f1, x?.f2) = (1, 2));
 ```
@@ -44,7 +45,7 @@ When using the C# 7.1 compiler (or later) with language version "7.0", the eleme
 
 The main drawback is that this introduces a compatibility break from C# 7.0:
 
-```C#
+```csharp
 Action y = () => M();
 var t = (x: x, y);
 t.y(); // this might have previously picked up an extension method called “y”, but would now call the lambda.

@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-The specification for the [existing C# as operator](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#the-as-operator) permits there to be no conversion between the type of the operand and the specified type when either is an open type. However, in C# 7 the `Type identifier` pattern requires there be a conversion between the type of the input and the given type.
+The specification for the [existing C# as operator](../../spec/expressions.md#the-as-operator) permits there to be no conversion between the type of the operand and the specified type when either is an open type. However, in C# 7 the `Type identifier` pattern requires there be a conversion between the type of the input and the given type.
 
 We propose to relax this and change `expression is Type identifier`, in addition to being permitted in the conditions when it is permitted in C# 7, to also be permitted when `expression as Type` would be allowed. Specifically, the new cases are cases where the type of the expression or the specified type is an open type. 
 
