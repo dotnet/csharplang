@@ -1,6 +1,6 @@
 # Readonly Instance Members
 
-Championed Issue: https://github.com/dotnet/csharplang/issues/1710
+Championed Issue: <https://github.com/dotnet/csharplang/issues/1710>
 
 ## Summary
 [summary]: #summary
@@ -25,7 +25,7 @@ Some other scenarios where hidden copies can occur include `static readonly fiel
 
 Allow a user to specify that an instance member is, itself, `readonly` and does not modify the state of the instance (with all the appropriate verification done by the compiler, of course). For example:
 
-```C#
+```csharp
 public struct Vector2
 {
     public float x;
@@ -87,7 +87,8 @@ public static class MyClass
 ```
 
 Readonly can be applied to property accessors to indicate that `this` will not be mutated in the accessor.
-```cs
+
+```csharp
 public int Prop1
 {
     readonly get
@@ -102,7 +103,8 @@ public int Prop1
 ```
 
 When `readonly` is applied to the property syntax, it means that all accessors are `readonly`.
-```cs
+
+```csharp
 public readonly int Prop2
 {
     get
@@ -117,7 +119,8 @@ public readonly int Prop2
 ```
 
 Readonly can only be applied to accessors which do not mutate the containing type.
-```cs
+
+```csharp
 public int Prop3
 {
     readonly get
@@ -132,7 +135,8 @@ public int Prop3
 ```
 
 Readonly can be applied to some auto-implemented properties, but it won't have a meaningful effect. The compiler will treat all auto-implemented getters as readonly whether or not the `readonly` keyword is present.
-```cs
+
+```csharp
 // Allowed
 public readonly int Prop4 { get; }
 public int Prop5 { readonly get; }
@@ -144,7 +148,8 @@ public int Prop8 { get; readonly set; }
 ```
 
 Readonly can be applied to manually-implemented events, but not field-like events. Readonly cannot be applied to individual event accessors (add/remove).
-```cs
+
+```csharp
 // Allowed
 public readonly event Action<EventArgs> Event1
 {
@@ -167,6 +172,7 @@ public static readonly event Event4
 ```
 
 Some other syntax examples:
+
 * Expression bodied members: `public readonly float ExpressionBodiedMember => (x * x) + (y * y);`
 * Generic constraints: `public static readonly void GenericMethod<T>(T value) where T : struct { }`
 
@@ -175,12 +181,13 @@ The compiler would emit the instance member, as usual, and would additionally em
 This would allow the user to safely call said instance method without the compiler needing to make a copy.
 
 The restrictions would include:
+
 * The `readonly` modifier cannot be applied to static methods, constructors or destructors.
 * The `readonly` modifier cannot be applied to delegates.
 * The `readonly` modifier cannot be applied to members of class or interface.
 
 ## Drawbacks
-[drawbacks]: #drawbacks 
+[drawbacks]: #drawbacks
 
 Same drawbacks as exist with `readonly struct` methods today. Certain code may still cause hidden copies.
 
