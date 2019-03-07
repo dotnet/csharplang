@@ -1,3 +1,5 @@
+# Conditional ref operator
+
 The pattern of binding a ref variable to one or another expression conditionally is not currently expressible in C#.
 
 The typical workaround is to introduce a method like:
@@ -66,7 +68,8 @@ Ref ternary can be used in a regular (not ref) context as well. Although it woul
 ```
 
 
-=======================
+___
+
 Implementation notes: 
 
 The complexity of the implementation would seem to be the size of a moderate-to-large bug fix. - I.E not very expensive.
