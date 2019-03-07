@@ -10,13 +10,13 @@ Allow named arguments to be used in non-trailing position, as long as they are u
 The main motivation is to avoid typing redundant information. It is common to name an argument that is a literal (such as `null`, `true`) for the purpose of clarifying the code, rather than of passing arguments out-of-order.
 That is currently disallowed (`CS1738`) unless all the following arguments are also named.
 
-```C#
+```csharp
 DoSomething(isEmployed:true, name, age); // currently disallowed, even though all arguments are in position
 // CS1738 "Named argument specifications must appear after all fixed arguments have been specified"
 ```
 
 Some additional examples:
-```C#
+```csharp
 public void DoSomething(bool isEmployed, string personName, int personAge) { ... }
 
 DoSomething(isEmployed:true, name, age); // currently CS1738, but would become legal
@@ -27,7 +27,7 @@ DoSomething(true, personAge:age, personName:name); // already legal
 ```
 
 This would also work with params:
-```C#
+```csharp
 public class Task
 {
     public static Task When(TaskStatus all, TaskStatus any, params Task[] tasks);
@@ -55,7 +55,8 @@ In other words, non-trailing named arguments are only allowed when the name and 
 [drawbacks]: #drawbacks
 
 This proposal exacerbates existing subtleties with named arguments in overload resolution. For instance:
-```
+
+```csharp
 void M(int x, int y) { }
 void M<T>(T y, int x) { }
 
@@ -68,7 +69,8 @@ void M2()
 ```
 
 You could get this situation today by swapping the parameters:
-```
+
+```csharp
 void M(int y, int x) { }
 void M<T>(int x, T y) { }
 
