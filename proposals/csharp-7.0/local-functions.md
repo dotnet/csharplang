@@ -1,5 +1,4 @@
-Local Functions
-===============
+# Local functions
 
 We extend C# to support the declaration of functions in block scope. Local functions may use (capture) variables from the enclosing scope.
 
@@ -9,9 +8,7 @@ Local functions may be called from a lexical point before its definition. Local 
 
 TODO: _WRITE SPEC_
 
-
-Syntax Grammar
-==============
+## Syntax grammar
 
 This grammar is represented as a diff from the current spec grammar.
 
