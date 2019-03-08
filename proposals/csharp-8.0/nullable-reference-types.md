@@ -1,22 +1,17 @@
-Nullable reference types in C#
-==============================
+# Nullable reference types in C# #
 
 The goal of this feature is to:
 
 * Allow developers to express whether a variable, parameter or result of a reference type is intended to be null or not.
 * Provide warnings when such variables, parameters and results are not used according to that intent.
 
-
-Expression of intent
---------------------
+## Expression of intent
 
 The language already contains the `T?` syntax for value types. It is straightforward to extend this syntax to reference types.
 
 It is assumed that the intent of an unadorned reference type `T` is for it to be non-null.
 
-
-Checking of nullable references
--------------------------------
+## Checking of nullable references
 
 A flow analysis tracks nullable reference variables. Where the analysis deems that they would not be null (e.g. after a check or an assignment), their value will be considered a non-null reference.
 
@@ -30,9 +25,7 @@ A warning is given when converting from `C<S>` to `C<T?>` except when the type p
 
 A warning is given on `C<T?>` if the type parameter has non-null constraints. 
 
-
-Checking of non-null references
--------------------------------
+## Checking of non-null references
 
 A warning is given if a null literal is assigned to a non-null variable or passed as a non-null parameter.
 
@@ -42,17 +35,13 @@ We cannot adequately track that all elements of an array of non-null references 
 
 We need to decide whether `default(T)` generates a warning, or is simply treated as being of the type `T?`.
 
-
-Metadata representation
------------------------
+## Metadata representation
 
 Nullability adornments should be represented in metadata as attributes. This means that downlevel compilers will ignore them.
 
 We need to decide if only nullable annotations are included, or there's also some indication of whether non-null was "on" in the assembly.
 
-
-Generics
---------
+## Generics
 
 If a type parameter `T` has non-nullable constraints, it is treated as non-nullable within its scope.
 
@@ -62,24 +51,20 @@ It is worth considering whether explicit nullable reference constraints should b
 
 The `class` constraint is non-null. We can consider whether `class?` should be a valid nullable constraint denoting "nullable reference type".
 
-
-Type inference
---------------
+## Type inference
 
 In type inference, if a contributing type is a nullable reference type, the resulting type should be nullable. In other words, nullness is propagated.
 
 We should consider whether the `null` literal as a participating expression should contribute nullness. It doesn't today: for value types it leads to an error, whereas for reference types the null successfully converts to the plain type. 
 
-``` c#
+```csharp
 string? n = "world";
 var x = b ? "Hello" : n; // string?
 var y = b ? "Hello" : null; // string? or error
 var z = b ? 7 : null; // Error today, could be int?
 ```
 
-
-Breaking changes
-----------------
+## Breaking changes
 
 Non-null warnings are an obvious breaking change on existing code, and should be accompanied with an opt-in mechanism.
 
@@ -105,9 +90,7 @@ The design of the opt-in/transition experience is crucial to the success and use
 * Library authors can add nullability annotations without fear of breaking customers
 * Despite these, there is not a sense of "configuration nightmare"
 
-
-Tweaks
-------
+## Tweaks
 
 We could consider not using the `?` annotations on locals, but just observing whether they are used in accordance with what gets assigned to them. I don't favor this; I think we should uniformly let people express their intent.
 
@@ -115,9 +98,7 @@ We could consider a shorthand `T! x` on parameters, that auto-generates a runtim
 
 Certain patterns on generic types, such as `FirstOrDefault` or `TryGet`, have slightly weird behavior with non-nullable type arguments, because they explicitly yield default values in certain situations. We could try to nuance the type system to accommodate these better. For instance, we could allow `?` on unconstrained type parameters, even though the type argument could already be nullable. I doubt that it is worth it, and it leads to weirdness related to interaction with nullable *value* types. 
 
-
-Nullable value types
---------------------
+## Nullable value types
 
 We could consider adopting some of the above semantics for nullable value types as well.
 

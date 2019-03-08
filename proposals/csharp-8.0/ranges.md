@@ -13,7 +13,7 @@ types and members may be necessary, depending on which syntactic forms are used.
 
 To use the "hat" operator (`^`), the following is required
 
-```C#
+```csharp
 namespace System
 {
     public readonly struct Index
@@ -26,14 +26,14 @@ namespace System
 To use the `System.Index` type as an argument in an array element access, the following
 member is required:
 
-```C#
+```csharp
 int System.Index.GetOffset(int length);
 ```
 
 The `..` syntax for `System.Range` will require the `System.Range` type, as well as one
 or more of the following members:
 
-```C#
+```csharp
 namespace System
 {
     public readonly struct Range
@@ -54,7 +54,7 @@ of the number of arguments, the `Range` constructor is always sufficient for usi
 Finally, for a value of type `System.Range` to be used in an array element access expression,
 the following member must be present:
 
-```C#
+```csharp
 namespace System.Runtime.CompilerServices
 {
     public static class RuntimeHelpers
@@ -70,7 +70,7 @@ C# has no way of indexing a collection from the end, but rather most indexers us
 
 We augment the grammar for *unary_expression* with the following additional syntax form:
 
-``` antlr
+```antlr
 unary_expression
     : '^' unary_expression
     ;
@@ -78,7 +78,7 @@ unary_expression
 
 We call this the *index from end* operator. The predefined *index from end* operators are as follows:
 
-``` c#
+```csharp
     System.Index operator ^(int fromEnd);
 ```
 
@@ -101,7 +101,7 @@ The language will introduce a new range operator `x..y`. It is a binary infix op
 
 We replace the C# grammar rules for *shift_expression* with the following (in order to introduce a new precedence level):
 
-``` antlr
+```antlr
 shift_expression
     : range_expression
     | shift_expression '<<' range_expression
@@ -116,7 +116,7 @@ range_expression
 
 We call the `..` operator the *range operator*. The built-in range operator can roughly be understood to correspond to the invocation of a built-in operator of this form:
 
-``` c#
+```csharp
     System.Range operator ..(Index start = 0, Index end = ^0);
 ```
 
@@ -149,7 +149,7 @@ The new operators (`^` and `..`) are syntactic sugar. The functionality can be i
 
 These two operators will be lowered to regular indexer/method calls, with no change in subsequent compiler layers.
 
-## Runtime behaviour
+## Runtime behavior
 
 * Compiler can optimize indexers for built-in types like arrays and strings, and lower the indexing to the appropriate existing methods.
 * `System.Index` will throw if constructed with a negative value.

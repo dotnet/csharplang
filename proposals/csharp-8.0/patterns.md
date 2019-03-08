@@ -3,7 +3,7 @@
 ## Summary
 [summary]: #summary
 
-Pattern matching extensions for C# enable many of the benefits of algebraic data types and pattern matching from functional languages, but in a way that smoothly integrates with the feel of the underlying language. The basic features are: [record types](../records.md), which are types whose semantic meaning is described by the shape of the data; and pattern matching, which is a new expression form that enables extremely concise multilevel decomposition of these data types. Elements of this approach are inspired by related features in the programming languages [F#](http://www.msr-waypoint.net/pubs/79947/p29-syme.pdf "Extensible Pattern Matching Via a Lightweight Language") and [Scala](https://link.springer.com/content/pdf/10.1007%2F978-3-540-73589-2.pdf "Matching Objects With Patterns, page 273").
+Pattern matching extensions for C# enable many of the benefits of algebraic data types and pattern matching from functional languages, but in a way that smoothly integrates with the feel of the underlying language. The basic features are: [record types](https://github.com/dotnet/csharplang/proposals/records.md), which are types whose semantic meaning is described by the shape of the data; and pattern matching, which is a new expression form that enables extremely concise multilevel decomposition of these data types. Elements of this approach are inspired by related features in the programming languages [F#](http://www.msr-waypoint.net/pubs/79947/p29-syme.pdf "Extensible Pattern Matching Via a Lightweight Language") and [Scala](https://link.springer.com/content/pdf/10.1007%2F978-3-540-73589-2.pdf "Matching Objects With Patterns, page 273").
 
 ## Detailed design
 [design]: #detailed-design
@@ -91,14 +91,14 @@ Certain combinations of static type of the left-hand-side and the given type are
 
 The type pattern is useful for performing run-time type tests of reference types, and replaces the idiom
 
-```cs
+```csharp
 var v = expr as Type;
 if (v != null) { // code using v
 ```
 
 With the slightly more concise
 
-```cs
+```csharp
 if (expr is Type v) { // code using v
 ```
 
@@ -106,7 +106,7 @@ It is an error if *type* is a nullable value type.
 
 The type pattern can be used to test values of nullable types: a value of type `Nullable<T>` (or a boxed `T`) matches a type pattern `T2 id` if the value is non-null and the type of `T2` is `T`, or some base type or interface of `T`. For example, in the code fragment
 
-```cs
+```csharp
 int? x = 3;
 if (x is int v) { // code using v
 ```
@@ -129,7 +129,7 @@ We expect to see `e is null` as the most common way to test for `null` in newly 
 
 #### Var Pattern
 
-``` antlr
+```antlr
 var_pattern
     : 'var' designation
     ;
@@ -237,7 +237,7 @@ It is an error if any _subpattern_ of a _property_pattern_ does not contain an _
 
 Note that a null-checking pattern falls out of a trivial property pattern. To check if the string `s` is non-null, you can write any of the following forms
 
-``` c#
+```csharp
 if (s is object o) ... // o is of type object
 if (s is string x) ... // x is of type string
 if (s is {} x) ... // x is of type string
@@ -252,8 +252,8 @@ At runtime, the expression is tested against *T*. If this fails then the propert
 
 ##### Example
 
-``` c#
-    if (o is string { Length: 5 } s)
+```csharp
+if (o is string { Length: 5 } s)
 ```
 
 ### Switch Expression
@@ -296,14 +296,14 @@ At runtime, the result of the *switch_expression* is the value of the *expressio
 
 In order to switch on a tuple literal using the *switch_statement*, you have to write what appear to be redundant parens
 
-``` c#
+```csharp
 switch ((a, b))
 {
 ```
 
 To permit
 
-``` c#
+```csharp
 switch (a, b)
 {
 ```

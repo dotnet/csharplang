@@ -24,7 +24,7 @@ C# has support for iterator methods and async methods, but no support for a meth
 There has been much discussion of `IAsyncDisposable` (e.g. https://github.com/dotnet/roslyn/issues/114) and whether it's a good idea.  However, it's a required concept to add in support of async iterators.  Since `finally` blocks may contain `await`s, and since `finally` blocks need to be run as part of disposing of iterators, we need async disposal.  It's also just generally useful any time cleaning up of resources might take any period of time, e.g. closing files (requiring flushes), deregistering callbacks and providing a way to know when deregistration has completed, etc.
 
 The following interface is added to the core .NET libraries (e.g. System.Private.CoreLib / System.Runtime):
-```C#
+```csharp
 namespace System
 {
     public interface IAsyncDisposable
@@ -47,7 +47,8 @@ Alternatives considered:
 ### IAsyncEnumerable / IAsyncEnumerator
 
 Two interfaces are added to the core .NET libraries:
-```C#
+
+```csharp
 namespace System.Collections.Generic
 {
     public interface IAsyncEnumerable<out T>
@@ -62,8 +63,10 @@ namespace System.Collections.Generic
     }
 }
 ```
+
 Typical consumption (without additional language features) would look like:
-```C#
+
+```csharp
 IAsyncEnumerator<T> enumerator = enumerable.GetAsyncEnumerator();
 try
 {
@@ -86,7 +89,8 @@ Discarded options considered:
 - _`IAsyncEnumerator<T>` not implementing `IAsyncDisposable`_: We could choose to separate these.  However, doing so complicates certain other areas of the proposal, as code must then be able to deal with the possibility that an enumerator doesn't provide disposal, which makes it difficult to write pattern-based helpers.  Further, it will be common for enumerators to have a need for disposal (e.g. any C# async iterator that has a finally block, most things enumerating data from a network connection, etc.), and if one doesn't, it is simple to implement the method purely as `public ValueTask DisposeAsync() => default(ValueTask);` with minimal additional overhead.
 
 #### Viable alternative:
-```C#
+
+```csharp
 namespace System.Collections.Generic
 {
     public interface IAsyncEnumerable<out T>
@@ -101,8 +105,10 @@ namespace System.Collections.Generic
     }
 }
 ```
+
 `TryGetNext` is used in an inner loop to consume items with a single interface call as long as they're available synchronously.  When the next item can't be retrieved synchronously, it returns false, and any time it returns false, a caller must subsequently invoke `WaitForNextAsync` to either wait for the next item to be available or to determine that there will never be another item. Typical consumption (without additional language features) would look like:
-```C#
+
+```csharp
 IAsyncEnumerator<T> enumerator = enumerable.GetAsyncEnumerator();
 try
 {
@@ -118,6 +124,7 @@ try
 }
 finally { await enumerator.DisposeAsync(); }
 ```
+
 The advantage of this is two-fold, one minor and one major:
 - _Minor: Allows for an enumerator to support multiple consumers_. There may be scenarios where it's valuable for an enumerator to support multiple concurrent consumers.  That can't be achieved when `MoveNextAsync` and `Current` are separate such that an implementation can't make their usage atomic.  In contrast, this approach provides a single method `TryGetNext` that supports pushing the enumerator forward and getting the next item, so the enumerator can enable atomicity if desired.  However, it's likely that such scenarios could also be enabled by giving each consumer its own enumerator from a shared enumerable.  Further, we don't want to enforce that every enumerator support concurrent usage, as that would add non-trivial overheads to the majority case that doesn't require it, which means a consumer of the interface generally couldn't rely on this any way.
 - _Major: Performance_. The `MoveNextAsync`/`Current` approach requires two interface calls per operation, whereas the best case for `WaitForNextAsync`/`TryGetNext` is that most iterations complete synchronously, enabling a tight inner loop with `TryGetNext`, such that we only have one interface call per operation.  This can have a measurable impact in situations where the interface calls dominate the computation.
@@ -145,7 +152,8 @@ However, there are multiple problems with that approach:
 - If/when query comprehensions are supported, how would the `CancellationToken` supplied to `GetEnumerator` or `MoveNextAsync` be passed into each clause?  The easiest way would simply be for the clause to capture it, at which point whatever token is passed to `GetAsyncEnumerator`/`MoveNextAsync` is ignored.
 
 Due to all of this, the simplest and most consistent solution is simply to do (1): `IAsyncEnumerable<T>`/`IAsyncEnumerator<T>` are cancellation-agnostic.  If you want to cancel a `foreach` loop, you can use a `CancellationToken` in the body and in any methods you call:
-```C#
+
+```csharp
 CancellationToken ct = ...;
 await foreach (var i in GetData())
 {
@@ -154,8 +162,10 @@ await foreach (var i in GetData())
     ...
 }
 ```
+
 If you want to pass a `CancellationToken` into an iterator, you simply do so as an argument, just as with other `async` methods:
-```C#
+
+```csharp
 static async IAsyncEnumerable<T> GetData(CancellationToken cancellationToken = default)
 {
     using (cancellationToken.Register(...))
@@ -171,12 +181,15 @@ await foreach (T i in GetData(ct))
     ...
 }
 ```
+
 If you want to use a `CancellationToken` in a query comprehension, you just capture it:
-```C#
+
+```csharp
 CancellationToken ct = ...
 IAsyncEnumerable<string> results = from url in source
                                    select DownloadAsync(url, ct);
 ```
+
 Etc.
 
 For now, we should pursue (1).
@@ -188,13 +201,16 @@ For now, we should pursue (1).
 ### Syntax
 
 Using the syntax:
-```C#
+
+```csharp
 foreach (var i in enumerable)
 ```
+
 C# will continue to treat `enumerable` as a synchronous enumerable, such that even if it exposes the relevant APIs for async enumerables (exposing the pattern or implementing the interface), it will only consider the synchronous APIs.
 
 To force `foreach` to instead only consider the asynchronous APIs, `await` is inserted as follows:
-```C#
+
+```csharp
 await foreach (var i in enumerable)
 ```
 
@@ -217,15 +233,18 @@ The compiler will bind to the pattern-based APIs if they exist, preferring those
 - The enumerator may optionally expose a `DisposeAsync` method that may be invoked with no arguments and that returns something that can be `await`ed and whose `GetResult()` returns `void`.
 
 This code:
-```C#
+
+```csharp
 var enumerable = ...;
 await foreach (T item in enumerable)
 {
    ...
 }
 ```
+
 is translated to the equivalent of:
-```C#
+
+```csharp
 var enumerable = ...;
 var enumerator = enumerable.GetAsyncEnumerator();
 try
@@ -247,14 +266,17 @@ If the iterated type doesn't expose the right pattern, the interfaces will be us
 ### ConfigureAwait
 
 This pattern-based compilation will allow `ConfigureAwait` to be used on all of the awaits, via a `ConfigureAwait` extension method:
-```C#
+
+```csharp
 await foreach (T item in enumerable.ConfigureAwait(false))
 {
    ...
 }
 ```
+
 This will be based on types we'll add to .NET as well, likely to System.Threading.Tasks.Extensions.dll:
-```C#
+
+```csharp
 // Approximate implementation, omitting arg validation and the like
 namespace System.Threading.Tasks
 {
@@ -308,7 +330,8 @@ Note that this approach will not enable `ConfigureAwait` to be used with pattern
 ## Async Iterators
 
 The language / compiler will support producing `IAsyncEnumerable<T>`s and `IAsyncEnumerator<T>`s in addition to consuming them. Today the language supports writing an iterator like:
-```C#
+
+```csharp
 static IEnumerable<int> MyIterator()
 {
     try
@@ -326,12 +349,14 @@ static IEnumerable<int> MyIterator()
     }
 }
 ```
+
 but `await` can't be used in the body of these iterators.  We will add that support.
 
 ### Syntax
 
 The existing language support for iterators infers the iterator nature of the method based on whether it contains any `yield`s.  The same will be true for async iterators.  Such async iterators will be demarcated and differentiated from synchronous iterators via adding `async` to the signature, and must then also have either `IAsyncEnumerable<T>` or `IAsyncEnumerator<T>` as its return type.  For example, the above example could be written as an async iterator as follows:
-```C#
+
+```csharp
 static async IAsyncEnumerable<int> MyIterator()
 {
     try
@@ -362,23 +387,30 @@ There are over ~200 overloads of methods on the `System.Linq.Enumerable` class, 
 That is a staggering number of APIs, with the potential for even more when extension libraries like Interactive Extensions (Ix) are considered.  But Ix already has an implementation of many of these, and there doesn't seem to be a great reason to duplicate that work; we should instead help the community improve Ix and recommend it for when developers want to use LINQ with `IAsyncEnumerable<T>`.
 
 There is also the issue of query comprehension syntax.  The pattern-based nature of query comprehensions would allow them to "just work" with some operators, e.g. if Ix provides the following methods:
-```C#
+
+```csharp
 public static IAsyncEnumerable<TResult> Select<TSource, TResult>(this IAsyncEnumerable<TSource> source, Func<TSource, TResult> func);
 public static IAsyncEnumerable<T> Where(this IAsyncEnumerable<T> source, Func<T, bool> func);
 ```
+
 then this C# code will "just work":
-```C#
+
+```csharp
 IAsyncEnumerable<int> enumerable = ...;
 IAsyncEnumerable<int> result = from item in enumerable
                                where item % 2 == 0
                                select item * 2;
 ```
+
 However, there is no query comprehension syntax that supports using `await` in the clauses, so if Ix added, for example:
-```C#
+
+```csharp
 public static IAsyncEnumerable<TResult> Select<TSource, TResult>(this IAsyncEnumerable<TSource> source, Func<TSource, ValueTask<TResult>> func);
 ```
+
 then this would "just work":
-```C#
+
+```csharp
 IAsyncEnumerable<string> result = from url in urls
                                   where item % 2 == 0
                                   select SomeAsyncMethod(item);
@@ -389,8 +421,10 @@ async ValueTask<int> SomeAsyncMethod(int item)
     return item * 2;
 }
 ```
+
 but there'd be no way to write it with the `await` inline in the `select` clause.  As a separate effort, we could look into adding `async { ... }` expressions to the language, at which point we could allow them to be used in query comprehensions and the above could instead be written as:
-```C#
+
+```csharp
 IAsyncEnumerable<int> result = from item in enumerable
                                where item % 2 == 0
                                select async
@@ -399,6 +433,7 @@ IAsyncEnumerable<int> result = from item in enumerable
                                    return item * 2;
                                };
 ```
+
 or to enabling `await` to be used directly in expressions, such as by supporting `async from`.  However, it's unlikely a design here would impact the rest of the feature set one way or the other, and this isn't a particularly high-value thing to invest in right now, so the proposal is to do nothing additional here right now.
 
 ## Integration with other asynchronous frameworks

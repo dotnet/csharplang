@@ -26,17 +26,20 @@ be applied.
 ### using declaration
 
 The language will allow for `using` to be added to a local variable declaration. Such a declaration
-will have the same effect as declarating the variable in a `using` statement at the same location.
+will have the same effect as declaring the variable in a `using` statement at the same location.
 
-``` csharp
-if (...) { 
+```csharp
+if (...) 
+{ 
    using FileStream f = new FileStream(@"C:\users\jaredpar\using.md");
    // statements
 }
 
 // Equivalent to 
-if (...) { 
-   using (FileStream f = new FileStream(@"C:\users\jaredpar\using.md")) {
+if (...) 
+{ 
+   using (FileStream f = new FileStream(@"C:\users\jaredpar\using.md")) 
+   {
     // statements
    }
 }
@@ -45,7 +48,7 @@ if (...) {
 The lifetime of a `using` local will extend to the end of the scope in which it is declared. The 
 `using` locals will then be disposed in the reverse order in which they are declared. 
 
-``` csharp
+```csharp
 { 
     using var f1 = new FileStream("...");
     using var f2 = new FileStream("..."), f3 = new FileStream("...");
@@ -59,12 +62,13 @@ The lifetime of a `using` local will extend to the end of the scope in which it 
 There are no restrictions around `goto`, or any other control flow construct in the face of 
 a `using` declaration. Instead the code acts just as it would for the equivalent `using` statement:
 
-``` csharp
+```csharp
 {
     using var f1 = new FileStream("...");
   target:
     using var f2 = new FileStream("...");
-    if (someCondition) {
+    if (someCondition) 
+    {
         // Causes f2 to be disposed but has no effect on f1
         goto target;
     }
@@ -76,7 +80,7 @@ behavior of locals declared in a `using` statement.
 
 The language grammar for `using` declarations will be the following:
 
-```
+```antlr
 local-using-declaration:
   using type using-declarators
 
@@ -102,12 +106,14 @@ The language will add the notion of a disposable pattern: that is a type which h
 `Dispose` instance method. Types which fit the disposable pattern can participate in a `using` 
 statement or declaration without being required to implement `IDisposable`. 
 
-``` csharp
-class Resource { 
+```csharp
+class Resource
+{ 
     public void Dispose() { ... }
 }
 
-using (var r = new Resource()) {
+using (var r = new Resource())
+{
     // statements
 }
 ```
@@ -128,15 +134,15 @@ declared in the `using` are read-only, a `null` value will not cause an exceptio
 etc ... The code generation will be different only in that there will not be a cast to 
 `IDisposable` before calling Dispose:
 
-``` csharp
+```csharp
 {
-	Resource r = new Resource();
-	try {
-		// statements
-	}
-	finally {
-		if (resource != null) resource.Dispose();
-	}
+	  Resource r = new Resource();
+	  try {
+		    // statements
+	  }
+	  finally {
+		    if (resource != null) resource.Dispose();
+	  }
 }
 ```
 
@@ -160,5 +166,3 @@ ease of the work around (just add a block to the `case` label) didn't justify ta
 A `fixed` statement has all of the properties of `using` statements that motivated the ability
 to have `using` locals. Consideration should be given to extending this feature to `fixed` locals
 as well. The lifetime and ordering rules should apply equally well for `using` and `fixed` here.
-
-
