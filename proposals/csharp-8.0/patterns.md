@@ -322,6 +322,6 @@ The compilation of pattern matching can take advantage of common parts of patter
 
 When some of the patterns are integers or strings, the compiler can generate the same kind of code it generates for a switch-statement in earlier versions of the language.
 
-For more on these kinds of optimizations, see [[Scott and Ramsey (2000)]](http://www.cs.tufts.edu/~nr/cs257/archive/norman-ramsey/match.pdf "When Do Match-Compilation Heuristics Matter?").
+For more on these kinds of optimizations, see [[Scott and Ramsey (2000)]](https://www.cs.tufts.edu/~nr/cs257/archive/norman-ramsey/match.pdf "When Do Match-Compilation Heuristics Matter?").
 
 It would be possible to support declaring a type hierarchy closed, meaning that all subtypes of the given type are declared in the same assembly. In that case the compiler can generate an internal tag field to distinguish among the different subtypes and reduce the number of type tests required at runtime. Closed hierarchies enable the compiler to detect when a set of matches are complete. It is also possible to provide a slightly weaker form of this optimization while allowing the hierarchy to be open.
