@@ -1123,9 +1123,10 @@ class Test
 {
     static unsafe void Main()
     {
-        byte* buffer = (byte*)Memory.Alloc(256);
+        byte* buffer = null;
         try
         {
+            buffer = (byte*)Memory.Alloc(256);
             for (int i = 0; i < 256; i++) buffer[i] = (byte)i;
             byte[] array = new byte[256];
             fixed (byte* p = array) Memory.Copy(buffer, p, 256);
@@ -1133,7 +1134,7 @@ class Test
         }
         finally
         {
-            Memory.Free(buffer);
+            if (buffer != null) Memory.Free(buffer);
         }
     }
 }
