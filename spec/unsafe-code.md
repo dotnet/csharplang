@@ -1050,7 +1050,7 @@ public static unsafe class Memory
     // automatically initialized to zero.
     public static void* Alloc(int size)
     {
-        void* result = HeapAlloc(ph, HEAP_ZERO_MEMORY, size);
+        void* result = HeapAlloc(ph, HEAP_ZERO_MEMORY, (UIntPtr)size);
         if (result == null) throw new OutOfMemoryException();
         return result;
     }
@@ -1082,7 +1082,7 @@ public static unsafe class Memory
     // initialized to zero.
     public static void* ReAlloc(void* block, int size)
     {
-        void* result = HeapReAlloc(ph, HEAP_ZERO_MEMORY, block, size);
+        void* result = HeapReAlloc(ph, HEAP_ZERO_MEMORY, block, (UIntPtr)size);
         if (result == null) throw new OutOfMemoryException();
         return result;
     }
@@ -1090,7 +1090,7 @@ public static unsafe class Memory
     // Returns the size of a memory block.
     public static int SizeOf(void* block)
     {
-        int result = HeapSize(ph, 0, block);
+        int result = (int)HeapSize(ph, 0, block);
         if (result == -1) throw new InvalidOperationException();
         return result;
     }
@@ -1103,16 +1103,16 @@ public static unsafe class Memory
     private static extern IntPtr GetProcessHeap();
 
     [DllImport("kernel32")]
-    private static extern void* HeapAlloc(IntPtr hHeap, int flags, int size);
+    private static extern void* HeapAlloc(IntPtr hHeap, int flags, UIntPtr size);
 
     [DllImport("kernel32")]
     private static extern bool HeapFree(IntPtr hHeap, int flags, void* block);
 
     [DllImport("kernel32")]
-    private static extern void* HeapReAlloc(IntPtr hHeap, int flags, void* block, int size);
+    private static extern void* HeapReAlloc(IntPtr hHeap, int flags, void* block, UIntPtr size);
 
     [DllImport("kernel32")]
-    private static extern int HeapSize(IntPtr hHeap, int flags, void* block);
+    private static extern UIntPtr HeapSize(IntPtr hHeap, int flags, void* block);
 }
 ```
 
