@@ -1126,11 +1126,12 @@ class Test
         byte* buffer = null;
         try
         {
-            buffer = (byte*)Memory.Alloc(256);
-            for (int i = 0; i < 256; i++) buffer[i] = (byte)i;
-            byte[] array = new byte[256];
-            fixed (byte* p = array) Memory.Copy(buffer, p, 256);
-            for (int i = 0; i < 256; i++) Console.WriteLine(array[i]);
+            const int Size = 256;
+            buffer = (byte*)Memory.Alloc(Size);
+            for (int i = 0; i < Size; i++) buffer[i] = (byte)i;
+            byte[] array = new byte[Size];
+            fixed (byte* p = array) Memory.Copy(buffer, p, Size);
+            for (int i = 0; i < Size; i++) Console.WriteLine(array[i]);
         }
         finally
         {
