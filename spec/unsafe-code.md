@@ -1044,13 +1044,13 @@ public static unsafe class Memory
 {
     // Handle for the process heap. This handle is used in all calls to the
     // HeapXXX APIs in the methods below.
-    private static readonly IntPtr ph = GetProcessHeap();
+    private static readonly IntPtr s_heap = GetProcessHeap();
 
     // Allocates a memory block of the given size. The allocated memory is
     // automatically initialized to zero.
     public static void* Alloc(int size)
     {
-        void* result = HeapAlloc(ph, HEAP_ZERO_MEMORY, (UIntPtr)size);
+        void* result = HeapAlloc(s_heap, HEAP_ZERO_MEMORY, (UIntPtr)size);
         if (result == null) throw new OutOfMemoryException();
         return result;
     }
@@ -1074,7 +1074,7 @@ public static unsafe class Memory
     // Frees a memory block.
     public static void Free(void* block)
     {
-        if (!HeapFree(ph, 0, block)) throw new InvalidOperationException();
+        if (!HeapFree(s_heap, 0, block)) throw new InvalidOperationException();
     }
 
     // Re-allocates a memory block. If the reallocation request is for a
@@ -1082,7 +1082,7 @@ public static unsafe class Memory
     // initialized to zero.
     public static void* ReAlloc(void* block, int size)
     {
-        void* result = HeapReAlloc(ph, HEAP_ZERO_MEMORY, block, (UIntPtr)size);
+        void* result = HeapReAlloc(s_heap, HEAP_ZERO_MEMORY, block, (UIntPtr)size);
         if (result == null) throw new OutOfMemoryException();
         return result;
     }
@@ -1090,7 +1090,7 @@ public static unsafe class Memory
     // Returns the size of a memory block.
     public static int SizeOf(void* block)
     {
-        int result = (int)HeapSize(ph, 0, block);
+        int result = (int)HeapSize(s_heap, 0, block);
         if (result == -1) throw new InvalidOperationException();
         return result;
     }
