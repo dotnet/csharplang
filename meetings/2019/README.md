@@ -56,6 +56,9 @@ See also https://github.com/dotnet/csharplang/issues/2095
 - When we compute an annotation in the walker (e.g. type inference), do we use the context?
   See also https://github.com/dotnet/roslyn/issues/33639
 
+- Inferred nullable state from a finally block (open)
+  See also https://github.com/dotnet/roslyn/issues/34018
+
 ## Mar 6, 2019
 
 - ~~Nullable sidecar files (Immo)~~
