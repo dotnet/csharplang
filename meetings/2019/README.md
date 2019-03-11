@@ -100,11 +100,6 @@ See also https://github.com/dotnet/csharplang/issues/2095
   2. To that branch of the switch only
   3. To all code that follows the test in logical order
 
-## Mar 6, 2019
-
-- ~~Nullable sidecar files (Immo)~~
-- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
@@ -118,6 +113,17 @@ We brought in the design review team to look at some of our recent and open deci
 1. Nullable reference types: shipping annotations
 2. Pattern-based indexing with `Index` and `Range`
 3. Cancellation tokens in async streams
+
+## Mar 6, 2019
+
+[C# Language Design Notes for March 6th, 2019](LDM-2019-03-06.md)
+
+1. Pure checks in the switch expression
+2. Nullable analysis of unreachable code
+3. Warnings about nullability on expressions with errors
+4. Handling of type parameters that cannot be annotated
+5. Should anonymous type fields have top-level nullability?
+6. Element-wise analysis of tuple conversions
 
 ## Mar 4, 2019
 
@@ -141,6 +147,24 @@ We brought in the design review team to look at some of our recent and open deci
     - Base calls
     - We currently have open issues around `protected`, `internal`, reabstraction, and `static` fields among others.
 
+<<<<<<< HEAD
+=======
+# C# Language Design Notes for 2019
+
+Overview of meetings and agendas for 2019
+
+## Mar 6, 2019
+
+Open issues:
+
+1. Pure checks in the switch expression
+2. Nullable analysis of unreachable code
+3. Warnings about nullability on expressions with errors
+4. Handling of type parameters that cannot be annotated
+5. Should anonymous type fields have top-level nullability?
+6. Element-wise analysis of tuple conversions
+
+>>>>>>> 67f456e... Add LDM notes for Mar. 6th, 2019
 ## Feb 20, 2019
 
 [C# Language Design Notes for Feb 20, 2019](LDM-2019-02-20.md)
