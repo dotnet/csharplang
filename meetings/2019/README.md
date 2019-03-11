@@ -42,6 +42,12 @@ See also https://github.com/dotnet/csharplang/issues/2095
 
   In anticipation of possibly permitting `and` and `or` as pattern combinators in the future, we should forbid (or at least warn) when these identifiers are used as the designator in a declaration or recursive pattern.  Otherwise it would be a breaking change.
 
+- To where do null inferences flow from a pattern in a `switch`? (open)
+
+  1. To the entry of the switch and all previous cases
+  2. To that branch of the switch only
+  3. To all code that follows the test in logical order
+
 ## Mar 6, 2019
 
 - ~~Nullable sidecar files (Immo)~~
