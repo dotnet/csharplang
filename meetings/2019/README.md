@@ -48,6 +48,14 @@ See also https://github.com/dotnet/csharplang/issues/2095
   2. To that branch of the switch only
   3. To all code that follows the test in logical order
 
+#### Nullable Reference Types
+
+- What is the nullability of a dynamic value?  Oblivious?
+  See also https://github.com/dotnet/roslyn/issues/29893
+
+- When we compute an annotation in the walker (e.g. type inference), do we use the context?
+  See also https://github.com/dotnet/roslyn/issues/33639
+
 ## Mar 6, 2019
 
 - ~~Nullable sidecar files (Immo)~~
