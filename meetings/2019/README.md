@@ -25,6 +25,23 @@
 
 ## Mar 13, 2019
 
+#### Default Interface Methods
+See also https://github.com/dotnet/csharplang/issues/406
+
+- Reabstraction (open)
+- explicit interface abstract overrides in classes (open)
+
+#### Pattern-Matching
+See also https://github.com/dotnet/csharplang/issues/2095
+
+- Propose to change precedence of switch expression to primary (open)
+
+  The switch expression is currently at *relational* precedence. I propose to change it to *primary* precedence. See [#2331](https://github.com/dotnet/csharplang/issues/2331) for details.
+
+- Reserve `and` and `or` in patterns (open)
+
+  In anticipation of possibly permitting `and` and `or` as pattern combinators in the future, we should forbid (or at least warn) when these identifiers are used as the designator in a declaration or recursive pattern.  Otherwise it would be a breaking change.
+
 ## Mar 6, 2019
 
 - ~~Nullable sidecar files (Immo)~~
