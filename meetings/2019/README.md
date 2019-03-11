@@ -35,18 +35,20 @@
 - Nullable user studies (Phillip Carter)
 - Interpolated string optimizations (Jared, Jeremy Kuhne)
 
-## Feb 27, 2019
-
-- Triage [#2152](https://github.com/dotnet/csharplang/issues/2152): "Allow Obsolete attribute on getters and setters"
-- Open issues in recursive pattern-matching https://github.com/dotnet/csharplang/issues/2095
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
 
+## Feb 27, 2019
+
+[C# Language Design Notes for Feb 27, 2019](LDM-2019-02-27.md)
+
+1. Allow ObsoleteAttribute on property accessors
+2. More Default Interface Member questions
+
 ## Feb 25, 2019
 
-[C# Language Design Notes for Feb 20, 2019](LDM-2019-02-25.md)
+[C# Language Design Notes for Feb 25, 2019](LDM-2019-02-25.md)
 
 - Open issues in default interface methods (https://github.com/dotnet/csharplang/issues/406). 
     - Base calls
