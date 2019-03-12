@@ -25,6 +25,40 @@
 
 ## Mar 13, 2019
 
+#### Default Interface Methods
+See also https://github.com/dotnet/csharplang/issues/406
+
+- Reabstraction (open)
+- explicit interface abstract overrides in classes (open)
+
+#### Pattern-Matching
+See also https://github.com/dotnet/csharplang/issues/2095
+
+- Propose to change precedence of switch expression to primary (open)
+
+  The switch expression is currently at *relational* precedence. I propose to change it to *primary* precedence. See [#2331](https://github.com/dotnet/csharplang/issues/2331) for details.
+
+- Reserve `and` and `or` in patterns (open)
+
+  In anticipation of possibly permitting `and` and `or` as pattern combinators in the future, we should forbid (or at least warn) when these identifiers are used as the designator in a declaration or recursive pattern.  Otherwise it would be a breaking change.
+
+- To where do null inferences flow from a pattern in a `switch`? (open)
+
+  1. To the entry of the switch and all previous cases
+  2. To that branch of the switch only
+  3. To all code that follows the test in logical order
+
+#### Nullable Reference Types
+
+- What is the nullability of a dynamic value?  Oblivious?
+  See also https://github.com/dotnet/roslyn/issues/29893
+
+- When we compute an annotation in the walker (e.g. type inference), do we use the context?
+  See also https://github.com/dotnet/roslyn/issues/33639
+
+- Inferred nullable state from a finally block (open)
+  See also https://github.com/dotnet/roslyn/issues/34018
+
 ## Mar 6, 2019
 
 - ~~Nullable sidecar files (Immo)~~
