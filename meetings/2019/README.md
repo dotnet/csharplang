@@ -17,7 +17,19 @@
 - *Triage milestones*
 - *Design review*
 
+## Apr 17, 2019
+
+## Apr 15, 2019
+
+## Apr 3, 2019
+
+## Apr 1, 2019
+
+- Pattern-based index/range translation (Jared, Stephen)
+
 ## Mar 27, 2019
+
+- Whatever urgent issues accrued over the past few weeks
 
 ## Mar 25, 2019
 
