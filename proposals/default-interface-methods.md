@@ -292,6 +292,19 @@ class Derived: Base, IA // OK, all interface members have a concrete most specif
 }
 ```
 
+>***Open Issue:*** What happens if derived looks like this:
+```csharp
+class Derived: Base, IA // OK, all interface members have a concrete most specific override
+{
+    private void M() { } // method unrelated to 'IA.M' because private
+
+    public void SomeMethod() {
+        M();
+    }
+}
+```
+>Which `M()` will be called? The private `M()` or `IA.M()`?
+
 The same rules give similar results to the analogous situation involving default interface methods:
 
 ```csharp
