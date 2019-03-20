@@ -77,15 +77,6 @@ We now have a proposed runtime implementation for reabstraction.  See https://gi
 
 Overview of meetings and agendas for 2019
 
-## Mar 13, 2019
-
-[C# Language Design Notes for March 13, 2019](LDM-2019-03-13.md)
-
-1. Interface "reabstraction" with default interface implementations
-2. Precedence of the switch expression
-3. `or` keyword in patterns
-4. "Pure" null tests and the switch statement/expression
-
 ## Mar 25, 2019
 
 [C# Design Review Notes for Mar 25, 2019](LDM-2019-03-25.md)
@@ -95,6 +86,31 @@ We brought in the design review team to look at some of our recent and open deci
 1. Nullable reference types: shipping annotations
 2. Pattern-based indexing with `Index` and `Range`
 3. Cancellation tokens in async streams
+
+## Mar 19, 2019
+
+[C# Language Design Notes for March 19, 2019](LDM-2019-03-19.md)
+
+We held a live LDM during the MVP summit with some Q&A about C# 8 and the future
+
+Topics:
+
+1. Records
+2. "Extension interfaces"/roles
+3. Macros
+4. IAsyncEnumerable
+5. "Partially automatic" properties
+6. More integration with reactive extensions
+
+
+## Mar 13, 2019
+
+[C# Language Design Notes for March 13, 2019](LDM-2019-03-13.md)
+
+1. Interface "reabstraction" with default interface implementations
+2. Precedence of the switch expression
+3. `or` keyword in patterns
+4. "Pure" null tests and the switch statement/expression
 
 ## Mar 6, 2019
 
