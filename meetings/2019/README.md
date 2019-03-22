@@ -38,6 +38,14 @@ We now have a proposed runtime implementation for reabstraction.  See https://gi
 - Reabstraction (open)
 - explicit interface abstract overrides in classes (open)
 
+- Is `object.MemberwiseClone()` accessible in an interface?
+
+- Confirm: `static int P { get; set; }` is an auto-property with a compiler-generated backing field?
+
+- Confirm: `partial` on a method declaration implies `private`, and no access modifier is permitted?
+
+- Confirm: `operator ==` and `operator !=` are not permitted in interfaces?
+
 #### Nullable Reference Types
 
 - What is the nullability of a dynamic value?  Oblivious?
