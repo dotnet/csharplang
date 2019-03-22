@@ -44,8 +44,6 @@ We now have a proposed runtime implementation for reabstraction.  See https://gi
 
 - Confirm: `partial` on a method declaration implies `private`, and no access modifier is permitted?
 
-- Confirm: `operator ==` and `operator !=` are not permitted in interfaces?
-
 #### Nullable Reference Types
 
 - What is the nullability of a dynamic value?  Oblivious?
