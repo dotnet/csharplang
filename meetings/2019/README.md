@@ -5,6 +5,7 @@
 ## Schedule when convenient
 
 - Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
+- Default Implementation Members: Open LDM Issues https://github.com/dotnet/csharplang/issues/406
 - Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
