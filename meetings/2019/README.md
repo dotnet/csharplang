@@ -4,13 +4,10 @@
 
 ## Schedule when convenient
 
-- Discussion of refreshing language spec (Neal)
-- Double-check the desired syntax for switch expressions (Julien)
-- Making a `CancellationToken` available in async-iterator method bodies; possibly reserving a keyword (Julien/Stephen) 
+- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
 - Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
 - Syntax of positional records/primary constructors (Andy)
-- Nullable sidecar files (Immo)
-- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
+- Discussion of refreshing language spec (Neal)
 
 ## Recurring topics
 
