@@ -75,7 +75,28 @@ We now have a proposed runtime implementation for reabstraction.  See https://gi
 
 - Confirm: `partial` on a method declaration implies `private`, and no access modifier is permitted?
 
+
+# C# Language Design Notes for 2019
+
 Overview of meetings and agendas for 2019
+
+## Mar 27, 2019
+
+1. Switch expression syntax
+
+1. Default interface implementations
+
+    1. Reabstraction
+
+    2. Explicit interface abstract overrides in classes
+
+    3. `object.MemberwiseClone()`
+
+    4. `static int P {get; set}` semantics
+
+    5. `partial` on interface methods
+
+2. `?` on unconstrained generic param `T`
 
 ## Mar 25, 2019
 
@@ -101,7 +122,6 @@ Topics:
 4. IAsyncEnumerable
 5. "Partially automatic" properties
 6. More integration with reactive extensions
-
 
 ## Mar 13, 2019
 
