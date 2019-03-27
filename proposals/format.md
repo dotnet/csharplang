@@ -208,7 +208,7 @@ would need to have `static` methods named `Create`. Given that developers are st
 type in the `System` namespace this break seems like a reasonable compromise.
 
 ### Expanding to more types
-Given we're in the area we sohuld consider adding `IList<T>`, `ICollection<T>` and `IReadOnlyList<T>` to the set of
+Given we're in the area we should consider adding `IList<T>`, `ICollection<T>` and `IReadOnlyList<T>` to the set of
 collections for which `params` is supported. In terms of implementation it will cost a small amount over the other
 work here.
 
@@ -321,7 +321,7 @@ are available then it will give us this type of flexibility.
 ### Why not varargs? 
 The existing 
 [varargs](https://docs.microsoft.com/en-us/cpp/windows/variable-argument-lists-dot-dot-dot-cpp-cli?view=vs-2017)
-feature wsa considered here as a possible solution. This feature though is meant primarily for C++/CLI scenarios and
+feature was considered here as a possible solution. This feature though is meant primarily for C++/CLI scenarios and
 has known holes for other scenarios. Additionally there is significant cost in porting this to Unix. Hence it wasn't
 seen as a viable solution.
 
