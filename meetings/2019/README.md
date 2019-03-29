@@ -24,23 +24,15 @@
 
 ## Apr 1, 2019
 
+### Index/Range Feature
+
 - Pattern-based index/range translation (Jared, Stephen)
 
-## Mar 27, 2019
-
 #### Default Interface Methods
-See also https://github.com/dotnet/csharplang/issues/406
-
-We now have a proposed runtime implementation for reabstraction.  See https://github.com/dotnet/coreclr/pull/23313
-
-- Reabstraction (open)
-- explicit interface abstract overrides in classes (open)
 
 - Is `object.MemberwiseClone()` accessible in an interface?
 
-- Confirm: `static int P { get; set; }` is an auto-property with a compiler-generated backing field?
-
-- Confirm: `partial` on a method declaration implies `private`, and no access modifier is permitted?
+Please revisit this question.
 
 #### Nullable Reference Types
 
@@ -50,8 +42,24 @@ We now have a proposed runtime implementation for reabstraction.  See https://gi
 - When we compute an annotation in the walker (e.g. type inference), do we use the context?
   See also https://github.com/dotnet/roslyn/issues/33639
 
-- Inferred nullable state from a finally block (open)
+- Inferred nullable state from a finally block
   See also https://github.com/dotnet/roslyn/issues/34018
+
+## Mar 27, 2019
+
+#### Default Interface Methods
+See also https://github.com/dotnet/csharplang/issues/406
+
+We now have a proposed runtime implementation for reabstraction.  See https://github.com/dotnet/coreclr/pull/23313
+
+- Reabstraction
+- explicit interface abstract overrides in classes
+
+- Is `object.MemberwiseClone()` accessible in an interface?
+
+- Confirm: `static int P { get; set; }` is an auto-property with a compiler-generated backing field?
+
+- Confirm: `partial` on a method declaration implies `private`, and no access modifier is permitted?
 
 ## Mar 25, 2019
 
