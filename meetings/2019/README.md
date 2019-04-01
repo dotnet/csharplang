@@ -29,20 +29,6 @@
   See https://github.com/dotnet/csharplang/issues/2378.
   There is a breaking change in VS2019 to address, as well as a C# 8 language question
 
-## Apr 1, 2019
-
-### Index/Range Feature
-
-- Pattern-based index/range translation (Jared, Stephen)
-
-#### Default Interface Methods
-
-- Is `object.MemberwiseClone()` accessible in an interface?
-
-  Please revisit this question.
-
-#### Nullable Reference Types
-
 - What is the nullability of a dynamic value?  Oblivious?
 
   See also https://github.com/dotnet/roslyn/issues/29893
@@ -54,6 +40,18 @@
 - Inferred nullable state from a finally block
 
   See also https://github.com/dotnet/roslyn/issues/34018
+
+## Apr 1, 2019
+
+### Index/Range Feature
+
+- Pattern-based index/range translation (Jared, Stephen)
+
+#### Default Interface Methods
+
+- Is `object.MemberwiseClone()` accessible in an interface?
+
+  Please revisit this question.
 
 ## Mar 27, 2019
 
