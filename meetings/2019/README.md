@@ -71,7 +71,13 @@ We now have a proposed runtime implementation for reabstraction.  See https://gi
 
 ## Mar 25, 2019
 
-- *Design review*
+[C# Design Review Notes for Mar 25, 2019](LDM-2019-03-25.md)
+
+We brought in the design review team to look at some of our recent and open decisions in C# LDM.
+
+1. Nullable reference types: shipping annotations
+2. Pattern-based indexing with `Index` and `Range`
+3. Cancellation tokens in async streams
 
 ## Mar 13, 2019
 
