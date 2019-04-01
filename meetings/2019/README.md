@@ -22,18 +22,18 @@
 
 ## Apr 3, 2019
 
-## Apr 1, 2019
-
-### Index/Range Feature
-
-- Pattern-based index/range translation (Jared, Stephen)
-
-#### Nullable Reference Types
+### Nullable Reference Types
 
 - Ambiguous implements/overrides with generic methods and NRTs
 
   See https://github.com/dotnet/csharplang/issues/2378.
   There is a breaking change in VS2019 to address, as well as a C# 8 language question
+
+## Apr 1, 2019
+
+### Index/Range Feature
+
+- Pattern-based index/range translation (Jared, Stephen)
 
 #### Default Interface Methods
 
