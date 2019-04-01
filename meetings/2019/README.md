@@ -46,9 +46,6 @@
 - `??=` with `Nullable<T>` LHS and `T` (underlying VT) RHS (Fred)
 
   See also https://github.com/dotnet/csharplang/issues/34#issuecomment-444699550 and discussion following
-
-## Apr 1, 2019
-
 ### Index/Range Feature
 
 - Pattern-based index/range translation (Jared, Stephen)
@@ -62,6 +59,16 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Apr 1, 2019
+
+[C# Design Review Notes for Apr 1, 2019](LDM-2019-04-01.md)
+
+1. Pattern-based Index/Range translation
+
+2. Default interface implementations: Is object.MemberwiseClone() accessible in
+an interface?
+
 
 ## Mar 27, 2019
 
