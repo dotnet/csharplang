@@ -9,6 +9,7 @@
 - Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
+- Discussion of `??=` with NVT LHS and underlying VT RHS (Fred) https://github.com/dotnet/csharplang/issues/34
 
 ## Recurring topics
 
