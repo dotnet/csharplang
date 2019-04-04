@@ -20,14 +20,23 @@
 
 ## Apr 15, 2019
 
-## Apr 3, 2019
+### Pattern-Matching
+
+- Can we make the switch expression target-typed?
+
+  See also https://github.com/dotnet/csharplang/issues/2389
+
+### Coalescing Assignment
+
+- `??=` with `Nullable<T>` LHS and `T` (underlying VT) RHS (Fred)
+
+  See also https://github.com/dotnet/csharplang/issues/34#issuecomment-444699550 and discussion following
+
+### Index/Range Feature
+
+- Pattern-based index/range translation (Jared, Stephen)
 
 ### Nullable Reference Types
-
-- Ambiguous implements/overrides with generic methods and NRTs
-
-  See https://github.com/dotnet/csharplang/issues/2378.
-  There is a breaking change in VS2019 to address, as well as a C# 8 language question
 
 - What is the nullability of a dynamic value?  Oblivious?
 
@@ -41,14 +50,14 @@
 
   See also https://github.com/dotnet/roslyn/issues/34018
 
-### Coalescing Assignment
+## Apr 3, 2019
 
-- `??=` with `Nullable<T>` LHS and `T` (underlying VT) RHS (Fred)
+### Nullable Reference Types
 
-  See also https://github.com/dotnet/csharplang/issues/34#issuecomment-444699550 and discussion following
-### Index/Range Feature
+- Ambiguous implements/overrides with generic methods and NRTs
 
-- Pattern-based index/range translation (Jared, Stephen)
+  See https://github.com/dotnet/csharplang/issues/2378.
+  There is a breaking change in VS2019 to address, as well as a C# 8 language question
 
 #### Default Interface Methods
 
