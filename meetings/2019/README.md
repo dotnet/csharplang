@@ -59,28 +59,13 @@
 
   Please revisit this question.
 
-## Mar 27, 2019
-
-#### Default Interface Methods
-See also https://github.com/dotnet/csharplang/issues/406
-
-We now have a proposed runtime implementation for reabstraction.  See https://github.com/dotnet/coreclr/pull/23313
-
-- Reabstraction
-- explicit interface abstract overrides in classes
-
-- Is `object.MemberwiseClone()` accessible in an interface?
-
-- Confirm: `static int P { get; set; }` is an auto-property with a compiler-generated backing field?
-
-- Confirm: `partial` on a method declaration implies `private`, and no access modifier is permitted?
-
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
 
 ## Mar 27, 2019
+
+[C# Design Review Notes for Mar 27, 2019](LDM-2019-03-27.md)
 
 1. Switch expression syntax
 
