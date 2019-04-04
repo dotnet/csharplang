@@ -38,10 +38,6 @@
 
 ### Nullable Reference Types
 
-- What is the nullability of a dynamic value?  Oblivious?
-
-  See also https://github.com/dotnet/roslyn/issues/29893
-
 - When we compute an annotation in the walker (e.g. type inference), do we use the context?
 
   See also https://github.com/dotnet/roslyn/issues/33639
@@ -59,11 +55,9 @@
   See https://github.com/dotnet/csharplang/issues/2378.
   There is a breaking change in VS2019 to address, as well as a C# 8 language question
 
-#### Default Interface Methods
+- What is the nullability of a dynamic value?  Oblivious?
 
-- Is `object.MemberwiseClone()` accessible in an interface?
-
-  Please revisit this question.
+  See also https://github.com/dotnet/roslyn/issues/29893
 
 # C# Language Design Notes for 2019
 
