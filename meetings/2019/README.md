@@ -63,22 +63,16 @@
 
 ## Apr 15, 2019
 
-## Apr 3, 2019
-
-### Nullable Reference Types
-
-- Ambiguous implements/overrides with generic methods and NRTs
-
-  See https://github.com/dotnet/csharplang/issues/2378.
-  There is a breaking change in VS2019 to address, as well as a C# 8 language question
-
-- What is the nullability of a dynamic value?  Oblivious?
-
-  See also https://github.com/dotnet/roslyn/issues/29893
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Apr 3, 2019
+
+[C# Design Review Notes for Apr 3, 2019](LDM-2019-04-03.md)
+
+1. Ambiguous implementations/overrides with generic methods and NRTs
+2. NRT and `dynamic`
 
 ## Apr 1, 2019
 
