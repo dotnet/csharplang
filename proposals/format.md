@@ -39,7 +39,7 @@ The language will allow for `params` in a method signature to have the types `Sp
 The `Span<T>` and `ReadOnlySpan<T>` variants will be referred to as `Span<T>` below for simplicity. In cases where the 
 behavior of `ReadOnlySpan<T>` differs it will be explicitly called out. 
 
-The advantage the `Span<T>` variants of `params` provides is it gives the compiler great flexbility in how it allocates
+The advantage the `Span<T>` variants of `params` provides is it gives the compiler great flexibility in how it allocates
 the backing storage for the `Span<T>` value. With a `params T[]` the compiler must allocate a new `T[]` for every 
 invocation of a `params` method. Re-use is not possible because it must assume the callee stored and reused the 
 parameter. This can lead to a large inefficiency in methods with lots of `params` invocations.
@@ -73,16 +73,16 @@ The compiler could choose to emit the body of `Go` as follows:
     static void Go() {
         var args = new string[3];
         args[0] = "jaredpar";
-        Use(new Span<int>(args, start: 0, length: 1));
+        Use(new Span<string>(args, start: 0, length: 1));
 
         args[0] = "hello";
         args[1] = "world";
-        Use(new Span<int>(args, start: 0, length: 2));
+        Use(new Span<string>(args, start: 0, length: 2));
 
         args[0] = "a";
         args[1] = "longer";
         args[2] = "set";
-        Use(new Span<int>(args, start: 0, length: 3));
+        Use(new Span<string>(args, start: 0, length: 3));
    }
 ```
 
@@ -208,7 +208,7 @@ would need to have `static` methods named `Create`. Given that developers are st
 type in the `System` namespace this break seems like a reasonable compromise.
 
 ### Expanding to more types
-Given we're in the area we sohuld consider adding `IList<T>`, `ICollection<T>` and `IReadOnlyList<T>` to the set of
+Given we're in the area we should consider adding `IList<T>`, `ICollection<T>` and `IReadOnlyList<T>` to the set of
 collections for which `params` is supported. In terms of implementation it will cost a small amount over the other
 work here.
 
@@ -321,7 +321,7 @@ are available then it will give us this type of flexibility.
 ### Why not varargs? 
 The existing 
 [varargs](https://docs.microsoft.com/en-us/cpp/windows/variable-argument-lists-dot-dot-dot-cpp-cli?view=vs-2017)
-feature wsa considered here as a possible solution. This feature though is meant primarily for C++/CLI scenarios and
+feature was considered here as a possible solution. This feature though is meant primarily for C++/CLI scenarios and
 has known holes for other scenarios. Additionally there is significant cost in porting this to Unix. Hence it wasn't
 seen as a viable solution.
 
