@@ -33,35 +33,13 @@ This proposal specifically does not want to change how `Index` and `Range` type 
 expressions continue to have the same syntax and types.
 
 ## Detailed Design 
-### Indexable types
-Any type which has an accessible getter property named `Length` or `Count` with a return type of `int` is considered
-Indexable. The language can make use of this property to convert an index expression into an `int` at the point of 
-the expression without the need to use the type `Index` at all. 
+### Countable Types
+Any type which has an property named `Length` or `Count` with an accessible getter adn a return type of `int` is 
+considered Countable. The language can make use of this property to convert an expression of type `Index` into an `int`
+at the point of the expression without the need to use the type `Index` at all. In the case both `Length` and `Count`
+are present then `Length` will be preferred. 
 
-Note: For simplicity going forward the proposal will use the name `Length` to represent `Count` or `Length`.
-
-For example it allows the following simplication:
-
-``` csharp
-Span<char> span = ...;
-char c = span[^1];
-
-// Can be translated to 
-Span<char> span = ...;
-char c = span[span.Length - 1];
-```
-
-Transforming an index expression to an `int` at the call site significantly reduces the burden of frameworks to adopt 
-`Index`. Vitrually any collection type will automatically work with `Index` now as the compiler can translate it to 
-`int` in all cases.
-
-Further this can improve performance by eliminating extra branching. The callee when accepting an `Index` parameter must
-do both test to see if the value is from the end, `Index.IsFromEnd`, and if the value is inside the bounds of the 
-collection. While a small check this can be important in performance sensitive areas.
-
-Doing the translation to `int` at the call site means the `IsFromEnd` check can often be eliminated. For example when 
-dealing with an `int` the compiler can pass the value through. Or in the cases where `^` is used the computation from
-end can be done directly without the additional branching.
+For simplicity going forward the proposal will use the name `Length` to represent `Count` or `Length`.
 
 ### Index and Range implementations are known
 The implementations of `Index` and `Range` are considered to be known and side effect free. Much like 
@@ -72,85 +50,145 @@ like the implicit conversion from `int` to `Index`.
 All arithemtic operations which are emitted will be done so using an `unchecked` context. That matches the context
 in which `Index` and `Range` are compiled in.
 
-### Index target type conversion
-Whenever an expression with type `Index` is used as an argument to an instance member invocation and the receiver is 
-Indexable then the expression will have a target type conversion to `int`. The member invocations applicable for this
-conversion include methods, indexers, properties, extension methods, etc ... Only constructors are excluded as they
-have no receiver. 
+### Implicit Index support
+The language will provide an instance indexer member with a single parameter of type `Index` for types which meet the 
+following criteria:
 
-The target type conversion will be implemented as follows on the index expression:
+- The type is Countable
+- The type has an accessible instance indexer which takes a single `int` as the argument.
+- The type does not have an accessible instance indexer which takes a single `Index` as the parameter.
 
-- When the expression is `^expr` and the type is `int` it will be translated to `receiver.Length - expr`.
-- Else it will be translated as `expr.GetOffset(receiver.Length)` where `expr` is the expression typed as `Index`.
+For such types the language will act as if there is an index member of the form `T this[Index index]` where `T` is 
+the return type of the `int` based indexer including any `ref` style annotations. The new member will have the same 
+`get` and `set` members with matching accessibilty as the `int` indexer. 
 
-The receiver will be spilled as appropriate to ensure he side effects of obtaining the receiver are only executed
+The new indexer will be implemented by converting the argument of type `Index` into an `int` and emitting a call 
+to the `int` based indexer. For discussion purposes lets use the example of `receiver[expr]`. The conversion of 
+`expr` to `int` will occur as follows:
+
+- When the argument is in the form `^expr2` and the type of `expr2` is `int` it will be translated to 
+`receiver.Length - expr2`.
+- Else it will be translated as `expr.GetOffset(receiver.Length)`.
+
+This allows for developers to use the `Index` feature on existing types without the need for modification. For example:
+
+``` csharp
+List<char> list = ...;
+var value = list[^1]; 
+
+// Gets translated to 
+var value = list[list.Length - 1]; 
+```
+
+The `receiver` and `Length` expressions will be spilled as appropriate to ensure the side effects are only executed 
 once. For example:
 
 ``` csharp
+class Collection {
+    private int[] _array = new[] { 1, 2, 3 };
+
+    int Length {
+        get {
+            Console.Write("Length ");
+            return _array.Length;
+        }
+    }
+
+    int this[int index] => _array[index];
+}
+
 class SideEffect {
-    int[] Get() {
+    Collection Get() {
         Console.Write("Get ");
-        return new [] { 1, 2 , 3};
+        return new Collection();
     }
 
     void Use() { 
-        int i = Get()[^1]
+        int i = Get()[^1];
         Console.WriteLine(i);
     }
 }
 ```
 
-This code will print "Get 3". 
+This code will print "Get Length 3". 
 
-When a range expression is used as an argument to an instance member invocation then the target type conversion to 
-`int` extends to both `Index` operands. In the case either of the `Index` members are omitted then the the appropriate
-start or end value will be inserted using `0` or `receiver.Length` as appropriate.
+### Implicit Range support
+The language will provide an instance indexer member with a single parameter of type `Range` for types which meet the 
+following criteria:
 
-``` csharp
-class RangeTargettype {
-    void Example() { 
-        var array = new[] { 1, 2, 3 };
-        Console.WriteLine(array[1..]);
+- The type is Countable.
+- The type has an accessible member named `Slice` indexer which has two parameters of type `int`.
+- The type does not have an instance indexer which takes a single `Range` as the parameter.
 
-        // Becomes
-        Console.WriteLine(array[new Range(1, array.Length));
-    }
-}
-```
+For such types the language will bind as if there is an index member of the form `T this[Range range]` where `T` is 
+the return type of the `Slice` method including any `ref` style annotations. The new member will also have matching
+accessibility with `Slice`. 
 
-### Indexing on Range
-When binding an index member on a Indexable type where the single argument is of type `Range` the language will 
-attempt to translate it to a `Slice` call. The arguments to slice will be both `Index` values of the range converted
-to `Index` using their target typed conversion described in the previous section. If this translation is not succesful
-then normal index binding will occur.
+When the `Range` based indexer is bound on an expression named `receiver` it will be lowered by convering the `Range` 
+expression into two values that are then passed to the `Slice` method. For discussion purposes lets use the example of 
+`receiver[expr]`.
+
+The first argument of `Slice` will be obtained by converting the typed expression in the following way:
+
+- When `expr` is in the form `expr1..expr2` (where `expr2` can be omitted) and `expr1` has type `int` then it will be
+emitted as `expr1`.
+- When `expr` is in the form `^expr1..expr2` (where `expr2` can be omitted) then it will be emitted as 
+`receiver.Length - expr1`
+- When `expr` is in the form `..expr2` (where `expr2` can be omitted) then it will be emitted as `0`
+- Else it will be emitted as `expr.Start.GetOffset(receiver.Length)` 
+
+This value will be re-used in the calculation of the second `Slice` argument. When doing so it will be referred to as
+`start`. The second argument of `Slice` will be obtained by converting the range typed expression in the following way:
+
+- When `expr` is in the form `expr1..expr2` (where `expr1` can be omitted) and `expr2` has type `int` then it will be 
+emitted as `expr2 - start`.
+- When `expr` is in the form `expr1..^expr2` (where `expr1` can be omitted) then it will be emitted as 
+`(receiver.Length - expr2) - start`
+- When `expr` is in the form `expr1..` (where `expr1` can be omitted) then it will be emitted as `receiver.Length`
+- Else it will be emitted as `expr.End.GetOffset(receiver.Length) - start` 
+
+The `receiver`, `Length` and `expr` expressions will be spilled as appropriate to ensure the side effects are only
+executed once. For example:
 
 ``` csharp
 class Collection {
-    public int Length { get; }
-    public int[] this[Range range] => ...;
+    private int[] _array = new[] { 1, 2, 3 };
+
+    int Length {
+        get {
+            Console.Write("Length ");
+            return _array.Length;
+        }
+    }
+
+    int[] Slice(int start, int length) { 
+        var slice = new int[length];
+        Array.Copy(_array, start, slice, 0, length);
+        return slice;
+    }
 }
 
-class Slice {
-    void Example(Span<int> span, Collection collection) {
-        Span<int> slicedSpan = span[2..]
-        int[] slicedCollection = collection[2..];
+class SideEffect {
+    Collection Get() {
+        Console.Write("Get ");
+        return new Collection();
+    }
 
-        // Translated to 
-        Span<int> slicedSpan = span.Slice(2, span.Length);
-        int[] slicedCollection = collection[new Range(2, collection.Count)v;
+    void Use() { 
+        var array = Get()[0..2];
+        Console.WriteLine(array.length);
     }
 }
 ```
 
-The `Slice` method can instance or extension so long as it is accessible has types that are convertible from `int`.
+This code will print "Get Length 2". 
 
-The compiler will special case the following receiver types binding to `Slice`:
+The language will special case the following known types: 
 
-- `string`: instead of `Slice` the method `Substring` will be used. 
-- array: the runtime helper for array slicing will be used.
+- `string`: the method `Substring` will be used instead of `Slice`.
+- `array`: the method `System.Reflection.CompilerServices.GetSubArray` will be used instead of `Slice`.
 
 ## Open Issues
-
 
 ## Considerations
 
@@ -192,9 +230,68 @@ would've been ideal for slicing but the concept didn't exist when types were add
 
 Thus `Slice` being the sole example it was chosen as the name.
 
+### Index target type conversion
+Another way to view the `Index` transformation in an indexer expression is as a target type conversion. That is instead
+of binding as if there is a member of the form `return_type this[Index]` the language instead assigns a target 
+typed conversion to `int`. 
+
+This concept could be generalized to all member access on Countable types. Whenever an expression with type `Index` is 
+used as an argument to an instance member invocation and the receiver is Countable then the expression will have a 
+target type conversion to `int`. The member invocations applicable for this conversion include methods, indexers, 
+properties, extension methods, etc ... Only constructors are excluded as they have no receiver. 
+
+The target type conversion will be implemented as follows for any expression which has a type of `Index`. For
+discussion purposes lets use the example of `receiver[expr]`:
+
+- When `expr` is in the form `^expr2` and the type of `expr2` is `int` it will be translated to 
+`receiver.Length - expr2`.
+- Else it will be translated as `expr.GetOffset(receiver.Length)`.
+
+The `receiver` and `Length` expressions will be spilled as appropriate to ensure the side effects are only executed
+once. For example:
+
+``` csharp
+class Collection {
+    private int[] _array = new[] { 1, 2, 3 };
+
+    int Length {
+        get {
+            Console.Write("Length ");
+            return _array.Length;
+        }
+    }
+
+    int GetAt(int index) => _array[index];
+}
+
+class SideEffect {
+    Collection Get() {
+        Console.Write("Get ");
+        return new Collection();
+    }
+
+    void Use() { 
+        int i = Get().GetAt(^1);
+        Console.WriteLine(i);
+    }
+}
+```
+
+This code will print "Get Length 3". 
+
+This feature would be beneficial to any member which had a parameter that represented an index. For example 
+`List<T>.InsertAt`. This also has the potential for confusion as the language can't give any guidance as to whether
+or not an expression is meant for indexing. All it can do is convert any `Index` expression to `int` in when invoking
+a member on a Countable type. 
+
+Restrictions:
+
+- This conversion is only applicable when the expression with type `Index` is directly an argument to the member. It 
+would not apply to any nested expressions.
 
 ## Related Issues
 - https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.cs
 - https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md
 
 ## Design Meetings
+- https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-04-01.md
