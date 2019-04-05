@@ -117,14 +117,14 @@ The language will provide an instance indexer member with a single parameter of 
 following criteria:
 
 - The type is Countable.
-- The type has an accessible member named `Slice` indexer which has two parameters of type `int`.
+- The type has an accessible member named `Slice` which has two parameters of type `int`.
 - The type does not have an instance indexer which takes a single `Range` as the parameter.
 
 For such types the language will bind as if there is an index member of the form `T this[Range range]` where `T` is 
 the return type of the `Slice` method including any `ref` style annotations. The new member will also have matching
 accessibility with `Slice`. 
 
-When the `Range` based indexer is bound on an expression named `receiver` it will be lowered by convering the `Range` 
+When the `Range` based indexer is bound on an expression named `receiver` it will be lowered by converting the `Range` 
 expression into two values that are then passed to the `Slice` method. For discussion purposes lets use the example of 
 `receiver[expr]`.
 
@@ -205,7 +205,7 @@ required a number of special cases:
 
 This means to support key types special casing is already needed. The special casing of `string` is less interesting 
 as the language does this in other areas (`foreach` lowering, constants, etc ...). The special casing of `ref struct`
-is more concerning as it's special casing an entire class of types. The get labeled as Indexable if they simply have
+is more concerning as it's special casing an entire class of types. They get labeled as Indexable if they simply have
 a property named `Count` with a return type of `int`. 
 
 After consideration the design was normalized to say that any type which has a property `Count` / `Length` with a 
