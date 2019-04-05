@@ -36,7 +36,14 @@
 
 - Pattern-based index/range translation (Jared, Stephen)
 
+  (Will possibly be resolved by offline)
+
 ### Nullable Reference Types
+
+- Type parameters declared in a `#nullable disable`d context
+
+  See also https://github.com/dotnet/csharplang/issues/2398
+  (Will possibly be resolved by offline)
 
 - When we compute an annotation in the walker (e.g. type inference), do we use the context?
 
