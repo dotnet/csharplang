@@ -56,7 +56,8 @@ following criteria:
 
 - The type is Countable.
 - The type has an accessible instance indexer which takes a single `int` as the argument.
-- The type does not have an accessible instance indexer which takes a single `Index` as the parameter.
+- The type does not have an accessible instance indexer which takes an `Index` as the first parameter. The `Index` 
+must be the only parameter or the remaining parameters must be optional.
 
 For such types, the language will act as if there is an index member of the form `T this[Index index]` where `T` is 
 the return type of the `int` based indexer including any `ref` style annotations. The new member will have the same 
@@ -77,7 +78,7 @@ List<char> list = ...;
 var value = list[^1]; 
 
 // Gets translated to 
-var value = list[list.Length - 1]; 
+var value = list[list.Count - 1]; 
 ```
 
 The `receiver` and `Length` expressions will be spilled as appropriate to ensure any side effects are only executed 
@@ -118,7 +119,8 @@ following criteria:
 
 - The type is Countable.
 - The type has an accessible member named `Slice` which has two parameters of type `int`.
-- The type does not have an instance indexer which takes a single `Range` as the parameter.
+- The type does not have an instance indexer which takes a single `Range` as the first parameter. The `Range` 
+must be the only parameter or the remaining parameters must be optional.
 
 For such types, the language will bind as if there is an index member of the form `T this[Range range]` where `T` is 
 the return type of the `Slice` method including any `ref` style annotations. The new member will also have matching
@@ -190,6 +192,8 @@ The language will special case the following known types:
 
 ## Open Issues
 
+### Declared vs. Instantiated type
+
 ## Considerations
 
 ### Detect Indexable based on ICollection
@@ -222,7 +226,7 @@ from `ICollection` and hence prefer `Count` over length.
 The extra complication on the initial detection of Indexable types is outweighed by its simplification in other 
 aspects.
 
-### Choice of Slice as a anme
+### Choice of Slice as a name
 The name `Slice` was chosen as it's the de-facto standard name for slice style operations in .NET. Starting with 
 netcoreapp2.1 all span style types use the name `Slice` for slicing operations. Prior to netcoreapp2.1 there really
 aren't any examples of slicing to look to for an example. Types like `List<T>`, `ArraySegment<T>`, `SortedList<T>`
