@@ -2,6 +2,45 @@
 
 ## Schedule ASAP
 
+### Nullable Reference Types
+
+- Default constraint for type parameters declared in a `#nullable disable`d context.
+
+  See also hhttps://github.com/dotnet/csharplang/issues/2398
+  (Will possibly be resolved by offline)
+
+### Coalescing Assignment
+
+- `??=` with `Nullable<T>` LHS and `T` (underlying VT) RHS (Fred)
+
+  See also https://github.com/dotnet/csharplang/issues/34#issuecomment-444699550 and discussion following
+
+### Index/Range Feature
+
+- Pattern-based index/range translation (Jared, Stephen)
+
+  (Will possibly be resolved by offline)
+
+### Nullable Reference Types
+
+- Type parameters declared in a `#nullable disable`d context but referenced in a `#nullable enabled`d context.
+
+  See also https://github.com/dotnet/csharplang/issues/2409
+
+- When we compute an annotation in the walker (e.g. type inference), do we use the context?
+
+  See also https://github.com/dotnet/roslyn/issues/33639
+
+- Inferred nullable state from a finally block
+
+  See also https://github.com/dotnet/roslyn/issues/34018
+
+### Pattern-Matching
+
+- Can we make the switch expression target-typed?
+
+  See also https://github.com/dotnet/csharplang/issues/2389
+
 ## Schedule when convenient
 
 - Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
@@ -19,39 +58,6 @@
 ## Apr 17, 2019
 
 ## Apr 15, 2019
-
-### Pattern-Matching
-
-- Can we make the switch expression target-typed?
-
-  See also https://github.com/dotnet/csharplang/issues/2389
-
-### Coalescing Assignment
-
-- `??=` with `Nullable<T>` LHS and `T` (underlying VT) RHS (Fred)
-
-  See also https://github.com/dotnet/csharplang/issues/34#issuecomment-444699550 and discussion following
-
-### Index/Range Feature
-
-- Pattern-based index/range translation (Jared, Stephen)
-
-  (Will possibly be resolved by offline)
-
-### Nullable Reference Types
-
-- Type parameters declared in a `#nullable disable`d context
-
-  See also https://github.com/dotnet/csharplang/issues/2398
-  (Will possibly be resolved by offline)
-
-- When we compute an annotation in the walker (e.g. type inference), do we use the context?
-
-  See also https://github.com/dotnet/roslyn/issues/33639
-
-- Inferred nullable state from a finally block
-
-  See also https://github.com/dotnet/roslyn/issues/34018
 
 ## Apr 3, 2019
 
