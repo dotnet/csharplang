@@ -6,7 +6,7 @@
 
 - Default constraint for type parameters declared in a `#nullable disable`d context.
 
-  See also hhttps://github.com/dotnet/csharplang/issues/2398
+  See also https://github.com/dotnet/csharplang/issues/2398
   (Will possibly be resolved by offline)
 
 ### Coalescing Assignment
