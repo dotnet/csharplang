@@ -202,7 +202,6 @@ opted into a feature. In the case of collection initializers types can opt into 
 interface `IEnumerable` (non generic).
 
 This proposal initially required that types implement `ICollection` in order to qualify as Indexable. That required a number of special cases though:
-required a number of special cases:
 
 - `ref struct`: these cannot implement interfaces yet types like `Span<T>` are ideal for index / range support. 
 - `string`: does not implement `ICollection` and adding that `interface` has a large cost.
