@@ -9,6 +9,14 @@
   See also https://github.com/dotnet/csharplang/issues/2398
   (Will possibly be resolved by offline)
 
+- Inheriting constraints declared in a disabled context with an override in an enabled context.
+
+  See also https://github.com/dotnet/roslyn/issues/29979
+
+- Type parameters declared in a `#nullable disable`d context but referenced in a `#nullable enabled`d context.
+
+  See also https://github.com/dotnet/csharplang/issues/2409
+
 ### Coalescing Assignment
 
 - `??=` with `Nullable<T>` LHS and `T` (underlying VT) RHS (Fred)
@@ -22,10 +30,6 @@
   (Will possibly be resolved by offline)
 
 ### Nullable Reference Types
-
-- Type parameters declared in a `#nullable disable`d context but referenced in a `#nullable enabled`d context.
-
-  See also https://github.com/dotnet/csharplang/issues/2409
 
 - When we compute an annotation in the walker (e.g. type inference), do we use the context?
 
