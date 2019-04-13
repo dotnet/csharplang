@@ -36,7 +36,7 @@ of a `func*` will use `calli` where invocation of a `delegate` will use `callvir
 Syntactically though invocation is identical for both constructs.
 
 The ECMA-335 definition of method pointers includes the calling convention as part of the type signature (section 7.1).
-The default calling convention will be `managed `. Alternate forms can be specified by adding the appropriate modifier 
+The default calling convention will be `managed`. Alternate forms can be specified by adding the appropriate modifier 
 after the `func*` syntax: `cdecl`, `fastcall`, `stdcall`, `thiscall` or `winapi`. Example:
 
 ``` csharp

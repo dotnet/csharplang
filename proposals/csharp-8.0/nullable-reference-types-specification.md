@@ -376,7 +376,7 @@ The *Merge* function takes two candidate types and a direction (*+* or *-*):
 - *Merge*(`C<S1,...,Sn>`, `C<T1,...,Tn>`, *-*) = `C<`*Merge*(`S1`, `T1`, *d1*)`,...,`*Merge*(`Sn`, `Tn`, *dn*)`>`, *where*
     - `di` = *-* if the `i`'th type parameter of `C<...>` is covariant
     - `di` = *+* if the `i`'th type parameter of `C<...>` is contra- or invariant
-- *Merge*(`(S1 s1,..., Sn sn)`, `(T1 t1,..., Tn tn)`, *d*) = `(`*Merge*(`S1`, `T1`, *d*)` n1,...,`*Merge*(`Sn`, `Tn`, *d*) `nn)`, *where*
+- *Merge*(`(S1 s1,..., Sn sn)`, `(T1 t1,..., Tn tn)`, *d*) = `(`*Merge*(`S1`, `T1`, *d*)`n1,...,`*Merge*(`Sn`, `Tn`, *d*) `nn)`, *where*
     - `ni` is absent if `si` and `ti` differ, or if both are absent
     - `ni` is `si` if `si` and `ti` are the same
 - *Merge*(`object`, `dynamic`) = *Merge*(`dynamic`, `object`) = `dynamic`
