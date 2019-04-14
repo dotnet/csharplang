@@ -2,6 +2,12 @@
 
 ## Schedule ASAP
 
+### Async Iterators
+
+- Confirm change of behavior for cancellation tokens
+
+  See also https://github.com/dotnet/csharplang/issues/2434
+
 ### Nullable Reference Types
 
 - Default constraint for type parameters declared in a `#nullable disable`d context.
