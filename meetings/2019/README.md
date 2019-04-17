@@ -18,11 +18,12 @@
 
   See also https://github.com/dotnet/csharplang/issues/2389
 
+### Async Iterators
+
+- Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
+
 ## Schedule when convenient
 
-- Nullable Reference Types: Open LDM Issues https://github.com/dotnet/csharplang/issues/2201
-- Default Implementation Members: Open LDM Issues https://github.com/dotnet/csharplang/issues/406
-- Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
 
@@ -40,7 +41,7 @@ Overview of meetings and agendas for 2019
 
 ## Apr 15, 2019
 
-[C# Design Review Notes for Apr 15, 2019](LDM-2019-04-15.md)
+[C# Language Design Notes for Apr 15, 2019](LDM-2019-04-15.md)
 
 1. CancellationToken in iterators
 2. Implied nullable constraints in nullable disabled code
@@ -52,14 +53,14 @@ Overview of meetings and agendas for 2019
 
 ## Apr 3, 2019
 
-[C# Design Review Notes for Apr 3, 2019](LDM-2019-04-03.md)
+[C# Language Design Notes for Apr 3, 2019](LDM-2019-04-03.md)
 
 1. Ambiguous implementations/overrides with generic methods and NRTs
 2. NRT and `dynamic`
 
 ## Apr 1, 2019
 
-[C# Design Review Notes for Apr 1, 2019](LDM-2019-04-01.md)
+[C# Language Design Notes for Apr 1, 2019](LDM-2019-04-01.md)
 
 1. Pattern-based Index/Range translation
 
@@ -69,7 +70,7 @@ an interface?
 
 ## Mar 27, 2019
 
-[C# Design Review Notes for Mar 27, 2019](LDM-2019-03-27.md)
+[C# Language Design Notes for Mar 27, 2019](LDM-2019-03-27.md)
 
 1. Switch expression syntax
 
