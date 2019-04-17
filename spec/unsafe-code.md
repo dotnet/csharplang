@@ -877,7 +877,7 @@ struct_member_declaration_unsafe
     ;
 
 fixed_size_buffer_declaration
-    : attributes? fixed_size_buffer_modifier* 'fixed' buffer_element_type fixed_size_buffer_declarator+ ';'
+    : attributes? fixed_size_buffer_modifier* 'fixed' buffer_element_type fixed_size_buffer_declarators ';'
     ;
 
 fixed_size_buffer_modifier
@@ -891,6 +891,10 @@ fixed_size_buffer_modifier
 
 buffer_element_type
     : type
+    ;
+
+fixed_size_buffer_declarators
+    : fixed_size_buffer_declarator (',' fixed_size_buffer_declarator)*
     ;
 
 fixed_size_buffer_declarator
