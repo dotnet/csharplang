@@ -67,11 +67,21 @@
 
 ## Apr 17, 2019
 
-## Apr 15, 2019
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Apr 15, 2019
+
+[C# Design Review Notes for Apr 15, 2019](LDM-2019-04-15.md)
+
+1. CancellationToken in iterators
+2. Implied nullable constraints in nullable disabled code
+3. Inheriting constraints in nullable disabled code
+4. Declarations with constraints declared in #nullable disabled code
+5. Result type of `??=` expression
+6. Use annotation context to compute the annotations?
+7. Follow-up decisions for pattern-based Index/Range
 
 ## Apr 3, 2019
 
