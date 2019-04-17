@@ -298,3 +298,12 @@ would not apply to any nested expressions.
 
 ## Design Meetings
 - https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-04-01.md
+
+
+## Decisions made during implementation
+
+- All members in the pattern must be instance members
+- If a Length method is found but it has the wrong return type, continue looking for Count
+- The indexer used for the Index pattern must have exactly one int parameter
+- The Slice method used for the Range pattern must have exactly two int parameters
+- When looking for the pattern members, we look for original definitions, not constructed members
