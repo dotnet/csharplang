@@ -2,48 +2,15 @@
 
 ## Schedule ASAP
 
-### Async Iterators
-
-- Confirm change of behavior for cancellation tokens
-
-  See also https://github.com/dotnet/csharplang/issues/2434
-
 ### Nullable Reference Types
-
-- Default constraint for type parameters declared in a `#nullable disable`d context.
-
-  See also https://github.com/dotnet/csharplang/issues/2398
-  (Will possibly be resolved by offline)
-
-- Inheriting constraints declared in a disabled context with an override in an enabled context.
-
-  See also https://github.com/dotnet/roslyn/issues/29979
-
-- Type parameters declared in a `#nullable disable`d context but referenced in a `#nullable enabled`d context.
-
-  See also https://github.com/dotnet/csharplang/issues/2409
-
-### Coalescing Assignment
-
-- `??=` with `Nullable<T>` LHS and `T` (underlying VT) RHS (Fred)
-
-  See also https://github.com/dotnet/csharplang/issues/34#issuecomment-444699550 and discussion following
-
-### Index/Range Feature
-
-- Pattern-based index/range translation (Jared, Stephen)
-
-  (Will possibly be resolved by offline)
-
-### Nullable Reference Types
-
-- When we compute an annotation in the walker (e.g. type inference), do we use the context?
-
-  See also https://github.com/dotnet/roslyn/issues/33639
 
 - Inferred nullable state from a finally block
 
   See also https://github.com/dotnet/roslyn/issues/34018
+
+- What is the implied constraint for a type parameter of a partial?
+
+  See also https://github.com/dotnet/csharplang/issues/2450
 
 ### Pattern-Matching
 
