@@ -12,6 +12,10 @@
 
   See also https://github.com/dotnet/csharplang/issues/2450
 
+### Default Interface Methods
+
+- Should we hold off support for base calls until we can get runtime support?
+
 ### Pattern-Matching
 
 - Can we make the switch expression target-typed?
