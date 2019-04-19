@@ -424,7 +424,7 @@ A *pointer_member_access* consists of a *primary_expression*, followed by a "`->
 
 ```antlr
 pointer_member_access
-    : primary_expression '->' identifier
+    : primary_expression '->' identifier type_argument_list?
     ;
 ```
 
