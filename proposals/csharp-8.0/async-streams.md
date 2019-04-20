@@ -53,7 +53,7 @@ namespace System.Collections.Generic
 {
     public interface IAsyncEnumerable<out T>
     {
-        IAsyncEnumerator<T> GetAsyncEnumerator();
+        IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default);
     }
 
     public interface IAsyncEnumerator<out T> : IAsyncDisposable
@@ -87,6 +87,7 @@ Discarded options considered:
 - _`ITask<(bool,T)> TryMoveNextAsync();`_: Not covariant, allocations on every call, etc.
 - _`Task<bool> TryMoveNextAsync(out T result);`_: The `out` result would need to be set when the operation returns synchronously, not when it asynchronously completes the task potentially sometime long in the future, at which point there'd be no way to communicate the result.
 - _`IAsyncEnumerator<T>` not implementing `IAsyncDisposable`_: We could choose to separate these.  However, doing so complicates certain other areas of the proposal, as code must then be able to deal with the possibility that an enumerator doesn't provide disposal, which makes it difficult to write pattern-based helpers.  Further, it will be common for enumerators to have a need for disposal (e.g. any C# async iterator that has a finally block, most things enumerating data from a network connection, etc.), and if one doesn't, it is simple to implement the method purely as `public ValueTask DisposeAsync() => default(ValueTask);` with minimal additional overhead.
+- _ `IAsyncEnumerator<T> GetAsyncEnumerator()`: No cancellation token parameter.
 
 #### Viable alternative:
 
@@ -151,48 +152,23 @@ However, there are multiple problems with that approach:
 - How does a developer cancel a `foreach` loop?  If it's done by giving a `CancellationToken` to an enumerable/enumerator, then either a) we need to support `foreach`'ing over enumerators, which raises them to being first-class citizens, and now you need to start thinking about an ecosystem built up around enumerators (e.g. LINQ methods) or b) we need to embed the `CancellationToken` in the enumerable anyway by having some `WithCancellation` extension method off of `IAsyncEnumerable<T>` that would store the provided token and then pass it into  the wrapped enumerable's `GetAsyncEnumerator` when the `GetAsyncEnumerator` on the returned struct is invoked (ignoring that token).  Or, you can just use the `CancellationToken` you have in the body of the foreach.
 - If/when query comprehensions are supported, how would the `CancellationToken` supplied to `GetEnumerator` or `MoveNextAsync` be passed into each clause?  The easiest way would simply be for the clause to capture it, at which point whatever token is passed to `GetAsyncEnumerator`/`MoveNextAsync` is ignored.
 
-Due to all of this, the simplest and most consistent solution is simply to do (1): `IAsyncEnumerable<T>`/`IAsyncEnumerator<T>` are cancellation-agnostic.  If you want to cancel a `foreach` loop, you can use a `CancellationToken` in the body and in any methods you call:
+An earlier version of this document recommended (1), but we since switched to (4).
 
-```csharp
-CancellationToken ct = ...;
-await foreach (var i in GetData())
-{
-    ct.ThrowIfCancellationRequested();
-    await UseAsync(i, ct);
-    ...
-}
-```
+The two main problems with (1):
+- producers of cancellable enumerables have to implement some boilerplate, and can only leverage the compiler's support for async-iterators to implement a `IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken)` method.
+- it is likely that many producers would be tempted to just add a `CancellationToken` parameter to their async-enumerable signature instead, which will prevent consumers from passing the cancellation token they want when their are given an `IAsyncEnumerable` type.
 
-If you want to pass a `CancellationToken` into an iterator, you simply do so as an argument, just as with other `async` methods:
+There are two main consumption scenarios:
+1. `await foreach (var i in GetData(token)) ...` where the consumer calls the async-iterator method,
+2. `await foreach (var i in givenIAsyncEnumerable.WithCancellation(token)) ...` where the consumer deals with a given `IAsyncEnumerable` instance.
 
-```csharp
-static async IAsyncEnumerable<T> GetData(CancellationToken cancellationToken = default)
-{
-    using (cancellationToken.Register(...))
-    {
-        ...
-        await ...
-        ...
-    }
-}
-...
-await foreach (T i in GetData(ct))
-{
-    ...
-}
-```
+We find that a reasonable compromise to support both scenarios in a way that is convenient for both producers and consumers of async-streams is to use a specially annotated parameter in the async-iterator method. The `[EnumeratorCancellation]` attribute is used for this purpose. Placing this attribute on a parameter tells the compiler that if a token is passed to the `GetAsyncEnumerator` method, that token should be used instead of the value originally passed for the parameter.
 
-If you want to use a `CancellationToken` in a query comprehension, you just capture it:
-
-```csharp
-CancellationToken ct = ...
-IAsyncEnumerable<string> results = from url in source
-                                   select DownloadAsync(url, ct);
-```
-
-Etc.
-
-For now, we should pursue (1).
+Consider `IAsyncEnumerable<int> GetData([EnumeratorCancellation] CancellationToken token = default)`. 
+The implementer of this method can simply use the parameter in the method body. 
+The consumer can use either consumption patterns above:
+1. if you use `GetData(token)`, then the token is saved into the async-enumerable and will be used in iteration,
+2. if you use `givenIAsyncEnumerable.WithCancellation(token)`, then the token passed to `GetAsyncEnumerator` will supercede any token saved in the async-enumerable.
 
 ## foreach
 
