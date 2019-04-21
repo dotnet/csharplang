@@ -11,6 +11,8 @@
 - What is the implied constraint for a type parameter of a partial?
 
   See also https://github.com/dotnet/csharplang/issues/2450
+  
+- MaybeNullAttribute: see https://github.com/cston/csharplang/blob/MaybeNull/proposals/MaybeNull.md
 
 ### Default Interface Methods
 
