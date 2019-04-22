@@ -4,29 +4,11 @@
 
 ### Nullable Reference Types
 
-- Inferred nullable state from a finally block
-
-  See also https://github.com/dotnet/roslyn/issues/34018
-
-- What is the implied constraint for a type parameter of a partial?
-
-  See also https://github.com/dotnet/csharplang/issues/2450
-  
 - MaybeNullAttribute: see https://github.com/cston/csharplang/blob/MaybeNull/proposals/MaybeNull.md
 
 ### Default Interface Methods
 
 - Should we hold off support for base calls until we can get runtime support?
-
-### Pattern-Matching
-
-- Can we make the switch expression target-typed?
-
-  See also https://github.com/dotnet/csharplang/issues/2389
-
-### Async Iterators
-
-- Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
 
 ## Schedule when convenient
 
@@ -39,11 +21,31 @@
 - *Triage milestones*
 - *Design review*
 
-## Apr 17, 2019
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Apr 22, 2019
+
+### Nullable Reference Types
+
+- Inferred nullable state from a finally block
+
+  See also https://github.com/dotnet/roslyn/issues/34018
+
+- What is the implied constraint for a type parameter of a partial?
+
+  See also https://github.com/dotnet/csharplang/issues/2450
+
+### Pattern-Matching
+
+- Can we make the switch expression target-typed?
+
+  See also https://github.com/dotnet/csharplang/issues/2389
+
+### Async Iterators
+
+- Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
 
 ## Apr 15, 2019
 
