@@ -29,9 +29,10 @@ Overview of meetings and agendas for 2019
 
 ## Apr 24, 2019
 
-### Nullable Reference Types
+[C# Language Design Notes for Apr 24, 2019](LDM-2019-04-24.md)
 
-- MaybeNullAttribute: see https://github.com/cston/csharplang/blob/MaybeNull/proposals/MaybeNull.md
+MaybeNull and related nullable reference type attributes
+
 
 ## Apr 22, 2019
 
