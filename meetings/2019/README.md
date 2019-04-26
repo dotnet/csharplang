@@ -35,25 +35,12 @@ Overview of meetings and agendas for 2019
 
 ## Apr 22, 2019
 
-### Nullable Reference Types
+[C# Language Design Notes for Apr 22, 2019](LDM-2019-04-22.md)
 
-- Inferred nullable state from a finally block
-
-  See also https://github.com/dotnet/roslyn/issues/34018
-
-- What is the implied constraint for a type parameter of a partial?
-
-  See also https://github.com/dotnet/csharplang/issues/2450
-
-### Pattern-Matching
-
-- Can we make the switch expression target-typed?
-
-  See also https://github.com/dotnet/csharplang/issues/2389
-
-### Async Iterators
-
-- Allowing pattern-based `foreach` and `await foreach` to bind to an extension `GetEnumerator`/`GetAsyncEnumerator` and `MoveNext`/`MoveNextAsync` (Julien/Chris)
+1. Inferred nullable state from a finally block
+2. Implied constraint for a type parameter of a partial?
+3. Target-typed switch expression
+4. DefaultCancellationAttribute and overriding/hiding/interface implementation
 
 ## Apr 15, 2019
 
