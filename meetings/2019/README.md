@@ -2,7 +2,6 @@
 
 ## Schedule ASAP
 
-
 ## Schedule when convenient
 
 - Syntax of positional records/primary constructors (Andy)
@@ -24,19 +23,15 @@
 * DIM base calls - push out of C# 8.0 until properly implementable?
 * Async interator cancellation - how to deal with two cancellation tokens?
 
+# C# Language Design Notes for 2019
+
+Overview of meetings and agendas for 2019
+
 ## Apr 24, 2019
 
 ### Nullable Reference Types
 
 - MaybeNullAttribute: see https://github.com/cston/csharplang/blob/MaybeNull/proposals/MaybeNull.md
-
-### Default Interface Methods
-
-- Should we hold off support for base calls until we can get runtime support?
-
-# C# Language Design Notes for 2019
-
-Overview of meetings and agendas for 2019
 
 ## Apr 22, 2019
 
