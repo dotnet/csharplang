@@ -19,7 +19,7 @@
 * Nullable attributes - continue discussion
 * Nullable opt-in - do we need to adjust the story?
 
-## Apr 29. 2019
+## Apr 29, 2019
 
 * DIM base calls - push out of C# 8.0 until properly implementable?
 * Async interator cancellation - how to deal with two cancellation tokens?
