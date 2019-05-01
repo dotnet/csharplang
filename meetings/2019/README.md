@@ -18,14 +18,17 @@
 * Nullable attributes - continue discussion
 * Nullable opt-in - do we need to adjust the story?
 
-## Apr 29, 2019
-
-* DIM base calls - push out of C# 8.0 until properly implementable?
-* Async iterator cancellation - how to deal with two cancellation tokens?
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Apr 29, 2019
+
+[C# Language Design Notes for Apr 29, 2019](LDM-2019-04-29.md)
+
+1. Default interface implementations and `base()` calls
+2. Async iterator cancellation
+3. Attributes on local functions
 
 ## Apr 24, 2019
 
@@ -159,24 +162,6 @@ Topics:
     - Base calls
     - We currently have open issues around `protected`, `internal`, reabstraction, and `static` fields among others.
 
-<<<<<<< HEAD
-=======
-# C# Language Design Notes for 2019
-
-Overview of meetings and agendas for 2019
-
-## Mar 6, 2019
-
-Open issues:
-
-1. Pure checks in the switch expression
-2. Nullable analysis of unreachable code
-3. Warnings about nullability on expressions with errors
-4. Handling of type parameters that cannot be annotated
-5. Should anonymous type fields have top-level nullability?
-6. Element-wise analysis of tuple conversions
-
->>>>>>> 67f456e... Add LDM notes for Mar. 6th, 2019
 ## Feb 20, 2019
 
 [C# Language Design Notes for Feb 20, 2019](LDM-2019-02-20.md)
