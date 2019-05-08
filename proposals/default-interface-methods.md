@@ -760,11 +760,11 @@ interface IA
 {
     void M(int x) { }
 }
-interface IB
+interface IB : IA
 {
     override void M(int y) { }
 }
-interface IC
+interface IC : IB
 {
     static void M2()
     {
