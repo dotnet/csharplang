@@ -3,9 +3,11 @@
 ## Schedule ASAP
 
 - Close on desired rules for warning suppressions and `#nullable` interacting
+- Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
 
 ## Schedule when convenient
 
+- async LINQ (Julien)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
 
