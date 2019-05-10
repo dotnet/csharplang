@@ -280,7 +280,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 - For an assignment `e1 = e2`, if the type of `e1` is a `ref struct` type, then the *safe-to-escape* of `e2` must be at least as wide a scope as the *safe-to-escape* of `e1`.
 
 - In a method invocation, the following constraints apply:
-  - If there is a `ref` or `out` argument to a `ref struct` type (including the receiver), with *safe-to-escape* E1, then
+  - If there is a `ref` or `out` argument of a `ref struct` type (including the receiver), with *safe-to-escape* E1, then
   - no argument (including the receiver) may have a narrower *safe-to-escape* than E1.
 
 - A local function or anonymous function may not refer to a local or parameter of `ref struct` type declared in an enclosing scope.
