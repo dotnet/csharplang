@@ -2,12 +2,9 @@
 
 ## Schedule ASAP
 
-- Close on desired rules for warning suppressions and `#nullable` interacting
-- Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
 
 ## Schedule when convenient
 
-- async LINQ (Julien)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
 
@@ -16,6 +13,19 @@
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+
+## May 20, 2019
+
+- async LINQ (Julien)
+
+## May 15, 2019
+
+- Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
+
+## May 13, 2019
+
+- Close on nullable attributes (Mads and Steve)
+- Close on desired rules for warning suppressions and `#nullable` interacting
 
 ## May 1, 2019
 
