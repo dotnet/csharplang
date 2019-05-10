@@ -2,6 +2,8 @@
 
 ## Schedule ASAP
 
+- Close on desired rules for warning suppressions and `#nullable` interacting
+
 ## Schedule when convenient
 
 - Syntax of positional records/primary constructors (Andy)
