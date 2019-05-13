@@ -332,7 +332,7 @@ struct ImmutableArray<T>
     public ref readonly T ItemRef(int i)
     {
         // returning a readonly reference to an array element
-        return ref this.arrary[i];
+        return ref this.array[i];
     }
 }
 
