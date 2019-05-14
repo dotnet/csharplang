@@ -1,4 +1,4 @@
-# Function Pointers
+﻿# Function Pointers
 
 ## Summary
 This proposal provides language constructs that expose IL opcodes that cannot currently be accessed efficiently,
@@ -235,6 +235,23 @@ void* v = &CloseHandle;
 func* cdecl bool(IntPtr) f1 = (func* cdecl bool(IntPtr))v;
 ```
 
+### Extensible set of unmanaged calling conventions
+
+The set of unmanaged calling conventions supported by the current ECMA-335 encodings is outdated. We have seen requests to add support
+for more unmanaged calling conventions, for example:
+
+- [vectorcall](https://docs.microsoft.com/cpp/cpp/vectorcall) https://github.com/dotnet/coreclr/issues/12120
+- StdCall with explicit this https://github.com/dotnet/coreclr/pull/23974#issuecomment-482991750
+
+The design of this feature should allow extending the set of unmanaged calling conventions as needed in future. The problems include
+limited space for encoding calling conventions (12 out of 16 values are taken in `IMAGE_CEE_CS_CALLCONV_MASK`) and number of places
+that need to be touched in order to add a new calling convention. A potential solution is to introduce a new encoding that represents
+the calling convention using [`System.Runtime.InteropServices.CallingConvention`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.callingconvention) enum.
+
+For reference, https://github.com/llvm/llvm-project/blob/master/llvm/include/llvm/IR/CallingConv.h has the list of calling conventions
+supported by LLVM. While it is unlikely that .NET will ever need to support all of them, it demonstrates that the space of calling
+conventions is very rich.
+
 ## Considerations
 
 ### Allow instance methods
@@ -377,4 +394,3 @@ That means developers essentially have to decide between the following trade off
 option.
 1. No safety in face of assembly unloading: use a `func*`. This can be wrapped in a `struct` to allow usage outside 
 an `unsafe` context in the rest of the code. 
-
