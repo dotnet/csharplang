@@ -17,15 +17,16 @@
 ## May 20, 2019
 
 - async LINQ (Julien)
+- compile-time `is` vs runtime `instanceof` (Neal)
 
 ## May 15, 2019
 
 - Close on nullable attributes (Mads and Steve)
+- Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
 
 ## May 13, 2019
 
 - Close on desired rules for warning suppressions and `#nullable` interacting
-- Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
 
 ## May 1, 2019
 
