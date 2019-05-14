@@ -25,9 +25,6 @@
 - Close on nullable attributes (Mads and Steve)
 - Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
 
-## May 13, 2019
-
-- Close on desired rules for warning suppressions and `#nullable` interacting
 
 ## May 1, 2019
 
@@ -37,6 +34,11 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## May 13, 2019
+[C# Language Design Notes for May 13, 2019](LDM-2019-05-13.md)
+
+- Close on desired rules for warning suppressions and `#nullable` interacting
 
 ## Apr 29, 2019
 
@@ -51,7 +53,6 @@ Overview of meetings and agendas for 2019
 [C# Language Design Notes for Apr 24, 2019](LDM-2019-04-24.md)
 
 MaybeNull and related nullable reference type attributes
-
 
 ## Apr 22, 2019
 
