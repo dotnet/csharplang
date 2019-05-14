@@ -7,6 +7,7 @@
 
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
+- Conceptual model for tuples (Mads, Neal)
 
 ## Recurring topics
 
