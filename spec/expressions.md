@@ -1669,12 +1669,14 @@ Point a = new Point { X = 0, Y = 1 };
 ```
 which has the same effect as
 ```csharp
-Point __a = new Point();
+var __a = new Point();
 __a.X = 0;
 __a.Y = 1; 
 Point a = __a;
 ```
-where `__a` is an otherwise invisible and inaccessible temporary variable. The following class represents a rectangle created from two points:
+where `__a` is an otherwise invisible and inaccessible temporary variable, whose type is that of the object being initialized. While in this example such type is the same as that of the *local_variable_declarator* `a` (i.e., `Point`), this assumption does not always hold. For instance, consider the declaration `object a = new Point { X = 0, Y = 1 };`.
+
+The following class represents a rectangle created from two points:
 ```csharp
 public class Rectangle
 {
