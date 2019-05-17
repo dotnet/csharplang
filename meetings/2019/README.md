@@ -5,6 +5,7 @@
 
 ## Schedule when convenient
 
+- async LINQ (Julien)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
 - Conceptual model for tuples (Mads, Neal)
@@ -17,14 +18,8 @@
 
 ## May 20, 2019
 
-- async LINQ (Julien)
 - compile-time `is` vs runtime `instanceof` (Neal)
-
-## May 15, 2019
-
-- Close on nullable attributes (Mads and Steve)
 - Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
-
 
 ## May 1, 2019
 
@@ -34,6 +29,11 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## May 15, 2019
+[C# Language Design Notes for May 15, 2019](LDM-2019-05-15.md)
+
+- Close on nullable attributes (Mads and Steve)
 
 ## May 13, 2019
 [C# Language Design Notes for May 13, 2019](LDM-2019-05-13.md)
