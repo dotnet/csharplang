@@ -10,6 +10,7 @@
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
 - Conceptual model for tuples (Mads, Neal)
+- Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
 
 ## Recurring topics
 
@@ -17,10 +18,11 @@
 - *Triage milestones*
 - *Design review*
 
-## May 20, 2019
+## Jun 19, 2019
 
-- compile-time `is` vs runtime `instanceof` (Neal)
-- Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
+## Jun 17, 2019
+
+## Jun 12, 2019
 
 ## May 1, 2019
 
