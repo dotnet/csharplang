@@ -2,8 +2,6 @@
 
 ## Schedule ASAP
 
-- Confirm whether we want `abstract` modifier to be implied for interface implementations inside derived interfaces unless there is an implementation. There is no legacy behavior around that in interfaces, i.e. there is no existing code with declarations like that. Also, this could confuse users that ```int I1.P1 {get; set;}``` is an actual implementation of a property rather than a re-abstraction (what it would be if `abstract` was implied), because this is what it means in a class/struct.  
-
 ## Schedule when convenient
 
 - async LINQ (Julien)
@@ -23,6 +21,10 @@
 ## Jun 17, 2019
 
 ## Jun 12, 2019
+
+## May 22, 2019
+
+- Confirm whether we want `abstract` modifier to be implied for interface implementations inside derived interfaces unless there is an implementation.
 
 ## May 1, 2019
 
