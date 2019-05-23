@@ -252,7 +252,7 @@ See [the pattern-matching specification](csharp-8.0/patterns.md#positional-patte
 
 Unless there is a user-declared member named `With` declared, a record type has a compiler-provided method named `With` whose return type is the record type itself, and containing one value parameter corresponding to each *record-parameter* in the same order that these parameters appear in the record type declaration. Each parameter shall have a *caller-receiver default-argument* of the corresponding property.
 
-In an `abstract` record class, the compiler-provided `With` method is abstract. In a record struct, or a sealed record class, the compiler-provided `With` method is `sealed`. Otherwise the compiler-provided `With` method is `virtual and its implementation shall return a new instance produced by invoking the the primary constructor with the parameters as arguments to create a new instance from the parameters, and return that new instance.
+In an `abstract` record class, the compiler-provided `With` method is abstract. In a record struct, or a sealed record class, the compiler-provided `With` method is `sealed`. Otherwise the compiler-provided `With` method is `virtual and its implementation shall return a new instance produced by invoking the primary constructor with the parameters as arguments to create a new instance from the parameters, and return that new instance.
 
 - [ ] **Open issue**: We should also specify under what conditions we override or implement inherited virtual `With` methods or `With` methods from implemented interfaces.
 - [ ] **Open issue**: We should say what happens when we inherit a non-virtual `With` method.

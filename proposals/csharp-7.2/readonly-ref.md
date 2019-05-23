@@ -258,7 +258,7 @@ The life time of the argument temporaries matches the closest encompassing scope
 The formal life time of temporary variables is semantically significant in scenarios involving escape analysis of variables returned by reference.
 
 ### Metadata representation of `in` parameters.
-When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a byref parameter, it means that the the parameter is an `in` parameter.
+When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a byref parameter, it means that the parameter is an `in` parameter.
 
 In addition, if the method is *abstract* or *virtual*, then the signature of such parameters (and only such parameters) must have `modreq[System.Runtime.InteropServices.InAttribute]`.
 
@@ -442,7 +442,7 @@ readonly struct Vector3
 **Motivation:** consequence of restriction on instance fields.
 
 ### Metadata representation.
-When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a value type, it means that the the type is a `readonly struct`.
+When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a value type, it means that the type is a `readonly struct`.
 
 In particular:
 -  The identity of the `IsReadOnlyAttribute` type is unimportant. In fact it can be embedded by the compiler in the containing assembly if needed.
