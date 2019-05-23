@@ -4,7 +4,7 @@
 This proposes to make several changes to the 
 [index and range design](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md) based on 
 customer feedback: particularly from the CoreFX team and their experiences adding Index / Range support to .NET Core.
-The change is not to the syntax but rather how the langauge maps the syntax to APIs.
+The change is not to the syntax but rather how the language maps the syntax to APIs.
 
 ## Motivation
 The level of API churn necessary to adopt `Index` and `Range` is quite high today. Every collection type must have at
