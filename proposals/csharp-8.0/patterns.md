@@ -158,7 +158,7 @@ designations
 
 If the *designation* is a *simple_designation*, an expression *e* matches the pattern. In other words, a match to a *var pattern* always succeeds with a *simple_designation*. If the *simple_designation* is a *single_variable_designation*, the value of *e* is bounds to a newly introduced local variable. The type of the local variable is the static type of *e*.
 
-If the *designation* is a *tuple_designation*, then the pattern is equivalent to a *positional_pattern* of the form `(var ` *designation*, ... `)` where the *designation*s are those found within the *tuple_designation*.  For example, the pattern `var (x, (y, z))` is equivalent to `(var x, (var y, var z))`.
+If the *designation* is a *tuple_designation*, then the pattern is equivalent to a *positional_pattern* of the form `(var` *designation*, ... `)` where the *designation*s are those found within the *tuple_designation*.  For example, the pattern `var (x, (y, z))` is equivalent to `(var x, (var y, var z))`.
 
 It is an error if the name `var` binds to a type.
 

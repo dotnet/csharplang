@@ -600,7 +600,7 @@ Allow special kind of conditional expression that evaluates to a reference to on
 
 ### Using `ref` ternary expression.
 
-The syntax for the `ref` flavor of a conditional expression is ` <condition> ? ref <consequence> : ref <alternative>;`
+The syntax for the `ref` flavor of a conditional expression is `<condition> ? ref <consequence> : ref <alternative>;`
 
 Just like with the ordinary conditional expression only `<consequence>` or `<alternative>` is evaluated depending on result of the boolean condition expression.
 
