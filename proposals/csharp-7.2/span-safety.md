@@ -13,7 +13,7 @@ All the above problems would be alleviated if instances of `Span<T>` are constra
 
 An additional problem arises due to composition. It would be generally desirable to build more complex data types that would embed `Span<T>` and `ReadOnlySpan<T>` instances. Such composite types would have to be structs and would share all the hazards and requirements of `Span<T>`. As a result the safety rules described here should be viewed as applicable to the whole range of **_ref-like types_**.
 
-The <a href="#draft-language-specification">draft language specification</a> is intended to ensure that values of a ref-like type occurs only on the stack.
+The [draft language specification](#draft-language-specification) is intended to ensure that values of a ref-like type occurs only on the stack.
 
 ## Generalized `ref-like` types in source code
 
@@ -129,7 +129,7 @@ ref SpanLikeType Test2(ref SpanLikeType param1, Span<byte> param2)
 
 ----------------
 
-## <a name="draft-language-specification"></a>Draft language specification
+## Draft language specification
 
 Below we describe a set of safety rules for ref-like types (`ref struct`s) to ensure that values of these types occur only on the stack. A different, simpler set of safety rules would be possible if locals cannot be passed by reference. This specification would also permit the safe reassignment of ref locals.
 
@@ -292,7 +292,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 
 ## Future Considerations
 
-### Length one Span<T> over ref values
+### Length one Span\<T> over ref values
 Though not legal today there are cases where creating a length one `Span<T>` instance over a value would be beneficial:
 
 ```csharp
