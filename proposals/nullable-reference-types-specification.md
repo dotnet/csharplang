@@ -174,7 +174,7 @@ For a type parameter `T`, `T?` is only allowed if `T` is known to be a value typ
 
 A `type` is deemed to occur in a given annotation context when the last token of the type is within that context.
 
-Whether a given reference type `C` in source code is interpreted as oblivious or nonnullable depends on the annotation context of that source code. But once established, it is considered part of that type, and "travels with it" e.g. during subsitution of generic type arguments. It is as if there is an annotation like `?` on the type, but invisible.
+Whether a given reference type `C` in source code is interpreted as oblivious or nonnullable depends on the annotation context of that source code. But once established, it is considered part of that type, and "travels with it" e.g. during subsitution of generic type arguments. It is as if there is an annotation like `?` on the type, but invisible. In the following we will write 
 
 
 # Constraints
@@ -363,13 +363,13 @@ In addition we need to propagate "nullness" from the input expressions to the re
 To handle these we add more phases to fixing, which is now:
 
 1. Gather all the types in all the bounds as candidates, removing `?` from all that are nullable reference types
-2. Eliminate candidates based on requirements of exact, lower and upper bounds (ignoring `null` and `default` bounds)
+2. Eliminate candidates based on requirements of exact, lower and upper bounds (keeping `null` and `default` bounds)
 3. Eliminate candidates that do not have an implicit conversion to all the other candidates
 4. If the remaining candidates do not all have identity conversions to one another, then type inference fails
 5. *Merge* the remaining candidates as described below
 6. If the resulting candidate is a reference type or a nonnullable value type and *all* of the exact bounds or *any* of the lower bounds are nullable value types, nullable reference types, `null` or `default`, then `?` is added to the resulting candidate, making it a nullable value type or reference type.
 
-*Merging* is described between two candidate types. It is transitive and commutative, so the candidates can be merged in any order with the same ultimate result.
+*Merging* is described between two candidate types. It is transitive and commutative, so the candidates can be merged in any order with the same ultimate result. It is undefined if the two candidate types are not identity convertible to each other.
 
 The *Merge* function takes two candidate types and a direction (*+* or *-*):
 
