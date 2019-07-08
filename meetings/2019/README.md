@@ -23,11 +23,10 @@
 - *Triage milestones*
 - *Design review*
 
-## Jun 19, 2019
+## Jul 10, 2019
 
-## Jun 17, 2019
-
-## Jun 12, 2019
+- Review auto-null-checked parameters
+- Confirm other decisions as time allows
 
 ## May 22, 2019
 
