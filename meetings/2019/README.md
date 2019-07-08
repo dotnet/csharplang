@@ -26,6 +26,7 @@
 ## Jul 10, 2019
 
 - Review auto-null-checked parameters
+- Confirm whether `a switch { }` should be a warning or an error (@333fred, @gafter)
 - Confirm other decisions as time allows
 
 ## May 22, 2019
