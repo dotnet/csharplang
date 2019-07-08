@@ -5,6 +5,12 @@
 ## Schedule when convenient
 
 - removing support for `#pragma warning enable` (https://github.com/dotnet/roslyn/issues/36550) (Julien)
+- disallow `expr!!` and use `parameter!!` (instead of `parameter!`) (Mads)
+- allow `#nullable` to mean `#nullable enable`
+- confirm features that are pushed out: 
+    - nullable attributes do not affect method bodies (`[AllowNull] T M() { return default; }`)
+    - nullable attributes not checked in OHI
+    - no diagnostics on misused nullable attributes
 - async LINQ (Julien)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
