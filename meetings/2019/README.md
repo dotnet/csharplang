@@ -4,6 +4,7 @@
 
 ## Schedule when convenient
 
+- removing support for `#pragma warning enable` (https://github.com/dotnet/roslyn/issues/36550) (Julien)
 - async LINQ (Julien)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
