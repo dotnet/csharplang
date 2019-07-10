@@ -6,7 +6,10 @@
 
 - removing support for `#pragma warning enable` (https://github.com/dotnet/roslyn/issues/36550) (Julien)
 - disallow `expr!!` and use `parameter!!` (instead of `parameter!`) (Mads)
-- allow `#nullable` to mean `#nullable enable`
+- allow `#nullable` to mean `#nullable enable` (Julien)
+- effect of `[DoesNotReturn]` on various flow analyses? (https://github.com/dotnet/roslyn/issues/37081) (Julien)
+- suppressing LHS of compound assignment (https://github.com/dotnet/roslyn/issues/36617) (Julien)
+- warn on `[NonNull]` and other attributes outside of nullable context (https://github.com/dotnet/roslyn/issues/36588) (Julien)
 - confirm features that are pushed out: 
     - nullable attributes do not affect method bodies (`[AllowNull] T M() { return default; }`)
     - nullable attributes not checked in OHI
