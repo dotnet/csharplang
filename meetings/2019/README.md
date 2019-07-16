@@ -27,6 +27,10 @@
 - *Triage milestones*
 - *Design review*
 
+## Jul 22, 2019
+
+- "Records": object initializers, with-expressions etc.
+
 ## Jul 17, 2019
 
 ### Triage
