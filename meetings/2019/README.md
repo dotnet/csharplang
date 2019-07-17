@@ -43,12 +43,6 @@
     - Triage championed features https://github.com/dotnet/csharplang/projects/4#column-4649189
     - Triage milestones
 
-## Jul 10, 2019
-
-- Review auto-null-checked parameters
-- Confirm whether `a switch { }` should be a warning or an error (@333fred, @gafter)
-- Confirm other decisions as time allows
-
 ## May 22, 2019
 
 - Confirm whether we want `abstract` modifier to be implied for interface implementations inside derived interfaces unless there is an implementation.
@@ -61,6 +55,14 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Jul 10, 2019
+
+[C# Language Design Notes for July 10, 2019](LDM-2019-07-10.md)
+
+1. Empty switch statement
+1. `[DoesNotReturn]` attribute
+1. Revisiting the `param!` null-checking feature
 
 ## May 15, 2019
 [C# Language Design Notes for May 15, 2019](LDM-2019-05-15.md)
