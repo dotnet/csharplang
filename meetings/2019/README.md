@@ -33,10 +33,15 @@
 
 ## Jul 17, 2019
 
-### Triage
-See https://github.com/dotnet/csharplang/projects/4
-- Triage championed features https://github.com/dotnet/csharplang/projects/4#column-4649189
-- Triage milestones
+- Nullability of events
+
+    See https://github.com/dotnet/roslyn/issues/34982
+    
+- Triage
+
+    See https://github.com/dotnet/csharplang/projects/4
+    - Triage championed features https://github.com/dotnet/csharplang/projects/4#column-4649189
+    - Triage milestones
 
 ## Jul 10, 2019
 
