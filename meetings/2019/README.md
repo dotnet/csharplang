@@ -31,18 +31,6 @@
 
 - "Records": object initializers, with-expressions etc.
 
-## Jul 17, 2019
-
-- Nullability of events
-
-    See https://github.com/dotnet/roslyn/issues/34982
-    
-- Triage
-
-    See https://github.com/dotnet/csharplang/projects/4
-    - Triage championed features https://github.com/dotnet/csharplang/projects/4#column-4649189
-    - Triage milestones
-
 ## May 22, 2019
 
 - Confirm whether we want `abstract` modifier to be implied for interface implementations inside derived interfaces unless there is an implementation.
@@ -55,6 +43,16 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Jul 17, 2019
+
+[C# Language Design Notes for July 17, 2019](LDM-2019-07-17.md)
+
+1. [Nullability of events](https://github.com/dotnet/roslyn/issues/34982)
+
+1.  Triage, see https://github.com/dotnet/csharplang/projects/4
+    - Triage championed features https://github.com/dotnet/csharplang/projects/4#column-4649189
+    - Triage milestones
 
 ## Jul 10, 2019
 
