@@ -119,3 +119,4 @@ Features Added in C# Language Versions
 - [Stackalloc in nested contexts](https://github.com/dotnet/csharplang/issues/1412): `stackalloc` expressions are now allowed in more expression contexts.
 - [Alternative interpolated verbatim strings](https://github.com/dotnet/csharplang/issues/1630): `@$"..."` strings are recognized as interpolated verbatim strings just like `$@"..."`.
 - [Obsolete on property accessors](https://github.com/dotnet/csharplang/issues/2152): property accessors can now be individually marked as obsolete.
+- [Permit `t is null` on unconstrained type parameter](https://github.com/dotnet/csharplang/issues/1284)
