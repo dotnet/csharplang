@@ -118,3 +118,4 @@ Features Added in C# Language Versions
 - [Readonly members](https://github.com/dotnet/csharplang/issues/1710): individual members can now be marked as `readonly` to indicate and enforce that they do not modify instance state.
 - [Stackalloc in nested contexts](https://github.com/dotnet/csharplang/issues/1412): `stackalloc` expressions are now allowed in more expression contexts.
 - [Alternative interpolated verbatim strings](https://github.com/dotnet/csharplang/issues/1630): `@$"..."` strings are recognized as interpolated verbatim strings just like `$@"..."`.
+- [Obsolete on property accessors](https://github.com/dotnet/csharplang/issues/2152): property accessors can now be individually marked as obsolete.
