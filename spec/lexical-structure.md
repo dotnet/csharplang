@@ -195,12 +195,28 @@ A Unicode character escape sequence represents a Unicode character. Unicode char
 
 ```antlr
 unicode_escape_sequence
+    : unicode_bmp_escape_sequence
+    | unicode_supplementary_escape_sequence
+    ;
+
+unicode_bmp_escape_sequence
     : '\\u' hex_digit hex_digit hex_digit hex_digit
-    | '\\U' hex_digit hex_digit hex_digit hex_digit hex_digit hex_digit hex_digit hex_digit
+    | '\\U0000' hex_digit hex_digit hex_digit hex_digit
+    ;
+
+unicode_supplementary_escape_sequence
+    : '\\uD' ( '8' | '9' | 'A' | 'a' | 'B' | 'b' ) hex_digit hex_digit
+      '\\uD' ( 'C' | 'c' | 'D' | 'd' | 'E' | 'e' | 'F' | 'f' ) hex_digit hex_digit
+    | '\\U00' ( '10' | '0' hex_digit_except_zero ) hex_digit hex_digit hex_digit hex_digit
     ;
 ```
 
-A Unicode escape sequence represents the single Unicode character formed by the hexadecimal number following the "`\u`" or "`\U`" characters. Since C# uses a 16-bit encoding of Unicode code points in characters and string values, a Unicode character in the range U+10000 to U+10FFFF is not permitted in a character literal and is represented using a Unicode surrogate pair in a string literal. Unicode characters with code points above 0x10FFFF are not supported.
+A Unicode escape sequence represents the single Unicode character formed by the hexadecimal number following the "`\u`" or "`\U`" characters. Since C# uses UTF-16 — the 16-bit Unicode encoding — to encode string values, each `char` object represents a single code point in the range of U+0000 to U+FFFF. This range of code points is the Basic Multilingual Plane (BMP). Supplementary characters are code points in the range of U+10000 to U+10FFFF, which make up the supplementary planes. In UTF-16, supplementary characters are represented by two surrogate code points — a high-surrogate code point (U+D800 to U+DBFF) followed by a low-surrogate code point (U+DC00 to U+DFFF) — known as a surrogate pair. Therefore:
+
+* Unicode characters with code points above U+FFFF are represented internally by two characters, used to form the surrogate pair, and are permitted in a string literal, but not in a character literal.
+* The "`\u`" escape sequence cannot directly handle code points above U+FFFF, but it can be used in combination with two surrogate code points to produce a supplementary character.
+* The "`\U`" escape sequence can directly handle the entire range of Unicode code points, from U+0000 to U+10FFFF.
+* Unicode does not have any code points greater than U+10FFFF, and attempting to use "`\U`" with a value greater than "`0010FFFF`" is invalid and will result in a compile-time error.
 
 Multiple translations are not performed. For instance, the string literal "`\u005Cu005C`" is equivalent to "`\u005C`" rather than "`\`". The Unicode value `\u005C` is the character "`\`".
 
@@ -231,6 +247,8 @@ class Class1
 
 The rules for identifiers given in this section correspond exactly to those recommended by the Unicode Standard Annex 31, except that underscore is allowed as an initial character (as is traditional in the C programming language), Unicode escape sequences are permitted in identifiers, and the "`@`" character is allowed as a prefix to enable keywords to be used as identifiers.
 
+Note that supplementary characters are invalid for identifiers, whether specified directly or by a Unicode escape sequence.
+
 ```antlr
 identifier
     : available_identifier
@@ -259,28 +277,28 @@ identifier_part_character
     ;
 
 letter_character
-    : '<A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nl>'
-    | '<A unicode_escape_sequence representing a character of classes Lu, Ll, Lt, Lm, Lo, or Nl>'
+    : '<A Unicode BMP character of classes Lu, Ll, Lt, Lm, Lo, or Nl>'
+    | '<A unicode_bmp_escape_sequence representing a character of classes Lu, Ll, Lt, Lm, Lo, or Nl>'
     ;
 
 combining_character
-    : '<A Unicode character of classes Mn or Mc>'
-    | '<A unicode_escape_sequence representing a character of classes Mn or Mc>'
+    : '<A Unicode BMP character of classes Mn or Mc>'
+    | '<A unicode_bmp_escape_sequence representing a character of classes Mn or Mc>'
     ;
 
 decimal_digit_character
-    : '<A Unicode character of the class Nd>'
-    | '<A unicode_escape_sequence representing a character of the class Nd>'
+    : '<A Unicode BMP character of the class Nd>'
+    | '<A unicode_bmp_escape_sequence representing a character of the class Nd>'
     ;
 
 connecting_character
-    : '<A Unicode character of the class Pc>'
-    | '<A unicode_escape_sequence representing a character of the class Pc>'
+    : '<A Unicode BMP character of the class Pc>'
+    | '<A unicode_bmp_escape_sequence representing a character of the class Pc>'
     ;
 
 formatting_character
-    : '<A Unicode character of the class Cf>'
-    | '<A unicode_escape_sequence representing a character of the class Cf>'
+    : '<A Unicode BMP character of the class Cf>'
+    | '<A unicode_bmp_escape_sequence representing a character of the class Cf>'
     ;
 ```
 
@@ -316,7 +334,7 @@ defines a class named "`class`" with a static method named "`static`" that takes
 Two identifiers are considered the same if they are identical after the following transformations are applied, in order:
 
 *  The prefix "`@`", if used, is removed.
-*  Each *unicode_escape_sequence* is transformed into its corresponding Unicode character.
+*  Each *unicode_bmp_escape_sequence* is transformed into its corresponding Unicode character.
 *  Any *formatting_character*s are removed.
 
 Identifiers containing two consecutive underscore characters (`U+005F`) are reserved for use by the implementation. For example, an implementation might provide extended keywords that begin with two underscores.
@@ -404,8 +422,14 @@ hexadecimal_integer_literal
     ;
 
 hex_digit
-    : '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-    | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f';
+    : '0'
+    | hex_digit_except_zero
+    ;
+
+hex_digit_except_zero
+    : '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+    | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f'
+    ;
 ```
 
 The type of an integer literal is determined as follows:
@@ -467,7 +491,7 @@ Note that in a real literal, decimal digits are always required after the decima
 
 A character literal represents a single character, and usually consists of a character in quotes, as in `'a'`.
 
-Note: The ANTLR grammar notation makes the following confusing! In ANTLR, when you write `\'` it stands for a single quote `'`. And when you write `\\` it stands for a single backslash `\`. Therefore the first rule for a character literal means it starts with a single quote, then a character, then a single quote. And the eleven possible simple escape sequences are `\'`, `\"`, `\\`, `\0`, `\a`, `\b`, `\f`, `\n`, `\r`, `\t`, `\v`.
+Note: The ANTLR grammar notation makes the following confusing! In ANTLR, when you write `\'` it stands for a single quote `'`. And, when you write `\\` it stands for a single backslash `\`. Therefore, the first rule for a character literal means it starts with a single quote, then a character, then a single quote. The eleven possible simple escape sequences are: `\'`, `\"`, `\\`, `\0`, `\a`, `\b`, `\f`, `\n`, `\r`, `\t`, and `\v`.
 
 ```antlr
 character_literal
@@ -478,7 +502,7 @@ character
     : single_character
     | simple_escape_sequence
     | hexadecimal_escape_sequence
-    | unicode_escape_sequence
+    | unicode_bmp_escape_sequence
     ;
 
 single_character
@@ -495,11 +519,9 @@ hexadecimal_escape_sequence
 
 A character that follows a backslash character (`\`) in a *character* must be one of the following characters: `'`, `"`, `\`, `0`, `a`, `b`, `f`, `n`, `r`, `t`, `u`, `U`, `x`, `v`. Otherwise, a compile-time error occurs.
 
-A hexadecimal escape sequence represents a single Unicode character, with the value formed by the hexadecimal number following "`\x`".
+A hexadecimal escape sequence represents a single Unicode BMP character, with the value formed by the hexadecimal number following "`\x`".
 
-If the value represented by a character literal is greater than `U+FFFF`, a compile-time error occurs.
-
-A Unicode character escape sequence ([Unicode character escape sequences](lexical-structure.md#unicode-character-escape-sequences)) in a character literal must be in the range `U+0000` to `U+FFFF`.
+If the code point that represents a character literal is greater than U+FFFF, a compile-time error occurs.
 
 A simple escape sequence represents a Unicode character encoding, as described in the table below.
 
@@ -567,7 +589,7 @@ quote_escape_sequence
     ;
 ```
 
-A character that follows a backslash character (`\`) in a *regular_string_literal_character* must be one of the following characters: `'`, `"`, `\`, `0`, `a`, `b`, `f`, `n`, `r`, `t`, `u`, `U`, `x`, `v`. Otherwise, a compile-time error occurs.
+A character that follows a backslash character (`\`) in a *regular_string_literal_character* must be one of the following characters: `'`, `"`, `\`, `0`, `a`, `b`, `f`, `n`, `r`, `t`, `u`, `U`, `x`, or `v`. Otherwise, a compile-time error occurs.
 
 The example
 ```csharp
@@ -591,6 +613,8 @@ three";
 shows a variety of string literals. The last string literal, `j`, is a verbatim string literal that spans multiple lines. The characters between the quotation marks, including white space such as new line characters, are preserved verbatim.
 
 Since a hexadecimal escape sequence can have a variable number of hex digits, the string literal `"\x123"` contains a single character with hex value 123. To create a string containing the character with hex value 12 followed by the character 3, one could write `"\x00123"` or `"\x12" + "3"` instead.
+
+Supplementary characters — Unicode code points in the range of u+10000 to U+10FFFF — are encoded using two BMP surrogate code points in the range of U+D800 to U+DFFF, and are permitted in string literals.
 
 The type of a *string_literal* is `string`.
 
