@@ -27,10 +27,6 @@
 - *Triage milestones*
 - *Design review*
 
-## Jul 22, 2019
-
-- "Records": object initializers, with-expressions etc.
-
 ## May 22, 2019
 
 - Confirm whether we want `abstract` modifier to be implied for interface implementations inside derived interfaces unless there is an implementation.
@@ -43,6 +39,12 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Jul 22, 2019
+
+[C# Language Design Notes for July 22, 2019](LDM-2019-07-22.md)
+
+1. Discuss the [new records proposal](https://github.com/dotnet/csharplang/blob/856c335cc584eda2178f0604cc845ef200d89f97/proposals/recordsv2.md)
 
 ## Jul 17, 2019
 
