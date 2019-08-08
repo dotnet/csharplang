@@ -282,6 +282,7 @@ class Point
     : this(other.X, other.Y)
     { }
 
+    [WithConstructor]
     public virtual Point With() => new Point(this);
 
     public void Deconstruct(out int X, out int Y)
