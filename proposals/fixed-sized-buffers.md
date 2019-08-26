@@ -24,14 +24,13 @@ With a few minor tweaks, we could provide general-purpose fixed-sized buffers wh
 
 One would declare a safe fixed-sized buffer via the following:
 
-```C#
+```csharp
 public fixed DXGI_RGB GammaCurve[1025];
 ```
 
 The declaration would get translated into an internal representation by the compiler that is similar to the following
 
-```C#
-
+```csharp
 [FixedBuffer(typeof(DXGI_RGB), 1024)]
 public ConsoleApp1.<Buffer>e__FixedBuffer_1024<DXGI_RGB> GammaCurve;
 
@@ -57,10 +56,10 @@ Since such fixed-sized buffers no longer require use of `fixed`, it makes sense 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-* There could be some challenges with backwards compatibility, but given that the existing fixed-sized buffers only work with a selection of primitive types, it should be possible for the compiler to continue "just-working" if the user treats the fixed-buffer as a pointer. 
+* There could be some challenges with backwards compatibility, but given that the existing fixed-sized buffers only work with a selection of primitive types, it should be possible for the compiler to continue "just-working" if the user treats the fixed-buffer as a pointer.
 * Incompatible constructs may need to use slightly different `v2` encoding to hide the fields from old compiler.
 * Packing is not well defined in IL spec for generic types. While the approach should work, we will be bordering on undocumented behavior. We should make that documented and make sure other JITs like Mono have the same behavior.
-* Specifying a separate type for every length (an possibly another for `readonly` fields, if supported) will have impact on metadata. It will be bound by the number of arrays of different sizes in the given app. 
+* Specifying a separate type for every length (an possibly another for `readonly` fields, if supported) will have impact on metadata. It will be bound by the number of arrays of different sizes in the given app.
 * `ref` math is not formally verifiable (since it is unsafe). We will need to find a way to update verification rules to know that our use is ok.
 
 ## Alternatives

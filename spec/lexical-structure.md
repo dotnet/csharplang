@@ -110,7 +110,7 @@ new_line_character
     ;
 
 delimited_comment
-    : '/*' delimited_comment_section* asterisk* '/'
+    : '/*' delimited_comment_section* asterisk+ '/'
     ;
 
 delimited_comment_section
@@ -673,7 +673,7 @@ open_brace_escape_sequence
     : '{{'
     ;
 
-    close_brace_escape_sequence
+close_brace_escape_sequence
     : '}}'
     ;
     

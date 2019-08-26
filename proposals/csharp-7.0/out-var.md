@@ -1,5 +1,4 @@
-Out Variable Declarations
-=========================
+# Out variable declarations
 
 The *out variable declaration* feature enables a variable to be declared at the location that it is being passed as an `out` argument.
 
@@ -14,7 +13,7 @@ A variable declared this way is called an *out variable*. You may use the contex
 
 According to Language Specification (section 7.6.7 Element access) the argument-list of an element-access (indexing expression) does not contain ref or out arguments. However, they are permitted by the compiler for various scenarios, for example indexers declared in metadata that accept `out`.
 
-Within the scope of a local variable introduced by an argument_value, it is a compile-time error to refer to that local variable in a textual position that precedes its declaration. 
+Within the scope of a local variable introduced by an argument_value, it is a compile-time error to refer to that local variable in a textual position that precedes its declaration.
 
 It is also an error to reference an implicitly-typed (§8.5.1) out variable in the same argument list that immediately contains its declaration.
 

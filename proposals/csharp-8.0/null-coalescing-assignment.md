@@ -17,7 +17,7 @@ As part of this proposal, we will also loosen the type requirements on `??` to a
 
 It is common to see code of the form
 
-``` c#
+```csharp
 if (variable == null)
 {
     variable = expression;
@@ -39,7 +39,7 @@ assignment_operator
     ;
 ```
 
-Which follows the [existing semantic rules for compound assignment operators](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#compound-assignment), except that we elide the assignment if the left-hand side is non-null. The rules for this feature are as follows.
+Which follows the [existing semantic rules for compound assignment operators](../../spec/expressions.md#compound-assignment), except that we elide the assignment if the left-hand side is non-null. The rules for this feature are as follows.
 
 Given `a ??= b`, where `A` is the type of `a`, `B` is the type of `b`:
 

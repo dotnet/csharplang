@@ -59,7 +59,7 @@ All the other types that are not permitted in the *object_creation_expression* a
 
 > **Open Issue:** should we allow delegates and tuples as the target-type?
 
-The above rules include delegates (a reference type) and tuples (a struct type). Although both types are constructible, if the type is inferrable, an anonymous function or a tuple literal can already be used.
+The above rules include delegates (a reference type) and tuples (a struct type). Although both types are constructible, if the type is inferable, an anonymous function or a tuple literal can already be used.
 ```cs
 (int a, int b) t = new(1, 2); // "new" is redundant
 Action a = new(() => {}); // "new" is redundant
@@ -91,7 +91,7 @@ None.
 Most of complaints about types being too long to duplicate in field initialization is about *type arguments* not the type itself, we could infer only type arguments like `new Dictionary(...)` (or similar) and infer type arguments locally from arguments or the collection initializer.
 
 ## Questions
-[quesions]: #questions
+[questions]: #questions
 
 - Should we forbid usages in expression trees? (no)
 - How the feature interacts with `dynamic` arguments? (no special treatment)

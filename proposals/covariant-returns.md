@@ -50,7 +50,7 @@ The implementation of this would be for the compiler to emit the overriding meth
 
 We could relax the language rules slightly to allow, in source,
 
-``` c#
+```csharp
 abstract class Cloneable
 {
     public abstract Cloneable Clone();
@@ -77,5 +77,4 @@ class Digit : Cloneable
 
 ## Design meetings
 
-None yet. There has been some discussion at https://github.com/dotnet/roslyn/issues/357
-
+None yet. There has been some discussion at <https://github.com/dotnet/roslyn/issues/357>.

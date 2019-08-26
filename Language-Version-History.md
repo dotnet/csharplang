@@ -14,6 +14,11 @@ Features Added in C# Language Versions
 - Attributes
 - Literals
 
+# [C# 1.2](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-version-history#c-version-12)
+
+- Dispose in foreach
+- foreach over string specialization
+
 # [C# 2](https://msdn.microsoft.com/en-us/library/7cz8t42e(v=vs.80).aspx) (VS 2005)
 - Generics
 - Partial types

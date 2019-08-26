@@ -116,7 +116,7 @@ The scenario is good, not the current proposal.
 
 There's agreement on wanting the feature and on the syntax (#347, #1207).
 
-We probably prefer a value type version of Tuple<T>. Of course those would be subject to tearing, like all structs. We're willing to be swayed.
+We probably prefer a value type version of Tuple\<T>. Of course those would be subject to tearing, like all structs. We're willing to be swayed.
 
 There are performance trade offs around allocation vs copying, and also around generic instantiation. We could do some experiments in F# source code, which already has tuples.
 

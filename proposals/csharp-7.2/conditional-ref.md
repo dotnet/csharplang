@@ -1,7 +1,10 @@
+# Conditional ref expressions
+
 The pattern of binding a ref variable to one or another expression conditionally is not currently expressible in C#.
 
 The typical workaround is to introduce a method like:
-```CS
+
+```csharp
 ref T Choice(bool condition, ref T consequence, ref T alternative)
 {
     if (condition)
@@ -14,22 +17,25 @@ ref T Choice(bool condition, ref T consequence, ref T alternative)
     }
 }
 ```
+
 Note that this is not an exact replacement of a ternary since all arguments must be evaluated at the call site.
 
 The following will not work as expected:
-```CS
+
+```csharp
        // will crash with NRE because 'arr[0]' will be executed unconditionally
       ref var r = ref Choice(arr != null, ref arr[0], ref otherArr[0]);
 ```
 
 The proposed syntax would look like:
-```CS
+
+```csharp
      <condition> ? ref <consequence> : ref <alternative>;
 ```
 
 The above attempt with "Choice" can be _correctly_ written using ref ternary as:
 
-```CS
+```csharp
      ref var r = ref (arr != null ? ref arr[0]: ref otherArr[0]);
 ```
 
@@ -44,7 +50,7 @@ Safe-to-return will be assumed conservatively from the conditional operands. If 
 
 Ref ternary is an LValue and as such it can be passed/assigned/returned by reference;
 
-```CS
+```csharp
      // pass by reference
      foo(ref (arr != null ? ref arr[0]: ref otherArr[0]));
 
@@ -54,24 +60,23 @@ Ref ternary is an LValue and as such it can be passed/assigned/returned by refer
 
 Being an LValue, it can also be assigned to. 
 
-```CS
+```csharp
     // assign to
     (arr != null ? ref arr[0]: ref otherArr[0]) = 1;
 ```
 
 Ref ternary can be used in a regular (not ref) context as well. Although it would not be common since you could as well just use a regular ternary.
 
-```CS
+```csharp
      int x = (arr != null ? ref arr[0]: ref otherArr[0]);
 ```
 
 
-=======================
+___
+
 Implementation notes: 
 
 The complexity of the implementation would seem to be the size of a moderate-to-large bug fix. - I.E not very expensive.
 I do not think we need any changes to the syntax or parsing.
 There is no effect on metadata or interop. The feature is completely expression based.
 No effect on debugging/PDB either
-
-

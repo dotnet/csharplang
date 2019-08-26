@@ -1,4 +1,4 @@
-﻿# C# Language Design Notes for 2018
+# C# Language Design Notes for 2018
 
 Overview of meetings and agendas for 2018
 
@@ -93,7 +93,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 4. Expanding the feature
 5. Is T? where T : class? allowed or meaningful?
 6. Typing judgments containing oblivious types
-7. Unconstrained T in List<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
+7. Unconstrained T in List\<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
 
 ## August 22, 2018
 
@@ -233,32 +233,24 @@ Discussion of records proposals:
 1. `using` declaration open issues
 2. Return type of `Range` indexer on array and FX types
 
-# Upcoming meetings
-
 ## Dec 5, 2018
 
-- Tracked nullable states, their correspondance to source and the rules they follow in flow analysis (Neal/Julien)
-- ~~Generating null-check for `parameter!` (Jared, skipped)~~
+[C# Language Design Notes for Dec 5, 2018](LDM-2018-12-05.md)
+
+- Tracked nullable states, their correspondence to source and the rules they follow in flow analysis
 
 ## Dec 12, 2018
-- Async-streams: misc questions, including: should we emit one `CancellationToken` check in `GetAsyncEnumerator()` or one per `MoveNextAsync()`?
+
+[C# Language Design Notes for Dec 12, 2018](LDM-2018-12-12.md)
+
+- Async-streams misc. questions
 - Compat issue with Dispose pattern in `foreach`
-- ~~*Triage milestones* (skipped)~~
+
+# Upcoming meetings
 
 ## Dec 17, 2018
 
 - Review the [Nullable Reference Types Specification](https://github.com/dotnet/csharplang/blob/master/proposals/nullable-reference-types-specification.md)
-
-## Schedule ASAP
-- Nullable: never null warning 
-- Async-streams: re-discuss pattern-based `await foreach` (Stephen)
-- Generating null-check for `parameter!` (Jared)
-- Nullable: re-discuss uninitialized field warnings
-
-## Schedule when convenient
-
-- Discussion of refreshing language spec (Neal)
-- Nullability flow through conditional access when unconstrained generic type parameters are involved. (Aleksey)
 
 ## Recurring topics
 
