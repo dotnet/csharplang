@@ -27,6 +27,14 @@
 - *Triage milestones*
 - *Design review*
 
+## Aug 27, 2019
+
+- Triage language features
+
+## Aug 25, 2019
+
+- Triage language features
+
 ## May 22, 2019
 
 - Confirm whether we want `abstract` modifier to be implied for interface implementations inside derived interfaces unless there is an implementation.
