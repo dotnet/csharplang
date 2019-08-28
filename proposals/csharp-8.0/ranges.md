@@ -46,7 +46,7 @@ namespace System
 }
 ```
 
-The `..` syntax allows for either, both, or none of it's arguments to be absent. Regardless
+The `..` syntax allows for either, both, or none of its arguments to be absent. Regardless
 of the number of arguments, the `Range` constructor is always sufficient for using the
 `Range` syntax. However, if any of the other members are present and one or more of the
 `..` arguments are missing, the appropriate member may be substituted.
