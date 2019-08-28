@@ -308,7 +308,7 @@ A *class_type* constraint must satisfy the following rules:
 
 *  The type must be a class type.
 *  The type must not be `sealed`.
-*  The type must not be one of the following types: `System.Array`, `System.Delegate`, `System.Enum`, or `System.ValueType`.
+*  The type must not be one of the following types: `System.Array` or `System.ValueType`.
 *  The type must not be `object`. Because all types derive from `object`, such a constraint would have no effect if it were permitted.
 *  At most one constraint for a given type parameter can be a class type.
 
