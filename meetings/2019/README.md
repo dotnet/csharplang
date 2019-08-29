@@ -27,11 +27,24 @@
 - *Triage milestones*
 - *Design review*
 
-## Aug 27, 2019
+## Sep 25, 2019
+
+## Sep 18, 2019
+
+## Sep 16, 2019
+
+## Sep 11, 2019
+
+## Sep 4, 2019 
+
+- https://github.com/dotnet/roslyn/issues/37313 (Rikki, Phillip)
+- Finish triaging away 8.X milestone
+
+## Aug 28, 2019
 
 - Triage language features
 
-## Aug 25, 2019
+## Aug 26, 2019
 
 - Triage language features
 
