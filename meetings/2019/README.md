@@ -38,7 +38,8 @@
 ## Sep 4, 2019 
 
 - https://github.com/dotnet/roslyn/issues/37313 (Rikki, Phillip)
-- Finish triaging away 8.X milestone
+- Finish triaging away [8.X milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+milestone%3A%228.X+candidate%22)
+- Triage new proposed [9.0 features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+no%3Amilestone+label%3A%22Proposal+champion%22)
 
 ## Aug 28, 2019
 
