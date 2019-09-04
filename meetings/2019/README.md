@@ -43,10 +43,6 @@
 
 - https://github.com/dotnet/roslyn/issues/37313 (Rikki, Phillip)
 
-## Aug 28, 2019
-
-- Triage language features
-
 ## Aug 26, 2019
 
 - Triage language features
@@ -63,6 +59,12 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Aug 28, 2019
+
+[C# Language Design Notes for Aug 28, 2019](LDM-2019-08-28.md)
+
+1. Triage language features
 
 ## Jul 22, 2019
 
