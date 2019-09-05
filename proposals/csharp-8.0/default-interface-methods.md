@@ -264,7 +264,20 @@ Interfaces now contain types.  These types may be used in the base clause as bas
 
 While determining the meaning of the *interface_base* of an interface, the base interfaces are temporarily assumed to be empty. Intuitively this ensures that the meaning of a base clause cannot recursively depend on itself. 
 
-When an interface IB extends an interface IA, it is a compile-time error for IA to depend on IB. An interface ***directly depends on*** its direct base interfaces (if any) and directly depends on the type within which it is immediately nested (if any). Given this definition, and the definition of *directly depends on* for classes, the complete set of types upon which an interface depends is the reflexive and transitive closure of the directly depends on relationship.
+**We used to have the following rules:**
+
+"When a class B derives from a class A, it is a compile-time error for A to depend on B. A class **directly depends on** its direct base class (if any) and **directly depends on** the ~~**class**~~ within which it is immediately nested (if any). Given this definition, the complete set of ~~**classes**~~ upon which a class depends is the reflexive and transitive closure of the **directly depends on** relationship."
+
+It is a compile-time error for an interface to directly or indirectly inherit from itself.
+The **base interfaces** of an interface are the explicit base interfaces and their base interfaces. In other words, the set of base interfaces is the complete transitive closure of the explicit base interfaces, their explicit base interfaces, and so on.
+
+**We are adjusting them as follows:**
+
+When a class B derives from a class A, it is a compile-time error for A to depend on B. A class **directly depends on** its direct base class (if any) and **directly depends on** the _**type**_ within which it is immediately nested (if any).
+
+When an interface IB extends an interface IA, it is a compile-time error for IA to depend on IB. An interface **directly depends on** its direct base interfaces (if any) and **directly depends on** the type within which it is immediately nested (if any).
+
+Given these definitions, the complete set of **types** upon which a type depends is the reflexive and transitive closure of the **directly depends on** relationship.
 
 ### Effect on existing programs
 
