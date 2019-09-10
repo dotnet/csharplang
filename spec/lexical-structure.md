@@ -1258,7 +1258,7 @@ warning_list
     ;
 ```
 
-A `#pragma warning` directive that omits the warning list affects all warnings. A `#pragma warning` directive the includes a warning list affects only those warnings that are specified in the list.
+A `#pragma warning` directive that omits the warning list affects all warnings. A `#pragma warning` directive that includes a warning list affects only those warnings that are specified in the list.
 
 A `#pragma warning disable` directive disables all or the given set of warnings.
 
