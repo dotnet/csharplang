@@ -140,7 +140,7 @@ At a given location in the executable code of a function member, a variable is s
 
 The formal specification underlying the above informal rules is described in [Initially assigned variables](variables.md#initially-assigned-variables), [Initially unassigned variables](variables.md#initially-unassigned-variables), and [Precise rules for determining definite assignment](variables.md#precise-rules-for-determining-definite-assignment).
 
-The definite assignment states of instance variables of a *struct_type* variable are tracked individually as well as collectively. In additional to the rules above, the following rules apply to *struct_type* variables and their instance variables:
+The definite assignment states of instance variables of a *struct_type* variable are tracked individually as well as collectively. In addition to the rules above, the following rules apply to *struct_type* variables and their instance variables:
 
 *  An instance variable is considered definitely assigned if its containing *struct_type* variable is considered definitely assigned.
 *  A *struct_type* variable is considered definitely assigned if each of its instance variables is considered definitely assigned.
