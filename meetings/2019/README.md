@@ -1,9 +1,9 @@
 # Upcoming meetings for 2019
 
 ## Schedule ASAP
+- close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 
 ## Schedule when convenient
-- close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 - removing support for `#pragma warning enable` (https://github.com/dotnet/roslyn/issues/36550) (Julien)
 - disallow `expr!!` and use `parameter!!` (instead of `parameter!`) (Mads)
 - allow `#nullable` to mean `#nullable enable` (Julien)
