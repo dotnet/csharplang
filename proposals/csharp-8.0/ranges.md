@@ -234,7 +234,7 @@ This value will be re-used in the calculation of the second `Slice` argument. Wh
 
 - When `expr` is of the form `expr1..expr2` (where `expr1` can be omitted) and `expr2` has type `int`, then it will be emitted as `expr2 - start`.
 - When `expr` is of the form `expr1..^expr2` (where `expr1` can be omitted), then it will be emitted as `(receiver.Length - expr2) - start`.
-- When `expr` is of the form `expr1..` (where `expr1` can be omitted), then it will be emitted as `receiver.Length`.
+- When `expr` is of the form `expr1..` (where `expr1` can be omitted), then it will be emitted as `receiver.Length - start`.
 - Otherwise, it will be emitted as `expr.End.GetOffset(receiver.Length) - start`.
 
 The `receiver`, `Length` and `expr` expressions will be spilled as appropriate to ensure any side effects are only executed once. For example:
@@ -276,10 +276,6 @@ The language will special case the following known types:
 
 - `string`: the method `Substring` will be used instead of `Slice`.
 - `array`: the method `System.Reflection.CompilerServices.GetSubArray` will be used instead of `Slice`.
-
-
-
-
 
 ## Alternatives
 
