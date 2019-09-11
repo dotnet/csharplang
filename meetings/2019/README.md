@@ -33,12 +33,6 @@
 
 ## Sep 16, 2019
 
-## Sep 11, 2019
-
-- Close https://github.com/dotnet/roslyn/issues/37313 (Rikki, Phillip)
-- Triage new proposed [9.0 features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+no%3Amilestone+label%3A%22Proposal+champion%22)
-- Finish triaging away [8.X milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+milestone%3A%228.X+candidate%22)
-
 ## Aug 26, 2019
 
 - Triage language features
@@ -56,9 +50,17 @@
 
 Overview of meetings and agendas for 2019
 
+## Sep 11, 2019
+
+[C# Language Design Notes for Sep 11, 2019](LDM-2019-09-11.md)
+
+1. Close https://github.com/dotnet/roslyn/issues/37313
+2. Triage new proposed [9.0 features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+no%3Amilestone+label%3A%22Proposal+champion%22)
+2. Finish triaging away [8.X milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+milestone%3A%228.X+candidate%22)
+
 ## Sep 4, 2019
 
-[C# Language Design Notes for Sep 04, 2019](LDM-2019-09-04.md)
+[C# Language Design Notes for Sep 4, 2019](LDM-2019-09-04.md)
 
 1. AllowNull on properties https://github.com/dotnet/roslyn/issues/37313
 
