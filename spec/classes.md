@@ -2985,7 +2985,7 @@ public interface I
 
 public class C: I
 {
-    public Prop {
+    public string Prop {
         get { return "April"; }       // Must not have a modifier here
         internal set {...}            // Ok, because I.Prop has no set accessor
     }

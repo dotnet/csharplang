@@ -1,9 +1,20 @@
 # Upcoming meetings for 2019
 
 ## Schedule ASAP
+- close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 
 ## Schedule when convenient
-
+- removing support for `#pragma warning enable` (https://github.com/dotnet/roslyn/issues/36550) (Julien)
+- disallow `expr!!` and use `parameter!!` (instead of `parameter!`) (Mads)
+- allow `#nullable` to mean `#nullable enable` (Julien)
+- effect of `[DoesNotReturn]` on various flow analyses? (https://github.com/dotnet/roslyn/issues/37081) (Julien)
+- suppressing LHS of compound assignment (https://github.com/dotnet/roslyn/issues/36617) (Julien)
+- warn on `[NonNull]` and other attributes outside of nullable context (https://github.com/dotnet/roslyn/issues/36588) (Julien)
+- confirm suppression on `ref` arguments (https://github.com/dotnet/roslyn/issues/35555) (Julien)
+- confirm features that are pushed out: 
+    - nullable attributes do not affect method bodies (`[AllowNull] T M() { return default; }`)
+    - nullable attributes not checked in OHI
+    - no diagnostics on misused nullable attributes
 - async LINQ (Julien)
 - Syntax of positional records/primary constructors (Andy)
 - Discussion of refreshing language spec (Neal)
@@ -16,11 +27,15 @@
 - *Triage milestones*
 - *Design review*
 
-## Jun 19, 2019
+## Sep 25, 2019
 
-## Jun 17, 2019
+## Sep 18, 2019
 
-## Jun 12, 2019
+## Sep 16, 2019
+
+## Aug 26, 2019
+
+- Triage language features
 
 ## May 22, 2019
 
@@ -34,6 +49,50 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Sep 11, 2019
+
+[C# Language Design Notes for Sep 11, 2019](LDM-2019-09-11.md)
+
+1. Close https://github.com/dotnet/roslyn/issues/37313
+2. Triage new proposed [9.0 features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+no%3Amilestone+label%3A%22Proposal+champion%22)
+2. Finish triaging away [8.X milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+milestone%3A%228.X+candidate%22)
+
+## Sep 4, 2019
+
+[C# Language Design Notes for Sep 4, 2019](LDM-2019-09-04.md)
+
+1. AllowNull on properties https://github.com/dotnet/roslyn/issues/37313
+
+## Aug 28, 2019
+
+[C# Language Design Notes for Aug 28, 2019](LDM-2019-08-28.md)
+
+1. Triage language features
+
+## Jul 22, 2019
+
+[C# Language Design Notes for July 22, 2019](LDM-2019-07-22.md)
+
+1. Discuss the [new records proposal](https://github.com/dotnet/csharplang/blob/856c335cc584eda2178f0604cc845ef200d89f97/proposals/recordsv2.md)
+
+## Jul 17, 2019
+
+[C# Language Design Notes for July 17, 2019](LDM-2019-07-17.md)
+
+1. [Nullability of events](https://github.com/dotnet/roslyn/issues/34982)
+
+1.  Triage, see https://github.com/dotnet/csharplang/projects/4
+    - Triage championed features https://github.com/dotnet/csharplang/projects/4#column-4649189
+    - Triage milestones
+
+## Jul 10, 2019
+
+[C# Language Design Notes for July 10, 2019](LDM-2019-07-10.md)
+
+1. Empty switch statement
+1. `[DoesNotReturn]` attribute
+1. Revisiting the `param!` null-checking feature
 
 ## May 15, 2019
 [C# Language Design Notes for May 15, 2019](LDM-2019-05-15.md)

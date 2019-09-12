@@ -41,12 +41,19 @@ assignment_operator
 
 Which follows the [existing semantic rules for compound assignment operators](../../spec/expressions.md#compound-assignment), except that we elide the assignment if the left-hand side is non-null. The rules for this feature are as follows.
 
-Given `a ??= b`, where `A` is the type of `a`, `B` is the type of `b`:
+Given `a ??= b`, where `A` is the type of `a`, `B` is the type of `b`, and `A0` is the underlying type of `A` if `A` is a nullable value type:
 
 1. If `A` does not exist or is a non-nullable value type, a compile-time error occurs.
-2. If `B` is not implicitly convertible to `A`, a compile-time error occurs.
-3. The type of `a ??= b` is `A`.
-4. `a ??= b` is evaluated at runtime as `a ?? (a = b)`, except that `a` is only evaluated once.
+2. If `B` is not implicitly convertible to `A` or `A0` (if `A0` exists), a compile-time error occurs.
+3. If `A0` exists and `B` is implicitly convertible to `A0`, and `B` is not dynamic, then the type of `a ??= b` is `A0`. `a ??= b` is evaluated at runtime as:
+   ```C#
+   var tmp = a.GetValueOrDefault();
+   if (!a.HasValue) { tmp = b; a = tmp; }
+   tmp
+   ```
+   Except that `a` is only evaluated once.
+4. Otherwise, the type of `a ??= b` is `A`. `a ??= b` is evaluated at runtime as `a ?? (a = b)`, except that `a` is only evaluated once.
+
 
 For the relaxation of the type requirements of `??`, we update the spec where it currently states that, given `a ?? b`, where `A` is the type of `a`:
 
@@ -55,6 +62,8 @@ For the relaxation of the type requirements of `??`, we update the spec where it
 We relax this requirement to:
 
 1. If A exists and is a non-nullable value type, a compile-time error occurs.
+
+This allows the null coalescing operator to work on unconstrained type parameters, as the unconstrained type parameter T exists, is not a nullable type, and is not a reference type.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
