@@ -15,9 +15,22 @@
 
 ## Sep 18, 2019
 
+- Target typing and best-common-type features:
+    - https://github.com/dotnet/csharplang/issues/2473 Proposal: Target typed null coalescing (`??`) expression
+    - https://github.com/dotnet/csharplang/issues/2460 Champion: target-typed conditional expression
+    - https://github.com/dotnet/csharplang/issues/881 Permit ternary operation with int? and double operands
+    - https://github.com/dotnet/csharplang/issues/33 Champion "Nullable-enhanced common type"
+- These have complete designs. Are we good to go?
+    - https://github.com/dotnet/csharplang/issues/1888 Champion "Permit attributes on local functions"
+    - https://github.com/dotnet/csharplang/issues/100 Champion "Target-typed `new` expression"
+- These may be quick (famous last words):
+    - https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression
+    - https://github.com/dotnet/csharplang/issues/2608 module initializers
+
 ## Sep 16, 2019
 
-- Support for Utf8 strings (https://github.com/dotnet/corefxlab/issues/2350)(Levi)
+- Support for Utf8 strings (https://github.com/dotnet/corefxlab/issues/2350) (Levi)
+- Triage remaining features out of the [8.X milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%228.X+candidate%22)
 
 ## Aug 26, 2019
 
