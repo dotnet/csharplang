@@ -4,22 +4,6 @@
 - close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 
 ## Schedule when convenient
-- removing support for `#pragma warning enable` (https://github.com/dotnet/roslyn/issues/36550) (Julien)
-- disallow `expr!!` and use `parameter!!` (instead of `parameter!`) (Mads)
-- allow `#nullable` to mean `#nullable enable` (Julien)
-- effect of `[DoesNotReturn]` on various flow analyses? (https://github.com/dotnet/roslyn/issues/37081) (Julien)
-- suppressing LHS of compound assignment (https://github.com/dotnet/roslyn/issues/36617) (Julien)
-- warn on `[NonNull]` and other attributes outside of nullable context (https://github.com/dotnet/roslyn/issues/36588) (Julien)
-- confirm suppression on `ref` arguments (https://github.com/dotnet/roslyn/issues/35555) (Julien)
-- confirm features that are pushed out: 
-    - nullable attributes do not affect method bodies (`[AllowNull] T M() { return default; }`)
-    - nullable attributes not checked in OHI
-    - no diagnostics on misused nullable attributes
-- async LINQ (Julien)
-- Syntax of positional records/primary constructors (Andy)
-- Discussion of refreshing language spec (Neal)
-- Conceptual model for tuples (Mads, Neal)
-- Close on flag for warning waves (existing `/warn` or new `/warnVersion`?)
 
 ## Recurring topics
 
