@@ -33,6 +33,8 @@
 
 ## Sep 16, 2019
 
+- Support for Utf8 strings (https://github.com/dotnet/corefxlab/issues/2350)(Levi)
+
 ## Aug 26, 2019
 
 - Triage language features
