@@ -222,6 +222,7 @@ class Test
     }
 }
 ```
+
 When a value of a value type is converted to type `object`, an object instance, also called a "box," is allocated to hold the value, and the value is copied into that box. Conversely, when an `object` reference is cast to a value type, a check is made that the referenced object is a box of the correct value type, and, if the check succeeds, the value in the box is copied out.
 
 C#'s unified type system effectively means that value types can become objects "on demand." Because of the unification, general-purpose libraries that use type `object` can be used with both reference types and value types.
@@ -514,7 +515,8 @@ static void Main()
 __`yield` statement__
 
 ```csharp
-static IEnumerable<int> Range(int from, int to) {
+static IEnumerable<int> Range(int from, int to)
+{
     for (int i = from; i < to; i++)
     {
         yield return i;
@@ -883,6 +885,7 @@ class Squares
     }
 }
 ```
+
 C# requires a local variable to be ***definitely assigned*** before its value can be obtained. For example, if the declaration of the previous `i` did not include an initial value, the compiler would report an error for the subsequent usages of `i` because `i` would not be definitely assigned at those points in the program.
 
 A method can use `return` statements to return control to its caller. In a method returning `void`, `return` statements cannot specify an expression. In a method returning non-`void`, `return` statements must include an expression that computes the return value.
@@ -1166,7 +1169,8 @@ public class List<T>
         set
         {
             if (value < count) value = count;
-            if (value != items.Length) {
+            if (value != items.Length)
+            {
                 T[] newItems = new T[value];
                 Array.Copy(items, 0, newItems, 0, count);
                 items = newItems;
