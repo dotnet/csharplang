@@ -21,17 +21,21 @@ using System;
 
 class Hello
 {
-    static void Main() {
+    static void Main()
+    {
         Console.WriteLine("Hello, World");
     }
 }
 ```
 
 C# source files typically have the file extension `.cs`. Assuming that the "Hello, World" program is stored in the file `hello.cs`, the program can be compiled with the Microsoft C# compiler using the command line
+
 ```
 csc hello.cs
 ```
+
 which produces an executable assembly named `hello.exe`. The output produced by this application when it is run is
+
 ```
 Hello, World
 ```
@@ -57,11 +61,13 @@ namespace Acme.Collections
     {
         Entry top;
 
-        public void Push(object data) {
+        public void Push(object data)
+        {
             top = new Entry(top, data);
         }
 
-        public object Pop() {
+        public object Pop()
+        {
             if (top == null) throw new InvalidOperationException();
             object result = top.data;
             top = top.next;
@@ -73,7 +79,8 @@ namespace Acme.Collections
             public Entry next;
             public object data;
     
-            public Entry(Entry next, object data) {
+            public Entry(Entry next, object data)
+            {
                 this.next = next;
                 this.data = data;
             }
@@ -81,11 +88,13 @@ namespace Acme.Collections
     }
 }
 ```
+
 declares a class named `Stack` in a namespace called `Acme.Collections`. The fully qualified name of this class is `Acme.Collections.Stack`. The class contains several members: a field named `top`, two methods named `Push` and `Pop`, and a nested class named `Entry`. The `Entry` class further contains three members: a field named `next`, a field named `data`, and a constructor. Assuming that the source code of the example is stored in the file `acme.cs`, the command line
 
 ```
 csc /t:library acme.cs
 ```
+
 compiles the example as a library (code without a `Main` entry point) and produces an assembly named `acme.dll`.
 
 Assemblies contain executable code in the form of ***Intermediate Language*** (IL) instructions, and symbolic information in the form of ***metadata***. Before it is executed, the IL code in an assembly is automatically converted to processor-specific code by the Just-In-Time (JIT) compiler of .NET Common Language Runtime.
@@ -98,7 +107,8 @@ using Acme.Collections;
 
 class Test
 {
-    static void Main() {
+    static void Main()
+    {
         Stack s = new Stack();
         s.Push(1);
         s.Push(10);
@@ -109,11 +119,13 @@ class Test
     }
 }
 ```
+
 If the program is stored in the file `test.cs`, when `test.cs` is compiled, the `acme.dll` assembly can be referenced using the compiler's `/r` option:
 
 ```
 csc /r:acme.dll test.cs
 ```
+
 This creates an executable assembly named `test.exe`, which, when run, produces the output:
 
 ```
@@ -121,6 +133,7 @@ This creates an executable assembly named `test.exe`, which, when run, produces 
 10
 1
 ```
+
 C# permits the source text of a program to be stored in several source files. When a multi-file C# program is compiled, all of the source files are processed together, and the source files can freely reference each other—conceptually, it is as if all the source files were concatenated into one large file before being processed. Forward declarations are never needed in C# because, with very few exceptions, declaration order is insignificant. C# does not limit a source file to declaring only one public type nor does it require the name of the source file to match a type declared in the source file.
 
 ## Types and variables
@@ -201,7 +214,8 @@ using System;
 
 class Test
 {
-    static void Main() {
+    static void Main()
+    {
         int i = 123;
         object o = i;          // Boxing
         int j = (int)o;        // Unboxing
@@ -315,7 +329,8 @@ Below are examples of each kind of statement
 __Local variable declarations__
 
 ```csharp
-static void Main() {
+static void Main()
+{
    int a;
    int b = 2, c = 3;
    a = 1;
@@ -327,7 +342,8 @@ static void Main() {
 __Local constant declaration__
 
 ```csharp
-static void Main() {
+static void Main()
+{
     const float pi = 3.1415927f;
     const int r = 25;
     Console.WriteLine(pi * r * r);
@@ -338,7 +354,8 @@ static void Main() {
 __Expression statement__
 
 ```csharp
-static void Main() {
+static void Main()
+{
     int i;
     i = 123;                // Expression statement
     Console.WriteLine(i);   // Expression statement
@@ -350,11 +367,14 @@ static void Main() {
 __`if` statement__
 
 ```csharp
-static void Main(string[] args) {
-    if (args.Length == 0) {
+static void Main(string[] args)
+{
+    if (args.Length == 0)
+    {
         Console.WriteLine("No arguments");
     }
-    else {
+    else
+    {
         Console.WriteLine("One or more arguments");
     }
 }
@@ -364,9 +384,11 @@ static void Main(string[] args) {
 __`switch` statement__
 
 ```csharp
-static void Main(string[] args) {
+static void Main(string[] args)
+{
     int n = args.Length;
-    switch (n) {
+    switch (n)
+    {
         case 0:
             Console.WriteLine("No arguments");
             break;
@@ -383,9 +405,11 @@ static void Main(string[] args) {
 __`while` statement__
 
 ```csharp
-static void Main(string[] args) {
+static void Main(string[] args)
+{
     int i = 0;
-    while (i < args.Length) {
+    while (i < args.Length)
+    {
         Console.WriteLine(args[i]);
         i++;
     }
@@ -396,9 +420,11 @@ static void Main(string[] args) {
 __`do` statement__
 
 ```csharp
-static void Main() {
+static void Main()
+{
     string s;
-    do {
+    do
+    {
         s = Console.ReadLine();
         if (s != null) Console.WriteLine(s);
     } while (s != null);
@@ -408,8 +434,10 @@ static void Main() {
 __`for` statement__
 
 ```csharp
-static void Main(string[] args) {
-    for (int i = 0; i < args.Length; i++) {
+static void Main(string[] args)
+{
+    for (int i = 0; i < args.Length; i++)
+    {
         Console.WriteLine(args[i]);
     }
 }
@@ -418,8 +446,10 @@ static void Main(string[] args) {
 __`foreach` statement__
 
 ```csharp
-static void Main(string[] args) {
-    foreach (string s in args) {
+static void Main(string[] args)
+{
+    foreach (string s in args)
+    {
         Console.WriteLine(s);
     }
 }
@@ -428,8 +458,10 @@ static void Main(string[] args) {
 __`break` statement__
 
 ```csharp
-static void Main() {
-    while (true) {
+static void Main()
+{
+    while (true)
+    {
         string s = Console.ReadLine();
         if (s == null) break;
         Console.WriteLine(s);
@@ -440,8 +472,10 @@ static void Main() {
 __`continue` statement__
 
 ```csharp
-static void Main(string[] args) {
-    for (int i = 0; i < args.Length; i++) {
+static void Main(string[] args)
+{
+    for (int i = 0; i < args.Length; i++)
+    {
         if (args[i].StartsWith("/")) continue;
         Console.WriteLine(args[i]);
     }
@@ -451,12 +485,13 @@ static void Main(string[] args) {
 __`goto` statement__
 
 ```csharp
-static void Main(string[] args) {
+static void Main(string[] args)
+{
     int i = 0;
     goto check;
-    loop:
+loop:
     Console.WriteLine(args[i++]);
-    check:
+check:
     if (i < args.Length) goto loop;
 }
 ```
@@ -464,11 +499,13 @@ static void Main(string[] args) {
 __`return` statement__
 
 ```csharp
-static int Add(int a, int b) {
+static int Add(int a, int b)
+{
     return a + b;
 }
 
-static void Main() {
+static void Main()
+{
     Console.WriteLine(Add(1, 2));
     return;
 }
@@ -478,14 +515,17 @@ __`yield` statement__
 
 ```csharp
 static IEnumerable<int> Range(int from, int to) {
-    for (int i = from; i < to; i++) {
+    for (int i = from; i < to; i++)
+    {
         yield return i;
     }
     yield break;
 }
 
-static void Main() {
-    foreach (int x in Range(-10,10)) {
+static void Main()
+{
+    foreach (int x in Range(-10, 10))
+    {
         Console.WriteLine(x);
     }
 }
@@ -494,24 +534,30 @@ static void Main() {
 __`throw` and `try` statements__
 
 ```csharp
-static double Divide(double x, double y) {
+static double Divide(double x, double y)
+{
     if (y == 0) throw new DivideByZeroException();
     return x / y;
 }
 
-static void Main(string[] args) {
-    try {
-        if (args.Length != 2) {
+static void Main(string[] args)
+{
+    try
+    {
+        if (args.Length != 2)
+        {
             throw new Exception("Two numbers required");
         }
         double x = double.Parse(args[0]);
         double y = double.Parse(args[1]);
         Console.WriteLine(Divide(x, y));
     }
-    catch (Exception e) {
+    catch (Exception e)
+    {
         Console.WriteLine(e.Message);
     }
-    finally {
+    finally
+    {
         Console.WriteLine("Good bye!");
     }
 }
@@ -520,12 +566,15 @@ static void Main(string[] args) {
 __`checked` and `unchecked` statements__
 
 ```csharp
-static void Main() {
+static void Main()
+{
     int i = int.MaxValue;
-    checked {
+    checked
+    {
         Console.WriteLine(i + 1);        // Exception
     }
-    unchecked {
+    unchecked
+    {
         Console.WriteLine(i + 1);        // Overflow
     }
 }
@@ -537,9 +586,12 @@ __`lock` statement__
 class Account
 {
     decimal balance;
-    public void Withdraw(decimal amount) {
-        lock (this) {
-            if (amount > balance) {
+    public void Withdraw(decimal amount)
+    {
+        lock (this)
+        {
+            if (amount > balance)
+            {
                 throw new Exception("Insufficient funds");
             }
             balance -= amount;
@@ -551,8 +603,10 @@ class Account
 __`using` statement__
 
 ```csharp
-static void Main() {
-    using (TextWriter w = File.CreateText("test.txt")) {
+static void Main()
+{
+    using (TextWriter w = File.CreateText("test.txt"))
+    {
         w.WriteLine("Line one");
         w.WriteLine("Line two");
         w.WriteLine("Line three");
@@ -573,18 +627,21 @@ public class Point
 {
     public int x, y;
 
-    public Point(int x, int y) {
+    public Point(int x, int y)
+    {
         this.x = x;
         this.y = y;
     }
 }
 ```
+
 Instances of classes are created using the `new` operator, which allocates memory for a new instance, invokes a constructor to initialize the instance, and returns a reference to the instance. The following statements create two `Point` objects and store references to those objects in two variables:
 
 ```csharp
 Point p1 = new Point(0, 0);
 Point p2 = new Point(10, 20);
 ```
+
 The memory occupied by an object is automatically reclaimed when the object is no longer in use. It is neither necessary nor possible to explicitly deallocate objects in C#.
 
 ### Members
@@ -631,6 +688,7 @@ public class Pair<TFirst,TSecond>
     public TSecond Second;
 }
 ```
+
 A class type that is declared to take type parameters is called a generic class type. Struct, interface and delegate types can also be generic.
 
 When the generic class is used, type arguments must be provided for each of the type parameters:
@@ -640,6 +698,7 @@ Pair<int,string> pair = new Pair<int,string> { First = 1, Second = "two" };
 int i = pair.First;     // TFirst is int
 string s = pair.Second; // TSecond is string
 ```
+
 A generic type with type arguments provided, like `Pair<int,string>` above, is called a constructed type.
 
 ### Base classes
@@ -651,7 +710,8 @@ public class Point
 {
     public int x, y;
 
-    public Point(int x, int y) {
+    public Point(int x, int y)
+    {
         this.x = x;
         this.y = y;
     }
@@ -661,11 +721,13 @@ public class Point3D: Point
 {
     public int z;
 
-    public Point3D(int x, int y, int z): base(x, y) {
+    public Point3D(int x, int y, int z): base(x, y)
+    {
         this.z = z;
     }
 }
 ```
+
 A class inherits the members of its base class. Inheritance means that a class implicitly contains all members of its base class, except for the instance and static constructors, and the destructors of the base class. A derived class can add new members to those it inherits, but it cannot remove the definition of an inherited member. In the previous example, `Point3D` inherits the `x` and `y` fields from `Point`, and every `Point3D` instance contains three fields, `x`, `y`, and `z`.
 
 An implicit conversion exists from a class type to any of its base class types. Therefore, a variable of a class type can reference an instance of that class or an instance of any derived class. For example, given the previous class declarations, a variable of type `Point` can reference either a `Point` or a `Point3D`:
@@ -695,13 +757,15 @@ public class Color
     public static readonly Color Blue = new Color(0, 0, 255);
     private byte r, g, b;
 
-    public Color(byte r, byte g, byte b) {
+    public Color(byte r, byte g, byte b)
+    {
         this.r = r;
         this.g = g;
         this.b = b;
     }
 }
 ```
+
 As shown in the previous example, ***read-only fields*** may be declared with a `readonly` modifier. Assignment to a `readonly` field can only occur as part of the field's declaration or in a constructor in the same class.
 
 ### Methods
@@ -729,19 +793,22 @@ using System;
 
 class Test
 {
-    static void Swap(ref int x, ref int y) {
+    static void Swap(ref int x, ref int y)
+    {
         int temp = x;
         x = y;
         y = temp;
     }
 
-    static void Main() {
+    static void Main()
+    {
         int i = 1, j = 2;
         Swap(ref i, ref j);
         Console.WriteLine("{0} {1}", i, j);            // Outputs "2 1"
     }
 }
 ```
+
 An ***output parameter*** is used for output parameter passing. An output parameter is similar to a reference parameter except that the initial value of the caller-provided argument is unimportant. An output parameter is declared with the `out` modifier. The following example shows the use of `out` parameters.
 
 ```csharp
@@ -749,18 +816,21 @@ using System;
 
 class Test
 {
-    static void Divide(int x, int y, out int result, out int remainder) {
+    static void Divide(int x, int y, out int result, out int remainder)
+    {
         result = x / y;
         remainder = x % y;
     }
 
-    static void Main() {
+    static void Main()
+    {
         int res, rem;
         Divide(10, 3, out res, out rem);
         Console.WriteLine("{0} {1}", res, rem);    // Outputs "3 1"
     }
 }
 ```
+
 A ***parameter array*** permits a variable number of arguments to be passed to a method. A parameter array is declared with the `params` modifier. Only the last parameter of a method can be a parameter array, and the type of a parameter array must be a single-dimensional array type. The `Write` and `WriteLine` methods of the `System.Console` class are good examples of parameter array usage. They are declared as follows.
 
 ```csharp
@@ -771,11 +841,13 @@ public class Console
     ...
 }
 ```
+
 Within a method that uses a parameter array, the parameter array behaves exactly like a regular parameter of an array type. However, in an invocation of a method with a parameter array, it is possible to pass either a single argument of the parameter array type or any number of arguments of the element type of the parameter array. In the latter case, an array instance is automatically created and initialized with the given arguments. This example
 
 ```csharp
 Console.WriteLine("x={0} y={1} z={2}", x, y, z);
 ```
+
 is equivalent to writing the following.
 
 ```csharp
@@ -798,10 +870,12 @@ using System;
 
 class Squares
 {
-    static void Main() {
+    static void Main()
+    {
         int i = 0;
         int j;
-        while (i < 10) {
+        while (i < 10)
+        {
             j = i * i;
             Console.WriteLine("{0} x {0} = {1}", i, j);
             i = i + 1;
@@ -827,23 +901,28 @@ class Entity
     static int nextSerialNo;
     int serialNo;
 
-    public Entity() {
+    public Entity()
+    {
         serialNo = nextSerialNo++;
     }
 
-    public int GetSerialNo() {
+    public int GetSerialNo()
+    {
         return serialNo;
     }
 
-    public static int GetNextSerialNo() {
+    public static int GetNextSerialNo()
+    {
         return nextSerialNo;
     }
 
-    public static void SetNextSerialNo(int value) {
+    public static void SetNextSerialNo(int value)
+    {
         nextSerialNo = value;
     }
 }
 ```
+
 Each `Entity` instance contains a serial number (and presumably some other information that is not shown here). The `Entity` constructor (which is like an instance method) initializes the new instance with the next available serial number. Because the constructor is an instance member, it is permitted to access both the `serialNo` instance field and the `nextSerialNo` static field.
 
 The `GetNextSerialNo` and `SetNextSerialNo` static methods can access the `nextSerialNo` static field, but it would be an error for them to directly access the `serialNo` instance field.
@@ -855,7 +934,8 @@ using System;
 
 class Test
 {
-    static void Main() {
+    static void Main()
+    {
         Entity.SetNextSerialNo(1000);
         Entity e1 = new Entity();
         Entity e2 = new Entity();
@@ -865,6 +945,7 @@ class Test
     }
 }
 ```
+
 Note that the `SetNextSerialNo` and `GetNextSerialNo` static methods are invoked on the class whereas the `GetSerialNo` instance method is invoked on instances of the class.
 
 #### Virtual, override, and abstract methods
@@ -892,11 +973,13 @@ public class Constant: Expression
 {
     double value;
 
-    public Constant(double value) {
+    public Constant(double value)
+    {
         this.value = value;
     }
 
-    public override double Evaluate(Hashtable vars) {
+    public override double Evaluate(Hashtable vars)
+    {
         return value;
     }
 }
@@ -905,13 +988,16 @@ public class VariableReference: Expression
 {
     string name;
 
-    public VariableReference(string name) {
+    public VariableReference(string name)
+    {
         this.name = name;
     }
 
-    public override double Evaluate(Hashtable vars) {
+    public override double Evaluate(Hashtable vars)
+    {
         object value = vars[name];
-        if (value == null) {
+        if (value == null)
+        {
             throw new Exception("Unknown variable: " + name);
         }
         return Convert.ToDouble(value);
@@ -924,16 +1010,19 @@ public class Operation: Expression
     char op;
     Expression right;
 
-    public Operation(Expression left, char op, Expression right) {
+    public Operation(Expression left, char op, Expression right)
+    {
         this.left = left;
         this.op = op;
         this.right = right;
     }
 
-    public override double Evaluate(Hashtable vars) {
+    public override double Evaluate(Hashtable vars)
+    {
         double x = left.Evaluate(vars);
         double y = right.Evaluate(vars);
-        switch (op) {
+        switch (op)
+        {
             case '+': return x + y;
             case '-': return x - y;
             case '*': return x * y;
@@ -943,6 +1032,7 @@ public class Operation: Expression
     }
 }
 ```
+
 The previous four classes can be used to model arithmetic expressions. For example, using instances of these classes, the expression `x + 3` can be represented as follows.
 
 ```csharp
@@ -951,6 +1041,7 @@ Expression e = new Operation(
     '+',
     new Constant(3));
 ```
+
 The `Evaluate` method of an `Expression` instance is invoked to evaluate the given expression and produce a `double` value. The method takes as an argument a `Hashtable` that contains variable names (as keys of the entries) and values (as values of the entries). The `Evaluate` method is a virtual abstract method, meaning that non-abstract derived classes must override it to provide an actual implementation.
 
 A `Constant`'s implementation of `Evaluate` simply returns the stored constant. A `VariableReference`'s implementation looks up the variable name in the hashtable and returns the resulting value. An `Operation`'s implementation first evaluates the left and right operands (by recursively invoking their `Evaluate` methods) and then performs the given arithmetic operation.
@@ -963,7 +1054,8 @@ using System.Collections;
 
 class Test
 {
-    static void Main() {
+    static void Main()
+    {
         Expression e = new Operation(
             new VariableReference("x"),
             '*',
@@ -991,31 +1083,38 @@ Method ***overloading*** permits multiple methods in the same class to have the 
 ```csharp
 class Test
 {
-    static void F() {
+    static void F()
+    {
         Console.WriteLine("F()");
     }
 
-    static void F(object x) {
+    static void F(object x)
+    {
         Console.WriteLine("F(object)");
     }
 
-    static void F(int x) {
+    static void F(int x)
+    {
         Console.WriteLine("F(int)");
     }
 
-    static void F(double x) {
+    static void F(double x)
+    {
         Console.WriteLine("F(double)");
     }
 
-    static void F<T>(T x) {
+    static void F<T>(T x)
+    {
         Console.WriteLine("F<T>(T)");
     }
 
-    static void F(double x, double y) {
+    static void F(double x, double y)
+    {
         Console.WriteLine("F(double, double)");
     }
 
-    static void Main() {
+    static void Main()
+    {
         F();                 // Invokes F()
         F(1);                // Invokes F(int)
         F(1.0);              // Invokes F(double)
@@ -1027,6 +1126,7 @@ class Test
     }
 }
 ```
+
 As shown by the example, a particular method can always be selected by explicitly casting the arguments to the exact parameter types and/or explicitly supplying type arguments.
 
 ### Other function members
@@ -1037,7 +1137,8 @@ The following code shows a generic class called `List<T>`, which implements a gr
 
 
 ```csharp
-public class List<T> {
+public class List<T>
+{
     // Constant...
     const int defaultCapacity = 4;
 
@@ -1046,19 +1147,24 @@ public class List<T> {
     int count;
 
     // Constructors...
-    public List(int capacity = defaultCapacity) {
+    public List(int capacity = defaultCapacity)
+    {
         items = new T[capacity];
     }
 
     // Properties...
-    public int Count {
+    public int Count
+    {
         get { return count; }
     }
-    public int Capacity {
-        get {
+    public int Capacity
+    {
+        get
+        {
             return items.Length;
         }
-        set {
+        set
+        {
             if (value < count) value = count;
             if (value != items.Length) {
                 T[] newItems = new T[value];
@@ -1069,34 +1175,43 @@ public class List<T> {
     }
 
     // Indexer...
-    public T this[int index] {
-        get {
+    public T this[int index]
+    {
+        get
+        {
             return items[index];
         }
-        set {
+        set
+        {
             items[index] = value;
             OnChanged();
         }
     }
 
     // Methods...
-    public void Add(T item) {
+    public void Add(T item)
+    {
         if (count == Capacity) Capacity = count * 2;
         items[count] = item;
         count++;
         OnChanged();
     }
-    protected virtual void OnChanged() {
+    protected virtual void OnChanged()
+    {
         if (Changed != null) Changed(this, EventArgs.Empty);
     }
-    public override bool Equals(object other) {
+    public override bool Equals(object other)
+    {
         return Equals(this, other as List<T>);
     }
-    static bool Equals(List<T> a, List<T> b) {
+    static bool Equals(List<T> a, List<T> b)
+    {
         if (a == null) return b == null;
         if (b == null || a.count != b.count) return false;
-        for (int i = 0; i < a.count; i++) {
-            if (!object.Equals(a.items[i], b.items[i])) {
+        for (int i = 0; i < a.count; i++)
+        {
+            if (!object.Equals(a.items[i], b.items[i]))
+            {
                 return false;
             }
         }
@@ -1107,10 +1222,12 @@ public class List<T> {
     public event EventHandler Changed;
 
     // Operators...
-    public static bool operator ==(List<T> a, List<T> b) {
+    public static bool operator ==(List<T> a, List<T> b)
+    {
         return Equals(a, b);
     }
-    public static bool operator !=(List<T> a, List<T> b) {
+    public static bool operator !=(List<T> a, List<T> b)
+    {
         return !Equals(a, b);
     }
 }
@@ -1128,6 +1245,7 @@ Instance constructors can be overloaded. For example, the `List<T>` class declar
 List<string> list1 = new List<string>();
 List<string> list2 = new List<string>(10);
 ```
+
 Unlike other members, instance constructors are not inherited, and a class has no instance constructors other than those actually declared in the class. If no instance constructor is supplied for a class, then an empty one with no parameters is automatically provided.
 
 #### Properties
@@ -1148,6 +1266,7 @@ names.Capacity = 100;            // Invokes set accessor
 int i = names.Count;             // Invokes get accessor
 int j = names.Capacity;          // Invokes get accessor
 ```
+
 Similar to fields and methods, C# supports both instance properties and static properties. Static properties are declared with the `static` modifier, and instance properties are declared without it.
 
 The accessor(s) of a property can be virtual. When a property declaration includes a `virtual`, `abstract`, or `override` modifier, it applies to the accessor(s) of the property.
@@ -1163,11 +1282,13 @@ List<string> names = new List<string>();
 names.Add("Liz");
 names.Add("Martha");
 names.Add("Beth");
-for (int i = 0; i < names.Count; i++) {
+for (int i = 0; i < names.Count; i++)
+{
     string s = names[i];
     names[i] = s.ToUpper();
 }
 ```
+
 Indexers can be overloaded, meaning that a class can declare multiple indexers as long as the number or types of their parameters differ.
 
 #### Events
@@ -1187,11 +1308,13 @@ class Test
 {
     static int changeCount;
 
-    static void ListChanged(object sender, EventArgs e) {
+    static void ListChanged(object sender, EventArgs e)
+    {
         changeCount++;
     }
 
-    static void Main() {
+    static void Main()
+    {
         List<string> names = new List<string>();
         names.Changed += new EventHandler(ListChanged);
         names.Add("Liz");
@@ -1201,6 +1324,7 @@ class Test
     }
 }
 ```
+
 For advanced scenarios where control of the underlying storage of an event is desired, an event declaration can explicitly provide `add` and `remove` accessors, which are somewhat similar to the `set` accessor of a property.
 
 #### Operators
@@ -1214,7 +1338,8 @@ using System;
 
 class Test
 {
-    static void Main() {
+    static void Main()
+    {
         List<int> a = new List<int>();
         a.Add(1);
         a.Add(2);
@@ -1249,7 +1374,8 @@ class Point
 {
     public int x, y;
 
-    public Point(int x, int y) {
+    public Point(int x, int y)
+    {
         this.x = x;
         this.y = y;
     }
@@ -1257,12 +1383,14 @@ class Point
 
 class Test
 {
-    static void Main() {
+    static void Main()
+    {
         Point[] points = new Point[100];
         for (int i = 0; i < 100; i++) points[i] = new Point(i, i);
     }
 }
 ```
+
 An alternative is to make `Point` a struct.
 
 ```csharp
@@ -1270,12 +1398,14 @@ struct Point
 {
     public int x, y;
 
-    public Point(int x, int y) {
+    public Point(int x, int y)
+    {
         this.x = x;
         this.y = y;
     }
 }
 ```
+
 Now, only one object is instantiated—the one for the array—and the `Point` instances are stored in-line in the array.
 
 Struct constructors are invoked with the `new` operator, but that does not imply that memory is being allocated. Instead of dynamically allocating an object and returning a reference to it, a struct constructor simply returns the struct value itself (typically in a temporary location on the stack), and this value is then copied as necessary.
@@ -1288,6 +1418,7 @@ Point b = a;
 a.x = 20;
 Console.WriteLine(b.x);
 ```
+
 If `Point` is a class, the output is `20` because `a` and `b` reference the same object. If `Point` is a struct, the output is `10` because the assignment of `a` to `b` creates a copy of the value, and this copy is unaffected by the subsequent assignment to `a.x`.
 
 The previous example highlights two of the limitations of structs. First, copying an entire struct is typically less efficient than copying an object reference, so assignment and value parameter passing can be more expensive with structs than with reference types. Second, except for `ref` and `out` parameters, it is not possible to create references to structs, which rules out their usage in a number of situations.
@@ -1305,17 +1436,21 @@ using System;
 
 class Test
 {
-    static void Main() {
+    static void Main()
+    {
         int[] a = new int[10];
-        for (int i = 0; i < a.Length; i++) {
+        for (int i = 0; i < a.Length; i++)
+        {
             a[i] = i * i;
         }
-        for (int i = 0; i < a.Length; i++) {
+        for (int i = 0; i < a.Length; i++)
+        {
             Console.WriteLine("a[{0}] = {1}", i, a[i]);
         }
     }
 }
 ```
+
 This example creates and operates on a ***single-dimensional array***. C# also supports ***multi-dimensional arrays***. The number of dimensions of an array type, also known as the ***rank*** of the array type, is one plus the number of commas written between the square brackets of the array type. The following example allocates a one-dimensional, a two-dimensional, and a three-dimensional array.
 
 ```csharp
@@ -1323,6 +1458,7 @@ int[] a1 = new int[10];
 int[,] a2 = new int[10, 5];
 int[,,] a3 = new int[10, 5, 2];
 ```
+
 The `a1` array contains 10 elements, the `a2` array contains 50 (10 × 5) elements, and the `a3` array contains 100 (10 × 5 × 2) elements.
 
 The element type of an array can be any type, including an array type. An array with elements of an array type is sometimes called a ***jagged array*** because the lengths of the element arrays do not all have to be the same. The following example allocates an array of arrays of `int`:
@@ -1333,6 +1469,7 @@ a[0] = new int[10];
 a[1] = new int[5];
 a[2] = new int[20];
 ```
+
 The first line creates an array with three elements, each of type `int[]` and each with an initial value of `null`. The subsequent lines then initialize the three elements with references to individual array instances of varying lengths.
 
 The `new` operator permits the initial values of the array elements to be specified using an ***array initializer***, which is a list of expressions written between the delimiters `{` and `}`. The following example allocates and initializes an `int[]` with three elements.
@@ -1340,11 +1477,13 @@ The `new` operator permits the initial values of the array elements to be specif
 ```csharp
 int[] a = new int[] {1, 2, 3};
 ```
+
 Note that the length of the array is inferred from the number of expressions between `{` and `}`. Local variable and field declarations can be shortened further such that the array type does not have to be restated.
 
 ```csharp
 int[] a = {1, 2, 3};
 ```
+
 Both of the previous examples are equivalent to the following:
 
 ```csharp
@@ -1354,6 +1493,7 @@ t[1] = 2;
 t[2] = 3;
 int[] a = t;
 ```
+
 ## Interfaces
 
 An ***interface*** defines a contract that can be implemented by classes and structs. An interface can contain methods, properties, events, and indexers. An interface does not provide implementations of the members it defines—it merely specifies the members that must be supplied by classes or structs that implement the interface.
@@ -1378,6 +1518,7 @@ interface IListBox: IControl
 
 interface IComboBox: ITextBox, IListBox {}
 ```
+
 Classes and structs can implement multiple interfaces. In the following example, the class `EditBox` implements both `IControl` and `IDataBound`.
 
 ```csharp
@@ -1392,6 +1533,7 @@ public class EditBox: IControl, IDataBound
     public void Bind(Binder b) {...}
 }
 ```
+
 When a class or struct implements a particular interface, instances of that class or struct can be implicitly converted to that interface type. For example
 
 ```csharp
@@ -1399,6 +1541,7 @@ EditBox editBox = new EditBox();
 IControl control = editBox;
 IDataBound dataBound = editBox;
 ```
+
 In cases where an instance is not statically known to implement a particular interface, dynamic type casts can be used. For example, the following statements use dynamic type casts to obtain an object's `IControl` and `IDataBound` interface implementations. Because the actual type of the object is `EditBox`, the casts succeed.
 
 ```csharp
@@ -1406,6 +1549,7 @@ object obj = new EditBox();
 IControl control = (IControl)obj;
 IDataBound dataBound = (IDataBound)obj;
 ```
+
 In the previous `EditBox` class, the `Paint` method from the `IControl` interface and the `Bind` method from the `IDataBound` interface are implemented using `public` members. C# also supports ***explicit interface member implementations***, using which the class or struct can avoid making the members `public`. An explicit interface member implementation is written using the fully qualified interface member name. For example, the `EditBox` class could implement the `IControl.Paint` and `IDataBound.Bind` methods using explicit interface member implementations as follows.
 
 ```csharp
@@ -1415,6 +1559,7 @@ public class EditBox: IControl, IDataBound
     void IDataBound.Bind(Binder b) {...}
 }
 ```
+
 Explicit interface members can only be accessed via the interface type. For example, the implementation of `IControl.Paint` provided by the previous `EditBox` class can only be invoked by first converting the `EditBox` reference to the `IControl` interface type.
 
 ```csharp
@@ -1440,8 +1585,10 @@ enum Color
 
 class Test
 {
-    static void PrintColor(Color color) {
-        switch (color) {
+    static void PrintColor(Color color)
+    {
+        switch (color)
+        {
             case Color.Red:
                 Console.WriteLine("Red");
                 break;
@@ -1457,13 +1604,15 @@ class Test
         }
     }
 
-    static void Main() {
+    static void Main()
+    {
         Color c = Color.Red;
         PrintColor(c);
         PrintColor(Color.Blue);
     }
 }
 ```
+
 Each enum type has a corresponding integral type called the ***underlying type*** of the enum type. An enum type that does not explicitly declare an underlying type has an underlying type of `int`. An enum type's storage format and range of possible values are determined by its underlying type. The set of values that an enum type can take on is not limited by its enum members. In particular, any value of the underlying type of an enum can be cast to the enum type and is a distinct valid value of that enum type.
 
 The following example declares an enum type named `Alignment` with an underlying type of `sbyte`.
@@ -1476,6 +1625,7 @@ enum Alignment: sbyte
     Right = 1
 }
 ```
+
 As shown by the previous example, an enum member declaration can include a constant expression that specifies the value of the member. The constant value for each enum member must be in the range of the underlying type of the enum. When an enum member declaration does not explicitly specify a value, the member is given the value zero (if it is the first member in the enum type) or the value of the textually preceding enum member plus one.
 
 Enum values can be converted to integral values and vice versa using type casts. For example
@@ -1484,6 +1634,7 @@ Enum values can be converted to integral values and vice versa using type casts.
 int i = (int)Color.Blue;        // int i = 2;
 Color c = (Color)2;             // Color c = Color.Blue;
 ```
+
 The default value of any enum type is the integral value zero converted to the enum type. In cases where variables are automatically initialized to a default value, this is the value given to variables of enum types. In order for the default value of an enum type to be easily available, the literal `0` implicitly converts to any enum type. Thus, the following is permitted.
 
 ```csharp
@@ -1505,28 +1656,33 @@ class Multiplier
 {
     double factor;
 
-    public Multiplier(double factor) {
+    public Multiplier(double factor)
+    {
         this.factor = factor;
     }
 
-    public double Multiply(double x) {
+    public double Multiply(double x)
+    {
         return x * factor;
     }
 }
 
 class Test
 {
-    static double Square(double x) {
+    static double Square(double x)
+    {
         return x * x;
     }
 
-    static double[] Apply(double[] a, Function f) {
+    static double[] Apply(double[] a, Function f)
+    {
         double[] result = new double[a.Length];
         for (int i = 0; i < a.Length; i++) result[i] = f(a[i]);
         return result;
     }
 
-    static void Main() {
+    static void Main()
+    {
         double[] a = {0.0, 0.5, 1.0};
         double[] squares = Apply(a, Square);
         double[] sines = Apply(a, Math.Sin);
@@ -1535,6 +1691,7 @@ class Test
     }
 }
 ```
+
 An instance of the `Function` delegate type can reference any method that takes a `double` argument and returns a `double` value. The `Apply` method applies a given `Function` to the elements of a `double[]`, returning a `double[]` with the results. In the `Main` method, `Apply` is used to apply three different functions to a `double[]`.
 
 A delegate can reference either a static method (such as `Square` or `Math.Sin` in the previous example) or an instance method (such as `m.Multiply` in the previous example). A delegate that references an instance method also references a particular object, and when the instance method is invoked through the delegate, that object becomes `this` in the invocation.
@@ -1544,6 +1701,7 @@ Delegates can also be created using anonymous functions, which are "inline metho
 ```csharp
 double[] doubles =  Apply(a, (double x) => x * 2.0);
 ```
+
 An interesting and useful property of a delegate is that it does not know or care about the class of the method it references; all that matters is that the referenced method has the same parameters and return type as the delegate.
 
 ## Attributes
@@ -1560,20 +1718,24 @@ public class HelpAttribute: Attribute
     string url;
     string topic;
 
-    public HelpAttribute(string url) {
+    public HelpAttribute(string url)
+    {
         this.url = url;
     }
 
-    public string Url {
+    public string Url
+    {
         get { return url; }
     }
 
-    public string Topic {
+    public string Topic
+    {
         get { return topic; }
         set { topic = value; }
     }
 }
 ```
+
 All attribute classes derive from the `System.Attribute` base class provided by the .NET Framework. Attributes can be applied by giving their name, along with any arguments, inside square brackets just before the associated declaration. If an attribute's name ends in `Attribute`, that part of the name can be omitted when the attribute is referenced. For example, the `HelpAttribute` attribute can be used as follows.
 
 ```csharp
@@ -1584,6 +1746,7 @@ public class Widget
     public void Display(string text) {}
 }
 ```
+
 This example attaches a `HelpAttribute` to the `Widget` class and another `HelpAttribute` to the `Display` method in the class. The public constructors of an attribute class control the information that must be provided when the attribute is attached to a program entity. Additional information can be provided by referencing public read-write properties of the attribute class (such as the reference to the `Topic` property previously).
 
 The following example shows how attribute information for a given program entity can be retrieved at run-time using reflection.
@@ -1594,22 +1757,27 @@ using System.Reflection;
 
 class Test
 {
-    static void ShowHelp(MemberInfo member) {
+    static void ShowHelp(MemberInfo member)
+    {
         HelpAttribute a = Attribute.GetCustomAttribute(member,
             typeof(HelpAttribute)) as HelpAttribute;
-        if (a == null) {
-            Console.WriteLine("No help for {0}", member);
+        if (a == null)
+        {
+            Console.WriteLine($"No help for {member}");
         }
-        else {
-            Console.WriteLine("Help for {0}:", member);
-            Console.WriteLine("  Url={0}, Topic={1}", a.Url, a.Topic);
+        else
+        {
+            Console.WriteLine($"Help for {member}:");
+            Console.WriteLine($"  Url={a.Url}, Topic={a.Topic}");
         }
     }
 
-    static void Main() {
+    static void Main()
+    {
         ShowHelp(typeof(Widget));
         ShowHelp(typeof(Widget).GetMethod("Display"));
     }
 }
 ```
+
 When a particular attribute is requested through reflection, the constructor for the attribute class is invoked with the information provided in the program source, and the resulting attribute instance is returned. If additional information was provided through properties, those properties are set to the given values before the attribute instance is returned.
