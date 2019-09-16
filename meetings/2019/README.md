@@ -11,9 +11,9 @@
 - *Triage milestones*
 - *Design review*
 
-# Oct 28, 2019
+## Oct 28, 2019
 
-# Oct 23, 2019
+## Oct 23, 2019
 
 ## Oct 21, 2019
 
