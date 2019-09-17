@@ -99,20 +99,23 @@ C# has no syntactic way to access "ranges" or "slices" of collections. Usually u
 
 The language will introduce a new range operator `x..y`. It is a binary infix operator that accepts two expressions. Either operand can be omitted (examples below), and they have to be convertible to `System.Index`. It will be lowered to the appropriate `System.Range` factory method call.
 
-We replace the C# grammar rules for *shift_expression* with the following (in order to introduce a new precedence level):
+-We replace the C# grammar rules for *multiplicative_expression* with the following (in order to introduce a new precedence level):
 
 ```antlr
-shift_expression
-    : range_expression
-    | shift_expression '<<' range_expression
-    | shift_expression right_shift range_expression
+range_expression
+    : unary_expression
+    | range_expression? '..' range_expression?
     ;
 
-range_expression
-    : additive_expression
-    | range_expression? '..' additive_expression?
+multiplicative_expression
+    : range_expression
+    | multiplicative_expression '*' range_expression
+    | multiplicative_expression '/' range_expression
+    | multiplicative_expression '%' range_expression
     ;
 ```
+
+All forms of the *range operator* have the same precedence. This new precedence group is lower than the *unary operators* and higher than the *mulitiplicative arithmetic operators*.
 
 We call the `..` operator the *range operator*. The built-in range operator can roughly be understood to correspond to the invocation of a built-in operator of this form:
 
