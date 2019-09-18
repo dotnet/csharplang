@@ -35,11 +35,6 @@
     - https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression
     - https://github.com/dotnet/csharplang/issues/2608 module initializers
 
-## Sep 16, 2019
-
-- Support for Utf8 strings (https://github.com/dotnet/corefxlab/issues/2350) (Levi)
-- Triage remaining features out of the [8.X milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%228.X+candidate%22)
-
 ## Aug 26, 2019
 
 - Triage language features
@@ -56,6 +51,13 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Sep 16, 2019
+
+[C# Language Design Notes for Sep 16, 2019](LDM-2019-09-16.md)
+
+- Support for Utf8 strings
+- Triage remaining features out of the [8.X milestone](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%228.X+candidate%22)
 
 ## Sep 11, 2019
 
