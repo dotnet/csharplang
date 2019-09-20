@@ -8,6 +8,9 @@
 ## Recurring topics
 
 - *Triage championed features*
+    - https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression
+    - https://github.com/dotnet/csharplang/issues/2608 module initializers
+
 - *Triage milestones*
 - *Design review*
 
@@ -20,20 +23,6 @@
 ## Sep 25, 2019
 
 - Records and related features (Andy)
-
-## Sep 18, 2019
-
-- Target typing and best-common-type features:
-    - https://github.com/dotnet/csharplang/issues/2473 Proposal: Target typed null coalescing (`??`) expression
-    - https://github.com/dotnet/csharplang/issues/2460 Champion: target-typed conditional expression
-    - https://github.com/dotnet/csharplang/issues/881 Permit ternary operation with int? and double operands
-    - https://github.com/dotnet/csharplang/issues/33 Champion "Nullable-enhanced common type"
-- These have complete designs. Are we good to go?
-    - https://github.com/dotnet/csharplang/issues/1888 Champion "Permit attributes on local functions"
-    - https://github.com/dotnet/csharplang/issues/100 Champion "Target-typed `new` expression"
-- These may be quick (famous last words):
-    - https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression
-    - https://github.com/dotnet/csharplang/issues/2608 module initializers
 
 ## Aug 26, 2019
 
@@ -51,6 +40,24 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Sep 18, 2019
+
+[C# Language Design Notes for Sep 18, 2019](LDM-2019-09-18.md)
+
+Triage:
+
+1. Proposals with complete designs:
+
+    - https://github.com/dotnet/csharplang/issues/1888 Champion "Permit attributes on local functions"
+    - https://github.com/dotnet/csharplang/issues/100 Champion "Target-typed new expression"
+
+2. Target typing and best-common-type features: 
+
+    - https://github.com/dotnet/csharplang/issues/2473 Proposal: Target typed null coalescing (??) expression
+    - https://github.com/dotnet/csharplang/issues/2460 Champion: target-typed conditional expression
+    - https://github.com/dotnet/csharplang/issues/881 Permit ternary operation with int? and double operands
+    - https://github.com/dotnet/csharplang/issues/33 Champion "Nullable-enhanced common type"
 
 ## Sep 16, 2019
 
