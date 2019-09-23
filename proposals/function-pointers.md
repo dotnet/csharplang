@@ -56,7 +56,7 @@ unsafe class Example {
         func* managed int(int, int) p2 = ...;
         func* cdecl int(int, int) p3 = ...;
 
-        p1 = p2; // okay Func1 and Func3 have compatible signatures
+        p1 = p2; // okay p1 and p2 have compatible signatures
         Console.WriteLine(p2 == p1); // True
         p2 = p3; // error: calling conventions are incompatible
     }
@@ -86,16 +86,14 @@ funcptr_type =
     '(' funcptr_type ')' ;
 
 calling_convention = 
-    'managed' |
-    'unmanaged' |
     'cdecl' |
-    'winapi' | 
-    'fastcall' | 
+    'managed' |
     'stdcall' | 
-    'thiscall' ;
+    'thiscall' |
+    'unmanaged' ;
 ```
 
-The `unmanaged` calling convention represents the default calling convention for native code on the current platform.
+The `unmanaged` calling convention represents the default calling convention for native code on the current platform, and is encoded as winapi.
 
 When there is a nested function pointer, a function pointer which has or returns a function pointer, parens can be 
 optionally used to disambiguate the signature. Though they are not required and the resulting types are equivalent.
@@ -185,7 +183,7 @@ The address-of operator will be implemented using the `ldftn` instruction.
 
 Restrictions of this feature:
 - Only applies to methods marked as `static`.
-- Local functions cannot be used in `&`. The implementation details of these methods are
+- Non-`static` local functions cannot be used in `&`. The implementation details of these methods are
 deliberately not specified by the language. This includes whether they are static vs. instance or
 exactly what signature they are emitted with.
 
@@ -198,23 +196,23 @@ This means that it is possible to overload on `void*` and a `func*` and still se
 
 ## Open Issues
 
-### NativeCallback Attribute
+### NativeCallableAttribute
 This is an attribute used by the CLR to avoid the managed to native prologue when invoking. Methods marked by this 
 attribute are only callable from native code, not managed (can’t call methods, create a delegate, etc …). The attribute
 is not special to mscorlib; the runtime will treat any attribute with this name with the same semantics. 
 
 It's possible for the runtime and language to work together to fully support this. The language could choose to treat
-address-of `static` members with a `NativeCallback` attribute as a `func*` with the specified calling convention.
+address-of `static` members with a `NativeCallable` attribute as a `func*` with the specified calling convention.
 
 ``` csharp
-unsafe class NativeCallbackExample {
-    [NativeCallback(CallingConvention.CDecl)]
-    static extern bool CloseHandle(IntPtr p);
+unsafe class NativeCallableExample {
+    [NativeCallable(CallingConvention.CDecl)]
+    static void CloseHandle(IntPtr p) => Marshal.FreeHGlobal(p);
 
     void Use() {
-        func* bool(IntPtr) p1 = &CloseHandle; // Error: Invalid calling convention
+        func* void(IntPtr) p1 = &CloseHandle; // Error: Invalid calling convention
 
-        func* cdecl bool(IntPtr) p2 = &CloseHandle; // Okay
+        func* cdecl void(IntPtr) p2 = &CloseHandle; // Okay
     }
 }
 
@@ -222,12 +220,12 @@ unsafe class NativeCallbackExample {
 
 Additionally the language would likely also want to: 
 
-- Flag any managed calls to a method tagged with `NativeCallback` as an error. Given the function can't be invoked from
+- Flag any managed calls to a method tagged with `NativeCallable` as an error. Given the function can't be invoked from
 managed code the compiler should prevent developers from attempting such an invocation.
-- Prevent method group conversions to `delegate` when the method is tagged with `NativeCallback`. 
+- Prevent method group conversions to `delegate` when the method is tagged with `NativeCallable`. 
 
-This is not necessary to support `NativeCallback` though. The compiler can support the `NativeCallback` attribute as is
-using the existing syntax. The runtime would simply need to cast to `void*` before casting to the correct `func*` 
+This is not necessary to support `NativeCallable` though. The compiler can support the `NativeCallable` attribute as is
+using the existing syntax. The program would simply need to cast to `void*` before casting to the correct `func*` 
 signature. That would be no worse than the support today.
 
 ``` csharp
@@ -347,7 +345,7 @@ Part of the problem here is the underlying CLI primitive doesn't have names henc
 and require a bit of metadata work to enable. That is doable but is a significant about of work. It essentially requires
 C# to have a companion to the type def table purely for these names.
 
-Also when the arguments for named function pointers was examined we found they could apply equally well to a number of
+Also when the arguments for named function pointers were examined we found they could apply equally well to a number of
 other scenarios. For example it would be just as convenient to declare named tuples to reduce the need to type out
 the full signature in all cases. 
 
