@@ -207,12 +207,12 @@ address-of `static` members with a `NativeCallable` attribute as a `func*` with 
 ``` csharp
 unsafe class NativeCallableExample {
     [NativeCallable(CallingConvention.CDecl)]
-    static extern bool CloseHandle(IntPtr p);
+    static void CloseHandle(IntPtr p) => Marshal.FreeHGlobal(p);
 
     void Use() {
-        func* bool(IntPtr) p1 = &CloseHandle; // Error: Invalid calling convention
+        func* void(IntPtr) p1 = &CloseHandle; // Error: Invalid calling convention
 
-        func* cdecl bool(IntPtr) p2 = &CloseHandle; // Okay
+        func* cdecl void(IntPtr) p2 = &CloseHandle; // Okay
     }
 }
 
@@ -225,7 +225,7 @@ managed code the compiler should prevent developers from attempting such an invo
 - Prevent method group conversions to `delegate` when the method is tagged with `NativeCallable`. 
 
 This is not necessary to support `NativeCallable` though. The compiler can support the `NativeCallable` attribute as is
-using the existing syntax. The runtime would simply need to cast to `void*` before casting to the correct `func*` 
+using the existing syntax. The program would simply need to cast to `void*` before casting to the correct `func*` 
 signature. That would be no worse than the support today.
 
 ``` csharp
