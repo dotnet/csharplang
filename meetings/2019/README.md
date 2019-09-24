@@ -20,9 +20,9 @@
 
 ## Oct 21, 2019
 
-## Sep 25, 2019
-
 - Records and related features (Andy)
+
+## Sep 25, 2019
 
 ## Aug 26, 2019
 
