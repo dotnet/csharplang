@@ -18,22 +18,11 @@
 
 ## Oct 23, 2019
 
+- https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
+
 ## Oct 21, 2019
 
 - Records and related features (Andy)
-
-## Aug 26, 2019
-
-- Triage language features
-
-## May 22, 2019
-
-- Confirm whether we want `abstract` modifier to be implied for interface implementations inside derived interfaces unless there is an implementation.
-
-## May 1, 2019
-
-* Nullable attributes - continue discussion
-* Nullable opt-in - do we need to adjust the story?
 
 # C# Language Design Notes for 2019
 
