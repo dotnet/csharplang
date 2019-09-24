@@ -8,7 +8,7 @@ This feature is about delivering two new operators that allow constructing `Syst
 
 ### Well-known types and members
 
-To use the new syntactic forms for System.Index and System.Range, new well-known
+To use the new syntactic forms for `System.Index` and `System.Range`, new well-known
 types and members may be necessary, depending on which syntactic forms are used.
 
 To use the "hat" operator (`^`), the following is required
@@ -136,27 +136,7 @@ var multiDimensional = list[1..2, ..]   // list[Range.Create(1, 2), Range.All]
 
 Moreover, `System.Index` should have an implicit conversion from `System.Int32`, in order not to need to overload for mixing integers and indexes over multi-dimensional signatures.
 
-## Adding Index and Range support to library types
-
-Every collection type must have at least two new indexers added for `Index` and `Range` respectively. The implementation of `Index` is exactly the same 
-for virtually every collection in .NET. The implementation for `Range` is likewise often similar by simply deferring to the underlying collection type. This work must be done by the collection author. The reliance on indexers as the primary use case means developers can't update existing collections using extension methods.
-
-The use of `Index` does come with a small performance hit. Typically a consumer of `Index` will pay an extra branch check (`IsFromEnd` and bounds) as they would with an `int` parameter (bounds only). Moving to `Range` doubles this cost as it occurs on each `Index`.
-
-This penalty is small and insignificant in the vast majority of code. For highly optimized code though, this extra branching can be unacceptable. It simply can't be thought of as a syntactic transformation from a call to `span.Slice(start, end)` to `span[start..end]`. Instead, the performance implications must be evaluated for each usage. This will likely lead to the feature being banned in certain portions of code bases.
-
-### Countable Types
-
-Any type which has a property named `Length` or `Count` with an accessible getter and a return type of `int` is considered Countable. The language can make use of this property to convert an expression of type `Index` into an `int` at the point of the expression without the need to use the type `Index` at all. In case both `Length` and `Count`
-are present, `Length` will be preferred.
-
-For simplicity going forward, the proposal will use the name `Length` to represent `Count` or `Length`.
-
-### Index and Range implementations are known
-
-The implementations of `Index` and `Range` are considered to be known and side effect free. Much like `ValueTuple<T1, T2>`, the language can assume a standard implementation and emit code inline which represents the implementation of methods on `Index` and `Range`. This implementation includes methods like `GetOffset` or conversions like the implicit conversion from `int` to `Index`.
-
-All arithmetic operations will be emitted using an `unchecked` context. That matches the context in which `Index` and `Range` are compiled in.
+## Adding Index and Range support to existing library types
 
 ### Implicit Index support
 
@@ -166,7 +146,10 @@ The language will provide an instance indexer member with a single parameter of 
 - The type has an accessible instance indexer which takes a single `int` as the argument.
 - The type does not have an accessible instance indexer which takes an `Index` as the first parameter. The `Index` must be the only parameter or the remaining parameters must be optional.
 
-For such types, the language will act as if there is an index member of the form `T this[Index index]` where `T` is the return type of the `int` based indexer including any `ref` style annotations. The new member will have the same `get` and `set` members with matching accessibilty as the `int` indexer. 
+A type is ***Countable*** if it  has a property named `Length` or `Count` with an accessible getter and a return type of `int`. The language can make use of this property to convert an expression of type `Index` into an `int` at the point of the expression without the need to use the type `Index` at all. In case both `Length` and `Count`
+are present, `Length` will be preferred. For simplicity going forward, the proposal will use the name `Length` to represent `Count` or `Length`.
+
+For such types, the language will act as if there is an index member of the form `T this[Index index]` where `T` is the return type of the `int` based indexer including any `ref` style annotations. The new member will have the same `get` and `set` members with matching accessibility as the `int` indexer. 
 
 The new indexer will be implemented by converting the argument of type `Index` into an `int` and emitting a call to the `int` based indexer. For discussion purposes, lets use the example of `receiver[expr]`. The conversion of `expr` to `int` will occur as follows:
 
@@ -212,7 +195,7 @@ class SideEffect {
 }
 ```
 
-This code will print "Get Length 3". 
+This code will print "Get Length 3".
 
 ### Implicit Range support
 
