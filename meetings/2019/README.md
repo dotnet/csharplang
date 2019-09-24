@@ -22,8 +22,6 @@
 
 - Records and related features (Andy)
 
-## Sep 25, 2019
-
 ## Aug 26, 2019
 
 - Triage language features
