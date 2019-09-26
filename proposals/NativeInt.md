@@ -25,7 +25,9 @@ There is no direct syntax for native int literals. Explicit casts of other integ
 
 There are no fields for `MinValue` or `MaxValue` for native ints because, other than `nuint.MinValue`, these values cannot be emitted as constants.
 
-Constant folding is supported for the full set of operators supported in other constant expressions. _TODO: Provide list of operators._
+Constant folding is supported for the full set of operators supported in other constant expressions.
+_TODO: Provide list of operators._
+_TODO: We'll need to evaluate constant expressions with `int` rather than `nint` to ensure we catch overflow cases regardless of compiler platform._
 
 ### Conversions
 Types that differ only by `nint` and `IntPtr` and by `nuint` and `UIntPtr` are considered equivalent. That applies to the primitive types as well as arrays, `Nullable<>`, constructed types, and tuples.
@@ -36,7 +38,7 @@ The following numeric conversions are supported.
 (The IL for each conversion includes the variants for `unchecked` and `checked` contexts if different.)
 
 | Operand | Target | Implicit | IL |
-|:---:|:---:|:---:|:---:|:---:|
+|:---:|:---:|:---:|:---:|
 | `sbyte` | `nint` | Y | `conv.i` |
 | `byte` | `nint` | Y | `conv.i` |
 | `short` | `nint` | Y | `conv.i` |
@@ -45,7 +47,7 @@ The following numeric conversions are supported.
 | `uint` | `nint` |   | `conv.i` / `conv.ovf.i` |
 | `long` | `nint` |   | `conv.i` / `conv.ovf.i` |
 | `ulong` | `nint` |   | `conv.i` / `conv.ovf.i` |
-| `char` | `nint` |   | `conv.i` |
+| `char` | `nint` | Y | `conv.i` |
 | `float` | `nint` |   | `conv.i` / `conv.ovf.i` |
 | `double` | `nint` |   | `conv.i` / `conv.ovf.i` |
 | `sbyte` | `nuint` |   | `conv.u` / `conv.ovf.u` |
@@ -56,12 +58,12 @@ The following numeric conversions are supported.
 | `uint` | `nuint` | Y | `conv.u` |
 | `long` | `nuint` |   | `conv.u` / `conv.ovf.u` |
 | `ulong` | `nuint` |   | `conv.u` / `conv.ovf.u` |
-| `char` | `nuint` |   | `conv.u` |
+| `char` | `nuint` | Y | `conv.u` |
 | `float` | `nuint` |   | `conv.u` / `conv.ovf.u` |
 | `double` | `nuint` |   | `conv.u` / `conv.ovf.u` |
 
 | Operand | Target | Implicit | IL |
-|:---:|:---:|:---:|:---:|:---:|
+|:---:|:---:|:---:|:---:|
 | `nint` | `nuint` |   | `conv.u` / `conv.ovf.u` |
 | `nint` | `sbyte` |   | `conv.i1` / `conv.ovf.i1` |
 | `nint` | `byte` |   | `conv.u1` / `conv.ovf.u1` |
@@ -72,7 +74,7 @@ The following numeric conversions are supported.
 | `nint` | `long` | Y | `conv.i8` / `conv.ovf.i8` |
 | `nint` | `ulong` |   | `conv.u8` / `conv.ovf.u8` |
 | `nint` | `char` |   | `conv.u2` / `conv.ovf.u2` |
-| `nint` | `double` | Y | `conv.r4` |
+| `nint` | `float` | Y | `conv.r4` |
 | `nint` | `double` | Y | `conv.r8` |
 | `nuint` | `nint` |   | `conv.i` / `conv.ovf.i` |
 | `nuint` | `sbyte` |   | `conv.i1` / `conv.ovf.i1` |
@@ -118,11 +120,13 @@ In cases where there are two overloads, one for `nint` and one for `nuint`, the 
 | `>=` | `native` | `native` | `native` | `bge` / `bge.un` |
 | `&` | `native` | `native` | `native` | `and` |
 | `|` | `native` | `native` | `native` | `or` |
-| `<<` | `native` | `nint` | `native` | `shl` / `shl.un` |
-| `>>` | `native` | `nint` | `native` | `shr` / `shr.un` |
+| `<<` | `native` | `int` | `native` | `shl` |
+| `>>` | `native` | `int` | `native` | `shr` / `shr.un` |
 
 For some binary operators, the IL operators support additional operand types (see [ECMA-335](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf)).
 But the set of operand types supported by C# is limited for simplicity and for consistency with existing operators in the language.
+
+Lifted versions of the operators, where the arguments and return types are `nint?` and `nuint?`, are supported.
 
 _TODO: Describe compound operators: `+=`, etc._
 
@@ -152,6 +156,8 @@ public override string ToString(string format);
 
 `IntPtr` and `UIntPtr` implement `ISerializable` and the compiler will treat `nint` and `nuint` as `ISerializable`.
 
+_Are there other interfaces that need to be implemented? `IEquatable<nint>`, `IComparable<nint>`, `IFormattable<nint>` for instance?_
+
 Other members of the underlying types are not available on the native int aliases directly. To access the underlying members, a cast is needed:
 ```C#
 static int ToInt(nint n) => ((IntPtr)n).ToInt32();
@@ -178,7 +184,7 @@ enum E : nint // error
 
 `typeof(nint)` is `typeof(IntPtr)`.
 
-`sizeof(nint)` is supported and does not require compiling in an unsafe context. The value is not a compile-time constant. _Should `sizeof(nint)` be implemented as `IntPtr.Size`?_
+`sizeof(nint)` is supported and does not require compiling in an unsafe context. The value is not a compile-time constant. `sizeof(nint)` is implemented as `sizeof(IntPtr)` rather than `IntPtr.Size`.
 
 Compiler diagnostics for type references involving `nint` or `nuint` report `nint` or `nuint` rather than `IntPtr` or `UIntPtr`.
 
@@ -204,7 +210,7 @@ If there is a single primitive type, the parameter-less constructor can be used.
 
 ```C#
 nuint A;                    // [NativeType] UIntPtr A
-(string, nint) B;           // [NativeType] ValueType<string, IntPtr> B
+(Stream, nint) B;           // [NativeType] ValueType<Stream, IntPtr> B
 Dictionary<object, nint> C; // [NativeType(new[] { 0, 1 })] Dictionary<object, IntPtr> C
 ```
 
