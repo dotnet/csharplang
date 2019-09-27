@@ -25,14 +25,13 @@ There is no direct syntax for native int literals. Explicit casts of other integ
 
 There are no `MinValue` or `MaxValue` fields on `nint` or `nuint` because, other than `nuint.MinValue`, those values cannot be emitted as constants.
 
-Constant folding is supported for the full set of operators supported in other constant expressions.
-_TODO: Provide list of operators._
-_TODO: We'll need to evaluate constant expressions with `int` rather than `nint` to ensure we catch overflow cases regardless of compiler platform._
+Constant folding is supported for all operators: { (unary)`-`, `~`, `+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `&`, `|`, `<<`, `>>` }.
+Constant folding operations are evaluated with `Int32` and `UInt32` operands rather than native ints for consistent behavior regardless of compiler platform.
 
 ### Conversions
 Types that differ only by `nint` and `IntPtr` and by `nuint` and `UIntPtr` are considered equivalent. That applies to the primitive types as well as arrays, `Nullable<>`, constructed types, and tuples.
 
-_TODO: Are "identity" conversions between equivalent types represented in the Roslyn API?_
+_Are these "identity" conversions between equivalent types represented in the Roslyn API?_
 
 The following numeric conversions are supported.
 (The IL for each conversion includes the variants for `unchecked` and `checked` contexts if different.)
@@ -128,7 +127,8 @@ But the set of operand types supported by C# is limited for simplicity and for c
 
 Lifted versions of the operators, where the arguments and return types are `nint?` and `nuint?`, are supported.
 
-_TODO: Describe compound operators: `+=`, etc._
+Compound assignment operations `x op= y` where `x` or `y` are native ints follow the same rules as with other primitive types with pre-defined operators.
+Specifically the expression is bound as `x = (T)(x op y)` where `T` is the type of `x` and where `x` is only evaluated once.
 
 ### dynamic
 
