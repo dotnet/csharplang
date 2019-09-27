@@ -23,7 +23,7 @@ There is no direct syntax for native int literals. Explicit casts of other integ
 
 `nuint` constants are in the range [ `uint.MinValue`, `uint.MaxValue` ].
 
-There are no fields for `MinValue` or `MaxValue` for native ints because, other than `nuint.MinValue`, these values cannot be emitted as constants.
+There are no `MinValue` or `MaxValue` fields on `nint` or `nuint` because, other than `nuint.MinValue`, those values cannot be emitted as constants.
 
 Constant folding is supported for the full set of operators supported in other constant expressions.
 _TODO: Provide list of operators._
@@ -137,30 +137,46 @@ As a result those conversions and operators _are not available_ from the runtime
 
 ```C#
 nint x = 2;
-nint y = 3;
-nint z = x + y; // ok
+nint y = x + x; // ok
 dynamic d = x;
-nint w = d + y; // RuntimeBinderException: '+' cannot be applied 'System.IntPtr' and 'System.IntPtr'
+nint z = d + x; // RuntimeBinderException: '+' cannot be applied 'System.IntPtr' and 'System.IntPtr'
 ```
 
 ### Type members
 
-The `nint` and `nuint` types expose a few members of `System.IntPtr` and `System.UIntPtr`:
+The only constructor for `nint` or `nuint` is the parameter-less constructor.
+
+The members of `System.IntPtr` and `System.UIntPtr` other than the constructors and operators are available from `nint` and `nuint`.
+For `nint` the following `System.IntPtr` members are available. The members available on `nuint` are similar.
 
 ```C#
-public override int GetHashCode();
+public static readonly IntPtr Zero;
+public static int Size { get; }
+public static IntPtr Add(IntPtr pointer, int offset);
+public static IntPtr Subtract(IntPtr pointer, int offset);
 public override bool Equals(object obj);
+public override int GetHashCode();
+public int ToInt32();
+public long ToInt64();
+public void* ToPointer();
 public override string ToString();
-public override string ToString(string format);
+public string ToString(string format);
 ```
 
-`IntPtr` and `UIntPtr` implement `ISerializable` and the compiler will treat `nint` and `nuint` as `ISerializable`.
+Some members above use `IntPtr` in the signature even when used from `nint`.
 
-_Are there other interfaces that need to be implemented? `IEquatable<nint>`, `IComparable<nint>`, `IFormattable<nint>` for instance?_
-
-Other members of the underlying types are not available on the native int aliases directly. To access the underlying members, a cast is needed:
 ```C#
-static int ToInt(nint n) => ((IntPtr)n).ToInt32();
+nint x = nint.Zero;      // nint x
+nint y = nint.Add(x, 1); // nint y
+var z = nint.Zero;       // IntPtr z
+var w = nint.Add(x, 1);  // IntPtr w
+```
+
+Interfaces implemented by `System.IntPtr` and `System.UIntPtr` are available from `nint` and `nuint`.
+
+```C#
+nint n = 42;
+IEquatable<nint> i = n; // ok, IntPtr implements IEquatable<IntPtr>
 ```
 
 ### Overriding, hiding, and implementing
