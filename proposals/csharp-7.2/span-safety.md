@@ -157,7 +157,7 @@ An expression whose type is not a `ref struct` type is *safe-to-return* from the
 
 An lvalue designating a formal parameter is *ref-safe-to-escape* (by reference) as follows:
 - If the parameter is a `ref`, `out`, or `in` parameter, it is *ref-safe-to-escape* from the entire method (e.g. by a `return ref` statement); otherwise
-- If the parameter is the `this` parameter of a struct type, it is *ref-safe-to-escape* to the top-level scope of the method (but not from the entire method itself);
+- If the parameter is the `this` parameter of a struct type, it is *ref-safe-to-escape* to the top-level scope of the method (but not from the entire method itself); [Sample](#struct-this-escape)
 - Otherwise the parameter is a value parameter, and it is *ref-safe-to-escape* to the top-level scope of the method (but not from the method itself).
 
 An expression that is an rvalue designating the use of a formal parameter is *safe-to-escape* (by value) from the entire method (e.g. by a `return` statement). This applies to the `this` parameter as well.
@@ -279,9 +279,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 
 - For an assignment `e1 = e2`, if the type of `e1` is a `ref struct` type, then the *safe-to-escape* of `e2` must be at least as wide a scope as the *safe-to-escape* of `e1`.
 
-- In a method invocation, the following constraints apply:
-  - If there is a `ref` or `out` argument of a `ref struct` type (including the receiver), with *safe-to-escape* E1, then
-  - no argument (including the receiver) may have a narrower *safe-to-escape* than E1.
+- For a method invocation if there is a `ref` or `out` argument of a `ref struct` type (including the receiver), with *safe-to-escape* E1, then no argument (including the receiver) may have a narrower *safe-to-escape* than E1. [Sample](#method-arguments-must-match)
 
 - A local function or anonymous function may not refer to a local or parameter of `ref struct` type declared in an enclosing scope.
 
@@ -289,6 +287,93 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 > ```csharp
 > Foo(new Span<int>(...), await e2);
 > ```
+
+## Explanations
+These explanations and samples help explain why many of the safety rules above exist
+
+### Method Arguments Must Match
+When invoking a method where there is an `out`, `ref` parameter that is a `ref struct` including the receiver then all of the `ref struct` need to have the same lifetime. This is necessary because C# must make all of it's decisions around lifetime safety based on the information available in the signature of the method and the lifetime of the values at the call site. 
+
+When there are `ref` parameters that are `ref struct` then there is the possiblity they could swap around their contents. Hence at the call site we must ensure all of these **potential** swaps are compatible. If the language didn't enforce that then it will allow for bad code like the following.
+
+```csharp
+void M1(ref Span<int> s1)
+{
+    Span<int> s2 = stackalloc int[1];
+    Swap(ref s1, ref s2);
+}
+
+void Swap(ref Span<int> x, ref int Span<int> y)
+{
+    // This will effectively assign the stackalloc to the s1 parameter and allow it
+    // to escape to the caller of M1
+    ref x = ref y; 
+}
+```
+
+The restriction on the receiver is necessary because while none of its contents are ref-safe-to-escape it can store the provided values. This means with mismatched lifetimes you could create a type safety hole in the following way:
+
+```csharp
+ref struct S
+{
+    public Span<int> Span;
+
+    public void Set(Span<int> span)
+    {
+        Span = span;
+    }
+}
+
+void Broken(ref S s)
+{
+    Span<int> span = stackalloc int[1];
+
+    // The result of a stackalloc is now stored in s.Span and escaped to the caller
+    // of Broken
+    s.Set(span); 
+}
+```
+
+### Struct This Escape
+When it comes to span safety rules the `this` value in an instance member is modeled as a parameter to the member. Now for a `struct` the type of `this` is actually `ref S` where in a `class` it's simply `S` (for members of a `class / struct` named S). 
+
+Yet `this` has different escaping rules than other `ref` parameters. Specifically it is not ref-safe-to-escape while other parameters are:
+
+```csharp
+ref struct S
+{ 
+    int Field;
+
+    // Illegal because this isn't safe to escape as ref
+    ref int Get() => ref Field;
+
+    // Legal
+    ref int GetParam(ref int p) => ref p;
+}
+```
+
+The reason for this restriction actually has little to do with `struct` member invocation. There are some rules that need to be worked out with respect to member invocation on `struct` members where the receiver is an rvalue. But that is very approachable. 
+
+The reason for this restriction is actually about interface invocation. Specifically it comes down to whether or not the following sample should or should not compile;
+
+```csharp
+interface I1
+{
+    ref int Get();
+}
+
+ref int Use<T>(T p)
+    where T : I1
+{
+    return ref p.Get();
+}
+```
+
+Consider the case where `T` is instantiated as a `struct`. If the `this` parameter is ref-safe-to-escape then the return of `p.Get` could point to the stack (specifically it could be a field inside of the instantiated type of `T`). That means the language could not allow this sample to compile as it could be returning a `ref` to a stack location. On the other hand if `this` is not ref-safe-to-escape then `p.Get` cannot refer to the stack and hence it's safe to return. 
+
+This is why the escapability of `this` in a `struct` is really all about interfaces. It can absolutely be made to work but it has a trade off. The design eventually came down in favor of making interfaces more flexible. 
+
+There is potential for us to relax this in the future though. 
 
 ## Future Considerations
 
