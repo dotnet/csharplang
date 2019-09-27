@@ -2,7 +2,7 @@
 
 ## Summary
 
-The language will add two need capabilities around the `using` statement in order to make resource
+The language will add two new capabilities around the `using` statement in order to make resource
 management simpler: `using` should recognize a disposable pattern in addition to `IDisposable` and add a `using`
 declaration to the language.
 
