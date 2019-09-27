@@ -823,7 +823,7 @@ class Test
 }
 ```
 The output produced is as follows:
-```csharp
+```console
 1.2 2.3 3.4 4.5 5.6 6.7 7.8 8.9
 ```
 
@@ -882,7 +882,7 @@ class Test
 the `finally` blocks associated with two `try` statements are executed before control is transferred to the target of the jump statement.
 
 The output produced is as follows:
-```
+```console
 Before break
 Innermost finally block
 Outermost finally block
@@ -1130,13 +1130,13 @@ class Test
 }
 ```
 the method `F` catches an exception, writes some diagnostic information to the console, alters the exception variable, and re-throws the exception. The exception that is re-thrown is the original exception, so the output produced is:
-```
+```console
 Exception in F: G
 Exception in Main: G
 ```
 
 If the first catch block had thrown `e` instead of rethrowing the current exception, the output produced would be as follows:
-```
+```console
 Exception in F: G
 Exception in Main: F
 ```
