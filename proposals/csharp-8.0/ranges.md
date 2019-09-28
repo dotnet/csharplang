@@ -99,7 +99,7 @@ C# has no syntactic way to access "ranges" or "slices" of collections. Usually u
 
 The language will introduce a new range operator `x..y`. It is a binary infix operator that accepts two expressions. Either operand can be omitted (examples below), and they have to be convertible to `System.Index`. It will be lowered to the appropriate `System.Range` factory method call.
 
--We replace the C# grammar rules for *multiplicative_expression* with the following (in order to introduce a new precedence level):
+We replace the C# grammar rules for *multiplicative_expression* with the following (in order to introduce a new precedence level):
 
 ```antlr
 range_expression
@@ -149,9 +149,9 @@ The language will provide an instance indexer member with a single parameter of 
 A type is ***Countable*** if it  has a property named `Length` or `Count` with an accessible getter and a return type of `int`. The language can make use of this property to convert an expression of type `Index` into an `int` at the point of the expression without the need to use the type `Index` at all. In case both `Length` and `Count`
 are present, `Length` will be preferred. For simplicity going forward, the proposal will use the name `Length` to represent `Count` or `Length`.
 
-For such types, the language will act as if there is an index member of the form `T this[Index index]` where `T` is the return type of the `int` based indexer including any `ref` style annotations. The new member will have the same `get` and `set` members with matching accessibility as the `int` indexer. 
+For such types, the language will act as if there is an indexer member of the form `T this[Index index]` where `T` is the return type of the `int` based indexer including any `ref` style annotations. The new member will have the same `get` and `set` members with matching accessibility as the `int` indexer. 
 
-The new indexer will be implemented by converting the argument of type `Index` into an `int` and emitting a call to the `int` based indexer. For discussion purposes, lets use the example of `receiver[expr]`. The conversion of `expr` to `int` will occur as follows:
+The new indexer will be implemented by converting the argument of type `Index` into an `int` and emitting a call to the `int` based indexer. For discussion purposes, let's use the example of `receiver[expr]`. The conversion of `expr` to `int` will occur as follows:
 
 - When the argument is of the form `^expr2` and the type of `expr2` is `int`, it will be translated to `receiver.Length - expr2`.
 - Otherwise, it will be translated as `expr.GetOffset(receiver.Length)`.
@@ -205,11 +205,11 @@ The language will provide an instance indexer member with a single parameter of 
 - The type has an accessible member named `Slice` which has two parameters of type `int`.
 - The type does not have an instance indexer which takes a single `Range` as the first parameter. The `Range` must be the only parameter or the remaining parameters must be optional.
 
-For such types, the language will bind as if there is an index member of the form `T this[Range range]` where `T` is the return type of the `Slice` method including any `ref` style annotations. The new member will also have matching accessibility with `Slice`. 
+For such types, the language will bind as if there is an indexer member of the form `T this[Range range]` where `T` is the return type of the `Slice` method including any `ref` style annotations. The new member will also have matching accessibility with `Slice`. 
 
-When the `Range` based indexer is bound on an expression named `receiver`, it will be lowered by converting the `Range` expression into two values that are then passed to the `Slice` method. For discussion purposes, lets use the example of `receiver[expr]`.
+When the `Range` based indexer is bound on an expression named `receiver`, it will be lowered by converting the `Range` expression into two values that are then passed to the `Slice` method. For discussion purposes, let's use the example of `receiver[expr]`.
 
-The first argument of `Slice` will be obtained by converting the typed expression in the following way:
+The first argument of `Slice` will be obtained by converting the range typed expression in the following way:
 
 - When `expr` is of the form `expr1..expr2` (where `expr2` can be omitted) and `expr1` has type `int`, then it will be emitted as `expr1`.
 - When `expr` is of the form `^expr1..expr2` (where `expr2` can be omitted), then it will be emitted as `receiver.Length - expr1`.
@@ -223,7 +223,7 @@ This value will be re-used in the calculation of the second `Slice` argument. Wh
 - When `expr` is of the form `expr1..` (where `expr1` can be omitted), then it will be emitted as `receiver.Length - start`.
 - Otherwise, it will be emitted as `expr.End.GetOffset(receiver.Length) - start`.
 
-The `receiver`, `Length` and `expr` expressions will be spilled as appropriate to ensure any side effects are only executed once. For example:
+The `receiver`, `Length`, and `expr` expressions will be spilled as appropriate to ensure any side effects are only executed once. For example:
 
 ``` csharp
 class Collection {
