@@ -22,6 +22,7 @@
 
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 - Proposed changes for pattern-matching (Neal)
+- https://github.com/dotnet/csharplang/issues/2844 Draft specification for Covariant Return Types (Neal)
 
 ## Oct 21, 2019
 
