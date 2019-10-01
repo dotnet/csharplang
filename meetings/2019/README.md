@@ -16,6 +16,8 @@
 
 ## Oct 28, 2019
 
+- Native-sized ints
+
 ## Oct 23, 2019
 
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
