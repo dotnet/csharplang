@@ -1212,7 +1212,7 @@ class Test
 }
 ```
 a class `A` defines a read-only property `P`, thus reserving signatures for `get_P` and `set_P` methods. A class `B` derives from `A` and hides both of these reserved signatures. The example produces the output:
-```
+```console
 123
 123
 456
@@ -1528,7 +1528,7 @@ class Test
 }
 ```
 produces the output:
-```
+```console
 result = 143
 ```
 
@@ -1552,7 +1552,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 b = False, i = 0
 ```
 because `b` and `i` are both automatically initialized to default values.
@@ -1578,7 +1578,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 x = 1.4142135623731, i = 100, s = Hello
 ```
 because an assignment to `x` occurs when static field initializers execute and assignments to `i` and `s` occur when the instance field initializers execute.
@@ -1600,7 +1600,7 @@ class Test
 }
 ```
 exhibits this behavior. Despite the circular definitions of a and b, the program is valid. It results in the output
-```
+```console
 a = 1, b = 2
 ```
 because the static fields `a` and `b` are initialized to `0` (the default value for `int`) before their initializers are executed. When the initializer for `a` runs, the value of `b` is zero, and so `a` is initialized to `1`. When the initializer for `b` runs, the value of `a` is already `1`, and so `b` is initialized to `2`.
@@ -1634,13 +1634,13 @@ class B
 }
 ```
 might produce either the output:
-```
+```console
 Init A
 Init B
 1 1
 ```
 or the output:
-```
+```console
 Init B
 Init A
 1 1
@@ -1676,7 +1676,7 @@ class B
 }
 ```
 the output must be:
-```
+```console
 Init B
 Init A
 1 1
@@ -1906,7 +1906,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 i = 2, j = 1
 ```
 
@@ -1970,7 +1970,7 @@ class Test
 ```
 
 The example produces the output:
-```
+```console
 c:\Windows\System\
 hello.txt
 ```
@@ -2010,7 +2010,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 Array contains 3 elements: 1 2 3
 Array contains 4 elements: 10 20 30 40
 Array contains 0 elements:
@@ -2052,7 +2052,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 F();
 F(object[]);
 F(object,object);
@@ -2089,7 +2089,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 System.Int32 System.String System.Double
 System.Object[]
 System.Object[]
@@ -2160,7 +2160,7 @@ class Test
 ```
 
 In the example, `A` introduces a non-virtual method `F` and a virtual method `G`. The class `B` introduces a new non-virtual method `F`, thus hiding the inherited `F`, and also overrides the inherited method `G`. The example produces the output:
-```
+```console
 A.F
 B.F
 B.G
@@ -2208,7 +2208,7 @@ class Test
 }
 ```
 the `C` and `D` classes contain two virtual methods with the same signature: The one introduced by `A` and the one introduced by `C`. The method introduced by `C` hides the method inherited from `A`. Thus, the override declaration in `D` overrides the method introduced by `C`, and it is not possible for `D` to override the method introduced by `A`. The example produces the output:
-```
+```console
 B.F
 B.F
 D.F
@@ -3850,7 +3850,7 @@ class B: A
 }
 ```
 when `new B()` is used to create an instance of `B`, the following output is produced:
-```
+```console
 x = 1, y = 0
 ```
 
@@ -4076,7 +4076,7 @@ class B
 }
 ```
 must produce the output:
-```
+```console
 Init A
 A.F
 Init B
@@ -4111,7 +4111,7 @@ class B
 }
 ```
 produces the output
-```
+```console
 X = 1, Y = 2
 ```
 

@@ -178,7 +178,7 @@ This tag allows including information from an XML document that is external to t
 
 __Syntax:__
 
-```
+```xml
 <include file="filename" path="xpath" />
 ```
 

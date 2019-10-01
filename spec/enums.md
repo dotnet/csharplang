@@ -154,7 +154,7 @@ class Test
 
 prints out the enum member names and their associated values. The output is:
 
-```
+```console
 Red = 0
 Green = 10
 Blue = 11

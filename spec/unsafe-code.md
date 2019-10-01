@@ -619,7 +619,7 @@ class Test
 
 which produces the output:
 
-```
+```console
 p - q = -14
 q - p = 14
 ```
@@ -795,7 +795,7 @@ class Test
 
 which produces the output:
 
-```
+```console
 [0,0,0] =  0 [0,0,1] =  1 [0,0,2] =  2 [0,0,3] =  3
 [0,1,0] =  4 [0,1,1] =  5 [0,1,2] =  6 [0,1,3] =  7
 [0,2,0] =  8 [0,2,1] =  9 [0,2,2] = 10 [0,2,3] = 11

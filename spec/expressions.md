@@ -479,7 +479,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 x = 0, y = 1, z = 2
 x = 4, y = -1, z = 3
 ```
@@ -1201,7 +1201,7 @@ class A
 #### Grammar ambiguities
 
 The productions for *simple_name* ([Simple names](expressions.md#simple-names)) and *member_access* ([Member access](expressions.md#member-access)) can give rise to ambiguities in the grammar for expressions. For example, the statement:
-```
+```csharp
 F(G<A,B>(7));
 ```
 could be interpreted as a call to `F` with two arguments, `G < A` and `B > (7)`. Alternatively, it could be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument.
@@ -1402,7 +1402,7 @@ namespace N2
 ```
 
 The output of this example is:
-```
+```console
 E.F(1)
 D.G(2)
 C.H(3)
@@ -2135,7 +2135,7 @@ class Test
 }
 ```
 produces the following output:
-```
+```console
 System.Int32
 System.Int32
 System.String
@@ -3183,7 +3183,7 @@ The operators compare the operands according to the rules of the IEEE 754 standa
 *  If either operand is NaN, the result is `false` for all operators except `!=`, for which the result is `true`. For any two operands, `x != y` always produces the same result as `!(x == y)`. However, when one or both operands are NaN, the `<`, `>`, `<=`, and `>=` operators do not produce the same results as the logical negation of the opposite operator. For example, if either of `x` and `y` is NaN, then `x < y` is `false`, but `!(x >= y)` is `true`.
 *  When neither operand is NaN, the operators compare the values of the two floating-point operands with respect to the ordering
 
-   ```
+   ```csharp
    -inf < -max < ... < -min < -0.0 == +0.0 < +min < ... < +max < +inf
    ```
 
@@ -3286,7 +3286,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 True
 False
 False
@@ -3830,7 +3830,7 @@ class Test
 }
 ```
 the local variable `x` is captured by the anonymous function, and the lifetime of `x` is extended at least until the delegate returned from `F` becomes eligible for garbage collection (which doesn't happen until the very end of the program). Since each invocation of the anonymous function operates on the same instance of `x`, the output of the example is:
-```
+```console
 1
 2
 3
@@ -3889,7 +3889,7 @@ class Test
 }
 ```
 produces the output:
-```
+```console
 1
 3
 5
@@ -3908,7 +3908,7 @@ static D[] F() {
 }
 ```
 the output is:
-```
+```console
 5
 5
 5
@@ -3926,7 +3926,7 @@ static D[] F() {
 }
 ```
 only one instance of the iteration variable is captured, which produces the output:
-```
+```console
 3
 3
 3
@@ -3945,7 +3945,7 @@ static D[] F() {
 }
 ```
 the three delegates capture the same instance of `x` but separate instances of `y`, and the output is:
-```
+```console
 1 1
 2 1
 3 1
@@ -3973,7 +3973,7 @@ class Test
 }
 ```
 the two anonymous functions capture the same instance of the local variable `x`, and they can thus "communicate" through that variable. The output of the example is:
-```
+```console
 5
 10
 ```
@@ -4131,11 +4131,11 @@ from x in ( e ) . Cast < T > ( )
 ```
 
 A `join` clause that explicitly specifies a range variable type
-```
+```csharp
 join T x in e on k1 equals k2
 ```
 is translated into
-```
+```csharp
 join x in ( e ) . Cast < T > ( ) on k1 equals k2
 ```
 

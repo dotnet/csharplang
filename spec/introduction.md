@@ -28,11 +28,11 @@ class Hello
 ```
 
 C# source files typically have the file extension `.cs`. Assuming that the "Hello, World" program is stored in the file `hello.cs`, the program can be compiled with the Microsoft C# compiler using the command line
-```
+```console
 csc hello.cs
 ```
 which produces an executable assembly named `hello.exe`. The output produced by this application when it is run is
-```
+```console
 Hello, World
 ```
 
@@ -83,7 +83,7 @@ namespace Acme.Collections
 ```
 declares a class named `Stack` in a namespace called `Acme.Collections`. The fully qualified name of this class is `Acme.Collections.Stack`. The class contains several members: a field named `top`, two methods named `Push` and `Pop`, and a nested class named `Entry`. The `Entry` class further contains three members: a field named `next`, a field named `data`, and a constructor. Assuming that the source code of the example is stored in the file `acme.cs`, the command line
 
-```
+```console
 csc /t:library acme.cs
 ```
 compiles the example as a library (code without a `Main` entry point) and produces an assembly named `acme.dll`.
@@ -111,12 +111,12 @@ class Test
 ```
 If the program is stored in the file `test.cs`, when `test.cs` is compiled, the `acme.dll` assembly can be referenced using the compiler's `/r` option:
 
-```
+```console
 csc /r:acme.dll test.cs
 ```
 This creates an executable assembly named `test.exe`, which, when run, produces the output:
 
-```
+```console
 100
 10
 1

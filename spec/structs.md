@@ -229,7 +229,7 @@ class Program
 ```
 
 The output of the program is:
-```
+```console
 1
 2
 3
@@ -278,7 +278,7 @@ class Program
 ```
 
 The first call to `Increment` modifies the value in the variable `x`. This is not equivalent to the second call to `Increment`, which modifies the value in a boxed copy of `x`. Thus, the output of the program is:
-```
+```console
 0
 1
 1

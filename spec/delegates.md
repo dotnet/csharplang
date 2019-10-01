@@ -236,7 +236,7 @@ Immediately prior to the execution of the final statement, `cd3 -= cd1;`, the de
 
 The output produced is:
 
-```
+```console
 C.M1: -1
 C.M2: -2
 C.M1: 10
