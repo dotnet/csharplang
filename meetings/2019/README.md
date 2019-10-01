@@ -8,8 +8,8 @@
 ## Recurring topics
 
 - *Triage championed features*
-    - https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression
-    - https://github.com/dotnet/csharplang/issues/2608 module initializers
+    - https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression (Neal)
+    - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 
 - *Triage milestones*
 - *Design review*
