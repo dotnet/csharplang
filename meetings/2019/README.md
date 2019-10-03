@@ -1,28 +1,30 @@
 # Upcoming meetings for 2019
 
 ## Schedule ASAP
-- close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 
 ## Schedule when convenient
 
 ## Recurring topics
 
 - *Triage championed features*
-    - https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression (Neal)
-    - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
-
 - *Triage milestones*
 - *Design review*
 
+## Oct 30, 2019
+
+- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
+- https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression (Neal)
+- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+
 ## Oct 28, 2019
 
-- Native-sized ints
+- https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
+- https://github.com/dotnet/csharplang/issues/2844 Draft specification for Covariant Return Types (Neal)
 
 ## Oct 23, 2019
 
-- https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
-- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
-- https://github.com/dotnet/csharplang/issues/2844 Draft specification for Covariant Return Types (Neal)
+- close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
+- https://github.com/dotnet/csharplang/issues/435 Native-sized ints (Chuck, Jared)
 
 ## Oct 21, 2019
 
