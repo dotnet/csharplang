@@ -13,13 +13,13 @@
 ## Oct 30, 2019
 
 - https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
-- https://github.com/dotnet/csharplang/issues/2632 Champion: Switch expression as a statement expression (Neal)
+- https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (Neal)
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 
 ## Oct 28, 2019
 
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
-- https://github.com/dotnet/csharplang/issues/2844 Draft specification for Covariant Return Types (Neal)
+- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 
 ## Oct 23, 2019
 
