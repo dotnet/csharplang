@@ -118,7 +118,8 @@ In cases where there are two overloads, one for `nint` and one for `nuint`, the 
 | `>` | `native` | `native` | `native` | `bgt` / `cgt` / `bgt.un` / `cgt.un` |
 | `>=` | `native` | `native` | `native` | `bge` / `bge.un` |
 | `&` | `native` | `native` | `native` | `and` |
-| `\|` | `native` | `native` | `native` | `or` |
+| <code>&#124;</code> | `native` | `native` | `native` | `or` |
+| `^` | `native` | `native` | `native` | `xor` |
 | `<<` | `native` | `int` | `native` | `shl` |
 | `>>` | `native` | `int` | `native` | `shr` / `shr.un` |
 
