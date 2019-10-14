@@ -39,11 +39,11 @@ The following numeric conversions are supported.
 | Operand | Target | Implicit | IL |
 |:---:|:---:|:---:|:---:|
 | `sbyte` | `nint` | Y | `conv.i` |
-| `byte` | `nint` | Y | `conv.i` |
+| `byte` | `nint` | Y | `conv.u` |
 | `short` | `nint` | Y | `conv.i` |
-| `ushort` | `nint` | Y | `conv.i` |
+| `ushort` | `nint` | Y | `conv.u` |
 | `int` | `nint` | Y | `conv.i` |
-| `uint` | `nint` |   | `conv.i` / `conv.ovf.i` |
+| `uint` | `nint` |   | `conv.u` / `conv.ovf.u` |
 | `long` | `nint` |   | `conv.i` / `conv.ovf.i` |
 | `ulong` | `nint` |   | `conv.i` / `conv.ovf.i` |
 | `char` | `nint` | Y | `conv.i` |
@@ -71,7 +71,7 @@ The following numeric conversions are supported.
 | `nint` | `int` |   | `conv.i4` / `conv.ovf.i4` |
 | `nint` | `uint` |   | `conv.u4` / `conv.ovf.u4` |
 | `nint` | `long` | Y | `conv.i8` / `conv.ovf.i8` |
-| `nint` | `ulong` |   | `conv.u8` / `conv.ovf.u8` |
+| `nint` | `ulong` |   | `conv.i8` / `conv.ovf.i8` |
 | `nint` | `char` |   | `conv.u2` / `conv.ovf.u2` |
 | `nint` | `float` | Y | `conv.r4` |
 | `nint` | `double` | Y | `conv.r8` |
