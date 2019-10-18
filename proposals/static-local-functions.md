@@ -20,7 +20,7 @@ A `static` local function may reference `static` members from the enclosing scop
 
 A `static` local function may reference `constant` definitions from the enclosing scope.
 
-`nameof()` in a `static` local function cannot reference state from the enclosing scope.
+`nameof()` in a `static` local function may reference locals, parameters, or `this` or `base` from the enclosing scope.
 
 Accessibility rules for `private` members in the enclosing scope are the same for `static` and non-`static` local functions.
 
