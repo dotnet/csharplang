@@ -3,6 +3,7 @@
 ## Schedule ASAP
 
 ## Schedule when convenient
+- https://github.com/dotnet/csharplang/issues/373 Modifying scoping rules for attributes (allow `nameof(parameter)` (Julien)
 
 ## Recurring topics
 
