@@ -97,7 +97,6 @@ nullable_action
     : 'disable'
     | 'enable'
     | 'restore'
-    | 'safeonly'
     ;
 ```
 
@@ -119,7 +118,7 @@ Note that the new form of `pragma_warning_body` uses `nullable_action`, not `war
 
 ## Nullable contexts
 
-Every line of source code has a *nullable annotation context* and a *nullable warning context*. These control whether nullable annotations have effect, and whether nullability warnings are given. The annotation context of a given line is either *disabled* or *enabled*. The warning context of a given line is either *disabled*, *safeonly* or *enabled*.
+Every line of source code has a *nullable annotation context* and a *nullable warning context*. These control whether nullable annotations have effect, and whether nullability warnings are given. The annotation context of a given line is either *disabled* or *enabled*. The warning context of a given line is either *disabled* or *enabled*.
 
 Both contexts can be specified at the project level (outside of C# source code), or anywhere within a source file via `#nullable` and `#pragma warning` pre-processor directives. If no project level settings are provided the default is for both contexts to be *disabled*.
 
@@ -132,11 +131,9 @@ The effect of the directives is as follows:
 - `#nullable disable`: Sets the nullable annotation and warning contexts to *disabled*
 - `#nullable enable`: Sets the nullable annotation and warning contexts to *enabled*
 - `#nullable restore`: Restores the nullable annotation and warning contexts to project settings
-- `#nullable safeonly`: Sets the nullable annotation context to *enabled* and the warning context to *safeonly*
 - `#pragma warning disable nullable`: Sets the nullable warning context to *disabled*
 - `#pragma warning enable nullable`: Sets the nullable warning context to *enabled*
 - `#pragma warning restore nullable`: Restores the nullable warning context to project settings
-- `#pragma warning safeonly nullable`: Sets the nullable warning context to *safeonly*
 
 ## Nullability of types
 
