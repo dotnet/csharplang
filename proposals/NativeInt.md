@@ -10,10 +10,10 @@ The motivation is for interop scenarios and for low-level libraries.
 ## Design
 [design]: #design
 
-New contextual keywords `nint` and `nuint` represent native signed and unsigned integer types.
-The identifiers are only treated as keywords when used in a type context and when the identifier does not otherwise bind to a symbol at that program location.
+The identifiers `nint` and `nuint` are new contextual keywords that represent native signed and unsigned integer types.
+The identifiers are only treated as keywords when used as a simple name in a type context and name lookup does not find a viable result at that program location.
 
-The types `nint` and `nuint` are essentially aliases to underlying types `System.IntPtr` and `System.UIntPtr`, where the compiler can surface additional conversions and operations for native ints.
+The types `nint` and `nuint` are represented by the underlying types `System.IntPtr` and `System.UIntPtr` with compiler surfacing additional conversions and operations for those types as native ints.
 
 ### Constants
 
@@ -29,67 +29,70 @@ Constant folding is supported for all operators: { (unary)`-`, `~`, `+`, `-`, `*
 Constant folding operations are evaluated with `Int32` and `UInt32` operands rather than native ints for consistent behavior regardless of compiler platform.
 
 ### Conversions
-Types that differ only by `nint` and `IntPtr` and by `nuint` and `UIntPtr` are considered equivalent. That applies to the primitive types as well as arrays, `Nullable<>`, constructed types, and tuples.
-
-_Are these "identity" conversions between equivalent types represented in the Roslyn API?_
+There are identity conversions between native ints and the underlying types in both directions.
+And there are identity conversions between compound types that differ by native ints and underlying types only: arrays, `Nullable<>`, constructed types, and tuples.
 
 The following numeric conversions are supported.
 (The IL for each conversion includes the variants for `unchecked` and `checked` contexts if different.)
 
-| Operand | Target | Implicit | IL |
+| Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
-| `sbyte` | `nint` | Y | `conv.i` |
-| `byte` | `nint` | Y | `conv.u` |
-| `short` | `nint` | Y | `conv.i` |
-| `ushort` | `nint` | Y | `conv.u` |
-| `int` | `nint` | Y | `conv.i` |
-| `uint` | `nint` |   | `conv.u` / `conv.ovf.u` |
-| `long` | `nint` |   | `conv.i` / `conv.ovf.i` |
-| `ulong` | `nint` |   | `conv.i` / `conv.ovf.i` |
-| `char` | `nint` | Y | `conv.i` |
-| `float` | `nint` |   | `conv.i` / `conv.ovf.i` |
-| `double` | `nint` |   | `conv.i` / `conv.ovf.i` |
-| `sbyte` | `nuint` |   | `conv.u` / `conv.ovf.u` |
-| `byte` | `nuint` | Y | `conv.u` |
-| `short` | `nuint` |   | `conv.u` / `conv.ovf.u` |
-| `ushort` | `nuint` | Y | `conv.u` |
-| `int` | `nuint` |   | `conv.u` / `conv.ovf.u` |
-| `uint` | `nuint` | Y | `conv.u` |
-| `long` | `nuint` |   | `conv.u` / `conv.ovf.u` |
-| `ulong` | `nuint` |   | `conv.u` / `conv.ovf.u` |
-| `char` | `nuint` | Y | `conv.u` |
-| `float` | `nuint` |   | `conv.u` / `conv.ovf.u` |
-| `double` | `nuint` |   | `conv.u` / `conv.ovf.u` |
+| `sbyte` | `nint` | Implicit Numeric | `conv.i` |
+| `byte` | `nint` | Implicit Numeric | `conv.u` |
+| `short` | `nint` | Implicit Numeric | `conv.i` |
+| `ushort` | `nint` | Implicit Numeric | `conv.u` |
+| `int` | `nint` | Implicit Numeric | `conv.i` |
+| `uint` | `nint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `long` | `nint` | Explicit Numeric | `conv.i` / `conv.ovf.i` |
+| `ulong` | `nint` | Explicit Numeric | `conv.i` / `conv.ovf.i` |
+| `char` | `nint` | Implicit Numeric | `conv.i` |
+| `float` | `nint` | Explicit Numeric | `conv.i` / `conv.ovf.i` |
+| `double` | `nint` | Explicit Numeric | `conv.i` / `conv.ovf.i` |
+| `sbyte` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `byte` | `nuint` | Implicit Numeric | `conv.u` |
+| `short` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `ushort` | `nuint` | Implicit Numeric | `conv.u` |
+| `int` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `uint` | `nuint` | Implicit Numeric | `conv.u` |
+| `long` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `ulong` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `char` | `nuint` | Implicit Numeric | `conv.u` |
+| `float` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `double` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
 
-| Operand | Target | Implicit | IL |
+| Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
-| `nint` | `nuint` |   | `conv.u` / `conv.ovf.u` |
-| `nint` | `sbyte` |   | `conv.i1` / `conv.ovf.i1` |
-| `nint` | `byte` |   | `conv.u1` / `conv.ovf.u1` |
-| `nint` | `short` |   | `conv.i2` / `conv.ovf.i2` |
-| `nint` | `ushort` |   | `conv.u2` / `conv.ovf.u2` |
-| `nint` | `int` |   | `conv.i4` / `conv.ovf.i4` |
-| `nint` | `uint` |   | `conv.u4` / `conv.ovf.u4` |
-| `nint` | `long` | Y | `conv.i8` / `conv.ovf.i8` |
-| `nint` | `ulong` |   | `conv.i8` / `conv.ovf.i8` |
-| `nint` | `char` |   | `conv.u2` / `conv.ovf.u2` |
-| `nint` | `float` | Y | `conv.r4` |
-| `nint` | `double` | Y | `conv.r8` |
-| `nuint` | `nint` |   | `conv.i` / `conv.ovf.i` |
-| `nuint` | `sbyte` |   | `conv.i1` / `conv.ovf.i1` |
-| `nuint` | `byte` |   | `conv.u1` / `conv.ovf.u1` |
-| `nuint` | `short` |   | `conv.i2` / `conv.ovf.i2` |
-| `nuint` | `ushort` |   | `conv.u2` / `conv.ovf.u2` |
-| `nuint` | `int` |   | `conv.i4` / `conv.ovf.i4` |
-| `nuint` | `uint` |   | `conv.u4` / `conv.ovf.u4` |
-| `nuint` | `long` |   | `conv.i8` / `conv.ovf.i8` |
-| `nuint` | `ulong` | Y | `conv.u8` / `conv.ovf.u8` |
-| `nuint` | `char` |   | `conv.u2` / `conv.ovf.u2.un` |
-| `nuint` | `float` | Y | `conv.r.un conv.r4` |
-| `nuint` | `double` | Y | `conv.r.un conv.r8` |
+| `nint` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `nint` | `sbyte` | Explicit Numeric | `conv.i1` / `conv.ovf.i1` |
+| `nint` | `byte` | Explicit Numeric | `conv.u1` / `conv.ovf.u1` |
+| `nint` | `short` | Explicit Numeric | `conv.i2` / `conv.ovf.i2` |
+| `nint` | `ushort` | Explicit Numeric | `conv.u2` / `conv.ovf.u2` |
+| `nint` | `int` | Explicit Numeric | `conv.i4` / `conv.ovf.i4` |
+| `nint` | `uint` | Explicit Numeric | `conv.u4` / `conv.ovf.u4` |
+| `nint` | `long` | Implicit Numeric | `conv.i8` / `conv.ovf.i8` |
+| `nint` | `ulong` | Explicit Numeric | `conv.i8` / `conv.ovf.i8` |
+| `nint` | `char` | Explicit Numeric | `conv.u2` / `conv.ovf.u2` |
+| `nint` | `float` | Implicit Numeric | `conv.r4` |
+| `nint` | `double` | Implicit Numeric | `conv.r8` |
+| `nuint` | `nint` | Explicit Numeric | `conv.i` / `conv.ovf.i` |
+| `nuint` | `sbyte` | Explicit Numeric | `conv.i1` / `conv.ovf.i1` |
+| `nuint` | `byte` | Explicit Numeric | `conv.u1` / `conv.ovf.u1` |
+| `nuint` | `short` | Explicit Numeric | `conv.i2` / `conv.ovf.i2` |
+| `nuint` | `ushort` | Explicit Numeric | `conv.u2` / `conv.ovf.u2` |
+| `nuint` | `int` | Explicit Numeric | `conv.i4` / `conv.ovf.i4` |
+| `nuint` | `uint` | Explicit Numeric | `conv.u4` / `conv.ovf.u4` |
+| `nuint` | `long` | Explicit Numeric | `conv.i8` / `conv.ovf.i8` |
+| `nuint` | `ulong` | Implicit Numeric | `conv.u8` / `conv.ovf.u8` |
+| `nuint` | `char` | Explicit Numeric | `conv.u2` / `conv.ovf.u2.un` |
+| `nuint` | `float` | Implicit Numeric | `conv.r.un conv.r4` |
+| `nuint` | `double` | Implicit Numeric | `conv.r.un conv.r8` |
 
 Conversions between `decimal` and `nint` or `nuint` are not supported because there are no operators on `decimal` that use `native int`.
 There are operators on `decimal` to convert to and from `long` or `ulong` but those are not optimal on 32-bit platforms.
+
+Conversion from `A` to `Nullable<B>` is an implicit nullable conversion if there is an identity conversion or implicit numeric conversion from `A` to `B` and is an explicit nullable conversion if there is an explicit numeric conversion from `A` to `B`.
+Conversion from `Nullable<A>` to `B` is an explicit nullable conversion if there is an identity conversion or implicit or explicit numeric conversion from `A` to `B`.
+Conversion from `Nullable<A>` to `Nullable<B>` is an explicit nullable conversion if there is an identity conversion or implicit or explicit numeric conversion from `A` to `B`.
 
 ### Operators
 
