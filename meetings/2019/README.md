@@ -27,13 +27,17 @@
 - close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 - https://github.com/dotnet/csharplang/issues/435 Native-sized ints (Chuck, Jared)
 
-## Oct 21, 2019
-
-- Records and related features (Andy)
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Oct 21, 2019
+
+[C# Language Design Notes for Oct 21, 2019](LDM-2019-10-21.md)
+
+1. Records
+2. Init-only members
+3. Static lambdas
 
 ## Sep 18, 2019
 
