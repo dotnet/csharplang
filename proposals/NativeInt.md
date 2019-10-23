@@ -30,13 +30,16 @@ Constant folding operations are evaluated with `Int32` and `UInt32` operands rat
 
 ### Conversions
 There are identity conversions between native ints and the underlying types in both directions.
-And there are identity conversions between compound types that differ by native ints and underlying types only: arrays, `Nullable<>`, constructed types, and tuples.
+There are identity conversions between compound types that differ by native ints and underlying types only: arrays, `Nullable<>`, constructed types, and tuples.
 
-The following numeric conversions are supported.
+The tables below conver the conversions between special types.
 (The IL for each conversion includes the variants for `unchecked` and `checked` contexts if different.)
 
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
+| `object` | `nint` | Unboxing | `unbox` |
+| `string` | `nint` | None | |
+| `void*` | `nint` | Explicit User Defined | `IntPtr IntPtr.op_Explicit(void*)` |
 | `sbyte` | `nint` | Implicit Numeric | `conv.i` |
 | `byte` | `nint` | Implicit Numeric | `conv.u` |
 | `short` | `nint` | Implicit Numeric | `conv.i` |
@@ -48,6 +51,12 @@ The following numeric conversions are supported.
 | `char` | `nint` | Implicit Numeric | `conv.i` |
 | `float` | `nint` | Explicit Numeric | `conv.i` / `conv.ovf.i` |
 | `double` | `nint` | Explicit Numeric | `conv.i` / `conv.ovf.i` |
+| `decimal` | `nint` | Explicit User Defined | `long IntPtr.op_Explicit(decimal) IntPtr IntPtr.op_Explicit(long)` |
+| `IntPtr` | `nint` | Identity | |
+| `UIntPtr` | `nint` | None | |
+| `object` | `nuint` | Unboxing | `unbox` |
+| `string` | `nuint` | None | |
+| `void*` | `nuint` | Explicit User Defined | `UIntPtr UIntPtr.op_Explicit(void*)` |
 | `sbyte` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
 | `byte` | `nuint` | Implicit Numeric | `conv.u` |
 | `short` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
@@ -59,9 +68,15 @@ The following numeric conversions are supported.
 | `char` | `nuint` | Implicit Numeric | `conv.u` |
 | `float` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
 | `double` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
+| `decimal` | `nuint` | Explicit User Defined | `ulong UIntPtr.op_Explicit(decimal) UIntPtr UIntPtr.op_Explicit(ulong)` |
+| `IntPtr` | `nuint` | None | |
+| `UIntPtr` | `nuint` | Identity | |
 
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
+| `nint` | `object` | Boxing | `box` |
+| `nint` | `string` | None | |
+| `nint` | `void*` | Explicit User Defined | `void* IntrPtr.op_Explicit(IntPtr)` |
 | `nint` | `nuint` | Explicit Numeric | `conv.u` / `conv.ovf.u` |
 | `nint` | `sbyte` | Explicit Numeric | `conv.i1` / `conv.ovf.i1` |
 | `nint` | `byte` | Explicit Numeric | `conv.u1` / `conv.ovf.u1` |
@@ -74,6 +89,12 @@ The following numeric conversions are supported.
 | `nint` | `char` | Explicit Numeric | `conv.u2` / `conv.ovf.u2` |
 | `nint` | `float` | Implicit Numeric | `conv.r4` |
 | `nint` | `double` | Implicit Numeric | `conv.r8` |
+| `nint` | `decimal` | Explicit User Defined | `long decimal.op_Explicit(decimal) IntPtr IntPtr.op_Explicit(long)` |
+| `nint` | `IntPtr` | Identity | |
+| `nint` | `UIntPtr` | None | |
+| `nuint` | `object` | Boxing | `box` |
+| `nuint` | `string` | None | |
+| `nuint` | `void*` | Explicit User Defined | `void* IntrPtr.op_Explicit(IntPtr)` |
 | `nuint` | `nint` | Explicit Numeric | `conv.i` / `conv.ovf.i` |
 | `nuint` | `sbyte` | Explicit Numeric | `conv.i1` / `conv.ovf.i1` |
 | `nuint` | `byte` | Explicit Numeric | `conv.u1` / `conv.ovf.u1` |
@@ -86,13 +107,13 @@ The following numeric conversions are supported.
 | `nuint` | `char` | Explicit Numeric | `conv.u2` / `conv.ovf.u2.un` |
 | `nuint` | `float` | Implicit Numeric | `conv.r.un conv.r4` |
 | `nuint` | `double` | Implicit Numeric | `conv.r.un conv.r8` |
+| `nuint` | `decimal` | Explicit User Defined | `ulong decimal.op_Explicit(decimal) UIntPtr UIntPtr.op_Explicit(ulong)` |
+| `nuint` | `IntPtr` | None | |
+| `nuint` | `UIntPtr` | Identity | |
 
-Conversions between `decimal` and `nint` or `nuint` are not supported because there are no operators on `decimal` that use `native int`.
-There are operators on `decimal` to convert to and from `long` or `ulong` but those are not optimal on 32-bit platforms.
-
-Conversion from `A` to `Nullable<B>` is an implicit nullable conversion if there is an identity conversion or implicit numeric conversion from `A` to `B` and is an explicit nullable conversion if there is an explicit numeric conversion from `A` to `B`.
-Conversion from `Nullable<A>` to `B` is an explicit nullable conversion if there is an identity conversion or implicit or explicit numeric conversion from `A` to `B`.
-Conversion from `Nullable<A>` to `Nullable<B>` is an explicit nullable conversion if there is an identity conversion or implicit or explicit numeric conversion from `A` to `B`.
+Conversion from `A` to `Nullable<B>` is: an implicit nullable conversion if there is an identity conversion or implicit conversion from `A` to `B`; an explicit nullable conversion if there is an explicit conversion from `A` to `B`; otherwise invalid.
+Conversion from `Nullable<A>` to `B` is: an explicit nullable conversion if there is an identity conversion or implicit or explicit numeric conversion from `A` to `B`; otherwise invalid.
+Conversion from `Nullable<A>` to `Nullable<B>` is: an identity conversion if there is an identity conversion from `A` to `B`; an explicit nullable conversion if there is an implicit or explicit numeric conversion from `A` to `B`; otherwise invalid.
 
 ### Operators
 
@@ -104,6 +125,7 @@ In cases where there are two overloads, one for `nint` and one for `nuint`, the 
 
 | Unary | Operand | Result | IL |
 |:---:|:---:|:---:|:---:|
+| `+` | `native` | `native` | |
 | `-` | `nint` | `nint` | `neg` |
 | `~` | `native` | `native` | `not` |
 
