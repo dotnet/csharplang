@@ -42,13 +42,17 @@
 - https://github.com/dotnet/csharplang/issues/111 Confirm whether discard parameters are allowed in methods and local function, confirm scoping behavior (Julien)
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 
-## Oct 23, 2019
-
-- https://github.com/dotnet/csharplang/issues/435 Native-sized ints (Chuck, Jared)
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Oct 23, 2019
+
+[C# Language Design Notes for Oct 23, 2019](LDM-2019-10-23.md)
+
+1. New primitive types 
+
+https://github.com/dotnet/csharplang/issues/435
 
 ## Oct 21, 2019
 
