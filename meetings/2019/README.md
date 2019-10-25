@@ -4,6 +4,7 @@
 
 ## Schedule when convenient
 - https://github.com/dotnet/csharplang/issues/373 Modifying scoping rules for attributes (allow `nameof(parameter)` (Julien)
+- close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 
 ## Recurring topics
 
@@ -19,12 +20,12 @@
 
 ## Oct 28, 2019
 
+- https://github.com/dotnet/csharplang/issues/111 Confirm whether discard parameters are allowed in methods and local function, confirm scoping behavior (Julien)
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 - https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 
 ## Oct 23, 2019
 
-- close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 - https://github.com/dotnet/csharplang/issues/435 Native-sized ints (Chuck, Jared)
 
 # C# Language Design Notes for 2019
