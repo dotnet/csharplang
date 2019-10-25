@@ -23,6 +23,7 @@
 ## Nov 11, 2019
 
 - https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
+- https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
 
 ## Oct 30, 2019
 
