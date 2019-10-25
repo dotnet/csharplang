@@ -22,6 +22,8 @@
 
 ## Nov 11, 2019
 
+- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
+
 ## Oct 30, 2019
 
 - Function Pointer syntax (Fred)
@@ -33,7 +35,7 @@
 
 - https://github.com/dotnet/csharplang/issues/111 Confirm whether discard parameters are allowed in methods and local function, confirm scoping behavior (Julien)
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
-- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
 ## Oct 23, 2019
 
