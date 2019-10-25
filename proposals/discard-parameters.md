@@ -20,6 +20,7 @@ Unused parameters do not need to be named. The intent of discards is clear, i.e.
 In a parameter list with more than one parameter named `_`, such parameters are discard parameters.
 Note: if a single parameter is named `_` then it is a regular parameter for backwards compatibility reasons.
 
-Discard parameters are not in scope in the body of the method, they do not introduce any names.
+Discard parameters do not introduce any names to any scopes.
+Note this implies they do not cause any `_` (underscore) names to be hidden.
 In a method invocation, a named argument never corresponds to a discard parameter.
 
