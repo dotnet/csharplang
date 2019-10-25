@@ -12,8 +12,19 @@
 - *Triage milestones*
 - *Design review*
 
+## Nov 25, 2019
+
+## Nov 20, 2019
+
+## Nov 18, 2019
+
+## Nov 13, 2019
+
+## Nov 11, 2019
+
 ## Oct 30, 2019
 
+- Function Pointer syntax (Fred)
 - https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
 - https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (Neal)
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
