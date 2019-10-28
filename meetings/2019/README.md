@@ -18,25 +18,28 @@
 
 ## Nov 18, 2019
 
-## Nov 13, 2019
 
-## Nov 11, 2019
+## Nov 13, 2019
 
 - https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 - https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
 
-## Oct 30, 2019
+## Nov 11, 2019
 
-- Function Pointer syntax (Fred)
 - https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
 - https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (Neal)
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+
+## Oct 30, 2019
+
+- Function Pointer syntax (Fred)
+- https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
 ## Oct 28, 2019
 
 - https://github.com/dotnet/csharplang/issues/111 Confirm whether discard parameters are allowed in methods and local function, confirm scoping behavior (Julien)
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
 ## Oct 23, 2019
 
