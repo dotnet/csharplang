@@ -32,7 +32,7 @@
 
 ## Oct 30, 2019
 
-- Function Pointer syntax (Fred)
+- [Function Pointer syntax](https://gist.github.com/333fred/c69853d55fba26d92a4d03a19f8e28ab) (Fred)
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
