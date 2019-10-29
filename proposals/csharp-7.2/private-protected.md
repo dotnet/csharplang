@@ -22,7 +22,7 @@ Directly providing support for this access level in C# enables these circumstanc
 
 ### `private protected` access modifier
 
-We propose to add a new access modifier combination `private protected` (which can appear in any order among the modifiers). This maps to the CLR notion of protectedAndInternal, and borrows the same syntax currently used in [C++/CLI](https://msdn.microsoft.com/en-us/library/ke3a209d.aspx#BKMK_Member_visibility).
+We propose to add a new access modifier combination `private protected` (which can appear in any order among the modifiers). This maps to the CLR notion of protectedAndInternal, and borrows the same syntax currently used in [C++/CLI](https://msdn.microsoft.com/library/ke3a209d.aspx#BKMK_Member_visibility).
 
 A member declared `private protected` can be accessed within a subclass of its container if that subclass is in the same assembly as the member.
 

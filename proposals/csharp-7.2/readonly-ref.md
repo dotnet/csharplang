@@ -24,7 +24,7 @@ Here I just want to acknowledge that the idea by itself is not very new.
 ### Motivation
 
 Prior to this feature C# did not have an efficient way of expressing a desire to pass struct variables into method calls for readonly purposes with no intention of modifying. Regular by-value argument passing implies copying, which adds unnecessary costs.  That drives users to use by-ref argument passing and rely on comments/documentation to indicate that the data is not supposed to be mutated by the callee. It is not a good solution for many reasons.  
-The examples are numerous - vector/matrix math operators in graphics libraries like [XNA](https://msdn.microsoft.com/en-us/library/bb194944.aspx) are known to have ref operands purely because of performance considerations. There is code in Roslyn compiler itself that uses structs to avoid allocations and then passes them by reference to avoid copying costs.
+The examples are numerous - vector/matrix math operators in graphics libraries like [XNA](https://msdn.microsoft.com/library/bb194944.aspx) are known to have ref operands purely because of performance considerations. There is code in Roslyn compiler itself that uses structs to avoid allocations and then passes them by reference to avoid copying costs.
 
 ### Solution (`in` parameters)
 
