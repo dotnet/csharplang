@@ -120,9 +120,9 @@ Note that the new form of `pragma_warning_body` uses `nullable_action`, not `war
 
 Every line of source code has a *nullable annotation context* and a *nullable warning context*. These control whether nullable annotations have effect, and whether nullability warnings are given. The annotation context of a given line is either *disabled* or *enabled*. The warning context of a given line is either *disabled* or *enabled*.
 
-Both contexts can be specified at the project level (outside of C# source code), or anywhere within a source file via `#nullable` and `#pragma warning` pre-processor directives. If no project level settings are provided the default is for both contexts to be *disabled*.
+Both contexts can be specified at the project level (outside of C# source code), or anywhere within a source file via `#nullable` pre-processor directives. If no project level settings are provided the default is for both contexts to be *disabled*.
 
-The `#nullable` directive controls both the annotation and warning contexts within the source text, and take precedence over the project-level settings. The `#pragma warning ... nullable` directives control only the warning context, leaving the annotation context unchanged.
+The `#nullable` directive controls the annotation and warning contexts within the source text, and take precedence over the project-level settings.
 
 A directive sets the context(s) it controls for subsequent lines of code, until another directive overrides it, or until the end of the source file.
 
@@ -131,9 +131,12 @@ The effect of the directives is as follows:
 - `#nullable disable`: Sets the nullable annotation and warning contexts to *disabled*
 - `#nullable enable`: Sets the nullable annotation and warning contexts to *enabled*
 - `#nullable restore`: Restores the nullable annotation and warning contexts to project settings
-- `#pragma warning disable nullable`: Sets the nullable warning context to *disabled*
-- `#pragma warning enable nullable`: Sets the nullable warning context to *enabled*
-- `#pragma warning restore nullable`: Restores the nullable warning context to project settings
+- `#nullable disable annotations`: Sets the nullable annotation context to *disabled*
+- `#nullable enable annotations`: Sets the nullable annotation context to *enabled*
+- `#nullable restore annotations`: Restores the nullable annotation context to project settings
+- `#nullable disable warnings`: Sets the nullable warning context to *disabled*
+- `#nullable enable warnings`: Sets the nullable warning context to *enabled*
+- `#nullable restore warnings`: Restores the nullable warning context to project settings
 
 ## Nullability of types
 
