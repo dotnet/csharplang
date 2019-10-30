@@ -18,23 +18,24 @@
 
 ## Nov 18, 2019
 
+- https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
+- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 
 ## Nov 13, 2019
 
-- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
-- https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
+- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
 
 ## Nov 11, 2019
 
-- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
+- https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 - https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (Neal)
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
 ## Oct 30, 2019
 
 - [Function Pointer syntax](https://gist.github.com/333fred/c69853d55fba26d92a4d03a19f8e28ab) (Fred)
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
 ## Oct 28, 2019
 
