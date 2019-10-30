@@ -37,14 +37,17 @@
 - [Function Pointer syntax](https://gist.github.com/333fred/c69853d55fba26d92a4d03a19f8e28ab) (Fred)
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 
-## Oct 28, 2019
-
-- https://github.com/dotnet/csharplang/issues/111 Confirm whether discard parameters are allowed in methods and local function, confirm scoping behavior (Julien)
-- https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Oct 28, 2019
+
+[C# Language Design Notes for Oct 28, 2019](LDM-2019-10-28.md)
+
+1. Discard parameters in lambdas and other methods
+1. Enhancing the common type algorithm
 
 ## Oct 23, 2019
 
