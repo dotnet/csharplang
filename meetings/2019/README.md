@@ -39,15 +39,17 @@
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
 
-## Oct 30, 2019
-
-- [Function Pointer syntax](https://gist.github.com/333fred/c69853d55fba26d92a4d03a19f8e28ab) (Fred)
-- https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
-
 
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Oct 30, 2019
+
+[C# Language Design Notes for Oct 30, 2019](LDM-2019-10-30.md)
+
+1. Function Pointer syntax
+2. Enhancing the Common Type Specification
 
 ## Oct 28, 2019
 
