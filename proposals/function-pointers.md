@@ -130,17 +130,6 @@ delegate* managed<string, int>;
 delegate*<delegate* managed<string, int>, delegate*<string, int>>;
 ```
 
-When `calling_convention` is omitted, `managed` will be used as the calling convention. That means
-all of the forms of `Func1` and `Func2` defined above are equivalent signatures.
-
-``` csharp
-class cdecl { }
-
-// Function pointer which has a cdecl calling convention, a cdecl return type and takes a single
-// parameter of type cdecl;
-delegate* cdecl<cdecl, cdecl>;
-```
-
 ### Allow address-of to target methods
 
 Method groups will now be allowed as arguments to an address-of expression. The type of such an
