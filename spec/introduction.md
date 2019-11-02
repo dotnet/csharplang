@@ -120,10 +120,10 @@ class Test
 }
 ```
 
-If the program is stored in the file *test.cs*, when *test.cs* is compiled, the *acme.dll* assembly can be referenced using the compiler's `-r` option:
+If the program is stored in the file *test.cs*, when *test.cs* is compiled, the *acme.dll* assembly can be referenced using the compiler's `-reference` option:
 
 ```console
-csc -r:acme.dll test.cs
+csc -reference:acme.dll test.cs
 ```
 
 This creates an executable assembly named *test.exe*, which, when run, produces the output:
@@ -1154,10 +1154,7 @@ public class List<T>
     }
     public int Capacity
     {
-        get
-        {
-            return items.Length;
-        }
+        get { return items.Length; }
         set
         {
             if (value < count) value = count;
@@ -1173,10 +1170,7 @@ public class List<T>
     // Indexer...
     public T this[int index]
     {
-        get
-        {
-            return items[index];
-        }
+        get { return items[index]; }
         set
         {
             items[index] = value;
