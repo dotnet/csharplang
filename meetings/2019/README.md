@@ -20,13 +20,13 @@
 
 ## Nov 18, 2019
 
-- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
-- https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
+- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 
 ## Nov 13, 2019
 
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
+- https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
 
 ## Nov 11, 2019
 
