@@ -32,17 +32,20 @@
 - Discriminated Unions (Andy)
 - https://github.com/dotnet/csharplang/issues/2946 Improve analysis of `[MaybeNull]T` values (Chuck)
 
-## Nov 11, 2019
-
-- Confirm removal of warning calling a method that returns `[MaybeNull]T` (Neal, Chuck)
-- Allow interpolated string constant: `const string s = $"abc"` (Chuck, Rikki)
-- https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
-- https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
-
 
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Nov 11, 2019
+
+[C# Language Design Notes for Nov 11, 2019](LDM-2019-11-11.md)
+
+1. Confirm removal of warning calling a method that returns `[MaybeNull]T`
+2. Allow interpolated string constant
+3. Enhancing the Common Type Specification
+4. Type pattern
+5. Simple name binding with target type
 
 ## Oct 30, 2019
 
