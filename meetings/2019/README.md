@@ -31,7 +31,7 @@
 ## Nov 11, 2019
 
 - Confirm removal of warning calling a method that returns `[MaybeNull]T` (Neal, Chuck)
-- Allow interpolated string constant: `const string s = $"abc"` (Chuck)
+- Allow interpolated string constant: `const string s = $"abc"`
 - https://github.com/dotnet/csharplang/issues/2823 Enhancing the Common Type Specification (Neal)
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
 - https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (Neal)
