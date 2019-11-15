@@ -14,6 +14,8 @@
 
 ## Nov 25, 2019
 
+- Revisit unconstrained `T?` (Mads, Jared)
+
 ## Nov 20, 2019
 
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
