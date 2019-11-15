@@ -29,15 +29,17 @@
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 
-## Nov 13, 2019
-
-- Discriminated Unions (Andy)
-- https://github.com/dotnet/csharplang/issues/2946 Improve analysis of `[MaybeNull]T` values (Chuck)
-
 
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Nov 13, 2019
+
+[C# Language Design Notes for Nov 13, 2019](LDM-2019-11-13.md)
+
+1. Discriminated unions
+2. Improve analysis of `[MaybeNull]T` values
 
 ## Nov 11, 2019
 
