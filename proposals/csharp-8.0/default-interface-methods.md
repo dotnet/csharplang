@@ -28,9 +28,11 @@ The principal motivations for this feature are
 
 The syntax for an interface is extended to permit
 
-- a *body* for a method or indexer, property, or event accessor (that is, a "default" implementation)
-- static methods, properties, indexers, and events.
-- Explicit access modifiers (the default access is `public`)
+- member declarations that declare constants, operators, static constructors, and nested types;
+- a *body* for a method or indexer, property, or event accessor (that is, a "default" implementation);
+- member declarations that declare static fields, methods, properties, indexers, and events;
+- member declarations using the explicit interface implementation syntax; and
+- Explicit access modifiers (the default access is `public`).
 
 Members with bodies permit the interface to provide a "default" implementation for the method in classes and structs that do not provide an overriding implementation.
 
@@ -39,6 +41,15 @@ Interfaces may not contain instance state. While static fields are now permitted
 Static and private methods permit useful refactoring and organization of code used to implement the interface's public API.
 
 A method override in an interface must use the explicit interface implementation syntax.
+
+It is an error to declare a class type, struct type, or enum type within the scope of a type parameter that was declared with a *variance_annotation*.  For example, the declaration of `C` below is an error.
+
+```csharp
+interface IOuter<out T>
+{
+    class C { } // error: class declaration within the scope of variant type parameter 'T'
+}
+```
 
 ### Concrete methods in interfaces
 
@@ -86,11 +97,9 @@ Interfaces may declare `static` members, including nested types, methods, indexe
 
 Interfaces may not declare instance constructors, destructors, or fields.
 
-> ***Open Issue:*** Should operator declarations be permitted in an interface? Probably not conversion operators, but what about others?
+> ***Closed Issue:*** Should operator declarations be permitted in an interface? Probably not conversion operators, but what about others? ***Decision***: Operators are permitted *except* for conversion, equality, and inequality operators.
 
-> ***Open Issue:*** Should `new` be permitted on interface member declarations that hide members from base interfaces?
-
-> ***Open Issue:*** Should `const` declarations be permitted in an interface?
+> ***Closed Issue:*** Should `new` be permitted on interface member declarations that hide members from base interfaces? ***Decision***: Yes.
 
 > ***Closed Issue:*** We do not currently permit `partial` on an interface or its members. That would require a separate proposal. ***Decision***: Yes. <https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#permit-partial-in-interface>
 
