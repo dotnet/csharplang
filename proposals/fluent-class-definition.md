@@ -133,7 +133,7 @@ EventDefinition
 The definition types should be used internally in the compiler, but should also be public.
 This will enable programmers to define classes runtime.
 
-The dot-notation used in the class definition are extensions to a definition,
+The dot notation used in the class definition are extensions to a definition,
 this also enables users to add their own. 
 
 For example:
@@ -141,7 +141,7 @@ For example:
 SetPropertyDefinition SkipIfEqual(this SetPropertyDefinition previous)
 {
   return new SetPropertyDefinition(previous, 
-    (oldValue, newValue) => newValue.Equals(newValue))
+    (oldValue, newValue) => !newValue.Equals(newValue))
 }
 ```
 (_Simplyfied for readability, this actual code might not work._)
