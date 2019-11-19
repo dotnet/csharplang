@@ -12,13 +12,13 @@
 - *Triage milestones*
 - *Design review*
 
-## Dec 11, 2020
+## Dec 11, 2019
 
-## Dec 9, 2020
+## Dec 9, 2019
 
-## Dec 4, 2020 (Design Review)
+## Dec 4, 2019 (Design Review)
 
-## Dec 2, 2020
+## Dec 2, 2019
 
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 - https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
