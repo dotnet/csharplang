@@ -38,10 +38,6 @@
 - https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
 - https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (continued) (Neal)
 
-## Nov 18, 2019
-
-- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (Neal)
-
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
@@ -57,6 +53,12 @@ Overview of meetings and agendas for 2019
 [C# Language Design Notes for Nov 25, 2019](LDM-2019-11-25.md)
 
 1. Revisit unconstrained `T?` (Mads, Jared)
+
+## Nov 18, 2019
+
+[C# Language Design Notes for Nov. 18, 2019](LDM-2019-12-18.md)
+
+1. Proposed changes for pattern-matching
 
 ## Nov 13, 2019
 
