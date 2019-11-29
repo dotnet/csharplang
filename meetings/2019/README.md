@@ -12,21 +12,24 @@
 - *Triage milestones*
 - *Design review*
 
-## Dec 11, 2019
+## Dec 18, 2019
+
+## Dec 16, 2019
 
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 - https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 
-## Dec 9, 2019
+## Dec 11, 2019
 
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 
-## Dec 4, 2019 (Design Review)
+## Dec 9, 2019
 
-## Dec 2, 2019
 - https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (continued) (Neal)
 - https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (Neal)
+
+## Dec 4, 2019 (Design Review)
 
 ## Nov 20, 2019
 
