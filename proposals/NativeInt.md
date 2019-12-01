@@ -37,7 +37,7 @@ Constant folding operations are evaluated with `Int32` and `UInt32` operands rat
 There are identity conversions between native ints and the underlying types in both directions.
 There are identity conversions between compound types that differ by native ints and underlying types only: arrays, `Nullable<>`, constructed types, and tuples.
 
-The tables below conver the conversions between special types.
+The tables below cover the conversions between special types.
 (The IL for each conversion includes the variants for `unchecked` and `checked` contexts if different.)
 
 | Operand | Target | Conversion | IL |
