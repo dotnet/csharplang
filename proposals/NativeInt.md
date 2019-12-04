@@ -30,7 +30,7 @@ There is no direct syntax for native int literals. Explicit casts of other integ
 
 There are no `MinValue` or `MaxValue` fields on `nint` or `nuint` because, other than `nuint.MinValue`, those values cannot be emitted as constants.
 
-Constant folding is supported for all unary operators { `+`, `-`, `~` } and binary operators { `+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `&`, `|`, `<<`, `>>` }.
+Constant folding is supported for all unary operators { `+`, `-`, `~` } and binary operators { `+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `&`, `|`, `^`, `<<`, `>>` }.
 Constant folding operations are evaluated with `Int32` and `UInt32` operands rather than native ints for consistent behavior regardless of compiler platform.
 
 ### Conversions
@@ -132,36 +132,53 @@ Conversion from `Nullable<A>` to `Nullable<B>` is:
 
 ### Operators
 
-The following operators are supported.
+The following operators are provided by the compiler.
 These operators are considered during overload resolution based on normal rules for implicit conversions of arguments.
 
-In cases where there are two overloads, one for `nint` and one for `nuint`, the native int operand types are marked `native`. In other cases the specific types are provided.
-(The IL for each operator includes the variants for `nint` and `nuint` and the variants for `unchecked` and `checked` contexts if different.)
+(The IL for each operator includes the variants for `unchecked` and `checked` contexts if different.)
 
-| Unary | Operand | Result | IL |
-|:---:|:---:|:---:|:---:|
-| `+` | `native` | `native` | |
-| `-` | `nint` | `nint` | `neg` |
-| `~` | `native` | `native` | `not` |
+| Unary | Operator Signature | IL |
+|:---:|:---:|:---:|
+| `+` | `nint nint.op_UnaryPlus(nint value)` | `nop` |
+| `+` | `nuint nuint.op_UnaryPlus(nuint value)` | `nop` |
+| `-` | `nint nint.op_UnaryMinus(nint value)` | `neg` |
+| `~` | `nint nint.op_UnaryNot(nint value)` | `not` |
+| `~` | `nuint nuint.op_UnaryNot(nuint value)` | `not` |
 
-| Binary | Left | Right | Result | IL |
-|:---:|:---:|:---:|:---:|:---:|
-| `+` | `native` | `native` | `native` | `add` / `add.ovf` / `add.ovf.un` |
-| `-` | `native` | `native` | `native` | `sub` / `sub.ovf` / `sub.ovf.un` |
-| `*` | `native` | `native` | `native` | `mul` / `mul.ovf` / `mul.ovf.un` |
-| `/` | `native` | `native` | `native` | `div` / `div.un` |
-| `%` | `native` | `native` | `native` | `rem` / `rem.un` |
-| `==` | `native` | `native` | `native` | `beq` / `ceq` |
-| `!=` | `native` | `native` | `native` | `bne` |
-| `<` | `native` | `native` | `native` | `blt` / `clt` / `blt.un` / `clt.un` |
-| `<=` | `native` | `native` | `native` | `ble` / `ble.un` |
-| `>` | `native` | `native` | `native` | `bgt` / `cgt` / `bgt.un` / `cgt.un` |
-| `>=` | `native` | `native` | `native` | `bge` / `bge.un` |
-| `&` | `native` | `native` | `native` | `and` |
-| <code>&#124;</code> | `native` | `native` | `native` | `or` |
-| `^` | `native` | `native` | `native` | `xor` |
-| `<<` | `native` | `int` | `native` | `shl` |
-| `>>` | `native` | `int` | `native` | `shr` / `shr.un` |
+| Binary | Operator Signature | IL |
+|:---:|:---:|:---:|
+| `+` | `nint nint.op_Addition(nint left, nint right)` | `add` / `add.ovf` |
+| `+` | `nuint nuint.op_Addition(nuint left, nuint right)` | `add` / `add.ovf.un` |
+| `-` | `nint nint.op_Subtraction(nint left, nint right)` | `sub` / `sub.ovf` |
+| `-` | `nuint nuint.op_Subtraction(nuint left, nuint right)` | `sub` / `sub.ovf.un` |
+| `*` | `nint nint.op_Multiply(nint left, nint right)` | `mul` / `mul.ovf` |
+| `*` | `nuint nuint.op_Multiply(nuint left, nuint right)` | `mul` / `mul.ovf.un` |
+| `/` | `nint nint.op_Division(nint left, nint right)` | `div` |
+| `/` | `nuint nuint.op_Division(nuint left, nuint right)` | `div.un` |
+| `%` | `nint nint.op_Modulus(nint left, nint right)` | `rem` |
+| `%` | `nuint nuint.op_Modulus(nuint left, nuint right)` | `rem.un` |
+| `==` | `bool nint.op_Equality(nint left, nint right)` | `beq` / `ceq` |
+| `==` | `bool nuint.op_Equality(nuint left, nuint right)` | `beq` / `ceq` |
+| `!=` | `bool nint.op_Inequality(nint left, nint right)` | `bne` |
+| `!=` | `bool nuint.op_Inequality(nuint left, nuint right)` | `bne` |
+| `<` | `bool nint.op_LessThan(nint left, nint right)` | `blt` / `clt` |
+| `<` | `bool nuint.op_LessThan(nuint left, nuint right)` | `blt.un` / `clt.un` |
+| `<=` | `bool nint.op_LessThanOrEqual(nint left, nint right)` | `ble` |
+| `<=` | `bool nuint.op_LessThanOrEqual(nuint left, nuint right)` | `ble.un` |
+| `>` | `bool nint.op_GreaterThan(nint left, nint right)` | `bgt` / `cgt` |
+| `>` | `bool nuint.op_GreaterThan(nuint left, nuint right)` | `bgt.un` / `cgt.un` |
+| `>=` | `bool nint.op_GreaterThanOrEqual(nint left, nint right)` | `bge` |
+| `>=` | `bool nuint.op_GreaterThanOrEqual(nuint left, nuint right)` | `bge.un` |
+| `&` | `nint nint.op_BitwiseAnd(nint left, nint right)` | `and` |
+| `&` | `nuint nuint.op_BitwiseAnd(nuint left, nuint right)` | `and` |
+| <code>&#124;</code> | `nint nint.op_BitwiseOr(nint left, nint right)` | `or` |
+| <code>&#124;</code> | `nuint nuint.op_BitwiseOr(nuint left, nuint right)` | `or` |
+| `^` | `nint nint.op_ExclusiveOr(nint left, nint right)` | `xor` |
+| `^` | `nuint nuint.op_ExclusiveOr(nuint left, nuint right)` | `xor` |
+| `<<` | `nint nint.op_LeftShift(nint left, int right)` | `shl` |
+| `<<` | `nuint nuint.op_LeftShift(nuint left, int right)` | `shl` |
+| `>>` | `nint nint.op_RightShift(nint left, int right)` | `shr` |
+| `>>` | `nuint nuint.op_RightShift(nuint left, int right)` | `shr.un` |
 
 For some binary operators, the IL operators support additional operand types
 (see [ECMA-335](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf) III.1.5 Operand type table).
