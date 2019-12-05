@@ -192,7 +192,7 @@ Specifically the expression is bound as `x = (T)(x op y)` where `T` is the type 
 The shift operators should mask the number of bits to shift appropriately
 (see [shift operators](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#shift-operators) in C# spec).
 
-### dynamic
+### Dynamic
 
 The conversions and operators are synthesized by the compiler and are not part of the underlying `IntPtr` and `UIntPtr` types.
 As a result those conversions and operators _are not available_ from the runtime binder for `dynamic`. 
@@ -238,15 +238,15 @@ IEquatable<nint> i = n; // ok, IntPtr implements IEquatable<IntPtr>
 
 ### Overriding, hiding, and implementing
 
-The `native int` aliases and the underlying types are considered equivalent for overriding, hiding and implementing.
+`nint` and `System.IntPtr`, and `nuint` and `System.UIntPtr`, are considered equivalent for overriding, hiding, and implementing.
 
-Overloads cannot differ by `native int` and underlying type alone.
-Overrides and implementations may differ by `native int` and underlying type alone.
-Methods hide other methods that differ by `native int` and underlying type alone.
+Overloads cannot differ by `nint` and `System.IntPtr`, and `nuint` and `System.UIntPtr`, alone.
+Overrides and implementations may differ by `nint` and `System.IntPtr`, or `nuint` and `System.UIntPtr`, alone.
+Methods hide other methods that differ by `nint` and `System.IntPtr`, or `nuint` and `System.UIntPtr`, alone.
 
 ### Miscellaneous
 
-`native int` types can be used as array indices without conversion.
+`nint` and `nuint` expressions used as array indices are emitted without conversion.
 ```C#
 static object GetItem(object[] array, nint index)
 {
@@ -254,13 +254,17 @@ static object GetItem(object[] array, nint index)
 }
 ```
 
-`native int` types should be allowed as `enum` underlying types.
-_This could be handled separately from the rest of the proposal._
+`nint` and `nuint` can be used as an `enum` base type.
 ```C#
 enum E : nint // ok
 {
 }
 ```
+
+Reads and writes are atomic for types `nint`, `nuint`, and `enum` with base type `nint` or `nuint`.
+
+Fields may be marked `volatile` for types `nint` and `nuint`.
+[ECMA-334](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-334.pdf) 15.5.4 does not include `enum` with base type `System.IntPtr` or `System.UIntPtr` however.
 
 `default(nint)` and `new nint()` are equivalent to `(nint)0`.
 
@@ -276,29 +280,44 @@ Compiler diagnostics for type references involving `nint` or `nuint` report `nin
 
 `nint` and `nuint` are represented in metadata as `System.IntPtr` and `System.UIntPtr`.
 
-Type references that include `nint` or `nuint` are emitted with a `System.Runtime.CompilerServices.NativeTypeAttribute` to indicate which parts of the type reference are native ints.
+Type references that include `nint` or `nuint` are emitted with a `System.Runtime.CompilerServices.NativeIntegerAttribute` to indicate which parts of the type reference are native ints.
 
 ```C#
 namespace System.Runtime.CompilerServices
 {
-    public sealed class NativeTypeAttribute : System.Attribute
+    [AttributeUsage(
+        AttributeTargets.Class |
+        AttributeTargets.Event |
+        AttributeTargets.Field |
+        AttributeTargets.GenericParameter |
+        AttributeTargets.Parameter |
+        AttributeTargets.Property |
+        AttributeTargets.ReturnValue,
+        AllowMultiple = false,
+        Inherited = false)]
+    public sealed class NativeIntegerAttribute : Attribute
     {
-        public NativeTypeAttribute() { }
-        public NativeTypeAttribute(byte[] flags) { }
+        public NativeIntegerAttribute()
+        {
+            TransformFlags = new[] { true };
+        }
+        public NativeIntegerAttribute(bool[] flags)
+        {
+            TransformFlags = flags;
+        }
+        public IList<bool> TransformFlags { get; }
     }
 }
 ```
 
-The optional attribute argument contains a bit for each primitive type in the type reference.
-If there is a single primitive type, the parameter-less constructor can be used.
+The encoding uses the approach as used to encode `DynamicAttribute`, although obviously `DynamicAttribute` is encoding which types within the type reference are `dynamic` rather than which types are native ints.
+If the encoding results in an array of `false` values, no `NativeIntegerAttribute` is needed.
+The parameterless `NativeIntegerAttribute` constructor generates an encoding with a single `true` value.
 
 ```C#
-nuint A;                    // [NativeType] UIntPtr A
-(Stream, nint) B;           // [NativeType] ValueType<Stream, IntPtr> B
-Dictionary<object, nint> C; // [NativeType(new[] { 0, 1 })] Dictionary<object, IntPtr> C
+nuint A;                    // [NativeInteger] UIntPtr A
+(Stream, nint) B;           // [NativeInteger(new[] { false, false, true })] ValueType<Stream, IntPtr> B
 ```
-
-_There are now four attributes that encode state for types within a type reference as an array of values: `DynamicAttribute`, `NullableAttribute`, `TupleElementNamesAttribute`, and `NativeTypeAttribute`. Each of these attributes uses a distinct mapping to generate the array elements._
 
 ## Alternatives
 [alternatives]: #alternatives
