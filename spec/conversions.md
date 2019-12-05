@@ -16,7 +16,8 @@ The following conversions are classified as implicit conversions:
 
 *  Identity conversions
 *  Implicit numeric conversions
-*  Implicit enumeration conversions.
+*  Implicit enumeration conversions
+*  Implicit interpolated string conversions
 *  Implicit nullable conversions
 *  Null literal conversions
 *  Implicit reference conversions
