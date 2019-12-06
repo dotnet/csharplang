@@ -23,6 +23,9 @@ Note this implies they do not cause any `_` (underscore) names to be hidden.
 [Simple names](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#simple-names)
 If `K` is zero and the *simple_name* appears within a *block* and if the *block*'s (or an enclosing *block*'s) local variable declaration space ([Declarations](basic-concepts.md#declarations)) contains a local variable, parameter (with the exception of discard parameters) or constant with name `I`, then the *simple_name* refers to that local variable, parameter or constant and is classified as a variable or value.
 
-## Related spec sections
 [Scopes](https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#scopes)
-[Corresponding parameters](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#corresponding-parameters)
+With the exception of discard parameters, the scope of a parameter declared in a *lambda_expression* ([Anonymous function expressions](expressions.md#anonymous-function-expressions)) is the *anonymous_function_body* of that *lambda_expression*
+With the exception of discard parameters, the scope of a parameter declared in an *anonymous_method_expression* ([Anonymous function expressions](expressions.md#anonymous-function-expressions)) is the *block* of that *anonymous_method_expression*.
+
+## Related spec sections
+- [Corresponding parameters](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#corresponding-parameters)
