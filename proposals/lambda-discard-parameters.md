@@ -1,4 +1,4 @@
-# Discard parameters
+# Lambda discard parameters
 
 ## Summary
 
