@@ -3,6 +3,7 @@
 ## Schedule ASAP
 
 ## Schedule when convenient
+- re-discuss `x is object` being a pure null test (Jared/Julien)
 - https://github.com/dotnet/csharplang/issues/373 Modifying scoping rules for attributes (allow `nameof(parameter)` (Julien)
 - close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 
