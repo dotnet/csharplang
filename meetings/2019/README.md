@@ -12,19 +12,20 @@
 
 ## Dec 18, 2019
 
-## Dec 16, 2019
-
 - close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
 - re-discuss `x is object` being a pure null test (Jared/Julien)
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 - https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 
-## Dec 11, 2019
+## Dec 16, 2019
 
-- Feedback from Dec 4 design review (Andy, Mads)
 - https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (continued) (Neal, Fred)
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+
+## Dec 11, 2019
+
+- Feedback from Dec 4 design review (Andy, Mads)
 
 ## Dec 9, 2019
 
