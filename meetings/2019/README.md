@@ -27,10 +27,6 @@
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 
-## Dec 11, 2019
-
-- Feedback from Dec 4 design review (Andy, Mads)
-
 ## Dec 9, 2019
 
 - https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (continued) (Neal)
@@ -50,6 +46,12 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Dec 11, 2019
+
+[C# Language Design Notes for Dec 11, 2019](LDM-2019-12-11.md)
+
+1. Design review feedback
 
 ## Nov 25, 2019
 
