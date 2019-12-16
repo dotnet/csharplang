@@ -20,6 +20,8 @@
 
 ## Jan 6, 2020
 
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
+- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 
 # C# Language Design Notes for 2020
 
