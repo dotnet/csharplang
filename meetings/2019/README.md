@@ -18,14 +18,13 @@
     - consider `var?` to avoid "un-var'ing" for nullability (e.g. https://github.com/microsoft/vs-threading/pull/538/file)
     - heed attribute info inside method bodies
     - consider special-casing `Task<T>` and `ValueTask<T>` for null covariance
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
-- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
+- https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
+- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 
 ## Dec 16, 2019
 
 - https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (continued) (Neal, Fred)
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 
 ## Dec 9, 2019
 
