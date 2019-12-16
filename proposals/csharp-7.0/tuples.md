@@ -68,7 +68,7 @@ tuple_type_element
 
 ### Tuple types
 
-Tuple types are declared with a syntax very similar to a parameter list:
+Tuple types are declared with the following syntax:
 
 ```csharp
 public (int sum, int count) Tally(IEnumerable<int> values) { ... }
@@ -157,10 +157,10 @@ byte y;
 
 The evaluation order of deconstruction assignment expressions is "breadth first":
 
-1. **Evaluate the LHS**. That means evaluate each of the expressions inside of it one by one, left to right, to yield side effects and establish a storage location for each.
-1. **Evaluate the RHS**. That means evaluate each of the expressions inside of it one by one, left to right to yield side effects
+1. Evaluate the LHS: Evaluate each of the expressions inside of it one by one, left to right, to yield side effects and establish a storage location for each.
+1. Evaluate the RHS: Evaluate each of the expressions inside of it one by one, left to right to yield side effects
 1. Convert each of the RHS expressions to the LHS types expected, one by one, left to right.
-1. Assign each of the conversion results from 3 to the storage locations found in 1.
+1. Assign each of the conversion results from 3 to the storage locations found in 
 
 > **Note to reviewers**: I found this in the LDM notes for July 13-16, 2016. I don't think it is still accurate:
 
@@ -168,7 +168,7 @@ A deconstructing assignment is a *statement-expression* whose type could be `voi
 
 ### Duality with underlying type
 
-Tuples map to underlying types of particular names -
+Tuples map to underlying types of particular names.
 
 ```csharp
 System.ValueTuple<T1, T2>
@@ -177,17 +177,17 @@ System.ValueTuple<T1, T2, T3>
 System.ValueTuple<T1, T2, T3,..., T7, TRest>
 ```
 
-Tuple types behave exactly like underlying types with only additional optional enhancement of the more expressive field names given by the programmer.
+Tuple types behave exactly like underlying types. The only additional enhancement is the more expressive field names given by the programmer.
 
 ```csharp
 var t = (sum: 0, count: 1);
 t.sum   = 1;        // sum   is the name for the field #1
 t.Item1 = 1;        // Item1 is the name of underlying field #1 and is also available
 
-var t1 = (0, 1);    // tuple omits the field names.
-t.Item1 = 1;        // underlying field name is still available
+var t1 = (0, 1); // tuple omits the field names.
+t.Item1 = 1;     // underlying field name is still available
 
-t.ToString();        // ToString on the underlying tuple type is called.
+t.ToString();     // ToString on the underlying tuple type is called.
 
 System.ValueTuple<int, int> vt = t; // identity conversion
 (int moo, int boo) t2 = vt;         // identity conversion
@@ -202,7 +202,7 @@ var t1 = (Item1: 0, Item2: 1);            // valid
 var t2 = (misc: 0, Item1: 1);             // error: "Item1" was used in a wrong position
 ```
 
-If the tuple is bigger than the limit of 7, the implementation will nest the "tail" as a tuple into the eighth element recursively. This nesting is visible by accessing the `Rest` field of a tuple, but that field is considered an implementation detail, and is hidden from e.g. auto-completion, just as the `ItemX` field names are hidden but allowed when a tuple has named elements.
+If the tuple is bigger than the limit of 7, the implementation will nest the "tail" as a tuple into the eighth element recursively. This nesting is visible by accessing the `Rest` field of a tuple, but that field my be hidden from e.g. auto-completion, just as the `ItemX` field names may be hidden but allowed when a tuple has named elements.
 
 A well formed "big tuple" will have names `Item1` etc. all the way up to the number of tuple elements, even though the underlying type doesn't physically have those fields directly defined. The same goes for the tuple returned from the `Rest` field, only with the numbers "shifted" appropriately.
 
@@ -215,11 +215,11 @@ partial class C : IEnumerable<(string fullname, int)> { ... } // error: names mu
 
 When tuple elements names are used in overridden signatures, or implementations of interface methods, tuple element names in parameter and return types must be preserved. It is an error for the same generic interface to be inherited or implemented twice with identity convertible type arguments that have conflicting tuple element names
 
-### Overloading, overriding, hiding
-
-For the purpose of overloading, overriding and hiding, tuples of the same types and lengths as well as their underlying ValueTuple types are considered equivalent. All other differences are immaterial. When overriding a member it is permitted to use tuple types with same or different field names than in the base member.
-
-A situation where same field names are used for non-matching fields between base and derived member signatures, a warning is reported by the compiler.  
+> note:
+>
+> For the purpose of overloading, overriding and hiding, tuples of the same types and lengths as well as their underlying ValueTuple types are considered equivalent. All other differences are immaterial. When overriding a member it is permitted to use tuple types with same or different field names than in the base member.
+>
+> A situation where same field names are used for non-matching fields between base and derived member signatures, a warning is reported by the compiler.  
 
 ```csharp
 class Base
@@ -242,6 +242,8 @@ class InvalidOverloading
     virtual void M1(ValueTuple<int, int> arg){...}  // also invalid
 }
 ```
+
+> endnote.
 
 ### Tuple field name erasure at runtime
 
@@ -289,20 +291,24 @@ System.ValueTuple<int, int> vt = t;  // identity conversion
 t2.moo = 1;
 ```
 
-That said, if you have an element name at one position on one side of a conversion, and the same name at another position on the other side, you almost certainly have bug in your code:
+> note:
+>
+> An element name at one position on one side of a conversion, and the same name at another position on the other side almost certainly have bug in the code:
 
 ```csharp
 (string first, string last) GetNames() { ... }
 (string last, string first) names = GetNames(); // Oops!
 ```
 
-Compilers should issue a warning for the preceding code.
+> Compilers should issue a warning for the preceding code.
+>
+> endnote.
 
 ### Boxing conversions
 
 > The following text should be added to [Boxing conversions](../../spec/conversions.md#boxing-conversions) after the first paragraph:
 
-As a *value_type*, tuples naturally have a boxing conversion. Importantly, the names aren't part of the runtime representation of tuples, but are tracked only by the compiler. Thus, once you've "cast away" the names, you cannot recover them. In alignment with the identity conversions, a boxed tuple will unbox to any tuple type that has the same element types in the same order.
+Tuples, like all value types, have a boxing conversion. Importantly, the names aren't part of the runtime representation of tuples, but are tracked only by the compiler. Thus, once you've "cast away" the names, you cannot recover them. In alignment with the identity conversions, a boxed tuple will unbox to any tuple type that has the same element types in the same order.
 
 ### Tuple conversions
 
@@ -313,20 +319,13 @@ For the classification purpose, all element conversions are considered recursive
 
 Tuple conversions are *Standard Conversions* and therefore can stack with user-defined operators to form user-defined conversions.
 
-A tuple conversion can be classified as a valid instance conversion for an extension method invocation as long as all element conversions are applicable as instance conversions.
-
-On top of the member-wise conversions implied by target typing, we can certainly allow implicit conversions between tuple types themselves.
-
-Specifically, covariance seems straightforward, because the tuples are value types: As long as each member of the assigned tuple is assignable to the type of the corresponding member of the receiving tuple, things should be good.
-
 An implicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any implicit conversion between each corresponding pair of types.
 
 An explicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any explicit conversion between each corresponding pair of types.
 
-```csharp
-(double sum, long count) weaken = Tally(...); // why not?
-(int s, int c) rename = Tally(...) // why not?
-```
+A tuple conversion can be classified as a valid instance conversion or an extension method invocation as long as all element conversions are applicable as instance conversions.
+
+On top of the member-wise conversions implied by target typing, implicit conversions between tuple types themselves are allowed.
 
 ### Target typing
 
@@ -338,25 +337,7 @@ A tuple literal is "target typed" when used in a context specifying a tuple type
 (string name, byte age) t = (null, 5); // Ok: the expressions null and 5 convert to string and byte
 ```
 
-In cases where the tuple literal is not part of a conversion, a tuple is used by its "natural type", which means a tuple type where the element types are the types of the constituent expressions. Since not all expressions have types, not all tuple literals have a natural type either:
-
-```csharp
-var t = ("John", 5);              //   Ok: the type of t is (string, int)
-var t = (null, 5);                //   Error: tuple expression doesn't have a type because null does not have a type
-((1,2, null), 5).ToString();      //   Error: tuple expression doesn't have a type
-
-ImmutableArray.Create((()=>1, 1));               //   Error: tuple expression doesn't have a type because lambda does not have a type
-ImmutableArray.Create(((Func<int>)(()=>1), 1)); //   ok
-```
-
-A tuple literal may include names, in which case they become part of the natural type:
-
-```csharp
-var t = (name: "John", age: 5); // The type of t is (string name, int age)
-t.age++;                        // t has field named age.
-```
-
-A successful conversion from tuple expression to tuple type is classified as an *ImplicitTuple* conversion, unless tuple's natural type matches the target type exactly, in such case it is an *Identity* conversion.
+A successful conversion from tuple expression to tuple type is classified as an *ImplicitTuple* conversion, unless the tuple's natural type matches the target type exactly, in such case it is an *Identity* conversion.
 
 ```csharp
 void M1((int x, int y) arg){...};
@@ -401,8 +382,6 @@ The `_` wildcard indicates that the one or more of the tuple fields are discarde
 Console.WriteLine($"Sum: {sum}, count was ignored");  
 ```
 
-> Note: Should the `_` be added as a token? How was that resolved?
-
 Any object may be deconstructed by providing an accessible `Deconstruct` method, either as a member or as an extension method. A `Deconstruct` method converts an object to a set of discrete values. The Deconstruct method "returns" the component values by use of individual `out` parameters. Deconstruct is overloadable.
 
 The deconstructor pattern could be implemented as a member method, or an extension method:
@@ -445,9 +424,8 @@ p.Deconstruct(out byte __x, out byte __y);
 
 > The following note should be added to the end of the section on [extension methods](../../spec/classes.md#extension-methods):
 
-Note: Extension methods
-
-on a tuple type apply to tuples with different element names:
+> note: 
+>Extension methods on a tuple type apply to tuples with different element names:
 
 ```csharp
 static void M(this (int x, int y) t) { ... }
@@ -455,3 +433,5 @@ static void M(this (int x, int y) t) { ... }
 (int a, int b) t = ...;
 t.M(); // Sure
 ```
+
+> endnote.
