@@ -17,11 +17,6 @@
     - re-discuss `x is object` being a pure null test
     - consider `var?` to avoid "un-var'ing" for nullability (e.g. https://github.com/microsoft/vs-threading/pull/538/file)
 
-## Dec 16, 2019
-
-- https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (continued) (Neal, Fred)
-- https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
-
 ## Dec 9, 2019
 
 - https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (continued) (Neal)
@@ -37,6 +32,13 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Dec 16, 2019
+
+[C# Language Design Notes for Dec 16, 2019](LDM-2019-12-16.md)
+
+1. Switch Expression as a Statement Expression (continued) (Neal, Fred)
+2. Triage
 
 ## Dec 11, 2019
 
