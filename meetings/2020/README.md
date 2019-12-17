@@ -18,6 +18,8 @@
 
 ## Jan 8, 2020
 
+- https://github.com/dotnet/csharplang/pull/3035 Unconstrained type parameter annotation: `T??` (Chuck)
+
 ## Jan 6, 2020
 
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
