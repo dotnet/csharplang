@@ -10,12 +10,6 @@
 - *Triage milestones*
 - *Design review*
 
-## Dec 18, 2019
-
-- close on compat issue with duplicate implementations/constraints modulo nullability differences (Julien)
-- Irksome nullable issues to revisit (Jared)
-    - re-discuss `x is object` being a pure null test
-    - consider `var?` to avoid "un-var'ing" for nullability (e.g. https://github.com/microsoft/vs-threading/pull/538/file)
 
 ## Dec 9, 2019
 
@@ -32,6 +26,13 @@
 # C# Language Design Notes for 2019
 
 Overview of meetings and agendas for 2019
+
+## Dec 18, 2019
+
+[C# Language Design Notes for Dec 18, 2019](LDM-2019-12-18.md)
+
+1. Pure null checks
+2. `var?`
 
 ## Dec 16, 2019
 
