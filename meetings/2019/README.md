@@ -1,27 +1,3 @@
-# Upcoming meetings for 2019
-
-## Schedule ASAP
-
-## Schedule when convenient
-
-## Recurring topics
-
-- *Triage championed features*
-- *Triage milestones*
-- *Design review*
-
-
-## Dec 9, 2019
-
-- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (continued) (Neal)
-- https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (Neal)
-
-## Dec 4, 2019 (Design Review)
-
-## Nov 20, 2019
-
-- https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
-- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (continued) (Neal)
 
 # C# Language Design Notes for 2019
 
@@ -47,11 +23,24 @@ Overview of meetings and agendas for 2019
 
 1. Design review feedback
 
+## Dec 9, 2019
+(not yet transcribed)
+- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (continued) (Neal)
+- https://github.com/dotnet/csharplang/issues/2860 Switch Expression as a Statement Expression (Neal)
+
+## Dec 4, 2019 (Design Review)
+(not yet transcribed)
+
 ## Nov 25, 2019
 
 [C# Language Design Notes for Nov 25, 2019](LDM-2019-11-25.md)
 
 1. Revisit unconstrained `T?` (Mads, Jared)
+
+## Nov 20, 2019
+(not yet transcribed)
+- https://github.com/dotnet/csharplang/issues/2911 Utf8 String Literals (Neal)
+- https://github.com/dotnet/csharplang/issues/2850 Proposed changes for pattern-matching (continued) (Neal)
 
 ## Nov 18, 2019
 
