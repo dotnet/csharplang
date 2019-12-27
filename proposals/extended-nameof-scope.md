@@ -26,9 +26,13 @@ Within a `nameof` expression in attributes placed on the method or its parameter
 
 [Simple names](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#simple-names)
 
+If `K` is zero and the *simple_name* appears within a `nameof` expression TODO... block and if the block's (or an enclosing block's) local variable declaration space (Declarations) contains a local variable, parameter or constant with name I, then the simple_name refers to that local variable, parameter or constant and is classified as a variable or value.
+
+If `K` is zero and the simple_name appears within the body of a generic method declaration and if that declaration includes a type parameter with name I, then the simple_name refers to that type parameter.
+
 TODO
 
 [Scopes](https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#scopes)
 
 ## Related spec sections
-- [Corresponding parameters](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#corresponding-parameters)
+- [Declarations](https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#declarations)
