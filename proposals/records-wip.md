@@ -26,3 +26,5 @@ struct_body
     | ';'
     ;
 ```
+
+The `attributes` clause will also permit a new contextual attribute, `data`.
