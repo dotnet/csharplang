@@ -27,4 +27,4 @@ struct_body
     ;
 ```
 
-The `attributes` clause will also permit a new contextual attribute, `data`.
+The `attributes` non-terminal will also permit a new contextual attribute, `data`.
