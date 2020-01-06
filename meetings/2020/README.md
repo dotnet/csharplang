@@ -35,13 +35,15 @@
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
 - https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 
-## Jan 6, 2020
-
-- Irksome nullable issues to revisit (Jared)
-    - heed attribute info inside method bodies
-    - consider special-casing `Task<T>` and `ValueTask<T>` for null covariance
-- https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
-
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Jan 6, 2020
+
+[C# Language Design Notes for Jan 6, 2020](LDM-2020-01-06.md)
+
+1. Use attribute info inside method bodies
+1. Making Task-like types covariant for nullability
+1. Casting to non-nullable reference type
+1. Triage
