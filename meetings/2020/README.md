@@ -19,7 +19,6 @@
 
 ## Jan 22, 2020
 
-- https://github.com/dotnet/csharplang/pull/3035 Unconstrained type parameter annotation: `T??` (Chuck)
 - https://github.com/dotnet/csharplang/issues/3086 Expressions Blocks (Chuck)
 
 ## Jan 15, 2020
@@ -32,8 +31,9 @@
 
 ## Jan 8, 2020
 
-- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
+- https://github.com/dotnet/csharplang/pull/3035 Unconstrained type parameter annotation: `T??` (Chuck)
 - https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
+- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
 
 ## Jan 6, 2020
 
