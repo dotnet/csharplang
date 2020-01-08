@@ -4,23 +4,31 @@
 
 ## Schedule when convenient
 
+- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
+
 ## Recurring topics
 
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
 
+## Jan 29, 2020
+
+## Jan 27, 2020
+
 ## Jan 22, 2020
+
+- https://github.com/dotnet/csharplang/pull/3035 Unconstrained type parameter annotation: `T??` (Chuck)
+- https://github.com/dotnet/csharplang/issues/3086 Expressions Blocks (Chuck)
 
 ## Jan 15, 2020
 
-- https://github.com/dotnet/csharplang/issues/3086 Expressions Blocks (Chuck)
+- Records (Andy)
 
 ## Jan 13, 2020
 
-- https://github.com/dotnet/csharplang/pull/3035 Unconstrained type parameter annotation: `T??` (Chuck)
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
+- Records (Andy)
 
 ## Jan 8, 2020
 
