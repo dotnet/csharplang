@@ -30,15 +30,16 @@
 
 - Records: Paging back in the previous proposal (Andy)
 
-## Jan 8, 2020
-
-- https://github.com/dotnet/csharplang/pull/3035 Unconstrained type parameter annotation: `T??` (Chuck)
-- https://github.com/dotnet/csharplang/projects/4#column-4649189 Triage recently championed features
-- https://github.com/dotnet/csharplang/issues/2844 Covariant Return Types (Neal)
-
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Jan 8, 2020
+
+[C# Language Design Notes for Jan 8, 2020](LDM-2020-01-08.md)
+
+1. Unconstrained type parameter annotation
+2. Covariant returns
 
 ## Jan 6, 2020
 
