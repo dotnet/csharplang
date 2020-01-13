@@ -24,11 +24,11 @@
 
 ## Jan 15, 2020
 
-- Records: Paging back in the previous proposal (Andy)
+- Records: The individual subfeatures of records (Mads)
 
 ## Jan 13, 2020
 
-- Records: The individual subfeatures of records (Mads)
+- Records: Paging back in the previous proposal (Andy)
 
 ## Jan 8, 2020
 
