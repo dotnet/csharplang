@@ -20,6 +20,7 @@
 ## Jan 22, 2020
 
 - https://github.com/dotnet/csharplang/issues/3086 Expressions Blocks (Chuck)
+- Top-level statements and functions (Mads)
 
 ## Jan 15, 2020
 
