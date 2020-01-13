@@ -4,6 +4,7 @@
 
 ## Schedule when convenient
 
+- Is `e is dynamic` a "pure" null check? (Neal)
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
@@ -24,6 +25,7 @@
 
 ## Jan 15, 2020
 
+- Records: Where it fits in our *programming with data* theme (Neal)
 - Records: The individual subfeatures of records (Mads)
 
 ## Jan 13, 2020
