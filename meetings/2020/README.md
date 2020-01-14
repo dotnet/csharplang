@@ -16,8 +16,6 @@
 
 ## Jan 29, 2020
 
-## Jan 27, 2020
-
 ## Jan 22, 2020
 
 - https://github.com/dotnet/csharplang/issues/3086 Expressions Blocks (Chuck)
