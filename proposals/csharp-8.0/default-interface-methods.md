@@ -1,7 +1,7 @@
 # default interface methods
 
 * [x] Proposed
-* [ ] Prototype: [In progress](https://github.com/dotnet/roslyn/tree/features/DefaultInterfaceImplementation)
+* [ ] Prototype: [In progress](https://github.com/dotnet/roslyn/blob/master/docs/features/DefaultInterfaceImplementation.md)
 * [ ] Implementation: None
 * [ ] Specification: In progress, below
 
