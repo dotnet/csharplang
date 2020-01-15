@@ -1,21 +1,16 @@
 C# Language Specification
 ===========================
 
-__Version 6__
+__Version 5__
 
-This is an unofficial draft, posted here for convenience. When we submit a C# 6.0 spec proposal to ECMA, it will be shared here.
+This is the ECMA C# 5.0 standard text, converted to Markdown. For the official standard, see the [ECMA site](https://ecma-international.org/publications/standards/Ecma-334.htm).
+
+This version is stored in this branch as a working document as part of readying a submission for a future updated standard.
 
 <!--
 (This document is also available for download: [csharp.pdf](CSharp%20Language%20Specification.pdf?raw=true) and [csharp.docx](CSharp%20Language%20Specification.docx?raw=true))
 -->
 
-* [Introduction](introduction.md)
-    * [Hello world](introduction.md#hello-world)
-    * [Program structure](introduction.md#program-structure)
-    * [Types and variables](introduction.md#types-and-variables)
-    * [Expressions](introduction.md#expressions)
-    * [Statements](introduction.md#statements)
-    * [Classes and objects](introduction.md#classes-and-objects)
 * [Lexical structure](lexical-structure.md)
     * [Programs](lexical-structure.md#programs)
     * [Grammars](lexical-structure.md#grammars)
@@ -163,7 +158,10 @@ This is an unofficial draft, posted here for convenience. When we submit a C# 6.
     * [Fixed size buffers](unsafe-code.md#fixed-size-buffers)
     * [Stack allocation](unsafe-code.md#stack-allocation)
     * [Dynamic memory allocation](unsafe-code.md#dynamic-memory-allocation)
-* [Documentation comments](documentation-comments.md)
+* [Annex A: Grammar](grammar.md)
+* [Annex B: Portability issues](portability-issues.md)
+* [Annex C: Standard library](standard-library.md)
+* [Annex D: Documentation comments](documentation-comments.md)
     * [Introduction](documentation-comments.md#introduction)
     * [Recommended tags](documentation-comments.md#recommended-tags)
     * [Processing the documentation file](documentation-comments.md#processing-the-documentation-file)
