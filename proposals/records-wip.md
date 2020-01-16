@@ -59,5 +59,5 @@ For each record parameter of a record type declaration there is a corresponding 
 
 For a record struct or a record class:
 
-* A public get-only auto-property is created. Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited virtual property's get accessor is overridden.
+* A public get-only auto-property is created. Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
 
