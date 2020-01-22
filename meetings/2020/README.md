@@ -44,11 +44,6 @@
 - https://github.com/dotnet/csharplang/issues/3117 Top-level statements and functions (Mads)
 - https://github.com/dotnet/csharplang/issues/3086 Expressions Blocks (Chuck)
 
-## Jan 15, 2020
-
-- Records: Where it fits in our *programming with data* theme (Neal)
-- Records: The individual subfeatures of records (Mads)
-
 ## Jan 13, 2020
 
 - Records: Paging back in the previous proposal (Andy)
@@ -56,6 +51,15 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Jan 15, 2020
+
+[C# Language Design Notes for Jan, 2015](LDM-2020-01-15.md)
+
+Records
+
+1. "programming with data"
+1. Decomposing subfeatures of records
 
 ## Jan 8, 2020
 
