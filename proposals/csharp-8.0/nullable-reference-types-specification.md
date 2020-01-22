@@ -70,14 +70,8 @@ The postfix `!` operator has no runtime effect - it evaluates to the result of t
 
 ### nullable implicitly typed local variables
 
-Alongside `var` it is now permitted to write `var?`.
-
-```antlr
-local_variable_type
-    : ...
-    | 'var' '?'
-    ;
-```
+`var` infers an annotated type for reference types.
+For instance, in `var s = "";` the `var` is inferred as `string?`.
 
 ### Nullable compiler directives
 
