@@ -156,15 +156,15 @@ struct-type:
 ```ANTLR
 simple-type:
     numeric-type
-    `bool`
+    `bool
 ```
 
 [#Grammar_numeric_type](numeric-type)
 ```ANTLR
 numeric-type:
     integral-type
-    `float`ing-point-type
-    `decimal`
+    floating-point-type
+    decimal
 ```
 
 [#Grammar_integral_type](integral-type)
@@ -181,11 +181,11 @@ integral-type:
     char
 ```
 
-[#Grammar_`float`ing_point_type](`float`ing-point-type)
+[#Grammar_floating_point_type](floating-point-type)
 ```ANTLR
-`float`ing-point-type:
-    `float`
-    `double`
+floating-point-type:
+    float
+    double
 ```
 
 [#Grammar_nullable_type](nullable-type)
@@ -356,7 +356,7 @@ The floating-point operators, including the assignment operators, never produce 
 
 floating-point operations may be performed with higher precision than the result type of the operation. 
 
-\[*Example*: Some hardware architectures support an “extended” or “`long` `double`” floating-point type with greater range and precision than the `double` type, and implicitly perform all floating-point operations using this higher precision type. Only at excessive cost in performance can such hardware architectures be made to perform floating-point operations with *less* precision, and rather than require an implementation to forfeit both performance and precision, `C#` allows a higher precision type to be used for all floating-point operations. Other than delivering more precise results, this rarely has any measurable effects. However, in expressions of the form x \* y / z, where the multiplication produces a result that is outside the `double` range, but the subsequent division brings the temporary result back into the `double` range, the fact that the expression is evaluated in a higher range format can cause a finite result to be produced instead of an infinity. To force a value of a floating-point type to the exact precision of its type, an explicit cast can be used. *end example*\]
+\[*Example*: Some hardware architectures support an “extended” or “long double” floating-point type with greater range and precision than the `double` type, and implicitly perform all floating-point operations using this higher precision type. Only at excessive cost in performance can such hardware architectures be made to perform floating-point operations with *less* precision, and rather than require an implementation to forfeit both performance and precision, `C#` allows a higher precision type to be used for all floating-point operations. Other than delivering more precise results, this rarely has any measurable effects. However, in expressions of the form x \* y / z, where the multiplication produces a result that is outside the `double` range, but the subsequent division brings the temporary result back into the `double` range, the fact that the expression is evaluated in a higher range format can cause a finite result to be produced instead of an infinity. To force a value of a floating-point type to the exact precision of its type, an explicit cast can be used. *end example*\]
 
 ### The Decimal type
 
