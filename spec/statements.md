@@ -512,6 +512,7 @@ is valid. The example does not violate the "no fall through" rule because the la
 The "no fall through" rule prevents a common class of bugs that occur in C and C++ when `break` statements are accidentally omitted. In addition, because of this rule, the switch sections of a `switch` statement can be arbitrarily rearranged without affecting the behavior of the statement. For example, the sections of the `switch` statement above can be reversed without affecting the behavior of the statement:
 ```csharp
 switch (i) {
+case 2:
 default:
     CaseAny();
     break;
