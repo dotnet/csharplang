@@ -11,7 +11,10 @@ type-parameter
 
 A third category of types, pointers, is available only in unsafe code (§23.3).
 
-Value types differ from reference types in that variables of the value types directly contain their data, whereas variables of the reference types store ***references*** to their data, the latter being known as ***objects***. With reference types, it is possible for two variables to reference the same object, and thus possible for operations on one variable to affect the object referenced by the other variable. With value types, the variables each have their own copy of the data, and it is not possible for operations on one to affect the other. \[*Note*: When a variable is a ref or out parameter, it does not have its own storage but references the storage of another variable. In this case, the ref or out variable is effectively an alias for another variable and not a distinct variable. *end note*\]
+Value types differ from reference types in that variables of the value types directly contain their data, whereas variables of the reference types store ***references*** to their data, the latter being known as ***objects***. With reference types, it is possible for two variables to reference the same object, and thus possible for operations on one variable to affect the object referenced by the other variable. With value types, the variables each have their own copy of the data, and it is not possible for operations on one to affect the other. 
+
+> [!NOTE]
+> When a variable is a ref or out parameter, it does not have its own storage but references the storage of another variable. In this case, the ref or out variable is effectively an alias for another variable and not a distinct variable.
 
 C\#’s type system is unified such that *a value of any type can be treated as an object*. Every type in C\# directly or indirectly derives from the object class type, and object is the ultimate base class of all types. Values of reference types are treated as objects simply by viewing the values as type object. Values of value types are treated as objects by performing boxing and unboxing operations (§9.3.12).
 
@@ -118,7 +121,8 @@ Array types are described in §17.
 
 A delegate is a data structure that refers to one or more methods. For instance methods, it also refers to their corresponding object instances.
 
-\[*Note*: The closest equivalent of a delegate in C or C++ is a function pointer, but whereas a function pointer can only reference static functions, a delegate can reference both static and instance methods. In the latter case, the delegate stores not only a reference to the method’s entry point, but also a reference to the object instance on which to invoke the method. *end note*\]
+> [!NOTE]
+> The closest equivalent of a delegate in C or C++ is a function pointer, but whereas a function pointer can only reference static functions, a delegate can reference both static and instance methods. In the latter case, the delegate stores not only a reference to the method’s entry point, but also a reference to the object instance on which to invoke the method.
 
 Delegate types are described in §20.
 
@@ -208,7 +212,12 @@ All value types implicitly declare a public parameterless instance constructor c
 
 -   For a *nullable-value-type* the default value is an instance for which the HasValue property is false. The default value is also known as the ***null value*** of the nullable value type. Attempting to read the Value property of such a value causes an exception of type System.InvalidOperationException to be thrown (§9.3.11).
 
-Like any other instance constructor, the default constructor of a value type is invoked using the new operator. \[*Note*: For efficiency reasons, this requirement is not intended to actually have the implementation generate a constructor call. For value types, the default value expression (§12.7.15) produces the same result as using the default constructor. *end note*\] \[*Example*: In the code below, variables i, j and k are all initialized to zero.
+Like any other instance constructor, the default constructor of a value type is invoked using the new operator. 
+
+> [!NOTE]
+> For efficiency reasons, this requirement is not intended to actually have the implementation generate a constructor call. For value types, the default value expression (§12.7.15) produces the same result as using the default constructor.
+
+\[*Example*: In the code below, variables i, j and k are all initialized to zero.
 
 class A\
 {\
@@ -254,15 +263,14 @@ int i = int.MaxValue; // System.Int32.MaxValue constant\
 string s = i.ToString(); // System.Int32.ToString() instance method\
 string t = 123.ToString(); // System.Int32.ToString() instance method
 
-*end example*\] \[*Note*: The simple types differ from other struct types in that they permit certain additional operations:
+*end example*\] 
 
--   Most simple types permit values to be created by writing *literals* (§7.4.5). \[*Example*: 123 is a literal of type int and 'a' is a literal of type char. *end example*\] C\# makes no provision for literals of struct types in general.
-
--   When the operands of an expression are all simple type constants, it is possible for the compiler to evaluate the expression at compile-time. Such an expression is known as a *constant-expression* (§12.20). Expressions involving operators defined by other struct types are not considered to be constant expressions.
-
--   Through const declarations, it is possible to declare constants of the simple types (§15.4). It is not possible to have constants of other struct types, but a similar effect is provided by static readonly fields.
-
--   Conversions involving simple types can participate in evaluation of conversion operators defined by other struct types, but a user-defined conversion operator can never participate in evaluation of another user-defined conversionoperator (§11.5.3). *end note*\]
+> [!NOTE]
+> The simple types differ from other struct types in that they permit certain additional operations:
+> - Most simple types permit values to be created by writing *literals* (§7.4.5). \[*Example*: 123 is a literal of type int and 'a' is a literal of type char. *end example*\] C\# makes no provision for literals of struct types in general.
+> - When the operands of an expression are all simple type constants, it is possible for the compiler to evaluate the expression at compile-time. Such an expression is known as a *constant-expression* (§12.20). Expressions involving operators defined by other struct types are not considered to be constant expressions.
+> - Through const declarations, it is possible to declare constants of the simple types (§15.4). It is not possible to have constants of other struct types, but a similar effect is provided by static readonly fields.
+> - Conversions involving simple types can participate in evaluation of conversion operators defined by other struct types, but a user-defined conversion operator can never participate in evaluation of another user-defined conversionoperator (§11.5.3).
 
 ### Integral types
 
@@ -284,7 +292,10 @@ C\# supports nine integral types: sbyte, byte, short, ushort, int, uint, long, u
 
 -   The ulong type represents unsigned 64-bit integers with values from 0 to 18446744073709551615, inclusive.
 
--   The char type represents unsigned 16-bit integers with values from 0 to 65535, inclusive. The set of possible values for the char type corresponds to the Unicode character set. \[*Note*: Although char has the same representation as ushort, not all operations permitted on one type are permitted on the other. *end note*\]
+-   The char type represents unsigned 16-bit integers with values from 0 to 65535, inclusive. The set of possible values for the char type corresponds to the Unicode character set. 
+
+> [!NOTE]
+> Although char has the same representation as ushort, not all operations permitted on one type are permitted on the other.
 
 The *integral-type* unary and binary operators always operate with signed 32-bit precision, unsigned 32-bit precision, signed 64-bit precision, or unsigned 64-bit precision, as detailed in §12.4.7.
 
@@ -350,7 +361,8 @@ The bool type represents Boolean logical quantities. The possible values of type
 
 No standard conversions exist between bool and other value types. In particular, the bool type is distinct and separate from the integral types, a bool value cannot be used in place of an integral value, and vice versa.
 
-\[*Note*: In the C and C++ languages, a zero integral or floating-point value, or a null pointer can be converted to the Boolean value false, and a non-zero integral or floating-point value, or a non-null pointer can be converted to the Boolean value true. In C\#, such conversions are accomplished by explicitly comparing an integral or floating-point value to zero, or by explicitly comparing an object reference to null. *end note*\]
+> [!NOTE]
+> In the C and C++ languages, a zero integral or floating-point value, or a null pointer can be converted to the Boolean value false, and a non-zero integral or floating-point value, or a non-null pointer can be converted to the Boolean value true. In C\#, such conversions are accomplished by explicitly comparing an integral or floating-point value to zero, or by explicitly comparing an object reference to null.
 
 ### Enumeration types
 
@@ -539,25 +551,18 @@ A type parameter is an identifier designating a value type or reference type tha
 []{#Grammar_type_parameter .anchor}type-parameter:\
 identifier
 
-Since a type parameter can be instantiated with many different type arguments, type parameters have slightly different operations and restrictions than other types. \[*Note*: These include:
+Since a type parameter can be instantiated with many different type arguments, type parameters have slightly different operations and restrictions than other types. \
 
--   A type parameter cannot be used directly to declare a base class (§15.2.4.2) or interface (§18.2.4).
-
--   The rules for member lookup on type parameters depend on the constraints, if any, applied to the type parameter. They are detailed in §12.5.
-
--   The available conversions for a type parameter depend on the constraints, if any, applied to the type parameter. They are detailed in §11.2.11 and §11.3.8.
-
--   The literal null cannot be converted to a type given by a type parameter, except if the type parameter is known to be a reference type (§11.2.11). However, a default expression (§12.7.15) can be used instead. In addition, a value with a type given by a type parameter *can* be compared with null using == and != (§12.11.7) unless the type parameter has the value type constraint.
-
--   A new expression (§12.7.11.2) can only be used with a type parameter if the type parameter is constrained by a *constructor-constraint* or the value type constraint (§15.2.5).
-
--   A type parameter cannot be used anywhere within an attribute.
-
--   A type parameter cannot be used in a member access (§12.7.5) or type name (§8.8) to identify a static member or a nested type.
-
--   A type parameter cannot be used as an *unmanaged-type* (§23.3).
-
-*end note*\]
+> [!NOTE]
+> These include:
+> - A type parameter cannot be used directly to declare a base class (§15.2.4.2) or interface (§18.2.4).
+> - The rules for member lookup on type parameters depend on the constraints, if any, applied to the type parameter. They are detailed in §12.5.
+> - The available conversions for a type parameter depend on the constraints, if any, applied to the type parameter. They are detailed in §11.2.11 and §11.3.8.
+> - The literal null cannot be converted to a type given by a type parameter, except if the type parameter is known to be a reference type (§11.2.11). However, a default expression (§12.7.15) can be used instead. In addition, a value with a type given by a type parameter *can* be compared with null using == and != (§12.11.7) unless the type parameter has the value type constraint.
+> - A new expression (§12.7.11.2) can only be used with a type parameter if the type parameter is constrained by a *constructor-constraint* or the value type constraint (§15.2.5).
+> - A type parameter cannot be used anywhere within an attribute.
+> - A type parameter cannot be used in a member access (§12.7.5) or type name (§8.8) to identify a static member or a nested type.
+> - A type parameter cannot be used as an *unmanaged-type* (§23.3).
 
 As a type, type parameters are purely a compile-time construct. At run-time, each type parameter is bound to a run-time type that was specified by supplying a type argument to the generic type declaration. Thus, the type of a variable declared with a type parameter will, at run-time, be a closed constructed type (§9.4.3). The run-time execution of all statements and expressions involving type parameters uses the type that was supplied as the type argument for that parameter.
 
