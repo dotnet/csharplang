@@ -539,7 +539,7 @@ case 2:
 The governing type of a `switch` statement may be the type `string`. For example:
 ```csharp
 void DoCommand(string command) {
-    switch (command.ToLower()) {
+    switch (command?.ToLowerInvariant()) {
     case "run":
         DoRun();
         break;
