@@ -227,7 +227,7 @@ All value types implicitly declare a public parameterless instance constructor c
     - For `double`, the default value is 0.0d.
     - For `decimal`, the default value is 0.0m.
     - For `bool`, the default value is false.
-    - For an *enum-type* E, the default value is 0, converted to the type `E`.
+    - For an *enum-type* `E`, the default value is 0, converted to the type `E`.
     - For a *struct-type*, the default value is the value produced by setting all value type fields to their default value and all reference type fields to null.
     - For a *nullable-value-type* the default value is an instance for which the HasValue property is false. The default value is also known as the ***null value*** of the nullable value type. Attempting to read the Value property of such a value causes an exception of type `System.InvalidOperationException` to be thrown (§9.3.11).
 
@@ -242,9 +242,9 @@ In the code below, variables i, j and k are all initialized to zero.
 class A
 {
     void F() {
-        `int` i = 0;
-        `int` j = new int();
-        `int` k = default(int);
+        int i = 0;
+        int j = new int();
+        int k = default(int);
     }
 }
 ```
@@ -281,7 +281,7 @@ Because a simple type aliases a `struct` type, every simple type has members.
 `int` has the members declared in `System.Int32` and the members inherited from `System.Object`, and the following statements are permitted:
 
 ```csharp
-`int` i = int.MaxValue; // System.Int32.MaxValue constant
+int i = int.MaxValue; // System.Int32.MaxValue constant
 string s = i.ToString(); // System.Int32.ToString() instance method
 string t = 123.ToString(); // System.Int32.ToString() instance method
 ```
@@ -291,7 +291,7 @@ string t = 123.ToString(); // System.Int32.ToString() instance method
 > - Most simple types permit values to be created by writing *literals* (§7.4.5). 
 > 
 > ```csharp
-> 123 is a literal of type `int` and 'a' is a literal of type char. 
+> 123 is a literal of type 'int' and 'a' is a literal of type char. 
 > ```
 > 
 > `C#` makes no provision for literals of `struct` types in general.
@@ -604,8 +604,8 @@ Func<int,int> del2 = exp.Compile();
 Invoking this delegate causes the code represented by the expression tree to be executed. Thus, given the definitions above, del and del2 are equivalent, and the following two statements will have the same effect:
 
 ```csharp
-`int` i1 = del(1);
-`int` i2 = del2(1);
+int i1 = del(1);
+int i2 = del2(1);
 ```
 
 After executing this code, i1 and i2 will both have the value 2.
