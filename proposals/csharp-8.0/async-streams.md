@@ -168,7 +168,7 @@ Consider `IAsyncEnumerable<int> GetData([EnumeratorCancellation] CancellationTok
 The implementer of this method can simply use the parameter in the method body. 
 The consumer can use either consumption patterns above:
 1. if you use `GetData(token)`, then the token is saved into the async-enumerable and will be used in iteration,
-2. if you use `givenIAsyncEnumerable.WithCancellation(token)`, then the token passed to `GetAsyncEnumerator` will supercede any token saved in the async-enumerable.
+2. if you use `givenIAsyncEnumerable.WithCancellation(token)`, then the token passed to `GetAsyncEnumerator` will supersede any token saved in the async-enumerable.
 
 ## foreach
 
