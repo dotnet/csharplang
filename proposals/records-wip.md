@@ -41,22 +41,23 @@ In addition to the members declared in the class-body, a record type has the fol
 
 A record type has a public constructor whose signature corresponds to the value parameters of the
 type declaration. This is called the primary constructor for the type, and causes the implicitly
-declared default constructor to be suppressed. If a constructor with the same signature is
-already present in the class, the synthesized primary constructor is suppressed.
+declared default constructor to be suppressed. It is an error to have a primary constructor and
+a constructor with the same signature already present in the class.
 At runtime the primary constructor 
 
-1. initializes compiler-generated backing fields for the properties corresponding to the value parameters (if these properties are compiler-provided; see [Synthesized properties](#Synthesized Properties)); then
-
-2. executes the instance field initializers appearing in the class-body; and then
+1. executes the instance field initializers appearing in the class-body; and then
     invokes the base class constructor with no arguments.
+
+1. initializes compiler-generated backing fields for the properties corresponding to the value parameters (if these properties are compiler-provided; see [Synthesized properties](#Synthesized Properties))
+
 
 [ ] TODO: add base call syntax and specification about choosing base constructor through overload resolution
 
 ### Properties
 
-For each record parameter of a record type declaration there is a corresponding public property member whose name and type are taken from the value parameter declaration. If no concrete (i.e. non-abstract) public property with a get accessor and with this name and type is explicitly declared or inherited, it is produced by the compiler as follows:
+For each record parameter of a record type declaration there is a corresponding public property member whose name and type are taken from the value parameter declaration. If no concrete (i.e. non-abstract) property with a get accessor and with this name and type is explicitly declared or inherited, it is produced by the compiler as follows:
 
-For a record struct or a sealed record class:
+For a record struct or a record class:
 
-* A public get-only auto-property is created. Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited virtual property's get accessor is overridden.
+* A public get-only auto-property is created. Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
 
