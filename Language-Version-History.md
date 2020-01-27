@@ -50,6 +50,7 @@ Features Added in C# Language Versions
 # [C# 5](https://blogs.msdn.microsoft.com/mvpawardprogram/2012/03/26/an-introduction-to-new-features-in-c-5-0/) - Visual Studio 2012
 - Asynchronous methods
 - Caller info attributes
+- foreach loop was changed to generates a new loop variable rather than closing over the same variable every time
 
 # [C# 6](https://github.com/dotnet/roslyn/wiki/New-Language-Features-in-C%23-6) - Visual Studio 2015
 - [Draft Specification online](https://github.com/dotnet/csharplang/blob/master/spec/README.md)
