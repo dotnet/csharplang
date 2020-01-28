@@ -2,7 +2,7 @@
 
 ## General
 
-The types of the `C#` language are divided into two main categories: ***reference types*** and ***value types***. Both value types and reference types may be ***generic types***, which take one or more ***type parameters***. Type parameters can designate both value types and reference types.
+The types of the C# language are divided into two main categories: ***reference types*** and ***value types***. Both value types and reference types may be ***generic types***, which take one or more ***type parameters***. Type parameters can designate both value types and reference types.
 
 [#Grammar_type](type)
 ```ANTLR
@@ -19,7 +19,7 @@ Value types differ from reference types in that variables of the value types dir
 > [!NOTE]
 > When a variable is a ref or out parameter, it does not have its own storage but references the storage of another variable. In this case, the ref or out variable is effectively an alias for another variable and not a distinct variable.
 
-`C#`’s type system is unified such that *a value of any type can be treated as an object*. Every type in `C#` directly or indirectly derives from the object `class` type, and object is the ultimate base `class` of all types. Values of reference types are treated as objects simply by viewing the values as type object. Values of value types are treated as objects by performing boxing and unboxing operations (§9.3.12).
+C#’s type system is unified such that *a value of any type can be treated as an object*. Every type in C# directly or indirectly derives from the object `class` type, and object is the ultimate base `class` of all types. Values of reference types are treated as objects simply by viewing the values as type object. Values of value types are treated as objects by performing boxing and unboxing operations (§9.3.12).
 
 ## Reference types
 
@@ -52,7 +52,7 @@ non-array-type:
     interface-type
     delegate-type
     *dynamic
-*type-parameter
+    *type-parameter
 
 rank-specifiers:
     rank-specifier
@@ -77,12 +77,12 @@ A `class` type defines a data structure that contains data members (constants an
 
 `Class` types are described in §15.
 
-Certain predefined `class` types have special meaning in the `C#` language, as described in the table below.
+Certain predefined `class` types have special meaning in the C# language, as described in the table below.
 
   -------------------- -------------------------------------------------------
   Class type           Description
   `System.Object`      The ultimate base `class` of all other types. See §9.2.3.
-  `System.String`      The string type of the `C#` language. See §9.2.5.
+  `System.String`      The string type of the C# language. See §9.2.5.
   `System.ValueType`   The base `class` of all value types. See 9.3.2.
   `System.Enum`        The base `class` of all enum types. See §19.5.
   `System.Array`       The base `class` of all array types. See §17.2.2.
@@ -92,7 +92,7 @@ Certain predefined `class` types have special meaning in the `C#` language, as d
 
 ### The object type
 
-The object `class` type is the ultimate base `class` of all other types. Every type in `C#` directly or indirectly derives from the object `class` type.
+The object `class` type is the ultimate base `class` of all other types. Every type in C# directly or indirectly derives from the object `class` type.
 
 The keyword object is simply an alias for the predefined `class` `System.Object`.
 
@@ -127,7 +127,7 @@ Array types are described in §17.
 A delegate is a data structure that refers to one or more methods. For instance methods, it also refers to their corresponding object instances.
 
 > [!NOTE]
-> The closest equivalent of a delegate in `C` or `C++` is a function pointer, but whereas a function pointer can only reference static functions, a delegate can reference both static and instance methods. In the latter case, the delegate stores not only a reference to the method’s entry point, but also a reference to the object instance on which to invoke the method.
+> The closest equivalent of a delegate in C or C++ is a function pointer, but whereas a function pointer can only reference static functions, a delegate can reference both static and instance methods. In the latter case, the delegate stores not only a reference to the method’s entry point, but also a reference to the object instance on which to invoke the method.
 
 Delegate types are described in §20.
 
@@ -135,7 +135,7 @@ Delegate types are described in §20.
 
 ### General
 
-A value type is either a `struct` type or an enumeration type. `C#` provides a set of predefined `struct` types called the ***simple types***. The simple types are identified through keywords.
+A value type is either a `struct` type or an enumeration type. C# provides a set of predefined `struct` types called the ***simple types***. The simple types are identified through keywords.
 
 [#Grammar_value_type](value-type)
 ```ANTLR
@@ -236,7 +236,7 @@ Like any other instance constructor, the default constructor of a value type is 
 > [!NOTE]
 > For efficiency reasons, this requirement is not intended to actually have the implementation generate a constructor call. For value types, the default value expression (§12.7.15) produces the same result as using the default constructor.
 
-In the code below, variables i, j and k are all initialized to zero.
+[*Example*: In the code below, variables i, j and k are all initialized to zero.
 
 ```csharp
 class A
@@ -248,6 +248,7 @@ class A
     }
 }
 ```
+*end example*]
 
 Because every value type implicitly has a public parameterless instance constructor, it is not possible for a `struct` type to contain an explicit declaration of a parameterless constructor. A `struct` type is however permitted to declare parameterized instance constructors (§16.4.9).
 
@@ -257,7 +258,7 @@ A `struct` type is a value type that can declare constants, fields, methods, pro
 
 ### Simple types
 
-`C#` provides a set of predefined `struct` types called the simple types. The simple types are identified through keywords, but these keywords are simply aliases for predefined `struct` types in the System namespace, as described in the table below.
+C# provides a set of predefined `struct` types called the simple types. The simple types are identified through keywords, but these keywords are simply aliases for predefined `struct` types in the System namespace, as described in the table below.
 
   ------------- ------------------
   **Keyword**   **Aliased type**
@@ -271,37 +272,38 @@ A `struct` type is a value type that can declare constants, fields, methods, pro
   `ulong`       `System.UInt64`
   `char`        `System.Char`
   `float`       `System.Single`
-  `double`      `System.double`
-  `bool`        `System.boolean`
-  `decimal`     `System.decimal`
+  `double`      `System.Double`
+  `bool`        `System.Boolean`
+  `decimal`     `System.Decimal`
   ------------- ------------------
 
 Because a simple type aliases a `struct` type, every simple type has members.
 
-`int` has the members declared in `System.Int32` and the members inherited from `System.Object`, and the following statements are permitted:
+[*Example*: `int` has the members declared in `System.Int32` and the members inherited from `System.Object`, and the following statements are permitted:
 
 ```csharp
 int i = int.MaxValue; // System.Int32.MaxValue constant
 string s = i.ToString(); // System.Int32.ToString() instance method
 string t = 123.ToString(); // System.Int32.ToString() instance method
 ```
+*end example*]
 
 > [!NOTE]
 > The simple types differ from other `struct` types in that they permit certain additional operations:
 > - Most simple types permit values to be created by writing *literals* (§7.4.5). 
 > 
-> ```csharp
+> [*Example*:
 > 123 is a literal of type 'int' and 'a' is a literal of type char. 
-> ```
+> *end example*]
 > 
-> `C#` makes no provision for literals of `struct` types in general.
+> C# makes no provision for literals of `struct` types in general.
 > - When the operands of an expression are all simple type constants, it is possible for the compiler to evaluate the expression at compile-time. Such an expression is known as a *constant-expression* (§12.20). Expressions involving operators defined by other `struct` types are not considered to be constant expressions.
 > - Through const declarations, it is possible to declare constants of the simple types (§15.4). It is not possible to have constants of other `struct` types, but a similar effect is provided by static readonly fields.
 > - Conversions involving simple types can participate in evaluation of conversion operators defined by other `struct` types, but a user-defined conversion operator can never participate in evaluation of another user-defined conversionoperator (§11.5.3).
 
 ### Integral types
 
-`C#` supports nine integral types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, and `char`. The integral types have the following sizes and ranges of values:
+C# supports nine integral types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, and `char`. The integral types have the following sizes and ranges of values:
 - The `sbyte` type represents signed 8-bit integers with values from -128 to 127, inclusive.
 - The `byte` type represents unsigned 8-bit integers with values from 0 to 255, inclusive.
 - The `short` type represents signed 16-bit integers with values from -32768 to 32767, inclusive.
@@ -322,24 +324,24 @@ The `char` type is classified as an integral type, but it differs from the other
 - There are no predefined implicit conversions from other types to the `char` type. In particular, even though the `byte` and `ushort` types have ranges of values that are fully representable using the `char` type, implicit conversions from sbyte, byte, or `ushort` to `char` do not exist.
 - Constants of the `char` type shall be written as *character-literal*s or as *integer-literal*s in combination with a cast to type char.
 
-```csharp
+[*Example*: 
 (char)10 is the same as '\\x000A'. 
-```
+ *end example*]
 
 The checked and unchecked operators and statements are used to control overflow checking for integral-type arithmetic operations and conversions (§12.7.14). In a checked context, an overflow produces a compile-time error or causes a `System.OverflowException` to be thrown. In an unchecked context, overflows are ignored and any high-order bits that do not fit in the destination type are discarded.
 
 ### Floating-point types
 
-`C#` supports two floating-point types: `float` and `double`. The `float` and `double` types are represented using the 32-bit single-precision and 64-bit double-precision IEC 60559 formats, which provide the following sets of values:
+C# supports two floating-point types: `float` and `double`. The `float` and `double` types are represented using the 32-bit single-precision and 64-bit double-precision IEC 60559 formats, which provide the following sets of values:
 - Positive zero and negative zero. In most situations, positive zero and negative zero behave identically as the simple value zero, but certain operations distinguish between the two (§12.9.3).
 - Positive infinity and negative infinity. Infinities are produced by such operations as dividing a non-zero number by zero. 
 
-```csharp
+[*Example*: 
 1.0 / 0.0 yields positive infinity, and –1.0 / 0.0 yields negative infinity. 
-```
+ *end example*]
 
 - The ***Not-a-Number*** value, often abbreviated NaN. NaNs are produced by invalid floating-point operations, such as dividing zero by zero.
-- The finite set of non-zero values of the form *s* × *m* × 2*^e^*, where *s* is 1 or −1, and *m* and *e* are determined by the particular floating-point type: For `float`, 0 < *m *< 2^24^ and −149 ≤ *e *≤ 104, and for `double`, 0 < *m *< 2^53^ and −1075 ≤ *e *≤ 970. Denormalized floating-point numbers are considered valid non-zero values. `C#` neither requires nor forbids that a conforming implementation support denormalized floating-point numbers.
+- The finite set of non-zero values of the form `s * m * 2^e`, where `s` is 1 or −1, and `m` and `e` are determined by the particular floating-point type: For `float`, `0 < m < 2^24` and `−149 ≤ e ≤ 104`, and for `double`, `0 < m < 2^53^` and `−1075 ≤ e ≤ 970`. Denormalized floating-point numbers are considered valid non-zero values. C# neither requires nor forbids that a conforming implementation support denormalized floating-point numbers.
 
 The `float` type can represent values ranging from approximately 1.5 × 10^−45^ to 3.4 × 10^38^ with a precision of 7 digits.
 
@@ -356,13 +358,13 @@ The floating-point operators, including the assignment operators, never produce 
 
 floating-point operations may be performed with higher precision than the result type of the operation. 
 
-\[*Example*: Some hardware architectures support an “extended” or “long double” floating-point type with greater range and precision than the `double` type, and implicitly perform all floating-point operations using this higher precision type. Only at excessive cost in performance can such hardware architectures be made to perform floating-point operations with *less* precision, and rather than require an implementation to forfeit both performance and precision, `C#` allows a higher precision type to be used for all floating-point operations. Other than delivering more precise results, this rarely has any measurable effects. However, in expressions of the form x \* y / z, where the multiplication produces a result that is outside the `double` range, but the subsequent division brings the temporary result back into the `double` range, the fact that the expression is evaluated in a higher range format can cause a finite result to be produced instead of an infinity. To force a value of a floating-point type to the exact precision of its type, an explicit cast can be used. *end example*\]
+[*Example*: Some hardware architectures support an “extended” or “long double” floating-point type with greater range and precision than the `double` type, and implicitly perform all floating-point operations using this higher precision type. Only at excessive cost in performance can such hardware architectures be made to perform floating-point operations with *less* precision, and rather than require an implementation to forfeit both performance and precision, C# allows a higher precision type to be used for all floating-point operations. Other than delivering more precise results, this rarely has any measurable effects. However, in expressions of the form x \* y / z, where the multiplication produces a result that is outside the `double` range, but the subsequent division brings the temporary result back into the `double` range, the fact that the expression is evaluated in a higher range format can cause a finite result to be produced instead of an infinity. To force a value of a floating-point type to the exact precision of its type, an explicit cast can be used. *end example*]
 
 ### The Decimal type
 
 The `decimal` type is a 128-bit data type suitable for financial and monetary calculations. The `decimal` type can represent values including those in the range at least –7.9 × 10^−28^ to 7.9 × 10^28^, with at least 28-digit precision.
 
-The finite set of values of type `decimal` are of the form (–1)^s ^× *c *× 10^-e^, where the sign *s* is 0 or 1, the coefficient *c* is given by 0 ≤ *c *< *Cmax*, and the scale *e* is such that *Emin* ≤ e ≤ *Emax*, where *Cmax* is at least 1 × 10^28^, *Emin* ≤ 0, and *Emax* ≥ 28. The `decimal` type does not necessarily support signed zeros, infinities, or NaN's.
+The finite set of values of type `decimal` are of the form `(–1)^s ^× c × 10^-e`, where the sign `s` is 0 or 1, the coefficient `c` is given by `0 ≤ c < Cmax`, and the scale `e` is such that `Emin ≤ e ≤ Emax`, where `Cmax` is at least `1 × 10^28`, `Emin ≤ 0`, and `Emax ≥ 28`. The `decimal` type does not necessarily support signed zeros, infinities, or NaN's.
 
 A `decimal` is represented as an integer scaled by a power of ten. For `decimal`s with an absolute value less than 1.0m, the value is exact to at least the 28^th ^`decimal` place. For `decimal`s with an absolute value greater than or equal to 1.0m, the value is exact to at least 28 digits. Contrary to the `float` and `double` data types, `decimal` fractional numbers such as 0.1 can be represented exactly in the `decimal` representation. In the `float` and `double` representations, such numbers often have non-terminating binary expansions, making those representations more prone to round-off errors.
 
@@ -381,7 +383,7 @@ The `bool` type represents `boolean` logical quantities. The possible values of 
 No standard conversions exist between `bool` and other value types. In particular, the `bool` type is distinct and separate from the integral types, a `bool` value cannot be used in place of an integral value, and vice versa.
 
 > [!NOTE]
-> In the C and C++ languages, a zero integral or floating-point value, or a null pointer can be converted to the `boolean` value false, and a non-zero integral or floating-point value, or a non-null pointer can be converted to the `boolean` value true. In `C#`, such conversions are accomplished by explicitly comparing an integral or floating-point value to zero, or by explicitly comparing an object reference to null.
+> In the C and C++ languages, a zero integral or floating-point value, or a null pointer can be converted to the `boolean` value false, and a non-zero integral or floating-point value, or a non-null pointer can be converted to the `boolean` value true. In C#, such conversions are accomplished by explicitly comparing an integral or floating-point value to zero, or by explicitly comparing an object reference to null.
 
 ### Enumeration types
 
@@ -429,6 +431,7 @@ Constructed types can also be used in expressions as simple names (§12.7.3) or 
 
 When a *namespace-or-type-name* is evaluated, only generic types with the correct number of type parameters are considered. Thus, it is possible to use the same identifier to identify different types, as `long` as the types have different numbers of type parameters. This is useful when mixing generic and non-generic classes in the same program.
 
+[*Example*:
 ```csharp
 namespace Widgets
 {
@@ -447,9 +450,11 @@ namespace MyApplication
     }
 }
 ```
+*end example*]
 
 The detailed rules for name lookup in the *namespace-or-type-name* productions is described in §8.8. The resolution of ambiguities in these productions is described in §7.2.5. A *type-name* might identify a constructed type even though it doesn’t specify type parameters directly. This can occur where a type is nested within a generic `class` declaration, and the instance type of the containing declaration is implicitly used for name lookup (§15.3.9.7). 
 
+[*Example*:
 ```csharp
 class Outer<T>
 {
@@ -458,6 +463,7 @@ class Outer<T>
     public Inner i; // Type of i is Outer<T>.Inner
 }
 ```
+*end example*]
 
 A non-enum constructed type shall not be used as an *unmanaged-type* (§23.3).
 
@@ -510,11 +516,11 @@ An unbound type refers to the entity declared by a type declaration. An unbound 
 
 Whenever a constructed type or generic method is referenced, the supplied type arguments are checked against the type parameter constraints declared on the generic type or method (§15.2.5). For each where clause, the type argument `A` that corresponds to the named type parameter is checked against each constraint as follows:
 
-- If the constraint is a `class` type, an interface type, or a type parameter, let `C` represent that constraint with the supplied type arguments substituted for any type parameters that appear in the constraint. To satisfy the constraint, it shall be the case that type `A` is convertible to type `C` by one of the following:
+- If the constraint is a `class` type, an interface type, or a type parameter, let C represent that constraint with the supplied type arguments substituted for any type parameters that appear in the constraint. To satisfy the constraint, it shall be the case that type `A` is convertible to type C by one of the following:
     - An identity conversion (§11.2.2)
     - An implicit reference conversion (§11.2.7)
     - A boxing conversion (§11.2.8), provided that type `A` is a non-nullable value type.
-    - An implicit reference, boxing or type parameter conversion from a type parameter `A` to `C`.
+    - An implicit reference, boxing or type parameter conversion from a type parameter `A` to C.
 - If the constraint is the reference type constraint (class), the type `A` shall satisfy one of the following:
     - `A` is an interface type, `class` type, delegate type, array type or the dynamic type. 
     > [!NOTE]
@@ -536,7 +542,7 @@ A compile-time error occurs if one or more of a type parameter’s constraints a
 
 Since type parameters are not inherited, constraints are never inherited either.
 
-In the following, `D` needs to specify the constraint on its type parameter `T` so that `T` satisfies the constraint imposed by the base `class` `B<T>`. In contrast, `class` `E` need not specify a constraint, because `List<T>` implements `IEnumerable` for any `T`.
+[*Example*: In the following, `D` needs to specify the constraint on its type parameter `T` so that `T` satisfies the constraint imposed by the base `class` `B<T>`. In contrast, `class` `E` need not specify a constraint, because `List<T>` implements `IEnumerable` for any `T`.
 
 ```csharp
 class B<T> where T: IEnumerable {…}
@@ -545,6 +551,7 @@ class D<T>: B<T> where T: IEnumerable {…}
 
 class E<T>: B<List<T>> {…}
 ```
+*end example*]
 
 ## Type parameters
 
@@ -581,7 +588,7 @@ Expression trees are efficient in-memory data representations of lambda expressi
 
 Just like a delegate type `D`, `Expression<TDelegate>` is said to have parameter and return types, which are the same as those of `D`.
 
-The following program represents a lambda expression both as executable code and as an expression tree. Because a conversion exists to `Func<int,int>`, a conversion also exists to `Expression<Func<int,int>>`:
+[*Example*: The following program represents a lambda expression both as executable code and as an expression tree. Because a conversion exists to `Func<int,int>`, a conversion also exists to `Expression<Func<int,int>>`:
 
 ```csharp
 Func<int,int> del = x => x + 1; // Code
@@ -589,7 +596,7 @@ Func<int,int> del = x => x + 1; // Code
 Expression<Func<int,int>> exp = x => x + 1; // Data
 ```
 
-Following these assignments, the delegate `del` references a method that returns `x + 1`, and the expression tree exp references a data structure that describes the expression `x => x + 1`.
+Following these assignments, the delegate `del` references a method that returns `x + 1`, and the expression tree exp references a data structure that describes the expression `x => x + 1`. *end example*]
 
 The exact definition of the generic type `Expression<TDelegate>` as well as the precise rules for constructing an expression tree when a lambda expression is converted to an expression tree type, are implementation dependent.
 
@@ -612,7 +619,7 @@ After executing this code, i1 and i2 will both have the value 2.
 
 ## The dynamic type
 
-The type dynamic has special meaning in `C#`. Its purpose is to allow dynamic binding, which is described in detail in §12.3.2.
+The type dynamic has special meaning in C#. Its purpose is to allow dynamic binding, which is described in detail in §12.3.2.
 
 dynamic is considered identical to object except in the following respects:
 - Operations on expressions of type dynamic can be dynamically bound (§12.3.3).
