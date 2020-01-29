@@ -14,9 +14,25 @@
 - *Triage milestones*
 - *Design review*
 
-## Jan 29, 2020
+## Feb 26, 2020
 
 - Design review
+
+## Feb 24
+
+## Feb 19
+
+## Feb 12
+
+## Feb 10
+
+## Feb 5
+
+## Feb 3
+
+## Jan 29, 2020
+
+- Records: drilling in to individual features (Mads)
 
 ## Jan 22, 2020
 
