@@ -32,8 +32,6 @@
 
 - https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
 
-## Feb 5
-
 ## Feb 3
 
 - https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
@@ -50,10 +48,18 @@
 
 Overview of meetings and agendas for 2020
 
+## Feb 5
+
 [C# Language Design Notes for Feb. 5, 2020](LDM-2020-02-05.md)
 
 - Nullability of dependent calls (Chuck, Julien)
 - https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
+
+## Jan 29, 2020
+
+[C# Language Design Notes for Jan. 29, 2020](LDM-2020-01-29.md)
+
+Records: "With-ers"
 
 ## Jan 22, 2020
 
