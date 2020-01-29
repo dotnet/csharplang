@@ -39,11 +39,6 @@
 
 - Records: drilling in to individual features (Mads)
 
-## Jan 22, 2020
-
-- https://github.com/dotnet/csharplang/issues/3117 Top-level statements and functions (Mads)
-- https://github.com/dotnet/csharplang/issues/3086 Expressions Blocks (Chuck)
-
 ## Jan 13, 2020
 
 - Records: Paging back in the previous proposal (Andy)
@@ -52,9 +47,16 @@
 
 Overview of meetings and agendas for 2020
 
+## Jan 22, 2020
+
+[C# Language Design Notes for Jan 22, 2020](LDM-2020-01-22.md)
+
+1. Top-level statements and functions
+2. Expression Blocks
+
 ## Jan 15, 2020
 
-[C# Language Design Notes for Jan, 2015](LDM-2020-01-15.md)
+[C# Language Design Notes for Jan 15, 2020](LDM-2020-01-15.md)
 
 Records
 
