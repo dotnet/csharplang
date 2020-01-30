@@ -1,4 +1,3 @@
-Simple programs
 # Simple programs
 
 * [x] Proposed
