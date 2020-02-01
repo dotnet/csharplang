@@ -28,7 +28,12 @@
 
 ## Feb 5
 
+- Nullability of dependent calls (Chuck, Julien)
+- https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
+
 ## Feb 3
+
+- https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
 
 ## Jan 29, 2020
 
