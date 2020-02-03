@@ -17,9 +17,10 @@ A *struct-declaration* is a *type-declaration* (§14.7) that declares a new `str
 
 [#Grammar_struct_declaration](struct-declaration)
 ```ANTLR
-struct-declaration:
-    attributes~opt~ struct-modifiers~opt~ partial~opt~ struct identifier type-parameter-list~opt
-    ~struct-interfaces~opt~ type-parameter-constraints-clauses~opt~ struct-body;~opt~
+struct_declaration
+    : attributes? struct_modifier* 'partial'? 'struct' identifier type_parameter_list?
+      struct_interfaces? type_parameter_constraints_clause* struct_body ';'?
+    ;
 ```
 
 A *struct-declaration* consists of an optional set of *attributes* (§22), followed by an optional set of *struct-modifiers* (§16.2.2), followed by an optional partial modifier (§15.2.7), followed by the keyword `struct` and an *identifier* that names the `struct`, followed by an optional *type-parameter-list* specification (§15.2.3), followed by an optional *struct-interfaces* specification (§16.2.4), followed by an optional *type-parameter-constraints-clauses* specification (§15.2.5), followed by a *struct-body* (§16.2.5), optionally followed by a semicolon.
@@ -437,5 +438,3 @@ Automatically implemented properties (§15.7.4) use hidden backing fields, which
 
 > [!NOTE]
 > [*Note*: This access restriction means that constructors in `structs` containing automatically implemented properties often need an explicit constructor initializer where they would not otherwise need one, to satisfy the requirement of all fields being definitely assigned before any function member is invoked or the constructor returns. *end note*]
-
-[_Ref451675312](#_Toc445783066)
