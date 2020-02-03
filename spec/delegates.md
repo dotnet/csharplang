@@ -13,12 +13,14 @@ A *delegate-declaration* is a *type-declaration* (§14.7) that declares a new de
 
 ```ANTLR
 delegate-declaration:
-attributesopt  delegate-modifiersopt   delegate   return-type
-		identifier   variant-type-parameter-listopt
-		(   formal-parameter-listopt  )   type-parameter-constraints-clausesopt   ;
+attributes~opt~ delegate-modifiers~opt~ delegate return-type
+identifier variant-type-parameter-list~opt
+~ ( formal-parameter-list~opt~ ) type-parameter-constraints-clauses~opt~ ;
+
 delegate-modifiers:
 delegate-modifier
-delegate-modifiers   delegate-modifier
+delegate-modifiers delegate-modifier
+
 delegate-modifier:
 new
 public
