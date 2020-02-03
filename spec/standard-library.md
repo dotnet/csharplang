@@ -4,7 +4,6 @@
 
 A conforming C# implementation shall provide a minimum set of types having specific semantics. These types and their members are listed here, in alphabetical order by namespace and type. For a formal definition of these types and their members, refer to ISO/IEC 23271:2012 *Common Language Infrastructure (CLI), Partition IV; Base Class Library (BCL), Extended Numerics Library, and Extended Array Library*, which are included by reference in this specification.
 
-> [!NOTE]
 > **This text is informative.**
 >
 > The standard library is intended to be the minimum set of types and members required by a conforming C# implementation. As such, it contains only those members that are explicitly required by the C# language specification.
@@ -24,36 +23,45 @@ A conforming C# implementation shall provide a minimum set of types having spec
 
 ```csharp
 
-namespace System {
-    public class ArgumentException : SystemException {
+namespace System
+{
+    public class ArgumentException : SystemException
+    {
         public ArgumentException ();
         public ArgumentException (string message);
         public ArgumentException (string message, Exception innerException);
     }
 }
 
-namespace System {
+namespace System
+{
     public delegate void Action ();
 }
 
-namespace System {
-    public class ArithmeticException : Exception {
+namespace System
+{
+    public class ArithmeticException : Exception
+    {
         public ArithmeticException ();
         public ArithmeticException (string message);
         public ArithmeticException (string message, Exception innerException);
     }
 }
 
-namespace System {
-    public abstract class Array : IList, ICollection, IEnumerable {
+namespace System
+{
+    public abstract class Array : IList, ICollection, IEnumerable
+    {
         public int Length { get; }
         public int Rank { get; }
         public int GetLength (int dimension);
     }
 }
 
-namespace System {
-    public class ArrayTypeMismatchException : Exception {
+namespace System
+{
+    public class ArrayTypeMismatchException : Exception
+    {
         public ArrayTypeMismatchException ();
         public ArrayTypeMismatchException (string message);
         public ArrayTypeMismatchException (string message,
@@ -61,16 +69,20 @@ namespace System {
     }
 }
 
-namespace System {
+namespace System
+{
     [AttributeUsageAttribute (AttributeTargets.All, Inherited = true,
         AllowMultiple = false)]
-    public abstract class Attribute {
+    public abstract class Attribute
+    {
         protected Attribute ();
     }
 }
 
-namespace System {
-    public enum AttributeTargets {
+namespace System
+{
+    public enum AttributeTargets
+    {
         Assembly = 0x1,
         Module = 0x2,
         Class = 0x4,
@@ -90,9 +102,11 @@ namespace System {
     }
 }
 
-namespace System {
+namespace System
+{
     [AttributeUsageAttribute (AttributeTargets.Class, Inherited = true)]
-    public sealed class AttributeUsageAttribute : Attribute {
+    public sealed class AttributeUsageAttribute : Attribute
+    {
         public AttributeUsageAttribute (AttributeTargets validOn);
         public bool AllowMultiple { get; set; }
         public bool Inherited { get; set; }
@@ -100,46 +114,58 @@ namespace System {
     }
 }
 
-namespace System {
+namespace System
+{
     public struct Boolean { }
 }
 
-namespace System {
+namespace System
+{
     public struct Byte { }
 }
 
-namespace System {
+namespace System
+{
     public struct Char { }
 }
 
-namespace System {
+namespace System
+{
     public struct Decimal { }
 }
 
-namespace System {
+namespace System
+{
     public abstract class Delegate { }
 }
 
-namespace System {
-    public class DivideByZeroException : ArithmeticException {
+namespace System
+{
+    public class DivideByZeroException : ArithmeticException
+    {
         public DivideByZeroException ();
         public DivideByZeroException (string message);
         public DivideByZeroException (string message, Exception innerException);
     }
 }
 
-namespace System {
+namespace System
+{
     public struct Double { }
 }
 
-namespace System {
-    public abstract class Enum : ValueType {
+namespace System
+{
+    public abstract class Enum : ValueType
+    {
         protected Enum ();
     }
 }
 
-namespace System {
-    public class Exception {
+namespace System
+{
+    public class Exception
+    {
         public Exception ();
         public Exception (string message);
         public Exception (string message, Exception innerException);
@@ -148,18 +174,23 @@ namespace System {
     }
 }
 
-namespace System {
+namespace System
+{
     public class GC { }
 }
 
-namespace System {
-    public interface IDisposable {
+namespace System
+{
+    public interface IDisposable
+    {
         public void Dispose ();
     }
 }
 
-namespace System {
-    public sealed class IndexOutOfRangeException : Exception {
+namespace System
+{
+    public sealed class IndexOutOfRangeException : Exception
+    {
         public IndexOutOfRangeException ();
         public IndexOutOfRangeException (string message);
         public IndexOutOfRangeException (string message,
@@ -167,50 +198,64 @@ namespace System {
     }
 }
 
-namespace System {
+namespace System
+{
     public struct Int16 { }
 }
 
-namespace System {
+namespace System
+{
     public struct Int32 { }
 }
 
-namespace System {
+namespace System
+{
     public struct Int64 { }
 }
 
-namespace System {
+namespace System
+{
     public struct IntPtr { }
 }
 
-namespace System.Runtime.CompilerServices {
-    public sealed class IndexerNameAttribute : Attribute {
+namespace System.Runtime.CompilerServices
+{
+    public sealed class IndexerNameAttribute : Attribute
+    {
         public IndexerNameAttribute (String indexerName);
     }
 }
 
-namespace System.Collections.Generic {
-    public interface IReadOnlyCollection <out T> : IEnumerable <T> {
+namespace System.Collections.Generic
+{
+    public interface IReadOnlyCollection<out T> : IEnumerable<T>
+    {
         int Count { get; }
     }
 }
 
-namespace System.Collections.Generic {
-    public interface IReadOnlyList <out T>: IReadOnlyCollection <T> {
+namespace System.Collections.Generic
+{
+    public interface IReadOnlyList<out T> : IReadOnlyCollection<T>
+    {
         T this [int index] { get; }
     }
 }
 
-namespace System {
-    public class InvalidCastException : Exception {
+namespace System
+{
+    public class InvalidCastException : Exception
+    {
         public InvalidCastException ();
         public InvalidCastException (string message);
         public InvalidCastException (string message, Exception innerException);
     }
 }
 
-namespace System {
-    public class InvalidOperationException : Exception {
+namespace System
+{
+    public class InvalidOperationException : Exception
+    {
         public InvalidOperationException ();
         public InvalidOperationException (string message);
         public InvalidOperationException (string message,
@@ -218,37 +263,47 @@ namespace System {
     }
 }
 
-namespace System.Reflection {
-    public abstract class MemberInfo {
+namespace System.Reflection
+{
+    public abstract class MemberInfo
+    {
         protected MemberInfo ();
     }
 }
 
-namespace System {
-    public class NotSupportedException : Exception {
+namespace System
+{
+    public class NotSupportedException : Exception
+    {
         public NotSupportedException ();
         public NotSupportedException (string message);
         public NotSupportedException (string message, Exception innerException);
     }
 }
 
-namespace System {
-    public struct Nullable <T> {
+namespace System
+{
+    public struct Nullable<T>
+    {
         public bool HasValue { get; }
         public T Value { get; }
     }
 }
 
-namespace System {
-    public class NullReferenceException : Exception {
+namespace System
+{
+    public class NullReferenceException : Exception
+    {
         public NullReferenceException ();
         public NullReferenceException (string message);
         public NullReferenceException (string message, Exception innerException);
     }
 }
 
-namespace System {
-    public class Object {
+namespace System
+{
+    public class Object
+    {
         public Object ();
         ~Object ();
         public virtual bool Equals (object obj);
@@ -258,7 +313,8 @@ namespace System {
     }
 }
 
-namespace System {
+namespace System
+{
     [AttributeUsageAttribute (AttributeTargets.Class |
         AttributeTargets.Struct |
         AttributeTargets.Enum | AttributeTargets.Interface |
@@ -267,7 +323,8 @@ namespace System {
         AttributeTargets.Event | AttributeTargets.Delegate,
         Inherited = false)]
 
-    public sealed class ObsoleteAttribute : Attribute {
+    public sealed class ObsoleteAttribute : Attribute
+    {
         public ObsoleteAttribute ();
         public ObsoleteAttribute (string message);
         public ObsoleteAttribute (string message, bool error);
@@ -276,80 +333,101 @@ namespace System {
     }
 }
 
-namespace System {
-    public class OutOfMemoryException : Exception {
+namespace System
+{
+    public class OutOfMemoryException : Exception
+    {
         public OutOfMemoryException ();
         public OutOfMemoryException (string message);
         public OutOfMemoryException (string message, Exception innerException);
     }
 }
 
-namespace System {
-    public class OverflowException : ArithmeticException {
+namespace System
+{
+    public class OverflowException : ArithmeticException
+    {
         public OverflowException ();
         public OverflowException (string message);
         public OverflowException (string message, Exception innerException);
     }
 }
 
-namespace System {
+namespace System
+{
     public struct SByte { }
 }
 
-namespace System {
+namespace System
+{
     public struct Single { }
 }
 
-namespace System {
-    public sealed class StackOverflowException : Exception {
+namespace System
+{
+    public sealed class StackOverflowException : Exception
+    {
         public StackOverflowException ();
         public StackOverflowException (string message);
         public StackOverflowException (string message, Exception innerException);
     }
 }
 
-namespace System {
-    public sealed class String : IEnumerable <Char>, IEnumerable {
+namespace System
+{
+    public sealed class String : IEnumerable<Char>, IEnumerable
+    {
         public int Length { get; }
         public char this [int index] { get; }
     }
 }
 
-namespace System {
+namespace System
+{
     public abstract class Type : MemberInfo { }
 }
 
-namespace System {
-    public sealed class TypeInitializationException : Exception {
+namespace System
+{
+    public sealed class TypeInitializationException : Exception
+    {
         public TypeInitializationException (string fullTypeName,
             Exception innerException);
     }
 }
 
-namespace System {
+namespace System
+{
     public struct UInt16 { }
 }
 
-namespace System {
+namespace System
+{
     public struct UInt32 { }
 }
 
-namespace System {
+namespace System
+{
     public struct UInt64 { }
 }
 
-namespace System {
+namespace System
+{
     public struct UIntPtr { }
 }
 
-namespace System {
-    public abstract class ValueType {
+namespace System
+{
+    public abstract class ValueType
+    {
         protected ValueType ();
     }
 }
 
-namespace System.Collections {
-    public interface ICollection : IEnumerable {
+namespace System.Collections
+{
+    public interface ICollection : IEnumerable
+    {
         public int Count { get; }
         public bool IsSynchronized { get; }
         public object SyncRoot { get; }
@@ -357,8 +435,10 @@ namespace System.Collections {
     }
 }
 
-namespace System.Collections {
-    public interface IEnumerable {
+namespace System.Collections
+{
+    public interface IEnumerable
+    {
         public IEnumerator GetEnumerator ();
     }
 }
@@ -392,7 +472,8 @@ namespace System.Collections
 
 namespace System.Collections.Generic
 {
-    public interface ICollection <T>: IEnumerable <T> {
+    public interface ICollection<T> : IEnumerable<T>
+    {
         public int Count { get; }
         public bool IsReadOnly { get; }
         public void Add (T item);
@@ -403,21 +484,27 @@ namespace System.Collections.Generic
     }
 }
 
-namespace System.Collections.Generic {
-    public interface IEnumerable <T>: IEnumerable {
-        public IEnumerator <T>
-        GetEnumerator ();
+namespace System.Collections.Generic
+{
+    public interface IEnumerable<T> : IEnumerable
+    {
+        public IEnumerator<T>
+            GetEnumerator ();
     }
 }
 
-namespace System.Collections.Generic {
-    public interface IEnumerator <T>: IDisposable, IEnumerator {
+namespace System.Collections.Generic
+{
+    public interface IEnumerator<T> : IDisposable, IEnumerator
+    {
         public T Current { get; }
     }
 }
 
-namespace System.Collections.Generic {
-    public interface IList <T>: ICollection <T> {
+namespace System.Collections.Generic
+{
+    public interface IList<T> : ICollection<T>
+    {
         public T this [int index] { get; set; }
         public int IndexOf (T item);
         public void Insert (int index, T item);
@@ -425,17 +512,21 @@ namespace System.Collections.Generic {
     }
 }
 
-namespace System.diagnostics {
+namespace System.diagnostics
+{
     [AttributeUsageAttribute (AttributeTargets.Method |
         AttributeTargets.Class, AllowMultiple = true)]
-    public sealed class ConditionalAttribute : Attribute {
+    public sealed class ConditionalAttribute : Attribute
+    {
         public ConditionalAttribute (string conditionString);
         public string ConditionString { get; }
     }
 }
 
-namespace System.Threading {
-    public static class Monitor {
+namespace System.Threading
+{
+    public static class Monitor
+    {
         public static void Enter (object obj);
         public static void Exit (object obj);
     }
@@ -451,7 +542,8 @@ A conforming implementation may provide `Task.GetAwaiter()` and `Task<T>.GetAwai
 
 ```csharp
 
-namespace System.Runtime.CompilerServices {
+namespace System.Runtime.CompilerServices
+{
     [AttributeUsage (AttributeTargets.Parameter, Inherited = false)]
     public sealed class CallerFilePathAttribute : Attribute
     {
@@ -459,7 +551,8 @@ namespace System.Runtime.CompilerServices {
     }
 }
 
-namespace System.Runtime.CompilerServices {
+namespace System.Runtime.CompilerServices
+{
     [AttributeUsage (AttributeTargets.Parameter, Inherited = false)]
     public sealed class CallerLineNumberAttribute : Attribute
     {
@@ -467,7 +560,8 @@ namespace System.Runtime.CompilerServices {
     }
 }
 
-namespace System.Runtime.CompilerServices {
+namespace System.Runtime.CompilerServices
+{
     [AttributeUsage (AttributeTargets.Parameter, Inherited = false)]
     public sealed class CallerMemberNameAttribute : Attribute
     {
@@ -475,8 +569,9 @@ namespace System.Runtime.CompilerServices {
     }
 }
 
-namespace System.Linq.Expressions {
-    public sealed class Expression <TDelegate>
+namespace System.Linq.Expressions
+{
+    public sealed class Expression<TDelegate>
     {
         // See Section 12.7.3 for details on what
         // Delegate types (TDelegate) must be supported,
@@ -485,51 +580,57 @@ namespace System.Linq.Expressions {
     }
 }
 
-namespace System.Runtime.CompilerServices {
+namespace System.Runtime.CompilerServices
+{
     public interface INotifyCompletion
-   {
+    {
         void OnCompleted (Action continuation);
     }
 }
 
-namespace System.Runtime.CompilerServices {
+namespace System.Runtime.CompilerServices
+{
     public interface ICriticalNotifyCompletion : INotifyCompletion
     {
         void UnsafeOnCompleted (Action continuation);
     }
 }
 
-namespace System.Threading.Tasks {
+namespace System.Threading.Tasks
+{
     public class Task
     {
         public System.Runtime.CompilerServices.TaskAwaiter GetAwaiter ();
     }
 }
 
-namespace System.Threading.Tasks {
-    public class Task <TResult>: System.Threading.Tasks.Task
+namespace System.Threading.Tasks
+{
+    public class Task<TResult> : System.Threading.Tasks.Task
     {
-        public new System.Runtime.CompilerServices.TaskAwaiter <T>
-        GetAwaiter ();
+        public new System.Runtime.CompilerServices.TaskAwaiter<T>
+            GetAwaiter ();
     }
 }
 
-namespace System.Runtime.CompilerServices {
+namespace System.Runtime.CompilerServices
+{
     public struct TaskAwaiter : ICriticalNotifyCompletion,
         INotifyCompletion
-    {
-        public bool IsCompleted { get; }
-        public void GetResult ();
-    }
+        {
+            public bool IsCompleted { get; }
+            public void GetResult ();
+        }
 }
 
-namespace System.Runtime.CompilerServices {
-    public struct TaskAwaiter <T>: ICriticalNotifyCompletion,
-    INotifyCompletion
-    {
-        public bool IsCompleted { get; }
-        public T GetResult ();
-    }
+namespace System.Runtime.CompilerServices
+{
+    public struct TaskAwaiter<T> : ICriticalNotifyCompletion,
+        INotifyCompletion
+        {
+            public bool IsCompleted { get; }
+            public T GetResult ();
+        }
 }
 
 ```
