@@ -195,7 +195,7 @@ public class B: A
 
 Here, because `F`’s signature includes a pointer type, it can only be written in an unsafe context. However, the unsafe context can be introduced by either making the entire class unsafe, as is the case in `A`, or by including an unsafe modifier in the method declaration, as is the case in `B`. *end example*]
 
-When the unsafe modifier is used on a partial type declaration (§15.2.7), only that particular part is considered an unsafe context.
+When the `unsafe` modifier is used on a partial type declaration (§15.2.7), only that particular part is considered an unsafe context.
 
 ## Pointer types
 
