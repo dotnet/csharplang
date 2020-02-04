@@ -1151,7 +1151,7 @@ class Test
 }
 ```
 
-a stackalloc initializer is used in the IntToString method to allocate a buffer of 16 characters on the stack. The buffer is automatically discarded when the method returns. *end example*]
+a `stackalloc` initializer is used in the `IntToString` method to allocate a buffer of 16 characters on the stack. The buffer is automatically discarded when the method returns. *end example*]
 
 Except for the `stackalloc` operator, C# provides no predefined constructs for managing non-garbage collected memory. Such services are typically provided by supporting class libraries or imported directly from the underlying operating system.
 
