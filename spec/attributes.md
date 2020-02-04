@@ -162,84 +162,67 @@ The types of positional and named parameters for an attribute class are limited 
 Attributes are specified in ***attribute sections***. An attribute section consists of a pair of square brackets, which surround a comma-separated list of one or more attributes. The order in which attributes are specified in such a list, and the order in which sections attached to the same program entity are arranged, is not significant. For instance, the attribute specifications `[A][B]`, `[B][A]`, `[A,B]`, and `[B,A]` are equivalent.
 
 ```antlr
-global_attributes
-    : global_attribute_section+
-    ;
+global_attributes: 
+    global_attribute_section+;
 
-global_attribute_section
-    : '[' global_attribute_target_specifier attribute_list ']'
-    | '[' global_attribute_target_specifier attribute_list ',' ']'
-    ;
+global_attribute_section:
+     '[' global_attribute_target_specifier attribute_list ']' |
+     '[' global_attribute_target_specifier attribute_list ',' ']';
 
-global_attribute_target_specifier
-    : global_attribute_target ':'
-    ;
+global_attribute_target_specifier:
+     global_attribute_target ':';
 
-global_attribute_target
-    : 'assembly'
-    | 'module'
-    ;
+global_attribute_target:
+     'assembly'|
+     'module';
 
-attributes
-    : attribute_section+
-    ;
+attributes:
+     attribute_section+;
 
-attribute_section
-    : '[' attribute_target_specifier? attribute_list ']'
-    | '[' attribute_target_specifier? attribute_list ',' ']'
-    ;
+attribute_section:
+     '[' attribute_target_specifier? attribute_list ']' |
+     '[' attribute_target_specifier? attribute_list ',' ']';
 
-attribute_target_specifier
-    : attribute_target ':'
-    ;
+attribute_target_specifier:
+     attribute_target ':';
 
-attribute_target
-    : 'field'
-    | 'event'
-    | 'method'
-    | 'param'
-    | 'property'
-    | 'return'
-    | 'type'
-    ;
+attribute_target:
+     'field' |
+     'event' |
+     'method'|
+     'param' |
+     'property'|
+     'return'|
+     'type';
 
-attribute_list
-    : attribute (',' attribute)*
-    ;
+attribute_list:
+     attribute (',' attribute)*;
 
-attribute
-    : attribute_name attribute_arguments?
-    ;
+attribute:
+     attribute_name attribute_arguments?;
 
-attribute_name
-    : type_name
-    ;
+attribute_name: 
+    type_name;
 
-attribute_arguments
-    : '(' positional_argument_list? ')'
-    | '(' positional_argument_list ',' named_argument_list ')'
-    | '(' named_argument_list ')'
-    ;
+attribute_arguments:
+     '(' positional_argument_list? ')' |
+     '(' positional_argument_list ',' named_argument_list ')'|
+     '(' named_argument_list ')';
 
-positional_argument_list
-    : positional_argument (',' positional_argument)*
-    ;
+positional_argument_list: 
+    positional_argument (',' positional_argument)*;
 
-positional_argument
-    : attribute_argument_expression
-    ;
+positional_argument: 
+    attribute_argument_expression;
 
-named_argument_list
-    : named_argument (','  named_argument)*
-    ;
+named_argument_list: 
+    named_argument (','  named_argument)*;
 
-named_argument
-    : identifier '=' attribute_argument_expression
-    ;
+named_argument: 
+    identifier '=' attribute_argument_expression;
 
-attribute_argument_expression
-    : expression
-    ;
+attribute_argument_expression: 
+    expression;
 ```
 
 An attribute consists of an *attribute_name* and an optional list of positional and named arguments. The positional arguments (if any) precede the named arguments. A positional argument consists of an *attribute_argument_expression*; a named argument consists of a name, followed by an equal sign, followed by an *attribute_argument_expression*, which, together, are constrained by the same rules as simple assignment. The order of named arguments is not significant.
@@ -821,7 +804,7 @@ For invocations that occur within declarations of instance constructors, static 
 
 ## Attributes for Interoperation
 
-Note: This section is applicable only to the Microsoft .NET implementation of C#.
+[!Note] This section is applicable only to the Microsoft .NET implementation of C#.
 
 ### Interoperation with COM and Win32 components
 
