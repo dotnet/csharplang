@@ -341,7 +341,7 @@ In an unsafe context, several constructs are available for operating on pointers
 - The `++` and `--` operators may be used to increment and decrement pointers (§23.6.6).
 - The binary `+` and `-` operators may be used to perform pointer arithmetic (§23.6.7).
 - The `==`, `!=`, `<`, `>`, `<=`, and `>=` operators may be used to compare pointers (§23.6.8).
-- The stackalloc operator may be used to allocate memory from the call stack (§23.9).
+- The `stackalloc` operator may be used to allocate memory from the call stack (§23.9).
 - The fixed statement may be used to temporarily fix a variable so its address can be obtained (§23.7).
 
 ## Fixed and moveable variables
