@@ -10,7 +10,7 @@
 
 Allow a sequence of *statements* to occur right before the *namespace_member_declaration*s of a *compilation_unit* (i.e. source file).
 
-The semantics are that if such a sequence of *statements* is present, the following type declaration would be emitted:
+The semantics are that if such a sequence of *statements* is present, the following type declaration, modulo the actual type name and the method name, would be emitted:
 
 ``` c#
 static class Program
@@ -85,30 +85,30 @@ static class Program
 }
 ```
 
-If any one compilation unit has statements other than local function declarations, those statements occur first.
-The order of statement contributions (which would all be local functions) from other compilation units is undefined.
+Note that the names "Program" and "Main" are used only for illustrations purposes, actual names used by
+compiler are implementation dependent and neither the type, nor the method can be referenced by name from
+source code.
 
-Warnings about missing `await` expressions are omitted. 
+The method is designated as the entry point of the program. Explicitly declared methods that by convention 
+could be considered as an entry point candidates are ignored. A warning is reported when that happens. It is
+an error to specify `-main:<type>` compiler switch.
 
-The type 
+If any one compilation unit has statements other than local function declarations, statements from that
+compilation unit occur first. The order of statement contributions (which would all be local functions)
+from other compilation units is undefined.
 
-The `Main` method is designated as the entry point of the program. It is an error to specify  -main:<type>
+If `await` expressions and other async operations are omitted, no warning is produced. Instead the
+signature of the generated entry point method is equivalent to 
+``` c#
+    static void Main()
+```
 
-
-Normally collision between multiple `Main` method entry points is only diagnosed if and when the program is run.
-However, we should consider forbidding any `Main` methods suitable as entry points to coexist with top-level statements.
-Or if we do allow them, we should not allow synchronous ones to silently take precedence over the async one generated
-from the top-level statements. That precedence was only reluctantly allowed over async `Main` methods for back compat
-reasons which do not apply here.
-
-it would also be an error to have other valid entry points, such as explicit `Main` methods.
-
-The example above would yield the following `Main` method declaration:
+The example above would yield the following `$Main` method declaration:
 
 ``` c#
-static class Program
+static class $Program
 {
-    static async Task Main(string[] args)
+    static void $Main()
     {
         // Statements from File 1
         if (args.Length == 0
@@ -130,14 +130,16 @@ static class Program
 ### Scope of top-level local variables and local functions
 
 Even though top-level local variables and functions are "wrapped" 
-into the generated `Main` method, they should still be in scope throughout the program.
+into the generated entry point method, they should still be in scope throughout the program.
 For the purpose of simple-name evaluation, once the global namespace is reached:
-- First, an attempt is made to evaluate the name within the the generated `Main` method and 
+- First, an attempt is made to evaluate the name within the the generated entry point method and 
   only if this attempt fails 
 - The "regular" evaluation within the global namespace is performed. 
 
-This could lead to name collisions and shadowing of imported names. 
-If one is picked by name look-up, it should lead to an error instead of being silently bypassed. 
+This could lead to name shadowing of namespaces and types declared within the global namespace
+as well as shadowing of imported names.
+
+If the simple name evaluation occurs outside of the simple program statements and ... one is picked by name look-up, it should lead to an error instead of being silently bypassed.
 
 In this way we protect our future ability to better address "Top-level functions" (scenario 2 
 in https://github.com/dotnet/csharplang/issues/3117), and are able to give useful diagnostics 
