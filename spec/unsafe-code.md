@@ -16,7 +16,7 @@ An implementation that does not support unsafe code is required to diagnose any 
 
 The unsafe features of C# are available only in unsafe contexts. An unsafe context is introduced by including an unsafe modifier in the declaration of a type or member, or by employing an *unsafe-statement*:
 
-- A declaration of a `class`, `struct`, `interface`, or `delegate` may include an unsafe modifier, in which case, the entire textual extent of that type declaration (including the body of the `class`, `struct`, or `interface`) is considered an unsafe context. 
+- A declaration of a `class`, `struct`, `interface`, or `delegate` may include an `unsafe` modifier, in which case, the entire textual extent of that type declaration (including the body of the `class`, `struct`, or `interface`) is considered an unsafe context. 
 > [!NOTE]
 > If the *type-declaration* is partial, only that part is an unsafe context.
 - A declaration of a `field`, `method`, `property`, `event`, `indexer`, `operator`, `instance` constructor,` finalizer`, or `static` constructor may include an unsafe modifier, in which case, the entire textual extent of that member declaration is considered an unsafe context.
