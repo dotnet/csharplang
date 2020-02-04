@@ -150,15 +150,15 @@ static class $Program
 Even though top-level local variables and functions are "wrapped" 
 into the generated entry point method, they should still be in scope throughout the program.
 For the purpose of simple-name evaluation, once the global namespace is reached:
-- First, an attempt is made to evaluate the name within the the generated entry point method and 
+- First, an attempt is made to evaluate the name within the generated entry point method and 
   only if this attempt fails 
-- The "regular" evaluation within the global namespace is performed. 
+- The "regular" evaluation within the global namespace declaration is performed. 
 
 This could lead to name shadowing of namespaces and types declared within the global namespace
 as well as to shadowing of imported names.
 
-If the simple name evaluation occurs outside of the statements placed into the generated entry point
-method, and the new evaluation step above yields a result, that should lead to an error.
+If the simple name evaluation occurs outside of the top-level statements and the evaluation
+yields a top-level local variable or function, that should lead to an error.
 
 In this way we protect our future ability to better address "Top-level functions" (scenario 2 
 in https://github.com/dotnet/csharplang/issues/3117), and are able to give useful diagnostics 
