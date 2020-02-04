@@ -177,7 +177,7 @@ public class B: A
 }
 ```
 
-the unsafe modifier on the `F` method in A simply causes the textual extent of `F` to become an unsafe context in which the unsafe features of the language can be used. In the override of `F` in `B`, there is no need to re-specify the unsafe modifier—unless, of course, the `F` method in `B` itself needs access to unsafe features.
+the unsafe modifier on the `F` method in A simply causes the textual extent of `F` to become an `unsafe` context in which the unsafe features of the language can be used. In the override of `F` in `B`, there is no need to re-specify the unsafe modifier—unless, of course, the `F` method in `B` itself needs access to unsafe features.
 
 The situation is slightly different when a pointer type is part of the method’s signature
 
