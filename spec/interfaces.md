@@ -51,7 +51,7 @@ It is a compile-time error for the same modifier to appear multiple times in an 
 
 The new modifier is only permitted on interfaces defined within a class. It specifies that the interface hides an inherited member by the same name, as described in §15.3.5.
 
-The `public`, `protected`, `internal`, and `private` modifiers control the accessibility of the interface. Depending on the context in which the interface declaration occurs, only some of these modifiers might be permitted (§8.5.2). When a partial type declaration (§15.2.7) includes an accessibility specification (via the public, protected, internal, and private modifiers), the rules in §15.2.2 apply.
+The `public`, `protected`, `internal`, and `private` modifiers control the accessibility of the interface. Depending on the context in which the interface declaration occurs, only some of these modifiers might be permitted (§8.5.2). When a partial type declaration (§15.2.7) includes an accessibility specification (via the `public`, `protected`, `internal`, and `private` modifiers), the rules in §15.2.2 apply.
 
 ### Variant type parameter lists
 
@@ -100,19 +100,17 @@ If a generic interface is declared in multiple parts (§15.2.3), each partial de
 The occurrence of variance annotations in the type parameter list of a type restricts the places where types can occur within the type declaration.
 
 A type T is ***output-unsafe*** if one of the following holds:
-- T is a contravariant type parameter
-- T is an array type with an output-unsafe element type
-- T is an interface or delegate type S<A~1~,… A~K~> constructed from a generic type S<X~1~, … X~K~> where for at least one A~i~ one of the following holds:
-<!-- -->
-    - X~i~ is covariant or invariant and A~i~ is output-unsafe.
-    - X~i~ is contravariant or invariant and A~i~ is input-unsafe.
+- `T` is a contravariant type parameter
+- `T` is an array type with an output-unsafe element type
+- `T` is an interface or delegate type S<A<sub>1</sub>,… A<sub>K</sub> constructed from a generic type S<X<sub>1</sub>, … X<sub>K</sub>> where for at least one A<sub>i</sub> one of the following holds:
+    - X<sub>i</sub> is covariant or invariant and A<sub>i</sub> is output-unsafe.
+    - X<sub>i</sub> is contravariant or invariant and A<sub>i</sub> is input-unsafe.
 A type T is ***input-unsafe*** if one of the following holds:
-- T is a covariant type parameter
-- T is an array type with an input-unsafe element type
-- T is an interface or delegate type S<A~1~,… A~K~> constructed from a generic type S<X~1~, … X~K~> where for at least one A~i~ one of the following holds:
-<!-- -->
-    - X~i~ is covariant or invariant and A~i~ is input-unsafe.
-    - X~i~ is contravariant or invariant and A~i~ is output-unsafe.
+- `T` is a covariant type parameter
+- `T` is an array type with an input-unsafe element type
+- `T` is an interface or delegate type  S<A<sub>1</sub>,… A<sub>K</sub> constructed from a generic type S<X<sub>1</sub>, … X<sub>K</sub>> where for at least one A<sub>i</sub> one of the following holds:
+    - X<sub>i</sub> is covariant or invariant and A<sub>i</sub> is input-unsafe.
+    - X<sub>i</sub> is contravariant or invariant and A<sub>i</sub> is output-unsafe.
 
 Intuitively, an output-unsafe type is prohibited in an output position, and an input-unsafe type is prohibited in an input position.
 
@@ -122,11 +120,11 @@ A type is ***output-safe*** if it is not output-unsafe, and ***input-safe*** if 
 
 The purpose of variance annotations is to provide for more lenient (but still type safe) conversions to interface and delegate types. To this end the definitions of implicit (§11.2) and explicit conversions (§11.3) make use of the notion of variance-convertibility, which is defined as follows:
 
-A type T<A~1~, …, A~n~> is variance-convertible to a type T<B~1~, …, B~n~> if T is either an interface or a delegate type declared with the variant type parameters T<X~1~, …, X~n~>, and for each variant type parameter X~i~ one of the following holds:
+A type T<A<sub>i</sub>, …, A<sub>n</sub>> is variance-convertible to a type T<B<sub>i</sub> …, B<sub>n</sub>> if T is either an interface or a delegate type declared with the variant type parameters T<X<sub>i</sub>, …, X<sub>n</sub>>, and for each variant type parameter X<sub>i</sub> one of the following holds:
 
-- X~i~ is covariant and an implicit reference or identity conversion exists from A~i~ to B~i~
-- X~i~ is contravariant and an implicit reference or identity conversion exists from B~i~ to A~i~
-- X~i~ is invariant and an identity conversion exists from A~i~ to B~i~
+- X<sub>i</sub> is covariant and an implicit reference or identity conversion exists from A<sub>i</sub> to B<sub>i</sub>
+- X<sub>i</sub> is contravariant and an implicit reference or identity conversion exists from B<sub>i</sub> to A<sub>i</sub>
+- X<sub>i</sub> is invariant and an identity conversion exists from A<sub>i</sub> to B<sub>i</sub>
 
 ### Base interfaces
 
