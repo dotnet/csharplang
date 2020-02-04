@@ -32,10 +32,6 @@
 
 - https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
 
-## Feb 3
-
-- https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
-
 ## Jan 29, 2020
 
 - Records: drilling in to individual features (Mads)
@@ -54,6 +50,12 @@ Overview of meetings and agendas for 2020
 
 - Nullability of dependent calls (Chuck, Julien)
 - https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
+
+## Feb 3
+
+[C# Language Design Notes for Feb. 3, 2020](LDM-2020-02-03.md)
+
+Value Equality
 
 ## Jan 29, 2020
 
