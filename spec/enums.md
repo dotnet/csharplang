@@ -41,7 +41,7 @@ Each enum type has a corresponding integral type called the ***underlying type**
 >[!NOTE]
 >char cannot be used as an underlying type. 
 
-An enum declaration that does not explicitly declare an underlying type has an underlying type of `int`.
+\[*Example*: An enum declaration that does not explicitly declare an underlying type has an underlying type of `int`.
 
 The example
 
@@ -54,7 +54,7 @@ enum Color: long
 }
 ```
 
-declares an enum with an underlying type of long. 
+declares an enum with an underlying type of long. *end example*\]
 
 >[!NOTE]
 > A developer might choose to use an underlying type of long, as in the example, to enable the use of values that are in the range of long but not in the range of int, or to preserve this option for the future.
@@ -120,7 +120,7 @@ enum Color: uint
 
 results in a compile-time error because the constant values -1, -2, and –3 are not in the range of the underlying integral type uint.
 
-Multiple enum members may share the same associated value. The example
+Multiple enum members may share the same associated value.  \[*Example*: The example
 
 ```csharp
 enum Color
@@ -133,7 +133,7 @@ enum Color
 }
 ```
 
-shows an enum in which two enum members—Blue and Max—have the same associated value.
+shows an enum in which two enum members—Blue and Max—have the same associated value. *end example*\]
 
 The associated value of an enum member is assigned either implicitly or explicitly. If the declaration of the enum member has a *constant-expression* initializer, the value of that constant expression, implicitly converted to the underlying type of the enum, is the associated value of the enum member. If the declaration of the enum member has no initializer, its associated value is set implicitly, as follows:
 
@@ -141,7 +141,7 @@ The associated value of an enum member is assigned either implicitly or explicit
 
 -   Otherwise, the associated value of the enum member is obtained by increasing the associated value of the textually preceding enum member by one. This increased value shall be within the range of values that can be represented by the underlying type, otherwise a compile-time error occurs.
 
-The example
+\[*Example*: The example
 
 using System;
 
@@ -195,10 +195,11 @@ for the following reasons:
 
 -   and the enum member Blue is automatically assigned the value one greater than the member that textually precedes it.
 
+*end example*\]
 
 The associated value of an enum member may not, directly or indirectly, use the value of its own associated enum member. Other than this circularity restriction, enum member initializers may freely refer to other enum member initializers, regardless of their textual position. Within an enum member initializer, values of other enum members are always treated as having the type of their underlying type, so that casts are not necessary when referring to other enum members.
 
-The example
+\[*Example*: The example
 
 ```csharp
 enum Circular
@@ -208,7 +209,7 @@ enum Circular
 }
 ```
 
-results in a compile-time error because the declarations of `A` and `B` are circular. `A` depends on `B` explicitly, and `B` depends on `A` implicitly.
+results in a compile-time error because the declarations of `A` and `B` are circular. `A` depends on `B` explicitly, and `B` depends on `A` implicitly. *end example*\]
 
 Enum members are named and scoped in a manner exactly analogous to fields within classes. The scope of an enum member is the body of its containing enum type. Within that scope, enum members can be referred to by their simple name. From all other code, the name of an enum member shall be qualified with the name of its enum type. Enum members do not have any declared accessibility—an enum member is accessible if its containing enum type is accessible.
 

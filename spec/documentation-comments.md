@@ -44,13 +44,13 @@ The text within documentation comments must be well formed according to the rule
 
 Although developers are free to create their own set of tags, a recommended set is defined in §D.3. Some of the recommended tags have special meanings:
 
--   The &lt;param&gt; tag is used to describe parameters. If such a tag is used, the documentation generator must verify that the specified parameter exists and that all parameters are described in documentation comments. If such verification fails, the documentation generator issues a warning.
+-   The `<param>` tag is used to describe parameters. If such a tag is used, the documentation generator must verify that the specified parameter exists and that all parameters are described in documentation comments. If such verification fails, the documentation generator issues a warning.
 
--   The cref attribute can be attached to any tag to provide a reference to a code element. The documentation generator must verify that this code element exists. If the verification fails, the documentation generator issues a warning. When looking for a name described in a cref attribute, the documentation generator must respect namespace visibility according to using statements appearing within the source code. For code elements that are generic, the normal generic syntax (e.g.; “List&lt;T&gt;”) cannot be used because it produces invalid XML. Braces can be used instead of brackets (e.g.; “List{T}”), or the XML escape syntax can be used (e.g.; “List&lt;T&gt;”).
+-   The cref attribute can be attached to any tag to provide a reference to a code element. The documentation generator must verify that this code element exists. If the verification fails, the documentation generator issues a warning. When looking for a name described in a cref attribute, the documentation generator must respect namespace visibility according to using statements appearing within the source code. For code elements that are generic, the normal generic syntax (e.g.; “List`<T>`”) cannot be used because it produces invalid XML. Braces can be used instead of brackets (e.g.; “List{T}”), or the XML escape syntax can be used (e.g.; “List`<T>`”).
 
--   The &lt;summary&gt; tag is intended to be used by a documentation viewer to display additional information about a type or member.
+-   The `<summary>` tag is intended to be used by a documentation viewer to display additional information about a type or member.
 
--   The &lt;include&gt; tag includes information from an external XML file.
+-   The `<include>` tag includes information from an external XML file.
 
 Note carefully that the documentation file does not provide full information about the type and members (for example, it does not contain any type information). To get such information about a type or member, the documentation file must be used in conjunction with reflection on the type or member.
 
@@ -84,26 +84,26 @@ The documentation generator must accept and process any tag that is valid accord
 
 ### &lt;c&gt; {#c .Appendix3}
 
-This tag provides a mechanism to indicate that a fragment of text within a description should be set in a special font such as that used for a block of code. For lines of actual code, use &lt;code&gt; (§D.3.3).
+This tag provides a mechanism to indicate that a fragment of text within a description should be set in a special font such as that used for a block of code. For lines of actual code, use `<code>` (§D.3.3).
 
 **Syntax:**
 ```csharp
 <c>text</c>
 ```
 **Example:**
-```csharp
-/// <summary>Class <c>Point</c> models a point in a two-dimensional
-/// plane.</summary>
 
-public class Point
-{
-	// …
+/// &lt;summary&gt;Class &lt;c&gt;Point&lt;/c&gt; models a point in a two-dimensional\
+/// plane.&lt;/summary&gt;
+
+public class Point\
+{\
+	// …\
 }
-```
+
 
 ### &lt;code&gt; {#code .Appendix3}
 
-This tag is used to set one or more lines of source code or program output in some special font. For small code fragments in narrative, use &lt;c&gt; (§D.3.2).
+This tag is used to set one or more lines of source code or program output in some special font. For small code fragments in narrative, use `<c>` (§D.3.2).
 
 **Syntax:**
 ```csharp
@@ -141,7 +141,7 @@ This tag allows example code within a comment, to specify how a method or other 
 
 **Example:**
 
-See &lt;code&gt; (§D.3.3) for an example.
+See `<code>` (§D.3.3) for an example.
 
 ### &lt;exception&gt; {#exception .Appendix3}
 
@@ -180,7 +180,7 @@ public class DataBaseOperations
 
 ### &lt;include&gt; {#include .Appendix3}
 
-This tag allows including information from an XML document that is external to the source code file. The external file must be a well-formed XML document, and an XPath expression is applied to that document to specify what XML from that document to include. The &lt;include&gt; tag is then replaced with the selected XML from the external document.
+This tag allows including information from an XML document that is external to the source code file. The external file must be a well-formed XML document, and an XPath expression is applied to that document to specify what XML from that document to include. The `<include>` tag is then replaced with the selected XML from the external document.
 
 **Syntax**:
 
@@ -208,7 +208,7 @@ public class IntList { … }
 ```
 
 and the external file “docs.xml” had the following contents:
-```csharp
+```xml
 <?xml version="1.0"?>
 <extradoc>
 	<class name="IntList">
@@ -226,7 +226,7 @@ and the external file “docs.xml” had the following contents:
 
 then the same documentation is output as if the source code contained:
 
-```csharp
+```xml
 // <summary>
 /// Contains a list of integers.
 /// </summary>
@@ -235,9 +235,9 @@ public class IntList { … }
 
 ### &lt;list&gt; {#list .Appendix3}
 
-This tag is used to create a list or table of items. It can contain a &lt;listheader&gt; block to define the heading row of either a table or definition list. (When defining a table, only an entry for *term* in the heading need be supplied.)
+This tag is used to create a list or table of items. It can contain a `<listheader>` block to define the heading row of either a table or definition list. (When defining a table, only an entry for *term* in the heading need be supplied.)
 
-Each item in the list is specified with an &lt;item&gt; block. When creating a definition list, both *term* and *description* must be specified. However, for a table, bulleted list, or numbered list, only *description* need be specified.
+Each item in the list is specified with an `<item>` block. When creating a definition list, both *term* and *description* must be specified. However, for a table, bulleted list, or numbered list, only *description* need be specified.
 
 **Syntax:**
 
@@ -295,7 +295,7 @@ public class MyClass
 
 ### &lt;para&gt; {#para .Appendix3}
 
-This tag is for use inside other tags, such as &lt;summary&gt; (§D.3.16) or &lt;returns&gt; (§D.3.13), and permits structure to be added to text.
+This tag is for use inside other tags, such as `<summary>` (§D.3.16) or `<returns>` (§D.3.13), and permits structure to be added to text.
 
 **Syntax:**
 
@@ -416,7 +416,7 @@ public static void Test() {
 
 ### &lt;remarks&gt; {#remarks .Appendix3}
 
-This tag is used to specify extra information about a type. Use &lt;summary&gt; (§D.3.16) to describe the type itself and the members of a type.
+This tag is used to specify extra information about a type. Use `<summary>` (§D.3.16) to describe the type itself and the members of a type.
 
 **Syntax:**
 
@@ -471,7 +471,7 @@ public override string ToString() {
 
 ### &lt;see&gt; {#see .Appendix3}
 
-This tag allows a link to be specified within text. Use &lt;seealso&gt; (§D.3.15) to indicate text that is to appear in a *See Also* subclause.
+This tag allows a link to be specified within text. Use `<seealso>` (§D.3.15) to indicate text that is to appear in a *See Also* subclause.
 
 **Syntax:**
 
@@ -507,7 +507,7 @@ public void Translate(int xor, int yor) {
 
 ### &lt;seealso&gt; {#seealso .Appendix3}
 
-This tag allows an entry to be generated for the *See Also* subclause. Use &lt;see&gt; (§D.3.14) to specify a link from within text.
+This tag allows an entry to be generated for the *See Also* subclause. Use `<see>` (§D.3.14) to specify a link from within text.
 
 **Syntax:**
 
@@ -535,7 +535,7 @@ public override bool Equals(object o) {
 
 ### &lt;summary&gt; {#summary .Appendix3}
 
-This tag can be used to describe a type or a member of a type. Use &lt;remarks&gt; (§D.3.12) to describe the type itself.
+This tag can be used to describe a type or a member of a type. Use `<remarks>` (§D.3.12) to describe the type itself.
 
 **Syntax:**
 
@@ -1091,7 +1091,7 @@ namespace Graphics
 
 Here is the output produced by one documentation generator when given the source code for class Point, shown above:
 
-```csharp
+```xml
 <?xml version="1.0"?>
 <doc>
 	<assembly>
