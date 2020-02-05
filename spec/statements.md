@@ -2,33 +2,44 @@
 
 ## General
 
-C\# provides a variety of statements. \[*Note*: Most of these statements will be familiar to developers who have programmed in C and C++. *end note*\]
+C\# provides a variety of statements. 
+
+> [!NOTE] 
+> Most of these statements will be familiar to developers who have programmed in C and C++.
 
 []{#Grammar_statement .anchor}statement:\
-labeled-statement\
-declaration-statement\
+
+```ANTLR
+labeled-statement
+declaration-statement
 embedded-statement
+```
 
 []{#Grammar_embedded_statement .anchor}embedded-statement:\
-block\
-empty-statement\
-expression-statement\
-selection-statement\
-iteration-statement\
-jump-statement\
-try-statement\
-checked-statement\
-unchecked-statement\
-lock-statement\
-using-statement\
+
+```ANTLR
+block
+empty-statement
+expression-statement
+selection-statement
+iteration-statement
+jump-statement
+try-statement
+checked-statement
+unchecked-statement
+lock-statement
+using-statement
 yield-statement
+```
 
 The *embedded-statement* nonterminal is used for statements that appear within other statements. The use of *embedded-statement* rather than *statement* excludes the use of declaration statements and labeled statements in these contexts. \[*Example*: The code
 
-void F(bool b) {\
-if (b)\
-int i = 44;\
+```csharp
+void F(bool b) {
+if (b)
+int i = 44;
 }
+```
 
 results in a compile-time error because an if statement requires an *embedded-statement* rather than a *statement* for its if branch. If this code were permitted, then the variable i would be declared, but it could never be used. Note, however, that by placing i’s declaration in a block, the example is valid. *end example*\]
 
@@ -40,33 +51,40 @@ If a statement can possibly be reached by execution, the statement is said to be
 
 \[*Example*: In the following code
 
-void F() {\
-Console.WriteLine("reachable");\
-goto Label;\
-Console.WriteLine("unreachable");\
-Label:\
-Console.WriteLine("reachable");\
+```csharp
+void F() {
+Console.WriteLine("reachable");
+goto Label;
+Console.WriteLine("unreachable");
+Label:
+Console.WriteLine("reachable");
 }
+```
 
 the second invocation of Console.WriteLine is unreachable because there is no possibility that the statement will be executed. *end example*\]
 
 A warning is reported if the compiler determines that a statement is unreachable. It is specifically not an error for a statement to be unreachable.
 
-\[*Note*: To determine whether a particular statement or end point is reachable, the compiler performs flow analysis according to the reachability rules defined for each statement. The flow analysis takes into account the values of constant expressions (§12.20) that control the behavior of statements, but the possible values of non-constant expressions are not considered. In other words, for purposes of control flow analysis, a non-constant expression of a given type is considered to have any possible value of that type.
+> [!NOTE]
+> To determine whether a particular statement or end point is reachable, the compiler performs flow analysis according to the reachability rules defined for each statement. The flow analysis takes into account the values of constant expressions (§12.20) that control the behavior of statements, but the possible values of non-constant expressions are not considered. In other words, for purposes of control flow analysis, a non-constant expression of a given type is considered to have any possible value of that type.
 
 In the example
 
-void F() {\
-const int i = 1;\
-if (i == 2) Console.WriteLine("unreachable");\
+```csharp
+void F() {
+const int i = 1;
+if (i == 2) Console.WriteLine("unreachable");
 }
+```
 
 the Boolean expression of the if statement is a constant expression because both operands of the == operator are constants. As the constant expression is evaluated at compile-time, producing the value false, the Console.WriteLine invocation is considered unreachable. However, if i is changed to be a local variable
 
-void F() {\
-int i = 1;\
-if (i == 2) Console.WriteLine("reachable");\
+```csharp
+void F() {
+int i = 1;
+if (i == 2) Console.WriteLine("reachable");
 }
+```
 
 the Console.WriteLine invocation is considered reachable, even though, in reality, it will never be executed. *end note*\]
 
@@ -74,11 +92,12 @@ The *block* of a function member or an anonymous function is always considered r
 
 \[*Example*: In the following code
 
-void F(int x) {\
-Console.WriteLine("start");\
-if (x &lt; 0) Console.WriteLine("negative");\
+```csharp
+void F(int x) {
+Console.WriteLine("start");
+if (x < 0) Console.WriteLine("negative");
 }
-
+```
 the reachability of the second Console.WriteLine is determined as follows:
 
 -   The first Console.WriteLine expression statement is reachable because the block of the F method is reachable (§13.3).
@@ -133,6 +152,7 @@ A *block* that contains one or more yield statements (§13.15) is called an iter
 A ***statement list*** consists of one or more statements written in sequence. Statement lists occur in *block*s (§13.3) and in *switch-block*s (§13.8.3).
 
 []{#Grammar_statement_list .anchor}statement-list:\
+
 statement\
 statement-list statement
 
@@ -161,23 +181,26 @@ Execution of an empty statement simply transfers control to the end point of the
 
 \[*Example*: An empty statement can be used when writing a while statement with a null body:
 
+```csharp
 bool ProcessMessage() {…}
 
-void ProcessMessages() {\
-while (ProcessMessage())\
-;\
+void ProcessMessages() {
+while (ProcessMessage())
+;
 }
-
+```
 Also, an empty statement can be used to declare a label just before the closing “}” of a block:
 
-void F() {\
+```csharp
+void F() {
 …
 
-if (done) goto exit;\
+if (done) goto exit;
 …
 
-exit: ;\
+exit: ;
 }
+```
 
 [[]{#_Toc497631513 .anchor}]{#_Ref471972610 .anchor}*end example*\]
 
@@ -190,15 +213,20 @@ identifier *:* statement
 
 A labeled statement declares a label with the name given by the *identifier*. The scope of a label is the whole block in which the label is declared, including any nested blocks. It is a compile-time error for two labels with the same name to have overlapping scopes.
 
-A label can be referenced from goto statements (§13.10.4) within the scope of the label. \[*Note*: This means that goto statements can transfer control within blocks and out of blocks, but never into blocks. *end note*\]
+A label can be referenced from goto statements (§13.10.4) within the scope of the label. 
+
+> [!NOTE] 
+> This means that goto statements can transfer control within blocks and out of blocks, but never into blocks.
 
 Labels have their own declaration space and do not interfere with other identifiers. \[*Example*: The example
 
-int F(int x) {\
-if (x &gt;= 0) goto x;\
-x = -x;\
-x: return x;\
+```csharp
+int F(int x) {
+if (x >= 0) goto x;
+x = -x;
+x: return x;
 }
+```
 
 is valid and uses the name x as both a parameter and a label.[]{#_Toc445783018 .anchor} *end example*\]
 
@@ -213,31 +241,48 @@ In addition to the reachability provided by normal flow of control, a labeled st
 A *declaration-statement* declares a local variable or constant. Declaration statements are permitted in blocks, but are not permitted as embedded statements.
 
 []{#Grammar_declaration_statement .anchor}declaration-statement:\
-local-variable-declaration *;*\
-local-constant-declaration *;*
+
+```ANTLR
+local-variable-declaration ;
+local-constant-declaration ;
+```
 
 ### Local variable declarations
 
 A *local-variable-declaration* declares one or more local variables.
 
 []{#Grammar_local_variable_declaration .anchor}local-variable-declaration:\
-local-variable-type local-variable-declarators
 
+```ANTLR
+local-variable-type local-variable-declarators
+```
 []{#Grammar_local_variable_type .anchor}local-variable-type:\
-type\
+
+```ANTLR
+type
 var
+```
 
 []{#Grammar_local_variable_declarators .anchor}local-variable-declarators:\
-local-variable-declarator\
+
+```ANTLR
+local-variable-declarator
 local-variable-declarators *,* local-variable-declarator
+```
 
 []{#Grammar_local_variable_declarator .anchor}local-variable-declarator:\
-identifier\
+
+```ANTLR
+identifier
 identifier = local-variable-initializer
+```
 
 []{#Grammar_local_variable_initializer .anchor}local-variable-initialize[]{#_Toc445783019 .anchor}r:\
-expression\
+
+```ANTLR
+expression
 array-initializer
+```
 
 The *local-variable-type* of a *local-variable-declaration* either directly specifies the type of the variables introduced by the declaration, or indicates with the identifier var that the type should be inferred based on an initializer. The type is followed by a list of *local-variable-declarator*s, each of which introduces a new variable. A *local-variable-declarator* consists of an *identifier* that names the variable, optionally followed by an “=” token and a *local-variable-initializer* that gives the initial value of the variable.
 
@@ -255,11 +300,13 @@ In the context of a local variable declaration, the identifier var acts as a con
 
 \[*Example*: The following are incorrect implicitly typed local variable declarations:
 
-var x; // Error, no initializer to infer type from\
-var y = {1, 2, 3}; // Error, array initializer not permitted\
-var z = null; // Error, null does not have a type\
-var u = x =&gt; x + 1; // Error, anonymous functions do not have a type\
+```csharp
+var x; // Error, no initializer to infer type from
+var y = {1, 2, 3}; // Error, array initializer not permitted
+var z = null; // Error, null does not have a type
+var u = x => x + 1; // Error, anonymous functions do not have a type
 var v = v++; // Error, initializer cannot refer to v itself
+```
 
 *end example*\]
 
@@ -271,35 +318,42 @@ A local variable declaration that declares multiple variables is equivalent to m
 
 \[*Example*: The example
 
-void F() {\
-int x = 1, y, z = x \* 2;\
+```csharp
+void F() {
+int x = 1, y, z = x \* 2;
 }
-
+```
 corresponds exactly to
 
-void F() {\
-int x; x = 1;\
-int y;\
-int z; z = x \* 2;\
+```csharp
+void F() {
+int x; x = 1;
+int y;
+int z; z = x \* 2;
 }
+```
 
 *end example*\]
 
 In an implicitly typed local variable declaration, the type of the local variable being declared is taken to be the same as the type of the expression used to initialize the variable. \[*Example*:
 
-var i = 5;\
-var s = "Hello";\
-var d = 1.0;\
-var numbers = new int\[\] {1, 2, 3};\
-var orders = new Dictionary&lt;int,Order&gt;();
+```csharp
+var i = 5;
+var s = "Hello";
+var d = 1.0;
+var numbers = new int\[\] {1, 2, 3};
+var orders = new Dictionary<int,Order>();
+```
 
 The implicitly typed local variable declarations above are precisely equivalent to the following explicitly typed declarations:
 
-int i = 5;\
-string s = "Hello";\
-double d = 1.0;\
-int\[\] numbers = new int\[\] {1, 2, 3};\
-Dictionary&lt;int,Order&gt; orders = new Dictionary&lt;int,Order&gt;();
+```csharp
+int i = 5;
+string s = "Hello";
+double d = 1.0;
+int\[\] numbers = new int\[\] {1, 2, 3};
+Dictionary<int,Order> orders = new Dictionary<int,Order>();
+```
 
 *end example*\]
 
@@ -308,15 +362,17 @@ Dictionary&lt;int,Order&gt; orders = new Dictionary&lt;int,Order&gt;();
 A *local-constant-declaration* declares one or more local constants.
 
 []{#Grammar_local_constant_declaration .anchor}local-constant-declaration:\
-*const* type constant-declarators
 
-constant-declarators:\
-constant-declarator\
-constant-declarators *,* constant-declarator
+```ANTLR
+const type constant-declarators
 
-constant-declarator:\
+constant-declarators:
+constant-declarator
+constant-declarators , constant-declarator
+
+constant-declarator:
 identifier = constant-expression
-
+```
 [[]{#_Ref450638231 .anchor}]{#_Toc445783021 .anchor}The *type* of a *local-constant-declaration* specifies the type of the constants introduced by the declaration. The type is followed by a list of *constant-declarator*s, each of which introduces a new constant. A *constant-declarator* consists of an *identifier* that names the constant, followed by an “=” token, followed by a *constant-expression* (§12.20) that gives the value of the constant.
 
 The *type* and *constant-expression* of a local constant declaration shall follow the same rules as those of a constant member declaration (§15.4).
@@ -331,20 +387,29 @@ A local constant declaration that declares multiple constants is equivalent to m
 
 An *expression-statement* evaluates a given expression. The value computed by the expression, if any, is discarded.
 
+
 []{#Grammar_expression_statement .anchor}expression-statement:\
-statement-expression *;*
 
+```ANTLR
+statement-expression ;
+```
 []{#Grammar_statement_expression .anchor}statement-expression:\
-invocation-expression\
-object-creation-expression\
-assignment\
-post-increment-expression\
-post-decrement-expression\
-pre-increment-expression\
-pre-decrement-expression\
-await-expression
 
-Not all expressions are permitted as statements. \[*Note*: In particular, expressions such as x + y and x == 1, that merely compute a value (which will be discarded), are not permitted as statements. *end note*\]
+```ANTLR
+invocation-expression
+object-creation-expression
+assignment
+post-increment-expression
+post-decrement-expression
+pre-increment-expression
+pre-decrement-expression
+await-expression
+```
+
+Not all expressions are permitted as statements. 
+
+> [!NOTE] 
+> In particular, expressions such as x + y and x == 1, that merely compute a value (which will be discarded), are not permitted as statements.
 
 Execution of an expression statement evaluates the contained expression and then transfers control to the end point of the expression statement. The end point of an *expression-statement* is reachable if that *expression-statement* is reachable.
 
@@ -355,31 +420,38 @@ Execution of an expression statement evaluates the contained expression and then
 Selection statements select one of a number of possible statements for execution based on the value of some expression.
 
 []{#Grammar_selection_statement .anchor}selection-statement:\
-if-statement\
-switch-statement
 
+```ANTLR
+if-statement
+switch-statement
+```
 ### The if statement
 
 The if statement selects a statement for execution based on the value of a Boolean expression.
 
 []{#Grammar_if_statement .anchor}if-statement:\
-*if* *(* boolean-expression *)* embedded-statement\
-*if* *(* boolean-expression *)* embedded-statement *else* embedded-statement
 
+```ANTLR
+if ( boolean-expression ) embedded-statement\
+if ( boolean-expression ) embedded-statement else 
+embedded-statement
+```
 []{#_Toc445783024 .anchor}An else part is associated with the lexically nearest preceding if that is allowed by the syntax. \[*Example*: Thus, an if statement of the form
 
+```csharp
 if (x) if (y) F(); else G();
 
 is equivalent to
 
-if (x) {\
-if (y) {\
-F();\
-}\
-else {\
-G();\
-}\
+if (x) {
+if (y) {
+F();
 }
+else {
+G();
+}
+}
+```
 
 *end example*\]
 
@@ -404,25 +476,42 @@ The end point of an if statement is reachable if the end point of at least one o
 The switch statement selects for execution a statement list having an associated switch label that corresponds to the value of the switch expression.
 
 []{#Grammar_switch_statement .anchor}switch-statement:\
-*switch* *(* expression *)* switch-block
+
+```ANTLR
+switch ( expression ) switch-block
+```
 
 []{#Grammar_switch_block .anchor}switch-block:\
-*{* switch-sections~opt~ *}*
 
+```ANTLR
+{ switch-sections~opt~ }
+```
 []{#Grammar_switch_sections .anchor}switch-sections:\
-switch-section\
+
+```ANTLR
+switch-section
 switch-sections switch-section
+```
 
 []{#Grammar_switch_section .anchor}switch-section:\
+
+```ANTLR
 switch-labels statement-list
+```
 
 []{#Grammar_switch_labels .anchor}switch-labels:\
-switch-label\
+
+```ANTLR
+switch-label
 switch-labels switch-label
+```
 
 []{#Grammar_switch_label .anchor}switch-label:\
-*case* constant-expression *:*\
-*default* *:*
+
+```ANTLR
+case constant-expression :\
+default :
+```
 
 []{#_Toc445783025 .anchor}A *switch-statement* consists of the keyword switch, followed by a parenthesized expression (called the ***switch expression***), followed by a *switch-block*. The *switch-block* consists of zero or more *switch-section*s, enclosed in braces. Each *switch-section* consists of one or more *switch-labels* followed by a *statement-list* (§13.3.2).
 
@@ -450,114 +539,130 @@ A switch statement is executed as follows:
 
 If the end point of the statement list of a switch section is reachable, a compile-time error occurs. This is known as the “no fall through” rule. \[*Example*: The example
 
-switch (i) {\
-case 0:\
-CaseZero();\
-break;\
-case 1:\
-CaseOne();\
-break;\
-default:\
-CaseOthers();\
-break;\
+```csharp
+switch (i) {
+case 0:
+CaseZero();
+break;
+case 1:
+CaseOne();
+break;
+default:
+CaseOthers();
+break;
 }
+```
 
 is valid because no switch section has a reachable end point. Unlike C and C++, execution of a switch section is not permitted to “fall through” to the next switch section, and the example
 
-switch (i) {\
-case 0:\
-CaseZero();\
-case 1:\
-CaseZeroOrOne();\
-default:\
-CaseAny();\
+```csharp
+switch (i) {
+case 0:
+CaseZero();
+case 1:
+CaseZeroOrOne();
+default:
+CaseAny();
 }
+```
 
 results in a compile-time error. When execution of a switch section is to be followed by execution of another switch section, an explicit goto case or goto default statement shall be used:
 
-switch (i) {\
-case 0:\
-CaseZero();\
-goto case 1;\
-case 1:\
-CaseZeroOrOne();\
-goto default;\
-default:\
-CaseAny();\
-break;\
+```csharp
+switch (i) {
+case 0:
+CaseZero();
+goto case 1;
+case 1:
+CaseZeroOrOne();
+goto default;
+default:
+CaseAny();
+break;
 }
+```
 
 *end example*\]
 
 Multiple labels are permitted in a *switch-section*. \[*Example*: The example
 
-switch (i) {\
-case 0:\
-CaseZero();\
-break;\
-case 1:\
-CaseOne();\
-break;\
-case 2:\
-default:\
-CaseTwo();\
-break;\
+```csharp
+switch (i) {
+case 0:
+CaseZero();
+break;
+case 1:
+CaseOne();
+break;
+case 2:
+default:
+CaseTwo();
+break;
 }
+```
 
 is valid. The example does not violate the “no fall through” rule because the labels case 2: and default: are part of the same *switch-section*. *end example*\]
 
-\[*Note*: The “no fall through” rule prevents a common class of bugs that occur in C and C++ when break statements are accidentally omitted. For example, the sections of the switch statement above can be reversed without affecting the behavior of the statement:
+> [!NOTE] 
+> The “no fall through” rule prevents a common class of bugs that occur in C and C++ when break statements are accidentally omitted. For example, the sections of the switch statement above can be reversed without affecting the behavior of the statement:
 
-switch (i) {\
-default:\
-CaseAny();\
-break;\
-case 1:\
-CaseZeroOrOne();\
-goto default;\
-case 0:\
-CaseZero();\
-goto case 1;\
+```csharp
+switch (i) {
+default:
+CaseAny();
+break;
+case 1:
+CaseZeroOrOne();
+goto default;
+case 0:
+CaseZero();
+goto case 1;
 }
+```
 
 *end note*\]
 
-\[*Note*: The statement list of a switch section typically ends in a break, goto case, or goto default statement, but any construct that renders the end point of the statement list unreachable is permitted. For example, a while statement controlled by the Boolean expression true is known to never reach its end point. Likewise, a throw or return statement always transfers control elsewhere and never reaches its end point. Thus, the following example is valid:
+> [!NOTE] 
+> The statement list of a switch section typically ends in a break, goto case, or goto default statement, but any construct that renders the end point of the statement list unreachable is permitted. For example, a while statement controlled by the Boolean expression true is known to never reach its end point. Likewise, a throw or return statement always transfers control elsewhere and never reaches its end point. Thus, the following example is valid:
 
-switch (i) {\
-case 0:\
-while (true) F();\
-case 1:\
-throw new ArgumentException();\
-case 2:\
-return;\
+```csharp
+switch (i) {
+case 0:
+while (true) F();
+case 1:
+throw new ArgumentException();
+case 2:
+return;
 }
+```
 
 *end note*\]
 
 \[*Example*: The governing type of a switch statement can be the type string. For example:
 
-void DoCommand(string command) {\
-switch (command.ToLower()) {\
-case "run":\
-DoRun();\
-break;\
-case "save":\
-DoSave();\
-break;\
-case "quit":\
-DoQuit();\
-break;\
-default:\
-InvalidCommand(command);\
-break;\
-}\
+```csharp
+void DoCommand(string command) {
+switch (command.ToLower()) {
+case "run":
+DoRun();
+break;
+case "save":
+DoSave();
+break;
+case "quit":
+DoQuit();
+break;
+default:
+InvalidCommand(command);
+break;
 }
+}
+```
 
 *end example*\]
 
-\[*Note*: Like the string equality operators (§12.11.8), the switch statement is case sensitive and will execute a given switch section only if the switch expression string exactly matches a case label constant. *end note*\]
-
+> [!NOTE] 
+> Like the string equality operators (§12.11.8), the switch statement is case sensitive and will execute a given switch section only if the switch expression string exactly matches a case label constant. 
 When the governing type of a switch statement is string or a nullable value type, the value null is permitted as a case label constant.
 
 The *statement-list*s of a *switch-block* may contain declaration statements (§13.6). The scope of a local variable or constant declared in a switch block is the switch block.
@@ -589,17 +694,23 @@ The end point of a switch statement is reachable if at least one of the followin
 Iteration statements repeatedly execute an embedded statement.
 
 []{#Grammar_iteration_statement .anchor}iteration-statement:\
-while-statement\
-do-statement\
-for-statement\
+
+```ANTLR
+while-statement
+do-statement
+for-statement
 foreach-statement
+```
 
 ### The while statement
 
 The while statement conditionally executes an embedded statement zero or more times.
 
 []{#Grammar_while_statement .anchor}while-statement:\
-*while* *(* boolean-expression *)* embedded-statement
+
+```ANTLR
+while ( boolean-expression ) embedded-statement
+```
 
 A while statement is executed as follows:
 
@@ -624,7 +735,10 @@ The end point of a while statement is reachable if at least one of the following
 The do statement conditionally executes an embedded statement one or more times.
 
 []{#Grammar_do_statement .anchor}do-statement:\
-*do* embedded-statement *while* *(* boolean-expression *)* *;*
+
+```ANTLR
+do embedded-statement while ( boolean-expression ) ;
+```
 
 A do statement is executed as follows:
 
@@ -647,21 +761,36 @@ The embedded statement of a do statement is reachable if the do statement is rea
 The for statement evaluates a sequence of initialization expressions and then, while a condition is true, repeatedly executes an embedded statement and evaluates a sequence of iteration expressions.
 
 []{#Grammar_for_statement .anchor}for-statement:\
-*for* *(* for-initializer~opt~ *;* for-condition~opt~ *;* for-iterator~opt~ *)* embedded-statement
+
+```ANTLR
+for ( for-initializer~opt~ ; for-condition~opt~ ; for-iterator~opt~ ) embedded-statement
+```
 
 []{#Grammar_for_initializer .anchor}for-initializer:\
-local-variable-declaration\
+
+```ANTLR
+local-variable-declaration
 statement-expression-list
+```
 
 []{#Grammar_for_condition .anchor}for-condition:\
+
+```ANTLR
 boolean-expression
+```
 
 []{#Grammar_for_iterator .anchor}for-iterator:\
+
+```ANTLR
 statement-expression-list
+```
 
 []{#Grammar_statement_expression_list .anchor}statement-expression-list:\
-statement-expression\
+
+```ANTLR
+statement-expression
 statement-expression-list *,* statement-expression
+```
 
 The *for-initializer*, if present, consists of either a *local-variable-declaration* (§13.6.2) or a list of *statement-expression*s (§13.7) separated by commas. The scope of a local variable declared by a *for-initializer* starts at the *local-variable-declarator* for the variable and extends to the end of the embedded statement. The scope includes the *for-condition* and the *for-iterator*.
 
@@ -698,11 +827,14 @@ The end point of a for statement is reachable if at least one of the following i
 The foreach statement enumerates the elements of a collection, executing an embedded statement for each element of the collection.
 
 []{#Grammar_foreach_statement .anchor}foreach-statement:\
-*foreach* *(* local-variable-type identifier *in* expression *)* embedded-statement
+
+```ANTLR
+foreach ( local-variable-type identifier in expression ) embedded-statement
+```
 
 The *local-variable-type* and *identifier* of a foreach statement declare the ***iteration variable*** of the statement. If the var identifier is given as the *local-variable-type*, and no type named var is in scope, the iteration variable is said to be an ***implicitly typed iteration variable***, and its type is taken to be the element type of the foreach statement, as specified below. The iteration variable corresponds to a read-only local variable with a scope that extends over the embedded statement. During execution of a foreach statement, the iteration variable represents the collection element for which an iteration is currently being performed. A compile-time error occurs if the embedded statement attempts to modify the iteration variable (via assignment or the ++ and -- operators) or pass the iteration variable as a ref or out parameter.
 
-In the following, for brevity, IEnumerable, IEnumerator, IEnumerable&lt;T&gt; and IEnumerator&lt;T&gt; refer to the corresponding types in the namespaces System.Collections and System.Collections.Generic.
+In the following, for brevity, IEnumerable, IEnumerator, IEnumerable<T> and IEnumerator<T> refer to the corresponding types in the namespaces System.Collections and System.Collections.Generic.
 
 The compile-time processing of a foreach statement first determines the ***collection type***, ***enumerator type*** and ***element type*** of the expression. This determination proceeds as follows:
 
@@ -734,7 +866,7 @@ The compile-time processing of a foreach statement first determines the ***colle
 
 <!-- -->
 
--   If among all the types T~i~ for which there is an implicit conversion from X to IEnumerable&lt;T~i~&gt;, there is a unique type T such that T is not dynamic and for all the other T~i~ there is an implicit conversion from IEnumerable&lt;T&gt; to IEnumerable&lt;T~i~&gt;, then the ***collection type*** is the interface IEnumerable&lt;T&gt;, the ***enumerator type*** is the interface IEnumerator&lt;T&gt;, and the ***element type*** is T.
+-   If among all the types T~i~ for which there is an implicit conversion from X to IEnumerable<T~i~>, there is a unique type T such that T is not dynamic and for all the other T~i~ there is an implicit conversion from IEnumerable<T> to IEnumerable<T~i~>, then the ***collection type*** is the interface IEnumerable<T>, the ***enumerator type*** is the interface IEnumerator<T>, and the ***element type*** is T.
 
 -   Otherwise, if there is more than one such type T, then an error is produced and no further steps are taken.
 
@@ -748,36 +880,41 @@ foreach (V v in x) *embedded-statement*
 
 is then expanded to:
 
-{\
-E e = ((C)(x)).GetEnumerator();\
-try {\
-while (e.MoveNext()) {\
-V v = (V)(T)e.Current;\
-*embedded-statement*\
-}\
-}\
-finally {\
-… // Dispose e\
-}\
+```csharp
+{
+E e = ((C)(x)).GetEnumerator();
+try {
+while (e.MoveNext()) {
+V v = (V)(T)e.Current;
+embedded-statement
 }
+}
+finally {
+… // Dispose e
+}
+}
+```
 
-The variable e is not visible to or accessible to the expression x or the embedded statement or any other source code of the program. The variable v is read-only in the embedded statement. If there is not an explicit conversion (§11.2.13) from T (the element type) to V (the *local-variable-type* in the foreach statement), an error is produced and no further steps are taken. \[*Note*: If x has the value null, a System.NullReferenceException is thrown at run-time. *end note*\]
+The variable e is not visible to or accessible to the expression x or the embedded statement or any other source code of the program. The variable v is read-only in the embedded statement. If there is not an explicit conversion (§11.2.13) from T (the element type) to V (the *local-variable-type* in the foreach statement), an error is produced and no further steps are taken. 
+
+> [!NOTE] 
+> If x has the value null, a System.NullReferenceException is thrown at run-time. *end note*\]
 
 An implementation is permitted to implement a given *foreach-statement* differently; e.g., for performance reasons, as long as the behavior is consistent with the above expansion.
 
 The placement of v inside the while loop is important for how it is captured (§12.16.6.2) by any anonymous function occurring in the *embedded-statement*.
 
-\[*Example*:
-
-int\[\] values = { 7, 9, 13 };\
+```csharp
+[Example:
+int[] values = { 7, 9, 13 };
 Action f = null;
-
-foreach (var value in values)\
-{\
-if (f == null) f = () =&gt; Console.WriteLine("First value: " + value);\
+foreach (var value in values)
+{
+if (f == null) f = () => Console.WriteLine("First value: " + value);
 }
-
 f();
+```
+
 
 If v in the expanded form were declared outside of the while loop, it would be shared among all iterations, and its value after the for loop would be the final value, 13, which is what the invocation of f would print. Instead, because each iteration has its own variable v, the one captured by f in the first iteration will continue to hold the value 7, which is what will be printed. (Note that earlier versions of C\# declared v outside of the while loop.) *end example*\]
 
@@ -789,32 +926,40 @@ The body of the finally block is constructed according to the following steps:
 
 -   If E is a non-nullable value type then the finally clause is expanded to the semantic equivalent of:
 
-finally {\
-((System.IDisposable)e).Dispose();\
+```csharp
+finally {
+((System.IDisposable)e).Dispose();
 }
+```
 
 -   Otherwise the finally clause is expanded to the semantic equivalent of:
 
-finally {\
-System.IDisposable d = e as System.IDisposable;\
-if (d != null) d.Dispose();\
+```csharp
+finally {
+System.IDisposable d = e as System.IDisposable;
+if (d != null) d.Dispose();
 }
+```
 
 > except that if E is a value type, or a type parameter instantiated to a value type, then the conversion of e to System.IDisposable shall not cause boxing to occur.
 
 -   Otherwise, if E is a sealed type, the finally clause is expanded to an empty block:
 
-> finally {\
-> }
+```csharp
+finally {
+}
+```
 
 -   Otherwise, the finally clause is expanded to:
 
-> finally {\
-> System.IDisposable d = e as System.IDisposable;\
-> if (d != null) d.Dispose();\
-> }
->
-> The local variable d is not visible to or accessible to any user code. In particular, it does not conflict with any other variable whose scope includes the finally block.
+```csharp
+finally {
+System.IDisposable d = e as System.IDisposable;
+if (d != null) d.Dispose();
+}
+```
+
+The local variable d is not visible to or accessible to any user code. In particular, it does not conflict with any other variable whose scope includes the finally block.
 
 The order in which foreach traverses the elements of an array, is as follows: For single-dimensional arrays elements are traversed in increasing index order, starting with index 0 and ending with index Length – 1. For multi-dimensional arrays, elements are traversed such that the indices of the rightmost dimension are increased first, then the next left dimension, and so on to the left.
 
@@ -957,7 +1102,10 @@ The goto statement transfers control to a statement that is marked by a label.
 goto* *case* constant-expression *;*\
 *goto* *default* *;*
 
-The target of a goto *identifier* statement is the labeled statement with the given label. If a label with the given name does not exist in the current function member, or if the goto statement is not within the scope of the label, a compile-time error occurs. \[*Note*: This rule permits the use of a goto statement to transfer control *out of* a nested scope, but not *into* a nested scope. In the example
+The target of a goto *identifier* statement is the labeled statement with the given label. If a label with the given name does not exist in the current function member, or if the goto statement is not within the scope of the label, a compile-time error occurs. 
+
+> [!NOTE] 
+> This rule permits the use of a goto statement to transfer control *out of* a nested scope, but not *into* a nested scope. In the example
 
 using System;
 
@@ -971,8 +1119,8 @@ string\[,\] table = {\
 
 foreach (string str in args) {\
 int row, colm;\
-for (row = 0; row &lt;= 1; ++row)\
-for (colm = 0; colm &lt;= 2; ++colm)\
+for (row = 0; row <= 1; ++row)\
+for (colm = 0; colm <= 2; ++colm)\
 if (str == table\[row,colm\])\
 goto done;
 
@@ -1107,9 +1255,13 @@ Unless a catch clause includes an exception variable name, it is impossible to a
 
 A catch clause that specifies neither an exception type nor an exception variable name is called a general catch clause. A try statement can only have one general catch clause, and, if one is present, it shall be the last catch clause.
 
-\[*Note*: Some programming languages might support exceptions that are not representable as an object derived from System.Exception, although such exceptions could never be generated by C\# code. A general catch clause might be used to catch such exceptions. Thus, a general catch clause is semantically different from one that specifies the type System.Exception, in that the former might also catch exceptions from other languages. *end note*\]
+> [!NOTE] 
+> Some programming languages might support exceptions that are not representable as an object derived from System.Exception, although such exceptions could never be generated by C\# code. A general catch clause might be used to catch such exceptions. Thus, a general catch clause is semantically different from one that specifies the type System.Exception, in that the former might also catch exceptions from other languages. *end note*\]
 
-In order to locate a handler for an exception, catch clauses are examined in lexical order. A compile-time error occurs if a catch clause specifies a type that is the same as, or is derived from, a type that was specified in an earlier catch clause for the same try. \[*Note*: Without this restriction, it would be possible to write unreachable catch clauses. *end note*\]
+In order to locate a handler for an exception, catch clauses are examined in lexical order. A compile-time error occurs if a catch clause specifies a type that is the same as, or is derived from, a type that was specified in an earlier catch clause for the same try. 
+
+> [!NOTE] 
+> Without this restriction, it would be possible to write unreachable catch clauses. *end note*\]
 
 Within a catch block, a throw statement (§13.10.6) with no expression can be used to re-throw the exception that was caught by the catch block. Assignments to an exception variable do not alter the exception that is re-thrown.
 
@@ -1423,9 +1575,9 @@ There are several restrictions on where a yield statement can appear, as describ
 
 \[*Example*: The following example shows some valid and invalid uses of yield statements.
 
-delegate IEnumerable&lt;int&gt; D();
+delegate IEnumerable<int> D();
 
-IEnumerator&lt;int&gt; GetEnumerator() {\
+IEnumerator<int> GetEnumerator() {\
 try {\
 yield return 1; // Ok\
 yield break; // Ok\
