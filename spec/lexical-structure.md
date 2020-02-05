@@ -49,14 +49,14 @@ defines a *statement-list* to either consist of a *statement* or consist of a *s
 
 A subscripted suffix “*opt*” is used to indicate an optional symbol. [*Example*: The production:
 
-```csharp
+```ANTLR
 block:
     { statement-list~opt~ }
 ```
 
 is shorthand for:
 
-```csharp
+```ANTLR
 block:
     { }
     { statement-list }
@@ -114,7 +114,9 @@ If a sequence of tokens can be parsed (in context) as a *simple-name* (§12.7.3)
 ( ) ] : ; , . ? == !=
 ```
 
-then the *type-argument-list* is retained as part of the *simple-name*, *member-access*, or *pointer-member-access* and any other possible parse of the sequence of tokens is discarded. Otherwise, the *type-argument-list* is not considered part of the *simple-name*, *member-access*, or *pointer-member-access*, even if there is no other possible parse of the sequence of tokens. [*Note*: These rules are not applied when parsing a *type-argument-list* in a *namespace-or-type-name* (§8.8). *end note*] [*Example*: The statement:
+then the *type-argument-list* is retained as part of the *simple-name*, *member-access*, or *pointer-member-access* and any other possible parse of the sequence of tokens is discarded. Otherwise, the *type-argument-list* is not considered part of the *simple-name*, *member-access*, or *pointer-member-access*, even if there is no other possible parse of the sequence of tokens. 
+> [!NOTE] These rules are not applied when parsing a *type-argument-list* in a *namespace-or-type-name* (§8.8).
+[*Example*: The statement:
 
 ```csharp
 F(G<A, B>(7));
@@ -203,7 +205,8 @@ new-line::
 For compatibility with source code editing tools that add end-of-file markers, and to enable a source file to be viewed as a sequence of properly terminated lines, the following transformations are applied, in order, to every source file in a C# program:
 
 -   If the last character of the source file is a Control-Z character (U+001A), this character is deleted.
--   A carriage-return character (U+000D) is added to the end of the source file if that source file is non-empty and if the last character of the source file is not a carriage return (U+000D), a line feed (U+000A), a next line character (U+0085), a line separator (U+2028), or a paragraph separator (U+2029). [*Note*: The additional carriage-return allows a program to end in a *pp-directive* (§7.5) that does not have a terminating *new-line*. *end note*]
+-   A carriage-return character (U+000D) is added to the end of the source file if that source file is non-empty and if the last character of the source file is not a carriage return (U+000D), a line feed (U+000A), a next line character (U+0085), a line separator (U+2028), or a paragraph separator (U+2029). 
+> [!NOTE] The additional carriage-return allows a program to end in a *pp-directive* (§7.5) that does not have a terminating *new-line*.
 
 ### Comments
 
