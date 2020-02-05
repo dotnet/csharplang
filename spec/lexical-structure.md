@@ -784,23 +784,23 @@ A simple escape sequence represents a Unicode character, as described in the tab
 
 | __Escape sequence__  | __Character name__   | __Unicode code point__|
 | -----------------|--------------------------|-----------------------|
-| \\'               |  Single quote            |    U+0027             |
-| \\"               |  Double quote            |    U+0022             |
-| \\\               |  Backslash               |    U+005C             |
-|  \0               |  Null                    |    U+0000             |
-|  \a               |  Alert                   |    U+0007             |
-|  \b               |  Backspace               |    U+0008             |
-|  \f               |  Form feed               |    U+000C             |
-| \n               |  New line                |    U+000A             |
-|  \r               |  Carriage return         |    U+000D             |
-|  \t               |  Horizontal tab          |    U+0009             |
-|  \v               |  Vertical tab            |    U+000B             |
+| \\'              |  Single quote            |    U+0027             |
+| \\"              |  Double quote            |    U+0022             |
+| \\\              |  Backslash               |    U+005C             |
+|   \0             |  Null                    |    U+0000             |
+|   \a             |  Alert                   |    U+0007             |
+|   \b             |  Backspace               |    U+0008             |
+|   \f             |  Form feed               |    U+000C             |
+|   \n             |  New line                |    U+000A             |
+|   \r             |  Carriage return         |    U+000D             |
+|   \t             |  Horizontal tab          |    U+0009             |
+|   \v             |  Vertical tab            |    U+000B             |
 
 The type of a *character-literal* is char.
 
 #### String literals
 
-[]{#_Toc445782964 .anchor}C# supports two forms of string literals: ***regular string literals*** and ***verbatim string literals***. A regular string literal consists of zero or more characters enclosed in double quotes, as in "`hello`", and can include both simple escape sequences (such as `\t` for the tab character), and hexadecimal and Unicode escape sequences.
+C# supports two forms of string literals: ***regular string literals*** and ***verbatim string literals***. A regular string literal consists of zero or more characters enclosed in double quotes, as in "`hello`", and can include both simple escape sequences (such as `\t` for the tab character), and hexadecimal and Unicode escape sequences.
 
 A verbatim string literal consists of an @ character followed by a double-quote character, zero or more characters, and a closing double-quote character. [*Example*: A simple example is @"`hello`". *end example*] In a verbatim string literal, the characters between the delimiters are interpreted verbatim, with the only exception being a *quote-escape-sequence*, which represents one double-quote character. In particular, simple escape sequences, and hexadecimal and Unicode escape sequences are not processed in verbatim string literals. A verbatim string literal may span multiple lines.
 
