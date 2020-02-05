@@ -151,7 +151,7 @@ class Test {
 
 The Print method is compatible with the Action&lt;string&gt; delegate type because any invocation of an Action&lt;string&gt; delegate would also be a valid invocation of the Print method.
 
-If the signature of the Print method above were changed to Print(object value, bool prependTimestamp = false) for example, the Print method would no longer be compatible with Action&lt;string&gt; by the rules of this clause. 
+If the signature of the `Print` method above were changed to `Print(object value, bool prependTimestamp = false)` for example, the `Print` method would no longer be compatible with `Action<string>` by the rules of this clause. 
 
 ## Delegate instantiation
 
@@ -340,4 +340,3 @@ C.M2: 50
 C.M1: 60
 C.M1: 60
 ```
-
