@@ -86,7 +86,7 @@ For a discussion of tuple literals as tuple initializers, see [Tuple types](XXX)
 
 #### General
 
-A tuple type is declared using the following syntax:
+A tuple is declared using the following syntax:
 
 ```antlr
 tuple_type
@@ -202,7 +202,7 @@ System.ValueTuple<int, int> vt = t1;	// identity conversion
 ```
 end example\]
 
-The name given explicitly to any element shall not be the same as any name in the underlying type, except that an explicit name may have the form `Item`*N* provided it corresponds position-wise with an element of the same name in the underlying type.
+**ISSUE:** We need to define "element" to mean the `ItemN` data elements so that this following description does not exclude member The name given explicitly to any element shall not be the same as any element name in the underlying type, except that an explicit name may have the form `Item`*N* provided it corresponds position-wise with an element of the same name in the underlying type.
 
 \[Example:
 ```csharp
@@ -221,24 +221,24 @@ For the purpose of overloading, overriding and hiding, tuples of the same arity,
 If the same element name is used for non-matching elements in base and derived member signatures, the implementation shall issue a warning.  
 
 ```csharp
-class Base
+public class Base
 {
-    virtual void M1(ValueTuple<int, int> arg){...}
+    public virtual void M1(ValueTuple<int, int> arg){...}
 }
-class Derived : Base
+public class Derived : Base
 {
-    override void M1((int c, int d) arg){...}	// valid override, signatures are equivalent
+    public override void M1((int c, int d) arg){...}	// valid override, signatures are equivalent
 }
-class Derived2 : Derived 
+public class Derived2 : Derived 
 {
-    override void M1((int c1, int c) arg){...}	// also valid, warning on possible misuse of name 'c' 
+    public override void M1((int c1, int c) arg){...}	// also valid, warning on possible misuse of name 'c' 
 }
 
-class InvalidOverloading 
+public class InvalidOverloading 
 {
-    virtual void M1((int c, int d) arg){...}
-    virtual void M1((int x, int y) arg){...}		// invalid overload, signatures are eqivalent
-    virtual void M1(ValueTuple<int, int> arg){...}	// also invalid
+    public virtual void M1((int c, int d) arg){...}
+    public virtual void M1((int x, int y) arg){...}		// invalid overload, signatures are eqivalent
+    public virtual void M1(ValueTuple<int, int> arg){...}	// also invalid
 }
 ```
 
