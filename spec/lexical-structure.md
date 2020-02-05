@@ -194,18 +194,19 @@ Line terminators divide the characters of a C# source file into lines.
 ```ANTLR
 (#Grammar_new_line)
 new-line::
-    Carriage return character (*U+000D*)
-    Line feed character (*U+000A*)
-    Carriage return character (*U+000D*) followed by line feed character (*U+000A*)
-    Next line character (*U+0085*)
-    Line separator character (*U+2028*)
-    Paragraph separator character (*U+2029*)
+    Carriage return character (U+000D)
+    Line feed character (U+000A)
+    Carriage return character (U+000D) followed by line feed character (U+000A)
+    Next line character (U+0085)
+    Line separator character (U+2028)
+    Paragraph separator character (U+2029)
 ```
 
 For compatibility with source code editing tools that add end-of-file markers, and to enable a source file to be viewed as a sequence of properly terminated lines, the following transformations are applied, in order, to every source file in a C# program:
 
 -   If the last character of the source file is a Control-Z character (U+001A), this character is deleted.
 -   A carriage-return character (U+000D) is added to the end of the source file if that source file is non-empty and if the last character of the source file is not a carriage return (U+000D), a line feed (U+000A), a next line character (U+0085), a line separator (U+2028), or a paragraph separator (U+2029). 
+
 > [!NOTE] The additional carriage-return allows a program to end in a *pp-directive* (§7.5) that does not have a terminating *new-line*.
 
 ### Comments
