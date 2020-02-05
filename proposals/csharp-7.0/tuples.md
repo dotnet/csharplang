@@ -78,22 +78,6 @@ A tuple literal is *not* a [constant expression](../../spec/expressions.md#Const
 
 For a discussion of tuple literals as tuple initializers, see [Tuple types](XXX).
 
-## Changes to [Types](../../spec/types.md)
-
-> The first paragraph of [Value types](../../spec/types.md#value-types) is replaced with the following text:
-
-A value type is either a `struct` type, an enumeration type, or a tuple type. C# provides a set of predefined struct types called the ***simple types***. The simple types are identified through reserved words.
-
-> The `value_type` grammar is updated to include `tuple_type`:
-
-```antlr
-value_type
-    : struct_type
-    | enum_type
-    | tuple_type // new
-    ;
-```
-
 ## Additions to [Types](../../spec/types.md)
 
 > Add the following sections after [Nullable types](../../spec/types.md#nullable-types) (at the end of the current *Value types* section.)
