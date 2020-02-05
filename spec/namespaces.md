@@ -34,7 +34,7 @@ File B.cs:
     class B {}
 ```
 
-The two compilation units contribute to the single global namespace, in this case declaring two classes with the fully qualified names A and B. Because the two compilation units contribute to the same declaration space, it would have been an error if each contained a declaration of a member with the same name. *end example*]
+The two compilation units contribute to the single global namespace, in this case declaring two classes with the fully qualified names `A` and `B`. Because the two compilation units contribute to the same declaration space, it would have been an error if each contained a declaration of a member with the same name. *end example*]
 
 ## Namespace declarations
 
@@ -168,8 +168,11 @@ The scope of a *using-directive* extends over the *namespace-member-declarations
 
 A *using-alias-directive* introduces an identifier that serves as an alias for a namespace or type within the immediately enclosing compilation unit or namespace body.
 
-[]{#Grammar_using_alias_directive .anchor}using-alias-directive:
-*using* identifier *=* namespace-or-type-name *;*
+```ANTLR
+(#Grammar_using_alias_directive)
+using-alias-directive:
+    using identifier = namespace-or-type-name ;
+```
 
 Within global attributes and member declarations in a compilation unit or namespace body that contains a *using-alias-directive*, the identifier introduced by the *using-alias-directive* can be used to reference the given namespace or type. [*Example*:
 
@@ -207,7 +210,7 @@ namespace N1
 }
 ```
 
-Above, within member declarations in the `N1` namespace, `N2` is an alias for some namespace whose definition is external to the source code of the program. Class `N1.B` derives from class `N2.A`. The same effect can be obtained by creating an alias A for `N2.A` and then referencing `A`:
+Above, within member declarations in the `N1` namespace, `N2` is an alias for some namespace whose definition is external to the source code of the program. Class `N1.B` derives from class `N2.A`. The same effect can be obtained by creating an alias `A` for `N2.A` and then referencing `A`:
 
 ```csharp
 namespace N1
@@ -285,7 +288,7 @@ namespace N3
 }
 ```
 
-In the second namespace body for `N3`, unqualified use of `B` results in an error, since `N3` contains a member named `B` and the namespace body that also declares an alias with name `B`; likewise for `A`. The class `N3.B` can be referenced as `N3.B` or `global::N3.B`. The alias `A` can be used in a *qualified-alias-member* (§14.8), such as A::B. The alias `B` is essentially useless. It cannot be used in a *qualified-alias-member* since only namespace aliases can be used in a *qualified-alias-member* and B aliases a type. *end example*]
+In the second namespace body for `N3`, unqualified use of `B` results in an error, since `N3` contains a member named `B` and the namespace body that also declares an alias with name `B`; likewise for `A`. The class `N3.B` can be referenced as `N3.B` or `global::N3.B`. The alias `A` can be used in a *qualified-alias-member* (§14.8), such as `A::B`. The alias `B` is essentially useless. It cannot be used in a *qualified-alias-member* since only namespace aliases can be used in a *qualified-alias-member* and `B` aliases a type. *end example*]
 
 Just like regular members, names introduced by *alias-directives* are hidden by similarly named members in nested scopes. [*Example*: In the following code
 
