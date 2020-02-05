@@ -91,7 +91,7 @@ interface C<out X, in Y, Z>
 }
 ```
 
-X is covariant, Y is contravariant and Z is invariant. *end example*]
+`X` is covariant, `Y` is contravariant and `Z` is invariant. *end example*]
 
 If a generic interface is declared in multiple parts (§15.2.3), each partial declaration shall specify the same variance for each type parameter.
 
@@ -102,15 +102,15 @@ The occurrence of variance annotations in the type parameter list of a type rest
 A type T is ***output-unsafe*** if one of the following holds:
 - `T` is a contravariant type parameter
 - `T` is an array type with an output-unsafe element type
-- `T` is an interface or delegate type S<A<sub>1</sub>,… A<sub>K</sub> constructed from a generic type S<X<sub>1</sub>, … X<sub>K</sub>> where for at least one A<sub>i</sub> one of the following holds:
-    - X<sub>i</sub> is covariant or invariant and A<sub>i</sub> is output-unsafe.
-    - X<sub>i</sub> is contravariant or invariant and A<sub>i</sub> is input-unsafe.
+- `T` is an interface or delegate type `Si`,… `Ak` constructed from a generic type `S<Xi, … Xk>` where for at least one `Ai` one of the following holds:
+    - `Xi` is covariant or invariant and `Ai` is output-unsafe.
+    - `Xi` is contravariant or invariant and `Ai` is input-unsafe.
 A type T is ***input-unsafe*** if one of the following holds:
 - `T` is a covariant type parameter
 - `T` is an array type with an input-unsafe element type
-- `T` is an interface or delegate type  S<A<sub>1</sub>,… A<sub>K</sub> constructed from a generic type S<X<sub>1</sub>, … X<sub>K</sub>> where for at least one A<sub>i</sub> one of the following holds:
-    - X<sub>i</sub> is covariant or invariant and A<sub>i</sub> is input-unsafe.
-    - X<sub>i</sub> is contravariant or invariant and A<sub>i</sub> is output-unsafe.
+- `T` is an interface or delegate type  `S<Ai,… AK>` constructed from a generic type `S<Xi, … XK>` where for at least one `Ai` one of the following holds:
+    - `Xi` is covariant or invariant and `Ai` is input-unsafe.
+    - `Xi` is contravariant or invariant and `Ai` is output-unsafe.
 
 Intuitively, an output-unsafe type is prohibited in an output position, and an input-unsafe type is prohibited in an input position.
 
@@ -120,11 +120,11 @@ A type is ***output-safe*** if it is not output-unsafe, and ***input-safe*** if 
 
 The purpose of variance annotations is to provide for more lenient (but still type safe) conversions to interface and delegate types. To this end the definitions of implicit (§11.2) and explicit conversions (§11.3) make use of the notion of variance-convertibility, which is defined as follows:
 
-A type T<A<sub>i</sub>, …, A<sub>n</sub>> is variance-convertible to a type T<B<sub>i</sub> …, B<sub>n</sub>> if T is either an interface or a delegate type declared with the variant type parameters T<X<sub>i</sub>, …, X<sub>n</sub>>, and for each variant type parameter X<sub>i</sub> one of the following holds:
+A type T<A`i`, …, A`n`> is variance-convertible to a type T<B`i` …, B`n`> if T is either an interface or a delegate type declared with the variant type parameters T<X`i`, …, X`n`>, and for each variant type parameter X`i` one of the following holds:
 
-- X<sub>i</sub> is covariant and an implicit reference or identity conversion exists from A<sub>i</sub> to B<sub>i</sub>
-- X<sub>i</sub> is contravariant and an implicit reference or identity conversion exists from B<sub>i</sub> to A<sub>i</sub>
-- X<sub>i</sub> is invariant and an identity conversion exists from A<sub>i</sub> to B<sub>i</sub>
+- X`i` is covariant and an implicit reference or identity conversion exists from A`i` to B`i`
+- X`i` is contravariant and an implicit reference or identity conversion exists from B`i` to A`i`
+- X`i` is invariant and an identity conversion exists from A`i` to B`i`
 
 ### Base interfaces
 
@@ -613,7 +613,7 @@ class TextBox: ITextBox
 }
 ```
 
-the explicit interface member implementation of Paint must be written as `IControl.Paint`, not ITextBox.Paint. *end example*]
+the explicit interface member implementation of Paint must be written as `IControl.Paint`, not `ITextBox.Paint`. *end example*]
 
 ### Uniqueness of implemented interfaces
 
@@ -642,12 +642,12 @@ x.F();
 
 To determine if the interface list of a generic type declaration is valid, the following steps are performed:
 
-- Let L be the list of interfaces directly specified in a generic class, struct, or interface declaration C.
-- Add to L any base interfaces of the interfaces already in L.
-- Remove any duplicates from L.
-- If any possible constructed type created from C would, after type arguments are substituted into L, cause two interfaces in L to be identical, then the declaration of C is invalid. Constraint declarations are not considered when determining all possible constructed types.
+- Let `L` be the list of interfaces directly specified in a generic class, struct, or interface declaration `C`.
+- Add to `L` any base interfaces of the interfaces already in `L`.
+- Remove any duplicates from `L`.
+- If any possible constructed type created from `C` would, after type arguments are substituted into `L`, cause two interfaces in `L` to be identical, then the declaration of `C` is invalid. Constraint declarations are not considered when determining all possible constructed types.
 
-> [!NOTE] In the class declaration X above, the interface list L consists of l&lt;U&gt; and I&lt;V&gt;. The declaration is invalid because any constructed type with U and V being the same type would cause these two interfaces to be identical types.
+> [!NOTE] In the class declaration `X` above, the interface list `L` consists of `l<U>` and `I<V>`. The declaration is invalid because any constructed type with `U` and `V` being the same type would cause these two interfaces to be identical types.
 
 It is possible for interfaces specified at different inheritance levels to unify:
 
@@ -673,7 +673,7 @@ I<int> x = new Derived<int,int>();
 x.F();
 ```
 
-invokes the method in Derived, since `Derived<int,int>'`effectively re-implements `I<int>` (§18.6.7).
+invokes the method in Derived, since `Derived<int,int>'` effectively re-implements `I<int>` (§18.6.7).
 
 ### Implementation of generic methods
 
@@ -785,7 +785,7 @@ class Page: IControl, IForm
 }
 ```
 
-Here, the `Paint` methods of both `IControl` and `IForm` are mapped onto the `Paint` method in Page. It is of course also possible to have separate explicit interface member implementations for the two methods. *end example*]
+Here, the `Paint` methods of both `IControl` and `IForm` are mapped onto the `Paint` method in `Page`. It is of course also possible to have separate explicit interface member implementations for the two methods. *end example*]
 
 If a class or struct implements an interface that contains hidden members, then some members may need to be implemented through explicit interface member implementations. [*Example*:
 
