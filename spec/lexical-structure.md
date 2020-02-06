@@ -30,7 +30,7 @@ The lexical and syntactic grammars are presented using ***grammar productions***
 
 The first line of a grammar production is the name of the non-terminal symbol being defined, followed by one or two colons. One colon is used for a production in the syntactic grammar, two colons for a production in the lexical grammar. Each successive indented line contains a possible expansion of the non-terminal given as a sequence of non-terminal or terminal symbols. [*Example*: The production:
 
-```csharp
+```ANTLR
 while-statement:
     while ( boolean-expression ) embedded-statement
 ```
@@ -39,7 +39,7 @@ defines a *while-statement* to consist of the token while, followed by the token
 
 When there is more than one possible expansion of a non-terminal symbol, the alternatives are listed on separate lines. [*Example*: The production:
 
-```csharp
+```ANTLR
 statement-list:
     statement
     statement-list statement
@@ -66,14 +66,15 @@ and defines a *block* to consist of an optional *statement-list* enclosed in �
 
 Alternatives are normally listed on separate lines, though in cases where there are many alternatives, the phrase “one of” may precede a list of expansions given on a single line. This is simply shorthand for listing each of the alternatives on a separate line. [*Example*: The production:
 
-```csharp
-real-type-suffix:: one of
+```ANTLR
+real-type-suffix::
+    one of
     F f D d M m
 ```
 
 is shorthand for:
 
-```csharp
+```ANTLR
 real-type-suffix::
     F
     f
@@ -106,7 +107,7 @@ The productions for *simple-name* (§12.7.3) and *member-access* (§12.7.5) can 
 F(G<A, B>(7));
 ```
 
-could be interpreted as a call to `F` with two arguments, `G` < `A` and `B` > (7). Alternatively, it could be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument. *end example*]
+could be interpreted as a call to `F` with two arguments, `G < A and B >` (7). Alternatively, it could be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument. *end example*]
 
 If a sequence of tokens can be parsed (in context) as a *simple-name* (§12.7.3), *member-access* (§12.7.5), or *pointer-member-access* (§23.6.3) ending with a *type-argument-list* (§9.4.2), the token immediately following the closing > token is examined. If it is one of
 
@@ -114,7 +115,7 @@ If a sequence of tokens can be parsed (in context) as a *simple-name* (§12.7.3)
 ( ) ] : ; , . ? == !=
 ```
 
-then the *type-argument-list* is retained as part of the *simple-name*, *member-access*, or *pointer-member-access* and any other possible parse of the sequence of tokens is discarded. Otherwise, the *type-argument-list* is not considered part of the *simple-name*, *member-access*, or *pointer-member-access*, even if there is no other possible parse of the sequence of tokens. 
+then the *type-argument-list* is retained as part of the *simple-name*, *member-access*, or *pointer-member-access* and any other possible parse of the sequence of tokens is discarded. Otherwise, the *type-argument-list* is not considered part of the *simple-name*, *member-access*, or *pointer-member-access*, even if there is no other possible parse of the sequence of tokens.
 > [!NOTE] These rules are not applied when parsing a *type-argument-list* in a *namespace-or-type-name* (§8.8).
 [*Example*: The statement:
 
@@ -213,7 +214,7 @@ For compatibility with source code editing tools that add end-of-file markers, a
 
 Two forms of comments are supported: delimited comments and single-line comments.
 
-A ***delimited comment*** begins with the characters /* and ends with the characters */. Delimited comments can occupy a portion of a line, a single line, or multiple lines. [*Example*: The example
+A ***delimited comment*** begins with the characters `/*` and ends with the characters `*/`. Delimited comments can occupy a portion of a line, a single line, or multiple lines. [*Example*: The example
 
 ```csharp
 /* Hello, world program
@@ -377,25 +378,25 @@ A Unicode escape sequence represents a Unicode code point. Unicode escape sequen
     \U hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit
 ```
 
-A Unicode character escape sequence represents the single Unicode code point formed by the hexadecimal number following the “\u” or “\U” characters. Since C# uses a 16-bit encoding of Unicode code points in character and string values, a Unicode code point in the range U+10000 to U+10FFFF is represented using two Unicode surrogate code units. Unicode code points above U+FFFF are not permitted in character literals. Unicode code points above U+10FFFF are invalid and are not supported.
+A Unicode character escape sequence represents the single Unicode code point formed by the hexadecimal number following the “\u” or “\U” characters. Since C# uses a 16-bit encoding of Unicode code points in character and string values, a Unicode code point in the range U+10000 to `U+10FFFF` is represented using two Unicode surrogate code units. Unicode code points above `U+FFFF` are not permitted in character literals. Unicode code points above` U+10FFFF` are invalid and are not supported.
 
-Multiple translations are not performed. For instance, the string literal “\u005Cu005C” is equivalent to “\u005C” rather than “\”. 
-> [!NOTE] The Unicode value \u005C is the character “\”. 
+Multiple translations are not performed. For instance, the string literal “`\u005Cu005C`” is equivalent to “`\u005C`” rather than “`\`”. 
+> [!NOTE] The Unicode value `\u005C` is the character “`\`”. 
 
 [*Example*: The example
 
 ```csharp
 class Class1
 {
-    static void Test(bool u0066) {
-        char c = 'u0066';
-        if (u0066)
+    static void Test(bool \u0066) {
+        char c = '\u0066';
+        if (\u0066)
             System.Console.WriteLine(c.ToString());
     }
 }
 ```
 
-shows several uses of u0066, which is the escape sequence for the letter “f”. The program is equivalent to
+shows several uses of `\u0066`, which is the escape sequence for the letter “`f`”. The program is equivalent to
 
 ```csharp
 class Class1
@@ -412,7 +413,7 @@ class Class1
 
 ### Identifiers
 
-The rules for identifiers given in this subclause correspond exactly to those recommended by the Unicode Standard Annex 15 except that underscore is allowed as an initial character (as is traditional in the C programming language), Unicode escape sequences are permitted in identifiers, and the “@” character is allowed as a prefix to enable keywords to be used as identifiers.
+The rules for identifiers given in this subclause correspond exactly to those recommended by the Unicode Standard Annex 15 except that underscore is allowed as an initial character (as is traditional in the C programming language), Unicode escape sequences are permitted in identifiers, and the “`@`” character is allowed as a prefix to enable keywords to be used as identifiers.
 
 ```ANTLR
 (#Grammar_identifier)
@@ -504,7 +505,7 @@ formatting-character::
 
 An identifier in a conforming program shall be in the canonical format defined by Unicode Normalization Form C, as defined by Unicode Standard Annex 15. The behavior when encountering an identifier not in Normalization Form C is implementation-defined; however, a diagnostic is not required.
 
-The prefix “@” enables the use of keywords as identifiers, which is useful when interfacing with other programming languages. The character `@` is not actually part of the identifier, so the identifier might be seen in other languages as a normal identifier, without the prefix. An identifier with an `@` prefix is called a ***verbatim identifier*.** 
+The prefix “`@`” enables the use of keywords as identifiers, which is useful when interfacing with other programming languages. The character `@` is not actually part of the identifier, so the identifier might be seen in other languages as a normal identifier, without the prefix. An identifier with an `@` prefix is called a ***verbatim identifier*.** 
 > [!NOTE] Use of the `@` prefix for identifiers that are not keywords is permitted, but strongly discouraged as a matter of style.
 
 [*Example*: The example:
@@ -535,12 +536,12 @@ Two identifiers are considered the same if they are identical after the followin
 -   Each *unicode-escape-sequence* is transformed into its corresponding Unicode character.
 -   Any *formatting-character*s are removed.
 
-Identifiers containing two consecutive underscore characters (U+005F) are reserved for use by the implementation; however, no diagnostic is required if such an identifier is defined.
+Identifiers containing two consecutive underscore characters (`U+005F`) are reserved for use by the implementation; however, no diagnostic is required if such an identifier is defined.
 > [!NOTE] For example, an implementation might provide extended keywords that begin with two underscores.
 
 ### Keywords
 
-A ***keyword*** is an identifier-like sequence of characters that is reserved, and cannot be used as an identifier except when prefaced by the @ character.
+A ***keyword*** is an identifier-like sequence of characters that is reserved, and cannot be used as an identifier except when prefaced by the `@` character.
 
 ```ANTLR
 (#Grammar_keyword)
@@ -563,7 +564,7 @@ keyword:: one of
     volatile   while
 ```
 
-A ***contextual keyword*** is an identifier-like sequence of characters that has special meaning in certain contexts, but is not reserved, and can be used as an identifier outside of those contexts as well as when prefaced by the @ character.
+A ***contextual keyword*** is an identifier-like sequence of characters that has special meaning in certain contexts, but is not reserved, and can be used as an identifier outside of those contexts as well as when prefaced by the `@` character.
 
 ```csharp
 contextual-keyword: one of the following identifiers
@@ -576,9 +577,9 @@ contextual-keyword: one of the following identifiers
 
 In most cases, the syntactic location of contextual keywords is such that they can never be confused with ordinary identifier usage. For example, within a property declaration, the “`get`” and “`set`” identifiers have special meaning (§15.7.3). An identifier other than get or set is never permitted in these locations, so this use does not conflict with a use of these words as identifiers.
 
-In certain cases the grammar is not enough to distinguish contextual keyword usage from identifiers. In all such cases it will be specified how to disambiguate between the two. For example, the contextual keyword var in implicitly typed local variable declarations (§13.6.2) might conflict with a declared type called var, in which case the declared name takes precedence over the use of the identifier as a contextual keyword.
+In certain cases the grammar is not enough to distinguish contextual keyword usage from identifiers. In all such cases it will be specified how to disambiguate between the two. For example, the contextual keyword `var` in implicitly typed local variable declarations (§13.6.2) might conflict with a declared type called `var`, in which case the declared name takes precedence over the use of the identifier as a contextual keyword.
 
-Another example such disambiguation is the contextual keyword await (§12.8.8.1), which is considered a keyword only when inside a method declared async, but can be used as an identifier elsewhere.
+Another example such disambiguation is the contextual keyword `await` (§12.8.8.1), which is considered a keyword only when inside a method declared `async`, but can be used as an identifier elsewhere.
 
 Just as with keywords, contextual keywords can be used as ordinary identifiers by prefixing them with the `@` character.
 
@@ -680,10 +681,10 @@ If the value represented by an integer literal is outside the range of the `ulon
 
 > [!NOTE] As a matter of style, it is suggested that “`L`” be used instead of “`l`” when writing literals of type long, since it is easy to confuse the letter “`l`” with the digit “`1`”.
 
-To permit the smallest possible int and long values to be written as integer literals, the following two rules exist:
+To permit the smallest possible `int` and `long` values to be written as integer literals, the following two rules exist:
 
--   When an *integer-literal* representing the value 2147483648 (2^31^) and no *integer-type-suffix* appears as the token immediately following a unary minus operator token (§12.8.3), the result (of both tokens) is a constant of type int with the value −2147483648 (−2^31^). In all other situations, such an *integer-literal* is of type `uint`.
--   When an *integer-literal* representing the value 9223372036854775808 (2^63^) and no *integer-type-suffix* or the *integer-type-suffix* L or l appears as the token immediately following a unary minus operator token (§12.8.3), the result (of both tokens) is a constant of type long with the value −9223372036854775808 (−2^63^). In all other situations, such an *integer-literal* is of type `ulong`.
+-   When an *integer-literal* representing the value `2147483648 (2^31^)` and no *integer-type-suffix* appears as the token immediately following a unary minus operator token (§12.8.3), the result (of both tokens) is a constant of type int with the value `−2147483648 (−2^31^)`. In all other situations, such an *integer-literal* is of type `uint`.
+-   When an *integer-literal* representing the value `9223372036854775808 (2^63^)` and no *integer-type-suffix* or the *integer-type-suffix* `L` or `l` appears as the token immediately following a unary minus operator token (§12.8.3), the result (of both tokens) is a constant of type `long` with the value `−9223372036854775808 (−2^63^)`. In all other situations, such an *integer-literal* is of type `ulong`.
 
 #### Real literals
 
@@ -719,21 +720,21 @@ real-type-suffix:: one of
 
 If no *real-type-suffix* is specified, the type of the *real-literal* is `double`. Otherwise, the *real-type-suffix* determines the type of the real literal, as follows:
 
--   A real literal suffixed by `F` or `f` is of type `float`. [*Example*: The literals 1f, 1.5f, 1e10f, and 123.456F are all of type float. *end example*]
--   A real literal suffixed by `D` or `d` is of type `double`. [*Example*: The literals 1d, 1.5d, 1e10d, and 123.456D are all of type double. *end example*]
--   A real literal suffixed by `M` or `m` is of type `decimal`. [*Example*: The literals 1m, 1.5m, 1e10m, and 123.456M are all of type `decimal`. *end example*] This literal is converted to a `decimal` value by taking the exact value, and, if necessary, rounding to the nearest representable value using banker's rounding (§9.3.8). Any scale apparent in the literal is preserved unless the value is rounded. 
+-   A real literal suffixed by `F` or `f` is of type `float`. [*Example*: The literals `1f, 1.5f, 1e10f`, and `123.456F` are all of type `float`. *end example*]
+-   A real literal suffixed by `D` or `d` is of type `double`. [*Example*: The literals `1d, 1.5d, 1e10d`, and `123.456D` are all of type `double`. *end example*]
+-   A real literal suffixed by `M` or `m` is of type `decimal`. [*Example*: The literals `1m, 1.5m, 1e10m`, and `123.456M` are all of type `decimal`. *end example*] This literal is converted to a `decimal` value by taking the exact value, and, if necessary, rounding to the nearest representable value using banker's rounding (§9.3.8). Any scale apparent in the literal is preserved unless the value is rounded. 
 > [!NOTE] Hence, the literal `2.900m` will be parsed to form the `decimal` with sign `0`, coefficient `2900`, and scale `3`.
 
 If the magnitude of the specified literal is too large to be represented in the indicated type, a compile-time error occurs. 
 > [!NOTE] In particular, a *real-literal* will never produce a floating-point infinity. A non-zero *real-literal* may, however, be rounded to zero.
 
-The value of a real literal of type `float` or `double` is determined by using the IEC 60559 “round to nearest” mode with ties broken to “even” (a value with the least-significant-bit zero), and all digits considered significant.
+The value of a real literal of type `float` or `double` is determined by using the `IEC 60559` “round to nearest” mode with ties broken to “even” (a value with the least-significant-bit zero), and all digits considered significant.
 
 > [!NOTE] In a real literal, decimal digits are always required after the decimal point. For example, `1.3F` is a real literal but `1.F` is not.
 
 #### Character literals
 
-A character literal represents a single character, and consists of a character in quotes, as in 'a'.
+A character literal represents a single character, and consists of a character in quotes, as in `'a'`.
 
 ```ANTLR
 (#Grammar_character_literal)
@@ -767,11 +768,11 @@ simple-escape-sequence:: one of
     \x hex-digit hex-digit~opt~ hex-digit~opt~ hex-digit~opt~
 ```
 
-> [!NOTE] A character that follows a backslash character (\) in a *character* shall be one of the following characters: ', ", \, 0, a, b, f, n, r, t, u, U, x, v. Otherwise, a compile-time error occurs.
+> [!NOTE] A character that follows a backslash character `(\)` in a *character* shall be one of the following characters: ``', ", \, 0, a, b, f, n, r, t, u, U, x, v``. Otherwise, a compile-time error occurs.
 
-> [!NOTE]The use of the x *hexadecimal-escape-sequence* production can be error-prone and hard to read due to the variable number of hexadecimal digits following the x. For example, in the code:\
-`string good = "x9Good text";`\
-`string bad = "x9Bad text";`\
+> [!NOTE]The use of the `\x` *hexadecimal-escape-sequence* production can be error-prone and hard to read due to the variable number of hexadecimal digits following the `\x`. For example, in the code:\
+> `string good = "x9Good text";`\
+> `string bad = "x9Bad text";`\
 it might appear at first that the leading character is the same (`U+0009`, a tab character) in both strings. In fact the second string starts with `U+9BAD` as all three letters in the word "Bad" are valid hexadecimal digits. As a matter of style, it is recommended that `\x` is avoided in favour of either specific escape sequences (`\t` in this example) or the fixed-length `\u` escape sequence.
 
 A hexadecimal escape sequence represents a single Unicode `UTF-16` code unit, with the value formed by the hexadecimal number following “`\x`”.
@@ -802,7 +803,7 @@ The type of a *character-literal* is char.
 
 C# supports two forms of string literals: ***regular string literals*** and ***verbatim string literals***. A regular string literal consists of zero or more characters enclosed in double quotes, as in "`hello`", and can include both simple escape sequences (such as `\t` for the tab character), and hexadecimal and Unicode escape sequences.
 
-A verbatim string literal consists of an @ character followed by a double-quote character, zero or more characters, and a closing double-quote character. [*Example*: A simple example is @"`hello`". *end example*] In a verbatim string literal, the characters between the delimiters are interpreted verbatim, with the only exception being a *quote-escape-sequence*, which represents one double-quote character. In particular, simple escape sequences, and hexadecimal and Unicode escape sequences are not processed in verbatim string literals. A verbatim string literal may span multiple lines.
+A verbatim string literal consists of an `@` character followed by a double-quote character, zero or more characters, and a closing double-quote character. [*Example*: A simple example is `@"hello"`. *end example*] In a verbatim string literal, the characters between the delimiters are interpreted verbatim, with the only exception being a *quote-escape-sequence*, which represents one double-quote character. In particular, simple escape sequences, and hexadecimal and Unicode escape sequences are not processed in verbatim string literals. A verbatim string literal may span multiple lines.
 
 ```ANTLR
 (#Grammar_string_literal)
@@ -820,7 +821,7 @@ string-literal::
 (#Grammar_regular_string_literal_chars)regular-string-literal-characters::
     regular-string-literal-character
     regular-string-literal-characters regular-string-literal-character
-```    
+```
 
 ```ANTLR
 (#Grammar_regular_string_literal_char)regular-string-literal-character::
@@ -885,9 +886,9 @@ three";
 
 shows a variety of string literals. The last string literal, `j`, is a verbatim string literal that spans multiple lines. The characters between the quotation marks, including white space such as new line characters, are preserved verbatim, and each pair of double-quote characters is replaced by one such character. *end example*]
 
-> [!NOTE] Any line breaks within verbatim string literals are part of the resulting string. If the exact characters used to form line breaks are semantically relevant to an application, any tools that translate line breaks in source code to different formats (between "`n`" and "`rn`", for example) will change application behavior. Developers should be careful in such situations. 
+> [!NOTE] Any line breaks within verbatim string literals are part of the resulting string. If the exact characters used to form line breaks are semantically relevant to an application, any tools that translate line breaks in source code to different formats (between "`\n`" and "`\r\n`", for example) will change application behavior. Developers should be careful in such situations. 
 
-> [!NOTE] Since a hexadecimal escape sequence can have a variable number of hex digits, the string literal "`x123`" contains a single character with hex value `123`. To create a string containing the character with hex value `12` followed by the character `3`, one could write "`x00123`" or "`x12`" + "`3`" instead.
+> [!NOTE] Since a hexadecimal escape sequence can have a variable number of hex digits, the string literal "`\x123`" contains a single character with hex value `123`. To create a string containing the character with hex value `12` followed by the character `3`, one could write "`\x00123`" or "`\x12`" + "`3`" instead.
 
 The type of a *string-literal* is `string`.
 
@@ -918,7 +919,7 @@ A *null-literal* represents a null value. It does not have a type, but can be co
 
 ### Operators and punctuators
 
-There are several kinds of operators and punctuators. Operators are used in expressions to describe operations involving one or more operands. [*Example*: The expression a + b uses the + operator to add the two operands a and b. *end example*] Punctuators are for grouping and separating.
+There are several kinds of operators and punctuators. Operators are used in expressions to describe operations involving one or more operands. [*Example*: The expression `a + b` uses the `+` operator to add the two operands `a` and `b`. *end example*] Punctuators are for grouping and separating.
 
 ```ANTLR
 (#Grammar_operator_or_punctuator)
@@ -949,7 +950,8 @@ right-shift-assignment::
 
 ### General
 
-The pre-processing directives provide the ability to skip conditionally sections of source files, to report error and warning conditions, and to delineate distinct regions of source code. > [!NOTE] The term “pre-processing directives” is used only for consistency with the C and C++ programming languages. In C#, there is no separate pre-processing step; pre-processing directives are processed as part of the lexical analysis phase.
+The pre-processing directives provide the ability to skip conditionally sections of source files, to report error and warning conditions, and to delineate distinct regions of source code. 
+> [!NOTE] The term “pre-processing directives” is used only for consistency with the C and C++ programming languages. In C#, there is no separate pre-processing step; pre-processing directives are processed as part of the lexical analysis phase.
 
 ```ANTLR
 (#Grammar_pp_directive)
@@ -973,7 +975,7 @@ The following pre-processing directives are available:
 
 A pre-processing directive always occupies a separate line of source code and always begins with a # character and a pre-processing directive name. White space may occur before the # character and between the # character and the directive name.
 
-A source line containing a #define, #undef, #if, `#elif`, `#else`, `#endif`, `#line`, or `#endregion` directive can end with a single-line comment. Delimited comments (the /* */ style of comments) are not permitted on source lines containing pre-processing directives.
+A source line containing a `#define`, `#undef`, `#if`, `#elif`, `#else`, `#endif`, `#line`, or `#endregion` directive can end with a single-line comment. Delimited comments (the /* */ style of comments) are not permitted on source lines containing pre-processing directives.
 
 Pre-processing directives are not tokens and are not part of the syntactic grammar of C#. However, pre-processing directives can be used to include or exclude sequences of tokens and can in that way affect the meaning of a C# program. [*Example*: When compiled, the program
 
@@ -988,7 +990,7 @@ class C
     void G() {}
 #endif
 #if B
-void H() {}
+    void H() {}
 #else    
     void I() {}
 #endif
@@ -1097,7 +1099,7 @@ pp-new-line::
 
 The processing of a `#define` directive causes the given conditional compilation symbol to become defined, starting with the source line that follows the directive. Likewise, the processing of a `#undef` directive causes the given conditional compilation symbol to become undefined, starting with the source line that follows the directive.
 
-Any `#define` and #undef directives in a source file shall occur before the first *token* (§7.4) in the source file; otherwise a compile-time error occurs. In intuitive terms, `#define` and `#undef` directives shall precede any “real code” in the source file.
+Any `#define` and `#undef` directives in a source file shall occur before the first *token* (§7.4) in the source file; otherwise a compile-time error occurs. In intuitive terms, `#define` and `#undef` directives shall precede any “real code” in the source file.
 
 [*Example*: The example:
 
@@ -1236,7 +1238,7 @@ A *pp-conditional* selects at most one of the contained *conditional-section*s f
 
 The selected *conditional-section*, if any, is processed as a normal *input-section*: the source code contained in the section shall adhere to the lexical grammar; tokens are generated from the source code in the section; and pre-processing directives in the section have the prescribed effects.
 
-The remaining *conditional-section*s, if any, are processed as *skipped-section*s: except for pre-processing directives, the source code in the section need not adhere to the lexical grammar; no tokens are generated from the source code in the section; and pre-processing directives in the section shall be lexically correct but are not otherwise processed. Within a *conditional-section* that is being processed as a *skipped-section*, any nested *conditional-section*s (contained in nested `#if`…`#endif` and `#region`…`#endregion` constructs) are also processed as *skipped-section*s.
+The remaining *conditional-section*s, if any, are processed as *skipped-section*s: except for pre-processing directives, the source code in the section need not adhere to the lexical grammar; no tokens are generated from the source code in the section; and pre-processing directives in the section shall be lexically correct but are not otherwise processed. Within a *conditional-section* that is being processed as a *skipped-section*, any nested *conditional-section*s (contained in nested `#if…#endif` and `#region…#endregion` constructs) are also processed as *skipped-section*s.
 
 [*Example*: The following example illustrates how conditional compilation directives can nest:
 
@@ -1315,7 +1317,7 @@ In peculiar cases, the set of pre-processing directives that is processed might 
 #endif
 ```
 
-always produces the same token stream (`class Q` { }), regardless of whether or not `X` is defined. If `X` is defined, the only processed directives are `#if` and `#endif`, due to the multi-line comment. If `X` is undefined, then three directives (`#if`, `#else`, `#endif`) are part of the directive set. *end example*]
+always produces the same token stream `(class Q { })`, regardless of whether or not `X` is defined. If `X` is defined, the only processed directives are `#if` and `#endif`, due to the multi-line comment. If `X` is undefined, then three directives (`#if`, `#else`, `#endif`) are part of the directive set. *end example*]
 
 ### Diagnostic directives
 
