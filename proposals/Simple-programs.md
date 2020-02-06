@@ -94,7 +94,8 @@ could be considered as an entry point candidates are ignored. A warning is repor
 an error to specify `-main:<type>` compiler switch.
 
 If any one compilation unit has statements other than local function declarations, statements from that
-compilation unit occur first. The order of statement contributions (which would all be local functions)
+compilation unit occur first. This causes it to be legal for local functions in one file to reference
+local variables in another. The order of statement contributions (which would all be local functions)
 from other compilation units is undefined.
 
 If `await` expressions and other async operations are omitted, no warning is produced. Instead the
@@ -130,7 +131,8 @@ static class $Program
 At the same time an example like this:
 ``` c#
 // File 1
-await new System.Threading.Tasks.Task(() => System.Console.WriteLine("Hi!"));
+await System.Threading.Tasks.Task.Delay(1000);
+System.Console.WriteLine("Hi!");
 ```
 
 would  yield:
@@ -140,7 +142,8 @@ static class $Program
     static async Task $Main()
     {
         // Statements from File 1
-        await new System.Threading.Tasks.Task(() => System.Console.WriteLine("Hi!"));
+        await System.Threading.Tasks.Task.Delay(1000);
+        System.Console.WriteLine("Hi!");
     }
 }
 ```
