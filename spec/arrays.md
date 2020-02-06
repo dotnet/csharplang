@@ -34,7 +34,7 @@ At run-time, a value of an array type can be `null` or a reference to an instanc
 
 ### The `System.Array` type
 
-The type ``System.Array`` is the abstract base type of all array types. An implicit reference conversion (§11.2.7) exists from any array type to `System.Array` and to any interface type implemented by `System.Array`. An explicit reference conversion (§11.3.5) exists from `System.Array` and any interface type implemented by `System.Array` to any array type. `System.Array` is not itself an *array-type*. Rather, it is a *class-type* from which all *array-type*s are derived.
+The type `System.Array` is the abstract base type of all array types. An implicit reference conversion (§11.2.7) exists from any array type to `System.Array` and to any interface type implemented by `System.Array`. An explicit reference conversion (§11.3.5) exists from `System.Array` and any interface type implemented by `System.Array` to any array type. `System.Array` is not itself an *array-type*. Rather, it is a *class-type* from which all *array-type*s are derived.
 
 At run-time, a value of type `System.Array` can be `null` or a reference to an instance of any array type.
 
@@ -118,7 +118,7 @@ class Test
     }
 }
 ```
-The assignment to `array[i]` in the `Fill` method implicitly includes a run-time check, which ensures that `value` is either a `null` reference or a reference to an object of a type that is compatible with the actual element type of `array`. In `Main`, the first two invocations of `Fill` succeed, but the third invocation causes a `System.Array`TypeMismatchException to be thrown upon executing the first assignment to `array[i]`. The exception occurs because a boxed `int` cannot be stored in a `string` array. *end example*]
+The assignment to `array[i]` in the `Fill` method implicitly includes a run-time check, which ensures that `value` is either a `null` reference or a reference to an object of a type that is compatible with the actual element type of `array`. In `Main`, the first two invocations of `Fill` succeed, but the third invocation causes a `System.Array` TypeMismatchException to be thrown upon executing the first assignment to `array[i]`. The exception occurs because a boxed `int` cannot be stored in a `string` array. *end example*]
 
 Array covariance specifically does not extend to arrays of *value-type*s. For example, no conversion exists that permits an `int[]` to be treated as an `object[]`.
 
