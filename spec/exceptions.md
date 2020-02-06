@@ -55,4 +55,4 @@ The following exceptions are thrown by certain C\# operations.
   System.TypeInitializationException   Thrown when a static constructor or static field initializer throws an exception, and no catch clause exists to catch it.
   ------------------------------------ ------------------------------------------------------------------------------------------------------------------------------------------
 
-[[[]{#_Ref456607421 .anchor}]{#_Toc445783092 .anchor}]{#_Toc456601364 .anchor}
+[#_Ref456607421 .anchor](#_Ref456607421 .anchor)[#_Toc445783092 .anchor](#_Toc445783092 .anchor)[#_Toc456601364 .anchor](#_Toc456601364 .anchor)
