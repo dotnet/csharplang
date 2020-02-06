@@ -4,7 +4,9 @@
 
 Much of the C# language enables the programmer to specify declarative information about the entities defined in the program. For example, the accessibility of a method in a class is specified by decorating it with the *method-modifiers* `public`, `protected`, `internal`, and `private`.
 
-C# enables programmers to invent new kinds of declarative information, called ***attributes.*** Programmers can then attach attributes to various program entities, and retrieve attribute information in a run-time environment. [*Note*: For instance, a framework might define a `HelpAttribute` attribute that can be placed on certain program elements (such as classes and methods) to provide a mapping from those program elements to their documentation. *end note*]
+C# enables programmers to invent new kinds of declarative information, called ***attributes.*** Programmers can then attach attributes to various program entities, and retrieve attribute information in a run-time environment. 
+>[!NOTE]
+>For instance, a framework might define a `HelpAttribute` attribute that can be placed on certain program elements (such as classes and methods) to provide a mapping from those program elements to their documentation.
 
 Attributes are defined through the declaration of attribute classes (§22.2), which can have positional and named parameters (§22.2.3). Attributes are attached to entities in a C# program using attribute specifications (§22.3), and can be retrieved at run-time as attribute instances (§22.4).
 
@@ -254,8 +256,8 @@ attribute-argument-expression:
 For the above productions *global-attribute-target* and *attribute-target*, and in the text below, the referenced equality is that defined in §7.4.3.
 
 An attribute consists of an *attribute-name* and an optional list of positional and named arguments. The positional arguments (if any) precede the named arguments. A positional argument consists of an *attribute-argument-expression*; a named argument consists of a name, followed by an equal sign, followed by an *attribute-argument-expression*, which, together, are constrained by the same rules as simple assignment. The order of named arguments is not significant.
-
-[*Note*: For convenience, a trailing comma is allowed in a *global-attribute-section* and an *attribute-section*, just as one is allowed in an *array-initializer* (§17.7). *end note*]
+>[!NOTE]
+>For convenience, a trailing comma is allowed in a *global-attribute-section* and an *attribute-section*, just as one is allowed in an *array-initializer* (§17.7).
 
 The *attribute-name* identifies an attribute class.
 
@@ -400,11 +402,13 @@ class Class2 {}
 
 [@Example] // Error: no attribute named “Example”
 class Class3 {}
+```
 
 *end example*]
 
 It is a compile-time error to use a single-use attribute class more than once on the same entity. [*Example*: The example
 
+```csharp
 using System;
 
 [AttributeUsage(AttributeTargets.Class)]
@@ -526,7 +530,9 @@ The compilation of an *attribute* with attribute class `T`, *positional-argumen
 
 *   `Name` shall identify a non-static read-write public field or property on `T`. If `T` has no such field or property, then a compile-time error occurs.
 
-*   If any of the values within *positional-argument-list* P or one of the values within *named-argument-list* `N` is of type `System.String` and the value is not well-formed as defined by the Unicode Standard, it is implementation-defined whether the value compiled is equal to the run-time value retrieved (§22.4.3). [*Note:* As an example, a string which contains a high surrogate UTF-16 code unit which isn't immediately followed by a low surrogate code unit is not well-formed. *end note*]
+*   If any of the values within *positional-argument-list* P or one of the values within *named-argument-list* `N` is of type `System.String` and the value is not well-formed as defined by the Unicode Standard, it is implementation-defined whether the value compiled is equal to the run-time value retrieved (§22.4.3). 
+>[!NOTE]
+>As an example, a string which contains a high surrogate UTF-16 code unit which isn't immediately followed by a low surrogate code unit is not well-formed.
 
 *   Store the following information (for run-time instantiation of the attribute) in the assembly output by the compiler as a result of compiling the program containing the attribute: the attribute class `T`, the instance constructor `C` on `T`, the *positional-argument-list * `P`, the *named-argument-list* `N`, and the associated program entity `E`, with the values resolved completely at compile-time.
 
@@ -548,7 +554,8 @@ The attribute instance represented by `T`, `C`, `P`, and `N`, and associated wi
 
 -   The result is `O`, an instance of the attribute class `T` that has been initialized with the *positional-argument-list * `P` and the *named-argument-list* `N`.
 
-[*Note*: The format for storing `T`, `C`, `P`, `N` (and associating it with `E`) in `A` and the mechanism to specify `E` and retrieve `T`, `C`, `P`, `N` from `A` (and hence how an attribute instance is obtained at runtime) is beyond the scope of this standard. *end note*]
+>[!NOTE]
+>The format for storing `T`, `C`, `P`, `N` (and associating it with `E`) in `A` and the mechanism to specify `E` and retrieve `T`, `C`, `P`, `N` from `A` (and hence how an attribute instance is obtained at runtime) is beyond the scope of this standard.
 
 [*Example*: In an implementation of the CLI, the `Help` attribute instances in the assembly created by compiling the example program in §22.2.3 can be retrieved with the following program:
 
@@ -598,7 +605,8 @@ The attribute `AttributeUsage` is used to describe the manner in which the attri
 
 A class that is decorated with the `AttributeUsage` attribute shall derive from `System.Attribute`, either directly or indirectly. Otherwise, a compile-time error occurs.
 
-[*Note*: For an example of using this attribute, see §22.2.2. *end note*]
+>[!NOTE]
+>For an example of using this attribute, see §22.2.2.
 
 ### The Conditional attribute
 
