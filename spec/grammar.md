@@ -168,7 +168,7 @@ formatting-character::
 ### Keywords {#keywords-1 .Appendix3}
 
 ```csharp
-keyword:: one of\
+keyword:: one of
     abstract	as	base	bool	break
     byte	case	catch	char	checked
     class	const	continue	decimal	default
@@ -311,8 +311,8 @@ operator-or-punctuator:: one of
 	{	}	[	]	(	)	.	,	:	;
 	+	-	*	/	%	&	|	^	!	~
 	=	<	>	?	??	::	++	--	&&	||
-	->	==	!=	<=	>=	+=	-=	\*=	/=	%=
-	&=	|=	\^=	<<	<<=
+	->	==	!=	<=	>=	+=	-=	*=	/=	%=
+	&=	|=	^=	<<	<<=
 
 right-shift::
 	>	>
