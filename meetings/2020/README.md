@@ -22,9 +22,15 @@
 
 ## Feb 19
 
+- https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
+
 ## Feb 12
 
+- https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
+
 ## Feb 10
+
+- https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
 
 ## Feb 5
 
