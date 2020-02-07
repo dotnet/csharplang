@@ -2,22 +2,24 @@
 
 ## General
 
-C\# provides a variety of statements. 
+C# provides a variety of statements. 
 
 > [!NOTE] 
 > Most of these statements will be familiar to developers who have programmed in C and C++.
 
-[#Grammar_statement .anchor](#Grammar_statement .anchor)statement:\
+[#Grammar_statement .anchor](#Grammar_statement .anchor)
 
 ```ANTLR
+statement:
     labeled-statement
     declaration-statement
     embedded-statement
 ```
 
-[#Grammar_embedded_statement .anchor](#Grammar_embedded_statement .anchor)embedded-statement:\
+[#Grammar_embedded_statement .anchor](#Grammar_embedded_statement .anchor)
 
 ```ANTLR
+embedded-statement:
     block
     empty-statement
     expression-statement
@@ -123,8 +125,12 @@ There are two situations in which it is a compile-time error for the end point o
 
 A *block* permits multiple statements to be written in contexts where a single statement is allowed.
 
-[]{#Grammar_block .anchor}block:\
-*{* statement-list~opt~ *}*
+[#Grammar_block .anchor](#Grammar_block .anchor)
+
+```ANTLR
+block:
+{ statement-list~opt~ }
+```
 
 A *block* consists of an optional *statement-list* (§13.3.2), enclosed in braces. If the statement list is omitted, the block is said to be empty.
 
@@ -152,9 +158,10 @@ A *block* that contains one or more yield statements (§13.15) is called an iter
 
 A ***statement list*** consists of one or more statements written in sequence. Statement lists occur in *block*s (§13.3) and in *switch-block*s (§13.8.3).
 
-[#Grammar_statement_list .anchor](#Grammar_statement_list .anchor)statement-list:\
+[#Grammar_statement_list .anchor](#Grammar_statement_list .anchor)
 
 ```ANTLR
+statement-list:
     statement
     statement-list statement
 ```
@@ -175,9 +182,10 @@ The end point of a statement list is reachable if the end point of the last stat
 
 An *empty-statement* does nothing.
 
-[#Grammar_empty_statement .anchor](#Grammar_empty_statement .anchor)empty-statement:\
+[#Grammar_empty_statement .anchor](#Grammar_empty_statement .anchor)
 
 ```ANTLR
+empty-statement:
     ;
 ```
 
@@ -215,10 +223,11 @@ void F() {
 
 A *labeled-statement* permits a statement to be prefixed by a label. Labeled statements are permitted in blocks, but are not permitted as embedded statements.
 
-[#Grammar_labeled_statement .anchor](#Grammar_labeled_statement .anchor)labeled-statement:\
+[#Grammar_labeled_statement .anchor](#Grammar_labeled_statement .anchor)
 
 ```ANTLR
-identifier : statement
+labeled-statement:
+    identifier : statement
 ```
 
 A labeled statement declares a label with the name given by the *identifier*. The scope of a label is the whole block in which the label is declared, including any nested blocks. It is a compile-time error for two labels with the same name to have overlapping scopes.
@@ -250,49 +259,55 @@ In addition to the reachability provided by normal flow of control, a labeled st
 
 A *declaration-statement* declares a local variable or constant. Declaration statements are permitted in blocks, but are not permitted as embedded statements.
 
-[#Grammar_declaration_statement .anchor](#Grammar_declaration_statement .anchor)declaration-statement:\
+[#Grammar_declaration_statement .anchor](#Grammar_declaration_statement .anchor)
 
 ```ANTLR
-local-variable-declaration ;
-local-constant-declaration ;
+declaration-statement:
+    local-variable-declaration ;
+    local-constant-declaration ;
 ```
 
 ### Local variable declarations
 
 A *local-variable-declaration* declares one or more local variables.
 
-[#Grammar_local_variable_declaration .anchor](#Grammar_local_variable_declaration .anchor)local-variable-declaration:\
+[#Grammar_local_variable_declaration .anchor](#Grammar_local_variable_declaration .anchor)
 
 ```ANTLR
-local-variable-type local-variable-declarators
+local-variable-declaration:
+    local-variable-type local-variable-declarators
 ```
 
-[#Grammar_local_variable_type .anchor](#Grammar_local_variable_type .anchor)local-variable-type:\
+[#Grammar_local_variable_type .anchor](#Grammar_local_variable_type .anchor)
 
 ```ANTLR
-type
-var
+local-variable-type:
+    type
+    var
 ```
 
-[#Grammar_local_variable_declarators .anchor](#Grammar_local_variable_declarators .anchor)local-variable-declarators:\
+[#Grammar_local_variable_declarators .anchor](#Grammar_local_variable_declarators .anchor)
 
 ```ANTLR
-local-variable-declarator
-local-variable-declarators , local-variable-declarator
+local-variable-declarators:
+    local-variable-declarator
+    local-variable-declarators , local-variable-declarator
 ```
 
-[#Grammar_local_variable_declarator .anchor](#Grammar_local_variable_declarator .anchor)local-variable-declarator:\
+[#Grammar_local_variable_declarator .anchor](#Grammar_local_variable_declarator .anchor)
 
 ```ANTLR
-identifier
-identifier = local-variable-initializer
+local-variable-declarator:
+    identifier
+    identifier = local-variable-initializer
 ```
 
-[#Grammar_local_variable_initializer .anchor](#Grammar_local_variable_initializer .anchor)local-variable-initialize[#_Toc445783019 .anchor](#_Toc445783019 .anchor)r:\
+[#Grammar_local_variable_initializer .anchor](#Grammar_local_variable_initializer .anchor)local-variable-initialize[#_Toc445783019 .anchor](#_Toc445783019 .anchor)
 
 ```ANTLR
-expression
-array-initializer
+r:
+    expression
+    array-initializer
 ```
 
 The *local-variable-type* of a *local-variable-declaration* either directly specifies the type of the variables introduced by the declaration, or indicates with the identifier var that the type should be inferred based on an initializer. The type is followed by a list of *local-variable-declarator*s, each of which introduces a new variable. A *local-variable-declarator* consists of an *identifier* that names the variable, optionally followed by an “=” token and a *local-variable-initializer* that gives the initial value of the variable.
@@ -331,7 +346,7 @@ A local variable declaration that declares multiple variables is equivalent to m
 
 ```csharp
 void F() {
-    int x = 1, y, z = x \* 2;
+    int x = 1, y, z = x * 2;
 }
 ```
 corresponds exactly to
@@ -340,7 +355,7 @@ corresponds exactly to
 void F() {
     int x; x = 1;
     int y;
-    int z; z = x \* 2;
+    int z; z = x * 2;
 }
 ```
 
@@ -352,7 +367,7 @@ In an implicitly typed local variable declaration, the type of the local variabl
 var i = 5;
 var s = "Hello";
 var d = 1.0;
-var numbers = new int\[\] {1, 2, 3};
+var numbers = new int[] {1, 2, 3};
 var orders = new Dictionary<int,Order>();
 ```
 
@@ -372,17 +387,19 @@ Dictionary<int,Order> orders = new Dictionary<int,Order>();
 
 A *local-constant-declaration* declares one or more local constants.
 
-[#Grammar_local_constant_declaration .anchor](#Grammar_local_constant_declaration .anchor)local-constant-declaration:\
+[#Grammar_local_constant_declaration .anchor](#Grammar_local_constant_declaration .anchor)
 
 ```ANTLR
-const type constant-declarators
+local-constant-declaration:
+
+    const type constant-declarators
 
 constant-declarators:
-constant-declarator
-constant-declarators , constant-declarator
+    constant-declarator
+    constant-declarators , constant-declarator
 
 constant-declarator:
-identifier = constant-expression
+    identifier = constant-expression
 ```
 
 [#_Ref450638231 .anchor](#_Ref450638231 .anchor)[#_Toc445783021 .anchor](#_Toc445783021 .anchor)The *type* of a *local-constant-declaration* specifies the type of the constants introduced by the declaration. The type is followed by a list of *constant-declarator*s, each of which introduces a new constant. A *constant-declarator* consists of an *identifier* that names the constant, followed by an “=” token, followed by a *constant-expression* (§12.20) that gives the value of the constant.
@@ -400,22 +417,24 @@ A local constant declaration that declares multiple constants is equivalent to m
 An *expression-statement* evaluates a given expression. The value computed by the expression, if any, is discarded.
 
 
-[#Grammar_expression_statement .anchor](#Grammar_expression_statement .anchor)expression-statement:\
+[#Grammar_expression_statement .anchor](#Grammar_expression_statement .anchor)
 
 ```ANTLR
-statement-expression ;
+expression-statement:
+    statement-expression ;
 ```
-[#Grammar_statement_expression .anchor](#Grammar_statement_expression .anchor)statement-expression:\
+[#Grammar_statement_expression .anchor](#Grammar_statement_expression .anchor)
 
 ```ANTLR
-invocation-expression
-object-creation-expression
-assignment
-post-increment-expression
-post-decrement-expression
-pre-increment-expression
-pre-decrement-expression
-await-expression
+statement-expression:
+    invocation-expression
+    object-creation-expression
+    assignment
+    post-increment-expression
+    post-decrement-expression
+    pre-increment-expression
+    pre-decrement-expression
+    await-expression
 ```
 
 Not all expressions are permitted as statements. 
@@ -431,22 +450,24 @@ Execution of an expression statement evaluates the contained expression and then
 
 Selection statements select one of a number of possible statements for execution based on the value of some expression.
 
-[#Grammar_selection_statement .anchor](#Grammar_selection_statement .anchor)selection-statement:\
+[#Grammar_selection_statement .anchor](#Grammar_selection_statement .anchor)
 
 ```ANTLR
-if-statement
-switch-statement
+selection-statement:
+    if-statement
+    switch-statement
 ```
 ### The if statement
 
 The if statement selects a statement for execution based on the value of a Boolean expression.
 
-[#Grammar_if_statement .anchor](#Grammar_if_statement .anchor)if-statement:\
+[#Grammar_if_statement .anchor](#Grammar_if_statement .anchor)
 
 ```ANTLR
-if ( boolean-expression ) embedded-statement\
-if ( boolean-expression ) embedded-statement else 
-embedded-statement
+if-statement:
+    if ( boolean-expression ) embedded-statement\
+    if ( boolean-expression ) embedded-statement else 
+    embedded-statement
 ```
 [#_Toc445783024 .anchor](#_Toc445783024 .anchor)An else part is associated with the lexically nearest preceding if that is allowed by the syntax. \[*Example*: Thus, an if statement of the form
 
@@ -487,42 +508,48 @@ The end point of an if statement is reachable if the end point of at least one o
 
 The switch statement selects for execution a statement list having an associated switch label that corresponds to the value of the switch expression.
 
-[#Grammar_switch_statement .anchor](#Grammar_switch_statement .anchor)switch-statement:\
+[#Grammar_switch_statement .anchor](#Grammar_switch_statement .anchor)
 
 ```ANTLR
-switch ( expression ) switch-block
+switch-statement:
+    switch ( expression ) switch-block
 ```
 
-[#Grammar_switch_block .anchor](#Grammar_switch_block .anchor)switch-block:\
+[#Grammar_switch_block .anchor](#Grammar_switch_block .anchor)
 
 ```ANTLR
-{ switch-sections~opt~ }
+switch-block:
+    { switch-sections~opt~ }
 ```
-[#Grammar_switch_sections .anchor](#Grammar_switch_sections .anchor)switch-sections:\
+[#Grammar_switch_sections .anchor](#Grammar_switch_sections .anchor)
 
 ```ANTLR
-switch-section
-switch-sections switch-section
-```
-
-[#Grammar_switch_section .anchor](#Grammar_switch_section .anchor)switch-section:\
-
-```ANTLR
-switch-labels statement-list
+switch-sections:
+    switch-section
+    switch-sections switch-section
 ```
 
-[#Grammar_switch_labels .anchor](#Grammar_switch_labels .anchor)switch-labels:\
+[#Grammar_switch_section .anchor](#Grammar_switch_section .anchor)
 
 ```ANTLR
-switch-label
-switch-labels switch-label
+switch-section:
+    switch-labels statement-list
 ```
 
-[#Grammar_switch_label .anchor](#Grammar_switch_label .anchor)switch-label:\
+[#Grammar_switch_labels .anchor](#Grammar_switch_labels .anchor)
 
 ```ANTLR
-case constant-expression :\
-default :
+switch-labels:
+    switch-label
+    switch-labels switch-label
+```
+
+[#Grammar_switch_label .anchor](#Grammar_switch_label .anchor)
+
+```ANTLR
+switch-label:
+    case constant-expression :
+    default :
 ```
 
 [#_Toc445783025 .anchor](#_Toc445783025 .anchor)A *switch-statement* consists of the keyword switch, followed by a parenthesized expression (called the ***switch expression***), followed by a *switch-block*. The *switch-block* consists of zero or more *switch-section*s, enclosed in braces. Each *switch-section* consists of one or more *switch-labels* followed by a *statement-list* (§13.3.2).
@@ -705,23 +732,25 @@ The end point of a switch statement is reachable if at least one of the followin
 
 Iteration statements repeatedly execute an embedded statement.
 
-[#Grammar_iteration_statement .anchor](#Grammar_iteration_statement .anchor)iteration-statement:\
+[#Grammar_iteration_statement .anchor](#Grammar_iteration_statement .anchor)
 
 ```ANTLR
-while-statement
-do-statement
-for-statement
-foreach-statement
+iteration-statement:
+    while-statement
+    do-statement
+    for-statement
+    foreach-statement
 ```
 
 ### The while statement
 
 The while statement conditionally executes an embedded statement zero or more times.
 
-[#Grammar_while_statement .anchor](#Grammar_while_statement .anchor)while-statement:\
+[#Grammar_while_statement .anchor](#Grammar_while_statement .anchor)
 
 ```ANTLR
-while ( boolean-expression ) embedded-statement
+while-statement:
+    while ( boolean-expression ) embedded-statement
 ```
 
 A while statement is executed as follows:
@@ -746,10 +775,11 @@ The end point of a while statement is reachable if at least one of the following
 
 The do statement conditionally executes an embedded statement one or more times.
 
-[#Grammar_do_statement .anchor](#Grammar_do_statement .anchor)do-statement:\
+[#Grammar_do_statement .anchor](#Grammar_do_statement .anchor)
 
 ```ANTLR
-do embedded-statement while ( boolean-expression ) ;
+do-statement:
+    do embedded-statement while ( boolean-expression ) ;
 ```
 
 A do statement is executed as follows:
@@ -772,36 +802,41 @@ The embedded statement of a do statement is reachable if the do statement is rea
 
 The for statement evaluates a sequence of initialization expressions and then, while a condition is true, repeatedly executes an embedded statement and evaluates a sequence of iteration expressions.
 
-[#Grammar_for_statement .anchor](#Grammar_for_statement .anchor)for-statement:\
+[#Grammar_for_statement .anchor](#Grammar_for_statement .anchor)
 
 ```ANTLR
-for ( for-initializer~opt~ ; for-condition~opt~ ; for-iterator~opt~ ) embedded-statement
+for-statement:
+    for ( for-initializer~opt~ ; for-condition~opt~ ; for-iterator~opt~ ) embedded-statement
 ```
 
-[#Grammar_for_initializer .anchor](#Grammar_for_initializer .anchor)for-initializer:\
+[#Grammar_for_initializer .anchor](#Grammar_for_initializer .anchor)
 
 ```ANTLR
-local-variable-declaration
-statement-expression-list
+for-initializer:
+    local-variable-declaration
+    statement-expression-list
 ```
 
-[#Grammar_for_condition .anchor](#Grammar_for_condition .anchor)for-condition:\
+[#Grammar_for_condition .anchor](#Grammar_for_condition .anchor)
 
 ```ANTLR
-boolean-expression
+for-condition:
+    boolean-expression
 ```
 
-[#Grammar_for_iterator .anchor](#Grammar_for_iterator .anchor)for-iterator:\
+[#Grammar_for_iterator .anchor](#Grammar_for_iterator .anchor)
 
 ```ANTLR
-statement-expression-list
+for-iterator:
+    statement-expression-list
 ```
 
-[#Grammar_statement_expression_list .anchor](#Grammar_statement_expression_list .anchor)statement-expression-list:\
+[#Grammar_statement_expression_list .anchor](#Grammar_statement_expression_list .anchor)
 
 ```ANTLR
-statement-expression
-statement-expression-list *,* statement-expression
+statement-expression-list:
+    statement-expression
+    statement-expression-list , statement-expression
 ```
 
 The *for-initializer*, if present, consists of either a *local-variable-declaration* (§13.6.2) or a list of *statement-expression*s (§13.7) separated by commas. The scope of a local variable declared by a *for-initializer* starts at the *local-variable-declarator* for the variable and extends to the end of the embedded statement. The scope includes the *for-condition* and the *for-iterator*.
@@ -838,35 +873,36 @@ The end point of a for statement is reachable if at least one of the following i
 
 The foreach statement enumerates the elements of a collection, executing an embedded statement for each element of the collection.
 
-[#Grammar_foreach_statement .anchor](#Grammar_foreach_statement .anchor)foreach-statement:\
+[#Grammar_foreach_statement .anchor](#Grammar_foreach_statement .anchor)
 
 ```ANTLR
-foreach ( local-variable-type identifier in expression ) embedded-statement
+foreach-statement:
+    foreach ( local-variable-type identifier in expression ) embedded-statement
 ```
 
 The *local-variable-type* and *identifier* of a foreach statement declare the ***iteration variable*** of the statement. If the var identifier is given as the *local-variable-type*, and no type named var is in scope, the iteration variable is said to be an ***implicitly typed iteration variable***, and its type is taken to be the element type of the foreach statement, as specified below. The iteration variable corresponds to a read-only local variable with a scope that extends over the embedded statement. During execution of a foreach statement, the iteration variable represents the collection element for which an iteration is currently being performed. A compile-time error occurs if the embedded statement attempts to modify the iteration variable (via assignment or the ++ and -- operators) or pass the iteration variable as a ref or out parameter.
 
-In the following, for brevity, IEnumerable, IEnumerator, IEnumerable<T> and IEnumerator<T> refer to the corresponding types in the namespaces `System.Collections` and `System.Collections.Generic`.
+In the following, for brevity, `IEnumerable`, `IEnumerator`, `IEnumerable<T>` and `IEnumerator<T>` refer to the corresponding types in the namespaces `System.Collections` and `System.Collections.Generic`.
 
 The compile-time processing of a foreach statement first determines the ***collection type***, ***enumerator type*** and ***element type*** of the expression. This determination proceeds as follows:
 
-- If the type `X` of *expression* is an array type then there is an implicit reference conversion from X to the IEnumerable interface (since `System.Array` implements this interface). The ***collection type*** is the IEnumerable interface, the ***enumerator type*** is the IEnumerator interface and the ***element type*** is the element type of the array type `X`.
+- If the type `X` of *expression* is an array type then there is an implicit reference conversion from X to the `IEnumerable` interface (since `System.Array` implements this interface). The ***collection type*** is the `IEnumerable` interface, the ***enumerator type*** is the IEnumerator interface and the ***element type*** is the element type of the array type `X`.
 
-- If the type `X` of *expression* is dynamic then there is an implicit conversion from *expression* to the IEnumerable interface (§11.2.9). The ***collection type*** is the IEnumerable interface and the ***enumerator type*** is the IEnumerator interface. If the var identifier is given as the *local-variable-type* then the ***element type*** is dynamic, otherwise it is object.
+- If the type `X` of *expression* is dynamic then there is an implicit conversion from *expression* to the `IEnumerable` interface (§11.2.9). The ***collection type*** is the `IEnumerable` interface and the ***enumerator type*** is the `IEnumerator` interface. If the var identifier is given as the *local-variable-type* then the ***element type*** is dynamic, otherwise it is object.
 
 - Otherwise, determine whether the type `X` has an appropriate GetEnumerator method:
 
 <!-- -->
 
-- Perform member lookup on the type `X` with identifier GetEnumerator and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for an enumerable interface as described below. It is recommended that a warning be issued if member lookup produces anything except a method group or no match.
+- Perform member lookup on the type `X` with identifier `GetEnumerator` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for an enumerable interface as described below. It is recommended that a warning be issued if member lookup produces anything except a method group or no match.
 
 - Perform overload resolution using the resulting method group and an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, check for an enumerable interface as described below. It is recommended that a warning be issued if overload resolution produces anything except an unambiguous public instance method or no applicable methods.
 
-- If the return type `E` of the GetEnumerator method is not a class, struct or interface type, an error is produced and no further steps are taken.
+- If the return type `E` of the `GetEnumerator` method is not a class, struct or interface type, an error is produced and no further steps are taken.
 
-- Member lookup is performed on `E` with the identifier Current and no type arguments. If the member lookup produces no match, the result is an error, or the result is anything except a public instance property that permits reading, an error is produced and no further steps are taken.
+- Member lookup is performed on `E` with the identifier `Current` and no type arguments. If the member lookup produces no match, the result is an error, or the result is anything except a public instance property that permits reading, an error is produced and no further steps are taken.
 
-- Member lookup is performed on `E` with the identifier MoveNext and no type arguments. If the member lookup produces no match, the result is an error, or the result is anything except a method group, an error is produced and no further steps are taken.
+- Member lookup is performed on `E` with the identifier `MoveNext` and no type arguments. If the member lookup produces no match, the result is an error, or the result is anything except a method group, an error is produced and no further steps are taken.
 
 - Overload resolution is performed on the method group with an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, or its return type is not bool, an error is produced and no further steps are taken.
 
@@ -878,7 +914,7 @@ The compile-time processing of a foreach statement first determines the ***colle
 
 <!-- -->
 
-- If among all the types `T`~i~ for which there is an implicit conversion from `X` to IEnumerable<T~i~>, there is a unique type `T` such that `T` is not dynamic and for all the other `T`~i~ there is an implicit conversion from IEnumerable<T> to IEnumerable<T~i~>, then the ***collection type*** is the interface IEnumerable<T>, the ***enumerator type*** is the interface IEnumerator<T>, and the ***element type*** is `T`.
+- If among all the types `Ti` for which there is an implicit conversion from `X` to `IEnumerable<Ti>`, there is a unique type `T` such that `T` is not dynamic and for all the other `Ti` there is an implicit conversion from `IEnumerable<T>` to `IEnumerable<Ti>`, then the ***collection type*** is the interface `IEnumerable<T>`, the ***enumerator type*** is the interface `IEnumerator<T>`, and the ***element type*** is `T`.
 
 - Otherwise, if there is more than one such type `T`, then an error is produced and no further steps are taken.
 
@@ -930,7 +966,7 @@ f();
 ```
 
 
-If `v` in the expanded form were declared outside of the while loop, it would be shared among all iterations, and its value after the for loop would be the final value, 13, which is what the invocation of `f` would print. Instead, because each iteration has its own variable `v`, the one captured by `f` in the first iteration will continue to hold the value 7, which is what will be printed. (Note that earlier versions of C\# declared `v` outside of the while loop.) *end example*\]
+If `v` in the expanded form were declared outside of the while loop, it would be shared among all iterations, and its value after the for loop would be the final value, 13, which is what the invocation of `f` would print. Instead, because each iteration has its own variable `v`, the one captured by `f` in the first iteration will continue to hold the value 7, which is what will be printed. (Note that earlier versions of C# declared `v` outside of the while loop.) *end example*\]
 
 The body of the finally block is constructed according to the following steps:
 
@@ -1007,7 +1043,7 @@ The output produced is as follows:
 \[*Example*: In the following example
 
 ```csharp
-int\[\] numbers = { 1, 3, 5, 7, 9 };
+int[] numbers = { 1, 3, 5, 7, 9 };
 foreach (var n in numbers) Console.WriteLine(n);
 
 the type of n is inferred to be int, the element type of numbers.
@@ -1022,14 +1058,14 @@ the type of n is inferred to be int, the element type of numbers.
 Jump statements unconditionally transfer control.
 
 [#Grammar_jump_statement .anchor](#Grammar_jump_statement .anchor)
-jump-statement:\
 
 ```ANTLR
-break-statement
-continue-statement
-goto-statement
-return-statement
-throw-statement
+jump-statement:
+    break-statement
+    continue-statement
+    goto-statement
+    return-statement
+    throw-statement
 ```
 
 [#_Ref470868227 .anchor](#_Ref470868227 .anchor)[#_Toc445783031 .anchor](#_Toc445783031 .anchor)The location to which a jump statement transfers control is called the ***target*** of the jump statement.
@@ -1079,10 +1115,11 @@ After break
 
 The break statement exits the nearest enclosing switch, while, do, for, or foreach statement.
 
-[#Grammar_break_statement .anchor](#Grammar_break_statement .anchor)break-statement:\
+[#Grammar_break_statement .anchor](#Grammar_break_statement .anchor)
 
 ```ANTLR
-break ;
+break-statement:
+    break ;
 ```
 
 The target of a break statement is the end point of the nearest enclosing switch, while, do, for, or foreach statement. If a break statement is not enclosed by a switch, while, do, for, or foreach statement, a compile-time error occurs.
@@ -1103,10 +1140,11 @@ Because a break statement unconditionally transfers control elsewhere, the end p
 
 The continue statement starts a new iteration of the nearest enclosing while, do, for, or foreach statement.
 
-[#Grammar_continue_statement .anchor](#Grammar_continue_statement .anchor)continue-statement:\
+[#Grammar_continue_statement .anchor](#Grammar_continue_statement .anchor)
 
 ```ANTLR
-continue ;
+continue-statement:
+    continue ;
 ```
 
 The target of a continue statement is the end point of the embedded statement of the nearest enclosing while, do, for, or foreach statement. If a continue statement is not enclosed by a while, do, for, or foreach statement, a compile-time error occurs.
@@ -1127,12 +1165,13 @@ Because a continue statement unconditionally transfers control elsewhere, the en
 
 The goto statement transfers control to a statement that is marked by a label.
 
-[#Grammar_goto_statement .anchor](#Grammar_goto_statement .anchor)goto-statement:\
+[#Grammar_goto_statement .anchor](#Grammar_goto_statement .anchor)
 
 ```ANTLR
-goto identifier ;\
-goto case constant-expression ;\
-goto default ;
+goto-statement:
+    goto identifier ;
+    goto case constant-expression ;
+    goto default ;
 ```
 
 The target of a goto *identifier* statement is the labeled statement with the given label. If a label with the given name does not exist in the current function member, or if the goto statement is not within the scope of the label, a compile-time error occurs. 
@@ -1188,10 +1227,11 @@ Because a goto statement unconditionally transfers control elsewhere, the end po
 
 The return statement returns control to the current caller of the function member in which the return statement appears.
 
-[#Grammar_return_statement .anchor](#Grammar_return_statement .anchor)return-statement:\
+[#Grammar_return_statement .anchor](#Grammar_return_statement .anchor)
 
 ```ANTLR
-return expression~opt~ ;
+return-statement:
+    return expression~opt~ ;
 ```
 
 A function member is said to ***compute a value*** if it is a method with a non-void result type (§15.6.11), the get accessor of a property or indexer, or a user-defined operator. Function members that do not compute a value are methods with the effective return type void, set accessors of properties and indexers, add and remove accessors of event, instance constructors, static constructors and finalizers.
@@ -1218,10 +1258,11 @@ Because a return statement unconditionally transfers control elsewhere, the end 
 
 The throw statement throws an exception.
 
-[#Grammar_throw_statement .anchor](#Grammar_throw_statement .anchor)throw-statement:\
+[#Grammar_throw_statement .anchor](#Grammar_throw_statement .anchor)
 
 ```ANTLR
-throw expression~opt~ ;
+throw-statement:
+    throw expression~opt~ ;
 ```
 
 A throw statement with an expression throws an exception produced by evaluating the expression. The expression shall be implicitly convertible to `System.Exception`, and the result of evaluating the expression is converted to `System.Exception` before being thrown. If the result of the conversion is null, a `System.NullReferenceException` is thrown instead.
@@ -1260,42 +1301,48 @@ When an exception is thrown, control is transferred to the first catch clause in
 
 The try statement provides a mechanism for catching exceptions that occur during execution of a block. Furthermore, the try statement provides the ability to specify a block of code that is always executed when control leaves the try statement.
 
-[#Grammar_try_statement .anchor](#Grammar_try_statement .anchor)try-statement:\
+[#Grammar_try_statement .anchor](#Grammar_try_statement .anchor)
 
 ```ANTLR
-try block catch-clauses
-try block catch-clauses~opt~ finally-clause
+try-statement:
+    try block catch-clauses
+    try block catch-clauses~opt~ finally-clause
 ```
 
-[#Grammar_catch_clauses .anchor](#Grammar_catch_clauses .anchor)catch-clauses:\
+[#Grammar_catch_clauses .anchor](#Grammar_catch_clauses .anchor)
 
 ```ANTLR
-specific-catch-clauses
-specific-catch-clauses~opt~ general-catch-clause
+catch-clauses:
+    specific-catch-clauses
+    specific-catch-clauses~opt~ general-catch-clause
 ```
 
-[#Grammar_specific_catch_clauses .anchor](#Grammar_specific_catch_clauses .anchor)specific-catch-clauses:\
+[#Grammar_specific_catch_clauses .anchor](#Grammar_specific_catch_clauses .anchor)
 
 ```ANTLR
-specific-catch-clause
-specific-catch-clauses specific-catch-clause
+specific-catch-clauses:
+    specific-catch-clause
+    specific-catch-clauses specific-catch-clause
 ```
 
-[#Grammar_specific_catch_clause .anchor](#Grammar_specific_catch_clause .anchor)specific-catch-clause:\
+[#Grammar_specific_catch_clause .anchor](#Grammar_specific_catch_clause .anchor)
 
 ```ANTLR
-catch ( type identifier~opt~ ) block
+specific-catch-clause:
+    catch ( type identifier~opt~ ) block
 ```
-[#Grammar_general_catch_clause .anchor](#Grammar_general_catch_clause .anchor)general-catch-clause:\
+[#Grammar_general_catch_clause .anchor](#Grammar_general_catch_clause .anchor)
 
 ```ANTLR
-catch block
+general-catch-clause:
+    catch block
 ```
 
-[#Grammar_finally_clause .anchor](#Grammar_finally_clause .anchor)finally-clause:\
+[#Grammar_finally_clause .anchor](#Grammar_finally_clause .anchor)
 
 ```ANTLR
-finally block
+finally-clause:
+    finally block
 ```
 
 There are three possible forms of try statements:
@@ -1315,7 +1362,7 @@ Unless a catch clause includes an exception variable name, it is impossible to a
 A catch clause that specifies neither an exception type nor an exception variable name is called a general catch clause. A try statement can only have one general catch clause, and, if one is present, it shall be the last catch clause.
 
 > [!NOTE] 
-> Some programming languages might support exceptions that are not representable as an object derived from `System.Exception`, although such exceptions could never be generated by C\# code. A general catch clause might be used to catch such exceptions. Thus, a general catch clause is semantically different from one that specifies the type `System.Exception`, in that the former might also catch exceptions from other languages.
+> Some programming languages might support exceptions that are not representable as an object derived from `System.Exception`, although such exceptions could never be generated by C# code. A general catch clause might be used to catch such exceptions. Thus, a general catch clause is semantically different from one that specifies the type `System.Exception`, in that the former might also catch exceptions from other languages.
 
 In order to locate a handler for an exception, catch clauses are examined in lexical order. A compile-time error occurs if a catch clause specifies a type that is the same as, or is derived from, a type that was specified in an earlier catch clause for the same try. 
 
@@ -1452,16 +1499,18 @@ The end point of a try statement is reachable if both of the following are true:
 
 The checked and unchecked statements are used to control the ***overflow-checking context*** for integral-type arithmetic operations and conversions.
 
-[#Grammar_checked_statement .anchor](#Grammar_checked_statement .anchor)checked-statement:\
+[#Grammar_checked_statement .anchor](#Grammar_checked_statement .anchor)
 
 ```ANTLR
-checked block
+checked-statement:
+    checked block
 ```
 
-[#Grammar_unchecked_statement .anchor](#Grammar_unchecked_statement .anchor)unchecked-statement:\
+[#Grammar_unchecked_statement .anchor](#Grammar_unchecked_statement .anchor)
 
 ```ANTLR
-unchecked block
+unchecked-statement:
+    unchecked block
 ```
 
 The checked statement causes all expressions in the *block* to be evaluated in a checked context, and the unchecked statement causes all expressions in the *block* to be evaluated in an unchecked context.
@@ -1472,10 +1521,11 @@ The checked and unchecked statements are precisely equivalent to the checked and
 
 The lock statement obtains the mutual-exclusion lock for a given object, executes a statement, and then releases the lock.
 
-[#Grammar_lock_statement .anchor](#Grammar_lock_statement .anchor)lock-statement:\
+[#Grammar_lock_statement .anchor](#Grammar_lock_statement .anchor)
 
 ```ANTLR
-lock ( expression ) embedded-statement
+lock-statement:
+    lock ( expression ) embedded-statement
 ```
 
 The expression of a lock statement shall denote a value of a type known to be a *reference*. No implicit boxing conversion (§11.2.8) is ever performed for the expression of a lock statement, and thus it is a compile-time error for the expression to denote a value of a *value-type*.
@@ -1506,17 +1556,19 @@ While a mutual-exclusion lock is held, code executing in the same execution thre
 
 The using statement obtains one or more resources, executes a statement, and then disposes of the resource.
 
-[#Grammar_using_statement .anchor](#Grammar_using_statement .anchor)using-statement:\
+[#Grammar_using_statement .anchor](#Grammar_using_statement .anchor)
 
 ```ANTLR
-using ( resource-acquisition ) embedded-statement
+using-statement:
+    using ( resource-acquisition ) embedded-statement
 ```
 
-[#Grammar_resource_acquisition .anchor](#Grammar_resource_acquisition .anchor)resource-acquisition:\
+[#Grammar_resource_acquisition .anchor](#Grammar_resource_acquisition .anchor)
 
 ```ANTLR
-local-variable-declaration
-expression
+resource-acquisition:
+    local-variable-declaration
+    expression
 ```
 
 A ***resource*** is a class or struct that implements the `System.IDisposable` interface, which includes a single parameterless method named Dispose. Code that is using a resource can call Dispose to indicate that the resource is no longer needed.
@@ -1652,11 +1704,12 @@ Since the TextWriter and TextReader classes implement the IDisposable interface,
 
 The yield statement is used in an iterator block (§13.3) to yield a value to the enumerator object (§15.14.5) or enumerable object (§15.14.6) of an iterator or to signal the end of the iteration.
 
-[#Grammar_yield_statement .anchor](#Grammar_yield_statement .anchor)yield-statement:\
+[#Grammar_yield_statement .anchor](#Grammar_yield_statement .anchor)
 
 ```ANTLR
-yield return expression ;
-yield break ;
+yield-statement:
+    yield return expression ;
+    yield break ;
 ```
 
 yield is a contextual keyword (§7.4.4) and has special meaning only when used immediately before a return or break keyword.
