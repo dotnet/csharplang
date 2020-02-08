@@ -34,9 +34,6 @@
 
 ## Feb 5
 
-- Nullability of dependent calls (Chuck, Julien)
-- https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
-
 ## Feb 3
 
 - https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
@@ -52,6 +49,11 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+[C# Language Design Notes for Feb. 5, 2020](LDM-2020-02-05.md)
+
+- Nullability of dependent calls (Chuck, Julien)
+- https://github.com/dotnet/csharplang/issues/3137 Records as individual features (Mads)
 
 ## Jan 22, 2020
 
