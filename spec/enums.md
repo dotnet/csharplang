@@ -2,62 +2,88 @@
 
 ## General
 
-An ***enum type*** is a distinct value type (§9.2) that declares a set of named constants. \[*Example*: The example
+An ***enum type*** is a distinct value type (§9.2) that declares a set of named constants. The example
 
-enum Color\
-{\
-Red,\
-Green,\
-Blue\
+```csharp
+enum Color
+{
+	Red,
+	Green,
+	Blue
 }
+```
 
-declares an enum type named Color with members Red, Green, and Blue. *end example*\]
+declares an enum type named Color with members Red, Green, and Blue.
 
 ## Enum declarations
 
 An enum declaration declares a new enum type. An enum declaration begins with the keyword enum, and defines the name, accessibility, underlying type, and members of the enum.
 
-[]{#Grammar_enum_declaration .anchor}enum-declaration:\
-attributes~opt~ enum-modifiers~opt~ *enum* identifier enum-base~opt~ enum-body *;*~opt~[]{#Grammar_enum_base .anchor}
+[#Grammar_enum_declaration .anchor](#Grammar_enum_declaration .anchor) enum-declaration:
+```ANTLR
+attributes~opt~ enum-modifiers~opt~ *enum* identifier enum-base~opt~ enum-body *;*~opt~
+```
 
-enum-base:\
-*:* integral-type
+[#Grammar_enum_base .anchor](#Grammar_enum_base .anchor) enum-base:
+```ANTLR
+: integral-type
+```
 
-[]{#Grammar_enum_body .anchor}enum-body:\
-*{* enum-member-declarations~opt~ *}*\
-*{* enum-member-declarations *,* *}*
+[#Grammar_enum_body .anchor](#Grammar_enum_body .anchor)enum-body:
 
-Each enum type has a corresponding integral type called the ***underlying type*** of the enum type. This underlying type shall be able to represent all the enumerator values defined in the enumeration. An enum declaration may explicitly declare an underlying type of byte, sbyte, short, ushort, int, uint, long or ulong. \[*Note*: char cannot be used as an underlying type. *end note*\] An enum declaration that does not explicitly declare an underlying type has an underlying type of int.
+```ANTLR
+{ enum-member-declarations~opt~ }
+{ enum-member-declarations , }
+```
 
-\[*Example*: The example
+Each enum type has a corresponding integral type called the ***underlying type*** of the enum type. This underlying type shall be able to represent all the enumerator values defined in the enumeration. An enum declaration may explicitly declare an underlying type of `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long` or `ulong`. 
 
-enum Color: long\
-{\
-Red,\
-Green,\
-Blue\
+>[!NOTE]
+>char cannot be used as an underlying type. 
+
+\[*Example*: An enum declaration that does not explicitly declare an underlying type has an underlying type of `int`.
+
+The example
+
+```csharp
+enum Color: long
+{
+	Red,
+	Green,
+	Blue
 }
+```
 
-declares an enum with an underlying type of long. *end example*\] \[*Note*: A developer might choose to use an underlying type of long, as in the example, to enable the use of values that are in the range of long but not in the range of int, or to preserve this option for the future. *end note*\]
+declares an enum with an underlying type of long. *end example*\]
 
-\[*Note*: C\# allows a trailing comma in an *enum-body*, just like it allows one in an *array-initializer* (§17.7). *end note*\]
+>[!NOTE]
+> A developer might choose to use an underlying type of long, as in the example, to enable the use of values that are in the range of long but not in the range of int, or to preserve this option for the future.
+
+>[!NOTE] 
+> C# allows a trailing comma in an *enum-body*, just like it allows one in an *array-initializer* (§17.7).
 
 ## Enum modifiers
 
 An *enum-declaration* may optionally include a sequence of enum modifiers:
 
-[]{#Grammar_enum_modifiers .anchor}enum-modifiers:\
-enum-modifier\
+[#Grammar_enum_modifiers .anchor](#Grammar_enum_modifiers .anchor)
+```ANTLR
+enum-modifiers:
+enum-modifier
 enum-modifiers enum-modifier
+```
 
-[]{#Grammar_enum_modifier .anchor}enum-modifier:\
-*new*\
-*public\
-protected\
-internal*\
-*private*
+[#Grammar_enum_modifier .anchor](#Grammar_enum_modifier .anchor)enum-modifier:\
 
-[[[]{#_Ref485188801 .anchor}]{#_Ref485188649 .anchor}]{#_Ref483210964 .anchor}It is a compile-time error for the same modifier to appear multiple times in an enum declaration.
+```ANTLR
+new
+public
+protected
+internal
+private
+```
+
+[#_Ref485188801 .anchor](#_Ref485188801 .anchor)[#_Ref485188649 .anchor](#_Ref485188649 .anchor)[#_Ref483210964 .anchor](#_Ref483210964 .anchor) It is a compile-time error for the same modifier to appear multiple times in an enum declaration.
 
 The modifiers of an enum declaration have the same meaning as those of a class declaration (§15.2.2). However, the abstract, and sealed, and static modifiers are not permitted in an enum declaration. Enums cannot be abstract and do not permit derivation.
 
@@ -65,35 +91,47 @@ The modifiers of an enum declaration have the same meaning as those of a class d
 
 The body of an enum type declaration defines zero or more enum members, which are the named constants of the enum type. No two enum members can have the same name.
 
-[]{#Grammar_enum_member_declarations .anchor}enum-member-declarations:\
-enum-member-declaration\
-enum-member-declarations *,* enum-member-declaration
+[#Grammar_enum_member_declarations .anchor](#Grammar_enum_member_declarations .anchor)enum-member-declarations:
 
-[]{#Grammar_enum_member_declaration .anchor}enum-member-declaration:\
-attributes~opt~ identifier\
-attributes~opt~ identifier *=* constant-expression
+```ANTLR
+enum-member-declaration
+enum-member-declarations , enum-member-declaration
+```
 
-Each enum member has an associated constant value. The type of this value is the underlying type for the containing enum. The constant value for each enum member shall be in the range of the underlying type for the enum. \[*Example*: The example
+[#Grammar_enum_member_declaration .anchor](#Grammar_enum_member_declaration .anchor)enum-member-declaration:
 
-enum Color: uint\
-{\
-Red = -1,\
-Green = -2,\
-Blue = -3\
+```ANTLR
+attributes~opt~ identifier
+attributes~opt~ identifier = constant-expression
+```
+
+Each enum member has an associated constant value. The type of this value is the underlying type for the containing enum. The constant value for each enum member shall be in the range of the underlying type for the enum. The example
+
+```csharp
+enum Color: uint
+{
+	Red = -1,
+	Green = -2,
+	Blue = -3
 }
+```
 
-results in a compile-time error because the constant values -1, -2, and –3 are not in the range of the underlying integral type uint. *end example*\]
 
-Multiple enum members may share the same associated value. \[*Example*: The example
 
-enum Color\
-{\
-Red,\
-Green,\
-Blue,\
-\
-Max = Blue\
+results in a compile-time error because the constant values -1, -2, and –3 are not in the range of the underlying integral type uint.
+
+Multiple enum members may share the same associated value.  \[*Example*: The example
+
+```csharp
+enum Color
+{
+	Red,
+	Green,
+	Blue,
+
+	Max = Blue
 }
+```
 
 shows an enum in which two enum members—Blue and Max—have the same associated value. *end example*\]
 
@@ -107,43 +145,47 @@ The associated value of an enum member is assigned either implicitly or explicit
 
 using System;
 
-enum Color\
-{\
-Red,\
-Green = 10,\
-Blue\
+```csharp
+enum Color
+{
+	Red,
+	Green = 10,
+	Blue
 }
 
-class Test\
-{\
-static void Main() {\
-Console.WriteLine(StringFromColor(Color.Red));\
-Console.WriteLine(StringFromColor(Color.Green));\
-Console.WriteLine(StringFromColor(Color.Blue));\
+class Test
+{
+	static void Main() {
+		Console.WriteLine(StringFromColor(Color.Red));
+		Console.WriteLine(StringFromColor(Color.Green));
+		Console.WriteLine(StringFromColor(Color.Blue));
+	}
+
+	static string StringFromColor(Color c) {
+		switch (c) {
+			case Color.Red:
+			return String.Format("Red = {0}", (int) c);
+
+			case Color.Green:
+			return String.Format("Green = {0}", (int) c);
+
+			case Color.Blue:
+			return String.Format("Blue = {0}", (int) c);
+
+			default:
+			return "Invalid color";
+		}
+	}
 }
-
-static string StringFromColor(Color c) {\
-switch (c) {\
-case Color.Red:\
-return String.Format("Red = {0}", (int) c);
-
-case Color.Green:\
-return String.Format("Green = {0}", (int) c);
-
-case Color.Blue:\
-return String.Format("Blue = {0}", (int) c);
-
-default:\
-return "Invalid color";\
-}\
-}\
-}
+```
 
 prints out the enum member names and their associated values. The output is:
 
-Red = 0\
-Green = 10\
+```csharp
+Red = 0
+Green = 10
 Blue = 11
+```
 
 for the following reasons:
 
@@ -159,13 +201,15 @@ The associated value of an enum member may not, directly or indirectly, use the 
 
 \[*Example*: The example
 
-enum Circular\
-{\
-A = B,\
-B\
+```csharp
+enum Circular
+{
+	A = B,
+	B
 }
+```
 
-results in a compile-time error because the declarations of A and B are circular. A depends on B explicitly, and B depends on A implicitly. *end example*\]
+results in a compile-time error because the declarations of `A` and `B` are circular. `A` depends on `B` explicitly, and `B` depends on `A` implicitly. *end example*\]
 
 Enum members are named and scoped in a manner exactly analogous to fields within classes. The scope of an enum member is the body of its containing enum type. Within that scope, enum members can be referred to by their simple name. From all other code, the name of an enum member shall be qualified with the name of its enum type. Enum members do not have any declared accessibility—an enum member is accessible if its containing enum type is accessible.
 
@@ -179,23 +223,22 @@ Note that System.Enum is not itself an *enum-type*. Rather, it is a *class-type*
 
 Each enum type defines a distinct type; an explicit enumeration conversion (§11.3.3) is required to convert between an enum type and an integral type, or between two enum types. The set of values of the enum type is the same as the set of values of the underlying type and is not restricted to the values of the named constants. Any value of the underlying type of an enum can be cast to the enum type, and is a distinct valid value of that enum type.
 
-Enum members have the type of their containing enum type (except within other enum member initializers: see §19.4). The value of an enum member declared in enum type E with associated value v is (E)v.
+Enum members have the type of their containing enum type (except within other enum member initializers: see §19.4). The value of an enum member declared in enum type `E` with associated value v is (`E`)v.
 
 The following operators can be used on values of enum types:
 
--   ==, !=, &lt;, &gt;, &lt;=, &gt;= (§12.11.6)
+-   `==`, `!=`, `<`, `>`, `<=`, `>=` (§12.11.6)
 
--   binary + (§12.9.5)
+-   binary `+` (§12.9.5)
 
--   binary - (§12.9.6)
+-   binary `-` (§12.9.6)
 
--   \^, &, | (§12.12.3)
+-   `^`, `&`, `|` (§12.12.3)
 
--   \~ (§12.8.5)
+-   `~` (§12.8.5)
 
--   ++, -- (§12.7.10 and §12.8.6)
+-   `++`, `--` (§12.7.10 and §12.8.6)
 
 -   sizeof (§23.6.9)
 
 Every enum type automatically derives from the class System.Enum (which, in turn, derives from System.ValueType and object). Thus, inherited methods and properties of this class can be used on values of an enum type.
-
