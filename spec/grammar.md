@@ -8,6 +8,7 @@ This annex contains summaries of the lexical and syntactic grammars found in the
 
 ## Lexical grammar {#lexical-grammar-1 .Appendix2}
 
+
 ```ANTLR
 input::
 	input-section~opt~
