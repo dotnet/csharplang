@@ -28,12 +28,7 @@ A tuple literal consists of two or more tuple literal elements, each of which is
 
 ```antlr
 tuple_literal
-    : '(' tuple_literal_element_list ')'
-    ;
-
-tuple_literal_element_list
-    : tuple_literal_element ',' tuple_literal_element
-    | tuple_literal_element_list ',' tuple_literal_element
+    : '(' ( tuple_literal_element ',' )+ tuple_literal_element ')'
     ;
 
 tuple_literal_element
@@ -52,9 +47,7 @@ var t2 = (sum: 0, count: 1);  // infer tuple type (int sum, int count) from name
 ```
 end example\]
 
-A tuple literal has a "conversion from expression" to any tuple type having the same number of elements.
-
-**ISSUE:** But what if there is no conversion of types for a given element pair?
+A tuple literal has a "conversion from expression" to any tuple type of the same arity, as long as each of the element expressions of the tuple literal has an implicit conversion to the type of the corresponding element of the tuple type.
 
 \[Example:
 ```csharp
@@ -320,11 +313,9 @@ Tuples have a boxing conversion. Importantly, the element names aren't part of t
 
 Tuple types and expressions support a variety of conversions by "lifting" conversions of the elements into overall *tuple conversion*. For the classification purpose, all element conversions are considered recursively. For example, to have an implicit conversion, all element expressions/types shall have implicit conversions to the corresponding element types.
 
-Tuple conversions are *Standard Conversions* and therefore can stack with user-defined operators to form user-defined conversions.
+Tuple conversions are *Standard Conversions*.
 
-**ISSUE:** Is 'stack' a defined term in this context?
-
-An implicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any implicit conversion between each corresponding pair of element types.
+An implicit tuple conversion is a standard conversion. It applies from one tuple type to another of equal arity when  here is any implicit conversion from each element in the source tuple to the corresponding element in the destination tuple.
 
 An explicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any explicit conversion between each corresponding pair of element types.
 
@@ -332,11 +323,11 @@ A tuple conversion can be classified as a valid instance conversion or an extens
 
 On top of the member-wise conversions implied by implicit typing, implicit conversions between tuple types themselves are allowed.
 
-### Implicit typing
+### Tuple Literal Conversion
 
 > Add this section after [Anonymous function conversions and method group conversions](../../spec.md#Anonymous-function-conversions-and-method-group-conversions)
 
-A tuple literal is implictly typed when used in a context specifying a tuple type. The tuple literal has a "conversion from expression" to any tuple type, as long as the element expressions of the tuple literal have an implicit conversion to the corresponding element types of the tuple type.
+A tuple literal is implicitly typed when used in a context specifying a tuple type. The tuple literal has a "conversion from expression" to any tuple type of the same arity, as long as the element expressions of the tuple literal have an implicit conversion to the corresponding element types of the tuple type.
 
 \[Example:
 ```csharp
@@ -354,9 +345,7 @@ M1((1, 2));            // first overload is used. Identity conversion is better 
 M1(("hi", "hello"));   // second overload is used. Implicit tuple conversion is better than no conversion.
 ```
 
-Implicit typing will "see through" nullable target types. A successful conversion from tuple expression to a nullable tuple type is classified as *ImplicitNullable* conversion.
-
-**ISSUE:** Replace "see through" with something not quoted.
+A successful conversion from tuple expression to a nullable tuple type is classified as *ImplicitNullable* conversion.
 
 ```csharp
 ((int x, int y, int z)?, int t)? SpaceTime()
@@ -400,7 +389,7 @@ destination
 
 **ISSUE:** Is this expression constrained to being only on the LHS of simple (compound?) assignment, where the RHS is a tuple having at least as many elements as positions indicated by the LHS? See also my issue later w.r.t "deconstruction assignment expressions".
 
-Element values are copied from the source tuple to the destination(s). Each element's position is inferred from the destination position within *destination_list*. A destination with identifier `_` indicates that the corresponding element is discarded rather than being copied. The destination list shall accouint for every element in the tuple.
+Element values are copied from the source tuple to the destination(s). Each element's position is inferred from the destination position within *destination_list*. A destination with identifier `_` indicates that the corresponding element is discarded rather than being copied. The destination list shall account for every element in the tuple.
 
 \[Example:
 ```csharp
@@ -421,7 +410,7 @@ end example\]
 
 **ISSUE:** Presumably the scope of any newly created variable is from the point of declaration on to the end of the block, or does this fall-out of saying its a local variable?
 
-Any object may be deconstructed by providing an accessible `Deconstruct` method, either as a member or as an extension method. A `Deconstruct` method converts an object to a set of discrete values. The Deconstruct method "returns" the component values by use of individual `out` parameters. `Deconstruct` is overloadable. Consider the following:
+Any object may be deconstructed by providing an accessible `Deconstruct` method, either as an instance member or as an extension method. A `Deconstruct` method converts an object to a set of discrete values. The Deconstruct method "returns" the component values by use of individual `out` parameters. `Deconstruct` is overloadable. Consider the following:
 
 ```csharp
 class Name
