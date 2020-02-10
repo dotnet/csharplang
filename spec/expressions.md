@@ -3039,7 +3039,7 @@ If the operand of a unary-expression has the compile-time type dynamic, it is dy
 
 ### Unary plus operator
 
-For an operation of the form +x, unary operator overload resolution (§12.4.4) is applied to select a specific operator implementation. The operand is converted to the parameter type of the selected operator, and the type of the result is the return type of the operator. The predefined unary plus operators are:
+For an operation of the form `+x`, unary operator overload resolution (§12.4.4) is applied to select a specific operator implementation. The operand is converted to the parameter type of the selected operator, and the type of the result is the return type of the operator. The predefined unary plus operators are:
 
 ```csharp
 int operator +(int x);
@@ -3057,7 +3057,7 @@ Lifted (§12.4.8) forms of the unlifted predefined unary plus operators defined 
 
 ### Unary minus operator
 
-For an operation of the form –x, unary operator overload resolution (§12.4.4) is applied to select a specific operator implementation. The operand is converted to the parameter type of the selected operator, and the type of the result is the return type of the operator. The predefined unary minus operators are:
+For an operation of the form `–x`, unary operator overload resolution (§12.4.4) is applied to select a specific operator implementation. The operand is converted to the parameter type of the selected operator, and the type of the result is the return type of the operator. The predefined unary minus operators are:
 
 -   Integer negation:
 
@@ -3105,7 +3105,7 @@ Lifted (§12.4.8) forms of the unlifted predefined logical negation operator def
 
 ### Bitwise complement operator
 
-For an operation of the form \~x, unary operator overload resolution (§12.4.4) is applied to select a specific operator implementation. The operand is converted to the parameter type of the selected operator, and the type of the result is the return type of the operator. The predefined bitwise complement operators are:
+For an operation of the form `~x`, unary operator overload resolution (§12.4.4) is applied to select a specific operator implementation. The operand is converted to the parameter type of the selected operator, and the type of the result is the return type of the operator. The predefined bitwise complement operators are:
 
 ```csharp
 int operator ~(int x);
@@ -3298,7 +3298,7 @@ An awaiter’s implementation of the interface methods `INotifyCompletion.OnComp
 
 ### General
 
-The `*`, `/`, `%`, `+`, and – operators are called the arithmetic operators.
+The `*`, `/`, `%`, `+`, and `–` operators are called the arithmetic operators.
 
 [#Grammar_multiplicative_expression .anchor](#Grammar_multiplicative_expression .anchor)
 
@@ -3327,7 +3327,7 @@ If an operand of an arithmetic operator has the compile-time type dynamic, then 
 
 For an operation of the form `x` \* `y`, binary operator overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
 
-The predefined multiplication operators are listed below. The operators all compute the product of x and y.
+The predefined multiplication operators are listed below. The operators all compute the product of `x` and `y`.
 
 -   Integer multiplication:
 
@@ -3347,7 +3347,7 @@ float operator *(float x, float y);
 double operator *(double x, double y);
 ```
 
-> The product is computed according to the rules of IEC 60559 arithmetic. The following table lists the results of all possible combinations of nonzero finite values, zeros, infinities, and NaN’s. In the table, x and y are positive finite values. z is the result of x \* y, rounded to the nearest representable value. If the magnitude of the result is too large for the destination type, z is infinity. Because of rounding, z may be zero even though neither x nor y is zero.
+> The product is computed according to the rules of IEC 60559 arithmetic. The following table lists the results of all possible combinations of nonzero finite values, zeros, infinities, and NaN’s. In the table, x and y are positive finite values. z is the result of `x` \* `y`, rounded to the nearest representable value. If the magnitude of the result is too large for the destination type, `z` is infinity. Because of rounding, `z` may be zero even though neither `x` nor `y` is zero.
 
   ----- ----- ----- ----- ----- ----- ----- -----
         +y    –y    +0    –0    +∞    –∞    NaN
@@ -3429,7 +3429,7 @@ Lifted (§12.4.8) forms of the unlifted predefined division operators defined ab
 
 ### Remainder operator
 
-For an operation of the form x % y, binary operator overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
+For an operation of the form `x` % `y`, binary operator overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
 
 The predefined remainder operators are listed below. The operators all compute the remainder of the division between `x` and `y`.
 
@@ -3442,7 +3442,7 @@ long operator %(long x, long y);
 ulong operator %(ulong x, ulong y);
 ```
 
-> The result of `x` % `y` is the value produced by x – (`x / y`) \* `y`. If `y` is zero, a `System.DivideByZeroException` is thrown.
+> The result of `x % y` is the value produced by x – (`x / y`) \* `y`. If `y` is zero, a `System.DivideByZeroException` is thrown.
 >
 > If the left operand is the smallest int or long value and the right operand is `–1`, a `System.OverflowException` is thrown if and only if `x / y` would throw an exception.
 
@@ -3615,7 +3615,7 @@ double operator –(double x, double y);
   NaN   NaN   NaN   NaN   NaN   NaN   NaN
   ----- ----- ----- ----- ----- ----- -----
 
-(In the above table the -y entries denote the *negation* of `y`, not that the value is negative.)
+(In the above table the `-y` entries denote the *negation* of `y`, not that the value is negative.)
 
 -   Decimal subtraction:
 
@@ -3641,7 +3641,7 @@ E operator –(E x, U y);
 
 > This operator is evaluated exactly as `(E)((U)x – y)`. In other words, the operator subtracts a value from the underlying type of the enumeration, yielding a value of the enumeration.
 
--   Delegate removal. Every delegate type implicitly provides the following predefined operator, where D is the delegate type:
+-   Delegate removal. Every delegate type implicitly provides the following predefined operator, where `D` is the delegate type:
 
 ```csharp
 D operator –(D x, D y);
@@ -3744,7 +3744,7 @@ If the resulting shift count is zero, the shift operators simply return the valu
 
 Shift operations never cause overflows and produce the same results in checked and unchecked contexts.
 
-When the left operand of the >> operator is of a signed integral type, the operator performs an *arithmetic* shift right wherein the value of the most significant bit (the sign bit) of the operand is propagated to the high-order empty bit positions. When the left operand of the >> operator is of an unsigned integral type, the operator performs a *logical* shift right wherein high-order empty bit positions are always set to zero. To perform the opposite operation of that inferred from the operand type, explicit casts can be used. \[*Example*: If `x` is a variable of type int, the operation unchecked((int)((uint)x >> y)) performs a logical shift right of `x`. *end example*\]
+When the left operand of the >> operator is of a signed integral type, the operator performs an *arithmetic* shift right wherein the value of the most significant bit (the sign bit) of the operand is propagated to the high-order empty bit positions. When the left operand of the >> operator is of an unsigned integral type, the operator performs a *logical* shift right wherein high-order empty bit positions are always set to zero. To perform the opposite operation of that inferred from the operand type, explicit casts can be used. \[*Example*: If `x` is a variable of type `int`, the operation unchecked`((int)((uint)x >> y))` performs a logical shift right of `x`. *end example*\]
 
 Lifted (§12.4.8) forms of the unlifted predefined shift operators defined above are also predefined.
 
@@ -3752,7 +3752,7 @@ Lifted (§12.4.8) forms of the unlifted predefined shift operators defined above
 
 ### General
 
-The ==`, !=, <, >, <=, >=, is,` and as operators are called the relational and type-testing operators.
+The `==, !=, <, >, <=, >=, is,` and as operators are called the relational and type-testing operators.
 
 [#Grammar_relational_expression .anchor](#Grammar_relational_expression .anchor)
 
@@ -3782,7 +3782,7 @@ The `==, !=, <, >, <= and >=` operators are ***comparison operators***.
 
 If an operand of a comparison operator has the compile-time type dynamic, then the expression is dynamically bound (§12.3.3). In this case the compile-time type of the expression is dynamic, and the resolution described below will take place at run-time using the run-time type of those operands that have the compile-time type dynamic.
 
-For an operation of the form `x` *op* `y`, where *op* is a comparison operator, overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator. If both operands of an *equality-expression* are the null literal, then overload resolution is not performed and the expression evaluates to a constant value of true or false according to whether the operator is == or !=.
+For an operation of the form `x` *op* `y`, where *op* is a comparison operator, overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator. If both operands of an *equality-expression* are the null literal, then overload resolution is not performed and the expression evaluates to a constant value of true or false according to whether the operator is `==` or `!=`.
 
 The predefined comparison operators are described in the following subclauses. All predefined comparison operators return a result of type bool, as described in the following table.
 
@@ -3910,7 +3910,7 @@ bool operator !=(bool x, bool y);
 
 The result of == is true if both `x` and `y` are true or if both `x` and `y` are false. Otherwise, the result is false.
 
-The result of != is false if both `x` and `y` are true or if both x and y are false. Otherwise, the result is true. When the operands are of type bool, the != operator produces the same result as the \^ operator.
+The result of != is false if both `x` and `y` are true or if both `x` and `y` are false. Otherwise, the result is true. When the operands are of type bool, the `!=` operator produces the same result as the `^` operator.
 
 Lifted (§12.4.8) forms of the unlifted predefined Boolean equality operators defined above are also predefined.
 
@@ -3928,7 +3928,7 @@ bool operator <=(E x, E y);
 bool operator >=(E x, E y);
 ```
 
-The result of evaluating `x` *op* `y`, where x and y are expressions of an enumeration type E with an underlying type `U`, and *op* is one of the comparison operators, is exactly the same as evaluating `((U)x)` *op *`((U)y)`. In other words, the enumeration type comparison operators simply compare the underlying integral values of the two operands.
+The result of evaluating `x` *op* `y`, where x and y are expressions of an enumeration type `E` with an underlying type `U`, and *op* is one of the comparison operators, is exactly the same as evaluating `((U)x)` *op *`((U)y)`. In other words, the enumeration type comparison operators simply compare the underlying integral values of the two operands.
 
 Lifted (§12.4.8) forms of the unlifted predefined enumeration comparison operators defined above are also predefined.
 
@@ -3942,7 +3942,7 @@ bool operator !=`(C x, C y)`;
 
 unless predefined equality operators otherwise exist for `C` (for example, when `C` is string or `System.Delegate`).
 
-The operators return the result of comparing the two references for equality or non-equality. operator == returns true if and only if x and y refer to the same instance or are both null, while operator != returns true if and only if operator == with the same operands would return false.
+The operators return the result of comparing the two references for equality or non-equality. operator `==` returns true if and only if `x` and `y` refer to the same instance or are both null, while operator `!=` returns true if and only if operator == with the same operands would return false.
 
 In addition to normal applicability rules (§12.6.4.2), the predefined reference type equality operators require one of the following in order to be applicable:
 
@@ -3952,7 +3952,7 @@ In addition to normal applicability rules (§12.6.4.2), the predefined reference
 
 <!-- -->
 
--   If at runtime `T` is a non-nullable value type, the result of == is false and the result of != is true.
+-   If at runtime `T` is a non-nullable value type, the result of `==` is false and the result of `!=` is true.
 
 -   If at runtime `T` is a nullable value type, the result is computed from the HasValue property of the operand, as described in (§12.11.10).
 
@@ -3969,7 +3969,7 @@ Unless one of these conditions is true, a binding-time error occurs.
 
 -   Operands of predefined reference type equality operators are never boxed. It would be meaningless to perform such boxing operations, since references to the newly allocated boxed instances would necessarily differ from all other references.
 
-For an operation of the form `x == y` or `x != y`, if any applicable user-defined operator == or operator `!=` exists, the operator overload resolution rules (§12.4.5) will select that operator instead of the predefined reference type equality operator. It is always possible to select the predefined reference type equality operator by explicitly casting one or both of the operands to type object. *end note*\]
+For an operation of the form `x == y` or `x != y`, if any applicable user-defined operator `==` or operator `!=` exists, the operator overload resolution rules (§12.4.5) will select that operator instead of the predefined reference type equality operator. It is always possible to select the predefined reference type equality operator by explicitly casting one or both of the operands to type object. *end note*\]
 
 \[*Example*: The following example checks whether an argument of an unconstrained type parameter type is null.
 
@@ -3983,9 +3983,9 @@ class C<T>
 }
 ```
 
-The `x` == null construct is permitted even though `T` could represent a non-nullable value type, and the result is simply defined to be false when `T` is a non-nullable value type. *end example*\]
+The `x` `==` null construct is permitted even though `T` could represent a non-nullable value type, and the result is simply defined to be false when `T` is a non-nullable value type. *end example*\]
 
-For an operation of the form `x == y` or `x != y`, if any applicable operator == or operator != exists, the operator overload resolution (§12.4.5) rules will select that operator instead of the predefined reference type equality operator. 
+For an operation of the form `x == y` or `x != y`, if any applicable operator `==` or operator `!=` exists, the operator overload resolution (§12.4.5) rules will select that operator instead of the predefined reference type equality operator. 
 
 > [!NOTE]
 > It is always possible to select the predefined reference type equality operator by explicitly casting both of the operands to type object.
@@ -4017,7 +4017,7 @@ False
 False
 ```
 
-The `s` and `t` variables refer to two distinct string instances containing the same characters. The first comparison outputs True because the predefined string equality operator (§12.11.8) is selected when both operands are of type string. The remaining comparisons all output False because the overload of operator== in the string type is not applicable when either operand has a binding-time type of object.
+The `s` and `t` variables refer to two distinct string instances containing the same characters. The first comparison outputs True because the predefined string equality operator (§12.11.8) is selected when both operands are of type string. The remaining comparisons all output False because the overload of operator`==` in the string type is not applicable when either operand has a binding-time type of object.
 
 Note that the above technique is not meaningful for value types. The example
 
@@ -4087,7 +4087,7 @@ The following rules govern the equality of invocation list entries:
 
 ### Equality operators between nullable value types and the null literal
 
-The `==` and `!=` operators permit one operand to be a value of a nullable value type and the other to be the null literal, even if no predefined or user-defined operator (in unlifted or lifted form) exists for the operation.
+The `==` and `!=` operators permit one operand to be `a` value of `a` nullable value type and the other to be the null literal, even if no predefined or user-defined operator (in unlifted or lifted form) exists for the operation.
 
 For an operation of one of the forms
 
@@ -4119,7 +4119,7 @@ Otherwise, `D` is `R`.
 
 The result depends on `D` and `T` as follows:
 
-If T is a reference type, the result is true if:
+If `T` is a reference type, the result is true if:
 
 -   `D` and `T` are the same type,
 
@@ -4148,7 +4148,7 @@ User defined conversions are not considered by the is operator.
 
 -   If `C` is of a non-nullable value type, the result of the operation is true.
 
--   Otherwise, the result of the operation is equivalent to evaluating `E` != null.
+-   Otherwise, the result of the operation is equivalent to evaluating `E` `!=` null.
 
 <!-- -->
 
@@ -4235,7 +4235,7 @@ inclusive-or-expression | exclusive-or-expression
 
 If an operand of a logical operator has the compile-time type dynamic, then the expression is dynamically bound (§12.3.3). In this case the compile-time type of the expression is dynamic, and the resolution described below will take place at run-time using the run-time type of those operands that have the compile-time type dynamic.
 
-For an operation of the form x *op *y, where *op* is one of the logical operators, overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
+For an operation of the form `x` *op* `y`, where *op* is one of the logical operators, overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
 
 The predefined logical operators are described in the following subclauses.
 
@@ -4274,7 +4274,7 @@ E operator |(E x, E y);
 E operator \^(E x, E y);
 ```
 
-The result of evaluating `x *op *y`, where `x` and `y` are expressions of an enumeration type `E` with an underlying type `U`, and `*op*` is one of the logical operators, is exactly the same as evaluating `(E)((U)x *op *(U)y)`. In other words, the enumeration type logical operators simply perform the logical operation on the underlying type of the two operands.
+The result of evaluating `x *op *y`, where `x` and `y` are expressions of an enumeration type `E` with an underlying type `U`, and `*op*` is one of the logical operators, is exactly the same as evaluating `(E)((U)x` *op* `(U)y)`. In other words, the enumeration type logical operators simply perform the logical operation on the underlying type of the two operands.
 
 Lifted (§12.4.8) forms of the unlifted predefined enumeration logical operators defined above are also predefined.
 
@@ -4326,7 +4326,7 @@ The semantics of the lifted & and | operators are defined by the following tab
 
 ### General
 
-The && and || operators are called the conditional logical operators. They are also called the “short-circuiting” logical operators.
+The `&&` and `||` operators are called the conditional logical operators. They are also called the “short-circuiting” logical operators.
 
 [#Grammar_conditional_and_expression .anchor](#Grammar_conditional_and_expression .anchor)
 
@@ -4351,7 +4351,7 @@ The `&&` and `||` operators are conditional versions of the `&` and `|` operato
 -   The operation `x || y` corresponds to the operation `x | y`, except that `y` is evaluated only if `x` is not true.
 
 > [!NOTE]
-> The reason that short circuiting uses the 'not true' and 'not false' conditions is to enable user-defined conditional operators to define when short circuiting applies. User-defined types could be in a state where operator true returns false and operator false returns false. In those cases, neither && nor || would short circuit.
+> The reason that short circuiting uses the 'not true' and 'not false' conditions is to enable user-defined conditional operators to define when short circuiting applies. User-defined types could be in a state where operator true returns false and operator false returns false. In those cases, neither `&&` nor `||` would short circuit.
 
 If an operand of a conditional logical operator has the compile-time type dynamic, then the expression is dynamically bound (§12.3.3). In this case the compile-time type of the expression is dynamic, and the resolution described below will take place at run-time using the run-time type of those operands that have the compile-time type dynamic.
 
@@ -4367,15 +4367,15 @@ An operation of the form `x` && `y` or `x` || `y` is processed by applying o
 
 ### Boolean conditional logical operators
 
-When the operands of `&&` or `||` are of type bool, or when the operands are of types that do not define an applicable operator & or operator |, but do define implicit conversions to bool, the operation is processed as follows:
+When the operands of `&&` or `||` are of type bool, or when the operands are of types that do not define an applicable operator & or operator `|`, but do define implicit conversions to bool, the operation is processed as follows:
 
--   The operation `x` && `y` is evaluated as `x` ? `y` : false. In other words, x is first evaluated and converted to type bool. Then, if `x` is true, `y` is evaluated and converted to type bool, and this becomes the result of the operation. Otherwise, the result of the operation is false.
+-   The operation `x` `&&` `y` is evaluated as `x` ? `y` : false. In other words, `x` is first evaluated and converted to type bool. Then, if `x` is true, `y` is evaluated and converted to type bool, and this becomes the result of the operation. Otherwise, the result of the operation is false.
 
 -   The operation `x` || y is evaluated as `x` ? true : `y`. In other words, `x` is first evaluated and converted to type bool. Then, if `x` is true, the result of the operation is true. Otherwise, `y` is evaluated and converted to type bool, and this becomes the result of the operation.
 
 ### User-defined conditional logical operators
 
-When the operands of && or || are of types that declare an applicable user-defined operator & or operator |, both of the following shall be true, where `T` is the type in which the selected operator is declared:
+When the operands of `&&` or `||` are of types that declare an applicable user-defined operator `&` or operator `|`, both of the following shall be true, where `T` is the type in which the selected operator is declared:
 
 -   The return type and the type of each parameter of the selected operator shall be `T`. In other words, the operator shall compute the logical AND or the logical OR of two operands of type `T`, and shall return a result of type `T`.
 
@@ -4383,15 +4383,15 @@ When the operands of && or || are of types that declare an applicable user-def
 
 A binding-time error occurs if either of these requirements is not satisfied. Otherwise, the `&&` or `||` operation is evaluated by combining the user-defined operator true or operator false with the selected user-defined operator:
 
--   The operation `x` && `y` is evaluated as `T.false(x)` ? `x` : `T.&(x, y)`, where `T.false(x)` is an invocation of the operator false declared in `T`, and `T.&(x, y)` is an invocation of the selected operator `&`. In other words, `x` is first evaluated and operator false is invoked on the result to determine if `x` is definitely false. Then, if x is definitely false, the result of the operation is the value previously computed for `x`. Otherwise, `y` is evaluated, and the selected operator & is invoked on the value previously computed for `x` and the value computed for `y` to produce the result of the operation.
+-   The operation `x` `&&` `y` is evaluated as `T.false(x)` ? `x` : `T.&(x, y)`, where `T.false(x)` is an invocation of the operator false declared in `T`, and `T.&(x, y)` is an invocation of the selected operator `&`. In other words, `x` is first evaluated and operator false is invoked on the result to determine if `x` is definitely false. Then, if `x` is definitely false, the result of the operation is the value previously computed for `x`. Otherwise, `y` is evaluated, and the selected operator `&` is invoked on the value previously computed for `x` and the value computed for `y` to produce the result of the operation.
 
--   The operation `x` || y is evaluated as `T.true(x)` ? `x` : `T.|(x, y)`, where `T.true(x)` is an invocation of the operator true declared in `T`, and `T.|(x, y)` is an invocation of the selected operator |. In other words, `x` is first evaluated and operator true is invoked on the result to determine if `x` is definitely true. Then, if `x` is definitely true, the result of the operation is the value previously computed for `x`. Otherwise, `y` is evaluated, and the selected operator | is invoked on the value previously computed for `x` and the value computed for `y` to produce the result of the operation.
+-   The operation `x` `||` `y` is evaluated as `T.true(x)` ? `x` : `T.|(x, y)`, where `T.true(x)` is an invocation of the operator true declared in `T`, and `T.|(x, y)` is an invocation of the selected operator `|`. In other words, `x` is first evaluated and operator true is invoked on the result to determine if `x` is definitely true. Then, if `x` is definitely true, the result of the operation is the value previously computed for `x`. Otherwise, `y` is evaluated, and the selected operator `|` is invoked on the value previously computed for `x` and the value computed for `y` to produce the result of the operation.
 
 In either of these operations, the expression given by `x` is only evaluated once, and the expression given by `y` is either not evaluated or evaluated exactly once.
 
 ## The null coalescing operator
 
-The ?? operator is called the null coalescing operator.
+The `??` operator is called the null coalescing operator.
 
 [#Grammar_null_coalescing_expression .anchor](#Grammar_null_coalescing_expression .anchor)
 
@@ -4415,15 +4415,15 @@ The type of the expression `a ?? b` depends on which implicit conversions are 
 
 -   Otherwise, if `A` exists and an implicit conversion exists from `b` to `A`, the result type is `A`. At run-time, a is first evaluated. If a is not null, a becomes the result. Otherwise, `b` is evaluated and converted to type `A`, and this becomes the result.
 
--   Otherwise, if `A` exists and is a nullable value type, b has a type `B` and an implicit conversion exists from `A0` to `B`, the result type is `B`. At run-time, a is first evaluated. If a is not null, a is unwrapped to type `A0` and converted to type `B`, and this becomes the result. Otherwise, b is evaluated and becomes the result.
+-   Otherwise, if `A` exists and is `a` nullable value type, `b` has `a` type `B` and an implicit conversion exists from `A0` to `B`, the result type is `B`. At run-time, `a` is first evaluated. If `a` is not null, `a` is unwrapped to type `A0` and converted to type `B`, and this becomes the result. Otherwise, `b` is evaluated and becomes the result.
 
--   Otherwise, if b has a type `B` and an implicit conversion exists from a to `B`, the result type is `B`. At run-time, a is first evaluated. If a is not null, a is converted to type B, and this becomes the result. Otherwise, b is evaluated and becomes the result.
+-   Otherwise, if `b` has `a` type `B` and an implicit conversion exists from `a` to `B`, the result type is `B`. At run-time, `a` is first evaluated. If `a` is not null, `a` is converted to type `B`, and this becomes the result. Otherwise, `b` is evaluated and becomes the result.
 
-Otherwise, a and b are incompatible, and a compile-time error occurs.
+Otherwise, `a` and `b` are incompatible, and `a` compile-time error occurs.
 
 ## Conditional operator
 
-The ?: operator is called the conditional operator. It is at times also called the ternary operator.
+The `?:` operator is called the conditional operator. It is at times also called the ternary operator.
 
 [#Grammar_conditional_expression .anchor](#Grammar_conditional_expression .anchor)
 
@@ -4433,13 +4433,13 @@ conditional-expression:
 	null-coalescing-expression ? expression : expression
 ```
 
-A conditional expression of the form b ? `x : y` first evaluates the condition `b`. Then, if `b` is true, `x` is evaluated and becomes the result of the operation. Otherwise, `y` is evaluated and becomes the result of the operation. A conditional expression never evaluates both `x` and `y`.
+A conditional expression of the form `b ? x : y` first evaluates the condition `b`. Then, if `b` is true, `x` is evaluated and becomes the result of the operation. Otherwise, `y` is evaluated and becomes the result of the operation. A conditional expression never evaluates both `x` and `y`.
 
 The conditional operator is right-associative, meaning that operations are grouped from right to left. \[*Example*: An expression of the form `a ? b : c ? d : e` is evaluated as `a ? b : (c ? d : e)`. *end example*\]
 
-The first operand of the ?: operator shall be an expression that can be implicitly converted to bool, or an expression of a type that implements operator true. If neither of these requirements is satisfied, a compile-time error occurs.
+The first operand of the `?:` operator shall be an expression that can be implicitly converted to bool, or an expression of a type that implements operator true. If neither of these requirements is satisfied, a compile-time error occurs.
 
-The second and third operands, `x` and `y`, of the ?: operator control the type of the conditional expression.
+The second and third operands, `x` and `y`, of the `?:` operator control the type of the conditional expression.
 
 -   If `x` has type `X` and `y` has type `Y` then,
 
@@ -4475,7 +4475,7 @@ The run-time processing of a conditional expression of the form `b ? x : y` 
 
 <!-- -->
 
--   If the bool value produced by the step above is true, then `x` is evaluated and converted to the type of the conditional expression, and this becomes the result of the conditional expression.
+-   If the bool value produced by the step above is `true`, then `x` is evaluated and converted to the type of the conditional expression, and this becomes the result of the conditional expression.
 
 -   Otherwise, `y` is evaluated and converted to the type of the conditional expression, and this becomes the result of the conditional expression.
 
@@ -4561,7 +4561,7 @@ anonymous-function-body:
 	block
 ```
 
-The => operator has the same precedence as assignment (=) and is right-associative.
+The `=>` operator has the same precedence as assignment `(=)` and is right-associative.
 
 An anonymous function with the async modifier is an async function and follows the rules described in §15.15.
 
@@ -4668,7 +4668,7 @@ class ItemList<T>: List<T>
 }
 ```
 
-The ItemList<T> class has two Sum methods. Each takes a selector argument, which extracts the value to sum over from a list item. The extracted value can be either an int or a double and the resulting sum is likewise either an int or a double.
+The `ItemList<T>` class has two Sum methods. Each takes a selector argument, which extracts the value to sum over from a list item. The extracted value can be either an int or a double and the resulting sum is likewise either an int or a double.
 
 The Sum methods could for example be used to compute sums from a list of detail lines in an order.
 
@@ -4687,9 +4687,9 @@ void ComputeSums() {
 	…
 }
 ```
-In the first invocation of `orderDetails.Sum`, both Sum methods are applicable because the anonymous function d => `d.UnitCount` is compatible with both Func<Detail,int> and Func<Detail,double>. However, overload resolution picks the first Sum method because the conversion to Func<Detail,int> is better than the conversion to Func<Detail,double>.
+In the first invocation of `orderDetails.Sum`, both Sum methods are applicable because the anonymous function `d => d.UnitCount` is compatible with both `Func<Detail,int>` and `Func<Detail,double>`. However, overload resolution picks the first Sum method because the conversion to `Func<Detail,int>` is better than the conversion to Func<Detail,double>.
 
-In the second invocation of `orderDetails.Sum`, only the second Sum method is applicable because the anonymous function d => `d.UnitPrice` \* `d.UnitCount` produces a value of type double. Thus, overload resolution picks the second Sum method for that invocation. *end example*\]
+In the second invocation of `orderDetails.Sum`, only the second Sum method is applicable because the anonymous function `d => d.UnitPrice * d.UnitCount` produces a value of type double. Thus, overload resolution picks the second Sum method for that invocation. *end example*\]
 
 ### Anonymous functions and dynamic binding
 
@@ -4902,7 +4902,7 @@ the two anonymous functions capture the same instance of the local variable `x`
 
 ### Evaluation of anonymous function expressions
 
-An anonymous function F shall always be converted to a delegate type `D` or an expression-tree type `E`, either directly or through the execution of a delegate creation expression new `D(F)`. This conversion determines the result of the anonymous function, as described in §11.7.
+An anonymous function `F` shall always be converted to a delegate type `D` or an expression-tree type `E`, either directly or through the execution of a delegate creation expression new `D(F)`. This conversion determines the result of the anonymous function, as described in §11.7.
 
 ### Implementation Exmple
 
@@ -4910,9 +4910,11 @@ An anonymous function F shall always be converted to a delegate type `D` or an
 
 This subclause describes a possible implementation of anonymous function conversions in terms of other `C\#` constructs. The implementation described here is based on the same principles used by a commercial `C\#` compiler, but it is by no means a mandated implementation, nor is it the only one possible. It only briefly mentions conversions to expression trees, as their exact semantics are outside the scope of this specification.
 
-The remainder of this subclause gives several examples of code that contains anonymous functions with different characteristics. For each example, a corresponding translation to code that uses only other `C\#` constructs is provided. In the examples, the identifier D is assumed by represent the following delegate type:
+The remainder of this subclause gives several examples of code that contains anonymous functions with different characteristics. For each example, a corresponding translation to code that uses only other `C\#` constructs is provided. In the examples, the identifier `D` is assumed by represent the following delegate type:
 
+```csharp
 public delegate void D();
+```
 
 The simplest form of an anonymous function is one that captures no outer variables:
 
@@ -5019,7 +5021,7 @@ class Test
 }
 ```
 
-Here, a compiler-generated class is created for each statement block in which locals are captured such that the locals in the different blocks can have independent lifetimes. An instance of \_\_Locals2, the compiler generated class for the inner statement block, contains the local variable z and a field that references an instance of \_\_Locals1. An instance of \_\_Locals1, the compiler generated class for the outer statement block, contains the local variable y and a field that references this of the enclosing function member. With these data structures, it is possible to reach all captured outer variables through an instance of \_\_Local2, and the code of the anonymous function can thus be implemented as an instance method of that class.
+Here, a compiler-generated class is created for each statement block in which locals are captured such that the locals in the different blocks can have independent lifetimes. An instance of `__Locals2`, the compiler generated class for the inner statement block, contains the local variable `z` and a field that references an instance of `__Locals1`. An instance of `__Locals1`, the compiler generated class for the outer statement block, contains the local variable `y` and a field that references this of the enclosing function member. With these data structures, it is possible to reach all captured outer variables through an instance of `__Local2`, and the code of the anonymous function can thus be implemented as an instance method of that class.
 
 
 ```csharp
@@ -5063,7 +5065,7 @@ The same technique applied here to capture local variables can also be used when
 
 ### General
 
-***Query expressions*** provide a language-integrated syntax for queries that is similar to relational and hierarchical query languages such as SQL and XQuery.
+***Query expressions*** provide a language-integrated syntax for queries that is similar to relational and hierarchical query languages such as `SQL` and `XQuery`.
 
 [#Grammar_query_expression .anchor](#Grammar_query_expression .anchor)
 
@@ -5183,19 +5185,20 @@ query-continuation:
 	into identifier query-body
 ```	
 
-A query expression begins with a from clause and ends with either a select or group clause. The initial from clause may be followed by zero or more from, let, where, join or orderby clauses. Each from clause is a generator introducing a ***range variable*** that ranges over the elements of a ***sequence***. Each let clause introduces a range variable representing a value computed by means of previous range variables. Each where clause is a filter that excludes items from the result. Each join clause compares specified keys of the source sequence with keys of another sequence, yielding matching pairs. Each orderby clause reorders items according to specified criteria.The final select or group clause specifies the shape of the result in terms of the range variables. Finally, an into clause can be used to “splice” queries by treating the results of one query as a generator in a subsequent query.
+A query expression begins with a from clause and ends with either a select or group clause. The initial from clause may be followed by zero or more from, let, where, join or orderby clauses. Each from clause is a generator introducing a ***range variable*** that ranges over the elements of a ***sequence***. Each let clause introduces a range variable representing a value computed by means of previous range variables. Each where clause is a 
+filter that excludes items from the result. Each join clause compares specified keys of the source sequence with keys of another sequence, yielding matching pairs. Each orderby clause reorders items according to specified criteria.The final select or group clause specifies the shape of the result in terms of the range variables. Finally, an into clause can be used to “splice” queries by treating the results of one query as a generator in a subsequent query.
 
 ### Ambiguities in query expressions
 
 Query expressions use a number of contextual keywords (§7.4.4): `ascending, by, descending, equals, from, group, into, join, let, on, orderly, select` and `where`.
 
-To avoid ambiguities that could arise from the use of these identifiers both as keywords and simple names these identifiers are considered keywords anywhere within a query expression, unless they are prefixed with “@” (§7.4.4) in which case they are considered identifiers. For this purpose, a query expression is any expression that starts with “from *identifier*” followed by any token except* *“;”, “=” or* *“,”.
+To avoid ambiguities that could arise from the use of these identifiers both as keywords and simple names these identifiers are considered keywords anywhere within a query expression, unless they are prefixed with “@” (§7.4.4) in which case they are considered identifiers. For this purpose, a query expression is any expression that starts with “from *identifier*” followed by any token except* `“;”, “=” or “,”`.
 
 ### Query expression translation
 
 #### General
 
-The C# language does not specify the execution semantics of query expressions. Rather, query expressions are translated into invocations of methods that adhere to the query*-*expression pattern (§12.17.4). Specifically, query expressions are translated into invocations of methods named Where, Select, SelectMany, Join, GroupJoin, OrderBy, OrderByDescending, ThenBy, ThenByDescending, GroupBy, and Cast. These methods are expected to have particular signatures and return types, as described in §12.17.4. These methods may be instance methods of the object being queried or extension methods that are external to the object. These methods implement the actual execution of the query.
+The C# language does not specify the execution semantics of query expressions. Rather, query expressions are translated into invocations of methods that adhere to the query*-*expression pattern (§12.17.4). Specifically, query expressions are translated into invocations of methods named `Where, Select, SelectMany, Join, GroupJoin, OrderBy, OrderByDescending`, `ThenBy, ThenByDescending, GroupBy,` and `Cast`. These methods are expected to have particular signatures and return types, as described in §12.17.4. These methods may be instance methods of the object being queried or extension methods that are external to the object. These methods implement the actual execution of the query.
 
 The translation from query expressions to method invocations is a syntactic mapping that occurs before any type binding or overload resolution has been performed. Following translation of query expressions, the resulting method invocations are processed as regular method invocations, and this may in turn uncover compile time errors. These error conditions include, but are not limited to, methods that do not exist, arguments of the wrong types, and generic methods where type inference fails.
 
@@ -5207,13 +5210,13 @@ Certain translations inject range variables with *transparent identifiers* denot
 
 #### select and group … by clauses with continuations
 
-A query expression with a group clause using a property Prop of y and a query body `Q` containing a continuation in the form:
+A query expression with a group clause using a property Prop of `y` and `a` query body `Q` containing a continuation in the form:
 
-from `y` in `S` group `y` by `y`.Prop into *x* *Q*
+from `y` in `S` group `y` by `y`.Prop into `x Q`
 
 is translated into:
 
-from *x* in ( from *y in S group y by y.Prop* ) *Q*
+from `x` in ( from `y `in `S` group `y` by `y.Prop` ) `Q`
 
 The translations in the following sections assume that queries have no into continuations.
 
@@ -5248,19 +5251,19 @@ Select(g => new { Country = g.Key, CustCount = g.Count() })
 
 A from clause that explicitly specifies a range variable type
 
-from *T* *x* in *e*
+from `T` `x` in `e`
 
 is translated into
 
-from *x* in ( *e* ) . Cast < *T* > ( )
+from `x` in ( `e` ) . Cast < `T` > ( )
 
 A join clause that explicitly specifies a range variable type
 
-join *T* *x* in *e* on *k1* equals *k2*
+join `T` `x` in `e` on `k1` equals `k2`
 
 is translated into
 
-join *x* in ( *e* ) . Cast < *T* > ( ) on *k1* equals *k2*
+join `x` in ( `e` ) . Cast < `T` > ( ) on `k1` equals `k2`
 
 The translations in the following sections assume that queries have no explicit range variable types.
 
@@ -5289,17 +5292,17 @@ Where(c => c.City == "London")
 *end example*\]
 
 > [!NOTE]
-> Explicit range variable types are useful for querying collections that implement the non-generic IEnumerable interface, but not the generic IEnumerable<T> interface. In the example above, this would be the case if customers were of type ArrayList.
+> Explicit range variable types are useful for querying collections that implement the non-generic `IEnumerable` interface, but not the generic `IEnumerable<T>` interface. In the example above, this would be the case if customers were of type `ArrayList`.
 
 #### Degenerate query expressions
 
 A query expression of the form
 
-from *x* in *e* select *x*
+from `x` in `e` select `x`
 
 is translated into
 
-( *e* ) . Select ( *x* => *x* )
+( `e` ) . Select ( `x` => `x` )
 
 \[*Example*: The example
 
@@ -5437,7 +5440,7 @@ Where(x => x.t >= 1000).
 Select(x => new { x.o.OrderID, Total = x.t })
 ```
 
-where x is a compiler generated identifier that is otherwise invisible and inaccessible. *end example*\]
+where `x` is a compiler generated identifier that is otherwise invisible and inaccessible. *end example*\]
 
 A where expression along with its preceding from clause:
 
@@ -5608,15 +5611,15 @@ The following translations assume that there are no let, where, join or orderby 
 
 A query expression of the form
 
-from *x* in *e* select *v*
+from `x` in `e` select `v`
 
 is translated into
 
-( *e* ) . Select ( *x* => *v* )
+( `e` ) . Select ( `x` => `v` )
 
-except when *v* is the identifier *x*, the translation is simply
+except when `v` is the identifier `x`, the translation is simply
 
-( *e* )
+( `e` )
 
 \[*Example*: The example
 
@@ -5635,15 +5638,15 @@ is simply translated into
 
 A group clause
 
-from *x* in *e* group *v* by *k*
+from `x` in `e` group `v` by `k`
 
 is translated into
 
-( *e* ) . GroupBy ( *x* => *k* , *x* => *v* )
+( `e` ) . GroupBy ( `x` => `k` , `x` => `v` )
 
-except when *v* is the identifier *x*, the translation is
+except when `v` is the identifier `x`, the translation is
 
-( *e* ) . GroupBy ( *x* => *k* )
+( `e` ) . GroupBy ( `x` => `k` )
 
 \[*Example*: The example
 
@@ -5705,7 +5708,7 @@ SelectMany(c => c.Orders, (c,o) => new { c, o }).
 OrderByDescending(x => x.o.Total).
 Select(x => new { x.c.Name, x.o.Total })
 ```
-where x is a compiler generated identifier that is otherwise invisible and inaccessible.
+where `x` is a compiler generated identifier that is otherwise invisible and inaccessible.
 
 The example
 
@@ -5852,9 +5855,9 @@ assignment-operator:
 
 The left operand of an assignment shall be an expression classified as a variable, a property access, an indexer access, or an event access.
 
-The = operator is called the ***simple assignment operator***. It assigns the value of the right operand to the variable, property, or indexer element given by the left operand. The left operand of the simple assignment operator shall not be an event access (except as described in §15.8.2). The simple assignment operator is described in §12.18.2.
+The `=` operator is called the ***simple assignment operator***. It assigns the value of the right operand to the variable, property, or indexer element given by the left operand. The left operand of the simple assignment operator shall not be an event access (except as described in §15.8.2). The simple assignment operator is described in §12.18.2.
 
-The assignment operators other than the = operator are called the ***compound assignment operators***. These operators perform the indicated operation on the two operands, and then assign the resulting value to the variable, property, or indexer element given by the left operand. The compound assignment operators are described in §12.18.3.
+The assignment operators other than the `=` operator are called the ***compound assignment operators***. These operators perform the indicated operation on the two operands, and then assign the resulting value to the variable, property, or indexer element given by the left operand. The compound assignment operators are described in §12.18.3.
 
 The `+=` and `-=` operators with an event access expression as the left operand are called the ***event assignment operators***. No other assignment operator is valid with an event access as the left operand. The event assignment operators are described in §12.18.4.
 
@@ -5864,7 +5867,7 @@ The assignment operators are right-associative, meaning that operations are grou
 
 The `=` operator is called the simple assignment operator.
 
-If the left operand of a simple assignment is of the form `E.P` or `E[Ei]` where E has the compile-time type dynamic, then the assignment is dynamically bound (§12.3.3). In this case, the compile-time type of the assignment expression is dynamic, and the resolution described below will take place at run-time based on the run-time type of `E`. If the left operand is of the form `E[Ei]` where at least one element of `Ei` has the compile-time type dynamic, and the compile-time type of E is not an array, the resulting indexer access is dynamically bound, but with limited compile-time checking (§12.6.5).
+If the left operand of a simple assignment is of the form `E.P` or `E[Ei]` where `E` has the compile-time type dynamic, then the assignment is dynamically bound (§12.3.3). In this case, the compile-time type of the assignment expression is dynamic, and the resolution described below will take place at run-time based on the run-time type of `E`. If the left operand is of the form `E[Ei]` where at least one element of `Ei` has the compile-time type dynamic, and the compile-time type of `E` is not an array, the resulting indexer access is dynamically bound, but with limited compile-time checking (§12.6.5).
 
 In a simple assignment, the right operand shall be an expression that is implicitly convertible to the type of the left operand. The operation assigns the value of the right operand to the variable, property, or indexer element given by the left operand.
 
@@ -5913,7 +5916,7 @@ oa[1] = "Hello"; // Ok
 oa[2] = new ArrayList(); // ArrayTypeMismatchException
 ```
 
-the last assignment causes a `System.ArrayTypeMismatchException` to be thrown because a reference to an ArrayList cannot be stored in an element of a string[]. *end note*\]
+the last assignment causes a `System.ArrayTypeMismatchException` to be thrown because a reference to an ArrayList cannot be stored in an element of a `string[]`. *end note*\]
 
 When a property or indexer declared in a *struct-type* is the target of an assignment, the instance expression associated with the property or indexer access shall be classified as a variable. If the instance expression is classified as a value, a binding-time error occurs.
 
@@ -5991,19 +5994,19 @@ the assignments are all invalid, since `r.A` and `r.B` are not variables. *end e
 
 If the left operand of a compound assignment is of the form `E.P` or `E[Ei]` where `E` has the compile-time type dynamic, then the assignment is dynamically bound (§12.3.3). In this case, the compile-time type of the assignment expression is dynamic, and the resolution described below will take place at run-time based on the run-time type of `E`. If the left operand is of the form `E[Ei]` where at least one element of `Ei` has the compile-time type dynamic, and the compile-time type of `E` is not an array, the resulting indexer access is dynamically bound, but with limited compile-time checking (§12.6.5).
 
-An operation of the form `x` *op*= `y` is processed by applying binary operator overload resolution (§12.4.5) as if the operation was written `x` *op *y. Then,
+An operation of the form `x` *op*= `y` is processed by applying binary operator overload resolution (§12.4.5) as if the operation was written `x op y`. Then,
 
--   If the return type of the selected operator is implicitly convertible to the type of `x`, the operation is evaluated as `x` = x op y, except that `x` is evaluated only once.
+-   If the return type of the selected operator is implicitly convertible to the type of `x`, the operation is evaluated as `x = x op y`, except that `x` is evaluated only once.
 
 -   Otherwise, if the selected operator is a predefined operator, if the return type of the selected operator is explicitly convertible to the type of `x` , and if `y` is implicitly convertible to the type of `x`  or the operator is a shift operator, then the operation is evaluated as `x` = (`T)(x op y)`, where `T` is the type of `x`, except that `x` is evaluated only once.
 
 -   Otherwise, the compound assignment is invalid, and a binding-time error occurs.
 
-The term “evaluated only once” means that in the evaluation of `x` *op *y, the results of any constituent expressions of `x` are temporarily saved and then reused when performing the assignment to `x`. \[*Example*: In the assignment `A()\[B()\] += C()`, where `A` is a method returning int[], and `B` and `C` are methods returning int, the methods are invoked only once, in the order `A, B, C`. *end example*\]
+The term “evaluated only once” means that in the evaluation of `x op y`, the results of any constituent expressions of `x` are temporarily saved and then reused when performing the assignment to `x`. \[*Example*: In the assignment `A()\[B()\] += C()`, where `A` is a method returning `int[]`, and `B` and `C` are methods returning int, the methods are invoked only once, in the order `A, B, C`. *end example*\]
 
 When the left operand of a compound assignment is a property access or indexer access, the property or indexer shall have both a get accessor and a set accessor. If this is not the case, a binding-time error occurs.
 
-The second rule above permits `x` *op*= y to be evaluated as `x` = `(T)`(x *op *y) in certain contexts. The rule exists such that the predefined operators can be used as compound operators when the left operand is of type sbyte, byte, short, ushort, or char. Even when both arguments are of one of those types, the predefined operators produce a result of type int, as described in §12.4.7.3. Thus, without a cast it would not be possible to assign the result to the left operand.
+The second rule above permits `x op= y` to be evaluated as `x` = `(T)(x op y)` in certain contexts. The rule exists such that the predefined operators can be used as compound operators when the left operand is of type sbyte, byte, short, ushort, or char. Even when both arguments are of one of those types, the predefined operators produce a result of type int, as described in §12.4.7.3. Thus, without a cast it would not be possible to assign the result to the left operand.
 
 The intuitive effect of the rule for predefined operators is simply that `x op= y` is permitted if both of `x op y` and `x = y` are permitted. \[*Example*: In the following code
 
@@ -6091,7 +6094,7 @@ Only the following constructs are permitted in constant expressions:
 
 -   The predefined `+, –, *, /, %, <<, >>, &, |, ^, &&, ||, ==, !=, <, >, <=`, and `>=` binary operators.
 
--   The ?: conditional operator.
+-   The `?:` conditional operator.
 
 -   sizeof expressions, provided the unmanaged-type is one of the types specified in §23.6.9 for which sizeof returns a constant value.
 
@@ -6157,13 +6160,13 @@ boolean-expression:
 	expression
 ```
 
-The controlling conditional expression of an *if-statement* (§13.8.2), *while-statement* (§13.9.2), *do-statement* (§13.9.3), or *for-statement* (§13.9.4) is a *boolean-expression*. The controlling conditional expression of the ?: operator (§12.15) follows the same rules as a *boolean-expression*, but for reasons of operator precedence is classified as a *conditional-or-expression*.
+The controlling conditional expression of an *if-statement* (§13.8.2), *while-statement* (§13.9.2), *do-statement* (§13.9.3), or *for-statement* (§13.9.4) is a *boolean-expression*. The controlling conditional expression of the `?:` operator (§12.15) follows the same rules as a *boolean-expression*, but for reasons of operator precedence is classified as a *conditional-or-expression*.
 
 A boolean-expression `E` is required to be able to produce a value of type bool, as follows:
 
 -   If E is implicitly convertible to bool then at run-time that implicit conversion is applied.
 
--   Otherwise, unary operator overload resolution (§12.4.4) is used to find a unique best implementation of operator true on E, and that implementation is applied at run-time.
+-   Otherwise, unary operator overload resolution (§12.4.4) is used to find a unique best implementation of operator true on `E`, and that implementation is applied at run-time.
 
 -   If no such operator is found, a binding-time error occurs.
 
