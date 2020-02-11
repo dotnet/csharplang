@@ -41,18 +41,20 @@ tuple_literal_element
     ;
 ```
 
-A tuple literal is *target typed* whenever possible; that is, its type is determined by the context in which it is used.
-
-**ISSUE:** If the term target-typed is specific to this context, we probably need a complete definition somewhere.
+A tuple literal is implicitly typed; that is, its type is determined by the context in which it is used, referred to as the *target*. Each element *expression* in a tuple literal shall have a value that can be converted implicitly to its corresponding target element type.
 
 \[Example:
 ```csharp
-var t1 = (0, 2);              // infer tuple type from values
-var t2 = (sum: 0, count: 1);  // infer tuple type from names and values
+var t1 = (0, 2);              // infer tuple type (int, int) from values
+var t2 = (sum: 0, count: 1);  // infer tuple type (int sum, int count) from names and values
+(int, double) t3 = (0, 2);    // infer tuple type (int, double) from values; can implicitly convert int to double
+(int, double) t4 = (0.0, 2);  // Error: can't implicitly convert double to int
 ```
 end example\]
 
-A tuple literal has a "conversion from expression" to any tuple type having the same number of elements, as long as each of the element expressions of the tuple literal has an implicit conversion to the type of the corresponding element of the tuple type.
+A tuple literal has a "conversion from expression" to any tuple type having the same number of elements.
+
+**ISSUE:** But what if there is no conversion of types for a given element pair?
 
 \[Example:
 ```csharp
@@ -60,22 +62,13 @@ A tuple literal has a "conversion from expression" to any tuple type having the 
 ```
 end example\]
 
-In cases where a tuple literal is not part of a conversion, it acquires its *natural type*, which means a tuple type where the element types are the types of the constituent expressions, in lexical order. Since not all expressions have types, not all tuple literals have a natural type either:
-
-**ISSUE:** Is natural type specific to tuples? Need we say more about this term?
+In cases where a tuple literal is not part of a conversion, the literal's type is its [natural type](XXX), if one exists.
 
 \[Example:
 ```csharp
-var t = ("John", 5); // OK: the type of t is (string, int)
+var t = ("John", 5); // OK: the natural type is (string, int)
 var t = (null, 5);   // Error: null doesn't have a type
-```
-end example\]
-
-If a tuple literal includes element names, those names become part of the natural type: 
-
-\[Example:
-```csharp
-var t = (name: "John", age: 5); // The type of t is (string name, int age)
+var t = (name: "John", age: 5); // OK: The natural type is (string name, int age)
 ```
 end example\]
 
@@ -83,7 +76,7 @@ A tuple literal is *not* a [constant expression](../../spec/expressions.md#Const
 
 **ISSUE:** Consider removing the second sentence above, as it sounds like just one example of usage prohibition (rather than a spec requirement); there likely are others. If that is true, either completely omit that sentence, or delete it from here and add an example showing that such a usage fails.
 
-For a discussion of tuple literals as tuple initializers, see [Tuple types](../../spec/types.md#Tuple-types).
+For a discussion of tuple literals as tuple initializers, see [Tuple types](XXX).
 
 ## Changes to [Types](../../spec/types.md)
 
@@ -126,7 +119,18 @@ tuple_type_element
     ;
 ```
 
-A ***tuple*** is an anonymous data structure type that contains an ordered sequence of two or more ***elements***. Each element is public. Each unique, ordered combination of element types designates a distinct tuple type.
+A ***tuple*** is an anonymous data structure type that contains an ordered sequence of two or more ***elements***, which are optionally named. Each element is public. 
+
+**ISSUE:** Should we say something like, "If a tuple is mutable, its element values are also mutable?" I think that is true, yet some languages might not allow tuple element values to change. Unless mutability can be deduced eleswhere, not saying it will leave it unspecified.
+
+A tuple's ***natural type*** is the combination of its element types, in lexical order, and element names, if they exist.
+
+A tuple's ***arity*** is the combination of its element types, in lexical order; element names are *not* included.
+ Each unique tuple arity designates a distinct tuple type.
+
+Two tuple values are equal if they have the same arity, and the values of the elements in each corresponding element pair are equal.
+
+**ISSUE:** The above covers the behavior of System.ValueTuple.Equals as well as the ==/!= operators planned for 7.3. Should we say anything about relation comparisons ala System.ValueTuple.CompareTo? My (limited) testing for that shows that the element pairs are tested in order with the first non-zero result ending the comparison; otherwise, the result is 0.
 
 An element in a tuple is accessed using the [member-access operator `.`](../../spec/expressions.md#Member-access).
 
@@ -139,11 +143,13 @@ System.Console.WriteLine("first = {0}, second = {1}", pair1.code, pair1.message)
 
 the syntax `(int code, string message)` declares a tuple type having two elements, each with the given type and name.
 
-As shown, a tuple can be initialized using a [tuple literal](../../spec/lexical-structure.md#Tuple-literals).
+As shown, a tuple can be initialized using a [tuple literal](XXX).
 
-An element need not have a name.
+An element need not have a name. An element without a name is unnamed.
 
-The type of a tuple is the ordered set of types of its elements along with their names. An element without a name is unnamed. If a tuple declarator contains the type of all the tuple's elements, that set of types cannot be changed or augmented based on the context in which it is used; otherwise, element type information shall be inferred from the usage context. Likewise for element names.
+**ISSUE:** Make s statement about the purpose of element names. I think they are for notational convenience only, and have no other purpose. Is that true?
+
+If a tuple declarator contains the type of all the tuple's elements, that set of types cannot be changed or augmented based on the context in which it is used; otherwise, element type information shall be inferred from the usage context. Likewise for element names.
 
 A tuple's type can be declared explicitly. Consider the following declarations:
 
@@ -171,7 +177,7 @@ var pair13 = (1, message: "Hello");
 
 The type of `pair10` is inferred from the initializer's tuple literal, as `(int, string)` with unknown element names. Similarly, the type of `pair11` is inferred from the initialer's tuple literal, as `(int, string)` but this time with the element names `code` and `message`, respectively. For `pair12` and `pair13`, the element types are inferred, and one element is named, the other not.
 
-Elements within a tuple type shall have distinct names or be unnamed.
+Element names within a tuple type shall be distinct.
 
 \[Example:
 ```csharp
@@ -212,8 +218,6 @@ System.ValueTuple<int, int> vt = t1;	// identity conversion
 ```
 end example\]
 
-**ISSUE:** Where will the type System.Value be defined (and its public names listed)?
-
 The name given explicitly to any element shall not be the same as any name in the underlying type, except that an explicit name may have the form `Item`*N* provided it corresponds position-wise with an element of the same name in the underlying type.
 
 \[Example:
@@ -228,9 +232,7 @@ end example\]
 
 When tuple element names are used in overridden signatures or implementations of interface methods, tuple element names in parameter and return types shall be preserved. It is an error for the same generic interface to be inherited or implemented twice with identity-convertible type arguments that have conflicting tuple element names.
 
-For the purpose of overloading, overriding and hiding, tuples of the same types and lengths as well as their underlying ValueTuple types shall be considered equivalent. All other differences are immaterial. When overriding a member it is permitted to use tuple types with the same names or names different than in the base member.
-
-**ISSUE:** Re the mention of "tuple length", which is not mentioned elsewhere; it seems to me that a tuple type includes an implied length based on the number of elements.
+For the purpose of overloading, overriding and hiding, tuples of the same arity, as well as their underlying ValueTuple types, shall be considered equivalent. All other differences are immaterial. When overriding a member it shall be permitted to use tuple types with the same element names or element names different than in the base member.
 
 If the same element name is used for non-matching elements in base and derived member signatures, the implementation shall issue a warning.  
 
@@ -300,7 +302,7 @@ end example\]
 
 > Add the following text to [Identity conversion](../../spec/conversions.md#identity-conversion), after the bullet point on `object` and `dynamic`:
 
-* Element names are immaterial to tuple conversions. Tuples with the same element type set in the same order are identity-convertible to each other or to and from corresponding underlying `ValueTuple` types, regardless of the names.
+* Element names are immaterial to tuple conversions. Tuples with the same arity are identity-convertible to each other or to and from corresponding underlying `ValueTuple` types, regardless of their element names.
 
 \[Example:
 ```csharp
@@ -313,7 +315,7 @@ t2.moo = 1;
 ```
 end example\]
 
-In teh case in which an element name at one position on one side of a conversion, and the same name at a different position on the other side, the copmpiler shall issue a warning.
+In the case in which an element name at one position on one side of a conversion, and the same name at a different position on the other side, the compiler shall issue a warning.
 
 \[Example:
 ```csharp
@@ -326,7 +328,7 @@ end example\]
 
 > Add the following text to [Boxing conversions](../../spec/conversions.md#boxing-conversions) after the first paragraph:
 
-Tuples have a boxing conversion. Importantly, the element names aren't part of the runtime representation of tuples, but are tracked only by the compiler. Thus, once element names have been "cast away", they cannot be recovered. In alignment with identity conversion, a boxed tuple unboxes to any tuple type that has the same element types in the same order.
+Tuples have a boxing conversion. Importantly, the element names aren't part of the runtime representation of tuples, but are tracked only by the compiler. Thus, once element names have been "cast away", they cannot be recovered. In alignment with identity conversion, a boxed tuple unboxes to any tuple type that has the same arity.
 
 ### Tuple conversions
 
@@ -338,21 +340,19 @@ Tuple conversions are *Standard Conversions* and therefore can stack with user-d
 
 **ISSUE:** Is 'stack' a defined term in this context?
 
-An implicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any implicit conversion between each corresponding pair of types.
+An implicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any implicit conversion between each corresponding pair of element types.
 
-**ISSUE:** Re 'arity' does this mean number of elements, with their types and names? In any event, perhaps we should define this in terms of tuples and consistently use it throughout, as in, "The arity of a tuple is ...".
-
-An explicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any explicit conversion between each corresponding pair of types.
+An explicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any explicit conversion between each corresponding pair of element types.
 
 A tuple conversion can be classified as a valid instance conversion or an extension method invocation as long as all element conversions are applicable as instance conversions.
 
-On top of the member-wise conversions implied by target typing, implicit conversions between tuple types themselves are allowed.
+On top of the member-wise conversions implied by implicit typing, implicit conversions between tuple types themselves are allowed.
 
-### Target typing
+### Implicit typing
 
 > Add this section after [Anonymous function conversions and method group conversions](../../spec.md#Anonymous-function-conversions-and-method-group-conversions)
 
-A tuple literal is "target typed" when used in a context specifying a tuple type. The tuple literal has a "conversion from expression" to any tuple type, as long as the element expressions of the tuple literal have an implicit conversion to the element types of the tuple type.
+A tuple literal is implictly typed when used in a context specifying a tuple type. The tuple literal has a "conversion from expression" to any tuple type, as long as the element expressions of the tuple literal have an implicit conversion to the corresponding element types of the tuple type.
 
 \[Example:
 ```csharp
@@ -360,7 +360,7 @@ A tuple literal is "target typed" when used in a context specifying a tuple type
 ```
 end example\]
 
-A successful conversion from tuple expression to tuple type is classified as an *ImplicitTuple* conversion, unless the tuple's natural type matches the target type exactly, in such case it is an *Identity* conversion.
+A successful conversion from tuple expression to tuple type is classified as an *ImplicitTuple* conversion, unless the tuple's [natural type](XXX) matches the target type exactly, in such case it is an *Identity* conversion.
 
 ```csharp
 void M1((int x, int y) arg){...};
@@ -370,7 +370,7 @@ M1((1, 2));            // first overload is used. Identity conversion is better 
 M1(("hi", "hello"));   // second overload is used. Implicit tuple conversion is better than no conversion.
 ```
 
-Target typing will "see through" nullable target types. A successful conversion from tuple expression to a nullable tuple type is classified as *ImplicitNullable* conversion.
+Implicit typing will "see through" nullable target types. A successful conversion from tuple expression to a nullable tuple type is classified as *ImplicitNullable* conversion.
 
 **ISSUE:** Replace "see through" with something not quoted.
 
@@ -387,7 +387,7 @@ Target typing will "see through" nullable target types. A successful conversion 
 
 > Add the following text after the bullet list in [Exactly matching expressions](../../spec/expressions.md#Exactly-matching-expressions):
 
-The exact-match rule for tuple expressions is based on the natural types of the constituent tuple arguments. The rule is mutually recursive with respect to other containing or contained expressions not in a possession of a natural type.
+The exact-match rule for tuple expressions is based on the [natural types](XXX) of the constituent tuple arguments. The rule is mutually recursive with respect to other containing or contained expressions not in a possession of a natural type.
 
 **ISSUE:** The use of "argument" here doesn't seem right; arguments are passed to methods! Should it be "elements" instead?
 
@@ -416,7 +416,7 @@ destination
 
 **ISSUE:** Is this expression constrained to being only on the LHS of simple (compound?) assignment, where the RHS is a tuple having at least as many elements as positions indicated by the LHS? See also my issue later w.r.t "deconstruction assignment expressions".
 
-Element values are copied from the source tuple to the destinations. Each element's position is inferred from the destination position within *destination_list*. A destination with identifier `_` indicates that the corresponding element is discarded rather than being copied. The destination list shall accouint for every element in the tuple.
+Element values are copied from the source tuple to the destination(s). Each element's position is inferred from the destination position within *destination_list*. A destination with identifier `_` indicates that the corresponding element is discarded rather than being copied. The destination list shall accouint for every element in the tuple.
 
 \[Example:
 ```csharp
@@ -434,6 +434,7 @@ string message;
 end example\]
 
 **ISSUE:** As this is an operator, what is the result type? `void`?
+
 **ISSUE:** Presumably the scope of any newly created variable is from the point of declaration on to the end of the block, or does this fall-out of saying its a local variable?
 
 Any object may be deconstructed by providing an accessible `Deconstruct` method, either as a member or as an extension method. A `Deconstruct` method converts an object to a set of discrete values. The Deconstruct method "returns" the component values by use of individual `out` parameters. `Deconstruct` is overloadable. Consider the following:
@@ -485,7 +486,7 @@ The evaluation order of deconstruction assignment expressions is "breadth first"
 
 > **Note to reviewers**: I found this in the LDM notes for July 13-16, 2016. I don't think it is still accurate:
 
-**ISSUE:** flesh out the following example
+**ISSUE:** flesh out the following example with some explantory text.
 
 \[Example:
 ```csharp
@@ -510,8 +511,171 @@ A deconstructing assignment is a *statement-expression* whose type could be `voi
 static void M(this (int x, int y) t) { ... }
 
 (int a, int b) t = ...;
-t.M(); // Sure
+t.M();  // OK
 ```
+
+The extension method `M` is a candidate method, even though the tuple `t` has different element names (`a` and `b`) than the formal parameter of `M` (`x` and `y`).
 *endnote*].
 
-**ISSUE:** Explain what the comment "Sure" means.
+### Additions to [Annex C: Standard Library](XXX)
+
+> The published standard contains an Annex C, which states, "A conforming C# implementation shall provide a minimum set of types having specific semantics. These types and their members are listed here, in alphabetical order by namespace and type. For a formal definition of these types and their members, refer to ISO/IEC 23271:2012 Common Language Infrastructure (CLI), Partition IV; Base Class Library (BCL), Extended Numerics Library, and Extended Array Library, which are included by reference in this specification." 
+
+> The GitHub-based spec does *not* appear to have this annex.
+
+> Add the following section to either of "C.2 Standard Library Types defined in ISO/IEC 23271" or "C.3 Standard Library Types not defined in ISO/IEC 23271:2012", as appropriate:
+
+```csharp
+namespace System
+{
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2)>, IEquatable<(T1, T2)>, ITuple
+    {
+        [NullableAttribute(1)]
+        public T1 Item1;
+        [NullableAttribute(1)]
+        public T2 Item2;
+        [NullableContextAttribute(1)]
+        public ValueTuple(T1 item1, T2 item2);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1 })] (T1, T2) other);
+        [NullableContextAttribute(2)]
+        public override bool Equals(object? obj);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1 })] (T1, T2) other);
+        public override int GetHashCode();
+        [NullableContextAttribute(1)]
+        public override string ToString();
+    }
+}
+
+namespace System
+{
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3)>, IEquatable<(T1, T2, T3)>, ITuple
+    {
+        [NullableAttribute(1)]
+        public T1 Item1;
+        [NullableAttribute(1)]
+        public T2 Item2;
+        [NullableAttribute(1)]
+        public T3 Item3;
+        [NullableContextAttribute(1)]
+        public ValueTuple(T1 item1, T2 item2, T3 item3);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1 })] (T1, T2, T3) other);
+        [NullableContextAttribute(2)]
+        public override bool Equals(object? obj);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1 })] (T1, T2, T3) other);
+        public override int GetHashCode();
+        [NullableContextAttribute(1)]
+        public override string ToString();
+    }
+}
+
+namespace System
+{
+    [NullableAttribute(0)]
+    [NullableContextAttribute(1)]
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4)>, IEquatable<(T1, T2, T3, T4)>, ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1 })] (T1, T2, T3, T4) other);
+        [NullableContextAttribute(2)]
+        public override bool Equals(object? obj);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1 })] (T1, T2, T3, T4) other);
+        public override int GetHashCode();
+        public override string ToString();
+    }
+}
+
+namespace System
+{
+    [NullableAttribute(0)]
+    [NullableContextAttribute(1)]
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4, [NullableAttribute(2)] T5> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4, T5)>, IEquatable<(T1, T2, T3, T4, T5)>, ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1 })] (T1, T2, T3, T4, T5) other);
+        [NullableContextAttribute(2)]
+        public override bool Equals(object? obj);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1 })] (T1, T2, T3, T4, T5) other);
+        public override int GetHashCode();
+        public override string ToString();
+    }
+}
+
+namespace System
+{
+    [NullableAttribute(0)]
+    [NullableContextAttribute(1)]
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4, T5, T6)>, IEquatable<(T1, T2, T3, T4, T5, T6)>, ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1 })] (T1, T2, T3, T4, T5, T6) other);
+        [NullableContextAttribute(2)]
+        public override bool Equals(object? obj);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1 })] (T1, T2, T3, T4, T5, T6) other);
+        public override int GetHashCode();
+        public override string ToString();
+    }
+}
+
+namespace System
+{
+    [NullableAttribute(0)]
+    [NullableContextAttribute(1)]
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6, [NullableAttribute(2)] T7> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4, T5, T6, T7)>, IEquatable<(T1, T2, T3, T4, T5, T6, T7)>, ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public T7 Item7;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1 })] (T1, T2, T3, T4, T5, T6, T7) other);
+        [NullableContextAttribute(2)]
+        public override bool Equals(object? obj);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1 })] (T1, T2, T3, T4, T5, T6, T7) other);
+        public override int GetHashCode();
+        public override string ToString();
+    }
+}
+
+namespace System
+{
+    [NullableAttribute(0)]
+    [NullableContextAttribute(1)]
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6, [NullableAttribute(2)] T7, [NullableAttribute(0)] TRest> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, ITuple where TRest : struct
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public T7 Item7;
+        [NullableAttribute(0)]
+        public TRest Rest;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, [NullableAttribute(0)] TRest rest);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1, 0 })] ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other);
+        [NullableContextAttribute(2)]
+        public override bool Equals(object? obj);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1, 0 })] ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other);
+        public override int GetHashCode();
+        public override string ToString();
+    }
+}
+```
