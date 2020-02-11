@@ -385,7 +385,8 @@ class Class3 {}
 class Class4 {}
 ```
 
-shows two attribute classes named `Example` and `ExampleAttribute`. The attribute [Example] is ambiguous, since it could refer to either `Example` or `ExampleAttribute`. Using a verbatim identifier allows the exact intent to be specified in such rare cases. The attribute [ExampleAttribute] is not ambiguous (although it would be if there was an attribute class named `ExampleAttributeAttribute`!). If the declaration for class `Example` is removed, then both attributes refer to the attribute class named `ExampleAttribute`, as follows:
+shows two attribute classes named `Example` and `ExampleAttribute`. The attribute `[Example]` is ambiguous, since it could refer to either `Example` or `ExampleAttribute`. Using a verbatim identifier allows the exact intent to be specified in such rare cases. The attribute [ExampleAttribute] is not ambiguous (although it would be if there was an attribute class named `ExampleAttributeAttribute`!). If the declaration for class `Example` is removed, then both attributes refer to the attribute class named `ExampleAttribute`, as follows:
+
 
 ```csharp
 using System;
@@ -520,8 +521,8 @@ Retrieval of an attribute instance involves both compile-time and run-time proce
 
 The compilation of an *attribute* with attribute class `T`, *positional-argument-list * `P`, *named-argument-list* `N`, and specified on a program entity `E` is compiled into an assembly `A` via the following steps:
 
-*   Follow the compile-time processing steps for compiling an *object-creation-expression* of the form new `T(P)`. These steps either result in a compile-time error, or determine an instance constructor C on T that can be invoked at run-time.
 
+*   Follow the compile-time processing steps for compiling an *object-creation-expression* of the form new `T(P)`. These steps either result in a compile-time error, or determine an instance constructor `C` on `T` that can be invoked at run-time.
 *   If `C` does not have public accessibility, then a compile-time error occurs.
 
 *   For each *named-argument* `Arg` in `N`:
