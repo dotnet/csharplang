@@ -1,4 +1,4 @@
-# Tuples 
+# Tuples
 
 This proposal specifies the changes required to the [C# 6.0 (draft) Language specification](../../spec/introduction.md) to support *Tuples* as a new [value type](../../spec/types.md#value-types).
 
@@ -65,9 +65,7 @@ var t = (name: "John", age: 5); // OK: The natural type is (string name, int age
 ```
 end example\]
 
-A tuple literal is *not* a [constant expression](../../spec/expressions.md#Constant-expressions). As such, a tuple literal cannot be used as the default value for an optional parameter.
-
-**ISSUE:** Consider removing the second sentence above, as it sounds like just one example of usage prohibition (rather than a spec requirement); there likely are others. If that is true, either completely omit that sentence, or delete it from here and add an example showing that such a usage fails.
+A tuple literal is *not* a [constant expression](../../spec/expressions.md#Constant-expressions). 
 
 For a discussion of tuple literals as tuple initializers, see [Tuple types](XXX).
 
@@ -96,9 +94,7 @@ tuple_type_element
     ;
 ```
 
-A ***tuple*** is an anonymous data structure type that contains an ordered sequence of two or more ***elements***, which are optionally named. Each element is public. 
-
-**ISSUE:** Should we say something like, "If a tuple is mutable, its element values are also mutable?" I think that is true, yet some languages might not allow tuple element values to change. Unless mutability can be deduced eleswhere, not saying it will leave it unspecified.
+A ***tuple*** is an anonymous data structure type that contains an ordered sequence of two or more ***elements***, which are optionally named. Each element is public. If a tuple is mutable, its element values are also mutable?
 
 A tuple's ***natural type*** is the combination of its element types, in lexical order, and element names, if they exist.
 
@@ -106,8 +102,6 @@ A tuple's ***arity*** is the combination of its element types, in lexical order;
  Each unique tuple arity designates a distinct tuple type.
 
 Two tuple values are equal if they have the same arity, and the values of the elements in each corresponding element pair are equal.
-
-**ISSUE:** The above covers the behavior of System.ValueTuple.Equals as well as the ==/!= operators planned for 7.3. Should we say anything about relation comparisons ala System.ValueTuple.CompareTo? My (limited) testing for that shows that the element pairs are tested in order with the first non-zero result ending the comparison; otherwise, the result is 0.
 
 An element in a tuple is accessed using the [member-access operator `.`](../../spec/expressions.md#Member-access).
 
@@ -123,8 +117,6 @@ the syntax `(int code, string message)` declares a tuple type having two element
 As shown, a tuple can be initialized using a [tuple literal](XXX).
 
 An element need not have a name. An element without a name is unnamed.
-
-**ISSUE:** Make s statement about the purpose of element names. I think they are for notational convenience only, and have no other purpose. Is that true?
 
 If a tuple declarator contains the type of all the tuple's elements, that set of types cannot be changed or augmented based on the context in which it is used; otherwise, element type information shall be inferred from the usage context. Likewise for element names.
 
@@ -195,8 +187,6 @@ System.ValueTuple<int, int> vt = t1;	// identity conversion
 ```
 end example\]
 
-**ISSUE:** We need to define "element" to mean the `ItemN` data elements so that this following description does not exclude member The name given explicitly to any element shall not be the same as any element name in the underlying type, except that an explicit name may have the form `Item`*N* provided it corresponds position-wise with an element of the same name in the underlying type.
-
 \[Example:
 ```csharp
 var t =  (ToString: 0, GetHashCode: 1);	// Error: names match underlying member names
@@ -252,11 +242,7 @@ end example\]
 
 > Add the following text at the end of the [Variables](../../spec/variables.md) section.
 
-**ISSUE:** see my commetns later w.r.t deconstruction, assignment, patterns, and section organization
-
 ## Discards
-
-**ISSUE:** We need a definition for "discard" 
 
 The identifier `_` can be used as a *discard* in the following circumstances:
 
@@ -360,17 +346,13 @@ A successful conversion from tuple expression to a nullable tuple type is classi
 
 > Add the following text after the bullet list in [Exactly matching expressions](../../spec/expressions.md#Exactly-matching-expressions):
 
-The exact-match rule for tuple expressions is based on the [natural types](XXX) of the constituent tuple arguments. The rule is mutually recursive with respect to other containing or contained expressions not in a possession of a natural type.
-
-**ISSUE:** The use of "argument" here doesn't seem right; arguments are passed to methods! Should it be "elements" instead?
+The exact-match rule for tuple expressions is based on the [natural types](XXX) of the constituent tuple elements. The rule is mutually recursive with respect to other containing or contained expressions not in a possession of a natural type.
 
 ### Deconstruction expressions
 
 > Add this section at the end of the [Expressions](../../spec/expressions.md) chapter.
 
 A tuple-deconstruction expression copies from a source tuple zero or more of its element values to corresponding destinations.
-
-**ISSUE:** I whipped up the following grammar; it needs to be made correct/complete. I'm guessing we can leverage on existing productions. Also, destination can be a declaration of a new local variable (explicit or var), or it can be the name of an existing one. My tests show that destination_list can't contain a combination of the two, however.
 
 ```antlr
 tuple_deconstruction_expression
@@ -386,8 +368,6 @@ destination
     : type identifier
     ;
 ```
-
-**ISSUE:** Is this expression constrained to being only on the LHS of simple (compound?) assignment, where the RHS is a tuple having at least as many elements as positions indicated by the LHS? See also my issue later w.r.t "deconstruction assignment expressions".
 
 Element values are copied from the source tuple to the destination(s). Each element's position is inferred from the destination position within *destination_list*. A destination with identifier `_` indicates that the corresponding element is discarded rather than being copied. The destination list shall account for every element in the tuple.
 
@@ -406,10 +386,6 @@ string message;
 ```
 end example\]
 
-**ISSUE:** As this is an operator, what is the result type? `void`?
-
-**ISSUE:** Presumably the scope of any newly created variable is from the point of declaration on to the end of the block, or does this fall-out of saying its a local variable?
-
 Any object may be deconstructed by providing an accessible `Deconstruct` method, either as an instance member or as an extension method. A `Deconstruct` method converts an object to a set of discrete values. The Deconstruct method "returns" the component values by use of individual `out` parameters. `Deconstruct` is overloadable. Consider the following:
 
 ```csharp
@@ -424,8 +400,6 @@ static class Extensions
     public static void Deconstruct(this Name name, out string first, out string last) { first = name.First; last = name.Last; }
 }
 ```
-
-**ISSUE:** I think we need to say more about this code (which is not an example, but is intended to show/say just what is going on/needed).
 
 Overload resolution for `Deconstruct` methods considers only the arity of the `Deconstruct` method. If multiple `Deconstruct` methods of the same arity are accessible, the expression is ambiguous and a binding-time error shall occur.
 
@@ -450,16 +424,10 @@ p.Deconstruct(out byte __x, out byte __y);
 
 The evaluation order of deconstruction assignment expressions is "breadth first":
 
-**ISSUE:** This is the first place I've seen deconstruction mentioned in the same breath as assignment. If deconstruction can only occur on the LHS of a (simple?, compound?) assignment, should deconstruction be covered under assignment rather than in its own section? If the two are in spearate sections, the expression grammar needs to have the new production, tuple_deconstruction_expression, plugged into it. From my experience with tuples, patterns, and _ wildcards in other languages, I'm thinking that the V7.0 support for tuple deconstruction is the beginning of a more general pattern support mechanism to come later. If that is the case, perhaps we should admit that and start using pattern-related terminology and organization. If so, that suggests tuple deconstruction should be separate from the assignment operator, in a (pre-)patterns section that will be expanded over future spec versions.
-
 1. Evaluate the LHS: Evaluate each of the expressions inside of it one by one, left to right, to yield side effects and establish a storage location for each.
 1. Evaluate the RHS: Evaluate each of the expressions inside of it one by one, left to right to yield side effects
 1. Convert each of the RHS expressions to the LHS types expected, one by one, left to right.
 1. Assign each of the conversion results from Step 3 to the storage locations found in (???)
-
-> **Note to reviewers**: I found this in the LDM notes for July 13-16, 2016. I don't think it is still accurate:
-
-**ISSUE:** flesh out the following example with some explantory text.
 
 \[Example:
 ```csharp
