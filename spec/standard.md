@@ -11460,7 +11460,7 @@ To avoid ambiguities that could arise from the use of these identifiers both as 
 
 #### General
 
-The C# language does not specify the execution semantics of query expressions. Rather, query expressions are translated into invocations of methods that adhere to the query*-*expression pattern (§12.17.4). Specifically, query expressions are translated into invocations of methods named Where, Select, SelectMany, Join, GroupJoin, OrderBy, OrderByDescending, ThenBy, ThenByDescending, GroupBy, and Cast. These methods are expected to have particular signatures and return types, as described in §12.17.4. These methods may be instance methods of the object being queried or extension methods that are external to the object. These methods implement the actual execution of the query.
+The C# language does not specify the execution semantics of query expressions. Rather, query expressions are translated into invocations of methods that adhere to the query*-*expression pattern (§12.17.4). Specifically, query expressions are translated into invocations of methods named `Where`, `Select`, `SelectMany`, `Join`, `GroupJoin`, `OrderBy`, `OrderByDescending`, `ThenBy`, `ThenByDescending`, `GroupBy`, and `Cast`. These methods are expected to have particular signatures and return types, as described in §12.17.4. These methods may be instance methods of the object being queried or extension methods that are external to the object. These methods implement the actual execution of the query.
 
 The translation from query expressions to method invocations is a syntactic mapping that occurs before any type binding or overload resolution has been performed. Following translation of query expressions, the resulting method invocations are processed as regular method invocations, and this may in turn uncover compile time errors. These error conditions include, but are not limited to, methods that do not exist, arguments of the wrong types, and generic methods where type inference fails.
 
@@ -11468,38 +11468,47 @@ A query expression is processed by repeatedly applying the following translation
 
 It is a compile time error for a query expression to include an assignment to a range variable, or the use of a range variable as an argument for a ref or out parameter.
 
-Certain translations inject range variables with *transparent identifiers* denoted by \*. These are described further in §12.17.3.8.
+Certain translations inject range variables with *transparent identifiers* denoted by `*`. These are described further in §12.17.3.8.
 
 #### select and group … by clauses with continuations
 
-A query expression with a group clause using a property Prop of y and a query body Q containing a continuation in the form:
+A query expression with a group clause using a property `Prop` of `y` and a query body `Q` containing a continuation in the form:
 
-from y in S group y by y.Prop into *x* *Q*
+```csharp
+from y in S group y by y.Prop into x Q
+```
 
 is translated into:
 
-from *x* in ( from *y in S group y by y.Prop* ) *Q*
+```csharp
+from x in ( from y in S group y by y.Prop ) Q
+```
 
 The translations in the following sections assume that queries have no into continuations.
 
 [*Example*: The example:
 
+```csharp
 from c in customers
 group c by c.Country into g
-select new { Country = g.Key, CustCount = g.Count() }
+select new { Country = g.Key, CustCount = g.Count () }
+```
 
 is translated into:
 
+```csharp
 from g in
-(from c in customers
-group c by c.Country)
-select new { Country = g.Key, CustCount = g.Count() }
+    (from c in customers group c by c.Country)
+select new { Country = g.Key, CustCount = g.Count () }
+```
 
 the final translation of which is:
 
+```csharp
 customers.
-GroupBy(c => c.Country).
-Select(g => new { Country = g.Key, CustCount = g.Count() })
+GroupBy (c => c.Country).
+Select (g => new { Country = g.Key, CustCount = g.Count () })
+```
 
 *end example*]
 
@@ -11507,288 +11516,377 @@ Select(g => new { Country = g.Key, CustCount = g.Count() })
 
 A from clause that explicitly specifies a range variable type
 
-from *T* *x* in *e*
+```csharp
+from T x in e
+```
 
 is translated into
 
-from *x* in ( *e* ) . Cast < *T* > ( )
+```csharp
+from x in (e).Cast<T> ()
+```
 
 A join clause that explicitly specifies a range variable type
 
-join *T* *x* in *e* on *k1* equals *k2*
+```csharp
+join T x in e on k1 equals k2
+```
 
 is translated into
 
-join *x* in ( *e* ) . Cast < *T* > ( ) on *k1* equals *k2*
+```csharp
+join x in (e).Cast<T> () on k1 equals k2
+```
 
 The translations in the following sections assume that queries have no explicit range variable types.
 
 [*Example*: The example
 
+```csharp
 from Customer c in customers
 where c.City == "London"
 select c
+```
 
 is translated into
 
-from c in (customers).Cast<Customer>()
+```csharp
+from c in (customers).Cast<Customer> ()
 where c.City == "London"
 select c
+```
 
 the final translation of which is
 
+```csharp
 customers.
-Cast<Customer>().
-Where(c => c.City == "London")
+Cast<Customer> ().
+Where (c => c.City == "London")
+```
 
 *end example*]
 
-\[*Note*: Explicit range variable types are useful for querying collections that implement the non-generic IEnumerable interface, but not the generic IEnumerable<T> interface. In the example above, this would be the case if customers were of type ArrayList. *end note*\]
+> [!NOTE]
+> Explicit range variable types are useful for querying collections that implement the non-generic `IEnumerable` interface, but not the generic `IEnumerable<T>` interface. In the example above, this would be the case if `customers` were of type `ArrayList`.
 
 #### Degenerate query expressions
 
 A query expression of the form
 
-from *x* in *e* select *x*
+```csharp
+from x in e select x
+```
 
 is translated into
 
-( *e* ) . Select ( *x* => *x* )
+```csharp
+(e).Select (x => x)
+```
 
 [*Example*: The example
 
+```csharp
 from c in customers
 select c
+```
 
 Is translated into
 
+```csharp
 (customers).Select(c => c)
+```
 
 *end example*]
 
 A degenerate query expression is one that trivially selects the elements of the source.
 
-\[*Note*: Later phases of the translation (§12.17.3.6 and §12.17.3.7) remove degenerate queries introduced by other translation steps by replacing them with their source. It is important, however, to ensure that the result of a query expression is never the source object itself. Otherwise, returning the result of such a query might inadvertently expose private data (e.g., an element array) to a caller. Therefore this step protects degenerate queries written directly in source code by explicitly calling Select on the source. It is then up to the implementers of Select and other query operators to ensure that these methods never return the source object itself.*end note*\]
+> [!NOTE]
+> Later phases of the translation (§12.17.3.6 and §12.17.3.7) remove degenerate queries introduced by other translation steps by replacing them with their source. It is important, however, to ensure that the result of a query expression is never the source object itself. Otherwise, returning the result of such a query might inadvertently expose private data (e.g., an element array) to a caller. Therefore this step protects degenerate queries written directly in source code by explicitly calling `Select` on the source. It is then up to the implementers of `Select` and other query operators to ensure that these methods never return the source object itself.
 
 #### From, let, where, join and orderby clauses
 
 A query expression with a second from clause followed by a select clause
 
-from *x1* in *e1*
-from *x2* in *e2*
-select *v*
+```csharp
+from x1 in e1
+from x2 in e2
+select v
+```
 
 is translated into
 
-( *e1* ) . SelectMany( *x1* => *e2* , ( *x1* , *x2* ) => *v* )
+```csharp
+(e1).SelectMany (x1 => e2, (x1, x2) => v)
+```
 
 [*Example*: The example
 
+```csharp
 from c in customers
 from o in c.Orders
 select new { c.Name, o.OrderID, o.Total }
+```
 
 is translated into
 
+```csharp
 (customers).
-SelectMany(c => c.Orders,
-(c,o) => new { c.Name, o.OrderID, o.Total }
+SelectMany (c => c.Orders,
+    (c, o) => new { c.Name, o.OrderID, o.Total }
 )
+```
 
 *end example*]
 
-A query expression with a second from clause followed by a query body Q containing a non-empty set of query body clauses:
+A query expression with a second from clause followed by a query body `Q` containing a non-empty set of query body clauses:
 
-from *x1* in *e1*
-from *x2* in *e2*
+```csharp
+from x1 in e1
+from x2 in e2
 Q
+```
 
 is translated into
 
-from \* in ( *e1* ) . SelectMany( *x1* => *e2* , ( *x1* , *x2* ) => new { *x1* , *x2* } )
+```csharp
+from * in (e1).SelectMany (x1 => e2, (x1, x2) => new { x1, x2 })
 Q
+```
 
 [*Example*: The example
 
+```csharp
 from c in customers
 from o in c.Orders
 orderby o.Total descending
 select new { c.Name, o.OrderID, o.Total }
+```
 
 is translated into
 
-from \* in (customers).
-SelectMany(c => c.Orders, (c,o) => new { c, o })
+```csharp
+from * in (customers).
+SelectMany (c => c.Orders, (c, o) => new { c, o })
 orderby o.Total descending
 select new { c.Name, o.OrderID, o.Total }
+```
 
 the final translation of which is
 
+```csharp
 customers.
-SelectMany(c => c.Orders, (c,o) => new { c, o }).
-OrderByDescending(x => x.o.Total).
-Select(x => new { x.c.Name, x.o.OrderID, x.o.Total })
+SelectMany (c => c.Orders, (c, o) => new { c, o }).
+OrderByDescending (x => x.o.Total).
+Select (x => new { x.c.Name, x.o.OrderID, x.o.Total })
+```
 
-where x is a compiler generated identifier that is otherwise invisible and inaccessible. *end example*]
+where `x` is a compiler generated identifier that is otherwise invisible and inaccessible. *end example*]
 
 A let expression along with its preceding from clause:
 
-from *x* in *e*
-let *y* = *f
-… *
+```csharp
+from x in e
+let y = f
+…
+```
 
 is translated into
 
-from \* in ( *e* ) . Select ( *x* => new { *x* , *y* = *f* } )
+```csharp
+from * in (e).Select (x => new { x, y = f })
 …
+```
 
 [*Example*: The example
 
+```csharp
 from o in orders
-let t = o.Details.Sum(d => d.UnitPrice \* d.Quantity)
+let t = o.Details.Sum (d => d.UnitPrice * d.Quantity)
 where t >= 1000
 select new { o.OrderID, Total = t }
+```
 
 is translated into
 
-from \* in (orders).
-Select(o => new { o, t = o.Details.Sum(d => d.UnitPrice \* d.Quantity) })
+```csharp
+from * in (orders).
+Select (o => new { o, t = o.Details.Sum (d => d.UnitPrice * d.Quantity) })
 where t >= 1000
 select new { o.OrderID, Total = t }
+```
 
 the final translation of which is
 
+```csharp
 orders.
-Select(o => new { o, t = o.Details.Sum(d => d.UnitPrice \* d.Quantity) }).
-Where(x => x.t >= 1000).
-Select(x => new { x.o.OrderID, Total = x.t })
+Select (o => new { o, t = o.Details.Sum (d => d.UnitPrice * d.Quantity) }).
+Where (x => x.t >= 1000).
+Select (x => new { x.o.OrderID, Total = x.t })
+```
 
-where x is a compiler generated identifier that is otherwise invisible and inaccessible. *end example*]
+where `x` is a compiler generated identifier that is otherwise invisible and inaccessible. *end example*]
 
 A where expression along with its preceding from clause:
 
-from *x* in *e*
-where *f
-…*
+```csharp
+from x in e
+where f
+…
+```
 
 is translated into
 
-from *x* in ( *e* ) . Where ( *x* => *f* )
+```csharp
+from x in (e).Where (x => f)
 …
+```
 
 A join clause immediately followed by a select clause
 
-from *x1* in *e1*
-join *x2* in *e2* on *k1* equals *k2*
-select *v*
+```csharp
+from x1 in e1
+join x2 in e2 on k1 equals k2
+select v
+```
 
 is translated into
 
-( *e1* ) . Join( *e2* , *x1* => *k1* , *x2* => *k2* , ( *x1* , *x2* ) => *v* )
+```csharp
+(e1).Join (e2, x1 => k1, x2 => k2, (x1, x2) => v)
+```
 
 [*Example*: The example
 
+```csharp
 from c in customers
 join o in orders on c.CustomerID equals o.CustomerID
 select new { c.Name, o.OrderDate, o.Total }
+```
 
 is translated into
 
-(customers).Join(orders, c => c.CustomerID, o => o.CustomerID,
-(c, o) => new { c.Name, o.OrderDate, o.Total })
+```csharp
+(customers).Join (orders, c => c.CustomerID, o => o.CustomerID,
+    (c, o) => new { c.Name, o.OrderDate, o.Total })
+```
 
 *end example*]
 
 A join clause followed by a query body clause:
 
-from *x1* in *e1*
-join *x2* in *e2* on *k1* equals *k2*
+```csharp
+from x1 in e1
+join x2 in e2 on k1 equals k2
 …
+```
 
 is translated into
 
-from \* in ( *e1* ) . Join(
-*e2* , *x1* => *k1* , *x2* => *k2* , ( *x1* , *x2* ) => new { *x1* , *x2* })
+```csharp
+from * in (e1).Join (
+    e2, x1 => k1, x2 => k2, (x1, x2) => new { x1, x2 })
 …
+```
 
 A join-into clause immediately followed by a select clause
 
-from *x1* in *e1*
-join *x2* in *e2* on *k1* equals *k2* into *g*
-select *v*
+```csharp
+from x1 in e1
+join x2 in e2 on k1 equals k2 into g
+select v
+```
 
 is translated into
 
-( *e1* ) . GroupJoin( *e2* , *x1* => *k1* , *x2* => *k2* , ( *x1* , *g* ) => *v* )
+```csharp
+(e1).GroupJoin (e2, x1 => k1, x2 => k2, (x1, g) => v)```
 
 A join into clause followed by a query body clause
 
-from *x1* in *e1*
-join *x2* in *e2* on *k1* equals *k2* into *g*
+```csharp
+from x1 in e1
+join x2 in e2 on k1 equals k2 into g
 …
+```
 
 is translated into
 
-from \* in ( *e1* ) . GroupJoin(
-*e2* , *x1* => *k1* , *x2* => *k2* , ( *x1* , *g* ) => new { *x1* , *g* })
+```csharp
+from * in (e1).GroupJoin (
+    e2, x1 => k1, x2 => k2, (x1, g) => new { x1, g })
 …
+```
 
 [*Example*: The example
 
+```csharp
 from c in customers
 join o in orders on c.CustomerID equals o.CustomerID into co
-let n = co.Count()
+let n = co.Count ()
 where n >= 10
 select new { c.Name, OrderCount = n }
+```
 
 is translated into
 
-from \* in (customers).
-GroupJoin(orders, c => c.CustomerID, o => o.CustomerID,
-(c, co) => new { c, co })
-let n = co.Count()
+```csharp
+from * in (customers).
+GroupJoin (orders, c => c.CustomerID, o => o.CustomerID,
+    (c, co) => new { c, co })
+let n = co.Count ()
 where n >= 10
 select new { c.Name, OrderCount = n }
+```
 
 the final translation of which is
 
+```csharp
 customers.
-GroupJoin(orders, c => c.CustomerID, o => o.CustomerID,
-(c, co) => new { c, co }).
-Select(x => new { x, n = x.co.Count() }).
-Where(y => y.n >= 10).
-Select(y => new { y.x.c.Name, OrderCount = y.n)
+GroupJoin (orders, c => c.CustomerID, o => o.CustomerID,
+    (c, co) => new { c, co }).
+Select (x => new { x, n = x.co.Count () }).
+Where (y => y.n >= 10).
+Select (y => new { y.x.c.Name, OrderCount = y.n)
+```
 
-where x and y are compiler generated identifiers that are otherwise invisible and inaccessible. *end example*]
+where `x` and `y` are compiler generated identifiers that are otherwise invisible and inaccessible. *end example*]
 
 An orderby clause and its preceding from clause:
 
-from *x* in *e*
-orderby *k1* , *k2* , … , *kn*
-*…*
+```csharp
+from x in e
+orderby k1, k2, …, kn
+…
+```
 
 is translated into
 
-from *x* in ( *e* ) .
-OrderBy ( *x* => *k1* ) .
-ThenBy ( *x* => *k2* ) .
-*…* .
-ThenBy ( *x* => *kn* )
+```csharp
+from x in (e).
+OrderBy (x => k1).
+ThenBy (x => k2).
+….
+ThenBy (x => kn)
 …
+```
 
-If an ordering clause specifies a descending direction indicator, an invocation of OrderByDescending or ThenByDescending is produced instead.
+If an ordering clause specifies a descending direction indicator, an invocation of `OrderByDescending` or `ThenByDescending` is produced instead.
 
 [*Example*: The example
 
+```csharp
 from o in orders
 orderby o.Customer.Name, o.Total descending
 select o
+```
 
 has the final translation
 
+```csharp
 (orders).
-OrderBy(o => o.Customer.Name).
-ThenByDescending(o => o.Total)
+OrderBy (o => o.Customer.Name).
+ThenByDescending (o => o.Total)
+```
 
 *end example*]
 
@@ -11798,24 +11896,34 @@ The following translations assume that there are no let, where, join or orderby 
 
 A query expression of the form
 
-from *x* in *e* select *v*
+```csharp
+from x in e select v
+```
 
 is translated into
 
-( *e* ) . Select ( *x* => *v* )
+```csharp
+(e).Select (x => v)
+```
 
-except when *v* is the identifier *x*, the translation is simply
+except when *`v`* is the identifier *`x`*, the translation is simply
 
-( *e* )
+```csharp
+(e)
+```
 
 [*Example*: The example
 
-from c in customers.Where(c => c.City == “London”)
+```csharp
+from c in customers.Where (c => c.City == “London”)
 select c
+```
 
 is simply translated into
 
+```csharp
 (customers).Where(c => c.City == “London”)
+```
 
 *end example*]
 
@@ -11823,109 +11931,133 @@ is simply translated into
 
 A group clause
 
-from *x* in *e* group *v* by *k*
+```csharp
+from x in e group v by k
+```
 
 is translated into
 
-( *e* ) . GroupBy ( *x* => *k* , *x* => *v* )
+```csharp
+(e).GroupBy (x => k, x => v)
+```
 
-except when *v* is the identifier *x*, the translation is
+except when *`v`* is the identifier *`x`*, the translation is
 
-( *e* ) . GroupBy ( *x* => *k* )
+```csharp
+(e).GroupBy (x => k)
+```
 
 [*Example*: The example
 
+```csharp
 from c in customers
 group c.Name by c.Country
+```
 
 is translated into
 
+```csharp
 (customers).
-GroupBy(c => c.Country, c => c.Name)
+GroupBy (c => c.Country, c => c.Name)
+```
 
 *end example*]
 
 #### Transparent identifiers
 
-Certain translations inject range variables with ***transparent identifiers*** denoted by \*. Transparent identifiers exist only as an intermediate step in the query-expression translation process.
+Certain translations inject range variables with ***transparent identifiers*** denoted by *. Transparent identifiers exist only as an intermediate step in the query-expression translation process.
 
 When a query translation injects a transparent identifier, further translation steps propagate the transparent identifier into anonymous functions and anonymous object initializers. In those contexts, transparent identifiers have the following behavior:
 
 - When a transparent identifier occurs as a parameter in an anonymous function, the members of the associated anonymous type are automatically in scope in the body of the anonymous function.
-
 - When a member with a transparent identifier is in scope, the members of that member are in scope as well.
-
 - When a transparent identifier occurs as a member declarator in an anonymous object initializer, it introduces a member with a transparent identifier.
 
-    In the translation steps described above, transparent identifiers are always introduced together with anonymous types, with the intent of capturing multiple range variables as members of a single object. An implementation of C# is permitted to use a different mechanism than anonymous types to group together multiple range variables. The following translation examples assume that anonymous types are used, and shows one possible translation of transparent identifiers.
+In the translation steps described above, transparent identifiers are always introduced together with anonymous types, with the intent of capturing multiple range variables as members of a single object. An implementation of C# is permitted to use a different mechanism than anonymous types to group together multiple range variables. The following translation examples assume that anonymous types are used, and shows one possible translation of transparent identifiers.
 
 [*Example*: The example
 
+```csharp
 from c in customers
 from o in c.Orders
 orderby o.Total descending
 select new { c.Name, o.Total }
+```
 
 is translated into
 
-from \* in (customers).
-SelectMany(c => c.Orders, (c,o) => new { c, o })
+```csharp
+from * in (customers).
+SelectMany (c => c.Orders, (c, o) => new { c, o })
 orderby o.Total descending
 select new { c.Name, o.Total }
+```
 
 which is further translated into
 
+```csharp
 customers.
-SelectMany(c => c.Orders, (c,o) => new { c, o }).
-OrderByDescending(\* => o.Total).
-Select(\* => new { c.Name, o.Total })
+SelectMany (c => c.Orders, (c, o) => new { c, o }).
+OrderByDescending ( * => o.Total).
+Select ( * => new { c.Name, o.Total })
+```
 
 which, when transparent identifiers are erased, is equivalent to
 
+```csharp
 customers.
-SelectMany(c => c.Orders, (c,o) => new { c, o }).
-OrderByDescending(x => x.o.Total).
-Select(x => new { x.c.Name, x.o.Total })
+SelectMany (c => c.Orders, (c, o) => new { c, o }).
+OrderByDescending (x => x.o.Total).
+Select (x => new { x.c.Name, x.o.Total })
+```
 
-where x is a compiler generated identifier that is otherwise invisible and inaccessible.
+where `x` is a compiler generated identifier that is otherwise invisible and inaccessible.
 
 The example
 
+```csharp
 from c in customers
 join o in orders on c.CustomerID equals o.CustomerID
 join d in details on o.OrderID equals d.OrderID
 join p in products on d.ProductID equals p.ProductID
 select new { c.Name, o.OrderDate, p.ProductName }
+```
 
 is translated into
 
-from \* in (customers).
-Join(orders, c => c.CustomerID, o => o.CustomerID,
-(c, o) => new { c, o })
+```csharp
+from * in (customers).
+Join (orders, c => c.CustomerID, o => o.CustomerID,
+    (c, o) => new { c, o })
 join d in details on o.OrderID equals d.OrderID
 join p in products on d.ProductID equals p.ProductID
 select new { c.Name, o.OrderDate, p.ProductName }
+```
 
 which is further reduced to
 
+```csharp
 customers.
-Join(orders, c => c.CustomerID, o => o.CustomerID, (c, o) => new { c, o }).
-Join(details, \* => o.OrderID, d => d.OrderID, (\*, d) => new { \*, d }).
-Join(products, \* => d.ProductID, p => p.ProductID, (\*, p) => new { \*, p }).
-Select(\* => new { c.Name, o.OrderDate, p.ProductName })
+Join (orders, c => c.CustomerID, o => o.CustomerID, (c, o) => new { c, o }).
+Join (details, * => o.OrderID, d => d.OrderID, ( * , d) => new {*, d }).
+Join (products, * => d.ProductID, p => p.ProductID, ( * , p) => new {*, p }).
+Select ( * => new { c.Name, o.OrderDate, p.ProductName })
+```
 
-[[]{#_Ref130909184 .anchor}]{#_Ref112572083 .anchor}the final translation of which is
+the final translation of which is
 
+```csharp
 customers.
-Join(orders, c => c.CustomerID, o => o.CustomerID,
-(c, o) => new { c, o }).
-Join(details, x => x.o.OrderID, d => d.OrderID,
-(x, d) => new { x, d }).
-Join(products, y => y.d.ProductID, p => p.ProductID,
-(y, p) => new { y, p }).
-Select(z => new { z.y.x.c.Name, z.y.x.o.OrderDate, z.p.ProductName })
+Join (orders, c => c.CustomerID, o => o.CustomerID,
+    (c, o) => new { c, o }).
+Join (details, x => x.o.OrderID, d => d.OrderID,
+    (x, d) => new { x, d }).
+Join (products, y => y.d.ProductID, p => p.ProductID,
+    (y, p) => new { y, p }).
+Select (z => new { z.y.x.c.Name, z.y.x.o.OrderDate, z.p.ProductName })
+```
 
-where x, y, and z are compiler-generated identifiers that are otherwise invisible and inaccessible.
+where `x`, `y`, and `z` are compiler-generated identifiers that are otherwise invisible and inaccessible.
 
 *end example*]
 
@@ -11933,63 +12065,69 @@ where x, y, and z are compiler-generated identifiers that are otherwise invisi
 
 The ***Query-expression pattern*** establishes a pattern of methods that types can implement to support query expressions.
 
-A generic type C<T> supports the query-expression-pattern if its public member methods and the publicly accessible extension methods could be replaced by the following class definition. The members and accessible extenson methods is referred to as the "shape" of a generic type C<T>. A generic type is used in order to illustrate the proper relationships between parameter and return types, but it is possible to implement the pattern for non-generic types as well.
+A generic type `C<T>` supports the query-expression-pattern if its public member methods and the publicly accessible extension methods could be replaced by the following class definition. The members and accessible extenson methods is referred to as the "shape" of a generic type `C<T>`. A generic type is used in order to illustrate the proper relationships between parameter and return types, but it is possible to implement the pattern for non-generic types as well.
 
-delegate R Func<T1,R>(T1 arg1);
+```csharp
+delegate R Func<T1, R> (T1 arg1);
 
-delegate R Func<T1,T2,R>(T1 arg1, T2 arg2);
+delegate R Func<T1, T2, R> (T1 arg1, T2 arg2);
 
 class C
 {
-public C<T> Cast<T>();
+    public C<T> Cast<T> ();
 }
 
 class C<T> : C
 {
-public C<T> Where(Func<T,bool> predicate);
+    public C<T> Where (Func<T, bool> predicate);
 
-public C<U> Select<U>(Func<T,U> selector);
+    public C<U> Select<U> (Func<T, U> selector);
 
-public C<V> SelectMany<U,V>(Func<T,C<U>> selector,
-Func<T,U,V> resultSelector);
+    public C<V> SelectMany<U, V> (Func<T, C<U>> selector,
+        Func<T, U, V> resultSelector);
 
-public C<V> Join<U,K,V>(C<U> inner, Func<T,K> outerKeySelector,
-Func<U,K> innerKeySelector, Func<T,U,V> resultSelector);
+    public C<V> Join<U, K, V> (C<U> inner, Func<T, K> outerKeySelector,
+        Func<U, K> innerKeySelector, Func<T, U, V> resultSelector);
 
-public C<V> GroupJoin<U,K,V>(C<U> inner, Func<T,K> outerKeySelector,
-Func<U,K> innerKeySelector, Func<T,C<U>,V> resultSelector);
+    public C<V> GroupJoin<U, K, V> (C<U> inner, Func<T, K> outerKeySelector,
+        Func<U, K> innerKeySelector, Func<T, C<U>, V> resultSelector);
 
-public O<T> OrderBy<K>(Func<T,K> keySelector);
+    public O<T> OrderBy<K> (Func<T, K> keySelector);
 
-public O<T> OrderByDescending<K>(Func<T,K> keySelector);
+    public O<T> OrderByDescending<K> (Func<T, K> keySelector);
 
-public C<G<K,T>> GroupBy<K>(Func<T,K> keySelector);
+    public C<G<K, T>> GroupBy<K> (Func<T, K> keySelector);
 
-public C<G<K,E>> GroupBy<K,E>(Func<T,K> keySelector,
-Func<T,E> elementSelector);
+    public C<G<K, E>> GroupBy<K, E> (Func<T, K> keySelector,
+        Func<T, E> elementSelector);
 }
 
 class O<T> : C<T>
 {
-public O<T> ThenBy<K>(Func<T,K> keySelector);
+    public O<T> ThenBy<K> (Func<T, K> keySelector);
 
-public O<T> ThenByDescending<K>(Func<T,K> keySelector);
+    public O<T> ThenByDescending<K> (Func<T, K> keySelector);
 }
 
-class G<K,T> : C<T>
+class G<K, T> : C<T>
 {
-public K Key { get; }
+    public K Key { get; }
 }
+```
 
-The methods above use the generic delegate types Func<T1, R> and Func<T1, T2, R>, but they could equally well have used other delegate or expression-tree types with the same relationships in parameter and return types.
+The methods above use the generic delegate types` Func<T1, R>` and `Func<T1, T2, R>`, but they could equally well have used other delegate or expression-tree types with the same relationships in parameter and return types.
 
-\[*Note*: The recommended relationship between C<T> and O<T> that ensures that the ThenBy and ThenByDescending methods are available only on the result of an OrderBy or OrderByDescending. *end note*\]
+> [!NOTE]
+> The recommended relationship between `C<T>` and `O<T>` that ensures that the `ThenBy` and `ThenByDescending` methods are available only on the result of an `OrderBy` or `OrderByDescending`.
 
-\[*Note*: The recommended shape of the result of GroupBy—a sequence of sequences, where each inner sequence has an additional Key property. *end note*\]
+> [!NOTE]
+> The recommended shape of the result of `GroupBy`—a sequence of sequences, where each inner sequence has an additional `Key` property.
 
-\[*Note*: Because query expressions are translated to method invocations by means of a syntactic mapping, types have considerable flexibility in how they implement any or all of the query-expression pattern. For example, the methods of the pattern can be implemented as instance methods or as extension methods because the two have the same invocation syntax, and the methods can request delegates or expression trees because anonymous functions are convertible to both. Types implementing only some of the query expression pattern support only query expression translations that map to the methods that type supports. *end note*\]
+> [!NOTE]
+> Because query expressions are translated to method invocations by means of a syntactic mapping, types have considerable flexibility in how they implement any or all of the query-expression pattern. For example, the methods of the pattern can be implemented as instance methods or as extension methods because the two have the same invocation syntax, and the methods can request delegates or expression trees because anonymous functions are convertible to both. Types implementing only some of the query expression pattern support only query expression translations that map to the methods that type supports.
 
-\[*Note*: The System.Linq namespace provides an implementation of the query-expression pattern for any type that implements the System.Collections.Generic.IEnumerable<T> interface. *end note*\]
+> [!NOTE]
+> The `System.Linq` namespace provides an implementation of the query-expression pattern for any type that implements the `System.Collections.Generic.IEnumerable<T>` interface.
 
 ## Assignment operators
 
@@ -11997,37 +12135,39 @@ The methods above use the generic delegate types Func<T1, R> and Func<T1, T2, R>
 
 The assignment operators assign a new value to a variable, a property, an event, or an indexer element.
 
-[]{#Grammar_assignment .anchor}assignment:
-unary-expression assignment-operator expression
+```antlr
+assignment:
+    unary-expression assignment-operator expression
 
-[]{#Grammar_assignment_operator .anchor}assignment-operator:
-*=
-+=
--=
-\*=
-/=
-%=
-&=
-|=
-\^=
-<<=
-*right-shift-assignment
+assignment-operator:
+    *=
+    +=
+    -=
+    *=
+    /=
+    %=
+    &=
+    |=
+    ^=
+    <<=
+    right-shift-assignment
+```
 
 The left operand of an assignment shall be an expression classified as a variable, a property access, an indexer access, or an event access.
 
-The = operator is called the ***simple assignment operator***. It assigns the value of the right operand to the variable, property, or indexer element given by the left operand. The left operand of the simple assignment operator shall not be an event access (except as described in §15.8.2). The simple assignment operator is described in §12.18.2.
+The `=` operator is called the ***simple assignment operator***. It assigns the value of the right operand to the variable, property, or indexer element given by the left operand. The left operand of the simple assignment operator shall not be an event access (except as described in §15.8.2). The simple assignment operator is described in §12.18.2.
 
-The assignment operators other than the = operator are called the ***compound assignment operators***. These operators perform the indicated operation on the two operands, and then assign the resulting value to the variable, property, or indexer element given by the left operand. The compound assignment operators are described in §12.18.3.
+The assignment operators other than the `=` operator are called the ***compound assignment operators***. These operators perform the indicated operation on the two operands, and then assign the resulting value to the variable, property, or indexer element given by the left operand. The compound assignment operators are described in §12.18.3.
 
-The += and -= operators with an event access expression as the left operand are called the ***event assignment operators***. No other assignment operator is valid with an event access as the left operand. The event assignment operators are described in §12.18.4.
+The `+=` and `-=` operators with an event access expression as the left operand are called the ***event assignment operators***. No other assignment operator is valid with an event access as the left operand. The event assignment operators are described in §12.18.4.
 
-The assignment operators are right-associative, meaning that operations are grouped from right to left. [*Example*: An expression of the form a = b = c is evaluated as a = (b = c). *end example*]
+The assignment operators are right-associative, meaning that operations are grouped from right to left. [*Example*: An expression of the form `a = b = c` is evaluated as `a = (b = c)`. *end example*]
 
 ### Simple assignment
 
-The = operator is called the simple assignment operator.
+The `=` operator is called the simple assignment operator.
 
-If the left operand of a simple assignment is of the form E.P or E\[Ei\] where E has the compile-time type dynamic, then the assignment is dynamically bound (§12.3.3). In this case, the compile-time type of the assignment expression is dynamic, and the resolution described below will take place at run-time based on the run-time type of E. If the left operand is of the form E\[Ei\] where at least one element of Ei has the compile-time type dynamic, and the compile-time type of E is not an array, the resulting indexer access is dynamically bound, but with limited compile-time checking (§12.6.5).
+If the left operand of a simple assignment is of the form `E.P` or `E[Ei]` where E has the compile-time type dynamic, then the assignment is dynamically bound (§12.3.3). In this case, the compile-time type of the assignment expression is dynamic, and the resolution described below will take place at run-time based on the run-time type of `E`. If the left operand is of the form `E[Ei]` where at least one element of `Ei` has the compile-time type dynamic, and the compile-time type of `E` is not an array, the resulting indexer access is dynamically bound, but with limited compile-time checking (§12.6.5).
 
 In a simple assignment, the right operand shall be an expression that is implicitly convertible to the type of the left operand. The operation assigns the value of the right operand to the variable, property, or indexer element given by the left operand.
 
@@ -12035,153 +12175,157 @@ The result of a simple assignment expression is the value assigned to the left o
 
 If the left operand is a property or indexer access, the property or indexer shall have an accessible set accessor. If this is not the case, a binding-time error occurs.
 
-The run-time processing of a simple assignment of the form x = y consists of the following steps:
+The run-time processing of a simple assignment of the form `x = y` consists of the following steps:
 
-- If x is classified as a variable:
+- If `x` is classified as a variable:
+  - `x` is evaluated to produce the variable.
+  - `y` is evaluated and, if required, converted to the type of `x` through an implicit conversion (§11.2).
+  - If the variable given by `x` is an array element of a *reference-type*, a run-time check is performed to ensure that the value computed for `y` is compatible with the array instance of which `x` is an element. The check succeeds if `y` is `null`, or if an implicit reference conversion (§11.2.7) exists from the -type of the instance referenced by `y` to the actual element type of the array instance containing `x`. Otherwise, a `System.ArrayTypeMismatchException` is thrown.
+  - The value resulting from the evaluation and conversion of `y` is stored into the location given by the evaluation of `x`.
+- If `x` is classified as a property or indexer access:
+  - The instance expression (if `x` is not static) and the argument list (if `x` is an indexer access) associated with `x` are evaluated, and the results are used in the subsequent set accessor invocation.
+  - `y` is evaluated and, if required, converted to the type of `x` through an implicit conversion (§11.2).
+  - The set accessor of `x` is invoked with the value computed for `y` as its value argument.
 
-<!-- -->
+> [!NOTE]
+> If the compile time type of `x` is `dynamic` and there is an implicit conversion from the compile time type of `y` to `dynamic`, no runtime resolution is required.
 
-- x is evaluated to produce the variable.
+> [!NOTE]
+> The array co-variance rules (§17.6) permit a value of an array type `A[]` to be a reference to an instance of an array type `B[]`, provided an implicit reference conversion exists from `B` to `A`. Because of these rules, assignment to an array element of a *reference-type* requires a run-time check to ensure that the value being assigned is compatible with the array instance. In the example
+> 
+> ```csharp
+> string[] sa = new string[10];
+> object[] oa = sa;
+> 
+> oa[0] = null; // Ok
+> oa[1] = "Hello"; // Ok
+> oa[2] = new ArrayList (); // ArrayTypeMismatchException
+> ```
+> 
+> the last assignment causes a `System.ArrayTypeMismatchException` to be thrown because a reference to an `ArrayList` cannot be stored in an element of a `string[]`.
 
-- y is evaluated and, if required, converted to the type of x through an implicit conversion (§11.2).
+When a property or indexer declared in a *struct-type* is the target of an assignment, the instance expression associated with the property or indexer access shall be classified as a variable. If the instance expression is classified as a value, a binding-time error occurs.
 
-- If the variable given by x is an array element of a *reference-type*, a run-time check is performed to ensure that the value computed for y is compatible with the array instance of which x is an element. The check succeeds if y is null, or if an implicit reference conversion (§11.2.7) exists from the -type of the instance referenced by y to the actual element type of the array instance containing x. Otherwise, a System.ArrayTypeMismatchException is thrown.
-
-- The value resulting from the evaluation and conversion of y is stored into the location given by the evaluation of x.
-
-<!-- -->
-
-- If x is classified as a property or indexer access:
-
-<!-- -->
-
-- The instance expression (if x is not static) and the argument list (if x is an indexer access) associated with x are evaluated, and the results are used in the subsequent set accessor invocation.
-
-- y is evaluated and, if required, converted to the type of x through an implicit conversion (§11.2).
-
-- The set accessor of x is invoked with the value computed for y as its value argument.
-
-\[*Note*: if the compile time type of x is dynamic and there is an implicit conversion from the compile time type of y to dynamic, no runtime resolution is required. *end note*\]
-
-\[*Note*: The array co-variance rules (§17.6) permit a value of an array type A\[\] to be a reference to an instance of an array type B\[\], provided an implicit reference conversion exists from B to A. Because of these rules, assignment to an array element of a *reference-type* requires a run-time check to ensure that the value being assigned is compatible with the array instance. In the example
-
-string\[\] sa = new string\[10\];
-object\[\] oa = sa;
-
-oa\[0\] = null; // Ok
-oa\[1\] = "Hello"; // Ok
-oa\[2\] = new ArrayList(); // ArrayTypeMismatchException
-
-the last assignment causes a System.ArrayTypeMismatchException to be thrown because a reference to an ArrayList cannot be stored in an element of a string\[\]. *end note*\]
-
-When a property or indexer declared in a *struct-type* is the target of an assignment, the instance expression associated with the property or indexer access shall be classified as a variable. If the instance expression is classified as a value, a binding-time error occurs. \[*Note*: Because of §12.7.5, the same rule also applies to fields. *end note*\]
+> [!NOTE]
+> Because of §12.7.5, the same rule also applies to fields.
 
 [*Example*: Given the declarations:
 
+```csharp
 struct Point
 {
-int x, y;
+    int x, y;
 
-public Point(int x, int y) {
-this.x = x;
-this.y = y;
-}
+    public Point (int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
 
-public int X {
-get { return x; }
-set { x = value; }
-}
+    public int X
+    {
+        get { return x; }
+        set { x = value; }
+    }
 
-public int Y {
-get { return y; }
-set { y = value; }
-}
+    public int Y
+    {
+        get { return y; }
+        set { y = value; }
+    }
 }
 
 struct Rectangle
 {
-Point a, b;
+    Point a, b;
 
-public Rectangle(Point a, Point b) {
-this.a = a;
-this.b = b;
-}
+    public Rectangle (Point a, Point b)
+    {
+        this.a = a;
+        this.b = b;
+    }
 
-public Point A {
-get { return a; }
-set { a = value; }
-}
+    public Point A
+    {
+        get { return a; }
+        set { a = value; }
+    }
 
-public Point B {
-get { return b; }
-set { b = value; }
+    public Point B
+    {
+        get { return b; }
+        set { b = value; }
+    }
 }
-}
+```
 
 in the example
 
-Point p = new Point();
+```csharp
+Point p = new Point ();
 p.X = 100;
 p.Y = 100;
-Rectangle r = new Rectangle();
-r.A = new Point(10, 10);
+Rectangle r = new Rectangle ();
+r.A = new Point (10, 10);
 r.B = p;
+```
 
-the assignments to p.X, p.Y, r.A, and r.B are permitted because p and r are variables. However, in the example
+the assignments to `p.X`, `p.Y`, `r.A`, and `r.B` are permitted because `p` and `r` are variables. However, in the example
 
+```csharp
 Rectangle r = new Rectangle();
 r.A.X = 10;
 r.A.Y = 10;
 r.B.X = 100;
 r.B.Y = 100;
+```
 
-the assignments are all invalid, since r.A and r.B are not variables. *end example*]
+the assignments are all invalid, since `r.A` and `r.B` are not variables. *end example*]
 
 ### Compound assignment
 
-If the left operand of a compound assignment is of the form E.P or E\[Ei\] where E has the compile-time type dynamic, then the assignment is dynamically bound (§12.3.3). In this case, the compile-time type of the assignment expression is dynamic, and the resolution described below will take place at run-time based on the run-time type of E. If the left operand is of the form E\[Ei\] where at least one element of Ei has the compile-time type dynamic, and the compile-time type of E is not an array, the resulting indexer access is dynamically bound, but with limited compile-time checking (§12.6.5).
+If the left operand of a compound assignment is of the form `E.P` or `E[Ei]` where `E` has the compile-time type `dynamic`, then the assignment is dynamically bound (§12.3.3). In this case, the compile-time type of the assignment expression is `dynamic`, and the resolution described below will take place at run-time based on the run-time type of `E`. If the left operand is of the form `E[Ei]` where at least one element of `Ei` has the compile-time type `dynamic`, and the compile-time type of `E` is not an array, the resulting indexer access is dynamically bound, but with limited compile-time checking (§12.6.5).
 
-An operation of the form x *op*= y is processed by applying binary operator overload resolution (§12.4.5) as if the operation was written x *op *y. Then,
+An operation of the form `x *op*= y` is processed by applying binary operator overload resolution (§12.4.5) as if the operation was written `x *op *y`. Then,
 
-- If the return type of the selected operator is implicitly convertible to the type of x, the operation is evaluated as x = x op y, except that x is evaluated only once.
-
-- Otherwise, if the selected operator is a predefined operator, if the return type of the selected operator is explicitly convertible to the type of x , and if y is implicitly convertible to the type of x  or the operator is a shift operator, then the operation is evaluated as x = (T)(x *op *y), where T is the type of x, except that x is evaluated only once.
-
+- If the return type of the selected operator is implicitly convertible to the type of `x`, the operation is evaluated as `x = x op y`, except that `x` is evaluated only once.
+- Otherwise, if the selected operator is a predefined operator, if the return type of the selected operator is explicitly convertible to the type of `x` , and if `y` is implicitly convertible to the type of `x`  or the operator is a shift operator, then the operation is evaluated as `x = (T)(x *op *y)`, where `T` is the type of `x`, except that `x` is evaluated only once.
 - Otherwise, the compound assignment is invalid, and a binding-time error occurs.
 
-The term “evaluated only once” means that in the evaluation of x *op *y, the results of any constituent expressions of x are temporarily saved and then reused when performing the assignment to x. [*Example*: In the assignment A()\[B()\] += C(), where A is a method returning int\[\], and B and C are methods returning int, the methods are invoked only once, in the order A, B, C. *end example*]
+The term “evaluated only once” means that in the evaluation of `x *op* y`, the results of any constituent expressions of `x` are temporarily saved and then reused when performing the assignment to `x`. [*Example*: In the assignment `A()[B()] += C()`, where `A` is a method returning `int[]`, and `B` and `C` are methods returning int, the methods are invoked only once, in the order `A`, `B`, `C`. *end example*]
 
 When the left operand of a compound assignment is a property access or indexer access, the property or indexer shall have both a get accessor and a set accessor. If this is not the case, a binding-time error occurs.
 
-The second rule above permits x *op*= y to be evaluated as x = (T)(x *op *y) in certain contexts. The rule exists such that the predefined operators can be used as compound operators when the left operand is of type sbyte, byte, short, ushort, or char. Even when both arguments are of one of those types, the predefined operators produce a result of type int, as described in §12.4.7.3. Thus, without a cast it would not be possible to assign the result to the left operand.
+The second rule above permits `x *op*= y` to be evaluated as `x = (T)(x *op *y)` in certain contexts. The rule exists such that the predefined operators can be used as compound operators when the left operand is of type `sbyte`, `byte`, `short`, `ushort`, or `char`. Even when both arguments are of one of those types, the predefined operators produce a result of type `int`, as described in §12.4.7.3. Thus, without a cast it would not be possible to assign the result to the left operand.
 
-The intuitive effect of the rule for predefined operators is simply that x *op*= y is permitted if both of x *op *y and x = y are permitted. [*Example*: In the following code
+The intuitive effect of the rule for predefined operators is simply that `x *op*= y` is permitted if both of `x *op* y` and `x = y` are permitted. [*Example*: In the following code
 
+```csharp
 byte b = 0;
-char ch = '\\0';
+char ch = '\0';
 int i = 0;
 
 b += 1; // Ok
 b += 1000; // Error, b = 1000 not permitted
 b += i; // Error, b = i not permitted
-b += (byte)i; // Ok
+b += (byte) i; // Ok
 
 ch += 1; // Error, ch = 1 not permitted
-ch += (char)1; // Ok
+ch += (char) 1; // Ok
+```
 
 the intuitive reason for each error is that a corresponding simple assignment would also have been an error. *end example*]
 
-\[*Note*: This also means that compound assignment operations support lifted operators. Since a compound assignment x *op*= y is evaluated as either x = x *op *y or x = (T)(x *op *y), the rules of evaluation implicitly cover lifted operators. *end note*\]
+> [!NOTE]
+> This also means that compound assignment operations support lifted operators. Since a compound assignment `x *op*= y` is evaluated as either `x = x *op *y` or `x = (T)(x *op *y)`, the rules of evaluation implicitly cover lifted operators.
 
 ### Event assignment
 
-If the left operand of a += or -= operator is classified as an event access, then the expression is evaluated as follows:
+If the left operand of a `+=` or `-=` operator is classified as an event access, then the expression is evaluated as follows:
 
 - The instance expression, if any, of the event access is evaluated.
-
-- The right operand of the += or -= operator is evaluated, and, if required, converted to the type of the left operand through an implicit conversion (§11.2).
-
-- An event accessor of the event is invoked, with an argument list consisting of the value computed in the previous step. If the operator was +=, the add accessor is invoked; if the operator was -=, the remove accessor is invoked.
+- The right operand of the `+=` or `-=` operator is evaluated, and, if required, converted to the type of the left operand through an implicit conversion (§11.2).
+- An event accessor of the event is invoked, with an argument list consisting of the value computed in the previous step. If the operator was `+=`, the add accessor is invoked; if the operator was `-=`, the remove accessor is invoked.
 
 An event assignment expression does not yield a value. Thus, an event assignment expression is valid only in the context of a *statement-expression* (§13.7).
 
@@ -12189,72 +12333,65 @@ An event assignment expression does not yield a value. Thus, an event assignment
 
 An *expression* is either a *non-assignment-expression* or an *assignment*.
 
-[]{#Grammar_expression .anchor}expression:
-non-assignment-expression
-assignment
+```antlr
+expression:
+    non-assignment-expression
+    assignment
 
-[]{#Grammar_non_assignment_expression .anchor}non-assignment-expression:
-conditional-expression
-lambda-expression
-query-expression
+non-assignment-expression:
+    conditional-expression
+    lambda-expression
+    query-expression
+```
 
 ## Constant expressions
 
 A constant expression is an expression that shall be fully evaluated at compile-time.
 
-[]{#Grammar_constant_expression .anchor}constant-expression:
-expression
+```antlr
+constant-expression:
+    expression
+```
 
-A constant expression may be either a value type or a reference type. If a constant expression is a value type, it must be one of the following types: sbyte, byte, short, ushort, int, uint, long, ulong, char, float, double, decimal, bool, or any enumeration type. If a constant expression is a reference type, it must be the string type, a default value expression (§12.7.15) for some reference type, or the value of the expression must be null.
+A constant expression may be either a value type or a reference type. If a constant expression is a value type, it must be one of the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool`, or any enumeration type. If a constant expression is a reference type, it must be the `string` type, a default value expression (§12.7.15) for some reference type, or the value of the expression must be `null`.
 
 Only the following constructs are permitted in constant expressions:
 
-- Literals (including the null literal).
-
+- Literals (including the `null` literal).
 - References to const members of class and struct types.
-
 - References to members of enumeration types.
-
 - References to const parameters or local variables
-
 - Parenthesized subexpressions, which are themselves constant expressions.
-
 - Cast expressions.
-
-- checked and unchecked expressions
-
-- The predefined +, –, !, and ~ unary operators.
-
-- The predefined +, –, *, /, %, <<, >>, &, |, ^, &&, ||, ==, !=, <, >, <=, and >= binary operators.
-
-- The ?: conditional operator.
-
-- sizeof expressions, provided the unmanaged-type is one of the types specified in §23.6.9 for which sizeof returns a constant value.
-
+- `checked` and `unchecked` expressions
+- The predefined `+`, `–`, `!`, and `~` unary operators.
+- The predefined `+`, `–`, `*`, `/`, `%`, `<<`, `>>`, `&`, `|`, `^`, `&&`, `||`, `==`, `!=`, `<`, `>`, `<=`, and `>=` binary operators.
+- The `?:` conditional operator.
+- `sizeof` expressions, provided the unmanaged-type is one of the types specified in §23.6.9 for which `sizeof` returns a constant value.
 - Default value expressions, provided the type is one of the types listed above.
 
 The following conversions are permitted in constant expressions:
 
 - Identity conversions
-
 - Numeric conversions
-
 - Enumeration conversions
-
 - Constant expression conversions
+- Implicit and explicit reference conversions, provided the source of the conversions is a constant expression that evaluates to the `null` value.
 
-- Implicit and explicit reference conversions, provided the source of the conversions is a constant expression that evaluates to the null value.
-
-\[*Note*: Other conversions including boxing, unboxing, and implicit reference conversions of non-null values are not permitted in constant expressions. *end note*\]
+> [!NOTE]
+> Other conversions including boxing, unboxing, and implicit reference conversions of non-null values are not permitted in constant expressions.
 
 [*Example*: In the following code
 
-class C {
-const object i = 5; // error: boxing conversion not permitted
-const object str = “hello”; // error: implicit reference conversion
+```csharp
+class C
+{
+    const object i = 5; // error: boxing conversion not permitted
+    const object str = “hello”; // error: implicit reference conversion
 }
+```
 
-the initialization of i is an error because a boxing conversion is required. The initialization of str is an error because an implicit reference conversion from a non-null value is required. *end example*]
+the initialization of `i` is an error because a boxing conversion is required. The initialization of `str` is an error because an implicit reference conversion from a non-null value is required. *end example*]
 
 Whenever an expression fulfills the requirements listed above, the expression is evaluated at compile-time. This is true even if the expression is a subexpression of a larger expression that contains non-constant constructs.
 
@@ -12265,71 +12402,73 @@ Unless a constant expression is explicitly placed in an unchecked context, overf
 Constant expressions are required in the contexts listed below and this is indicated in the grammar by using *constant-expression*. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
 
 - Constant declarations (§15.4)
-
 - Enumeration member declarations (§19.4)
-
 - Default arguments of formal parameter lists (§15.6.2)
-
-- case labels of a switch statement (§13.8.3).
-
-- goto case statements (§13.10.4)
-
+- `case` labels of a `switch` statement (§13.8.3).
+- `goto` case statements (§13.10.4)
 - Dimension lengths in an array creation expression (§12.7.11.5) that includes an initializer.
-
 - Attributes (§22)
 
-An implicit constant expression conversion (§11.2.10) permits a constant expression of type int to be converted to sbyte, byte, short, ushort, uint, or ulong, provided the value of the constant expression is within the range of the destination type.
+An implicit constant expression conversion (§11.2.10) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
 
 ## Boolean expressions
 
-A *boolean-expression* is an expression that yields a result of type bool; either directly or through application of operator true in certain contexts as specified in the following:
+A *boolean-expression* is an expression that yields a result of type `bool`; either directly or through application of operator true in certain contexts as specified in the following:
 
-[]{#Grammar_boolean_expression .anchor}boolean-expression:
-expression
+```antlr
+boolean-expression:
+    expression
+```
 
-The controlling conditional expression of an *if-statement* (§13.8.2), *while-statement* (§13.9.2), *do-statement* (§13.9.3), or *for-statement* (§13.9.4) is a *boolean-expression*. The controlling conditional expression of the ?: operator (§12.15) follows the same rules as a *boolean-expression*, but for reasons of operator precedence is classified as a *conditional-or-expression*.
+The controlling conditional expression of an *if-statement* (§13.8.2), *while-statement* (§13.9.2), *do-statement* (§13.9.3), or *for-statement* (§13.9.4) is a *boolean-expression*. The controlling conditional expression of the `?:` operator (§12.15) follows the same rules as a *boolean-expression*, but for reasons of operator precedence is classified as a *conditional-or-expression*.
 
-A *boolean-expression *E is required to be able to produce a value of type bool, as follows:
+A *boolean-expression* `E` is required to be able to produce a value of type `bool`, as follows:
 
-- If E is implicitly convertible to bool then at run-time that implicit conversion is applied.
-
-- Otherwise, unary operator overload resolution (§12.4.4) is used to find a unique best implementation of operator true on E, and that implementation is applied at run-time.
-
+- If `E` is implicitly convertible to `bool` then at run-time that implicit conversion is applied.
+- Otherwise, unary operator overload resolution (§12.4.4) is used to find a unique best implementation of operator true on `E`, and that implementation is applied at run-time.
 - If no such operator is found, a binding-time error occurs.
 
 # Statements
 
 ## General
 
-C# provides a variety of statements. \[*Note*: Most of these statements will be familiar to developers who have programmed in C and C++. *end note*\]
+C# provides a variety of statements. 
 
-[]{#Grammar_statement .anchor}statement:
-labeled-statement
-declaration-statement
-embedded-statement
+> [!NOTE]
+> Most of these statements will be familiar to developers who have programmed in C and C++.
 
-[]{#Grammar_embedded_statement .anchor}embedded-statement:
-block
-empty-statement
-expression-statement
-selection-statement
-iteration-statement
-jump-statement
-try-statement
-checked-statement
-unchecked-statement
-lock-statement
-using-statement
-yield-statement
+```antlr
+statement:
+    labeled-statement
+    declaration-statement
+    embedded-statement
+
+embedded-statement:
+    block
+    empty-statement
+    expression-statement
+    selection-statement
+    iteration-statement
+    jump-statement
+    try-statement
+    checked-statement
+    unchecked-statement
+    lock-statement
+    using-statement
+    yield-statement
+```
 
 The *embedded-statement* nonterminal is used for statements that appear within other statements. The use of *embedded-statement* rather than *statement* excludes the use of declaration statements and labeled statements in these contexts. [*Example*: The code
 
-void F(bool b) {
-if (b)
-int i = 44;
+```csharp
+void F (bool b)
+{
+    if (b)
+        int i = 44;
 }
+```
 
-results in a compile-time error because an if statement requires an *embedded-statement* rather than a *statement* for its if branch. If this code were permitted, then the variable i would be declared, but it could never be used. Note, however, that by placing i’s declaration in a block, the example is valid. *end example*]
+results in a compile-time error because an if statement requires an *embedded-statement* rather than a *statement* for its if branch. If this code were permitted, then the variable `i` would be declared, but it could never be used. Note, however, that by placing `i`’s declaration in a block, the example is valid. *end example*]
 
 ## End points and reachability
 
@@ -12339,62 +12478,71 @@ If a statement can possibly be reached by execution, the statement is said to be
 
 [*Example*: In the following code
 
-void F() {
-Console.WriteLine("reachable");
-goto Label;
-Console.WriteLine("unreachable");
-Label:
-Console.WriteLine("reachable");
+```csharp
+void F ()
+{
+    Console.WriteLine ("reachable");
+    goto Label;
+    Console.WriteLine ("unreachable");
+    Label:
+        Console.WriteLine ("reachable");
 }
+```
 
-the second invocation of Console.WriteLine is unreachable because there is no possibility that the statement will be executed. *end example*]
+the second invocation of `Console.WriteLine` is unreachable because there is no possibility that the statement will be executed. *end example*]
 
 A warning is reported if the compiler determines that a statement is unreachable. It is specifically not an error for a statement to be unreachable.
 
-\[*Note*: To determine whether a particular statement or end point is reachable, the compiler performs flow analysis according to the reachability rules defined for each statement. The flow analysis takes into account the values of constant expressions (§12.20) that control the behavior of statements, but the possible values of non-constant expressions are not considered. In other words, for purposes of control flow analysis, a non-constant expression of a given type is considered to have any possible value of that type.
-
-In the example
-
-void F() {
-const int i = 1;
-if (i == 2) Console.WriteLine("unreachable");
-}
-
-the Boolean expression of the if statement is a constant expression because both operands of the == operator are constants. As the constant expression is evaluated at compile-time, producing the value false, the Console.WriteLine invocation is considered unreachable. However, if i is changed to be a local variable
-
-void F() {
-int i = 1;
-if (i == 2) Console.WriteLine("reachable");
-}
-
-the Console.WriteLine invocation is considered reachable, even though, in reality, it will never be executed. *end note*\]
+> [!NOTE]
+> To determine whether a particular statement or end point is reachable, the compiler performs flow analysis according to the reachability rules defined for each statement. The flow analysis takes into account the values of constant expressions (§12.20) that control the behavior of statements, but the possible values of non-constant expressions are not considered. In other words, for purposes of control flow analysis, a non-constant expression of a given type is considered to have any possible value of that type.
+> 
+> In the example
+> 
+> ```csharp
+> void F ()
+> {
+>     const int i = 1;
+>     if (i == 2) Console.WriteLine ("unreachable");
+> }
+> ```
+> 
+> the `Boolean` expression of the if statement is a constant expression because both operands of the `==` operator are constants. As the constant expression is evaluated at compile-time, producing the value false, the `Console.WriteLine` invocation is considered unreachable. However, if `i` is changed to be a local variable
+> 
+> ```csharp
+> void F ()
+> {
+>     int i = 1;
+>     if (i == 2) Console.WriteLine ("reachable");
+> }
+> ```
+> 
+> the `Console.WriteLine` invocation is considered reachable, even though, in reality, it will never be executed.
 
 The *block* of a function member or an anonymous function is always considered reachable. By successively evaluating the reachability rules of each statement in a block, the reachability of any given statement can be determined.
 
 [*Example*: In the following code
 
-void F(int x) {
-Console.WriteLine("start");
-if (x < 0) Console.WriteLine("negative");
+```csharp
+void F (int x)
+{
+    Console.WriteLine ("start");
+    if (x < 0) Console.WriteLine ("negative");
 }
+```
 
-the reachability of the second Console.WriteLine is determined as follows:
+the reachability of the second `Console.WriteLine` is determined as follows:
 
-- The first Console.WriteLine expression statement is reachable because the block of the F method is reachable (§13.3).
-
-- The end point of the first Console.WriteLine expression statement is reachable because that statement is reachable (§13.7 and §13.3).
-
-- The if statement is reachable because the end point of the first Console.WriteLine expression statement is reachable (§13.7 and §13.3).
-
-- The second Console.WriteLine expression statement is reachable because the Boolean expression of the if statement does not have the constant value false.
+- The first `Console.WriteLine` expression statement is reachable because the block of the `F` method is reachable (§13.3).
+- The end point of the first `Console.WriteLine` expression statement is reachable because that statement is reachable (§13.7 and §13.3).
+- The `if` statement is reachable because the end point of the first `Console.WriteLine` expression statement is reachable (§13.7 and §13.3).
+- The second `Console.WriteLine` expression statement is reachable because the `Boolean` expression of the if statement does not have the constant value false.
 
 *end example*]
 
 There are two situations in which it is a compile-time error for the end point of a statement to be reachable:
 
-- Because the switch statement does not permit a switch section to “fall through” to the next switch section, it is a compile-time error for the end point of the statement list of a switch section to be reachable. If this error occurs, it is typically an indication that a break statement is missing.
-
-- It is a compile-time error for the end point of the block of a function member or an anonymous function that computes a value to be reachable. If this error occurs, it typically is an indication that a return statement is missing (§13.10.5).
+- Because the `switch` statement does not permit a `switch` section to “fall through” to the next `switch` section, it is a compile-time error for the end point of the statement list of a `switch` section to be reachable. If this error occurs, it is typically an indication that a `break` statement is missing.
+- It is a compile-time error for the end point of the block of a function member or an anonymous function that computes a value to be reachable. If this error occurs, it typically is an indication that a `return` statement is missing (§13.10.5).
 
 ## Blocks
 
@@ -12402,8 +12550,10 @@ There are two situations in which it is a compile-time error for the end point o
 
 A *block* permits multiple statements to be written in contexts where a single statement is allowed.
 
-[]{#Grammar_block .anchor}block:
-*{* statement-listopt *}*
+```antlr
+block:
+    { statement-listopt }
+```
 
 A *block* consists of an optional *statement-list* (§13.3.2), enclosed in braces. If the statement list is omitted, the block is said to be empty.
 
@@ -12414,7 +12564,6 @@ Within a block, the meaning of a name used in an expression context shall always
 A block is executed as follows:
 
 - If the block is empty, control is transferred to the end point of the block.
-
 - If the block is not empty, control is transferred to the statement list. When and if control reaches the end point of the statement list, control is transferred to the end point of the block.
 
 The statement list of a block is reachable if the block itself is reachable.
@@ -12423,26 +12572,25 @@ The end point of a block is reachable if the block is empty or if the end point 
 
 A *block* that contains one or more yield statements (§13.15) is called an iterator block. Iterator blocks are used to implement function members as iterators (§15.14). Some additional restrictions apply to iterator blocks:
 
-- It is a compile-time error for a return statement to appear in an iterator block (but yield return statements are permitted).
-
-- It is a compile-time error for an iterator block to contain an unsafe context (§23.2). An iterator block always defines a safe context, even when its declaration is nested in an unsafe context.
+- It is a compile-time error for a return statement to appear in an iterator block (but `yield return` statements are permitted).
+- It is a compile-time error for an iterator block to contain an `unsafe` context (§23.2). An iterator block always defines a safe context, even when its declaration is nested in an `unsafe` context.
 
 ### Statement lists
 
 A ***statement list*** consists of one or more statements written in sequence. Statement lists occur in *block*s (§13.3) and in *switch-block*s (§13.8.3).
 
-[]{#Grammar_statement_list .anchor}statement-list:
-statement
-statement-list statement
+```antlr
+statement-list:
+    statement
+    statement-list statement
+```
 
 A statement list is executed by transferring control to the first statement. When and if control reaches the end point of a statement, control is transferred to the next statement. When and if control reaches the end point of the last statement, control is transferred to the end point of the statement list.
 
 A statement in a statement list is reachable if at least one of the following is true:
 
 - The statement is the first statement and the statement list itself is reachable.
-
 - The end point of the preceding statement is reachable.
-
 - The statement is a labeled statement and the label is referenced by a reachable goto statement.
 
 The end point of a statement list is reachable if the end point of the last statement in the list is reachable.
@@ -12451,8 +12599,10 @@ The end point of a statement list is reachable if the end point of the last stat
 
 An *empty-statement* does nothing.
 
-[]{#Grammar_empty_statement .anchor}empty-statement:
-*;*
+```antlr
+empty-statement:
+    ;
+```
 
 An empty statement is used when there are no operations to perform in a context where a statement is required.
 
@@ -12460,50 +12610,63 @@ Execution of an empty statement simply transfers control to the end point of the
 
 [*Example*: An empty statement can be used when writing a while statement with a null body:
 
-bool ProcessMessage() {…}
+```csharp
+bool ProcessMessage () {…}
 
-void ProcessMessages() {
-while (ProcessMessage())
-;
+void ProcessMessages ()
+{
+    while (ProcessMessage ())
+    ;
 }
+```
 
-Also, an empty statement can be used to declare a label just before the closing “}” of a block:
+Also, an empty statement can be used to declare a label just before the closing “`}`” of a block:
 
-void F() {
-…
+```csharp
+void F ()
+{
+    …
 
-if (done) goto exit;
-…
+    if (done) goto exit;
+    …
 
-exit: ;
+    exit: ;
 }
-
-[[]{#_Toc497631513 .anchor}]{#_Ref471972610 .anchor}*end example*]
+```
+*end example*]
 
 ## Labeled statements
 
 A *labeled-statement* permits a statement to be prefixed by a label. Labeled statements are permitted in blocks, but are not permitted as embedded statements.
 
-[]{#Grammar_labeled_statement .anchor}labeled-statement:
-identifier *:* statement
+```antlr
+labeled-statement:
+    identifier : statement
+```
 
 A labeled statement declares a label with the name given by the *identifier*. The scope of a label is the whole block in which the label is declared, including any nested blocks. It is a compile-time error for two labels with the same name to have overlapping scopes.
 
-A label can be referenced from goto statements (§13.10.4) within the scope of the label. \[*Note*: This means that goto statements can transfer control within blocks and out of blocks, but never into blocks. *end note*\]
+A label can be referenced from goto statements (§13.10.4) within the scope of the label. 
+
+> [!NOTE]
+> This means that goto statements can transfer control within blocks and out of blocks, but never into blocks.
 
 Labels have their own declaration space and do not interfere with other identifiers. [*Example*: The example
 
-int F(int x) {
-if (x >= 0) goto x;
-x = -x;
-x: return x;
+```csharp
+int F (int x)
+{
+    if (x >= 0) goto x;
+    x = -x;
+    x : return x;
 }
+```
 
-is valid and uses the name x as both a parameter and a label.[]{#_Toc445783018 .anchor} *end example*]
+is valid and uses the name `x` as both a parameter and a label. *end example*]
 
 Execution of a labeled statement corresponds exactly to execution of the statement following the label.
 
-In addition to the reachability provided by normal flow of control, a labeled statement is reachable if the label is referenced by a reachable goto statement, unless the goto statement is inside the try block or a catch block of a *try-statement* that includes a finally block whose end point is unreachable, and the labeled statement is outside the *try-statement*.
+In addition to the reachability provided by normal flow of control, a labeled statement is reachable if the label is referenced by a reachable `goto` statement, unless the `goto` statement is inside the `try` block or a `catch` block of a *try-statement* that includes a `finally` block whose end point is unreachable, and the labeled statement is outside the *try-statement*.
 
 ## Declaration statements
 
@@ -12511,54 +12674,56 @@ In addition to the reachability provided by normal flow of control, a labeled st
 
 A *declaration-statement* declares a local variable or constant. Declaration statements are permitted in blocks, but are not permitted as embedded statements.
 
-[]{#Grammar_declaration_statement .anchor}declaration-statement:
-local-variable-declaration *;*
-local-constant-declaration *;*
+```antlr
+declaration-statement:
+    local-variable-declaration ;
+    local-constant-declaration ;
+```
 
 ### Local variable declarations
 
 A *local-variable-declaration* declares one or more local variables.
 
-[]{#Grammar_local_variable_declaration .anchor}local-variable-declaration:
-local-variable-type local-variable-declarators
+```antlr
+local-variable-declaration:
+    local-variable-type local-variable-declarators
 
-[]{#Grammar_local_variable_type .anchor}local-variable-type:
-type
-var
+local-variable-type:
+    type
+    var
 
-[]{#Grammar_local_variable_declarators .anchor}local-variable-declarators:
-local-variable-declarator
-local-variable-declarators *,* local-variable-declarator
+local-variable-declarators:
+    local-variable-declarator
+    local-variable-declarators , local-variable-declarator
 
-[]{#Grammar_local_variable_declarator .anchor}local-variable-declarator:
-identifier
-identifier = local-variable-initializer
+local-variable-declarator:
+    identifier
+    identifier = local-variable-initializer
 
-[]{#Grammar_local_variable_initializer .anchor}local-variable-initialize[]{#_Toc445783019 .anchor}r:
-expression
-array-initializer
+local-variable-initializer:
+    expression
+    array-initializer
+```
 
-The *local-variable-type* of a *local-variable-declaration* either directly specifies the type of the variables introduced by the declaration, or indicates with the identifier var that the type should be inferred based on an initializer. The type is followed by a list of *local-variable-declarator*s, each of which introduces a new variable. A *local-variable-declarator* consists of an *identifier* that names the variable, optionally followed by an “=” token and a *local-variable-initializer* that gives the initial value of the variable.
+The *local-variable-type* of a *local-variable-declaration* either directly specifies the type of the variables introduced by the declaration, or indicates with the identifier var that the type should be inferred based on an initializer. The type is followed by a list of *local-variable-declarator*s, each of which introduces a new variable. A *local-variable-declarator* consists of an *identifier* that names the variable, optionally followed by an “`=`” token and a *local-variable-initializer* that gives the initial value of the variable.
 
-In the context of a local variable declaration, the identifier var acts as a contextual keyword (§7.4.4).When the *local-variable-type* is specified as var and no type named var is in scope, the declaration is an ***implicitly typed local variable declaration***, whose type is inferred from the type of the associated initializer expression. Implicitly typed local variable declarations are subject to the following restrictions:
+In the context of a local variable declaration, the identifier `var` acts as a contextual keyword (§7.4.4).When the *local-variable-type* is specified as `var` and no type named `var` is in scope, the declaration is an ***implicitly typed local variable declaration***, whose type is inferred from the type of the associated initializer expression. Implicitly typed local variable declarations are subject to the following restrictions:
 
 - The *local-variable-declaration* cannot include multiple *local-variable-declarator*s.
-
 - The *local-variable-declarator* shall include a *local-variable-initializer*.
-
 - The *local-variable-initializer* shall be an *expression*.
-
 - The initializer *expression* shall have a compile-time type.
-
 - The initializer *expression* cannot refer to the declared variable itself
 
 [*Example*: The following are incorrect implicitly typed local variable declarations:
 
+```csharp
 var x; // Error, no initializer to infer type from
-var y = {1, 2, 3}; // Error, array initializer not permitted
+var y = { 1, 2, 3 }; // Error, array initializer not permitted
 var z = null; // Error, null does not have a type
 var u = x => x + 1; // Error, anonymous functions do not have a type
 var v = v++; // Error, initializer cannot refer to v itself
+```
 
 *end example*]
 
@@ -12570,35 +12735,47 @@ A local variable declaration that declares multiple variables is equivalent to m
 
 [*Example*: The example
 
-void F() {
-int x = 1, y, z = x \* 2;
+```csharp
+void F ()
+{
+    int x = 1, y, z = x * 2;
 }
+```
 
 corresponds exactly to
 
-void F() {
-int x; x = 1;
-int y;
-int z; z = x \* 2;
+```csharp
+void F ()
+{
+    int x;
+    x = 1;
+    int y;
+    int z;
+    z = x * 2;
 }
+```
 
 *end example*]
 
 In an implicitly typed local variable declaration, the type of the local variable being declared is taken to be the same as the type of the expression used to initialize the variable. [*Example*:
 
+```csharp
 var i = 5;
 var s = "Hello";
 var d = 1.0;
-var numbers = new int\[\] {1, 2, 3};
-var orders = new Dictionary<int,Order>();
+var numbers = new int[] { 1, 2, 3 };
+var orders = new Dictionary<int, Order> ();
+```
 
 The implicitly typed local variable declarations above are precisely equivalent to the following explicitly typed declarations:
 
+```csharp
 int i = 5;
 string s = "Hello";
 double d = 1.0;
-int\[\] numbers = new int\[\] {1, 2, 3};
-Dictionary<int,Order> orders = new Dictionary<int,Order>();
+int[] numbers = new int[] { 1, 2, 3 };
+Dictionary<int, Order> orders = new Dictionary<int, Order> ();
+```
 
 *end example*]
 
@@ -12606,17 +12783,19 @@ Dictionary<int,Order> orders = new Dictionary<int,Order>();
 
 A *local-constant-declaration* declares one or more local constants.
 
-[]{#Grammar_local_constant_declaration .anchor}local-constant-declaration:
-*const* type constant-declarators
+```antlr
+local-constant-declaration:
+    const type constant-declarators
 
 constant-declarators:
-constant-declarator
-constant-declarators *,* constant-declarator
+    constant-declarator
+    constant-declarators , constant-declarator
 
 constant-declarator:
-identifier = constant-expression
+    identifier = constant-expression
+```
 
-[[]{#_Ref450638231 .anchor}]{#_Toc445783021 .anchor}The *type* of a *local-constant-declaration* specifies the type of the constants introduced by the declaration. The type is followed by a list of *constant-declarator*s, each of which introduces a new constant. A *constant-declarator* consists of an *identifier* that names the constant, followed by an “=” token, followed by a *constant-expression* (§12.20) that gives the value of the constant.
+The *type* of a *local-constant-declaration* specifies the type of the constants introduced by the declaration. The type is followed by a list of *constant-declarator*s, each of which introduces a new constant. A *constant-declarator* consists of an *identifier* that names the constant, followed by an “`=`” token, followed by a *constant-expression* (§12.20) that gives the value of the constant.
 
 The *type* and *constant-expression* of a local constant declaration shall follow the same rules as those of a constant member declaration (§15.4).
 
@@ -12630,20 +12809,25 @@ A local constant declaration that declares multiple constants is equivalent to m
 
 An *expression-statement* evaluates a given expression. The value computed by the expression, if any, is discarded.
 
-[]{#Grammar_expression_statement .anchor}expression-statement:
-statement-expression *;*
+```antlr
+expression-statement:
+    statement-expression ;
 
 []{#Grammar_statement_expression .anchor}statement-expression:
-invocation-expression
-object-creation-expression
-assignment
-post-increment-expression
-post-decrement-expression
-pre-increment-expression
-pre-decrement-expression
-await-expression
+    invocation-expression
+    object-creation-expression
+    assignment
+    post-increment-expression
+    post-decrement-expression
+    pre-increment-expression
+    pre-decrement-expression
+    await-expression
+```
 
-Not all expressions are permitted as statements. \[*Note*: In particular, expressions such as x + y and x == 1, that merely compute a value (which will be discarded), are not permitted as statements. *end note*\]
+Not all expressions are permitted as statements. 
+
+> [!NOTE]
+> In particular, expressions such as `x + y` and `x == 1`, that merely compute a value (which will be discarded), are not permitted as statements.
 
 Execution of an expression statement evaluates the contained expression and then transfers control to the end point of the expression statement. The end point of an *expression-statement* is reachable if that *expression-statement* is reachable.
 
@@ -12653,233 +12837,250 @@ Execution of an expression statement evaluates the contained expression and then
 
 Selection statements select one of a number of possible statements for execution based on the value of some expression.
 
-[]{#Grammar_selection_statement .anchor}selection-statement:
-if-statement
-switch-statement
+```antlr
+selection-statement:
+    if-statement
+    switch-statement
+```
 
 ### The if statement
 
-The if statement selects a statement for execution based on the value of a Boolean expression.
+The `if` statement selects a statement for execution based on the value of a `Boolean` expression.
 
-[]{#Grammar_if_statement .anchor}if-statement:
-*if* *(* boolean-expression *)* embedded-statement
-*if* *(* boolean-expression *)* embedded-statement *else* embedded-statement
+```antlr
+if-statement:
+    if ( boolean-expression ) embedded-statement
+    if ( boolean-expression ) embedded-statement else embedded-statement
+```
 
-[]{#_Toc445783024 .anchor}An else part is associated with the lexically nearest preceding if that is allowed by the syntax. [*Example*: Thus, an if statement of the form
+An `else` part is associated with the lexically nearest preceding if that is allowed by the syntax. [*Example*: Thus, an `if` statement of the form
 
+```csharp
 if (x) if (y) F(); else G();
+```
 
 is equivalent to
 
-if (x) {
-if (y) {
-F();
+```csharp
+if (x)
+{
+    if (y)
+    {
+        F ();
+    }
+    else
+    {
+        G ();
+    }
 }
-else {
-G();
-}
-}
+```
 
 *end example*]
 
-An if statement is executed as follows:
+An `if` statement is executed as follows:
 
 - The *boolean-expression* (§12.21) is evaluated.
+- If the `Boolean` expression yields `true`, control is transferred to the first embedded statement. When and if control reaches the end point of that statement, control is transferred to the end point of the `if` statement.
+- If the `Boolean` expression yields `false` and if an `else` part is present, control is transferred to the second embedded statement. When and if control reaches the end point of that statement, control is transferred to the end point of the `if` statement.
+- If the `Boolean` expression yields `false` and if an `else` part is not present, control is transferred to the end point of the `if` statement.
 
-- If the Boolean expression yields true, control is transferred to the first embedded statement. When and if control reaches the end point of that statement, control is transferred to the end point of the if statement.
+The first embedded statement of an `if` statement is reachable if the `if` statement is reachable and the `Boolean` expression does not have the constant value `false`.
 
-- If the Boolean expression yields false and if an else part is present, control is transferred to the second embedded statement. When and if control reaches the end point of that statement, control is transferred to the end point of the if statement.
-
-- If the Boolean expression yields false and if an else part is not present, control is transferred to the end point of the if statement.
-
-The first embedded statement of an if statement is reachable if the if statement is reachable and the Boolean expression does not have the constant value false.
-
-The second embedded statement of an if statement, if present, is reachable if the if statement is reachable and the Boolean expression does not have the constant value true.
+The second embedded statement of an `if` statement, if present, is reachable if the `if` statement is reachable and the `Boolean` expression does not have the constant value `true`.
 
 The end point of an if statement is reachable if the end point of at least one of its embedded statements is reachable. In addition, the end point of an if statement with no else part is reachable if the if statement is reachable and the Boolean expression does not have the constant value true.
 
 ### The switch statement
 
-The switch statement selects for execution a statement list having an associated switch label that corresponds to the value of the switch expression.
+The `switch` statement selects for execution a statement list having an associated `switch` label that corresponds to the value of the `switch` expression.
 
-[]{#Grammar_switch_statement .anchor}switch-statement:
-*switch* *(* expression *)* switch-block
+```antlr
+switch-statement:
+    switch ( expression ) switch-block
 
-[]{#Grammar_switch_block .anchor}switch-block:
-*{* switch-sectionsopt *}*
+switch-block:
+    { switch-sectionsopt }
 
-[]{#Grammar_switch_sections .anchor}switch-sections:
-switch-section
-switch-sections switch-section
+switch-sections:
+    switch-section
+    switch-sections switch-section
 
-[]{#Grammar_switch_section .anchor}switch-section:
-switch-labels statement-list
+switch-section:
+    switch-labels statement-list
 
-[]{#Grammar_switch_labels .anchor}switch-labels:
-switch-label
-switch-labels switch-label
+switch-labels:
+    switch-label
+    switch-labels switch-label
 
-[]{#Grammar_switch_label .anchor}switch-label:
-*case* constant-expression *:*
-*default* *:*
+switch-label:
+    case constant-expression :
+    default :
+```
 
-[]{#_Toc445783025 .anchor}A *switch-statement* consists of the keyword switch, followed by a parenthesized expression (called the ***switch expression***), followed by a *switch-block*. The *switch-block* consists of zero or more *switch-section*s, enclosed in braces. Each *switch-section* consists of one or more *switch-labels* followed by a *statement-list* (§13.3.2).
+A *switch-statement* consists of the keyword `switch`, followed by a parenthesized expression (called the ***switch expression***), followed by a *switch-block*. The *switch-block* consists of zero or more *switch-section*s, enclosed in braces. Each *switch-section* consists of one or more *switch-labels* followed by a *statement-list* (§13.3.2).
 
-The ***governing type*** of a switch statement is established by the switch expression.
+The ***governing type*** of a `switch` statement is established by the `switch` expression.
 
-- If the type of the switch expression is sbyte, byte, short, ushort, int, uint, long, ulong, char, bool, string, or an enum-type, or if it is the nullable value type corresponding to one of these types, then that is the governing type of the switch statement.
-
-- Otherwise, exactly one user-defined implicit conversion shall exist from the type of the switch expression to one of the following possible governing types: sbyte, byte, short, ushort, int, uint, long, ulong, char, string, or, a nullable value type corresponding to one of those types.
-
+- If the type of the `switch` expression is `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `bool`, `string`, or an enum-type, or if it is the nullable value type corresponding to one of these types, then that is the governing type of the `switch` statement.
+- Otherwise, exactly one user-defined implicit conversion shall exist from the type of the `switch` expression to one of the following possible governing types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `string`, or, a nullable value type corresponding to one of those types.
 - Otherwise, a compile-time error occurs.
 
-The constant expression of each case label shall denote a value of a type that is implicitly convertible (§11.2) to the governing type of the switch statement. A compile-time error occurs if two or more case labels in the same switch statement specify the same constant value.
+The constant expression of each case label shall denote a value of a type that is implicitly convertible (§11.2) to the governing type of the `switch` statement. A compile-time error occurs if two or more case labels in the same `switch` statement specify the same constant value.
 
-There can be at most one default label in a switch statement.
+There can be at most one default label in a `switch` statement.
 
-A switch statement is executed as follows:
+A `switch` statement is executed as follows:
 
-- The switch expression is evaluated and converted to the governing type.
+- The `switch` expression is evaluated and converted to the governing type.
+- If one of the constants specified in a case label in the same `switch` statement is equal to the value of the `switch` expression, control is transferred to the statement list following the matched case label.
+- If none of the constants specified in case labels in the same `switch` statement is equal to the value of the `switch` expression, and if a default label is present, control is transferred to the statement list following the `default` label.
+- If none of the constants specified in case labels in the same `switch` statement is equal to the value of the `switch` expression, and if no `default` label is present, control is transferred to the end point of the `switch` statement.
 
-- If one of the constants specified in a case label in the same switch statement is equal to the value of the switch expression, control is transferred to the statement list following the matched case label.
+If the end point of the statement list of a `switch` section is reachable, a compile-time error occurs. This is known as the “no fall through” rule. [*Example*: The example
 
-- If none of the constants specified in case labels in the same switch statement is equal to the value of the switch expression, and if a default label is present, control is transferred to the statement list following the default label.
-
-- If none of the constants specified in case labels in the same switch statement is equal to the value of the switch expression, and if no default label is present, control is transferred to the end point of the switch statement.
-
-If the end point of the statement list of a switch section is reachable, a compile-time error occurs. This is known as the “no fall through” rule. [*Example*: The example
-
-switch (i) {
-case 0:
-CaseZero();
-break;
-case 1:
-CaseOne();
-break;
-default:
-CaseOthers();
-break;
+```csharp
+switch (i)
+{
+    case 0:
+        CaseZero ();
+        break;
+    case 1:
+        CaseOne ();
+        break;
+    default:
+        CaseOthers ();
+        break;
 }
+```
 
-is valid because no switch section has a reachable end point. Unlike C and C++, execution of a switch section is not permitted to “fall through” to the next switch section, and the example
+is valid because no `switch` section has a reachable end point. Unlike C and C++, execution of a `switch` section is not permitted to “fall through” to the next `switch` section, and the example
 
-switch (i) {
-case 0:
-CaseZero();
-case 1:
-CaseZeroOrOne();
-default:
-CaseAny();
+```csharp
+switch (i)
+{
+    case 0:
+        CaseZero ();
+    case 1:
+        CaseZeroOrOne ();
+    default:
+        CaseAny ();
 }
+```
 
-results in a compile-time error. When execution of a switch section is to be followed by execution of another switch section, an explicit goto case or goto default statement shall be used:
+results in a compile-time error. When execution of a `switch` section is to be followed by execution of another `switch` section, an explicit goto case or goto default statement shall be used:
 
-switch (i) {
-case 0:
-CaseZero();
-goto case 1;
-case 1:
-CaseZeroOrOne();
-goto default;
-default:
-CaseAny();
-break;
+```csharp
+switch (i)
+{
+    case 0:
+        CaseZero ();
+        goto case 1;
+    case 1:
+        CaseZeroOrOne ();
+        goto default;
+    default:
+        CaseAny ();
+        break;
 }
+```
 
 *end example*]
 
 Multiple labels are permitted in a *switch-section*. [*Example*: The example
 
+```csharp
 switch (i) {
 case 0:
-CaseZero();
-break;
+    CaseZero ();
+    break;
 case 1:
-CaseOne();
-break;
+    CaseOne ();
+    break;
 case 2:
 default:
-CaseTwo();
-break;
+    CaseTwo ();
+    break;
+    }
+```
+
+is valid. The example does not violate the “no fall through” rule because the labels `case 2:` and `default:` are part of the same *switch-section*. *end example*]
+
+> [!NOTE]
+> The “no fall through” rule prevents a common class of bugs that occur in C and C++ when break statements are accidentally omitted. For example, the sections of the switch statement above can be reversed without affecting the behavior of the statement:
+> 
+> switch (i)
+> {
+>     default : CaseAny ();
+>     break;
+>     case 1:
+>             CaseZeroOrOne ();
+>         goto default;
+>     case 0:
+>             CaseZero ();
+>         goto case 1;
+> }
+> 
+
+> [!NOTE]
+> The statement list of a switch section typically ends in a break, goto case, or goto default statement, but any construct that renders the end point of the statement list unreachable is permitted. For example, a while statement controlled by the Boolean expression true is known to never reach its end point. Likewise, a throw or return statement always transfers control elsewhere and never reaches its end point. Thus, the following example is valid:
+> 
+> switch (i)
+> {
+>     case 0:
+>         while (true) F ();
+>     case 1:
+>         throw new ArgumentException ();
+>     case 2:
+>         return;
+> }
+> 
+
+[*Example*: The governing type of a switch statement can be the type `string`. For example:
+
+```csharp
+void DoCommand (string command)
+{
+    switch (command.ToLower ())
+    {
+        case "run":
+            DoRun ();
+            break;
+        case "save":
+            DoSave ();
+            break;
+        case "quit":
+            DoQuit ();
+            break;
+        default:
+            InvalidCommand (command);
+            break;
+    }
 }
-
-is valid. The example does not violate the “no fall through” rule because the labels case 2: and default: are part of the same *switch-section*. *end example*]
-
-\[*Note*: The “no fall through” rule prevents a common class of bugs that occur in C and C++ when break statements are accidentally omitted. For example, the sections of the switch statement above can be reversed without affecting the behavior of the statement:
-
-switch (i) {
-default:
-CaseAny();
-break;
-case 1:
-CaseZeroOrOne();
-goto default;
-case 0:
-CaseZero();
-goto case 1;
-}
-
-*end note*\]
-
-\[*Note*: The statement list of a switch section typically ends in a break, goto case, or goto default statement, but any construct that renders the end point of the statement list unreachable is permitted. For example, a while statement controlled by the Boolean expression true is known to never reach its end point. Likewise, a throw or return statement always transfers control elsewhere and never reaches its end point. Thus, the following example is valid:
-
-switch (i) {
-case 0:
-while (true) F();
-case 1:
-throw new ArgumentException();
-case 2:
-return;
-}
-
-*end note*\]
-
-[*Example*: The governing type of a switch statement can be the type string. For example:
-
-void DoCommand(string command) {
-switch (command.ToLower()) {
-case "run":
-DoRun();
-break;
-case "save":
-DoSave();
-break;
-case "quit":
-DoQuit();
-break;
-default:
-InvalidCommand(command);
-break;
-}
-}
+```
 
 *end example*]
 
-\[*Note*: Like the string equality operators (§12.11.8), the switch statement is case sensitive and will execute a given switch section only if the switch expression string exactly matches a case label constant. *end note*\]
+> [!NOTE]
+> Like the string equality operators (§12.11.8), the `switch` statement is case sensitive and will execute a given `switch` section only if the `switch` expression string exactly matches a case label constant.
 
-When the governing type of a switch statement is string or a nullable value type, the value null is permitted as a case label constant.
+When the governing type of a `switch` statement is `string` or a nullable value type, the value `null` is permitted as a case label constant.
 
-The *statement-list*s of a *switch-block* may contain declaration statements (§13.6). The scope of a local variable or constant declared in a switch block is the switch block.
+The *statement-list*s of a *switch-block* may contain declaration statements (§13.6). The scope of a local variable or constant declared in a `switch` block is the `switch` block.
 
-Within a switch block, the meaning of a name used in an expression context shall always be the same (§12.7.3.2).
+Within a `switch` block, the meaning of a name used in an expression context shall always be the same (§12.7.3.2).
 
-The statement list of a given switch section is reachable if the switch statement is reachable and at least one of the following is true:
+The statement list of a given `switch` section is reachable if the `switch` statement is reachable and at least one of the following is `true`:
 
-- The switch expression is a non-constant value.
+- The `switch` expression is a non-constant value.
+- The `switch` expression is a constant value that matches a case label in the `switch` section.
+- The `switch` expression is a constant value that doesn’t match any case label, and the `switch` section contains the `default` label.
+- A `switch` label of the `switch` section is referenced by a reachable goto case or goto `default` statement.
 
-- The switch expression is a constant value that matches a case label in the switch section.
+The end point of a `switch` statement is reachable if at least one of the following is `true`:
 
-- The switch expression is a constant value that doesn’t match any case label, and the switch section contains the default label.
-
-- A switch label of the switch section is referenced by a reachable goto case or goto default statement.
-
-The end point of a switch statement is reachable if at least one of the following is true:
-
-- The switch statement contains a reachable break statement that exits the switch statement.
-
-- The switch statement is reachable, the switch expression is a non-constant value, and no default label is present.
-
-- The switch statement is reachable, the switch expression is a constant value that doesn’t match any case label, and no default label is present.
+- The `switch` statement contains a reachable break statement that exits the `switch` statement.
+- The `switch` statement is reachable, the `switch` expression is a non-constant value, and no `default` label is present.
+- The `switch` statement is reachable, the `switch` expression is a constant value that doesn’t match any case label, and no `default` label is present.
 
 ## Iteration statements
 
