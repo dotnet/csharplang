@@ -27,7 +27,7 @@ decimal_integer_literal
     : decimal_digits integer_type_suffix?
     ;
 
-decimal_digits:
+decimal_digits
     : decimal_digit
     | decimal_digit decimal_digits_and_underscores? decimal_digit
     ;
@@ -36,11 +36,11 @@ decimal_digit
     : '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
     ;
 
-decimal_digits_and_underscores:
+decimal_digits_and_underscores
     : decimal_digit_or_underscore+
     ;
 
-decimal_digit_or_underscore:
+decimal_digit_or_underscore
     : decimal_digit
     | '_'
     ;
@@ -50,7 +50,7 @@ hexadecimal_integer_literal
     | '0X' hex_digits integer_type_suffix?
     ;
 
-hex_digits:
+hex_digits
     : hex_digit
     | hex_digit hex_digits_and_underscores? hex_digit
     ;
@@ -60,35 +60,35 @@ hex_digit
     | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f'
     ;
 
-hex_digits_and_underscores:
+hex_digits_and_underscores
     : hex_digit_or_underscore+
     ;
 
-hex_digit_or_underscore:
+hex_digit_or_underscore
     : hex_digit
     | '_'
     ;
 
-binary_integer_literal:
+binary_integer_literal
     : '0b' binary_digits integer_type_suffix?
     | '0B' binary_digits integer_type_suffix?
     ;
 
-binary_digits:
+binary_digits
     : binary_digit
     | binary_digit binary_digits_and_underscores? binary_digit
     ;
 
-binary_digit:
+binary_digit
     : '0'
     | '1'
     ;
 
-binary_digits_and_underscores:
+binary_digits_and_underscores
     : binary_digit_or_underscore+
     ;
 
-binary_digit_or_underscore:
+binary_digit_or_underscore
     : binary_digit
     | '_'
     ;
