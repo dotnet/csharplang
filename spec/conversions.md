@@ -79,7 +79,7 @@ In most cases, an identity conversion has no effect at runtime. However, since f
 
 The implicit numeric conversions are:
 
--   From ``sbyte`` to `short`, `int`, `long`, `float`, `double`, or `decimal`.
+-   From `sbyte` to `short`, `int`, `long`, `float`, `double`, or `decimal`.
 
 -   From `byte` to `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
 
