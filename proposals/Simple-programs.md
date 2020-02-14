@@ -98,8 +98,10 @@ compilation unit occur first. This causes it to be legal for local functions in 
 local variables in another. The order of statement contributions (which would all be local functions)
 from other compilation units is undefined.
 
-If `await` expressions and other async operations are omitted, no warning is produced. Instead the
-signature of the generated entry point method is equivalent to 
+Async operations are allowed in top-level statements to the degree they are allowed in statements within
+a regular async entry point method. However, they are not required, if `await` expressions and other async
+operations are omitted, no warning is produced. Instead the signature of the generated entry point method
+is equivalent to 
 ``` c#
     static void Main()
 ```
