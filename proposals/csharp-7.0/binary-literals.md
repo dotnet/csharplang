@@ -40,12 +40,12 @@ hex_digit
     : '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
     | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f';
 
-binary_integer_literal:
+binary_integer_literal
     : '0b' binary_digit+ integer_type_suffix?
     | '0B' binary_digit+ integer_type_suffix?
     ;
 
-binary_digit:
+binary_digit
     : '0'
     | '1'
     ;

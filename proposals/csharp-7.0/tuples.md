@@ -1,4 +1,4 @@
-# Tuples
+# Tuples 
 
 This proposal specifies the changes required to the [C# 6.0 (draft) Language specification](../../spec/introduction.md) to support *Tuples* as a new [value type](../../spec/types.md#value-types).
 
@@ -28,7 +28,12 @@ A tuple literal consists of two or more tuple literal elements, each of which is
 
 ```antlr
 tuple_literal
-    : '(' ( tuple_literal_element ',' )+ tuple_literal_element ')'
+    : '(' tuple_literal_element_list ')'
+    ;
+
+tuple_literal_element_list
+    : tuple_literal_element ',' tuple_literal_element
+    | tuple_literal_element_list ',' tuple_literal_element
     ;
 
 tuple_literal_element
@@ -47,7 +52,9 @@ var t2 = (sum: 0, count: 1);  // infer tuple type (int sum, int count) from name
 ```
 end example\]
 
-A tuple literal has a "conversion from expression" to any tuple type of the same arity, as long as each of the element expressions of the tuple literal has an implicit conversion to the type of the corresponding element of the tuple type.
+A tuple literal has a "conversion from expression" to any tuple type having the same number of elements.
+
+**ISSUE:** But what if there is no conversion of types for a given element pair?
 
 \[Example:
 ```csharp
@@ -65,9 +72,27 @@ var t = (name: "John", age: 5); // OK: The natural type is (string name, int age
 ```
 end example\]
 
-A tuple literal is *not* a [constant expression](../../spec/expressions.md#Constant-expressions). 
+A tuple literal is *not* a [constant expression](../../spec/expressions.md#Constant-expressions). As such, a tuple literal cannot be used as the default value for an optional parameter.
+
+**ISSUE:** Consider removing the second sentence above, as it sounds like just one example of usage prohibition (rather than a spec requirement); there likely are others. If that is true, either completely omit that sentence, or delete it from here and add an example showing that such a usage fails.
 
 For a discussion of tuple literals as tuple initializers, see [Tuple types](XXX).
+
+## Changes to [Types](../../spec/types.md)
+
+> The first paragraph of [Value types](../../spec/types.md#value-types) is replaced with the following text:
+
+A value type is either a `struct` type, an enumeration type, or a tuple type. C# provides a set of predefined struct types called the ***simple types***. The simple types are identified through reserved words.
+
+> The `value_type` grammar is updated to include `tuple_type`:
+
+```antlr
+value_type
+    : struct_type
+    | enum_type
+    | tuple_type // new
+    ;
+```
 
 ## Additions to [Types](../../spec/types.md)
 
@@ -77,7 +102,7 @@ For a discussion of tuple literals as tuple initializers, see [Tuple types](XXX)
 
 #### General
 
-A tuple is declared using the following syntax:
+A tuple type is declared using the following syntax:
 
 ```antlr
 tuple_type
@@ -94,7 +119,9 @@ tuple_type_element
     ;
 ```
 
-A ***tuple*** is an anonymous data structure type that contains an ordered sequence of two or more ***elements***, which are optionally named. Each element is public. If a tuple is mutable, its element values are also mutable?
+A ***tuple*** is an anonymous data structure type that contains an ordered sequence of two or more ***elements***, which are optionally named. Each element is public. 
+
+**ISSUE:** Should we say something like, "If a tuple is mutable, its element values are also mutable?" I think that is true, yet some languages might not allow tuple element values to change. Unless mutability can be deduced eleswhere, not saying it will leave it unspecified.
 
 A tuple's ***natural type*** is the combination of its element types, in lexical order, and element names, if they exist.
 
@@ -102,6 +129,8 @@ A tuple's ***arity*** is the combination of its element types, in lexical order;
  Each unique tuple arity designates a distinct tuple type.
 
 Two tuple values are equal if they have the same arity, and the values of the elements in each corresponding element pair are equal.
+
+**ISSUE:** The above covers the behavior of System.ValueTuple.Equals as well as the ==/!= operators planned for 7.3. Should we say anything about relation comparisons ala System.ValueTuple.CompareTo? My (limited) testing for that shows that the element pairs are tested in order with the first non-zero result ending the comparison; otherwise, the result is 0.
 
 An element in a tuple is accessed using the [member-access operator `.`](../../spec/expressions.md#Member-access).
 
@@ -117,6 +146,8 @@ the syntax `(int code, string message)` declares a tuple type having two element
 As shown, a tuple can be initialized using a [tuple literal](XXX).
 
 An element need not have a name. An element without a name is unnamed.
+
+**ISSUE:** Make s statement about the purpose of element names. I think they are for notational convenience only, and have no other purpose. Is that true?
 
 If a tuple declarator contains the type of all the tuple's elements, that set of types cannot be changed or augmented based on the context in which it is used; otherwise, element type information shall be inferred from the usage context. Likewise for element names.
 
@@ -187,6 +218,8 @@ System.ValueTuple<int, int> vt = t1;	// identity conversion
 ```
 end example\]
 
+The name given explicitly to any element shall not be the same as any name in the underlying type, except that an explicit name may have the form `Item`*N* provided it corresponds position-wise with an element of the same name in the underlying type.
+
 \[Example:
 ```csharp
 var t =  (ToString: 0, GetHashCode: 1);	// Error: names match underlying member names
@@ -204,24 +237,24 @@ For the purpose of overloading, overriding and hiding, tuples of the same arity,
 If the same element name is used for non-matching elements in base and derived member signatures, the implementation shall issue a warning.  
 
 ```csharp
-public class Base
+class Base
 {
-    public virtual void M1(ValueTuple<int, int> arg){...}
+    virtual void M1(ValueTuple<int, int> arg){...}
 }
-public class Derived : Base
+class Derived : Base
 {
-    public override void M1((int c, int d) arg){...}	// valid override, signatures are equivalent
+    override void M1((int c, int d) arg){...}	// valid override, signatures are equivalent
 }
-public class Derived2 : Derived 
+class Derived2 : Derived 
 {
-    public override void M1((int c1, int c) arg){...}	// also valid, warning on possible misuse of name 'c' 
+    override void M1((int c1, int c) arg){...}	// also valid, warning on possible misuse of name 'c' 
 }
 
-public class InvalidOverloading 
+class InvalidOverloading 
 {
-    public virtual void M1((int c, int d) arg){...}
-    public virtual void M1((int x, int y) arg){...}		// invalid overload, signatures are eqivalent
-    public virtual void M1(ValueTuple<int, int> arg){...}	// also invalid
+    virtual void M1((int c, int d) arg){...}
+    virtual void M1((int x, int y) arg){...}		// invalid overload, signatures are eqivalent
+    virtual void M1(ValueTuple<int, int> arg){...}	// also invalid
 }
 ```
 
@@ -242,7 +275,11 @@ end example\]
 
 > Add the following text at the end of the [Variables](../../spec/variables.md) section.
 
+**ISSUE:** see my commetns later w.r.t deconstruction, assignment, patterns, and section organization
+
 ## Discards
+
+**ISSUE:** We need a definition for "discard" 
 
 The identifier `_` can be used as a *discard* in the following circumstances:
 
@@ -299,9 +336,11 @@ Tuples have a boxing conversion. Importantly, the element names aren't part of t
 
 Tuple types and expressions support a variety of conversions by "lifting" conversions of the elements into overall *tuple conversion*. For the classification purpose, all element conversions are considered recursively. For example, to have an implicit conversion, all element expressions/types shall have implicit conversions to the corresponding element types.
 
-Tuple conversions are *Standard Conversions*.
+Tuple conversions are *Standard Conversions* and therefore can stack with user-defined operators to form user-defined conversions.
 
-An implicit tuple conversion is a standard conversion. It applies from one tuple type to another of equal arity when  here is any implicit conversion from each element in the source tuple to the corresponding element in the destination tuple.
+**ISSUE:** Is 'stack' a defined term in this context?
+
+An implicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any implicit conversion between each corresponding pair of element types.
 
 An explicit tuple conversion is a standard conversion. It applies between two tuple types of equal arity when there is any explicit conversion between each corresponding pair of element types.
 
@@ -309,11 +348,11 @@ A tuple conversion can be classified as a valid instance conversion or an extens
 
 On top of the member-wise conversions implied by implicit typing, implicit conversions between tuple types themselves are allowed.
 
-### Tuple Literal Conversion
+### Implicit typing
 
 > Add this section after [Anonymous function conversions and method group conversions](../../spec.md#Anonymous-function-conversions-and-method-group-conversions)
 
-A tuple literal is implicitly typed when used in a context specifying a tuple type. The tuple literal has a "conversion from expression" to any tuple type of the same arity, as long as the element expressions of the tuple literal have an implicit conversion to the corresponding element types of the tuple type.
+A tuple literal is implictly typed when used in a context specifying a tuple type. The tuple literal has a "conversion from expression" to any tuple type, as long as the element expressions of the tuple literal have an implicit conversion to the corresponding element types of the tuple type.
 
 \[Example:
 ```csharp
@@ -331,7 +370,9 @@ M1((1, 2));            // first overload is used. Identity conversion is better 
 M1(("hi", "hello"));   // second overload is used. Implicit tuple conversion is better than no conversion.
 ```
 
-A successful conversion from tuple expression to a nullable tuple type is classified as *ImplicitNullable* conversion.
+Implicit typing will "see through" nullable target types. A successful conversion from tuple expression to a nullable tuple type is classified as *ImplicitNullable* conversion.
+
+**ISSUE:** Replace "see through" with something not quoted.
 
 ```csharp
 ((int x, int y, int z)?, int t)? SpaceTime()
@@ -346,13 +387,17 @@ A successful conversion from tuple expression to a nullable tuple type is classi
 
 > Add the following text after the bullet list in [Exactly matching expressions](../../spec/expressions.md#Exactly-matching-expressions):
 
-The exact-match rule for tuple expressions is based on the [natural types](XXX) of the constituent tuple elements. The rule is mutually recursive with respect to other containing or contained expressions not in a possession of a natural type.
+The exact-match rule for tuple expressions is based on the [natural types](XXX) of the constituent tuple arguments. The rule is mutually recursive with respect to other containing or contained expressions not in a possession of a natural type.
+
+**ISSUE:** The use of "argument" here doesn't seem right; arguments are passed to methods! Should it be "elements" instead?
 
 ### Deconstruction expressions
 
 > Add this section at the end of the [Expressions](../../spec/expressions.md) chapter.
 
 A tuple-deconstruction expression copies from a source tuple zero or more of its element values to corresponding destinations.
+
+**ISSUE:** I whipped up the following grammar; it needs to be made correct/complete. I'm guessing we can leverage on existing productions. Also, destination can be a declaration of a new local variable (explicit or var), or it can be the name of an existing one. My tests show that destination_list can't contain a combination of the two, however.
 
 ```antlr
 tuple_deconstruction_expression
@@ -369,7 +414,9 @@ destination
     ;
 ```
 
-Element values are copied from the source tuple to the destination(s). Each element's position is inferred from the destination position within *destination_list*. A destination with identifier `_` indicates that the corresponding element is discarded rather than being copied. The destination list shall account for every element in the tuple.
+**ISSUE:** Is this expression constrained to being only on the LHS of simple (compound?) assignment, where the RHS is a tuple having at least as many elements as positions indicated by the LHS? See also my issue later w.r.t "deconstruction assignment expressions".
+
+Element values are copied from the source tuple to the destination(s). Each element's position is inferred from the destination position within *destination_list*. A destination with identifier `_` indicates that the corresponding element is discarded rather than being copied. The destination list shall accouint for every element in the tuple.
 
 \[Example:
 ```csharp
@@ -386,7 +433,11 @@ string message;
 ```
 end example\]
 
-Any object may be deconstructed by providing an accessible `Deconstruct` method, either as an instance member or as an extension method. A `Deconstruct` method converts an object to a set of discrete values. The Deconstruct method "returns" the component values by use of individual `out` parameters. `Deconstruct` is overloadable. Consider the following:
+**ISSUE:** As this is an operator, what is the result type? `void`?
+
+**ISSUE:** Presumably the scope of any newly created variable is from the point of declaration on to the end of the block, or does this fall-out of saying its a local variable?
+
+Any object may be deconstructed by providing an accessible `Deconstruct` method, either as a member or as an extension method. A `Deconstruct` method converts an object to a set of discrete values. The Deconstruct method "returns" the component values by use of individual `out` parameters. `Deconstruct` is overloadable. Consider the following:
 
 ```csharp
 class Name
@@ -400,6 +451,8 @@ static class Extensions
     public static void Deconstruct(this Name name, out string first, out string last) { first = name.First; last = name.Last; }
 }
 ```
+
+**ISSUE:** I think we need to say more about this code (which is not an example, but is intended to show/say just what is going on/needed).
 
 Overload resolution for `Deconstruct` methods considers only the arity of the `Deconstruct` method. If multiple `Deconstruct` methods of the same arity are accessible, the expression is ambiguous and a binding-time error shall occur.
 
@@ -424,10 +477,16 @@ p.Deconstruct(out byte __x, out byte __y);
 
 The evaluation order of deconstruction assignment expressions is "breadth first":
 
+**ISSUE:** This is the first place I've seen deconstruction mentioned in the same breath as assignment. If deconstruction can only occur on the LHS of a (simple?, compound?) assignment, should deconstruction be covered under assignment rather than in its own section? If the two are in spearate sections, the expression grammar needs to have the new production, tuple_deconstruction_expression, plugged into it. From my experience with tuples, patterns, and _ wildcards in other languages, I'm thinking that the V7.0 support for tuple deconstruction is the beginning of a more general pattern support mechanism to come later. If that is the case, perhaps we should admit that and start using pattern-related terminology and organization. If so, that suggests tuple deconstruction should be separate from the assignment operator, in a (pre-)patterns section that will be expanded over future spec versions.
+
 1. Evaluate the LHS: Evaluate each of the expressions inside of it one by one, left to right, to yield side effects and establish a storage location for each.
 1. Evaluate the RHS: Evaluate each of the expressions inside of it one by one, left to right to yield side effects
 1. Convert each of the RHS expressions to the LHS types expected, one by one, left to right.
 1. Assign each of the conversion results from Step 3 to the storage locations found in (???)
+
+> **Note to reviewers**: I found this in the LDM notes for July 13-16, 2016. I don't think it is still accurate:
+
+**ISSUE:** flesh out the following example with some explantory text.
 
 \[Example:
 ```csharp
