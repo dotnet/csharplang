@@ -2,27 +2,11 @@
 
 This proposal specifies the changes required to the [C# 6.0 (draft) Language specification](../../spec/introduction.md) to support *Tuples* as a new [value type](../../spec/types.md#value-types).
 
-## Changes to [Lexical structure](../../spec/lexical-structure.md)
+## Additions to [Expressions](../../spec/expressions.md)
 
-### Literals
+> Add the following section after [xxx](xxx):
 
-> The grammar for [Literals](../../spec/lexical-structure.md#literals) is extended to include `tuple_literal`:
-
-```antlr
-literal
-    : boolean_literal
-    | integer_literal
-    | real_literal
-    | character_literal
-    | string_literal
-    | null_literal
-    | tuple_literal // new
-    ;
-```
-
-> Add the following section after [The null literal](../../spec/lexical-structure.md#The-null-literal):
-
-#### Tuple literals
+## Tuple literal expressions
 
 A tuple literal consists of two or more tuple literal elements, each of which is optionally named.
 
@@ -40,10 +24,10 @@ A tuple literal is implicitly typed; that is, its type is determined by the cont
 
 \[Example:
 ```csharp
-var t1 = (0, 2);              // infer tuple type (int, int) from values
-var t2 = (sum: 0, count: 1);  // infer tuple type (int sum, int count) from names and values
-(int, double) t3 = (0, 2);    // infer tuple type (int, double) from values; can implicitly convert int to double
-(int, double) t4 = (0.0, 2);  // Error: can't implicitly convert double to int
+var t1 = (0, 2);             // infer tuple type (int, int) from values
+var t2 = (sum: 0, count: 1); // infer tuple type (int sum, int count) from names and values
+(int, double) t3 = (0, 2);   // infer tuple type (int, double) from values; can implicitly convert int to double
+(int, double) t4 = (0.0, 2); // Error: can't implicitly convert double to int
 ```
 end example\]
 
@@ -51,7 +35,7 @@ A tuple literal has a "conversion from expression" to any tuple type of the same
 
 \[Example:
 ```csharp
-(string name, byte age) t = (null, 5); // OK: the expressions null and 5 convert to string and byte, respectively
+(string name, byte age) t = (null, 5); // OK: null and 5 convert to string and byte, respectively
 ```
 end example\]
 
@@ -59,8 +43,8 @@ In cases where a tuple literal is not part of a conversion, the literal's type i
 
 \[Example:
 ```csharp
-var t = ("John", 5); // OK: the natural type is (string, int)
-var t = (null, 5);   // Error: null doesn't have a type
+var t = ("John", 5);            // OK: the natural type is (string, int)
+var t = (null, 5);              // Error: null doesn't have a type
 var t = (name: "John", age: 5); // OK: The natural type is (string name, int age)
 ```
 end example\]
@@ -133,7 +117,7 @@ A tuple's type can be declared explicitly. Consider the following declarations:
 
 The type of `pair2` is `(int, string)` with unknown element names. Similarly, the type of `pair3` is `(int, string)` but this time with the element names `code` and `message`, respectively. For `pair4` and `pair5`, one element is named, the other not.
 
-In the case of `pair6`, the second element is declared as being unanmed, and any attempt to provide a name in an initializing context shall be ignored. Likewise for any attempt to change an element's name, as in the case of `pair7`.
+In the case of `pair6`, the second element is declared as being unnamed, and any attempt to provide a name in an initializing context shall be ignored. Likewise for any attempt to change an element's name, as in the case of `pair7`.
 
 A tuple's type can be wholely inferred from the context in which it is used. Consider the following declarations:
 
@@ -150,8 +134,8 @@ Element names within a tuple type shall be distinct.
 
 \[Example:
 ```csharp
-(int e1, float e1) t = (10, 1.2);					// Error: both elements have the same name
-(int e1, (int e1, int e2) e2) t = (10, (20, 30));	// OK: element names in each tuple type are distinct
+(int e1, float e1) t = (10, 1.2);                 // Error: both elements have the same name
+(int e1, (int e1, int e2) e2) t = (10, (20, 30)); // OK: element names in each tuple type are distinct
 ```
 end example\]
 
@@ -181,17 +165,17 @@ t1.Item2 = 3;		// access the second element by its underlying name
 
 System.ValueTuple<int, int> vt = t1;	// identity conversion
 
- var t2 = (1, 2, 3, 4, 5, 6, 7, 8, 9);	// t2 is a System.ValueTuple<T1, T2, T3,..., T7, TRest>
- var t3 = t4.Rest;						// t3 is a (int, int); that is, a System.ValueTuple<T1, T2>
- System.Console.WriteLine("Item9 = {0}", t1.Item9);	// outputs 9 even though no such name Item9 exists!
+var t2 = (1, 2, 3, 4, 5, 6, 7, 8, 9);  // t2 is a System.ValueTuple<T1, T2, T3,..., T7, TRest>
+var t3 = t4.Rest;                      // t3 is a (int, int); that is, a System.ValueTuple<T1, T2>
+System.Console.WriteLine("Item9 = {0}", t1.Item9); // outputs 9 even though no such name Item9 exists!
 ```
 end example\]
 
 \[Example:
 ```csharp
-var t =  (ToString: 0, GetHashCode: 1);	// Error: names match underlying member names
-var t1 = (Item1: 0, Item2: 1);			// OK
-var t2 = (misc: 0, Item1: 1);			// Error: "Item1" used in a wrong position
+var t =  (ToString: 0, GetHashCode: 1); // Error: names match underlying member names
+var t1 = (Item1: 0, Item2: 1);          // OK
+var t2 = (misc: 0, Item1: 1);           // Error: "Item1" used in a wrong position
 ```
 end example\]
 
@@ -210,18 +194,18 @@ public class Base
 }
 public class Derived : Base
 {
-    public override void M1((int c, int d) arg){...}	// valid override, signatures are equivalent
+    public override void M1((int c, int d) arg){...}  // valid override, signatures are equivalent
 }
 public class Derived2 : Derived 
 {
-    public override void M1((int c1, int c) arg){...}	// also valid, warning on possible misuse of name 'c' 
+    public override void M1((int c1, int c) arg){...} // also valid, warning on possible misuse of name 'c' 
 }
 
 public class InvalidOverloading 
 {
     public virtual void M1((int c, int d) arg){...}
-    public virtual void M1((int x, int y) arg){...}		// invalid overload, signatures are eqivalent
-    public virtual void M1(ValueTuple<int, int> arg){...}	// also invalid
+    public virtual void M1((int x, int y) arg){...}       // invalid overload, signatures are eqivalent
+    public virtual void M1(ValueTuple<int, int> arg){...} // also invalid
 }
 ```
 
@@ -233,8 +217,8 @@ In alignment with the identity conversions, a boxed tuple shall not retain the n
 
 \[Example:
 ```csharp
-object o = (a: 1, b: 2);           // boxing conversion
-var t = ((int moo, int boo))o;     // unboxing conversion
+object o = (a: 1, b: 2);         // boxing conversion
+var t = ((int moo, int boo))o;   // unboxing conversion
 ```
 end example\]
 
@@ -253,9 +237,9 @@ Like unassigned variables, discards do not have a value. A discard may only occu
 
 \[Example:
 ```csharp
-M(out _, out var _, out int _);			// three out variable discards
-(_, var _, int _) = GetCoordinates();	// deconstruction into discards
-if (x is var _ && y is int _) { ... }	// discards in patterns
+M(out _, out var _, out int _);        // three out variable discards
+(_, var _, int _) = GetCoordinates();  // deconstruction into discards
+if (x is var _ && y is int _) { ... }  // discards in patterns
 ```
 end example\]
 
@@ -317,7 +301,7 @@ A tuple literal is implicitly typed when used in a context specifying a tuple ty
 
 \[Example:
 ```csharp
-(string name, byte age) t = (null, 5); // Ok: the expressions null and 5 convert to string and byte
+(string name, byte age) t = (null, 5); // OK: the expressions null and 5 convert to string and byte
 ```
 end example\]
 
@@ -376,13 +360,13 @@ Element values are copied from the source tuple to the destination(s). Each elem
 int code;
 string message;
 
-(code, message) = (10, "hello");				// copy both element values to existing variables
-(code, _) = (11, "Go!");						// copy element 1 to code and discard element 2
-(_, _) = (12, "Stop!");							// discard both element values
-(int code2, string message2) = (20, "left");	// copy both element values to newly created variables
-(code, string message3) = (21, "right");		// Error: can't mix existing and new variables
-(code, _) = (30, 2.5, (10, 20));			    // Error: can't deconstruct tuple of 3 elements into 2 values
-(code, _, _) = (30, 2.5, (10, 20));				// OK: deconstructing 3 elements into 3 values
+(code, message) = (10, "hello");             // copy both element values to existing variables
+(code, _) = (11, "Go!");                     // copy element 1 to code and discard element 2
+(_, _) = (12, "Stop!");                      // discard both element values
+(int code2, string message2) = (20, "left"); // copy both element values to newly created variables
+(code, string message3) = (21, "right");     // Error: can't mix existing and new variables
+(code, _) = (30, 2.5, (10, 20));             // Error: can't deconstruct tuple of 3 elements into 2 values
+(code, _, _) = (30, 2.5, (10, 20));          // OK: deconstructing 3 elements into 3 values
 ```
 end example\]
 
@@ -391,13 +375,17 @@ Any object may be deconstructed by providing an accessible `Deconstruct` method,
 ```csharp
 class Name
 {
-    public void Deconstruct(out string first, out string last) { first = First; last = Last; }
+    public void Deconstruct(out string first, out string last) {
+        first = First; last = Last;
+    }
     ...
 }
 // or
 static class Extensions
 {
-    public static void Deconstruct(this Name name, out string first, out string last) { first = name.First; last = name.Last; }
+    public static void Deconstruct(this Name name, out string first, out string last) {
+        first = name.First; last = name.Last;
+    }
 }
 ```
 
@@ -469,7 +457,8 @@ The extension method `M` is a candidate method, even though the tuple `t` has di
 ```csharp
 namespace System
 {
-    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2)>, IEquatable<(T1, T2)>, ITuple
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2> : IStructuralComparable,
+      IStructuralEquatable, IComparable, IComparable<(T1, T2)>, IEquatable<(T1, T2)>, ITuple
     {
         [NullableAttribute(1)]
         public T1 Item1;
@@ -489,7 +478,9 @@ namespace System
 
 namespace System
 {
-    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3)>, IEquatable<(T1, T2, T3)>, ITuple
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3>
+      : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3)>,
+      IEquatable<(T1, T2, T3)>, ITuple
     {
         [NullableAttribute(1)]
         public T1 Item1;
@@ -513,7 +504,9 @@ namespace System
 {
     [NullableAttribute(0)]
     [NullableContextAttribute(1)]
-    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4)>, IEquatable<(T1, T2, T3, T4)>, ITuple
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3,
+      [NullableAttribute(2)] T4> : IStructuralComparable, IStructuralEquatable, IComparable,
+      IComparable<(T1, T2, T3, T4)>, IEquatable<(T1, T2, T3, T4)>, ITuple
     {
         public T1 Item1;
         public T2 Item2;
@@ -533,7 +526,9 @@ namespace System
 {
     [NullableAttribute(0)]
     [NullableContextAttribute(1)]
-    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4, [NullableAttribute(2)] T5> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4, T5)>, IEquatable<(T1, T2, T3, T4, T5)>, ITuple
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3,
+      [NullableAttribute(2)] T4, [NullableAttribute(2)] T5> : IStructuralComparable, IStructuralEquatable,
+      IComparable, IComparable<(T1, T2, T3, T4, T5)>, IEquatable<(T1, T2, T3, T4, T5)>, ITuple
     {
         public T1 Item1;
         public T2 Item2;
@@ -554,7 +549,10 @@ namespace System
 {
     [NullableAttribute(0)]
     [NullableContextAttribute(1)]
-    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4, T5, T6)>, IEquatable<(T1, T2, T3, T4, T5, T6)>, ITuple
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3,
+      [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6> : IStructuralComparable,
+      IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4, T5, T6)>,
+      IEquatable<(T1, T2, T3, T4, T5, T6)>, ITuple
     {
         public T1 Item1;
         public T2 Item2;
@@ -576,7 +574,10 @@ namespace System
 {
     [NullableAttribute(0)]
     [NullableContextAttribute(1)]
-    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6, [NullableAttribute(2)] T7> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4, T5, T6, T7)>, IEquatable<(T1, T2, T3, T4, T5, T6, T7)>, ITuple
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3,
+      [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6, [NullableAttribute(2)] T7>
+      : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<(T1, T2, T3, T4, T5, T6, T7)>,
+      IEquatable<(T1, T2, T3, T4, T5, T6, T7)>, ITuple
     {
         public T1 Item1;
         public T2 Item2;
@@ -586,10 +587,12 @@ namespace System
         public T6 Item6;
         public T7 Item7;
         public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7);
-        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1 })] (T1, T2, T3, T4, T5, T6, T7) other);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1 })]
+          (T1, T2, T3, T4, T5, T6, T7) other);
         [NullableContextAttribute(2)]
         public override bool Equals(object? obj);
-        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1 })] (T1, T2, T3, T4, T5, T6, T7) other);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1 })]
+          (T1, T2, T3, T4, T5, T6, T7) other);
         public override int GetHashCode();
         public override string ToString();
     }
@@ -599,7 +602,11 @@ namespace System
 {
     [NullableAttribute(0)]
     [NullableContextAttribute(1)]
-    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3, [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6, [NullableAttribute(2)] T7, [NullableAttribute(0)] TRest> : IStructuralComparable, IStructuralEquatable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, ITuple where TRest : struct
+    public struct ValueTuple<[NullableAttribute(2)] T1, [NullableAttribute(2)] T2, [NullableAttribute(2)] T3,
+      [NullableAttribute(2)] T4, [NullableAttribute(2)] T5, [NullableAttribute(2)] T6, [NullableAttribute(2)] T7,
+      [NullableAttribute(0)] TRest> : IStructuralComparable, IStructuralEquatable, IComparable,
+      IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>,
+      IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, ITuple where TRest : struct
     {
         public T1 Item1;
         public T2 Item2;
@@ -610,11 +617,14 @@ namespace System
         public T7 Item7;
         [NullableAttribute(0)]
         public TRest Rest;
-        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, [NullableAttribute(0)] TRest rest);
-        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1, 0 })] ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other);
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7,
+          [NullableAttribute(0)] TRest rest);
+        public int CompareTo([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1, 0 })]
+          ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other);
         [NullableContextAttribute(2)]
         public override bool Equals(object? obj);
-        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1, 0 })] ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other);
+        public bool Equals([NullableAttribute(new[] { 0, 1, 1, 1, 1, 1, 1, 1, 0 })]
+          ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other);
         public override int GetHashCode();
         public override string ToString();
     }
