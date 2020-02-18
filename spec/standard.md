@@ -16462,65 +16462,60 @@ the variable initializer for `y` results in a compile-time error because it refe
 
 A ***method*** is a member that implements a computation or action that can be performed by an object or class. Methods are declared using *method-declaration*s:
 
-[]{#Grammar_method_declaration .anchor}method-declaration:
-method-header method-body
+```antlr
+method-declaration:
+    method-header method-body
 
-[]{#Grammar_method_header .anchor}method-header:
-attributesopt method-modifiersopt partialopt return-type member-name
-type-parameter-listopt*
-(* formal-parameter-listopt *)* type-parameter-constraints-clausesopt
+method-header:
+    attributesopt method-modifiersopt partialopt return-type member-name
+    type-parameter-listopt
+    ( formal-parameter-listopt ) type-parameter-constraints-clausesopt
 
-[]{#Grammar_method_modifiers .anchor}method-modifiers:
-method-modifier
-method-modifiers method-modifier
+method-modifiers:
+    method-modifier
+    method-modifiers method-modifier
 
-[]{#Grammar_method_modifier .anchor}method-modifier:
-*new
-public
-protected
-internal
-private
-static
-virtual
-sealed
-override
-abstract
-extern
-async*
+method-modifier:
+    new
+    public
+    protected
+    internal
+    private
+    static
+    virtual
+    sealed
+    override
+    abstract
+    extern
+    async
 
-[]{#Grammar_return_type .anchor}return-type:
-type
-*void*
+return-type:
+    type
+    void
 
 member-name:
-identifier
-interface-type *.* identifier
+    identifier
+    interface-type . identifier
 
-[]{#Grammar_method_body .anchor}method-body:
-block
-*;*
+method-body:
+    block
+    ;
+```
 
-A *method-declaration* may include a set of *attributes* (§22) and a valid combination of the four access modifiers (§15.3.6), the new (§15.3.5), static (§15.6.3), virtual (§15.6.4), override (§15.6.5), sealed (§15.6.6), abstract (§15.6.7), extern (§15.6.8) and async (§15.15) modifiers.
+A *method-declaration* may include a set of *attributes* (§22) and a valid combination of the four access modifiers (§15.3.6), the `new` (§15.3.5), `static` (§15.6.3), `virtual` (§15.6.4), `override` (§15.6.5), `sealed` (§15.6.6), `abstract` (§15.6.7), `extern` (§15.6.8) and `async` (§15.15) modifiers.
 
 A declaration has a valid combination of modifiers if all of the following are true:
 
 - The declaration includes a valid combination of access modifiers (§15.3.6).
-
 - The declaration does not include the same modifier multiple times.
+- The declaration includes at most one of the following modifiers: `static`, `virtual`, and `override`.
+- The declaration includes at most one of the following modifiers: `new` and `override`.
+- If the declaration includes the `abstract` modifier, then the declaration does not include any of the following modifiers: `static`, `virtual`, `sealed`, or `extern`.
+- If the declaration includes the `private` modifier, then the declaration does not include any of the following modifiers: `virtual`, `override`, or `abstract`.
+- If the declaration includes the `sealed` modifier, then the declaration also includes the `override` modifier.
+- If the declaration includes the `partial` modifier, then it does not include any of the following modifiers: `new`, `public`, `protected`, `internal`, `private`, `virtual`, `sealed`, `override`, `abstract`, or `extern`.
 
-- The declaration includes at most one of the following modifiers: static, virtual, and override.
-
-- The declaration includes at most one of the following modifiers: new and override.
-
-- If the declaration includes the abstract modifier, then the declaration does not include any of the following modifiers: static, virtual, sealed, or extern.
-
-- If the declaration includes the private modifier, then the declaration does not include any of the following modifiers: virtual, override, or abstract.
-
-- If the declaration includes the sealed modifier, then the declaration also includes the override modifier.
-
-- If the declaration includes the partial modifier, then it does not include any of the following modifiers: new, public, protected, internal, private, virtual, sealed, override, abstract, or extern.
-
-The *return-type* of a method declaration specifies the type of the value computed and returned by the method. The *return-type* is void if the method does not return a value. If the declaration includes the partial modifier, then the return type shall be void.
+The *return-type* of a method declaration specifies the type of the value computed and returned by the method. The *return-type* is `void` if the method does not return a value. If the declaration includes the `partial` modifier, then the return type shall be `void`.
 
 A generic method is a method whose declaration includes a *type-parameter-list*. This specifies the type parameters for the method. The optional *type-parameter-constraints-clauses* specify the constraints for the type parameters. A *method-declaration* shall not have *type-parameter-constraints-clauses* unless it also has a *type-parameter-list*. A *method-declaration* for an explicit interface member implementation shall not have any *type-parameter-constraints-clauses*. A generic *method-declaration* for an explicit interface member implementation inherits any constraints from the constraints on the interface method. Similarly, a method declaration with the override modifier shall not have any *type-parameter-constraints-clauses* and the constraints of the method’s type parameters are inherited from the virtual method being overridden.The *member-name* specifies the name of the method. Unless the method is an explicit interface member implementation (§18.6.2), the *member-name* is simply an *identifier*. For an explicit interface member implementation, the *member-name* consists of an *interface-type* followed by a “.” and an *identifier*. In this case, the declaration shall include no modifiers other than (possibly) extern or async.
 
@@ -16528,9 +16523,9 @@ The optional *formal-parameter-list* specifies the parameters of the method (§1
 
 The *return-type* and each of the types referenced in the *formal-parameter-list* of a method shall be at least as accessible as the method itself (§8.5.5).
 
-For abstract and extern methods, the *method-body* consists simply of a semicolon. For partial methods the *method-body* may consist of either a semicolon or a *block*. For all other methods, the *method-body* consists of a *block,* which specifies the statements to execute when the method is invoked.
+For `abstract` and `extern` methods, the *method-body* consists simply of a semicolon. For partial methods the *method-body* may consist of either a semicolon or a *block*. For all other methods, the *method-body* consists of a *block,* which specifies the statements to execute when the method is invoked.
 
-If the *method-body* consists of a semicolon, the declaration shall not include the async modifier.
+If the *method-body* consists of a semicolon, the declaration shall not include the `async` modifier.
 
 The name, the number of type parameters, and the formal parameter list of a method define the signature (§8.6) of the method. Specifically, the signature of a method consists of its name, the number of its type parameters, and the number, *parameter-mode-modifier*s (§15.6.2.1), and types of its formal parameters. The return type is not part of a method’s signature, nor are the names of the formal parameters, the names of the type parameters, or the constraints. When a formal parameter type references a type parameter of the method, the ordinal position of the type parameter (not the name of the type parameter) is used for type equivalence.
 
@@ -16546,43 +16541,43 @@ All formal parameters and type parameters shall have different names.
 
 The parameters of a method, if any, are declared by the method’s *formal-parameter-list*.
 
-[]{#Grammar_formal_parameter_list .anchor}formal-parameter-list:
-fixed-parameters
-fixed-parameters *,* parameter-array
-parameter-array
+```antlr
+formal-parameter-list:
+    fixed-parameters
+    fixed-parameters , parameter-array
+    parameter-array
 
-[]{#Grammar_fixed_parameters .anchor}fixed-parameters:
-fixed-parameter
-fixed-parameters *,* fixed-parameter
+fixed-parameters:
+    fixed-parameter
+    fixed-parameters , fixed-parameter
 
-[]{#Grammar_fixed_parameter .anchor}fixed-parameter:
-attributesopt parameter-modifieropt type identifier default-argumentopt
+fixed-parameter:
+    attributesopt parameter-modifieropt type identifier default-argumentopt
 
-[]{#Grammar_default_argument .anchor}default-argument:
-= expression
+default-argument:
+    = expression
 
-[]{#Grammar_parameter_modifier .anchor}parameter-modifier:
-*parameter-mode-modifier
-this*
+parameter-modifier:
+    parameter-mode-modifier
+    this
 
-[]{#Grammar_parameter_array .anchor}parameter-mode-modifier:
-*ref
-out*
+parameter-mode-modifier:
+    ref
+    out
 
 parameter-array:
-attributesopt *params* array-type identifier
+    attributesopt params array-type identifier
+```
 
 The formal parameter list consists of one or more comma-separated parameters of which only the last may be a *parameter-array*.
 
-A *fixed-parameter* consists of an optional set of *attributes* (§22); an optional ref, out, or this modifier; a *type*; an *identifier*; and an optional *default-argument*. Each *fixed-parameter* declares a parameter of the given type with the given name. The this modifier designates the method as an extension method and is only allowed on the first parameter of a static method in a non-generic, non-nested static class. Extension methods are further described in §15.6.10. A *fixed-parameter* with a *default-argument* is known as an ***optional parameter***, whereas a *fixed-parameter* without a *default-argument* is a ***required parameter***. A required parameter may not appear after an optional parameter in a *formal-parameter-list*.
+A *fixed-parameter* consists of an optional set of *attributes* (§22); an optional `ref`, `out`, or `this` modifier; a *type*; an *identifier*; and an optional *default-argument*. Each *fixed-parameter* declares a parameter of the given type with the given name. The `this` modifier designates the method as an extension method and is only allowed on the first parameter of a static method in a non-generic, non-nested static class. Extension methods are further described in §15.6.10. A *fixed-parameter* with a *default-argument* is known as an ***optional parameter***, whereas a *fixed-parameter* without a *default-argument* is a ***required parameter***. A required parameter may not appear after an optional parameter in a *formal-parameter-list*.
 
-A parameter with a ref, out or this modifier cannot have a *default-argument*. The *expression* in a *default-argument* shall be one of the following:
+A parameter with a `ref`, `out` or `this` modifier cannot have a *default-argument*. The *expression* in a *default-argument* shall be one of the following:
 
 - a *constant-expression*
-
-- an expression of the form new S() where S is a value type
-
-- an expression of the form default(S) where S is a value type
+- an expression of the form `new S()` where `S` is a value type
+- an expression of the form `default(S)` where `S` is a value type
 
 The *expression* shall be implicitly convertible by an identity or nullable conversion to the type of the parameter.
 
@@ -16594,18 +16589,20 @@ A *parameter-array* may occur after an optional parameter, but cannot have a def
 
 [*Example*: The following illustrates different kinds of parameters:
 
-public void M(
-ref int i,
-decimal d,
-bool b = false,
-bool? n = false,
-string s = "Hello",
-object o = null,
-T t = default(T),
-params int[] a
+```csharp
+public void M (
+    ref int i,
+    decimal d,
+    bool b = false,
+    bool? n = false,
+    string s = "Hello",
+    object o = null,
+    T t = default (T),
+    params int[] a
 ) { }
+```
 
-In the *formal-parameter-list* for M, i is a required ref parameter, d is a required value parameter, b, s, o and t are optional value parameters and a is a parameter array. *end example*]
+In the *formal-parameter-list* for `M`, `i` is a required `ref` parameter, `d` is a required value parameter, `b`, `s`, `o` and `t` are optional value parameters and `a` is a parameter array. *end example*]
 
 A method declaration creates a separate declaration space (§8.3) for parameters and type parameters. Names are introduced into this declaration space by the type parameter list and the formal parameter list of the method. The body of the method, if any, is considered to be nested within this declaration space. It is an error for two members of a method declaration space to have the same name. It is an error for the method declaration space and the local variable declaration space of a nested declaration space to contain elements with the same name.
 
@@ -16614,14 +16611,12 @@ A method invocation (§12.7.6.2) creates a copy, specific to that invocation, of
 There are four kinds of formal parameters:
 
 - Value parameters, which are declared without any modifiers.
+- Reference parameters, which are declared with the `ref` modifier.
+- Output parameters, which are declared with the `out` modifier.
+- Parameter arrays, which are declared with the `params` modifier.
 
-- Reference parameters, which are declared with the ref modifier.
-
-- Output parameters, which are declared with the out modifier.
-
-- Parameter arrays, which are declared with the params modifier.
-
-[*Note*: As described in §8.6, the ref and out modifiers are part of a method’s signature, but the params modifier is not. *end note*]
+> [!NOTE]
+> As described in §8.6, the `ref` and `out` modifiers are part of a method’s signature, but the `params` modifier is not.
 
 #### Value parameters
 
@@ -16633,9 +16628,9 @@ A method is permitted to assign new values to a value parameter. Such assignment
 
 #### Reference parameters
 
-A parameter declared with a ref modifier is a reference parameter. Unlike a value parameter, a reference parameter does not create a new storage location. Instead, a reference parameter represents the same storage location as the variable given as the argument in the method invocation.
+A parameter declared with a `ref` modifier is a reference parameter. Unlike a value parameter, a reference parameter does not create a new storage location. Instead, a reference parameter represents the same storage location as the variable given as the argument in the method invocation.
 
-When a formal parameter is a reference parameter, the corresponding argument in a method invocation shall consist of the keyword ref followed by a *variable-reference* (§10.5) of the same type as the formal parameter. A variable shall be definitely assigned before it can be passed as a reference parameter.
+When a formal parameter is a reference parameter, the corresponding argument in a method invocation shall consist of the keyword `ref` followed by a *variable-reference* (§10.5) of the same type as the formal parameter. A variable shall be definitely assigned before it can be passed as a reference parameter.
 
 Within a method, a reference parameter is always considered definitely assigned.
 
@@ -16643,53 +16638,63 @@ A method declared as an iterator (§15.14) may not have reference parameters.
 
 [*Example*: The example
 
+```csharp
 using System;
 
 class Test
 {
-static void Swap(ref int x, ref int y) {
-int temp = x;
-x = y;
-y = temp;
-}
+    static void Swap (ref int x, ref int y)
+    {
+        int temp = x;
+        x = y;
+        y = temp;
+    }
 
-static void Main() {
-int i = 1, j = 2;
-Swap(ref i, ref j);
-Console.WriteLine("i = {0}, j = {1}", i, j);
+    static void Main ()
+    {
+        int i = 1, j = 2;
+        Swap (ref i, ref j);
+        Console.WriteLine ("i = {0}, j = {1}", i, j);
+    }
 }
-}
+```
 
 produces the output
 
+```plaintext
 i = 2, j = 1
+```
 
-For the invocation of Swap in Main, x represents i and y represents j. Thus, the invocation has the effect of swapping the values of i and j. *end example*]
+For the invocation of `Swap` in `Main`, `x` represents `i` and `y` represents `j`. Thus, the invocation has the effect of swapping the values of `i` and `j`. *end example*]
 
 In a method that takes reference parameters, it is possible for multiple names to represent the same storage location. [*Example*: In the following code
 
+```csharp
 class A
 {
-string s;
+    string s;
 
-void F(ref string a, ref string b) {
-s = "One";
-a = "Two";
-b = "Three";
-}
+    void F (ref string a, ref string b)
+    {
+        s = "One";
+        a = "Two";
+        b = "Three";
+    }
 
-void G() {
-F(ref s, ref s);
+    void G ()
+    {
+        F (ref s, ref s);
+    }
 }
-}
+```
 
-the invocation of F in G passes a reference to s for both a and b. Thus, for that invocation, the names s, a, and b all refer to the same storage location, and the three assignments all modify the instance field s. *end example*]
+the invocation of `F` in `G` passes a reference to `s` for both `a` and `b`. Thus, for that invocation, the names `s`, `a`, and `b` all refer to the same storage location, and the three assignments all modify the instance field `s`. *end example*]
 
 #### Output parameters
 
-A parameter declared with an out modifier is an output parameter. Similar to a reference parameter, an output parameter does not create a new storage location. Instead, an output parameter represents the same storage location as the variable given as the argument in the method invocation.
+A parameter declared with an `out` modifier is an output parameter. Similar to a reference parameter, an output parameter does not create a new storage location. Instead, an output parameter represents the same storage location as the variable given as the argument in the method invocation.
 
-When a formal parameter is an output parameter, the corresponding argument in a method invocation shall consist of the keyword out followed by a *variable-reference* (§10.5) of the same type as the formal parameter. A variable need not be definitely assigned before it can be passed as an output parameter, but following an invocation where a variable was passed as an output parameter, the variable is considered definitely assigned.
+When a formal parameter is an output parameter, the corresponding argument in a method invocation shall consist of the keyword `out` followed by a *variable-reference* (§10.5) of the same type as the formal parameter. A variable need not be definitely assigned before it can be passed as an output parameter, but following an invocation where a variable was passed as an output parameter, the variable is considered definitely assigned.
 
 Within a method, just like a local variable, an output parameter is initially considered unassigned and shall be definitely assigned before its value is used.
 
@@ -16699,159 +16704,188 @@ A method declared as a partial method (§15.6.9) or an iterator (§15.14) may no
 
 Output parameters are typically used in methods that produce multiple return values. [*Example*:
 
+```csharp
 using System;
 
 class Test
 {
-static void SplitPath(string path, out string dir, out string name) {
-int i = path.Length;
-while (i > 0) {
-char ch = path[i – 1];
-if (ch == '\\\\' || ch == '/' || ch == ':') break;
-i--;
-}
-dir = path.Substring(0, i);
-name = path.Substring(i);
-}
+    static void SplitPath (string path, out string dir, out string name)
+    {
+        int i = path.Length;
+        while (i > 0)
+        {
+            char ch = path[i– 1];
+            if (ch == '\\' || ch == '/' || ch == ':') break;
+            i--;
+        }
+        dir = path.Substring (0, i);
+        name = path.Substring (i);
+    }
 
-static void Main() {
-string dir, name;
-SplitPath("c:\\\\Windows\\\\System\\\\hello.txt", out dir, out name);
-Console.WriteLine(dir);
-Console.WriteLine(name);
+    static void Main ()
+    {
+        string dir, name;
+        SplitPath ("c:\\Windows\\System\\hello.txt", out dir, out name);
+        Console.WriteLine (dir);
+        Console.WriteLine (name);
+    }
 }
-}
+```
 
 The example produces the output:
 
+```plaintext
 c:\\Windows\\System\\
 hello.txt
+```
 
-Note that the dir and name variables can be unassigned before they are passed to SplitPath, and that they are considered definitely assigned following the call. *end example*]
+Note that the `dir` and `name` variables can be unassigned before they are passed to `SplitPath`, and that they are considered definitely assigned following the call. *end example*]
 
 #### Parameter arrays
 
-A parameter declared with a params modifier is a parameter array. If a formal parameter list includes a parameter array, it shall be the last parameter in the list and it shall be of a single-dimensional array type. [*Example*: The types string[] and string[][] can be used as the type of a parameter array, but the type string[,] can not. *end example*] It is not possible to combine the params modifier with the modifiers ref and out.
+A parameter declared with a `params` modifier is a parameter array. If a formal parameter list includes a parameter array, it shall be the last parameter in the list and it shall be of a single-dimensional array type. [*Example*: The types `string[]` and `string[][]` can be used as the type of a parameter array, but the type `string[,]` can not. *end example*] It is not possible to combine the `params` modifier with the modifiers `ref` and `out`.
 
 A parameter array permits arguments to be specified in one of two ways in a method invocation:
 
 - The argument given for a parameter array can be a single expression that is implicitly convertible (§11.2) to the parameter array type. In this case, the parameter array acts precisely like a value parameter.
-
 - Alternatively, the invocation can specify zero or more arguments for the parameter array, where each argument is an expression that is implicitly convertible (§11.2) to the element type of the parameter array. In this case, the invocation creates an instance of the parameter array type with a length corresponding to the number of arguments, initializes the elements of the array instance with the given argument values, and uses the newly created array instance as the actual argument.
 
 Except for allowing a variable number of arguments in an invocation, a parameter array is precisely equivalent to a value parameter (§15.6.2.2) of the same type.
 
 [*Example*: The example
 
+```csharp
 using System;
 
 class Test
 {
-static void F(params int[] args) {
-Console.Write("Array contains {0} elements:", args.Length);
-foreach (int i in args)
-Console.Write(" {0}", i);
-Console.WriteLine();
-}
+    static void F (params int[] args)
+    {
+        Console.Write ("Array contains {0} elements:", args.Length);
+        foreach (int i in args)
+            Console.Write (" {0}", i);
+        Console.WriteLine ();
+    }
 
-static void Main() {
-int[] arr = {1, 2, 3};
-F(arr);
-F(10, 20, 30, 40);
-F();
+    static void Main ()
+    {
+        int[] arr = { 1, 2, 3 };
+        F (arr);
+        F (10, 20, 30, 40);
+        F ();
+    }
 }
-}
+```
 
 produces the output
 
+```plaintext
 Array contains 3 elements: 1 2 3
 Array contains 4 elements: 10 20 30 40
 Array contains 0 elements:
+```
 
-The first invocation of F simply passes the array arr as a value parameter. The second invocation of F automatically creates a four-element int[] with the given element values and passes that array instance as a value parameter. Likewise, the third invocation of F creates a zero-element int[] and passes that instance as a value parameter. The second and third invocations are precisely equivalent to writing:
+The first invocation of `F` simply passes the array `arr` as a value parameter. The second invocation of `F` automatically creates a four-element `int[]` with the given element values and passes that array instance as a value parameter. Likewise, the third invocation of `F` creates a zero-element `int[]` and passes that instance as a value parameter. The second and third invocations are precisely equivalent to writing:
 
+```csharp
 F(new int[] {10, 20, 30, 40});
 F(new int[] {});
+```
 
 *end example*]
 
 When performing overload resolution, a method with a parameter array might be applicable, either in its normal form or in its expanded form (§12.6.4.2). The expanded form of a method is available only if the normal form of the method is not applicable and only if an applicable method with the same signature as the expanded form is not already declared in the same type.
 
-> [*Example*: The example
+[*Example*: The example
 
+```csharp
 using System;
 
 class Test
 {
-static void F(params object[] a) {
-Console.WriteLine("F(object[])");
-}
+    static void F (params object[] a)
+    {
+        Console.WriteLine ("F(object[])");
+    }
 
-static void F() {
-Console.WriteLine("F()");
-}
+    static void F ()
+    {
+        Console.WriteLine ("F()");
+    }
 
-static void F(object a0, object a1) {
-Console.WriteLine("F(object,object)");
-}
+    static void F (object a0, object a1)
+    {
+        Console.WriteLine ("F(object,object)");
+    }
 
-static void Main() {
-F();
-F(1);
-F(1, 2);
-F(1, 2, 3);
-F(1, 2, 3, 4);
+    static void Main ()
+    {
+        F ();
+        F (1);
+        F (1, 2);
+        F (1, 2, 3);
+        F (1, 2, 3, 4);
+    }
 }
-}
+```
 
 produces the output
 
+```plaintext
 F();
 F(object[]);
 F(object,object);
 F(object[]);
 F(object[]);
+```
 
 In the example, two of the possible expanded forms of the method with a parameter array are already included in the class as regular methods. These expanded forms are therefore not considered when performing overload resolution, and the first and third method invocations thus select the regular methods. When a class declares a method with a parameter array, it is not uncommon to also include some of the expanded forms as regular methods. By doing so, it is possible to avoid the allocation of an array instance that occurs when an expanded form of a method with a parameter array is invoked. *end example*]
 
-When the type of a parameter array is object[], a potential ambiguity arises between the normal form of the method and the expanded form for a single object parameter. The reason for the ambiguity is that an object[] is itself implicitly convertible to type object. The ambiguity presents no problem, however, since it can be resolved by inserting a cast if needed.
+When the type of a parameter array is `object[]`, a potential ambiguity arises between the normal form of the method and the expanded form for a single object parameter. The reason for the ambiguity is that an `object[]` is itself implicitly convertible to type `object`. The ambiguity presents no problem, however, since it can be resolved by inserting a cast if needed.
 
 [*Example*: The example
 
+```csharp
 using System;
 
 class Test
 {
-static void F(params object[] args) {
-foreach (object o in args) {
-Console.Write(o.GetType().FullName);
-Console.Write(" ");
-}
-Console.WriteLine();
-}
+    static void F (params object[] args)
+    {
+        foreach (object o in args)
+        {
+            Console.Write (o.GetType ().FullName);
+            Console.Write (" ");
+        }
+        Console.WriteLine ();
+    }
 
-static void Main() {
-object[] a = {1, "Hello", 123.456};
-object o = a;
-F(a);
-F((object)a);
-F(o);
-F((object[])o);
+    static void Main ()
+    {
+        object[] a = { 1, "Hello", 123.456 };
+        object o = a;
+        F (a);
+        F ((object) a);
+        F (o);
+        F ((object[]) o);
+    }
 }
-}
+```
 
 produces the output
 
+```plaintext
 System.Int32 System.String System.Double
 System.Object[]
 System.Object[]
 System.Int32 System.String System.Double
+```
 
-In the first and last invocations of F, the normal form of F is applicable because an implicit conversion exists from the argument type to the parameter type (both are of type object[]). Thus, overload resolution selects the normal form of F, and the argument is passed as a regular value parameter. In the second and third invocations, the normal form of F is not applicable because no implicit conversion exists from the argument type to the parameter type (type object cannot be implicitly converted to type object[]). However, the expanded form of F is applicable, so it is selected by overload resolution. As a result, a one-element object[] is created by the invocation, and the single element of the array is initialized with the given argument value (which itself is a reference to an object[]). *end example*]
+In the first and last invocations of F, the normal form of `F` is applicable because an implicit conversion exists from the argument type to the parameter type (both are of type `object[]`). Thus, overload resolution selects the normal form of `F`, and the argument is passed as a regular value parameter. In the second and third invocations, the normal form of `F` is not applicable because no implicit conversion exists from the argument type to the parameter type (type `object` cannot be implicitly converted to type `object[]`). However, the expanded form of `F` is applicable, so it is selected by overload resolution. As a result, a one-element `object[]` is created by the invocation, and the single element of the array is initialized with the given argument value (which itself is a reference to an `object[]`). *end example*]
 
 ### Static and instance methods
 
-When a method declaration includes a static modifier, that method is said to be a static method. When no static modifier is present, the method is said to be an instance method.
+When a method declaration includes a `static` modifier, that method is said to be a static method. When no `static` modifier is present, the method is said to be an instance method.
 
 A static method does not operate on a specific instance, and it is a compile-time error to refer to this in a static method.
 
@@ -16861,265 +16895,279 @@ The differences between static and instance members are discussed further in §1
 
 ### Virtual methods
 
-When an instance method declaration includes a virtual modifier, that method is said to be a ***virtual method***. When no virtual modifier is present, the method is said to be a ***non-virtual method***.
+When an instance method declaration includes a `virtual` modifier, that method is said to be a ***virtual method***. When no `virtual` modifier is present, the method is said to be a ***non-virtual method***.
 
 The implementation of a non-virtual method is invariant: The implementation is the same whether the method is invoked on an instance of the class in which it is declared or an instance of a derived class. In contrast, the implementation of a virtual method can be superseded by derived classes. The process of superseding the implementation of an inherited virtual method is known as ***overriding*** that method (§15.6.5).
 
 In a virtual method invocation, the ***run-time type*** of the instance for which that invocation takes place determines the actual method implementation to invoke. In a non-virtual method invocation, the ***compile-time type*** of the instance is the determining factor. In precise terms, when a method named N is invoked with an argument list A on an instance with a compile-time type C and a run-time type R (where R is either C or a class derived from C), the invocation is processed as follows:
 
-- At binding-time, overload resolution is applied to C, N, and A, to select a specific method M from the set of methods declared in and inherited by C. This is described in §12.7.6.2.
-
+- At binding-time, overload resolution is applied to `C`, `N`, and `A`, to select a specific method `M` from the set of methods declared in and inherited by `C. This is described in §12.7.6.2.
 - Then at run-time:
+  - If `M` is a non-virtual method, `M` is invoked.
+  - Otherwise, `M` is a virtual method, and the most derived implementation of `M` with respect to `R` is invoked.
 
-<!-- -->
+For every virtual method declared in or inherited by a class, there exists a ***most derived implementation*** of the method with respect to that class. The most derived implementation of a virtual method `M` with respect to a class `R` is determined as follows:
 
-- If M is a non-virtual method, M is invoked.
-
-- Otherwise, M is a virtual method, and the most derived implementation of M with respect to R is invoked.
-
-For every virtual method declared in or inherited by a class, there exists a ***most derived implementation*** of the method with respect to that class. The most derived implementation of a virtual method M with respect to a class R is determined as follows:
-
-- If R contains the introducing virtual declaration of M, then this is the most derived implementation of M with respect to R.
-
-- Otherwise, if R contains an override of M, then this is the most derived implementation of M with respect to R.
-
-- Otherwise, the most derived implementation of M with respect to R is the same as the most derived implementation of M with respect to the direct base class of R.
+- If `R` contains the introducing virtual declaration of `M`, then this is the most derived implementation of `M` with respect to `R`.
+- Otherwise, if `R` contains an override of `M`, then this is the most derived implementation of M with respect to `R`.
+- Otherwise, the most derived implementation of M with respect to `R` is the same as the most derived implementation of `M` with respect to the direct base class of `R`.
 
 [*Example*: The following example illustrates the differences between virtual and non-virtual methods:
 
+```csharp
 using System;
 
 class A
 {
-public void F() { Console.WriteLine("A.F"); }
-public virtual void G() { Console.WriteLine("A.G"); }
+    public void F () { Console.WriteLine ("A.F"); }
+    public virtual void G () { Console.WriteLine ("A.G"); }
 }
 
-class B: A
+class B : A
 {
-new public void F() { Console.WriteLine("B.F"); }
-public override void G() { Console.WriteLine("B.G"); }
+    new public void F () { Console.WriteLine ("B.F"); }
+    public override void G () { Console.WriteLine ("B.G"); }
 }
 
 class Test
 {
-static void Main() {
-B b = new B();
-A a = b;
-a.F();
-b.F();
-a.G();
-b.G();
+    static void Main ()
+    {
+        B b = new B ();
+        A a = b;
+        a.F ();
+        b.F ();
+        a.G ();
+        b.G ();
+    }
 }
-}
+```
 
-In the example, A introduces a non-virtual method F and a virtual method G. The class B introduces a *new* non-virtual method F, thus *hiding* the inherited F, and also *overrides* the inherited method G. The example produces the output:
+In the example, `A` introduces a non-virtual method `F` and a virtual method `G`. The class `B` introduces a *new* non-virtual method `F, thus *hiding* the inherited `F`, and also *overrides* the inherited method `G`. The example produces the output:
 
+```plaintext
 A.F
 B.F
 B.G
 B.G
+```
 
-Notice that the statement a.G() invokes B.G, not A.G. This is because the run-time type of the instance (which is B), not the compile-time type of the instance (which is A), determines the actual method implementation to invoke. *end example*]
+Notice that the statement `a.G()` invokes `B.G,` not `A.G`. This is because the run-time type of the instance (which is `B`), not the compile-time type of the instance (which is `A`), determines the actual method implementation to invoke. *end example*]
 
-[[]{#_Ref458831966 .anchor}]{#_Ref458831978 .anchor}Because methods are allowed to hide inherited methods, it is possible for a class to contain several virtual methods with the same signature. This does not present an ambiguity problem, since all but the most derived method are hidden. [*Example*: In the following code
+Because methods are allowed to hide inherited methods, it is possible for a class to contain several virtual methods with the same signature. This does not present an ambiguity problem, since all but the most derived method are hidden. [*Example*: In the following code
 
+```csharp
 using System;
 
 class A
 {
-public virtual void F() { Console.WriteLine("A.F"); }
+    public virtual void F () { Console.WriteLine ("A.F"); }
 }
 
-class B: A
+class B : A
 {
-public override void F() { Console.WriteLine("B.F"); }
+    public override void F () { Console.WriteLine ("B.F"); }
 }
 
-class C: B
+class C : B
 {
-new public virtual void F() { Console.WriteLine("C.F"); }
+    new public virtual void F () { Console.WriteLine ("C.F"); }
 }
 
-class D: C
+class D : C
 {
-public override void F() { Console.WriteLine("D.F"); }
+    public override void F () { Console.WriteLine ("D.F"); }
 }
 
 class Test
 {
-static void Main() {
-D d = new D();
-A a = d;
-B b = d;
-C c = d;
-a.F();
-b.F();
-c.F();
-d.F();
+    static void Main ()
+    {
+        D d = new D ();
+        A a = d;
+        B b = d;
+        C c = d;
+        a.F ();
+        b.F ();
+        c.F ();
+        d.F ();
+    }
 }
-}
+```
 
-the C and D classes contain two virtual methods with the same signature: The one introduced by A and the one introduced by C. The method introduced by C hides the method inherited from A. Thus, the override declaration in D overrides the method introduced by C, and it is not possible for D to override the method introduced by A. The example produces the output:
+the `C` and `D` classes contain two virtual methods with the same signature: The one introduced by `A` and the one introduced by `C`. The method introduced by `C` hides the method inherited from `A`. Thus, the override declaration in `D` overrides the method introduced by `C`, and it is not possible for `D` to override the method introduced by `A`. The example produces the output:
 
+```plaintext
 B.F
 B.F
 D.F
 D.F
+```
 
-Note that it is possible to invoke the hidden virtual method by accessing an instance of D through a less derived type in which the method is not hidden. *end example*]
+Note that it is possible to invoke the hidden virtual method by accessing an instance of `D` through a less derived type in which the method is not hidden. *end example*]
 
 ### Override methods
 
-When an instance method declaration includes an override modifier, the method is said to be an ***override method***. An override method overrides an inherited virtual method with the same signature. Whereas a virtual method declaration *introduces* a new method, an override method declaration *specializes* an existing inherited virtual method by providing a new implementation of that method.
+When an instance method declaration includes an `override` modifier, the method is said to be an ***override method***. An override method overrides an inherited virtual method with the same signature. Whereas a virtual method declaration *introduces* a new method, an override method declaration *specializes* an existing inherited virtual method by providing a new implementation of that method.
 
-The method overridden by an override declaration is known as the ***overridden base method*** For an override method M declared in a class C, the overridden base method is determined by examining each base class of C, starting with the direct base class of C and continuing with each successive direct base class, until in a given base class type at least one accessible method is located which has the same signature as M after substitution of type arguments. For the purposes of locating the overridden base method, a method is considered accessible if it is public, if it is protected, if it is protected internal, or if it is internal and declared in the same program as C.
+The method overridden by an `override` declaration is known as the ***overridden base method*** For an override method `M` declared in a class `C`, the overridden base method is determined by examining each base class of `C`, starting with the direct base class of `C` and continuing with each successive direct base class, until in a given base class type at least one accessible method is located which has the same signature as `M` after substitution of type arguments. For the purposes of locating the overridden base method, a method is considered accessible if it is `public`, if it is `protected`, if it is `protected internal`, or if it is `internal` and declared in the same program as `C`.
 
-A compile-time error occurs unless all of the following are true for an override declaration:
+A compile-time error occurs unless all of the following are true for an `override` declaration:
 
 - An overridden base method can be located as described above.
-
 - There is exactly one such overridden base method. This restriction has effect only if the base class type is a constructed type where the substitution of type arguments makes the signature of two methods the same.
-
-- The overridden base method is a virtual, abstract, or override method. In other words, the overridden base method cannot be static or non-virtual.
-
-- The overridden base method is not a sealed method.
-
+- The overridden base method is a `virtual`, `abstract`, or `override` method. In other words, the overridden base method cannot be `static` or non-virtual.
+- The overridden base method is not a `sealed` method.
 - There is an identity conversion between the return type of the overridden base method and the override method.
-
-- The override declaration and the overridden base method have the same declared accessibility. In other words, an override declaration cannot change the accessibility of the virtual method. However, if the overridden base method is protected internal and it is declared in a different assembly than the assembly containing the override declaration then the override declaration’s declared accessibility shall be protected.
-
-- The override declaration does not specify type-parameter-constraints-clauses. Instead, the constraints are inherited from the overridden base method. Constraints that are type parameters in the overridden method may be replaced by type arguments in the inherited constraint. This can lead to constraints that are not valid when explicitly specified, such as value types or sealed types.
+- The `override` declaration and the overridden base method have the same declared accessibility. In other words, an `override` declaration cannot change the accessibility of the virtual method. However, if the overridden base method is `protected internal` and it is declared in a different assembly than the assembly containing the `override` declaration then the `override` declaration’s declared accessibility shall be `protected`.
+- The `override` declaration does not specify type-parameter-constraints-clauses. Instead, the constraints are inherited from the overridden base method. Constraints that are type parameters in the overridden method may be replaced by type arguments in the inherited constraint. This can lead to constraints that are not valid when explicitly specified, such as value types or sealed types.
 
 [*Example*: The following demonstrates how the overriding rules work for generic classes:
 
+```csharp
 abstract class C<T>
 {
-public virtual T F() {…}
+    public virtual T F () {…}
 
-public virtual C<T> G() {…}
+    public virtual C<T> G () {…}
 
-public virtual void H(C<T> x) {…}
+    public virtual void H (C<T> x) {…}
 }
 
-class D: C<string>
+class D : C<string>
 {
-public override string F() {…} // Ok
+    public override string F () {…} // Ok
 
-public override C<string> G() {…} // Ok
+    public override C<string> G () {…} // Ok
 
-public override void H(C<T> x) {…} // Error, should be C<string>
+    public override void H (C<T> x) {…} // Error, should be C<string>
 }
 
-class E<T,U>: C<U>
+class E<T, U> : C<U>
 {
-public override U F() {…} // Ok
+    public override U F () {…} // Ok
 
-public override C<U> G() {…} // Ok
+    public override C<U> G () {…} // Ok
 
-public override void H(C<T> x) {…} // Error, should be C<U>
+    public override void H (C<T> x) {…} // Error, should be C<U>
 }
+```
 
 *end example*]
 
 An override declaration can access the overridden base method using a *base-access* (§12.7.9). [*Example*: In the following code
 
+```csharp
 class A
 {
-int x;
+    int x;
 
-public virtual void PrintFields() {
-Console.WriteLine("x = {0}", x);
-}
+    public virtual void PrintFields ()
+    {
+        Console.WriteLine ("x = {0}", x);
+    }
 }
 
-class B: A
+class B : A
 {
-int y;
+    int y;
 
-public override void PrintFields() {
-base.PrintFields();
-Console.WriteLine("y = {0}", y);
+    public override void PrintFields ()
+    {
+        base.PrintFields ();
+        Console.WriteLine ("y = {0}", y);
+    }
 }
-}
+```
 
-the base.PrintFields() invocation in B invokes the PrintFields method declared in A. A *base-access* disables the virtual invocation mechanism and simply treats the base method as a non-virtual method. Had the invocation in B been written ((A)this).PrintFields(), it would recursively invoke the PrintFields method declared in B, not the one declared in A, since PrintFields is virtual and the run-time type of ((A)this) is B. *end example*]
+the `base.PrintFields()` invocation in `B` invokes the `PrintFields` method declared in `A`. A *base-access* disables the virtual invocation mechanism and simply treats the base method as a non-virtual method. Had the invocation in `B` been written `((A)this).PrintFields()`, it would recursively invoke the `PrintFields` method declared in `B`, not the one declared in `A`, since `PrintFields` is `virtual` and the run-time type of `((A)this)` is `B`. *end example*]
 
-Only by including an override modifier can a method override another method. In all other cases, a method with the same signature as an inherited method simply hides the inherited method. [*Example*: In the following code
+Only by including an `override` modifier can a method override another method. In all other cases, a method with the same signature as an inherited method simply hides the inherited method. [*Example*: In the following code
 
+```csharp
 class A
 {
-public virtual void F() {}
+    public virtual void F () { }
 }
 
-class B: A
+class B : A
 {
-public virtual void F() {} // Warning, hiding inherited F()
+    public virtual void F () { } // Warning, hiding inherited F()
 }
+```
 
-the F method in B does not include an override modifier and therefore does not override the F method in A. Rather, the F method in B hides the method in A, and a warning is reported because the declaration does not include a new modifier. *end example*]
+the `F` method in `B` does not include an `override` modifier and therefore does not override the `F` method in `A`. Rather, the `F` method in `B` hides the method in `A`, and a warning is reported because the declaration does not include a `new` modifier. *end example*]
 
 [*Example*: In the following code
 
+```csharp
 class A
 {
-public virtual void F() {}
+    public virtual void F () { }
 }
 
-class B: A
+class B : A
 {
-new private void F() {} // Hides A.F within body of B
+    new private void F () { } // Hides A.F within body of B
 }
 
-class C: B
+class C : B
 {
-public override void F() {} // Ok, overrides A.F
+    public override void F () { } // Ok, overrides A.F
 }
+```
 
-the F method in B hides the virtual F method inherited from A. Since the new F in B has private access, its scope only includes the class body of B and does not extend to C. Therefore, the declaration of F in C is permitted to override the F inherited from A. *end example*]
+the `F` method in `B` hides the virtual `F` method inherited from `A`. Since the new `F` in `B` has `private` access, its scope only includes the class body of `B` and does not extend to `C`. Therefore, the declaration of `F` in `C` is permitted to override the `F` inherited from `A`. *end example*]
 
 ### Sealed methods
 
-When an instance method declaration includes a sealed modifier, that method is said to be a ***sealed method***. A sealed method overrides an inherited virtual method with the same signature. A sealed method shall also be marked with the override modifier. Use of the sealed modifier prevents a derived class from further overriding the method.
+When an instance method declaration includes a `sealed` modifier, that method is said to be a ***sealed method***. A sealed method overrides an inherited virtual method with the same signature. A sealed method shall also be marked with the `override` modifier. Use of the `sealed` modifier prevents a derived class from further overriding the method.
 
 [*Example*: The example
 
+```csharp
 using System;
 
 class A
 {
-public virtual void F() {
-Console.WriteLine("A.F");
+    public virtual void F ()
+    {
+        Console.WriteLine ("A.F");
+    }
+
+    public virtual void G ()
+    {
+        Console.WriteLine ("A.G");
+    }
 }
 
-public virtual void G() {
-Console.WriteLine("A.G");
-}
-}
-
-class B: A
+class B : A
 {
-public sealed override void F() {
-Console.WriteLine("B.F");
+    public sealed override void F ()
+    {
+        Console.WriteLine ("B.F");
+    }
+
+    public override void G ()
+    {
+        Console.WriteLine ("B.G");
+    }
 }
 
-public override void G() {
-Console.WriteLine("B.G");
-}
-}
-
-class C: B
+class C : B
 {
-public override void G() {
-Console.WriteLine("C.G");
+    public override void G ()
+    {
+        Console.WriteLine ("C.G");
+    }
 }
-}
+```
 
-the class B provides two override methods: an F method that has the sealed modifier and a G method that does not. B’s use of the sealed modifier prevents C from further overriding F.[]{#_Ref459600504 .anchor} *end example*]
+the class `B` provides two override methods: an `F` method that has the `sealed` modifier and a `G` method that does not. `B`’s use of the `sealed` modifier prevents `C` from further overriding `F`. *end example*]
 
 ### Abstract methods
 
-When an instance method declaration includes an abstract modifier, that method is said to be an ***abstract method***. Although an abstract method is implicitly also a virtual method, it cannot have the modifier virtual.
+When an instance method declaration includes an `abstract` modifier, that method is said to be an ***abstract method***. Although an abstract method is implicitly also a virtual method, it cannot have the modifier `virtual`.
 
 An abstract method declaration introduces a new virtual method but does not provide an implementation of that method. Instead, non-abstract derived classes are required to provide their own implementation by overriding that method. Because an abstract method provides no actual implementation, the *method-body* of an abstract method simply consists of a semicolon.
 
@@ -17127,238 +17175,261 @@ Abstract method declarations are only permitted in abstract classes (§15.2.2.2)
 
 [*Example*: In the following code
 
-[]{#_Ref458831992 .anchor}public abstract class Shape
+```csharp
+public abstract class Shape
 {
-public abstract void Paint(Graphics g, Rectangle r);
+    public abstract void Paint (Graphics g, Rectangle r);
 }
 
-public class Ellipse: Shape
+public class Ellipse : Shape
 {
-public override void Paint(Graphics g, Rectangle r) {
-g.DrawEllipse(r);
-}
+    public override void Paint (Graphics g, Rectangle r)
+    {
+        g.DrawEllipse (r);
+    }
 }
 
-public class Box: Shape
+public class Box : Shape
 {
-public override void Paint(Graphics g, Rectangle r) {
-g.DrawRect(r);
+    public override void Paint (Graphics g, Rectangle r)
+    {
+        g.DrawRect (r);
+    }
 }
-}
+```
 
-the Shape class defines the abstract notion of a geometrical shape object that can paint itself. The Paint method is abstract because there is no meaningful default implementation. The Ellipse and Box classes are concrete Shape implementations. Because these classes are non-abstract, they are required to override the Paint method and provide an actual implementation. *end example*]
+the `Shape` class defines the abstract notion of a geometrical shape object that can paint itself. The `Paint` method is abstract because there is no meaningful default implementation. The `Ellipse` and `Box` classes are concrete `Shape` implementations. Because these classes are non-abstract, they are required to override the `Paint` method and provide an actual implementation. *end example*]
 
 It is a compile-time error for a *base-access* (§12.7.9) to reference an abstract method. [*Example*: In the following code
 
+```csharp
 abstract class A
 {
-public abstract void F();
+    public abstract void F ();
 }
 
-class B: A
+class B : A
 {
-public override void F() {
-base.F(); // Error, base.F is abstract
+    public override void F ()
+    {
+        base.F (); // Error, base.F is abstract
+    }
 }
-}
+```
 
-a compile-time error is reported for the base.F() invocation because it references an abstract method. *end example*]
+a compile-time error is reported for the `base.F()` invocation because it references an abstract method. *end example*]
 
 An abstract method declaration is permitted to override a virtual method. This allows an abstract class to force re-implementation of the method in derived classes, and makes the original implementation of the method unavailable. [*Example*: In the following code
 
+```csharp
 using System;
 
 class A
 {
-public virtual void F() {
-Console.WriteLine("A.F");
-}
+    public virtual void F ()
+    {
+        Console.WriteLine ("A.F");
+    }
 }
 
-abstract class B: A
+abstract class B : A
 {
-public abstract override void F();
+    public abstract override void F ();
 }
 
-class C: B
+class C : B
 {
-public override void F() {
-Console.WriteLine("C.F");
+    public override void F ()
+    {
+        Console.WriteLine ("C.F");
+    }
 }
-}
+```
 
-class A declares a virtual method, class B overrides this method with an abstract method, and class C overrides the abstract method to provide its own implementation. *end example*]
+class `A` declares a virtual method, class `B` overrides this method with an abstract method, and class `C` overrides the abstract method to provide its own implementation. *end example*]
 
 ### External methods
 
-When a method declaration includes an extern modifier, the method is said to be an ***external method***. External methods are implemented externally, typically using a language other than C#. Because an external method declaration provides no actual implementation, the *method-body* of an external method simply consists of a semicolon. An external method shall not be generic.
+When a method declaration includes an `extern` modifier, the method is said to be an ***external method***. External methods are implemented externally, typically using a language other than C#. Because an external method declaration provides no actual implementation, the *method-body* of an external method simply consists of a semicolon. An external method shall not be generic.
 
 The mechanism by which linkage to an external method is achieved, is implementation-defined.
 
-[*Example*: The following example demonstrates the use of the extern modifier and the DllImport attribute:
+[*Example*: The following example demonstrates the use of the `extern` modifier and the DllImport attribute:
 
-using System.Text;
-using System.Security.Permissions;
+```csharp
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
+using System.Text;
 
 class Path
 {
-[DllImport("kernel32", SetLastError=true)]
-static extern bool CreateDirectory(string name, SecurityAttribute sa);
+    [DllImport ("kernel32", SetLastError = true)]
+    static extern bool CreateDirectory (string name, SecurityAttribute sa);
 
-[DllImport("kernel32", SetLastError=true)]
-static extern bool RemoveDirectory(string name);
+    [DllImport ("kernel32", SetLastError = true)]
+    static extern bool RemoveDirectory (string name);
 
-[DllImport("kernel32", SetLastError=true)]
-static extern int GetCurrentDirectory(int bufSize, StringBuilder buf);
+    [DllImport ("kernel32", SetLastError = true)]
+    static extern int GetCurrentDirectory (int bufSize, StringBuilder buf);
 
-[DllImport("kernel32", SetLastError=true)]
-static extern bool SetCurrentDirectory(string name);
+    [DllImport ("kernel32", SetLastError = true)]
+    static extern bool SetCurrentDirectory (string name);
 }
+```
 
 *end example*]
 
 ### Partial methods
 
-When a method declaration includes a partial modifier, that method is said to be a ***partial method***. Partial methods may only be declared as members of partial types (§15.2.7), and are subject to a number of restrictions.
+When a method declaration includes a `partial` modifier, that method is said to be a ***partial method***. Partial methods may only be declared as members of partial types (§15.2.7), and are subject to a number of restrictions.
 
 Partial methods may be defined in one part of a type declaration and implemented in another. The implementation is optional; if no part implements the partial method, the partial method declaration and all calls to it are removed from the type declaration resulting from the combination of the parts.
 
-Partial methods shall not define access modifiers; they are implicitly private. Their return type shall be void, and their parameters shall not have the out modifier. The identifier partial is recognized as a contextual keyword (§7.4.4) in a method declaration only if it appears immediately before the void keyword. A partial method cannot explicitly implement interface methods.
+Partial methods shall not define access modifiers; they are implicitly `private`. Their return type shall be `void`, and their parameters shall not have the `out` modifier. The identifier partial is recognized as a contextual keyword (§7.4.4) in a method declaration only if it appears immediately before the `void` keyword. A partial method cannot explicitly implement interface methods.
 
 There are two kinds of partial method declarations: If the body of the method declaration is a semicolon, the declaration is said to be a ***defining partial method declaration***. If the body is given as a *block*, the declaration is said to be an ***implementing partial method declaration***. Across the parts of a type declaration, there may be only one defining partial method declaration with a given signature, and there may be only one implementing partial method declaration with a given signature. If an implementing partial method declaration is given, a corresponding defining partial method declaration shall exist, and the declarations shall match as specified in the following:
 
 - The declarations shall have the same modifiers (although not necessarily in the same order), method name, number of type parameters and number of parameters.
-
 - Corresponding parameters in the declarations shall have the same modifiers (although not necessarily in the same order) and the same types (modulo differences in type parameter names).
-
 - Corresponding type parameters in the declarations shall have the same constraints (modulo differences in type parameter names).
 
 An implementing partial method declaration can appear in the same part as the corresponding defining partial method declaration.
 
-Only a defining partial method participates in overload resolution. Thus, whether or not an implementing declaration is given, invocation expressions may resolve to invocations of the partial method. Because a partial method always returns void, such invocation expressions will always be expression statements. Furthermore, because a partial method is implicitly private, such statements will always occur within one of the parts of the type declaration within which the partial method is declared.
+Only a defining partial method participates in overload resolution. Thus, whether or not an implementing declaration is given, invocation expressions may resolve to invocations of the partial method. Because a partial method always returns void, such invocation expressions will always be expression statements. Furthermore, because a partial method is implicitly `private`, such statements will always occur within one of the parts of the type declaration within which the partial method is declared.
 
 If no part of a partial type declaration contains an implementing declaration for a given partial method, any expression statement invoking it is simply removed from the combined type declaration. Thus the invocation expression, including any subexpressions, has no effect at run-time. The partial method itself is also removed and will not be a member of the combined type declaration.
 
 If an implementing declaration exists for a given partial method, the invocations of the partial methods are retained. The partial method gives rise to a method declaration similar to the implementing partial method declaration except for the following:
 
 - The partial modifier is not included
-
 - The attributes in the resulting method declaration are the combined attributes of the defining and the implementing partial method declaration in unspecified order. Duplicates are not removed.
-
 - The attributes on the parameters of the resulting method declaration are the combined attributes of the corresponding parameters of the defining and the implementing partial method declaration in unspecified order. Duplicates are not removed.
 
-If a defining declaration but not an implementing declaration is given for a partial method M, the following restrictions apply:
+If a defining declaration but not an implementing declaration is given for a partial method `M`, the following restrictions apply:
 
-- It is a compile-time error to create a delegate from M (§12.7.11.6).
-
-- It is a compile-time error to refer to M inside an anonymous function that is converted to an expression tree type (§9.6).
-
+- It is a compile-time error to create a delegate from `M` (§12.7.11.6).
+- It is a compile-time error to refer to `M` inside an anonymous function that is converted to an expression tree type (§9.6).
 - Expressions occurring as part of an invocation of M do not affect the definite assignment state (§10.4), which can potentially lead to compile-time errors.
-
-- M cannot be the entry point for an application (§8.1).
+- `M` cannot be the entry point for an application (§8.1).
 
 Partial methods are useful for allowing one part of a type declaration to customize the behavior of another part, e.g., one that is generated by a tool. Consider the following partial class declaration:
 
+```csharp
 partial class Customer
 {
-string name;
+    string name;
 
-public string Name {
+    public string Name
+    {
 
-get { return name; }
+        get { return name; }
 
-set {
-OnNameChanging(value);
-name = value;
-OnNameChanged();
+        set
+        {
+            OnNameChanging (value);
+            name = value;
+            OnNameChanged ();
+        }
+
+    }
+
+    partial void OnNameChanging (string newName);
+
+    partial void OnNameChanged ();
 }
-
-}
-
-partial void OnNameChanging(string newName);
-
-partial void OnNameChanged();
-}
+```
 
 If this class is compiled without any other parts, the defining partial method declarations and their invocations will be removed, and the resulting combined class declaration will be equivalent to the following:
 
+```csharp
 class Customer
 {
-string name;
+    string name;
 
-public string Name {
+    public string Name
+    {
 
-get { return name; }
+        get { return name; }
 
-set { name = value; }
+        set { name = value; }
+    }
 }
-}
+```
 
 Assume that another part is given, however, which provides implementing declarations of the partial methods:
 
+```csharp
 partial class Customer
 {
-partial void OnNameChanging(string newName)
-{
-Console.WriteLine(“Changing “ + name + “ to “ + newName);
-}
+    partial void OnNameChanging (string newName)
+    {
+        Console.WriteLine (“Changing“ + name + “to“ + newName);
+    }
 
-partial void OnNameChanged()
-{
-Console.WriteLine(“Changed to “ + name);
+    partial void OnNameChanged ()
+    {
+        Console.WriteLine (“Changed to“ + name);
+    }
 }
-}
+```
 
 Then the resulting combined class declaration will be equivalent to the following:
 
+```csharp
 class Customer
 {
-string name;
+    string name;
 
-public string Name {
+    public string Name
+    {
 
-get { return name; }
+        get { return name; }
 
-set {
-OnNameChanging(value);
-name = value;
-OnNameChanged();
+        set
+        {
+            OnNameChanging (value);
+            name = value;
+            OnNameChanged ();
+        }
+
+    }
+
+    void OnNameChanging (string newName)
+    {
+        Console.WriteLine (“Changing“ + name + “to“ + newName);
+    }
+
+    void OnNameChanged ()
+    {
+        Console.WriteLine (“Changed to“ + name);
+    }
 }
-
-}
-
-void OnNameChanging(string newName)
-{
-Console.WriteLine(“Changing “ + name + “ to “ + newName);
-}
-
-void OnNameChanged()
-{
-Console.WriteLine(“Changed to “ + name);
-}
-}
+```
 
 ### Extension methods
 
-When the first parameter of a method includes the this modifier, that method is said to be an ***extension method***. Extension methods shall only be declared in non-generic, non-nested static classes. The first parameter of an extension method may have no modifiers other than this, and the parameter type may not be a pointer type.
+When the first parameter of a method includes the `this` modifier, that method is said to be an ***extension method***. Extension methods shall only be declared in non-generic, non-nested static classes. The first parameter of an extension method may have no modifiers other than `this`, and the parameter type may not be a pointer type.
 
 [*Example*: The following is an example of a static class that declares two extension methods:
 
+```csharp
 public static class Extensions
 {
-public static int ToInt32(this string s) {
-return Int32.Parse(s);
-}
+    public static int ToInt32 (this string s)
+    {
+        return Int32.Parse (s);
+    }
 
-public static T[] Slice<T>(this T[] source, int index, int count) {
-if (index < 0 || count < 0 || source.Length – index < count)
-throw new ArgumentException();
-T[] result = new T[count];
-Array.Copy(source, index, result, 0, count);
-return result;
+    public static T[] Slice<T> (this T[] source, int index, int count)
+    {
+        if (index < 0 || count < 0 || source.Length– index < count)
+            throw new ArgumentException ();
+        T[] result = new T[count];
+        Array.Copy (source, index, result, 0, count);
+        return result;
+    }
 }
-}
+```
 
 *end example*]
 
@@ -17366,27 +17437,35 @@ An extension method is a regular static method. In addition, where its enclosing
 
 [*Example*: The following program uses the extension methods declared above:
 
+```csharp
 static class Program
 {
-static void Main() {
-string[] strings = { "1", "22", "333", "4444" };
-foreach (string s in strings.Slice(1, 2)) {
-Console.WriteLine(s.ToInt32());
+    static void Main ()
+    {
+        string[] strings = { "1", "22", "333", "4444" };
+        foreach (string s in strings.Slice (1, 2))
+        {
+            Console.WriteLine (s.ToInt32 ());
+        }
+    }
 }
-}
-}
+```
 
-The Slice method is available on the string[], and the ToInt32 method is available on string, because they have been declared as extension methods. The meaning of the program is the same as the following, using ordinary static method calls:
+The `Slice` method is available on the `string[]`, and the `ToInt32` method is available on `string`, because they have been declared as extension methods. The meaning of the program is the same as the following, using ordinary static method calls:
 
+```csharp
 static class Program
 {
-static void Main() {
-string[] strings = { "1", "22", "333", "4444" };
-foreach (string s in Extensions.Slice(strings, 1, 2)) {
-Console.WriteLine(Extensions.ToInt32(s));
+    static void Main ()
+    {
+        string[] strings = { "1", "22", "333", "4444" };
+        foreach (string s in Extensions.Slice (strings, 1, 2))
+        {
+            Console.WriteLine (Extensions.ToInt32 (s));
+        }
+    }
 }
-}
-}
+```
 
 *end example*]
 
@@ -17396,33 +17475,39 @@ The *method-body* of a method declaration consists of either a *block* or a semi
 
 Abstract and external method declarations do not provide a method implementation, so their method bodies simply consist of a semicolon. For any other method, the method body is a block (§13.3) that contains the statements to execute when that method is invoked.
 
-The ***effective return type*** of a method is void if the return type is void, or if the method is async and the return type is System.Threading.Tasks.Task. Otherwise, the effective return type of a non-async method is its return type, and the effective return type of an async method with return type System.Threading.Tasks.Task<T> is T.
+The ***effective return type*** of a method is `void` if the return type is `void`, or if the method is `async` and the return type is `System.Threading.Tasks.Task`. Otherwise, the effective return type of a non-async method is its return type, and the effective return type of an async method with return type `System.Threading.Tasks.Task<T>` is `T`.
 
-When the effective return type of a method is void, return statements (§13.10.5) in that method’s body are not permitted to specify an expression. If execution of the method body of a void method completes normally (that is, control flows off the end of the method body), that method simply returns to its caller.
+When the effective return type of a method is `void`, return statements (§13.10.5) in that method’s body are not permitted to specify an expression. If execution of the method body of a void method completes normally (that is, control flows off the end of the method body), that method simply returns to its caller.
 
-When the effective return type of a method is not void, each return statement in that method's body shall specify an expression that is implicitly convertible to the effective return type. The endpoint of the method body of a value-returning method shall not be reachable. In other words, in a value-returning method, control is not permitted to flow off the end of the method body.
+When the effective return type of a method is not `void`, each return statement in that method's body shall specify an expression that is implicitly convertible to the effective return type. The endpoint of the method body of a value-returning method shall not be reachable. In other words, in a value-returning method, control is not permitted to flow off the end of the method body.
 
 [*Example*: In the following code
 
+```csharp
 class A
 {
-public int F() {} // Error, return value required
+    public int F () { } // Error, return value required
 
-public int G() {
-return 1;
-}
+    public int G ()
+    {
+        return 1;
+    }
 
-public int H(bool b) {
-if (b) {
-return 1;
+    public int H (bool b)
+    {
+        if (b)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 }
-else {
-return 0;
-}
-}
-}
+```
 
-the value-returning F method results in a compile-time error because control can flow off the end of the method body. The G and H methods are correct because all possible execution paths end in a return statement that specifies a return value. *end example*]
+the value-returning `F` method results in a compile-time error because control can flow off the end of the method body. The `G` and `H` methods are correct because all possible execution paths end in a return statement that specifies a return value. *end example*]
 
 ## Properties
 
@@ -17432,43 +17517,45 @@ A ***property*** is a member that provides access to a characteristic of an obje
 
 Properties are declared using *property-declaration*s:
 
-[]{#Grammar_property_declaration .anchor}property-declaration:
-attributesopt property-modifiersopt type member-name *{* accessor-declarations *}*
+```antlr
+property-declaration:
+    attributesopt property-modifiersopt type member-name { accessor-declarations }
 
-[]{#Grammar_property_modifiers .anchor}property-modifiers:
-property-modifier
-property-modifiers property-modifier
+[property-modifiers:
+    property-modifier
+    property-modifiers property-modifier
 
-[]{#Grammar_property_modifier .anchor}property-modifier:
-*new
-public
-protected
-internal
-private
-static
-virtual
-sealed
-override
-abstract
-extern*
+property-modifier:
+    new
+    public
+    protected
+    internal
+    private
+    static
+    virtual
+    sealed
+    override
+    abstract
+    extern
+```
 
-A *property-declaration* may include a set of *attributes* (§22) and a valid combination of the four access modifiers (§15.3.6), the new (§15.3.5), static (§15.7.2), virtual (§15.6.4, §15.7.6), override (§15.6.5, §15.7.6), sealed (§15.6.6), abstract (§15.6.7, §15.7.6), and extern (§15.6.8) modifiers.
+A *property-declaration* may include a set of *attributes* (§22) and a valid combination of the four access modifiers (§15.3.6), the `new` (§15.3.5), `static` (§15.7.2), `virtual` (§15.6.4, §15.7.6), `override` (§15.6.5, §15.7.6), `sealed` (§15.6.6), `abstract` (§15.6.7, §15.7.6), and `extern` (§15.6.8) modifiers.
 
 Property declarations are subject to the same rules as method declarations (§15.6) with regard to valid combinations of modifiers.
 
-The *type* of a property declaration specifies the type of the property introduced by the declaration, and the *member-name* (§15.6.1) specifies the name of the property. Unless the property is an explicit interface member implementation, the *member-name* is simply an *identifier*. For an explicit interface member implementation (§18.6.2), the *member-name* consists of an *interface-type* followed by a “.” and an *identifier*.
+The *type* of a property declaration specifies the type of the property introduced by the declaration, and the *member-name* (§15.6.1) specifies the name of the property. Unless the property is an explicit interface member implementation, the *member-name* is simply an *identifier*. For an explicit interface member implementation (§18.6.2), the *member-name* consists of an *interface-type* followed by a “`.`” and an *identifier*.
 
 The *type* of a property shall be at least as accessible as the property itself (§8.5.5).
 
-The *accessor-declarations*, which shall be enclosed in “{” and “}” tokens, declare the accessors (§15.7.3) of the property. The accessors specify the executable statements associated with reading and writing the property.
+The *accessor-declarations*, which shall be enclosed in “`{`” and “`}`” tokens, declare the accessors (§15.7.3) of the property. The accessors specify the executable statements associated with reading and writing the property.
 
-[]{#_Ref460549912 .anchor}Even though the syntax for accessing a property is the same as that for a field, a property is not classified as a variable. Thus, it is not possible to pass a property as a ref or out argument.
+Even though the syntax for accessing a property is the same as that for a field, a property is not classified as a variable. Thus, it is not possible to pass a property as a `ref` or `out` argument.
 
-When a property declaration includes an extern modifier, the property is said to be an ***external property***. Because an external property declaration provides no actual implementation, each of its *accessor-declarations* consists of a semicolon.
+When a property declaration includes an `extern` modifier, the property is said to be an ***external property***. Because an external property declaration provides no actual implementation, each of its *accessor-declarations* consists of a semicolon.
 
 ### Static and instance properties
 
-[]{#_Ref460498060 .anchor}When a property declaration includes a static modifier, the property is said to be a ***static property***. When no static modifier is present, the property is said to be an ***instance property***.
+When a property declaration includes a `static` modifier, the property is said to be a ***static property***. When no `static` modifier is present, the property is said to be an ***instance property***.
 
 A static property is not associated with a specific instance, and it is a compile-time error to refer to this in the accessors of a static property.
 
@@ -17480,259 +17567,300 @@ The differences between static and instance members are discussed further in §1
 
 The *accessor-declarations* of a property specify the executable statements associated with reading and writing that property.
 
-[]{#Grammar_accessor_declarations .anchor}accessor-declarations:
-get-accessor-declaration set-accessor-declarationopt
-set-accessor-declaration get-accessor-declarationopt
+```antlr
+accessor-declarations:
+    get-accessor-declaration set-accessor-declarationopt
+    set-accessor-declaration get-accessor-declarationopt
 
-[]{#Grammar_get_accessor_declaration .anchor}get-accessor-declaration:
-attributesopt accessor-modifieropt *get* accessor-body
+get-accessor-declaration:
+    attributesopt accessor-modifieropt get accessor-body
 
-[]{#Grammar_set_accessor_declaration .anchor}set-accessor-declaration:
-attributesopt accessor-modifieropt *set* accessor-body
+set-accessor-declaration:
+    attributesopt accessor-modifieropt set accessor-body
 
-[]{#Grammar_accessor_modifier .anchor}accessor-modifier:
-*protected
-internal
-private
-protected* *internal
-internal* *protected*
+accessor-modifier:
+    protected
+    internal
+    private
+    protected internal
+    internal protected
 
-[]{#Grammar_accessor_body .anchor}accessor-body:
-block
-*;*
+accessor-body:
+    block
+    ;
+```
 
 The accessor declarations consist of a *get-accessor-declaration*, a *set-accessor-declaration*, or both. Each accessor declaration consists of optional attributes, an optional *accessor-modifier*, the token get or set, followed by an *accessor-body*.
 
 The use of *accessor-modifier*s is governed by the following restrictions:
 
 - An *accessor-modifier* shall not be used in an interface or in an explicit interface member implementation.
-
-- For a property or indexer that has no override modifier, an *accessor-modifier* is permitted only if the property or indexer has both a get and set accessor, and then is permitted only on one of those accessors.
-
-- For a property or indexer that includes an override modifier, an accessor shall match the *accessor-modifier*, if any, of the accessor being overridden.
-
+- For a property or indexer that has no `override` modifier, an *accessor-modifier* is permitted only if the property or indexer has both a `get` and `set` accessor, and then is permitted only on one of those accessors.
+- For a property or indexer that includes an `override` modifier, an accessor shall match the *accessor-modifier*, if any, of the accessor being overridden.
 - The *accessor-modifier* shall declare an accessibility that is strictly more restrictive than the declared accessibility of the property or indexer itself. To be precise:
-
-<!-- -->
-
-- If the property or indexer has a declared accessibility of public, the *accessor-modifier* may be either protected internal, internal, protected, or private.
-
-- If the property or indexer has a declared accessibility of protected internal, the *accessor-modifier* may be either internal, protected, or private.
-
-- If the property or indexer has a declared accessibility of internal or protected, the *accessor-modifier* shall be private.
-
-- If the property or indexer has a declared accessibility of private, no *accessor-modifier* may be used.
+  - If the property or indexer has a declared accessibility of `public`, the *accessor-modifier* may be either `protected internal`, `internal`, `protected`, or `private`.
+  - If the property or indexer has a declared accessibility of `protected internal`, the *accessor-modifier* may be either `internal`, `protected`, or `private`.
+  - If the property or indexer has a declared accessibility of `internal` or `protected`, the *accessor-modifier* shall be `private`.
+  - If the property or indexer has a declared accessibility of `private`, no *accessor-modifier* may be used.
 
 For abstract and extern properties, the *accessor-body* for each accessor specified is simply a semicolon. A non-abstract, non-extern property may be an ***automatically implemented property***, in which case both get and set accessors shall be given, both with a semicolon body (§15.7.4). For the accessors of any other non-abstract, non-extern property, the *accessor-body* is a *block* that specifies the statements to be executed when the corresponding accessor is invoked.
 
-A get accessor corresponds to a parameterless method with a return value of the property type. Except as the target of an assignment, when a property is referenced in an expression, the get accessor of the property is invoked to compute the value of the property (§12.2.2). The body of a get accessor shall conform to the rules for value-returning methods described in §15.6.11. In particular, all return statements in the body of a get accessor shall specify an expression that is implicitly convertible to the property type. Furthermore, the endpoint of a get accessor shall not be reachable.
+A `get` accessor corresponds to a parameterless method with a return value of the property type. Except as the target of an assignment, when a property is referenced in an expression, the `get` accessor of the property is invoked to compute the value of the property (§12.2.2). The body of a `get` accessor shall conform to the rules for value-returning methods described in §15.6.11. In particular, all `return` statements in the body of a `get` accessor shall specify an expression that is implicitly convertible to the property type. Furthermore, the endpoint of a `get` accessor shall not be reachable.
 
-A set accessor corresponds to a method with a single value parameter of the property type and a void return type. The implicit parameter of a set accessor is always named value. When a property is referenced as the target of an assignment (§12.18), or as the operand of ++ or –- (§12.7.10, 12.8.6), the set accessor is invoked with an argument that provides the new value (§12.18.2). The body of a set accessor shall conform to the rules for void methods described in §15.6.11. In particular, return statements in the set accessor body are not permitted to specify an expression. Since a set accessor implicitly has a parameter named value, it is a compile-time error for a local variable or constant declaration in a set accessor to have that name.
+A `set` accessor corresponds to a method with a single value parameter of the property type and a `void` return type. The implicit parameter of a set accessor is always named value. When a property is referenced as the target of an assignment (§12.18), or as the operand of `++` or `–-` (§12.7.10, 12.8.6), the `set` accessor is invoked with an argument that provides the new value (§12.18.2). The body of a `set` accessor shall conform to the rules for void methods described in §15.6.11. In particular, `return` statements in the `set` accessor body are not permitted to specify an expression. Since a `set` accessor implicitly has a parameter named value, it is a compile-time error for a local variable or constant declaration in a `set` accessor to have that name.
 
-Based on the presence or absence of the get and set accessors, a property is classified as follows:
+Based on the presence or absence of the `get` and `set` accessors, a property is classified as follows:
 
-- A property that includes both a get accessor and a set accessor is said to be a ***read-write*** property.
-
-- A property that has only a get accessor is said to be a ***read-only*** property. It is a compile-time error for a read-only property to be the target of an assignment.
-
-- A property that has only a set accessor is said to be a ***write-only*** property. Except as the target of an assignment, it is a compile-time error to reference a write-only property in an expression. [*Note*: The pre- and postfix ++ and -- operators and compound assignment operators cannot be applied to write-only properties, since these operators read the old value of their operand before they write the new one. *end note*]
+- A property that includes both a `get` accessor and a `set` accessor is said to be a ***read-write*** property.
+- A property that has only a `get` accessor is said to be a ***read-only*** property. It is a compile-time error for a read-only property to be the target of an assignment.
+- A property that has only a `set` accessor is said to be a ***write-only*** property. Except as the target of an assignment, it is a compile-time error to reference a write-only property in an expression. [*Note*: The pre- and postfix `++` and `--` operators and compound assignment operators cannot be applied to write-only properties, since these operators read the old value of their operand before they write the new one. *end note*]
 
 [*Example*: In the following code
 
-public class Button: Control
+```csharp
+public class Button : Control
 {
-private string caption;
+    private string caption;
 
-public string Caption {
-get {
-return caption;
-}
-set {
-if (caption != value) {
-caption = value;
-Repaint();
-}
-}
-}
+    public string Caption
+    {
+        get
+        {
+            return caption;
+        }
+        set
+        {
+            if (caption != value)
+            {
+                caption = value;
+                Repaint ();
+            }
+        }
+    }
 
-public override void Paint(Graphics g, Rectangle r) {
-// Painting code goes here
+    public override void Paint (Graphics g, Rectangle r)
+    {
+        // Painting code goes here
+    }
 }
-}
+```
 
-the Button control declares a public Caption property. The get accessor of the Caption property returns the string stored in the private caption field. The set accessor checks if the new value is different from the current value, and if so, it stores the new value and repaints the control. Properties often follow the pattern shown above: The get accessor simply returns a value stored in a private field, and the set accessor modifies that private field and then performs any additional actions required to update fully the state of the object.
+the `Button` control declares a public `Caption` property. The `get` accessor of the `Caption` property returns the `string` stored in the private `caption` field. The `set` accessor checks if the new value is different from the current value, and if so, it stores the new value and repaints the control. Properties often follow the pattern shown above: The `get` accessor simply returns a value stored in a private field, and the `set` accessor modifies that private field and then performs any additional actions required to update fully the state of the object.
 
-Given the Button class above, the following is an example of use of the Caption property:
+Given the `Button` class above, the following is an example of use of the `Caption` property:
 
+```csharp
 Button okButton = new Button();
 okButton.Caption = "OK"; // Invokes set accessor
 string s = okButton.Caption; // Invokes get accessor
+```
 
-Here, the set accessor is invoked by assigning a value to the property, and the get accessor is invoked by referencing the property in an expression. *end example*]
+Here, the `set` accessor is invoked by assigning a value to the property, and the `get` accessor is invoked by referencing the property in an expression. *end example*]
 
-The get and set accessors of a property are not distinct members, and it is not possible to declare the accessors of a property separately. [*Example*: The example
+The `get` and `set` accessors of a property are not distinct members, and it is not possible to declare the accessors of a property separately. [*Example*: The example
 
+```csharp
 class A
 {
-private string name;
+    private string name;
 
-public string Name { // Error, duplicate member name
-get { return name; }
-}
+    public string Name
+    { // Error, duplicate member name
+        get { return name; }
+    }
 
-public string Name { // Error, duplicate member name
-set { name = value; }
+    public string Name
+    { // Error, duplicate member name
+        set { name = value; }
+    }
 }
-}
+```
 
 does not declare a single read-write property. Rather, it declares two properties with the same name, one read-only and one write-only. Since two members declared in the same class cannot have the same name, the example causes a compile-time error to occur. *end example*]
 
 When a derived class declares a property by the same name as an inherited property, the derived property hides the inherited property with respect to both reading and writing. [*Example*: In the following code
 
+```csharp
 class A
 {
-public int P {
-set {…}
-}
+    public int P
+    {
+        set {…}
+    }
 }
 
-class B: A
+class B : A
 {
-new public int P {
-get {…}
+    new public int P
+    {
+        get {…}
+    }
 }
-}
+```
 
-the P property in B hides the P property in A with respect to both reading and writing. Thus, in the statements
+the `P` property in `B` hides the `P` property in `A` with respect to both reading and writing. Thus, in the statements
 
+```csharp
 B b = new B();
 b.P = 1; // Error, B.P is read-only
 ((A)b).P = 1; // Ok, reference to A.P
+```
 
-the assignment to b.P causes a compile-time error to be reported, since the read-only P property in B hides the write-only P property in A. Note, however, that a cast can be used to access the hidden P property. *end example*]
+the assignment to `b.P` causes a compile-time error to be reported, since the read-only `P` property in `B` hides the write-only `P` property in `A`. Note, however, that a cast can be used to access the hidden `P` property. *end example*]
 
-Unlike public fields, properties provide a separation between an object’s internal state and its public interface. [*Example*: Consider the following code, which uses a Point struct to represent a location:
+Unlike public fields, properties provide a separation between an object’s internal state and its public interface. [*Example*: Consider the following code, which uses a `Point` struct to represent a location:
 
+```csharp
 class Label
 {
-private int x, y;
-private string caption;
+    private int x, y;
+    private string caption;
 
-public Label(int x, int y, string caption) {
-this.x = x;
-this.y = y;
-this.caption = caption;
+    public Label (int x, int y, string caption)
+    {
+        this.x = x;
+        this.y = y;
+        this.caption = caption;
+    }
+
+    public int X
+    {
+        get { return x; }
+    }
+
+    public int Y
+    {
+        get { return y; }
+    }
+
+    public Point Location
+    {
+        get { return new Point (x, y); }
+    }
+
+    public string Caption
+    {
+        get { return caption; }
+    }
 }
+```
 
-public int X {
-get { return x; }
-}
+Here, the `Label` class uses two `int` fields, `x` and `y`, to store its location. The location is publicly exposed both as an `X` and a `Y` property and as a `Location` property of type `Point`. If, in a future version of `Label`, it becomes more convenient to store the location as a `Point` internally, the change can be made without affecting the public interface of the class:
 
-public int Y {
-get { return y; }
-}
-
-public Point Location {
-get { return new Point(x, y); }
-}
-
-public string Caption {
-get { return caption; }
-}
-}
-
-Here, the Label class uses two int fields, x and y, to store its location. The location is publicly exposed both as an X and a Y property and as a Location property of type Point. If, in a future version of Label, it becomes more convenient to store the location as a Point internally, the change can be made without affecting the public interface of the class:
-
+```csharp
 class Label
 {
-private Point location;
-private string caption;
+    private Point location;
+    private string caption;
 
-public Label(int x, int y, string caption) {
-this.location = new Point(x, y);
-this.caption = caption;
+    public Label (int x, int y, string caption)
+    {
+        this.location = new Point (x, y);
+        this.caption = caption;
+    }
+
+    public int X
+    {
+        get { return location.x; }
+    }
+
+    public int Y
+    {
+        get { return location.y; }
+    }
+
+    public Point Location
+    {
+        get { return location; }
+    }
+
+    public string Caption
+    {
+        get { return caption; }
+    }
 }
+```
 
-public int X {
-get { return location.x; }
-}
+Had `x` and `y` instead been public readonly fields, it would have been impossible to make such a change to the `Label` class. *end example*]
 
-public int Y {
-get { return location.y; }
-}
-
-public Point Location {
-get { return location; }
-}
-
-public string Caption {
-get { return caption; }
-}
-}
-
-Had x and y instead been public readonly fields, it would have been impossible to make such a change to the Label class. *end example*]
-
-[*Note*: Exposing state through properties is not necessarily any less efficient than exposing fields directly. In particular, when a property is non-virtual and contains only a small amount of code, the execution environment might replace calls to accessors with the actual code of the accessors. This process is known as ***inlining***, and it makes property access as efficient as field access, yet preserves the increased flexibility of properties. *end note*]
+> [!NOTE]
+> Exposing state through properties is not necessarily any less efficient than exposing fields directly. In particular, when a property is non-virtual and contains only a small amount of code, the execution environment might replace calls to accessors with the actual code of the accessors. This process is known as ***inlining***, and it makes property access as efficient as field access, yet preserves the increased flexibility of properties.
 
 [*Example*: Since invoking a get accessor is conceptually equivalent to reading the value of a field, it is considered bad programming style for get accessors to have observable side-effects. In the example
 
+```csharp
 class Counter
 {
-private int next;
+    private int next;
 
-public int Next {
-get { return next++; }
+    public int Next
+    {
+        get { return next++; }
+    }
 }
-}
+```
 
-the value of the Next property depends on the number of times the property has previously been accessed. Thus, accessing the property produces an observable side effect, and the property should be implemented as a method instead.
+the value of the `Next` property depends on the number of times the property has previously been accessed. Thus, accessing the property produces an observable side effect, and the property should be implemented as a method instead.
 
-The “no side-effects” convention for get accessors doesn’t mean that get accessors should always be written simply to return values stored in fields. Indeed, get accessors often compute the value of a property by accessing multiple fields or invoking methods. However, a properly designed get accessor performs no actions that cause observable changes in the state of the object. *end example*]
+The “no side-effects” convention for `get` accessors doesn’t mean that `get` accessors should always be written simply to return values stored in fields. Indeed, `get` accessors often compute the value of a property by accessing multiple fields or invoking methods. However, a properly designed `get` accessor performs no actions that cause observable changes in the state of the object. *end example*]
 
 Properties can be used to delay initialization of a resource until the moment it is first referenced. [*Example*:
 
+```csharp
 using System.IO;
 
 public class Console
 {
-private static TextReader reader;
-private static TextWriter writer;
-private static TextWriter error;
+    private static TextReader reader;
+    private static TextWriter writer;
+    private static TextWriter error;
 
-public static TextReader In {
-get {
-if (reader == null) {
-reader = new StreamReader(Console.OpenStandardInput());
-}
-return reader;
-}
-}
+    public static TextReader In
+    {
+        get
+        {
+            if (reader == null)
+            {
+                reader = new StreamReader (Console.OpenStandardInput ());
+            }
+            return reader;
+        }
+    }
 
-public static TextWriter Out {
-get {
-if (writer == null) {
-writer = new StreamWriter(Console.OpenStandardOutput());
-}
-return writer;
-}
-}
+    public static TextWriter Out
+    {
+        get
+        {
+            if (writer == null)
+            {
+                writer = new StreamWriter (Console.OpenStandardOutput ());
+            }
+            return writer;
+        }
+    }
 
-public static TextWriter Error {
-get {
-if (error == null) {
-error = new StreamWriter(Console.OpenStandardError());
+    public static TextWriter Error
+    {
+        get
+        {
+            if (error == null)
+            {
+                error = new StreamWriter (Console.OpenStandardError ());
+            }
+            return error;
+        }
+    }
+    …
 }
-return error;
-}
-}
-…
-}
+```
 
-The Console class contains three properties, In, Out, and Error, that represent the standard input, output, and error devices, respectively. By exposing these members as properties, the Console class can delay their initialization until they are actually used. For example, upon first referencing the Out property, as in
+The `Console` class contains three properties, `In`, `Out`, and `Error`, that represent the standard input, output, and error devices, respectively. By exposing these members as properties, the `Console` class can delay their initialization until they are actually used. For example, upon first referencing the `Out` property, as in
 
+```csharp
 Console.Out.WriteLine("hello, world");
+```
 
-the underlying TextWriter for the output device is created. However, if the application makes no reference to the In and Error properties, then no objects are created for those devices. *end example*]
+the underlying `TextWriter` for the output device is created. However, if the application makes no reference to the `In` and `Error` properties, then no objects are created for those devices. *end example*]
 
 ### Automatically implemented properties
 
@@ -17740,29 +17868,38 @@ When a property is specified as an automatically implemented property, a hidden 
 
 [*Example*:
 
-public class Point {
-public int X { get; set; } // automatically implemented
-public int Y { get; set; } // automatically implemented
+```csharp
+public class Point
+{
+    public int X { get; set; } // automatically implemented
+    public int Y { get; set; } // automatically implemented
 }
+```
 
 is equivalent to the following declaration:
 
-public class Point {
-private int x;
-private int y;
-public int X { get { return x; } set { x = value; } }
-public int Y { get { return y; } set { y = value; } }
-}
+```csharp
+    public class Point
+    {
+        private int x;
+        private int y;
+        public int X { get { return x; } set { x = value; } }
+        public int Y { get { return y; } set { y = value; } }
+    }
+```
 
 *end example*]
 
 Because the backing field is inaccessible, automatically implemented read-only or write-only properties do not make sense, and are disallowed. It is however possible to set the access level of each accessor differently. Thus, the effect of a read-only property with a private backing field can be mimicked like this:
 
-public class ReadOnlyPoint {
-public int X { get; private set; }
-public int Y { get; private set; }
-public ReadOnlyPoint(int x, int y) { X = x; Y = y; }
+```csharp
+public class ReadOnlyPoint
+{
+    public int X { get; private set; }
+    public int Y { get; private set; }
+    public ReadOnlyPoint (int x, int y) { X = x; Y = y; }
 }
+```
 
 ### Accessibility
 
@@ -17773,151 +17910,171 @@ The presence of an *accessor-modifier* never affects member lookup (§12.5) or o
 Once a particular property or indexer has been selected, the accessibility domains of the specific accessors involved are used to determine if that usage is valid:
 
 - If the usage is as a value (§12.2.2), the get accessor shall exist and be accessible.
-
 - If the usage is as the target of a simple assignment (§12.18.2), the set accessor shall exist and be accessible.
+- If the usage is as the target of compound assignment (§12.18.3), or as the target of the `++` or `--` operators (§12.7.10, §12.8.6), both the `get` accessors and the `set` accessor shall exist and be accessible.
 
-- If the usage is as the target of compound assignment (§12.18.3), or as the target of the ++ or -- operators (§12.7.10, §12.8.6), both the get accessors and the set accessor shall exist and be accessible.
+[*Example*: In the following example, the property `A.Text` is hidden by the property `B.Text`, even in contexts where only the `set` accessor is called. In contrast, the property `B.Coun`t is not accessible to class `M`, so the accessible property `A.Count` is used instead.
 
-[*Example*: In the following example, the property A.Text is hidden by the property B.Text, even in contexts where only the set accessor is called. In contrast, the property B.Count is not accessible to class M, so the accessible property A.Count is used instead.
-
+```csharp
 class A
 {
-public string Text {
-get { return "hello"; }
-set { }
+    public string Text
+    {
+        get { return "hello"; }
+        set { }
+    }
+
+    public int Count
+    {
+        get { return 5; }
+        set { }
+    }
 }
 
-public int Count {
-get { return 5; }
-set { }
-}
-}
-
-class B: A
+class B : A
 {
-private string text = "goodbye";
-private int count = 0;
+    private string text = "goodbye";
+    private int count = 0;
 
-new public string Text {
-get { return text; }
-protected set { text = value; }
-}
+    new public string Text
+    {
+        get { return text; }
+        protected set { text = value; }
+    }
 
-new protected int Count {
-get { return count; }
-set { count = value; }
-}
+    new protected int Count
+    {
+        get { return count; }
+        set { count = value; }
+    }
 }
 
 class M
 {
-static void Main() {
-B b = new B();
-b.Count = 12; // Calls A.Count set accessor
-int i = b.Count; // Calls A.Count get accessor
-b.Text = "howdy"; // Error, B.Text set accessor not accessible
-string s = b.Text; // Calls B.Text get accessor
+    static void Main ()
+    {
+        B b = new B ();
+        b.Count = 12; // Calls A.Count set accessor
+        int i = b.Count; // Calls A.Count get accessor
+        b.Text = "howdy"; // Error, B.Text set accessor not accessible
+        string s = b.Text; // Calls B.Text get accessor
+    }
 }
-}
+```
 
 *end example*]
 
 An accessor that is used to implement an interface shall not have an *accessor-modifier*. If only one accessor is used to implement an interface, the other accessor may be declared with an *accessor-modifier*: [*Example*:
 
+```csharp
 public interface I
 {
-string Prop { get; }
+    string Prop { get; }
 }
 
-public class C: I
+public class C : I
 {
-public Prop {
-get { return "April"; } // Must not have a modifier here
-internal set {…} // Ok, because I.Prop has no set accessor
+    public Prop
+    {
+        get { return "April"; } // Must not have a modifier here
+        internal set {…} // Ok, because I.Prop has no set accessor
+    }
 }
-}
+```
 
 *end example*]
 
 ### Virtual, sealed, override, and abstract accessors
 
-A virtual property declaration specifies that the accessors of the property are virtual. The virtual modifier applies to all non-private accessors of a property. When an accessor of a virtual property has the private *accessor-modifier*, the private accessor is implicitly not virtual.
+A `virtual` property declaration specifies that the accessors of the property are virtual. The `virtual` modifier applies to all non-private accessors of a property. When an accessor of a virtual property has the `private` *accessor-modifier*, the `private` accessor is implicitly not virtual.
 
-An abstract property declaration specifies that the accessors of the property are virtual, but does not provide an actual implementation of the accessors. Instead, non-abstract derived classes are required to provide their own implementation for the accessors by overriding the property. Because an accessor for an abstract property declaration provides no actual implementation, its *accessor-body* simply consists of a semicolon. An abstract property shall not have a private accessor.
+An `abstract` property declaration specifies that the accessors of the property are virtual, but does not provide an actual implementation of the accessors. Instead, non-abstract derived classes are required to provide their own implementation for the accessors by overriding the property. Because an accessor for an abstract property declaration provides no actual implementation, its *accessor-body* simply consists of a semicolon. An abstract property shall not have a `private` accessor.
 
-A property declaration that includes both the abstract and override modifiers specifies that the property is abstract and overrides a base property. The accessors of such a property are also abstract.
+A property declaration that includes both the `abstract` and `override` modifiers specifies that the property is abstract and overrides a base property. The accessors of such a property are also abstract.
 
-Abstract property declarations are only permitted in abstract classes (§15.2.2.2). The accessors of an inherited virtual property can be overridden in a derived class by including a property declaration that specifies an override directive. This is known as an ***overriding property declaration***. An overriding property declaration does not declare a new property. Instead, it simply specializes the implementations of the accessors of an existing virtual property.
+Abstract property declarations are only permitted in abstract classes (§15.2.2.2). The accessors of an inherited virtual property can be overridden in a derived class by including a property declaration that specifies an `override` directive. This is known as an ***overriding property declaration***. An overriding property declaration does not declare a `new` property. Instead, it simply specializes the implementations of the accessors of an existing `virtual` property.
 
 An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion between the type of the overriding and the inherited property. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors.
 
-An overriding property declaration may include the sealed modifier. Use of this modifier prevents a derived class from further overriding the property. The accessors of a sealed property are also sealed.
+An overriding property declaration may include the `sealed` modifier. Use of this modifier prevents a derived class from further overriding the property. The accessors of a `sealed` property are also sealed.
 
-Except for differences in declaration and invocation syntax, virtual, sealed, override, and abstract accessors behave exactly like virtual, sealed, override and abstract methods. Specifically, the rules described in §15.6.4, §15.6.5, §15.6.6, and §15.6.7 apply as if accessors were methods of a corresponding form:
+Except for differences in declaration and invocation syntax, `virtual`, `sealed`, `override`, and `abstract` accessors behave exactly like `virtual`, `sealed`, `override` and `abstract` methods. Specifically, the rules described in §15.6.4, §15.6.5, §15.6.6, and §15.6.7 apply as if accessors were methods of a corresponding form:
 
-- A get accessor corresponds to a parameterless method with a return value of the property type and the same modifiers as the containing property.
-
-- A set accessor corresponds to a method with a single value parameter of the property type, a void return type, and the same modifiers as the containing property.
+- A `get` accessor corresponds to a parameterless method with a return value of the property type and the same modifiers as the containing property.
+- A `set` accessor corresponds to a method with a single value parameter of the property type, a `void` return type, and the same modifiers as the containing property.
 
 [*Example*: In the following code
 
+```csharp
 abstract class A
 {
-int y;
+    int y;
 
-public virtual int X {
-get { return 0; }
+    public virtual int X
+    {
+        get { return 0; }
+    }
+
+    public virtual int Y
+    {
+        get { return y; }
+        set { y = value; }
+    }
+
+    public abstract int Z { get; set; }
 }
+```
 
-public virtual int Y {
-get { return y; }
-set { y = value; }
-}
+`X` is a virtual read-only property, `Y` is a virtual read-write property, and `Z` is an abstract read-write property. Because `Z` is abstract, the containing class `A` shall also be declared abstract.
 
-public abstract int Z { get; set; }
-}
+A class that derives from `A` is show below:
 
-X is a virtual read-only property, Y is a virtual read-write property, and Z is an abstract read-write property. Because Z is abstract, the containing class A shall also be declared abstract.
-
-A class that derives from A is show below:
-
-class B: A
+```csharp
+class B : A
 {
-int z;
+    int z;
 
-public override int X {
-get { return base.X + 1; }
-}
+    public override int X
+    {
+        get { return base.X + 1; }
+    }
 
-public override int Y {
-set { base.Y = value < 0? 0: value; }
-}
+    public override int Y
+    {
+        set { base.Y = value < 0 ? 0 : value; }
+    }
 
-public override int Z {
-get { return z; }
-set { z = value; }
+    public override int Z
+    {
+        get { return z; }
+        set { z = value; }
+    }
 }
-}
+```
 
-Here, the declarations of X, Y, and Z are overriding property declarations. Each property declaration exactly matches the accessibility modifiers, type, and name of the corresponding inherited property. The get accessor of X and the set accessor of Y use the base keyword to access the inherited accessors. The declaration of Z overrides both abstract accessors—thus, there are no outstanding abstract function members in B, and B is permitted to be a non-abstract class. *end example*]
+Here, the declarations of `X`, `Y`, and `Z` are overriding property declarations. Each property declaration exactly matches the accessibility modifiers, type, and name of the corresponding inherited property. The `get` accessor of `X` and the `set` accessor of `Y` use the `base` keyword to access the inherited accessors. The declaration of `Z` overrides both abstract accessors—thus, there are no outstanding abstract function members in `B`, and `B` is permitted to be a non-abstract class. *end example*]
 
 When a property is declared as an override, any overridden accessors shall be accessible to the overriding code. In addition, the declared accessibility of both the property or indexer itself, and of the accessors, shall match that of the overridden member and accessors. [*Example*:
 
+```csharp
 public class B
 {
-public virtual int P {
-protected set {…}
-get {…}
-}
+    public virtual int P
+    {
+        protected set {…}
+        get {…}
+    }
 }
 
-public class D: B
+public class D : B
 {
-public override int P {
-protected set {…} // Must specify protected here
-get {…} // Must not have a modifier here
+    public override int P
+    {
+        protected set {…} // Must specify protected here
+        get {…} // Must not have a modifier here
+    }
 }
-}
+```
 
 *end example*]
 
@@ -17929,39 +18086,41 @@ An ***event*** is a member that enables an object or class to provide notificati
 
 Events are declared using *event-declaration*s:
 
-[]{#Grammar_event_declaration .anchor}event-declaration:
-attributesopt event-modifiersopt *event* type variable-declarators *;
-*attributesopt event-modifiersopt *event* type member-name
-*{* event-accessor-declarations *}*
+```antlr
+event-declaration:
+    attributesopt event-modifiersopt event type variable-declarators ;
+    attributesopt event-modifiersopt event type member-name
+    { event-accessor-declarations }
 
-[]{#Grammar_event_modifiers .anchor}event-modifiers:
-event-modifier
-event-modifiers event-modifier
+vent-modifiers:
+    event-modifier
+    event-modifiers event-modifier
 
-[]{#Grammar_event_modifier .anchor}event-modifier:
-*new
-public
-protected
-internal
-private
-static
-virtual
-sealed
-override
-abstract
-extern*
+event-modifier:
+    new
+    public
+    protected
+    internal
+    private
+    static
+    virtual
+    sealed
+    override
+    abstract
+    extern
 
-[]{#Grammar_event_accessor_declarations .anchor}event-accessor-declarations:
-add-accessor-declaration remove-accessor-declaration
-remove-accessor-declaration add-accessor-declaration
+event-accessor-declarations:
+    add-accessor-declaration remove-accessor-declaration
+    remove-accessor-declaration add-accessor-declaration
 
-[]{#Grammar_add_accessor_declaration .anchor}add-accessor-declaration:
-attributesopt *add* block
+add-accessor-declaration:
+    attributesopt add block
 
-[]{#Grammar_remove_accessor_declaration .anchor}remove-accessor-declaration:
-attributesopt *remove* block
+remove-accessor-declaration:
+    attributesopt remove block
+```
 
-An *event-declaration* may include a set of *attributes* (§22) and a valid combination of the four access modifiers (§15.3.6), the new (§15.3.5), static (§15.6.3, §15.8.4), virtual (§15.6.4, §15.8.5), override (§15.6.5, §15.8.5), sealed (§15.6.6), abstract (§15.6.7, §15.8.5), and extern (§15.6.8) modifiers.
+An *event-declaration* may include a set of *attributes* (§22) and a valid combination of the four access modifiers (§15.3.6), the `new` (§15.3.5), `static` (§15.6.3, §15.8.4), `virtual` (§15.6.4, §15.8.5), `override` (§15.6.5, §15.8.5), `sealed` (§15.6.6), `abstract` (§15.6.7, §15.8.5), and `extern` (§15.6.8) modifiers.
 
 Event declarations are subject to the same rules as method declarations (§15.6) with regard to valid combinations of modifiers.
 
@@ -17971,168 +18130,193 @@ An event declaration can include *event-accessor-declaration*s. However, if it d
 
 An event declaration that omits *event-accessor-declaration*s defines one or more events—one for each of the *variable-declarator*s. The attributes and modifiers apply to all of the members declared by such an *event-declaration*.
 
-It is a compile-time error for an *event-declaration* to include both the abstract modifier and *event-accessor-declaration*s.
+It is a compile-time error for an *event-declaration* to include both the `abstract` modifier and *event-accessor-declaration*s.
 
-When an event declaration includes an extern modifier, the event is said to be an ***external event***. Because an external event declaration provides no actual implementation, it is an error for it to include both the extern modifier and *event-accessor-declaration*s.
+When an event declaration includes an `extern` modifier, the event is said to be an ***external event***. Because an external event declaration provides no actual implementation, it is an error for it to include both the `extern` modifier and *event-accessor-declaration*s.
 
-It is a compile-time error for a *variable-declarator* of an event declaration with an abstract or external modifier to include a *variable-initializer*.
+It is a compile-time error for a *variable-declarator* of an event declaration with an `abstract` or `external` modifier to include a *variable-initializer*.
 
-An event can be used as the left-hand operand of the += and -= operators. These operators are used, respectively, to attach event handlers to, or to remove event handlers from an event, and the access modifiers of the event control the contexts in which such operations are permitted.
+An event can be used as the left-hand operand of the `+=` and `-=` operators. These operators are used, respectively, to attach event handlers to, or to remove event handlers from an event, and the access modifiers of the event control the contexts in which such operations are permitted.
 
-The only operations that are permitted on an event by code that is outside the type in which that event is declared, are += and -=. Therefore, while such code can add and remove handlers for an event, it cannot directly obtain or modify the underlying list of event handlers.
+The only operations that are permitted on an event by code that is outside the type in which that event is declared, are `+=` and `-=`. Therefore, while such code can add and remove handlers for an event, it cannot directly obtain or modify the underlying list of event handlers.
 
-In an operation of the form x += y or x –= y, when x is an event the result of the operation has type void (§12.18.4) (as opposed to having the type of x, with the value of x after the assignment, as for other the += and -= operators defined on non-event types). This prevents external code from indirectly examining the underlying delegate of an event.
+In an operation of the form `x += y` or `x –= y`, when `x` is an event the result of the operation has type `void` (§12.18.4) (as opposed to having the type of `x`, with the value of `x` after the assignment, as for other the `+=` and `-=` operators defined on non-event types). This prevents external code from indirectly examining the underlying delegate of an event.
 
-[*Example*: The following example shows how event handlers are attached to instances of the Button class:
+[*Example*: The following example shows how event handlers are attached to instances of the `Button` class:
 
-public delegate void EventHandler(object sender, EventArgs e);
+```csharp
+public delegate void EventHandler (object sender, EventArgs e);
 
-public class Button: Control
+public class Button : Control
 {
-public event EventHandler Click;
+    public event EventHandler Click;
 }
 
-public class LoginDialog: Form
+public class LoginDialog : Form
 {
-Button okButton;
-Button cancelButton;
+    Button okButton;
+    Button cancelButton;
 
-public LoginDialog() {
-okButton = new Button(…);
-okButton.Click += new EventHandler(OkButtonClick);
-cancelButton = new Button(…);
-cancelButton.Click += new EventHandler(CancelButtonClick);
-}
+    public LoginDialog ()
+    {
+        okButton = new Button (…);
+        okButton.Click += new EventHandler (OkButtonClick);
+        cancelButton = new Button (…);
+        cancelButton.Click += new EventHandler (CancelButtonClick);
+    }
 
-void OkButtonClick(object sender, EventArgs e) {
-// Handle okButton.Click event
-}
+    void OkButtonClick (object sender, EventArgs e)
+    {
+        // Handle okButton.Click event
+    }
 
-void CancelButtonClick(object sender, EventArgs e) {
-// Handle cancelButton.Click event
+    void CancelButtonClick (object sender, EventArgs e)
+    {
+        // Handle cancelButton.Click event
+    }
 }
-}
+```
 
-Here, the LoginDialog instance constructor creates two Button instances and attaches event handlers to the Click events. *end example*]
+Here, the `LoginDialog` instance constructor creates two Button instances and attaches event handlers to the `Click` events. *end example*]
 
 ### Field-like events
 
-Within the program text of the class or struct that contains the declaration of an event, certain events can be used like fields. To be used in this way, an event shall not be abstract or extern, and shall not explicitly include *event-accessor-declaration*s. Such an event can be used in any context that permits a field. The field contains a delegate (§20), which refers to the list of event handlers that have been added to the event. If no event handlers have been added, the field contains null.
+Within the program text of the class or struct that contains the declaration of an event, certain events can be used like fields. To be used in this way, an event shall not be `abstract` or `extern`, and shall not explicitly include *event-accessor-declaration*s. Such an event can be used in any context that permits a field. The field contains a delegate (§20), which refers to the list of event handlers that have been added to the event. If no event handlers have been added, the field contains `null`.
 
 [*Example*: In the following code
 
-public delegate void EventHandler(object sender, EventArgs e);
+```csharp
+public delegate void EventHandler (object sender, EventArgs e);
 
-public class Button: Control
+public class Button : Control
 {
-public event EventHandler Click;
+    public event EventHandler Click;
 
-protected void OnClick(EventArgs e) {
-EventHandler handler = Click;
-if (handler != null)
-handler(this, e);
+    protected void OnClick (EventArgs e)
+    {
+        EventHandler handler = Click;
+        if (handler != null)
+            handler (this, e);
+    }
+
+    public void Reset ()
+    {
+        Click = null;
+    }
 }
+```
 
-public void Reset() {
-Click = null;
-}
-}
+`Click` is used as a field within the `Button` class. As the example demonstrates, the field can be examined, modified, and used in delegate invocation expressions. The `OnClick` method in the `Button` class “raises” the `Click` event. The notion of raising an event is precisely equivalent to invoking the delegate represented by the event—thus, there are no special language constructs for raising events. Note that the delegate invocation is preceded by a check that ensures the delegate is non-null and that the check is made on a local copy to ensure thread safety.
 
-Click is used as a field within the Button class. As the example demonstrates, the field can be examined, modified, and used in delegate invocation expressions. The OnClick method in the Button class “raises” the Click event. The notion of raising an event is precisely equivalent to invoking the delegate represented by the event—thus, there are no special language constructs for raising events. Note that the delegate invocation is preceded by a check that ensures the delegate is non-null and that the check is made on a local copy to ensure thread safety.
+Outside the declaration of the `Button` class, the `Click` member can only be used on the left-hand side of the `+=` and `–=` operators, as in
 
-Outside the declaration of the Button class, the Click member can only be used on the left-hand side of the += and –= operators, as in
-
+```csharp
 b.Click += new EventHandler(…);
+```
 
-which appends a delegate to the invocation list of the Click event, and
+which appends a delegate to the invocation list of the `Click` event, and
 
+```csharp
 b.Click –= new EventHandler(…);
+```
 
-which removes a delegate from the invocation list of the Click event. *end example*]
+which removes a delegate from the invocation list of the `Click` event. *end example*]
 
 When compiling a field-like event, the compiler automatically creates storage to hold the delegate, and creates accessors for the event that add or remove event handlers to the delegate field. The addition and removal operations are thread safe, and may (but are not required to) be done while holding the lock (§10.4.4.19) on the containing object for an instance event, or the type object (§12.7.11.7) for a static event.
 
-[*Note*: Thus, an instance event declaration of the form:
-
-class X
-{
-public event D Ev;
-}
-
-shall be compiled to something equivalent to:
-
-class X
-{
-private D \_\_Ev; // field to hold the delegate
-
-public event D Ev {
-add {
-/\* add the delegate in a thread safe way \*/
-}
-
-remove {
-/\* remove the delegate in a thread safe way \*/
-}
-}
-}
-
-Within the class X, references to Ev on the left-hand side of the += and –= operators cause the add and remove accessors to be invoked. All other references to Ev are compiled to reference the hidden field \_\_Ev instead (§12.7.5). The name “\_\_Ev” is arbitrary; the hidden field could have any name or no name at all. *end note*]
+> [!NOTE]
+> Thus, an instance event declaration of the form:
+> 
+> ```csharp
+> class X
+> {
+>     public event D Ev;
+> }
+> 
+> shall be compiled to something equivalent to:
+> 
+>     class X
+>     {
+>         private D __Ev; // field to hold the delegate
+> 
+>         public event D Ev
+>         {
+>             add
+>             {
+>                 /* add the delegate in a thread safe way */
+>             }
+> 
+>             remove
+>             {
+>                 /* remove the delegate in a thread safe way */
+>             }
+>         }
+>     }
+> ```
+> 
+> Within the class `X`, references to `Ev` on the left-hand side of the `+=` and `–=` operators cause the add and remove accessors to be invoked. All other references to `Ev` are compiled to reference the hidden field `__Ev` instead (§12.7.5). The name “`__Ev`” is arbitrary; the hidden field could have any name or no name at all. 
 
 ###  Event accessors
 
-[*Note*: Event declarations typically omit *event-accessor-declaration*s, as in the Button example above. For example, they might be included if the storage cost of one field per event is not acceptable. In such cases, a class can include *event-accessor-declaration*s and use a private mechanism for storing the list of event handlers. *end note*]
+> [!NOTE]
+> Event declarations typically omit *event-accessor-declaration*s, as in the Button example above. For example, they might be included if the storage cost of one field per event is not acceptable. In such cases, a class can include *event-accessor-declaration*s and use a private mechanism for storing the list of event handlers.
 
 The *event-accessor-declarations* of an event specify the executable statements associated with adding and removing event handlers.
 
 The accessor declarations consist of an *add-accessor-declaration* and a *remove-accessor-declaration*. Each accessor declaration consists of the token add or remove followed by a *block*. The *block* associated with an *add-accessor-declaration* specifies the statements to execute when an event handler is added, and the *block* associated with a *remove-accessor-declaration* specifies the statements to execute when an event handler is removed.
 
-Each *add-accessor-declaration* and *remove-accessor-declaration* corresponds to a method with a single value parameter of the event type, and a void return type. The implicit parameter of an event accessor is named value. When an event is used in an event assignment, the appropriate event accessor is used. Specifically, if the assignment operator is += then the add accessor is used, and if the assignment operator is –= then the remove accessor is used. In either case, the right-hand operand of the assignment operator is used as the argument to the event accessor. The block of an *add-accessor-declaration* or a *remove-accessor-declaration* shall conform to the rules for void methods described in §15.6.9. In particular, return statements in such a block are not permitted to specify an expression.
+Each *add-accessor-declaration* and *remove-accessor-declaration* corresponds to a method with a single value parameter of the event type, and a void return type. The implicit parameter of an event accessor is named value. When an event is used in an event assignment, the appropriate event accessor is used. Specifically, if the assignment operator is `+=` then the add accessor is used, and if the assignment operator is `–=` then the remove accessor is used. In either case, the right-hand operand of the assignment operator is used as the argument to the event accessor. The block of an *add-accessor-declaration* or a *remove-accessor-declaration* shall conform to the rules for void methods described in §15.6.9. In particular, return statements in such a block are not permitted to specify an expression.
 
 Since an event accessor implicitly has a parameter named value, it is a compile-time error for a local variable or constant declared in an event accessor to have that name.
 
 [*Example*: In the following code
 
-class Control: Component
+```csharp
+class Control : Component
 {
-// Unique keys for events
-static readonly object mouseDownEventKey = new object();
-static readonly object mouseUpEventKey = new object();
+    // Unique keys for events
+    static readonly object mouseDownEventKey = new object ();
+    static readonly object mouseUpEventKey = new object ();
 
-// Return event handler associated with key
-protected Delegate GetEventHandler(object key) {…}
+    // Return event handler associated with key
+    protected Delegate GetEventHandler (object key) {…}
 
-// Add event handler associated with key
-protected void AddEventHandler(object key, Delegate handler) {…}
+    // Add event handler associated with key
+    protected void AddEventHandler (object key, Delegate handler) {…}
 
-// Remove event handler associated with key
-protected void RemoveEventHandler(object key, Delegate handler) {…}
+    // Remove event handler associated with key
+    protected void RemoveEventHandler (object key, Delegate handler) {…}
 
-// MouseDown event
-public event MouseEventHandler MouseDown {
-add { AddEventHandler(mouseDownEventKey, value); }
-remove { RemoveEventHandler(mouseDownEventKey, value); }
+    // MouseDown event
+    public event MouseEventHandler MouseDown
+    {
+        add { AddEventHandler (mouseDownEventKey, value); }
+        remove { RemoveEventHandler (mouseDownEventKey, value); }
+    }
+
+    // MouseUp event
+    public event MouseEventHandler MouseUp
+    {
+        add { AddEventHandler (mouseUpEventKey, value); }
+        remove { RemoveEventHandler (mouseUpEventKey, value); }
+    }
+
+    // Invoke the MouseUp event
+    protected void OnMouseUp (MouseEventArgs args)
+    {
+        MouseEventHandler handler;
+        handler = (MouseEventHandler) GetEventHandler (mouseUpEventKey);
+        if (handler != null)
+            handler (this, args);
+    }
 }
+```
 
-// MouseUp event
-public event MouseEventHandler MouseUp {
-add { AddEventHandler(mouseUpEventKey, value); }
-remove { RemoveEventHandler(mouseUpEventKey, value); }
-}
-
-// Invoke the MouseUp event
-protected void OnMouseUp(MouseEventArgs args) {
-MouseEventHandler handler;
-handler = (MouseEventHandler)GetEventHandler(mouseUpEventKey);
-if (handler != null)
-handler(this, args);
-}
-}
-
-the Control class implements an internal storage mechanism for events. The AddEventHandler method associates a delegate value with a key, the GetEventHandler method returns the delegate currently associated with a key, and the RemoveEventHandler method removes a delegate as an event handler for the specified event. Presumably, the underlying storage mechanism is designed such that there is no cost for associating a null delegate value with a key, and thus unhandled events consume no storage. *end example*]
+the `Control` class implements an internal storage mechanism for events. The `AddEventHandler` method associates a delegate value with a key, the `GetEventHandler` method returns the delegate currently associated with a key, and the `RemoveEventHandler` method removes a delegate as an event handler for the specified event. Presumably, the underlying storage mechanism is designed such that there is no cost for associating a null delegate value with a key, and thus unhandled events consume no storage. *end example*]
 
 ### Static and instance events
 
-When an event declaration includes a static modifier, the event is said to be a ***static event***. When no static modifier is present, the event is said to be an ***instance event***.
+When an event declaration includes a `static` modifier, the event is said to be a ***static event***. When no `static` modifier is present, the event is said to be an ***instance event***.
 
 A static event is not associated with a specific instance, and it is a compile-time error to refer to this in the accessors of a static event.
 
@@ -18142,66 +18326,68 @@ The differences between static and instance members are discussed further in §1
 
 ### Virtual, sealed, override, and abstract accessors
 
-A virtual event declaration specifies that the accessors of that event are virtual. The virtual modifier applies to both accessors of an event.
+A `virtual` event declaration specifies that the accessors of that event are virtual. The `virtual` modifier applies to both accessors of an event.
 
-An abstract event declaration specifies that the accessors of the event are virtual, but does not provide an actual implementation of the accessors. Instead, non-abstract derived classes are required to provide their own implementation for the accessors by overriding the event. Because an accessor for an abstract event declaration provides no actual implementation, it shall not provide *event-accessor-declaration*s.
+An `abstract` event declaration specifies that the accessors of the event are `virtual`, but does not provide an actual implementation of the accessors. Instead, non-abstract derived classes are required to provide their own implementation for the accessors by overriding the event. Because an accessor for an `abstract` event declaration provides no actual implementation, it shall not provide *event-accessor-declaration*s.
 
-An event declaration that includes both the abstract and override modifiers specifies that the event is abstract and overrides a base event. The accessors of such an event are also abstract.
+An event declaration that includes both the `abstract` and `override` modifiers specifies that the event is abstract and overrides a base event. The accessors of such an event are also abstract.
 
 Abstract event declarations are only permitted in abstract classes (§15.2.2.2).
 
-The accessors of an inherited virtual event can be overridden in a derived class by including an event declaration that specifies an override modifier. This is known as an ***overriding event declaration***. An overriding event declaration does not declare a new event. Instead, it simply specializes the implementations of the accessors of an existing virtual event.
+The accessors of an inherited virtual event can be overridden in a derived class by including an event declaration that specifies an `override` modifier. This is known as an ***overriding event declaration***. An overriding event declaration does not declare a new event. Instead, it simply specializes the implementations of the accessors of an existing virtual event.
 
 An overriding event declaration shall specify the exact same accessibility modifiers and name as the overridden event, there shall be an identity conversion between the type of the overriding and the overridden event, and both the add and remove accessors shall be specified within the declaration.
 
-An overriding event declaration can include the sealed modifier. Use of this modifier prevents a derived class from further overriding the event. The accessors of a sealed event are also sealed.
+An overriding event declaration can include the `sealed` modifier. Use of this modifier prevents a derived class from further overriding the event. The accessors of a sealed event are also sealed.
 
-It is a compile-time error for an overriding event declaration to include a new modifier.
+It is a compile-time error for an overriding event declaration to include a `new` modifier.
 
-Except for differences in declaration and invocation syntax, virtual, sealed, override, and abstract accessors behave exactly like virtual, sealed, override and abstract methods. Specifically, the rules described in §15.6.4, §15.6.5, §15.6.6, and §15.6.7 apply as if accessors were methods of a corresponding form. Each accessor corresponds to a method with a single value parameter of the event type, a void return type, and the same modifiers as the containing event.
+Except for differences in declaration and invocation syntax, `virtual`, `sealed`, `override`, and `abstract` accessors behave exactly like `virtual`, `sealed`, `override` and `abstract` methods. Specifically, the rules described in §15.6.4, §15.6.5, §15.6.6, and §15.6.7 apply as if accessors were methods of a corresponding form. Each accessor corresponds to a method with a single value parameter of the event type, a `void` return type, and the same modifiers as the containing event.
 
 ## Indexers
 
 An ***indexer*** is a member that enables an object to be indexed in the same way as an array. Indexers are declared using *indexer-declaration*s:
 
-[]{#Grammar_indexer_declaration .anchor}indexer-declaration:
-attributesopt indexer-modifiersopt indexer-declarator *{* accessor-declarations *}*
+```antlr
+indexer-declaration:
+    attributesopt indexer-modifiersopt indexer-declarator { accessor-declarations }
 
-[]{#Grammar_indexer_modifiers .anchor}indexer-modifiers:
-indexer-modifier
-indexer-modifiers indexer-modifier
+indexer-modifiers:
+    indexer-modifier
+    indexer-modifiers indexer-modifier
 
-[]{#Grammar_indexer_modifier .anchor}indexer-modifier:
-*new
-public
-protected
-internal
-private
-virtual
-sealed
-override
-abstract
-extern*
+indexer-modifier:
+    new
+    public
+    protected
+    internal
+    private
+    virtual
+    sealed
+    override
+    abstract
+    extern
 
-[]{#Grammar_indexer_declarator .anchor}indexer-declarator:
-type *this* *[* formal-parameter-list *]*
-type interface-type *.* *this* *[* formal-parameter-list *]*
+indexer-declarator:
+    type this [ formal-parameter-list ]
+    type interface-type . this [ formal-parameter-list ]
+```
 
-An *indexer-declaration* may include a set of *attributes* (§22) and a valid combination of the four access modifiers (§15.3.6), the new (§15.3.5), virtual (§15.6.4), override (§15.6.5), sealed (§15.6.6), abstract (§15.6.7), and extern (§15.6.8) modifiers.
+An *indexer-declaration* may include a set of *attributes* (§22) and a valid combination of the four access modifiers (§15.3.6), the `new` (§15.3.5), `virtual` (§15.6.4), `override` (§15.6.5), `sealed` (§15.6.6), `abstract` (§15.6.7), and `extern` (§15.6.8) modifiers.
 
-Indexer declarations are subject to the same rules as method declarations (§15.6) with regard to valid combinations of modifiers, with the one exception being that the static modifier is not permitted on an indexer declaration.
+Indexer declarations are subject to the same rules as method declarations (§15.6) with regard to valid combinations of modifiers, with the one exception being that the `static` modifier is not permitted on an indexer declaration.
 
-The modifiers virtual, override, and abstract are mutually exclusive except in one case. The abstract and override modifiers may be used together so that an abstract indexer can override a virtual one.
+The modifiers `virtual`, `override`, and `abstract` are mutually exclusive except in one case. The `abstract` and `override` modifiers may be used together so that an abstract indexer can override a virtual one.
 
-The *type* of an indexer declaration specifies the element type of the indexer introduced by the declaration. Unless the indexer is an explicit interface member implementation, the *type* is followed by the keyword this. For an explicit interface member implementation, the *type* is followed by an *interface-type*, a “.”, and the keyword this. Unlike other members, indexers do not have user-defined names.
+The *type* of an indexer declaration specifies the element type of the indexer introduced by the declaration. Unless the indexer is an explicit interface member implementation, the *type* is followed by the keyword `this`. For an explicit interface member implementation, the *type* is followed by an *interface-type*, a “`.`”, and the keyword this. Unlike other members, indexers do not have user-defined names.
 
-The *formal-parameter-list* specifies the parameters of the indexer. The formal parameter list of an indexer corresponds to that of a method (§15.6.2), except that at least one parameter shall be specified, and that the this, ref, and out parameter modifiers are not permitted.
+The *formal-parameter-list* specifies the parameters of the indexer. The formal parameter list of an indexer corresponds to that of a method (§15.6.2), except that at least one parameter shall be specified, and that the `this`, `ref`, and `out` parameter modifiers are not permitted.
 
 The *type* of an indexer and each of the types referenced in the *formal-parameter-list* shall be at least as accessible as the indexer itself (§8.5.5).
 
-The *accessor-declarations* (§15.7.3), which shall be enclosed in “{” and “}” tokens, declare the accessors of the indexer. The accessors specify the executable statements associated with reading and writing indexer elements.
+The *accessor-declarations* (§15.7.3), which shall be enclosed in “`{`” and “`}`” tokens, declare the accessors of the indexer. The accessors specify the executable statements associated with reading and writing indexer elements.
 
-Even though the syntax for accessing an indexer element is the same as that for an array element, an indexer element is not classified as a variable. Thus, it is not possible to pass an indexer element as a ref or out argument.
+Even though the syntax for accessing an indexer element is the same as that for an array element, an indexer element is not classified as a variable. Thus, it is not possible to pass an indexer element as a `ref` or `out` argument.
 
 The *formal-parameter-list* of an indexer defines the signature (§8.6) of the indexer. Specifically, the signature of an indexer consists of the number and types of its formal parameters. The element type and names of the formal parameters are not part of an indexer’s signature.
 
@@ -18210,126 +18396,145 @@ The signature of an indexer shall differ from the signatures of all other indexe
 Indexers and properties are very similar in concept, but differ in the following ways:
 
 - A property is identified by its name, whereas an indexer is identified by its signature.
-
 - A property is accessed through a *simple-name* (§12.7.3) or a *member-access* (§12.7.5), whereas an indexer element is accessed through an *element-access* (§12.7.7.3).
-
-- A property can be a static member, whereas an indexer is always an instance member.
-
-- A get accessor of a property corresponds to a method with no parameters, whereas a get accessor of an indexer corresponds to a method with the same formal parameter list as the indexer.
-
-- A set accessor of a property corresponds to a method with a single parameter named value, whereas a set accessor of an indexer corresponds to a method with the same formal parameter list as the indexer, plus an additional parameter named value.
-
+- A property can be a `static` member, whereas an indexer is always an instance member.
+- A `get` accessor of a property corresponds to a method with no parameters, whereas a get accessor of an indexer corresponds to a method with the same formal parameter list as the indexer.
+- A `set` accessor of a property corresponds to a method with a single parameter named value, whereas a `set` accessor of an indexer corresponds to a method with the same formal parameter list as the indexer, plus an additional parameter named value.
 - It is a compile-time error for an indexer accessor to declare a local variable or local constant with the same name as an indexer parameter.
-
-- In an overriding property declaration, the inherited property is accessed using the syntax base.P, where P is the property name. In an overriding indexer declaration, the inherited indexer is accessed using the syntax base[E], where E is a comma-separated list of expressions.
+- In an overriding property declaration, the inherited property is accessed using the syntax `base.P`, where `P` is the property name. In an overriding indexer declaration, the inherited indexer is accessed using the syntax `base[E]`, where `E` is a comma-separated list of expressions.
 
 Aside from these differences, all rules defined in §15.7.3 and §15.7.6 apply to indexer accessors as well as to property accessors.
 
-When an indexer declaration includes an extern modifier, the indexer is said to be an ***external indexer***. Because an external indexer declaration provides no actual implementation, each of its *accessor-declarations* consists of a semicolon.
+When an indexer declaration includes an `extern` modifier, the indexer is said to be an ***external indexer***. Because an external indexer declaration provides no actual implementation, each of its *accessor-declarations* consists of a semicolon.
 
 [*Example*: The example below declares a BitArray class that implements an indexer for accessing the individual bits in the bit array.
 
+```csharp
 using System;
 
 class BitArray
 {
-int[] bits;
-int length;
+    int[] bits;
+    int length;
 
-public BitArray(int length) {
-if (length < 0) throw new ArgumentException();
-bits = new int[((length - 1) >> 5) + 1];
-this.length = length;
-}
+    public BitArray (int length)
+    {
+        if (length < 0) throw new ArgumentException ();
+        bits = new int[((length - 1) >> 5) + 1];
+        this.length = length;
+    }
 
-public int Length {
-get { return length; }
-}
+    public int Length
+    {
+        get { return length; }
+    }
 
-public bool this[int index] {
-get {
-if (index < 0 || index >= length) {
-throw new IndexOutOfRangeException();
+    public bool this [int index]
+    {
+        get
+        {
+            if (index < 0 || index >= length)
+            {
+                throw new IndexOutOfRangeException ();
+            }
+            return (bits[index >> 5] & 1 << index) != 0;
+        }
+        set
+        {
+            if (index < 0 || index >= length)
+            {
+                throw new IndexOutOfRangeException ();
+            }
+            if (value)
+            {
+                bits[index >> 5] |= 1 << index;
+            }
+            else
+            {
+                bits[index >> 5] &= ~(1 << index);
+            }
+        }
+    }
 }
-return (bits[index >> 5] & 1 << index) != 0;
-}
-set {
-if (index < 0 || index >= length) {
-throw new IndexOutOfRangeException();
-}
-if (value) {
-bits[index >> 5] |= 1 << index;
-}
-else {
-bits[index >> 5] &= ~(1 << index);
-}
-}
-}
-}
+```
 
-An instance of the BitArray class consumes substantially less memory than a corresponding bool[] (since each value of the former occupies only one bit instead of the latter’s one byte), but it permits the same operations as a bool[].
+An instance of the `BitArray` class consumes substantially less memory than a corresponding `bool[]` (since each value of the former occupies only one bit instead of the latter’s one byte), but it permits the same operations as a `bool[]`.
 
-The following CountPrimes class uses a BitArray and the classical “sieve” algorithm to compute the number of primes between2 and a given maximum:
+The following `CountPrimes` class uses a `BitArray` and the classical “sieve” algorithm to compute the number of primes between 2 and a given maximum:
 
+```csharp
 class CountPrimes
 {
-static int Count(int max) {
-BitArray flags = new BitArray(max + 1);
-int count = 0;
-for (int i = 2; i <= max; i++) {
-if (!flags[i]) {
-for (int j = i \* 2; j <= max; j += i) flags[j] = true;
-count++;
-}
-}
-return count;
-}
+    static int Count (int max)
+    {
+        BitArray flags = new BitArray (max + 1);
+        int count = 0;
+        for (int i = 2; i <= max; i++)
+        {
+            if (!flags[i])
+            {
+                for (int j = i * 2; j <= max; j += i) flags[j] = true;
+                count++;
+            }
+        }
+        return count;
+    }
 
-static void Main(string[] args) {
-int max = int.Parse(args[0]);
-int count = Count(max);
-Console.WriteLine(
-"Found {0} primes between 2 and {1}", count, max);
+    static void Main (string[] args)
+    {
+        int max = int.Parse (args[0]);
+        int count = Count (max);
+        Console.WriteLine (
+            "Found {0} primes between 2 and {1}", count, max);
+    }
 }
-}
+```
 
-Note that the syntax for accessing elements of the BitArray is precisely the same as for a bool[]. *end example*]
+Note that the syntax for accessing elements of the BitArray is precisely the same as for a `bool[]`. *end example*]
 
 [*Example*: The following example shows a 26×10 grid class that has an indexer with two parameters. The first parameter is required to be an upper- or lowercase letter in the range A–Z, and the second is required to be an integer in the range 0–9.
 
+```csharp
 using System;
 
 class Grid
 {
-const int NumRows = 26;
-const int NumCols = 10;
-int[,] cells = new int[NumRows, NumCols];
+    const int NumRows = 26;
+    const int NumCols = 10;
+    int[, ] cells = new int[NumRows, NumCols];
 
-public int this[char row, int col]
-{
-get {
-row = Char.ToUpper(row);
-if (row < 'A' || row > 'Z') {
-throw new ArgumentOutOfRangeException("row");
-}
-if (col < 0 || col >= NumCols) {
-throw new ArgumentOutOfRangeException ("col");
-}
-return cells[row - 'A', col];
-}
+    public int this [char row, int col]
+    {
+        get
+        {
+            row = Char.ToUpper (row);
+            if (row < 'A' || row > 'Z')
+            {
+                throw new ArgumentOutOfRangeException ("row");
+            }
+            if (col < 0 || col >= NumCols)
+            {
+                throw new ArgumentOutOfRangeException ("col");
+            }
+            return cells[row - 'A', col];
+        }
 
-set {
-row = Char.ToUpper(row);
-if (row < 'A' || row > 'Z') {
-throw new ArgumentOutOfRangeException ("row");
+        set
+        {
+            row = Char.ToUpper (row);
+            if (row < 'A' || row > 'Z')
+            {
+                throw new ArgumentOutOfRangeException ("row");
+            }
+            if (col < 0 || col >= NumCols)
+            {
+                throw new ArgumentOutOfRangeException ("col");
+            }
+            cells[row - 'A', col] = value;
+        }
+    }
 }
-if (col < 0 || col >= NumCols) {
-throw new ArgumentOutOfRangeException ("col");
-}
-cells[row - 'A', col] = value;
-}
-}
-}
+```
 
 *end example*]
 
