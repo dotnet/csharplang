@@ -23,6 +23,7 @@
 
 ## Feb 19
 
+- https://github.com/dotnet/csharplang/issues/3213 Natural value equality (Mads)
 - https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
 
 ## Feb 12
