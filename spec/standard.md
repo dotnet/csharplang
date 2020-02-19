@@ -18544,63 +18544,61 @@ class Grid
 
 An ***operator*** is a member that defines the meaning of an expression operator that can be applied to instances of the class. Operators are declared using *operator-declaration*s:
 
-[[[[[[]{#_Ref458680662 .anchor}]{#_Ref457133884 .anchor}]{#_Ref456697761 .anchor}]{#_Ref456697439 .anchor}]{#_Toc445783058 .anchor}]{#Grammar_operator_declaration .anchor}operator-declaration:
-attributesopt operator-modifiers operator-declarator operator-body
+```antlr
+operator-declaration:
+    attributesopt operator-modifiers operator-declarator operator-body
 
-[]{#Grammar_operator_modifiers .anchor}operator-modifiers:
-operator-modifier
-operator-modifiers operator-modifier
+operator-modifiers:
+    operator-modifier
+    operator-modifiers operator-modifier
 
-[]{#Grammar_operator_modifier .anchor}operator-modifier:
-*public
-static
-extern*
+operator-modifier:
+    public
+    static
+    extern
 
-[]{#Grammar_operator_declarator .anchor}operator-declarator:
-unary-operator-declarator
-binary-operator-declarator
-conversion-operator-declarator
+operator-declarator:
+    unary-operator-declarator
+    binary-operator-declarator
+    conversion-operator-declarator
 
-[]{#Grammar_unary_operator_declarator .anchor}unary-operator-declarator:
-type *operator* overloadable-unary-operator *(* fixed-parameter *)*
+unary-operator-declarator:
+    type operator overloadable-unary-operator ( fixed-parameter )
 
-[]{#Grammar_overloadable_unary_operator .anchor}overloadable-unary-operator: *one of*
-*+ - ! ~ ++ -- true false*
+overloadable-unary-operator: one of
+    + - ! ~ ++ -- true false
 
-[]{#Grammar_binary_operator_declarator .anchor}binary-operator-declarator:
-type *operator* overloadable-binary-operator *(* fixed-parameter *,* fixed-parameter *)*
+binary-operator-declarator:
+    type operator overloadable-binary-operator ( fixed-parameter , fixed-parameter )
 
-[]{#Grammar_overloadable_binary_operator .anchor}overloadable-binary-operator: *one of*
-*+ - \* / % & | \^ <<* right-shift*
-== != > < >= <=*
+overloadable-binary-operator: one of
+    + - * / % & | \^ << right-shift
+    == != > < >= <=
 
-[]{#Grammar_conversion_operator_declarator .anchor}conversion-operator-declarator:*
-implicit* *operator* type *(* fixed-parameter *)*
-*explicit* *operator* type *(* fixed-parameter *)*
+conversion-operator-declarator:
+    implicit operator type ( fixed-parameter )
+    explicit operator type ( fixed-parameter )
 
-[]{#Grammar_operator_body .anchor}operator-body:
-block
-*;*[]{#_Toc445783057 .anchor}
+operator-body:
+    block
+    ;
+```
 
 There are three categories of overloadable operators: Unary operators (§15.10.2), binary operators (§15.10.3), and conversion operators (§15.10.4).
 
-When an operator declaration includes an extern modifier, the operator is said to be an ***external operator***. Because an external operator provides no actual implementation, its *operator-body* consists of a semi-colon. For all other operators, the *operator-body* consists of a *block*, which specifies the statements to execute when the operator is invoked. The *block* of an operator shall conform to the rules for value-returning methods described in §15.6.11.
+When an operator declaration includes an `extern` modifier, the operator is said to be an ***external operator***. Because an external operator provides no actual implementation, its *operator-body* consists of a semi-colon. For all other operators, the *operator-body* consists of a *block*, which specifies the statements to execute when the operator is invoked. The *block* of an operator shall conform to the rules for value-returning methods described in §15.6.11.
 
 The following rules apply to all operator declarations:
 
-- An operator declaration shall include both a public and a static modifier.
-
+- An operator declaration shall include both a `public` and a `static` modifier.
 - The parameter(s) of an operator shall have no modifiers.
-
 - The signature of an operator (§15.10.2, §15.10.3, §15.10.4) shall differ from the signatures of all other operators declared in the same class.
-
 - All types referenced in an operator declaration shall be at least as accessible as the operator itself (§8.5.5).
-
 - It is an error for the same modifier to appear multiple times in an operator declaration.
 
 Each operator category imposes additional restrictions, as described in the following subclauses.
 
-Like other members, operators declared in a base class are inherited by derived classes. Because operator declarations always require the class or struct in which the operator is declared to participate in the signature of the operator, it is not possible for an operator declared in a derived class to hide an operator declared in a base class. Thus, the new modifier is never required, and therefore never permitted, in an operator declaration.
+Like other members, operators declared in a base class are inherited by derived classes. Because operator declarations always require the class or struct in which the operator is declared to participate in the signature of the operator, it is not possible for an operator declared in a derived class to hide an operator declared in a base class. Thus, the `new` modifier is never required, and therefore never permitted, in an operator declaration.
 
 Additional information on unary and binary operators can be found in §12.4.
 
@@ -18610,63 +18608,62 @@ Additional information on conversion operators can be found in §11.5.
 
 The following rules apply to unary operator declarations, where T denotes the instance type of the class or struct that contains the operator declaration:
 
-- A unary +, -, !, or ~ operator shall take a single parameter of type T or T? and can return any type.
+- A unary `+`, `-`, `!`, or `~` operator shall take a single parameter of type `T` or `T?` and can return any type.
+- A unary `++ `or `--` operator shall take a single parameter of type `T` or `T?` and shall return that same type or a type derived from it.
+- A unary `true` or `false` operator shall take a single parameter of type `T` or `T?` and shall return type `bool`.
 
-- A unary ++ or -- operator shall take a single parameter of type T or T? and shall return that same type or a type derived from it.
+The signature of a unary operator consists of the operator token (`+`, `-`, `!`, `~`, `++`, `--`, `true`, or `false`) and the type of the single formal parameter. The return type is not part of a unary operator’s signature, nor is the name of the formal parameter.
 
-- A unary true or false operator shall take a single parameter of type T or T? and shall return type bool.
+The `true` and `false` unary operators require pair-wise declaration. A compile-time error occurs if a class declares one of these operators without also declaring the other. The `true` and `false` operators are described further in §12.21.
 
-The signature of a unary operator consists of the operator token (+, -, !, ~, ++, --, true, or false) and the type of the single formal parameter. The return type is not part of a unary operator’s signature, nor is the name of the formal parameter.
+[*Example*: The following example shows an implementation and subsequent usage of `operator++` for an integer vector class:
 
-The true and false unary operators require pair-wise declaration. A compile-time error occurs if a class declares one of these operators without also declaring the other. The true and false operators are described further in §12.21.
-
-[*Example*: The following example shows an implementation and subsequent usage of operator++ for an integer vector class:
-
+```csharp
 public class IntVector
 {
-public IntVector(int length) {…}
+    public IntVector (int length) {…}
 
-public int Length { … } // read-only property
-public int this[int index] { … } // read-write indexer
+    public int Length {…} // read-only property
+    public int this [int index] {…} // read-write indexer
 
-public static IntVector operator++(IntVector iv) {
-IntVector temp = new IntVector(iv.Length);
-for (int i = 0; i < iv.Length; i++)
-temp[i] = iv[i] + 1;
-return temp;
-}
+    public static IntVector operator ++ (IntVector iv)
+    {
+        IntVector temp = new IntVector (iv.Length);
+        for (int i = 0; i < iv.Length; i++)
+            temp[i] = iv[i] + 1;
+        return temp;
+    }
 }
 
 class Test
 {
-static void Main() {
-IntVector iv1 = new IntVector(4); // vector of 4 x 0
-IntVector iv2;
+    static void Main ()
+    {
+        IntVector iv1 = new IntVector (4); // vector of 4 x 0
+        IntVector iv2;
 
-iv2 = iv1++; // iv2 contains 4 x 0, iv1 contains 4 x 1
-iv2 = ++iv1; // iv2 contains 4 x 2, iv1 contains 4 x 2
+        iv2 = iv1++; // iv2 contains 4 x 0, iv1 contains 4 x 1
+        iv2 = ++iv1; // iv2 contains 4 x 2, iv1 contains 4 x 2
+    }
 }
-}
+```
 
 Note how the operator method returns the value produced by adding 1 to the operand, just like the postfix increment and decrement operators (§12.7.10), and the prefix increment and decrement operators (§12.8.6). Unlike in C++, this method should not modify the value of its operand directly as this would violate the standard semantics of the postfix increment operator (§12.8.6). *end example*]
 
 ### Binary operators
 
-The following rules apply to binary operator declarations, where T denotes the instance type of the class or struct that contains the operator declaration:
+The following rules apply to binary operator declarations, where `T` denotes the instance type of the class or struct that contains the operator declaration:
 
-- A binary non-shift operator shall take two parameters, at least one of which shall have type T or T?, and can return any type.
+- A binary non-shift operator shall take two parameters, at least one of which shall have type `T` or `T?`, and can return any type.
+- A binary `<<` or `>>` operator (§12.10) shall take two parameters, the first of which shall have type `T` or `T?` and the second of which shall have type `int` or `int?`, and can return any type.
 
-- A binary << or >> operator (§12.10) shall take two parameters, the first of which shall have type T or T? and the second of which shall have type int or int?, and can return any type.
+The signature of a binary operator consists of the operator token (`+`, `-`, `*`, `/`, `%`, `&`, `|`, `^`, `<<`, `>>`,`~`, `==`, `!=`, `>`, `<`, `>=`, or `<=`) and the types of the two formal parameters. The return type and the names of the formal parameters are not part of a binary operator’s signature.
 
-The signature of a binary operator consists of the operator token (+, -, \*, /, %, &, |, \^, <<, >>,~, ==, !=, >, <, >=, or <=) and the types of the two formal parameters. The return type and the names of the formal parameters are not part of a binary operator’s signature.
+Certain binary operators require pair-wise declaration. For every declaration of either operator of a pair, there shall be a matching declaration of the other operator of the pair. Two operator declarations match if identity conversions exist between their return types and their corresponding parameter types. The following operators require pair-wise declaration:
 
-[]{#_Ref465588874 .anchor}Certain binary operators require pair-wise declaration. For every declaration of either operator of a pair, there shall be a matching declaration of the other operator of the pair. Two operator declarations match if identity conversions exist between their return types and their corresponding parameter types. The following operators require pair-wise declaration:
-
-- operator == and operator !=
-
-- operator > and operator <
-
-- operator >= and operator <=
+- operator `==` and operator `!=`
+- operator `>` and operator `<`
+- operator `>=` and operator `<=`
 
 ### Conversion operators
 
@@ -18674,79 +18671,80 @@ A conversion operator declaration introduces a ***user-defined conversion*** (§
 
 A conversion operator declaration that includes the implicit keyword introduces a user-defined implicit conversion. Implicit conversions can occur in a variety of situations, including function member invocations, cast expressions, and assignments. This is described further in §11.2.
 
-A conversion operator declaration that includes the explicit keyword introduces a user-defined explicit conversion. Explicit conversions can occur in cast expressions, and are described further in §11.3.
+A conversion operator declaration that includes the `explicit` keyword introduces a user-defined explicit conversion. Explicit conversions can occur in cast expressions, and are described further in §11.3.
 
 A conversion operator converts from a source type, indicated by the parameter type of the conversion operator, to a target type, indicated by the return type of the conversion operator.
 
-For a given source type S and target type T, if S or T are nullable value types, let S0 and T0 refer to their underlying types; otherwise, S0 and T0 are equal to S and T respectively. A class or struct is permitted to declare a conversion from a source type S to a target type T only if all of the following are true:
+For a given source type `S` and target type `T`, if `S` or `T` are nullable value types, let `S0` and `T0` refer to their underlying types; otherwise, `S0` and `T0` are equal to `S` and `T` respectively. A class or struct is permitted to declare a conversion from a source type `S` to a target type `T` only if all of the following are true:
 
-- S0 and T0 are different types.
+- `S0` and `T0` are different types.
+- Either `S0` or `T0` is the instance type of the class or struct that contains the operator declaration.
+- Neither `S0` nor `T0` is an *interface-type*.
+- Excluding user-defined conversions, a conversion does not exist from `S` to `T` or from `T` to `S`.
 
-- Either S0 or T0 is the instance type of the class or struct that contains the operator declaration.
-
-- Neither S0 nor T0 is an *interface-type*.
-
-- Excluding user-defined conversions, a conversion does not exist from S to T or from T to S.
-
-For the purposes of these rules, any type parameters associated with S or T are considered to be unique types that have no inheritance relationship with other types, and any constraints on those type parameters are ignored.
+For the purposes of these rules, any type parameters associated with `S` or `T` are considered to be unique types that have no inheritance relationship with other types, and any constraints on those type parameters are ignored.
 
 [*Example*: In the following:
 
+```csharp
 class C<T> {…}
 
-class D<T>: C<T>
+class D<T> : C<T>
 {
-public static implicit operator C<int>(D<T> value) {…} // Ok
+    public static implicit operator C<int> (D<T> value) {…} // Ok
 
-public static implicit operator C<string>(D<T> value) {…} // Ok
+    public static implicit operator C<string> (D<T> value) {…} // Ok
 
-public static implicit operator C<T>(D<T> value) {…} // Error
+    public static implicit operator C<T> (D<T> value) {…} // Error
 }
+```
 
-the first two operator declarations are permitted because T and int and string, respectively are considered unique types with no relationship. However, the third operator is an error because C<T> is the base class of D<T>. *end example*]
+the first two operator declarations are permitted because `T` and `int` and `string`, respectively are considered unique types with no relationship. However, the third operator is an error because `C<T>` is the base class of `D<T>`. *end example*]
 
-From the second rule, it follows that a conversion operator shall convert either to or from the class or struct type in which the operator is declared. [*Example*: It is possible for a class or struct type C to define a conversion from C to int and from int to C, but not from int to bool. *end example*]
+From the second rule, it follows that a conversion operator shall convert either to or from the class or struct type in which the operator is declared. [*Example*: It is possible for a class or struct type `C` to define a conversion from `C` to `int` and from `int` to `C`, but not from `int` to `bool`. *end example*]
 
-[]{#_Ref461619987 .anchor}It is not possible to directly redefine a pre-defined conversion. Thus, conversion operators are not allowed to convert from or to object because implicit and explicit conversions already exist between object and all other types. Likewise, neither the source nor the target types of a conversion can be a base type of the other, since a conversion would then already exist. However, it *is* possible to declare operators on generic types that, for particular type arguments, specify conversions that already exist as pre-defined conversions. [*Example*:
+It is not possible to directly redefine a pre-defined conversion. Thus, conversion operators are not allowed to convert from or to object because implicit and explicit conversions already exist between object and all other types. Likewise, neither the source nor the target types of a conversion can be a base type of the other, since a conversion would then already exist. However, it *is* possible to declare operators on generic types that, for particular type arguments, specify conversions that already exist as pre-defined conversions. [*Example*:
 
+```csharp
 struct Convertible<T>
 {
-public static implicit operator Convertible<T>(T value) {…}
+    public static implicit operator Convertible<T> (T value) {…}
 
-public static explicit operator T(Convertible<T> value) {…}
+    public static explicit operator T (Convertible<T> value) {…}
 }
+```
 
-when type object is specified as a type argument for T, the second operator declares a conversion that already exists (an implicit, and therefore also an explicit, conversion exists from any type to type object). *end example*]
+when type `object` is specified as a type argument for `T`, the second operator declares a conversion that already exists (an implicit, and therefore also an explicit, conversion exists from any type to type object). *end example*]
 
 In cases where a pre-defined conversion exists between two types, any user-defined conversions between those types are ignored. Specifically:
 
-- If a pre-defined implicit conversion (§11.2) exists from type S to type T, all user-defined conversions (implicit or explicit) from S to T are ignored.
+- If a pre-defined implicit conversion (§11.2) exists from type `S` to type `T`, all user-defined conversions (implicit or explicit) from `S` to `T` are ignored.
+- If a pre-defined explicit conversion (§11.3) exists from type `S` to type `T`, any user-defined explicit conversions from `S` to `T` are ignored. Furthermore:
+  - If either `S` or `T` is an interface type, user-defined implicit conversions from `S` to `T` are ignored.
+  - Otherwise, user-defined implicit conversions from `S` to `T` are still considered.
 
-- If a pre-defined explicit conversion (§11.3) exists from type S to type T, any user-defined explicit conversions from S to T are ignored. Furthermore:
+For all types but `object`, the operators declared by the `Convertible<T>` type above do not conflict with pre-defined conversions. [*Example*:
 
-<!-- -->
-
-- If either S or T is an interface type, user-defined implicit conversions from S to T are ignored.
-
-- Otherwise, user-defined implicit conversions from S to T are still considered.
-
-For all types but object, the operators declared by the Convertible<T> type above do not conflict with pre-defined conversions. [*Example*:
-
-void F(int i, Convertible<int> n) {
-i = n; // Error
-i = (int)n; // User-defined explicit conversion
-n = i; // User-defined implicit conversion
-n = (Convertible<int>)i; // User-defined implicit conversion
+```csharp
+void F (int i, Convertible<int> n)
+{
+    i = n; // Error
+    i = (int) n; // User-defined explicit conversion
+    n = i; // User-defined implicit conversion
+    n = (Convertible<int>) i; // User-defined implicit conversion
 }
 
-However, for type object, pre-defined conversions hide the user-defined conversions in all cases but one:
+However,
+for type object, pre - defined conversions hide the user - defined conversions in all cases but one:
 
-void F(object o, Convertible<object> n) {
-o = n; // Pre-defined boxing conversion
-o = (object)n; // Pre-defined boxing conversion
-n = o; // User-defined implicit conversion
-n = (Convertible<object>)o; // Pre-defined unboxing conversion
-}
+    void F (object o, Convertible<object> n)
+    {
+        o = n; // Pre-defined boxing conversion
+        o = (object) n; // Pre-defined boxing conversion
+        n = o; // User-defined implicit conversion
+        n = (Convertible<object>) o; // Pre-defined unboxing conversion
+    }
+```
 
 *end example*]
 
@@ -18758,27 +18756,32 @@ The signature of a conversion operator consists of the source type and the targe
 
 [*Example*: In the following code
 
+```csharp
 using System;
 
 public struct Digit
 {
-byte value;
+    byte value;
 
-public Digit(byte value) {
-if (value < 0 || value > 9) throw new ArgumentException();
-this.value = value;
-}
+    public Digit (byte value)
+    {
+        if (value < 0 || value > 9) throw new ArgumentException ();
+        this.value = value;
+    }
 
-public static implicit operator byte(Digit d) {
-return d.value;
-}
+    public static implicit operator byte (Digit d)
+    {
+        return d.value;
+    }
 
-public static explicit operator Digit(byte b) {
-return new Digit(b);
+    public static explicit operator Digit (byte b)
+    {
+        return new Digit (b);
+    }
 }
-}
+```
 
-the conversion from Digit to byte is implicit because it never throws exceptions or loses information, but the conversion from byte to Digit is explicit since Digit can only represent a subset of the possible values of a byte. *end example*]
+the conversion from `Digit` to `byte` is implicit because it never throws exceptions or loses information, but the conversion from `byte` to `Digit` is explicit since `Digit` can only represent a subset of the possible values of a `byte`. *end example*]
 
 ## Instance constructors
 
@@ -18786,42 +18789,44 @@ the conversion from Digit to byte is implicit because it never throws exceptions
 
 An ***instance constructor*** is a member that implements the actions required to initialize an instance of a class. Instance constructors are declared using *constructor-declaration*s:
 
-[]{#Grammar_constructor_declaration .anchor}constructor-declaration:
-attributesopt constructor-modifiersopt constructor-declarator constructor-body
+```antlr
+constructor-declaration:
+    attributesopt constructor-modifiersopt constructor-declarator constructor-body
 
-[]{#Grammar_constructor_modifiers .anchor}constructor-modifiers:
-constructor-modifier
-constructor-modifiers constructor-modifier
+constructor-modifiers:
+    constructor-modifier
+    constructor-modifiers constructor-modifier
 
-[]{#Grammar_constructor_modifier .anchor}constructor-modifier:
-*public*
-*protected
-internal*
-*private
-extern*
+constructor-modifier:
+    public
+    protected
+    internal
+    private
+    extern
 
-[]{#Grammar_constructor_declarator .anchor}constructor-declarator:
-identifier *(* formal-parameter-listopt *)* constructor-initializeropt
+constructor-declarator:
+    identifier ( formal-parameter-listopt ) constructor-initializeropt
 
-[]{#Grammar_constructor_initializer .anchor}constructor-initializer:
-*:* *base* *(* argument-listopt *)
-:* *this* *(* argument-listopt *)*
+constructor-initializer:
+    : base ( argument-listopt )
+    : this ( argument-listopt )
 
-[]{#Grammar_constructor_body .anchor}constructor-body:
-block
-*;*
+constructor-body:
+    block
+    ;
+```
 
-A *constructor-declaration* may include a set of *attributes* (§22), a valid combination of the four access modifiers (§15.3.6), and an extern (§15.6.8) modifier. A constructor declaration is not permitted to include the same modifier multiple times.
+A *constructor-declaration* may include a set of *attributes* (§22), a valid combination of the four access modifiers (§15.3.6), and an `extern` (§15.6.8) modifier. A constructor declaration is not permitted to include the same modifier multiple times.
 
 The *identifier* of a *constructor-declarator* shall name the class in which the instance constructor is declared. If any other name is specified, a compile-time error occurs.
 
-The optional *formal-parameter-list* of an instance constructor is subject to the same rules as the *formal-parameter-list* of a method (§15.6). As the this modifier for parameters only applies to extension methods (§15.6.10), no parameter in a constructor's *formal-parameter-list* shall contain the this modifier. The formal parameter list defines the signature (§8.6) of an instance constructor and governs the process whereby overload resolution (§12.6.4) selects a particular instance constructor in an invocation.
+The optional *formal-parameter-list* of an instance constructor is subject to the same rules as the *formal-parameter-list* of a method (§15.6). As the `this` modifier for parameters only applies to extension methods (§15.6.10), no parameter in a constructor's *formal-parameter-list* shall contain the `this` modifier. The formal parameter list defines the signature (§8.6) of an instance constructor and governs the process whereby overload resolution (§12.6.4) selects a particular instance constructor in an invocation.
 
 Each of the types referenced in the *formal-parameter-list* of an instance constructor shall be at least as accessible as the constructor itself (§8.5.5).
 
-The optional *constructor-initializer* specifies another instance constructor to invoke before executing the statements given in the *constructor-body* of this instance constructor. This is described further in §15.11.2.
+The optional *constructor-initializer* specifies another instance constructor to invoke before executing the statements given in the *constructor-body* of `this` instance constructor. This is described further in §15.11.2.
 
-When a constructor declaration includes an extern modifier, the constructor is said to be an ***external constructor***. Because an external constructor declaration provides no actual implementation, its *constructor-body* consists of a semicolon. For all other constructors, the *constructor-body* consists of a *block*, which specifies the statements to initialize a new instance of the class. This corresponds exactly to the *block* of an instance method with a void return type (§15.6.11).
+When a constructor declaration includes an `extern` modifier, the constructor is said to be an ***external constructor***. Because an external constructor declaration provides no actual implementation, its *constructor-body* consists of a semicolon. For all other constructors, the *constructor-body* consists of a *block*, which specifies the statements to initialize a new instance of the class. This corresponds exactly to the *block* of an instance method with a `void` return type (§15.6.11).
 
 Instance constructors are not inherited. Thus, a class has no instance constructors other than those actually declared in the class, with the exception that if a class contains no instance constructor declarations, a default instance constructor is automatically provided (§15.11.5).
 
@@ -18829,33 +18834,38 @@ Instance constructors are invoked by *object-creation-expression*s (§12.7.11.2)
 
 ### Constructor initializers
 
-All instance constructors (except those for class object) implicitly include an invocation of another instance constructor immediately before the *constructor-body*. The constructor to implicitly invoke is determined by the *constructor-initializer*:
+All instance constructors (except those for class `object`) implicitly include an invocation of another instance constructor immediately before the *constructor-body*. The constructor to implicitly invoke is determined by the *constructor-initializer*:
 
-- An instance constructor initializer of the form base(*argument-listopt*) causes an instance constructor from the direct base class to be invoked. That constructor is selected using *argument-list* and the overload resolution rules of §12.6.4. The set of candidate instance constructors consists of all the accessible instance constructors of the direct base class. If this set is empty, or if a single best instance constructor cannot be identified, a compile-time error occurs.
+- An instance constructor initializer of the form `base(*argument-listopt*)` causes an instance constructor from the direct base class to be invoked. That constructor is selected using *argument-list* and the overload resolution rules of §12.6.4. The set of candidate instance constructors consists of all the accessible instance constructors of the direct base class. If this set is empty, or if a single best instance constructor cannot be identified, a compile-time error occurs.
+- An instance constructor initializer of the form `this(*argument-listopt*)` invokes another instance constructor from the same class. The constructor is selected using *argument-list* and the overload resolution rules of §12.6.4. The set of candidate instance constructors consists of all instance constructors declared in the class itself. If the resulting set of applicable instance constructors is empty, or if a single best instance constructor cannot be identified, a compile-time error occurs. If an instance constructor declaration invokes itself through a chain of one or more constructor initializers, a compile-time error occurs.
 
-- An instance constructor initializer of the form this(*argument-listopt*) invokes another instance constructor from the same class. The constructor is selected using *argument-list* and the overload resolution rules of §12.6.4. The set of candidate instance constructors consists of all instance constructors declared in the class itself. If the resulting set of applicable instance constructors is empty, or if a single best instance constructor cannot be identified, a compile-time error occurs. If an instance constructor declaration invokes itself through a chain of one or more constructor initializers, a compile-time error occurs.
+If an instance constructor has no constructor initializer, a constructor initializer of the form base()is implicitly provided. 
 
-If an instance constructor has no constructor initializer, a constructor initializer of the form base()is implicitly provided. [*Note*: Thus, an instance constructor declaration of the form
-
-C(…) {…}
-
-is exactly equivalent to
-
-C(…): base() {…}
-
-*end note*]
+> [!NOTE]
+> Thus, an instance constructor declaration of the form
+> 
+> ```csharp
+> C(…) {…}
+> ```
+> is exactly equivalent to
+> 
+> ```csharp
+> C(…): base() {…}
+> ```
 
 The scope of the parameters given by the *formal-parameter-list* of an instance constructor declaration includes the constructor initializer of that declaration. Thus, a constructor initializer is permitted to access the parameters of the constructor. [*Example*:
 
+```csharp
 class A
 {
-public A(int x, int y) {}
+    public A (int x, int y) { }
 }
 
-class B: A
+class B : A
 {
-public B(int x, int y): base(x + y, x - y) {}
+    public B (int x, int y) : base (x + y, x - y) { }
 }
+```
 
 *end example*]
 
@@ -18863,151 +18873,181 @@ An instance constructor initializer cannot access the instance being created. Th
 
 ### Instance variable initializers
 
-When an instance constructor has no constructor initializer, or it has a constructor initializer of the form base(…), that constructor implicitly performs the initializations specified by the *variable-initializer*s of the instance fields declared in its class. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class constructor. The variable initializers are executed in the textual order in which they appear in the class declaration (§15.5.6).
+When an instance constructor has no constructor initializer, or it has a constructor initializer of the form `base(…)`, that constructor implicitly performs the initializations specified by the *variable-initializer*s of the instance fields declared in its class. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class constructor. The variable initializers are executed in the textual order in which they appear in the class declaration (§15.5.6).
 
 ### Constructor execution
 
 Variable initializers are transformed into assignment statements, and these assignment statements are executed *before* the invocation of the base class instance constructor. This ordering ensures that all instance fields are initialized by their variable initializers before *any* statements that have access to that instance are executed. [*Example*: Given the following:
 
+```csharp
 using System;
 
 class A
 {
-public A() {
-PrintFields();
+    public A ()
+    {
+        PrintFields ();
+    }
+
+    public virtual void PrintFields () { }
 }
 
-public virtual void PrintFields() {}
-}
-
-class B: A
+class B : A
 {
-int x = 1;
-int y;
+    int x = 1;
+    int y;
 
-public B() {
-y = -1;
+    public B ()
+    {
+        y = -1;
+    }
+
+    public override void PrintFields ()
+    {
+        Console.WriteLine ("x = {0}, y = {1}", x, y);
+    }
 }
+```
 
-public override void PrintFields() {
-Console.WriteLine("x = {0}, y = {1}", x, y);
-}
-}
+when `new B()` is used to create an instance of `B`, the following output is produced:
 
-when new B() is used to create an instance of B, the following output is produced:
-
+```csharp
 x = 1, y = 0
+```
 
-The value of x is 1 because the variable initializer is executed before the base class instance constructor is invoked. However, the value of y is 0 (the default value of an int) because the assignment to y is not executed until after the base class constructor returns.
+The value of `x` is 1 because the variable initializer is executed before the base class instance constructor is invoked. However, the value of `y` is 0 (the default value of an `int`) because the assignment to `y` is not executed until after the base class constructor returns.
 
 It is useful to think of instance variable initializers and constructor initializers as statements that are automatically inserted before the *constructor-body*. The example
 
+```csharp
 using System;
 using System.Collections;
 
 class A
 {
-int x = 1, y = -1, count;
+    int x = 1, y = -1, count;
 
-public A() {
-count = 0;
+    public A ()
+    {
+        count = 0;
+    }
+
+    public A (int n)
+    {
+        count = n;
+    }
 }
 
-public A(int n) {
-count = n;
-}
-}
-
-class B: A
+class B : A
 {
-double sqrt2 = Math.Sqrt(2.0);
-ArrayList items = new ArrayList(100);
-int max;
+    double sqrt2 = Math.Sqrt (2.0);
+    ArrayList items = new ArrayList (100);
+    int max;
 
-public B(): this(100) {
-items.Add("default");
+    public B () : this (100)
+    {
+        items.Add ("default");
+    }
+
+    public B (int n) : base (n– 1)
+    {
+        max = n;
+    }
 }
+```
 
-public B(int n): base(n – 1) {
-max = n;
-}
-}
+contains several variable initializers; it also contains constructor initializers of both forms (`base` and `this`). The example corresponds to the code shown below, where each comment indicates an automatically inserted statement (the syntax used for the automatically inserted constructor invocations isn’t valid, but merely serves to illustrate the mechanism).
 
-contains several variable initializers; it also contains constructor initializers of both forms (base and this). The example corresponds to the code shown below, where each comment indicates an automatically inserted statement (the syntax used for the automatically inserted constructor invocations isn’t valid, but merely serves to illustrate the mechanism).
-
+```csharp
 using System.Collections;
 
 class A
 {
-int x, y, count;
+    int x, y, count;
 
-public A() {
-x = 1; // Variable initializer
-y = -1; // Variable initializer
-object(); // Invoke object() constructor
-count = 0;
+    public A ()
+    {
+        x = 1; // Variable initializer
+        y = -1; // Variable initializer
+        object (); // Invoke object() constructor
+        count = 0;
+    }
+
+    public A (int n)
+    {
+        x = 1; // Variable initializer
+        y = -1; // Variable initializer
+        object (); // Invoke object() constructor
+        count = n;
+    }
 }
 
-public A(int n) {
-x = 1; // Variable initializer
-y = -1; // Variable initializer
-object(); // Invoke object() constructor
-count = n;
-}
-}
-
-class B: A
+class B : A
 {
-double sqrt2;
-ArrayList items;
-int max;
+    double sqrt2;
+    ArrayList items;
+    int max;
 
-public B(): this(100) {
-B(100); // Invoke B(int) constructor
-items.Add("default");
-}
+    public B () : this (100)
+    {
+        B (100); // Invoke B(int) constructor
+        items.Add ("default");
+    }
 
-public B(int n): base(n – 1) {
-sqrt2 = Math.Sqrt(2.0); // Variable initializer
-items = new ArrayList(100); // Variable initializer
-A(n – 1); // Invoke A(int) constructor
-max = n;
+    public B (int n) : base (n– 1)
+    {
+        sqrt2 = Math.Sqrt (2.0); // Variable initializer
+        items = new ArrayList (100); // Variable initializer
+        A (n– 1); // Invoke A(int) constructor
+        max = n;
+    }
 }
-}
+```
 
 *end example*]
 
 ### Default constructors
 
-If a class contains no instance constructor declarations, a default instance constructor is automatically provided. That default constructor simply invokes a constructor of the direct base class, as if it had a constructor initializer of the form base(). If the class is abstract then the declared accessibility for the default constructor is protected. Otherwise, the declared accessibility for the default constructor is public. [*Note*: Thus, the default constructor is always of the form
+If a class contains no instance constructor declarations, a default instance constructor is automatically provided. That default constructor simply invokes a constructor of the direct base class, as if it had a constructor initializer of the form `base()`. If the class is abstract then the declared accessibility for the default constructor is protected. Otherwise, the declared accessibility for the default constructor is public. 
 
-protected C(): base() {}
-
-or
-
-public C(): base() {}
-
-where C is the name of the class. *end note*]
+> [!NOTE]
+> Thus, the default constructor is always of the form
+> 
+> ```csharp
+> protected C(): base() {}
+> ```
+> 
+> or
+> 
+> ```csharp
+> public C(): base() {}
+> ```
+> 
+> where C is the name of the class.
 
 If overload resolution is unable to determine a unique best candidate for the base-class constructor initializer then a compile-time error occurs.
 
 [*Example*: In the following code
 
+```csharp
 class Message
 {
-object sender;
-string text;
+    object sender;
+    string text;
 }
+```
 
 a default constructor is provided because the class contains no instance constructor declarations. Thus, the example is precisely equivalent to
 
+```csharp
 class Message
 {
-object sender;
-string text;
+    object sender;
+    string text;
 
-public Message(): base() {}
+    public Message () : base () { }
 }
+```
 
 *end example*]
 
@@ -19015,113 +19055,133 @@ public Message(): base() {}
 
 A ***static constructor*** is a member that implements the actions required to initialize a closed class. Static constructors are declared using *static-constructor-declaration*s:
 
-[]{#Grammar_static_constructor_declaration .anchor}static-constructor-declaration:
-attributesopt static-constructor-modifiers identifier *(* *)* static-constructor-body
+```antlr
+static-constructor-declaration:
+    attributesopt static-constructor-modifiers identifier ( ) static-constructor-body
 
-[]{#Grammar_static_constructor_modifiers .anchor}static-constructor-modifiers:
-*extern*opt *static*
-*static extern*opt[]{#Grammar_static_constructor_body .anchor}
+static-constructor-modifiers:
+    externopt static
+    static externopt
 
 static-constructor-body:
-block
-*;*
+    block
+    ;
+```
 
-A *static-constructor-declaration* may include a set of *attributes* (§22) and an extern modifier (§15.6.8).
+A *static-constructor-declaration* may include a set of *attributes* (§22) and an `extern` modifier (§15.6.8).
 
 The *identifier* of a *static-constructor-declaration* shall name the class in which the static constructor is declared. If any other name is specified, a compile-time error occurs.
 
-When a static constructor declaration includes an extern modifier, the static constructor is said to be an ***external static constructor***. Because an external static constructor declaration provides no actual implementation, its *static-constructor-body* consists of a semicolon. For all other static constructor declarations, the *static-constructor-body* consists of a *block*, which specifies the statements to execute in order to initialize the class. This corresponds exactly to the *method-body* of a static method with a void return type (§15.6.11).
+When a static constructor declaration includes an `extern` modifier, the static constructor is said to be an ***external static constructor***. Because an external static constructor declaration provides no actual implementation, its *static-constructor-body* consists of a semicolon. For all other static constructor declarations, the *static-constructor-body* consists of a *block*, which specifies the statements to execute in order to initialize the class. This corresponds exactly to the *method-body* of a static method with a void return type (§15.6.11).
 
 Static constructors are not inherited, and cannot be called directly.
 
 The static constructor for a closed class executes at most once in a given application domain. The execution of a static constructor is triggered by the first of the following events to occur within an application domain:
 
 - An instance of the class is created.
-
 - Any of the static members of the class are referenced.
 
-If a class contains the Main method (§8.1) in which execution begins, the static constructor for that class executes before the Main method is called.
+If a class contains the `Main` method (§8.1) in which execution begins, the static constructor for that class executes before the `Main` method is called.
 
 To initialize a new closed class type, first a new set of static fields (§15.5.2) for that particular closed type is created. Each of the static fields is initialized to its default value (§15.5.5). Next, the static field initializers (§15.5.6.2) are executed for those static fields. Finally, the static constructor is executed.[*Example*: The example
 
+```csharp
 using System;
 
 class Test
 {
-static void Main() {
-A.F();
-B.F();
-}
+    static void Main ()
+    {
+        A.F ();
+        B.F ();
+    }
 }
 
 class A
 {
-static A() {
-Console.WriteLine("Init A");
-}
-public static void F() {
-Console.WriteLine("A.F");
-}
+    static A ()
+    {
+        Console.WriteLine ("Init A");
+    }
+    public static void F ()
+    {
+        Console.WriteLine ("A.F");
+    }
 }
 
 class B
 {
-static B() {
-Console.WriteLine("Init B");
+    static B ()
+    {
+        Console.WriteLine ("Init B");
+    }
+    public static void F ()
+    {
+        Console.WriteLine ("B.F");
+    }
 }
-public static void F() {
-Console.WriteLine("B.F");
-}
-}
+```
 
 must produce the output:
 
+```plaintext
 Init A
 A.F
 Init B
 B.F
+```
 
-because the execution of A's static constructor is triggered by the call to A.F, and the execution of B's static constructor is triggered by the call to B.F. *end example*]
+because the execution of `A`'s static constructor is triggered by the call to `A.F`, and the execution of `B`'s static constructor is triggered by the call to `B.F`. *end example*]
 
 It is possible to construct circular dependencies that allow static fields with variable initializers to be observed in their default value state.
 
 [*Example*: The example
 
+```csharp
 using System;
 
 class A
 {
-public static int X;
-static A() {
-X = B.Y + 1;
-}
+    public static int X;
+    static A ()
+    {
+        X = B.Y + 1;
+    }
 }
 
 class B
 {
-public static int Y = A.X + 1;
-static B() {}
-static void Main() {
-Console.WriteLine("X = {0}, Y = {1}", A.X, B.Y);
+    public static int Y = A.X + 1;
+    static B () { }
+    static void Main ()
+    {
+        Console.WriteLine ("X = {0}, Y = {1}", A.X, B.Y);
+    }
 }
-}
+```
 
 produces the output
 
+```plaintext
 X = 1, Y = 2
+```
 
-To execute the Main method, the system first runs the initializer for B.Y, prior to class B's static constructor. Y's initializer causes A's static constructor to be run because the value of A.X is referenced. The static constructor of A in turn proceeds to compute the value of X, and in doing so fetches the default value of Y, which is zero. A.X is thus initialized to 1. The process of running A's static field initializers and static constructor then completes, returning to the calculation of the initial value of Y, the result of which becomes 2. *end example*][[[[[[]{#_Toc511022979 .anchor}]{#_Toc505664133 .anchor}]{#_Toc505589999 .anchor}]{#_Toc503164235 .anchor}]{#_Toc501035573 .anchor}]{#_Ref456697771 .anchor}
+To execute the `Main` method, the system first runs the initializer for `B.Y`, prior to class `B`'s static constructor. `Y`'s initializer causes `A`'s static constructor to be run because the value of `A.X` is referenced. The static constructor of `A` in turn proceeds to compute the value of `X`, and in doing so fetches the default value of Y, which is zero. `A.X` is thus initialized to 1. The process of running `A`'s static field initializers and static constructor then completes, returning to the calculation of the initial value of `Y`, the result of which becomes 2. *end example*]
 
 Because the static constructor is executed exactly once for each closed constructed class type, it is a convenient place to enforce run-time checks on the type parameter that cannot be checked at compile-time via constraints (§15.2.5). [*Example*: The following type uses a static constructor to enforce that the type argument is an enum:
 
-class Gen<T> where T: struct
+```csharp
+class Gen<T> where T : struct
 {
-static Gen() {
-if (!typeof(T).IsEnum) {
-throw new ArgumentException("T must be an enum");
+    static Gen ()
+    {
+        if (!typeof (T).IsEnum)
+        {
+            throw new ArgumentException ("T must be an enum");
+        }
+    }
 }
-}
-}
+```
 
 *end example*]
 
@@ -19131,82 +19191,97 @@ throw new ArgumentException("T must be an enum");
 
 A ***finalizer*** is a member that implements the actions required to finalize an instance of a class. A finalizer is declared using a *finalizer-declaration*:
 
-[]{#Grammar_destructor_declaration .anchor}finalizer-declaration:
-attributesopt *extern*opt ~ identifier *(* *)* finalizer-body
+```antlr
+finalizer-declaration:
+    attributesopt externopt ~ identifier ( ) finalizer-body
 
-[]{#Grammar_destructor_body .anchor}finalizer-body:
-block
-*;*
+finalizer-body:
+    block
+    ;
+```
 
 A *finalizer-declaration* may include a set of *attributes* (§22).
 
 The *identifier* of a *finalizer-declarator* shall name the class in which the finalizer is declared. If any other name is specified, a compile-time error occurs.
 
-When a finalizer declaration includes an extern modifier, the finalizer is said to be an ***external finalizer***. Because an external finalizer declaration provides no actual implementation, its *finalizer-body* consists of a semicolon. For all other finalizers, the *finalizer-body* consists of a *block*, which specifies the statements to execute in order to finalize an instance of the class. A *finalizer-body* corresponds exactly to the *method-body* of an instance method with a void return type (§15.6.11).
+When a finalizer declaration includes an `extern` modifier, the finalizer is said to be an ***external finalizer***. Because an external finalizer declaration provides no actual implementation, its *finalizer-body* consists of a semicolon. For all other finalizers, the *finalizer-body* consists of a *block*, which specifies the statements to execute in order to finalize an instance of the class. A *finalizer-body* corresponds exactly to the *method-body* of an instance method with a `void` return type (§15.6.11).
 
 Finalizers are not inherited. Thus, a class has no finalizers other than the one that may be declared in that class.
 
-[*Note*: Since a finalizer is required to have no parameters, it cannot be overloaded, so a class can have, at most, one finalizer. *end note*]
+> [!NOTE]
+> Since a finalizer is required to have no parameters, it cannot be overloaded, so a class can have, at most, one finalizer.
 
 Finalizers are invoked automatically, and cannot be invoked explicitly. An instance becomes eligible for finalization when it is no longer possible for any code to use that instance. Execution of the finalizer for the instance may occur at any time after the instance becomes eligible for finalization (§8.9). When an instance is finalized, the finalizers in that instance’s inheritance chain are called, in order, from most derived to least derived. A finalizer may be executed on any thread. For further discussion of the rules that govern when and how a finalizer is executed, see §8.9.
 
 [*Example*: The output of the example
 
+```csharp
 using System;
 
 class A
 {
-~A() {
-Console.WriteLine("A's finalizer");
-}
+    ~A ()
+    {
+        Console.WriteLine ("A's finalizer");
+    }
 }
 
-class B: A
+class B : A
 {
-~B() {
-Console.WriteLine("B's finalizer");
-}
+    ~B ()
+    {
+        Console.WriteLine ("B's finalizer");
+    }
 }
 
 class Test
 {
-static void Main() {
-B b = new B();
-b = null;
-GC.Collect();
-GC.WaitForPendingFinalizers();
+    static void Main ()
+    {
+        B b = new B ();
+        b = null;
+        GC.Collect ();
+        GC.WaitForPendingFinalizers ();
+    }
 }
-}
+```
 
 is
 
+```plaintext
 B’s finalizer
 A’s finalizer
+```
 
 since finalizers in an inheritance chain are called in order, from most derived to least derived. *end example*]
 
-Finalizers are implemented by overriding the virtual method Finalize on System.Object. C# programs are not permitted to override this method or call it (or overrides of it) directly. [*Example*: For instance, the program
+Finalizers are implemented by overriding the virtual method `Finalize` on `System.Object`. C# programs are not permitted to override this method or call it (or overrides of it) directly. [*Example*: For instance, the program
 
+```csharp
 class A
 {
-override protected void Finalize() {} // error
-public void F() {
-this.Finalize(); // error
+    override protected void Finalize () { } // error
+    public void F ()
+    {
+        this.Finalize (); // error
+    }
 }
-}
+```
 
 contains two errors. *end example*]
 
 The compiler behaves as if this method, and overrides of it, do not exist at all. [*Example*: Thus, this program:
 
+```csharp
 class A
 {
-void Finalize() {} // permitted
+    void Finalize () { } // permitted
 }
+```
 
-is valid and the method shown hides System.Object's Finalize method. *end example*]
+is valid and the method shown hides `System.Objec`t's `Finalize` method. *end example*]
 
-For a discussion of the behavior when an exception is thrown from a finalizer, see §21.4.[]{#_Ref461619890 .anchor}
+For a discussion of the behavior when an exception is thrown from a finalizer, see §21.4.
 
 ## Iterators
 
@@ -19220,183 +19295,127 @@ When a function member is implemented using an iterator block, it is a compile-t
 
 ### Enumerator interfaces
 
-The ***enumerator interfaces*** are the non-generic interface System.Collections.IEnumerator and all instantiations of the generic interface System.Collections.Generic.IEnumerator<T>. For the sake of brevity, in this subclause and its siblings these interfaces are referenced as IEnumerator and IEnumerator<T>, respectively.
+The ***enumerator interfaces*** are the non-generic interface `System.Collections.IEnumerator` and all instantiations of the generic interface `System.Collections.Generic.IEnumerator<T>`. For the sake of brevity, in this subclause and its siblings these interfaces are referenced as `IEnumerator` and `IEnumerator<T>`, respectively.
 
 ### Enumerable interfaces
 
-The ***enumerable interfaces*** are the non-generic interface System.Collections.IEnumerable and all instantiations of the generic interface System.Collections.Generic.IEnumerable<T>. For the sake of brevity, in this subclause and its siblings these interfaces are referenced as IEnumerable and IEnumerable<T>, respectively.
+The ***enumerable interfaces*** are the non-generic interface `System.Collections.IEnumerable` and all instantiations of the generic interface `System.Collections.Generic.IEnumerable<T>`. For the sake of brevity, in this subclause and its siblings these interfaces are referenced as `IEnumerable` and `IEnumerable<T>`, respectively.
 
 ### Yield type
 
 An iterator produces a sequence of values, all of the same type. This type is called the ***yield type*** of the iterator.
 
-- The yield type of an iterator that returns IEnumerator or IEnumerable is object.
-
-- The yield type of an iterator that returns IEnumerator<T> or IEnumerable<T> is T.
+- The yield type of an iterator that returns `IEnumerator` or `IEnumerable` is `object`.
+- The yield type of an iterator that returns `IEnumerator<T>` or `IEnumerable<T>` is `T`.
 
 ### Enumerator objects
 
 #### General
 
-When a function member returning an enumerator interface type is implemented using an iterator block, invoking the function member does not immediately execute the code in the iterator block. Instead, an ***enumerator object*** is created and returned. This object encapsulates the code specified in the iterator block, and execution of the code in the iterator block occurs when the enumerator object’s MoveNext method is invoked. An enumerator object has the following characteristics:
+When a function member returning an enumerator interface type is implemented using an iterator block, invoking the function member does not immediately execute the code in the iterator block. Instead, an ***enumerator object*** is created and returned. This object encapsulates the code specified in the iterator block, and execution of the code in the iterator block occurs when the enumerator object’s `MoveNext` method is invoked. An enumerator object has the following characteristics:
 
-- It implements IEnumerator and IEnumerator<T>, where T is the yield type of the iterator.
-
-- It implements System.IDisposable.
-
+- It implements `IEnumerator` and `IEnumerator<T>`, where `T` is the yield type of the iterator.
+- It implements `System.IDisposable`.
 - It is initialized with a copy of the argument values (if any) and instance value passed to the function member.
-
 - It has four potential states, ***before***, ***running***, ***suspended***, and ***after***, and is initially in the ***before*** state.
 
 An enumerator object is typically an instance of a compiler-generated enumerator class that encapsulates the code in the iterator block and implements the enumerator interfaces, but other methods of implementation are possible. If an enumerator class is generated by the compiler, that class will be nested, directly or indirectly, in the class containing the function member, it will have private accessibility, and it will have a name reserved for compiler use (§7.4.3).
 
 An enumerator object may implement more interfaces than those specified above.
 
-The following subclauses describe the required behavior of the MoveNext, Current, and Dispose members of the IEnumerator and IEnumerator<T> interface implementations provided by an enumerator object.
+The following subclauses describe the required behavior of the `MoveNext`, `Current`, and `Dispose` members of the `IEnumerator` and `IEnumerator<T>` interface implementations provided by an enumerator object.
 
-Enumerator objects do not support the IEnumerator.Reset method. Invoking this method causes a System.NotSupportedException to be thrown.
+Enumerator objects do not support the `IEnumerator.Reset` method. Invoking this method causes a `System.NotSupportedException` to be thrown.
 
 #### The MoveNext method
 
-The MoveNext method of an enumerator object encapsulates the code of an iterator block. Invoking the MoveNext method executes code in the iterator block and sets the Current property of the enumerator object as appropriate. The precise action performed by MoveNext depends on the state of the enumerator object when MoveNext is invoked:
+The `MoveNext` method of an enumerator object encapsulates the code of an iterator block. Invoking the `MoveNext` method executes code in the iterator block and sets the `Current` property of the enumerator object as appropriate. The precise action performed by `MoveNext` depends on the state of the enumerator object when `MoveNext` is invoked:
 
-- If the state of the enumerator object is ***before***, invoking MoveNext:
+- If the state of the enumerator object is ***before***, invoking `MoveNext`:
+  - Changes the state to ***running***.
+  - Initializes the parameters (including `this`) of the iterator block to the argument values and instance value saved when the enumerator object was initialized.
+  - Executes the iterator block from the beginning until execution is interrupted (as described below).
+- If the state of the enumerator object is ***running***, the result of invoking `MoveNext` is unspecified.
+- If the state of the enumerator object is ***suspended***, invoking `MoveNext`:
+  - Changes the state to ***running***.
+  - Restores the values of all local variables and parameters (including `this`) to the values saved when execution of the iterator block was last suspended. 
+  > [!NOTE]
+  > The contents of any objects referenced by these variables may have changed since the previous call to `MoveNext`. 
+  - Resumes execution of the iterator block immediately following the `yield return` statement that caused the suspension of execution and continues until execution is interrupted (as described below).
+- If the state of the enumerator object is ***after***, invoking `MoveNext` returns `false`.
 
-<!-- -->
+When `MoveNext` executes the iterator block, execution can be interrupted in four ways: By a `yield return` statement, by a `yield break` statement, by encountering the end of the iterator block, and by an exception being thrown and propagated out of the iterator block.
 
-- Changes the state to ***running***.
-
-- Initializes the parameters (including this) of the iterator block to the argument values and instance value saved when the enumerator object was initialized.
-
-- Executes the iterator block from the beginning until execution is interrupted (as described below).
-
-<!-- -->
-
-- If the state of the enumerator object is ***running***, the result of invoking MoveNext is unspecified.
-
-- If the state of the enumerator object is ***suspended***, invoking MoveNext:
-
-<!-- -->
-
-- Changes the state to ***running***.
-
-- Restores the values of all local variables and parameters (including this) to the values saved when execution of the iterator block was last suspended. [*Note*: The contents of any objects referenced by these variables may have changed since the previous call to MoveNext. *end note*]
-
-- Resumes execution of the iterator block immediately following the yield return statement that caused the suspension of execution and continues until execution is interrupted (as described below).
-
-<!-- -->
-
-- If the state of the enumerator object is ***after***, invoking MoveNext returns false.
-
-When MoveNext executes the iterator block, execution can be interrupted in four ways: By a yield return statement, by a yield break statement, by encountering the end of the iterator block, and by an exception being thrown and propagated out of the iterator block.
-
-- When a yield return statement is encountered (§10.4.4.20):
-
-<!-- -->
-
-- The expression given in the statement is evaluated, implicitly converted to the yield type, and assigned to the Current property of the enumerator object.
-
-- Execution of the iterator body is suspended. The values of all local variables and parameters (including this) are saved, as is the location of this yield return statement. If the yield return statement is within one or more try blocks, the associated finally blocks are *not* executed at this time.
-
-- The state of the enumerator object is changed to ***suspended***.
-
-- The MoveNext method returns true to its caller, indicating that the iteration successfully advanced to the next value.
-
-<!-- -->
-
-- When a yield break statement is encountered (§10.4.4.20):
-
-<!-- -->
-
-- If the yield break statement is within one or more try blocks, the associated finally blocks are executed.
-
-- The state of the enumerator object is changed to ***after***.
-
-- The MoveNext method returns false to its caller, indicating that the iteration is complete.
-
-<!-- -->
-
+- When a `yield return` statement is encountered (§10.4.4.20):
+  - The expression given in the statement is evaluated, implicitly converted to the yield type, and assigned to the `Current` property of the enumerator object.
+  - Execution of the iterator body is suspended. The values of all local variables and parameters (including `this`) are saved, as is the location of this `yield return` statement. If the `yield return` statement is within one or more try blocks, the associated finally blocks are *not* executed at this time.
+  - The state of the enumerator object is changed to ***suspended***.
+  - The `MoveNext` method returns true to its caller, indicating that the iteration successfully advanced to the next value.
+- When a `yield break` statement is encountered (§10.4.4.20):
+  - If the `yield break` statement is within one or more try blocks, the associated finally blocks are executed.
+  - The state of the enumerator object is changed to ***after***.
+  - The `MoveNext` method returns false to its caller, indicating that the iteration is complete.
 - When the end of the iterator body is encountered:
-
-<!-- -->
-
-- The state of the enumerator object is changed to ***after***.
-
-- The MoveNext method returns false to its caller, indicating that the iteration is complete.
-
-<!-- -->
-
+  - The state of the enumerator object is changed to ***after***.
+  - The `MoveNext` method returns false to its caller, indicating that the iteration is complete.
 - When an exception is thrown and propagated out of the iterator block:
-
-<!-- -->
-
-- Appropriate finally blocks in the iterator body will have been executed by the exception propagation.
-
-- The state of the enumerator object is changed to ***after***.
-
-- The exception propagation continues to the caller of the MoveNext method.
+  - Appropriate finally blocks in the iterator body will have been executed by the exception propagation.
+  - The state of the enumerator object is changed to ***after***.
+  - The exception propagation continues to the caller of the `MoveNext` method.
 
 #### The Current property
 
-An enumerator object’s Current property is affected by yield return statements in the iterator block.
+An enumerator object’s `Current` property is affected by `yield return` statements in the iterator block.
 
-When an enumerator object is in the ***suspended*** state, the value of Current is the value set by the previous call to MoveNext. When an enumerator object is in the ***before***, ***running***, or ***after*** states, the result of accessing Current is unspecified.
+When an enumerator object is in the ***suspended*** state, the value of `Current` is the value set by the previous call to `MoveNext`. When an enumerator object is in the ***before***, ***running***, or ***after*** states, the result of accessing `Current` is unspecified.
 
-For an iterator with a yield type other than object, the result of accessing Current through the enumerator object’s IEnumerable implementation corresponds to accessing Current through the enumerator object’s IEnumerator<T> implementation and casting the result to object.
+For an iterator with a yield type other than `object`, the result of accessing `Current` through the enumerator object’s `IEnumerable` implementation corresponds to accessing `Current` through the enumerator object’s `IEnumerator<T>` implementation and casting the result to `object`.
 
 #### The Dispose method
 
-The Dispose method is used to clean up the iteration by bringing the enumerator object to the ***after*** state.
+The `Dispose` method is used to clean up the iteration by bringing the enumerator object to the ***after*** state.
 
-- If the state of the enumerator object is ***before***, invoking Dispose changes the state to ***after***.
-
-- If the state of the enumerator object is ***running***, the result of invoking Dispose is unspecified.
-
-- If the state of the enumerator object is ***suspended***, invoking Dispose:
-
-<!-- -->
-
-- Changes the state to ***running***.
-
-- Executes any finally blocks as if the last executed yield return statement were a yield break statement. If this causes an exception to be thrown and propagated out of the iterator body, the state of the enumerator object is set to ***after*** and the exception is propagated to the caller of the Dispose method.
-
-- Changes the state to ***after***.
-
-<!-- -->
-
-- If the state of the enumerator object is ***after***, invoking Dispose has no affect.
+- If the state of the enumerator object is ***before***, invoking `Dispose` changes the state to ***after***.
+- If the state of the enumerator object is ***running***, the result of invoking `Dispose` is unspecified.
+- If the state of the enumerator object is ***suspended***, invoking `Dispose`:
+  - Changes the state to ***running***.
+  - Executes any finally blocks as if the last executed yield return statement were a `yield break` statement. If this causes an exception to be thrown and propagated out of the iterator body, the state of the enumerator object is set to ***after*** and the exception is propagated to the caller of the `Dispose` method.
+  - Changes the state to ***after***.
+- If the state of the enumerator object is ***after***, invoking `Dispose` has no affect.
 
 ### Enumerable objects
 
 #### General
 
-When a function member returning an enumerable interface type is implemented using an iterator block, invoking the function member does not immediately execute the code in the iterator block. Instead, an ***enumerable object*** is created and returned. The enumerable object’s GetEnumerator method returns an enumerator object that encapsulates the code specified in the iterator block, and execution of the code in the iterator block occurs when the enumerator object’s MoveNext method is invoked. An enumerable object has the following characteristics:
+When a function member returning an enumerable interface type is implemented using an iterator block, invoking the function member does not immediately execute the code in the iterator block. Instead, an ***enumerable object*** is created and returned. The enumerable object’s `GetEnumerator` method returns an enumerator object that encapsulates the code specified in the iterator block, and execution of the code in the iterator block occurs when the enumerator object’s MoveNext method is invoked. An enumerable object has the following characteristics:
 
-- It implements IEnumerable and IEnumerable<T>, where T is the yield type of the iterator.
-
+- It implements `IEnumerable` and `IEnumerable<T>`, where `T` is the yield type of the iterator.
 - It is initialized with a copy of the argument values (if any) and instance value passed to the function member.
 
 An enumerable object is typically an instance of a compiler-generated enumerable class that encapsulates the code in the iterator block and implements the enumerable interfaces, but other methods of implementation are possible. If an enumerable class is generated by the compiler, that class will be nested, directly or indirectly, in the class containing the function member, it will have private accessibility, and it will have a name reserved for compiler use (§7.4.3).
 
-An enumerable object may implement more interfaces than those specified above. [*Note*: For example, an enumerable object may also implement IEnumerator and IEnumerator<T>, enabling it to serve as both an enumerable and an enumerator. Typically, such an implementation would return its own instance (to save allocations) from the first call to GetEnumerator. Subsequent invocations of GetEnumerator, if any, would return a new class instance, typically of the same class, so that calls to different enumerator instances will not affect each other. It cannot return the same instance even if the previous enumerator has already enumerated past the end of the sequence, since all future calls to an exhausted enumerator must throw exceptions. *end note*]
+An enumerable object may implement more interfaces than those specified above. 
+
+> [!NOTE]
+> For example, an enumerable object may also implement `IEnumerator` and `IEnumerator<T>`, enabling it to serve as both an enumerable and an enumerator. Typically, such an implementation would return its own instance (to save allocations) from the first call to `GetEnumerator`. Subsequent invocations of `GetEnumerator`, if any, would return a new class instance, typically of the same class, so that calls to different enumerator instances will not affect each other. It cannot return the same instance even if the previous enumerator has already enumerated past the end of the sequence, since all future calls to an exhausted enumerator must throw exceptions.
 
 #### The GetEnumerator method
 
-An enumerable object provides an implementation of the GetEnumerator methods of the IEnumerable and IEnumerable<T> interfaces. The two GetEnumerator methods share a common implementation that acquires and returns an available enumerator object. The enumerator object is initialized with the argument values and instance value saved when the enumerable object was initialized, but otherwise the enumerator object functions as described in §15.14.5.
+An enumerable object provides an implementation of the `GetEnumerator` methods of the `IEnumerable` and `IEnumerable<T>` interfaces. The two `GetEnumerator` methods share a common implementation that acquires and returns an available enumerator object. The enumerator object is initialized with the argument values and instance value saved when the enumerable object was initialized, but otherwise the enumerator object functions as described in §15.14.5.
 
 ## Async Functions
 
 ### General
 
-A method (§15.6) or anonymous function (§12.16) with the async modifier is called an ***async function***. In general, the term ***async*** is used to describe any kind of function that has the async modifier.
+A method (§15.6) or anonymous function (§12.16) with the `async` modifier is called an ***async function***. In general, the term ***async*** is used to describe any kind of function that has the `async` modifier.
 
-It is a compile-time error for the formal parameter list of an async function to specify any ref or out parameters.
+It is a compile-time error for the formal parameter list of an async function to specify any `ref` or `out` parameters.
 
-The *return-type* of an async method shall be either void or a ***task type***. The task types are System.Threading.Tasks.Task and types constructed from System.Threading.Tasks.Task<T>. For the sake of brevity, in this chapter these types are referenced as Task and Task<T>, respectively. An async method returning a task type is said to be ***task-returning***.
+The *return-type* of an async method shall be either `void` or a ***task type***. The task types are `System.Threading.Tasks.Task` and types constructed from `System.Threading.Tasks.Task<T>`. For the sake of brevity, in this chapter these types are referenced as `Task` and `Task<T>`, respectively. An async method returning a task type is said to be ***task-returning***.
 
-The exact definition of the task types is implementation-defined, but from the language’s point of view, a task type is in one of the states *incomplete*, *succeeded* or *faulted*. A *faulted* task records a pertinent exception. A *succeeded* Task<*T*> records a result of type *T*. Task types are awaitable, and tasks can therefore be the operands of await expressions (§12.8.8).
+The exact definition of the task types is implementation-defined, but from the language’s point of view, a task type is in one of the states *incomplete*, *succeeded* or *faulted*. A *faulted* task records a pertinent exception. A *succeeded* `Task<*T*>` records a result of type *`T`*. Task types are awaitable, and tasks can therefore be the operands of await expressions (§12.8.8).
 
-An async function has the ability to suspend evaluation by means of await expressions (§12.8.8) in its body. Evaluation may later be resumed at the point of the suspending await expression by means of a ***resumption delegate***. The resumption delegate is of type System.Action, and when it is invoked, evaluation of the async function invocation will resume from the await expression where it left off. The ***current caller*** of an async function invocation is the original caller if the function invocation has never been suspended or the most recent caller of the resumption delegate otherwise.
+An async function has the ability to suspend evaluation by means of await expressions (§12.8.8) in its body. Evaluation may later be resumed at the point of the suspending await expression by means of a ***resumption delegate***. The resumption delegate is of type `System.Action`, and when it is invoked, evaluation of the async function invocation will resume from the await expression where it left off. The ***current caller*** of an async function invocation is the original caller if the function invocation has never been suspended or the most recent caller of the resumption delegate otherwise.
 
 ### Evaluation of a task-returning async function
 
@@ -19407,12 +19426,11 @@ The async function body is then evaluated until it is either suspended (by reach
 When the body of the async function terminates, the return task is moved out of the incomplete state:
 
 - If the function body terminates as the result of reaching a return statement or the end of the body, any result value is recorded in the return task, which is put into a *succeeded* state.
-
 - If the function body terminates as the result of an uncaught exception (§13.10.6) the exception is recorded in the return task which is put into a *faulted* state.
 
 ### Evaluation of a void-returning async function
 
-If the return type of the async function is void, evaluation differs from the above in the following way: Because no task is returned, the function instead communicates completion and exceptions to the current thread’s ***synchronization context***. The exact definition of synchronization context is implementation-dependent, but is a representation of “where” the current thread is running. The synchronization context is notified when evaluation of a void-returning async function commences, completes successfully, or causes an uncaught exception to be thrown.
+If the return type of the async function is `void`, evaluation differs from the above in the following way: Because no task is returned, the function instead communicates completion and exceptions to the current thread’s ***synchronization context***. The exact definition of synchronization context is implementation-dependent, but is a representation of “where” the current thread is running. The synchronization context is notified when evaluation of a void-returning async function commences, completes successfully, or causes an uncaught exception to be thrown.
 
 This allows the context to keep track of how many void-returning async functions are running under it, and to decide how to propagate exceptions coming out of them.
 
@@ -19422,9 +19440,10 @@ This allows the context to keep track of how many void-returning async functions
 
 Structs are similar to classes in that they represent data structures that can contain data members and function members. However, unlike classes, structs are value types and do not require heap allocation. A variable of a struct type directly contains the data of the struct, whereas a variable of a class type contains a reference to the data, the latter known as an object.
 
-[*Note*: Structs are particularly useful for small data structures that have value semantics. Complex numbers, points in a coordinate system, or key-value pairs in a dictionary are all good examples of structs. Key to these data structures is that they have few data members, that they do not require use of inheritance or referential identity, and that they can be conveniently implemented using value semantics where assignment copies the value instead of the reference. *end note*]
+> [!NOTE]
+> Structs are particularly useful for small data structures that have value semantics. Complex numbers, points in a coordinate system, or key-value pairs in a dictionary are all good examples of structs. Key to these data structures is that they have few data members, that they do not require use of inheritance or referential identity, and that they can be conveniently implemented using value semantics where assignment copies the value instead of the reference.
 
-As described in §9.3.5, the simple types provided by C#, such as int, double, and bool, are, in fact, all struct types.
+As described in §9.3.5, the simple types provided by C#, such as `int`, `double`, and `bool`, are, in fact, all struct types.
 
 ## Struct declarations
 
@@ -19432,11 +19451,13 @@ As described in §9.3.5, the simple types provided by C#, such as int, double, 
 
 A *struct-declaration* is a *type-declaration* (§14.7) that declares a new struct:
 
-[]{#Grammar_struct_declaration .anchor}struct-declaration:
-attributesopt struct-modifiersopt *partial*opt *struct* identifier type-parameter-listopt
-struct-interfacesopt type-parameter-constraints-clausesopt struct-body *;*opt
+```antlr
+struct-declaration:
+    attributesopt struct-modifiersopt partialopt struct identifier type-parameter-listopt
+    struct-interfacesopt type-parameter-constraints-clausesopt struct-body ;opt
+```
 
-A *struct-declaration* consists of an optional set of *attributes* (§22), followed by an optional set of *struct-modifiers* (§16.2.2), followed by an optional partial modifier (§15.2.7), followed by the keyword struct and an *identifier* that names the struct, followed by an optional *type-parameter-list* specification (§15.2.3), followed by an optional *struct-interfaces* specification (§16.2.4), followed by an optional *type-parameter-constraints-clauses* specification (§15.2.5), followed by a *struct-body* (§16.2.5), optionally followed by a semicolon.
+A *struct-declaration* consists of an optional set of *attributes* (§22), followed by an optional set of *struct-modifiers* (§16.2.2), followed by an optional partial modifier (§15.2.7), followed by the keyword `struct` and an *identifier* that names the struct, followed by an optional *type-parameter-list* specification (§15.2.3), followed by an optional *struct-interfaces* specification (§16.2.4), followed by an optional *type-parameter-constraints-clauses* specification (§15.2.5), followed by a *struct-body* (§16.2.5), optionally followed by a semicolon.
 
 A struct declaration shall not supply a *type-parameter-constraints-clauses* unless it also supplies a *type-parameter-list*.
 
@@ -19446,16 +19467,18 @@ A struct declaration that supplies a *type-parameter-list* is a generic struct d
 
 A *struct-declaration* may optionally include a sequence of struct modifiers:
 
-[]{#Grammar_struct_modifiers .anchor}struct-modifiers:
-struct-modifier
-struct-modifiers struct-modifier
+```antlr
+struct-modifiers:
+    struct-modifier
+    struct-modifiers struct-modifier
 
-[]{#Grammar_struct_modifier .anchor}struct-modifier:
-*new*
-*public
-protected
-internal*
-*private*
+struct-modifier:
+    new
+    public
+    protected
+    internal
+    private
+```
 
 It is a compile-time error for the same modifier to appear multiple times in a struct declaration.
 
@@ -19463,14 +19486,16 @@ The modifiers of a struct declaration have the same meaning as those of a class 
 
 ### Partial modifier
 
-The partial modifier indicates that this *struct-declaration* is a partial type declaration. Multiple partial struct declarations with the same name within an enclosing namespace or type declaration combine to form one struct declaration, following the rules specified in §15.2.7.
+The `partial` modifier indicates that this *struct-declaration* is a partial type declaration. Multiple partial struct declarations with the same name within an enclosing namespace or type declaration combine to form one struct declaration, following the rules specified in §15.2.7.
 
 ### Struct interfaces
 
 A struct declaration may include a *struct-interfaces* specification, in which case the struct is said to directly implement the given interface types. For a constructed struct type, including a nested type declared within a generic type declaration (§15.3.9.7), each implemented interface type is obtained by substituting, for each *type-parameter* in the given interface, the corresponding *type-argument* of the constructed type.
 
-[]{#Grammar_struct_interfaces .anchor}struct-interfaces:
-*:* interface-type-list
+```antlr
+struct-interfaces:
+    : interface-type-list
+```
 
 The handling of interfaces on multiple parts of a partial struct declaration (§15.2.7) are discussed further in §15.2.4.3.
 
@@ -19480,30 +19505,37 @@ Interface implementations are discussed further in §18.6.
 
 The *struct-body* of a struct defines the members of the struct.
 
-[]{#Grammar_struct_body .anchor}struct-body:
-*{* struct-member-declarationsopt *}*
+```antlr
+struct-body:
+    { struct-member-declarationsopt }
+```
 
 ## Struct members
 
-The members of a struct consist of the members introduced by its *struct-member-declaration*s and the members inherited from the type System.ValueType.
+The members of a struct consist of the members introduced by its *struct-member-declaration*s and the members inherited from the type `System.ValueType`.
 
-[]{#Grammar_struct_member_declarations .anchor}struct-member-declarations:
-struct-member-declaration
-struct-member-declarations struct-member-declaration
+```antlr
+struct-member-declarations:
+    struct-member-declaration
+    struct-member-declarations struct-member-declaration
 
 struct-member-declaration:
-constant-declaration
-field-declaration
-method-declaration
-property-declaration
-event-declaration
-indexer-declaration
-operator-declaration
-constructor-declaration
-static-constructor-declaration
-type-declaration
+    constant-declaration
+    field-declaration
+    method-declaration
+    property-declaration
+    event-declaration
+    indexer-declaration
+    operator-declaration
+    constructor-declaration
+    static-constructor-declaration
+    type-declaration
+```
 
-[*Note*: All kinds of *class-member-declaration*s except *finalizer-declaration* are also *struct-member-declaration*s. *end note*] Except for the differences noted in §16.4, the descriptions of class members provided in §15.3 through §15.12 apply to struct members as well.
+> [!NOTE]
+> All kinds of *class-member-declaration*s except *finalizer-declaration* are also *struct-member-declaration*s.
+
+Except for the differences noted in §16.4, the descriptions of class members provided in §15.3 through §15.12 apply to struct members as well.
 
 ## Class and struct differences
 
@@ -19512,268 +19544,306 @@ type-declaration
 Structs differ from classes in several important ways:
 
 - Structs are value types (§16.4.2).
-
-- All struct types implicitly inherit from the class System.ValueType (§16.4.3).
-
+- All struct types implicitly inherit from the class `System.ValueType` (§16.4.3).
 - Assignment to a variable of a struct type creates a *copy* of the value being assigned (§16.4.4).
-
 - The default value of a struct is the value produced by setting all fields to their default value (§16.4.5).
-
 - Boxing and unboxing operations are used to convert between a struct type and certain reference types (§16.4.6).
-
-- The meaning of this is different within struct members (§16.4.7).
-
+- The meaning of `this` is different within struct members (§16.4.7).
 - Instance field declarations for a struct are not permitted to include variable initializers (§16.4.8).
-
 - A struct is not permitted to declare a parameterless instance constructor (§16.4.9).
-
 - A struct is not permitted to declare a finalizer.
 
 ### Value semantics
 
 Structs are value types (§9.3) and are said to have value semantics. Classes, on the other hand, are reference types (§9.2) and are said to have reference semantics.
 
-A variable of a struct type directly contains the data of the struct, whereas a variable of a class type contains a reference to an object that contains the data. When a struct B contains an instance field of type A and A is a struct type, it is a compile-time error for A to depend on B or a type constructed from B. A struct X ***directly depends on*** a struct Y if X contains an instance field of type Y. Given this definition, the complete set of structs upon which a struct depends is the transitive closure of the ***directly depends on*** relationship. [*Example*:
+A variable of a struct type directly contains the data of the struct, whereas a variable of a class type contains a reference to an object that contains the data. When a struct `B` contains an instance field of type `A` and `A` is a struct type, it is a compile-time error for `A` to depend on `B` or a type constructed from `B`. A struct `X` ***directly depends on*** a struct `Y` if `X` contains an instance field of type `Y`. Given this definition, the complete set of structs upon which a struct depends is the transitive closure of the ***directly depends on*** relationship. [*Example*:
 
+```csharp
 struct Node
 {
-int data;
+    int data;
 
-Node next; // error, Node directly depends on itself
+    Node next; // error, Node directly depends on itself
 
 }
+```
 
 is an error because Node contains an instance field of its own type. Another example
 
+```csharp
 struct A { B b; }
 
 struct B { C c; }
 
 struct C { A a; }
+```
 
-is an error because each of the types A, B, and C depend on each other. *end example*]
+is an error because each of the types `A`, `B`, and `C` depend on each other. *end example*]
 
-With classes, it is possible for two variables to reference the same object, and thus possible for operations on one variable to affect the object referenced by the other variable. With structs, the variables each have their own copy of the data (except in the case of ref and out parameter variables), and it is not possible for operations on one to affect the other. Furthermore, except when explicitly nullable (§9.3.11), it is not possible for values of a struct type to be null. [*Note*: If a struct contains a field of reference type then the contents of the object referenced can be altered by other operations. However the value of the field itself, i.e., which object it references, cannot be changed through a mutation of a different struct value. *end note*]
+With classes, it is possible for two variables to reference the same object, and thus possible for operations on one variable to affect the object referenced by the other variable. With structs, the variables each have their own copy of the data (except in the case of ref and out parameter variables), and it is not possible for operations on one to affect the other. Furthermore, except when explicitly nullable (§9.3.11), it is not possible for values of a struct type to be `null`. 
+
+> [!NOTE]
+> If a struct contains a field of reference type then the contents of the object referenced can be altered by other operations. However the value of the field itself, i.e., which object it references, cannot be changed through a mutation of a different struct value.
 
 [*Example*: Given the declaration
 
+```csharp
 struct Point
 {
-public int x, y;
+    public int x, y;
 
-public Point(int x, int y) {
-this.x = x;
-this.y = y;
+    public Point (int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
 }
-}
+```
 
 the code fragment
 
+```csharp
 Point a = new Point(10, 10);
 Point b = a;
 a.x = 100;
 System.Console.WriteLine(b.x);
+```
 
-outputs the value 10. The assignment of a to b creates a copy of the value, and b is thus unaffected by the assignment to a.x. Had Point instead been declared as a class, the output would be 100 because a and b would reference the same object. *end example*]
+outputs the value 10. The assignment of `a` to `b` creates a copy of the value, and `b` is thus unaffected by the assignment to `a.x`. Had `Point` instead been declared as a class, the output would be 100 because `a` and `b` would reference the same object. *end example*]
 
 ### Inheritance
 
-All struct types implicitly inherit from the class System.ValueType, which, in turn, inherits from class object. A struct declaration may specify a list of implemented interfaces, but it is not possible for a struct declaration to specify a base class.
+All struct types implicitly inherit from the class `System.ValueType`, which, in turn, inherits from class `object`. A struct declaration may specify a list of implemented interfaces, but it is not possible for a struct declaration to specify a base class.
 
-Struct types are never abstract and are always implicitly sealed. The abstract and sealed modifiers are therefore not permitted in a struct declaration.
+Struct types are never abstract and are always implicitly sealed. The `abstract` and `sealed` modifiers are therefore not permitted in a struct declaration.
 
-Since inheritance isn’t supported for structs, the declared accessibility of a struct member cannot be protected or protected internal.
+Since inheritance isn’t supported for structs, the declared accessibility of a struct member cannot be `protected` or `protected internal`.
 
-Function members in a struct cannot be abstract or virtual, and the override modifier is allowed only to override methods inherited from System.ValueType.
+Function members in a struct cannot be `abstract` or `virtual`, and the `override` modifier is allowed only to override methods inherited from `System.ValueType`.
 
 ### Assignment
 
 Assignment to a variable of a struct type creates a *copy* of the value being assigned. This differs from assignment to a variable of a class type, which copies the reference but not the object identified by the reference.
 
-Similar to an assignment, when a struct is passed as a value parameter or returned as the result of a function member, a copy of the struct is created. A struct may be passed by reference to a function member using a ref or out parameter.
+Similar to an assignment, when a struct is passed as a value parameter or returned as the result of a function member, a copy of the struct is created. A struct may be passed by reference to a function member using a `ref` or `out` parameter.
 
 When a property or indexer of a struct is the target of an assignment, the instance expression associated with the property or indexer access shall be classified as a variable. If the instance expression is classified as a value, a compile-time error occurs. This is described in further detail in §12.18.2.
 
 ### Default values
 
-As described in §10.3, several kinds of variables are automatically initialized to their default value when they are created. For variables of class types and other reference types, this default value is null. However, since structs are value types that cannot be null, the default value of a struct is the value produced by setting all value type fields to their default value and all reference type fields to null.
+As described in §10.3, several kinds of variables are automatically initialized to their default value when they are created. For variables of class types and other reference types, this default value is `null`. However, since structs are value types that cannot be `null`, the default value of a struct is the value produced by setting all value type fields to their default value and all reference type fields to `null`.
 
-[*Example*: Referring to the Point struct declared above, the example
+[*Example*: Referring to the `Point` struct declared above, the example
 
+```csharp
 Point[] a = new Point[100];
+```
 
-initializes each Point in the array to the value produced by setting the x and y fields to zero. *end example*]
+initializes each `Point` in the array to the value produced by setting the `x` and `y` fields to zero. *end example*]
 
 The default value of a struct corresponds to the value returned by the default constructor of the struct (§9.3.3). Unlike a class, a struct is not permitted to declare a parameterless instance constructor. Instead, every struct implicitly has a parameterless instance constructor, which always returns the value that results from setting all fields to their default values.
 
-[*Note*: Structs should be designed to consider the default initialization state a valid state. In the example
-
-using System;
-
-struct KeyValuePair
-{
-string key;
-string value;
-
-public KeyValuePair(string key, string value) {
-if (key == null || value == null) throw new ArgumentException();
-this.key = key;
-this.value = value;
-}
-}
-
-the user-defined instance constructor protects against null values only where it is explicitly called. In cases where a KeyValuePair variable is subject to default value initialization, the key and value fields will be null, and the struct should be prepared to handle this state. *end note*]
+> [!NOTE]
+> Structs should be designed to consider the default initialization state a valid state. In the example
+> 
+> using System;
+> 
+> struct KeyValuePair
+> {
+>     string key;
+>     string value;
+> 
+>     public KeyValuePair (string key, string value)
+>     {
+>         if (key == null || value == null) throw new ArgumentException ();
+>         this.key = key;
+>         this.value = value;
+>     }
+> }
+> 
+> the user-defined instance constructor protects against null values only where it is explicitly called. In cases where a `KeyValuePair` variable is subject to default value initialization, the key and value fields will be null, and the struct should be prepared to handle this state. 
 
 ### Boxing and unboxing
 
-A value of a class type can be converted to type object or to an interface type that is implemented by the class simply by treating the reference as another type at compile-time. Likewise, a value of type object or a value of an interface type can be converted back to a class type without changing the reference (but, of course, a run-time type check is required in this case).
+A value of a class type can be converted to type `object` or to an interface type that is implemented by the class simply by treating the reference as another type at compile-time. Likewise, a value of type `object` or a value of an interface type can be converted back to a class type without changing the reference (but, of course, a run-time type check is required in this case).
 
-Since structs are not reference types, these operations are implemented differently for struct types. When a value of a struct type is converted to certain reference types (as defined in §11.2.8), a boxing operation takes place. Likewise, when a value of certain reference types (as defined in §11.3.6) is converted back to a struct type, an unboxing operation takes place. A key difference from the same operations on class types is that boxing and unboxing *copies* the struct value either into or out of the boxed instance. [*Note*: Thus, following a boxing or unboxing operation, changes made to the unboxed struct are not reflected in the boxed struct. *end note*]
+Since structs are not reference types, these operations are implemented differently for struct types. When a value of a struct type is converted to certain reference types (as defined in §11.2.8), a boxing operation takes place. Likewise, when a value of certain reference types (as defined in §11.3.6) is converted back to a struct type, an unboxing operation takes place. A key difference from the same operations on class types is that boxing and unboxing *copies* the struct value either into or out of the boxed instance. 
+
+> [!NOTE]
+> Thus, following a boxing or unboxing operation, changes made to the unboxed struct are not reflected in the boxed struct.
 
 For further details on boxing and unboxing, see §11.2.8 and §11.3.6.
 
 ### Meaning of this
 
-The meaning of this in a struct differs from the meaning of this in a class, as described in §12.7.8.When a struct type overrides a virtual method inherited from System.ValueType (such as Equals, GetHashCode, or ToString), invocation of the virtual method through an instance of the struct type does not cause boxing to occur. This is true even when the struct is used as a type parameter and the invocation occurs through an instance of the type parameter type. [*Example*:
+The meaning of `this` in a struct differs from the meaning of `this` in a class, as described in §12.7.8.When a struct type overrides a virtual method inherited from `System.ValueType` (such as `Equals`, `GetHashCode`, or `ToString`), invocation of the virtual method through an instance of the struct type does not cause boxing to occur. This is true even when the struct is used as a type parameter and the invocation occurs through an instance of the type parameter type. [*Example*:
 
+```csharp
 using System;
 
 struct Counter
 {
-int value;
+    int value;
 
-public override string ToString() {
-value++;
-return value.ToString();
-}
+    public override string ToString ()
+    {
+        value++;
+        return value.ToString ();
+    }
 }
 
 class Program
 {
-static void Test<T>() where T: new() {
-T x = new T();
-Console.WriteLine(x.ToString());
-Console.WriteLine(x.ToString());
-Console.WriteLine(x.ToString());
-}
+    static void Test<T> () where T : new ()
+    {
+        T x = new T ();
+        Console.WriteLine (x.ToString ());
+        Console.WriteLine (x.ToString ());
+        Console.WriteLine (x.ToString ());
+    }
 
-static void Main() {
-Test<Counter>();
+    static void Main ()
+    {
+        Test<Counter> ();
+    }
 }
-}
+```
 
 The output of the program is:
 
+```plaintext
 1
 2
 3
+```
 
-Although it is bad style for ToString to have side effects, the example demonstrates that no boxing occurred for the three invocations of x.ToString(). *end example*]
+Although it is bad style for `ToString` to have side effects, the example demonstrates that no boxing occurred for the three invocations of `x.ToString()`. *end example*]
 
-Similarly, boxing never implicitly occurs when accessing a member on a constrained type parameter when the member is implemented within the value type. For example, suppose an interface ICounter contains a method Increment, which can be used to modify a value. If ICounter is used as a constraint, the implementation of the Increment method is called with a reference to the variable that Increment was called on, never a boxed copy. [*Example*:
+Similarly, boxing never implicitly occurs when accessing a member on a constrained type parameter when the member is implemented within the value type. For example, suppose an interface `ICounter` contains a method `Increment`, which can be used to modify a value. If `ICounter` is used as a constraint, the implementation of the `Increment` method is called with a reference to the variable that `Increment` was called on, never a boxed copy. [*Example*:
 
+```csharp
 using System;
 
 interface ICounter
 {
-void Increment();
+    void Increment ();
 }
 
-struct Counter: ICounter
+struct Counter : ICounter
 {
-int value;
+    int value;
 
-public override string ToString() {
-return value.ToString();
-}
+    public override string ToString ()
+    {
+        return value.ToString ();
+    }
 
-void ICounter.Increment() {
-value++;
-}
+    void ICounter.Increment ()
+    {
+        value++;
+    }
 }
 
 class Program
 {
-static void Test<T>() where T: ICounter, new() {
-T x = new T();
-Console.WriteLine(x);
-x.Increment(); // Modify x
-Console.WriteLine(x);
-((ICounter)x).Increment(); // Modify boxed copy of x
-Console.WriteLine(x);
-}
+    static void Test<T> () where T : ICounter, new ()
+    {
+        T x = new T ();
+        Console.WriteLine (x);
+        x.Increment (); // Modify x
+        Console.WriteLine (x);
+        ((ICounter) x).Increment (); // Modify boxed copy of x
+        Console.WriteLine (x);
+    }
 
-static void Main() {
-Test<Counter>();
+    static void Main ()
+    {
+        Test<Counter> ();
+    }
 }
-}
+```
 
-The first call to Increment modifies the value in the variable x. This is not equivalent to the second call to Increment, which modifies the value in a boxed copy of x. Thus, the output of the program is:
+The first call to `Increment` modifies the value in the variable `x`. This is not equivalent to the second call to `Increment`, which modifies the value in a boxed copy of `x`. Thus, the output of the program is:
 
+```plaintext
 0
 1
 1
+```
 
 *end example*]
 
 ### Field initializers
 
-As described in §16.4.5, the default value of a struct consists of the value that results from setting all value type fields to their default value and all reference type fields to null. For this reason, a struct does not permit instance field declarations to include variable initializers. This restriction applies only to instance fields. Static fields of a struct are permitted to include variable initializers. [*Example*: The following
+As described in §16.4.5, the default value of a struct consists of the value that results from setting all value type fields to their default value and all reference type fields to `null`. For this reason, a struct does not permit instance field declarations to include variable initializers. This restriction applies only to instance fields. Static fields of a struct are permitted to include variable initializers. [*Example*: The following
 
+```csharp
 struct Point
 {
-public int x = 1; // Error, initializer not permitted
-public int y = 1; // Error, initializer not permitted
+    public int x = 1; // Error, initializer not permitted
+    public int y = 1; // Error, initializer not permitted
 }
+```
 
 is in error because the instance field declarations include variable initializers. *end example*]
 
 ### Constructors
 
-Unlike a class, a struct is not permitted to declare a parameterless instance constructor. Instead, every struct implicitly has a parameterless instance constructor, which always returns the value that results from setting all value type fields to their default value and all reference type fields to null (§9.3.3). A struct can declare instance constructors having parameters. [*Example*:
+Unlike a class, a struct is not permitted to declare a parameterless instance constructor. Instead, every struct implicitly has a parameterless instance constructor, which always returns the value that results from setting all value type fields to their default value and all reference type fields to `null` (§9.3.3). A struct can declare instance constructors having parameters. [*Example*:
 
+```csharp
 struct Point
 {
-int x, y;
+    int x, y;
 
-public Point(int x, int y) {
-this.x = x;
-this.y = y;
+    public Point (int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
 }
-}
+```
 
 Given the above declaration, the statements
 
+```csharp
 Point p1 = new Point();
 Point p2 = new Point(0, 0);
+```
 
-both create a Point with x and y initialized to zero. *end example*]
+both create a `Point` with `x` and `y` initialized to zero. *end example*]
 
-A struct instance constructor is not permitted to include a constructor initializer of the form base(*argument-listopt*).
+A struct instance constructor is not permitted to include a constructor initializer of the form `base(*argument-listopt*)`.
 
-The this parameter of a struct instance constructor corresponds to an out parameter of the struct type. As such, this shall be definitely assigned (§10.4) at every location where the constructor returns. Similarly, it cannot be read (even implicitly) in the constructor body before being definitely assigned.
+The `this` parameter of a struct instance constructor corresponds to an `out` parameter of the struct type. As such, this shall be definitely assigned (§10.4) at every location where the constructor returns. Similarly, it cannot be read (even implicitly) in the constructor body before being definitely assigned.
 
 If the struct instance constructor specifies a constructor initializer, that initializer is considered a definite assignment to this that occurs prior to the body of the constructor. Therefore, the body itself has no initialization requirements. [*Example*: Consider the instance constructor implementation below:
 
+```csharp
 struct Point
 {
-int x, y;
+    int x, y;
 
-public int X {
-set { x = value; }
-}
+    public int X
+    {
+        set { x = value; }
+    }
 
-public int Y {
-set { y = value; }
-}
+    public int Y
+    {
+        set { y = value; }
+    }
 
-public Point(int x, int y) {
-X = x; // error, this is not yet definitely assigned
-Y = y; // error, this is not yet definitely assigned
+    public Point (int x, int y)
+    {
+        X = x; // error, this is not yet definitely assigned
+        Y = y; // error, this is not yet definitely assigned
+    }
 }
-}
+```
 
-No instance function member (including the set accessors for the properties X and Y) can be called until all fields of the struct being constructed have been definitely assigned. Note, however, that if Point were a class instead of a struct, the instance constructor implementation would be permitted.
+No instance function member (including the set accessors for the properties `X` and `Y`) can be called until all fields of the struct being constructed have been definitely assigned. Note, however, that if `Point` were a class instead of a struct, the instance constructor implementation would be permitted.
 
 *end example*]
 
@@ -19782,16 +19852,17 @@ No instance function member (including the set accessors for the properties X a
 Static constructors for structs follow most of the same rules as for classes. The execution of a static constructor for a struct type is triggered by the first of the following events to occur within an application domain:
 
 - A static member of the struct type is referenced.
-
 - An explicitly declared constructor of the struct type is called.
 
-[*Note*: The creation of default values (§16.4.5) of struct types does not trigger the static constructor. (An example of this is the initial value of elements in an array.) *end note*]
+> [!NOTE]
+> The creation of default values (§16.4.5) of struct types does not trigger the static constructor. (An example of this is the initial value of elements in an array.)
 
 ### Automatically implemented properties
 
-Automatically implemented properties (§15.7.4) use hidden backing fields, which are only accessible to the property accessors. [*Note*: This access restriction means that constructors in structs containing automatically implemented properties often need an explicit constructor initializer where they would not otherwise need one, to satisfy the requirement of all fields being definitely assigned before any function member is invoked or the constructor returns. *end note*]
+Automatically implemented properties (§15.7.4) use hidden backing fields, which are only accessible to the property accessors. 
 
-[[]{#_Ref451675312 .anchor}]{#_Toc445783066 .anchor}
+> [!NOTE]
+> This access restriction means that constructors in structs containing automatically implemented properties often need an explicit constructor initializer where they would not otherwise need one, to satisfy the requirement of all fields being definitely assigned before any function member is invoked or the constructor returns.
 
 # Arrays
 
@@ -19813,82 +19884,86 @@ An array type is written as a *non-array-type* followed by one or more *rank-spe
 
 A *non-array-type* is any *type* that is not itself an *array-type*.
 
-The rank of an array type is given by the leftmost *rank-specifier* in the *array-type*: A *rank-specifier* indicates that the array is an array with a rank of one plus the number of “,” tokens in the *rank-specifier*.
+The rank of an array type is given by the leftmost *rank-specifier* in the *array-type*: A *rank-specifier* indicates that the array is an array with a rank of one plus the number of “`,`” tokens in the *rank-specifier*.
 
 The element type of an array type is the type that results from deleting the leftmost *rank-specifier*:
 
-- An array type of the form T[R] is an array with rank R and a non-array element type T.
+- An array type of the form `T[R]` is an array with rank `R` and a non-array element type `T`.
+- An array type of the form `T[R][R1]…[RN]` is an array with rank `R` and an element type `T[R1]…[RN]`.
 
-- An array type of the form T[R][R1]…[RN] is an array with rank R and an element type T[R1]…[RN].
+In effect, the *rank-specifier*s are read from left to right *before* the final non-array element type. [*Example*: The type `int[][,,][,]` is a single-dimensional array of three-dimensional arrays of two-dimensional arrays of `int`. *end example*]
 
-In effect, the *rank-specifier*s are read from left to right *before* the final non-array element type. [*Example*: The type int[][,,][,] is a single-dimensional array of three-dimensional arrays of two-dimensional arrays of int. *end example*]
+At run-time, a value of an array type can be `null` or a reference to an instance of that array type. 
 
-At run-time, a value of an array type can be null or a reference to an instance of that array type. [*Note*: Following the rules of §17.6, the value may also be a reference to a covariant array type. *end note*]
+> [!NOTE]
+> Following the rules of §17.6, the value may also be a reference to a covariant array type.
 
 ### The System.Array type
 
-The type System.Array is the abstract base type of all array types. An implicit reference conversion (§11.2.7) exists from any array type to System.Array and to any interface type implemented by System.Array. An explicit reference conversion (§11.3.5) exists from System.Array and any interface type implemented by System.Array to any array type. System.Array is not itself an *array-type*. Rather, it is a *class-type* from which all *array-type*s are derived.
+The type `System.Array` is the abstract base type of all array types. An implicit reference conversion (§11.2.7) exists from any array type to `System.Array` and to any interface type implemented by `System.Array`. An explicit reference conversion (§11.3.5) exists from `System.Array` and any interface type implemented by `System.Array` to any array type. `System.Array` is not itself an *array-type*. Rather, it is a *class-type* from which all *array-type*s are derived.
 
-At run-time, a value of type System.Array can be null or a reference to an instance of any array type.
+At run-time, a value of type `System.Array` can be `null` or a reference to an instance of any array type.
 
 ### Arrays and the generic collection interfaces
 
-A single-dimensional array T[] implements the interface System.Collections.Generic.IList<T> (IList<T> for short) and its base interfaces. Accordingly, there is an implicit conversion from T[] to IList<T> and its base interfaces. In addition, if there is an implicit reference conversion from S to T then S[] implements IList<T> and there is an implicit reference conversion from S[] to IList<T> and its base interfaces (§11.2.7). If there is an explicit reference conversion from S to T then there is an explicit reference conversion from S[] to IList<T> and its base interfaces (§11.3.5).
+A single-dimensional array `T[]` implements the interface `System.Collections.Generic.IList<T>` (`IList<T>` for short) and its base interfaces. Accordingly, there is an implicit conversion from `T[]` to `IList<T>` and its base interfaces. In addition, if there is an implicit reference conversion from `S` to `T` then `S[]` implements `IList<T>` and there is an implicit reference conversion from `S[]` to `IList<T>` and its base interfaces (§11.2.7). If there is an explicit reference conversion from `S` to `T` then there is an explicit reference conversion from `S[]` to `IList<T>` and its base interfaces (§11.3.5).
 
-Similarly, a single-dimensional array T[] also implements the interface System.Collections.Generic.IReadOnlyList<T> (IReadOnlyList<T> for short) and its base interfaces. Accordingly, there is an implicit conversion from T[] to IReadOnlyList<T> and its base interfaces. In addition, if there is an implicit reference conversion from S to T then S[] implements IReadOnlyList<T> and there is an implicit reference conversion from S[] to IReadOnlyList<T> and its base interfaces (§11.2.7). If there is an explicit reference conversion from S to T then there is an explicit reference conversion from S[] to IReadOnlyList<T> and its base interfaces (§11.3.5).
+Similarly, a single-dimensional array `T[]` also implements the interface `System.Collections.Generic.IReadOnlyList<T>` (`IReadOnlyList<T>` for short) and its base interfaces. Accordingly, there is an implicit conversion from `T[]` to `IReadOnlyList<T>` and its base interfaces. In addition, if there is an implicit reference conversion from `S` to `T` then `S[]` implements `IReadOnlyList<T>` and there is an implicit reference conversion from `S[]` to `IReadOnlyList<T>` and its base interfaces (§11.2.7). If there is an explicit reference conversion from `S` to `T` then there is an explicit reference conversion from `S[]` to `IReadOnlyList<T>` and its base interfaces (§11.3.5).
 
 [*Example*: For example:
 
+```csharp
 using System.Collections.Generic;
 
 class Test
 
 {
 
-static void Main()
+    static void Main ()
 
-{
+    {
 
-string[] sa = new string[5];
+        string[] sa = new string[5];
 
-object[] oa1 = new object[5];
+        object[] oa1 = new object[5];
 
-object[] oa2 = sa;
+        object[] oa2 = sa;
 
-IList<string> lst1 = sa; // Ok
+        IList<string> lst1 = sa; // Ok
 
-IList<string> lst2 = oa1; // Error, cast needed
+        IList<string> lst2 = oa1; // Error, cast needed
 
-IList<object> lst3 = sa; // Ok
+        IList<object> lst3 = sa; // Ok
 
-IList<object> lst4 = oa1; // Ok
+        IList<object> lst4 = oa1; // Ok
 
-IList<string> lst5 = (IList<string>)oa1; // Exception
+        IList<string> lst5 = (IList<string>) oa1; // Exception
 
-IList<string> lst6 = (IList<string>)oa2; // Ok
+        IList<string> lst6 = (IList<string>) oa2; // Ok
 
-IReadOnlyList<string> lst7 = sa; // Ok
+        IReadOnlyList<string> lst7 = sa; // Ok
 
-IReadOnlyList<string> lst8 = oa1; // Error, cast needed
+        IReadOnlyList<string> lst8 = oa1; // Error, cast needed
 
-IReadOnlyList<object> lst9 = sa; // Ok
+        IReadOnlyList<object> lst9 = sa; // Ok
 
-IReadOnlyList<object> lst10 = oa1; // Ok
+        IReadOnlyList<object> lst10 = oa1; // Ok
 
-IReadOnlyList<string> lst11 = (IReadOnlyList<string>)oa1;
-// Exception
+        IReadOnlyList<string> lst11 = (IReadOnlyList<string>) oa1;
+        // Exception
 
-IReadOnlyList<string> lst12 = (IReadOnlyList<string>)oa2; // Ok
+        IReadOnlyList<string> lst12 = (IReadOnlyList<string>) oa2; // Ok
+
+    }
 
 }
+```
 
-}
+The assignment `lst2 = oa1` generates a compile-time error since the conversion from `object[]` to `IList<string>` is an explicit conversion, not implicit. The cast `(IList<string>)oa1` will cause an exception to be thrown at run-time since `oa1` references an `object[]` and not a `string[]`. However the cast `(IList<string>)oa2` will not cause an exception to be thrown since `oa2` references a `string[]`. *end example*]
 
-The assignment lst2 = oa1 generates a compile-time error since the conversion from object[] to IList<string> is an explicit conversion, not implicit. The cast (IList<string>)oa1 will cause an exception to be thrown at run-time since oa1 references an object[] and not a string[]. However the cast (IList<string>)oa2 will not cause an exception to be thrown since oa2 references a string[]. *end example*]
+Whenever there is an implicit or explicit reference conversion from `S[]` to `IList<T>`, there is also an explicit reference conversion from `IList<T>` and its base interfaces to `S[]` (§11.3.5).
 
-Whenever there is an implicit or explicit reference conversion from S[] to IList<T>, there is also an explicit reference conversion from IList<T> and its base interfaces to S[] (§11.3.5).
-
-When an array type S[] implements IList<T>, some of the members of the implemented interface may throw exceptions. The precise behavior of the implementation of the interface is beyond the scope of this specification.
+When an array type `S[]` implements `IList<T>`, some of the members of the implemented interface may throw exceptions. The precise behavior of the implementation of the interface is beyond the scope of this specification.
 
 ## Array creation
 
@@ -19896,116 +19971,141 @@ Array instances are created by *array-creation-expression*s (§12.7.11.5) or by 
 
 When an array instance is created, the rank and length of each dimension are established and then remain constant for the entire lifetime of the instance. In other words, it is not possible to change the rank of an existing array instance, nor is it possible to resize its dimensions.
 
-An array instance is always of an array type. The System.Array type is an abstract type that cannot be instantiated.
+An array instance is always of an array type. The `System.Array` type is an abstract type that cannot be instantiated.
 
 Elements of arrays created by *array-creation-expression*s are always initialized to their default value (§10.3).
 
 ## Array element access
 
-Array elements are accessed using *element-access* expressions (§12.7.7.2) of the form A[I1, I2, …, IN], where A is an expression of an array type and each IX is an expression of type int, uint, long, ulong, or can be implicitly converted to one or more of these types. The result of an array element access is a variable, namely the array element selected by the indices.
+Array elements are accessed using *element-access* expressions (§12.7.7.2) of the form `A[I1, I2, …, IN]`, where `A` is an expression of an array type and each `IX` is an expression of type `int`, `uint`, `long`, `ulong`, or can be implicitly converted to one or more of these types. The result of an array element access is a variable, namely the array element selected by the indices.
 
-The elements of an array can be enumerated using a foreach statement (§13.9.5).
+The elements of an array can be enumerated using a `foreach` statement (§13.9.5).
 
 ## Array members
 
-Every array type inherits the members declared by the System.Array type.
+Every array type inherits the members declared by the `System.Array` type.
 
 ## Array covariance
 
-For any two *reference-type*s A and B, if an implicit reference conversion (§11.2.7) or explicit reference conversion (§11.3.4) exists from A to B, then the same reference conversion also exists from the array type A[R] to the array type B[R], where R is any given *rank-specifier* (but the same for both array types). This relationship is known as ***array covariance***. Array covariance, in particular, means that a value of an array type A[R] might actually be a reference to an instance of an array type B[R], provided an implicit reference conversion exists from B to A.
+For any two *reference-type*s `A` and `B`, if an implicit reference conversion (§11.2.7) or explicit reference conversion (§11.3.4) exists from `A` to `B`, then the same reference conversion also exists from the array type `A[R]` to the array type `B[R]`, where `R` is any given *rank-specifier* (but the same for both array types). This relationship is known as ***array covariance***. Array covariance, in particular, means that a value of an array type `A[R]` might actually be a reference to an instance of an array type `B[R]`, provided an implicit reference conversion exists from `B` to `A`.
 
 Because of array covariance, assignments to elements of reference type arrays include a run-time check which ensures that the value being assigned to the array element is actually of a permitted type (§12.18.2). [*Example*:
 
+```csharp
 class Test
 {
-static void Fill(object[] array, int index, int count, object value) {
-for (int i = index; i < index + count; i++) array[i] = value;
-}
+    static void Fill (object[] array, int index, int count, object value)
+    {
+        for (int i = index; i < index + count; i++) array[i] = value;
+    }
 
-static void Main() {
-string[] strings = new string[100];
-Fill(strings, 0, 100, "Undefined");
-Fill(strings, 0, 10, null);
-Fill(strings, 90, 10, 0);
+    static void Main ()
+    {
+        string[] strings = new string[100];
+        Fill (strings, 0, 100, "Undefined");
+        Fill (strings, 0, 10, null);
+        Fill (strings, 90, 10, 0);
+    }
 }
-}
+```
 
-The assignment to array[i] in the Fill method implicitly includes a run-time check, which ensures that value is either a null reference or a reference to an object of a type that is compatible with the actual element type of array. In Main, the first two invocations of Fill succeed, but the third invocation causes a System.ArrayTypeMismatchException to be thrown upon executing the first assignment to array[i]. The exception occurs because a boxed int cannot be stored in a string array. *end example*]
+The assignment to `array[i]` in the `Fill` method implicitly includes a run-time check, which ensures that value is either a null reference or a reference to an object of a type that is compatible with the actual element type of array. In `Main`, the first two invocations of `Fill` succeed, but the third invocation causes a `System.ArrayTypeMismatchException` to be thrown upon executing the first assignment to `array[i]`. The exception occurs because a boxed `int` cannot be stored in a `string` array. *end example*]
 
-Array covariance specifically does not extend to arrays of *value-type*s. For example, no conversion exists that permits an int[] to be treated as an object[].
+Array covariance specifically does not extend to arrays of *value-type*s. For example, no conversion exists that permits an `int[]` to be treated as an `object[]`.
 
 ## Array initializers
 
 Array initializers may be specified in field declarations (§15.5), local variable declarations (§13.6.2), and array creation expressions (§12.7.11.5):
 
-[]{#Grammar_array_initializer .anchor}array-initializer:
-*{* variable-initializer-listopt *}*
-*{* variable-initializer-list *,* *}*
+```antlr
+array-initializer:
+    { variable-initializer-listopt }
+    { variable-initializer-list , }
 
-[]{#Grammar_variable_initializer_list .anchor}variable-initializer-list:
-variable-initializer
-variable-initializer-list *,*[]{#_Toc445783067 .anchor} variable-initializer
+variable-initializer-list:
+    variable-initializer
+    variable-initializer-list , variable-initializer
 
-[]{#Grammar_variable_initializer .anchor}variable-initializer:
-expression
-array-initializer
+variable-initializer:
+    expression
+    array-initializer
+```
 
-An array initializer consists of a sequence of variable initializers, enclosed by “{”and “}” tokens and separated by “,” tokens. Each variable initializer is an expression or, in the case of a multi-dimensional array, a nested array initializer.
+An array initializer consists of a sequence of variable initializers, enclosed by “`{`”and “`}`” tokens and separated by “`,`” tokens. Each variable initializer is an expression or, in the case of a multi-dimensional array, a nested array initializer.
 
 The context in which an array initializer is used determines the type of the array being initialized. In an array creation expression, the array type immediately precedes the initializer, or is inferred from the expressions in the array initializer. In a field or variable declaration, the array type is the type of the field or variable being declared. When an array initializer is used in a field or variable declaration, [*Example*:
 
+```csharp
 int[] a = {0, 2, 4, 6, 8};
+```
 
 *end example*] it is simply shorthand for an equivalent array creation expression: [*Example*:
 
+```csharp
 int[] a = new int[] {0, 2, 4, 6, 8};
+```
 
 *end example*]
 
-For a single-dimensional array, the array initializer shall consist of a sequence of expressions, each having an implicit conversion to the element type of the array (§11.2). The expressions initialize array elements in increasing order, starting with the element at index zero. The number of expressions in the array initializer determines the length of the array instance being created. [*Example*: The array initializer above creates an int[] instance of length 5 and then initializes the instance with the following values:
+For a single-dimensional array, the array initializer shall consist of a sequence of expressions, each having an implicit conversion to the element type of the array (§11.2). The expressions initialize array elements in increasing order, starting with the element at index zero. The number of expressions in the array initializer determines the length of the array instance being created. [*Example*: The array initializer above creates an `int[]` instance of length 5 and then initializes the instance with the following values:
 
+```csharp
 a[0] = 0; a[1] = 2; a[2] = 4; a[3] = 6; a[4] = 8;
+```
 
 *end example*]
 
 For a multi-dimensional array, the array initializer shall have as many levels of nesting as there are dimensions in the array. The outermost nesting level corresponds to the leftmost dimension and the innermost nesting level corresponds to the rightmost dimension. The length of each dimension of the array is determined by the number of elements at the corresponding nesting level in the array initializer. For each nested array initializer, the number of elements shall be the same as the other array initializers at the same level. [*Example*: The example:
 
+```csharp
 int[,] b = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}};
+```
 
 creates a two-dimensional array with a length of five for the leftmost dimension and a length of two for the rightmost dimension:
 
+```csharp
 int[,] b = new int[5, 2];
+```
 
 and then initializes the array instance with the following values:
 
+```csharp
 b[0, 0] = 0; b[0, 1] = 1;
 b[1, 0] = 2; b[1, 1] = 3;
 b[2, 0] = 4; b[2, 1] = 5;
 b[3, 0] = 6; b[3, 1] = 7;
 b[4, 0] = 8; b[4, 1] = 9;
+```
 
 *end example*]
 
 If a dimension other than the rightmost is given with length zero, the subsequent dimensions are assumed to also have length zero. [*Example*:
 
+```csharp
 int[,] c = {};
+```
 
 creates a two-dimensional array with a length of zero for both the leftmost and the rightmost dimension:
 
+```csharp
 int[,] c = new int[0, 0];
+```
 
 *end example*]
 
 When an array creation expression includes both explicit dimension lengths and an array initializer, the lengths shall be constant expressions and the number of elements at each nesting level shall match the corresponding dimension length. [*Example*: Here are some examples:
 
+```csharp
 int i = 3;
 int[] x = new int[3] {0, 1, 2}; // OK
 int[] y = new int[i] {0, 1, 2}; // Error, i not a constant
 int[] z = new int[3] {0, 1, 2, 3}; // Error, length/initializer mismatch
+```
 
-Here, the initializer for y results in a compile-time error because the dimension length expression is not a constant, and the initializer for z results in a compile-time error because the length and the number of elements in the initializer do not agree. *end example*]
+Here, the initializer for `y` results in a compile-time error because the dimension length expression is not a constant, and the initializer for `z` results in a compile-time error because the length and the number of elements in the initializer do not agree. *end example*]
 
-[*Note*: C# allows a trailing comma at the end of an *array-initializer*. This syntax provides flexibility in adding or deleting members from such a list, and simplifies machine generation of such lists. *end note*]
+> [!NOTE]
+> C# allows a trailing comma at the end of an *array-initializer*. This syntax provides flexibility in adding or deleting members from such a list, and simplifies machine generation of such lists.
 
 # Interfaces
 
@@ -20021,12 +20121,14 @@ Interfaces can contain methods, properties, events, and indexers. The interface 
 
 An *interface-declaration* is a *type-declaration* (§14.7) that declares a new interface type.
 
-[]{#Grammar_interface_declaration .anchor}interface-declaration:
-attributesopt interface-modifiersopt *partial*opt *interface
-*identifier variant-type-parameter-listopt
- interface-baseopt type-parameter-constraints-clausesopt interface-body *;*opt[]{#_Toc445783069 .anchor}
+```antlr
+interface-declaration:
+    attributesopt interface-modifiersopt partialopt interface
+    identifier variant-type-parameter-listopt
+    interface-baseopt type-parameter-constraints-clausesopt interface-body ;opt
+```
 
-An *interface-declaration* consists of an optional set of *attributes* (§22), followed by an optional set of *interface-modifiers* (§18.2.2), followed by an optional partial modifier (§15.2.7), followed by the keyword interface and an *identifier* that names the interface, followed by an optional *variant*-*type-parameter-list* specification (§18.2.3), followed by an optional *interface-base* specification (§18.2.4), followed by an optional *type-parameter-constraints-clauses* specification (§15.2.5), followed by an *interface-body* (§18.3), optionally followed by a semicolon.
+An *interface-declaration* consists of an optional set of *attributes* (§22), followed by an optional set of *interface-modifiers* (§18.2.2), followed by an optional `partial` modifier (§15.2.7), followed by the keyword `interface` and an *identifier* that names the interface, followed by an optional *variant*-*type-parameter-list* specification (§18.2.3), followed by an optional *interface-base* specification (§18.2.4), followed by an optional *type-parameter-constraints-clauses* specification (§15.2.5), followed by an *interface-body* (§18.3), optionally followed by a semicolon.
 
 An interface declaration shall not supply a *type-parameter-constraints-clauses* unless it also supplies a *type-parameter-list*.
 
@@ -20036,22 +20138,24 @@ An interface declaration that supplies a *type-parameter-list* is a generic inte
 
 An *interface-declaration* may optionally include a sequence of interface modifiers:
 
-[]{#Grammar_interface_modifiers .anchor}interface-modifiers:
-interface-modifier
-interface-modifiers interface-modifier
+```antlr
+interface-modifiers:
+    interface-modifier
+    interface-modifiers interface-modifier
 
-[]{#Grammar_interface_modifier .anchor}interface-modifier:
-*new*
-*public
-protected
-internal*
-*private*
+interface-modifier:
+    new
+    public
+    protected
+    internal
+    private
+```
 
-[[]{#_Ref456661617 .anchor}]{#_Toc445783070 .anchor}It is a compile-time error for the same modifier to appear multiple times in an interface declaration.
+It is a compile-time error for the same modifier to appear multiple times in an interface declaration.
 
-The new modifier is only permitted on interfaces defined within a class. It specifies that the interface hides an inherited member by the same name, as described in §15.3.5.
+The `new` modifier is only permitted on interfaces defined within a class. It specifies that the interface hides an inherited member by the same name, as described in §15.3.5.
 
-The public, protected, internal, and private modifiers control the accessibility of the interface. Depending on the context in which the interface declaration occurs, only some of these modifiers might be permitted (§8.5.2). When a partial type declaration (§15.2.7) includes an accessibility specification (via the public, protected, internal, and private modifiers), the rules in §15.2.2 apply.
+The `public`, `protected`, `internal`, and `private` modifiers control the accessibility of the interface. Depending on the context in which the interface declaration occurs, only some of these modifiers might be permitted (§8.5.2). When a partial type declaration (§15.2.7) includes an accessibility specification (via the `public`, `protected`, `internal`, and `private` modifiers), the rules in §15.2.2 apply.
 
 ### Variant type parameter lists
 
@@ -20059,29 +20163,33 @@ The public, protected, internal, and private modifiers control the accessibility
 
 Variant type parameter lists can only occur on interface and delegate types. The difference from ordinary *type-parameter-list*s is the optional *variance-annotation* on each type parameter.
 
-[]{#Grammar_variant_type_parameter_list .anchor}variant-type-parameter-list:
-*<* variant-type-parameters *>*
+```antlr
+variant-type-parameter-list:
+    < variant-type-parameters >
 
-[]{#Grammar_variant_type_parameters .anchor}variant-type-parameters:
-attributesopt variance-annotationopt type-parameter
-variant-type-parameters *,* attributesopt variance-annotationopt type-parameter
+variant-type-parameters:
+    attributesopt variance-annotationopt type-parameter
+    variant-type-parameters , attributesopt variance-annotationopt type-parameter
 
-[]{#Grammar_variance_annotation .anchor}variance-annotation:
-*in*
-*out*
+variance-annotation:
+    in
+    out
+```
 
-If the variance annotation is out, the type parameter is said to be ***covariant***. If the variance annotation is in, the type parameter is said to be ***contravariant***. If there is no variance annotation, the type parameter is said to be ***invariant***.
+If the variance annotation is `out`, the type parameter is said to be ***covariant***. If the variance annotation is `in`, the type parameter is said to be ***contravariant***. If there is no variance annotation, the type parameter is said to be ***invariant***.
 
 [*Example*: In the following:
 
+```csharp
 interface C<out X, in Y, Z>
 {
-X M(Y y);
+    X M (Y y);
 
-Z P { get; set; }
+    Z P { get; set; }
 }
+```
 
-X is covariant, Y is contravariant and Z is invariant. *end example*]
+`X` is covariant, `Y` is contravariant and `Z` is invariant. *end example*]
 
 If a generic interface is declared in multiple parts (§15.2.3), each partial declaration shall specify the same variance for each type parameter.
 
@@ -20089,56 +20197,44 @@ If a generic interface is declared in multiple parts (§15.2.3), each partial de
 
 The occurrence of variance annotations in the type parameter list of a type restricts the places where types can occur within the type declaration.
 
-A type T is ***output-unsafe*** if one of the following holds:
+A type `T` is ***output-unsafe*** if one of the following holds:
 
-- T is a contravariant type parameter
+- `T` is a contravariant type parameter
+- `T` is an array type with an output-unsafe element type
+- `T` is an interface or delegate type `S<A1,… AK>` constructed from a generic type `S<X1, … XK>` where for at least one `Ai` one of the following holds:
+  - `Xi` is covariant or invariant and `Ai` is output-unsafe.
+  - `Xi` is contravariant or invariant and `Ai` is input-unsafe.
 
-- T is an array type with an output-unsafe element type
+A type `T` is ***input-unsafe*** if one of the following holds:
 
-- T is an interface or delegate type S<A1,… AK> constructed from a generic type S<X1, … XK> where for at least one Ai one of the following holds:
+- `T` is a covariant type parameter
+- `T` is an array type with an input-unsafe element type
+- `T` is an interface or delegate type `S<A1,… AK>` constructed from a generic type `S<X1, … XK>` where for at least one `Ai` one of the following holds:
+  - `Xi` is covariant or invariant and `Ai` is input-unsafe.
+  - `Xi` is contravariant or invariant and `Ai` is output-unsafe.
 
-<!-- -->
+Intuitively, an output-unsafe type is prohibited in an output position, and an input-unsafe type is prohibited in an input position.
 
-- Xi is covariant or invariant and Ai is output-unsafe.
-
-- Xi is contravariant or invariant and Ai is input-unsafe.
-
-A type T is ***input-unsafe*** if one of the following holds:
-
-- T is a covariant type parameter
-
-- T is an array type with an input-unsafe element type
-
-- T is an interface or delegate type S<A1,… AK> constructed from a generic type S<X1, … XK> where for at least one Ai one of the following holds:
-
-<!-- -->
-
-- Xi is covariant or invariant and Ai is input-unsafe.
-
-- Xi is contravariant or invariant and Ai is output-unsafe.
-
-    Intuitively, an output-unsafe type is prohibited in an output position, and an input-unsafe type is prohibited in an input position.
-
-    A type is ***output-safe*** if it is not output-unsafe, and ***input-safe*** if it is not input-unsafe.
+A type is ***output-safe*** if it is not output-unsafe, and ***input-safe*** if it is not input-unsafe.
 
 #### Variance conversion
 
 The purpose of variance annotations is to provide for more lenient (but still type safe) conversions to interface and delegate types. To this end the definitions of implicit (§11.2) and explicit conversions (§11.3) make use of the notion of variance-convertibility, which is defined as follows:
 
-A type T<A1, …, An> is variance-convertible to a type T<B1, …, Bn> if T is either an interface or a delegate type declared with the variant type parameters T<X1, …, Xn>, and for each variant type parameter Xi one of the following holds:
+A type `T<A1, …, An>` is variance-convertible to a type `T<B1, …, Bn>` if `T` is either an interface or a delegate type declared with the variant type parameters `T<X1, …, Xn>`, and for each variant type parameter `Xi` one of the following holds:
 
-- Xi is covariant and an implicit reference or identity conversion exists from Ai to Bi
-
-- Xi is contravariant and an implicit reference or identity conversion exists from Bi to Ai
-
-- Xi is invariant and an identity conversion exists from Ai to Bi
+- `Xi` is covariant and an implicit reference or identity conversion exists from `Ai` to `Bi`
+- `Xi` is contravariant and an implicit reference or identity conversion exists from `Bi` to `Ai`
+- `Xi` is invariant and an identity conversion exists from `Ai` to `Bi`
 
 ### Base interfaces
 
 An interface can inherit from zero or more interface types, which are called the ***explicit base interfaces*** of the interface. When an interface has one or more explicit base interfaces, then in the declaration of that interface, the interface identifier is followed by a colon and a comma-separated list of base interface types.
 
-[]{#Grammar_interface_base .anchor}interface-base:
-*:* interface-type-list
+```antlr
+interface-base:
+    : interface-type-list
+```
 
 The explicit base interfaces can be constructed interface types (§9.4, §18.2). A base interface cannot be a type parameter on its own, though it can involve the type parameters that are in scope.
 
@@ -20150,51 +20246,57 @@ It is a compile-time error for an interface to directly or indirectly inherit fr
 
 The ***base interfaces*** of an interface are the explicit base interfaces and their base interfaces. In other words, the set of base interfaces is the complete transitive closure of the explicit base interfaces, their explicit base interfaces, and so on. An interface inherits all members of its base interfaces. [*Example*: In the following code
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-interface ITextBox: IControl
+interface ITextBox : IControl
 {
-void SetText(string text);
+    void SetText (string text);
 }
 
-interface IListBox: IControl
+interface IListBox : IControl
 {
-void SetItems(string[] items);
+    void SetItems (string[] items);
 }
 
-interface IComboBox: ITextBox, IListBox {}
+interface IComboBox : ITextBox, IListBox { }
+```
 
-the base interfaces of IComboBox are IControl, ITextBox, and IListBox. In other words, the IComboBox interface above inherits members SetText and SetItems as well as Paint. *end example*]
+the base interfaces of `IComboBox` are `IControl`, `ITextBox`, and `IListBox`. In other words, the `IComboBox` interface above inherits members `SetText` and `SetItems` as well as `Paint`. *end example*]
 
 Members inherited from a constructed generic type are inherited after type substitution. That is, any constituent types in the member have the base class declaration’s type parameters replaced with the corresponding type arguments used in the *class-base* specification. [*Example*: In the following code
 
+```csharp
 interface IBase<T>
 {
-T[] Combine(T a, T b);
+    T[] Combine (T a, T b);
 }
 
-interface IDerived : IBase<string[,]>
+interface IDerived : IBase<string[, ]>
 {
-// Inherited: string[][,] Combine(string[,] a, string[,] b);
+    // Inherited: string[][,] Combine(string[,] a, string[,] b);
 }
+```
 
-the interface IDerived inherits the Combine method after the type parameter T is replaced with string[,]. *end example*]
+the interface `IDerived` inherits the `Combine` method after the type parameter `T` is replaced with `string[,]`. *end example*]
 
 A class or struct that implements an interface also implicitly implements all of the interface’s base interfaces.
 
 The handling of interfaces on multiple parts of a partial interface declaration (§15.2.7) are discussed further in §15.2.4.3.
 
-Every base interface of an interface shall be output-safe (§18.2.3.2).[[[[[[[[[]{#_Toc34995766 .anchor}]{#_Toc511023012 .anchor}]{#_Toc505664166 .anchor}]{#_Toc505590032 .anchor}]{#_Toc503164267 .anchor}]{#_Toc501035605 .anchor}]{#_Ref465151456 .anchor}]{#_Ref456661645 .anchor}]{#_Toc445783071 .anchor}
+Every base interface of an interface shall be output-safe (§18.2.3.2).
 
 ## Interface body
 
 The *interface-body* of an interface defines the members of the interface.
 
-[]{#Grammar_interface_body .anchor}interface-body:
-*{* interface-member-declarationsopt *}*
+```antlr
+interface-body:
+    { interface-member-declarationsopt }
+```
 
 ## Interface members
 
@@ -20202,35 +20304,34 @@ The *interface-body* of an interface defines the members of the interface.
 
 The members of an interface are the members inherited from the base interfaces and the members declared by the interface itself.
 
-[]{#Grammar_interface_member_declarations .anchor}interface-member-declarations:
-interface-member-declaration
-interface-member-declarations interface-member-declaration
-
-[]{#Grammar_interface_member_declaration .anchor}interface-member-declaration:
-interface-method-declaration
-interface-property-declaration
-interface-event-declaration
-interface-indexer-declaration
-
+```antlr
+interface-member-declarations:
+    interface-member-declaration
+    interface-member-declarations interface-member-declaration
+    
+interface-member-declaration:
+    interface-method-declaration
+    interface-property-declaration
+    interface-event-declaration
+    interface-indexer-declaration
+```
 An interface declaration declares zero or more members. The members of an interface shall be methods, properties, events, or indexers. An interface cannot contain constants, fields, operators, instance constructors, finalizers, or types, nor can an interface contain static members of any kind.
 
-All interface members implicitly have public access. It is a compile-time error for interface member declarations to include any modifiers.
+All interface members implicitly have `public` access. It is a compile-time error for interface member declarations to include any modifiers.
 
 An *interface-declaration* creates a new declaration space (§8.3), and the type parameters and *interface-member-declarations* immediately contained by the *interface-declaration* introduce new members into this declaration space. The following rules apply to *interface-member-declaration*s:
 
 - The name of a type parameter in the *type-parameter-list* of an interface declaration shall differ from the names of all other type parameters in the same *type-parameter-list* and shall differ from the names of all members of the interface.
-
-- The name of a method shall differ from the names of all properties and events declared in the same interface. In addition, the signature (§8.6) of a method shall differ from the signatures of all other methods declared in the same interface, and two methods declared in the same interface may not have signatures that differ solely by ref and out.
-
+- The name of a method shall differ from the names of all properties and events declared in the same interface. In addition, the signature (§8.6) of a method shall differ from the signatures of all other methods declared in the same interface, and two methods declared in the same interface may not have signatures that differ solely by `ref` and `out`.
 - The name of a property or event shall differ from the names of all other members declared in the same interface.
-
 - The signature of an indexer shall differ from the signatures of all other indexers declared in the same interface.
 
-The inherited members of an interface are specifically not part of the declaration space of the interface. Thus, an interface is allowed to declare a member with the same name or signature as an inherited member.[]{#_Toc445783073 .anchor} When this occurs, the derived interface member is said to *hide* the base interface member. Hiding an inherited member is not considered an error, but it does cause the compiler to issue a warning. To suppress the warning, the declaration of the derived interface member shall include a new modifier to indicate that the derived member is intended to hide the base member. This topic is discussed further in §8.7.2.3.
+The inherited members of an interface are specifically not part of the declaration space of the interface. Thus, an interface is allowed to declare a member with the same name or signature as an inherited member. When this occurs, the derived interface member is said to *hide* the base interface member. Hiding an inherited member is not considered an error, but it does cause the compiler to issue a warning. To suppress the warning, the declaration of the derived interface member shall include a new modifier to indicate that the derived member is intended to hide the base member. This topic is discussed further in §8.7.2.3.
 
-If a new modifier is included in a declaration that doesn’t hide an inherited member, a warning is issued to that effect. This warning is suppressed by removing the new modifier.
+If a `new` modifier is included in a declaration that doesn’t hide an inherited member, a warning is issued to that effect. This warning is suppressed by removing the `new` modifier.
 
-[*Note*: The members in class object are not, strictly speaking, members of any interface (§18.4). However, the members in class object are available via member lookup in any interface type (§12.5). *end note*][[[[[]{#_Toc511023014 .anchor}]{#_Toc505664168 .anchor}]{#_Toc505590034 .anchor}]{#_Toc503164269 .anchor}]{#_Toc501035607 .anchor}
+> [!NOTE]
+> The members in class object are not, strictly speaking, members of any interface (§18.4). However, the members in class object are available via member lookup in any interface type (§12.5).
 
 The set of members of an interface declared in multiple parts (§15.2.7) is the union of the members declared in each part. The bodies of all parts of the interface declaration share the same declaration space (§8.3), and the scope of each member (§8.7) extends to the bodies of all the parts.
 
@@ -20238,44 +20339,57 @@ The set of members of an interface declared in multiple parts (§15.2.7) is the 
 
 Interface methods are declared using *interface-method-declaration*s:
 
+```antlr
 []{#Grammar_interface_method_declaration .anchor}interface-method-declaration:
-attributesopt *new*opt return-type identifier type-parameter-listopt
-*(* formal-parameter-listopt *)* type-parameter-constraints-clausesopt *;*
+    attributesopt newopt return-type identifier type-parameter-listopt
+    ( formal-parameter-listopt ) type-parameter-constraints-clausesopt ;
+```
 
 The *attributes*, *return-type*, *identifier*, and *formal-parameter-list* of an interface method declaration have the same meaning as those of a method declaration in a class (§15.6). An interface method declaration is not permitted to specify a method body, and the declaration therefore always ends with a semicolon. An *interface-method-declaration* shall not have *type-parameter-constraints-clauses* unless it also has a *type-parameter-list*.
 
-Each formal parameter type of an interface method shall be input-safe (§18.2.3.2), and the return type shall be either void or output-safe. In addition, any out or ref formal parameter types shall also be output-safe. [*Note*: Even out parameters are required to be input-safe, due to common implementation restrictions. *end note*] Furthermore, each class type constraint, interface type constraint and type parameter constraint on any type parameter of the method shall be input-safe.
+Each formal parameter type of an interface method shall be input-safe (§18.2.3.2), and the return type shall be either void or output-safe. In addition, any `out` or `ref` formal parameter types shall also be output-safe. 
+
+> [!NOTE]
+> Even `out` parameters are required to be input-safe, due to common implementation restrictions. 
+
+Furthermore, each class type constraint, interface type constraint and type parameter constraint on any type parameter of the method shall be input-safe.
 
 These rules ensure that any covariant or contravariant usage of the interface remains typesafe. [*Example*:
 
+```csharp
 interface I<out T> { void M<U>() where U : T; }
+```
 
-is ill-formed because the usage of T as a type parameter constraint on U is not input-safe.
+is ill-formed because the usage of `T` as a type parameter constraint on `U` is not input-safe.
 
 Were this restriction not in place it would be possible to violate type safety in the following manner:
 
-class B {}
-class D : B {}
-class E : B {}
-class C : I<D> { public void M<U>() {…} }
+```csharp
+class B { }
+class D : B { }
+class E : B { }
+class C : I<D> { public void M<U> () {…} }
 …
-I<B> b = new C();
-b.M<E>();
+I<B> b = new C ();
+b.M<E> ();
+```
 
-This is actually a call to C.M<E>. But that call requires that E derive from D, so type safety would be violated here. *end example*]
+This is actually a call to `C.M<E>`. But that call requires that `E` derive from `D`, so type safety would be violated here. *end example*]
 
 ### Interface properties
 
 Interface properties are declared using *interface-property-declaration*s:
 
-[]{#Grammar_interface_property_declaration .anchor}interface-property-declaration:
-attributesopt *new*opt type identifier *{* interface-accessors *}*
+```antlr
+interface-property-declaration:
+    attributesopt newopt type identifier { interface-accessors }
 
-[]{#Grammar_interface_accessors .anchor}interface-accessors:
-attributesopt *get* *;
-*attributesopt *set* *;
-*attributesopt *get* *;* attributesopt *set* *;*
-attributesopt *set* *;* attributesopt *get* *;*
+interface-accessors:
+    attributesopt get ;
+    attributesopt set ;
+    attributesopt get ; attributesopt set ;
+    attributesopt set ; attributesopt get ;
+```
 
 The *attributes*, *type*, and *identifier* of an interface property declaration have the same meaning as those of a property declaration in a class (§15.7).
 
@@ -20287,8 +20401,10 @@ The type of an interface property shall be output-safe if there is a get accesso
 
 Interface events are declared using *interface-event-declaration*s:
 
-[]{#Grammar_interface_event_declaration .anchor}interface-event-declaration:
-attributesopt *new*opt *event* type identifier *;*
+```antlr
+interface-event-declaration:
+    attributesopt newopt event type identifier ;
+```
 
 The *attributes*, *type*, and *identifier* of an interface event declaration have the same meaning as those of an event declaration in a class (§15.8).
 
@@ -20298,135 +20414,153 @@ The type of an interface event shall be input-safe.
 
 Interface indexers are declared using *interface-indexer-declaration*s:
 
-[]{#Grammar_interface_indexer_declaration .anchor}interface-indexer-declaration:
-attributesopt *new*opt type *this* *[* formal-parameter-list *]* *{* interface-accessors *}*
+```antlr
+interface-indexer-declaration:
+    attributesopt newopt type this [ formal-parameter-list ] { interface-accessors }
+```
 
 The *attributes*, *type*, and *formal-parameter-list* of an interface indexer declaration have the same meaning as those of an indexer declaration in a class (§15.9).
 
 The accessors of an interface indexer declaration correspond to the accessors of a class indexer declaration (§15.9), except that the accessor body shall always be a semicolon. Thus, the accessors simply indicate whether the indexer is read-write, read-only, or write-only.
 
-All the formal parameter types of an interface indexer shall be input-safe. In addition, any out or ref formal parameter types shall also be output-safe. [*Note*: Even out parameters are required to be input-safe, due to common implementation restrictions. *end note*]
+All the formal parameter types of an interface indexer shall be input-safe. In addition, any `out` or `ref` formal parameter types shall also be output-safe. 
+
+> [!NOTE]
+> Even `out` parameters are required to be input-safe, due to common implementation restrictions.
 
 The type of an interface indexer shall be output-safe if there is a get accessor, and shall be input-safe if there is a set accessor.
 
 ### Interface member access
 
-Interface members are accessed through member access (§12.7.5) and indexer access (§12.7.7.3) expressions of the form I.M and I[A], where I is an interface type, M is a method, property, or event of that interface type, and A is an indexer argument list.
+Interface members are accessed through member access (§12.7.5) and indexer access (§12.7.7.3) expressions of the form `I.M` and `I[A]`, where `I` is an interface type, `M` is a method, property, or event of that interface type, and `A` is an indexer argument list.
 
 For interfaces that are strictly single-inheritance (each interface in the inheritance chain has exactly zero or one direct base interface), the effects of the member lookup (§12.5), method invocation (§12.7.6.2), and indexer access (§12.7.7.3) rules are exactly the same as for classes and structs: More derived members hide less derived members with the same name or signature. However, for multiple-inheritance interfaces, ambiguities can occur when two or more unrelated base interfaces declare members with the same name or signature. This subclause shows several examples, some of which lead to ambiguities and others which don't. In all cases, explicit casts can be used to resolve the ambiguities.
 
 [*Example*: In the following code
 
+```csharp
 interface IList
 {
-int Count { get; set; }
+    int Count { get; set; }
 }
 
 interface ICounter
 {
-void Count(int i);
+    void Count (int i);
 }
 
-interface IListCounter: IList, ICounter {}
+interface IListCounter : IList, ICounter { }
 
 class C
 {
-void Test(IListCounter x) {
-x.Count(1); // Error
-x.Count = 1; // Error
-((IList)x).Count = 1; // Ok, invokes IList.Count.set
-((ICounter)x).Count(1); // Ok, invokes ICounter.Count
+    void Test (IListCounter x)
+    {
+        x.Count (1); // Error
+        x.Count = 1; // Error
+        ((IList) x).Count = 1; // Ok, invokes IList.Count.set
+        ((ICounter) x).Count (1); // Ok, invokes ICounter.Count
+    }
 }
-}
+```
 
-the first two statements cause compile-time errors because the member lookup (§12.5) of Count in IListCounter is ambiguous. As illustrated by the example, the ambiguity is resolved by casting x to the appropriate base interface type. Such casts have no run-time costs—they merely consist of viewing the instance as a less derived type at compile-time. *end example*]
+the first two statements cause compile-time errors because the member lookup (§12.5) of `Count` in `IListCounter` is ambiguous. As illustrated by the example, the ambiguity is resolved by casting `x` to the appropriate base interface type. Such casts have no run-time costs—they merely consist of viewing the instance as a less derived type at compile-time. *end example*]
 
 [*Example*: In the following code
 
+```csharp
 interface IInteger
 {
-void Add(int i);
+    void Add (int i);
 }
 
 interface IDouble
 {
-void Add(double d);
+    void Add (double d);
 }
 
-interface INumber: IInteger, IDouble {}
+interface INumber : IInteger, IDouble { }
 
 class C
 {
-void Test(INumber n) {
-n.Add(1); // Invokes IInteger.Add
-n.Add(1.0); // Only IDouble.Add is applicable
-((IInteger)n).Add(1); // Only IInteger.Add is a candidate
-((IDouble)n).Add(1); // Only IDouble.Add is a candidate
+    void Test (INumber n)
+    {
+        n.Add (1); // Invokes IInteger.Add
+        n.Add (1.0); // Only IDouble.Add is applicable
+        ((IInteger) n).Add (1); // Only IInteger.Add is a candidate
+        ((IDouble) n).Add (1); // Only IDouble.Add is a candidate
+    }
 }
-}
+```
 
-the invocation n.Add(1) selects IInteger.Add by applying overload resolution rules of §12.6.4. Similarly, the invocation n.Add(1.0) selects IDouble.Add. When explicit casts are inserted, there is only one candidate method, and thus no ambiguity. *end example*]
+the invocation `n.Add(1)` selects `IInteger.Add` by applying overload resolution rules of §12.6.4. Similarly, the invocation `n.Add(1.0)` selects `IDouble.Add`. When explicit casts are inserted, there is only one candidate method, and thus no ambiguity. *end example*]
 
 [*Example*: In the following code
 
+```csharp
 interface IBase
 {
-void F(int i);
+    void F (int i);
 }
 
-interface ILeft: IBase
+interface ILeft : IBase
 {
-new void F(int i);
+    new void F (int i);
 }
 
-interface IRight: IBase
+interface IRight : IBase
 {
-void G();
+    void G ();
 }
 
-interface IDerived: ILeft, IRight {}
+interface IDerived : ILeft, IRight { }
 
 class A
 {
-void Test(IDerived d) {
-d.F(1); // Invokes ILeft.F
-((IBase)d).F(1); // Invokes IBase.F
-((ILeft)d).F(1); // Invokes ILeft.F
-((IRight)d).F(1); // Invokes IBase.F
+    void Test (IDerived d)
+    {
+        d.F (1); // Invokes ILeft.F
+        ((IBase) d).F (1); // Invokes IBase.F
+        ((ILeft) d).F (1); // Invokes ILeft.F
+        ((IRight) d).F (1); // Invokes IBase.F
+    }
 }
-}
+```
 
-the IBase.F member is hidden by the ILeft.F member. The invocation d.F(1) thus selects ILeft.F, even though IBase.F appears to not be hidden in the access path that leads through IRight.
+the `IBase.F` member is hidden by the `ILeft.F` member. The invocation `d.F(1)` thus selects `ILeft.F`, even though `IBase.F` appears to not be hidden in the access path that leads through `IRight`.
 
-The intuitive rule for hiding in multiple-inheritance interfaces is simply this: If a member is hidden in any access path, it is hidden in all access paths. Because the access path from IDerived to ILeft to IBase hides IBase.F, the member is also hidden in the access path from IDerived to IRight to IBase. *end example*]
+The intuitive rule for hiding in multiple-inheritance interfaces is simply this: If a member is hidden in any access path, it is hidden in all access paths. Because the access path from `IDerived` to `ILeft` to `IBase` hides `IBase.F`, the member is also hidden in the access path from `IDerived` to `IRight` to `IBase`. *end example*]
 
 ## Qualified interface member names
 
 An interface member is sometimes referred to by its ***qualified interface member name***. The qualified name of an interface member consists of the name of the interface in which the member is declared, followed by a dot, followed by the name of the member. The qualified name of a member references the interface in which the member is declared. [*Example*: Given the declarations
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-interface ITextBox: IControl
+interface ITextBox : IControl
 {
-void SetText(string text);
+    void SetText (string text);
 }
+```
 
-the qualified name of Paint is IControl.Paint and the qualified name of SetText is ITextBox.SetText. In the example above, it is not possible to refer to Paint as ITextBox.Paint. *end example*]
+the qualified name of `Paint` is `IControl.Paint` and the qualified name of `SetText` is `ITextBox.SetText`. In the example above, it is not possible to refer to `Paint` as `ITextBox.Paint`. *end example*]
 
 When an interface is part of a namespace, a qualified interface member name can include the namespace name. [*Example*:
 
+```csharp
 namespace System
 {
-public interface ICloneable
-{
-object Clone();
+    public interface ICloneable
+    {
+        object Clone ();
+    }
 }
-}
+```
 
-Within the System namespace, both ICloneable.Clone and System.ICloneable.Clone are qualified interface member names for the Clone method. *end example*]
+Within the `System` namespace, both `ICloneable.Clone` and `System.ICloneable.Clone` are qualified interface member names for the `Clone` method. *end example*]
 
 ## Interface implementations
 
@@ -20434,57 +20568,63 @@ Within the System namespace, both ICloneable.Clone and System.ICloneable.Clone a
 
 Interfaces may be implemented by classes and structs. To indicate that a class or struct directly implements an interface, the interface is included in the base class list of the class or struct. [*Example*:
 
+```csharp
 interface ICloneable
 {
-object Clone();
+    object Clone ();
 }
 
 interface IComparable
 {
-int CompareTo(object other);
+    int CompareTo (object other);
 }
 
-class ListEntry: ICloneable, IComparable
+class ListEntry : ICloneable, IComparable
 {
-public object Clone() {…}
+    public object Clone () {…}
 
-public int CompareTo(object other) {…}
+    public int CompareTo (object other) {…}
 }
+```
 
 *end example*]
 
 A class or struct that directly implements an interface also implicitly implements all of the interface’s base interfaces. This is true even if the class or struct doesn’t explicitly list all base interfaces in the base class list. [*Example*:
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-interface ITextBox: IControl
+interface ITextBox : IControl
 {
-void SetText(string text);
+    void SetText (string text);
 }
 
-class TextBox: ITextBox
+class TextBox : ITextBox
 {
-public void Paint() {…}
+    public void Paint () {…}
 
-public void SetText(string text) {…}
+    public void SetText (string text) {…}
 }
+```
 
-Here, class TextBox implements both IControl and ITextBox. *end example*]
+Here, class `TextBox` implements both `IControl` and `ITextBox`. *end example*]
 
-When a class C directly implements an interface, all classes derived from C also implement the interface implicitly.
+When a class `C` directly implements an interface, all classes derived from `C` also implement the interface implicitly.
 
 The base interfaces specified in a class declaration can be constructed interface types (§9.4, §18.2). [*Example*: The following code illustrates how a class can implement constructed interface types:
 
-class C<U,V> {}
+```csharp
+class C<U, V> { }
 
-interface I1<V> {}
+interface I1<V> { }
 
-class D: C<string,int>, I1<string> {}
+class D : C<string, int>, I1<string> { }
 
-class E<T>: C<int,T>, I1<T> {}
+class E<T> : C<int, T>, I1<T> { }
+```
 
 *end example*]
 
@@ -20494,367 +20634,399 @@ The base interfaces of a generic class declaration shall satisfy the uniqueness 
 
 For purposes of implementing interfaces, a class or struct may declare ***explicit interface member implementations***. An explicit interface member implementation is a method, property, event, or indexer declaration that references a qualified interface member name. [*Example*:
 
+```csharp
 interface IList<T>
 {
-T[] GetElements();
+    T[] GetElements ();
 }
 
-interface IDictionary<K,V>
+interface IDictionary<K, V>
 {
-V this[K key];
+    V this [K key];
 
-void Add(K key, V value);
+    void Add (K key, V value);
 }
 
-class List<T>: IList<T>, IDictionary<int,T>
+class List<T> : IList<T>, IDictionary<int, T>
 {
-public T[] GetElements() {…}
+    public T[] GetElements () {…}
 
-T IDictionary<int,T>.this[int index] {…}
+    T IDictionary<int, T>.this [int index] {…}
 
-void IDictionary<int,T>.Add(int index, T value) {…}
+    void IDictionary<int, T>.Add (int index, T value) {…}
 }
+```
 
-Here IDictionary<int,T>.this and IDictionary<int,T>.Add are explicit interface member implementations. *end example*]
+Here `IDictionary<int,T>.this` and `IDictionary<int,T>.Add` are explicit interface member implementations. *end example*]
 
-[*Example*: In some cases, the name of an interface member might not be appropriate for the implementing class, in which case, the interface member may be implemented using explicit interface member implementation. A class implementing a file abstraction, for example, would likely implement a Close member function that has the effect of releasing the file resource, and implement the Dispose method of the IDisposable interface using explicit interface member implementation:
+[*Example*: In some cases, the name of an interface member might not be appropriate for the implementing class, in which case, the interface member may be implemented using explicit interface member implementation. A class implementing a file abstraction, for example, would likely implement a `Close` member function that has the effect of releasing the file resource, and implement the `Dispose` method of the `IDisposable` interface using explicit interface member implementation:
 
+```csharp
 interface IDisposable
 {
-void Dispose();
+    void Dispose ();
 }
 
-class MyFile: IDisposable
+class MyFile : IDisposable
 {
-void IDisposable.Dispose()
-{
-Close();
-}
+    void IDisposable.Dispose ()
+    {
+        Close ();
+    }
 
-public void Close()
-{
-// Do what's necessary to close the file
-System.GC.SuppressFinalize(this);
+    public void Close ()
+    {
+        // Do what's necessary to close the file
+        System.GC.SuppressFinalize (this);
+    }
 }
-}
+```
 
 *end example*]
 
 It is not possible to access an explicit interface member implementation through its qualified interface member name in a method invocation, property access, event access, or indexer access. An explicit interface member implementation can only be accessed through an interface instance, and is in that case referenced simply by its member name.
 
-It is a compile-time error for an explicit interface member implementation to include any modifiers (§15.6) other than extern or async.
+It is a compile-time error for an explicit interface member implementation to include any modifiers (§15.6) other than `extern` or `async`.
 
-It is a compile-time error for an explicit interface method implementation to include *type-parameter-constraints-clauses*. The constraints for a generic explicit interface method implementation are inherited from the interface method.[*Note*: Explicit interface member implementations have different accessibility characteristics than other members. Because explicit interface member implementations are never accessible through a qualified interface member name in a method invocation or a property access, they are in a sense private. However, since they can be accessed through the interface, they are in a sense also as public as the interface in which they are declared.
+It is a compile-time error for an explicit interface method implementation to include *type-parameter-constraints-clauses*. The constraints for a generic explicit interface method implementation are inherited from the interface method.
 
-Explicit interface member implementations serve two primary purposes:
-
-- Because explicit interface member implementations are not accessible through class or struct instances, they allow interface implementations to be excluded from the public interface of a class or struct. This is particularly useful when a class or struct implements an internal interface that is of no interest to a consumer of that class or struct.
-
-- Explicit interface member implementations allow disambiguation of interface members with the same signature. Without explicit interface member implementations it would be impossible for a class or struct to have different implementations of interface members with the same signature and return type, as would it be impossible for a class or struct to have any implementation at all of interface members with the same signature but with different return types.
-
-*end note*]
+> [!NOTE]
+> Explicit interface member implementations have different accessibility characteristics than other members. Because explicit interface member implementations are never accessible through a qualified interface member name in a method invocation or a property access, they are in a sense private. However, since they can be accessed through the interface, they are in a sense also as public as the interface in which they are declared.
+> 
+> Explicit interface member implementations serve two primary purposes:
+> 
+> - Because explicit interface member implementations are not accessible through class or struct instances, they allow interface implementations to be excluded from the public interface of a class or struct. This is particularly useful when a class or struct implements an internal interface that is of no interest to a consumer of that class or struct.
+> - Explicit interface member implementations allow disambiguation of interface members with the same signature. Without explicit interface member implementations it would be impossible for a class or struct to have different implementations of interface members with the same signature and return type, as would it be impossible for a class or struct to have any implementation at all of interface members with the same signature but with different return types.
 
 For an explicit interface member implementation to be valid, the class or struct shall name an interface in its base class list that contains a member whose qualified interface member name, type, number of type parameters, and parameter types exactly match those of the explicit interface member implementation. If an interface function member has a parameter array, the corresponding parameter of an associated explicit interface member implementation is allowed, but not required, to have the params modifier. If the interface function member does not have a parameter array then an associated explicit interface member implementation shall not have a parameter array. [*Example*: Thus, in the following class
 
-class Shape: ICloneable
+```csharp
+class Shape : ICloneable
 {
-object ICloneable.Clone() {…}
+    object ICloneable.Clone () {…}
 
-int IComparable.CompareTo(object other) {…} // invalid
+    int IComparable.CompareTo (object other) {…} // invalid
+}
+```
+
+the declaration of `IComparable.CompareTo` results in a compile-time error because `IComparable` is not listed in the base class list of `Shape` and is not a base interface of `ICloneable`. Likewise, in the declarations
+
+```csharp
+class Shape : ICloneable
+{
+    object ICloneable.Clone () {…}
 }
 
-the declaration of IComparable.CompareTo results in a compile-time error because IComparable is not listed in the base class list of Shape and is not a base interface of ICloneable. Likewise, in the declarations
-
-class Shape: ICloneable
+class Ellipse : Shape
 {
-object ICloneable.Clone() {…}
+    object ICloneable.Clone () {…} // invalid
 }
+```
 
-class Ellipse: Shape
-{
-object ICloneable.Clone() {…} // invalid
-}
-
-the declaration of ICloneable.Clone in Ellipse results in a compile-time error because ICloneable is not explicitly listed in the base class list of Ellipse. *end example*]
+the declaration of `ICloneable.Clone` in `Ellipse` results in a compile-time error because `ICloneable` is not explicitly listed in the base class list of `Ellipse`. *end example*]
 
 The qualified interface member name of an explicit interface member implementation shall reference the interface in which the member was declared. [*Example*: Thus, in the declarations
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-interface ITextBox: IControl
+interface ITextBox : IControl
 {
-void SetText(string text);
+    void SetText (string text);
 }
 
-class TextBox: ITextBox
+class TextBox : ITextBox
 {
-void IControl.Paint() {…}
+    void IControl.Paint () {…}
 
-void ITextBox.SetText(string text) {…}
+    void ITextBox.SetText (string text) {…}
 }
+```
 
-the explicit interface member implementation of Paint must be written as IControl.Paint, not ITextBox.Paint. *end example*]
+the explicit interface member implementation of `Paint` must be written as `IControl.Paint`, not `ITextBox.Paint`. *end example*]
 
 ### Uniqueness of implemented interfaces
 
 The interfaces implemented by a generic type declaration shall remain unique for all possible constructed types. Without this rule, it would be impossible to determine the correct method to call for certain constructed types. [*Example*: Suppose a generic class declaration were permitted to be written as follows:
 
+```csharp
 interface I<T>
 {
-void F();
+    void F ();
 }
 
-class X<U,V>: I<U>, I<V> // Error: I<U> and I<V> conflict
+class X<U, V> : I<U>, I<V> // Error: I<U> and I<V> conflict
 {
-void I<U>.F() {…}
-void I<V>.F() {…}
+    void I<U>.F () {…}
+    void I<V>.F () {…}
 }
+```
 
 Were this permitted, it would be impossible to determine which code to execute in the following case:
 
+```csharp
 I<int> x = new X<int,int>();
 x.F();
+```
 
 *end example*]
 
 To determine if the interface list of a generic type declaration is valid, the following steps are performed:
 
-- Let L be the list of interfaces directly specified in a generic class, struct, or interface declaration C.
+- Let `L` be the list of interfaces directly specified in a generic class, struct, or interface declaration `C`.
+- Add to L any base interfaces of the interfaces already in `L`.
+- Remove any duplicates from `L`.
+- If any possible constructed type created from `C` would, after type arguments are substituted into L, cause two interfaces in `L` to be identical, then the declaration of `C` is invalid. Constraint declarations are not considered when determining all possible constructed types.
 
-- Add to L any base interfaces of the interfaces already in L.
-
-- Remove any duplicates from L.
-
-- If any possible constructed type created from C would, after type arguments are substituted into L, cause two interfaces in L to be identical, then the declaration of C is invalid. Constraint declarations are not considered when determining all possible constructed types.
-
-[*Note*: In the class declaration X above, the interface list L consists of I<U> and I<V>. The declaration is invalid because any constructed type with U and V being the same type would cause these two interfaces to be identical types. *end note*]
+> [!NOTE]
+> In the class declaration `X` above, the interface list `L` consists of `I<U>` and `I<V>`. The declaration is invalid because any constructed type with `U` and `V` being the same type would cause these two interfaces to be identical types.
 
 It is possible for interfaces specified at different inheritance levels to unify:
 
+```csharp
 interface I<T>
 {
-void F();
+    void F ();
 }
 
-class Base<U>: I<U>
+class Base<U> : I<U>
 {
-void I<U>.F() {…}
+    void I<U>.F () {…}
 }
 
-class Derived<U,V>: Base<U>, I<V> // Ok
+class Derived<U, V> : Base<U>, I<V> // Ok
 {
-void I<V>.F() {…}
+    void I<V>.F () {…}
 }
+```
 
-This code is valid even though Derived<U,V> implements both I<U> and I<V>. The code
+This code is valid even though `Derived<U,V>` implements both `I<U>` and `I<V>`. The code
 
+```csharp
 I<int> x = new Derived<int,int>();
 x.F();
+```
 
-invokes the method in Derived, since Derived<int,int> effectively re-implements I<int> (§18.6.7).
+invokes the method in `Derived`, since `Derived<int,int>` effectively re-implements `I<int>` (§18.6.7).
 
 ### Implementation of generic methods
 
 When a generic method implicitly implements an interface method, the constraints given for each method type parameter shall be equivalent in both declarations (after any interface type parameters are replaced with the appropriate type arguments), where method type parameters are identified by ordinal positions, left to right. [*Example*: In the following code:
 
+```csharp
 interface I<X, Y, Z>
 {
-void F<T>(T t) where T: X;
-void G<T>(T t) where T: Y;
-void H<T>(T t) where T: Z;
+    void F<T> (T t) where T : X;
+    void G<T> (T t) where T : Y;
+    void H<T> (T t) where T : Z;
 }
 
-class C: I<object,C,string>
+class C : I<object, C, string>
 {
-public void F<T>(T t) {…} // Ok
-public void G<T>(T t) where T: C {…} // Ok
-public void H<T>(T t) where T: string {…} // Error
+    public void F<T> (T t) {…} // Ok
+    public void G<T> (T t) where T : C {…} // Ok
+    public void H<T> (T t) where T : string {…} // Error
 }
+```
 
-the method C.F<T> implicitly implements I<object,C,string>.F<T>. In this case, C.F<T> is not required (nor permitted) to specify the constraint T: object since object is an implicit constraint on all type parameters. The method C.G<T> implicitly implements I<object,C,string>.G<T> because the constraints match those in the interface, after the interface type parameters are replaced with the corresponding type arguments. The constraint for method C.H<T> is an error because sealed types (string in this case) cannot be used as constraints. Omitting the constraint would also be an error since constraints of implicit interface method implementations are required to match. Thus, it is impossible to implicitly implement I<object,C,string>.H<T>. This interface method can only be implemented using an explicit interface member implementation:
+the method `C.F<T>` implicitly implements `I<object,C,string>.F<T>`. In this case, `C.F<T>` is not required (nor permitted) to specify the constraint `T: object` since `object` is an implicit constraint on all type parameters. The method `C.G<T>` implicitly implements `I<object,C,string>.G<T>` because the constraints match those in the interface, after the interface type parameters are replaced with the corresponding type arguments. The constraint for method `C.H<T>` is an error because sealed types (string in this case) cannot be used as constraints. Omitting the constraint would also be an error since constraints of implicit interface method implementations are required to match. Thus, it is impossible to implicitly implement `I<object,C,string>.H<T>`. This interface method can only be implemented using an explicit interface member implementation:
 
-class C: I<object,C,string>
-{
-…
+```csharp
+class C : I<object, C, string>
+{…
 
-public void H<U>(U u) where U: class {…}
+    public void H<U> (U u) where U : class {…}
 
-void I<object,C,string>.H<T>(T t) {
-string s = t; // Ok
-H<T>(t);
+    void I<object, C, string>.H<T> (T t)
+    {
+        string s = t; // Ok
+        H<T> (t);
+    }
 }
-}
+```
 
-In this case, the explicit interface member implementation invokes a public method having strictly weaker constraints. The assignment from t to s is valid since T inherits a constraint of T: string, even though this constraint is not expressible in source code. *end example*]
+In this case, the explicit interface member implementation invokes a public method having strictly weaker constraints. The assignment from `t` to `s` is valid since `T` inherits a constraint of `T: string`, even though this constraint is not expressible in source code. *end example*]
 
-[*Note*: When a generic method explicitly implements an interface method no constraints are allowed on the implementing method (§15.7.1, §18.6.2) *end note*].
+> [!NOTE]
+> When a generic method explicitly implements an interface method no constraints are allowed on the implementing method (§15.7.1, §18.6.2).
 
 ### Interface mapping
 
 A class or struct shall provide implementations of all members of the interfaces that are listed in the base class list of the class or struct. The process of locating implementations of interface members in an implementing class or struct is known as ***interface mapping***.
 
-Interface mapping for a class or struct C locates an implementation for each member of each interface specified in the base class list of C. The implementation of a particular interface member I.M, where I is the interface in which the member M is declared, is determined by examining each class or struct S, starting with C and repeating for each successive base class of C, until a match is located:
+Interface mapping for a class or struct `C` locates an implementation for each member of each interface specified in the base class list of `C`. The implementation of a particular interface member `I.M`, where `I` is the interface in which the member `M` is declared, is determined by examining each class or struct `S`, starting with `C` and repeating for each successive base class of `C`, until a match is located:
 
-- If S contains a declaration of an explicit interface member implementation that matches I and M, then this member is the implementation of I.M.
+- If `S` contains a declaration of an explicit interface member implementation that matches `I` and `M`, then this member is the implementation of `I.M`.
+- Otherwise, if S contains a declaration of a non-static public member that matches `M`, then this member is the implementation of `I.M`. If more than one member matches, it is unspecified which member is the implementation of `I.M`. This situation can only occur if `S` is a constructed type where the two members as declared in the generic type have different signatures, but the type arguments make their signatures identical.
 
-- Otherwise, if S contains a declaration of a non-static public member that matches M, then this member is the implementation of I.M. If more than one member matches, it is unspecified which member is the implementation of I.M. This situation can only occur if S is a constructed type where the two members as declared in the generic type have different signatures, but the type arguments make their signatures identical.
-
-A compile-time error occurs if implementations cannot be located for all members of all interfaces specified in the base class list of C. The members of an interface include those members that are inherited from base interfaces.
+A compile-time error occurs if implementations cannot be located for all members of all interfaces specified in the base class list of `C`. The members of an interface include those members that are inherited from base interfaces.
 
 Members of a constructed interface type are considered to have any type parameters replaced with the corresponding type arguments as specified in §15.3.3. [*Example*: For example, given the generic interface declaration:
 
+```csharp
 interface I<T>
 {
-T F(int x, T[,] y);
-T this[int y] { get; }
+    T F (int x, T[, ] y);
+    T this [int y] { get; }
 }
+```
 
-the constructed interface I<string[]> has the members:
+the constructed interface `I<string[]>` has the members:
 
+```csharp
 string[] F(int x, string[,][] y);
 string[] this[int y] { get; }
+```
 
 *end example*]
 
-For purposes of interface mapping, a class or struct member A matches an interface member B when:
+For purposes of interface mapping, a class or struct member `A` matches an interface member `B` when:
 
-- A and B are methods, and the name, type, and formal parameter lists of A and B are identical.
-
-- A and B are properties, the name and type of A and B are identical, and A has the same accessors as B (A is permitted to have additional accessors if it is not an explicit interface member implementation).
-
-- A and B are events, and the name and type of A and B are identical.
-
-- A and B are indexers, the type and formal parameter lists of A and B are identical, and A has the same accessors as B (A is permitted to have additional accessors if it is not an explicit interface member implementation).
+- `A` and `B` are methods, and the name, type, and formal parameter lists of `A` and `B` are identical.
+- `A` and `B` are properties, the name and type of `A` and `B` are identical, and A has the same accessors as `B` (`A` is permitted to have additional accessors if it is not an explicit interface member implementation).
+- `A` and `B` are events, and the name and type of `A` and `B` are identical.
+- `A` and `B` are indexers, the type and formal parameter lists of `A` and `B` are identical, and `A` has the same accessors as `B` (`A` is permitted to have additional accessors if it is not an explicit interface member implementation).
 
 Notable implications of the interface-mapping algorithm are:
 
 - Explicit interface member implementations take precedence over other members in the same class or struct when determining the class or struct member that implements an interface member.
-
 - Neither non-public nor static members participate in interface mapping.
 
 [*Example*: In the following code
 
+```csharp
 interface ICloneable
 {
-object Clone();
+    object Clone ();
 }
 
-class C: ICloneable
+class C : ICloneable
 {
-object ICloneable.Clone() {…}
+    object ICloneable.Clone () {…}
 
-public object Clone() {…}
+    public object Clone () {…}
 }
+```
 
-the ICloneable.Clone member of C becomes the implementation of Clone in ICloneable because explicit interface member implementations take precedence over other members. *end example*]
+the `ICloneable.Clone` member of `C` becomes the implementation of `Clone` in `ICloneable` because explicit interface member implementations take precedence over other members. *end example*]
 
 If a class or struct implements two or more interfaces containing a member with the same name, type, and parameter types, it is possible to map each of those interface members onto a single class or struct member. [*Example*:
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
 interface IForm
 {
-void Paint();
+    void Paint ();
 }
 
-class Page: IControl, IForm
+class Page : IControl, IForm
 {
-public void Paint() {…}
+    public void Paint () {…}
 }
+```
 
-Here, the Paint methods of both IControl and IForm are mapped onto the Paint method in Page. It is of course also possible to have separate explicit interface member implementations for the two methods. *end example*]
+Here, the `Paint` methods of both `IControl` and `IForm` are mapped onto the `Paint` method in `Page`. It is of course also possible to have separate explicit interface member implementations for the two methods. *end example*]
 
 If a class or struct implements an interface that contains hidden members, then some members may need to be implemented through explicit interface member implementations. [*Example*:
 
+```csharp
 interface IBase
 {
-int P { get; }
+    int P { get; }
 }
 
-interface IDerived: IBase
+interface IDerived : IBase
 {
-new int P();
+    new int P ();
 }
+```
 
 An implementation of this interface would require at least one explicit interface member implementation, and would take one of the following forms
 
-class C: IDerived
+```csharp
+class C : IDerived
 {
-int IBase.P { get {…} }
+    int IBase.P { get {…} }
 
-int IDerived.P() {…}
+    int IDerived.P () {…}
 }
 
-class C: IDerived
+class C : IDerived
 {
-public int P { get {…} }
+    public int P { get {…} }
 
-int IDerived.P() {…}
+    int IDerived.P () {…}
 }
 
-class C: IDerived
+class C : IDerived
 {
-int IBase.P { get {…} }
+    int IBase.P { get {…} }
 
-public int P() {…}
+    public int P () {…}
 }
+```
 
 *end example*]
 
 When a class implements multiple interfaces that have the same base interface, there can be only one implementation of the base interface. [*Example*: In the following code
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-interface ITextBox: IControl
+interface ITextBox : IControl
 {
-void SetText(string text);
+    void SetText (string text);
 }
 
-interface IListBox: IControl
+interface IListBox : IControl
 {
-void SetItems(string[] items);
+    void SetItems (string[] items);
 }
 
-class ComboBox: IControl, ITextBox, IListBox
+class ComboBox : IControl, ITextBox, IListBox
 {
-void IControl.Paint() {…}
+    void IControl.Paint () {…}
 
-void ITextBox.SetText(string text) {…}
+    void ITextBox.SetText (string text) {…}
 
-void IListBox.SetItems(string[] items) {…}
+    void IListBox.SetItems (string[] items) {…}
 }
+```
 
-it is not possible to have separate implementations for the IControl named in the base class list, the IControl inherited by ITextBox, and the IControl inherited by IListBox. Indeed, there is no notion of a separate identity for these interfaces. Rather, the implementations of ITextBox and IListBox share the same implementation of IControl, and ComboBox is simply considered to implement three interfaces, IControl, ITextBox, and IListBox. *end example*]
+it is not possible to have separate implementations for the `IControl` named in the base class list, the `IControl` inherited by `ITextBox`, and the `IControl` inherited by `IListBox`. Indeed, there is no notion of a separate identity for these interfaces. Rather, the implementations of `ITextBox` and `IListBox` share the same implementation of `IControl`, and `ComboBox` is simply considered to implement three interfaces, `IControl`, `ITextBox`, and `IListBox`. *end example*]
 
 The members of a base class participate in interface mapping. [*Example*: In the following code
 
+```csharp
 interface Interface1
 {
-void F();
+    void F ();
 }
 
 class Class1
 {
-public void F() {}
+    public void F () { }
 
-public void G() {}
+    public void G () { }
 }
 
-class Class2: Class1, Interface1
+class Class2 : Class1, Interface1
 {
-new public void G() {}
+    new public void G () { }
 }
+```
 
-the method F in Class1 is used in Class2's implementation of Interface1. *end example*]
+the method `F` in `Class1` is used in `Class2`'s implementation of `Interface1`. *end example*]
 
 ### Interface implementation inheritance
 
@@ -20862,84 +21034,94 @@ A class inherits all interface implementations provided by its base classes.
 
 Without explicitly ***re-implementing*** an interface, a derived class cannot in any way alter the interface mappings it inherits from its base classes. [*Example*: In the declarations
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-class Control: IControl
+class Control : IControl
 {
-public void Paint() {…}
+    public void Paint () {…}
 }
 
-class TextBox: Control
+class TextBox : Control
 {
-new public void Paint() {…}
+    new public void Paint () {…}
 }
+```
 
-the Paint method in TextBox hides the Paint method in Control, but it does not alter the mapping of Control.Paint onto IControl.Paint, and calls to Paint through class instances and interface instances will have the following effects
+the `Paint` method in `TextBox` hides the `Paint` method in `Control`, but it does not alter the mapping of `Control.Paint` onto `IControl.Paint`, and calls to `Paint` through class instances and interface instances will have the following effects
 
-Control c = new Control();
-TextBox t = new TextBox();
+```csharp
+Control c = new Control ();
+TextBox t = new TextBox ();
 IControl ic = c;
 IControl it = t;
-c.Paint(); // invokes Control.Paint();
-t.Paint(); // invokes TextBox.Paint();
-ic.Paint(); // invokes Control.Paint();
-it.Paint(); // invokes Control.Paint();
+c.Paint (); // invokes Control.Paint();
+t.Paint (); // invokes TextBox.Paint();
+ic.Paint (); // invokes Control.Paint();
+it.Paint (); // invokes Control.Paint();
+```
 
 *end example*]
 
 However, when an interface method is mapped onto a virtual method in a class, it is possible for derived classes to override the virtual method and alter the implementation of the interface. [*Example*: Rewriting the declarations above to
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-class Control: IControl
+class Control : IControl
 {
-public virtual void Paint() {…}
+    public virtual void Paint () {…}
 }
 
-class TextBox: Control
+class TextBox : Control
 {
-public override void Paint() {…}
+    public override void Paint () {…}
 }
+```
 
 the following effects will now be observed
 
-Control c = new Control();
-TextBox t = new TextBox();
+```csharp
+Control c = new Control ();
+TextBox t = new TextBox ();
 IControl ic = c;
 IControl it = t;
-c.Paint(); // invokes Control.Paint();
-t.Paint(); // invokes TextBox.Paint();
-ic.Paint(); // invokes Control.Paint();
-it.Paint(); // invokes TextBox.Paint();
+c.Paint (); // invokes Control.Paint();
+t.Paint (); // invokes TextBox.Paint();
+ic.Paint (); // invokes Control.Paint();
+it.Paint (); // invokes TextBox.Paint();
+```
 
 *end example*]
 
 Since explicit interface member implementations cannot be declared virtual, it is not possible to override an explicit interface member implementation. However, it is perfectly valid for an explicit interface member implementation to call another method, and that other method can be declared virtual to allow derived classes to override it. [*Example*:
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-class Control: IControl
+class Control : IControl
 {
-void IControl.Paint() { PaintControl(); }
+    void IControl.Paint () { PaintControl (); }
 
-protected virtual void PaintControl() {…}
+    protected virtual void PaintControl () {…}
 }
 
-class TextBox: Control
+class TextBox : Control
 {
-protected override void PaintControl() {…}
+    protected override void PaintControl () {…}
 }
+```
 
-Here, classes derived from Control can specialize the implementation of IControl.Paint by overriding the PaintControl method. *end example*]
+Here, classes derived from Control can specialize the implementation of `IControl.Paint` by overriding the `PaintControl` method. *end example*]
 
 ### Interface re-implementation
 
@@ -20947,112 +21129,122 @@ A class that inherits an interface implementation is permitted to ***re-implemen
 
 A re-implementation of an interface follows exactly the same interface mapping rules as an initial implementation of an interface. Thus, the inherited interface mapping has no effect whatsoever on the interface mapping established for the re-implementation of the interface. [*Example*: In the declarations
 
+```csharp
 interface IControl
 {
-void Paint();
+    void Paint ();
 }
 
-class Control: IControl
+class Control : IControl
 {
-void IControl.Paint() {…}
+    void IControl.Paint () {…}
 }
 
-class MyControl: Control, IControl
+class MyControl : Control, IControl
 {
-public void Paint() {}
+    public void Paint () { }
 }
+```
 
-the fact that Control maps IControl.Paint onto Control.IControl.Paint doesn’t affect the re-implementation in MyControl, which maps IControl.Paint onto MyControl.Paint. *end example*]
+the fact that `Control` maps `IControl.Paint` onto `Control.IControl.Paint` doesn’t affect the re-implementation in `MyControl`, which maps `IControl.Paint` onto `MyControl.Paint`. *end example*]
 
 Inherited public member declarations and inherited explicit interface member declarations participate in the interface mapping process for re-implemented interfaces. [*Example*:
 
+```csharp
 interface IMethods
 {
-void F();
-void G();
-void H();
-void I();
+    void F ();
+    void G ();
+    void H ();
+    void I ();
 }
 
-class Base: IMethods
+class Base : IMethods
 {
-void IMethods.F() {}
-void IMethods.G() {}
-public void H() {}
-public void I() {}
+    void IMethods.F () { }
+    void IMethods.G () { }
+    public void H () { }
+    public void I () { }
 }
 
-class Derived: Base, IMethods
+class Derived : Base, IMethods
 {
-public void F() {}
-void IMethods.H() {}
+    public void F () { }
+    void IMethods.H () { }
 }
+```
 
-Here, the implementation of IMethods in Derived maps the interface methods onto Derived.F, Base.IMethods.G, Derived.IMethods.H, and Base.I. *end example*]
+Here, the implementation of `IMethods` in `Derived` maps the interface methods onto `Derived.F`, `Base.IMethods.G`, `Derived.IMethods.H`, and `Base.I`. *end example*]
 
 When a class implements an interface, it implicitly also implements all that interface’s base interfaces. Likewise, a re-implementation of an interface is also implicitly a re-implementation of all of the interface’s base interfaces. [*Example*:
 
+```csharp
 interface IBase
 {
-void F();
+    void F ();
 }
 
-interface IDerived: IBase
+interface IDerived : IBase
 {
-void G();
+    void G ();
 }
 
-class C: IDerived
+class C : IDerived
 {
-void IBase.F() {…}
+    void IBase.F () {…}
 
-void IDerived.G() {…}
+    void IDerived.G () {…}
 }
 
-class D: C, IDerived
+class D : C, IDerived
 {
-public void F() {…}
+    public void F () {…}
 
-public void G() {…}
+    public void G () {…}
 }
+```
 
-Here, the re-implementation of IDerived also re-implements IBase, mapping IBase.F onto D.F. *end example*]
+Here, the re-implementation of IDerived also re-implements `IBase`, mapping `IBase.F` onto `D.F`. *end example*]
 
 ### Abstract classes and interfaces
 
 Like a non-abstract class, an abstract class shall provide implementations of all members of the interfaces that are listed in the base class list of the class. However, an abstract class is permitted to map interface methods onto abstract methods. [*Example*:
 
+```csharp
 interface IMethods
 {
-void F();
-void G();
+    void F ();
+    void G ();
 }
 
-abstract class C: IMethods
+abstract class C : IMethods
 {
-public abstract void F();
-public abstract void G();
+    public abstract void F ();
+    public abstract void G ();
 }
+```
 
-Here, the implementation of IMethods maps F and G onto abstract methods, which shall be overridden in non-abstract classes that derive from C. *end example*]
+Here, the implementation of `IMethods` maps `F` and `G` onto abstract methods, which shall be overridden in non-abstract classes that derive from `C`. *end example*]
 
 Explicit interface member implementations cannot be abstract, but explicit interface member implementations are of course permitted to call abstract methods. [*Example*:
 
+```csharp
 interface IMethods
 {
-void F();
-void G();
+    void F ();
+    void G ();
 }
 
-abstract class C: IMethods
+abstract class C : IMethods
 {
-void IMethods.F() { FF(); }
-void IMethods.G() { GG(); }
-protected abstract void FF();
-protected abstract void GG();
+    void IMethods.F () { FF (); }
+    void IMethods.G () { GG (); }
+    protected abstract void FF ();
+    protected abstract void GG ();
 }
+```
 
-Here, non-abstract classes that derive from C would be required to override FF and GG, thus providing the actual implementation of IMethods. *end example*]
+Here, non-abstract classes that derive from `C` would be required to override `FF` and `GG`, thus providing the actual implementation of `IMethods`. *end example*]
 
 # Enums
 
