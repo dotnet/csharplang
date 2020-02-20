@@ -3458,7 +3458,7 @@ shall be compiled to something equivalent to:
 ```csharp
 class X
 {
-    private D \_\_Ev; // field to hold the delegate
+    private D __Ev; // field to hold the delegate
 
     public event D Ev {
         add {
