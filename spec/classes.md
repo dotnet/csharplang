@@ -3462,7 +3462,7 @@ class X
 
     public event D Ev {
         add {
-            /\* add the delegate in a thread safe way \*/\
+            /* add the delegate in a thread safe way */
         }
 
         remove {
