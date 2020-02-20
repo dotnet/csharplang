@@ -8,7 +8,8 @@ This annex contains summaries of the lexical and syntactic grammars found in the
 
 ## Lexical grammar {#lexical-grammar-1 .Appendix2}
 
-```csharp
+
+```ANTLR
 input::
 	input-section~opt~
 
@@ -28,9 +29,11 @@ input-element::
 	whitespace
 	comment
 	token
+```
 
 Line terminators
 
+```ANTLR
 new-line::
 	Carriage return character (U+000D)
 	Line feed character (U+000A)
@@ -38,9 +41,11 @@ new-line::
 	Next line character (U+0085)
 	Line separator character (U+2028)
 	Paragraph separator character (U+2029)
+```
 
 White space
 
+```ANTLR
 whitespace::
 	whitespace-character
 	whitespace whitespace-character
@@ -54,7 +59,7 @@ whitespace-character::
 
 ### Comments {#comments-1 .Appendix3}
 
-```csharp
+```ANTLR
 comment::
 	single-line-comment
 	delimited-comment
@@ -97,7 +102,7 @@ not-slash-or-asterisk::
 
 ### Tokens {#tokens-1 .Appendix3}
 
-```csharp
+```ANTLR
 token::
 	identifier
 	keyword
@@ -167,7 +172,7 @@ formatting-character::
 
 ### Keywords {#keywords-1 .Appendix3}
 
-```csharp
+```ANTLR
 keyword:: one of
     abstract	as	base	bool	break
     byte	case	catch	char	checked
@@ -185,9 +190,11 @@ keyword:: one of
     try	typeof	uint	ulong	unchecked
     unsafe	ushort	using	virtual	void
     volatile	while
+```
 
 Literals
 
+```ANTLR
 literal::
 	boolean-literal
 	integer-literal
@@ -306,7 +313,7 @@ null-literal::
 
 ### Operators and punctuators {#operators-and-punctuators-1 .Appendix3}
 
-```csharp
+```ANTLR
 operator-or-punctuator:: one of
 	{	}	[	]	(	)	.	,	:	;
 	+	-	*	/	%	&	|	^	!	~
@@ -323,7 +330,7 @@ right-shift-assignment::
 
 ### Pre-processing directives {#pre-processing-directives-1 .Appendix3}
 
-```csharp
+```ANTLR
 pp-directive::
 	pp-declaration
 	pp-conditional
@@ -455,7 +462,7 @@ pp-pragma-text::
 
 ### Basic concepts {#basic-concepts-1 .Appendix3}
 
-```csharp
+```ANTLR
 namespace-name:
 	namespace-or-type-name
 
@@ -470,7 +477,7 @@ namespace-or-type-name:
 
 ### Types {#types-1 .Appendix3}
 
-```csharp
+```ANTLR
 type:
 	reference-type
 	value-type
@@ -534,14 +541,14 @@ type-parameter:
 
 ### Variables {#variables-1 .Appendix3}
 
-```csharp
+```ANTLR
 variable-reference:
     expression
 ```
 
 ### Expressions {#expressions-6 .Appendix3}
 
-```csharp
+```ANTLR
 argument-list:
 	argument
 	argument-list , argument
@@ -920,7 +927,7 @@ boolean-expression:
 
 ### Statements {#statements-1 .Appendix3}
 
-```csharp
+```ANTLR
 statement:
 	labeled-statement
 	declaration-statement
@@ -1129,7 +1136,7 @@ yield-statement:
 
 ###  Namespaces {#namespaces-1 .Appendix3}
 
-```csharp
+```ANTLR
 compilation-unit:
 	extern-alias-directives~opt~ using-directives~opt~ global-attributes~opt~
 		namespace-member-declarations~opt~
@@ -1186,7 +1193,7 @@ qualified-alias-member:
 
 ### Classes {#classes-1 .Appendix3}
 
-```csharp
+```ANTLR
 class-declaration:
 	attributes~opt~ class-modifiers~opt~ partial~opt~ class identifier type-parameter-list~opt~
 	class-base~opt~ type-parameter-constraints-clauses~opt~ class-body ;~opt~
@@ -1559,7 +1566,7 @@ finalizer-body:
 
 ### Structs {#structs-1 .Appendix3}
 
-```csharp
+```ANTLR
 struct-declaration:
 	attributes~opt~ struct-modifiers~opt~ partial~opt~ struct identifier type-parameter-list~opt
 		~struct-interfaces~opt~ type-parameter-constraints-clauses~opt~ struct-body ;~opt~
@@ -1592,7 +1599,7 @@ struct-member-declaration:
 
 ### Arrays {#arrays-1 .Appendix3}
 
-```csharp
+```ANTLR
 array-initializer:
 	{ variable-initializer-list~opt~ }
 	{ variable-initializer-list , }
@@ -1608,7 +1615,7 @@ variable-initializer:
 
 ### Interfaces {#interfaces-1 .Appendix3}
 
-```csharp
+```ANTLR
 interface-declaration:
 	attributes~opt~ interface-modifiers~opt~ partial~opt~ interface
 		identifier variant-type-parameter-list~opt
@@ -1674,7 +1681,7 @@ interface-indexer-declaration:
 
 ### Enums {#enums-1 .Appendix3}
 
-```csharp
+```ANTLR
 enum-declaration:
 	attributes~opt~ enum-modifiers~opt~ enum identifier enum-base~opt~ enum-body ;~opt~
 	
@@ -1707,7 +1714,7 @@ enum-member-declaration:
 
 ### Delegates {#delegates-1 .Appendix3}
 
-```csharp
+```ANTLR
 delegate-declaration:
 	attributes~opt~ delegate-modifiers~opt~ delegate return-type
 		identifier variant-type-parameter-list~opt
@@ -1727,7 +1734,7 @@ delegate-modifier:
 
 ### Attributes {#attributes-1 .Appendix3}
 
-```csharp
+```ANTLR
 global-attributes:
 	global-attribute-sections
 	
