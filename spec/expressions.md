@@ -900,9 +900,9 @@ An *upper-bound inference from* a type `U` *to* a type `V` is made as follows:
 
 -   `U` is an array type `U~1~[…]`and `V` is an array type `V~1~[…]`of the same rank
 
--   `U` is one of `IEnumerable<U~e~>, ICollection<U~e~>, IReadOnlyList<U~e~>, IReadOnlyCollection<U~e~>` or `IList<U~e~>` and `V` is a single-dimensional array type `V~e~[]`
+-   `U` is one of `IEnumerable<Ue>`, `ICollection<Ue>`, `IReadOnlyList<Ue>`, `IReadOnlyCollection<Ue>` or `IList<Ue>` and `V` is a single-dimensional array type `Ve[]`
 
--   `U` is the type `U~1~?` and `V` is the type `V~1~?`
+-   `U` is the type `U1?` and `V` is the type `V1?`
 
 -   `U` is constructed class, struct, interface or delegate type `C<U~1~…U~k~>` and `V` is a `class, struct, interface` or `delegate` type which is `identical` to, `inherits` from (directly or indirectly), or implements (directly or indirectly) a unique type `C<V~1~…V~k~>`
 	
@@ -1121,13 +1121,13 @@ Parameter lists for each of the candidate function members are constructed in th
 
 -   The parameters are reordered so that they occur at the same position as the corresponding argument in the argument list.
 
-Given an argument list `A` with a set of argument expressions { `E~1~, E~2~, …, E~N~` } and two applicable function members `M~P~` and `M~Q~` with parameter types { `P~1~, P~2~, …, P~N~` } and { `Q~1~, Q~2~, …, Q~N~` }, `M~P~` is defined to be a ***better function member*** than `M~Q~` if
+Given an argument list `A` with a set of argument expressions { `E1, E2, …, EN` } and two applicable function members `Mp` and `Mq` with parameter types { `P1, P2, …, Pn` } and { `Q1, Q2, …, Qn` }, `Mp` is defined to be a ***better function member*** than `Mq` if
 
 -   for each argument, the implicit conversion from `E~X~` to `Q~X~` is not better than the implicit conversion from `E~X~` to `P~X~`, and
 
 -   for at least one argument, the conversion from `E~X~` to `P~X~` is better than the conversion from `E~X~` to `Q~X~`.
 
-In case the parameter type sequences {`P~1~`, `P~2~`, …, `P~N~`} and {`Q~1~`, `Q~2~`, …, `Q~N~`} are equivalent (i.e., each `P~i~` has an identity conversion to the corresponding `Q~i~`), the following tie-breaking rules are applied, in order, to determine the better function member.
+In case the parameter type sequences {`P1`, `P2`, …, `Pn`} and {`Q1`, `Q2`, …, `Qn`} are equivalent (i.e., each `Pi` has an identity conversion to the corresponding `Qi`), the following tie-breaking rules are applied, in order, to determine the better function member.
 
 -   If `M~P~` is a non-generic method and `M~Q~` is a generic method, then `M~P~` is better than `M~Q~`.
 
@@ -1135,7 +1135,7 @@ In case the parameter type sequences {`P~1~`, `P~2~`, …, `P~N~`} and {`Q~1~`,
 
 -   Otherwise, if both methods have params arrays and are applicable only in their expanded forms, and if the params array of `M~P~` has fewer elements than the params array of `M~Q~`, then `M~P~` is better than `M~Q~`.
 
--   Otherwise, if `M~P~` has more specific parameter types than `M~Q~`, then `M~P~` is better than `M~Q~`. Let {`R~1~`, `R~2~`, …, `R~N~`} and {`S~1~`, `S~2~`, …, `S~N~`} represent the uninstantiated and unexpanded parameter types of `M~P~` and `M~Q~`. `M~P~’s` parameter types are more specific than `M~Q~’s` if, for each parameter, `R~X~` is not less specific than `S~X~`, and, for at least one parameter, `R~X~` is more specific than `S~X~`:
+-   Otherwise, if `Mp` has more specific parameter types than `Mq`, then `Mp` is better than `Mq`. Let {`R1`, `R2`, …, `Rn`} and {`S1`, `S2`, …, `Sn`} represent the uninstantiated and unexpanded parameter types of `Mp` and `Mq`. `Mp’s` parameter types are more specific than `Mq’s` if, for each parameter, `Rx` is not less specific than `Sx`, and, for at least one parameter, `Rx` is more specific than `Sx`:
 
 <!-- -->
 
@@ -1149,17 +1149,17 @@ In case the parameter type sequences {`P~1~`, `P~2~`, …, `P~N~`} and {`Q~1~`,
 
 -   Otherwise if one member is a non-lifted operator and the other is a lifted operator, the non-lifted one is better.
 
--   If neither function member was found to be better, and all parameters of `M~P~` have a corresponding argument whereas default arguments need to be substituted for at least one optional parameter in `M~Q~`, then `M~P~` is better than `M~Q~`. Otherwise, no function member is better.
+-   If neither function member was found to be better, and all parameters of `Mp` have a corresponding argument whereas default arguments need to be substituted for at least one optional parameter in `Mq`, then `Mp` is better than `Mq`. Otherwise, no function member is better.
 
 #### Better conversion from expression
 
-Given an implicit conversion `C~1~` that converts from an expression `E` to a type `T~1~`, and an implicit conversion `C~2~` that converts from an expression `E` to a type `T~2~`, `C~1~` is a ***better conversion*** than `C~2~` if at least one of the following holds:
+Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if at least one of the following holds:
 
 -   `E` has a type `S` and an identity conversion exists from `S` to `T~1~` but not from `S` to `T~2~`
 
 -   `E` is not an anonymous function and `T~1~` is a better conversion target than `T~2~` (§12.6.4.6)
 
--   `E` is an anonymous function, `T~1~` is either a delegate type `D~1~` or an expression tree type Expression`<D~1~>`, `T~2~` is either a delegate type `D~2~` or an expression tree type Expression`<D~2~>` and one of the following holds:
+-   `E` is an anonymous function, `T1` is either a delegate type `D1` or an expression tree type Expression`<D1>`, `T2` is either a delegate type `D2` or an expression tree type Expression`<D2>` and one of the following holds:
 
 <!-- -->
 
@@ -1169,15 +1169,15 @@ Given an implicit conversion `C~1~` that converts from an expression `E` to a 
 
 <!-- -->
 
--   `D~1~` has a return type `Y~1~`, and `D~2~` has a return type `Y~2~`, an inferred return type `X` exists for `E` in the context of that parameter list (§12.6.3.13), and the conversion from `X` to `Y~1~` is better than the conversion from `X` to `Y~2~`
+-   `D1` has a return type `Y1`, and `D2` has a return type `Y2`, an inferred return type `X` exists for `E` in the context of that parameter list (§12.6.3.13), and the conversion from `X` to `Y1` is better than the conversion from `X` to `Y2`
 
--   `E` is async, `D~1~` has a return type Task`<Y~1~>`, and `D~2~` has a return type Task`<Y~2~>`, an inferred return type Task`<X>` exists for `E` in the context of that parameter list (§12.6.3.13), and the conversion from `X` to `Y~1~` is better than the conversion from `X` to `Y~2~`
+-   `E` is async, `D1` has a return type Task`<Y1>`, and `D2` has a return type Task`<Y>`, an inferred return type Task`<X>` exists for `E` in the context of that parameter list (§12.6.3.13), and the conversion from `X` to `Y1` is better than the conversion from `X` to `Y2`
 
 -   `D~1~` has a return type `Y`, and `D~2~` is void returning
 
 #### Better conversion from type
 
-Given a conversion `C~1~` that converts from a type `S` to a type `T~1~`, and a conversion `C~2~` that converts from a type `S` to a type `T~2~`, `C~1~` is a ***better conversion*** than `C~2~` if at least one of the following holds:
+Given a conversion `C1` that converts from a type `S` to a type `T1`, and a conversion `C2` that converts from a type `S` to a type `T2`, `C1` is a ***better conversion*** than `C2` if at least one of the following holds:
 
 -   An identity conversion exists from `S` to `T~1~` but not from `S` to `T~2~`
 
@@ -1185,21 +1185,21 @@ Given a conversion `C~1~` that converts from a type `S` to a type `T~1~`, and
 
 #### Better conversion target
 
-Given two different types `T~1~` and `T~2~`, `T~1~` is a better conversion target than `T~2~` if at least one of the following holds:
+Given two different types `T1` and `T2`, `T1` is a better conversion target than `T2` if at least one of the following holds:
 
--   An implicit conversion from `T~1~` to `T~2~` exists, and no implicit conversion from `T~2~` to `T~1~` exists
+-   An implicit conversion from `T1` to `T2` exists, and no implicit conversion from `T2` to `T1` exists
 
 -   `T~1~` is a signed integral type and `T~2~` is an unsigned integral type. Specifically:
 
 <!-- -->
 
--   `T~1~` is sbyte and `T~2~` is byte, ushort, uint, or ulong
+-   `T1` is `sbyte` and `T2` is `byte`, `ushort`, `uint`, or `ulong`
 
--   `T~1~` is short and `T~2~` is ushort, uint, or ulong
+-   `T1` is `short` and `T2` is `ushort`, `uint`, or `ulong`
 
--   `T~1~` is int and `T~2~` is uint, or ulong
+-   `T1` is `int` and `T2` is `uint`, or `ulong`
 
--   `T~1~` is long and `T~2~` is ulong
+-   `T1` is `long` and `T2` is `ulong`
 
 #### Overloading in generic classes
 
@@ -1424,7 +1424,7 @@ simple-name:
 	identifier type-argument-list~opt~
 ```
 
-A *simple-name* is either of the form `I` or of the form `I<A~1~, …, A~K~>`, where I is a single identifier and `<A~1~, …, A~K~>` is an optional *type-argument-list*. When no *type-argument-list* is specified, consider `K` to be zero. The *simple-name* is evaluated and classified as follows:
+A *simple-name* is either of the form `I` or of the form `I<A1, …, Ak>`, where `I` is a single identifier and `<A1, …, Ak>` is an optional *type-argument-list*. When no *type-argument-list* is specified, consider `K` to be zero. The *simple-name* is evaluated and classified as follows:
 
 -   If `K` is zero and the *simple-name* appears within a *block* and if the *block*’s (or an enclosing *block*’s) local variable declaration space (§8.3) contains a local variable, parameter or constant with name `I`, then the *simple-name* refers to that local variable, parameter or constant and is classified as a variable or value.
 
@@ -1585,7 +1585,7 @@ predefined-type: one of
 ```
 The *qualified-alias-member* production is defined in §14.8.
 
-A *member-access* is either of the form `E.I` or of the form `E.I<A~1~, …, A~K~>`, where `E` is a *primary-expression*, *predefined-type* or *qualified-alias-member,* `I` is a single identifier, and `<A~1~, …, A~K~>` is an optional *type-argument-list*. When no *type-argument-list* is specified, consider `K` to be zero.
+A *member-access* is either of the form `E.I` or of the form `E.I<A1, …, Ak>`, where `E` is a *primary-expression*, *predefined-type* or *qualified-alias-member,* `I` is a single identifier, and `<A1, …, Ak>` is an optional *type-argument-list*. When no *type-argument-list* is specified, consider `K` to be zero.
 
 A *member-access* with a *primary-expression* of type dynamic is dynamically bound (§12.3.3). In this case, the compiler classifies the member access as a property access of type dynamic. The rules below to determine the meaning of the *member-access* are then applied at run-time, using the run-time type instead of the compile-time type of the *primary-expression*. If this run-time classification leads to a method group, then the member access shall be the *primary-expression* of an *invocation-expression*.
 
@@ -2476,7 +2476,7 @@ __clist.Add(__c2);
 var contacts = __clist;
 ```
 
-where \_\_clist, \_\_c1 and \_\_c2 are temporary variables that are otherwise invisible and inaccessible. *end example*\]
+where `__clist`, `__c1` and `__c2` are temporary variables that are otherwise invisible and inaccessible. *end example*\]
 
 #### Array creation expressions
 
@@ -2949,15 +2949,15 @@ class Test
 	const int y = 1000000;
 
 	static int F() {
-		return checked(x \ y); // Compile-time error, overflow
+		return checked(x * y); // Compile-time error, overflow
 	}
 
 	static int G() {
-		return unchecked(x \ y); // Returns -727379968
+		return unchecked(x * y); // Returns -727379968
 	}
 
 	static int H() {
-		return x \ y; // Compile-time error, overflow
+		return x * y; // Compile-time error, overflow
 	}
 }
 ```
@@ -2970,7 +2970,7 @@ The checked and unchecked operators only affect the overflow checking context fo
 class Test
 {
 	static int Multiply(int x, int y) {
-		return x \ y;
+		return x * y;
 	}
 
 	static int F() {
@@ -2978,7 +2978,7 @@ class Test
 	}
 }
 ```
-the use of checked in F does not affect the evaluation of `x \ Y` in Multiply, so `x \ Y` is evaluated in the default overflow checking context. end example\]
+the use of checked in F does not affect the evaluation of `x * Y` in Multiply, so `x * Y` is evaluated in the default overflow checking context. end example\]
 
 The unchecked operator is convenient when writing constants of the signed integral types in hexadecimal notation. \[Example:
 
@@ -3325,7 +3325,7 @@ If an operand of an arithmetic operator has the compile-time type dynamic, then 
 
 ### Multiplication operator
 
-For an operation of the form `x` \* `y`, binary operator overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
+For an operation of the form `x * y`, binary operator overload resolution (§12.4.5) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
 
 The predefined multiplication operators are listed below. The operators all compute the product of `x` and `y`.
 
@@ -3347,7 +3347,7 @@ float operator *(float x, float y);
 double operator *(double x, double y);
 ```
 
-> The product is computed according to the rules of IEC 60559 arithmetic. The following table lists the results of all possible combinations of nonzero finite values, zeros, infinities, and NaN’s. In the table, x and y are positive finite values. z is the result of `x` \* `y`, rounded to the nearest representable value. If the magnitude of the result is too large for the destination type, `z` is infinity. Because of rounding, `z` may be zero even though neither `x` nor `y` is zero.
+> The product is computed according to the rules of IEC 60559 arithmetic. The following table lists the results of all possible combinations of nonzero finite values, zeros, infinities, and NaN’s. In the table, x and y are positive finite values. z is the result of `x * y`, rounded to the nearest representable value. If the magnitude of the result is too large for the destination type, `z` is infinity. Because of rounding, `z` may be zero even though neither `x` nor `y` is zero.
 
   ----- ----- ----- ----- ----- ----- ----- -----
         +y    –y    +0    –0    +∞    –∞    NaN
@@ -3453,7 +3453,7 @@ float operator %(float x, float y);
 double operator %(double x, double y);
 ```
 
-> The following table lists the results of all possible combinations of nonzero finite values, zeros, infinities, and NaN’s. In the table, `x` and `y` are positive finite values. `z` is the result of `x` % `y` and is computed as `x – n \* y`, where n is the largest possible integer that is less than or equal to `x / y`. This method of computing the remainder is analogous to that used for integer operands, but differs from the IEC 60559 definition (in which `n` is the integer closest to `x / y`).
+> The following table lists the results of all possible combinations of nonzero finite values, zeros, infinities, and NaN’s. In the table, `x` and `y` are positive finite values. `z` is the result of `x % y` and is computed as `x – n * y`, where n is the largest possible integer that is less than or equal to `x / y`. This method of computing the remainder is analogous to that used for integer operands, but differs from the IEC 60559 definition (in which `n` is the integer closest to `x / y`).
 
   ----- ----- ----- ----- ----- ----- ----- -----
         +y    –y    +0    –0    +∞    –∞    NaN
@@ -3603,7 +3603,7 @@ float operator –(float x, float y);
 double operator –(double x, double y);
 ```
 
-> The difference is computed according to the rules of IEC 60559 arithmetic. The following table lists the results of all possible combinations of nonzero finite values, zeros, infinities, and NaNs. In the table, `x` and `y` are nonzero finite values, and `z` is the result of `x` – `y`. If `x` and `y` are equal, `z` is positive zero. If `x` – `y` is too large to represent in the destination type, `z` is an infinity with the same sign as `x` – `y`.
+> The difference is computed according to the rules of IEC 60559 arithmetic. The following table lists the results of all possible combinations of nonzero finite values, zeros, infinities, and NaNs. In the table, `x` and `y` are nonzero finite values, and `z` is the result of `x – y`. If `x` and `y` are equal, `z` is positive zero. If `x – y` is too large to represent in the destination type, `z` is an infinity with the same sign as `x – y`.
 
   ----- ----- ----- ----- ----- ----- -----
         y     +0    –0    +∞    –∞    NaN
@@ -3653,8 +3653,8 @@ D operator –(D x, D y);
 delegate void D(int x);
 class C
 {
-	public static void M1(int i) { /\* … \*/ }
-	public static void M2(int i) { /\* … \*/ }
+	public static void M1(int i) { /* … */ }
+	public static void M2(int i) { /* … */ }
 }
 
 class Test
@@ -4285,14 +4285,14 @@ The predefined Boolean logical operators are:
 ```csharp
 bool operator &(bool x, bool y);
 bool operator |(bool x, bool y);
-bool operator \^(bool x, bool y);
+bool operator ^(bool x, bool y);
 ```
 
 The result of `x` & `y` is true if both `x` and `y` are true. Otherwise, the result is false.
 
 The result of `x` | `y` is true if either `x` or `y` is true. Otherwise, the result is false.
 
-The result of `x \^ y` is true if `x` is true and `y` is false, or `x` is false and `y` is true. Otherwise, the result is false. When the operands are of type bool, the `\^` operator computes the same result as the != operator.
+The result of `x ^ y` is true if `x` is true and `y` is false, or `x` is false and `y` is true. Otherwise, the result is false. When the operands are of type bool, the `^` operator computes the same result as the != operator.
 
 ### Nullable Boolean & and | operators
 
@@ -4320,7 +4320,7 @@ The semantics of the lifted & and | operators are defined by the following tab
   null    null    null    null
 
 > [!NOTE]
-> The bool? type is conceptually similar to the three-valued type used for Boolean expressions in SQL. The table above follows the same semantics as SQL, whereas applying the rules of §12.4.8 to the & and | operators would not. The rules of §12.4.8 already provide SQL-like semantics for the lifted \^ operator.
+> The bool? type is conceptually similar to the three-valued type used for Boolean expressions in SQL. The table above follows the same semantics as SQL, whereas applying the rules of §12.4.8 to the & and | operators would not. The rules of §12.4.8 already provide SQL-like semantics for the lifted ^ operator.
 
 ## Conditional logical operators
 
@@ -4998,7 +4998,7 @@ class Test
 	{
 		public int y;
 
-		public void \_\_Method1() {
+		public void __Method1() {
 			Console.WriteLine(y);
 		}
 	}
@@ -5366,7 +5366,7 @@ Q
 is translated into
 
 ```csharp
-from \ in ( e1 ) . SelectMany( x1 => e2 , ( x1 , x2 ) => new { x1 , x2 } )\
+from * in ( e1 ) . SelectMany( x1 => e2 , ( x1 , x2 ) => new { x1 , x2 } )
 Q
 ```
 \[*Example*: The example
@@ -5381,7 +5381,7 @@ select new { c.Name, o.OrderID, o.Total }
 is translated into
 
 ```csharp
-from \ in (customers).
+from * in (customers).
 SelectMany(c => c.Orders, (c,o) => new { c, o })
 orderby o.Total descending
 select new { c.Name, o.OrderID, o.Total }
@@ -5409,7 +5409,7 @@ let y = f
 is translated into
 
 ```csharp
-from \ in ( e ) . Select ( x => new { x , y = f } )
+from * in ( e ) . Select ( x => new { x , y = f } )
 …
 ```
 
@@ -5425,7 +5425,7 @@ select new { o.OrderID, Total = t }
 is translated into
 
 ```csharp
-from \ in (orders).
+from * in (orders).
 Select(o => new { o, t = o.Details.Sum(d => d.UnitPrice \ d.Quantity) })
 where t >= 1000
 select new { o.OrderID, Total = t }
@@ -5499,7 +5499,7 @@ join x2 in e2 on k1 equals k2
 is translated into
 
 ```csharp
-from \ in ( e1 ) . Join(
+from * in ( e1 ) . Join(
 e2 , x1 => k1 , x2 => k2 , ( x1 , x2 ) => new { x1 , x2 })
 …
 ```
@@ -5529,7 +5529,7 @@ join x2 in e2 on k1 equals k2 into g
 is translated into
 
 ```csharp
-from \ in ( e1 ) . GroupJoin(
+from * in ( e1 ) . GroupJoin(
 e2 , x1 => k1 , x2 => k2 , ( x1 , g ) => new { x1 , g })
 …
 ```
@@ -5547,7 +5547,7 @@ select new { c.Name, OrderCount = n }
 is translated into
 
 ```csharp
-from \ in (customers).
+from * in (customers).
 GroupJoin(orders, c => c.CustomerID, o => o.CustomerID,
 (c, co) => new { c, co })
 let n = co.Count()
@@ -5687,7 +5687,7 @@ select new { c.Name, o.Total }
 is translated into
 
 ```csharp
-from \ in (customers).
+from * in (customers).
 SelectMany(c => c.Orders, (c,o) => new { c, o })
 orderby o.Total descending
 select new { c.Name, o.Total }
@@ -5697,7 +5697,7 @@ which is further translated into
 ```csharp
 customers.
 SelectMany(c => c.Orders, (c,o) => new { c, o }).
-OrderByDescending(\* => o.Total).
+OrderByDescending(* => o.Total).
 Select(\ => new { c.Name, o.Total })
 ```
 which, when transparent identifiers are erased, is equivalent to
@@ -5722,7 +5722,7 @@ select new { c.Name, o.OrderDate, p.ProductName }
 is translated into
 
 ```csharp
-from \ in (customers).
+from * in (customers).
 Join(orders, c => c.CustomerID, o => o.CustomerID,
 (c, o) => new { c, o })
 join d in details on o.OrderID equals d.OrderID
@@ -5734,8 +5734,8 @@ which is further reduced to
 ```csharp
 customers.
 Join(orders, c => c.CustomerID, o => o.CustomerID, (c, o) => new { c, o }).
-Join(details, \ => o.OrderID, d => d.OrderID, (\, d) => new { \, d }).
-Join(products, \ => d.ProductID, p => p.ProductID, (\, p) => new { \, p }).
+Join(details, * => o.OrderID, d => d.OrderID, (*, d) => new { *, d }).
+Join(products, * => d.ProductID, p => p.ProductID, (*, p) => new { *, p }).
 Select(\ => new { c.Name, o.OrderDate, p.ProductName })
 ```
 
@@ -6169,4 +6169,3 @@ A boolean-expression `E` is required to be able to produce a value of type bool
 -   Otherwise, unary operator overload resolution (§12.4.4) is used to find a unique best implementation of operator true on `E`, and that implementation is applied at run-time.
 
 -   If no such operator is found, a binding-time error occurs.
-
