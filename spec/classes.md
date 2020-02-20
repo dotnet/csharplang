@@ -3846,7 +3846,7 @@ The following rules apply to unary operator declarations, where `T` denotes the 
 -  A unary `++` or `--` operator shall take a single parameter of type `T` or `T?` and shall return that same type or a type derived from it.
 -  A unary true or false operator shall take a single parameter of type `T` or `T?` and shall return type `bool`.
 
-The signature of a unary operator consists of the operator token (`+`, `-`, `!`, `\~`, `++`, `--`, `true`, or `false`) and the type of the single formal parameter. The return type is not part of a unary operator’s signature, nor is the name of the formal parameter.
+The signature of a unary operator consists of the operator token (`+`, `-`, `!`, `~`, `++`, `--`, `true`, or `false`) and the type of the single formal parameter. The return type is not part of a unary operator’s signature, nor is the name of the formal parameter.
 
 The `true` and `false` unary operators require pair-wise declaration. A compile-time error occurs if a `class` declares one of these operators without also declaring the other. The `true` and `false` operators are described further in §12.21.
 
