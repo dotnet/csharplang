@@ -3686,7 +3686,7 @@ class CountPrimes
         int count = 0;
         for (int i = 2; i <= max; i++) {
             if (!flags[i]) {
-                for (int j = i \* 2; j <= max; j += i) flags[j] = true;
+                for (int j = i * 2; j <= max; j += i) flags[j] = true;
                 count++;
             }
         }
