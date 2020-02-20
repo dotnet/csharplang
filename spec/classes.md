@@ -3842,7 +3842,7 @@ Additional information on conversion operators can be found in §11.5.
 
 The following rules apply to unary operator declarations, where `T` denotes the instance type of the `class` or `struct` that contains the operator declaration:
 
--  A unary `+`, `-`, `!`, or `\~` operator shall take a single parameter of type `T` or `T?` and can return any type.
+-  A unary `+`, `-`, `!`, or `~` operator shall take a single parameter of type `T` or `T?` and can return any type.
 -  A unary `++` or `--` operator shall take a single parameter of type `T` or `T?` and shall return that same type or a type derived from it.
 -  A unary true or false operator shall take a single parameter of type `T` or `T?` and shall return type `bool`.
 
