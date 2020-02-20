@@ -3466,7 +3466,7 @@ class X
         }
 
         remove {
-            /\* remove the delegate in a thread safe way \*/\
+            /* remove the delegate in a thread safe way */
         }
     }
 }
