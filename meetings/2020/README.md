@@ -26,14 +26,6 @@
 - https://github.com/dotnet/csharplang/issues/3213 Natural value equality (Mads)
 - https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
 
-## Feb 12
-
-- https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
-
-## Feb 10
-
-- https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
-
 ## Jan 29, 2020
 
 - Records: drilling in to individual features (Mads)
@@ -45,6 +37,18 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Feb 12
+
+[C# Language Design Notes for Feb. 12, 2020](LDM-2020-02-12.md)
+
+Records
+
+## Feb 10
+
+[C# Language Design Notes for Feb. 10, 2020](LDM-2020-02-10.md)
+
+Records
 
 ## Feb 5
 
