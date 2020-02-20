@@ -2241,7 +2241,7 @@ This third edition cancels and replaces the second edition (ISO/IEC 23270:2006).
 The major changes from the previous edition include:
 
 - Addition of
-  - default and hidden options on the \#line preprocessing directive
+  - default and hidden options on the #line preprocessing directive
   - Fixed-size buffers in unsafe code
   - Automatically implemented properties
   - Implicitly typed local variables and arrays
@@ -2423,7 +2423,7 @@ informational message reported during program translation, which is intended to 
 > 
 > The name C# is pronounced “C Sharp”.
 > 
-> The name C# is written as the <span style="font-variant:small-caps;">latin capital letter C</span> (U+0043) followed by the <span style="font-variant:small-caps;">number sign \#</span> (U+0023).
+> The name C# is written as the <span style="font-variant:small-caps;">latin capital letter C</span> (U+0043) followed by the <span style="font-variant:small-caps;">number sign #</span> (U+0023).
 > 
 > The following types appear throughout this specification. The full names of those types, including the global namespace qualifier are listed below for reference. Throughout this specification, these types will appear as the fully qualified name, omitting the global namespace qualifier, or as a simple unqualified type name, omitting the namespace. For example, the type `ICollection<T>`, when used in this specification, always means the type `global::System.Collections.Generic.ICollection<T>`.
 > 
@@ -2548,7 +2548,7 @@ A conforming implementation of C# shall provide and support all the types, value
 
 A conforming implementation of C# shall interpret characters in conformance with the Unicode Standard. Conforming implementations shall accept Unicode source files encoded with the UTF-8 encoding form.
 
-A conforming implementation of C# shall not successfully translate source containing a \#error preprocessing directive unless it is part of a group skipped by conditional compilation.
+A conforming implementation of C# shall not successfully translate source containing a #error preprocessing directive unless it is part of a group skipped by conditional compilation.
 
 A conforming implementation of C# shall produce at least one diagnostic message if the source program violates any rule of syntax, or any negative requirement (defined as a “shall” or “shall not” or “error” or “warning” requirement), unless that requirement is marked with the words “no diagnostic is required”.
 
@@ -3381,9 +3381,9 @@ There are several kinds of operators and punctuators. Operators are used in expr
 ```antlr
 operator-or-punctuator:: one of
     { } [ ] ( ) . , : ;
-    + - \* / % & | \^ ! \ ~
+    + - * / % & | \^ ! \ ~
     = < > ? ?? :: ++ -- && ||
-    -> == != <= >= += -= \*= /= %=
+    -> == != <= >= += -= *= /= %=
     &= |= \^= << <<=
 
 right-shift::
@@ -3473,7 +3473,7 @@ Two conditional compilation symbols are considered the same if they are identica
 - Each *unicode-escape-sequence* is transformed into its corresponding Unicode character.
 - Any *formatting-characters* are removed.
 
-A conditional compilation symbol has two possible states: ***defined*** or ***undefined***. At the beginning of the lexical processing of a source file, a conditional compilation symbol is undefined unless it has been explicitly defined by an external mechanism (such as a command-line compiler option). When a `#define` directive is processed, the conditional compilation symbol named in that directive becomes defined in that source file. The symbol remains defined until a \#undef directive for that same symbol is processed, or until the end of the source file is reached. An implication of this is that `#define` and `#undef` directives in one source file have no effect on other source files in the same program.
+A conditional compilation symbol has two possible states: ***defined*** or ***undefined***. At the beginning of the lexical processing of a source file, a conditional compilation symbol is undefined unless it has been explicitly defined by an external mechanism (such as a command-line compiler option). When a `#define` directive is processed, the conditional compilation symbol named in that directive becomes defined in that source file. The symbol remains defined until a #undef directive for that same symbol is processed, or until the end of the source file is reached. An implication of this is that `#define` and `#undef` directives in one source file have no effect on other source files in the same program.
 
 When referenced in a pre-processing expression (§7.5.3), a defined conditional compilation symbol has the `Boolean` value true, and an undefined conditional compilation symbol has the `Boolean` value false. There is no requirement that conditional compilation symbols be explicitly declared before they are referenced in pre-processing expressions. Instead, undeclared symbols are simply undefined and thus have the value false.
 
@@ -3481,7 +3481,7 @@ The namespace for conditional compilation symbols is distinct and separate from 
 
 ### Pre-processing expressions
 
-Pre-processing expressions can occur in `#if` and \#elif directives. The operators `!`, `==`, `!=`, `&&`, and `||` are permitted in pre-processing expressions, and parentheses may be used for grouping.
+Pre-processing expressions can occur in `#if` and #elif directives. The operators `!`, `==`, `!=`, `&&`, and `||` are permitted in pre-processing expressions, and parentheses may be used for grouping.
 
 ```antlr
 pp-expression::
@@ -3521,8 +3521,8 @@ The definition directives are used to define or undefine conditional compilation
 
 ```antlr
 pp-declaration::
-    whitespaceopt \# whitespaceopt define whitespace conditional-symbol pp-new-line
-    whitespaceopt \# whitespaceopt undef whitespace conditional-symbol pp-new-line
+    whitespaceopt # whitespaceopt define whitespace conditional-symbol pp-new-line
+    whitespaceopt # whitespaceopt undef whitespace conditional-symbol pp-new-line
 
 pp-new-line::
     whitespaceopt single-line-commentopt new-line
@@ -3548,7 +3548,7 @@ namespace Megacorp.Data
 #endif
 }
 ```
-is valid because the \#define directives precede the first token (the namespace keyword) in the source file.
+is valid because the #define directives precede the first token (the namespace keyword) in the source file.
 
 *end example*]
 
@@ -5115,7 +5115,7 @@ The floating-point operators, including the assignment operators, never produce 
 - If a floating-point operation is invalid, the result of the operation becomes NaN.
 - If one or both operands of a floating-point operation is NaN, the result of the operation becomes NaN.
 
-Floating-point operations may be performed with higher precision than the result type of the operation. [*Example*: Some hardware architectures support an “extended” or “long double” floating-point type with greater range and precision than the double type, and implicitly perform all floating-point operations using this higher precision type. Only at excessive cost in performance can such hardware architectures be made to perform floating-point operations with *less* precision, and rather than require an implementation to forfeit both performance and precision, C# allows a higher precision type to be used for all floating-point operations. Other than delivering more precise results, this rarely has any measurable effects. However, in expressions of the form x \* y / z, where the multiplication produces a result that is outside the double range, but the subsequent division brings the temporary result back into the double range, the fact that the expression is evaluated in a higher range format can cause a finite result to be produced instead of an infinity. To force a value of a floating-point type to the exact precision of its type, an explicit cast can be used. *end example*]
+Floating-point operations may be performed with higher precision than the result type of the operation. [*Example*: Some hardware architectures support an “extended” or “long double” floating-point type with greater range and precision than the double type, and implicitly perform all floating-point operations using this higher precision type. Only at excessive cost in performance can such hardware architectures be made to perform floating-point operations with *less* precision, and rather than require an implementation to forfeit both performance and precision, C# allows a higher precision type to be used for all floating-point operations. Other than delivering more precise results, this rarely has any measurable effects. However, in expressions of the form x * y / z, where the multiplication produces a result that is outside the double range, but the subsequent division brings the temporary result back into the double range, the fact that the expression is evaluated in a higher range format can cause a finite result to be produced instead of an infinity. To force a value of a floating-point type to the exact precision of its type, an explicit cast can be used. *end example*]
 
 ### The decimal type
 
@@ -19187,7 +19187,8 @@ class Gen<T> where T : struct
 
 ## Finalizers
 
-[*Note*: In an earlier version of this standard, what is now referred to as a "finalizer" was called a "destructor". Experience has shown that the term "destructor" caused confusion and often resulted to incorrect expectations, especially to programmers knowing C++. In C++, a destructor is called in a determinate manner, whereas, in C#, a finalizer is not. To get determinate behavior from C#, one should use Dispose. *end note*]
+> [!NOTE]
+> In an earlier version of this standard, what is now referred to as a "finalizer" was called a "destructor". Experience has shown that the term "destructor" caused confusion and often resulted to incorrect expectations, especially to programmers knowing C++. In C++, a destructor is called in a determinate manner, whereas, in C#, a finalizer is not. To get determinate behavior from C#, one should use `Dispose`.
 
 A ***finalizer*** is a member that implements the actions required to finalize an instance of a class. A finalizer is declared using a *finalizer-declaration*:
 
@@ -19279,7 +19280,7 @@ class A
 }
 ```
 
-is valid and the method shown hides `System.Objec`t's `Finalize` method. *end example*]
+is valid and the method shown hides `System.Object`'s `Finalize` method. *end example*]
 
 For a discussion of the behavior when an exception is thrown from a finalizer, see §21.4.
 
@@ -21252,154 +21253,181 @@ Here, non-abstract classes that derive from `C` would be required to override `F
 
 An ***enum type*** is a distinct value type (§9.2) that declares a set of named constants. [*Example*: The example
 
+```csharp
 enum Color
 {
-Red,
-Green,
-Blue
+    Red,
+    Green,
+    Blue
 }
+```
 
-declares an enum type named Color with members Red, Green, and Blue. *end example*]
+declares an enum type named `Color` with members `Red`, `Green`, and `Blue`. *end example*]
 
 ## Enum declarations
 
-An enum declaration declares a new enum type. An enum declaration begins with the keyword enum, and defines the name, accessibility, underlying type, and members of the enum.
+An `enum` declaration declares a new enum type. An `enum` declaration begins with the keyword `enum`, and defines the name, accessibility, underlying type, and members of the enum.
 
-[]{#Grammar_enum_declaration .anchor}enum-declaration:
-attributesopt enum-modifiersopt *enum* identifier enum-baseopt enum-body *;*opt[]{#Grammar_enum_base .anchor}
+```antlr
+enum-declaration:
+    attributesopt enum-modifiersopt enum identifier enum-baseopt enum-body ;opt
 
 enum-base:
-*:* integral-type
+    : integral-type
 
-[]{#Grammar_enum_body .anchor}enum-body:
-*{* enum-member-declarationsopt *}*
-*{* enum-member-declarations *,* *}*
+enum-body:
+    { enum-member-declarationsopt }
+    { enum-member-declarations , }
+```
 
-Each enum type has a corresponding integral type called the ***underlying type*** of the enum type. This underlying type shall be able to represent all the enumerator values defined in the enumeration. An enum declaration may explicitly declare an underlying type of byte, sbyte, short, ushort, int, uint, long or ulong. [*Note*: char cannot be used as an underlying type. *end note*] An enum declaration that does not explicitly declare an underlying type has an underlying type of int.
+Each enum type has a corresponding integral type called the ***underlying type*** of the enum type. This underlying type shall be able to represent all the enumerator values defined in the enumeration. An enum declaration may explicitly declare an underlying type of `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long` or `ulong`. 
+
+> [!NOTE]
+> `char` cannot be used as an underlying type. 
+
+An enum declaration that does not explicitly declare an underlying type has an underlying type of `int`.
 
 [*Example*: The example
 
-enum Color: long
+```csharp
+enum Color : long
 {
-Red,
-Green,
-Blue
+    Red,
+    Green,
+    Blue
 }
+```
 
-declares an enum with an underlying type of long. *end example*] [*Note*: A developer might choose to use an underlying type of long, as in the example, to enable the use of values that are in the range of long but not in the range of int, or to preserve this option for the future. *end note*]
+declares an enum with an underlying type of `long`. *end example*] 
 
-[*Note*: C# allows a trailing comma in an *enum-body*, just like it allows one in an *array-initializer* (§17.7). *end note*]
+> [!NOTE]
+> A developer might choose to use an underlying type of `long`, as in the example, to enable the use of values that are in the range of `long` but not in the range of `int`, or to preserve this option for the future. 
+
+> [!NOTE]
+> C# allows a trailing comma in an *enum-body*, just like it allows one in an *array-initializer* (§17.7).
 
 ## Enum modifiers
 
 An *enum-declaration* may optionally include a sequence of enum modifiers:
 
-[]{#Grammar_enum_modifiers .anchor}enum-modifiers:
-enum-modifier
-enum-modifiers enum-modifier
+```antlr
+enum-modifiers:
+    enum-modifier
+    enum-modifiers enum-modifier
 
-[]{#Grammar_enum_modifier .anchor}enum-modifier:
-*new*
-*public
-protected
-internal*
-*private*
+enum-modifier:
+    new
+    public
+    protected
+    internal
+    private
+```
 
-[[[]{#_Ref485188801 .anchor}]{#_Ref485188649 .anchor}]{#_Ref483210964 .anchor}It is a compile-time error for the same modifier to appear multiple times in an enum declaration.
+It is a compile-time error for the same modifier to appear multiple times in an enum declaration.
 
-The modifiers of an enum declaration have the same meaning as those of a class declaration (§15.2.2). However, the abstract, and sealed, and static modifiers are not permitted in an enum declaration. Enums cannot be abstract and do not permit derivation.
+The modifiers of an enum declaration have the same meaning as those of a class declaration (§15.2.2). However, the `abstract`, and `sealed`, and `static` modifiers are not permitted in an enum declaration. Enums cannot be `abstract` and do not permit derivation.
 
 ## Enum members
 
 The body of an enum type declaration defines zero or more enum members, which are the named constants of the enum type. No two enum members can have the same name.
 
-[]{#Grammar_enum_member_declarations .anchor}enum-member-declarations:
-enum-member-declaration
-enum-member-declarations *,* enum-member-declaration
+```antlr
+enum-member-declarations:
+    enum-member-declaration
+    enum-member-declarations , enum-member-declaration
 
-[]{#Grammar_enum_member_declaration .anchor}enum-member-declaration:
-attributesopt identifier
-attributesopt identifier *=* constant-expression
+enum-member-declaration:
+    attributesopt identifier
+    attributesopt identifier = constant-expression
+```
 
 Each enum member has an associated constant value. The type of this value is the underlying type for the containing enum. The constant value for each enum member shall be in the range of the underlying type for the enum. [*Example*: The example
 
-enum Color: uint
+```csharp
+enum Color : uint
 {
-Red = -1,
-Green = -2,
-Blue = -3
+    Red = -1,
+    Green = -2,
+    Blue = -3
 }
+```
 
-results in a compile-time error because the constant values -1, -2, and –3 are not in the range of the underlying integral type uint. *end example*]
+results in a compile-time error because the constant values -1, -2, and –3 are not in the range of the underlying integral type `uint`. *end example*]
 
 Multiple enum members may share the same associated value. [*Example*: The example
 
+```csharp
 enum Color
 {
-Red,
-Green,
-Blue,
+    Red,
+    Green,
+    Blue,
 
-Max = Blue
+    Max = Blue
 }
+```
 
-shows an enum in which two enum members—Blue and Max—have the same associated value. *end example*]
+shows an enum in which two enum members—`Blue` and `Max`—have the same associated value. *end example*]
 
 The associated value of an enum member is assigned either implicitly or explicitly. If the declaration of the enum member has a *constant-expression* initializer, the value of that constant expression, implicitly converted to the underlying type of the enum, is the associated value of the enum member. If the declaration of the enum member has no initializer, its associated value is set implicitly, as follows:
 
 - If the enum member is the first enum member declared in the enum type, its associated value is zero.
-
 - Otherwise, the associated value of the enum member is obtained by increasing the associated value of the textually preceding enum member by one. This increased value shall be within the range of values that can be represented by the underlying type, otherwise a compile-time error occurs.
 
 [*Example*: The example
 
+```csharp
 using System;
 
 enum Color
 {
-Red,
-Green = 10,
-Blue
+    Red,
+    Green = 10,
+    Blue
 }
 
 class Test
 {
-static void Main() {
-Console.WriteLine(StringFromColor(Color.Red));
-Console.WriteLine(StringFromColor(Color.Green));
-Console.WriteLine(StringFromColor(Color.Blue));
-}
+    static void Main ()
+    {
+        Console.WriteLine (StringFromColor (Color.Red));
+        Console.WriteLine (StringFromColor (Color.Green));
+        Console.WriteLine (StringFromColor (Color.Blue));
+    }
 
-static string StringFromColor(Color c) {
-switch (c) {
-case Color.Red:
-return String.Format("Red = {0}", (int) c);
+    static string StringFromColor (Color c)
+    {
+        switch (c)
+        {
+            case Color.Red:
+                return String.Format ("Red = {0}", (int) c);
 
-case Color.Green:
-return String.Format("Green = {0}", (int) c);
+            case Color.Green:
+                return String.Format ("Green = {0}", (int) c);
 
-case Color.Blue:
-return String.Format("Blue = {0}", (int) c);
+            case Color.Blue:
+                return String.Format ("Blue = {0}", (int) c);
 
-default:
-return "Invalid color";
+            default:
+                return "Invalid color";
+        }
+    }
 }
-}
-}
+```
 
 prints out the enum member names and their associated values. The output is:
 
+```plaintext
 Red = 0
 Green = 10
 Blue = 11
+```
 
 for the following reasons:
 
-- the enum member Red is automatically assigned the value zero (since it has no initializer and is the first enum member);
-
-- the enum member Green is explicitly given the value 10;
-
-- and the enum member Blue is automatically assigned the value one greater than the member that textually precedes it.
+- the enum member `Red` is automatically assigned the value zero (since it has no initializer and is the first enum member);
+- the enum member `Green` is explicitly given the value 10;
+- and the enum member `Blue` is automatically assigned the value one greater than the member that textually precedes it.
 
 *end example*]
 
@@ -21407,73 +21435,72 @@ The associated value of an enum member may not, directly or indirectly, use the 
 
 [*Example*: The example
 
+```csharp
 enum Circular
 {
-A = B,
-B
+    A = B,
+    B
 }
+```
 
-results in a compile-time error because the declarations of A and B are circular. A depends on B explicitly, and B depends on A implicitly. *end example*]
+results in a compile-time error because the declarations of `A` and `B` are circular. `A` depends on `B` explicitly, and `B` depends on `A` implicitly. *end example*]
 
 Enum members are named and scoped in a manner exactly analogous to fields within classes. The scope of an enum member is the body of its containing enum type. Within that scope, enum members can be referred to by their simple name. From all other code, the name of an enum member shall be qualified with the name of its enum type. Enum members do not have any declared accessibility—an enum member is accessible if its containing enum type is accessible.
 
 ## The System.Enum type
 
-The type System.Enum is the abstract base class of all enum types (this is distinct and different from the underlying type of the enum type), and the members inherited from System.Enum are available in any enum type. A boxing conversion (§11.2.8) exists from any enum type to System.Enum, and an unboxing conversion (§11.3.6) exists from System.Enum to any enum type.
+The type `System.Enum` is the abstract base class of all enum types (this is distinct and different from the underlying type of the enum type), and the members inherited from `System.Enum` are available in any enum type. A boxing conversion (§11.2.8) exists from any enum type to `System.Enum`, and an unboxing conversion (§11.3.6) exists from `System.Enum` to any enum type.
 
-Note that System.Enum is not itself an *enum-type*. Rather, it is a *class-type* from which all *enum-type*s are derived. The type System.Enum inherits from the type System.ValueType (§9.3.2), which, in turn, inherits from type object. At run-time, a value of type System.Enum can be null or a reference to a boxed value of any enum type.
+Note that `System.Enum` is not itself an *enum-type*. Rather, it is a *class-type* from which all *enum-type*s are derived. The type `System.Enum` inherits from the type `System.ValueType` (§9.3.2), which, in turn, inherits from type `object`. At run-time, a value of type `System.Enum` can be `null` or a reference to a boxed value of any enum type.
 
 ## Enum values and operations
 
 Each enum type defines a distinct type; an explicit enumeration conversion (§11.3.3) is required to convert between an enum type and an integral type, or between two enum types. The set of values of the enum type is the same as the set of values of the underlying type and is not restricted to the values of the named constants. Any value of the underlying type of an enum can be cast to the enum type, and is a distinct valid value of that enum type.
 
-Enum members have the type of their containing enum type (except within other enum member initializers: see §19.4). The value of an enum member declared in enum type E with associated value v is (E)v.
+Enum members have the type of their containing enum type (except within other enum member initializers: see §19.4). The value of an enum member declared in enum type `E` with associated value `v` is `(E)v`.
 
 The following operators can be used on values of enum types:
 
-- ==, !=, <, >, <=, >= (§12.11.6)
+- `==`, `!=`, `<`, `>`, `<=`, `>=` (§12.11.6)
+- binary `+` (§12.9.5)
+- binary `-` (§12.9.6)
+- `^`, `&`, `|` (§12.12.3)
+- `~` (§12.8.5)
+- `++`, `--` (§12.7.10 and §12.8.6)
+- `sizeof` (§23.6.9)
 
-- binary + (§12.9.5)
-
-- binary - (§12.9.6)
-
-- ^, &, | (§12.12.3)
-
-- ~ (§12.8.5)
-
-- ++, -- (§12.7.10 and §12.8.6)
-
-- sizeof (§23.6.9)
-
-Every enum type automatically derives from the class System.Enum (which, in turn, derives from System.ValueType and object). Thus, inherited methods and properties of this class can be used on values of an enum type.
+Every enum type automatically derives from the class `System.Enum` (which, in turn, derives from `System.ValueType` and `object`). Thus, inherited methods and properties of this class can be used on values of an enum type.
 
 # Delegates
 
 ## General
 
-A delegate declaration defines a class that is derived from the class System.Delegate. A delegate instance encapsulates an ***invocation list***, which is a list of one or more methods, each of which is referred to as a ***callable entity***. For instance methods, a callable entity consists of an instance and a method on that instance. For static methods, a callable entity consists of just a method. Invoking a delegate instance with an appropriate set of arguments causes each of the delegate’s callable entities to be invoked with the given set of arguments.
+A delegate declaration defines a class that is derived from the class `System.Delegate`. A delegate instance encapsulates an ***invocation list***, which is a list of one or more methods, each of which is referred to as a ***callable entity***. For instance methods, a callable entity consists of an instance and a method on that instance. For static methods, a callable entity consists of just a method. Invoking a delegate instance with an appropriate set of arguments causes each of the delegate’s callable entities to be invoked with the given set of arguments.
 
-[*Note*: An interesting and useful property of a delegate instance is that it does not know or care about the classes of the methods it encapsulates; all that matters is that those methods be compatible (§20.4) with the delegate’s type. This makes delegates perfectly suited for “anonymous” invocation. *end note*]
+> [!NOTE]
+> An interesting and useful property of a delegate instance is that it does not know or care about the classes of the methods it encapsulates; all that matters is that those methods be compatible (§20.4) with the delegate’s type. This makes delegates perfectly suited for “anonymous” invocation.
 
 ## Delegate declarations
 
 A *delegate-declaration* is a *type-declaration* (§14.7) that declares a new delegate type.
 
-[]{#Grammar_delegate_declaration .anchor}delegate-declaration:
-attributesopt delegate-modifiersopt *delegate* return-type
-identifier variant-type-parameter-listopt
- *(* formal-parameter-listopt *)* type-parameter-constraints-clausesopt *;*
+```antlr
+delegate-declaration:
+    attributesopt delegate-modifiersopt delegate return-type
+    identifier variant-type-parameter-listopt
+    ( formal-parameter-listopt ) type-parameter-constraints-clausesopt ;
 
-[]{#Grammar_delegate_modifiers .anchor}delegate-modifiers:
-delegate-modifier
-delegate-modifiers delegate-modifier
+delegate-modifiers:
+    delegate-modifier
+    delegate-modifiers delegate-modifier
 
-[]{#Grammar_delegate_modifier .anchor}delegate-modifier:
-*new*
-*public
-protected
-internal*
-*private*
+delegate-modifier:
+    new
+    public
+    protected
+    internal
+    private
+```
 
 It is a compile-time error for the same modifier to appear multiple times in a delegate declaration.
 
@@ -21481,146 +21508,150 @@ A delegate declaration shall not supply a *type-parameter-constraints-clauses* u
 
 A delegate declaration that supplies a *variant-type-parameter-list* is a generic delegate declaration.
 
-The new modifier is only permitted on delegates declared within another type, in which case it specifies that such a delegate hides an inherited member by the same name, as described in §15.3.5.
+The `new` modifier is only permitted on delegates declared within another type, in which case it specifies that such a delegate hides an inherited member by the same name, as described in §15.3.5.
 
-The public, protected, internal, and private modifiers control the accessibility of the delegate type. Depending on the context in which the delegate declaration occurs, some of these modifiers might not be permitted (§8.5.2).
+The `public`, `protected`, `internal`, and `private` modifiers control the accessibility of the delegate type. Depending on the context in which the delegate declaration occurs, some of these modifiers might not be permitted (§8.5.2).
 
 The delegate’s type name is *identifier*.
 
-The optional *formal-parameter-list* specifies the parameters of the delegate, and []{#_Hlt505504571 .anchor}*return-type* indicates the return type of the delegate.
+The optional *formal-parameter-list* specifies the parameters of the delegate, and *return-type* indicates the return type of the delegate.
 
 The optional *variant-type-parameter-list* (§18.2.3) specifies the type parameters to the delegate itself.
 
-The return type of a delegate type shall be either void, or output-safe (§18.2.3.2).
+The return type of a delegate type shall be either `void`, or output-safe (§18.2.3.2).
 
-All the formal parameter types of a delegate type shall be input-safe. In addition, any out or ref parameter types shall also be output-safe. [Note: Even out parameters are required to be input-safe, due to common implementation restrictions. end note]
+All the formal parameter types of a delegate type shall be input-safe. In addition, any `out` or `ref` parameter types shall also be output-safe. 
+
+> [!NOTE]
+> Even `out` parameters are required to be input-safe, due to common implementation restrictions.
 
 Delegate types in C# are name equivalent, not structurally equivalent.
 
 [*Example*:
 
+```csharp
 delegate int D1(int i, double d);
 delegate int D2(int c, double d);
+```
 
-The delegate types D1 and D2 are two different types, so they are not interchangeable, despite their identical signatures. *end example*]
+The delegate types `D1` and `D2` are two different types, so they are not interchangeable, despite their identical signatures. *end example*]
 
 Like other generic type declarations, type arguments shall be given to create a constructed delegate type. The parameter types and return type of a constructed delegate type are created by substituting, for each type parameter in the delegate declaration, the corresponding type argument of the constructed delegate type.
 
-[[]{#_Hlt505511189 .anchor}]{#_Hlt505513336 .anchor}The only way to declare a delegate type is via a *delegate-declaration*. Every delegate type is a reference type that is derived from System.Delegate. The members required for every delegate type are detailed in §20.3. Delegate types are implicitly sealed, so it is not permissible to derive any type from a delegate type. It is also not permissible to declare a non-delegate class type deriving from System.Delegate. System.Delegate is not itself a delegate type; it is a class type from which all delegate types are derived.[]{#_Toc445783091 .anchor}
+The only way to declare a delegate type is via a *delegate-declaration*. Every delegate type is a reference type that is derived from `System.Delegate`. The members required for every delegate type are detailed in §20.3. Delegate types are implicitly sealed, so it is not permissible to derive any type from a delegate type. It is also not permissible to declare a non-delegate class type deriving from `System.Delegate`. `System.Delegate` is not itself a delegate type; it is a class type from which all delegate types are derived.
 
 ## Delegate members
 
-Every delegate type inherits members from the Delegate class as described in §15.3.4. In addition, every delegate type must provide a non-generic Invoke method whose parameter list matches the *formal-parameter-list* in the delegate declaration, and whose return type matches the *return-type* in the delegate declaration. The Invoke method shall be at least as accessible as the containing delegate type. Calling the Invoke method on a delegate type is semantically equivalent to using the delegate invocation syntax (§20.6) .
+Every delegate type inherits members from the `Delegate` class as described in §15.3.4. In addition, every delegate type must provide a non-generic `Invoke` method whose parameter list matches the *formal-parameter-list* in the delegate declaration, and whose return type matches the *return-type* in the delegate declaration. The `Invoke` method shall be at least as accessible as the containing delegate type. Calling the `Invoke` method on a delegate type is semantically equivalent to using the delegate invocation syntax (§20.6) .
 
 Implementations may define additional members in the delegate type.
 
-Except for instantiation, any operation that can be applied to a class or class instance can also be applied to a delegate class or instance, respectively. In particular, it is possible to access members of the System.Delegate type via the usual member access syntax.
+Except for instantiation, any operation that can be applied to a class or class instance can also be applied to a delegate class or instance, respectively. In particular, it is possible to access members of the `System.Delegate` type via the usual member access syntax.
 
 ## Delegate compatibility
 
-A method or delegate type M is ***compatible*** with a delegate type D if all of the following are true:
+A method or delegate type `M` is ***compatible*** with a delegate type `D` if all of the following are true:
 
-- D and M have the same number of parameters, and each parameter in D has the same ref or out modifiers as the corresponding parameter in M.
-
-- For each value parameter (a parameter with no ref or out modifier), an identity conversion (§11.2.2) or implicit reference conversion (§11.2.7) exists from the parameter type in D to the corresponding parameter type in M.
-
-- For each ref or out parameter, the parameter type in D is the same as the parameter type in M.
-
-- An identity or implicit reference conversion exists from the return type of M to the return type of D.
+- `D` and `M` have the same number of parameters, and each parameter in `D` has the same `ref` or `out` modifiers as the corresponding parameter in `M`.
+- For each value parameter (a parameter with no ref or out modifier), an identity conversion (§11.2.2) or implicit reference conversion (§11.2.7) exists from the parameter type in `D` to the corresponding parameter type in `M`.
+- For each `ref` or `out` parameter, the parameter type in `D` is the same as the parameter type in `M`.
+- An identity or implicit reference conversion exists from the return type of `M` to the return type of `D`.
 
 This definition of consistency allows covariance in return type and contravariance in parameter types.
 
 [*Example*:
 
-delegate int D1(int i, double d);
-delegate int D2(int c, double d);
-delegate object D3(string s);
+```csharp
+delegate int D1 (int i, double d);
+delegate int D2 (int c, double d);
+delegate object D3 (string s);
 
 class A
 {
-public static int M1(int a, double b) {…}
+    public static int M1 (int a, double b) {…}
 }
 
 class B
 {
-public static int M1(int f, double g) {…}
-public static void M2(int k, double l) {…}
-public static int M3(int g) {…}
-public static void M4(int g) {…}
-public static object M5(string s) {…}
-public static int[] M6(object o) {…}
+    public static int M1 (int f, double g) {…}
+    public static void M2 (int k, double l) {…}
+    public static int M3 (int g) {…}
+    public static void M4 (int g) {…}
+    public static object M5 (string s) {…}
+    public static int[] M6 (object o) {…}
 
 }
+```
 
-The methods A.M1 and B.M1 are compatible with both the delegate types D1 and D2, since they have the same return type and parameter list. The methods B.M2, B.M3, and B.M4 are incompatible with the delegate types D1 and D2, since they have different return types or parameter lists. The methods B.M5 and B.M6 are both compatible with delegate type D3. *end example*]
+The methods `A.M1` and `B.M1` are compatible with both the delegate types `D1` and `D2`, since they have the same return type and parameter list. The methods `B.M2`, `B.M3`, and `B.M4` are incompatible with the delegate types `D1` and `D2`, since they have different return types or parameter lists. The methods `B.M5 `and `B.M6` are both compatible with delegate type `D3`. *end example*]
 
 [*Example*:
 
-delegate bool Predicate<T>(T value);
+```csharp
+delegate bool Predicate<T> (T value);
 
 class X
 {
-static bool F(int i) {…}
+    static bool F (int i) {…}
 
-static bool G(string s) {…}
+    static bool G (string s) {…}
 }
+```
 
-The method X.F is compatible with the delegate type Predicate<int> and the method X.G is compatible with the delegate type Predicate<string>. *end example*]
+The method `X.F` is compatible with the delegate type `Predicate<int>` and the method `X.G` is compatible with the delegate type `Predicate<string>`. *end example*]
 
-[*Note*: The intuitive meaning of delegate compatibility is that a method is compatible with a delegate type if every invocation of the delegate could be replaced with an invocation of the method without violating type safety, treating optional parameters and parameter arrays as explicit parameters. For example, in the following code:
-
-delegate void Action<T>(T arg);
-
-class Test {
-
-static void Print(object value) {
-
-Console.WriteLine(value);
-
-}
-
-static void Main() {
-
-Action<string> log = Print;
-
-log("text");
-
-}
-
-}
-
-The Print method is compatible with the Action<string> delegate type because any invocation of an Action<string> delegate would also be a valid invocation of the Print method.
-
-If the signature of the Print method above were changed to Print(object value, bool prependTimestamp = false) for example, the Print method would no longer be compatible with Action<string> by the rules of this clause. *end note*]
+> [!NOTE]
+> The intuitive meaning of delegate compatibility is that a method is compatible with a delegate type if every invocation of the delegate could be replaced with an invocation of the method without violating type safety, treating optional parameters and parameter arrays as explicit parameters. For example, in the following code:
+> 
+> delegate void Action<T> (T arg);
+> 
+> class Test
+> {
+>     static void Print (object value)
+>     {
+>         Console.WriteLine (value);
+>     }
+> 
+>     static void Main ()
+>     {
+>         Action<string> log = Print;
+>         log ("text");
+>     }
+> }
+> 
+> The `Print` method is compatible with the `Action<string>` delegate type because any invocation of an `Action<string>` delegate would also be a valid invocation of the `Print` method.
+> 
+> If the signature of the `Print` method above were changed to `Print(object value, bool prependTimestamp = false)` for example, the `Print` method would no longer be compatible with `Action<string>` by the rules of this clause. 
 
 ## Delegate instantiation
 
 An instance of a delegate is created by a *delegate-creation-expression* (§12.7.11.6), a conversion to a delegate type, delegate combination or delegate removal. The newly created delegate instance then refers to one or more of:
 
 - The static method referenced in the *delegate-creation-expression*, or
-
 - The target object (which cannot be null) and instance method referenced in the *delegate-creation-expression*, or
-
 - Another delegate (§12.7.11.6).
 
 [*Example*:
 
-delegate void D(int x);
+```csharp
+delegate void D (int x);
 class C
 {
-public static void M1(int i) {…}
-public void M2(int i) {…}
+    public static void M1 (int i) {…}
+    public void M2 (int i) {…}
 }
 
 class Test
 {
-static void Main() {
-D cd1 = new D(C.M1); // static method
-C t = new C();
-D cd2 = new D(t.M2); // instance method
-D cd3 = new D(cd2); // another delegate
+    static void Main ()
+    {
+        D cd1 = new D (C.M1); // static method
+        C t = new C ();
+        D cd2 = new D (t.M2); // instance method
+        D cd3 = new D (cd2); // another delegate
+    }
 }
-}
+```
 
 *end example*]
 
@@ -21628,55 +21659,59 @@ The set of methods encapsulated by a delegate instance is called an ***invocatio
 
 When a new delegate is created from a single delegate the resultant invocation list has just one entry, which is the source delegate (§12.7.11.6).
 
-Delegates are combined using the binary + (§12.9.5) and += operators (§12.18.3). A delegate can be removed from a combination of delegates, using the binary - (§12.9.6) and -= operators (§12.18.3). Delegates can be compared for equality (§12.11.9).
+Delegates are combined using the binary `+` (§12.9.5) and `+=` operators (§12.18.3). A delegate can be removed from a combination of delegates, using the binary `-` (§12.9.6) and `-=` operators (§12.18.3). Delegates can be compared for equality (§12.11.9).
 
 [*Example*: The following example shows the instantiation of a number of delegates, and their corresponding invocation lists:
 
-delegate void D(int x);
-class C
-{
-public static void M1(int i) {…}
-public static void M2(int i) {…}
-}
+```csharp
+    delegate void D (int x);
+    class C
+    {
+        public static void M1 (int i) {…}
+        public static void M2 (int i) {…}
+    }
 
-class Test
-{
-static void Main() {
-D cd1 = new D(C.M1); // M1 - one entry in invocation list
+    class Test
+    {
+        static void Main ()
+        {
+            D cd1 = new D (C.M1); // M1 - one entry in invocation list
 
-D cd2 = new D(C.M2); // M2 - one entry
+            D cd2 = new D (C.M2); // M2 - one entry
 
-D cd3 = cd1 + cd2; // M1 + M2 - two entries
+            D cd3 = cd1 + cd2; // M1 + M2 - two entries
 
-D cd4 = cd3 + cd1; // M1 + M2 + M1 - three entries
+            D cd4 = cd3 + cd1; // M1 + M2 + M1 - three entries
 
-D cd5 = cd4 + cd3; // M1 + M2 + M1 + M1 + M2 - five entries
+            D cd5 = cd4 + cd3; // M1 + M2 + M1 + M1 + M2 - five entries
 
-D td3 = new D(cd3); // [M1 + M2] - ONE entry in invocation
+            D td3 = new D (cd3); // [M1 + M2] - ONE entry in invocation
 
-// list, which is itself a list of two methods.
+            // list, which is itself a list of two methods.
 
-D td4 = td3 + cd1; // [M1 + M2] + M1 - two entries
+            D td4 = td3 + cd1; // [M1 + M2] + M1 - two entries
 
-D cd6 = cd4 - cd2; // M1 + M1 - two entries in invocation list
+            D cd6 = cd4 - cd2; // M1 + M1 - two entries in invocation list
 
-D td6 = td4 - cd2; // [M1 + M2] + M1 - two entries in
+            D td6 = td4 - cd2; // [M1 + M2] + M1 - two entries in
 
-// invocation list, but still three methods called, M2 not removed.
-}
-}
+            // invocation list, but still three methods called, M2 not removed.
+        }
+    }
+```
 
-When cd1 and cd2 are instantiated, they each encapsulate one method. When cd3 is instantiated, it has an invocation list of two methods, M1 and M2, in that order. cd4’s invocation list contains M1, M2, and M1, in that order. For cd5, the invocation list contains M1, M2, M1, M1, and M2, in that order.
+When `cd1` and `cd2` are instantiated, they each encapsulate one method. When `cd3` is instantiated, it has an invocation list of two methods, `M1` and `M2`, in that order. `cd4`’s invocation list contains `M1`, `M2`, and `M1`, in that order. For `cd5`, the invocation list contains `M1`, `M2`, `M1`, `M1`, and `M2`, in that order.
 
-When cd1 and cd2 are instantiated, they each encapsulate one method. When cd3 is instantiated, it has an invocation list of two methods, M1 and M2, in that order. cd4’s invocation list contains M1, M2, and M1, in that order. For cd5 the invocation list contains M1, M2, M1, M1, and M2, in that order.
+When creating a delegate from another delegate with a *delegate-creation-expression* the result has an invocation list with a different structure from the original, but which results in the same methods being invoked in the same order. When `td3` is created from `cd3` its invocation list has just one member, but that member is a list of the methods `M1` and `M2` and those methods are invoked by `td3` in the same order as they are invoked by cd3. Similarly when `td4` is instantiated its invocation list has just two entries but it invokes the three methods `M1`, `M2,` and `M1`, in that order just as `cd4` does.
 
-When creating a delegate from another delegate with a *delegate-creation-expression* the result has an invocation list with a different structure from the original, but which results in the same methods being invoked in the same order. When td3 is created from cd3 its invocation list has just one member, but that member is a list of the methods M1 and M2 and those methods are invoked by td3 in the same order as they are invoked by cd3. Similarly when td4 is instantiated its invocation list has just two entries but it invokes the three methods M1, M2, and M1, in that order just as cd4 does.
-
-The structure of the invocation list affects delegate subtraction. Delegate cd6, created by subtracting cd2 (which invokes M2) from cd4 (which invokes M1, M2, and M1) invokes M1 and M1. However delegate td6, created by subtracting cd2 (which invokes M2) from td4 (which invokes M1, M2, and M1) still invokes M1, M2 and M1, in that order, as M2 is not a single entry in the list but a member of a nested list.
+The structure of the invocation list affects delegate subtraction. Delegate cd6, created by subtracting `cd2` (which invokes `M2`) from `cd4` (which invokes `M1`, `M2`, and `M1`) invokes `M1` and `M1`. However delegate `td6`, created by subtracting `cd2` (which invokes `M2`) from `td4` (which invokes `M1`, `M2`, and `M1`) still invokes `M1`, `M2` and `M1`, in that order, as `M2` is not a single entry in the list but a member of a nested list.
 
 For more examples of combining (as well as removing) delegates, see §20.6. *end example*]
 
-Once instantiated, a delegate instance always refers to the same invocation list. [*Note*: Remember, when two delegates are combined, or one is removed from another, a new delegate results with its own invocation list; the invocation lists of the delegates combined or removed remain unchanged. *end note*]
+Once instantiated, a delegate instance always refers to the same invocation list. 
+
+> [!NOTE]
+> Remember, when two delegates are combined, or one is removed from another, a new delegate results with its own invocation list; the invocation lists of the delegates combined or removed remain unchanged.
 
 ## Delegate invocation
 
@@ -21684,71 +21719,78 @@ C# provides special syntax for invoking a delegate. When a non-null delegate ins
 
 Invocation of a delegate instance whose invocation list contains multiple entries, proceeds by invoking each of the methods in the invocation list, synchronously, in order. Each method so called is passed the same set of arguments as was given to the delegate instance. If such a delegate invocation includes reference parameters (§15.6.2.3), each method invocation will occur with a reference to the same variable; changes to that variable by one method in the invocation list will be visible to methods further down the invocation list. If the delegate invocation includes output parameters or a return value, their final value will come from the invocation of the last delegate in the list. If an exception occurs during processing of the invocation of such a delegate, and that exception is not caught within the method that was invoked, the search for an exception catch clause continues in the method that called the delegate, and any methods further down the invocation list are not invoked.
 
-Attempting to invoke a delegate instance whose value is null results in an exception of type System.NullReferenceException.
+Attempting to invoke a delegate instance whose value is `null` results in an exception of type `System.NullReferenceException`.
 
 [*Example*: The following example shows how to instantiate, combine, remove, and invoke delegates:
 
+```csharp
 using System;
 
-delegate void D(int x);
+delegate void D (int x);
 class C
 {
-public static void M1(int i) {
-Console.WriteLine("C.M1: " + i);
-}
+    public static void M1 (int i)
+    {
+        Console.WriteLine ("C.M1: " + i);
+    }
 
-public static void M2(int i) {
-Console.WriteLine("C.M2: " + i);
-}
+    public static void M2 (int i)
+    {
+        Console.WriteLine ("C.M2: " + i);
+    }
 
-public void M3(int i) {
-Console.WriteLine("C.M3: " + i);
-}
+    public void M3 (int i)
+    {
+        Console.WriteLine ("C.M3: " + i);
+    }
 }
 
 class Test
 {
-static void Main() {
-D cd1 = new D(C.M1);
-cd1(-1); // call M1
+    static void Main ()
+    {
+        D cd1 = new D (C.M1);
+        cd1 (-1); // call M1
 
-D cd2 = new D(C.M2);
-cd2(-2); // call M2
+        D cd2 = new D (C.M2);
+        cd2 (-2); // call M2
 
-D cd3 = cd1 + cd2;
-cd3(10); // call M1 then M2
+        D cd3 = cd1 + cd2;
+        cd3 (10); // call M1 then M2
 
-cd3 += cd1;
-cd3(20); // call M1, M2, then M1
+        cd3 += cd1;
+        cd3 (20); // call M1, M2, then M1
 
-C c = new C();
-D cd4 = new D(c.M3);
-cd3 += cd4;
-cd3(30); // call M1, M2, M1, then M3
+        C c = new C ();
+        D cd4 = new D (c.M3);
+        cd3 += cd4;
+        cd3 (30); // call M1, M2, M1, then M3
 
-cd3 -= cd1; // remove last M1
-cd3(40); // call M1, M2, then M3
+        cd3 -= cd1; // remove last M1
+        cd3 (40); // call M1, M2, then M3
 
-cd3 -= cd4;
-cd3(50); // call M1 then M2
+        cd3 -= cd4;
+        cd3 (50); // call M1 then M2
 
-cd3 -= cd2;
-cd3(60); // call M1
-cd3 -= cd2; // impossible removal is benign
-cd3(60); // call M1
+        cd3 -= cd2;
+        cd3 (60); // call M1
+        cd3 -= cd2; // impossible removal is benign
+        cd3 (60); // call M1
 
-cd3 -= cd1; // invocation list is empty so cd3 is null
-// cd3(70); // System.NullReferenceException thrown
-cd3 -= cd1; // impossible removal is benign
+        cd3 -= cd1; // invocation list is empty so cd3 is null
+        // cd3(70); // System.NullReferenceException thrown
+        cd3 -= cd1; // impossible removal is benign
+    }
 }
-}
+```
 
-As shown in the statement cd3 += cd1;, a delegate can be present in an invocation list multiple times. In this case, it is simply invoked once per occurrence. In an invocation list such as this, when that delegate is removed, the last occurrence in the invocation list is the one actually removed.
+As shown in the statement `cd3 += cd1`;, a delegate can be present in an invocation list multiple times. In this case, it is simply invoked once per occurrence. In an invocation list such as this, when that delegate is removed, the last occurrence in the invocation list is the one actually removed.
 
-Immediately prior to the execution of the final statement, cd3 -= cd1;, the delegate cd3 refers to an empty invocation list. Attempting to remove a delegate from an empty list (or to remove a non-existent delegate from a non-empty list) is not an error.
+Immediately prior to the execution of the final statement, `cd3 -= cd1`;, the delegate `cd3` refers to an empty invocation list. Attempting to remove a delegate from an empty list (or to remove a non-existent delegate from a non-empty list) is not an error.
 
 The output produced is:
 
+```plaintext
 C.M1: -1
 C.M2: -2
 
@@ -21773,6 +21815,7 @@ C.M2: 50
 
 C.M1: 60
 C.M1: 60
+```
 
 *end example*]
 
@@ -21786,62 +21829,56 @@ Exceptions in C# provide a structured, uniform, and type-safe way of handling bo
 
 Exception can be thrown in two different ways.
 
-- A throw statement (§13.10.6) throws an exception immediately and unconditionally. Control never reaches the statement immediately following the throw.
-
-- Certain exceptional conditions that arise during the processing of C# statements and expression cause an exception in certain circumstances when the operation cannot be completed normally. [*Example*: An integer division operation (§12.9.3) throws a System.DivideByZeroException if the denominator is zero. *end example*] See §21.5 for a list of the various exceptions that can occur in this way.
+- A `throw` statement (§13.10.6) throws an exception immediately and unconditionally. Control never reaches the statement immediately following the throw.
+- Certain exceptional conditions that arise during the processing of C# statements and expression cause an exception in certain circumstances when the operation cannot be completed normally. [*Example*: An integer division operation (§12.9.3) throws a `System.DivideByZeroException` if the denominator is zero. *end example*] See §21.5 for a list of the various exceptions that can occur in this way.
 
 ## The System.Exception class
 
-The System.Exception class is the base type of all exceptions. This class has a few notable properties that all exceptions share:
+The `System.Exception` class is the base type of all exceptions. This class has a few notable properties that all exceptions share:
 
-- Message is a read-only property of type string that contains a human-readable description of the reason for the exception.
+- `Message` is a read-only property of type string that contains a human-readable description of the reason for the exception.
+- `InnerException` is a read-only property of type `Exception`. If its value is non-null, it refers to the exception that caused the current exception. (That is, the current exception was raised in a catch block handling the `InnerException`.) Otherwise, its value is `null`, indicating that this exception was not caused by another exception. The number of exception objects chained together in this manner can be arbitrary.
 
-- InnerException is a read-only property of type Exception. If its value is non-null, it refers to the exception that caused the current exception. (That is, the current exception was raised in a catch block handling the InnerException.) Otherwise, its value is null, indicating that this exception was not caused by another exception. The number of exception objects chained together in this manner can be arbitrary.
-
-The value of these properties can be specified in calls to the instance constructor for System.Exception.
+The value of these properties can be specified in calls to the instance constructor for `System.Exception`.
 
 ## How exceptions are handled
 
-Exceptions are handled by a try statement (§13.11).
+Exceptions are handled by a `try` statement (§13.11).
 
-When an exception occurs, the system searches for the nearest catch clause that can handle the exception, as determined by the run-time type of the exception. First, the current method is searched for a lexically enclosing try statement, and the associated catch clauses of the try statement are considered in order. If that fails, the method that called the current method is searched for a lexically enclosing try statement that encloses the point of the call to the current method. This search continues until a catch clause is found that can handle the current exception, by naming an exception class that is of the same class, or a base class, of the run-time type of the exception being thrown. A catch clause that doesn’t name an exception class can handle any exception.
+When an exception occurs, the system searches for the nearest catch clause that can handle the exception, as determined by the run-time type of the exception. First, the current method is searched for a lexically enclosing `try` statement, and the associated `catch` clauses of the `try` statement are considered in order. If that fails, the method that called the current method is searched for a lexically enclosing `try` statement that encloses the point of the call to the current method. This search continues until a `catch` clause is found that can handle the current exception, by naming an exception class that is of the same class, or a base class, of the run-time type of the exception being thrown. A cat`ch clause that doesn’t name an exception class can handle any exception.
 
 Once a matching catch clause is found, the system prepares to transfer control to the first statement of the catch clause. Before execution of the catch clause begins, the system first executes, in order, any finally clauses that were associated with try statements more nested that than the one that caught the exception.
 
 If no matching catch clause is found:
 
-- If the search for a matching catch clause reaches a static constructor (§15.12) or static field initializer, then a System.TypeInitializationException is thrown at the point that triggered the invocation of the static constructor. The inner exception of the System.TypeInitializationException contains the exception that was originally thrown.
-
+- If the search for a matching catch clause reaches a static constructor (§15.12) or static field initializer, then a `System.TypeInitializationException` is thrown at the point that triggered the invocation of the static constructor. The inner exception of the `System.TypeInitializationException` contains the exception that was originally thrown.
 - Otherwise, if an exception occurs during finalizer execution, and that exception is not caught, then the behavior is unspecified.
-
 - Otherwise, if the search for matching catch clauses reaches the code that initially started the thread, then execution of the thread is terminated. The impact of such termination is implementation-defined.
 
 ## Common exception classes
 
 The following exceptions are thrown by certain C# operations.
 
-  ------------------------------------ ------------------------------------------------------------------------------------------------------------------------------------------
-  System.ArithmeticException           A base class for exceptions that occur during arithmetic operations, such as System.DivideByZeroException and System.OverflowException.
-  System.ArrayTypeMismatchException    Thrown when a store into an array fails because the type of the stored element is incompatible with the type of the array.
-  System.DivideByZeroException         Thrown when an attempt to divide an integral value by zero occurs.
-  System.IndexOutOfRangeException      Thrown when an attempt to index an array via an index that is less than zero or outside the bounds of the array.
-  System.InvalidCastException          Thrown when an explicit conversion from a base type or interface to a derived type fails at run-time.
-  System.NullReferenceException        Thrown when a null reference is used in a way that causes the referenced object to be required.
-  System.OutOfMemoryException          Thrown when an attempt to allocate memory (via new) fails.
-  System.OverflowException             Thrown when an arithmetic operation in a checked context overflows.
-  System.StackOverflowException        Thrown when the execution stack is exhausted by having too many pending calls; typically indicative of very deep or unbounded recursion.
-  System.TypeInitializationException   Thrown when a static constructor or static field initializer throws an exception, and no catch clause exists to catch it.
-  ------------------------------------ ------------------------------------------------------------------------------------------------------------------------------------------
-
-
+|                                      |                                                                                                                                            |
+|  ------------------------------------| ------------------------------------------------------------------------------------------------------------------------------------------ |
+|  `System.ArithmeticException`          | A base class for exceptions that occur during arithmetic operations, such as `System.DivideByZeroException` and `System.OverflowException`.    |
+|  `System.ArrayTypeMismatchException`   | Thrown when a store into an array fails because the type of the stored element is incompatible with the type of the array.                 |
+|  `System.DivideByZeroException`        | Thrown when an attempt to divide an integral value by zero occurs.                                                                         |
+|  `System.IndexOutOfRangeException`     | Thrown when an attempt to index an array via an index that is less than zero or outside the bounds of the array.                           |
+|  `System.InvalidCastException`         | Thrown when an explicit conversion from a base type or interface to a derived type fails at run-time.                                      |
+|  `System.NullReferenceException`       | Thrown when a null reference is used in a way that causes the referenced object to be required.                                            |
+|  `System.OutOfMemoryException`         | Thrown when an attempt to allocate memory (via `new`) fails.                                                                                 |
+|  `System.OverflowException`            | Thrown when an arithmetic operation in a checked context overflows.                                                                        |
+|  `System.StackOverflowException`       | Thrown when the execution stack is exhausted by having too many pending calls; typically indicative of very deep or unbounded recursion.   |
+|  `System.TypeInitializationException`  | Thrown when a static constructor or static field initializer throws an exception, and no catch clause exists to catch it.                  |
 
 # Attributes
 
 ## General
 
-Much of the C# language enables the programmer to specify declarative information about the entities defined in the program. For example, the accessibility of a method in a class is specified by decorating it with the *method-modifiers* public, protected, internal, and private.
+Much of the C# language enables the programmer to specify declarative information about the entities defined in the program. For example, the accessibility of a method in a class is specified by decorating it with the *method-modifiers* `public`, `protected`, `internal`, and `private`.
 
-C# enables programmers to invent new kinds of declarative information, called ***attributes.*** Programmers can then attach attributes to various program entities, and retrieve attribute information in a run-time environment. [*Note*: For instance, a framework might define a HelpAttribute attribute that can be placed on certain program elements (such as classes and methods) to provide a mapping from those program elements to their documentation. *end note*]
+C# enables programmers to invent new kinds of declarative information, called ***attributes.*** Programmers can then attach attributes to various program entities, and retrieve attribute information in a run-time environment. [*Note*: For instance, a framework might define a `HelpAttribute` attribute that can be placed on certain program elements (such as classes and methods) to provide a mapping from those program elements to their documentation. *end note*]
 
 Attributes are defined through the declaration of attribute classes (§22.2), which can have positional and named parameters (§22.2.3). Attributes are attached to entities in a C# program using attribute specifications (§22.3), and can be retrieved at run-time as attribute instances (§22.4).
 
@@ -21849,89 +21886,105 @@ Attributes are defined through the declaration of attribute classes (§22.2), wh
 
 ### General
 
-A class that derives from the abstract class System.Attribute, whether directly or indirectly, is an ***attribute class***. The declaration of an attribute class defines a new kind of attribute that can be placed on program entities. By convention, attribute classes are named with a suffix of Attribute. Uses of an attribute may either include or omit this suffix.
+A class that derives from the abstract class `System.Attribute`, whether directly or indirectly, is an ***attribute class***. The declaration of an attribute class defines a new kind of attribute that can be placed on program entities. By convention, attribute classes are named with a suffix of `Attribute`. Uses of an attribute may either include or omit this suffix.
 
-A generic class declaration shall not use System.Attribute as a direct or indirect base class. [*Example*:
+A generic class declaration shall not use `System.Attribute` as a direct or indirect base class. [*Example*:
 
+```csharp
 using System;
 
-public class B : Attribute {}
+public class B : Attribute { }
 
-public class C<T> : B {} // Error – generic cannot be an attribute
+public class C<T> : B { } // Error – generic cannot be an attribute
+```
 
 *end example*]
 
 ### Attribute usage
 
-The attribute AttributeUsage (§22.5.2) is used to describe how an attribute class can be used.
+The attribute `AttributeUsage` (§22.5.2) is used to describe how an attribute class can be used.
 
-AttributeUsage has a positional parameter (§22.2.3) that enables an attribute class to specify the kinds of program entities on which it can be used. [*Example*: The example
+`AttributeUsage` has a positional parameter (§22.2.3) that enables an attribute class to specify the kinds of program entities on which it can be used. [*Example*: The example
 
+```csharp
 using System;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-public class SimpleAttribute: Attribute
-{ … }
+[AttributeUsage (AttributeTargets.Class | AttributeTargets.Interface)]
+public class SimpleAttribute : Attribute {…}
+```
 
 defines an attribute class named SimpleAttribute that can be placed on *class-declaration*s and *interface-declaration*s only. The example
 
+```csharp
 [Simple] class Class1 {…}
 
 [Simple] interface Interface1 {…}
+```
 
-shows several uses of the Simple attribute. Although this attribute is defined with the name SimpleAttribute, when this attribute is used, the Attribute suffix may be omitted, resulting in the short name Simple. Thus, the example above is semantically equivalent to the following
+shows several uses of the `Simple` attribute. Although this attribute is defined with the name `SimpleAttribute`, when this attribute is used, the `Attribute` suffix may be omitted, resulting in the short name `Simple`. Thus, the example above is semantically equivalent to the following
 
+```csharp
 [SimpleAttribute] class Class1 {…}
 
 [SimpleAttribute] interface Interface1 {…}
+```
 
 *end example*]
 
-AttributeUsage has a named parameter (§22.2.3), called AllowMultiple, which indicates whether the attribute can be specified more than once for a given entity. If AllowMultiple for an attribute class is true, then that attribute class is a ***multi-use attribute class***, and can be specified more than once on an entity. If AllowMultiple for an attribute class is false or it is unspecified, then that attribute class is a ***single-use attribute class***, and can be specified at most once on an entity.
+`AttributeUsage` has a named parameter (§22.2.3), called `AllowMultiple`, which indicates whether the attribute can be specified more than once for a given entity. If `AllowMultiple` for an attribute class is true, then that attribute class is a ***multi-use attribute class***, and can be specified more than once on an entity. If `AllowMultiple` for an attribute class is false or it is unspecified, then that attribute class is a ***single-use attribute class***, and can be specified at most once on an entity.
 
 [*Example*: The example
 
+```csharp
 using System;
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class AuthorAttribute: Attribute
+[AttributeUsage (AttributeTargets.Class, AllowMultiple = true)]
+public class AuthorAttribute : Attribute
 {
-private string name;
+    private string name;
 
-public AuthorAttribute(string name) {
-this.name = name;
+    public AuthorAttribute (string name)
+    {
+        this.name = name;
+    }
+
+    public string Name
+    {
+        get { return name; }
+    }
 }
+```
 
-public string Name {
-get { return name; }
-}
-}
+defines a multi-use attribute class named `AuthorAttribute`. The example
 
-defines a multi-use attribute class named AuthorAttribute. The example
-
+```csharp
 [Author("Brian Kernighan"), Author("Dennis Ritchie")]
 class Class1 {…}
+```
 
-shows a class declaration with two uses of the Author attribute. *end example*]
+shows a class declaration with two uses of the `Author` attribute. *end example*]
 
-AttributeUsage has another named parameter (§22.2.3), called Inherited, which indicates whether the attribute, when specified on a base class, is also inherited by classes that derive from that base class. If Inherited for an attribute class is true, then that attribute is inherited. If Inherited for an attribute class is false then that attribute is not inherited. If it is unspecified, its default value is true.
+`AttributeUsage` has another named parameter (§22.2.3), called `Inherited`, which indicates whether the attribute, when specified on a base class, is also inherited by classes that derive from that base class. If `Inherited` for an attribute class is true, then that attribute is inherited. If `Inherited` for an attribute class is false then that attribute is not inherited. If it is unspecified, its default value is true.
 
-An attribute class X not having an AttributeUsage attribute attached to it, as in
+An attribute class X not having an `AttributeUsage` attribute attached to it, as in
 
+```csharp
 using System;
 
 class X: Attribute { … }
+```
 
 is equivalent to the following:
 
+```csharp
 using System;
 
-[AttributeUsage(
-AttributeTargets.All,
-AllowMultiple = []{#_Hlt513880365 .anchor}false,
-Inherited = true)
-]
-class X: Attribute { … }
+[AttributeUsage (
+    AttributeTargets.All,
+    AllowMultiple = [] {# _Hlt513880365.anchor } false,
+    Inherited = true)]
+class X : Attribute {…}
+```
 
 ### Positional and named parameters
 
@@ -21939,37 +21992,41 @@ Attribute classes can have ***positional parameters*** and ***named parameters**
 
 [*Example*: The example
 
+```csharp
 using System;
 
-[AttributeUsage(AttributeTargets.Class)]
-public class HelpAttribute: Attribute
+[AttributeUsage (AttributeTargets.Class)]
+public class HelpAttribute : Attribute
 {
 
-public HelpAttribute(string url) { // url is a positional parameter
-…
-}
+    public HelpAttribute (string url)
+    { // url is a positional parameter
+        …
+    }
 
-public string Topic { // Topic is a named parameter
-get {…}
-set {…}
-}
+    public string Topic
+    { // Topic is a named parameter
+        get {…}
+        set {…}
+    }
 
-public string Url { get {…} }
+    public string Url { get {…} }
 }
+```
 
-defines an attribute class named HelpAttribute that has one positional parameter, url, and one named parameter, Topic. Although it is non-static and public, the property Url does not define a named parameter, since it is not read-write.
+defines an attribute class named `HelpAttribute` that has one positional parameter, `url`, and one named parameter, `Topic`. Although it is non-static and public, the property `Url` does not define a named parameter, since it is not read-write.
 
 This attribute class might be used as follows:
 
-[Help("http://www.mycompany.com/…/Class1.htm")]
+```csharp
+[Help ("http://www.mycompany.com/…/Class1.htm")]
 class Class1
-{
-}
+{ }
 
-[Help("http://www.mycompany.com/…/Misc.htm", Topic ="Class2")]
+[Help ("http://www.mycompany.com/…/Misc.htm", Topic = "Class2")]
 class Class2
-{
-}
+{ }
+```
 
 *end example*]
 
@@ -21977,356 +22034,305 @@ class Class2
 
 The types of positional and named parameters for an attribute class are limited to the ***attribute parameter types***, which are:
 
-- One of the following types: bool, byte, char, double, float, int, long, sbyte, short, string, uint, ulong, ushort.
-
-- The type object.
-
-- The type System.Type.
-
+- One of the following types: `bool`, `byte`, `char`, `double`, `float`, `int`, `long`, `sbyte`, `short`, `string`, `uint`, `ulong`, `ushort`.
+- The type `object`.
+- The type `System.Type`.
 - Enum types.
-
 - Single-dimensional arrays of the above types.
 
-[[[[[[[[]{#_Toc34995800 .anchor}]{#_Toc511023045 .anchor}]{#_Toc505664201 .anchor}]{#_Toc505590067 .anchor}]{#_Toc503164302 .anchor}]{#_Toc501035640 .anchor}]{#_Toc466975632 .anchor}]{#_Ref461621220 .anchor}A constructor argument or public field that does not have one of these types, shall not be used as a positional or named parameter in an attribute specification.
+A constructor argument or public field that does not have one of these types, shall not be used as a positional or named parameter in an attribute specification.
 
 ## Attribute specification
 
 ***Attribute specification*** is the application of a previously defined attribute to a program entity. An attribute is a piece of additional declarative information that is specified for a program entity. Attributes can be specified at global scope (to specify attributes on the containing assembly or module) and for *type-declaration*s (§14.7), *class-member-declaration*s (§15.3), *interface-member-declaration*s (§18.4), *struct-member-declaration*s (§16.3), *enum-member-declaration*s (§19.2), *accessor-declaration*s (§15.7.3), *event-accessor-declaration*s (§15.8), elements of *formal-parameter-list*s (§15.6.2), and elements of *type-parameter-list*s (§15.2.3).
 
-Attributes are specified in ***attribute sections***. An attribute section consists of a pair of square brackets, which surround a comma-separated list of one or more attributes. The order in which attributes are specified in such a list, and the order in which sections attached to the same program entity are arranged, is not significant. For instance, the attribute specifications [A][B], [B][A], [A, B], and [B, A] are equivalent.
+Attributes are specified in ***attribute sections***. An attribute section consists of a pair of square brackets, which surround a comma-separated list of one or more attributes. The order in which attributes are specified in such a list, and the order in which sections attached to the same program entity are arranged, is not significant. For instance, the attribute specifications `[A][B]`, `[B][A]`, `[A, B]`, and `[B, A]` are equivalent.
 
-[]{#Grammar_global_attributes .anchor}global-attributes:
-global-attribute-sections
+```antlr
+global-attributes:
+    global-attribute-sections
 
-[]{#Grammar_global_attribute_sections .anchor}global-attribute-sections:
-global-attribute-section
-global-attribute-sections global-attribute-section
+global-attribute-sections:
+    global-attribute-section
+    global-attribute-sections global-attribute-section
 
-[]{#Grammar_global_attribute_section .anchor}global-attribute-section:
-*[* global-attribute-target-specifier attribute-list *]
-[* global-attribute-target-specifier attribute-list , *]*
+global-attribute-section:
+    [ global-attribute-target-specifier attribute-list ]
+    [ global-attribute-target-specifier attribute-list , ]
 
-[]{#Grammar_global_attribute_target_specifie .anchor}global-attribute-target-specifier:
-global-attribute-target *:*
+global-attribute-target-specifier:
+    global-attribute-target :
 
-[]{#Grammar_global_attribute_target .anchor}global-attribute-target:
-identifier *equal to assembly or module*
+global-attribute-target:
+    identifier equal to assembly or module
 
-[]{#Grammar_attributes .anchor}attributes:
-attribute-sections
+attributes:
+    attribute-sections
 
-[]{#Grammar_attribute_sections .anchor}attribute-sections:
-attribute-section
-attribute-sections attribute-section
+attribute-sections:
+    attribute-section
+    attribute-sections attribute-section
 
-[]{#Grammar_attribute_section .anchor}attribute-section:
-*[* attribute-target-specifieropt attribute-list *]
-[* attribute-target-specifieropt attribute-list , *]*
+attribute-section:
+    [ attribute-target-specifieropt attribute-list ]
+    [ attribute-target-specifieropt attribute-list , ]
 
-[]{#Grammar_attribute_target_specifier .anchor}attribute-target-specifier:
-attribute-target *:*
+attribute-target-specifier:
+    attribute-target :
 
-[]{#Grammar_attribute_target .anchor}attribute-target:
-identifier *not equal to assembly or module
-keyword*
+attribute-target:
+    identifier not equal to assembly or module
+    keyword
 
-[]{#Grammar_attribute_list .anchor}attribute-list:
-attribute
-attribute-list *,* attribute
+attribute-list:
+    attribute
+    attribute-list , attribute
 
-[]{#Grammar_attribute .anchor}attribute:
-attribute-name attribute-argumentsopt
+attribute:
+    attribute-name attribute-argumentsopt
 
-[]{#Grammar_attribute_name .anchor}attribute-name:
-type-name
+attribute-name:
+    type-name
 
-[]{#Grammar_attribute_arguments .anchor}attribute-arguments:
-*(* positional-argument-listopt *)
-(* positional-argument-list *,* named-argument-list *)
-(* named-argument-list *)*
+attribute-arguments:
+    ( positional-argument-listopt )
+    ( positional-argument-list , named-argument-list )
+    ( named-argument-list )
 
-[]{#Grammar_positional_argument_list .anchor}positional-argument-list:
-positional-argument
-positional-argument-list *,* positional-argument
+positional-argument-list:
+    positional-argument
+    positional-argument-list , positional-argument
 
-[]{#Grammar_positional_argument .anchor}positional-argument:
-argument-nameopt attribute-argument-expression
+positional-argument:
+    argument-nameopt attribute-argument-expression
 
-[]{#Grammar_named_argument_list .anchor}named-argument-list:
-named-argument
-named-argument-list *,* named-argument
+named-argument-list:
+    named-argument
+    named-argument-list , named-argument
 
-[]{#Grammar_named_argument .anchor}named-argument:
-identifier *=* attribute-argument-expression
+named-argument:
+    identifier = attribute-argument-expression
 
-[]{#Grammar_attribute_argument_expression .anchor}attribute-argument-expression:
-expression
+attribute-argument-expression:
+    expression
+```
 
 For the above productions *global-attribute-target* and *attribute-target*, and in the text below, the referenced equality is that defined in §7.4.3.
 
 An attribute consists of an *attribute-name* and an optional list of positional and named arguments. The positional arguments (if any) precede the named arguments. A positional argument consists of an *attribute-argument-expression*; a named argument consists of a name, followed by an equal sign, followed by an *attribute-argument-expression*, which, together, are constrained by the same rules as simple assignment. The order of named arguments is not significant.
 
-[*Note*: For convenience, a trailing comma is allowed in a *global-attribute-section* and an *attribute-section*, just as one is allowed in an *array-initializer* (§17.7). *end note*]
+> [!NOTE]
+> For convenience, a trailing comma is allowed in a *global-attribute-section* and an *attribute-section*, just as one is allowed in an *array-initializer* (§17.7). 
 
 The *attribute-name* identifies an attribute class.
 
 When an attribute is placed at the global level, a *global-attribute-target-specifier* is required. When the *global-attribute-target* is equal to:
 
-- assembly – the target is the containing assembly
-
-- module – the target is the containing module
+- `assembly` – the target is the containing assembly
+- `module` – the target is the containing module
 
 No other values for *global-attribute-target* are allowed.
 
-The standardized *attribute-target* names are event, field, method, param, property, return, type, and typevar. These target names shall only be used in the following contexts:
+The standardized *attribute-target* names are `event`, `field`, `method`, `param`, `property`, `return`, `type`, and `typevar`. These target names shall only be used in the following contexts:
 
-- event — an event.
-
-- field — a field. A field-like event (i.e., one without accessors) can also have an attribute with this target.
-
-- method — a constructor, finalizer, method, operator, property get and set accessors, indexer get and set accessors, and event add and remove accessors. A field-like event (i.e., one without accessors) can also have an attribute with this target.
-
-- param — a property set accessor, an indexer set accessor, event add and remove accessors, and a parameter in a constructor, method, and operator.
-
-- property — a property and an indexer.
-
-- return — a delegate, method, operator, property get accessor, and indexer get accessor.
-
-- type — a delegate, class, struct, enum, and interface.
-
-- typevar — a type parameter.
+- `event` — an event.
+- `field` — a field. A field-like event (i.e., one without accessors) can also have an attribute with this target.
+- `method` — a constructor, finalizer, method, operator, property get and set accessors, indexer get and set accessors, and event add and remove accessors. A field-like event (i.e., one without accessors) can also have an attribute with this target.
+- `param` — a property set accessor, an indexer set accessor, event add and remove accessors, and a parameter in a constructor, method, and operator.
+- `property` — a property and an indexer.
+- `return` — a delegate, method, operator, property get accessor, and indexer get accessor.
+- `type` — a delegate, class, struct, enum, and interface.
+- `typevar` — a type parameter.
 
 Certain contexts permit the specification of an attribute on more than one target. A program can explicitly specify the target by including an *attribute-target-specifier*. Without an *attribute-target-specifier* a default is applied, but an *attribute-target-specifier* can be used to affirm or override the default. The contexts are resolved as follows:
 
 - For an attribute on a delegate declaration the default target is the delegate. Otherwise when the attribute-target is equal to:
-
-<!-- -->
-
-- type — the target is the delegate
-
-- return — the target is the return value
-
-<!-- -->
-
+  - `type` — the target is the delegate
+  - `return` — the target is the return value
 - For an attribute on a method declaration the default target is the method. Otherwise when the *attribute-target* is equal to:
-
-<!-- -->
-
-- method — the target is the method
-
-- return — the target is the return value
-
-<!-- -->
-
+  - `method` — the target is the method
+  - `return` — the target is the return value
 - For an attribute on an operator declaration the default target is the operator. Otherwise when the *attribute-target* is equal to:
-
-<!-- -->
-
-- method — the target is the operator
-
-- return — the target is the return value
-
-<!-- -->
-
+  - `method` — the target is the operator
+  - `return` — the target is the return value
 - For an attribute on a get accessor declaration for a property or indexer declaration the default target is the associated method. Otherwise when the *attribute-target* is equal to:
-
-<!-- -->
-
-- method — the target is the associated method
-
-- return — the target is the return value
-
-<!-- -->
-
+  - `method` — the target is the associated method
+  - `return` — the target is the return value
 - For an attribute specified on a set accessor for a property or indexer declaration the default target is the associated method. Otherwise when the *attribute-target* is equal to:
-
-<!-- -->
-
-- method — the target is the associated method
-
-- param — the target is the lone implicit parameter
-
-<!-- -->
-
+  - `method` — the target is the associated method
+  - `param` — the target is the lone implicit parameter
 - For an attribute specified on an event declaration that omits event-accessor-declarations the default target is the event declaration. Otherwise when the *attribute-target* is equal to:
-
-<!-- -->
-
-- event — the target is the event declaration
-
-- field — the target is the field
-
-- method — the targets are the methods
-
-<!-- -->
-
+  - `event` — the target is the event declaration
+  - `field` — the target is the field
+  - `method` — the targets are the methods
 - In the case of an event declaration that does not omit event-accessor-declarations the default target is the method.
-
-<!-- -->
-
-- method — the target is the associated method
-
-- param — the target is the lone parameter
+  - `method` — the target is the associated method
+  - `param` — the target is the lone parameter
 
 In all other contexts, inclusion of an *attribute-target-specifier* is permitted but unnecessary. [*Example*: a class declaration may either include or omit the specifier type:
 
-[type: Author("Brian Kernighan")]
-class Class1 {}
+```csharp
+[type : Author ("Brian Kernighan")]
+class Class1 { }
 
-[Author("Dennis Ritchie")]
-class Class2 {}
+[Author ("Dennis Ritchie")]
+class Class2 { }
+```
 
 *end example*.]
 
 An implementation can accept other *attribute-target*s, the purposes of which are implementation defined. An implementation that does not recognize such an *attribute-target* shall issue a warning and ignore the containing *attribute-section*.
 
-By convention, attribute classes are named with a suffix of Attribute. An *attribute-name* can either include or omit this suffix. Specifically, an *attribute-name* is resolved as follows:
+By convention, attribute classes are named with a suffix of `Attribute`. An *attribute-name* can either include or omit this suffix. Specifically, an *attribute-name* is resolved as follows:
 
-- If the right-most identifier of the *attribute-name* is a verbatim identifier (§7.4.3), then the *attribute-name* is resolved as a *type-name* (§8.8). If the result is not a type derived from System.Attribute, a compile-time error occurs.
-
+- If the right-most identifier of the *attribute-name* is a verbatim identifier (§7.4.3), then the *attribute-name* is resolved as a *type-name* (§8.8). If the result is not a type derived from `System.Attribute`, a compile-time error occurs.
 - Otherwise,
+  - The *attribute-name* is resolved as a *type-name* (§8.8) except any errors are suppressed. If this resolution is successful and results in a type derived from `System.Attribute` then the type is the result of this step.
+  - The characters Attribute are appended to the right-most identifier in the *attribute-name* and the resulting string of tokens is resolved as a *type-name* (§8.8) except any errors are suppressed. If this resolution is successful and results in a type derived from `System.Attribute` then the type is the result of this step.
 
-<!-- -->
-
-- The *attribute-name* is resolved as a *type-name* (§8.8) except any errors are suppressed. If this resolution is successful and results in a type derived from System.Attribute then the type is the result of this step.
-
-- The characters Attribute are appended to the right-most identifier in the *attribute-name* and the resulting string of tokens is resolved as a *type-name* (§8.8) except any errors are suppressed. If this resolution is successful and results in a type derived from System.Attribute then the type is the result of this step.
-
-If exactly one of the two steps above results in a type derived from System.Attribute, then that type is the result of the *attribute-name*. Otherwise a compile-time error occurs.
+If exactly one of the two steps above results in a type derived from `System.Attribute`, then that type is the result of the *attribute-name*. Otherwise a compile-time error occurs.
 
 [*Example*: If an attribute class is found both with and without this suffix, an ambiguity is present, and a compile-time error results. If the *attribute-name* is spelled such that its right-most *identifier* is a verbatim identifier (§7.4.3), then only an attribute without a suffix is matched, thus enabling such an ambiguity to be resolved. The example
 
+```csharp
 using System;
 
-[AttributeUsage(AttributeTargets.All)]
-public class Example: Attribute
-{}
+[AttributeUsage (AttributeTargets.All)]
+public class Example : Attribute { }
 
-[AttributeUsage(AttributeTargets.All)]
-public class ExampleAttribute: Attribute
-{}
+[AttributeUsage (AttributeTargets.All)]
+public class ExampleAttribute : Attribute { }
 
 [Example] // Error: ambiguity
-class Class1 {}
+class Class1 { }
 
 [ExampleAttribute] // Refers to ExampleAttribute
-class Class2 {}
+class Class2 { }
 
 [@Example] // Refers to Example
-class Class3 {}
+class Class3 { }
 
 [@ExampleAttribute] // Refers to ExampleAttribute
-class Class4 {}
+class Class4 { }
+```
 
-shows two attribute classes named Example and ExampleAttribute. The attribute [Example] is ambiguous, since it could refer to either Example or ExampleAttribute. Using a verbatim identifier allows the exact intent to be specified in such rare cases. The attribute [ExampleAttribute] is not ambiguous (although it would be if there was an attribute class named ExampleAttributeAttribute!). If the declaration for class Example is removed, then both attributes refer to the attribute class named ExampleAttribute, as follows:
+shows two attribute classes named Example and `ExampleAttribute`. The attribute `[Example]` is ambiguous, since it could refer to either `Example` or `ExampleAttribute`. Using a verbatim identifier allows the exact intent to be specified in such rare cases. The attribute `[ExampleAttribute]` is not ambiguous (although it would be if there was an attribute class named `ExampleAttributeAttribute`!). If the declaration for class `Example` is removed, then both attributes refer to the attribute class named `ExampleAttribute`, as follows:
 
+```csharp
 using System;
 
-[AttributeUsage(AttributeTargets.All)]
-public class ExampleAttribute: Attribute
-{}
+[AttributeUsage (AttributeTargets.All)]
+public class ExampleAttribute : Attribute { }
 
 [Example] // Refers to ExampleAttribute
-class Class1 {}
+class Class1 { }
 
 [ExampleAttribute] // Refers to ExampleAttribute
-class Class2 {}
+class Class2 { }
 
 [@Example] // Error: no attribute named “Example”
-class Class3 {}
+class Class3 { }
+```
 
 *end example*]
 
 It is a compile-time error to use a single-use attribute class more than once on the same entity. [*Example*: The example
 
+```csharp
 using System;
 
-[AttributeUsage(AttributeTargets.Class)]
-public class HelpStringAttribute: Attribute
+[AttributeUsage (AttributeTargets.Class)]
+public class HelpStringAttribute : Attribute
 {
-string value;
+    string value;
 
-public HelpStringAttribute(string value) {
-this.value = value;
+    public HelpStringAttribute (string value)
+    {
+        this.value = value;
+    }
+
+    public string Value { get {…} }
 }
 
-public string Value { get {…} }
-}
+[HelpString ("Description of Class1")]
+[HelpString ("Another description of Class1")]
+public class Class1 { }
+```
 
-[HelpString("Description of Class1")]
-[HelpString("Another description of Class1")]
-public class Class1 {}
+results in a compile-time error because it attempts to use `HelpString`, which is a single-use attribute class, more than once on the declaration of `Class1`. *end example*]
 
-results in a compile-time error because it attempts to use HelpString, which is a single-use attribute class, more than once on the declaration of Class1. *end example*]
+An expression `E` is an *attribute-argument-expression* if all of the following statements are true:
 
-An expression E is an *attribute-argument-expression* if all of the following statements are true:
-
-- The type of E is an attribute parameter type (§22.2.4).
-
-- At compile-time, the value of E can be resolved to one of the following:
-
-<!-- -->
-
-- A constant value.
-
-- A System.Type object obtained using a *typeof-expression* (§12.7.12) specifying a non-generic type, a closed constructed type (§9.4.3), or an unbound generic type (§9.4.4), but not an open type (§9.4.3).
-
-- A single-dimensional array of *attribute-argument-expression*s.
+- The type of `E` is an attribute parameter type (§22.2.4).
+- At compile-time, the value of `E` can be resolved to one of the following:
+  - A constant value.
+  - A `System.Type` object obtained using a *typeof-expression* (§12.7.12) specifying a non-generic type, a closed constructed type (§9.4.3), or an unbound generic type (§9.4.4), but not an open type (§9.4.3).
+  - A single-dimensional array of *attribute-argument-expression*s.
 
 [*Example*:
 
+```csharp
 using System;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Field)]
-public class TestAttribute: Attribute
+[AttributeUsage (AttributeTargets.Class | AttributeTargets.Field)]
+public class TestAttribute : Attribute
 {
-public int P1 {
-get {…}
-set {…}
+    public int P1
+    {
+        get {…}
+        set {…}
+    }
+
+    public Type P2
+    {
+        get {…}
+        set {…}
+    }
+
+    public object P3
+    {
+        get {…}
+        set {…}
+    }
 }
 
-public Type P2 {
-get {…}
-set {…}
+[Test (P1 = 1234, P3 = new int[] { 1, 3, 5 }, P2 = typeof (float))]
+class MyClass { }
+
+class C<T>
+{
+    [Test (P2 = typeof (T))] // Error – T not a closed type.
+    int x1;
+
+    [Test (P2 = typeof (C<T>))] // Error – C<T> not a closed type.
+    int x2;
+
+    [Test (P2 = typeof (C<int>))] // Ok
+    int x3;
+
+    [Test (P2 = typeof (C<>))] // Ok
+    int x4;
 }
-
-public object P3 {
-get {…}
-set {…}
-}
-}
-
-[Test(P1 = 1234, P3 = new int[]{1, 3, 5}, P2 = typeof(float))]
-class MyClass {}
-
-class C<T> {
-[Test(P2 = typeof(T))] // Error – T not a closed type.
-int x1;
-
-[Test(P2 = typeof(C<T>))] // Error – C<T> not a closed type.
-int x2;
-
-[Test(P2 = typeof(C<int>))] // Ok
-int x3;
-
-[Test(P2 = typeof(C<>))] // Ok
-int x4;
-}
+```
 
 *end example*]
 
 The attributes of a type declared in multiple parts are determined by combining, in an unspecified order, the attributes of each of its parts. If the same attribute is placed on multiple parts, it is equivalent to specifying that attribute multiple times on the type. [*Example*: The two parts:
 
-[Attr1, Attr2("hello")]
-partial class A {}
+```csharp
+[Attr1, Attr2 ("hello")]
+partial class A { }
 
-[Attr3, Attr2("goodbye")]
-partial class A {}
+[Attr3, Attr2 ("goodbye")]
+partial class A { }
+```
 
 are equivalent to the following single declaration:
 
-[Attr1, Attr2("hello"), Attr3, Attr2("goodbye")]
-class A {}
+```csharp
+[Attr1, Attr2 ("hello"), Attr3, Attr2 ("goodbye")]
+class A { }
+```
 
 *end example*]
 
@@ -22342,68 +22348,58 @@ Retrieval of an attribute instance involves both compile-time and run-time proce
 
 ### Compilation of an attribute
 
-The compilation of an *attribute* with attribute class T, *positional-argument-list *P, *named-argument-list* N, and specified on a program entity E is compiled into an assembly A viathe following steps:
+The compilation of an *attribute* with attribute class `T`, *positional-argument-list *P, *named-argument-list* `N`, and specified on a program entity `E` is compiled into an assembly `A` via the following steps:
 
-- Follow the compile-time processing steps for compiling an *object-creation-expression* of the form new T(P). These steps either result in a compile-time error, or determine an instance constructor C on T that can be invoked at run-time.
-
-- If C does not have public accessibility, then a compile-time error occurs.
-
-- For each *named-argument* Arg in N:
-
-<!-- -->
-
-- Let Name be the *identifier* of the *named-argument* Arg.
-
-- Name shall identify a non-static read-write public field or property on T. If T has no such field or property, then a compile-time error occurs.
-
-<!-- -->
-
-- If any of the values within *positional-argument-list* P or one of the values within *named-argument-list* N is of type System.String and the value is not well-formed as defined by the Unicode Standard, it is implementation-defined whether the value compiled is equal to the run-time value retrieved (§22.4.3). [*Note:* As an example, a string which contains a high surrogate UTF-16 code unit which isn't immediately followed by a low surrogate code unit is not well-formed. *end note*]
-
-- Store the following information (for run-time instantiation of the attribute) in the assembly output by the compiler as a result of compiling the program containing the attribute: the attribute class T, the instance constructor C on T, the *positional-argument-list *P, the *named-argument-list* N, and the associated program entity E, with the values resolved completely at compile-time.
+- Follow the compile-time processing steps for compiling an *object-creation-expression* of the form new `T(P)`. These steps either result in a compile-time error, or determine an instance constructor `C` on `T` that can be invoked at run-time.
+- If `C` does not have public accessibility, then a compile-time error occurs.
+- For each *named-argument* `Arg` in `N`:
+  - Let `Name` be the *identifier* of the *named-argument* `Arg`.
+  - `Name` shall identify a non-static read-write public field or property on `T`. If `T` has no such field or property, then a compile-time error occurs.
+- If any of the values within *positional-argument-list* P or one of the values within *named-argument-list* `N` is of type `System.String` and the value is not well-formed as defined by the Unicode Standard, it is implementation-defined whether the value compiled is equal to the run-time value retrieved (§22.4.3). 
+  > [!NOTE]
+  > As an example, a string which contains a high surrogate UTF-16 code unit which isn't immediately followed by a low surrogate code unit is not well-formed.
+- Store the following information (for run-time instantiation of the attribute) in the assembly output by the compiler as a result of compiling the program containing the attribute: the attribute class `T`, the instance constructor `C` on `T`, the *positional-argument-list *P, the *named-argument-list* `N`, and the associated program entity `E`, with the values resolved completely at compile-time.
 
 ### Run-time retrieval of an attribute instance
 
-The attribute instance represented by T, C, P, and N, and associated with E can be retrieved at run-time from the assembly A using the following steps:
+The attribute instance represented by `T`, `C`, `P`, and `N`, and associated with E can be retrieved at run-time from the assembly `A` using the following steps:
 
-- Follow the run-time processing steps for executing an *object-creation-expression* of the form new T(P), using the instance constructor C and values as determined at compile-time. These steps either result in an exception, or produce an instance O of T.
+- Follow the run-time processing steps for executing an *object-creation-expression* of the form new `T(P)`, using the instance constructor `C` and values as determined at compile-time. These steps either result in an exception, or produce an instance `O` of `T`.
+- For each *named-argument* `Arg` in `N`, in order:
+  - Let `Name` be the *identifier* of the *named-argument* `Arg`. If Name does not identify a non-static public read-write field or property on `O`, then an exception is thrown.
+  - Let `Value` be the result of evaluating the *attribute-argument-expression* of `Arg`.
+  - If `Name` identifies a field on `O`, then set this field to `Value`.
+  - Otherwise, `Name` identifies a property on `O`. Set this property to `Value`.
+  - The result is `O`, an instance of the attribute class `T` that has been initialized with the *positional-argument-list *P and the *named-argument-list* `N`.
 
-- For each *named-argument* Arg in N, in order:
+> [!NOTE]
+> The format for storing `T`, `C`, `P`, `N` (and associating it with `E`) in `A` and the mechanism to specify `E` and retrieve `T`, `C`, `P`, `N` from `A` (and hence how an attribute instance is obtained at runtime) is beyond the scope of this standard.
 
-<!-- -->
+[*Example*: In an implementation of the CLI, the `Help` attribute instances in the assembly created by compiling the example program in §22.2.3 can be retrieved with the following program:
 
-- Let Name be the *identifier* of the *named-argument* Arg. If Name does not identify a non-static public read-write field or property on O, then an exception is thrown.
-
-- Let Value be the result of evaluating the *attribute-argument-expression* of Arg.
-
-- If Name identifies a field on O, then set this field to Value.
-
-- Otherwise, Name identifies a property on O. Set this property to Value.
-
-- The result is O, an instance of the attribute class T that has been initialized with the *positional-argument-list *P and the *named-argument-list* N.
-
-[*Note*: The format for storing T, C, P, N (and associating it with E) in A and the mechanism to specify E and retrieve T, C, P, N from A (and hence how an attribute instance is obtained at runtime) is beyond the scope of this standard. *end note*]
-
-[*Example*: In an implementation of the CLI, the Help attribute instances in the assembly created by compiling the example program in §22.2.3 can be retrieved with the following program:
-
+```csharp
 using System;
 using System.Reflection;
 
 public sealed class InterrogateHelpUrls
 {
-public static void Main(string[] args) {
-Type helpType = typeof(HelpAttribute);
-string assemblyName = args[0];
-foreach (Type t in Assembly.Load(assemblyName).GetTypes()) {
-Console.WriteLine("Type : {0}", t.ToString());
-HelpAttribute[] helpers =
-(HelpAttribute[])t.GetCustomAttributes(helpType, false);
-for (int at = 0; at != helpers.Length; at++) {
-Console.WriteLine("\\tUrl : {0}", helpers[at].Url);
+    public static void Main (string[] args)
+    {
+        Type helpType = typeof (HelpAttribute);
+        string assemblyName = args[0];
+        foreach (Type t in Assembly.Load (assemblyName).GetTypes ())
+        {
+            Console.WriteLine ("Type : {0}", t.ToString ());
+            HelpAttribute[] helpers =
+                (HelpAttribute[]) t.GetCustomAttributes (helpType, false);
+            for (int at = 0; at != helpers.Length; at++)
+            {
+                Console.WriteLine ("\\tUrl : {0}", helpers[at].Url);
+            }
+        }
+    }
 }
-}
-}
-}
+```
 
 *end example*]
 
@@ -22413,126 +22409,133 @@ Console.WriteLine("\\tUrl : {0}", helpers[at].Url);
 
 A small number of attributes affect the language in some way. These attributes include:
 
-- System.AttributeUsageAttribute (§22.5.2), which is used to describe the ways in which an attribute class can be used.
-
-- System.Diagnostics.ConditionalAttribute (§22.5.3), is a multi-use attribute class which is used to define conditional methods and conditional attribute classes. This attribute indicates a condition by testing a conditional compilation symbol.
-
-- System.ObsoleteAttribute (§22.5.4), which is used to mark a member as obsolete.
-
-- [[[[[[[[]{#_Toc34995805 .anchor}]{#_Toc511023050 .anchor}]{#_Toc505664206 .anchor}]{#_Toc505590072 .anchor}]{#_Toc503164307 .anchor}]{#_Toc501035645 .anchor}]{#_Toc466975637 .anchor}]{#_Ref461621265 .anchor}System.Runtime.CompilerServices.CallerLineNumberAttribute (§22.5.5.2), System.Runtime.CompilerServices.CallerFilePathAttribute (§22.5.5.3), and System.Runtime.CompilerServices.CallerMemberNameAttribute (§22.5.5.4), which are used to supply information about the calling context to optional parameters.
+- `System.AttributeUsageAttribute `(§22.5.2), which is used to describe the ways in which an attribute class can be used.
+- `System.Diagnostics.ConditionalAttribute` (§22.5.3), is a multi-use attribute class which is used to define conditional methods and conditional attribute classes. This attribute indicates a condition by testing a conditional compilation symbol.
+- `System.ObsoleteAttribute` (§22.5.4), which is used to mark a member as obsolete.
+- `System.Runtime.CompilerServices.CallerLineNumberAttribute` (§22.5.5.2), `System.Runtime.CompilerServices.CallerFilePathAttribute` (§22.5.5.3), and `System.Runtime.CompilerServices.CallerMemberNameAttribute` (§22.5.5.4), which are used to supply information about the calling context to optional parameters.
 
 An execution environment may provide additional implementation-specific attributes that affect the execution of a C# program.
 
 ### The AttributeUsage attribute
 
-The attribute AttributeUsage is used to describe the manner in which the attribute class can be used.
+The attribute `AttributeUsage` is used to describe the manner in which the attribute class can be used.
 
-A class that is decorated with the AttributeUsage attribute shall derive from System.Attribute, either directly or indirectly. Otherwise, a compile-time error occurs.
+A class that is decorated with the `AttributeUsage` attribute shall derive from `System.Attribute`, either directly or indirectly. Otherwise, a compile-time error occurs.
 
-[*Note*: For an example of using this attribute, see §22.2.2. *end note*]
+> [!NOTE]
+> For an example of using this attribute, see §22.2.2.
 
 ### The Conditional attribute
 
 #### General
 
-The attribute Conditional enables the definition of ***conditional methods*** and ***conditional attribute classes***.
+The attribute `Conditional` enables the definition of ***conditional methods*** and ***conditional attribute classes***.
 
 #### Conditional methods
 
-A method decorated with the Conditional attribute is a conditional method. Each conditional method is thus associated with the conditional compilation symbols declared in its Conditional attributes. [*Example*:
+A method decorated with the `Conditional` attribute is a conditional method. Each conditional method is thus associated with the conditional compilation symbols declared in its `Conditional` attributes. [*Example*:
 
+```csharp
 using System.Diagnostics;
 class Eg
 {
-[Conditional("ALPHA")]
-[Conditional("BETA")]
-public static void M() {
-//…
+    [Conditional ("ALPHA")]
+    [Conditional ("BETA")]
+    public static void M ()
+    {
+        //…
+    }
 }
-}
+```
 
-declares Eg.M as a conditional method associated with the two conditional compilation symbols ALPHA and BETA. *end example*]
+declares `Eg.M` as a conditional method associated with the two conditional compilation symbols `ALPHA` and `BETA`. *end example*]
 
 A call to a conditional method is included if one or more of its associated conditional compilation symbols is defined at the point of call, otherwise the call is omitted.
 
 A conditional method is subject to the following restrictions:
 
-- The conditional method shall be a method in a *class-declaration* or *struct-declaration*. A compile-time error occurs if the Conditional attribute is specified on a method in an interface declaration.
-
-- The conditional method shall have a return type of void.
-
-- The conditional method shall not be marked with the override modifier. A conditional method can be marked with the virtual modifier, however. Overrides of such a method are implicitly conditional, and shall not be explicitly marked with a Conditional attribute.
-
+- The conditional method shall be a method in a *class-declaration* or *struct-declaration*. A compile-time error occurs if the `Conditional` attribute is specified on a method in an interface declaration.
+- The conditional method shall have a return type of `void`.
+- The conditional method shall not be marked with the override modifier. A conditional method can be marked with the `virtual` modifier, however. Overrides of such a method are implicitly conditional, and shall not be explicitly marked with a `Conditional` attribute.
 - The conditional method shall not be an implementation of an interface method. Otherwise, a compile-time error occurs.
-
-- The parameters of the conditional method shall not have the out modifier.
+- The parameters of the conditional method shall not have the `out` modifier.
 
 In addition, a compile-time error occurs if a delegate is created from a conditional method.
 
 [*Example*: The example
 
-\#define DEBUG
+```csharp
+#define DEBUG
 
 using System;
 using System.Diagnostics;
 
 class Class1
 {
-[Conditional("DEBUG")]
-public static void M() {
-Console.WriteLine("Executed Class1.M");
-}
+    [Conditional ("DEBUG")]
+    public static void M ()
+    {
+        Console.WriteLine ("Executed Class1.M");
+    }
 }
 
 class Class2
 {
-public static void Test() {
-Class1.M();
+    public static void Test ()
+    {
+        Class1.M ();
+    }
 }
-}
+```
 
-declares Class1.M as a conditional method. Class2's Test method calls this method. Since the conditional compilation symbol DEBUG is defined, if Class2.Test is called, it will call M. If the symbol DEBUG had not been defined, then Class2.Test would not call Class1.M. *end example*]
+declares `Class1.M` as a conditional method. `Class2`'s `Test` method calls this method. Since the conditional compilation symbol `DEBUG` is defined, if `Class2.Test` is called, it will call `M`. If the symbol `DEBUG` had not been defined, then `Class2.Test` would not call `Class1.M`. *end example*]
 
 It is important to understand that the inclusion or exclusion of a call to a conditional method is controlled by the conditional compilation symbols at the point of the call. [*Example*: In the following code
 
+```csharp
 // File class1.cs
 
 using System.Diagnostics;
 
 class Class1
 {
-[Conditional("DEBUG")]
-public static void F() {
-Console.WriteLine("Executed Class1.F");
-}
+    [Conditional ("DEBUG")]
+    public static void F ()
+    {
+        Console.WriteLine ("Executed Class1.F");
+    }
 }
 
 // File class2.cs
 
-\#define DEBUG
+#define DEBUG
 
 class Class2
 {
-public static void G() {
-Class1.F(); // F is called
-}
+    public static void G ()
+    {
+        Class1.F (); // F is called
+    }
 }
 
 // File class3.cs
 
-\#undef DEBUG
+#undef DEBUG
 
 class Class3
 {
-public static void H() {
-Class1.F(); // F is not called
+    public static void H ()
+    {
+        Class1.F (); // F is not called
+    }
 }
-}
+```
 
-the classes Class2 and Class3 each contain calls to the conditional method Class1.F, which is conditional based on whether or not DEBUG is defined. Since this symbol is defined in the context of Class2 but not Class3, the call to F in Class2 is included, while the call to F in Class3 is omitted. *end example*]
+the classes `Class2` and `Class3` each contain calls to the conditional method `Class1.F`, which is conditional based on whether or not `DEBUG` is defined. Since this symbol is defined in the context of `Class2` but not `Class3`, the call to `F` in `Class2` is included, while the call to `F` in `Class3` is omitted. *end example*]
 
-The use of conditional methods in an inheritance chain can be confusing. Calls made to a conditional method through base, of the form base.M, are subject to the normal conditional method call rules. [*Example*: In the following code
+The use of conditional methods in an inheritance chain can be confusing. Calls made to a conditional method through base, of the form `base.`M, are subject to the normal conditional method call rules. [*Example*: In the following code
 
+```csharp
 // File class1.cs
 
 using System;
@@ -22540,112 +22543,124 @@ using System.Diagnostics;
 
 class Class1
 {
-[Conditional("DEBUG")]
-public virtual void M() {
-Console.WriteLine("Class1.M executed");
-}
+    [Conditional ("DEBUG")]
+    public virtual void M ()
+    {
+        Console.WriteLine ("Class1.M executed");
+    }
 }
 
 // File class2.cs
 
 using System;
 
-class Class2: Class1{
-public override void M() {
-Console.WriteLine("Class2.M executed");
-base.M(); // base.M is not called!
-}
+class Class2 : Class1
+{
+    public override void M ()
+    {
+        Console.WriteLine ("Class2.M executed");
+        base.M (); // base.M is not called!
+    }
 }
 
 // File class3.cs
 
-\#define DEBUG
+#define DEBUG
 
 using System;
 
 class Class3
 {
-public static void Test() {
-Class2 c = new Class2();
-c.M(); // M is called
+    public static void Test ()
+    {
+        Class2 c = new Class2 ();
+        c.M (); // M is called
+    }
 }
-}
+```
 
-Class2 includes a call to the M defined in its base class. This call is omitted because the base method is conditional based on the presence of the symbol DEBUG, which is undefined. Thus, the method writes to the console “Class2.M executed” only. Judicious use of *pp-declaration*s can eliminate such problems. *end example*]
+`Class2` includes a call to the `M` defined in its base class. This call is omitted because the `base` method is conditional based on the presence of the symbol `DEBUG`, which is undefined. Thus, the method writes to the console “`Class2.M executed`” only. Judicious use of *pp-declaration*s can eliminate such problems. *end example*]
 
 #### Conditional attribute classes
 
-An attribute class (§22.2) decorated with one or more Conditional attributes is a ***conditional attribute class***. A conditional attribute class is thus associated with the conditional compilation symbols declared in its Conditional attributes.
+An attribute class (§22.2) decorated with one or more `Conditional` attributes is a ***conditional attribute class***. A conditional attribute class is thus associated with the conditional compilation symbols declared in its `Conditional` attributes.
 
 [*Example*:
 
+```csharp
 using System;
 using System.Diagnostics;
-[Conditional("ALPHA")]
-[Conditional("BETA")]
-public class TestAttribute : Attribute {}
+[Conditional ("ALPHA")]
+[Conditional ("BETA")]
+public class TestAttribute : Attribute { }
+```
 
-declares TestAttribute as a conditional attribute class associated with the conditional compilations symbols ALPHA and BETA. *end example*]
+declares `TestAttribute` as a conditional attribute class associated with the conditional compilations symbols `ALPHA` and `BETA`. *end example*]
 
 Attribute specifications (§22.3) of a conditional attribute are included if one or more of its associated conditional compilation symbols is defined at the point of specification, otherwise the attribute specification is omitted.
 
 It is important to note that the inclusion or exclusion of an attribute specification of a conditional attribute class is controlled by the conditional compilation symbols at the point of the specification. [*Example*: In the example
 
-> File test.cs:
+```csharp
+// File test.cs:
 
 using System;
 using System.Diagnostics;
 
-[Conditional(“DEBUG”)]
+[Conditional (“DEBUG”)]
 
-public class TestAttribute : Attribute {}
+public class TestAttribute : Attribute { }
 
-> File class1.cs:
+// File class1.cs:
 
-\#define DEBUG
+#define DEBUG
 
 [Test] // TestAttribute is specified
 
-class Class1 {}
+class Class1 { }
 
-> File class2.cs:
+// File class2.cs:
 
-\#undef DEBUG
+#undef DEBUG
 
 [Test] // TestAttribute is not specified
 
-class Class2 {}
+class Class2 { }
+```
 
-the classes Class1 and Class2 are each decorated with attribute Test, which is conditional based on whether or not DEBUG is defined. Since this symbol is defined in the context of Class1 but not Class2, the specification of the Test attribute on Class1 is included, while the specification of the Test attribute on Class2 is omitted. *end example*]
+the classes `Class1` and `Class2` are each decorated with attribute `Test`, which is conditional based on whether or not `DEBUG` is defined. Since this symbol is defined in the context of `Class1` but not `Class2`, the specification of the `Test` attribute on `Class1` is included, while the specification of the `Test` attribute on `Class2` is omitted. *end example*]
 
 ### The Obsolete attribute
 
-The attribute Obsolete is used to mark types and members of types that should no longer be used.
+The attribute `Obsolete` is used to mark types and members of types that should no longer be used.
 
-If a program uses a type or member that is decorated with the Obsolete attribute, the compiler shall issue a warning or an error. Specifically, the compiler shall issue a warning if no error parameter is provided, or if the error parameter is provided and has the value false. The compiler shall issue an error if the error parameter is specified and has the value true.
+If a program uses a type or member that is decorated with the `Obsolete` attribute, the compiler shall issue a warning or an error. Specifically, the compiler shall issue a warning if no error parameter is provided, or if the error parameter is provided and has the value false. The compiler shall issue an error if the error parameter is specified and has the value true.
 
 [*Example*: In the following code
 
-[Obsolete("This class is obsolete; use class B instead")]
+```csharp
+[Obsolete ("This class is obsolete; use class B instead")]
 class A
 {
-public void F() {}
+    public void F () { }
 }
 
 class B
 {
-public void F() {}
+    public void F () { }
 }
 
 class Test
 {
-static void Main() {
-A a = new A(); // Warning
-a.F();
+    static void Main ()
+    {
+        A a = new A (); // Warning
+        a.F ();
+    }
 }
-}
+```
 
-the class A is decorated with the Obsolete attribute. Each use of A in Main results in a warning that includes the specified message, “This class is obsolete; use class B instead.” *end example*]
+the class `A` is decorated with the `Obsolete` attribute. Each use of `A` in `Main` results in a warning that includes the specified message, “`This class is obsolete; use class B instead.`” *end example*]
 
 ### Caller-info attributes
 
@@ -22657,22 +22672,24 @@ When an optional parameter is annotated with one of the caller-info attributes, 
 
 [*Example*:
 
+```csharp
 using System.Runtime.CompilerServices
 
 …
 
-public void Log(
-[CallerLineNumber] int line = -1,
-[CallerFilePath] string path = null,
-[CallerMemberName] string name = null
+public void Log (
+    [CallerLineNumber] int line = -1, 
+    [CallerFilePath] string path = null, 
+    [CallerMemberName] string name = null
 )
 {
-Console.WriteLine((line < 0) ? "No line" : "Line "+ line);
-Console.WriteLine((path == null) ? "No file path" : path);
-Console.WriteLine((name == null) ? "No member name" : name);
+    Console.WriteLine ((line < 0) ? "No line" : "Line " + line);
+    Console.WriteLine ((path == null) ? "No file path" : path);
+    Console.WriteLine ((name == null) ? "No member name" : name);
 }
+```
 
-A call to Log() with no arguments would print the line number and file path of the call, as well as the name of the member within which the call occurred. *end example*]
+A call to `Log()` with no arguments would print the line number and file path of the call, as well as the name of the member within which the call occurred. *end example*]
 
 Caller-info attributes can occur on optional parameters anywhere, including in delegate declarations. However, the specific caller-info attributes have restrictions on the types of the parameters they can attribute, so that there will always be an implicit conversion from a substituted value to the parameter type.
 
@@ -22684,66 +22701,71 @@ Caller information is only substituted when a function is explicitly invoked in 
 
 One exception is query expressions. These are considered syntactic expansions, and if the calls they expand to omit optional parameters with caller-info attributes, caller information will be substituted. The location used is the location of the query clause which the call was generated from.
 
-If more than one caller-info attribute is specified on a given parameter, they are preferred in the following order: CallerLineNumber, CallerFilePath, CallerMemberName.
+If more than one caller-info attribute is specified on a given parameter, they are preferred in the following order: `CallerLineNumber`, `CallerFilePath`, `CallerMemberName`.
 
 #### The CallerLineNumber attribute
 
-The System.Runtime.CompilerServices.CallerLineNumberAttribute is allowed on optional parameters when there is a standard implicit conversion (§11.2.2) from the constant value int.MaxValue to the parameter’s type. This ensures that any non-negative line number up to that value can be passed without error.
+The `System.Runtime.CompilerServices.CallerLineNumberAttribute` is allowed on optional parameters when there is a standard implicit conversion (§11.2.2) from the constant value `int.MaxValue` to the parameter’s type. This ensures that any non-negative line number up to that value can be passed without error.
 
+```csharp
 namespace System.Runtime.CompilerServices
 {
-[AttributeUsageAttribute(AttributeTargets.Parameter, Inherited = false)]
-public sealed class CallerLineNumberAttribute : Attribute
+    [AttributeUsageAttribute (AttributeTargets.Parameter, Inherited = false)]
+    public  sealed  class  CallerLineNumberAttribute : Attribute
 
-{
-public CallerLineNumberAttribute() {…}
-
+    {
+        public  CallerLineNumberAttribute () {…}
+    }
 }
-}
+```
 
-If a function invocation from a location in source code omits an optional parameter with the CallerLineNumberAttribute, then a numeric literal representing that location's line number is used as an argument to the invocation instead of the default parameter value.
+If a function invocation from a location in source code omits an optional parameter with the `CallerLineNumberAttribute`, then a numeric literal representing that location's line number is used as an argument to the invocation instead of the default parameter value.
 
 If the invocation spans multiple lines, the line chosen is implementation-dependent.
 
-The line number may be affected by \#line directives (§7.5.8).
+The line number may be affected by `#line` directives (§7.5.8).
 
 #### The CallerFilePath attribute
 
-The System.Runtime.CompilerServices.CallerFilePathAttribute is allowed on optional parameters when there is a standard implicit conversion (§11.2.2) from string to the parameter’s type.
+The `System.Runtime.CompilerServices.CallerFilePathAttribute `is allowed on optional parameters when there is a standard implicit conversion (§11.2.2) from string to the parameter’s type.
 
+```csharp
 namespace System.Runtime.CompilerServices
 {
-[AttributeUsageAttribute(AttributeTargets.Parameter, Inherited = false)]
-public sealed class CallerFilePathAttribute : Attribute
+    [AttributeUsageAttribute (AttributeTargets.Parameter, Inherited = false)]
+    public  sealed  class  CallerFilePathAttribute : Attribute
 
-{
-public CallerFilePathAttribute() {…}
+    {
+        public  CallerFilePathAttribute () {…}
 
+    }
 }
-}
+```
 
-If a function invocation from a location in source code omits an optional parameter with the CallerFilePathAttribute, then a string literal representing that location's file path is used as an argument to the invocation instead of the default parameter value.
+If a function invocation from a location in source code omits an optional parameter with the `CallerFilePathAttribute`, then a string literal representing that location's file path is used as an argument to the invocation instead of the default parameter value.
 
 The format of the file path is implementation-dependent.
 
-The file path may be affected by \#line directives (§7.5.8).
+The file path may be affected by `#line` directives (§7.5.8).
 
 #### The CallerMemberName attribute
 
-The System.Runtime.CompilerServices.CallerMemberNameAttribute is allowed on optional parameters when there is a standard implicit conversion (§11.2.2) from string to the parameter’s type.
+The `System.Runtime.CompilerServices.CallerMemberNameAttribute` is allowed on optional parameters when there is a standard implicit conversion (§11.2.2) from string to the parameter’s type.
 
+```csharp
 namespace System.Runtime.CompilerServices
 {
-[AttributeUsageAttribute(AttributeTargets.Parameter, Inherited = false)]
-public sealed class CallerMemberNameAttribute : Attribute
+    [AttributeUsageAttribute (AttributeTargets.Parameter, Inherited = false)]
+    public  sealed  class  CallerMemberNameAttribute : Attribute
 
-{
-public CallerMemberNameAttribute() {…}
+    {
+        public  CallerMemberNameAttribute () {…}
 
+    }
 }
-}
+```
 
-If a function invocation from a location within the body of a function member or within an attribute applied to the function member itself or its return type, parameters or type parameters in source code omits an optional parameter with the CallerMemberNameAttribute, then a string literal representing the name of that member is used as an argument to the invocation instead of the default parameter value.
+If a function invocation from a location within the body of a function member or within an attribute applied to the function member itself or its return type, parameters or type parameters in source code omits an optional parameter with the `CallerMemberNameAttribute`, then a string literal representing the name of that member is used as an argument to the invocation instead of the default parameter value.
 
 For invocations that occur within generic methods, only the method name itself is used, without the type parameter list.
 
@@ -22751,7 +22773,7 @@ For invocations that occur within explicit interface member implementations, onl
 
 For invocations that occur within property or event accessors, the member name used is that of the property or event itself.
 
-For invocations that occur within indexer accessors, the member name used is that supplied by an IndexerNameAttribute (§) on the indexer member, if present, or the default name Item otherwise.
+For invocations that occur within indexer accessors, the member name used is that supplied by an `IndexerNameAttribute` (§) on the indexer member, if present, or the default name `Item` otherwise.
 
 For invocations that occur within field or event initializers, the member name used is the name of the field or event being initialized.
 
@@ -22759,18 +22781,20 @@ For invocations that occur within declarations of instance constructors, static 
 
 ## Attributes for interoperation
 
-For interoperation with other languages, an indexer may be implemented using indexed properties. If no IndexerName attribute is present for an indexer, then the name Item is used by default. The IndexerName attribute enables a developer to override this default and specify a different name.
+For interoperation with other languages, an indexer may be implemented using indexed properties. If no `IndexerName` attribute is present for an indexer, then the name `Item` is used by default. The `IndexerName` attribute enables a developer to override this default and specify a different name.
 
+```csharp
 namespace System.Runtime.CompilerServices
 {
-[AttributeUsage(AttributeTargets.Property)]
-public class IndexerNameAttribute: Attribute
-{
-public IndexerNameAttribute(string indexerName) {…}
+    [AttributeUsage (AttributeTargets.Property)]
+    public class IndexerNameAttribute : Attribute
+    {
+        public IndexerNameAttribute (string indexerName) {…}
 
-public string Value { get {…} }
+        public string Value { get {…} }
+    }
 }
-}[[[[[[[[]{#_Toc466975656 .anchor}]{#_Toc466972244 .anchor}]{#_Toc466975653 .anchor}]{#_Toc466972241 .anchor}]{#_Toc466975649 .anchor}]{#_Toc466972237 .anchor}]{#_Toc466975639 .anchor}]{#_Toc466972227 .anchor}
+```
 
 # Unsafe code
 
@@ -22780,212 +22804,226 @@ An implementation that does not support unsafe code is required to diagnose any 
 
 **The remainder of this clause, including all of its subclauses, is conditionally normative.**
 
-[*Note*: The core C# language, as defined in the preceding clauses, differs notably from C and C++ in its omission of pointers as a data type. Instead, C# provides references and the ability to create objects that are managed by a garbage collector. This design, coupled with other features, makes C# a much safer language than C or C++. In the core C# language, it is simply not possible to have an uninitialized variable, a “dangling” pointer, or an expression that indexes an array beyond its bounds. Whole categories of bugs that routinely plague C and C++ programs are thus eliminated.
-
-While practically every pointer type construct in C or C++ has a reference type counterpart in C#, nonetheless, there are situations where access to pointer types becomes a necessity. For example, interfacing with the underlying operating system, accessing a memory-mapped device, or implementing a time-critical algorithm might not be possible or practical without access to pointers. To address this need, C# provides the ability to write ***unsafe code***.
-
-In unsafe code, it is possible to declare and operate on pointers, to perform conversions between pointers and integral types, to take the address of variables, and so forth. In a sense, writing unsafe code is much like writing C code within a C# program.
-
-Unsafe code is in fact a “safe” feature from the perspective of both developers and users. Unsafe code shall be clearly marked with the modifier unsafe, so developers can’t possibly use unsafe features accidentally, and the execution engine works to ensure that unsafe code cannot be executed in an untrusted environment. *end note*]
+> [!NOTE]
+> The core C# language, as defined in the preceding clauses, differs notably from C and C++ in its omission of pointers as a data type. Instead, C# provides references and the ability to create objects that are managed by a garbage collector. This design, coupled with other features, makes C# a much safer language than C or C++. In the core C# language, it is simply not possible to have an uninitialized variable, a “dangling” pointer, or an expression that indexes an array beyond its bounds. Whole categories of bugs that routinely plague C and C++ programs are thus eliminated.
+> 
+> While practically every pointer type construct in C or C++ has a reference type counterpart in C#, nonetheless, there are situations where access to pointer types becomes a necessity. For example, interfacing with the underlying operating system, accessing a memory-mapped device, or implementing a time-critical algorithm might not be possible or practical without access to pointers. To address this need, C# provides the ability to write ***unsafe code***.
+> 
+> In unsafe code, it is possible to declare and operate on pointers, to perform conversions between pointers and integral types, to take the address of variables, and so forth. In a sense, writing unsafe code is much like writing C code within a C# program.
+> 
+> Unsafe code is in fact a “safe” feature from the perspective of both developers and users. Unsafe code shall be clearly marked with the modifier unsafe, so developers can’t possibly use unsafe features accidentally, and the execution engine works to ensure that unsafe code cannot be executed in an untrusted environment.
 
 ## Unsafe contexts
 
-The unsafe features of C# are available only in unsafe contexts. An unsafe context is introduced by including an unsafe modifier in the declaration of a type or member, or by employing an *unsafe-statement*:
+The unsafe features of C# are available only in unsafe contexts. An unsafe context is introduced by including an `unsafe` modifier in the declaration of a type or member, or by employing an *unsafe-statement*:
 
-- A declaration of a class, struct, interface, or delegate may include an unsafe modifier, in which case, the entire textual extent of that type declaration (including the body of the class, struct, or interface) is considered an unsafe context. [*Note*: If the *type-declaration* is partial, only that part is an unsafe context. *end note*]
-
-- A declaration of a field, method, property, event, indexer, operator, instance constructor, finalizer, or static constructor may include an unsafe modifier, in which case, the entire textual extent of that member declaration is considered an unsafe context.
-
+- A declaration of a class, struct, interface, or delegate may include an unsafe modifier, in which case, the entire textual extent of that type declaration (including the body of the class, struct, or interface) is considered an unsafe context. 
+  > [!NOTE]
+  > If the *type-declaration* is `partial`, only that part is an unsafe context.
+- A declaration of a field, method, property, event, indexer, operator, instance constructor, finalizer, or static constructor may include an `unsafe` modifier, in which case, the entire textual extent of that member declaration is considered an unsafe context.
 - An *unsafe-statement* enables the use of an unsafe context within a *block*. The entire textual extent of the associated *block* is considered an unsafe context.
 
 The associated grammar extensions are shown below. For brevity, ellipses (…) are used to represent productions that appear in preceding clauses.
 
-[]{#Grammar_uc_class_modifier .anchor}class-modifier:
-…
-*unsafe*
+```antlr
+class-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_struct_modifier .anchor}struct-modifier:
-…
-*unsafe*
+struct-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_interface_modifier .anchor}interface-modifier:
-…
-*unsafe*
+interface-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_delegate_modifier .anchor}delegate-modifier:
-…
-*unsafe*
+delegate-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_field_modifier .anchor}field-modifier:
-…
-*unsafe*
+field-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_method_modifier .anchor}method-modifier:
-…
-*unsafe*
+method-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_property_modifier .anchor}property-modifier:
-…
-*unsafe*
+property-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_event_modifier .anchor}event-modifier:
-…
-*unsafe*
+event-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_indexer_modifier .anchor}indexer-modifier:
-…
-*unsafe*
+indexer-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_operator_modifier .anchor}operator-modifier:
-…
-*unsafe*
+operator-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_constructor_modifier .anchor}constructor-modifier:
-…
-*unsafe*
+constructor-modifier:
+    …
+    unsafe
 
-[]{#Grammar_uc_destructor_declaration .anchor}finalizer-declaration:
-attributesopt *extern*opt *unsafe*opt ~ identifier *(* *)* finalizer-body
-attributesopt *unsafe*opt *extern*opt ~ identifier *(* *)* finalizer-body
+finalizer-declaration:
+    attributesopt externopt unsafeopt ~ identifier ( ) finalizer-body
+    attributesopt unsafeopt externopt ~ identifier ( ) finalizer-body
 
-[]{#Grammar_uc_static_constructor_modifiers .anchor}static-constructor-modifiers:
-*extern*opt *unsafe*opt *static*
-*unsafe*opt *extern*opt *static*
-*extern*opt *static* *unsafe*opt
-*unsafe*opt *static* *extern*opt
-*static* *extern*opt *unsafe*opt
-*static* *unsafe*opt *extern*opt
+static-constructor-modifiers:
+    externopt unsafeopt static
+    unsafeopt externopt static
+    externopt static unsafeopt
+    unsafeopt static externopt
+    static externopt unsafeopt
+    static unsafeopt externopt
 
-[]{#Grammar_uc_embedded_statement .anchor}embedded-statement:
-…
-unsafe-statement
+embedded-statement:
+    …
+    unsafe-statement
 
-[]{#Grammar_uc_unsafe_statement .anchor}unsafe-statement:
-*unsafe* block
+unsafe-statement:
+    unsafe block
+```
 
 [*Example*: In the following code
 
+```csharp
 public unsafe struct Node
 {
-public int Value;
-public Node\* Left;
-public Node\* Right;
+    public int Value;
+    public Node * Left;
+    public Node * Right;
 }
+```
 
-the unsafe modifier specified in the struct declaration causes the entire textual extent of the struct declaration to become an unsafe context. Thus, it is possible to declare the Left and Right fields to be of a pointer type. The example above could also be written
+the `unsafe` modifier specified in the struct declaration causes the entire textual extent of the struct declaration to become an unsafe context. Thus, it is possible to declare the `Left` and `Right` fields to be of a pointer type. The example above could also be written
 
+```csharp
 public struct Node
 {
-public int Value;
-public unsafe Node\* Left;
-public unsafe Node\* Right;
+    public int Value;
+    public unsafe Node* Left;
+    public unsafe Node* Right;
 }
+```
 
-Here, the unsafe modifiers in the field declarations cause those declarations to be considered unsafe contexts. *end example*]
+Here, the `unsafe` modifiers in the field declarations cause those declarations to be considered unsafe contexts. *end example*]
 
-Other than establishing an unsafe context, thus permitting the use of pointer types, the unsafe modifier has no effect on a type or a member. [*Example*: In the following code
+Other than establishing an unsafe context, thus permitting the use of pointer types, the `unsafe` modifier has no effect on a type or a member. [*Example*: In the following code
 
+```csharp
 public class A
 {
-public unsafe virtual void F() {
-char\* p;
-…
-}
+    public unsafe virtual void F ()
+    {
+        char* p;
+        …
+    }
 }
 
-public class B: A
+public class B : A
 {
-public override void F() {
-base.F();
-…
+    public override void F ()
+    {
+        base.F ();
+        …
+    }
 }
-}
+```
 
-the unsafe modifier on the F method in A simply causes the textual extent of F to become an unsafe context in which the unsafe features of the language can be used. In the override of F in B, there is no need to re-specify the unsafe modifier—unless, of course, the F method in B itself needs access to unsafe features.
+the `unsafe` modifier on the `F` method in `A` simply causes the textual extent of `F` to become an unsafe context in which the unsafe features of the language can be used. In the override of `F` in `B`, there is no need to re-specify the unsafe modifier—unless, of course, the `F` method in `B` itself needs access to unsafe features.
 
 The situation is slightly different when a pointer type is part of the method’s signature
 
+```csharp
 public unsafe class A
 {
-public virtual void F(char\* p) {…}
+    public virtual void F (char* p) {…}
 }
 
-public class B: A
+public class B : A
 {
-public unsafe override void F(char\* p) {…}
+    public unsafe override void F (char* p) {…}
 }
+```
 
-Here, because F’s signature includes a pointer type, it can only be written in an unsafe context. However, the unsafe context can be introduced by either making the entire class unsafe, as is the case in A, or by including an unsafe modifier in the method declaration, as is the case in B. *end example*]
+Here, because `F`’s signature includes a pointer type, it can only be written in an unsafe context. However, the unsafe context can be introduced by either making the entire class unsafe, as is the case in `A`, or by including an `unsafe` modifier in the method declaration, as is the case in `B`. *end example*]
 
-When the unsafe modifier is used on a partial type declaration (§15.2.7), only that particular part is considered an unsafe context.
+When the `unsafe` modifier is used on a `partial` type declaration (§15.2.7), only that particular part is considered an unsafe context.
 
 ## Pointer types
 
-In an unsafe context, a *type* (§9) can be a *pointer-type* as well as a *value-type*, a *reference-type*, or a *type-parameter*. In an unsafe context a pointer-type may also be the element type of an array (§17). A pointer-type may also be used in a typeof expression (§12.7.12) outside of an unsafe context (as such usage is not unsafe).
+In an unsafe context, a *type* (§9) can be a *pointer-type* as well as a *value-type*, a *reference-type*, or a *type-parameter*. In an unsafe context a pointer-type may also be the element type of an array (§17). A pointer-type may also be used in a `typeof` expression (§12.7.12) outside of an unsafe context (as such usage is not unsafe).
 
-[]{#Grammar_uc_type .anchor}type:
-…
-pointer-type
+```antlr
+type:
+    …
+    pointer-type
 
-[]{#Grammar_uc_non_array_type .anchor}non-array-type:
-…
-pointer-type
+non-array-type:
+    …
+    pointer-type
+```
 
-A *pointer-type* is written as an *unmanaged-type* or the keyword void, followed by a \* token:
+A *pointer-type* is written as an *unmanaged-type* or the keyword void, followed by a * token:
 
-[]{#Grammar_uc_pointer_type .anchor}pointer-type:
-unmanaged-type *\**
-*void* *\**
+```antlr
+pointer-type:
+    unmanaged-type 
+    void *
 
-[]{#Grammar_uc_unmanaged_type .anchor}unmanaged-type:
-type
+unmanaged-type:
+    type
+```
 
-The type specified before the \* in a pointer type is called the ***referent type*** of the pointer type. It represents the type of the variable to which a value of the pointer type points.
+The type specified before the `*` in a pointer type is called the ***referent type*** of the pointer type. It represents the type of the variable to which a value of the pointer type points.
 
 A *pointer-type* may only be used in an *array-type* in an unsafe context (§23.2). A *non-array-type* is any type that is not itself an *array-type*.
 
-The type specified before the \* in a pointer type is called the ***referent type*** of the pointer type. It represents the type of the variable to which a value of the pointer type points.
+The type specified before the `*` in a pointer type is called the ***referent type*** of the pointer type. It represents the type of the variable to which a value of the pointer type points.
 
 Unlike references (values of reference types), pointers are not tracked by the garbage collector—the garbage collector has no knowledge of pointers and the data to which they point. For this reason a pointer is not permitted to point to a reference or to a struct that contains references, and the referent type of a pointer shall be an *unmanaged-type*.
 
 An *unmanaged-type* is any type that isn’t a *reference-type*, a type-parameter, or a constructed type, and contains no fields whose type is not an unmanaged-type. In other words, an *unmanaged-type* is one of the following:
 
-- sbyte, byte, short, ushort, int, uint, long, ulong, char, float, double, decimal, or bool.
-
+- `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, `decimal`, or `bool`.
 - Any *enum-type*.
-
 - Any *pointer-type*.
-
 - Any user-defined *struct-type* that is not a constructed type and contains fields of *unmanaged-type*s only.
 
 The intuitive rule for mixing of pointers and references is that referents of references (objects) are permitted to contain pointers, but referents of pointers are not permitted to contain references.
 
 [*Example*: Some examples of pointer types are given in the table below:
 
-  ----------- ---------------------------------------------
-  Example     Description
-  byte\*      Pointer to byte
-  char\*      Pointer to char
-  int\*\*     Pointer to pointer to int
-  int\*[]   Single-dimensional array of pointers to int
-  void\*      Pointer to unknown type
-  ----------- ---------------------------------------------
+|  Example    | Description                                   |
+|  -----------| --------------------------------------------- |
+|  `byte*`      | Pointer to `byte`                               |
+|  `char*`      | Pointer to `char`                               |
+|  `int**`      | Pointer to pointer to `int`                     |
+|  `int*[]`     | Single-dimensional array of pointers to `int`   |
+|  `void*`      | Pointer to unknown type                       |
 
 *end example*]
 
 For a given implementation, all pointer types shall have the same size and representation.
 
-[*Note*: Unlike C and C++, when multiple pointers are declared in the same declaration, in C# the \* is written along with the underlying type only, not as a prefix punctuator on each pointer name. For example:
+> [!NOTE]
+> Unlike C and C++, when multiple pointers are declared in the same declaration, in C# the `*` is written along with the underlying type only, not as a prefix punctuator on each pointer name. For example:
+> 
+> ```csharp
+> int* pi, pj; // NOT as int *pi, *pj;
+> ```
 
-int\* pi, pj; // NOT as int \*pi, \*pj;
+The value of a pointer having type `T*` represents the address of a variable of type `T`. The pointer indirection operator `*` (§23.6.2) can be used to access this variable. [*Example*: Given a variable `P` of type `int*`, the expression `*P` denotes the `int` variable found at the address contained in `P`. *end example*]
 
-*end note*]
+Like an object reference, a pointer may be `null`. Applying the indirection operator to a null pointer results in implementation-defined behavior (§23.6.2). A pointer with value `null` is represented by all-bits-zero.
 
-The value of a pointer having type T\* represents the address of a variable of type T. The pointer indirection operator \* (§23.6.2) can be used to access this variable. [*Example*: Given a variable P of type int\*, the expression \*P denotes the int variable found at the address contained in P. *end example*]
-
-Like an object reference, a pointer may be null. Applying the indirection operator to a null pointer results in implementation-defined behavior (§23.6.2). A pointer with value null is represented by all-bits-zero.
-
-The void\* type represents a pointer to an unknown type. Because the referent type is unknown, the indirection operator cannot be applied to a pointer of type void\*, nor can any arithmetic be performed on such a pointer. However, a pointer of type void\* can be cast to any other pointer type (and vice versa) and compared to values of other pointer types (§23.6.8).
+The `void*` type represents a pointer to an unknown type. Because the referent type is unknown, the indirection operator cannot be applied to a pointer of type `void*`, nor can any arithmetic be performed on such a pointer. However, a pointer of type `void*` can be cast to any other pointer type (and vice versa) and compared to values of other pointer types (§23.6.8).
 
 Pointer types are a separate category of types. Unlike reference types and value types, pointer types do not inherit from object and no conversions exist between pointer types and object. In particular, boxing and unboxing (§9.3.12) are not supported for pointers. However, conversions are permitted between different pointer types and between pointer types and the integral types. This is described in §23.5.
 
@@ -22995,90 +23033,89 @@ A *pointer-type* cannot be used as a type of a subexpression of a dynamically bo
 
 A *pointer-type* may be used as the type of a volatile field (§15.5.4).
 
-[*Note*: Although pointers can be passed as ref or out parameters, doing so can cause undefined behavior, since the pointer might well be set to point to a local variable that no longer exists when the called method returns, or the fixed object to which it used to point, is no longer fixed. For example:
+> [!NOTE]
+> Although pointers can be passed as ref or out parameters, doing so can cause undefined behavior, since the pointer might well be set to point to a local variable that no longer exists when the called method returns, or the fixed object to which it used to point, is no longer fixed. For example:
+> 
+> ```csharp
+> using System;
+> 
+> class Test
+> {
+>     static int value = 20;
+> 
+>     unsafe static void F (out int* pi1, ref int* pi2)
+>     {
+>         int i = 10;
+>         pi1 = & i;
+>         fixed (int* pj = & value)
+>         {
+>             // …
+>             pi2 = pj;
+>         }
+>     }
+> 
+>     static void Main ()
+>     {
+>         int i = 10;
+>         unsafe
+>         {
+>             int* px1;
+>             int* px2 = & i;
+>             F (out px1, ref px2);
+> 
+>             Console.WriteLine ("*px1 = {0}, *px2 = {1}",
+>                 *px1, *px2); // undefined behavior
+>         }
+>     }
+> }
+> ```
 
-using System;
+A method can return a value of some type, and that type can be a pointer. [*Example*: When given a pointer to a contiguous sequence of `int`s, that sequence's element count, and some other `int` value, the following method returns the address of that value in that sequence, if a match occurs; otherwise it returns `null`:
 
-class Test
+```csharp
+unsafe static int* Find (int* pi, int size, int value)
 {
-static int value = 20;
-
-unsafe static void F(out int\* pi1, ref int\* pi2) {
-int i = 10;
-pi1 = &i;
-fixed (int\* pj = &value) {
-// …
-pi2 = pj;
+    for (int i = 0; i < size; ++i)
+    {
+        if ( *pi == value)
+            return pi;
+        ++pi;
+    }
+    return null;
 }
-}
-
-static void Main() {
-int i = 10;
-unsafe {
-int\* px1;
-int\* px2 = &i;
-F(out px1, ref px2);
-
-Console.WriteLine("\*px1 = {0}, \*px2 = {1}",
-\*px1, \*px2); // undefined behavior
-}
-}
-}
-
-*end note*]
-
-A method can return a value of some type, and that type can be a pointer. [*Example*: When given a pointer to a contiguous sequence of ints, that sequence's element count, and some other int value, the following method returns the address of that value in that sequence, if a match occurs; otherwise it returns null:
-
-unsafe static int\* Find(int\* pi, int size, int value) {
-for (int i = 0; i < size; ++i) {
-if (\*pi == value)
-return pi;
-++pi;
-}
-return null;
-}
+```
 
 *end example*]
 
 In an unsafe context, several constructs are available for operating on pointers:
 
-- The unary \* operator may be used to perform pointer indirection (§23.6.2).
-
-- The -> operator may be used to access a member of a struct through a pointer (§23.6.3).
-
-- The [] operator may be used to index a pointer (§23.6.4).
-
-- The unary & operator may be used to obtain the address of a variable (§23.6.5).
-
-- The ++ and -- operators may be used to increment and decrement pointers (§23.6.6).
-
-- The binary + and - operators may be used to perform pointer arithmetic (§23.6.7).
-
-- The ==, !=, <, >, <=, and >= operators may be used to compare pointers (§23.6.8).
-
-- The stackalloc operator may be used to allocate memory from the call stack (§23.9).
-
-- The fixed statement may be used to temporarily fix a variable so its address can be obtained (§23.7).
+- The unary `*` operator may be used to perform pointer indirection (§23.6.2).
+- The `->` operator may be used to access a member of a struct through a pointer (§23.6.3).
+- The `[]` operator may be used to index a pointer (§23.6.4).
+- The unary `&` operator may be used to obtain the address of a variable (§23.6.5).
+- The `++` and `--` operators may be used to increment and decrement pointers (§23.6.6).
+- The binary `+` and `-` operators may be used to perform pointer arithmetic (§23.6.7).
+- The `==`, `!=`, `<`, `>`, `<=`, and `>=` operators may be used to compare pointers (§23.6.8).
+- The `stackalloc` operator may be used to allocate memory from the call stack (§23.9).
+- The `fixed` statement may be used to temporarily fix a variable so its address can be obtained (§23.7).
 
 ## Fixed and moveable variables
 
-The address-of operator (§23.6.5) and the fixed statement (§23.7) divide variables into two categories: ***Fixed variables*** and ***moveable variables***.
+The `address-of` operator (§23.6.5) and the `fixed` statement (§23.7) divide variables into two categories: ***Fixed variables*** and ***moveable variables***.
 
 Fixed variables reside in storage locations that are unaffected by operation of the garbage collector. (Examples of fixed variables include local variables, value parameters, and variables created by dereferencing pointers.) On the other hand, moveable variables reside in storage locations that are subject to relocation or disposal by the garbage collector. (Examples of moveable variables include fields in objects and elements of arrays.)
 
-The & operator (§23.6.5) permits the address of a fixed variable to be obtained without restrictions. However, because a moveable variable is subject to relocation or disposal by the garbage collector, the address of a moveable variable can only be obtained using a fixed statement (§23.7), and that address remains valid only for the duration of that fixed statement.
+The `&` operator (§23.6.5) permits the address of a fixed variable to be obtained without restrictions. However, because a moveable variable is subject to relocation or disposal by the garbage collector, the address of a moveable variable can only be obtained using a fixed statement (§23.7), and that address remains valid only for the duration of that fixed statement.
 
 In precise terms, a fixed variable is one of the following:
 
 - A variable resulting from a *simple-name* (§12.7.3) that refers to a local variable, value parameter, or parameter array, unless the variable is captured by an anonymous function (§12.16.6.2).
-
-- A variable resulting from a *member-access* (§12.7.5) of the form V.I, where V is a fixed variable of a *struct-type*.
-
-- A variable resulting from a *pointer-indirection-expression* (§23.6.2) of the form \*P, a *pointer-member-access* (§23.6.3) of the form P->I, or a *pointer-element-access* (§23.6.4) of the form P[E].
+- A variable resulting from a *member-access* (§12.7.5) of the form `V.I`, where `V` is a fixed variable of a *struct-type*.
+- A variable resulting from a *pointer-indirection-expression* (§23.6.2) of the form *P, a *pointer-member-access* (§23.6.3) of the form `P->I`, or a *pointer-element-access* (§23.6.4) of the form `P[E]`.
 
 All other variables are classified as moveable variables.
 
-A static field is classified as a moveable variable. Also, a ref or out parameter is classified as a moveable variable, even if the argument given for the parameter is a fixed variable. Finally, a variable produced by dereferencing a pointer is always classified as a fixed variable.
+A static field is classified as a moveable variable. Also, a `ref` or `out` parameter is classified as a moveable variable, even if the argument given for the parameter is a fixed variable. Finally, a variable produced by dereferencing a pointer is always classified as a fixed variable.
 
 ## Pointer conversions
 
@@ -23086,90 +23123,98 @@ A static field is classified as a moveable variable. Also, a ref or out paramete
 
 In an unsafe context, the set of available implicit conversions (§11.2) is extended to include the following implicit pointer conversions:
 
-- From any *pointer-type* to the type void\*.
-
-- From the null literal (§7.4.5.7) to any *pointer-type*.
+- From any *pointer-type* to the type `void*`.
+- From the `null` literal (§7.4.5.7) to any *pointer-type*.
 
 Additionally, in an unsafe context, the set of available explicit conversions (§11.3) is extended to include the following explicit pointer conversions:
 
 - From any *pointer-type* to any other *pointer-type*.
-
-- From sbyte, byte, short, ushort, int, uint, long, or ulong to any *pointer-type*.
-
-- From any *pointer-type* to sbyte, byte, short, ushort, int, uint, long, or ulong.
+- From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, or `ulong` to any *pointer-type*.
+- From any *pointer-type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, or `ulong`.
 
 Finally, in an unsafe context, the set of standard implicit conversions (§11.4.2) includes the following pointer conversions:
 
-- From any *pointer-type* to the type void\*.
-
-- From the null literal to any *pointer-type*.
+- From any *pointer-type* to the type `void*`.
+- From the `null` literal to any *pointer-type*.
 
 Conversions between two pointer types never change the actual pointer value. In other words, a conversion from one pointer type to another has no effect on the underlying address given by the pointer.
 
-When one pointer type is converted to another, if the resulting pointer is not correctly aligned for the pointed-to type, the behavior is undefined if the result is dereferenced. In general, the concept “correctly aligned” is transitive: if a pointer to type A is correctly aligned for a pointer to type B, which, in turn, is correctly aligned for a pointer to type C, then a pointer to type A is correctly aligned for a pointer to type C. [*Example*: Consider the following case in which a variable having one type is accessed via a pointer to a different type:
+When one pointer type is converted to another, if the resulting pointer is not correctly aligned for the pointed-to type, the behavior is undefined if the result is dereferenced. In general, the concept “correctly aligned” is transitive: if a pointer to type `A` is correctly aligned for a pointer to type `B`, which, in turn, is correctly aligned for a pointer to type `C`, then a pointer to type `A` is correctly aligned for a pointer to type `C`. [*Example*: Consider the following case in which a variable having one type is accessed via a pointer to a different type:
 
+```csharp
 char c = 'A';
-char\* pc = &c;
-void\* pv = pc;
-int\* pi = (int\*)pv;
-int i = \*pi; // undefined
-\*pi = 123456; // undefined
+char* pc = &c;
+void* pv = pc;
+int* pi = (int*)pv;
+int i = *pi; // undefined
+*pi = 123456; // undefined
+```
 
 *end example*]
 
-When a pointer type is converted to a pointer to byte, the result points to the lowest addressed byte of the variable. Successive increments of the result, up to the size of the variable, yield pointers to the remaining bytes of that variable. [*Example*: The following method displays each of the eight bytes in a double as a hexadecimal value:
+When a pointer type is converted to a pointer to `byte`, the result points to the lowest addressed `byte` of the variable. Successive increments of the result, up to the size of the variable, yield pointers to the remaining bytes of that variable. [*Example*: The following method displays each of the eight bytes in a double as a hexadecimal value:
 
+```csharp
 using System;
 
 class Test
 {
-static void Main() {
-double d = 123.456e23;
-unsafe {
-byte\* pb = (byte\*)&d;
-for (int i = 0; i < sizeof(double); ++i)
-Console.Write("{0:X2} ", \*pb++);
-Console.WriteLine();
+    static void Main ()
+    {
+        double d = 123.456e23;
+        unsafe
+        {
+            byte* pb = (byte* ) & d;
+            for (int i = 0; i < sizeof (double); ++i)
+                Console.Write ("{0:X2} ", *pb++);
+            Console.WriteLine ();
+        }
+    }
 }
-}
-}
+```
 
 Of course, the output produced depends on endianness. *end example*]
 
-Mappings between pointers and integers are implementation-defined. [*Note*: However, on 32- and 64-bit CPU architectures with a linear address space, conversions of pointers to or from integral types typically behave exactly like conversions of uint or ulong values, respectively, to or from those integral types. *end note*]
+Mappings between pointers and integers are implementation-defined. 
+
+> [!NOTE]
+> However, on 32- and 64-bit CPU architectures with a linear address space, conversions of pointers to or from integral types typically behave exactly like conversions of uint or ulong values, respectively, to or from those integral types.
 
 ### Pointer arrays
 
 Arrays of pointers can be constructed using *array-creation-expression* (§12.7.11.5) in an usafe context. Only some of the conversions that apply to other array types are allowed on pointer arrays:
 
-- The implicit reference conversion (§11.2.5) from any *array-type* to System.Array and the interfaces it implements also applies to pointer arrays. However, any attempt to access the array elements through System.Array or the interfaces it implements may result in an exception at run-time, as pointer types are not convertible to object.
+- The implicit reference conversion (§11.2.5) from any *array-type* to `System.Array` and the interfaces it implements also applies to pointer arrays. However, any attempt to access the array elements through `System.Array` or the interfaces it implements may result in an exception at run-time, as pointer types are not convertible to `object`.
+- The implicit and explicit reference conversions (§11.2.5, §11.3.4) from a single-dimensional array type `S[]` to `System.Collections.Generic.IList<T>` and its generic base interfaces never apply to pointer arrays.
+- The explicit reference conversion (§11.3.4) from `System.Array` and the interfaces it implements to any *array-type* applies to pointer arrays.
+- The explicit reference conversions (§11.3.4) from `System.Collections.Generic.IList<S>` and its base interfaces to a single-dimensional array type `T[]` never applies to pointer arrays, since pointer types cannot be used as type arguments, and there are no conversions from pointer types to non-pointer types.
 
-- The implicit and explicit reference conversions (§11.2.5, §11.3.4) from a single-dimensional array type S[] to System.Collections.Generic.IList<T> and its generic base interfaces never apply to pointer arrays.
+These restrictions mean that the expansion for the `foreach` statement over arrays described in §10.4.4.17 cannot be applied to pointer arrays. Instead, a `foreach` statement of the form
 
-- The explicit reference conversion (§11.3.4) from System.Array and the interfaces it implements to any *array-type* applies to pointer arrays.
+```csharp
+foreach (V v in x) *embedded-statement*
+```
 
-- The explicit reference conversions (§11.3.4) from System.Collections.Generic.IList<S> and its base interfaces to a single-dimensional array type T[] never applies to pointer arrays, since pointer types cannot be used as type arguments, and there are no conversions from pointer types to non-pointer types.
+where the type of `x` is an array type of the form `T[,,…,], *n*` is the number of dimensions minus 1 and `T` or `V` is a pointer type, is expanded using nested for-loops as follows:
 
-These restrictions mean that the expansion for the foreach statement over arrays described in §10.4.4.17 cannot be applied to pointer arrays. Instead, a foreach statement of the form
-
-> foreach (V v in x) *embedded-statement*
-
-where the type of x is an array type of the form T[,,…,], *n* is the number of dimensions minus 1 and T or V is a pointer type, is expanded using nested for-loops as follows:
-
+```csharp
 {
-T[,,…,] a = x; for (int i0 = a.GetLowerBound(0); i0 <= a.GetUpperBound(0); i0++)
-for (int i1 = a.GetLowerBound(1); i1 <= a.GetUpperBound(1); i1++)
-…
-for (int i*n* = a.GetLowerBound(*n*); i*n* <= a.GetUpperBound(*n*); i*n*++) {
-V v = (V)a[i0,i1,…,i*n*];
+    T[, , …, ] a = x;
+    for (int i0 = a.GetLowerBound (0); i0 <= a.GetUpperBound (0); i0++)
+        for (int i1 = a.GetLowerBound (1); i1 <= a.GetUpperBound (1); i1++)…
+            for (int in = a.GetLowerBound (n); in <= a.GetUpperBound (n); in ++)
+            {
+                V v = (V) a[i0, i1, …, in ];
 
-*embedded-statement*
+                embedded - statement
+            }
 }
-}
+```
 
-The variables a, i0, i1, … i*n* are not visible to or accessible to x or the *embedded-statement* or any other source code of the program. The variable v is read-only in the embedded statement. If there is not an explicit conversion (§23.5) from T (the element type) to V, an error is produced and no further steps are taken. If x has the value null, a System.NullReferenceException is thrown at run-time.
+The variables `a`, `i0`, `i1`, … `i*n*` are not visible to or accessible to `x` or the *embedded-statement* or any other source code of the program. The variable `v` is read-only in the embedded statement. If there is not an explicit conversion (§23.5) from `T` (the element type) to `V`, an error is produced and no further steps are taken. If `x` has the value `null`, a `System.NullReferenceException` is thrown at run-time.
 
-[*Note*: Although pointer types are not permitted as type arguments, pointer arrays may be used as type arguments. *end note*]
+> [!NOTE]
+> Although pointer types are not permitted as type arguments, pointer arrays may be used as type arguments.
 
 ## Pointers in expressions
 
@@ -23179,220 +23224,273 @@ In an unsafe context, an expression may yield a result of a pointer type, but ou
 
 In an unsafe context, the *primary-no-array-creation-expression* (§12.7) and *unary-expression* (§12.8) productions permit the following additional constructs:
 
-[]{#Grammar_uc_primary_no_array_creation_ex2 .anchor}primary-no-array-creation-expression:
-…
-pointer-member-access
-pointer-element-access
+```antlr
+primary-no-array-creation-expression:
+    …
+    pointer-member-access
+    pointer-element-access
 
-[]{#Grammar_uc_unary_expression .anchor}unary-expression:
-…
-pointer-indirection-expression
-addressof-expression
+unary-expression:
+    …
+    pointer-indirection-expression
+    addressof-expression
+```
 
 These constructs are described in the following subclauses.
 
-[*Note*: The precedence and associativity of the unsafe operators is implied by the grammar. *end note*]
+> [!NOTE]
+> The precedence and associativity of the unsafe operators is implied by the grammar.
 
 ### Pointer indirection
 
-A *pointer-indirection-expression* consists of an asterisk (\*)followed by a *unary-expression*.
+A *pointer-indirection-expression* consists of an asterisk (`*`)followed by a *unary-expression*.
 
-[]{#Grammar_uc_pointer_indirection_expressio .anchor}pointer-indirection-expression:
-*\** unary-expression
+```antlr
+pointer-indirection-expression:
+    * unary-expression
+```
 
-The unary \* operator denotes pointer indirection and is used to obtain the variable to which a pointer points. The result of evaluating \*P, where P is an expression of a pointer type T\*, is a variable of type T. It is a compile-time error to apply the unary \* operator to an expression of type void\* or to an expression that isn’t of a pointer type.
+The unary `*` operator denotes pointer indirection and is used to obtain the variable to which a pointer points. The result of evaluating `*P`, where `P` is an expression of a pointer type `T*`, is a variable of type `T`. It is a compile-time error to apply the unary `*` operator to an expression of type `void*` or to an expression that isn’t of a pointer type.
 
-The effect of applying the unary \* operator to a null pointer is implementation-defined. In particular, there is no guarantee that this operation throws a System.NullReferenceException.
+The effect of applying the unary `*` operator to a `null` pointer is implementation-defined. In particular, there is no guarantee that this operation throws a `System.NullReferenceException`.
 
-If an invalid value has been assigned to the pointer, the behavior of the unary \* operator is undefined. [*Note*: Among the invalid values for dereferencing a pointer by the unary \* operator are an address inappropriately aligned for the type pointed to (see example in §23.5), and the address of a variable after the end of its lifetime. *end note*]
+If an invalid value has been assigned to the pointer, the behavior of the unary `*` operator is undefined. 
 
-For purposes of definite assignment analysis, a variable produced by evaluating an expression of the form \*P is considered initially assigned (§10.4.2).
+> [!NOTE]
+> Among the invalid values for dereferencing a pointer by the unary `*` operator are an address inappropriately aligned for the type pointed to (see example in §23.5), and the address of a variable after the end of its lifetime.
+
+For purposes of definite assignment analysis, a variable produced by evaluating an expression of the form `*P` is considered initially assigned (§10.4.2).
 
 ### Pointer member access
 
-A *pointer-member-access* consists of a *primary-expression*, followed by a “->” token, followed by an *identifier* and an optional *type-argument-list*.
+A *pointer-member-access* consists of a *primary-expression*, followed by a “`->`” token, followed by an *identifier* and an optional *type-argument-list*.
 
-[]{#Grammar_uc_pointer_member_access .anchor}pointer-member-access:
-primary-expression *->* identifier type-argument-listopt
+```antlr
+pointer-member-access:
+    primary-expression -> identifier type-argument-listopt
+```
 
-In a pointer member access of the form P->I, P shall be an expression of a pointer type, and I shall denote an accessible member of the type to which P points.
+In a pointer member access of the form `P->I`, `P` shall be an expression of a pointer type, and `I` shall denote an accessible member of the type to which `P` points.
 
-A pointer member access of the form P->I is evaluated exactly as (\*P).I. For a description of the pointer indirection operator (\*), see §23.6.2. For a description of the member access operator (.), see §12.7.5.
+A pointer member access of the form `P->I` is evaluated exactly as `(*P).I`. For a description of the pointer indirection operator (`*`), see §23.6.2. For a description of the member access operator (`.`), see §12.7.5.
 
 [*Example*: In the following code
 
+```csharp
 using System;
 
 struct Point
 {
-public int x;
-public int y;
+    public int x;
+    public int y;
 
-public override string ToString() {
-return "(" + x + "," + y + ")";
+    public override string ToString()
+    {
+        return "(" + x + "," + y + ")";
+    }
 }
-}
-
-class Test
-{
-static void Main() {
-Point point;
-unsafe {
-Point\* p = &point;
-p->x = 10;
-p->y = 20;
-Console.WriteLine(p->ToString());
-}
-}
-}
-
-the -> operator is used to access fields and invoke a method of a struct through a pointer. Because the operation P->I is precisely equivalent to (\*P).I, the Main method could equally well have been written:
 
 class Test
 {
-static void Main() {
-Point point;
-unsafe {
-Point\* p = &point;
-(\*p).x = 10;
-(\*p).y = 20;
-Console.WriteLine((\*p).ToString());
+    static void Main()
+    {
+        Point point;
+        unsafe
+        {
+            Point* p = &point;
+            p->x = 10;
+            p->y = 20;
+            Console.WriteLine (p->ToString());
+        }
+    }
 }
+```
+
+the `->` operator is used to access fields and invoke a method of a struct through a pointer. Because the operation `P->I` is precisely equivalent to `(*P).I`, the `Main` method could equally well have been written:
+
+```csharp
+class Test
+{
+    static void Main()
+    {
+        Point point;
+        unsafe
+        {
+            Point *p = &point;
+            (*p).x = 10;
+            (*p).y = 20;
+            Console.WriteLine ((*p).ToString());
+        }
+    }
 }
-}
+```
 
 *end example*]
 
 ### Pointer element access
 
-A *pointer-element-access* consists of a *primary-no-array-creation-expression* followed by an expression enclosed in “[” and “]”.
+A *pointer-element-access* consists of a *primary-no-array-creation-expression* followed by an expression enclosed in “`[`” and “`]`”.
 
-[]{#Grammar_uc_pointer_element_access .anchor}pointer-element-access:
-primary-no-array-creation-expression *[* expression *]*
+```antlr
+pointer-element-access:
+    primary-no-array-creation-expression [ expression ]
+```
 
-In a pointer element access of the form P[E], P shall be an expression of a pointer type other than void\*, and E shall be an expression that can be implicitly converted to int, uint, long, or ulong.
+In a pointer element access of the form `P[E]`, `P` shall be an expression of a pointer type other than `void*`, and `E` shall be an expression that can be implicitly converted to `int`, `uint`, `long`, or `ulong`.
 
-A pointer element access of the form P[E] is evaluated exactly as \*(P + E). For a description of the pointer indirection operator (\*), see §23.6.2. For a description of the pointer addition operator (+), see §23.6.7.
+A pointer element access of the form `P[E]` is evaluated exactly as `*(P + E)`. For a description of the pointer indirection operator (`*`), see §23.6.2. For a description of the pointer addition operator (`+`), see §23.6.7.
 
 [*Example*: In the following code
 
+```csharp
 class Test
 {
-static void Main() {
-unsafe {
-char\* p = stackalloc char[256];
-for (int i = 0; i < 256; i++) p[i] = (char)i;
+    static void Main()
+    {
+        unsafe
+        {
+            char* p = stackalloc char[256];
+            for (int i = 0; i < 256; i++) p[i] = (char) i;
+        }
+    }
 }
-}
-}
+```
 
-a pointer element access is used to initialize the character buffer in a for loop. Because the operation P[E] is precisely equivalent to \*(P + E), the example could equally well have been written:
+a pointer element access is used to initialize the character buffer in a `for` loop. Because the operation `P[E]` is precisely equivalent to `*(P + E)`, the example could equally well have been written:
 
+```csharp
 class Test
 {
-static void Main() {
-unsafe {
-char\* p = stackalloc char[256];
-for (int i = 0; i < 256; i++) \*(p + i) = (char)i;
+    static void Main()
+    {
+        unsafe
+        {
+            char* p = stackalloc char[256];
+            for (int i = 0; i < 256; i++) *(p + i) = (char) i;
+        }
+    }
 }
-}
-}
+```
 
 *end example*]
 
-The pointer element access operator does not check for out-of-bounds errors and the behavior when accessing an out-of-bounds element is undefined. [*Note*: This is the same as C and C++. *end note*]
+The pointer element access operator does not check for out-of-bounds errors and the behavior when accessing an out-of-bounds element is undefined. 
+
+> [!NOTE]
+> This is the same as C and C++.
 
 ### The address-of operator
 
-An *addressof-expression* consists of an ampersand (&) followed by a *unary-expression*.
+An *addressof-expression* consists of an ampersand (`&`) followed by a *unary-expression*.
 
-[]{#Grammar_uc_address_expression .anchor}addressof-expression:
-*&* unary-expression
+```antlr
+addressof-expression:
+    & unary-expression
+```
 
-Given an expression E which is of a type T and is classified as a fixed variable (§23.4), the construct &E computes the address of the variable given by E. The type of the result is T\* and is classified as a value. A compile-time error occurs if E is not classified as a variable, if E is classified as a read-only local variable, or if E denotes a moveable variable. In the last case, a fixed statement (§23.7) can be used to temporarily “fix” the variable before obtaining its address. [*Note*: As stated in §12.7.5, outside an instance constructor or static constructor for a struct or class that defines a readonly field, that field is considered a value, not a variable. As such, its address cannot be taken. Similarly, the address of a constant cannot be taken. *end note*]
+Given an expression `E` which is of a type `T` and is classified as a fixed variable (§23.4), the construct `&E` computes the address of the variable given by `E`. The type of the result is `T*` and is classified as a value. A compile-time error occurs if `E` is not classified as a variable, if `E` is classified as a read-only local variable, or if `E` denotes a moveable variable. In the last case, a fixed statement (§23.7) can be used to temporarily “fix” the variable before obtaining its address. 
 
-The & operator does not require its argument to be definitely assigned, but following an & operation, the variable to which the operator is applied is considered definitely assigned in the execution path in which the operation occurs. It is the responsibility of the programmer to ensure that correct initialization of the variable actually does take place in this situation.
+> [!NOTE]
+> As stated in §12.7.5, outside an instance constructor or static constructor for a struct or class that defines a readonly field, that field is considered a value, not a variable. As such, its address cannot be taken. Similarly, the address of a constant cannot be taken.
+
+The `&` operator does not require its argument to be definitely assigned, but following an `&` operation, the variable to which the operator is applied is considered definitely assigned in the execution path in which the operation occurs. It is the responsibility of the programmer to ensure that correct initialization of the variable actually does take place in this situation.
 
 [*Example*: In the following code
 
+```csharp
 using System;
 
 class Test
 {
-static void Main() {
-int i;
-unsafe {
-int\* p = &i;
-\*p = 123;
+    static void Main()
+    {
+        int i;
+        unsafe
+        {
+            int* p = &i;
+            *p = 123;
+        }
+        Console.WriteLine (i);
+    }
 }
-Console.WriteLine(i);
-}
-}
+```
 
-i is considered definitely assigned following the &i operation used to initialize p. The assignment to \*p in effect initializes i, but the inclusion of this initialization is the responsibility of the programmer, and no compile-time error would occur if the assignment was removed. *end example*]
+`i` is considered definitely assigned following the &i operation used to initialize `p`. The assignment to `*p` in effect initializes `i`, but the inclusion of this initialization is the responsibility of the programmer, and no compile-time error would occur if the assignment was removed. *end example*]
 
-[*Note*: The rules of definite assignment for the & operator exist such that redundant initialization of local variables can be avoided. For example, many external APIs take a pointer to a structure which is filled in by the API. Calls to such APIs typically pass the address of a local struct variable, and without the rule, redundant initialization of the struct variable would be required. *end note*]
+> [!NOTE]
+> The rules of definite assignment for the `&` operator exist such that redundant initialization of local variables can be avoided. For example, many external APIs take a pointer to a structure which is filled in by the API. Calls to such APIs typically pass the address of a local struct variable, and without the rule, redundant initialization of the struct variable would be required.
 
-[*Note*: When a local variable, value parameter, or parameter array is captured by an anonymous function (§12.7.16), that local variable, parameter, or parameter array is no longer considered to be a fixed variable (§23.7), but is instead considered to be a moveable variable. Thus it is an error for any unsafe code to take the address of a local variable, value parameter, or parameter array that has been captured by an anonymous function. *end note*]
+> [!NOTE]
+> When a local variable, value parameter, or parameter array is captured by an anonymous function (§12.7.16), that local variable, parameter, or parameter array is no longer considered to be a fixed variable (§23.7), but is instead considered to be a moveable variable. Thus it is an error for any unsafe code to take the address of a local variable, value parameter, or parameter array that has been captured by an anonymous function.
 
 ### Pointer increment and decrement
 
-In an unsafe context, the ++ and -- operators (§12.7.10 and §12.8.6) can be applied to pointer variables of all types except void\*. Thus, for every pointer type T\*, the following operators are implicitly defined:
+In an unsafe context, the `++` and `--` operators (§12.7.10 and §12.8.6) can be applied to pointer variables of all types except `void*`. Thus, for every pointer type `T*`, the following operators are implicitly defined:
 
-T\* operator ++(T\* x);
+```csharp
+T* operator ++(T* x);
 
-T\* operator --(T\* x);
+T* operator --(T* x);
+```
 
-The operators produce the same results as x+1 and x-1, respectively (§23.6.7). In other words, for a pointer variable of type T\*, the ++ operator adds sizeof(T) to the address contained in the variable, and the -- operator subtracts sizeof(T) from the address contained in the variable.
+The operators produce the same results as `x+1` and `x-1`, respectively (§23.6.7). In other words, for a pointer variable of type `T*`, the `++` operator adds `sizeof(T)` to the address contained in the variable, and the `--` operator subtracts `sizeof(T)` from the address contained in the variable.
 
 If a pointer increment or decrement operation overflows the domain of the pointer type, the result is implementation-defined, but no exceptions are produced.
 
 ### Pointer arithmetic
 
-In an unsafe context, the + operator (§12.9.5) and – operator (§12.9.6) can be applied to values of all pointer types except void\*. Thus, for every pointer type T\*, the following operators are implicitly defined:
+In an unsafe context, the `+` operator (§12.9.5) and `–` operator (§12.9.6) can be applied to values of all pointer types except `void*`. Thus, for every pointer type `T*`, the following operators are implicitly defined:
 
-T\* operator +(T\* x, int y);
-T\* operator +(T\* x, uint y);
-T\* operator +(T\* x, long y);
-T\* operator +(T\* x, ulong y);
+```csharp
+T* operator +(T* x, int y);
+T* operator +(T* x, uint y);
+T* operator +(T* x, long y);
+T* operator +(T* x, ulong y);
 
-T\* operator +(int x, T\* y);
-T\* operator +(uint x, T\* y);
-T\* operator +(long x, T\* y);
-T\* operator +(ulong x, T\* y);
+T* operator +(int x, T* y);
+T* operator +(uint x, T* y);
+T* operator +(long x, T* y);
+T* operator +(ulong x, T* y);
 
-T\* operator –(T\* x, int y);
-T\* operator –(T\* x, uint y);
-T\* operator –(T\* x, long y);
-T\* operator –(T\* x, ulong y);
+T* operator –(T* x, int y);
+T* operator –(T* x, uint y);
+T* operator –(T* x, long y);
+T* operator –(T* x, ulong y);
 
-long operator –(T\* x, T\* y);
+long operator –(T* x, T* y);
+```
 
-Given an expression P of a pointer type T\* and an expression N of type int, uint, long, or ulong, the expressions P + N and N + P compute the pointer value of type T\* that results from adding N \* sizeof(T) to the address given by P. Likewise, the expression P – N computes the pointer value of type T\* that results from subtracting N \* sizeof(T) from the address given by P.
+Given an expression `P` of a pointer type `T*` and an expression `N` of type `int`, `uint`, `long`, or `ulong`, the expressions `P + N` and `N + P` compute the pointer value of type `T*` that results from adding `N * sizeof(T)` to the address given by `P`. Likewise, the expression `P – N` computes the pointer value of type `T*` that results from subtracting `N * sizeof(T)` from the address given by `P`.
 
-Given two expressions, P and Q, of a pointer type T\*, the expression P – Q computes the difference between the addresses given by P and Q and then divides that difference by sizeof(T). The type of the result is always long. In effect, P - Q is computed as ((long)(P) - (long)(Q)) / sizeof(T). [*Example*:
+Given two expressions, `P` and `Q`, of a pointer type `T*`, the expression `P – Q` computes the difference between the addresses given by `P` and `Q` and then divides that difference by `sizeof(T)`. The type of the result is always `long`. In effect, `P - Q` is computed as `((long)(P) - (long)(Q)) / sizeof(T)`. [*Example*:
 
+```csharp
 using System;
 
 class Test
 {
-static void Main() {
-unsafe {
-int\* values = stackalloc int[20];
+    static void Main()
+    {
+        unsafe
+        {
+            int* values = stackalloc int[20];
 
-int\* p = &values[1];
-int\* q = &values[15];
+            int* p = &values[1];
+            int* q = &values[15];
 
-Console.WriteLine("p - q = {0}", p - q);
-Console.WriteLine("q - p = {0}", q - p);
+            Console.WriteLine ("p - q = {0}", p - q);
+            Console.WriteLine ("q - p = {0}", q - p);
+        }
+    }
 }
-}
-}
+```
 
 which produces the output:
 
+```plaintext
 p - q = -14
 q - p = 14
+```
 
 *end example*]
 
@@ -23400,21 +23498,23 @@ If a pointer arithmetic operation overflows the domain of the pointer type, the 
 
 ### Pointer comparison
 
-In an unsafe context, the ==, !=, <, >, <=, and >= operators (§12.11) can be applied to values of all pointer types. The pointer comparison operators are:
+In an unsafe context, the `==`, `!=`, `<`, `>`, `<=`, and `>=` operators (§12.11) can be applied to values of all pointer types. The pointer comparison operators are:
 
-bool operator ==(void\* x, void\* y);
-bool operator !=(void\* x, void\* y);
+```csharp
+bool operator ==(void* x, void* y);
+bool operator !=(void* x, void* y);
 
-bool operator <(void\* x, void\* y);
-bool operator >(void\* x, void\* y);
-bool operator <=(void\* x, void\* y);
-bool operator >=(void\* x, void\* y);
+bool operator <(void* x, void* y);
+bool operator >(void* x, void* y);
+bool operator <=(void* x, void* y);
+bool operator >=(void* x, void* y);
+```
 
-Because an implicit conversion exists from any pointer type to the void\* type, operands of any pointer type can be compared using these operators. The comparison operators compare the addresses given by the two operands as if they were unsigned integers.
+Because an implicit conversion exists from any pointer type to the `void*` type, operands of any pointer type can be compared using these operators. The comparison operators compare the addresses given by the two operands as if they were unsigned integers.
 
 ### The sizeof operator
 
-For certain predefined types (§12.7.13), the sizeof operator yields a constant int value. For all other types, the result of the sizeof operator is implementation-defined and is classified as a value, not a constant.
+For certain predefined types (§12.7.13), the `sizeof` operator yields a constant `int` value. For all other types, the result of the `sizeof` operator is implementation-defined and is classified as a value, not a constant.
 
 The order in which members are packed into a struct is unspecified.
 
@@ -23424,36 +23524,35 @@ When applied to an operand that has struct type, the result is the total number 
 
 ## The fixed statement
 
-In an unsafe context, the *embedded-statement* (§13.1) production permits an additional construct, the fixed statement, which is used to “fix” a moveable variable such that its address remains constant for the duration of the statement.
+In an unsafe context, the *embedded-statement* (§13.1) production permits an additional construct, the `fixed` statement, which is used to “fix” a moveable variable such that its address remains constant for the duration of the statement.
 
-[]{#Grammar_uc_embedded_statement2 .anchor}embedded-statement:
-…
-fixed-statement
+```antlr
+embedded-statement:
+    …
+    fixed-statement
 
-[]{#Grammar_uc_fixed_statement .anchor}fixed-statement:
-*fixed* *(* pointer-type fixed-pointer-declarators *)* embedded-statement
+fixed-statement:
+    fixed ( pointer-type fixed-pointer-declarators ) embedded-statement
 
-[]{#Grammar_uc_fixed_pointer_declarators .anchor}fixed-pointer-declarators:
-fixed-pointer-declarator
-fixed-pointer-declarators *,* fixed-pointer-declarator
+fixed-pointer-declarators:
+    fixed-pointer-declarator
+    fixed-pointer-declarators , fixed-pointer-declarator
 
-[]{#Grammar_uc_fixed_pointer_declarator .anchor}fixed-pointer-declarator:
-identifier *=* fixed-pointer-initializer
+fixed-pointer-declarator:
+    identifier = fixed-pointer-initializer
 
-[]{#Grammar_uc_fixed_pointer_initializer .anchor}fixed-pointer-initializer:
-*&* variable-reference
-expression
+fixed-pointer-initializer:
+    & variable-reference
+    expression
+```
 
-Each *fixed-pointer-declarator* declares a local variable of the given *pointer-type* and initializes that local variable with the address computed by the corresponding *fixed-pointer-initializer*. A local variable declared in a fixed statement is accessible in any *fixed-pointer-initializer*s occurring to the right of that variable’s declaration, and in the *embedded-statement* of the fixed statement. A local variable declared by a fixed statement is considered read-only. A compile-time error occurs if the embedded statement attempts to modify this local variable (via assignment or the ++ and -- operators) or pass it as a ref or out parameter.
+Each *fixed-pointer-declarator* declares a local variable of the given *pointer-type* and initializes that local variable with the address computed by the corresponding *fixed-pointer-initializer*. A local variable declared in a fixed statement is accessible in any *fixed-pointer-initializer*s occurring to the right of that variable’s declaration, and in the *embedded-statement* of the fixed statement. A local variable declared by a fixed statement is considered read-only. A compile-time error occurs if the embedded statement attempts to modify this local variable (via assignment or the `++` and `--` operators) or pass it as a `ref` or `out` parameter.
 
 It is an error to use a captured local variable (§12.16.6.2), value parameter, or parameter array in a *fixed-pointer-initializer*.A *fixed-pointer-initializer* can be one of the following:
 
-- The token “&” followed by a *variable-reference* (§10.5) to a moveable variable (§23.4) of an unmanaged type T, provided the type T\* is implicitly convertible to the pointer type given in the fixed statement. In this case, the initializer computes the address of the given variable, and the variable is guaranteed to remain at a fixed address for the duration of the fixed statement.
-
-- An expression of an *array-type* with elements of an unmanaged type T, provided the type T\* is implicitly convertible to the pointer type given in the fixed statement. In this case, the initializer computes the address of the first element in the array, and the entire array is guaranteed to remain at a fixed address for the duration of the fixed statement. The behavior of the fixed statement is implementation-defined if the array expression is null or if the array has zero elements.
-
-- An expression of type string, provided the type char\* is implicitly convertible to the pointer type given in the fixed statement. In this case, the initializer computes the address of the first character in the string, and the entire string is guaranteed to remain at a fixed address for the duration of the fixed statement. The behavior of the fixed statement is implementation-defined if the string expression is null.
-
+- The token “`&`” followed by a *variable-reference* (§10.5) to a moveable variable (§23.4) of an unmanaged type `T`, provided the type `T*` is implicitly convertible to the pointer type given in the fixed statement. In this case, the initializer computes the address of the given variable, and the variable is guaranteed to remain at a fixed address for the duration of the fixed statement.
+- An expression of an *array-type* with elements of an unmanaged type `T`, provided the type `T*` is implicitly convertible to the pointer type given in the fixed statement. In this case, the initializer computes the address of the first element in the array, and the entire array is guaranteed to remain at a fixed address for the duration of the fixed statement. The behavior of the fixed statement is implementation-defined if the array expression is `null` or if the array has zero elements.
+- An expression of type string, provided the type `char*` is implicitly convertible to the pointer type given in the fixed statement. In this case, the initializer computes the address of the first character in the string, and the entire string is guaranteed to remain at a fixed address for the duration of the fixed statement. The behavior of the fixed statement is implementation-defined if the string expression is null.
 - A *simple-name* or *member-access* that references a fixed-size buffer member of a moveable variable, provided the type of the fixed-size buffer member is implicitly convertible to the pointer type given in the fixed statement. In this case, the initializer computes a pointer to the first element of the fixed-size buffer (§23.8.3), and the fixed-size buffer is guaranteed to remain at a fixed address for the duration of the fixed statement.
 
 For each address computed by a *fixed-pointer-initializer* the fixed statement ensures that the variable referenced by the address is not subject to relocation or disposal by the garbage collector for the duration of the fixed statement. [*Example*: If the address computed by a *fixed-pointer-initializer* references a field of an object or an element of an array instance, the fixed statement guarantees that the containing object instance is not relocated or disposed of during the lifetime of the statement. *end example*]
@@ -23462,112 +23561,139 @@ It is the programmer's responsibility to ensure that pointers created by fixed s
 
 Fixed objects can cause fragmentation of the heap (because they can’t be moved). For that reason, objects should be fixed only when absolutely necessary and then only for the shortest amount of time possible. [*Example*: The example
 
+```csharp
 class Test
 {
-static int x;
-int y;
+    static int x;
+    int y;
 
-unsafe static void F(int\* p) {
-\*p = 1;
+    unsafe static void F (int* p)
+    {
+        *p = 1;
+    }
+
+    static void Main()
+    {
+        Test t = new Test ();
+        int[] a = new int[10];
+        unsafe
+        {
+            fixed (int* p = &x) F (p);
+            fixed (int* p = &t.y) F (p);
+            fixed (int* p = &a[0]) F (p);
+            fixed (int* p = a) F (p);
+        }
+    }
 }
+```
 
-static void Main() {
-Test t = new Test();
-int[] a = new int[10];
-unsafe {
-fixed (int\* p = &x) F(p);
-fixed (int\* p = &t.y) F(p);
-fixed (int\* p = &a[0]) F(p);
-fixed (int\* p = a) F(p);
-}
-}
-}
+demonstrates several uses of the fixed statement. The first statement fixes and obtains the address of a static field, the second statement fixes and obtains the address of an instance field, and the third statement fixes and obtains the address of an array element. In each case, it would have been an error to use the regular `&` operator since the variables are all classified as moveable variables.
 
-demonstrates several uses of the fixed statement. The first statement fixes and obtains the address of a static field, the second statement fixes and obtains the address of an instance field, and the third statement fixes and obtains the address of an array element. In each case, it would have been an error to use the regular & operator since the variables are all classified as moveable variables.
+The third and fourth fixed statements in the example above produce identical results. In general, for an array instance `a`, specifying `&a[0]` in a fixed statement is the same as simply specifying `a`. Here’s another example of the fixed statement, this time using `string`:
 
-The third and fourth fixed statements in the example above produce identical results. In general, for an array instance a, specifying &a[0] in a fixed statement is the same as simply specifying a.Here’s another example of the fixed statement, this time using string:
-
+```csharp
 class Test
 {
-static string name = "xx";
+    static string name = "xx";
 
-unsafe static void F(char\* p) {
-for (int i = 0; p[i] != '\\0'; ++i)
-Console.WriteLine(p[i]);
-}
+    unsafe static void F (char* p)
+    {
+        for (int i = 0; p[i] != '\\0'; ++i)
+            Console.WriteLine (p[i]);
+    }
 
-static void Main() {
-unsafe {
-fixed (char\* p = name) F(p);
-fixed (char\* p = "xx") F(p);
+    static void Main()
+    {
+        unsafe
+        {
+            fixed (char* p = name) F (p);
+            fixed (char* p = "xx") F (p);
+        }
+    }
 }
-}
-}
+```
 
 *end example*]
 
-In an unsafe context, array elements of single-dimensional arrays are stored in increasing index order, starting with index 0 and ending with index Length – 1. For multi-dimensional arrays, array elements are stored such that the indices of the rightmost dimension are increased first, then the next left dimension, and so on to the left.
+In an unsafe context, array elements of single-dimensional arrays are stored in increasing index order, starting with index 0 and ending with index `Length – 1`. For multi-dimensional arrays, array elements are stored such that the indices of the rightmost dimension are increased first, then the next left dimension, and so on to the left.
 
-Within a fixed statement that obtains a pointer p to an array instance a, the pointer values ranging from p to p + a.Length - 1 represent addresses of the elements in the array. Likewise, the variables ranging from p[0] to p[a.Length - 1] represent the actual array elements. Given the way in which arrays are stored, we can treat an array of any dimension as though it were linear. [*Example*:
+Within a fixed statement that obtains a pointer `p` to an array instance `a`, the pointer values ranging from `p` to `p + a.Length - 1` represent addresses of the elements in the array. Likewise, the variables ranging from `p[0]` to `p[a.Length - 1]` represent the actual array elements. Given the way in which arrays are stored, we can treat an array of any dimension as though it were linear. [*Example*:
 
+```csharp
 using System;
 
 class Test
 {
-static void Main() {
-int[,,] a = new int[2,3,4];
+    static void Main ()
+    {
+        int[, , ] a = new int[2, 3, 4];
 
-unsafe {
-fixed (int\* p = a) {
-for (int i = 0; i < a.Length; ++i) // treat as linear
-p[i] = i;
-}
-}
+        unsafe
+        {
+            fixed (int* p = a)
+            {
+                for (int i = 0; i < a.Length; ++i) // treat as linear
+                    p[i] = i;
+            }
+        }
 
-for (int i = 0; i < 2; ++i)
-for (int j = 0; j < 3; ++j) {
-for (int k = 0; k < 4; ++k)
-Console.Write("[{0},{1},{2}] = {3,2} ", i, j, k,
-a[i,j,k]);
-Console.WriteLine();
+        for (int i = 0; i < 2; ++i)
+            for (int j = 0; j < 3; ++j)
+            {
+                for (int k = 0; k < 4; ++k)
+                    Console.Write ("[{0},{1},{2}] = {3,2} ", i, j, k,
+                        a[i, j, k]);
+                Console.WriteLine ();
+            }
+    }
 }
-}
-}
+```
 
 which produces the output:
 
+```plaintext
 [0,0,0] = 0 [0,0,1] = 1 [0,0,2] = 2 [0,0,3] = 3
 [0,1,0] = 4 [0,1,1] = 5 [0,1,2] = 6 [0,1,3] = 7
 [0,2,0] = 8 [0,2,1] = 9 [0,2,2] = 10 [0,2,3] = 11
 [1,0,0] = 12 [1,0,1] = 13 [1,0,2] = 14 [1,0,3] = 15
 [1,1,0] = 16 [1,1,1] = 17 [1,1,2] = 18 [1,1,3] = 19
 [1,2,0] = 20 [1,2,1] = 21 [1,2,2] = 22 [1,2,3] = 23
+```
 
 *end example*]
 
 [*Example*: In the following code
 
+```csharp
 class Test
 {
-unsafe static void Fill(int\* p, int count, int value) {
-for (; count != 0; count--) \*p++ = value;
-}
+    unsafe static void Fill (int* p, int count, int value)
+    {
+        for (; count != 0; count--) *p++ = value;
+    }
 
-static void Main() {
-int[] a = new int[100];
-unsafe {
-fixed (int\* p = a) Fill(p, 100, -1);
+    static void Main()
+    {
+        int[] a = new int[100];
+        unsafe
+        {
+            fixed (int* p = a) Fill (p, 100, -1);
+        }
+    }
 }
-}
-}
+```
 
 a fixed statement is used to fix an array so its address can be passed to a method that takes a pointer. *end example*]
 
-A char\* value produced by fixing a string instance always points to a null-terminated string. Within a fixed statement that obtains a pointer p to a string instance s, the pointer values ranging from p to p + s.Length ‑ 1 represent addresses of the characters in the string, and the pointer value p + s.Length always points to a null character (the character with value '\\0').
+A `char*` value produced by fixing a string instance always points to a null-terminated string. Within a fixed statement that obtains a pointer `p` to a string instance `s`, the pointer values ranging from `p` to `p + s.Length ‑ 1` represent addresses of the characters in the string, and the pointer value` p + s.Length` always points to a `null` character (the character with value '`\\0`').
 
-Modifying objects of managed type through fixed pointers can result in undefined behavior. [*Note*: For example, because strings are immutable, it is the programmer’s responsibility to ensure that the characters referenced by a pointer to a fixed string are not modified. *end note*]
+Modifying objects of managed type through fixed pointers can result in undefined behavior. 
 
-[*Note*: The automatic null-termination of strings is particularly convenient when calling external APIs that expect “C-style” strings. Note, however, that a string instance is permitted to contain null characters. If such null characters are present, the string will appear truncated when treated as a null-terminated char\*. *end note*]
+> [!NOTE]
+> For example, because strings are immutable, it is the programmer’s responsibility to ensure that the characters referenced by a pointer to a fixed string are not modified.
+
+> [!NOTE]
+> The automatic null-termination of strings is particularly convenient when calling external APIs that expect “C-style” strings. Note, however, that a string instance is permitted to contain `null` characters. If such `null` characters are present, the string will appear truncated when treated as a null-terminated char*.
 
 ## Fixed-size buffers
 
@@ -23579,61 +23705,67 @@ Fixed-size buffers are used to declare “C-style” in-line arrays as members o
 
 A ***fixed-size buffer*** is a member that represents storage for a fixed-length buffer of variables of a given type. A fixed-size buffer declaration introduces one or more fixed-size buffers of a given element type. Fixed-size buffers are only permitted in struct declarations and may only occur in unsafe contexts (§23.2).
 
-[]{#Grammar_struct_member_declaration .anchor}struct-member-declaration:
-…
-fixed-size-buffer-declaration
+```antlr
+struct-member-declaration:
+    …
+    fixed-size-buffer-declaration
 
-[]{#Grammar_fixed_size_buffer_declaration .anchor}fixed-size-buffer-declaration:
-attributesopt fixed-size-buffer-modifiersopt *fixed* buffer-element-type
-fixed-size-buffer-declarators *;*
+fixed-size-buffer-declaration:
+    attributesopt fixed-size-buffer-modifiersopt fixed buffer-element-type
+    fixed-size-buffer-declarators ;
 
-[]{#Grammar_fixed_size_buffer_modifiers .anchor}fixed-size-buffer-modifiers:
-fixed-size-buffer-modifier
-fixed-size-buffer-modifier fixed-size-buffer-modifiers
+fixed-size-buffer-modifiers:
+    fixed-size-buffer-modifier
+    fixed-size-buffer-modifier fixed-size-buffer-modifiers
 
-[]{#Grammar_fixed_size_buffer_modifier .anchor}fixed-size-buffer-modifier:
-*new*
-*public*
-*protected
-internal*
-*private
-unsafe*
+fixed-size-buffer-modifier:
+    new
+    public
+    protected
+    internal
+    private
+    unsafe
 
-[]{#Grammar_buffer_element_type .anchor}buffer-element-type:
-type
+buffer-element-type:
+    type
 
-[]{#Grammar_fixed_size_buffer_declarators .anchor}fixed-size-buffer-declarators:
-fixed-size-buffer-declarator
-fixed-size-buffer-declarator *,* fixed-size-buffer-declarators
+fixed-size-buffer-declarators:
+    fixed-size-buffer-declarator
+    fixed-size-buffer-declarator , fixed-size-buffer-declarators
 
-[]{#Grammar_fixed_size_buffer_declarator .anchor}fixed-size-buffer-declarator:
-identifier *[* constant-expression *]*
+fixed-size-buffer-declarator:
+    identifier [ constant-expression ]
+```
 
-A fixed-size buffer declaration may include a set of attributes (§22), a new modifier (§15.3.5), a valid combination of the four access modifiers (§15.3.6) and an unsafe modifier (§23.2). The attributes and modifiers apply to all of the members declared by the fixed-size buffer declaration. It is an error for the same modifier to appear multiple times in a fixed-size buffer declaration.
+A fixed-size buffer declaration may include a set of attributes (§22), a `new` modifier (§15.3.5), a valid combination of the four access modifiers (§15.3.6) and an `unsafe` modifier (§23.2). The attributes and modifiers apply to all of the members declared by the fixed-size buffer declaration. It is an error for the same modifier to appear multiple times in a fixed-size buffer declaration.
 
-A fixed-size buffer declaration is not permitted to include the static modifier.
+A fixed-size buffer declaration is not permitted to include the `static` modifier.
 
-The buffer element type of a fixed-size buffer declaration specifies the element type of the buffer(s) introduced by the declaration. The buffer element type shall be one of the predefined types sbyte, byte, short, ushort, int, uint, long, ulong, char, float, double, or bool.
+The buffer element type of a fixed-size buffer declaration specifies the element type of the buffer(s) introduced by the declaration. The buffer element type shall be one of the predefined types `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `bool`.
 
-The buffer element type is followed by a list of fixed-size buffer declarators, each of which introduces a new member. A fixed-size buffer declarator consists of an identifier that names the member, followed by a constant expression enclosed in [ and ] tokens. The constant expression denotes the number of elements in the member introduced by that fixed-size buffer declarator. The type of the constant expression shall be implicitly convertible to type int, and the value shall be a non-zero positive integer.
+The buffer element type is followed by a list of fixed-size buffer declarators, each of which introduces a new member. A fixed-size buffer declarator consists of an identifier that names the member, followed by a constant expression enclosed in `[` and `]` tokens. The constant expression denotes the number of elements in the member introduced by that fixed-size buffer declarator. The type of the constant expression shall be implicitly convertible to type `int`, and the value shall be a non-zero positive integer.
 
 The elements of a fixed-size buffer shall be laid out sequentially in memory.
 
 A fixed-size buffer declaration that declares multiple fixed-size buffers is equivalent to multiple declarations of a single fixed-size buffer declation with the same attributes, and element types. [*Example*:
 
+```csharp
 unsafe struct A
 {
-public fixed int x[5], y[10], z[100];
+    public fixed int x[5], y[10], z[100];
 }
+```
 
 is equivalent to
 
+```csharp
 unsafe struct A
 {
-public fixed int x[5];
-public fixed int y[10];
-public fixed int z[100];
+    public fixed int x[5];
+    public fixed int y[10];
+    public fixed int z[100];
 }
+```
 
 *end example*]
 
@@ -23643,44 +23775,44 @@ Member lookup (§12.5) of a fixed-size buffer member proceeds exactly like membe
 
 A fixed-size buffer can be referenced in an expression using a *simple-name* (§12.6.3) or a *member-access* (§12.6.5).
 
-When a fixed-size buffer member is referenced as a simple name, the effect is the same as a member access of the form this.I, where I is the fixed-size buffer member.
+When a fixed-size buffer member is referenced as a simple name, the effect is the same as a member access of the form `this.I`, where `I` is the fixed-size buffer member.
 
-In a member access of the form E.I, if E is of a struct type and a member lookup of I in that struct type identifies a fixed-size member, then E.I is evaluated an classified as follows:
+In a member access of the form `E.I`, if `E` is of a struct type and a member lookup of `I` in that struct type identifies a fixed-size member, then `E.I` is evaluated an classified as follows:
 
-- If the expression E.I does not occur in an unsafe context, a compile-time error occurs.
-
-- If E is classified as a value, a compile-time error occurs.
-
-- Otherwise, if E is a moveable variable (§23.4) and the expression E.I is not a *fixed-pointer-initializer* (§23.7), a compile-time error occurs.
-
-- Otherwise, E references a fixed variable and the result of the expression is a pointer to the first element of the fixed-size buffer member I in E. The result is of type S\*, where S is the element type of I, and is classified as a value.
+- If the expression `E.I` does not occur in an unsafe context, a compile-time error occurs.
+- If `E` is classified as a value, a compile-time error occurs.
+- Otherwise, if `E` is a moveable variable (§23.4) and the expression `E.I` is not a *fixed-pointer-initializer* (§23.7), a compile-time error occurs.
+- Otherwise, `E` references a fixed variable and the result of the expression is a pointer to the first element of the fixed-size buffer member `I` in `E`. The result is of type `S*`, where `S` is the element type of `I`, and is classified as a value.
 
 The subsequent elements of the fixed-size buffer can be accessed using pointer operations from the first element. Unlike access to arrays, access to the elements of a fixed-size buffer is an unsafe operation and is not range checked.
 
 [*Example*: The following declares and uses a struct with a fixed-size buffer member.
 
+```csharp
 unsafe struct Font
 {
-public int size;
-public fixed char name[32];
+    public int size;
+    public fixed char name[32];
 }
 
 class Test
 {
-unsafe static void PutString(string s, char\* buffer, int bufSize) {
-int len = s.Length;
-if (len > bufSize) len = bufSize;
-for (int i = 0; i < len; i++) buffer[i] = s[i];
-for (int i = len; i < bufSize; i++) buffer[i] = (char)0;
-}
+    unsafe static void PutString (string s, char* buffer, int bufSize)
+    {
+        int len = s.Length;
+        if (len > bufSize) len = bufSize;
+        for (int i = 0; i < len; i++) buffer[i] = s[i];
+        for (int i = len; i < bufSize; i++) buffer[i] = (char) 0;
+    }
 
-unsafe static void Main()
-{
-Font f;
-f.size = 10;
-PutString("Times New Roman", f.name, 32);
+    unsafe static void Main()
+    {
+        Font f;
+        f.size = 10;
+        PutString ("Times New Roman", f.name, 32);
+    }
 }
-}
+```
 
 *end example*]
 
@@ -23694,52 +23826,66 @@ When the outermost containing struct variable of a fixed-size buffer member is a
 
 In an unsafe context, a local variable declaration (§13.6.2) may include a stack allocation initializer, which allocates memory from the call stack.
 
-[]{#Grammar_uc_local_variable_initializer .anchor}local-variable-initializer:
-…
-stackalloc-initializer
+```antlr
+local-variable-initializer:
+    …
+    stackalloc-initializer
 
-[]{#Grammar_uc_stackalloc_initializer .anchor}stackalloc-initializer:
-*stackalloc* unmanaged-type *[* expression *]*
+stackalloc-initializer:
+    stackalloc unmanaged-type [ expression ]
+```
 
 The *unmanaged-type* indicates the type of the items that will be stored in the newly allocated location, and the *expression* indicates the number of these items. Taken together, these specify the required allocation size. Since the size of a stack allocation cannot be negative, it is a compile-time error to specify the number of items as a *constant-expression* that evaluates to a negative value.
 
-A stack allocation initializer of the form stackalloc T[E] requires T to be an unmanaged type (§23.3) and E to be an expression implicitly convertible to type int. The construct allocates E \* sizeof(T) bytes from the call stack and returns a pointer, of type T\*, to the newly allocated block. If E is a negative value, then the behavior is undefined. If E is zero, then no allocation is made, and the pointer returned is implementation-defined. If there is not enough memory available to allocate a block of the given size, a System.StackOverflowException is thrown.
+A stack allocation initializer of the form `stackalloc T[E]` requires `T` to be an unmanaged type (§23.3) and `E` to be an expression implicitly convertible to type `int`. The construct allocates `E * sizeof(T)` bytes from the call stack and returns a pointer, of type `T*`, to the newly allocated block. If `E` is a negative value, then the behavior is undefined. If `E` is zero, then no allocation is made, and the pointer returned is implementation-defined. If there is not enough memory available to allocate a block of the given size, a `System.StackOverflowException` is thrown.
 
 The content of the newly allocated memory is undefined.
 
-Stack allocation initializers are not permitted in catch or finally blocks (§13.11).
+Stack allocation initializers are not permitted in `catch` or `finally` blocks (§13.11).
 
-[*Note*: There is no way to explicitly free memory allocated using stackalloc. *end note*] All stack-allocated memory blocks created during the execution of a function member are automatically discarded when that function member returns. [*Note*: This corresponds to the alloca function, an extension commonly found in C and C++ implementations. *end note*]
+> [!NOTE]
+> There is no way to explicitly free memory allocated using `stackalloc`. 
+
+All stack-allocated memory blocks created during the execution of a function member are automatically discarded when that function member returns. 
+
+> [!NOTE]
+> This corresponds to the `alloca` function, an extension commonly found in C and C++ implementations.
 
 [*Example*: In the following code
 
+```csharp
 using System;
 
 class Test
 {
-static string IntToString(int value) {
-int n = value >= 0 ? value : -value;
-unsafe {
-char\* buffer = stackalloc char[16];
-char\* p = buffer + 16;
-do {
-\*--p = (char)(n % 10 + '0');
-n /= 10;
-} while (n != 0);
-if (value < 0) \*--p = '-';
-return new string(p, 0, (int)(buffer + 16 - p));
-}
-}
+    static string IntToString(int value)
+    {
+        int n = value >= 0 ? value : -value;
+        unsafe
+        {
+            char* buffer = stackalloc char[16];
+            char* p = buffer + 16;
+            do
+            {
+                *--p = (char) (n % 10 + '0');
+                n /= 10;
+            } while (n != 0);
+            if (value < 0) *--p = '-';
+            return new string (p, 0, (int) (buffer + 16 - p));
+        }
+    }
 
-static void Main() {
-Console.WriteLine(IntToString(12345));
-Console.WriteLine(IntToString(-999));
+    static void Main()
+    {
+        Console.WriteLine (IntToString (12345));
+        Console.WriteLine (IntToString (-999));
+    }
 }
-}
+```
 
-a stackalloc initializer is used in the IntToString method to allocate a buffer of 16 characters on the stack. The buffer is automatically discarded when the method returns. *end example*]
+a `stackalloc` initializer is used in the `IntToString` method to allocate a buffer of 16 characters on the stack. The buffer is automatically discarded when the method returns. *end example*]
 
-Except for the stackalloc operator, C# provides no predefined constructs for managing non-garbage collected memory. Such services are typically provided by supporting class libraries or imported directly from the underlying operating system.
+Except for the `stackalloc` operator, C# provides no predefined constructs for managing non-garbage collected memory. Such services are typically provided by supporting class libraries or imported directly from the underlying operating system.
 
 **End of conditionally normative text.**
 
@@ -23819,7 +23965,7 @@ Line separator character (*U+2028*)
 Paragraph separator character (*U+2029*)
 
 delimited-comment::
-*/\** delimited-comment-textopt asterisks */*
+*/** delimited-comment-textopt asterisks */*
 
 delimited-comment-text::
 delimited-comment-section
@@ -23830,11 +23976,11 @@ delimited-comment-section::
 asterisksopt not-slash-or-asterisk
 
 asterisks::
-*\**
-asterisks *\**
+***
+asterisks ***
 
 not-slash-or-asterisk::
-Any Unicode character except */ or \**
+Any Unicode character except */ or **
 
 ### Tokens {#tokens-1 .Appendix3}
 
@@ -23870,7 +24016,7 @@ letter-character
 *underscore-character*
 
 underscore-character::
-\_ (the underscore character U+005F)
+_ (the underscore character U+005F)
 A unicode-escape-sequence representing the character U+005F
 
 identifier-part-characters::
@@ -23992,7 +24138,7 @@ hexadecimal-escape-sequence
 unicode-escape-sequence
 
 single-character::
-Any character except *'* (*U+0027*), *\\* (*U+005C*), and new-line-character
+Any character except *'* (*U+0027*), *\* (*U+005C*), and new-line-character
 
 simple-escape-sequence:: one of
 *\\' \\" \\\\ \\0 \\a \\b \\f \\n \\r \\t \\v*
@@ -24018,7 +24164,7 @@ hexadecimal-escape-sequence
 unicode-escape-sequence
 
 single-regular-string-literal-character::
-Any character except *"* (*U+0022*), *\\* (*U+005C*), and new-line-character
+Any character except *"* (*U+0022*), *\* (*U+005C*), and new-line-character
 
 verbatim-string-literal::
 *@"* verbatim-string-literal-charactersopt *"*
@@ -24095,8 +24241,8 @@ conditional-symbol
 *(* whitespaceopt pp-expression whitespaceopt *)*
 
 pp-declaration::
-whitespaceopt *\#* whitespaceopt *define* whitespace conditional-symbol pp-new-line
-whitespaceopt *\#* whitespaceopt *undef* whitespace conditional-symbol pp-new-line
+whitespaceopt *#* whitespaceopt *define* whitespace conditional-symbol pp-new-line
+whitespaceopt *#* whitespaceopt *undef* whitespace conditional-symbol pp-new-line
 
 pp-new-line::
 whitespaceopt single-line-commentopt new-line
@@ -24105,7 +24251,7 @@ pp-conditional::
 pp-if-section pp-elif-sectionsopt pp-else-sectionopt pp-endif
 
 pp-if-section::
-whitespaceopt *\#* whitespaceopt *if* whitespace pp-expression pp-new-line
+whitespaceopt *#* whitespaceopt *if* whitespace pp-expression pp-new-line
 conditional-sectionopt
 
 pp-elif-sections::
@@ -24113,14 +24259,14 @@ pp-elif-section
 pp-elif-sections pp-elif-section
 
 pp-elif-section::
-whitespaceopt *\#* whitespaceopt *elif* whitespace pp-expression pp-new-line
+whitespaceopt *#* whitespaceopt *elif* whitespace pp-expression pp-new-line
 conditional-sectionopt
 
 pp-else-section::
-whitespaceopt *\#* whitespaceopt *else* pp-new-line conditional-sectionopt
+whitespaceopt *#* whitespaceopt *else* pp-new-line conditional-sectionopt
 
 pp-endif::
-whitespaceopt *\#* whitespaceopt *endif* pp-new-line
+whitespaceopt *#* whitespaceopt *endif* pp-new-line
 
 conditional-section::
 input-section
@@ -24138,10 +24284,10 @@ skipped-characters::
 whitespaceopt not-number-sign input-charactersopt
 
 not-number-sign::
-Any input-character except *\#*
+Any input-character except *#*
 
 pp-line::
-whitespaceopt *\#* whitespaceopt *line* whitespace line-indicator pp-new-line
+whitespaceopt *#* whitespaceopt *line* whitespace line-indicator pp-new-line
 
 line-indicator::
 decimal-digits whitespace file-name
@@ -24160,8 +24306,8 @@ file-name-character::
 Any input-character except *"* *(U+0022)*, and new-line-character
 
 pp-diagnostic::
-whitespaceopt *\#* whitespaceopt *error* pp-message
-whitespaceopt *\#* whitespaceopt *warning* pp-message
+whitespaceopt *#* whitespaceopt *error* pp-message
+whitespaceopt *#* whitespaceopt *warning* pp-message
 
 pp-message::
 new-line
@@ -24171,13 +24317,13 @@ pp-region::
 pp-start-region conditional-sectionopt pp-end-region
 
 pp-start-region::
-whitespaceopt *\#* whitespaceopt *region* pp-message
+whitespaceopt *#* whitespaceopt *region* pp-message
 
 pp-end-region::
-whitespaceopt *\#* whitespaceopt *endregion* pp-message
+whitespaceopt *#* whitespaceopt *endregion* pp-message
 
 pp-pragma::
-whitespaceopt *\#* whitespaceopt *pragma* pp-pragma-text
+whitespaceopt *#* whitespaceopt *pragma* pp-pragma-text
 
 pp-pragma-text::
 new-line
@@ -24456,7 +24602,7 @@ await-expression:
 
 multiplicative-expression:
 unary-expression
-multiplicative-expression *\** unary-expression
+multiplicative-expression *** unary-expression
 multiplicative-expression */* unary-expression
 multiplicative-expression *%* unary-expression
 
@@ -24618,7 +24764,7 @@ assignment-operator:
 *=
 +=
 -=
-\*=
+*=
 /=
 %=
 &=
@@ -25575,8 +25721,8 @@ non-array-type:
 pointer-type
 
 pointer-type:
-unmanaged-type *\**
-*void* *\**
+unmanaged-type ***
+*void* ***
 
 unmanaged-type:
 type
@@ -25592,7 +25738,7 @@ pointer-indirection-expression
 addressof-expression
 
 pointer-indirection-expression:
-*\** unary-expression
+*** unary-expression
 
 pointer-member-access:
 primary-expression *->* identifier type-argument-listopt
@@ -25678,7 +25824,7 @@ Passing pointers as ref or out parameters (§23.3).
 
 When dereferencing the result of converting one pointer type to another and the resulting pointer is not correctly aligned for the pointed-to type. (§23.5.1)
 
-When the unary \* operator is applied to a pointer containing an invalid value (§23.6.2).
+When the unary * operator is applied to a pointer containing an invalid value (§23.6.2).
 
 When a pointer is subscripted to access an out-of-bounds element (§23.6.4).
 
@@ -25694,7 +25840,7 @@ A conforming implementation is required to document its choice of behavior in ea
 
 1.  The behavior when an identifier not in Normalization Form C is encountered[[]{#OLE_LINK16 .anchor}]{#OLE_LINK15 .anchor} (§7.4.3).
 
-The interpretation of the *input-characters* in the *pp-pragma-text* of a \#pragma directive (§7.5.9).
+The interpretation of the *input-characters* in the *pp-pragma-text* of a #pragma directive (§7.5.9).
 
 The values of any application parameters passed to Main by the host environment prior to application startup (§8.1).
 
@@ -25710,7 +25856,7 @@ The impact of thread termination when no matching catch clause is found for an e
 
 The mappings between pointers and integers (§23.5.1).
 
-The effect of applying the unary \* operator to a null pointer (§23.6.2).
+The effect of applying the unary * operator to a null pointer (§23.6.2).
 
 The behavior when pointer arithmetic overflows the domain of the pointer type (§23.6.6, §23.6.7).
 
@@ -26503,7 +26649,7 @@ This specification suggests a set of standard tags to be used in documentation c
 
 ## Introduction {#introduction-1 .Appendix2}
 
-Comments having a special form can be used to direct a tool to produce XML from those comments and the source code elements, which they precede. Such comments are single-line comments that start with three slashes (///), or delimited comments that start with a slash and two stars (/\*\*). They must immediately precede a user-defined type (such as a class, delegate, or interface) or a member (such as a field, event, property, or method) that they annotate. Attribute sections (§22.3) are considered part of declarations, so documentation comments must precede attributes applied to a type or member.
+Comments having a special form can be used to direct a tool to produce XML from those comments and the source code elements, which they precede. Such comments are single-line comments that start with three slashes (///), or delimited comments that start with a slash and two stars (/**). They must immediately precede a user-defined type (such as a class, delegate, or interface) or a member (such as a field, event, property, or method) that they annotate. Attribute sections (§22.3) are considered part of declarations, so documentation comments must precede attributes applied to a type or member.
 
 **Syntax:**
 
@@ -26511,7 +26657,7 @@ single-line-doc-comment::
 *///* input-charactersopt
 
 delimited-doc-comment::
-*/\*\** delimited-comment-textopt *\*/*
+*/*** delimited-comment-textopt **/*
 
 In a *single-line-doc-comment*, if there is a *whitespace* character following the /// characters on each of the *single-line-doc-comments* adjacent to the current *single-line-doc-comment*, then that *whitespace* character is not included in the XML output.
 
@@ -26681,7 +26827,7 @@ where
 
 If the source code contained a declaration like:
 
-/// <include file="docs.xml" path='extradoc/class[@name="IntList"]/\*' />
+/// <include file="docs.xml" path='extradoc/class[@name="IntList"]/*' />
 public class IntList { … }
 
 and the external file “docs.xml” had the following contents:
@@ -27093,7 +27239,7 @@ The documentation generator observes the following rules when it generates the I
   !               Error string; the rest of the string provides information about the error. For example, the documentation generator generates error information for links that cannot be resolved.
   --------------- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-- The second part of the string is the fully qualified name of the element, starting at the root of the namespace. The name of the element, its enclosing type(s), and namespace are separated by periods. If the name of the item itself has periods, they are replaced by \# (U+0023) characters. (It is assumed that no element has this character in its name.)
+- The second part of the string is the fully qualified name of the element, starting at the root of the namespace. The name of the element, its enclosing type(s), and namespace are separated by periods. If the name of the item itself has periods, they are replaced by # (U+0023) characters. (It is assumed that no element has this character in its name.)
 
 - [[]{#_Toc34995895 .anchor}]{#_Toc510510576 .anchor}For methods and properties with arguments, the argument list follows, enclosed in parentheses. For those without arguments, the parentheses are omitted. The arguments are separated by commas. The encoding of each argument is the same as a CLI signature, as follows:
 
@@ -27109,7 +27255,7 @@ The documentation generator observes the following rules when it generates the I
 
 - Arguments that are arrays are represented as [ *lowerbound* : *size* , … , *lowerbound* : *size* ] where the number of commas is the rank less one, and the lower bounds and size of each dimension, if known, are represented in []{#_Hlt518052355 .anchor}decimal. If a lower bound or size is not specified, it is omitted. If the lower bound and size for a particular dimension are omitted, the “:” is omitted as well. Jagged arrays are represented by one “[]” per level.
 
-- Arguments that have pointer types other than void are represented using a \* following the type name. A void pointer is represented using a type name of System.Void.
+- Arguments that have pointer types other than void are represented using a * following the type name. A void pointer is represented using a type name of System.Void.
 
 - Arguments that refer to generic type parameters defined on types are encoded using the “\`” character followed by the zero-based index of the type parameter.
 
@@ -27181,8 +27327,8 @@ private const double PI = 3.14159;
 protected readonly double monthlyAverage;
 private long[] array1;
 private Widget[,] array2;
-private unsafe int \*pCount;
-private unsafe float \*\*ppValues;
+private unsafe int *pCount;
+private unsafe float **ppValues;
 }
 }
 
@@ -27211,9 +27357,9 @@ public Widget(string s) { … }
 }
 }
 
-"M:Acme.Widget.\#cctor"
-"M:Acme.Widget.\#ctor"
-"M:Acme.Widget.\#ctor(System.String)"
+"M:Acme.Widget.#cctor"
+"M:Acme.Widget.#ctor"
+"M:Acme.Widget.#ctor(System.String)"
 
 - Finalizers.
 
@@ -27247,8 +27393,8 @@ public static void M0() { … }
 public void M1(char c, out float f, ref ValueType v) { … }
 public void M2(short[] x1, int[,] x2, long[][] x3) { … }
 public void M3(long[][] x3, Widget[][,,] x4) { … }
-public unsafe void M4(char \*pc, Color \*\*pf) { … }
-public unsafe void M5(void \*pv, double \*[][,] pd) { … }
+public unsafe void M4(char *pc, Color **pf) { … }
+public unsafe void M5(void *pv, double *[][,] pd) { … }
 public void M6(int i, params object[] args) { … }
 }
 class MyList<T>
@@ -27268,8 +27414,8 @@ public MyList<T> GetValues<T>(T value) { … } }
 "M:Acme.Widget.M1(System.Char,System.Single@,Acme.ValueType@)"
 "M:Acme.Widget.M2(System.Int16[],System.Int32[0:,0:],System.Int64[][])"
 "M:Acme.Widget.M3(System.Int64[][],Acme.Widget[0:,0:,0:][])"
-"M:Acme.Widget.M4(System.Char\*,Color\*\*)"
-"M:Acme.Widget.M5(System.Void\*,System.Double\*[0:,0:][])"
+"M:Acme.Widget.M4(System.Char*,Color**)"
+"M:Acme.Widget.M5(System.Void*,System.Double*[0:,0:][])"
 "M:Acme.Widget.M6(System.Int32,System.Object[])"
 "M:Acme.MyList\`1.Test(\`0)"
 "M:Acme.UseList.Process(Acme.MyList{System.Int32})"
@@ -27313,9 +27459,9 @@ public static Widget operator+(Widget x) { … }
 }
 }
 
-"M:Acme.Widget.op\_UnaryPlus(Acme.Widget)"
+"M:Acme.Widget.op_UnaryPlus(Acme.Widget)"
 
-> The complete set of unary operator function names used is as follows: op\_UnaryPlus, op\_UnaryNegation, op\_LogicalNot, op\_OnesComplement, op\_Increment, op\_Decrement, op\_True, and op\_False.
+> The complete set of unary operator function names used is as follows: op_UnaryPlus, op_UnaryNegation, op_LogicalNot, op_OnesComplement, op_Increment, op_Decrement, op_True, and op_False.
 
 - Binary operators.
 
@@ -27327,9 +27473,9 @@ public static Widget operator+(Widget x1, Widget x2) { … }
 }
 }
 
-"M:Acme.Widget.op\_Addition(Acme.Widget,Acme.Widget)"
+"M:Acme.Widget.op_Addition(Acme.Widget,Acme.Widget)"
 
-> The complete set of binary operator function names used is as follows: op\_Addition, op\_Subtraction, op\_Multiply, op\_Division, op\_Modulus, op\_BitwiseAnd, op\_BitwiseOr, op\_ExclusiveOr, op\_LeftShift, op\_RightShift, op\_Equality, op\_Inequality, op\_LessThan, op\_LessThanOrEqual, op\_GreaterThan, and op\_GreaterThanOrEqual.
+> The complete set of binary operator function names used is as follows: op_Addition, op_Subtraction, op_Multiply, op_Division, op_Modulus, op_BitwiseAnd, op_BitwiseOr, op_ExclusiveOr, op_LeftShift, op_RightShift, op_Equality, op_Inequality, op_LessThan, op_LessThanOrEqual, op_GreaterThan, and op_GreaterThanOrEqual.
 
 - Conversion operators have a trailing “~” followed by the return type.
 
@@ -27342,8 +27488,8 @@ public static implicit operator long(Widget x) { … }
 }
 }
 
-"M:Acme.Widget.op\_Explicit(Acme.Widget)~System.Int32"
-"M:Acme.Widget.op\_Implicit(Acme.Widget)~System.Int64"
+"M:Acme.Widget.op_Explicit(Acme.Widget)~System.Int32"
+"M:Acme.Widget.op_Implicit(Acme.Widget)~System.Int64"
 
 ## An example {#an-example .Appendix2}
 
@@ -27514,12 +27660,12 @@ x-coordinate.</summary>
 y-coordinate.</summary>
 </member>
 
-<member name="M:Graphics.Point.\#ctor">
+<member name="M:Graphics.Point.#ctor">
 <summary>This constructor initializes the new Point to
 (0,0).</summary>
 </member>
 
-<member name="M:Graphics.Point.\#ctor(System.Int32,System.Int32)">
+<member name="M:Graphics.Point.#ctor(System.Int32,System.Int32)">
 <summary>This constructor initializes the new Point to
 (<paramref name="xor"/>,<paramref name="yor"/>).</summary>
 <param><c>xor</c> is the new Point's x-coordinate.</param>
@@ -27560,9 +27706,9 @@ object.
 <returns>True if the Points have the same location and they have
 the exact same type; otherwise, false.</returns>
 <seealso
-cref="M:Graphics.Point.op\_Equality(Graphics.Point,Graphics.Point)"/>
+cref="M:Graphics.Point.op_Equality(Graphics.Point,Graphics.Point)"/>
 <seealso
-cref="M:Graphics.Point.op\_Inequality(Graphics.Point,Graphics.Point)"/>
+cref="M:Graphics.Point.op_Inequality(Graphics.Point,Graphics.Point)"/>
 </member>
 
 <member name="M:Graphics.Point.ToString">
@@ -27573,7 +27719,7 @@ without any leading, training, or embedded whitespace.</returns>
 </member>
 
 <member
-name="M:Graphics.Point.op\_Equality(Graphics.Point,Graphics.Point)">
+name="M:Graphics.Point.op_Equality(Graphics.Point,Graphics.Point)">
 <summary>This operator determines whether two Points have the
 same
 location.</summary>
@@ -27583,11 +27729,11 @@ location.</summary>
 the exact same type; otherwise, false.</returns>
 <seealso cref="M:Graphics.Point.Equals(System.Object)"/>
 <seealso
-cref="M:Graphics.Point.op\_Inequality(Graphics.Point,Graphics.Point)"/>
+cref="M:Graphics.Point.op_Inequality(Graphics.Point,Graphics.Point)"/>
 </member>
 
 <member
-name="M:Graphics.Point.op\_Inequality(Graphics.Point,Graphics.Point)">
+name="M:Graphics.Point.op_Inequality(Graphics.Point,Graphics.Point)">
 <summary>This operator determines whether two Points have the
 same
 location.</summary>
@@ -27598,7 +27744,7 @@ the
 exact same type; otherwise, false.</returns>
 <seealso cref="M:Graphics.Point.Equals(System.Object)"/>
 <seealso
-cref="M:Graphics.Point.op\_Equality(Graphics.Point,Graphics.Point)"/>
+cref="M:Graphics.Point.op_Equality(Graphics.Point,Graphics.Point)"/>
 </member>
 
 <member name="M:Graphics.Point.Main">
