@@ -21,6 +21,8 @@
 
 ## Feb 24
 
+- Analysis of the alternatives for record equality based on the design criteria from Jan 15 (Neal)
+
 ## Feb 19
 
 - https://github.com/dotnet/csharplang/issues/3213 Natural value equality (Mads)
