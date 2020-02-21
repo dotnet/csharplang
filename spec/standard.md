@@ -2774,7 +2774,7 @@ A ***delimited comment*** begins with the characters `/*` and ends with the cha
 This program writes “hello, world” to the console */
 class Hello
 {
-    static void Main ()
+    static void Main()
     {
         System.Console.WriteLine ("hello, world");
     }
@@ -2791,7 +2791,7 @@ A ***single-line comment*** begins with the characters `//` and extends to the 
 //
 class Hello // any name will do for this class
 {
-    static void Main ()
+    static void Main()
     { // this method must be named "Main"
         System.Console.WriteLine ("hello, world");
     }
@@ -2861,7 +2861,7 @@ Comments are not processed within character and string literals.
 > Example code:
 > 
 > ```csharp
->  static void Main ()
+>  static void Main()
 >  {
 >      /* A
 >      // B */
@@ -3354,7 +3354,7 @@ Each string literal does not necessarily result in a new string instance. When t
 ```csharp
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         object a = "hello";
         object b = "hello";
@@ -3689,7 +3689,7 @@ Pre-processing directives are not processed when they appear inside multi-line i
 ```csharp
 class Hello
 {
-    static void Main ()
+    static void Main()
     {
         System.Console.WriteLine (@"hello,
         #if Debug
@@ -4237,7 +4237,7 @@ Here, the three assignments to `x` are permitted because they all take place th
 > 
 > class D : C<string>
 > {
->     static void Main ()
+>     static void Main()
 >     {
 >         C<int>.x = 5;
 >     }
@@ -4420,7 +4420,7 @@ The scoping rules for local variables and local constants are designed to guaran
 > 
 > class Test
 > {
->     static void Main ()
+>     static void Main()
 >     {
 >         string A = "hello, world";
 >         string s = A; // expression context
@@ -4713,7 +4713,7 @@ class B
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         B b = new B (new A ());
         b = null;
@@ -4768,7 +4768,7 @@ class Test
 {
     public static A RefA;
     public static B RefB;
-    static void Main ()
+    static void Main()
     {
         RefB = new B ();
         RefA = new A ();
@@ -7076,7 +7076,7 @@ class X
     public static T F<T> (string s, T t) {…}
     public static T G<T> () {…}
 
-    static void Main ()
+    static void Main()
     {
         D d1 = F<int>; // Ok, type argument given explicitly
 
@@ -7625,7 +7625,7 @@ class Test
         System.Console.WriteLine ("x = {0}, y = {1}, z = {2}", x, y, z);
     }
 
-    static void Main ()
+    static void Main()
     {
         int i = 0;
         F (i++, i++, i++);
@@ -7650,7 +7650,7 @@ class Test
 {
     static void F (ref object x) {…}
 
-    static void Main ()
+    static void Main()
     {
         object[] a = new object[10];
         object[] b = new string[10];
@@ -9361,7 +9361,7 @@ class X<T>
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         X<int>.PrintTypes ();
     }
@@ -9986,7 +9986,7 @@ The predefined addition operators are listed below. For numeric and enumeration 
   
   class Test
   {
-      static void Main ()
+      static void Main()
       {
           string s = null;
           Console.WriteLine ("s = >" + s + "<"); // displays s = ><
@@ -10075,7 +10075,7 @@ The predefined subtraction operators are listed below. The operators all subtrac
   
   class Test
   {
-      static void Main ()
+      static void Main()
       {
           D cd1 = new D (C.M1);
           D cd2 = new D (C.M2);
@@ -10383,7 +10383,7 @@ using System;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         string s = "Test";
         string t = string.Copy (s);
@@ -10411,7 +10411,7 @@ Note that the above technique is not meaningful for value types. The example
 ```csharp
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         int i = 123;
         int j = 123;
@@ -10999,7 +10999,7 @@ class Test
         return result;
     }
 
-    static void Main ()
+    static void Main()
     {
         D d = F ();
         Console.WriteLine (d ());
@@ -11077,7 +11077,7 @@ class Test
         return result;
     }
 
-    static void Main ()
+    static void Main()
     {
         foreach (D d in F ()) d ();
     }
@@ -11181,7 +11181,7 @@ delegate int Getter ();
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         int x = 0;
         Setter s = (int value) => { x = value; };
@@ -12811,7 +12811,7 @@ An *expression-statement* evaluates a given expression. The value computed by th
 expression-statement:
     statement-expression ;
 
-[]{#Grammar_statement_expression .anchor}statement-expression:
+statement-expression:
     invocation-expression
     object-creation-expression
     assignment
@@ -13312,7 +13312,7 @@ using System;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         double[, ] values = { { 1.2, 2.3, 3.4, 4.5 },
             { 5.6, 6.7, 7.8, 8.9 }
@@ -13372,7 +13372,7 @@ using System;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         while (true)
         {
@@ -13643,7 +13643,7 @@ class Test
         throw new Exception ("G");
     }
 
-    static void Main ()
+    static void Main()
     {
         try
         {
@@ -13885,7 +13885,7 @@ using System.IO;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         using (TextWriter w = File.CreateText ("log.txt"))
         {
@@ -15503,7 +15503,7 @@ class C<V>
 
 class Application
 {
-    static void Main ()
+    static void Main()
     {
         C<int> x1 = new C<int> (1);
         Console.WriteLine (x1.f1); // Prints 1
@@ -15598,7 +15598,7 @@ class Test
         y = 1; // Ok, same as Test.y = 1
     }
 
-    static void Main ()
+    static void Main()
     {
         Test t = new Test ();
         t.x = 1; // Ok
@@ -15704,7 +15704,7 @@ class Derived : Base
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         Derived.M.F ();
     }
@@ -15745,7 +15745,7 @@ class C
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         C c = new C ();
         c.F ();
@@ -15779,7 +15779,7 @@ class C
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         C.Nested.G ();
     }
@@ -15815,7 +15815,7 @@ class Derived : Base
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         Derived.Nested n = new Derived.Nested ();
         n.G ();
@@ -15921,7 +15921,7 @@ class B : A
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         B b = new B ();
         A a = b;
@@ -16196,7 +16196,7 @@ namespace Program2
 {
     class Test
     {
-        static void Main ()
+        static void Main()
         {
             Console.WriteLine (Program1.Utils.X);
         }
@@ -16237,7 +16237,7 @@ class Test
         finished = true;
     }
 
-    static void Main ()
+    static void Main()
     {
         finished = false;
         // Run Thread2() in a new thread
@@ -16276,7 +16276,7 @@ class Test
     static bool b;
     int i;
 
-    static void Main ()
+    static void Main()
     {
         Test t = new Test ();
         Console.WriteLine ("b = {0}, i = {1}", b, t.i);
@@ -16309,7 +16309,7 @@ class Test
     int i = 100;
     string s = "Hello";
 
-    static void Main ()
+    static void Main()
     {
         Test a = new Test ();
         Console.WriteLine ("x = {0}, i = {1}, s = {2}", x, a.i, a.s);
@@ -16337,7 +16337,7 @@ class Test
     static int a = b + 1;
     static int b = a + 1;
 
-    static void Main ()
+    static void Main()
     {
         Console.WriteLine ("a = {0}, b = {1}", a, b);
     }
@@ -16361,7 +16361,7 @@ using System;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         Console.WriteLine ("{0} {1}", B.Y, A.X);
     }
@@ -16406,7 +16406,7 @@ using System;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         Console.WriteLine ("{0} {1}", B.Y, A.X);
     }
@@ -16650,7 +16650,7 @@ class Test
         y = temp;
     }
 
-    static void Main ()
+    static void Main()
     {
         int i = 1, j = 2;
         Swap (ref i, ref j);
@@ -16722,7 +16722,7 @@ class Test
         name = path.Substring (i);
     }
 
-    static void Main ()
+    static void Main()
     {
         string dir, name;
         SplitPath ("c:\\Windows\\System\\hello.txt", out dir, out name);
@@ -16767,7 +16767,7 @@ class Test
         Console.WriteLine ();
     }
 
-    static void Main ()
+    static void Main()
     {
         int[] arr = { 1, 2, 3 };
         F (arr);
@@ -16818,7 +16818,7 @@ class Test
         Console.WriteLine ("F(object,object)");
     }
 
-    static void Main ()
+    static void Main()
     {
         F ();
         F (1);
@@ -16860,7 +16860,7 @@ class Test
         Console.WriteLine ();
     }
 
-    static void Main ()
+    static void Main()
     {
         object[] a = { 1, "Hello", 123.456 };
         object o = a;
@@ -16931,7 +16931,7 @@ class B : A
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         B b = new B ();
         A a = b;
@@ -16981,7 +16981,7 @@ class D : C
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         D d = new D ();
         A a = d;
@@ -17440,7 +17440,7 @@ An extension method is a regular static method. In addition, where its enclosing
 ```csharp
 static class Program
 {
-    static void Main ()
+    static void Main()
     {
         string[] strings = { "1", "22", "333", "4444" };
         foreach (string s in strings.Slice (1, 2))
@@ -17456,7 +17456,7 @@ The `Slice` method is available on the `string[]`, and the `ToInt32` method is a
 ```csharp
 static class Program
 {
-    static void Main ()
+    static void Main()
     {
         string[] strings = { "1", "22", "333", "4444" };
         foreach (string s in Extensions.Slice (strings, 1, 2))
@@ -17951,7 +17951,7 @@ class B : A
 
 class M
 {
-    static void Main ()
+    static void Main()
     {
         B b = new B ();
         b.Count = 12; // Calls A.Count set accessor
@@ -18637,7 +18637,7 @@ public class IntVector
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         IntVector iv1 = new IntVector (4); // vector of 4 x 0
         IntVector iv2;
@@ -19090,7 +19090,7 @@ using System;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         A.F ();
         B.F ();
@@ -19153,7 +19153,7 @@ class B
 {
     public static int Y = A.X + 1;
     static B () { }
-    static void Main ()
+    static void Main()
     {
         Console.WriteLine ("X = {0}, Y = {1}", A.X, B.Y);
     }
@@ -19237,7 +19237,7 @@ class B : A
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         B b = new B ();
         b = null;
@@ -19704,7 +19704,7 @@ class Program
         Console.WriteLine (x.ToString ());
     }
 
-    static void Main ()
+    static void Main()
     {
         Test<Counter> ();
     }
@@ -19758,7 +19758,7 @@ class Program
         Console.WriteLine (x);
     }
 
-    static void Main ()
+    static void Main()
     {
         Test<Counter> ();
     }
@@ -19920,7 +19920,7 @@ class Test
 
 {
 
-    static void Main ()
+    static void Main()
 
     {
 
@@ -20000,7 +20000,7 @@ class Test
         for (int i = index; i < index + count; i++) array[i] = value;
     }
 
-    static void Main ()
+    static void Main()
     {
         string[] strings = new string[100];
         Fill (strings, 0, 100, "Undefined");
@@ -20341,7 +20341,7 @@ The set of members of an interface declared in multiple parts (§15.2.7) is the 
 Interface methods are declared using *interface-method-declaration*s:
 
 ```antlr
-[]{#Grammar_interface_method_declaration .anchor}interface-method-declaration:
+interface-method-declaration:
     attributesopt newopt return-type identifier type-parameter-listopt
     ( formal-parameter-listopt ) type-parameter-constraints-clausesopt ;
 ```
@@ -21388,7 +21388,7 @@ enum Color
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         Console.WriteLine (StringFromColor (Color.Red));
         Console.WriteLine (StringFromColor (Color.Green));
@@ -21612,7 +21612,7 @@ The method `X.F` is compatible with the delegate type `Predicate<int>` and the m
 >         Console.WriteLine (value);
 >     }
 > 
->     static void Main ()
+>     static void Main()
 >     {
 >         Action<string> log = Print;
 >         log ("text");
@@ -21643,7 +21643,7 @@ class C
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         D cd1 = new D (C.M1); // static method
         C t = new C ();
@@ -21673,7 +21673,7 @@ Delegates are combined using the binary `+` (§12.9.5) and `+=` operators (§12
 
     class Test
     {
-        static void Main ()
+        static void Main()
         {
             D cd1 = new D (C.M1); // M1 - one entry in invocation list
 
@@ -21747,7 +21747,7 @@ class C
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         D cd1 = new D (C.M1);
         cd1 (-1); // call M1
@@ -21981,7 +21981,7 @@ using System;
 
 [AttributeUsage (
     AttributeTargets.All,
-    AllowMultiple = [] {# _Hlt513880365.anchor } false,
+    AllowMultiple = false,
     Inherited = true)]
 class X : Attribute {…}
 ```
@@ -22652,7 +22652,7 @@ class B
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         A a = new A (); // Warning
         a.F ();
@@ -23054,7 +23054,7 @@ A *pointer-type* may be used as the type of a volatile field (§15.5.4).
 >         }
 >     }
 > 
->     static void Main ()
+>     static void Main()
 >     {
 >         int i = 10;
 >         unsafe
@@ -23159,7 +23159,7 @@ using System;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         double d = 123.456e23;
         unsafe
@@ -23624,7 +23624,7 @@ using System;
 
 class Test
 {
-    static void Main ()
+    static void Main()
     {
         int[, , ] a = new int[2, 3, 4];
 
@@ -23889,2024 +23889,2023 @@ Except for the `stackalloc` operator, C# provides no predefined constructs for m
 
 **End of conditionally normative text.**
 
-# Grammar {#grammar .Appendix1}
+# Grammar
 
 **This clause is informative.**
 
-## General {#general-106 .Appendix2}
+## General
 
 This annex contains summaries of the lexical and syntactic grammars found in the main document, and of the grammar extensions for unsafe code. Grammar productions appear here in the same order that they appear in the main document.
 
-## Lexical grammar {#lexical-grammar-1 .Appendix2}
+## Lexical grammar
 
+```ANTLR
 input::
-input-sectionopt
+  input-sectionopt
 
 input-section::
-input-section-part
-input-section input-section-part
+  input-section-part
+  input-section input-section-part
 
 input-section-part::
-input-elementsopt new-line
-pp-directive
+  input-elementsopt new-line
+  pp-directive
 
 input-elements::
-input-element
-input-elements input-element
+  input-element
+  input-elements input-element
 
 input-element::
-whitespace
-comment
-token
-
+  whitespace
+  comment
+  token
+```
 Line terminators
 
+```ANTLR
 new-line::
-Carriage return character (*U+000D*)
-Line feed character (*U+000A*)
-Carriage return character (*U+000D*) followed by line feed character (*U+000A*)
-Next line character (*U+0085*)
-Line separator character (*U+2028*)
-Paragraph separator character (*U+2029*)
-
+  Carriage return character (U+000D)
+  Line feed character (U+000A)
+  Carriage return character (U+000D) followed by line feed character (U+000A)
+  Next line character (U+0085)
+  Line separator character (U+2028)
+  Paragraph separator character (U+2029)
+```
 White space
 
+```ANTLR
 whitespace::
-whitespace-character
-whitespace whitespace-character
+  whitespace-character
+  whitespace whitespace-character
 
 whitespace-character::
-Any character with Unicode class Zs
-Horizontal tab character (*U+0009*)
-Vertical tab character (*U+000B*)
-Form feed character (*U+000C*)
+  Any character with Unicode class Zs
+  Horizontal tab character (U+0009)
+  Vertical tab character (U+000B)
+  Form feed character (U+000C)
+```
+### Comments
 
-### Comments {#comments-1 .Appendix3}
-
+```ANTLR
 comment::
-single-line-comment
-delimited-comment
+  single-line-comment
+  delimited-comment
 
 single-line-comment::
-*//* input-charactersopt
+  // input-charactersopt
 
 input-characters::
-input-character
-input-characters input-character
+  input-character
+  input-characters input-character
 
 input-character::
-Any Unicode character except a new-line-character
+  Any Unicode character except a new-line-character
 
 new-line-character::
-Carriage return character (*U+000D*)
-Line feed character (*U+000A*)
-Next line character (*U+0085*)
-Line separator character (*U+2028*)
-Paragraph separator character (*U+2029*)
+  Carriage return character (U+000D)
+  Line feed character (U+000A)
+  Next line character (U+0085)
+  Line separator character (U+2028)
+  Paragraph separator character (U+2029)
 
 delimited-comment::
-*/** delimited-comment-textopt asterisks */*
+  /* delimited-comment-textopt asterisks /
 
 delimited-comment-text::
-delimited-comment-section
-delimited-comment-text delimited-comment-section
+  delimited-comment-section
+  delimited-comment-text delimited-comment-section
 
 delimited-comment-section::
-/
-asterisksopt not-slash-or-asterisk
+  /
+  asterisksopt not-slash-or-asterisk
 
 asterisks::
-***
-asterisks ***
+  *
+  asterisks *
 
 not-slash-or-asterisk::
-Any Unicode character except */ or **
+  Any Unicode character except / or *
+```
+### Tokens
 
-### Tokens {#tokens-1 .Appendix3}
-
+```ANTLR
 token::
-identifier
-keyword
-integer-literal
-real-literal
-character-literal
-string-literal
-operator-or-punctuator
-
+  identifier
+  keyword
+  integer-literal
+  real-literal
+  character-literal
+  string-literal
+  operator-or-punctuator
+```
 Unicode character escape sequences
 
+```ANTLR
 unicode-escape-sequence::
-*\\u* hex-digit hex-digit hex-digit hex-digit
-*\\U* hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit
-
+  \\u hex-digit hex-digit hex-digit hex-digit
+  \\U hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit hex-digit
+```
 Identifiers
 
+```ANTLR
 identifier::
-available-identifier
-*@* identifier-or-keyword
+  available-identifier
+  @ identifier-or-keyword
 
 available-identifier::
-An identifier-or-keyword that is not a keyword
+  An identifier-or-keyword that is not a keyword
 
 identifier-or-keyword::
-identifier-start-character identifier-part-charactersopt
+  identifier-start-character identifier-part-charactersopt
 
 identifier-start-character::
-letter-character
-*underscore-character*
+  letter-character
+  underscore-character
 
 underscore-character::
-_ (the underscore character U+005F)
-A unicode-escape-sequence representing the character U+005F
+  _ (the underscore character U+005F)
+  A unicode-escape-sequence representing the character U+005F
 
 identifier-part-characters::
-identifier-part-character
-identifier-part-characters identifier-part-character
+  identifier-part-character
+  identifier-part-characters identifier-part-character
 
 identifier-part-character::
-letter-character
-decimal-digit-character
-connecting-character
-combining-character
-formatting-character
+  letter-character
+  decimal-digit-character
+  connecting-character
+  combining-character
+  formatting-character
 
 letter-character::
-A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nl
-A unicode-escape-sequence representing a character of classes Lu, Ll, Lt, Lm, Lo, or Nl
+  A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nl
+  A unicode-escape-sequence representing a character of classes Lu, Ll, Lt, Lm, Lo, or Nl
 
 combining-character::
-A Unicode character of classes Mn or Mc
-A unicode-escape-sequence representing a character of classes Mn or Mc
+  A Unicode character of classes Mn or Mc
+  A unicode-escape-sequence representing a character of classes Mn or Mc
 
 decimal-digit-character::
-A Unicode character of the class Nd
-A unicode-escape-sequence representing a character of the class Nd
+  A Unicode character of the class Nd
+  A unicode-escape-sequence representing a character of the class Nd
 
 connecting-character::
-A Unicode character of the class Pc
-A unicode-escape-sequence representing a character of the class Pc
+  A Unicode character of the class Pc
+  A unicode-escape-sequence representing a character of the class Pc
 
 formatting-character::
-A Unicode character of the class Cf
-A unicode-escape-sequence representing a character of the class Cf
+  A Unicode character of the class Cf
+  A unicode-escape-sequence representing a character of the class Cf
+```
+### Keywords
 
-### Keywords {#keywords-1 .Appendix3}
-
+```ANTLR
 keyword:: one of
-*abstract as base bool break
-byte case catch char checked
-class const continue decimal default
-delegate do double else enum
-event explicit extern false finally
-fixed float for foreach goto
-if implicit in int interface
-internal is lock long namespace
-new null object operator out
-override params private protected public
-readonly ref return sbyte sealed
-short sizeof stackalloc static string
-struct switch this throw true
-try typeof uint ulong unchecked
-unsafe ushort using virtual void
-volatile while*
-
+  abstract as base bool break
+  byte case catch char checked
+  class const continue decimal default
+  delegate do double else enum
+  event explicit extern false finally
+  fixed float for foreach goto
+  if implicit in int interface
+  internal is lock long namespace
+  new null object operator out
+  override params private protected public
+  readonly ref return sbyte sealed
+  short sizeof stackalloc static string
+  struct switch this throw true
+  try typeof uint ulong unchecked
+  unsafe ushort using virtual void
+  volatile while
+```
 Literals
 
+```ANTLR
 literal::
-boolean-literal
-integer-literal
-real-literal
-character-literal
-string-literal
-null-literal
+  boolean-literal
+  integer-literal
+  real-literal
+  character-literal
+  string-literal
+  null-literal
 
 boolean-literal::
-*true
-false*
+  true
+  false
 
 integer-literal::
-decimal-integer-literal
-hexadecimal-integer-literal
+  decimal-integer-literal
+  hexadecimal-integer-literal
 
 decimal-integer-literal::
-decimal-digits integer-type-suffixopt
+  decimal-digits integer-type-suffixopt
 
 decimal-digits::
-decimal-digit
-decimal-digits decimal-digit
+  decimal-digit
+  decimal-digits decimal-digit
 
 decimal-digit:: one of
-*0 1 2 3 4 5 6 7 8 9*
+  0 1 2 3 4 5 6 7 8 9
 
 integer-type-suffix:: one of
-*U u L l UL Ul uL ul LU Lu lU lu*
+  U u L l UL Ul uL ul LU Lu lU lu
 
 hexadecimal-integer-literal::
-*0x* hex-digits integer-type-suffixopt
-*0X* hex-digits integer-type-suffixopt
+  0x hex-digits integer-type-suffixopt
+  0X hex-digits integer-type-suffixopt
 
 hex-digits::
-hex-digit
-hex-digits hex-digit
+  hex-digit
+  hex-digits hex-digit
 
 hex-digit:: one of
-*0 1 2 3 4 5 6 7 8 9 A B C D E F a b c d e f*
+  0 1 2 3 4 5 6 7 8 9 A B C D E F a b c d e f
 
 real-literal::
-decimal-digits *.* decimal-digits exponent-partopt real-type-suffixopt
-*.* decimal-digits exponent-partopt real-type-suffixopt
-decimal-digits exponent-part real-type-suffixopt
-decimal-digits real-type-suffix
+  decimal-digits . decimal-digits exponent-partopt real-type-suffixopt
+  . decimal-digits exponent-partopt real-type-suffixopt
+  decimal-digits exponent-part real-type-suffixopt
+  decimal-digits real-type-suffix
 
 exponent-part::
-*e* signopt decimal-digits
-*E* signopt decimal-digits
+  e signopt decimal-digits
+  E signopt decimal-digits
 
 sign:: one of
-*+ -*
+  + -
 
 real-type-suffix:: one of
-*F f D d M m*
+  F f D d M m
 
 character-literal::
-*'* character *'*
+  ' character '
 
 character::
-single-character
-simple-escape-sequence
-hexadecimal-escape-sequence
-unicode-escape-sequence
+  single-character
+  simple-escape-sequence
+  hexadecimal-escape-sequence
+  unicode-escape-sequence
 
 single-character::
-Any character except *'* (*U+0027*), *\* (*U+005C*), and new-line-character
+  Any character except ' (U+0027), \\ (U+005C), and new-line-character
 
 simple-escape-sequence:: one of
-*\\' \\" \\\\ \\0 \\a \\b \\f \\n \\r \\t \\v*
+  \' \" \\ \0 \a \b \f \n \r \t \v
 
 hexadecimal-escape-sequence::
-*\\x* hex-digit hex-digitopt hex-digitopt hex-digitopt
+  \x hex-digit hex-digitopt hex-digitopt hex-digitopt
 
 string-literal::
-regular-string-literal
-verbatim-string-literal
+  regular-string-literal
+  verbatim-string-literal
 
 regular-string-literal::
-*"* regular-string-literal-charactersopt *"*
+  " regular-string-literal-charactersopt "
 
 regular-string-literal-characters::
-regular-string-literal-character
-regular-string-literal-characters regular-string-literal-character
+  regular-string-literal-character
+  regular-string-literal-characters regular-string-literal-character
 
 regular-string-literal-character::
-single-regular-string-literal-character
-simple-escape-sequence
-hexadecimal-escape-sequence
-unicode-escape-sequence
+  single-regular-string-literal-character
+  simple-escape-sequence
+  hexadecimal-escape-sequence
+  unicode-escape-sequence
 
 single-regular-string-literal-character::
-Any character except *"* (*U+0022*), *\* (*U+005C*), and new-line-character
+  Any character except " (U+0022), \ (U+005C), and new-line-character
 
 verbatim-string-literal::
-*@"* verbatim-string-literal-charactersopt *"*
+  @" verbatim-string-literal-charactersopt "
 
 verbatim-string-literal-characters::
-verbatim-string-literal-character
-verbatim-string-literal-characters verbatim-string-literal-character
+  verbatim-string-literal-character
+  verbatim-string-literal-characters verbatim-string-literal-character
 
 verbatim-string-literal-character::
-single-verbatim-string-literal-character
-quote-escape-sequence
+  single-verbatim-string-literal-character
+  quote-escape-sequence
 
 single-verbatim-string-literal-character::
-Any character except *"*
+  Any character except "
 
 quote-escape-sequence::
-*""*
+  ""
 
 null-literal::
-*null*
+  null
+```
+### Operators and punctuators
 
-### Operators and punctuators {#operators-and-punctuators-1 .Appendix3}
-
-operator-or-punctuator:: *one of*
-*{ } [ ] ( ) . , : ;
-+ - * / % & | ^ ! ~
-= < > ? ?? :: ++ -- && ||
--> == != <= >= += -= *= /= %=
-&= |= ^= << <<=*
+```ANTLR
+operator-or-punctuator:: one of
+  { } [ ] ( ) . , : ;
+  + - * / % & | ^ ! ~
+  = < > ? ?? :: ++ -- && ||
+  -> == != <= >= += -= *= /= %=
+  &= |= ^= << <<=
 
 right-shift::
-*>* *>*
+  > >
 
 right-shift-assignment::
-*>* *>=*
+  > >=
+```
+### Pre-processing directives
 
-### Pre-processing directives {#pre-processing-directives-1 .Appendix3}
-
+```ANTLR
 pp-directive::
-pp-declaration
-pp-conditional
-pp-line
-pp-diagnostic
-pp-region
-pp-pragma
+  pp-declaration
+  pp-conditional
+  pp-line
+  pp-diagnostic
+  pp-region
+  pp-pragma
 
 conditional-symbol::
-Any identifier-or-keyword except *true* or *false*
+  Any identifier-or-keyword except true or false
 
 pp-expression::
-whitespaceopt pp-or-expression whitespaceopt
+  whitespaceopt pp-or-expression whitespaceopt
 
 pp-or-expression::
-pp-and-expression
-pp-or-expression whitespaceopt *||* whitespaceopt pp-and-expression
+  pp-and-expression
+  pp-or-expression whitespaceopt || whitespaceopt pp-and-expression
 
 pp-and-expression::
-pp-equality-expression
-pp-and-expression whitespaceopt *&&* whitespaceopt pp-equality-expression
+  pp-equality-expression
+  pp-and-expression whitespaceopt && whitespaceopt pp-equality-expression
 
 pp-equality-expression::
-pp-unary-expression
-pp-equality-expression whitespaceopt *==* whitespaceopt pp-unary-expression
-pp-equality-expression whitespaceopt *!=* whitespaceopt pp-unary-expression
+  pp-unary-expression
+  pp-equality-expression whitespaceopt == whitespaceopt pp-unary-expression
+  pp-equality-expression whitespaceopt != whitespaceopt pp-unary-expression
 
 pp-unary-expression::
-pp-primary-expression
-*!* whitespaceopt pp-unary-expression
+  pp-primary-expression
+  ! whitespaceopt pp-unary-expression
 
 pp-primary-expression::
-*true*
-*false*
-conditional-symbol
-*(* whitespaceopt pp-expression whitespaceopt *)*
+  true
+  false
+  conditional-symbol
+  ( whitespaceopt pp-expression whitespaceopt )
 
 pp-declaration::
-whitespaceopt *#* whitespaceopt *define* whitespace conditional-symbol pp-new-line
-whitespaceopt *#* whitespaceopt *undef* whitespace conditional-symbol pp-new-line
+  whitespaceopt \# whitespaceopt define whitespace conditional-symbol pp-new-line
+  whitespaceopt \# whitespaceopt undef whitespace conditional-symbol pp-new-line
 
 pp-new-line::
-whitespaceopt single-line-commentopt new-line
+  whitespaceopt single-line-commentopt new-line
 
 pp-conditional::
-pp-if-section pp-elif-sectionsopt pp-else-sectionopt pp-endif
+  pp-if-section pp-elif-sectionsopt pp-else-sectionopt pp-endif
 
 pp-if-section::
-whitespaceopt *#* whitespaceopt *if* whitespace pp-expression pp-new-line
-conditional-sectionopt
+  whitespaceopt \# whitespaceopt if whitespace pp-expression pp-new-line
+  conditional-sectionopt
 
 pp-elif-sections::
-pp-elif-section
-pp-elif-sections pp-elif-section
+  pp-elif-section
+  pp-elif-sections pp-elif-section
 
 pp-elif-section::
-whitespaceopt *#* whitespaceopt *elif* whitespace pp-expression pp-new-line
-conditional-sectionopt
+  whitespaceopt \# whitespaceopt elif whitespace pp-expression pp-new-line
+  conditional-sectionopt
 
 pp-else-section::
-whitespaceopt *#* whitespaceopt *else* pp-new-line conditional-sectionopt
+  whitespaceopt \# whitespaceopt else pp-new-line conditional-sectionopt
 
 pp-endif::
-whitespaceopt *#* whitespaceopt *endif* pp-new-line
+  whitespaceopt \# whitespaceopt endif pp-new-line
 
 conditional-section::
-input-section
-skipped-section
+  input-section
+  skipped-section
 
 skipped-section::
-skipped-section-part
-skipped-section skipped-section-part
+  skipped-section-part
+  skipped-section skipped-section-part
 
 skipped-section-part::
-skipped-charactersopt new-line
-pp-directive
+  skipped-charactersopt new-line
+  pp-directive
 
 skipped-characters::
-whitespaceopt not-number-sign input-charactersopt
+  whitespaceopt not-number-sign input-charactersopt
 
 not-number-sign::
-Any input-character except *#*
+  Any input-character except \#
 
 pp-line::
-whitespaceopt *#* whitespaceopt *line* whitespace line-indicator pp-new-line
+  whitespaceopt \# whitespaceopt line whitespace line-indicator pp-new-line
 
 line-indicator::
-decimal-digits whitespace file-name
-decimal-digits
-*default
-hidden*
+  decimal-digits whitespace file-name
+  decimal-digits
+  default
+  hidden
 
 file-name::
-*"* file-name-characters *"*
+  " file-name-characters "
 
 file-name-characters::
-file-name-character
-file-name-characters file-name-character
+  file-name-character
+  file-name-characters file-name-character
 
 file-name-character::
-Any input-character except *"* *(U+0022)*, and new-line-character
+  Any input-character except " (U+0022), and new-line-character
 
 pp-diagnostic::
-whitespaceopt *#* whitespaceopt *error* pp-message
-whitespaceopt *#* whitespaceopt *warning* pp-message
+  whitespaceopt \# whitespaceopt error pp-message
+  whitespaceopt \# whitespaceopt warning pp-message
 
 pp-message::
-new-line
-whitespace input-charactersopt new-line
+  new-line
+  whitespace input-charactersopt new-line
 
 pp-region::
-pp-start-region conditional-sectionopt pp-end-region
+  pp-start-region conditional-sectionopt pp-end-region
 
 pp-start-region::
-whitespaceopt *#* whitespaceopt *region* pp-message
+  whitespaceopt \# whitespaceopt region pp-message
 
 pp-end-region::
-whitespaceopt *#* whitespaceopt *endregion* pp-message
+  whitespaceopt \# whitespaceopt endregion pp-message
 
 pp-pragma::
-whitespaceopt *#* whitespaceopt *pragma* pp-pragma-text
+  whitespaceopt \# whitespaceopt pragma pp-pragma-text
 
 pp-pragma-text::
-new-line
-whitespace input-charactersopt new-line
+  new-line
+  whitespace input-charactersopt new-line
+```
+## Syntactic grammar
 
-## Syntactic grammar {#syntactic-grammar-1 .Appendix2}
+### Basic concepts
 
-### Basic concepts {#basic-concepts-1 .Appendix3}
-
-namespace-name:
-namespace-or-type-name
+```ANTLR
+  namespace-name:
+  namespace-or-type-name
 
 type-name:
-namespace-or-type-name
+  namespace-or-type-name
 
 namespace-or-type-name:
-identifier type-argument-listopt
-namespace-or-type-name *.* identifier type-argument-listopt
-qualified-alias-member
+  identifier type-argument-listopt
+  namespace-or-type-name . identifier type-argument-listopt
+  qualified-alias-member
+```
+### Types
 
-### Types {#types-1 .Appendix3}
-
+```ANTLR
 type:
-reference-type
-value-type
-type-parameter
+  reference-type
+  value-type
+  type-parameter
 
 value-type:
-struct-type
-enum-type
+  struct-type
+  enum-type
 
 struct-type:
-type-name
-simple-type
-nullable-value-type
+  type-name
+  simple-type
+  nullable-value-type
 
 simple-type:
-numeric-type
-*bool*
+  numeric-type
+  bool
 
 numeric-type:
-integral-type
-floating-point-type
-*decimal*
+  integral-type
+  floating-point-type
+  decimal
 
 integral-type:
-*sbyte
-byte
-short
-ushort
-int
-uint
-long
-ulong
-char*
+  sbyte
+  byte
+  short
+  ushort
+  int
+  uint
+  long
+  ulong
+  char
 
 nullable-type:
-non-nullable-value-type *?*
+  non-nullable-value-type ?
 
 non-nullable-value-type:
-type
+  type
 
 floating-point-type:
-*float
-double*
+  float
+  double
 
 enum-type:
-type-name
+  type-name
 
 type-argument-list:
-*<* type-arguments *>*
+  < type-arguments >
 
 type-arguments:
-type-argument
-type-arguments *,* type-argument
+  type-argument
+  type-arguments , type-argument
 
 type-argument:
-type
+  type
 
 type-parameter:
-identifier
+  identifier
+```
+### Variables
 
-### Variables {#variables-1 .Appendix3}
+```ANTLR
+  variable-reference:
+  expression
+```
+### Expressions
 
-variable-reference:
-expression
-
-### Expressions {#expressions-6 .Appendix3}
-
+```ANTLR
 argument-list:
-argument
-argument-list *,* argument
+  argument
+  argument-list , argument
 
 argument:
-argument-nameopt argument-value
+  argument-nameopt argument-value
 
 argument-name:
-identifier *:*
+  identifier :
 
 argument-value:
-expression
-*ref* variable-reference
-*out* variable-reference
+  expression
+  ref variable-reference
+  out variable-reference
 
 primary-expression:
-primary-no-array-creation-expression
-array-creation-expression
+  primary-no-array-creation-expression
+  array-creation-expression
 
 primary-no-array-creation-expression:
-literal
-simple-name
-parenthesized-expression
-member-access
-invocation-expression
-element-access
-this-access
-base-access
-post-increment-expression
-post-decrement-expression
-object-creation-expression
-delegate-creation-expression
-anonymous-object-creation-expression
-typeof-expression
-sizeof-expression
-checked-expression
-unchecked-expression
-default-value-expression
-anonymous-method-expression
+  literal
+  simple-name
+  parenthesized-expression
+  member-access
+  invocation-expression
+  element-access
+  this-access
+  base-access
+  post-increment-expression
+  post-decrement-expression
+  object-creation-expression
+  delegate-creation-expression
+  anonymous-object-creation-expression
+  typeof-expression
+  sizeof-expression
+  checked-expression
+  unchecked-expression
+  default-value-expression
+  anonymous-method-expression
 
 simple-name:
-identifier type-argument-listopt
+  identifier type-argument-listopt
 
 parenthesized-expression:
-*(* expression *)*
+  ( expression )
 
 member-access:
-primary-expression *.* identifier type-argument-listopt
-predefined-type *.* identifier type-argument-listopt
-qualified-alias-member *.* identifier type-argument-listopt
+  primary-expression . identifier type-argument-listopt
+  predefined-type . identifier type-argument-listopt
+  qualified-alias-member . identifier type-argument-listopt
 
 predefined-type: one of
-*bool byte char decimal double float int long
-object sbyte short string uint ulong ushort*
+  bool byte char decimal double float int long
+  object sbyte short string uint ulong ushort
 
 invocation-expression:
-primary-expression *(* argument-listopt *)*
+  primary-expression ( argument-listopt )
 
 element-access:
-primary-no-array-creation-expression *[* argument-list *]*
+  primary-no-array-creation-expression [ argument-list ]
 
 expression-list:
-expression
-expression-list *,* expression
+  expression
+  expression-list , expression
 
 this-access:
-*this*
+  this
 
 base-access:
-*base* *.* identifier type-argument-listopt
-*base* *[* argument-list *]*
+  base . identifier type-argument-listopt
+  base [ argument-list ]
 
 post-increment-expression:
-primary-expression *++*
+  primary-expression ++
 
 post-decrement-expression:
-primary-expression *--*
+  primary-expression --
 
 object-creation-expression:
-*new* type *(* argument-listopt *)* object-or-collection-initializeropt
-*new* type object-or-collection-initializer
+  new type ( argument-listopt ) object-or-collection-initializeropt
+  new type object-or-collection-initializer
 
 object-or-collection-initializer:
-object-initializer
-collection-initializer
+  object-initializer
+  collection-initializer
 
 object-initializer:
-*{* member-initializer-listopt *}*
-*{* member-initializer-list *,* *}*
+  { member-initializer-listopt }
+  { member-initializer-list , }
 
 member-initializer-list:
-member-initializer
-member-initializer-list *,* member-initializer
+  member-initializer
+  member-initializer-list , member-initializer
 
 member-initializer:
-identifier *=* initializer-value
+  identifier = initializer-value
 
 initializer-value:
-expression
-object-or-collection-initializer
+  expression
+  object-or-collection-initializer
 
 collection-initializer:
-*{* element-initializer-list *}*
-*{* element-initializer-list *,* *}*
+  { element-initializer-list }
+  { element-initializer-list , }
 
 element-initializer-list:
-element-initializer
-element-initializer-list *,* element-initializer
+  element-initializer
+  element-initializer-list , element-initializer
 
 element-initializer:
-non-assignment-expression
-*{* expression-list *}*
+  non-assignment-expression
+  { expression-list }
 
 array-creation-expression:
-*new* non-array-type *[* expression-list *]* rank-specifiersopt array-initializeropt
-*new* array-type array-initializer
-*new* rank-specifier array-initializer
+  new non-array-type [ expression-list ] rank-specifiersopt array-initializeropt
+  new array-type array-initializer
+  new rank-specifier array-initializer
 
 delegate-creation-expression:
-*new* delegate-type *(* expression *)*
+  new delegate-type ( expression )
 
 anonymous-object-creation-expression:
-*new* anonymous-object-initializer
+  new anonymous-object-initializer
 
 anonymous-object-initializer:
-*{* member-declarator-listopt *}*
-*{* member-declarator-list *,* *}*
+  { member-declarator-listopt }
+  { member-declarator-list , }
 
 member-declarator-list:
-member-declarator
-member-declarator-list *,* member-declarator
+  member-declarator
+  member-declarator-list , member-declarator
 
 member-declarator:
-simple-name
-member-access
-base-access
-identifier = expression
+  simple-name
+  member-access
+  base-access
+  identifier = expression
 
 typeof-expression:
-*typeof* *(* type *)
-typeof* *(* unbound-type-name *)
-typeof ( void )*
+  typeof ( type )
+  typeof ( unbound-type-name )
+  typeof ( void )
 
 unbound-type-name:
-identifier generic-dimension-specifieropt
-identifier *::* identifier generic-dimension-specifieropt
-unbound-type-name ***.*** identifier generic-dimension-specifieropt
+  identifier generic-dimension-specifieropt
+  identifier :: identifier generic-dimension-specifieropt
+  unbound-type-name . identifier generic-dimension-specifieropt
 
 generic-dimension-specifier:
-*<* commasopt *>*
+  < commasopt >
 
 commas:
-*,*
-commas *,*
+  ,
+  commas ,
 
 checked-expression:
-*checked* *(* expression *)*
+  checked ( expression )
 
 unchecked-expression:
-*unchecked* *(* expression *)*
+  unchecked ( expression )
 
 default-value-expression:
-*default* *(* type *)*
+  default ( type )
 
 unary-expression:
-primary-expression
-*+* unary-expression
-*-* unary-expression
-*!* unary-expression
-~ unary-expression
-pre-increment-expression
-pre-decrement-expression
-cast-expression
-await-expression
+  primary-expression
+  + unary-expression
+  - unary-expression
+  ! unary-expression
+  ~ unary-expression
+  pre-increment-expression
+  pre-decrement-expression
+  cast-expression
+  await-expression
 
 pre-increment-expression:
-*++* unary-expression
+  ++ unary-expression
 
 pre-decrement-expression:
-*--* unary-expression
+  -- unary-expression
 
 cast-expression:
-*(* type *)* unary-expression
+  ( type ) unary-expression
 
 await-expression:
-*await* unary-expression
+  await unary-expression
 
 multiplicative-expression:
-unary-expression
-multiplicative-expression *** unary-expression
-multiplicative-expression */* unary-expression
-multiplicative-expression *%* unary-expression
+  unary-expression
+  multiplicative-expression * unary-expression
+  multiplicative-expression / unary-expression
+  multiplicative-expression % unary-expression
 
 additive-expression:
-multiplicative-expression
-additive-expression *+* multiplicative-expression
-additive-expression *–* multiplicative-expression
+  multiplicative-expression
+  additive-expression + multiplicative-expression
+  additive-expression – multiplicative-expression
 
 shift-expression:
-additive-expression
-shift-expression *<<* additive-expression
-shift-expression right-shift additive-expression
+  additive-expression
+  shift-expression << additive-expression
+  shift-expression right-shift additive-expression
 
 relational-expression:
-shift-expression
-relational-expression *<* shift-expression
-relational-expression *>* shift-expression
-relational-expression *<=* shift-expression
-relational-expression *>=* shift-expression
-relational-expression *is* type
-relational-expression *as* type
+  shift-expression
+  relational-expression < shift-expression
+  relational-expression > shift-expression
+  relational-expression <= shift-expression
+  relational-expression >= shift-expression
+  relational-expression is type
+  relational-expression as type
 
 equality-expression:
-relational-expression
-equality-expression *==* relational-expression
-equality-expression *!=* relational-expression
+  relational-expression
+  equality-expression == relational-expression
+  equality-expression != relational-expression
 
 and-expression:
-equality-expression
-and-expression *&* equality-expression
+  equality-expression
+  and-expression & equality-expression
 
 exclusive-or-expression:
-and-expression
-exclusive-or-expression *\^* and-expression
+  and-expression
+  exclusive-or-expression ^ and-expression
 
 inclusive-or-expression:
-exclusive-or-expression
-inclusive-or-expression *|* exclusive-or-expression
+  exclusive-or-expression
+  inclusive-or-expression | exclusive-or-expression
 
 conditional-and-expression:
-inclusive-or-expression
-conditional-and-expression *&&* inclusive-or-expression
+  inclusive-or-expression
+  conditional-and-expression && inclusive-or-expression
 
 conditional-or-expression:
-conditional-and-expression
-conditional-or-expression *||* conditional-and-expression
+  conditional-and-expression
+  conditional-or-expression || conditional-and-expression
 
 null-coalescing-expression:
-conditional-or-expression
-conditional-or-expression *??* null-coalescing-expression
+  conditional-or-expression
+  conditional-or-expression ?? null-coalescing-expression
 
 conditional-expression:
-null-coalescing-expression
-null-coalescing-expression *?* expression *:* expression
+  null-coalescing-expression
+  null-coalescing-expression ? expression : expression
 
 lambda-expression:
-*asyncopt* anonymous-function-signature *=>* anonymous-function-body
+  asyncopt anonymous-function-signature => anonymous-function-body
 
 anonymous-method-expression:
-*asyncopt* *delegate* explicit-anonymous-function-signatureopt block
+  asyncopt delegate explicit-anonymous-function-signatureopt block
 
 anonymous-function-signature:
-explicit-anonymous-function-signature
-implicit-anonymous-function-signature
+  explicit-anonymous-function-signature
+  implicit-anonymous-function-signature
 
 explicit-anonymous-function-signature:
-*(* explicit-anonymous-function-parameter-list*opt* )
+  ( explicit-anonymous-function-parameter-listopt* )
 
 explicit-anonymous-function-parameter-list:
-explicit-anonymous-function-parameter
-explicit-anonymous-function-parameter-list *,* explicit-anonymous-function-parameter
+  explicit-anonymous-function-parameter
+  explicit-anonymous-function-parameter-list , explicit-anonymous-function-parameter
 
 explicit-anonymous-function-parameter:
-anonymous-function-parameter-modifieropt type identifier
+  anonymous-function-parameter-modifieropt type identifier
 
 anonymous-function-parameter-modifier:
-*ref
-out*
+  ref
+  out
 
 implicit-anonymous-function-signature:
-( implicit-anonymous-function-parameter-list*opt* )
-implicit-anonymous-function-parameter
+  ( implicit-anonymous-function-parameter-listopt* )
+  implicit-anonymous-function-parameter
 
 implicit-anonymous-function-parameter-list:
-implicit-anonymous-function-parameter
-implicit-anonymous-function-parameter-list *,* implicit-anonymous-function-parameter
+  implicit-anonymous-function-parameter
+  implicit-anonymous-function-parameter-list , implicit-anonymous-function-parameter
 
 implicit-anonymous-function-parameter:
-identifier
+  identifier
 
 anonymous-function-body:
-expression
-block
+  expression
+  block
 
 query-expression:
-from-clause query-body
+  from-clause query-body
 
 from-clause:
-*from* typeopt identifier *in* expression
+  from typeopt identifier in expression
 
 query-body:
-query-body-clausesopt select-or-group-clause query-continuationopt
+  query-body-clausesopt select-or-group-clause query-continuationopt
 
 query-body-clauses:
-query-body-clause
-query-body-clauses query-body-clause
+  query-body-clause
+  query-body-clauses query-body-clause
 
 query-body-clause:
-from-clause
-let-clause
-where-clause
-join-clause
-join-into-clause
-orderby-clause
+  from-clause
+  let-clause
+  where-clause
+  join-clause
+  join-into-clause
+  orderby-clause
 
 let-clause:
-*let* identifier *=* expression
+  let identifier = expression
 
 where-clause:
-*where* boolean-expression
+  where boolean-expression
 
 join-clause:
-*join* typeopt identifier *in* expression *on* expression *equals* expression
+  join typeopt identifier in expression on expression equals expression
 
 join-into-clause:
-*join* typeopt identifier *in* expression *on* expression *equals* expression *into* identifier
+  join typeopt identifier in expression on expression equals expression into identifier
 
 orderby-clause:
-*orderby* orderings
+  orderby orderings
 
 orderings:
-ordering
-orderings *,* ordering
+  ordering
+  orderings , ordering
 
 ordering:
-expression ordering-directionopt
+  expression ordering-directionopt
 
 ordering-direction:
-*ascending*
-*descending*
+  ascending
+  descending
 
 select-or-group-clause:
-select-clause
-group-clause
+  select-clause
+  group-clause
 
 select-clause:
-*select* expression
+  select expression
 
 group-clause:
-*group* expression *by* expression
+  group expression by expression
 
 query-continuation:
-*into* identifier query-body
+  into identifier query-body
 
 assignment:
-unary-expression assignment-operator expression
+  unary-expression assignment-operator expression
 
 assignment-operator:
-*=
-+=
--=
-*=
-/=
-%=
-&=
-|=
-\^=
-<<=
-*right-shift-assignment
+  *=
+  +=
+  -=
+  *=
+  /=
+  %=
+  &=
+  |=
+  \^=
+  <<=
+  *right-shift-assignment
 
 expression:
-non-assignment-expression
-assignment
+  non-assignment-expression
+  assignment
 
 non-assignment-expression:
-conditional-expression
-lambda-expression
-query-expression
+  conditional-expression
+  lambda-expression
+  query-expression
 
 constant-expression:
-expression
+  expression
 
 boolean-expression:
-expression
+  expression
+```
+### Statements
 
-### Statements {#statements-1 .Appendix3}
-
+```ANTLR
 statement:
-labeled-statement
-declaration-statement
-embedded-statement
+  labeled-statement
+  declaration-statement
+  embedded-statement
 
 embedded-statement:
-block
-empty-statement
-expression-statement
-selection-statement
-iteration-statement
-jump-statement
-try-statement
-checked-statement
-unchecked-statement
-lock-statement
-using-statement
-yield-statement
+  block
+  empty-statement
+  expression-statement
+  selection-statement
+  iteration-statement
+  jump-statement
+  try-statement
+  checked-statement
+  unchecked-statement
+  lock-statement
+  using-statement
+  yield-statement
 
 block:
-*{* statement-listopt *}*
+  { statement-listopt }
 
 statement-list:
-statement
-statement-list statement
+  statement
+  statement-list statement
 
 empty-statement:
-*;*
+  ;
 
 labeled-statement:
-identifier *:* statement
+  identifier : statement
 
 declaration-statement:
-local-variable-declaration *;*
-local-constant-declaration *;*
+  local-variable-declaration ;
+  local-constant-declaration ;
 
 local-variable-declaration:
-local-variable-type local-variable-declarators
+  local-variable-type local-variable-declarators
 
 local-variable-type:
-type
-var
+  type
+  var
 
 local-variable-declarators:
-local-variable-declarator
-local-variable-declarators *,* local-variable-declarator
+  local-variable-declarator
+  local-variable-declarators , local-variable-declarator
 
 local-variable-declarator:
-identifier
-identifier = local-variable-initializer
+  identifier
+  identifier = local-variable-initializer
 
 local-variable-initializer:
-expression
-array-initializer
+  expression
+  array-initializer
 
 local-constant-declaration:
-*const* type constant-declarators
+  const type constant-declarators
 
 constant-declarators:
-constant-declarator
-constant-declarators *,* constant-declarator
+  constant-declarator
+  constant-declarators , constant-declarator
 
 constant-declarator:
-identifier = constant-expression
+  identifier = constant-expression
 
 expression-statement:
-statement-expression *;*
+  statement-expression ;
 
 statement-expression:
-invocation-expression
-object-creation-expression
-assignment
-post-increment-expression
-post-decrement-expression
-pre-increment-expression
-pre-decrement-expression
-await-expression
+  invocation-expression
+  object-creation-expression
+  assignment
+  post-increment-expression
+  post-decrement-expression
+  pre-increment-expression
+  pre-decrement-expression
+  await-expression
 
 selection-statement:
-if-statement
-switch-statement
+  if-statement
+  switch-statement
 
 if-statement:
-*if* *(* boolean-expression *)* embedded-statement
-*if* *(* boolean-expression *)* embedded-statement *else* embedded-statement
+  if ( boolean-expression ) embedded-statement
+  if ( boolean-expression ) embedded-statement else embedded-statement
 
 switch-statement:
-*switch* *(* expression *)* switch-block
+  switch ( expression ) switch-block
 
 switch-block:
-*{* switch-sectionsopt *}*
+  { switch-sectionsopt }
 
 switch-sections:
-switch-section
-switch-sections switch-section
+  switch-section
+  switch-sections switch-section
 
 switch-section:
-switch-labels statement-list
+  switch-labels statement-list
 
 switch-labels:
-switch-label
-switch-labels switch-label
+  switch-label
+  switch-labels switch-label
 
 switch-label:
-*case* constant-expression *:*
-*default* *:*
+  case constant-expression :
+  default :
 
 iteration-statement:
-while-statement
-do-statement
-for-statement
-foreach-statement
+  while-statement
+  do-statement
+  for-statement
+  foreach-statement
 
 while-statement:
-*while* *(* boolean-expression *)* embedded-statement
+  while ( boolean-expression ) embedded-statement
 
 do-statement:
-*do* embedded-statement *while* *(* boolean-expression *)* *;*
+  do embedded-statement while ( boolean-expression ) ;
 
 for-statement:
-*for* *(* for-initializeropt *;* for-conditionopt *;* for-iteratoropt *)* embedded-statement
+  for ( for-initializeropt ; for-conditionopt ; for-iteratoropt ) embedded-statement
 
 for-initializer:
-local-variable-declaration
-statement-expression-list
+  local-variable-declaration
+  statement-expression-list
 
 for-condition:
-boolean-expression
+  boolean-expression
 
 for-iterator:
-statement-expression-list
+  statement-expression-list
 
 statement-expression-list:
-statement-expression
-statement-expression-list *,* statement-expression
+  statement-expression
+  statement-expression-list , statement-expression
 
 foreach-statement:
-*foreach* *(* local-variable-type identifier *in* expression *)* embedded-statement
+  foreach ( local-variable-type identifier in expression ) embedded-statement
 
 jump-statement:
-break-statement
-continue-statement
-goto-statement
-return-statement
-throw-statement
+  break-statement
+  continue-statement
+  goto-statement
+  return-statement
+  throw-statement
 
 break-statement:
-*break* *;*
+  break ;
 
 continue-statement:
-*continue* *;*
+  continue ;
 
 goto-statement:
-*goto* identifier *;
-goto* *case* constant-expression *;*
-*goto* *default* *;*
+  goto identifier ;
+  goto case constant-expression ;
+  goto default ;
 
 return-statement:
-*return* expressionopt *;*
+  return expressionopt ;
 
 throw-statement:
-*throw* expressionopt *;*
+  throw expressionopt ;
 
 try-statement:
-*try* block catch-clauses
-*try* block catch-clausesopt finally-clause
+  try block catch-clauses
+  try block catch-clausesopt finally-clause
 
 catch-clauses:
-specific-catch-clauses
-specific-catch-clausesopt general-catch-clause
+  specific-catch-clauses
+  specific-catch-clausesopt general-catch-clause
 
 specific-catch-clauses:
-specific-catch-clause
-specific-catch-clauses specific-catch-clause
+  specific-catch-clause
+  specific-catch-clauses specific-catch-clause
 
 specific-catch-clause:
-*catch* *(* type identifieropt *)* block
+  catch ( type identifieropt ) block
 
 general-catch-clause:
-*catch* block
+  catch block
 
 finally-clause:
-*finally* block
+  finally block
 
 checked-statement:
-*checked* block
+  checked block
 
 unchecked-statement:
-*unchecked* block
+  unchecked block
 
 lock-statement:
-*lock* *(* expression *)* embedded-statement
+  lock ( expression ) embedded-statement
 
 using-statement:
-*using* *(* resource-acquisition *)* embedded-statement
+  using ( resource-acquisition ) embedded-statement
 
 resource-acquisition:
-local-variable-declaration
-expression
+  local-variable-declaration
+  expression
 
 yield-statement:
-*yield* *return* expression *;*
-*yield* *break* *;*
+  yield return expression ;
+  yield break ;
+```
+###  Namespaces
 
-###  Namespaces {#namespaces-1 .Appendix3}
-
-compilation-unit:
-extern-alias-directivesopt using-directivesopt global-attributesopt
-namespace-member-declarationsopt
+```ANTLR
+  compilation-unit:
+  extern-alias-directivesopt using-directivesopt global-attributesopt
+  namespace-member-declarationsopt
 
 namespace-declaration:
-*namespace* qualified-identifier namespace-body *;*opt
+  namespace qualified-identifier namespace-body ;opt
 
 qualified-identifier:
-identifier
-qualified-identifier *.* identifier
+  identifier
+  qualified-identifier . identifier
 
 namespace-body:
-*{* extern-alias-directivesopt using-directivesopt namespace-member-declarationsopt *}*
+  { extern-alias-directivesopt using-directivesopt namespace-member-declarationsopt }
 
 extern-alias-directives:
-extern-alias-directive
-extern-alias-directives extern-alias-directive
+  extern-alias-directive
+  extern-alias-directives extern-alias-directive
 
 extern-alias-directive:
-*extern* *alias* identifier *;*
+  extern alias identifier ;
 
 using-directives:
-using-directive
-using-directives using-directive
+  using-directive
+  using-directives using-directive
 
 using-directive:
-using-alias-directive
-using-namespace-directive
+  using-alias-directive
+  using-namespace-directive
 
 using-alias-directive:
-*using* identifier *=* namespace-or-type-name *;*
+  using identifier = namespace-or-type-name ;
 
 using-namespace-directive:
-*using* namespace-name *;*
+  using namespace-name ;
 
 namespace-member-declarations:
-namespace-member-declaration
-namespace-member-declarations namespace-member-declaration
+  namespace-member-declaration
+  namespace-member-declarations namespace-member-declaration
 
 namespace-member-declaration:
-namespace-declaration
-type-declaration
+  namespace-declaration
+  type-declaration
 
 type-declaration:
-class-declaration
-struct-declaration
-interface-declaration
-enum-declaration
-delegate-declaration
+  class-declaration
+  struct-declaration
+  interface-declaration
+  enum-declaration
+  delegate-declaration
 
 qualified-alias-member:
-identifier *::* identifier type-argument-listopt
+  identifier :: identifier type-argument-listopt
+```
+### Classes
 
-### Classes {#classes-1 .Appendix3}
-
+```ANTLR
 class-declaration:
-attributesopt class-modifiersopt *partial*opt *class* identifier type-parameter-listopt
-class-baseopt type-parameter-constraints-clausesopt class-body *;*opt
+  attributesopt class-modifiersopt partialopt class identifier type-parameter-listopt
+  class-baseopt type-parameter-constraints-clausesopt class-body ;opt
 
 class-modifiers:
-class-modifier
-class-modifiers class-modifier
+  class-modifier
+  class-modifiers class-modifier
 
 class-modifier:
-*new*
-*public
-protected
-internal*
-*private*
-*abstract*
-*sealed
-static*
+  new
+  public
+  protected
+  internal
+  private
+  abstract
+  sealed
+  static
 
 type-parameter-list:
-*<* type-parameters *>*
+  < type-parameters >
 
 type-parameters:
-attributesopt type-parameter
-type-parameters *,* attributesopt type-parameter
+  attributesopt type-parameter
+  type-parameters , attributesopt type-parameter
 
 class-base:
-*:* class-type
-*:* interface-type-list
-*:* class-type *,* interface-type-list
+  : class-type
+  : interface-type-list
+  : class-type , interface-type-list
 
 interface-type-list:
-interface-type
-interface-type-list *,* interface-type
+  interface-type
+  interface-type-list , interface-type
 
 type-parameter-constraints-clauses:
-type-parameter-constraints-clause
-type-parameter-constraints-clauses type-parameter-constraints-clause
+  type-parameter-constraints-clause
+  type-parameter-constraints-clauses type-parameter-constraints-clause
 
 type-parameter-constraints-clause:
-*where* type-parameter *:* type-parameter-constraints
+  where type-parameter : type-parameter-constraints
 
 type-parameter-constraints:
-primary-constraint
-secondary-constraints
-constructor-constraint
-primary-constraint *,* secondary-constraints
-primary-constraint *,* constructor-constraint
-secondary-constraints *,* constructor-constraint
-primary-constraint *,* secondary-constraints *,* constructor-constraint
+  primary-constraint
+  secondary-constraints
+  constructor-constraint
+  primary-constraint , secondary-constraints
+  primary-constraint , constructor-constraint
+  secondary-constraints , constructor-constraint
+  primary-constraint , secondary-constraints , constructor-constraint
 
 primary-constraint:
-class-type
-*class*
-*struct*
+  class-type
+  class
+  struct
 
 secondary-constraints:
-interface-type
-type-parameter
-secondary-constraints *,* interface-type
-secondary-constraints *,* type-parameter
+  interface-type
+  type-parameter
+  secondary-constraints , interface-type
+  secondary-constraints , type-parameter
 
 constructor-constraint:
-*new* *(* *)*
+  new ( )
 
 class-body:
-*{* class-member-declarationsopt *}*
+  { class-member-declarationsopt }
 
 class-member-declarations:
-class-member-declaration
-class-member-declarations class-member-declaration
+  class-member-declaration
+  class-member-declarations class-member-declaration
 
 class-member-declaration:
-constant-declaration
-field-declaration
-method-declaration
-property-declaration
-event-declaration
-indexer-declaration
-operator-declaration
-constructor-declaration
-finalizer-declaration
-static-constructor-declaration
-type-declaration
+  constant-declaration
+  field-declaration
+  method-declaration
+  property-declaration
+  event-declaration
+  indexer-declaration
+  operator-declaration
+  constructor-declaration
+  finalizer-declaration
+  static-constructor-declaration
+  type-declaration
 
 constant-declaration:
-attributesopt constant-modifiersopt *const* type constant-declarators *;*
+  attributesopt constant-modifiersopt const type constant-declarators ;
 
 constant-modifiers:
-constant-modifier
-constant-modifiers constant-modifier
+  constant-modifier
+  constant-modifiers constant-modifier
 
 constant-modifier:
-*new*
-*public*
-*protected
-internal*
-*private*
+  new
+  public
+  protected
+  internal
+  private
 
 constant-declarators:
-constant-declarator
-constant-declarators *,* constant-declarator
+  constant-declarator
+  constant-declarators , constant-declarator
 
 constant-declarator:
-identifier = constant-expression
+  identifier = constant-expression
 
 field-declaration:
-attributesopt field-modifiersopt type variable-declarators *;*
+  attributesopt field-modifiersopt type variable-declarators ;
 
 field-modifiers:
-field-modifier
-field-modifiers field-modifier
+  field-modifier
+  field-modifiers field-modifier
 
 field-modifier:
-*new*
-*public*
-*protected
-internal*
-*private
-static
-readonly
-volatile*
+  new
+  public
+  protected
+  internal
+  private
+  static
+  readonly
+  volatile
 
 variable-declarators:
-variable-declarator
-variable-declarators *,* variable-declarator
+  variable-declarator
+  variable-declarators , variable-declarator
 
 variable-declarator:
-identifier
-identifier = variable-initializer
+  identifier
+  identifier = variable-initializer
 
 variable-initializer:
-expression
-array-initializermethod-declaration:
-method-header method-body
+  expression
+  array-initializermethod-declaration:
+  method-header method-body
 
 method-header:
-attributesopt method-modifiersopt partialopt return-type member-name
-type-parameter-listopt*
-(* formal-parameter-listopt *)* type-parameter-constraints-clausesopt
+  attributesopt method-modifiersopt partialopt return-type member-name
+  type-parameter-listopt
+  ( formal-parameter-listopt ) type-parameter-constraints-clausesopt
 
 method-modifiers:
-method-modifier
-method-modifiers method-modifier
+  method-modifier
+  method-modifiers method-modifier
 
 method-modifier:
-*new
-public
-protected
-internal
-private
-static
-virtual
-sealed
-override
-abstract
-extern
-async*
+  new
+  public
+  protected
+  internal
+  private
+  static
+  virtual
+  sealed
+  override
+  abstract
+  extern
+  async
 
 return-type:
-type
-*void*
+  type
+  void
 
 method-body:
-block
-*;*
+  block
+  ;
 
 formal-parameter-list:
-fixed-parameters
-fixed-parameters *,* parameter-array
-parameter-array
+  fixed-parameters
+  fixed-parameters , parameter-array
+  parameter-array
 
 fixed-parameters:
-fixed-parameter
-fixed-parameters *,* fixed-parameter
+  fixed-parameter
+  fixed-parameters , fixed-parameter
 
 fixed-parameter:
-attributesopt parameter-modifieropt type identifier default-argumentopt
+  attributesopt parameter-modifieropt type identifier default-argumentopt
 
 default-argument:
-= expression
+  = expression
 
 parameter-modifier:
-*parameter-mode-modifier
-this*
+  parameter-mode-modifier
+  this
 
 parameter-mode-modifier:
-*ref
-out*
+  ref
+  out
 
 parameter-array:
-attributesopt *params* array-type identifier
+  attributesopt params array-type identifier
 
 property-declaration:
-attributesopt property-modifiersopt type member-name *{* accessor-declarations *}*
+  attributesopt property-modifiersopt type member-name { accessor-declarations }
 
 property-modifiers:
-property-modifier
-property-modifiers property-modifier
+  property-modifier
+  property-modifiers property-modifier
 
 property-modifier:
-*new
-public
-protected
-internal
-private
-static
-virtual
-sealed
-override
-abstract
-extern*
+  new
+  public
+  protected
+  internal
+  private
+  static
+  virtual
+  sealed
+  override
+  abstract
+  extern
 
 accessor-declarations:
-get-accessor-declaration set-accessor-declarationopt
-set-accessor-declaration get-accessor-declarationopt
+  get-accessor-declaration set-accessor-declarationopt
+  set-accessor-declaration get-accessor-declarationopt
 
 get-accessor-declaration:
-attributesopt accessor-modifieropt *get* accessor-body
+  attributesopt accessor-modifieropt get accessor-body
 
 set-accessor-declaration:
-attributesopt accessor-modifieropt *set* accessor-body
+  attributesopt accessor-modifieropt set accessor-body
 
 accessor-modifier:
-*protected
-internal
-private
-protected* *internal
-internal* *protected*
+  protected
+  internal
+  private
+  protected internal
+  internal protected
 
 accessor-body:
-block
-*;*
+  block
+  ;
 
 event-declaration:
-attributesopt event-modifiersopt *event* type variable-declarators *;
-*attributesopt event-modifiersopt *event* type member-name
-*{* event-accessor-declarations *}*
+  attributesopt event-modifiersopt event type variable-declarators ;
+  attributesopt event-modifiersopt event type member-name
+  { event-accessor-declarations }
 
 event-modifiers:
-event-modifier
-event-modifiers event-modifier
+  event-modifier
+  event-modifiers event-modifier
 
 event-modifier:
-*new
-public
-protected
-internal
-private
-static
-virtual
-sealed
-override
-abstract
-extern*
+  new
+  public
+  protected
+  internal
+  private
+  static
+  virtual
+  sealed
+  override
+  abstract
+  extern
 
 event-accessor-declarations:
-add-accessor-declaration remove-accessor-declaration
-remove-accessor-declaration add-accessor-declaration
+  add-accessor-declaration remove-accessor-declaration
+  remove-accessor-declaration add-accessor-declaration
 
 add-accessor-declaration:
-attributesopt *add* block
+  attributesopt add block
 
 remove-accessor-declaration:
-attributesopt *remove* block
+  attributesopt remove block
 
 indexer-declaration:
-attributesopt indexer-modifiersopt indexer-declarator *{* accessor-declarations *}*
+  attributesopt indexer-modifiersopt indexer-declarator { accessor-declarations }
 
 indexer-modifiers:
-indexer-modifier
-indexer-modifiers indexer-modifier
+  indexer-modifier
+  indexer-modifiers indexer-modifier
 
 indexer-modifier:
-*new
-public
-protected
-internal
-private
-virtual
-sealed
-override
-abstract
-extern*
+  new
+  public
+  protected
+  internal
+  private
+  virtual
+  sealed
+  override
+  abstract
+  extern
 
 indexer-declarator:
-type *this* *[* formal-parameter-list *]*
-type interface-type *.* *this* *[* formal-parameter-list *]*
+  type this [ formal-parameter-list ]
+  type interface-type . this [ formal-parameter-list ]
 
 operator-declaration:
-attributesopt operator-modifiers operator-declarator operator-body
+  attributesopt operator-modifiers operator-declarator operator-body
 
 operator-modifiers:
-operator-modifier
-operator-modifiers operator-modifier
+  operator-modifier
+  operator-modifiers operator-modifier
 
 operator-modifier:
-*public
-static
-extern*
+  public
+  static
+  extern
 
 operator-declarator:
-unary-operator-declarator
-binary-operator-declarator
-conversion-operator-declarator
+  unary-operator-declarator
+  binary-operator-declarator
+  conversion-operator-declarator
 
 unary-operator-declarator:
-type *operator* overloadable-unary-operator *(* fixed-parameter *)*
+  type operator overloadable-unary-operator ( fixed-parameter )
 
-overloadable-unary-operator: *one of*
-*+ - ! ~ ++ -- true false*
+overloadable-unary-operator: one of
+  + - ! ~ ++ -- true false
 
 binary-operator-declarator:
-type *operator* overloadable-binary-operator *(* fixed-parameter *,* fixed-parameter *)*
+  type operator overloadable-binary-operator ( fixed-parameter , fixed-parameter )
 
-overloadable-binary-operator: *one of*
-*+ - * / % & | ^ <<* right-shift*
-== != > < >= <=*
+overloadable-binary-operator: one of
+  + - * / % & | ^ << right-shift
+  == != > < >= <=
 
-conversion-operator-declarator:*
-implicit* *operator* type *(* fixed-parameter *)*
-*explicit* *operator* type *(* fixed-parameter *)*
+conversion-operator-declarator:
+  implicit operator type ( fixed-parameter )
+  explicit operator type ( fixed-parameter )
 
 operator-body:
-block
-*;*
+  block
+  ;
 
 constructor-declaration:
-attributesopt constructor-modifiersopt constructor-declarator constructor-body
+  attributesopt constructor-modifiersopt constructor-declarator constructor-body
 
 constructor-modifiers:
-constructor-modifier
-constructor-modifiers constructor-modifier
+  constructor-modifier
+  constructor-modifiers constructor-modifier
 
 constructor-modifier:
-*public*
-*protected
-internal*
-*private
-extern*
+  public
+  protected
+  internal
+  private
+  extern
 
 constructor-declarator:
-identifier *(* formal-parameter-listopt *)* constructor-initializeropt
+  identifier ( formal-parameter-listopt ) constructor-initializeropt
 
 constructor-initializer:
-*:* *base* *(* argument-listopt *)
-:* *this* *(* argument-listopt *)*
+  : base ( argument-listopt )
+  : this ( argument-listopt )
 
 constructor-body:
-block
-*;*
+  block
+  ;
 
 static-constructor-declaration:
-attributesopt static-constructor-modifiers identifier *(* *)* static-constructor-body
+  attributesopt static-constructor-modifiers identifier ( ) static-constructor-body
 
 static-constructor-modifiers:
-*extern*opt *static*
-*static extern*opt
+  externopt static
+  static externopt
 
 static-constructor-body:
-block*
-*;
+  block
+  ;
 
 finalizer-declaration:
-attributesopt *extern*opt ~ identifier *(* *)* finalizer-body
+  attributesopt externopt ~ identifier ( ) finalizer-body
 
 finalizer-body:
-block
-*;*
+  block
+  ;
+```
 
-### Structs {#structs-1 .Appendix3}
+### Structs
 
+```ANTLR
 struct-declaration:
-attributesopt struct-modifiersopt *partial*opt *struct* identifier type-parameter-listopt
-struct-interfacesopt type-parameter-constraints-clausesopt struct-body *;*opt
+  attributesopt struct-modifiersopt *partial*opt *struct* identifier type-parameter-listopt
+  struct-interfacesopt type-parameter-constraints-clausesopt struct-body ; opt
 
 struct-modifiers:
-struct-modifier
-struct-modifiers struct-modifier
-
+  struct-modifier
+  struct-modifiers struct-modifier
+  
 struct-modifier:
-*new*
-*public
-protected
-internal*
-*private*
-
+  new
+  public
+  protected
+  internal
+  private
+  
 struct-interfaces:
-*:* interface-type-list
-
+  : interface-type-list
+  
 struct-body:
-*{* struct-member-declarationsopt *}*
-
+  { struct-member-declarationsopt }
+  
 struct-member-declarations:
-struct-member-declaration
-struct-member-declarations struct-member-declaration
-
+  struct-member-declaration
+  struct-member-declarations struct-member-declaration
+  
 struct-member-declaration:
-…
-fixed-size-buffer-declaration
+  …
+  fixed-size-buffer-declaration
+```
 
-### Arrays {#arrays-1 .Appendix3}
+### Arrays
 
+```csharp
 array-initializer:
-*{* variable-initializer-listopt *}*
-*{* variable-initializer-list *,* *}*
+  { variable-initializer-listopt }
+  { variable-initializer-list , }
 
 variable-initializer-list:
-variable-initializer
-variable-initializer-list *,* variable-initializer
+  variable-initializer
+  variable-initializer-list *,* variable-initializer
 
 variable-initializer:
-expression
-array-initializer
+  expression
+  array-initializer
+```
 
-### Interfaces {#interfaces-1 .Appendix3}
+### Interfaces
 
+```ANTLR
 interface-declaration:
-attributesopt interface-modifiersopt *partial*opt *interface
-*identifier variant-type-parameter-listopt
- interface-baseopt type-parameter-constraints-clausesopt interface-body *;*opt
+  attributesopt interface-modifiersopt partialopt interface
+  identifier variant-type-parameter-listopt
+   interface-baseopt type-parameter-constraints-clausesopt interface-body ;opt
 
 interface-modifiers:
-interface-modifier
-interface-modifiers interface-modifier
+  interface-modifier
+  interface-modifiers interface-modifier
 
 interface-modifier:
-*new*
-*public
-protected
-internal*
-*private*
+  new
+  public
+  protected
+  internal
+  private
 
 variant-type-parameter-list:
-*<* variant-type-parameters *>*
+  < variant-type-parameters >
 
 variant-type-parameters:
-attributesopt variance-annotationopt type-parameter
-variant-type-parameters *,* attributesopt variance-annotationopt type-parameter
+  attributesopt variance-annotationopt type-parameter
+  variant-type-parameters , attributesopt variance-annotationopt type-parameter
 
 variance-annotation:
-*in*
-*out*
+  in
+  out
 
 interface-base:
-*:* interface-type-list
+  : interface-type-list
 
 interface-body:
-*{* interface-member-declarationsopt *}*
+  { interface-member-declarationsopt }
 
 interface-member-declarations:
-interface-member-declaration
-interface-member-declarations interface-member-declaration
+  interface-member-declaration
+  interface-member-declarations interface-member-declaration
 
 interface-member-declaration:
-interface-method-declaration
-interface-property-declaration
-interface-event-declaration
-interface-indexer-declaration
-
+  interface-method-declaration
+  interface-property-declaration
+  interface-event-declaration
+  interface-indexer-declaration
+  
 interface-method-declaration:
-attributesopt *new*opt return-type identifier type-parameter-listopt
-*(* formal-parameter-listopt *)* type-parameter-constraints-clausesopt *;*
+  attributesopt newopt return-type identifier type-parameter-listopt
+  ( formal-parameter-listopt ) type-parameter-constraints-clausesopt ;
 
 interface-property-declaration:
-attributesopt *new*opt type identifier *{* interface-accessors *}*
+  attributesopt newopt type identifier { interface-accessors }
 
 interface-accessors:
-attributesopt *get* *;
-*attributesopt *set* *;
-*attributesopt *get* *;* attributesopt *set* *;*
-attributesopt *set* *;* attributesopt *get* *;*
+  attributesopt get ;
+  attributesopt set ;
+  attributesopt get ; attributesopt set ;
+  attributesopt set ; attributesopt get ;
 
 interface-event-declaration:
-attributesopt *new*opt *event* type identifier *;*
+  attributesopt newopt event type identifier ;
 
 interface-indexer-declaration:
-attributesopt *new*opt type *this* *[* formal-parameter-list *]* *{* interface-accessors *}*
+  attributesopt newopt type this [ formal-parameter-list ] { interface-accessors }
+```
 
-### Enums {#enums-1 .Appendix3}
+### Enums
 
+```antlr
 enum-declaration:
-attributesopt enum-modifiersopt *enum* identifier enum-baseopt enum-body *;*opt
+  attributesopt enum-modifiersopt enum identifier enum-baseopt enum-body ;opt
 
 enum-base:
-*:* integral-type
+  : integral-type
 
 enum-body:
-*{* enum-member-declarationsopt *}*
-*{* enum-member-declarations *,* *}*
+  { enum-member-declarationsopt }
+  { enum-member-declarations , }
 
 enum-modifiers:
-enum-modifier
-enum-modifiers enum-modifier
+  enum-modifier
+  enum-modifiers enum-modifier
 
 enum-modifier:
-*new*
-*public
-protected
-internal*
-*private*
+  new
+  public
+  protected
+  internal
+  private
 
 enum-member-declarations:
-enum-member-declaration
-enum-member-declarations *,* enum-member-declaration
+  enum-member-declaration
+  enum-member-declarations , enum-member-declaration
 
 enum-member-declaration:
-attributesopt identifier
-attributesopt identifier *=* constant-expression
+  attributesopt identifier
+  attributesopt identifier = constant-expression
+```  
 
-### Delegates {#delegates-1 .Appendix3}
+### Delegates
 
+```antlr
 delegate-declaration:
-attributesopt delegate-modifiersopt *delegate* return-type
-identifier variant-type-parameter-listopt
- *(* formal-parameter-listopt *)* type-parameter-constraints-clausesopt *;*
+  attributesopt delegate-modifiersopt delegate return-type
+  identifier variant-type-parameter-listopt
+    ( formal-parameter-listopt ) type-parameter-constraints-clausesopt ;
 
 delegate-modifiers:
-delegate-modifier
-delegate-modifiers delegate-modifier
+  delegate-modifier
+  delegate-modifiers delegate-modifier
 
 delegate-modifier:
-*new*
-*public
-protected
-internal*
-*private*
+  new
+  public
+  protected
+  internal
+  private
+```  
 
-### Attributes {#attributes-1 .Appendix3}
+### Attributes
 
+```antlr
 global-attributes:
-global-attribute-sections
+  global-attribute-sections
 
 global-attribute-sections:
-global-attribute-section
-global-attribute-sections global-attribute-section
+  global-attribute-section
+  global-attribute-sections global-attribute-section
 
 global-attribute-section:
-*[* global-attribute-target-specifier attribute-list *]
-[* global-attribute-target-specifier attribute-list , *]*
+  [ global-attribute-target-specifier attribute-list ]
+  [ global-attribute-target-specifier attribute-list , ]
 
 global-attribute-target-specifier:
-global-attribute-target *:*
+  global-attribute-target :
 
 global-attribute-target:
-identifier *equal to assembly or module*
+  identifier equal to assembly or module
 
 attributes:
-attribute-sections
+  attribute-sections
 
 attribute-sections:
-attribute-section
-attribute-sections attribute-section
+  attribute-section
+  attribute-sections attribute-section
 
 attribute-section:
-*[* attribute-target-specifieropt attribute-list *]
-[* attribute-target-specifieropt attribute-list , *]*
-
+  [ attribute-target-specifieropt attribute-list ]
+  [ attribute-target-specifieropt attribute-list , ]
+  
 attribute-target-specifier:
-attribute-target *:*
+  attribute-target :
 
 attribute-target:
-identifier *not equal to assembly or module
-keyword*
+  identifier not equal to assembly or module
+  keyword
 
 attribute-list:
-attribute
-attribute-list *,* attribute
+  attribute
+  attribute-list , attribute
 
 attribute:
-attribute-name attribute-argumentsopt
+  attribute-name attribute-argumentsopt
 
 attribute-name:
-type-name
+  type-name
 
 attribute-arguments:
-*(* positional-argument-listopt *)
-(* positional-argument-list *,* named-argument-list *)
-(* named-argument-list *)*
+  ( positional-argument-listopt )
+  ( positional-argument-list , named-argument-list )
+  ( named-argument-list )
 
 positional-argument-list:
-positional-argument
-positional-argument-list *,* positional-argument
+  positional-argument
+  positional-argument-list , positional-argument
 
 positional-argument:
-argument-nameopt attribute-argument-expression
+  argument-nameopt attribute-argument-expression
 
 named-argument-list:
-named-argument
-named-argument-list *,* named-argument
+  named-argument
+  named-argument-list , named-argument
 
 named-argument:
-identifier *=* attribute-argument-expression
+  identifier = attribute-argument-expression
 
 attribute-argument-expression:
-expression
+  expression
+```  
 
-## Grammar extensions for unsafe code {#grammar-extensions-for-unsafe-code .Appendix2}
+## Grammar extensions for unsafe code
 
+```ANTLR
 class-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 struct-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 interface-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 delegate-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 field-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 method-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 property-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 event-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 indexer-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 operator-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 constructor-modifier:
-…
-*unsafe*
+  …
+  unsafe
 
 finalizer-declaration:
-attributesopt *extern*opt *unsafe*opt ~ identifier *(* *)* finalizer-body
-attributesopt *unsafe*opt *extern*opt ~ identifier *(* *)* finalizer-body
+  attributesopt externopt unsafeopt ~ identifier ( ) finalizer-body
+  attributesopt unsafeopt externopt ~ identifier ( ) finalizer-body
 
 static-constructor-modifiers:
-*extern*opt *unsafe*opt *static*
-*unsafe*opt *extern*opt *static*
-*extern*opt *static* *unsafe*opt
-*unsafe*opt *static* *extern*opt
-*static* *extern*opt *unsafe*opt
-*static* *unsafe*opt *extern*opt
+  externopt unsafeopt static
+  unsafeopt externopt static
+  externopt static unsafeopt
+  unsafeopt static externopt
+  static externopt unsafeopt
+  static unsafeopt externopt
 
 embedded-statement:
-…
-unsafe-statement
+  …
+  unsafe-statement
 
 unsafe-statement:
-*unsafe* block
+  unsafe block
 
 type:
-…
-pointer-type
+  …
+  pointer-type
 
 non-array-type:
-…
-pointer-type
+  …
+  pointer-type
 
 pointer-type:
-unmanaged-type ***
-*void* ***
+  unmanaged-type \
+  void \
 
 unmanaged-type:
-type
+  type
 
 primary-no-array-creation-expression:
-…
-pointer-member-access
-pointer-element-access
-
+  …
+  pointer-member-access
+  pointer-element-access
+  
 unary-expression:
-…
-pointer-indirection-expression
-addressof-expression
-
+  …
+  pointer-indirection-expression
+  addressof-expression
+  
 pointer-indirection-expression:
-*** unary-expression
+  \ unary-expression
 
 pointer-member-access:
-primary-expression *->* identifier type-argument-listopt
+  primary-expression -> identifier type-argument-listopt
 
 pointer-element-access:
-primary-no-array-creation-expression *[* expression *]*
+  primary-no-array-creation-expression [ expression ]
 
 addressof-expression:
-*&* unary-expression
+  & unary-expression
 
 embedded-statement:
-…
-fixed-statement
-
+  …
+  fixed-statement
+  
 fixed-statement:
-*fixed* *(* pointer-type fixed-pointer-declarators *)* embedded-statement
+  fixed ( pointer-type fixed-pointer-declarators ) embedded-statement
 
 fixed-pointer-declarators:
-fixed-pointer-declarator
-fixed-pointer-declarators *,* fixed-pointer-declarator
-
+  fixed-pointer-declarator
+  fixed-pointer-declarators , fixed-pointer-declarator
+  
 fixed-pointer-declarator:
-identifier *=* fixed-pointer-initializer
+  identifier = fixed-pointer-initializer
 
 fixed-pointer-initializer:
-*&* variable-reference
-expression
-
+  & variable-reference
+  expression
+  
 struct-member-declaration:
-…
-fixed-size-buffer-declaration
-
+  …
+  fixed-size-buffer-declaration
+  
 fixed-size-buffer-declaration:
-attributesopt fixed-size-buffer-modifiersopt *fixed* buffer-element-type
-fixed-size-buffer-declarators *;*
-
+  attributesopt fixed-size-buffer-modifiersopt fixed buffer-element-type
+  fixed-size-buffer-declarators ;
+  
 fixed-size-buffer-modifiers:
-fixed-size-buffer-modifier
-fixed-size-buffer-modifier fixed-size-buffer-modifiers
-
+  fixed-size-buffer-modifier
+  fixed-size-buffer-modifier fixed-size-buffer-modifiers
+  
 fixed-size-buffer-modifier:
-*new*
-*public*
-*protected
-internal*
-*private
-unsafe*
-
+  new
+  public
+  protected
+  internal
+  private
+  unsafe
+  
 buffer-element-type:
-type
+  type
 
 fixed-size-buffer-declarators:
-fixed-size-buffer-declarator
-fixed-size-buffer-declarator *,* fixed-size-buffer-declarators
-
+  fixed-size-buffer-declarator
+  fixed-size-buffer-declarator , fixed-size-buffer-declarators
+  
 fixed-size-buffer-declarator:
-identifier *[* constant-expression *]*
+  identifier [ constant-expression ]
 
 local-variable-initializer:
-…
-stackalloc-initializer
-
+  …
+  stackalloc-initializer
+  
 stackalloc-initializer:
-*stackalloc* unmanaged-type *[* expression *]*
+  stackalloc unmanaged-type [ expression ]
+```
 
 **End of informative text.**
 
-# Portability issues {#portability-issues .Appendix1}
+# Portability issues
 
 **This clause is informative.**
 
-## General {#general-107 .Appendix2}
+## General
 
 This annex collects some information about portability that appears in this specification.
 
-## Undefined behavior {#undefined-behavior .Appendix2}
+## Undefined behavior
 
 The behavior is undefined in the following circumstances:
 
-1.  The behavior of the enclosing async function when an awaiter’s implementation of the interface methods INotifyCompletion.OnCompleted and ICriticalNotifyCompletion.UnsafeOnCompleted does not cause the resumption delegate to be invoked at most once (§12.8.8.4).
+1.  The behavior of the enclosing async function when an awaiter’s implementation of the interface methods `INotifyCompletion.OnCompleted` and `ICriticalNotifyCompletion.UnsafeOnCompleted` does not cause the resumption delegate to be invoked at most once (§12.8.8.4).
+1. Passing pointers as ref or out parameters (§23.3).
+1. When dereferencing the result of converting one pointer type to another and the resulting pointer is not correctly aligned for the pointed-to type. (§23.5.1)
+1. When the unary `*` operator is applied to a pointer containing an invalid value (§23.6.2).
+1. When a pointer is subscripted to access an out-of-bounds element (§23.6.4).
+1. Modifying objects of managed type through fixed pointers (§23.7)
+1. The content of memory newly allocated by `stackalloc` (§23.9).
+1. Attempting to allocate a negative number of items using `stackalloc` (§23.9).
 
-Passing pointers as ref or out parameters (§23.3).
-
-When dereferencing the result of converting one pointer type to another and the resulting pointer is not correctly aligned for the pointed-to type. (§23.5.1)
-
-When the unary * operator is applied to a pointer containing an invalid value (§23.6.2).
-
-When a pointer is subscripted to access an out-of-bounds element (§23.6.4).
-
-Modifying objects of managed type through fixed pointers (§23.7)
-
-The content of memory newly allocated by stackalloc (§23.9).
-
-Attempting to allocate a negative number of items using stackalloc (§23.9).
-
-## Implementation-defined behavior {#implementation-defined-behavior .Appendix2}
+## Implementation-defined behavior
 
 A conforming implementation is required to document its choice of behavior in each of the areas listed in this subclause. The following are implementation-defined:
 
-1.  The behavior when an identifier not in Normalization Form C is encountered[[]{#OLE_LINK16 .anchor}]{#OLE_LINK15 .anchor} (§7.4.3).
+1.  The behavior when an identifier not in Normalization Form C is encountered (§7.4.3).
+1. The interpretation of the *input-characters* in the *pp-pragma-text* of a `#pragma` directive (§7.5.9).
+1. The values of any application parameters passed to `Main` by the host environment prior to application startup (§8.1).
+1. The precise structure of the expression tree, as well as the exact process for creating it, when an anonymous function is converted to an expression-tree (§11.7.3).
+1. Whether a `System.ArithmeticException` (or a subclass thereof) is thrown or the overflow goes unreported with the resulting value being that of the left operand, when in an unchecked context and the left operand of an integer division is the maximum negative `int` or `long` value and the right operand is –1 (§12.9.3).
+1. When a `System.ArithmeticException` (or a subclass thereof) is thrown when performing a decimal remainder operation (§12.9.4).
+1. The impact of thread termination when a thread has no handler for an exception, and the thread is itself terminated (§13.10.6).
+1. The impact of thread termination when no matching catch clause is found for an exception and the code that initially started that thread is reached. (§21.4)
+1. The mappings between pointers and integers (§23.5.1).
+1. The effect of applying the unary `*` operator to a null pointer (§23.6.2).
+1. The behavior when pointer arithmetic overflows the domain of the pointer type (§23.6.6, §23.6.7).
+1. The result of the sizeof operator for non-pre-defined value types (§23.6.9).
+1. The behavior of the fixed statement if the array expression is `null` or if the array has zero elements (§23.7).
+1. The behavior of the fixed statement if the string expression is `null `(§23.7).
+1. The value returned when a stack allocation of size zero is made (§23.9).
 
-The interpretation of the *input-characters* in the *pp-pragma-text* of a #pragma directive (§7.5.9).
-
-The values of any application parameters passed to Main by the host environment prior to application startup (§8.1).
-
-The precise structure of the expression tree, as well as the exact process for creating it, when an anonymous function is converted to an expression-tree (§11.7.3).
-
-Whether a System.ArithmeticException (or a subclass thereof) is thrown or the overflow goes unreported with the resulting value being that of the left operand, when in an unchecked context and the left operand of an integer division is the maximum negative int or long value and the right operand is –1 (§12.9.3).
-
-When a System.ArithmeticException (or a subclass thereof) is thrown when performing a decimal remainder operation (§12.9.4).
-
-The impact of thread termination when a thread has no handler for an exception, and the thread is itself terminated (§13.10.6).
-
-The impact of thread termination when no matching catch clause is found for an exception and the code that initially started that thread is reached. (§21.4)
-
-The mappings between pointers and integers (§23.5.1).
-
-The effect of applying the unary * operator to a null pointer (§23.6.2).
-
-The behavior when pointer arithmetic overflows the domain of the pointer type (§23.6.6, §23.6.7).
-
-The result of the sizeof operator for non-pre-defined value types (§23.6.9).
-
-The behavior of the fixed statement if the array expression is null or if the array has zero elements (§23.7).
-
-The behavior of the fixed statement if the string expression is null (§23.7).
-
-The value returned when a stack allocation of size zero is made (§23.9).
-
-## Unspecified behavior {#unspecified-behavior .Appendix2}
+## Unspecified behavior
 
 1.  The time at which the finalizer (if any) for an object is run, once that object has become eligible for finalization (§8.9).
+1. The value of the result when converting out-of-range values from `float` or `double` values to an integral type in an unchecked context (§11.3.2).
+1. The exact target object and target method of the delegate produced from an *anonymous-method-expression* contains (§11.7.2).
+1. The layout of arrays, except in an unsafe context (§12.7.11.5).
+1. Whether there is any way to execute the *block* of an anonymous function other than through evaluation and invocation of the *lambda-expression* or *anonymous-method-expression* (§12.16.3).
+1. The exact timing of static field initialization (§15.5.6.2).
+1. The result of invoking `MoveNext` when an enumerator object is running (§15.14.5.2).
+1. The result of accessing `Current` when an enumerator object is in the before, running, or after states (§15.14.5.3).
+1. The result of invoking `Dispose` when an enumerator object is in the running state (§15.14.5.4).
+1. The attributes of a type declared in multiple parts are determined by combining, in an unspecified order, the attributes of each of its parts (§22.3).
+1. The order in which members are packed into a struct (§23.6.9).
+1. An exception occurs during finalizer execution, and that execution is not caught (§21.4).
+1. If more than one member matches, which member is the implementation of I.M.(§18.6.5)
 
-The value of the result when converting out-of-range values from float or double values to an integral type in an unchecked context (§11.3.2).
-
-The exact target object and target method of the delegate produced from an *anonymous-method-expression* contains (§11.7.2).
-
-The layout of arrays, except in an unsafe context (§12.7.11.5).
-
-Whether there is any way to execute the *block* of an anonymous function other than through evaluation and invocation of the *lambda-expression* or *anonymous-method-expression* (§12.16.3).
-
-The exact timing of static field initialization (§15.5.6.2).
-
-The result of invoking MoveNext when an enumerator object is running (§15.14.5.2).
-
-The result of accessing Current when an enumerator object is in the before, running, or after states (§15.14.5.3).
-
-The result of invoking Dispose when an enumerator object is in the running state (§15.14.5.4).
-
-The attributes of a type declared in multiple parts are determined by combining, in an unspecified order, the attributes of each of its parts (§22.3).
-
-The order in which members are packed into a struct (§23.6.9).
-
-An exception occurs during finalizer execution, and that execution is not caught (§21.4).
-
-If more than one member matches, which member is the implementation of I.M.(§18.6.5)
-
-## Other Issues {#other-issues .Appendix2}
+## Other Issues
 
 1.  The exact results of floating-point expression evaluation can vary from one implementation to another, because an implementation is permitted to evaluate such expressions using a greater range and/or precision than is required. (§9.3.7)
-
-2.  The CLI reserves certain signatures for compatibility with other programming languages. (§15.3.9.7)
+1.  The CLI reserves certain signatures for compatibility with other programming languages. (§15.3.9.7)
 
 **End of informative text.**
 
-# Standard library {#standard-library .Appendix1}
+# Standard library
 
-## General {#general-108 .Appendix2}
+## General 
 
 A conforming C# implementation shall provide a minimum set of types having specific semantics. These types and their members are listed here, in alphabetical order by namespace and type. For a formal definition of these types and their members, refer to ISO/IEC 23271:2012 *Common Language Infrastructure (CLI), Partition IV; Base Class Library (BCL), Extended Numerics Library, and Extended Array Library*, which are included by reference in this specification.
 
@@ -25917,729 +25916,728 @@ The standard library is intended to be the minimum set of types and members requ
 It is expected that a conforming C# implementation will supply a significantly more extensive library that enables useful programs to be written. For example, a conforming implementation might extend this library by
 
 - Adding namespaces.
-
 - Adding types.
-
 - Adding members to non-interface types.
-
 - Adding intervening base classes or interfaces.
-
 - Having struct and class types implement additional interfaces.
-
-- Adding attributes (other than the ConditionalAttribute) to existing types and members.
+- Adding attributes (other than the `ConditionalAttribute`) to existing types and members.
 
 **End of informative text.**
 
-## Standard Library Types defined in ISO/IEC 23271 {#standard-library-types-defined-in-isoiec-23271 .Appendix2}
+## Standard Library Types defined in ISO/IEC 23271
 
+```csharp
 namespace System
 {
-public class ArgumentException : SystemException
-{
-public ArgumentException();
-public ArgumentException(string message);
-public ArgumentException(string message, Exception innerException);
-}
-}
-
-namespace System
-{
-public delegate void Action();
+    public class ArgumentException : SystemException
+    {
+        public ArgumentException();
+        public ArgumentException(string message);
+        public ArgumentException(string message, Exception innerException);
+    }
 }
 
 namespace System
 {
-[]{#_Hlk493483393 .anchor}public class ArithmeticException : Exception
-{
-public ArithmeticException();
-public ArithmeticException(string message);
-public ArithmeticException(string message, Exception innerException);
-}
+    public delegate void Action();
 }
 
 namespace System
 {
-public abstract class Array : IList, ICollection, IEnumerable
-{
-public int Length { get; }
-public int Rank { get; }
-public int GetLength(int dimension);
-}
-}
-
-namespace System
-{
-public class ArrayTypeMismatchException : Exception
-{
-public ArrayTypeMismatchException();
-public ArrayTypeMismatchException(string message);
-public ArrayTypeMismatchException(string message,
-Exception innerException);
-}
+    public class ArithmeticException : Exception
+    {
+        public ArithmeticException();
+        public ArithmeticException(string message);
+        public ArithmeticException(string message, Exception innerException);
+    }
 }
 
 namespace System
 {
-[AttributeUsageAttribute(AttributeTargets.All, Inherited = true,
-AllowMultiple = false)]
-public abstract class Attribute
-{
-protected Attribute();
-}
-}
-
-namespace System
-{
-public enum AttributeTargets
-{
-Assembly = 0x1,
-Module = 0x2,
-Class = 0x4,
-Struct = 0x8,
-Enum = 0x10,
-Constructor = 0x20,
-Method = 0x40,
-Property = 0x80,
-Field = 0x100,
-Event = 0x200,
-Interface = 0x400,
-Parameter = 0x800,
-Delegate = 0x1000,
-ReturnValue = 0x2000,
-GenericParameter = 0x4000,
-All = 0x7FFF
-}
+    public abstract class Array : IList, ICollection, IEnumerable
+    {
+        public int Length { get; }
+        public int Rank { get; }
+        public int GetLength(int dimension);
+    }
 }
 
 namespace System
 {
-[AttributeUsageAttribute(AttributeTargets.Class, Inherited = true)]
-public sealed class AttributeUsageAttribute : Attribute
-{
-public AttributeUsageAttribute(AttributeTargets validOn);
-public bool AllowMultiple { get; set; }
-public bool Inherited { get; set; }
-public AttributeTargets ValidOn { get; }
-}
-}
-
-namespace System
-{
-public struct Boolean
-{
-}
+    public class ArrayTypeMismatchException : Exception
+    {
+        public ArrayTypeMismatchException();
+        public ArrayTypeMismatchException(string message);
+        public ArrayTypeMismatchException(string message,
+        Exception innerException);
+    }
 }
 
 namespace System
 {
-public struct Byte
-{
-}
-}
-
-namespace System
-{
-public struct Char
-{
-}
+    [AttributeUsageAttribute(AttributeTargets.All, Inherited = true,
+    AllowMultiple = false)]
+    public abstract class Attribute
+    {
+        protected Attribute();
+    }
 }
 
 namespace System
 {
-public struct Decimal
-{
-}
-}
-
-namespace System
-{
-public abstract class Delegate
-{
-}
-}
-
-namespace System
-{
-public class DivideByZeroException : ArithmeticException
-{
-public DivideByZeroException();
-public DivideByZeroException(string message);
-public DivideByZeroException(string message, Exception innerException);
-}
-}
-
-namespace System
-{
-public struct Double
-{
-}
+    public enum AttributeTargets
+    {
+        Assembly = 0x1,
+        Module = 0x2,
+        Class = 0x4,
+        Struct = 0x8,
+        Enum = 0x10,
+        Constructor = 0x20,
+        Method = 0x40,
+        Property = 0x80,
+        Field = 0x100,
+        Event = 0x200,
+        Interface = 0x400,
+        Parameter = 0x800,
+        Delegate = 0x1000,
+        ReturnValue = 0x2000,
+        GenericParameter = 0x4000,
+        All = 0x7FFF
+    }
 }
 
 namespace System
 {
-public abstract class Enum : ValueType
-{
-protected Enum();
-}
-}
-
-namespace System
-{
-public class Exception
-{
-public Exception();
-public Exception(string message);
-public Exception(string message, Exception innerException);
-public sealed Exception InnerException { get; }
-public virtual string Message { get; }
-}
+    [AttributeUsageAttribute(AttributeTargets.Class, Inherited = true)]
+    public sealed class AttributeUsageAttribute : Attribute
+    {
+        public AttributeUsageAttribute(AttributeTargets validOn);
+        public bool AllowMultiple { get; set; }
+        public bool Inherited { get; set; }
+        public AttributeTargets ValidOn { get; }
+    }
 }
 
 namespace System
 {
-public class GC
-{
-}
-}
-
-namespace System
-{
-public interface IDisposable
-{
-public void Dispose();
-}
+    public struct Boolean
+    {
+    }
 }
 
 namespace System
 {
-public sealed class IndexOutOfRangeException : Exception
-{
-public IndexOutOfRangeException();
-public IndexOutOfRangeException(string message);
-public IndexOutOfRangeException(string message,
-Exception innerException);
-}
+    public struct Byte
+    {
+    }
 }
 
 namespace System
 {
-public struct Int16
-{
-}
-}
-
-namespace System
-{
-public struct Int32
-{
-}
+    public struct Char
+    {
+    }
 }
 
 namespace System
 {
-public struct Int64
-{
-}
+    public struct Decimal
+    {
+    }
 }
 
 namespace System
 {
-public struct IntPtr
-{
+    public abstract class Delegate
+    {
+    }
 }
+
+namespace System
+{
+    public class DivideByZeroException : ArithmeticException
+    {
+        public DivideByZeroException();
+        public DivideByZeroException(string message);
+        public DivideByZeroException(string message, Exception innerException);
+    }
+}
+
+namespace System
+{
+    public struct Double
+    {
+    }
+}
+
+namespace System
+{
+    public abstract class Enum : ValueType
+    {
+        protected Enum();
+    }
+}
+
+namespace System
+{
+    public class Exception
+    {
+        public Exception();
+        public Exception(string message);
+        public Exception(string message, Exception innerException);
+        public sealed Exception InnerException { get; }
+        public virtual string Message { get; }
+    }
+}
+
+namespace System
+{
+    public class GC
+    {
+    }
+}
+
+namespace System
+{
+    public interface IDisposable
+    {
+        public void Dispose();
+    }
+}
+
+namespace System
+{
+    public sealed class IndexOutOfRangeException : Exception
+    {
+        public IndexOutOfRangeException();
+        public IndexOutOfRangeException(string message);
+        public IndexOutOfRangeException(string message,
+        Exception innerException);
+    }
+}
+
+namespace System
+{
+    public struct Int16
+    {
+    }
+}
+
+namespace System
+{
+    public struct Int32
+    {
+    }
+}
+
+namespace System
+{
+    public struct Int64
+    {
+    }
+}
+
+namespace System
+{
+    public struct IntPtr
+    {
+    }
 }
 
 namespace System.Runtime.CompilerServices
 {
-public sealed class IndexerNameAttribute: Attribute
-{
-public IndexerNameAttribute(String indexerName);
-}
-}
-
-namespace System.Collections.Generic
-{
-public interface IReadOnlyCollection<out T> : IEnumerable<T>
-{
-int Count { get; }
-}
+    public sealed class IndexerNameAttribute: Attribute
+    {
+        public IndexerNameAttribute(String indexerName);
+    }
 }
 
 namespace System.Collections.Generic
 {
-public interface IReadOnlyList<out T> : IReadOnlyCollection<T>
-{
-T this[int index] { get; }
+    public interface IReadOnlyCollection<out T> : IEnumerable<T>
+    {
+        int Count { get; }
+    }
 }
+
+namespace System.Collections.Generic
+{
+    public interface IReadOnlyList<out T> : IReadOnlyCollection<T>
+    {
+        T this[int index] { get; }
+    }
 }
 
 namespace System
 {
-public class InvalidCastException : Exception
-{
-public InvalidCastException();
-public InvalidCastException(string message);
-public InvalidCastException(string message, Exception innerException);
-}
+    public class InvalidCastException : Exception
+    {
+        public InvalidCastException();
+        public InvalidCastException(string message);
+        public InvalidCastException(string message, Exception innerException);
+    }
 }
 
 namespace System
 {
-public class InvalidOperationException : Exception
-{
-public InvalidOperationException();
-public InvalidOperationException(string message);
-public InvalidOperationException(string message,
-Exception innerException);
-}
+    public class InvalidOperationException : Exception
+    {
+        public InvalidOperationException();
+        public InvalidOperationException(string message);
+        public InvalidOperationException(string message,
+        Exception innerException);
+    }
 }
 
 namespace System.Reflection
 {
-public abstract class MemberInfo
-{
-protected MemberInfo();
-}
-}
-
-namespace System
-{
-public class NotSupportedException : Exception
-{
-public NotSupportedException();
-public NotSupportedException(string message);
-public NotSupportedException(string message, Exception innerException);
-}
+    public abstract class MemberInfo
+    {
+        protected MemberInfo();
+    }
 }
 
 namespace System
 {
-public struct Nullable<T>
-{
-public bool HasValue { get; }
-public T Value { get; }
-}
-}
-
-namespace System
-{
-public class NullReferenceException : Exception
-{
-public NullReferenceException();
-public NullReferenceException(string message);
-public NullReferenceException(string message, Exception innerException);
-}
+    public class NotSupportedException : Exception
+    {
+        public NotSupportedException();
+        public NotSupportedException(string message);
+        public NotSupportedException(string message, Exception innerException);
+    }
 }
 
 namespace System
 {
-public class Object
-{
-public Object();
-~Object();
-public virtual bool Equals(object obj);
-public virtual int GetHashCode();
-public Type GetType();
-public virtual string ToString();
-}
+    public struct Nullable<T>
+    {
+        public bool HasValue { get; }
+        public T Value { get; }
+    }
 }
 
 namespace System
 {
-[AttributeUsageAttribute(AttributeTargets.Class
-| AttributeTargets.Struct
-| AttributeTargets.Enum | AttributeTargets.Interface
-| AttributeTargets.Constructor | AttributeTargets.Method
-| AttributeTargets.Property | AttributeTargets.Field
-| AttributeTargets.Event | AttributeTargets.Delegate,
-Inherited = false)]
-
-public sealed class ObsoleteAttribute : Attribute
-{
-public ObsoleteAttribute();
-public ObsoleteAttribute(string message);
-public ObsoleteAttribute(string message, bool error);
-public bool IsError { get; }
-public string Message { get; }
-}
+    public class NullReferenceException : Exception
+    {
+        public NullReferenceException();
+        public NullReferenceException(string message);
+        public NullReferenceException(string message, Exception innerException);
+    }
 }
 
 namespace System
 {
-public class OutOfMemoryException : Exception
-{
-public OutOfMemoryException();
-public OutOfMemoryException(string message);
-public OutOfMemoryException(string message, Exception innerException);
-}
-}
-
-namespace System
-{
-public class OverflowException : ArithmeticException
-{
-public OverflowException();
-public OverflowException(string message);
-public OverflowException(string message, Exception innerException);
-}
+    public class Object
+    {
+        public Object();
+        ~Object();
+        public virtual bool Equals(object obj);
+        public virtual int GetHashCode();
+        public Type GetType();
+        public virtual string ToString();
+    }
 }
 
 namespace System
 {
-public struct SByte
-{
-}
-}
-
-namespace System
-{
-public struct Single
-{
-}
-}
-
-namespace System
-{
-public sealed class StackOverflowException : Exception
-{
-public StackOverflowException();
-public StackOverflowException(string message);
-public StackOverflowException(string message, Exception innerException);
-}
+    [AttributeUsageAttribute(AttributeTargets.Class
+    | AttributeTargets.Struct
+    | AttributeTargets.Enum | AttributeTargets.Interface
+    | AttributeTargets.Constructor | AttributeTargets.Method
+    | AttributeTargets.Property | AttributeTargets.Field
+    | AttributeTargets.Event | AttributeTargets.Delegate,
+    Inherited = false)]
+    
+    public sealed class ObsoleteAttribute : Attribute
+    {
+        public ObsoleteAttribute();
+        public ObsoleteAttribute(string message);
+        public ObsoleteAttribute(string message, bool error);
+        public bool IsError { get; }
+        public string Message { get; }
+    }
 }
 
 namespace System
 {
-public sealed class String : IEnumerable<Char>, IEnumerable
-{
-public int Length { get; }
-public char this[int index] { get; }
-}
-}
-
-namespace System
-{
-public abstract class Type : MemberInfo
-{
-}
+    public class OutOfMemoryException : Exception
+    {
+        public OutOfMemoryException();
+        public OutOfMemoryException(string message);
+        public OutOfMemoryException(string message, Exception innerException);
+    }
 }
 
 namespace System
 {
-public sealed class TypeInitializationException : Exception
-{
-public TypeInitializationException(string fullTypeName,
-Exception innerException);
+    public class OverflowException : ArithmeticException
+    {
+        public OverflowException();
+        public OverflowException(string message);
+        public OverflowException(string message, Exception innerException);
 }
 }
 
 namespace System
-{
-public struct UInt16
-{
+    {
+    public struct SByte
+    {
+    }
 }
+
+namespace System
+    {
+    public struct Single
+    {
+    }
 }
 
 namespace System
 {
-public struct UInt32
-{
-}
-}
-
-namespace System
-{
-public struct UInt64
-{
-}
+    public sealed class StackOverflowException : Exception
+    {
+        public StackOverflowException();
+        public StackOverflowException(string message);
+        public StackOverflowException(string message, Exception innerException);
+    }
 }
 
 namespace System
 {
-public struct UIntPtr
-{
-}
+    public sealed class String : IEnumerable<Char>, IEnumerable
+    {
+        public int Length { get; }
+        public char this[int index] { get; }
+    }
 }
 
 namespace System
 {
-public abstract class ValueType
-{
-protected ValueType();
+    public abstract class Type : MemberInfo
+    {
+    }
 }
+
+namespace System
+{
+    public sealed class TypeInitializationException : Exception
+    {
+        public TypeInitializationException(string fullTypeName,
+        Exception innerException);
+    }
+}
+
+namespace System
+{
+    public struct UInt16
+    {
+    }
+}
+
+namespace System
+{
+    public struct UInt32
+    {
+    }
+}
+
+namespace System
+{
+    public struct UInt64
+    {
+    }
+}
+
+namespace System
+{
+    public struct UIntPtr
+    {
+    }
+}
+
+namespace System
+{
+    public abstract class ValueType
+    {
+    protected ValueType();
+    }
 }
 
 namespace System.Collections
 {
-public interface ICollection : IEnumerable
-{
-public int Count { get; }
-public bool IsSynchronized { get; }
-public object SyncRoot { get; }
-public void CopyTo(Array array, int index);
-}
-}
-
-namespace System.Collections
-{
-public interface IEnumerable
-{
-public IEnumerator GetEnumerator();
-}
+    public interface ICollection : IEnumerable
+    {
+        public int Count { get; }
+        public bool IsSynchronized { get; }
+        public object SyncRoot { get; }
+        public void CopyTo(Array array, int index);
+    }
 }
 
 namespace System.Collections
-
 {
-
-public interface IEnumerator
-
-{
-
-public object Current { get; }
-
-public bool MoveNext();
-
-public void Reset();
-
-}
-
+        public interface IEnumerable
+        {
+        public IEnumerator GetEnumerator();
+        }
 }
 
 namespace System.Collections
 
 {
 
-public interface IList : ICollection, IEnumerable
+    public interface IEnumerator
 
 {
 
-public bool IsFixedSize { get; }
-
-public bool IsReadOnly { get; }
-
-public object this[int index] { get; set; }
-
-public int Add(object value);
-
-public void Clear();
-
-public bool Contains(object value);
-
-public int IndexOf(object value);
-
-public void Insert(int index, object value);
-
-public void Remove(object value);
-
-public void RemoveAt(int index);
+    public object Current { get; }
+    
+    public bool MoveNext();
+    
+    public void Reset();
 
 }
 
+}
+
+    namespace System.Collections
+
+{
+
+    public interface IList : ICollection, IEnumerable
+
+    {
+    
+        public bool IsFixedSize { get; }
+        
+        public bool IsReadOnly { get; }
+        
+        public object this[int index] { get; set; }
+        
+        public int Add(object value);
+        
+        public void Clear();
+        
+        public bool Contains(object value);
+        
+        public int IndexOf(object value);
+        
+        public void Insert(int index, object value);
+        
+        public void Remove(object value);
+        
+        public void RemoveAt(int index);
+    
+    }
+
+}
+
+    namespace System.Collections.Generic
+    
+    {
+    public interface ICollection<T> : IEnumerable<T>
+    {
+        public int Count { get; }
+        public bool IsReadOnly { get; }
+        public void Add(T item);
+        public void Clear();
+        public bool Contains(T item);
+        public void CopyTo(T[] array, int arrayIndex);
+        public bool Remove(T item);
+    }
 }
 
 namespace System.Collections.Generic
-
 {
-public interface ICollection<T> : IEnumerable<T>
-{
-public int Count { get; }
-public bool IsReadOnly { get; }
-public void Add(T item);
-public void Clear();
-public bool Contains(T item);
-public void CopyTo(T[] array, int arrayIndex);
-public bool Remove(T item);
-}
+    public interface IEnumerable<T> : IEnumerable
+    {
+        public IEnumerator<T> GetEnumerator();
+    }
 }
 
 namespace System.Collections.Generic
 {
-public interface IEnumerable<T> : IEnumerable
-{
-public IEnumerator<T> GetEnumerator();
-}
-}
-
-namespace System.Collections.Generic
-{
-public interface IEnumerator<T> : IDisposable, IEnumerator
-{
-public T Current { get; }
-}
+    public interface IEnumerator<T> : IDisposable, IEnumerator
+    {
+        public T Current { get; }
+    }
 }
 
 namespace System.Collections.Generic
 {
-public interface IList<T> : ICollection<T>
-{
-public T this[int index] { get; set; }
-public int IndexOf(T item);
-public void Insert(int index, T item);
-public void RemoveAt(int index);
-}
+    public interface IList<T> : ICollection<T>
+    {
+        public T this[int index] { get; set; }
+        public int IndexOf(T item);
+        public void Insert(int index, T item);
+        public void RemoveAt(int index);
+    }
 }
 
 namespace System.Diagnostics
 {
-[AttributeUsageAttribute(AttributeTargets.Method
-| AttributeTargets.Class, AllowMultiple = true)]
-public sealed class ConditionalAttribute : Attribute
-{
-public ConditionalAttribute(string conditionString);
-public string ConditionString { get; }
-}
+    [AttributeUsageAttribute(AttributeTargets.Method
+    | AttributeTargets.Class, AllowMultiple = true)]
+    public sealed class ConditionalAttribute : Attribute
+    {
+        public ConditionalAttribute(string conditionString);
+        public string ConditionString { get; }
+    }
 }
 
 namespace System.Threading
 {
-public static class Monitor
-{
-public static void Enter(object obj);
-public static void Exit(object obj);
+    public static class Monitor
+    {
+        public static void Enter(object obj);
+        public static void Exit(object obj);
+    }
 }
-}
+```
 
-## Standard Library Types not defined in ISO/IEC 23271:2012 {#standard-library-types-not-defined-in-isoiec-232712012 .Appendix2}
+## Standard Library Types not defined in ISO/IEC 23271:2012
 
 The following types, including the members listed, must be defined in a conforming standard library. (These types might be defined in a future edition of ISO/IEC 23271.) It is expected that many of these types will have more members available than are listed.
 
-A conforming implementation may provide Task.GetAwaiter() and Task<T>.GetAwaiter() as extension methods.
+A conforming implementation may provide `Task.GetAwaiter()` and `Task<T>.GetAwaiter()` as extension methods.
 
+```csharp
 namespace System.Runtime.CompilerServices
 {
-[AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    
+    public sealed class CallerFilePathAttribute : Attribute
 
-public sealed class CallerFilePathAttribute : Attribute
-
-{
-
-public CallerFilePathAttribute() {}
-
-}
-}
-
-namespace System.Runtime.CompilerServices
-{
-[AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-
-public sealed class CallerLineNumberAttribute : Attribute
-
-{
-
-public CallerLineNumberAttribute() {}
-
-}
+    {
+    
+        public CallerFilePathAttribute() {}
+    
+    }
 }
 
 namespace System.Runtime.CompilerServices
 {
-[AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-
-public sealed class CallerMemberNameAttribute : Attribute
-
-{
-
-public CallerMemberNameAttribute() {}
-
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    
+    public sealed class CallerLineNumberAttribute : Attribute
+    
+    {
+    
+        public CallerLineNumberAttribute() {}
+    
+    }
 }
+
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    
+    public sealed class CallerMemberNameAttribute : Attribute
+    
+    {
+    
+        public CallerMemberNameAttribute() {}
+    
+    }
 }
 
 namespace System.Linq.Expressions
 {
-public sealed class Expression<TDelegate>
-
-{
-
-// See Section 12.7.3 for details on what
-
-// Delegate types (TDelegate) must be supported,
-
-// and which may be omitted.
-
-public TDelegate Compile();
-
-}
-}
-
-namespace System.Runtime.CompilerServices
-{
-public interface INotifyCompletion
-
-{
-
-void OnCompleted(Action continuation);
-
-}
+    public sealed class Expression<TDelegate>
+    
+    {
+    
+        // See Section 12.7.3 for details on what
+        
+        // Delegate types (TDelegate) must be supported,
+        
+        // and which may be omitted.
+        
+        public TDelegate Compile();
+    
+    }
 }
 
 namespace System.Runtime.CompilerServices
 {
-public interface ICriticalNotifyCompletion : INotifyCompletion
-
-{
-
-void UnsafeOnCompleted(Action continuation);
-
+    public interface INotifyCompletion
+    
+    {
+    
+        void OnCompleted(Action continuation);
+    
+    }
 }
+
+namespace System.Runtime.CompilerServices
+{
+    public interface ICriticalNotifyCompletion : INotifyCompletion
+    
+    {
+    
+        void UnsafeOnCompleted(Action continuation);
+    
+    }
 }
 
 namespace System.Threading.Tasks
 {
-public class Task
-
-{
-
-public System.Runtime.CompilerServices.TaskAwaiter GetAwaiter();
-
-}
+    public class Task
+    
+    {
+    
+        public System.Runtime.CompilerServices.TaskAwaiter GetAwaiter();
+    
+    }
 }
 
 namespace System.Threading.Tasks
 {
-public class Task<TResult> : System.Threading.Tasks.Task
-
-{
-
-public new System.Runtime.CompilerServices.TaskAwaiter<T>
-GetAwaiter();
-
-}
-}
-
-namespace System.Runtime.CompilerServices
-{
-public struct TaskAwaiter : ICriticalNotifyCompletion,
-INotifyCompletion
-
-{
-
-public bool IsCompleted { get; }
-
-public void GetResult();
-
-}
+    public class Task<TResult> : System.Threading.Tasks.Task
+    
+    {
+    
+        public new System.Runtime.CompilerServices.TaskAwaiter<T>
+        GetAwaiter();
+    
+    }
 }
 
 namespace System.Runtime.CompilerServices
 {
-public struct TaskAwaiter<T> : ICriticalNotifyCompletion,
-INotifyCompletion
+    public struct TaskAwaiter : ICriticalNotifyCompletion,
+    INotifyCompletion
+    
+    {
+    
+        public bool IsCompleted { get; }
+        
+        public void GetResult();
+    
+    }
+}
 
+namespace System.Runtime.CompilerServices
 {
-
-public bool IsCompleted { get; }
-
-public T GetResult();
-
+    public struct TaskAwaiter<T> : ICriticalNotifyCompletion,
+    INotifyCompletion
+    
+    {
+    
+        public bool IsCompleted { get; }
+        
+        public T GetResult();
+    
+    }
 }
-}
+```
 
-# Documentation comments {#documentation-comments .Appendix1}
+# Documentation comments
 
 **This annex is informative.**
 
-## General {#general-109 .Appendix2}
+## General
 
 C# provides a mechanism for programmers to document their code using a special comment syntax that contains XML text. In source code files, comments having a certain form can be used to direct a tool to produce XML from those comments and the source code elements, which they precede. Comments using such syntax are called ***documentation comments***. They must immediately precede a user-defined type (such as a class, delegate, or interface) or a member (such as a field, event, property, or method). The XML generation tool is called the ***documentation generator***. (This generator could be, but need not be, the C# compiler itself.) The output produced by the documentation generator is called the ***documentation file***. A documentation file is used as input to a ***documentation viewer***; a tool intended to produce some sort of visual display of type information and its associated documentation.
 
@@ -26647,24 +26645,27 @@ A conforming C# compiler is not required to check the syntax of documentation c
 
 This specification suggests a set of standard tags to be used in documentation comments, but use of these tags is not required, and other tags may be used if desired, as long the rules of well-formed XML are followed. For C# implementations targeting the CLI, it also provides information about the documentation generator and the format of the documentation file. No information is provided about the documentation viewer.
 
-## Introduction {#introduction-1 .Appendix2}
+## Introduction
 
-Comments having a special form can be used to direct a tool to produce XML from those comments and the source code elements, which they precede. Such comments are single-line comments that start with three slashes (///), or delimited comments that start with a slash and two stars (/**). They must immediately precede a user-defined type (such as a class, delegate, or interface) or a member (such as a field, event, property, or method) that they annotate. Attribute sections (§22.3) are considered part of declarations, so documentation comments must precede attributes applied to a type or member.
+Comments having a special form can be used to direct a tool to produce XML from those comments and the source code elements, which they precede. Such comments are single-line comments that start with three slashes (`///`), or delimited comments that start with a slash and two stars (`/**`). They must immediately precede a user-defined type (such as a class, delegate, or interface) or a member (such as a field, event, property, or method) that they annotate. Attribute sections (§22.3) are considered part of declarations, so documentation comments must precede attributes applied to a type or member.
 
 **Syntax:**
 
+```antlr
 single-line-doc-comment::
-*///* input-charactersopt
+    /// input-charactersopt
 
 delimited-doc-comment::
-*/*** delimited-comment-textopt **/*
+/** delimited-comment-textopt 
+```
 
-In a *single-line-doc-comment*, if there is a *whitespace* character following the /// characters on each of the *single-line-doc-comments* adjacent to the current *single-line-doc-comment*, then that *whitespace* character is not included in the XML output.
+In a *single-line-doc-comment*, if there is a *whitespace* character following the `//` characters on each of the *single-line-doc-comments* adjacent to the current *single-line-doc-comment*, then that *whitespace* character is not included in the XML output.
 
 In a *delimited-doc-comment*, if the first non-*whitespace* character on the second line is an *asterisk* and the same pattern of optional *whitespace* characters and an *asterisk* character is repeated at the beginning of each of the lines within the *delimited-doc-comment*, then the characters of the repeated pattern are not included in the XML output. The pattern can include *whitespace* characters after, as well as before, the *asterisk* character.
 
 **Example:**
 
+```csharp
 /// <summary>Class <c>Point</c> models a point in a two-dimensional
 /// plane.</summary>
 ///
@@ -26673,59 +26674,57 @@ public class Point
 /// <summary>method <c>draw</c> renders the point.</summary>
 void draw() {…}
 }
+```
 
 The text within documentation comments must be well formed according to the rules of XML (http://www.w3.org/TR/REC-xml). If the XML is ill formed, a warning is generated and the documentation file will contain a comment saying that an error was encountered.
 
 Although developers are free to create their own set of tags, a recommended set is defined in §D.3. Some of the recommended tags have special meanings:
 
-- The <param> tag is used to describe parameters. If such a tag is used, the documentation generator must verify that the specified parameter exists and that all parameters are described in documentation comments. If such verification fails, the documentation generator issues a warning.
-
-- The cref attribute can be attached to any tag to provide a reference to a code element. The documentation generator must verify that this code element exists. If the verification fails, the documentation generator issues a warning. When looking for a name described in a cref attribute, the documentation generator must respect namespace visibility according to using statements appearing within the source code. For code elements that are generic, the normal generic syntax (e.g.; “List<T>”) cannot be used because it produces invalid XML. Braces can be used instead of brackets (e.g.; “List{T}”), or the XML escape syntax can be used (e.g.; “List<T>”).
-
-- The <summary> tag is intended to be used by a documentation viewer to display additional information about a type or member.
-
-- The <include> tag includes information from an external XML file.
+- The `<param>` tag is used to describe parameters. If such a tag is used, the documentation generator must verify that the specified parameter exists and that all parameters are described in documentation comments. If such verification fails, the documentation generator issues a warning.
+- The `cref` attribute can be attached to any tag to provide a reference to a code element. The documentation generator must verify that this code element exists. If the verification fails, the documentation generator issues a warning. When looking for a name described in a `cref` attribute, the documentation generator must respect namespace visibility according to using statements appearing within the source code. For code elements that are generic, the normal generic syntax (e.g.; “`List<T>`”) cannot be used because it produces invalid XML. Braces can be used instead of brackets (e.g.; “List{T}”), or the XML escape syntax can be used (e.g.; “`List<T>`”).
+- The `<summary>` tag is intended to be used by a documentation viewer to display additional information about a type or member.
+- The `<include>` tag includes information from an external XML file.
 
 Note carefully that the documentation file does not provide full information about the type and members (for example, it does not contain any type information). To get such information about a type or member, the documentation file must be used in conjunction with reflection on the type or member.
 
-## Recommended tags {#recommended-tags .Appendix2}
+## Recommended tags
 
-### General {#general-110 .Appendix3}
+### General 
 
 The documentation generator must accept and process any tag that is valid according to the rules of XML. The following tags provide commonly used functionality in user documentation. (Of course, other tags are possible.)
 
-  ---------------------- --------------- --------------------------------------------------------
-  **Tag**                **Reference**   **Purpose**
-  <c>              §D.3.2          Set text in a code-like font
-  <code>           §D.3.3          Set one or more lines of source code or program output
-  <example>        §D.3.4          Indicate an example
-  <exception>      §D.3.5          Identifies the exceptions a method can throw
-  <list>           §D.3.6          Create a list or table
-  <include>        §D.3.6          Includes XML from an external file
-  <para>           §D.3.8          Permit structure to be added to text
-  <param>          §D.3.9          Describe a parameter for a method or constructor
-  <paramref>       §D.3.10         Identify that a word is a parameter name
-  <permission>     §D.3.11         Document the security accessibility of a member
-  <remarks>        §D.3.12         Describe additional information about a type
-  <returns>        §D.3.13         Describe the return value of a method
-  <see>            §D.3.14         Specify a link
-  <seealso>        §D.3.15         Generate a *See Also* entry
-  <summary>        §D.3.16         Describe a type or a member of a type
-  <typeparam>      §D.3.17         Describe a type parameter for a generic type or method
-  <typeparamref>   §D.3.18         Identify that a word is a type parameter name
-  <value>          §D.3.17         Describe a property
-  ---------------------- --------------- --------------------------------------------------------
+|  **Tag**          | **Reference**   | **Purpose**                                                   |
+|  -----------------| ----------------| ------------------------------------------------------------- |
+|  <c>              | §D.3.2          | Set text in a code-like font                                  |
+|  <code>           | §D.3.3          | Set one or more lines of source code or program output        |
+|  <example>        | §D.3.4          | Indicate an example                                           |
+|  <exception>      | §D.3.5          | Identifies the exceptions a method can throw                  |
+|  <list>           | §D.3.6          | Create a list or table                                        |
+|  <include>        | §D.3.6          | Includes XML from an external file                            |
+|  <para>           | §D.3.8          | Permit structure to be added to text                          |
+|  <param>          | §D.3.9          | Describe a parameter for a method or constructor              |
+|  <paramref>       | §D.3.10         | Identify that a word is a parameter name                      |
+|  <permission>     | §D.3.11         | Document the security accessibility of a member               |
+|  <remarks>        | §D.3.12         | Describe additional information about a type                  |
+|  <returns>        | §D.3.13         | Describe the return value of a method                         |
+|  <see>            | §D.3.14         | Specify a link                                                |
+|  <seealso>        | §D.3.15         | Generate a *See Also* entry                                   |
+|  <summary>        | §D.3.16         | Describe a type or a member of a type                         |
+|  <typeparam>      | §D.3.17         | Describe a type parameter for a generic type or method        |
+|  <typeparamref>   | §D.3.18         | Identify that a word is a type parameter name                 |
+|  <value>          | §D.3.17         | Describe a property                                           |
 
-### <c> {#c .Appendix3}
+### `<c>`
 
-This tag provides a mechanism to indicate that a fragment of text within a description should be set in a special font such as that used for a block of code. For lines of actual code, use <code> (§D.3.3).
+This tag provides a mechanism to indicate that a fragment of text within a description should be set in a special font such as that used for a block of code. For lines of actual code, use `<code>` (§D.3.3).
 
 **Syntax:**
 
-<c>*text*</c>
+`<c>text</c>`
 
 **Example:**
 
+```csharp
 /// <summary>Class <c>Point</c> models a point in a two-dimensional
 /// plane.</summary>
 
@@ -26733,17 +26732,19 @@ public class Point
 {
 // …
 }
+```
 
-### <code> {#code .Appendix3}
+### `<code>`
 
-This tag is used to set one or more lines of source code or program output in some special font. For small code fragments in narrative, use <c> (§D.3.2).
+This tag is used to set one or more lines of source code or program output in some special font. For small code fragments in narrative, use `<c>` (§D.3.2).
 
 **Syntax:**
 
-<code>*source code or program output*</code>
+`<code>`*source code or program output*`</code>`
 
 **Example:**
 
+```csharp
 /// <summary>This method changes the point's location by
 /// the given x- and y-offsets.
 /// <example>For example:
@@ -26759,39 +26760,43 @@ public void Translate(int xor, int yor) {
 X += xor;
 Y += yor;
 }
+```
 
-### <example> {#example .Appendix3}
+### <example>
 
-This tag allows example code within a comment, to specify how a method or other library member might be used. Ordinarily, this would also involve use of the tag <code> (§D.3.3) as well.
+This tag allows example code within a comment, to specify how a method or other library member might be used. Ordinarily, this would also involve use of the tag `<code>` (§D.3.3) as well.
 
 **Syntax:**
 
-<example>*description*</example>
+`<example>`*description*`</example>`
 
 **Example:**
 
-See <code> (§D.3.3) for an example.
+See `<code>` (§D.3.3) for an example.
 
-### <exception> {#exception .Appendix3}
+### `<exception>`
 
 This tag provides a way to document the exceptions a method can throw.
 
 **Syntax:**
 
-<exception cref="*member*">*description*</exception>
+`<exception cref="*member*">`*description*`</exception>`
 
 where
 
-> cref="*member*"
+```csharp
+> cref="member"
 >
-> The name of a member. The documentation generator checks that the given member exists and translates *member* to the canonical element name in the documentation file.
+> The name of a member. The documentation generator checks that the given member exists and translates member to the canonical element name in the documentation file.
 >
-> *description *
+> description 
 >
 > A description of the circumstances in which the exception is thrown.
+```
 
 **Example:**
 
+```csharp
 public class DataBaseOperations
 {
 /// <exception cref="MasterFileFormatCorruptException"></exception>
@@ -26804,17 +26809,19 @@ throw new MasterFileLockedOpenException();
 // …
 }
 }
+```
 
-### <include> {#include .Appendix3}
+### <include>
 
-This tag allows including information from an XML document that is external to the source code file. The external file must be a well-formed XML document, and an XPath expression is applied to that document to specify what XML from that document to include. The <include> tag is then replaced with the selected XML from the external document.
+This tag allows including information from an XML document that is external to the source code file. The external file must be a well-formed XML document, and an XPath expression is applied to that document to specify what XML from that document to include. The `<include>` tag is then replaced with the selected XML from the external document.
 
 **Syntax**:
 
-<include file="*filename*" path="*xpath*" */>*
+`<include file="*filename*" path="*xpath*" */>*`
 
 where
 
+```ANTLR
 > file="filename"
 >
 > The file name of an external XML file. The file name is interpreted relative to the file that contains the include tag.
@@ -26822,16 +26829,20 @@ where
 > path=*"*xpath*"*
 >
 > An XPath expression that selects some of the XML in the external XML file.
+```
 
 **Example**:
 
 If the source code contained a declaration like:
 
-/// <include file="docs.xml" path='extradoc/class[@name="IntList"]/*' />
+```csharp
+/// <include file="docs.xml" path='extradoc/class[@name="IntList"]/\*' />
 public class IntList { … }
+```
 
 and the external file “docs.xml” had the following contents:
 
+```xml
 <?xml version="1.0"?>
 <extradoc>
 <class name="IntList">
@@ -26845,22 +26856,26 @@ Contains a list of integers.
 </summary>
 </class>
 </extradoc>
+```
 
 then the same documentation is output as if the source code contained:
 
+```csharp
 /// <summary>
 /// Contains a list of integers.
 /// </summary>
 public class IntList { … }
+```
 
-### <list> {#list .Appendix3}
+### <list>
 
-This tag is used to create a list or table of items. It can contain a <listheader> block to define the heading row of either a table or definition list. (When defining a table, only an entry for *term* in the heading need be supplied.)
+This tag is used to create a list or table of items. It can contain a `<listheader>` block to define the heading row of either a table or definition list. (When defining a table, only an entry for *term* in the heading need be supplied.)
 
-Each item in the list is specified with an <item> block. When creating a definition list, both *term* and *description* must be specified. However, for a table, bulleted list, or numbered list, only *description* need be specified.
+Each item in the list is specified with an `<item>` block. When creating a definition list, both *term* and *description* must be specified. However, for a table, bulleted list, or numbered list, only *description* need be specified.
 
 **Syntax:**
 
+```xml
 <list type="bullet" | "number" | "table">
 <listheader>
 <term>term</term>
@@ -26879,9 +26894,11 @@ Each item in the list is specified with an <item> block. When creating a definit
 <description>description</description>
 </item>
 </list>
+```
 
 where
 
+```csharp
 > *term*
 >
 > The term to define, whose definition is in *description*.
@@ -26889,9 +26906,11 @@ where
 > *description*
 >
 > Either an item in a bullet or numbered list, or the definition of a *term*.
+```
 
 **Example:**
 
+```csharp
 public class MyClass
 {
 /// <summary>Here is an example of a bulleted list:
@@ -26908,23 +26927,27 @@ public static void Main () {
 // …
 }
 }
+```
 
-### <para> {#para .Appendix3}
+### `<para>`}
 
-This tag is for use inside other tags, such as <summary> (§D.3.16) or <returns> (§D.3.13), and permits structure to be added to text.
+This tag is for use inside other tags, such as `<summary>` (§D.3.16) or `<returns>` (§D.3.13), and permits structure to be added to text.
 
 **Syntax:**
-
-<para>*content*</para>
-
+```HTML
+<para>content</para>
+```
 where
 
-> *content*
->
-> The text of the paragraph.
+```HTML
+ content
+```
+ The text of the paragraph.
+
 
 **Example:**
 
+```csharp
 /// <summary>This is the entry point of the Point class testing program.
 /// <para>This program tests each method and operator, and
 /// is intended to be run after any non-trvial maintenance has
@@ -26932,27 +26955,32 @@ where
 public static void Main() {
 // …
 }
+```
 
-### <param> {#param .Appendix3}
+### `<param>`
 
 This tag is used to describe a parameter for a method, constructor, or indexer.
 
 **Syntax:**
-
-<param name="*name*">*description*</param>
+```HTML
+<param name="name">description</param>
+```
 
 where
 
-> *name*
->
-> The name of the parameter.
->
-> *description*
->
-> A description of the parameter.
+```ANTLR
+name
+```
+The name of the parameter.
+
+```ANTLR
+description
+```
+A description of the parameter.
+
 
 **Example:**
-
+```csharp
 /// <summary>This method changes the point's location to
 /// the given coordinates.</summary>
 /// <param name="xor">the new x-coordinate.</param>
@@ -26961,23 +26989,27 @@ public void Move(int xor, int yor) {
 X = xor;
 Y = yor;
 }
+```
 
-### <paramref> {#paramref .Appendix3}
+### `<paramref>`
 
 This tag is used to indicate that a word is a parameter. The documentation file can be processed to format this parameter in some distinct way.
 
 **Syntax:**
 
-<paramref name="*name*"/>
-
+```csharp
+<paramref name="name"/>
+```
 where
 
-> *name*
->
-> The name of the parameter.
+```
+name
+```
+The name of the parameter.
 
 **Example:**
 
+```csharp
 /// <summary>This constructor initializes the new Point to
 /// (<paramref name="xor"/>,<paramref name="yor"/>).</summary>
 /// <param name="xor">the new Point's x-coordinate.</param>
@@ -26987,50 +27019,56 @@ public Point(int xor, int yor) {
 X = xor;
 Y = yor;
 }
+```
 
-### <permission> {#permission .Appendix3}
+### `<permission>`
 
 This tag allows the security accessibility of a member to be documented.
 
 **Syntax:**
-
-<permission cref="*member*">*description*</permission>
-
+```csharp
+<permission cref="member">description</permission>
+```
 where
 
-> *member*
->
-> The name of a member. The documentation generator checks that the given code element exists and translates *member* to the canonical element name in the documentation file.
->
-> *description*
->
-> A description of the access to the member.
+```csharp
+member
+```
+The name of a member. The documentation generator checks that the given code element exists and translates *member* to the canonical element name in the documentation file.
+
+```csharp
+description
+```
+A description of the access to the member.
 
 **Example:**
-
+```csharp
 /// <permission cref="System.Security.PermissionSet">Everyone can
 /// access this method.</permission>
 
 public static void Test() {
 // …
 }
+```
 
-### <remarks> {#remarks .Appendix3}
+### `<remarks>`
 
-This tag is used to specify extra information about a type. Use <summary> (§D.3.16) to describe the type itself and the members of a type.
+This tag is used to specify extra information about a type. Use `<summary>` (§D.3.16) to describe the type itself and the members of a type.
 
 **Syntax:**
-
-<remarks>*description*</remarks>
-
+```csharp
+<remarks>description</remarks>
+```
 where
 
-> *description*
->
-> The text of the remark.
+```csharp
+description
+```
+The text of the remark.
 
 **Example:**
 
+```csharp
 /// <summary>Class <c>Point</c> models a point in a
 /// two-dimensional plane.</summary>
 /// <remarks>Uses polar coordinates</remarks>
@@ -27038,46 +27076,53 @@ public class Point
 {
 // …
 }
+```
 
-### <returns> {#returns .Appendix3}
+### `<returns>`
 
 This tag is used to describe the return value of a method.
 
 **Syntax:**
-
-<returns>*description*</returns>
-
+```csharp
+<returns>description</returns>
+```
 where
 
-> *description*
->
-> A description of the return value.
+```
+description
+```
+A description of the return value.
 
 **Example:**
 
+```csharp
 /// <summary>Report a point's location as a string.</summary>
 /// <returns>A string representing a point's location, in the form (x,y),
 /// without any leading, trailing, or embedded whitespace.</returns>
 public override string ToString() {
 return "(" + X + "," + Y + ")";
 }
+```
 
-### <see> {#see .Appendix3}
+### `<see>`
 
-This tag allows a link to be specified within text. Use <seealso> (§D.3.15) to indicate text that is to appear in a *See Also* subclause.
+This tag allows a link to be specified within text. Use `<seealso>` (§D.3.15) to indicate text that is to appear in a *See Also* subclause.
 
 **Syntax:**
 
-<see cref="*member*"/>
-
+```csharp
+<see cref="member"/>
+```
 where
 
-> *member*
->
-> The name of a member. The documentation generator checks that the given code element exists and changes *member* to the element name in the generated documentation file.
+```
+member
+```
+The name of a member. The documentation generator checks that the given code element exists and changes *member* to the element name in the generated documentation file.
 
 **Example:**
 
+```csharp
 /// <summary>This method changes the point's location to
 /// the given coordinates. <see cref="Translate"/></summary>
 
@@ -27093,23 +27138,27 @@ public void Translate(int xor, int yor) {
 X += xor;
 Y += yor;
 }
+```
 
-### <seealso> {#seealso .Appendix3}
+### `<seealso>`
 
-This tag allows an entry to be generated for the *See Also* subclause. Use <see> (§D.3.14) to specify a link from within text.
+This tag allows an entry to be generated for the *See Also* subclause. Use `<see>` (§D.3.14) to specify a link from within text.
 
 **Syntax:**
-
+```csharp
 <seealso cref="*member*"/>
+```
 
 where
 
-> *member*
->
-> The name of a member. The documentation generator checks that the given code element exists and changes *member* to the element name in the generated documentation file.
+```
+member
+```
+The name of a member. The documentation generator checks that the given code element exists and changes *member* to the element name in the generated documentation file.
 
 **Example:**
 
+```csharp
 /// <summary>This method determines whether two Points have the same
 /// location.</summary>
 /// <seealso cref="operator=="/>
@@ -27117,102 +27166,114 @@ where
 public override bool Equals(object o) {
 // …
 }
+```
 
-### <summary> {#summary .Appendix3}
+### `<summary>`
 
-This tag can be used to describe a type or a member of a type. Use <remarks> (§D.3.12) to describe the type itself.
+This tag can be used to describe a type or a member of a type. Use `<remarks>` (§D.3.12) to describe the type itself.
 
 **Syntax:**
-
+```csharp
 <summary>*description*</summary>
+```
 
 where
 
-> *description*
->
-> A summary of the type or member.
+```
+description
+```
+A summary of the type or member.
 
 **Example:**
-
+```csharp
 /// <summary>This constructor initializes the new Point to (0,0).</summary>
 public Point() : this(0,0) {
 }
+```
 
-### <typeparam> {#typeparam .Appendix3}
+### <typeparam>
 
 This tag is used to describe a type parameter for a generic type or method.
 
 **Syntax:**
-
+```csharp
 <typeparam name="*name*">*description*</typeparam>
+```
 
 where
 
-> *name*
->
-> The name of the type parameter.
->
-> *description*
->
-> A description of the typeparameter.
+```
+name
+```
+The name of the type parameter.
+
+```
+description
+```
+A description of the typeparameter.
 
 **Example:**
-
+```csharp
 /// <summary>A generic list class.</summary>
 /// <typeparam name="T">The type stored by the list.</typeparam>
 public class MyList<T> {
 …
 }
+```
 
-### <typeparamref> {#typeparamref .Appendix3}
+### `<typeparamref>`
 
 This tag is used to indicate that a word is a type parameter. The documentation file can be processed to format this type parameter in some distinct way.
 
 **Syntax:**
-
+```csharp
 <typeparamref name="*name*"/>
+```
 
 where
-
-> *name*
->
-> The name of the type parameter.
+```
+Rname
+```
+The name of the type parameter.
 
 **Example:**
-
+```csharp
 /// <summary>This method fetches data and returns a list of <typeparamref name=”T”> ”/>”> .</summary>
 /// <param name="string">query to execute</param>
 
 public List<T> FetchData<T>(string query) {
 …
 }
+```
 
-### <value> {#value .Appendix3}
+### `<value>`
 
 This tag allows a property to be described.
 
 **Syntax:**
-
-<value>*property* *description*</value>
-
+```csharp
+<value>property description</value>
+```
 where
 
-> *property description*
->
-> A description for the property.
+```
+property description
+```
+A description for the property.
 
 **Example:**
-
+```csharp
 /// <value>Property <c>X</c> represents the point's x-coordinate.</value>
 public int X
 {
 get { return x; }
 set { x = value; }
 }
+```
 
-## Processing the documentation file {#processing-the-documentation-file .Appendix2}
+## Processing the documentation file
 
-### General {#general-111 .Appendix3}
+### General
 
 The following information is intended for C# implementations targeting the CLI.
 
@@ -27220,557 +27281,542 @@ The documentation generator generates an ID string for each element in the sour
 
 The documentation file is not a hierarchical representation of the source code; rather, it is a flat list with a generated ID string for each element.
 
-### ID string format {#id-string-format .Appendix3}
-
+### ID string format
 The documentation generator observes the following rules when it generates the ID strings:
 
 - No white space is placed in the string.
-
 - The first part of the string identifies the kind of member being documented, via a single character followed by a colon. The following kinds of members are defined:
 
-  --------------- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  **Character**   **Description**
-  E               Event
-  F               Field
-  M               Method (including constructors, finalizers, and operators)
-  N               Namespace
-  P               Property (including indexers)
-  T               Type (such as class, delegate, enum, interface, and struct)
-  !               Error string; the rest of the string provides information about the error. For example, the documentation generator generates error information for links that cannot be resolved.
-  --------------- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-- The second part of the string is the fully qualified name of the element, starting at the root of the namespace. The name of the element, its enclosing type(s), and namespace are separated by periods. If the name of the item itself has periods, they are replaced by # (U+0023) characters. (It is assumed that no element has this character in its name.)
-
-- [[]{#_Toc34995895 .anchor}]{#_Toc510510576 .anchor}For methods and properties with arguments, the argument list follows, enclosed in parentheses. For those without arguments, the parentheses are omitted. The arguments are separated by commas. The encoding of each argument is the same as a CLI signature, as follows:
-
-<!-- -->
-
-- Arguments are represented by their documentation name, which is based on their fully qualified name, modified as follows:
-
-<!-- -->
-
+  |  **Character**  | **Description**                                                                                                                                                                      |
+  |  ---------------| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+  |  E              | Event |
+  |  F              | Field |
+  |  M              | Method (including constructors, finalizers, and operators) |
+  |  N              | Namespace |
+  |  P              | Property (including indexers) |
+  |  T              | Type (such as class, delegate, enum, interface, and struct) |
+  |  !              | Error string; the rest of the string provides information about the error. For example, the documentation generator generates error information for links that cannot be resolved. |
+- The second part of the string is the fully qualified name of the element, starting at the root of the namespace. The name of the element, its enclosing type(s), and namespace are separated by periods. If the name of the item itself has periods, they are replaced by \# (U+0023) characters. (It is assumed that no element has this character in its name.)
+- For methods and properties with arguments, the argument list follows, enclosed in parentheses. For those without arguments, the parentheses are omitted. The arguments are separated by commas. The encoding of each argument is the same as a CLI signature, as follows:
+  - Arguments are represented by their documentation name, which is based on their fully qualified name, modified as follows:
 - Arguments that represent generic types have an appended “’” character followed by the number of type parameters
+- Arguments having the `out` or `ref` modifier have an `@` following their type name. Arguments passed by value or via params have no special notation.
+- Arguments that are arrays are represented as [ *lowerbound* : *size* , … , *lowerbound* : *size* ] where the number of commas is the rank less one, and the lower bounds and size of each dimension, if known, are represented in decimal. If a lower bound or size is not specified, it is omitted. If the lower bound and size for a particular dimension are omitted, the “:” is omitted as well. Jagged arrays are represented by one “`[]`” per level.
+- Arguments that have pointer types other than void are represented using a `*` following the type name. A void pointer is represented using a type name of `System.Void`.
+- Arguments that refer to generic type parameters defined on types are encoded using the “`” character followed by the zero-based index of the type parameter.
+- Arguments that use generic type parameters defined in methods use a double-backtick “````” instead of the “`” used for types.
+- Arguments that refer to constructed generic types are encoded using the generic type, followed by “`{`“, followed by a comma-separated list of type arguments, followed by “`}`”.
 
-- Arguments having the out or ref modifier have an @ following their type name. Arguments passed by value or via params have no special notation.
-
-- Arguments that are arrays are represented as [ *lowerbound* : *size* , … , *lowerbound* : *size* ] where the number of commas is the rank less one, and the lower bounds and size of each dimension, if known, are represented in []{#_Hlt518052355 .anchor}decimal. If a lower bound or size is not specified, it is omitted. If the lower bound and size for a particular dimension are omitted, the “:” is omitted as well. Jagged arrays are represented by one “[]” per level.
-
-- Arguments that have pointer types other than void are represented using a * following the type name. A void pointer is represented using a type name of System.Void.
-
-- Arguments that refer to generic type parameters defined on types are encoded using the “\`” character followed by the zero-based index of the type parameter.
-
-- Arguments that use generic type parameters defined in methods use a double-backtick “\`\`” instead of the “\`” used for types.
-
-- Arguments that refer to constructed generic types are encoded using the generic type, followed by “{“, followed by a comma-separated list of type arguments, followed by “}”.
-
-### ID string examples {#id-string-examples .Appendix3}
+### ID string examples
 
 The following examples each show a fragment of C# code, along with the ID string produced from each source element capable of having a documentation comment:
 
 - Types are represented using their fully qualified name, augmented with generic information:
-
-enum Color { Red, Blue, Green }
-
-namespace Acme
-{
-interface IProcess { … }
-
-struct ValueType { … }
-
-class Widget: IProcess
-{
-public class NestedClass { … }
-
-public interface IMenuItem { … }
-
-public delegate void Del(int i);
-
-public enum Direction { North, South, East, West }
-}
-
-class MyList<T>
-{
-class Helper<U,V>{ … }
-}
-}
-
-"T:Color"
-"T:Acme.IProcess"
-"T:Acme.ValueType"
-"T:Acme.Widget"
-"T:Acme.Widget.NestedClass"
-"T:Acme.Widget.IMenuItem"
-"T:Acme.Widget.Del"
-"T:Acme.Widget.Direction"
-"T:Acme.MyList\`1"
-"T:Acme.MyList\`1.Helper\`2"
-
+  ```csharp
+  enum Color { Red, Blue, Green }
+  
+  namespace Acme
+  {
+  	interface IProcess { … }
+  
+  	struct ValueType { … }
+  
+  	class Widget: IProcess
+  	{
+  		public class NestedClass { … }
+  
+  		public interface IMenuItem { … }
+  
+  		public delegate void Del(int i);
+  
+  		public enum Direction { North, South, East, West }
+  	}
+  
+  	class MyList<T>
+  	{
+  		class Helper<U,V>{ … }
+  	}
+  }
+  
+  "T:Color"
+  "T:Acme.IProcess"
+  "T:Acme.ValueType"
+  "T:Acme.Widget"
+  "T:Acme.Widget.NestedClass"
+  "T:Acme.Widget.IMenuItem"
+  "T:Acme.Widget.Del"
+  "T:Acme.Widget.Direction"
+  "T:Acme.MyList`1"
+  "T:Acme.MyList`1.Helper`2"
+  ```
 - Fields are represented by their fully qualified name.
-
-namespace Acme
-{
-struct ValueType
-{
-private int total;
-}
-
-class Widget: IProcess
-{
-public class NestedClass
-{
-private int value;
-}
-
-private string message;
-private static Color defaultColor;
-private const double PI = 3.14159;
-protected readonly double monthlyAverage;
-private long[] array1;
-private Widget[,] array2;
-private unsafe int *pCount;
-private unsafe float **ppValues;
-}
-}
-
-"F:Acme.ValueType.total"
-"F:Acme.Widget.NestedClass.value"
-"F:Acme.Widget.message"
-"F:Acme.Widget.defaultColor"
-"F:Acme.Widget.PI"
-"F:Acme.Widget.monthlyAverage"
-"F:Acme.Widget.array1"
-"F:Acme.Widget.array2"
-"F:Acme.Widget.pCount"
-"F:Acme.Widget.ppValues"
-
+  ```csharp
+  namespace Acme
+  {
+  	struct ValueType
+  	{
+  		private int total;
+  	}
+  
+  	class Widget: IProcess
+  	{
+  		public class NestedClass
+  		{
+  			private int value;
+  		}
+  
+  		private string message;
+  		private static Color defaultColor;
+  		private const double PI = 3.14159;
+  		protected readonly double monthlyAverage;
+  		private long[] array1;
+  		private Widget[,] array2;
+  		private unsafe int *pCount;
+  		private unsafe float **ppValues;
+  	}
+  }
+  
+  "F:Acme.ValueType.total"
+  "F:Acme.Widget.NestedClass.value"
+  "F:Acme.Widget.message"
+  "F:Acme.Widget.defaultColor"
+  "F:Acme.Widget.PI"
+  "F:Acme.Widget.monthlyAverage"
+  "F:Acme.Widget.array1"
+  "F:Acme.Widget.array2"
+  "F:Acme.Widget.pCount"
+  "F:Acme.Widget.ppValues"
+  ```
 - Constructors.
-
-namespace Acme
-{
-class Widget: IProcess
-{
-static Widget() { … }
-
-public Widget() { … }
-
-public Widget(string s) { … }
-}
-}
-
-"M:Acme.Widget.#cctor"
-"M:Acme.Widget.#ctor"
-"M:Acme.Widget.#ctor(System.String)"
-
+  
+  ```csharp
+  namespace Acme
+  {
+  	class Widget: IProcess
+  	{
+  		static Widget() { … }
+  
+  		public Widget() { … }
+  
+  		public Widget(string s) { … }
+  	}
+  }
+  
+  "M:Acme.Widget.#cctor"
+  "M:Acme.Widget.#ctor"
+  "M:Acme.Widget.#ctor(System.String)"
+  ```
 - Finalizers.
-
-namespace Acme
-{
-class Widget: IProcess
-{
-~Widget() { … }
-}
-}
-
-"M:Acme.Widget.Finalize"
-
+```csharp
+  namespace Acme
+  {
+  	class Widget: IProcess
+  	{
+  		~Widget() { … }
+  	}
+  }
+  
+  "M:Acme.Widget.Finalize"
+  ```
 - Methods.
-
-namespace Acme
-{
-struct ValueType
-{
-public void M(int i) { … }
-}
-
-class Widget: IProcess
-{
-public class NestedClass
-{
-public void M(int i) { … }
-}
-
-public static void M0() { … }
-public void M1(char c, out float f, ref ValueType v) { … }
-public void M2(short[] x1, int[,] x2, long[][] x3) { … }
-public void M3(long[][] x3, Widget[][,,] x4) { … }
-public unsafe void M4(char *pc, Color **pf) { … }
-public unsafe void M5(void *pv, double *[][,] pd) { … }
-public void M6(int i, params object[] args) { … }
-}
-class MyList<T>
-{
-public void Test(T t) { … }
-}
-
-class UseList
-{
-public void Process(MyList<int> list) { … }
-public MyList<T> GetValues<T>(T value) { … } }
-}
-
-"M:Acme.ValueType.M(System.Int32)"
-"M:Acme.Widget.NestedClass.M(System.Int32)"
-"M:Acme.Widget.M0"
-"M:Acme.Widget.M1(System.Char,System.Single@,Acme.ValueType@)"
-"M:Acme.Widget.M2(System.Int16[],System.Int32[0:,0:],System.Int64[][])"
-"M:Acme.Widget.M3(System.Int64[][],Acme.Widget[0:,0:,0:][])"
-"M:Acme.Widget.M4(System.Char*,Color**)"
-"M:Acme.Widget.M5(System.Void*,System.Double*[0:,0:][])"
-"M:Acme.Widget.M6(System.Int32,System.Object[])"
-"M:Acme.MyList\`1.Test(\`0)"
-"M:Acme.UseList.Process(Acme.MyList{System.Int32})"
-"M:Acme.UseList.GetValues\`\`1(\`\`0)"
-
+  ```csharp
+  namespace Acme
+  {
+  	struct ValueType
+  	{
+  		public void M(int i) { … }
+  	}
+  
+  	class Widget: IProcess
+  	{
+  		public class NestedClass
+  	{
+  	public void M(int i) { … }
+  	}
+  
+  	public static void M0() { … }
+  	public void M1(char c, out float f, ref ValueType v) { … }
+  	public void M2(short[] x1, int[,] x2, long[][] x3) { … }
+  	public void M3(long[][] x3, Widget[][,,] x4) { … }
+  	public unsafe void M4(char *pc, Color **pf) { … }
+  	public unsafe void M5(void *pv, double *[][,] pd) { … }
+  	public void M6(int i, params object[] args) { … }
+  }
+  class MyList<T>
+  {
+  	public void Test(T t) { … }
+  }
+  
+  class UseList
+  {
+  	public void Process(MyList<int> list) { … }
+  	public MyList<T> GetValues<T>(T value) { … } }
+  }
+  
+  "M:Acme.ValueType.M(System.Int32)"
+  "M:Acme.Widget.NestedClass.M(System.Int32)"
+  "M:Acme.Widget.M0"
+  "M:Acme.Widget.M1(System.Char,System.Single@,Acme.ValueType@)"
+  "M:Acme.Widget.M2(System.Int16[],System.Int32[0:,0:],System.Int64[][])"
+  "M:Acme.Widget.M3(System.Int64[][],Acme.Widget[0:,0:,0:][])"
+  "M:Acme.Widget.M4(System.Char*,Color**)"
+  "M:Acme.Widget.M5(System.Void*,System.Double*[0:,0:][])"
+  "M:Acme.Widget.M6(System.Int32,System.Object[])"
+  "M:Acme.MyList`1.Test(`0)"
+  "M:Acme.UseList.Process(Acme.MyList{System.Int32})"
+  "M:Acme.UseList.GetValues``1(``0)"
+  ```
 - Properties and indexers.
-
-namespace Acme
-{
-class Widget: IProcess
-{
-public int Width {get { … } set { … }}
-public int this[int i] {get { … } set { … }}
-public int this[string s, int i] {get { … } set { … }}
-}
-}
-
-"P:Acme.Widget.Width"
-"P:Acme.Widget.Item(System.Int32)"
-"P:Acme.Widget.Item(System.String,System.Int32)"
-
+  ```csharp
+  namespace Acme
+  {
+  	class Widget: IProcess
+  	{
+  		public int Width {get { … } set { … }}
+  		public int this[int i] {get { … } set { … }}
+  		public int this[string s, int i] {get { … } set { … }}
+  	}
+  }
+  
+  "P:Acme.Widget.Width"
+  "P:Acme.Widget.Item(System.Int32)"
+  "P:Acme.Widget.Item(System.String,System.Int32)"
+  ```
 - Events
-
-namespace Acme
-{
-class Widget: IProcess
-{
-public event Del AnEvent;
-}
-}
-
-"E:Acme.Widget.AnEvent"
-
+  ```csharp
+  namespace Acme
+  {
+  	class Widget: IProcess
+  	{
+  		public event Del AnEvent;
+  	}
+  }
+  
+  "E:Acme.Widget.AnEvent"
+  ```
 - Unary operators.
-
-namespace Acme
-{
-class Widget: IProcess
-{
-public static Widget operator+(Widget x) { … }
-}
-}
-
-"M:Acme.Widget.op_UnaryPlus(Acme.Widget)"
-
-> The complete set of unary operator function names used is as follows: op_UnaryPlus, op_UnaryNegation, op_LogicalNot, op_OnesComplement, op_Increment, op_Decrement, op_True, and op_False.
-
+  ```csharp
+  namespace Acme
+  {
+  	class Widget: IProcess
+  	{
+  		public static Widget operator+(Widget x) { … }
+  	}
+  }
+  
+  "M:Acme.Widget.op_UnaryPlus(Acme.Widget)"
+  ```
+  The complete set of unary operator function names used is as follows: `op_UnaryPlus`, `op_UnaryNegation`, `op_LogicalNot`, `op_OnesComplement`, `op_Increment`, `op_Decrement`, `op_True`, and `op_False`.
 - Binary operators.
+  ```csharp
+  namespace Acme
+  {
+  	class Widget: IProcess
+  	{
+  		public static Widget operator+(Widget x1, Widget x2) { … }
+  	}
+  }
+  
+  "M:Acme.Widget.op_Addition(Acme.Widget,Acme.Widget)"
+  ```
+  The complete set of binary operator function names used is as follows: `op_Addition`, `op_Subtraction`, `op_Multiply`, `op_Division`, `op_Modulus`, `op_BitwiseAnd`, `op_BitwiseOr`, `op_ExclusiveOr`, `op_LeftShift`, `op_RightShift`, `op_Equality`, `op_Inequality`, `op_LessThan`, `op_LessThanOrEqual`, `op_GreaterThan`, and `op_GreaterThanOrEqual`.
+- Conversion operators have a trailing “`~`” followed by the return type.
+  ```csharp
+  namespace Acme
+  {
+  	class Widget: IProcess
+  	{
+  		public static explicit operator int(Widget x) { … }
+  		public static implicit operator long(Widget x) { … }
+  	}
+  }
+  
+  "M:Acme.Widget.op\_Explicit(Acme.Widget)~System.Int32"
+  "M:Acme.Widget.op\_Implicit(Acme.Widget)~System.Int64"
+  ```
 
-namespace Acme
-{
-class Widget: IProcess
-{
-public static Widget operator+(Widget x1, Widget x2) { … }
-}
-}
+## An example
 
-"M:Acme.Widget.op_Addition(Acme.Widget,Acme.Widget)"
+### C# source code
 
-> The complete set of binary operator function names used is as follows: op_Addition, op_Subtraction, op_Multiply, op_Division, op_Modulus, op_BitwiseAnd, op_BitwiseOr, op_ExclusiveOr, op_LeftShift, op_RightShift, op_Equality, op_Inequality, op_LessThan, op_LessThanOrEqual, op_GreaterThan, and op_GreaterThanOrEqual.
+The following example shows the source code of a `Point` class:
 
-- Conversion operators have a trailing “~” followed by the return type.
-
-namespace Acme
-{
-class Widget: IProcess
-{
-public static explicit operator int(Widget x) { … }
-public static implicit operator long(Widget x) { … }
-}
-}
-
-"M:Acme.Widget.op_Explicit(Acme.Widget)~System.Int32"
-"M:Acme.Widget.op_Implicit(Acme.Widget)~System.Int64"
-
-## An example {#an-example .Appendix2}
-
-### C# source code {#c-source-code .Appendix3}
-
-The following example shows the source code of a Point class:
-
+```csharp
 namespace Graphics
 {
 
-/// <summary>Class <c>Point</c> models a point in a two-dimensional plane.
-/// </summary>
-public class Point
-{
+	/// <summary>Class <c>Point</c> models a point in a two-dimensional plane.
+	/// </summary>
+	public class Point
+	{
 
-/// <summary>Instance variable <c>x</c> represents the point's
-/// x-coordinate.</summary>
-private int x;
+		/// <summary>Instance variable <c>x</c> represents the point's
+		/// x-coordinate.</summary>
+		private int x;
 
-/// <summary>Instance variable <c>y</c> represents the point's
-/// y-coordinate.</summary>
-private int y;
+		/// <summary>Instance variable <c>y</c> represents the point's
+		/// y-coordinate.</summary>
+		private int y;
 
-/// <value>Property <c>X</c> represents the point's x-coordinate.</value>
-public int X
-{
-get { return x; }
-set { x = value; }
+		/// <value>Property <c>X</c> represents the point's x-coordinate.</value>
+		public int X
+		{
+			get { return x; }
+			set { x = value; }
+		}
+
+		/// <value>Property <c>Y</c> represents the point's y-coordinate.</value>
+		public int Y
+		{
+			get { return y; }
+			set { y = value; }
+		}
+
+		/// <summary>This constructor initializes the new Point to
+		/// (0,0).</summary>
+		public Point() : this(0,0) {}
+
+		/// <summary>This constructor initializes the new Point to
+		/// (<paramref name="xor"/>,<paramref name="yor"/>).</summary>
+		/// <param><c>xor</c> is the new Point's x-coordinate.</param>
+		/// <param><c>yor</c> is the new Point's y-coordinate.</param>
+		public Point(int xor, int yor) {
+		X = xor;
+		Y = yor;
+		}
+
+		/// <summary>This method changes the point's location to
+		/// the given coordinates. <see cref="Translate"/></summary>
+		/// <param><c>xor</c> is the new x-coordinate.</param>
+		/// <param><c>yor</c> is the new y-coordinate.</param>
+
+		public void Move(int xor, int yor) {
+			X = xor;
+			Y = yor;
+		}
+
+		/// <summary>This method changes the point's location by
+		/// the given x- and y-offsets.
+		/// <example>For example:
+		/// <code>
+		/// Point p = new Point(3,5);
+		/// p.Translate(-1,3);
+		/// </code>
+		/// results in <c>p</c>'s having the value (2,8).
+		/// <see cref="Move"/></example>
+		/// </summary>
+		/// <param><c>xor</c> is the relative x-offset.</param>
+		/// <param><c>yor</c> is the relative y-offset.</param>
+
+		public void Translate(int xor, int yor) {
+			X += xor;
+			Y += yor;
+		}
+
+		/// <summary>This method determines whether two Points have the same
+		/// location.</summary>
+		/// <param><c>o</c> is the object to be compared to the current object.
+		/// </param>
+		/// <returns>True if the Points have the same location and they have
+		/// the exact same type; otherwise, false.</returns>
+		/// <seealso cref="operator=="/>
+		/// <seealso cref="operator!="/>
+		public override bool Equals(object o) {
+			if (o == null) {
+			return false;
+			}
+
+			if (this == o) {
+				return true;
+			}
+
+			if (GetType() == o.GetType()) {
+				Point p = (Point)o;
+				return (X == p.X) && (Y == p.Y);
+			}
+			return false;
+		}
+
+		/// <summary>Report a point's location as a string.</summary>
+		/// <returns>A string representing a point's location, in the form (x,y),
+		/// without any leading, training, or embedded whitespace.</returns>
+		public override string ToString() {
+			return "(" + X + "," + Y + ")";
+		}
+
+		/// <summary>This operator determines whether two Points have the same
+		/// location.</summary>
+		/// <param><c>p1</c> is the first Point to be compared.</param>
+		/// <param><c>p2</c> is the second Point to be compared.</param>
+		/// <returns>True if the Points have the same location and they have
+		/// the exact same type; otherwise, false.</returns>
+		/// <seealso cref="Equals"/>
+		/// <seealso cref="operator!="/>
+		public static bool operator==(Point p1, Point p2) {
+			if ((object)p1 == null || (object)p2 == null) {
+				return false;
+			}
+
+		if (p1.GetType() == p2.GetType()) {
+			return (p1.X == p2.X) && (p1.Y == p2.Y);
+		}
+
+		return false;
+		}
+
+		/// <summary>This operator determines whether two Points have the same
+		/// location.</summary>
+		/// <param><c>p1</c> is the first Point to be compared.</param>
+		/// <param><c>p2</c> is the second Point to be compared.</param>
+		/// <returns>True if the Points do not have the same location and the
+		/// exact same type; otherwise, false.</returns>
+		/// <seealso cref="Equals"/>
+		/// <seealso cref="operator=="/>
+		public static bool operator!=(Point p1, Point p2) {
+			return !(p1 == p2);
+		}
+
+	}
 }
+```
 
-/// <value>Property <c>Y</c> represents the point's y-coordinate.</value>
-public int Y
-{
-get { return y; }
-set { y = value; }
-}
+### Resulting XML
 
-/// <summary>This constructor initializes the new Point to
-/// (0,0).</summary>
-public Point() : this(0,0) {}
-
-/// <summary>This constructor initializes the new Point to
-/// (<paramref name="xor"/>,<paramref name="yor"/>).</summary>
-/// <param><c>xor</c> is the new Point's x-coordinate.</param>
-/// <param><c>yor</c> is the new Point's y-coordinate.</param>
-public Point(int xor, int yor) {
-X = xor;
-Y = yor;
-}
-
-/// <summary>This method changes the point's location to
-/// the given coordinates. <see cref="Translate"/></summary>
-/// <param><c>xor</c> is the new x-coordinate.</param>
-/// <param><c>yor</c> is the new y-coordinate.</param>
-
-public void Move(int xor, int yor) {
-X = xor;
-Y = yor;
-}
-
-/// <summary>This method changes the point's location by
-/// the given x- and y-offsets.
-/// <example>For example:
-/// <code>
-/// Point p = new Point(3,5);
-/// p.Translate(-1,3);
-/// </code>
-/// results in <c>p</c>'s having the value (2,8).
-/// <see cref="Move"/></example>
-/// </summary>
-/// <param><c>xor</c> is the relative x-offset.</param>
-/// <param><c>yor</c> is the relative y-offset.</param>
-
-public void Translate(int xor, int yor) {
-X += xor;
-Y += yor;
-}
-
-/// <summary>This method determines whether two Points have the same
-/// location.</summary>
-/// <param><c>o</c> is the object to be compared to the current object.
-/// </param>
-/// <returns>True if the Points have the same location and they have
-/// the exact same type; otherwise, false.</returns>
-/// <seealso cref="operator=="/>
-/// <seealso cref="operator!="/>
-public override bool Equals(object o) {
-if (o == null) {
-return false;
-}
-
-if (this == o) {
-return true;
-}
-
-if (GetType() == o.GetType()) {
-Point p = (Point)o;
-return (X == p.X) && (Y == p.Y);
-}
-return false;
-}
-
-/// <summary>Report a point's location as a string.</summary>
-/// <returns>A string representing a point's location, in the form (x,y),
-/// without any leading, training, or embedded whitespace.</returns>
-public override string ToString() {
-return "(" + X + "," + Y + ")";
-}
-
-/// <summary>This operator determines whether two Points have the same
-/// location.</summary>
-/// <param><c>p1</c> is the first Point to be compared.</param>
-/// <param><c>p2</c> is the second Point to be compared.</param>
-/// <returns>True if the Points have the same location and they have
-/// the exact same type; otherwise, false.</returns>
-/// <seealso cref="Equals"/>
-/// <seealso cref="operator!="/>
-public static bool operator==(Point p1, Point p2) {
-if ((object)p1 == null || (object)p2 == null) {
-return false;
-}
-
-if (p1.GetType() == p2.GetType()) {
-return (p1.X == p2.X) && (p1.Y == p2.Y);
-}
-
-return false;
-}
-
-/// <summary>This operator determines whether two Points have the same
-/// location.</summary>
-/// <param><c>p1</c> is the first Point to be compared.</param>
-/// <param><c>p2</c> is the second Point to be compared.</param>
-/// <returns>True if the Points do not have the same location and the
-/// exact same type; otherwise, false.</returns>
-/// <seealso cref="Equals"/>
-/// <seealso cref="operator=="/>
-public static bool operator!=(Point p1, Point p2) {
-return !(p1 == p2);
-}
-
-}
-}
-
-### Resulting XML {#resulting-xml .Appendix3}
-
-Here is the output produced by one documentation generator when given the source code for class Point, shown above:
-
+Here is the output produced by one documentation generator when given the source code for class `Point`, shown above:
+```XML
 <?xml version="1.0"?>
 <doc>
-<assembly>
-<name>Point</name>
-</assembly>
-<members>
-<member name="T:Graphics.Point">
-<summary>Class <c>Point</c> models a point in a two-dimensional
-plane.
-</summary>
-</member>
+	<assembly>
+		<name>Point</name>
+	</assembly>
+	<members>
+		<member name="T:Graphics.Point">
+			<summary>Class <c>Point</c> models a point in a two-dimensional
+			plane.
+			</summary>
+		</member>
 
-<member name="F:Graphics.Point.x">
-<summary>Instance variable <c>x</c> represents the point's
-x-coordinate.</summary>
-</member>
+		<member name="F:Graphics.Point.x">
+			<summary>Instance variable <c>x</c> represents the point's
+			x-coordinate.</summary>
+		</member>
 
-<member name="F:Graphics.Point.y">
-<summary>Instance variable <c>y</c> represents the point's
-y-coordinate.</summary>
-</member>
+		<member name="F:Graphics.Point.y">
+			<summary>Instance variable <c>y</c> represents the point's
+			y-coordinate.</summary>
+		</member>
 
-<member name="M:Graphics.Point.#ctor">
-<summary>This constructor initializes the new Point to
-(0,0).</summary>
-</member>
+		<member name="M:Graphics.Point.\#ctor">
+			<summary>This constructor initializes the new Point to
+			(0,0).</summary>
+		</member>
 
-<member name="M:Graphics.Point.#ctor(System.Int32,System.Int32)">
-<summary>This constructor initializes the new Point to
-(<paramref name="xor"/>,<paramref name="yor"/>).</summary>
-<param><c>xor</c> is the new Point's x-coordinate.</param>
-<param><c>yor</c> is the new Point's y-coordinate.</param>
-</member>
+		<member name="M:Graphics.Point.\#ctor(System.Int32,System.Int32)">
+			<summary>This constructor initializes the new Point to
+			(<paramref name="xor"/>,<paramref name="yor"/>).</summary>
+			<param><c>xor</c> is the new Point's x-coordinate.</param>
+			<param><c>yor</c> is the new Point's y-coordinate.</param>
+		</member>
 
-<member name="M:Graphics.Point.Move(System.Int32,System.Int32)">
-<summary>This method changes the point's location to
-the given coordinates. <see cref="M:Graphics.Point.Translate(System.Int32,System.Int32)"/></summary>
-<param><c>xor</c> is the new x-coordinate.</param>
-<param><c>yor</c> is the new y-coordinate.</param>
+		<member name="M:Graphics.Point.Move(System.Int32,System.Int32)">
+			<summary>This method changes the point's location to
+			the given coordinates. <see cref="M:Graphics.Point.Translate(System.Int32,System.Int32)"/></summary>
+			<param><c>xor</c> is the new x-coordinate.</param>
+			<param><c>yor</c> is the new y-coordinate.</param>
 
-</member>
+		</member>
 
-<member
-name="M:Graphics.Point.Translate(System.Int32,System.Int32)">
-<summary>This method changes the point's location by
-the given x- and y-offsets.
-<example>For example:
-<code>
-Point p = new Point(3,5);
-p.Translate(-1,3);
-</code>
-results in <c>p</c>'s having the value (2,8).
-</example>
-<see cref="M:Graphics.Point.Move(System.Int32,System.Int32)"/></summary>
-<param><c>xor</c> is the relative x-offset.</param>
-<param><c>yor</c> is the relative y-offset.</param>
+		<member
+		name="M:Graphics.Point.Translate(System.Int32,System.Int32)">
+			<summary>This method changes the point's location by
+			the given x- and y-offsets.
+			<example>For example:
+			<code>
+			Point p = new Point(3,5);
+			p.Translate(-1,3);
+			</code>
+			results in <c>p</c>'s having the value (2,8).
+			</example>
+			<see cref="M:Graphics.Point.Move(System.Int32,System.Int32)"/></summary>
+			<param><c>xor</c> is the relative x-offset.</param>
+			<param><c>yor</c> is the relative y-offset.</param>
 
-</member>
+		</member>
 
-<member name="M:Graphics.Point.Equals(System.Object)">
-<summary>This method determines whether two Points have the same
-location.</summary>
-<param><c>o</c> is the object to be compared to the current
-object.
-</param>
-<returns>True if the Points have the same location and they have
-the exact same type; otherwise, false.</returns>
-<seealso
-cref="M:Graphics.Point.op_Equality(Graphics.Point,Graphics.Point)"/>
-<seealso
-cref="M:Graphics.Point.op_Inequality(Graphics.Point,Graphics.Point)"/>
-</member>
+		<member name="M:Graphics.Point.Equals(System.Object)">
+			<summary>This method determines whether two Points have the same
+			location.</summary>
+			<param><c>o</c> is the object to be compared to the current
+			object.
+			</param>
+			<returns>True if the Points have the same location and they have
+			the exact same type; otherwise, false.</returns>
+			<seealso
+			cref="M:Graphics.Point.op\_Equality(Graphics.Point,Graphics.Point)"/>
+			<seealso
+			cref="M:Graphics.Point.op\_Inequality(Graphics.Point,Graphics.Point)"/>
+		</member>
 
-<member name="M:Graphics.Point.ToString">
-<summary>Report a point's location as a string.</summary>
-<returns>A string representing a point's location, in the form
-(x,y),
-without any leading, training, or embedded whitespace.</returns>
-</member>
+		<member name="M:Graphics.Point.ToString">
+			<summary>Report a point's location as a string.</summary>
+			<returns>A string representing a point's location, in the form
+			(x,y),
+			without any leading, training, or embedded whitespace.</returns>
+		</member>
 
-<member
-name="M:Graphics.Point.op_Equality(Graphics.Point,Graphics.Point)">
-<summary>This operator determines whether two Points have the
-same
-location.</summary>
-<param><c>p1</c> is the first Point to be compared.</param>
-<param><c>p2</c> is the second Point to be compared.</param>
-<returns>True if the Points have the same location and they have
-the exact same type; otherwise, false.</returns>
-<seealso cref="M:Graphics.Point.Equals(System.Object)"/>
-<seealso
-cref="M:Graphics.Point.op_Inequality(Graphics.Point,Graphics.Point)"/>
-</member>
+		<member
+		name="M:Graphics.Point.op\_Equality(Graphics.Point,Graphics.Point)">
+			<summary>This operator determines whether two Points have the
+			same
+			location.</summary>
+			<param><c>p1</c> is the first Point to be compared.</param>
+			<param><c>p2</c> is the second Point to be compared.</param>
+			<returns>True if the Points have the same location and they have
+			the exact same type; otherwise, false.</returns>
+			<seealso cref="M:Graphics.Point.Equals(System.Object)"/>
+			<seealso
+			cref="M:Graphics.Point.op\_Inequality(Graphics.Point,Graphics.Point)"/>
+		</member>
 
-<member
-name="M:Graphics.Point.op_Inequality(Graphics.Point,Graphics.Point)">
-<summary>This operator determines whether two Points have the
-same
-location.</summary>
-<param><c>p1</c> is the first Point to be compared.</param>
-<param><c>p2</c> is the second Point to be compared.</param>
-<returns>True if the Points do not have the same location and
-the
-exact same type; otherwise, false.</returns>
-<seealso cref="M:Graphics.Point.Equals(System.Object)"/>
-<seealso
-cref="M:Graphics.Point.op_Equality(Graphics.Point,Graphics.Point)"/>
-</member>
+		<member
+		name="M:Graphics.Point.op\_Inequality(Graphics.Point,Graphics.Point)">
+			<summary>This operator determines whether two Points have the
+			same
+			location.</summary>
+			<param><c>p1</c> is the first Point to be compared.</param>
+			<param><c>p2</c> is the second Point to be compared.</param>
+			<returns>True if the Points do not have the same location and
+			the
+			exact same type; otherwise, false.</returns>
+			<seealso cref="M:Graphics.Point.Equals(System.Object)"/>
+			<seealso
+			cref="M:Graphics.Point.op\_Equality(Graphics.Point,Graphics.Point)"/>
+		</member>
 
-<member name="M:Graphics.Point.Main">
-<summary>This is the entry point of the Point class testing
-program.
-<para>This program tests each method and operator, and
-is intended to be run after any non-trvial maintenance has
-been performed on the Point class.</para></summary>
-</member>
+		<member name="M:Graphics.Point.Main">
+			<summary>This is the entry point of the Point class testing
+			program.
+			<para>This program tests each method and operator, and
+			is intended to be run after any non-trvial maintenance has
+			been performed on the Point class.</para></summary>
+		</member>
 
-<member name="P:Graphics.Point.X">
-<value>Property <c>X</c> represents the point's
-x-coordinate.</value>
-</member>
+		<member name="P:Graphics.Point.X">
+			<value>Property <c>X</c> represents the point's
+			x-coordinate.</value>
+		</member>
 
-<member name="P:Graphics.Point.Y">
-<value>Property <c>Y</c> represents the point's
-y-coordinate.</value>
-</member>
-</members>
+		<member name="P:Graphics.Point.Y">
+			<value>Property <c>Y</c> represents the point's
+			y-coordinate.</value>
+		</member>
+	</members>
 </doc>
+```
 
 **End of informative text.**
 
-# **Bibliography** {#bibliography .UnnumberedHeading}
-
+# **Bibliography**
 > **This annex is informative.**
 > 
 > ANSI X3.274-1996, *Programming Language REXX*. (This document is useful in understanding floating-point decimal arithmetic rules.)
@@ -27784,4 +27830,3 @@ y-coordinate.</value>
 > ISO 80000-1, Quantities and units — Part 1: General. (This document defines “banker’s rounding.”)
 > 
 > **End of informative text.**
-g
