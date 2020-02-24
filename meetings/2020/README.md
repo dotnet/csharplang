@@ -22,7 +22,7 @@
 ## Feb 24
 
 - https://github.com/dotnet/csharplang/issues/3226 Nominal records (Mads)
-- Analysis of the alternatives for records based on the design criteria from Jan 15 (Neal)
+- https://github.com/dotnet/csharplang/issues/3231 Analysis of the alternatives for records based on the design criteria from Jan 15 (Neal)
 
 ## Feb 19
 
