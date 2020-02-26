@@ -57,11 +57,6 @@
 
 - Design review
 
-## Feb 24
-
-- https://github.com/dotnet/csharplang/issues/3226 Nominal records (Mads)
-- https://github.com/dotnet/csharplang/issues/3231 Analysis of the alternatives for records based on the design criteria from Jan 15 (Neal)
-
 ## Jan 29, 2020
 
 - Records: drilling in to individual features (Mads)
@@ -73,6 +68,12 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Feb 24
+
+[C# Language Design Notes for Feb. 24, 2020](LDM-2020-02-24.md)
+
+Taking another look at "nominal" records
 
 ## Feb 19
 
