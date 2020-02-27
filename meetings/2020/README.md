@@ -4,7 +4,6 @@
 
 ## Schedule when convenient
 
-- Is `e is dynamic` a "pure" null check? (Neal)
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
