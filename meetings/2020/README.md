@@ -7,13 +7,30 @@
 - Is `e is dynamic` a "pure" null check? (Neal)
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
-- Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
 
 ## Recurring topics
 
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+
+## March 11, 2020
+
+## March 9, 2020
+
+- Is `e is dynamic` a "pure" null check? (Neal)
+- Records design (Mads, Andy)
+
+## March 4, 2020
+
+- Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
+- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
+- Records design (Mads, Andy)
+
+## March 2, 2020
+
+- Records design (Mads, Andy)
+- Digest feedback from design review
 
 ## Feb 26, 2020
 
