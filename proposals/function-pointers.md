@@ -13,8 +13,7 @@ potential implementation of the feature):
 
 https://github.com/dotnet/csharplang/issues/191
 
-This is an alternate design proposal to [compiler intrinsics]
-(https://github.com/dotnet/csharplang/blob/master/proposals/intrinsics.md)
+This is an alternate design proposal to [compiler intrinsics](https://github.com/dotnet/csharplang/blob/master/proposals/intrinsics.md)
 
 ## Detailed Design
 
@@ -293,7 +292,7 @@ hide the fact that this is a pointer value and it kept peeking through even with
 the conversion to `object` can't be allowed, it can't be a member of a `class`, etc ... The C# design is to require
 `unsafe` for all pointer uses and hence this design follows that.
 
-Developers will still be capable of preventing a _safe_ wrapper on top of `delegate*` values the same way that they do
+Developers will still be capable of presenting a _safe_ wrapper on top of `delegate*` values the same way that they do
 for normal pointer types today. Consider:
 
 ``` csharp
