@@ -15,13 +15,21 @@
 
 ## April 15, 2020
 
+- Is `e is dynamic` a "pure" null check? (Neal)
+- Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
+- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
+
 ## March 25, 2020
+
+- Records design (Mads, Andy)
 
 ## March 23, 2020
 
-- Feedback from MVP Summit (Mads)
+- Feedback from MVP Summit on records etc. (Mads, Andy)
 
 ## March 18, 2020
+
+- Records design (Mads, Andy)
 
 ## March 11, 2020
 
@@ -29,9 +37,7 @@
 
 ## March 9, 2020
 
-- Is `e is dynamic` a "pure" null check? (Neal)
-- Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
-- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
+- Records design (Mads, Andy)
 
 ## March 4, 2020
 
