@@ -37,10 +37,6 @@
 
 ## March 9, 2020
 
-- Records design (Mads, Andy)
-
-## March 4, 2020
-
 - Digest feedback from design review
 - Records design (Mads, Andy)
 
