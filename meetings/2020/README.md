@@ -18,6 +18,7 @@
 - Is `e is dynamic` a "pure" null check? (Neal)
 - Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
 - https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
+- Reconsider: Inferred type of an or pattern is the "common type" of the two inferred types (Neal)
 
 ## March 25, 2020
 
