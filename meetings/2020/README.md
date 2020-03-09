@@ -49,11 +49,6 @@
 
 - Records design (Mads, Andy)
 
-## March 9, 2020
-
-- Digest feedback from design review
-- Records design (Mads, Andy)
-
 ## Jan 29, 2020
 
 - Records: drilling in to individual features (Mads)
@@ -65,6 +60,14 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## March 9, 2020
+
+[C# Language Design Notes for March 9, 2020](LDM-2020-03-09.md)
+
+1. Simple programs
+
+2. Records
 
 ## Feb 26, 2020
 
