@@ -156,7 +156,7 @@ An earlier version of this document recommended (1), but we since switched to (4
 
 The two main problems with (1):
 - producers of cancellable enumerables have to implement some boilerplate, and can only leverage the compiler's support for async-iterators to implement a `IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken)` method.
-- it is likely that many producers would be tempted to just add a `CancellationToken` parameter to their async-enumerable signature instead, which will prevent consumers from passing the cancellation token they want when their are given an `IAsyncEnumerable` type.
+- it is likely that many producers would be tempted to just add a `CancellationToken` parameter to their async-enumerable signature instead, which will prevent consumers from passing the cancellation token they want when they are given an `IAsyncEnumerable` type.
 
 There are two main consumption scenarios:
 1. `await foreach (var i in GetData(token)) ...` where the consumer calls the async-iterator method,
@@ -168,7 +168,7 @@ Consider `IAsyncEnumerable<int> GetData([EnumeratorCancellation] CancellationTok
 The implementer of this method can simply use the parameter in the method body. 
 The consumer can use either consumption patterns above:
 1. if you use `GetData(token)`, then the token is saved into the async-enumerable and will be used in iteration,
-2. if you use `givenIAsyncEnumerable.WithCancellation(token)`, then the token passed to `GetAsyncEnumerator` will supercede any token saved in the async-enumerable.
+2. if you use `givenIAsyncEnumerable.WithCancellation(token)`, then the token passed to `GetAsyncEnumerator` will supersede any token saved in the async-enumerable.
 
 ## foreach
 

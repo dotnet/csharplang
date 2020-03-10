@@ -105,12 +105,10 @@ Features Added in C# Language Versions
 - Delegate inference
 
 # [C# 1.2](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-version-history#c-version-12) - Visual Studio .NET 2003
-
 - Dispose in foreach
 - foreach over string specialization
 
 # [C# 1.0](https://en.wikipedia.org/wiki/Microsoft_Visual_Studio#.NET_.282002.29) - Visual Studio .NET 2002
-
 - Classes
 - Structs
 - Interfaces
