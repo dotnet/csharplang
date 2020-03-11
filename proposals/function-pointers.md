@@ -129,6 +129,18 @@ delegate* managed<string, int>;
 delegate*<delegate* managed<string, int>, delegate*<string, int>>;
 ```
 
+### Function pointer conversions
+
+In an unsafe context, the set of available implicit conversions (Implicit conversions) is extended to include the following implicit pointer conversions:
+- [_Existing conversions_](https://github.com/dotnet/csharplang/blob/master/spec/unsafe-code.md#pointer-conversions)
+- From _funcptr\_type_ `F0` to another _funcptr\_type_ `F1`, provided all of the following are true:
+    - `F0` and `F1` have the same number of parameters, and each parameter `D0n` in `F0` has the same `ref`, `out`, or `in` modifiers as the corresponding parameter `D1n` in `F1`.
+    - For each value parameter (a parameter with no `ref`, `out`, or `in` modifier), an identity conversion, implicit reference conversion, or implicit pointer conversion exists from the parameter type in `F0` to the corresponding parameter type in `F1`.
+    - For each `ref`, `out`, or `in` parameter, the parameter type in `F0` is the same as the corresponding parameter type in `F1`.
+    - If the return type is by value (no `ref` or `ref readonly`), an identity, implicit reference, or implicit pointer conversion exists from the return type of `F1` to the return type of `F0`.
+    - If the return type is by reference (`ref` or `ref readonly`), the return type and `ref` modifiers of `F1` are the same as the return type and `ref` modifiers of `F0`.
+    - The calling convention of `F0` is the same as the calling convention of `F1`.
+
 ### Allow address-of to target methods
 
 Method groups will now be allowed as arguments to an address-of expression. The type of such an
@@ -151,11 +163,26 @@ unsafe class Util {
 }
 ```
 
-The conversion of an address-of method group to `delegate*` has roughly the same process as method group to `delegate`
-conversion. There are two additional restrictions to the existing process:
+In an unsafe context, a method `M` is compatible with a function pointer type `F` if all of the following are true:
+- `M` and `F` have the same number of parameters, and each parameter in `D` has the same `ref`, `out`, or `in` modifiers as the corresponding parameter in `F`.
+- For each value parameter (a parameter with no `ref`, `out`, or `in` modifier), an identity conversion, implicit reference conversion, or implicit pointer conversion exists from the parameter type in `M` to the corresponding parameter type in `F`.
+- For each `ref`, `out`, or `in` parameter, the parameter type in `M` is the same as the corresponding parameter type in `F`.
+- If the return type is by value (no `ref` or `ref readonly`), an identity, implicit reference, or implicit pointer conversion exists from the return type of `F` to the return type of `M`.
+- If the return type is by reference (`ref` or `ref readonly`), the return type and `ref` modifiers of `F` are the same as the return type and `ref` modifiers of `M`.
+- The calling convention of `M` is the same as the calling convention of `F`.
+- `M` is a static method.
 
-- Only members of the method group that are marked as `static` will be considered.
-- Only a `delegate*` with a managed calling convention can be the target of such a conversion.
+In an unsafe context, an implicit conversion exists from an address-of expression whose target is a method group `E` to a compatible function pointer type `F` if `E` contains at least one method that is applicable in its normal form to an argument list constructed by use of the parameter types and modifiers of `F`, as described in the following.
+- A single method `M` is selected corresponding to a method invocation of the form `E(A)` with the following modifications:
+   - The arguments list `A` is a list of expressions, each classified as a variable and with the type and modifier (`ref`, `out`, or `in`) of the corresponding _formal\_parameter\_list_ of `D`.
+   - The candidate methods are only those methods that are only those methods that are applicable in their normal form, not those applicable in their expanded form.
+- If the algorithm of Method invocations produces an error, then a compile-time error occurs. Otherwise, the algorithm produces a single best method `M` having the same number of parameters as `F` and the conversion is considered to exist.
+- The selected method `M` must be compatible (as defined above) with the function pointer type `F`. Otherwise, a compile-time error occurs.
+- The result of the conversion is a function pointer of type `F`.
+
+An implicit conversion exists from an address-of expression whose target is a method group `E` to `void*` if there is only one static method `M` in `E`.
+If there is one static method, then the single best method from `E` is `M`.
+Otherwise, a compile-time error occurs.
 
 This means developers can depend on overload resolution rules to work in conjunction with the
 address-of operator:
