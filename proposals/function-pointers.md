@@ -182,7 +182,7 @@ In an unsafe context, an implicit conversion exists from an address-of expressio
 
 An implicit conversion exists from an address-of expression whose target is a method group `E` to `void*` if there is only one static method `M` in `E`.
 If there is one static method, then the single best method from `E` is `M`.
-Otherwise, a compile-tiem error occurs.
+Otherwise, a compile-time error occurs.
 
 This means developers can depend on overload resolution rules to work in conjunction with the
 address-of operator:
