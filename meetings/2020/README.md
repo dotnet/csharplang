@@ -6,6 +6,7 @@
 
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
+- https://github.com/dotnet/csharplang/issues/140 `field` keyword in properties (cyrusn)
 
 ## Recurring topics
 
