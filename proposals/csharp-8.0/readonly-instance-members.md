@@ -86,7 +86,7 @@ public static class MyClass
 }
 ```
 
-Readonly can be applied to property accessors to indicate that `this` will not be mutated in the accessor.
+Readonly can be applied to property accessors to indicate that `this` will not be mutated in the accessor. The following examples have readonly setters because those accessors modify the state of member field, but do not modify the value of that member field.
 
 ```csharp
 public int Prop1
