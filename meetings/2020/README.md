@@ -21,8 +21,19 @@
 - https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
 - Reconsider: Inferred type of an or pattern is the "common type" of the two inferred types (Neal)
 
+## April 13, 2020
+
+## April 8, 2020
+
+## April 6, 2020
+
+## April 1, 2020
+
+## March 30, 2020
+
 ## March 25, 2020
 
+- https://github.com/dotnet/csharplang/issues/3259 Open issues with native integers (Chuck)
 - Records design (Mads, Andy)
 
 ## March 23, 2020
