@@ -42,7 +42,7 @@
 
 ## March 18, 2020
 
-- Records design (Mads, Andy)
+- https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
 
 ## March 11, 2020
 
