@@ -62,11 +62,6 @@
 - https://github.com/dotnet/csharplang/issues/3226 Nominal records (Mads)
 - https://github.com/dotnet/csharplang/issues/3231 Analysis of the alternatives for records based on the design criteria from Jan 15 (Neal)
 
-## Feb 19
-
-- https://github.com/dotnet/csharplang/issues/3213 Natural value equality (Mads)
-- https://github.com/dotnet/csharplang/issues/3137 Records (Mads)
-
 ## Jan 29, 2020
 
 - Records: drilling in to individual features (Mads)
@@ -78,6 +73,12 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Feb 19
+
+[C# Language Design Notes for Feb. 12, 2020](LDM-2020-02-19.md)
+
+State-based value equality
 
 ## Feb 12
 
