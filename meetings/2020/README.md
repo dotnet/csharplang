@@ -76,7 +76,7 @@ Overview of meetings and agendas for 2020
 
 ## Feb 19
 
-[C# Language Design Notes for Feb. 12, 2020](LDM-2020-02-19.md)
+[C# Language Design Notes for Feb. 19, 2020](LDM-2020-02-19.md)
 
 State-based value equality
 
