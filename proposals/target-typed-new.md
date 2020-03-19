@@ -20,14 +20,17 @@ Dictionary<string, List<int>> field = new() {
     { "item1", new() { 1, 2, 3 } }
 };
 ```
+
 Allow omitting the type when it can be inferred from usage.
 ```cs
 XmlReader.Create(reader, new() { IgnoreWhitespace = true });
 ```
+
 Instantiate an object without spelling out the type.
 ```cs
 private readonly static object s_syncObj = new();
 ```
+
 ## Detailed design
 [design]: #detailed-design
 
@@ -38,14 +41,15 @@ object_creation_expression
     | 'new' type object_or_collection_initializer
     ;
 ```
+
 A target-typed `new` is convertible to any type. As a result, it does not contribute to overload resolution. This is mainly to avoid unpredictable breaking changes.
 
 The argument list and the initializer expressions will be bound after the type is determined.
 
 The type of the expression would be inferred from the target-type which would be required to be one of the following:
 
-- **Any struct type**
-- **Any reference type**
+- **Any struct type** (including tuple types)
+- **Any reference type** (including delegate types)
 - **Any type parameter** with a constructor or a `struct` constraint
 
 with the following exceptions:
@@ -53,9 +57,11 @@ with the following exceptions:
 - **Enum types:** not all enum types contain the constant zero, so it should be desirable to use the explicit enum member.
 - **Interface types:** this is a niche feature and it should be preferable to explicitly mention the type.
 - **Array types:** arrays need a special syntax to provide the length.
-- **Struct default constructor**: this rules out all primitive types and most value types. If you wanted to use the default value of such types you could write `default` instead.
+- **dynamic:** we don't allow `new dynamic()`, so we don't allow `new()` with `dynamic` as a target type.
 
 All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.
+
+When the target type is a nullable value type, the target-typed `new` will be converted to the underlying type instead of the nullable type.
 
 > **Open Issue:** should we allow delegates and tuples as the target-type?
 
@@ -67,23 +73,20 @@ Action a = new(() => {}); // "new" is redundant
 (int a, int b) t = new(); // ruled out by "use of struct default constructor"
 Action a = new(); // no constructor found
 
-var x = new() == (1, 2); // ruled out by "use of struct default constructor"
-var x = new(1, 2) == (1, 2) // "new" is redundant
-```
+### Miscellaneous
 
+`throw new()` is disallowed.
 
-> **Open Issue:** should we allow `throw new()` with `Exception` as the target-type?
+Target-typed `new` is not allowed with binary operators.
 
-We have `throw null` today, but not `throw default` (though it would have the same effect). On the other hand, `throw new()` could be actually useful as a shorthand for `throw new Exception(...)`. Note that it is already allowed by the current specification. `Exception` is a reference type, and the specification for the throw statement says that the expression is converted to `Exception`.
+It is disallowed when there is no type to target: unary operators, collection of a `foreach`, in a `using`, in a deconstruction, in an `await` expression, as an anonymous type property (`new { Prop = new() }`), in a `lock` statement, in a `sizeof`, in a `fixed` statement, in a member access (`new().field`), in a dynamically dispatched operation (`someDynamic.Method(new())`), in a LINQ query, as the operand of the `is` operator, as the left operand of the `??` operator,  ...
 
-> **Open Issue:** should we allow usages of a target-typed `new` with user-defined comparison and arithmetic operators?
-
-For comparison, `default` only supports equality (user-defined and built-in) operators. Would it make sense to support other operators for `new()` as well?
+It is also disallowed as a `ref`.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-None.
+There were some concerns with target-typed `new` creating new categories of breaking changes, but we already have that with `null` and `default`, and that has not been a significant problem.
 
 ## Alternatives
 [alternatives]: #alternatives
@@ -96,6 +99,11 @@ Most of complaints about types being too long to duplicate in field initializati
 - Should we forbid usages in expression trees? (no)
 - How the feature interacts with `dynamic` arguments? (no special treatment)
 - How IntelliSense should work with `new()`? (only when there is a single target-type)
+
 ## Design meetings
 
 - [LDM-2017-10-18](https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-10-18.md#100)
+- [LDM-2018-05-21](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-05-21.md)
+- [LDM-2018-06-25](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-06-25.md)
+- [LDM-2018-08-22](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-08-22.md#target-typed-new)
+- [LDM-2018-10-17](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md)
