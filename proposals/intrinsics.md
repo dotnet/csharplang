@@ -214,7 +214,7 @@ types in the signature. Calling from managed code results in a runtime error.
 
 This feature would pattern well with this proposal as it would allow:
 
-- Passing a funtion defined in managed code to native code as a function pointer (via address-of)
+- Passing a function defined in managed code to native code as a function pointer (via address-of)
 with no overhead in managed or native code. 
 - Runtime can introduce use site errors for such functions in managed code to prevent them from
 being invoked at compile time.

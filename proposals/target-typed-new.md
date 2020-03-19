@@ -63,11 +63,21 @@ All the other types that are not permitted in the *object_creation_expression* a
 
 When the target type is a nullable value type, the target-typed `new` will be converted to the underlying type instead of the nullable type.
 
+> **Open Issue:** should we allow delegates and tuples as the target-type?
+
+The above rules include delegates (a reference type) and tuples (a struct type). Although both types are constructible, if the type is inferable, an anonymous function or a tuple literal can already be used.
+```cs
+(int a, int b) t = new(1, 2); // "new" is redundant
+Action a = new(() => {}); // "new" is redundant
+
+(int a, int b) t = new(); // ruled out by "use of struct default constructor"
+Action a = new(); // no constructor found
+
 ### Miscellaneous
 
 `throw new()` is disallowed.
 
-Target-typed `new` is allowed with binary operators, where the target type is determined by overload resolution. This excludes tuple equality.
+Target-typed `new` is not allowed with binary operators.
 
 It is disallowed when there is no type to target: unary operators, collection of a `foreach`, in a `using`, in a deconstruction, in an `await` expression, as an anonymous type property (`new { Prop = new() }`), in a `lock` statement, in a `sizeof`, in a `fixed` statement, in a member access (`new().field`), in a dynamically dispatched operation (`someDynamic.Method(new())`), in a LINQ query, as the operand of the `is` operator, as the left operand of the `??` operator,  ...
 
@@ -84,7 +94,7 @@ There were some concerns with target-typed `new` creating new categories of brea
 Most of complaints about types being too long to duplicate in field initialization is about *type arguments* not the type itself, we could infer only type arguments like `new Dictionary(...)` (or similar) and infer type arguments locally from arguments or the collection initializer.
 
 ## Questions
-[quesions]: #questions
+[questions]: #questions
 
 - Should we forbid usages in expression trees? (no)
 - How the feature interacts with `dynamic` arguments? (no special treatment)

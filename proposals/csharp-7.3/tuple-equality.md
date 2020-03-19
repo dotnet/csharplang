@@ -41,9 +41,9 @@ If an element-wise comparison returns some other non-bool type in a tuple equali
 - if the non-bool type converts to `bool`, we apply that conversion,
 - if there is no such conversion, but the type has an operator `false`, we'll use that and negate the result.
 
-In a tuple inequality, the same rules apply except that we'll use the operator `true` (without negation) instead of the operator `true`.
+In a tuple inequality, the same rules apply except that we'll use the operator `true` (without negation) instead of the operator `false`.
 
-Those rules are similar the rules involved for using a non-bool type in an `if` statement and some other existing contexts.
+Those rules are similar to the rules involved for using a non-bool type in an `if` statement and some other existing contexts.
 
 ## Evaluation order and special cases
 The left-hand-side value is evaluated first, then the right-hand-side value, then the element-wise comparisons from left to right (including conversions, and with early exit based on existing rules for conditional AND/OR operators).
@@ -73,5 +73,5 @@ If someone wrote their own `ValueTuple` types with  an implementation of the com
 
 ----
 
-Relates to https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#relational-and-type-testing-operators
-Relates to https://github.com/dotnet/csharplang/issues/190
+Relates to [relational and type testing operators](../../spec/expressions.md#relational-and-type-testing-operators)
+Relates to [#190](https://github.com/dotnet/csharplang/issues/190)

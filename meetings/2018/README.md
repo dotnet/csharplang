@@ -1,4 +1,4 @@
-﻿# C# Language Design Notes for 2018
+# C# Language Design Notes for 2018
 
 Overview of meetings and agendas for 2018
 
@@ -93,7 +93,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 4. Expanding the feature
 5. Is T? where T : class? allowed or meaningful?
 6. Typing judgments containing oblivious types
-7. Unconstrained T in List<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
+7. Unconstrained T in List\<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
 
 ## August 22, 2018
 
@@ -193,48 +193,64 @@ Discussion of records proposals:
 - [Adding Nullable Reference Type features to Nullable Value Types](https://github.com/dotnet/csharplang/issues/1865)
 - Open issues with pattern matching
 
-# Upcoming meetings
-
 ## Oct 29, 2018
 
-- Nullable switches, settings and directives, and their metadata encoding
+[C# Language Design Notes for Oct 29, 2018](LDM-2018-10-29.md)
+
+- [Source-level opt-in to nullable reference types](https://github.com/dotnet/csharplang/issues/1939)
 
 ## Oct 31, 2018
+
+[C# Language Design Notes for Oct 31, 2018](LDM-2018-10-31.md)
 
 - *Design review*
 
 ## Nov 5, 2018
 
-- Where can `#nullable` go? (Chuck, Fred)
-- Open issues with pattern matching (Neal)
+[C# Language Design Notes for Nov 5, 2018](LDM-2018-11-05.md)
+
+1. Where can #nullable go?
+2. Open issues with pattern matching
 
 ## Nov 14, 2018
 
-- Base call syntax for default interface implementations (Aleksey, David, Michal)
-- Range and Index indexers - where and why? (Immo)
+[C# Language Design Notes for Nov 14, 2018](LDM-2018-11-14.md)
+
+1. Base call syntax for default interface implementations
+2. Switch exhaustiveness and null
 
 ## Nov 28, 2018
 
-- *Triage milestones*
+[C# Language Design Notes for Nov 28, 2018](LDM-2018-11-28.md)
+
+1. Are nullable annotations part of array specifiers?
+2. Cancellation of async-streams
 
 ## Dec 3, 2018
 
+[C# Language Design Notes for Dec 3, 2018](LDM-2018-12-03.md)
+
+1. `using` declaration open issues
+2. Return type of `Range` indexer on array and FX types
 
 ## Dec 5, 2018
 
+[C# Language Design Notes for Dec 5, 2018](LDM-2018-12-05.md)
 
-## Dec 10, 2018
-
+- Tracked nullable states, their correspondence to source and the rules they follow in flow analysis
 
 ## Dec 12, 2018
 
+[C# Language Design Notes for Dec 12, 2018](LDM-2018-12-12.md)
 
-## Schedule ASAP
+- Async-streams misc. questions
+- Compat issue with Dispose pattern in `foreach`
 
+# Upcoming meetings
 
-## Schedule when convenient
+## Dec 17, 2018
 
-- Discussion of refreshing language spec (Neal)
+- Review the [Nullable Reference Types Specification](https://github.com/dotnet/csharplang/blob/master/proposals/nullable-reference-types-specification.md)
 
 ## Recurring topics
 

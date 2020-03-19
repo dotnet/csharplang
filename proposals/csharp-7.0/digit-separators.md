@@ -1,5 +1,4 @@
-Digit Separators
-================
+# Digit separators
 
 Being able to group digits in large numeric literals would have great readability impact and no significant downside. 
 
@@ -7,7 +6,7 @@ Adding binary literals (#215) would increase the likelihood of numeric literals 
 
 We would follow Java and others, and use an underscore `_` as a digit separator. It would be able to occur everywhere in a numeric literal (except as the first and last character), since different groupings may make sense in different scenarios and especially for different numeric bases:
 
-``` c#
+```csharp
 int bin = 0b1001_1010_0001_0100;
 int hex = 0x1b_a0_44_fe;
 int dec = 33_554_432;

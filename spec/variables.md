@@ -140,7 +140,7 @@ At a given location in the executable code of a function member, a variable is s
 
 The formal specification underlying the above informal rules is described in [Initially assigned variables](variables.md#initially-assigned-variables), [Initially unassigned variables](variables.md#initially-unassigned-variables), and [Precise rules for determining definite assignment](variables.md#precise-rules-for-determining-definite-assignment).
 
-The definite assignment states of instance variables of a *struct_type* variable are tracked individually as well as collectively. In additional to the rules above, the following rules apply to *struct_type* variables and their instance variables:
+The definite assignment states of instance variables of a *struct_type* variable are tracked individually as well as collectively. In addition to the rules above, the following rules apply to *struct_type* variables and their instance variables:
 
 *  An instance variable is considered definitely assigned if its containing *struct_type* variable is considered definitely assigned.
 *  A *struct_type* variable is considered definitely assigned if each of its instance variables is considered definitely assigned.
@@ -566,7 +566,7 @@ For an expression *expr* of the form `expr_first ?? expr_second`:
 *  The definite assignment state of *v* before *expr_first* is the same as the definite assignment state of *v* before *expr*.
 *  The definite assignment state of *v* before *expr_second* is the same as the definite assignment state of *v* after *expr_first*.
 *  The definite assignment statement of *v* after *expr* is determined by:
-    * If *expr_first* is a constant expression ([Constant expressions](expressions.md#constant-expressions)) with value null, then the the state of *v* after *expr* is the same as the state of *v* after *expr_second*.
+    * If *expr_first* is a constant expression ([Constant expressions](expressions.md#constant-expressions)) with value null, then the state of *v* after *expr* is the same as the state of *v* after *expr_second*.
 *  Otherwise, the state of *v* after *expr* is the same as the definite assignment state of *v* after *expr_first*.
 
 #### ?: (conditional) expressions

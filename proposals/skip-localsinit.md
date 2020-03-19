@@ -73,7 +73,7 @@ Yet, this is the most requested scenario.
 [alternatives]: #alternatives
 
 - omit `localinits` flag when method is declared in `unsafe` context. 
-That could cause silent and dangerous behavior change from deterministic to nonditerministic in a case of `stackalloc` .
+That could cause silent and dangerous behavior change from deterministic to nondeterministic in a case of `stackalloc`.
 
 - omit `localinits` flag always.
 Even worse than above.

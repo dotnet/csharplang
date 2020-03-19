@@ -110,7 +110,7 @@ new_line_character
     ;
 
 delimited_comment
-    : '/*' delimited_comment_section* asterisk* '/'
+    : '/*' delimited_comment_section* asterisk+ '/'
     ;
 
 delimited_comment_section
@@ -673,7 +673,7 @@ open_brace_escape_sequence
     : '{{'
     ;
 
-    close_brace_escape_sequence
+close_brace_escape_sequence
     : '}}'
     ;
     
@@ -1107,7 +1107,7 @@ class Hello
 }
 ```
 results in the output:
-```
+```console
 hello,
 #if Debug
         world
@@ -1258,7 +1258,7 @@ warning_list
     ;
 ```
 
-A `#pragma warning` directive that omits the warning list affects all warnings. A `#pragma warning` directive the includes a warning list affects only those warnings that are specified in the list.
+A `#pragma warning` directive that omits the warning list affects all warnings. A `#pragma warning` directive that includes a warning list affects only those warnings that are specified in the list.
 
 A `#pragma warning disable` directive disables all or the given set of warnings.
 

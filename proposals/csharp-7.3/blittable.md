@@ -10,14 +10,14 @@ The unmanaged constraint feature will give language enforcement to the class of 
 
 The primary motivation is to make it easier to author low level interop code in C#. Unmanaged types are one of the core building blocks for interop code, yet the lack of support in generics makes it impossible to create re-usable routines across all unmanaged types. Instead developers are forced to author the same boiler plate code for every unmanaged type in their library:
 
-``` c#
+```csharp
 int Hash(Point point) { ... } 
 int Hash(TimeSpan timeSpan) { ... } 
 ```
 
 To enable this type of scenario the language will be introducing a new constraint: unmanaged:
 
-``` c#
+```csharp
 void Hash<T>(T value) where T : unmanaged
 {
     ...
@@ -26,7 +26,7 @@ void Hash<T>(T value) where T : unmanaged
 
 This constraint can only be met by types which fit into the unmanaged type definition in the C# language spec. Another way of looking at it is that a type satisfies the unmanaged constraint iff it can also be used as a pointer. 
 
-``` c#
+```csharp
 Hash(new Point()); // Okay 
 Hash(42); // Okay
 Hash("hello") // Error: Type string does not satisfy the unmanaged constraint
@@ -34,8 +34,7 @@ Hash("hello") // Error: Type string does not satisfy the unmanaged constraint
 
 Type parameters with the unmanaged constraint can use all the features available to unmanaged types: pointers, fixed, etc ... 
 
-
-``` c#
+```csharp
 void Hash<T>(T value) where T : unmanaged
 {
     // Okay
@@ -48,7 +47,7 @@ void Hash<T>(T value) where T : unmanaged
 
 This constraint will also make it possible to have efficient conversions between structured data and streams of bytes. This is an operation that is common in networking stacks and serialization layers:
 
-``` c#
+```csharp
 Span<byte> Convert<T>(ref T value) where T : unmanaged 
 {
     ...
@@ -71,7 +70,7 @@ Compiler generated instance fields, such as those backing auto-implemented prope
 
 For example:
 
-``` c# 
+```csharp
 // Unmanaged type
 struct Point 
 { 
@@ -121,7 +120,7 @@ There are a couple of alternatives to consider:
 The F# language encodes the constraint in the signature file which means C# cannot re-use their representation. A new attribute will need to be chosen for this constraint. Additionally a method which has this constraint must be protected by a mod-req.
 
 ### Blittable vs. Unmanaged
-The F# language has a very [similar feature](https://docs.microsoft.com/en-us/dotnet/articles/fsharp/language-reference/generics/constraints) which uses the keyword unmanaged. The blittable name comes from the use in Midori.  May want to look to precedence here and use unmanaged instead. 
+The F# language has a very [similar feature](https://docs.microsoft.com/dotnet/articles/fsharp/language-reference/generics/constraints) which uses the keyword unmanaged. The blittable name comes from the use in Midori.  May want to look to precedence here and use unmanaged instead. 
 
 **Resolution** The language decide to use unmanaged 
 

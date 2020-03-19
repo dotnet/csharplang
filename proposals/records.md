@@ -103,7 +103,7 @@ Where, for each method named `With` that is an accessible instance member of *e1
 
 ### pattern-matching
 
-See the [Pattern Matching Specification](patterns.md) for a specification of `Deconstruct` and its relationship to pattern-matching.
+See the [Pattern Matching Specification](csharp-8.0/patterns.md#positional-pattern) for a specification of `Deconstruct` and its relationship to pattern-matching.
 
 > **Design Notes**: By virtue of the compiler-generated `Deconstruct` as specified herein, and the specification for pattern-matching, a record declaration
 > ```cs
@@ -246,13 +246,13 @@ For a *record struct* or a `sealed` *record class*, implementations of the metho
 
 A record type has a compiler-generated `public` method `void Deconstruct` unless one with any signature is provided by the user. Each parameter is an `out` parameter of the same name and type as the corresponding parameter of the record type. The compiler-provided implementation of this method shall assign each `out` parameter with the value of the corresponding property.
 
-See [the pattern-matching specification](patterns.md) for the semantics of `Deconstruct`.
+See [the pattern-matching specification](csharp-8.0/patterns.md#positional-pattern) for the semantics of `Deconstruct`.
 
 ##### `With` method
 
 Unless there is a user-declared member named `With` declared, a record type has a compiler-provided method named `With` whose return type is the record type itself, and containing one value parameter corresponding to each *record-parameter* in the same order that these parameters appear in the record type declaration. Each parameter shall have a *caller-receiver default-argument* of the corresponding property.
 
-In an `abstract` record class, the compiler-provided `With` method is abstract. In a record struct, or a sealed record class, the compiler-provided `With` method is `sealed`. Otherwise the compiler-provided `With` method is `virtual and its implementation shall return a new instance produced by invoking the the primary constructor with the parameters as arguments to create a new instance from the parameters, and return that new instance.
+In an `abstract` record class, the compiler-provided `With` method is abstract. In a record struct, or a sealed record class, the compiler-provided `With` method is `sealed`. Otherwise the compiler-provided `With` method is `virtual and its implementation shall return a new instance produced by invoking the primary constructor with the parameters as arguments to create a new instance from the parameters, and return that new instance.
 
 - [ ] **Open issue**: We should also specify under what conditions we override or implement inherited virtual `With` methods or `With` methods from implemented interfaces.
 - [ ] **Open issue**: We should say what happens when we inherit a non-virtual `With` method.

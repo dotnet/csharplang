@@ -10,7 +10,7 @@ Introduce a pattern that would allow types to participate in `fixed` statements.
 
 The language provides a mechanism for pinning managed data and obtain a native pointer to the underlying buffer.
 
-```C#
+```csharp
 fixed(byte* ptr = byteArray)
 {
    // ptr is a native pointer to the first element of the array
@@ -39,12 +39,12 @@ I think the above could be satisfied by recognizing a specially named ref-return
 
 In order to be used by the `fixed` statement the following conditions must be met:
 
-1)	There is only one such member provided for a type.
-1)	Returns by `ref` or `ref readonly`. 
+1. There is only one such member provided for a type.
+1. Returns by `ref` or `ref readonly`. 
 (`readonly` is permitted so that authors of immutable/readonly types could implement the pattern without adding writeable API that could be used in safe code)
-1)  T is an unmanaged type.
+1. T is an unmanaged type.
 (since `T*` becomes the pointer type. The restriction will naturally expand if/when the notion of "unmanaged" is expanded)
-1)	Returns managed `nullptr` when there is no data to pin – probably the cheapest way to convey emptiness.
+1. Returns managed `nullptr` when there is no data to pin – probably the cheapest way to convey emptiness.
 (note that “” string returns a ref to '\0' since strings are null-terminated)
 
 Alternatively for the `#3` we can allow the result in empty cases be undefined or implementation-specific. 
@@ -52,48 +52,45 @@ That, however, may make the API more dangerous and prone to abuse and unintended
 
 ## *Translation* ##
 
-```C#
-    fixed(byte* ptr = thing)
-    { 
-		// <BODY>
-    }
+```csharp
+fixed(byte* ptr = thing)
+{ 
+    // <BODY>
+}
 ```
 
 becomes the following pseudocode (not all expressible in C#)
 
-```C#
+```csharp
+byte* ptr;
+// specially decorated "pinned" IL local slot, not visible to user code.
+pinned ref byte _pinned;
 
-    byte* ptr;
-    // specially decorated "pinned" IL local slot, not visible to user code.
-    pinned ref byte _pinned;
-
-    try
+try
+{
+    // NOTE: null check is omitted for value types 
+    // NOTE: `thing` is evaluated only once (temporary is introduced if necessary) 
+    if (thing != null)
     {
-        // NOTE: null check is omitted for value types 
-        // NOTE: `thing` is evaluated only once (temporary is introduced if necessary) 
-        if (thing != null)
-        {
-            // obtain and "pin" the reference
-            _pinned = ref thing.GetPinnableReference();
+        // obtain and "pin" the reference
+        _pinned = ref thing.GetPinnableReference();
 
-            // unsafe cast in IL
-            ptr = (byte*)_pinned;
-        }
-        else
-        {
-            ptr = default(byte*);
-        }
-
-        // <BODY> 
+        // unsafe cast in IL
+        ptr = (byte*)_pinned;
     }
-    finally   // finally can be omitted when not observable
+    else
     {
-        // "unpin" the object
-        _pinned = nullptr;
+        ptr = default(byte*);
     }
 
+    // <BODY> 
+}
+finally   // finally can be omitted when not observable
+{
+    // "unpin" the object
+    _pinned = nullptr;
+}
 ```
-
 
 ## Drawbacks
 [drawbacks]: #drawbacks
@@ -105,11 +102,11 @@ becomes the following pseudocode (not all expressible in C#)
 
 Users can introduce GetPinnableReference or similar member and use it as
  
-```C#
-    fixed(byte* ptr = thing.GetPinnableReference())
-    { 
-		// <BODY>
-    }
+```csharp
+fixed(byte* ptr = thing.GetPinnableReference())
+{ 
+    // <BODY>
+}
 ```
 
 There is no solution for `System.String` if alternative solution is desired.

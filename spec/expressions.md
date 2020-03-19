@@ -84,7 +84,7 @@ The following sections describe for each construct in the language exactly when 
 
 ### Types of constituent expressions
 
-When an operation is statically bound, the type of a constituent expression (e.g. a receiver, and argument, an index or an operand) is always considered to be the compile-time type of that expression.
+When an operation is statically bound, the type of a constituent expression (e.g. a receiver, an argument, an index or an operand) is always considered to be the compile-time type of that expression.
 
 When an operation is dynamically bound, the type of a constituent expression is determined in different ways depending on the compile-time type of the constituent expression:
 
@@ -479,7 +479,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 x = 0, y = 1, z = 2
 x = 4, y = -1, z = 3
 ```
@@ -1201,7 +1201,7 @@ class A
 #### Grammar ambiguities
 
 The productions for *simple_name* ([Simple names](expressions.md#simple-names)) and *member_access* ([Member access](expressions.md#member-access)) can give rise to ambiguities in the grammar for expressions. For example, the statement:
-```
+```csharp
 F(G<A,B>(7));
 ```
 could be interpreted as a call to `F` with two arguments, `G < A` and `B > (7)`. Alternatively, it could be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument.
@@ -1402,7 +1402,7 @@ namespace N2
 ```
 
 The output of this example is:
-```
+```console
 E.F(1)
 D.G(2)
 C.H(3)
@@ -2135,7 +2135,7 @@ class Test
 }
 ```
 produces the following output:
-```
+```console
 System.Int32
 System.Int32
 System.String
@@ -2481,7 +2481,7 @@ For an operation of the form `-x`, unary operator overload resolution ([Unary op
    long operator -(long x);
    ```
 
-   The result is computed by subtracting `x` from zero. If the value of of `x` is the smallest representable value of the operand type (-2^31 for `int` or -2^63 for `long`), then the mathematical negation of `x` is not representable within the operand type. If this occurs within a `checked` context, a `System.OverflowException` is thrown; if it occurs within an `unchecked` context, the result is the value of the operand and the overflow is not reported.
+   The result is computed by subtracting `x` from zero. If the value of `x` is the smallest representable value of the operand type (-2^31 for `int` or -2^63 for `long`), then the mathematical negation of `x` is not representable within the operand type. If this occurs within a `checked` context, a `System.OverflowException` is thrown; if it occurs within an `unchecked` context, the result is the value of the operand and the overflow is not reported.
 
    If the operand of the negation operator is of type `uint`, it is converted to type `long`, and the type of the result is `long`. An exception is the rule that permits the `int` value -2147483648 (-2^31) to be written as a decimal integer literal ([Integer literals](lexical-structure.md#integer-literals)).
 
@@ -2945,7 +2945,7 @@ The predefined subtraction operators are listed below. The operators all subtrac
 
    |      |      |      |      |      |      |     |
    |:----:|:----:|:----:|:----:|:----:|:----:|:---:|
-   | NaN  | y    | +0   | -0   | +inf | -inf | NaN | 
+   |      | y    | +0   | -0   | +inf | -inf | NaN | 
    | x    | z    | x    | x    | -inf | +inf | NaN | 
    | +0   | -y   | +0   | +0   | -inf | +inf | NaN | 
    | -0   | -y   | -0   | +0   | -inf | +inf | NaN | 
@@ -3183,7 +3183,7 @@ The operators compare the operands according to the rules of the IEEE 754 standa
 *  If either operand is NaN, the result is `false` for all operators except `!=`, for which the result is `true`. For any two operands, `x != y` always produces the same result as `!(x == y)`. However, when one or both operands are NaN, the `<`, `>`, `<=`, and `>=` operators do not produce the same results as the logical negation of the opposite operator. For example, if either of `x` and `y` is NaN, then `x < y` is `false`, but `!(x >= y)` is `true`.
 *  When neither operand is NaN, the operators compare the values of the two floating-point operands with respect to the ordering
 
-   ```
+   ```csharp
    -inf < -max < ... < -min < -0.0 == +0.0 < +min < ... < +max < +inf
    ```
 
@@ -3286,7 +3286,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 True
 False
 False
@@ -3830,7 +3830,7 @@ class Test
 }
 ```
 the local variable `x` is captured by the anonymous function, and the lifetime of `x` is extended at least until the delegate returned from `F` becomes eligible for garbage collection (which doesn't happen until the very end of the program). Since each invocation of the anonymous function operates on the same instance of `x`, the output of the example is:
-```
+```console
 1
 2
 3
@@ -3889,7 +3889,7 @@ class Test
 }
 ```
 produces the output:
-```
+```console
 1
 3
 5
@@ -3908,7 +3908,7 @@ static D[] F() {
 }
 ```
 the output is:
-```
+```console
 5
 5
 5
@@ -3926,7 +3926,7 @@ static D[] F() {
 }
 ```
 only one instance of the iteration variable is captured, which produces the output:
-```
+```console
 3
 3
 3
@@ -3945,7 +3945,7 @@ static D[] F() {
 }
 ```
 the three delegates capture the same instance of `x` but separate instances of `y`, and the output is:
-```
+```console
 1 1
 2 1
 3 1
@@ -3973,7 +3973,7 @@ class Test
 }
 ```
 the two anonymous functions capture the same instance of the local variable `x`, and they can thus "communicate" through that variable. The output of the example is:
-```
+```console
 5
 10
 ```
@@ -4131,11 +4131,11 @@ from x in ( e ) . Cast < T > ( )
 ```
 
 A `join` clause that explicitly specifies a range variable type
-```
+```csharp
 join T x in e on k1 equals k2
 ```
 is translated into
-```
+```csharp
 join x in ( e ) . Cast < T > ( ) on k1 equals k2
 ```
 

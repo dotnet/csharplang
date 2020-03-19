@@ -15,7 +15,7 @@ Currently it is not possible to apply attributes to the backing fields of auto-i
 
 In short, the following would be legal C# and not produce a warning:
 
-```cs
+```csharp
 [Serializable]
 public class Foo 
 {
@@ -26,7 +26,7 @@ public class Foo
 
 This would result in the field-targeted attributes being applied to the compiler-generated backing field:
 
-```cs
+```csharp
 [Serializable]
 public class Foo 
 {
@@ -43,7 +43,7 @@ public class Foo
 
 As mentioned, this brings parity with event syntax from C# 1.0 as the following is already legal and behaves as expected:
 
-```cs
+```csharp
 [Serializable]
 public class Foo
 {
@@ -67,5 +67,3 @@ There are two potential drawbacks to implementing this change:
 [unresolved]: #unresolved-questions
 
 ## Design meetings
-
-

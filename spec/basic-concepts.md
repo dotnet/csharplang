@@ -790,12 +790,13 @@ class Test
 }
 ```
 creates an instance of class `A` and an instance of class `B`. These objects become eligible for garbage collection when the variable `b` is assigned the value `null`, since after this time it is impossible for any user-written code to access them. The output could be either
-```
+
+```console
 Destruct instance of A
 Destruct instance of B
 ```
 or
-```
+```console
 Destruct instance of B
 Destruct instance of A
 ```
@@ -851,7 +852,7 @@ class Test
 ```
 
 In the above program, if the garbage collector chooses to run the destructor of `A` before the destructor of `B`, then the output of this program might be:
-```
+```console
 Destruct instance of A
 Destruct instance of B
 A.F
