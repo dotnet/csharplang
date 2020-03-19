@@ -76,3 +76,45 @@ each primary constructor parameter to the corresponding property of the other ty
 ```C#
 override Equals(object o) => Equals(o as T);
 ```
+
+## `with` expression
+
+A `with` expression is a new expression using the following syntax.
+
+```antlr
+with_expression
+    : switch_expression
+    | switch_expression 'with' anonymous_object_initializer
+```
+
+A `with` expression allows for "non-destructive mutation", designed to
+produce a copy of the receiver expression with modifications to properties
+listed in the `anonymous_object_initializer`.
+
+A valid `with` expression has a receiver with a non-target-typed, non-null type. The receiver type must contain an instance method called `With` with
+the appropriate parameters and return type. It is an error if there are multiple non-override `With` methods. If there are multiple `With` overrides,
+there must be a non-override `With` method, which is the target method. Otherwise, there must be exactly one `With` method.
+
+On the right hand side of the `with` expression is an `anonymous_object_initializer` with a
+sequence of assignments with a field or property of the receiver on the left hand side of the
+assignment, and an arbitrary expression on the right hand side.
+
+Given a target `With` method, the return type must be the type of the receiver expression type, or a base type thereof. For each parameter of
+the `With` method, there must be a corresponding field or property on the
+receiver type with the same name and the same type.
+
+Given a valid `With` method, the evaluation of a `with` expression is equivalent to calling the `With` method with the expressions in the
+`anonymous_object_initializer` substituted for the parameter of the same
+name as the property on the left hand side. If there is no matching property
+for a given parameter in the `anonymous_object_initializer`, the argument
+is the evaluation of the field or property of the same name on the receiver.
+
+The order of evaluation of side effects is as follows, with each expression
+evaluated exactly once:
+
+1. Receiver expression
+
+2. Expressions in the `anonymous_object_initializer`, in lexical order
+
+3. The evaluation of any properties matching the `With` method parameters,
+in order of definition of the `With` method parameters.
