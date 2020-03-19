@@ -176,6 +176,7 @@ In an unsafe context, an implicit conversion exists from an address-of expressio
 - A single method `M` is selected corresponding to a method invocation of the form `E(A)` with the following modifications:
    - The arguments list `A` is a list of expressions, each classified as a variable and with the type and modifier (`ref`, `out`, or `in`) of the corresponding _formal\_parameter\_list_ of `D`.
    - The candidate methods are only those methods that are only those methods that are applicable in their normal form, not those applicable in their expanded form.
+   - The candidate methods are only those methods that are static.
 - If the algorithm of Method invocations produces an error, then a compile-time error occurs. Otherwise, the algorithm produces a single best method `M` having the same number of parameters as `F` and the conversion is considered to exist.
 - The selected method `M` must be compatible (as defined above) with the function pointer type `F`. Otherwise, a compile-time error occurs.
 - The result of the conversion is a function pointer of type `F`.
