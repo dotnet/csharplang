@@ -101,7 +101,7 @@ assignment, and an arbitrary expression on the right-hand side which is implicit
 of the left-hand side.
 
 Given a target `With` method, the return type must be the type of the receiver expression type, or a base type thereof. For each parameter of
-the `With` method, there must be an accessible corresponding instance field or property on the
+the `With` method, there must be an accessible corresponding instance field or readable property on the
 receiver type with the same name and the same type. Each property or field in the right-hand side of the With
 expression must also correspond to a parameter of the same name in the `With` method.
 
