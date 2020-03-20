@@ -91,17 +91,19 @@ A `with` expression allows for "non-destructive mutation", designed to
 produce a copy of the receiver expression with modifications to properties
 listed in the `anonymous_object_initializer`.
 
-A valid `with` expression has a receiver with a non-target-typed, non-null type. The receiver type must contain an instance method called `With` with
+A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible instance method called `With` with
 the appropriate parameters and return type. It is an error if there are multiple non-override `With` methods. If there are multiple `With` overrides,
 there must be a non-override `With` method, which is the target method. Otherwise, there must be exactly one `With` method.
 
 On the right hand side of the `with` expression is an `anonymous_object_initializer` with a
-sequence of assignments with a field or property of the receiver on the left hand side of the
-assignment, and an arbitrary expression on the right hand side.
+sequence of assignments with a field or property of the receiver on the left-hand side of the
+assignment, and an arbitrary expression on the right-hand side which is implicitly convertible to the type
+of the left-hand side.
 
 Given a target `With` method, the return type must be the type of the receiver expression type, or a base type thereof. For each parameter of
-the `With` method, there must be a corresponding field or property on the
-receiver type with the same name and the same type.
+the `With` method, there must be an accessible corresponding instance field or property on the
+receiver type with the same name and the same type. Each property or field in the right-hand side of the With
+expression must also correspond to a parameter of the same name in the `With` method.
 
 Given a valid `With` method, the evaluation of a `with` expression is equivalent to calling the `With` method with the expressions in the
 `anonymous_object_initializer` substituted for the parameter of the same
