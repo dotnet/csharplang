@@ -61,3 +61,18 @@ For a record struct or a record class:
 
 * A public get-only auto-property is created. Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
 
+### Equality members
+
+Record types produce synthesized implementations for the following methods:
+
+* `object.GetHashCode()` override, unless it is sealed or user provided
+* `object.Equals(object)` override, unless it is sealed or user provided
+* `T Equals(T)` method, where `T` is the current type
+
+`T Equals(T)` is specified to perform value equality, comparing the property with same name as
+each primary constructor parameter to the corresponding property of the other type.
+`object.Equals` performs the equivalent of
+
+```C#
+override Equals(object o) => Equals(o as T);
+```
