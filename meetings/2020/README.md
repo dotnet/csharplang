@@ -38,7 +38,7 @@
 
 ## March 23, 2020
 
-- Feedback from MVP Summit on records etc. (Mads, Andy)
+- Builder-based records (Cyrus)
 
 ## March 18, 2020
 
