@@ -149,7 +149,7 @@ The scope of a *using_directive* extends over the *namespace_member_declaration*
 
 ### Using alias directives
 
-A *using_alias_directive* introduces an identifier that serves as an alias for a namespace or type within the immediately enclosing compilation unit or namespace body.
+A *using_alias_directive* introduces an identifier that serves as an alias for a namespace or accessible type within the immediately enclosing compilation unit or namespace body.
 
 ```antlr
 using_alias_directive
@@ -434,7 +434,7 @@ The *namespace_name* referenced by a *using_namespace_directive* is resolved in 
 
 ### Using static directives
 
-A *using_static_directive* imports the nested types and static members contained directly in a type declaration into the immediately enclosing compilation unit or namespace body, enabling the identifier of each member and type to be used without qualification.
+A *using_static_directive* imports the nested types and static members contained directly in an accessible type declaration into the immediately enclosing compilation unit or namespace body, enabling the identifier of each member and type to be used without qualification.
 
 ```antlr
 using_static_directive
