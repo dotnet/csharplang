@@ -34,7 +34,7 @@
 ## March 25, 2020
 
 - https://github.com/dotnet/csharplang/issues/3259 Open issues with native integers (Chuck)
-- Records design (Mads, Andy)
+- Target-typed `new` (Julien)
 
 ## March 23, 2020
 
