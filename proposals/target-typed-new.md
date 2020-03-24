@@ -72,6 +72,7 @@ Action a = new(() => {}); // "new" is redundant
 
 (int a, int b) t = new(); // ruled out by "use of struct default constructor"
 Action a = new(); // no constructor found
+```
 
 ### Miscellaneous
 
