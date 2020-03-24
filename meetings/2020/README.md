@@ -31,11 +31,6 @@
 
 ## March 30, 2020
 
-## March 23, 2020
-
-- Triage
-- Builder-based records (Cyrus)
-
 ## March 18, 2020
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
@@ -58,9 +53,18 @@ Overview of meetings and agendas for 2020
 
 ## March 25, 2020
 
+[C# Language Design Notes for March 25, 2020](LDM-2020-03-25.md)
+
 1. Open issues with native int
 
 2. Open issues with target-typed new
+
+## March 23, 2020
+
+[C# Language Design Notes for March 23, 2020](LDM-2020-03-23.md)
+
+1. Triage
+2. Builder-based records
 
 ## March 9, 2020
 
