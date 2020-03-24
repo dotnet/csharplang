@@ -34,7 +34,7 @@
 ## March 25, 2020
 
 - https://github.com/dotnet/csharplang/issues/3259 Open issues with native integers (Chuck)
-- Target-typed `new` (Julien)
+- https://github.com/dotnet/csharplang/blob/master/proposals/target-typed-new.md Target-typed `new` (Julien)
 
 ## March 23, 2020
 
