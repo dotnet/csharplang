@@ -7,7 +7,7 @@
 - https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 - https://github.com/dotnet/csharplang/issues/140 `field` keyword in properties (cyrusn)
-
+- https://github.com/dotnet/roslyn/issues/39865    Function pointer calling conventions (frsilb)
 ## Recurring topics
 
 - *Triage championed features*
