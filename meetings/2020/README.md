@@ -31,11 +31,6 @@
 
 ## March 30, 2020
 
-## March 25, 2020
-
-- https://github.com/dotnet/csharplang/issues/3259 Open issues with native integers (Chuck)
-- https://github.com/dotnet/csharplang/blob/master/proposals/target-typed-new.md Target-typed `new` (Julien)
-
 ## March 23, 2020
 
 - Triage
@@ -60,6 +55,12 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## March 25, 2020
+
+1. Open issues with native int
+
+2. Open issues with target-typed new
 
 ## March 9, 2020
 
