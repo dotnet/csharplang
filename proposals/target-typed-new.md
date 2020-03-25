@@ -55,6 +55,8 @@ A *target_typed_new* expression does not have a type. However, there is a new *o
 
 Given a target type `T`, the type `T0` is `T`'s underlying type if `T` is an instance of `System.Nullable`. Otherwise `T0` is `T`. The meaning of a *target_typed_new* expression that is converted to the type `T` is the same as the meaning of a corresponding *object_creation_expression* that specifies `T0` as the type.
 
+It is a compile-time error if a *target_typed_new* is used as an operand of a unary or binary operator.
+
 > **Open Issue:** should we allow delegates and tuples as the target-type?
 
 The above rules include delegates (a reference type) and tuples (a struct type). Although both types are constructible, if the type is inferable, an anonymous function or a tuple literal can already be used.
