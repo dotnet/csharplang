@@ -47,15 +47,11 @@ target_typed_new
     ;
 ```
 
-A *target_typed_new* expression does not have a type. However, there is a new *object creation conversion* that is an implicit conversion from expression, that exists from a *target_typed_new* to every type. It is an error for this conversion to be applied unless the type being converted to is
-- a `struct` type; or
-- a `class` type that is not an anonymous type; or
-- a `delegate` type; or
-- a type parameter.
+A *target_typed_new* expression does not have a type. However, there is a new *object creation conversion* that is an implicit conversion from expression, that exists from a *target_typed_new* to every type.
 
 Given a target type `T`, the type `T0` is `T`'s underlying type if `T` is an instance of `System.Nullable`. Otherwise `T0` is `T`. The meaning of a *target_typed_new* expression that is converted to the type `T` is the same as the meaning of a corresponding *object_creation_expression* that specifies `T0` as the type.
 
-It is a compile-time error if a *target_typed_new* is used as an operand of a unary or binary operator.
+It is a compile-time error if a *target_typed_new* is used as an operand of a unary or binary operator, or if it is used where it is not subject to an *object creation conversion*.
 
 > **Open Issue:** should we allow delegates and tuples as the target-type?
 
@@ -78,7 +74,7 @@ The following are consequences of the specification:
 - It is also disallowed as a `ref`.
 - The following kinds of types are not permitted as targets of the conversion
   - **Enum types:** not all enum types contain the constant zero, so it should be desirable to use the explicit enum member.	It is a compile-time error if a *target_typed_new* is used as an operand of a unary or binary operator.
-  - **Interface types:** this is a niche feature and it should be preferable to explicitly mention the type.	
+  - **Interface types:** This would work the same as the corresponding creation expression for COM types.
   - **Array types:** arrays need a special syntax to provide the length.	
   - **dynamic:** we don't allow `new dynamic()`, so we don't allow `new()` with `dynamic` as a target type.	
   - All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.	
@@ -107,3 +103,4 @@ Most of complaints about types being too long to duplicate in field initializati
 - [LDM-2018-06-25](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-06-25.md)
 - [LDM-2018-08-22](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-08-22.md#target-typed-new)
 - [LDM-2018-10-17](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md)
+- [LDM-2020-03-25](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-03-25.md)
