@@ -47,7 +47,7 @@ target_typed_new
     ;
 ```
 
-There is a new *object creation conversion* that is an implicit conversion from expression, that exists from a *target_typed_new* to every type. It is an error for this conversion to be applied unless the type being converted to is
+A *target_typed_new* expression does not have a type. However, there is a new *object creation conversion* that is an implicit conversion from expression, that exists from a *target_typed_new* to every type. It is an error for this conversion to be applied unless the type being converted to is
 - a `struct` type; or
 - a `class` type; or
 - a `delegate` type; or
