@@ -31,37 +31,29 @@ Instantiate an object without spelling out the type.
 private readonly static object s_syncObj = new();
 ```
 
-## Detailed design
+## Specification
 [design]: #detailed-design
 
-The *object_creation_expression* syntax would be modified to make the *type* optional when parentheses are present. This is required to address the ambiguity with *anonymous_object_creation_expression*.
+A new syntactic form, *target_typed_new* of the *object_creation_expression* is accepted in which the *type* is optional.
+
 ```antlr
 object_creation_expression
-    : 'new' type? '(' argument_list? ')' object_or_collection_initializer?
+    : 'new' type '(' argument_list? ')' object_or_collection_initializer?
     | 'new' type object_or_collection_initializer
+    | target_typed_new
+    ;
+target_typed_new
+    : 'new' '(' argument_list? ')' object_or_collection_initializer?
     ;
 ```
 
-A target-typed `new` is convertible to any type. As a result, it does not contribute to overload resolution. This is mainly to avoid unpredictable breaking changes.
+There is a new *object creation conversion* that is an implicit conversion from expression, that exists from a *target_typed_new* to every type. It is an error for this conversion to be applied unless the type being converted to is
+- a `struct` type; or
+- a `class` type; or
+- a `delegate` type; or
+- a type parameter.
 
-The argument list and the initializer expressions will be bound after the type is determined.
-
-The type of the expression would be inferred from the target-type which would be required to be one of the following:
-
-- **Any struct type** (including tuple types)
-- **Any reference type** (including delegate types)
-- **Any type parameter** with a constructor or a `struct` constraint
-
-with the following exceptions:
-
-- **Enum types:** not all enum types contain the constant zero, so it should be desirable to use the explicit enum member.
-- **Interface types:** this is a niche feature and it should be preferable to explicitly mention the type.
-- **Array types:** arrays need a special syntax to provide the length.
-- **dynamic:** we don't allow `new dynamic()`, so we don't allow `new()` with `dynamic` as a target type.
-
-All the other types that are not permitted in the *object_creation_expression* are excluded as well, for instance, pointer types.
-
-When the target type is a nullable value type, the target-typed `new` will be converted to the underlying type instead of the nullable type.
+Given a target type `T`, the type `T0` is `T`'s underlying type if `T` is an instance of `System.Nullable`. Otherwise `T0` is `T`. The meaning of a *target_typed_new* expression that is converted to the type `T` is the same as the meaning of a corresponding *object_creation_expression* that specifies `T0` as the type.
 
 > **Open Issue:** should we allow delegates and tuples as the target-type?
 
@@ -76,13 +68,12 @@ Action a = new(); // no constructor found
 
 ### Miscellaneous
 
-`throw new()` is allowed.
+The following are consequences of the specification:
 
-Target-typed `new` is not allowed with binary operators.
-
-It is disallowed when there is no type to target: unary operators, collection of a `foreach`, in a `using`, in a deconstruction, in an `await` expression, as an anonymous type property (`new { Prop = new() }`), in a `lock` statement, in a `sizeof`, in a `fixed` statement, in a member access (`new().field`), in a dynamically dispatched operation (`someDynamic.Method(new())`), in a LINQ query, as the operand of the `is` operator, as the left operand of the `??` operator,  ...
-
-It is also disallowed as a `ref`.
+- `throw new()` is allowed (the target type is `System.Exception`)
+- Target-typed `new` is not allowed with binary operators.
+- It is disallowed when there is no type to target: unary operators, collection of a `foreach`, in a `using`, in a deconstruction, in an `await` expression, as an anonymous type property (`new { Prop = new() }`), in a `lock` statement, in a `sizeof`, in a `fixed` statement, in a member access (`new().field`), in a dynamically dispatched operation (`someDynamic.Method(new())`), in a LINQ query, as the operand of the `is` operator, as the left operand of the `??` operator,  ...
+- It is also disallowed as a `ref`.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
