@@ -76,8 +76,6 @@ Action a = new(); // no constructor found
 
 ### Miscellaneous
 
-`throw new()` is disallowed.
-
 Target-typed `new` is not allowed with binary operators.
 
 It is disallowed when there is no type to target: unary operators, collection of a `foreach`, in a `using`, in a deconstruction, in an `await` expression, as an anonymous type property (`new { Prop = new() }`), in a `lock` statement, in a `sizeof`, in a `fixed` statement, in a member access (`new().field`), in a dynamically dispatched operation (`someDynamic.Method(new())`), in a LINQ query, as the operand of the `is` operator, as the left operand of the `??` operator,  ...
