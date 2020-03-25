@@ -47,13 +47,13 @@ compilation_unit
     ;
 ```
 
-Only one *compilation_unit* is allowed to have the *statement*s. 
+Only one *compilation_unit* is allowed to have *statement*s. 
 
 Example:
 
 ``` c#
-if (args.Length == 0
-    || !int.TryParse(args[0], out int n)
+if (System.Environment.CommandLine.Length == 0
+    || !int.TryParse(System.Environment.CommandLine, out int n)
     || n < 0) return;
 Console.WriteLine(Fib(n).curr);
 
@@ -87,7 +87,7 @@ source code.
 
 The method is designated as the entry point of the program. Explicitly declared methods that by convention 
 could be considered as an entry point candidates are ignored. A warning is reported when that happens. It is
-an error to specify `-main:<type>` compiler switch.
+an error to specify `-main:<type>` compiler switch when there are top-level statements.
 
 Async operations are allowed in top-level statements to the degree they are allowed in statements within
 a regular async entry point method. However, they are not required, if `await` expressions and other async
@@ -104,8 +104,8 @@ static class $Program
 {
     static void $Main()
     {
-        if (args.Length == 0
-            || !int.TryParse(args[0], out int n)
+        if (System.Environment.CommandLine.Length == 0
+            || !int.TryParse(System.Environment.CommandLine, out int n)
             || n < 0) return;
         Console.WriteLine(Fib(n).curr);
         
@@ -140,7 +140,8 @@ static class $Program
 ### Scope of top-level local variables and local functions
 
 Even though top-level local variables and functions are "wrapped" 
-into the generated entry point method, they should still be in scope throughout the program.
+into the generated entry point method, they should still be in scope throughout the program in
+every compilation unit.
 For the purpose of simple-name evaluation, once the global namespace is reached:
 - First, an attempt is made to evaluate the name within the generated entry point method and 
   only if this attempt fails 
