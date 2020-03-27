@@ -4,10 +4,6 @@
 
 ## Schedule when convenient
 
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
-- https://github.com/dotnet/csharplang/issues/140 `field` keyword in properties (cyrusn)
-- https://github.com/dotnet/roslyn/issues/39865    Function pointer calling conventions (frsilb)
 ## Recurring topics
 
 - *Triage championed features*
@@ -16,20 +12,33 @@
 
 ## April 15, 2020
 
+
+## April 13, 2020
+
+- Record Monday (Andy, Mads)
+
+## April 8, 2020
+
+- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 - Is `e is dynamic` a "pure" null check? (Neal)
 - Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
 - https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
 - Reconsider: Inferred type of an or pattern is the "common type" of the two inferred types (Neal)
-
-## April 13, 2020
-
-## April 8, 2020
+- Triage (focus on features championed by Neal)
 
 ## April 6, 2020
 
+- Record Monday (Andy, Mads)
+
 ## April 1, 2020
 
+- https://github.com/dotnet/roslyn/issues/39865    Function pointer calling conventions (frsilb)
+- https://github.com/dotnet/csharplang/issues/140 `field` keyword in properties (cyrusn)
+
 ## March 30, 2020
+
+- Record Monday (Andy, Mads)
 
 ## March 18, 2020
 
