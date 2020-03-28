@@ -19,13 +19,13 @@
 
 ## April 8, 2020
 
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 - Is `e is dynamic` a "pure" null check? (Neal)
 - Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
-- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
 - Reconsider: Inferred type of an or pattern is the "common type" of the two inferred types (Neal)
+- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
 - Triage (focus on features championed by Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
 ## April 6, 2020
 
