@@ -36,10 +36,6 @@
 - https://github.com/dotnet/roslyn/issues/39865    Function pointer calling conventions (frsilb)
 - https://github.com/dotnet/csharplang/issues/140 `field` keyword in properties (cyrusn)
 
-## March 30, 2020
-
-- Record Monday (Andy, Mads)
-
 ## March 18, 2020
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
@@ -59,6 +55,12 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## March 30, 2020
+
+1. Record Monday
+
+[C# Language Design Notes for March 30, 2020](LDM-2020-03-30.md)
 
 ## March 25, 2020
 
