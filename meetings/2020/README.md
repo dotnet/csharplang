@@ -12,6 +12,7 @@
 
 ## April 15, 2020
 
+https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
 
 ## April 13, 2020
 
