@@ -34,7 +34,7 @@ https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partia
 
 ## April 1, 2020
 
-- https://github.com/dotnet/roslyn/issues/39865    Function pointer calling conventions (frsilb)
+- https://github.com/dotnet/csharplang/issues/3324    Function pointer calling conventions (frsilb)
 - https://github.com/dotnet/csharplang/issues/140 `field` keyword in properties (cyrusn)
 
 ## March 18, 2020
