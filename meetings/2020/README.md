@@ -32,11 +32,6 @@ https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partia
 
 - Record Monday (Andy, Mads)
 
-## April 1, 2020
-
-- https://github.com/dotnet/csharplang/issues/3324    Function pointer calling conventions (frsilb)
-- https://github.com/dotnet/csharplang/issues/140 `field` keyword in properties (cyrusn)
-
 ## March 18, 2020
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
@@ -56,6 +51,14 @@ https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partia
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## April 1, 2020
+
+[C# Language Design Notes for April 1, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-01.md)
+
+1. Function pointer design adjustments
+
+2. `field` keyword in properties
 
 ## March 30, 2020
 
