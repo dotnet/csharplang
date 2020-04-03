@@ -9,10 +9,23 @@
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+## April 29, 2020
+
+- Design review
+
+## April 27, 2020
+
+- Record Monday (Andy, Mads)
+
+## April 22, 2020
+
+## April 20, 2020
+
+- Record Monday (Andy, Mads)
 
 ## April 15, 2020
 
-https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
+- https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
 
 ## April 13, 2020
 
@@ -30,7 +43,7 @@ https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partia
 
 ## April 6, 2020
 
-- Record Monday (Andy, Mads)
+- Record Monday: Init-only properties deep dive (Jared)
 
 ## March 18, 2020
 
