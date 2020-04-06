@@ -48,7 +48,7 @@ present in the class. At runtime the primary constructor
 1. executes the instance field initializers appearing in the class-body; and then
     invokes the base class constructor with no arguments.
 
-1. initializes compiler-generated backing fields for the properties corresponding to the value parameters (if these properties are compiler-provided; see [Synthesized properties](#Synthesized Properties))
+1. initializes compiler-generated backing fields for the properties corresponding to the value parameters (if these properties are compiler-provided
 
 ### Properties
 
