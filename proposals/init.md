@@ -64,8 +64,8 @@ An init only field is declared by using the `init` modifier.
 ```cs
 class Student
 {
-    public init FirstName;
-    public init LastName;
+    public init string FirstName;
+    public init string LastName;
 }
 ```
 
@@ -87,22 +87,33 @@ var s = new Student()
 s.LastName = "Parsons"; // Error: LastName is `readonly`.
 ```
 
-The rules around setting a `init` field inside a constructor allow the 
-following (just as simply `readonly` would):
+The rules around when `init` is settable extend across type hierarchies. If the 
+member is accessible and the object is known to be in the construction phase
+then the member is settable. That specifically allows for the following:
 
 ```cs
 class Base
 {
-    protected init bool Value;
+    public init bool Value;
 }
 
 class Derived : Base
 {
     Derived()
     {
+        // Not allowed by readonly but is allowed by init
         Value = true;
     }
 }
+
+class Consumption
+{
+    void Example()
+    {
+        var d = new Derived() { Value = true; };
+    }
+}
+
 ```
 
 An instance property can likewise add the `init` modifier to the `set`
@@ -118,34 +129,84 @@ class Student
 }
 ```
 
+At the point a `init set` member is invoked the instance is known to be 
+in the open construction phase. Hence an `init set` is free to call other 
+`init set` members as well as modify `init` or `readonly` fields.
+
+```cs
+class Complex
+{
+    readonly int Field1;
+    int Field2;
+    int Prop1 { get; init set; }
+    int Prop2
+    {
+        get => 42;
+        set
+        {
+            Field1 = 13; // okay
+            Field2 = 13; // okay
+            Prop1 = 13; // okay
+        }
+    }
+}
+```
+
 When `init set` is used in a virtual property then all the overrides must also
 be marked as `init set`. Likewise it is not possible to override a simple 
 `set` with `init set`.
+
+An `interface` declaration can also particpate in `init` style initalization 
+via the following pattern:
+
+```cs
+interface IPerson
+{
+    string Name { get; init set; }
+}
+
+class Init
+{
+    void M<T>() where T : IPerson, new()
+    {
+        var local = new T()
+        {
+            Name = "Jared"
+        };
+        local.Name = "Jraed"; // Error
+    }
+}
+```
 
 Restrictions of this feature:
 - The `init` modifier can only be used on:
     - Instance fields of a `class` or `struct`. Use on `static` fields are 
     illegal
-    - Instance property `set` accessors inside a `class` or `struct`.
+    - Instance property `set` accessors on `class`, `struct` or `interface`.
 - The `init` modifier cannot be paired with `readonly`. 
 - All overrides of a property `set` must match the original declaration with
-respect to `init`
+respect to `init`. This includes implementing interface members.
 
 ### Metadata encoding 
 The `init` members will be encoded using the attribute
-`Microsoft.CodeAnalysis.InitOnlyAttribute` which will have the following 
-declaration:
+`System.Runtime.CompilerServices.InitOnlyAttribute` which will have the
+following declaration:
 
 ```cs
-namespace Microsoft.CodeAnalysis
+namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.All)]
-    internal sealed class InitOnlyAttribute : Attribute
+    public sealed class InitOnlyAttribute : Attribute
     {
 
     }
 }
 ```
+
+This attribute will be matched by full name. There is no requiremnet that it 
+appear in the core library. In the case there are mulitple attributes by this
+name available then the compiler will pick the one defined in the core library
+should one exist.
 
 An `init` field will be emitted as a `readonly` field that is marked with an 
 `InitOnlyAttribute` instance.
@@ -165,8 +226,8 @@ struct Circle
 }
 ```
 
-An `init set` method will be emitted as a normal `set` accessor that is 
-annotated with the `InitOnlyAttribute`:
+An `init set` method will be emitted as a normal `set` accessor where the
+`value` parameter contains a modreq referring to `InitOnlyAttribute`.
 
 
 ```cs
@@ -179,7 +240,7 @@ struct Circle
 
 struct Circle
 {
-    public int Radius { get; [InitOnly] set; }
+    public int Radius { get; modreq(InitOnly) set; }
 }
 ```
 
@@ -201,6 +262,9 @@ If we want to make the removal of `init` from a property a compatible change
 then it will force our hand on the modreq vs. attributes decision below. If 
 one the other hand this is seen as a non-interesting scenario then this will 
 make the modreq vs. attribute decision less impactful.
+
+**Resolution**
+This scenario is not seen as compelling by LDM.
 
 ### Modreqs vs. attributes
 The emit strategy for `init` property accessors must choose between using 
@@ -246,8 +310,25 @@ fields is a relaxation of an existing rule. All existing compilers already
 support `readonly` and hence an attribute serves fine as a way to alert them
 that write access can be extended in certain circumstances.
 
+**Resolution**
+The feature will use a modreq to encode the property `init` setter. The
+compelling factors were (in no particular order):
+
+1. Desire to discourage older compilers from violating `init` semantics
+1. Desire to make adding or removing `init` in a `virtual` declaratio or 
+`interface` both a source and binary breaking change.
+
+Given there was also no significant support for removing `init` to be a 
+binary compatible change it made the choice of using modreq straight forward.
+
 ### init vs. initonly
 Syntax debate time.
+
+**Resolution**
+There was no other syntax which was overwelming favored in LDM. For the time 
+being we will be moving forward with the initial design laid out in this 
+document. This may change as the feature progresses and LDM members have time
+to digest the design here.
 
 ### Warn on failed init
 Consider the following scenario. A type declares an `init` only member which
@@ -267,6 +348,13 @@ Further if we believe there is value here in the overall scenario of forcing
 object creators to be warned / error'd about specific fields then this 
 likely makes sense as a general feature. There is no reason it should be 
 limited to just `init` members.
+
+**Resolution**
+There will be no warning on consumption of `init` fields and properties.
+
+LDM wants to have a broader discussion on the idea of required fields and
+properties. That may cause us to come back and reconsider our position on
+`init` members and validation.
 
 ### Allow init as a type modifier
 In the same way the `readonly` modifier can be applied to a `struct` to 
