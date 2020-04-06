@@ -268,6 +268,28 @@ fields is a relaxation of an existing rule. All existing compilers already
 support `readonly` and hence an attribute serves fine as a way to alert them
 that write access can be extended in certain circumstances.
 
+### init vs. initonly
+Syntax debate time.
+
+### Warn on failed init
+Consider the following scenario. A type declares an `init` only member which
+is not set in the constructor. Should the code which constructs the object 
+get a warning if they failed to initialize the value?
+
+At that point it is clear the field will never be set and hence has a lot of
+similarities with the warning around failing to initialize `private` data. 
+Hence a warning would seemingly have some value here?
+
+There are significant downsides to this warning though:
+1. It complicates the compatibility story of changing `readonly` to `init`. 
+1. It requires carrying additional metadata around to denote the members
+which are required to be initialized by the caller.
+
+Further if we believe there is value here in the overall scenario of forcing
+object creators to be warned / error'd about specific fields then this 
+likely makes sense as a general feature. There is no reason it should be 
+limited to just `init` members.
+
 ## Considerations
 
 ### Compatibility
@@ -325,8 +347,24 @@ Such members would have all the restricions that an `init set` accessor does
 in this design. The need is questionable though and this can be safely added
 in a future version of the language in a compatible manner.
 
-### Warn on failed init
-
 ### Generate three accessors
+One potential implementation of `init` properties is to make `init` completely
+separate from `set`. That means that a property can potentially have three 
+different accessors: `get`, `set` and `init`.
 
+This has the potential advantage of allowing the use of modreq to enforce 
+correctness while maintaining binary compatibility. The implementation would
+roughly be the following:
 
+1. An `init` accessor is always emitted if there is a `set`. When not defined 
+by the developer it is simply a reference to `set`. 
+1. The set of a property in an object initializer will always use `init` if 
+present but fall back to `set` if it's missing.
+
+This means that a developer can always safely delete `init` from a property. 
+
+The downside of this design is that is only useful if `init` is **always** 
+emitted when there is a `set`. The language can't know if `init` was deleted
+in the past, it has to assume it was and hence the `init` must always be
+emitted. That would cause a significant metadata expansion and is simply not
+worth the cost of the compatibility here.
