@@ -35,23 +35,20 @@ It is an error to declare a record type without both a parameter list and the `d
 
 ## Members of a record type
 
-In addition to the members declared in the class-body, a record type has the following additional members:
+In addition to the members declared in the class or struct body, a record type has the following additional members:
 
 ### Primary Constructor
 
 A record type has a public constructor whose signature corresponds to the value parameters of the
 type declaration. This is called the primary constructor for the type, and causes the implicitly
-declared default constructor to be suppressed. It is an error to have a primary constructor and
-a constructor with the same signature already present in the class.
-At runtime the primary constructor 
+declared default constructor to be suppressed (including the struct parameterless constructor).
+It is an error to have a primary constructor and a constructor with the same signature already
+present in the class. At runtime the primary constructor
 
 1. executes the instance field initializers appearing in the class-body; and then
     invokes the base class constructor with no arguments.
 
 1. initializes compiler-generated backing fields for the properties corresponding to the value parameters (if these properties are compiler-provided; see [Synthesized properties](#Synthesized Properties))
-
-
-[ ] TODO: add base call syntax and specification about choosing base constructor through overload resolution
 
 ### Properties
 
