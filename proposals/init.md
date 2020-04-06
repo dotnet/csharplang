@@ -1,9 +1,65 @@
 Init Only Members
 =====
 
-**Wildly non-detailed sketch, reader beware**
+## Summary
+This proposal adds the concept of init-only members to C#. Members which can be
+written at the point of objection creation but become `readonly` once object
+creation has completed. This allows for a much more flexible immutable model
+in C#. 
 
-## Syntax 
+## Motivation
+The underlying mechanisms for building immutable data in C# haven't changed
+since 1.0. They remain
+
+1. Declaring fields as `readonly`.
+1. Declaring properties that contain only a `get` accessor.
+
+These mechanisms are effective at allowing the construction of immutable data
+but they do so by adding cost to the boiler plate code of types and opting
+such types out of features like object and collection initializers. This means
+developers must choose between easy of use and immutability.
+
+Simple immutable object like `Point` requires twice as much boiler plate code
+to support construction as it does to declare the type. The bigger the type 
+the bigger the cost of this boiler plate:
+
+```cs
+struct Point
+{
+    public readonly int X;
+    public readonly int Y;
+
+    public Point(int X, int Y)
+    {
+        this.X = x;
+        this.Y = y;
+    }
+}
+```
+
+The `init` modifier makes immutable objects more flexible by allowing the
+caller to mutate the members during the act of construction. That means the 
+object can participate in object initialzers and thus removes the need for 
+all boiler plate code in the type. The `Point` type is now simply:
+
+```cs
+struct Point
+{
+    public init int X;
+    public init int Y;
+}
+```
+
+The consumer can then use object initializers to create the object
+
+```cs
+var p = new Point() { X = 42, Y = 13 };
+```
+
+## Detailed Design
+
+### init members
+An init only field is declared by using the 
 
 An init only field is recognized with the `init` modifier.
 
@@ -78,7 +134,11 @@ not legal on `static` members
 - The `InitOnlyAttribute` is recognized by full name. It does not need an 
 - identity requirement
 
+### InitOnlyAttribute
+
 **Mention that InitOnlyAttribute is emitted as needed by compiler**
+
+### Metadata encoding 
 
 ## Open Questions
 
@@ -125,8 +185,6 @@ is no value to be gained by using a modreq on a field. The `init` feature for
 fields is a relaxation of an existing rule. All existing compilers already 
 support `readonly` and hence an attribute serves fine as a way to alert them
 that write access can be extended in certain circumstances.
-
-**Jared will add his detaile justification for not using modreq in this solution**
 
 ### init only struct
 Given that we allow for a `readonly struct` declaration to implicitly declare
