@@ -2,6 +2,8 @@
 
 ## Schedule ASAP
 
+- Mandatory properties
+
 ## Schedule when convenient
 
 ## Recurring topics
