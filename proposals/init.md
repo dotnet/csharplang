@@ -153,45 +153,62 @@ Restrictions of this feature:
 - All overrides of a property `set` must match the original declaration with
 respect to `init`
 
-### InitOnlyAttribute
-
-**Mention that InitOnlyAttribute is emitted as needed by compiler**
-- The `InitOnlyAttribute` is recognized by full name. It does not need an 
-- identity requirement
-
 ### Metadata encoding 
+The `init` members will be encoded using the attribute
+`Microsoft.CodeAnalysis.InitOnlyAttribute` which will have the following 
+declaration:
+
+```cs
+namespace Microsoft.CodeAnalysis
+{
+    [AttributeUsage(AttributeTargets.All)]
+    internal sealed class InitOnlyAttribute : Attribute
+    {
+
+    }
+}
+```
 
 An `init` field will be emitted as a `readonly` field that is marked with an 
 `InitOnlyAttribute` instance.
 
 ```cs
-// Emitted as 
-struct Point {
+struct Circle
+{
+    public init int Radius;
+}
+
+// Emitted as
+
+struct Circle
+{
     [InitOnly]
-    public readonly X;
+    public readonly int Radius;
 }
 ```
 
-An init only property setter is recoginized by using `init` in place of a 
-`set` accessor. 
+An `init set` method will be emitted as a normal `set` accessor that is 
+annotated with the `InitOnlyAttribute`:
+
 
 ```cs
-struct Student {
-    public string Name { get; init; }
+struct Circle
+{
+    public int Radius { get; init set; }
+}
+
+// Emitted as
+
+struct Circle
+{
+    public int Radius { get; [InitOnly] set; }
 }
 ```
-
-This type of property will be emitted as a normal `set` accessor but will be 
-marked with the `InitOnlyAttribute`:
-
-```cs
-struct Student {
-    public string Name { get; [InitOnly]set; }
-}
-```
-
 
 ## Open Questions
+
+### Binary breaking changes
+is this
 
 ### Mod reqs vs. attributes
 The emit strategy for `init` property accessors must choose between using 
@@ -237,28 +254,6 @@ fields is a relaxation of an existing rule. All existing compilers already
 support `readonly` and hence an attribute serves fine as a way to alert them
 that write access can be extended in certain circumstances.
 
-### init only struct
-Given that we allow for a `readonly struct` declaration to implicitly declare
-all members `readonly` should we likewise allow for a `init struct` to 
-implicitly declare all members `init`?
-
-```cs
-init struct Point {
-    public int X, Y;
-}
-
-// Generates as 
-struct Point {
-    public init X;
-    public init Y;
-}
-```
-
-### virtual members
-If a `virtual` property has an `init` setter do the derived properties also
-need to have an `init` setter? Pretty sure yes but I need to sit down and 
-think through it.
-
 ## init members
 
 If we ever want them then we need to move `init` to the `set` accessor 
@@ -268,6 +263,10 @@ instead of the property body
 
 ## Considerations
 
+### IL verification
+When .NET Core decides to re-implement IL verify the rules will need to be 
+adjusted to account for `init` members. This will need to be included in the 
+rule changes for non-mutating acess to `readonly` data.
 
 ### Compatibility
 
