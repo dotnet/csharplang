@@ -148,8 +148,8 @@ Restrictions of this feature:
     - Instance fields of a `class` or `struct`. Use on `static` fields are 
     illegal
     - Instance property `set` accessors inside a `class` or `struct`.
-- A field can be marked as `readonly` and `init` but will function as `init`
-- The fields of a `readonly struct` can be marked as `init`. 
+- The `init` modifier cannot be paired with `readonly`. 
+    - This means a field of a `readonly struct` cannot be marked with `init`
 - All overrides of a property `set` must match the original declaration with
 respect to `init`
 
@@ -207,10 +207,24 @@ struct Circle
 
 ## Open Questions
 
-### Binary breaking changes
-is this
+### Breaking changes
+One of the main pivot points in how this feature is encoded will come down to
+the following question: 
 
-### Mod reqs vs. attributes
+> Is it a binary breaking change to remove `init` from a `set`?
+
+Removing `init`, and thus making a field or property fully writable is never
+a source breaking change. For fields it is never a binary breaking change 
+either. Additionally removing it from a field is never a binary breaking 
+change. The only behavior up in question is whether or not this remains 
+true for a property. 
+
+If we want to make the removal of `init` from a property a compatible change
+then it will force our hand on the modreq vs. attributes decision below. If 
+one the other hand this is seen as a non-interesting scenario then this will 
+make the modreq vs. attribute decision less impactful.
+
+### Modreqs vs. attributes
 The emit strategy for `init` property accessors must choose between using 
 attributes or modreqs when emitting during metadata. These have different 
 trade offs that need to be considered.
@@ -254,21 +268,62 @@ fields is a relaxation of an existing rule. All existing compilers already
 support `readonly` and hence an attribute serves fine as a way to alert them
 that write access can be extended in certain circumstances.
 
-## init members
-
-If we ever want them then we need to move `init` to the `set` accessor 
-instead of the property body
-
-### Is removing init from a property a breaking change
-
 ## Considerations
+
+### Compatibility
+The `init` feature is designed to be compatible with existing data types. 
+Specifically it is meant to be a completely additive change for data which is
+`readonly` today but desires more flexible object creation semantics.
+
+For example consider the following type:
+
+```cs
+class Name
+{
+    public readonly string First;
+    public readonly string Last;
+
+    public Name(string first, string last)
+    {
+        First = first;
+        Last = last;
+    }
+}
+```
+
+It is not a breaking change to use `init` in place of `readonly` here:
+
+```cs
+class Name
+{
+    public init string First;
+    public init string Last;
+
+    public Name(string first, string last)
+    {
+        First = first;
+        Last = last;
+    }
+}
+```
+
+The same applies for changing a `get` only property to have an `init set` 
+accessor.
 
 ### IL verification
 When .NET Core decides to re-implement IL verify the rules will need to be 
 adjusted to account for `init` members. This will need to be included in the 
 rule changes for non-mutating acess to `readonly` data.
 
-### Compatibility
+## init members
+The `init` modifier could be extended to apply to all instance members. This 
+would generalize the concept of `init` during object construction and allow
+types to declare helper methods that could partipate in the construction 
+process to initialize `init` fields and properties.
+
+Such members would have all the restricions that an `init set` accessor does
+in this design. The need is questionable though and this can be safely added
+in a future version of the language in a compatible manner.
 
 ### Warn on failed init
 
