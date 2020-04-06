@@ -59,15 +59,107 @@ var p = new Point() { X = 42, Y = 13 };
 ## Detailed Design
 
 ### init members
-An init only field is declared by using the 
-
-An init only field is recognized with the `init` modifier.
+An init only field is declared by using the `init` modifier. 
 
 ```cs
-struct Point {
-    public init X;
+class Student
+{
+    public init FirstName;
+    public init LastName;
 }
 ```
+
+An instance field marked with `init` is considered writable in the following
+circumstances:
+
+- During an object initializer
+- Inside an instance constructor of the containing or derived type
+- Inside the `set` accessor of an `init` property
+
+This means the `Student` class can be used in the following ways:
+
+```cs
+var s = new Student()
+{
+    FirstName = "Jared",
+    LastName = "Parosns",
+};
+s.LastName = "Parsons"; // Error: LastName is `readonly`.
+```
+
+The rules around setting a `init` field inside a constructor allow the 
+following (just as simply `readonly` would):
+
+```cs
+class Base
+{
+    protected init bool Value;
+}
+
+class Derived : Base
+{
+    Derived()
+    {
+        Value = true;
+    }
+}
+```
+
+An instance property can likewise add the `init` modifier to the `set`
+accessor. That will extend the places the `set` can be used to include all
+the places an `init` field can be written. That means the `Student` class could
+also be written as follows:
+
+```cs
+class Student
+{
+    public string FirstName { get; init set; };
+    public string LastName { get; init set; };
+}
+```
+
+When `init set` is used in a virtual property then all the overrides must also
+be marked as `init set`. Likewise it is not possible to override a simple 
+`set` with `init set`.
+
+In the same way the `readonly` modifier can be applied to a `struct` to 
+automatically declare all fields as `readonly`, the `init` only modifier can
+be declared on a `struct` or `class` to automatically mark all fields as `init`.
+This means the following two type declarations are equivalent:
+
+```cs
+struct Point
+{
+    public init int X;
+    public init int Y;
+}
+
+// vs. 
+
+init struct Point
+{
+    public int X;
+    public int Y;
+}
+```
+
+Restrictions of this feature:
+- The `init` modifier can only be used on:
+    - Instance fields of a `class` or `struct`. Use on `static` fields are 
+    illegal
+    - Instance property `set` accessors inside a `class` or `struct`.
+- A field can be marked as `readonly` and `init` but will function as `init`
+- The fields of a `readonly struct` can be marked as `init`. 
+- All overrides of a property `set` must match the original declaration with
+respect to `init`
+
+### InitOnlyAttribute
+
+**Mention that InitOnlyAttribute is emitted as needed by compiler**
+- The `InitOnlyAttribute` is recognized by full name. It does not need an 
+- identity requirement
+
+### Metadata encoding 
 
 An `init` field will be emitted as a `readonly` field that is marked with an 
 `InitOnlyAttribute` instance.
@@ -98,47 +190,6 @@ struct Student {
 }
 ```
 
-A field or property which is marked as `init` is considered settable in the
-following circumstances:
-1. For members of the type, or derived types, that defines the field / property
-  1. Inside the constructor
-  1. Inside `init` accessors
-1. From inside a constructor of the type that defines the member or derives 
-from the type that defines the member
-
-The rules should specifically allow the following:
-
-```cs
-class Base {
-    protecetd init bool Prop1;
-}
-
-class Derived : Base {
-    protected int Prop2 {
-        get => 42;
-        init => Prop1 = true;
-    }
-
-    Dervide() {
-        Prop1 = false;
-        Prop2 = 13;
-    }
-}
-```
-
-Detailed Info:
-- An `init` accessor cannot be combined with a `set` accessor
-- A member of `readonly struct` can be decorated with a `init` modifier
-- The `init` modifier is only legal on instance fields and properties, it is 
-not legal on `static` members
-- The `InitOnlyAttribute` is recognized by full name. It does not need an 
-- identity requirement
-
-### InitOnlyAttribute
-
-**Mention that InitOnlyAttribute is emitted as needed by compiler**
-
-### Metadata encoding 
 
 ## Open Questions
 
@@ -207,6 +258,11 @@ struct Point {
 If a `virtual` property has an `init` setter do the derived properties also
 need to have an `init` setter? Pretty sure yes but I need to sit down and 
 think through it.
+
+## init members
+
+If we ever want them then we need to move `init` to the `set` accessor 
+instead of the property body
 
 ### Is removing init from a property a breaking change
 
