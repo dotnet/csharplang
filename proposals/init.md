@@ -78,19 +78,55 @@ not legal on `static` members
 - The `InitOnlyAttribute` is recognized by full name. It does not need an 
 - identity requirement
 
-## Considerations
-
-### Mod reqs
-This proposal does not use modreq but instead plain old attributes. The quick
-summary of why is that attributes provide the greatest flexbility for type
-evolution and it's inline with the protections that `readonly` provides today.
-
-modreqs provide limited extra value here, this feature is not needed for type
-safety, and actually significantly constrains some use cases.
-
-**Jared will add his detaile justification for not using modreq in this solution**
+**Mention that InitOnlyAttribute is emitted as needed by compiler**
 
 ## Open Questions
+
+### Mod reqs vs. attributes
+The emit strategy for `init` property accessors must choose between using 
+attributes or modreqs when emitting during metadata. These have different 
+trade offs that need to be considered.
+
+Annotating a property set accessor with a modreq declaration means CLI compliant
+compilers will ignore the accessor unless it understands the modreq. That means
+only compilers aware of `init` will read the member. Compilers unaware of 
+`init` will ignore the `set` member and hence will not accidentally treat the
+property as read / write. 
+
+The downside of modreq is `init` becomes a part of the binary signature of 
+the `set` accessor. Adding or removing `init` will break binary compatbility 
+of the application.
+
+Using attributes to annotate the `set` accessor means that only compilers which
+understand the attribute will know to limit access to it. A compiler unaware 
+of `init` will see it as a simple read / write property and allow access.
+
+This would seemingly mean this decision is a choice between extra safety at 
+the expense of binary compatibility. Digging in a bit the extra safety is not
+exactly what it seems. It will not for instance protect against the following
+circumstances:
+
+1. Reflection over `public` members
+1. The use of `dynamic` 
+1. Compilers that don't recognize modreqs
+
+It should also be considered that when we complete the IL verification rules 
+for .NET 5, `init` will be one of those rules. that means extra enforcement 
+will be gained from simply verifying compilers emitting verifiable IL.
+
+The primary languages for .NET (C#, F# and VB) will all be updated to 
+recognize these `init` accessors. Hence the only realistic scenario here is 
+when a C# 9 compiler emits `init` properties and they are seen by a C# 8 
+compiler. That is the trade off to consider and weigh against binary 
+compatibility.
+
+Note: this discussion applies to the accessor members only, not to fields. There
+is no value to be gained by using a modreq on a field. The `init` feature for 
+fields is a relaxation of an existing rule. All existing compilers already 
+support `readonly` and hence an attribute serves fine as a way to alert them
+that write access can be extended in certain circumstances.
+
+**Jared will add his detaile justification for not using modreq in this solution**
 
 ### init only struct
 Given that we allow for a `readonly struct` declaration to implicitly declare
@@ -113,3 +149,16 @@ struct Point {
 If a `virtual` property has an `init` setter do the derived properties also
 need to have an `init` setter? Pretty sure yes but I need to sit down and 
 think through it.
+
+### Is removing init from a property a breaking change
+
+## Considerations
+
+
+### Compatibility
+
+### Warn on failed init
+
+### Generate three accessors
+
+
