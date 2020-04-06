@@ -122,34 +122,12 @@ When `init set` is used in a virtual property then all the overrides must also
 be marked as `init set`. Likewise it is not possible to override a simple 
 `set` with `init set`.
 
-In the same way the `readonly` modifier can be applied to a `struct` to 
-automatically declare all fields as `readonly`, the `init` only modifier can
-be declared on a `struct` or `class` to automatically mark all fields as `init`.
-This means the following two type declarations are equivalent:
-
-```cs
-struct Point
-{
-    public init int X;
-    public init int Y;
-}
-
-// vs. 
-
-init struct Point
-{
-    public int X;
-    public int Y;
-}
-```
-
 Restrictions of this feature:
 - The `init` modifier can only be used on:
     - Instance fields of a `class` or `struct`. Use on `static` fields are 
     illegal
     - Instance property `set` accessors inside a `class` or `struct`.
 - The `init` modifier cannot be paired with `readonly`. 
-    - This means a field of a `readonly struct` cannot be marked with `init`
 - All overrides of a property `set` must match the original declaration with
 respect to `init`
 
@@ -205,7 +183,7 @@ struct Circle
 }
 ```
 
-## Open Questions
+## Questions
 
 ### Breaking changes
 One of the main pivot points in how this feature is encoded will come down to
@@ -289,6 +267,38 @@ Further if we believe there is value here in the overall scenario of forcing
 object creators to be warned / error'd about specific fields then this 
 likely makes sense as a general feature. There is no reason it should be 
 limited to just `init` members.
+
+### Allow init as a type modifier
+In the same way the `readonly` modifier can be applied to a `struct` to 
+automatically declare all fields as `readonly`, the `init` only modifier can
+be declared on a `struct` or `class` to automatically mark all fields as `init`.
+This means the following two type declarations are equivalent:
+
+```cs
+struct Point
+{
+    public init int X;
+    public init int Y;
+}
+
+// vs. 
+
+init struct Point
+{
+    public int X;
+    public int Y;
+}
+```
+
+**Resolution** 
+This feature is too *cute* here and conflicts with the `readonly struct` 
+feature on which it is based. The `readonly struct` feature is simple in that 
+it applies `readonly` to all members: fields, methods, etc ... The 
+`init struct` feature would only apply to fields. This actually ends up making
+it confusing for users. 
+
+Given that `init` is only valid on certain aspects of a type we rejected the 
+idea of having it as a type modifier.
 
 ## Considerations
 
