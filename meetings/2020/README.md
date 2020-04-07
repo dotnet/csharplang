@@ -2,43 +2,50 @@
 
 ## Schedule ASAP
 
-## Schedule when convenient
+- Mandatory properties
 
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
-- https://github.com/dotnet/csharplang/issues/140 `field` keyword in properties (cyrusn)
+## Schedule when convenient
 
 ## Recurring topics
 
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+## April 29, 2020
+
+- Design review
+
+## April 27, 2020
+
+- Record Monday (Andy, Mads)
+
+## April 22, 2020
+
+## April 20, 2020
+
+- Record Monday (Andy, Mads)
 
 ## April 15, 2020
 
-- Is `e is dynamic` a "pure" null check? (Neal)
-- Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
-- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
-- Reconsider: Inferred type of an or pattern is the "common type" of the two inferred types (Neal)
+- https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
 
 ## April 13, 2020
 
+- Record Monday (Andy, Mads)
+
 ## April 8, 2020
+
+- Is `e is dynamic` a "pure" null check? (Neal)
+- Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
+- Reconsider: Inferred type of an or pattern is the "common type" of the two inferred types (Neal)
+- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
+- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
+- Triage (focus on features championed by Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
 ## April 6, 2020
 
-## April 1, 2020
-
-## March 30, 2020
-
-## March 25, 2020
-
-- https://github.com/dotnet/csharplang/issues/3259 Open issues with native integers (Chuck)
-- Records design (Mads, Andy)
-
-## March 23, 2020
-
-- Feedback from MVP Summit on records etc. (Mads, Andy)
+- Record Monday: Init-only properties deep dive (Jared)
 
 ## March 18, 2020
 
@@ -47,15 +54,6 @@
 ## March 11, 2020
 
 - Records design (Mads, Andy)
-
-## March 9, 2020
-
-- Digest feedback from design review
-- Records design (Mads, Andy)
-
-## Feb 26, 2020
-
-- Design review
 
 ## Jan 29, 2020
 
@@ -68,6 +66,49 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## April 1, 2020
+
+[C# Language Design Notes for April 1, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-01.md)
+
+1. Function pointer design adjustments
+
+2. `field` keyword in properties
+
+## March 30, 2020
+
+1. Record Monday
+
+[C# Language Design Notes for March 30, 2020](LDM-2020-03-30.md)
+
+## March 25, 2020
+
+[C# Language Design Notes for March 25, 2020](LDM-2020-03-25.md)
+
+1. Open issues with native int
+
+2. Open issues with target-typed new
+
+## March 23, 2020
+
+[C# Language Design Notes for March 23, 2020](LDM-2020-03-23.md)
+
+1. Triage
+2. Builder-based records
+
+## March 9, 2020
+
+[C# Language Design Notes for March 9, 2020](LDM-2020-03-09.md)
+
+1. Simple programs
+
+2. Records
+
+## Feb 26, 2020
+
+[C# Language Design Notes for Feb. 26, 2020](LDM-2020-02-26.md)
+
+Design Review
 
 ## Feb 24
 
