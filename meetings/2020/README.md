@@ -37,16 +37,6 @@
 
 - Record Monday (Andy, Mads)
 
-## April 8, 2020
-
-- Is `e is dynamic` a "pure" null check? (Neal)
-- Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
-- Reconsider: Inferred type of an or pattern is the "common type" of the two inferred types (Neal)
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
-- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
-- Triage (focus on features championed by Neal)
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
-
 ## April 6, 2020
 
 - Record Monday: Init-only properties deep dive (Jared)
@@ -70,6 +60,15 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## April 8, 2020
+
+[C# Language Design Notes for April 8, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-08.md)
+
+1. `e is dynamic` pure null check
+2. Target typing `?:`
+3. Inferred type of an `or` pattern
+4. Module initializers
 
 ## April 1, 2020
 
