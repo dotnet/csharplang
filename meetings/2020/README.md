@@ -7,6 +7,8 @@
 
 ## Schedule when convenient
 
+- https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
+
 ## Recurring topics
 
 - *Triage championed features*
