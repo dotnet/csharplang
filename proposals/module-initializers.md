@@ -26,7 +26,9 @@ Add a tiny feature to support this without any explicit syntax, by having the C#
 ``` c#
 namespace System.Runtime.CompilerServices
 {
-    [Obsolete("This attribute is only to be used in C# language version 9.0 or later", true)]
+    // Note: an Obsolete attribute is not needed here,
+    // because only C# 9 compilers will have access to attributes added in .NET 5.
+    // LangVersion checks will still be necessary.
     [AttributeUsage(AttributeTargets.Module, AllowMultiple = false)]
     public class ModuleInitializerAttribute : Attribute
     {
@@ -38,7 +40,9 @@ namespace System.Runtime.CompilerServices
 You would use it like this
 
 ``` c#
-[module: System.Runtime.CompilerServices.ModuleInitializerAttribute(typeof(MyModuleInitializer))]
+using System.Runtime.CompilerServices;
+
+[module: ModuleInitializer(typeof(MyModuleInitializer))]
 
 internal static class MyModuleInitializer
 {
@@ -64,6 +68,42 @@ This proposal naturally prevents the user from declaring more than one initializ
 
 It may make it more difficult for users to realize that the static constructor they are looking at is the module initializer, because the attribute may be far away from the class that actually contains the module initializer.
 
+## Unresolved questions
+[unresolved]: #unresolved-questions
+
+#### Should we permit multiple types to be decorated with ModuleInitializerAttribute in a compilation? If so, in what order should the static constructors be invoked?
+
+One option: do the same thing we do for static initializers in partial classes. Order them based on file order+source position.
+
+#### Should we permit using a type from another assembly as the module initializer?
+
+e.g.  `[module: ModuleInitializerAttribute(typeof(InitializerFromOtherAssembly))]`
+
+This could make it difficult to invoke the class constructor simply by calling a dummy method, because we won't be able to synthesize such a method on the type. We could consider falling back to `System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor()` in this case, but it introduces a dependency on the reflection stack.
+
+This use case implies that the initializer class is not the module initializer for the assembly it is declared in. It feels like this use case should instead by handled by exposing a method that the external consumer should call from their module initializer.
+
+```cs
+// Assembly 1
+public class MyLibInit
+{
+    public static void Init() { }
+}
+
+// Assembly 2
+using System.Runtime.CompilerServices;
+
+[module: ModuleInitializer(typeof(MyInit))]
+
+class MyInit
+{
+    static
+    {
+        MyLibInit.Init();
+    }
+}
+```
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 
@@ -78,7 +118,7 @@ What other designs have been considered? What is the impact of not doing this?
 
 There are a number of possible ways of exposing this feature in the language:
 
-#### 1. Special global method declaration
+### 1. Special global method declaration
 
 A module initializer would be provided by writing a special kind of method in the global scope:
 
@@ -88,7 +128,7 @@ internal void operator init() ...
 
 This gives the new language construct its own syntax. However, given how rare and niche the scenario is, this is probably far too heavyweight an approach.
 
-#### 2. Attribute on the type to be initialized
+### 2. Attribute on the type to be initialized
 
 Instead of a module-level attribute, perhaps the attribute would be placed on the type to be initialized
 
@@ -134,14 +174,6 @@ As in the previous approach, we would either need to reject a program that conta
 If we do not implement this feature, then:
 - Users who really need module initializers continue to rely on third-party tooling to inject them into their assemblies.
 - Source generators will have to rely on static constructors which add overhead or on Init() methods that users must explicitly call.
-
-
-## Unresolved questions
-[unresolved]: #unresolved-questions
-
-Should we permit multiple types to be decorated with ModuleInitializerAttribute in a compilation? If so, in what order should the static constructors be invoked?
-
-One option: do the same thing we do for static initializers in partial classes. Order them based on file order+source position.
 
 ## Design meetings
 
