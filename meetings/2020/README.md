@@ -3,6 +3,7 @@
 ## Schedule ASAP
 
 - Mandatory properties
+- Target typing of `?:`
 
 ## Schedule when convenient
 
