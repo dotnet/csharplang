@@ -1,7 +1,7 @@
 # Module Initializers
 
 * [x] Proposed
-* [ ] Prototype: [In Progress](https://github.com/jnm2/roslyn/module_initializer)
+* [ ] Prototype: [In Progress](https://github.com/jnm2/roslyn/tree/module_initializer)
 * [ ] Implementation: [Not Started](https://github.com/dotnet/roslyn/BRANCH_NAME)
 * [ ] Specification: [Not Started]()
 
