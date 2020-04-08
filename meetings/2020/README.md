@@ -37,10 +37,6 @@
 
 - Record Monday (Andy, Mads)
 
-## April 6, 2020
-
-- Record Monday: Init-only properties deep dive (Jared)
-
 ## March 18, 2020
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
@@ -69,6 +65,12 @@ Overview of meetings and agendas for 2020
 2. Target typing `?:`
 3. Inferred type of an `or` pattern
 4. Module initializers
+
+## April 6, 2020
+
+[C# Language Design Notes for April 6, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-06.md)
+
+1. Record Monday: Init-only members
 
 ## April 1, 2020
 
