@@ -41,9 +41,10 @@ In addition to the members declared in the class or struct body, a record type h
 
 A record type has a public constructor whose signature corresponds to the value parameters of the
 type declaration. This is called the primary constructor for the type, and causes the implicitly
-declared default constructor to be suppressed (including the struct parameterless constructor).
-It is an error to have a primary constructor and a constructor with the same signature already
-present in the class. At runtime the primary constructor
+declared default class constructor, if present, to be suppressed. It is an error to have a primary
+constructor and a constructor with the same signature already present in the class.
+
+At runtime the primary constructor
 
 1. executes the instance field initializers appearing in the class-body; and then
     invokes the base class constructor with no arguments.
