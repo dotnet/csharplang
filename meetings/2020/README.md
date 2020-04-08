@@ -29,6 +29,7 @@
 ## April 15, 2020
 
 - https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
+- https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Top-level programs (Aleksey)
 
 ## April 13, 2020
 
