@@ -92,9 +92,9 @@ listed in the `anonymous_object_initializer`.
 A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible parameterless instance method called `Clone` whose return type must be the receiver type, or a base type thereof.
 
 On the right hand side of the `with` expression is an `anonymous_object_initializer` with a
-sequence of assignments with a compiler-generated record property (see Properties, above) of the receiver 
+sequence of assignments, each with a compiler-generated record property (see Properties, above) of the receiver 
 on the left-hand side of the assignment, and an arbitrary expression on the right-hand side which is 
-implicitly convertible to the type of the left-hand side.
+implicitly convertible to the type of the property.
 
 The evaluation of a `with` expression is equivalent to calling the `Clone` method exactly once,
 and then setting the backing field of each record property in the argument list to its corresponding
