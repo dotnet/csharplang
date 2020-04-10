@@ -53,7 +53,7 @@ At runtime the primary constructor
 
 ### Properties
 
-For each record parameter of a record type declaration there is a corresponding public property member whose name and type are taken from the value parameter declaration. If no concrete (i.e. non-abstract) property with a get accessor and with this name and type is explicitly declared or inherited, it is produced by the compiler as follows:
+For each record parameter of a record type declaration there is a corresponding public property member (record property) whose name and type are taken from the value parameter declaration. If no concrete (i.e. non-abstract) property with a get accessor and with this name and type is explicitly declared or inherited, it is produced by the compiler as follows:
 
 For a record struct or a record class:
 
@@ -89,12 +89,12 @@ A `with` expression allows for "non-destructive mutation", designed to
 produce a copy of the receiver expression with modifications to properties
 listed in the `anonymous_object_initializer`.
 
-A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible parameterless instance method called `Clone` whose return type must be the type of the receiver express type, or a base type thereof.
+A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible parameterless instance method called `Clone` whose return type must be the receiver type, or a base type thereof.
 
 On the right hand side of the `with` expression is an `anonymous_object_initializer` with a
-sequence of assignments with a compiler-generated record property of the receiver on the left-hand side of the
-assignment, and an arbitrary expression on the right-hand side which is implicitly convertible to the type
-of the left-hand side.
+sequence of assignments with a compiler-generated record property (see Properties, above) of the receiver 
+on the left-hand side of the assignment, and an arbitrary expression on the right-hand side which is 
+implicitly convertible to the type of the left-hand side.
 
 The evaluation of a `with` expression is equivalent to calling the `Clone` method exactly once,
 and then setting the backing field of each record property in the argument list to its corresponding
