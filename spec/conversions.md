@@ -396,7 +396,7 @@ The following implicit conversions are classified as standard implicit conversio
 *  Implicit nullable conversions ([Implicit nullable conversions](conversions.md#implicit-nullable-conversions))
 *  Implicit reference conversions ([Implicit reference conversions](conversions.md#implicit-reference-conversions))
 *  Boxing conversions ([Boxing conversions](conversions.md#boxing-conversions))
-*  Implicit constant expression conversions ([Implicit dynamic conversions](conversions.md#implicit-dynamic-conversions))
+*  Implicit constant expression conversions ([Implicit constant expression conversions](conversions.md#implicit-constant-expression-conversions))
 *  Implicit conversions involving type parameters ([Implicit conversions involving type parameters](conversions.md#implicit-conversions-involving-type-parameters))
 
 The standard implicit conversions specifically exclude user-defined implicit conversions.
