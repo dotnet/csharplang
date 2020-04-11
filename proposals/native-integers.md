@@ -45,7 +45,6 @@ The tables below cover the conversions between special types.
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
 | `object` | `nint` | Unboxing | `unbox` |
-| `string` | `nint` | None | |
 | `void*` | `nint` | PointerToVoid | `conv.i` |
 | `sbyte` | `nint` | ImplicitNumeric | `conv.i` |
 | `byte` | `nint` | ImplicitNumeric | `conv.u` |
@@ -62,7 +61,6 @@ The tables below cover the conversions between special types.
 | `IntPtr` | `nint` | Identity | |
 | `UIntPtr` | `nint` | None | |
 | `object` | `nuint` | Unboxing | `unbox` |
-| `string` | `nuint` | None | |
 | `void*` | `nuint` | PointerToVoid | `conv.u` |
 | `sbyte` | `nuint` | ExplicitNumeric | `conv.u` / `conv.ovf.u` |
 | `byte` | `nuint` | ImplicitNumeric | `conv.u` |
@@ -82,7 +80,6 @@ The tables below cover the conversions between special types.
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
 | `nint` | `object` | Boxing | `box` |
-| `nint` | `string` | None | |
 | `nint` | `void*` | PointerToVoid | `conv.i` |
 | `nint` | `nuint` | ExplicitNumeric | `conv.u` / `conv.ovf.u` |
 | `nint` | `sbyte` | ExplicitNumeric | `conv.i1` / `conv.ovf.i1` |
@@ -100,7 +97,6 @@ The tables below cover the conversions between special types.
 | `nint` | `IntPtr` | Identity | |
 | `nint` | `UIntPtr` | None | |
 | `nuint` | `object` | Boxing | `box` |
-| `nuint` | `string` | None | |
 | `nuint` | `void*` | PointerToVoid | `conv.u` |
 | `nuint` | `nint` | ExplicitNumeric | `conv.i` / `conv.ovf.i` |
 | `nuint` | `sbyte` | ExplicitNumeric | `conv.i1` / `conv.ovf.i1` |
@@ -173,8 +169,8 @@ These operators are considered during overload resolution based on normal rules 
 | `>=` | `bool operator >=(nuint left, nuint right)` | `bge.un` |
 | `&` | `nint operator &(nint left, nint right)` | `and` |
 | `&` | `nuint operator &(nuint left, nuint right)` | `and` |
-| <code>&#124;</code> | `nint operator |(nint left, nint right)` | `or` |
-| <code>&#124;</code> | `nuint operator |(nuint left, nuint right)` | `or` |
+| <code>&#124;</code> | `nint operator <code>&#124;</code>(nint left, nint right)` | `or` |
+| <code>&#124;</code> | `nuint operator <code>&#124;</code>(nuint left, nuint right)` | `or` |
 | `^` | `nint operator ^(nint left, nint right)` | `xor` |
 | `^` | `nuint operator ^(nuint left, nuint right)` | `xor` |
 | `<<` | `nint operator <<(nint left, int right)` | `shl` |
@@ -233,10 +229,8 @@ public string ToString(string format);
 ```
 
 Interfaces implemented by `System.IntPtr` and `System.UIntPtr` _are implicitly included_ in `nint` and `nuint`.
-```C#
-nint n = 42;
-IEquatable<nint> i = n; // ok, IntPtr implements IEquatable<IntPtr>
-```
+For instance if `IntPtr` implements `ISerializable, IEquatable<IntPtr>, IComparable<IntPtr>`,
+then `nint` implements `ISerializable, IEquatable<nint>, IComparable<nint>`.
 
 ### Overriding, hiding, and implementing
 
