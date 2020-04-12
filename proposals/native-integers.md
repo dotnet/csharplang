@@ -169,8 +169,8 @@ These operators are considered during overload resolution based on normal rules 
 | `>=` | `bool operator >=(nuint left, nuint right)` | `bge.un` |
 | `&` | `nint operator &(nint left, nint right)` | `and` |
 | `&` | `nuint operator &(nuint left, nuint right)` | `and` |
-| <code>&#124;</code> | `nint operator <code>&#124;</code>(nint left, nint right)` | `or` |
-| <code>&#124;</code> | `nuint operator <code>&#124;</code>(nuint left, nuint right)` | `or` |
+| <code>&#124;</code> | <code>nint operator &#124;(nint left, nint right)</code> | `or` |
+| <code>&#124;</code> | <code>nuint operator &#124;(nuint left, nuint right)</code> | `or` |
 | `^` | `nint operator ^(nint left, nint right)` | `xor` |
 | `^` | `nuint operator ^(nuint left, nuint right)` | `xor` |
 | `<<` | `nint operator <<(nint left, int right)` | `shl` |
