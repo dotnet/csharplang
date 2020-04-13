@@ -3,11 +3,14 @@
 ## Schedule ASAP
 
 - Mandatory properties
-- Target typing of `?:`
+- Continued: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
 
 ## Schedule when convenient
 
 - https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
+- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
+- Triage (focus on features championed by Neal)
+- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
 
 ## Recurring topics
 
