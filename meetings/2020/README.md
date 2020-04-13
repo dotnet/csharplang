@@ -33,10 +33,6 @@
 - https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
 - https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Top-level programs (Aleksey)
 
-## April 13, 2020
-
-- Record Monday (Andy, Mads)
-
 ## March 18, 2020
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
@@ -56,6 +52,11 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+[C# Language Design Notes for April 13, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-13.md)
+
+1. Roadmap for records
+2. Init-only properties
 
 ## April 8, 2020
 
