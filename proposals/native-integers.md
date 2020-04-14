@@ -14,15 +14,16 @@ The identifiers `nint` and `nuint` are new contextual keywords that represent na
 The identifiers are only treated as keywords when name lookup does not find a viable result at that program location.
 ```C#
 nint x = 3;
-var y = nameof(nuint);
-var z = nint.Zero;
+string y = nameof(nuint);
+_ = nint.Equals(x, 3);
 ```
 
 The types `nint` and `nuint` are represented by the underlying types `System.IntPtr` and `System.UIntPtr` with compiler surfacing additional conversions and operations for those types as native ints.
 
 ### Constants
 
-There is no direct syntax for native int literals. Explicit casts of other integral constant values can be used instead: `(nint)42`.
+Constant expressions may be of type `nint` or `nuint`.
+There is no direct syntax for native int literals. Implicit or explicit casts of other integral constant values can be used instead: `const nint i = (nint)42;`.
 
 `nint` constants are in the range [ `int.MinValue`, `int.MaxValue` ].
 
@@ -30,10 +31,10 @@ There is no direct syntax for native int literals. Explicit casts of other integ
 
 There are no `MinValue` or `MaxValue` fields on `nint` or `nuint` because, other than `nuint.MinValue`, those values cannot be emitted as constants.
 
-Constant folding is supported for all unary operators { `+`, `-` } and binary operators { `+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `&`, `|`, `^`, `<<`, `>>` }.
+Constant folding is supported for all unary operators { `+`, `-`, `~` } and binary operators { `+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `&`, `|`, `^`, `<<`, `>>` }.
 Constant folding operations are evaluated with `Int32` and `UInt32` operands rather than native ints for consistent behavior regardless of compiler platform.
 If the operation results in a constant value in 32-bits, constant folding is performed at compile-time.
-Otherwise the operation is executed at runtime and not considered a constant. (The unary operator `~` in particular cannot be used in constant expressions.)
+Otherwise the operation is executed at runtime and not considered a constant.
 
 ### Conversions
 There is an identity conversion between `nint` and `IntPtr`, and between `nuint` and `UIntPtr`.
@@ -131,7 +132,7 @@ Conversion from `Nullable<A>` to `Nullable<B>` is:
 ### Operators
 
 The predefined operators are as follows.
-These operators are considered during overload resolution based on normal rules for implicit conversions of arguments.
+These operators are considered during overload resolution based on normal rules for implicit conversions _if at least one of the operands is of type `nint` or `nuint`_.
 
 (The IL for each operator includes the variants for `unchecked` and `checked` contexts if different.)
 
@@ -187,7 +188,7 @@ Lifted versions of the operators, where the arguments and return types are `nint
 Compound assignment operations `x op= y` where `x` or `y` are native ints follow the same rules as with other primitive types with pre-defined operators.
 Specifically the expression is bound as `x = (T)(x op y)` where `T` is the type of `x` and where `x` is only evaluated once.
 
-The shift operators should mask the number of bits to shift appropriately
+The shift operators should mask the number of bits to shift - to 5 bits if `sizeof(nint)` is 4, and to 6 bits if `sizeof(nint)` is 8.
 (see [shift operators](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#shift-operators) in C# spec).
 
 ### Dynamic
@@ -228,7 +229,8 @@ public override string ToString();
 public string ToString(string format);
 ```
 
-Interfaces implemented by `System.IntPtr` and `System.UIntPtr` _are implicitly included_ in `nint` and `nuint`.
+Interfaces implemented by `System.IntPtr` and `System.UIntPtr` _are implicitly included_ in `nint` and `nuint`,
+with occurrences of the underlying types replaced by the corresponding native integer types.
 For instance if `IntPtr` implements `ISerializable, IEquatable<IntPtr>, IComparable<IntPtr>`,
 then `nint` implements `ISerializable, IEquatable<nint>, IComparable<nint>`.
 
