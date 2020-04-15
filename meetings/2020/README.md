@@ -11,6 +11,7 @@
 - https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
 - Triage (focus on features championed by Neal)
 - https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
+- https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Args in top-level programs (Aleksey, Mads)
 
 ## Recurring topics
 
