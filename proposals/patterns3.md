@@ -250,4 +250,4 @@ int x = b switch { <100 => 0, 100 => 1, 101 => 2, >101 => 3 };
 
 A switch expression such as this should be considered *exhaustive* (it handles all possible input values).
 
-In C# 8.0, a switch expression with an input of type `byte` is only considered exhaustive if it contains a final arm whose pattern matches everything (a *discard-pattern* or *var-pattern*).  Even a switch expression that has an arm for every distinct `byte` value is not considered exhaustive in C# 8.  In order to properly handle exhaustiveness of relational patterns, we will have to handle this case too.  This will technically be a breaking change, but one no user is likely to notice.
+In C# 8.0, a switch expression with an input of type `byte` is only considered exhaustive if it contains a final arm whose pattern matches everything (a *discard-pattern* or *var-pattern*).  Even a switch expression that has an arm for every distinct `byte` value is not considered exhaustive in C# 8.  In order to properly handle exhaustiveness of relational patterns, we will have to handle this case too.  This will technically be a breaking change, but no user is likely to notice.
