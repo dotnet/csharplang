@@ -15,10 +15,42 @@ Parenthesized patterns permit the programmer to put parentheses around any patte
 ```antlr
 primary_pattern
     : parenthesized_pattern
+    | // all of the existing forms
     ;
 parenthesized_pattern
     : '(' pattern ')'
     ;
+```
+
+## Type Patterns
+
+We permit a type as a pattern:
+
+``` antlr
+primary_pattern
+    : type-pattern
+    | // all of the existing forms
+    ;
+type_pattern
+    : type
+    ;
+```
+
+This retcons the existing *is-type-expression* to be an *is-pattern-expression* in which the pattern is a *type-pattern*, though we would not change the syntax tree produced by the compiler.
+
+One subtle implementation issue is that this grammar is ambiguous.  A string such as `a.b` can be parsed either as a qualified name (in a type context) or a dotted expression (in an expression context).  The compiler is already capable of treating a qualified name the same as a dotted expression in order to handle something like `e is Color.Red`.  The compiler's semantic analysis would be further extended to be capable of binding a (syntactic) constant pattern (e.g. a dotted expression) as a type in order to treat it as a bound type pattern in order to support this construct.
+
+After this change, you would be able to write
+```csharp
+void M(object o1, object o2)
+{
+    var t = (o1, o2);
+    if (t is (int, string)) {} // test if o1 is an int and o2 is a string
+    switch (o1) {
+        case int: break; // test if o1 is an int
+        case System.String: break; // test if o1 is a string
+    }
+}
 ```
 
 ## Relational Patterns
@@ -40,7 +72,7 @@ Relational patterns permit the programmer to express that an input value must sa
     };
 ```
 
-We imagine supporting `<`, `<=`, `>`, and `>=` patterns on all of the built-in types that support such binary relational operators with two operands of the same type in an expression. Specifically, we support all of these relational patterns for `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, and `decimal`.
+Relational patterns support the relational operators `<`, `<=`, `>`, and `>=` on all of the built-in types that support such binary relational operators with two operands of the same type in an expression. Specifically, we support all of these relational patterns for `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `nint`, and `nuint`.
 
 ```antlr
 primary_pattern
@@ -54,7 +86,7 @@ relational_pattern
     ;
 ```
 
-The expression is required to evaluate to a constant value.  It is an error if that constant value is `double.NaN` or `float.NaN`.  It is an error if the expression is a null constant and the relational operator is `<`, `<=`, `>`, or `>=`.
+The expression is required to evaluate to a constant value.  It is an error if that constant value is `double.NaN` or `float.NaN`.  It is an error if the expression is a null constant.
 
 When the input is a type for which a suitable built-in binary relational operator is defined that is applicable with the input as its left operand and the given constant as its right operand, the evaluation of that operator is taken as the meaning of the relational pattern.  Otherwise we convert the input to the type of the expression using an explicit nullable or unboxing conversion.  It is a compile-time error if no such conversion exists.  The pattern is considered not to match if the conversion fails.  If the conversion succeeds then the result of the pattern-matching operation is the result of evaluating the expression `e OP v` where `e` is the converted input, `OP` is the relational operator, and `v` is the constant expression.
 
@@ -76,7 +108,7 @@ The `and` and `or` combinators will be useful for testing ranges of values
 bool IsLetter(char c) => c is >= 'a' and <= 'z' or >= 'A' and <= 'Z';
 ```
 
-This example illustrates our expectation that `and` will have a higher parsing priority (i.e. will bind more closely) than `or`.  The programmer can use the *parenthesized pattern* to make the precedence explicit:
+This example illustrates that `and` will have a higher parsing priority (i.e. will bind more closely) than `or`.  The programmer can use the *parenthesized pattern* to make the precedence explicit:
 
 ``` c#
 bool IsLetter(char c) => c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z');
@@ -110,18 +142,6 @@ primary_pattern
 ### Syntax for relational operators
 
 Are `and`, `or`, and `not` some kind of contextual keyword?  If so, is there a breaking change (e.g. compared to their use as a designator in a *declaration-pattern*).
-
-Should we support some combination of declaration pattern along with a relational pattern?  For example,
-
-``` csharp
-if (o is int x <= 100) // x is an int with value < 100 here.
-```
-
-Or will the `and` combinator be sufficient?
-
-``` c#
-if (o is int x and <= 100) // x is an int with value < 100 here.
-```
 
 ### Semantics (e.g. type) for relational operators
 
