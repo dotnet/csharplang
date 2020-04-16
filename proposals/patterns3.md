@@ -28,7 +28,7 @@ Relational patterns permit the programmer to express that an input value must sa
 ``` C#
     public static LifeStage LifeStageAtAge(int age) => age switch
     {
-        < 0 =>  LiftStage.Prenatal,
+        < 0 =>  LifeStage.Prenatal,
         < 2 =>  LifeStage.Infant,
         < 4 =>  LifeStage.Toddler,
         < 6 =>  LifeStage.EarlyChild,
