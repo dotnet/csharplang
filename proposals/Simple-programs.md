@@ -2,7 +2,7 @@
 
 * [x] Proposed
 * [x] Prototype: Started
-* [ ] Implementation: Not Started
+* [x] Implementation: Started
 * [ ] Specification: Not Started
 
 ## Summary
@@ -91,11 +91,14 @@ an error to specify `-main:<type>` compiler switch when there are top-level stat
 
 Async operations are allowed in top-level statements to the degree they are allowed in statements within
 a regular async entry point method. However, they are not required, if `await` expressions and other async
-operations are omitted, no warning is produced. Instead the signature of the generated entry point method
-is equivalent to 
-``` c#
-    static void Main()
-```
+operations are omitted, no warning is produced.
+
+The signature of the generated entry point method is determined based on operations used by the top level
+statements as follows:
+**Async-operations\Return-with-expression** | **Present** | **Absent**
+----------------------------------------| -------------|-------------
+**Present** | ```static Task<int> Main()```| ```static Task Main()```
+**Absent**  | ```static int Main()``` | ```static void Main()```
 
 The example above would yield the following `$Main` method declaration:
 
@@ -133,6 +136,44 @@ static class $Program
     {
         await System.Threading.Tasks.Task.Delay(1000);
         System.Console.WriteLine("Hi!");
+    }
+}
+```
+
+An example like this:
+``` c#
+await System.Threading.Tasks.Task.Delay(1000);
+System.Console.WriteLine("Hi!");
+return 0;
+```
+
+would  yield:
+``` c#
+static class $Program
+{
+    static async Task<int> $Main()
+    {
+        await System.Threading.Tasks.Task.Delay(1000);
+        System.Console.WriteLine("Hi!");
+        return 0;
+    }
+}
+```
+
+And an example like this:
+``` c#
+System.Console.WriteLine("Hi!");
+return 2;
+```
+
+would  yield:
+``` c#
+static class $Program
+{
+    static int $Main()
+    {
+        System.Console.WriteLine("Hi!");
+        return 2;
     }
 }
 ```
