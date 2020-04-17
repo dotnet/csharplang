@@ -214,9 +214,9 @@ Restrictions of this feature:
 also applies to interface implementation.
 
 ### Metadata encoding 
-The `init` members will be encoded using the attribute
-`System.Runtime.CompilerServices.InitOnlyAttribute` which will have the
-following declaration:
+Property `init` accessors will be emitted as a standard `set` accessor with
+the return type marked with a modreq of `IsInitOnly`. This is a new type
+which will have the following definition:
 
 ```cs
 namespace System.Runtime.CompilerServices
@@ -229,46 +229,10 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-This attribute will be matched by full name. There is no requiremnet that it 
-appear in the core library. In the case there are mulitple attributes by this
-name available then the compiler will pick the one defined in the core library
-should one exist.
-
-An `init` field will be emitted as a `readonly` field that is marked with an 
-`InitOnlyAttribute` instance.
-
-```cs
-struct Circle
-{
-    public init int Radius;
-}
-
-// Emitted as
-
-struct Circle
-{
-    [InitOnly]
-    public readonly int Radius;
-}
-```
-
-An `init set` method will be emitted as a normal `set` accessor where the
-`value` parameter contains a modreq referring to `InitOnlyAttribute`.
-
-
-```cs
-struct Circle
-{
-    public int Radius { get; init set; }
-}
-
-// Emitted as
-
-struct Circle
-{
-    public int Radius { get; modreq(InitOnly) set; }
-}
-```
+The compiler will match the attribute by full name. There is no requirement
+that it appear in the core library. In the case there are mulitple attributes
+by this name available then the compiler will pick the one defined in the core 
+library should one exist.
 
 ## Questions
 
