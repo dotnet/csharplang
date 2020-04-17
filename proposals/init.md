@@ -9,7 +9,7 @@ in C#.
 
 ## Motivation
 The underlying mechanisms for building immutable data in C# haven't changed
-since 1.0. They remain
+since 1.0. They remain:
 
 1. Declaring fields as `readonly`.
 1. Declaring properties that contain only a `get` accessor.
@@ -26,8 +26,8 @@ the bigger the cost of this boiler plate:
 ```cs
 struct Point
 {
-    public readonly int X;
-    public readonly int Y;
+    public int X { get; }
+    public int Y { get; }
 
     public Point(int X, int Y)
     {
@@ -45,8 +45,8 @@ all boiler plate code in the type. The `Point` type is now simply:
 ```cs
 struct Point
 {
-    public init int X;
-    public init int Y;
+    public int X { get; init; }
+    public int Y { get; init; }
 }
 ```
 
@@ -59,22 +59,23 @@ var p = new Point() { X = 42, Y = 13 };
 ## Detailed Design
 
 ### init members
-An init only field is declared by using the `init` modifier. 
+An init only property is declared by using the `init` accessor in place of the 
+`set` accessor:
 
 ```cs
 class Student
 {
-    public init string FirstName;
-    public init string LastName;
+    public string FirstName { get; init; }
+    public string LastName { get; init; }
 }
 ```
 
-An instance field marked with `init` is considered writable in the following
-circumstances:
+An instance property containing an `init` accessor is considered settable in
+the following circumstances:
 
 - During an object initializer
 - Inside an instance constructor of the containing or derived type
-- Inside the `set` accessor of an `init` property
+- Inside the `init` accessor of any property on `this`
 
 This means the `Student` class can be used in the following ways:
 
@@ -84,24 +85,25 @@ var s = new Student()
     FirstName = "Jared",
     LastName = "Parosns",
 };
-s.LastName = "Parsons"; // Error: LastName is `readonly`.
+s.LastName = "Parsons"; // Error: LastName is not settable
 ```
 
-The rules around when `init` is settable extend across type hierarchies. If the 
-member is accessible and the object is known to be in the construction phase
-then the member is settable. That specifically allows for the following:
+The rules around when `init` accessors are settable extend across type
+hierarchies. If the member is accessible and the object is known to be in the
+construction phase then the member is settable. That specifically allows for
+the following:
 
 ```cs
 class Base
 {
-    public init bool Value;
+    public bool Value { get; init; }
 }
 
 class Derived : Base
 {
     Derived()
     {
-        // Not allowed by readonly but is allowed by init
+        // Not allowed with get only properties but allowed with init
         Value = true;
     }
 }
@@ -116,29 +118,18 @@ class Consumption
 
 ```
 
-An instance property can likewise add the `init` modifier to the `set`
-accessor. That will extend the places the `set` can be used to include all
-the places an `init` field can be written. That means the `Student` class could
-also be written as follows:
-
-```cs
-class Student
-{
-    public string FirstName { get; init set; };
-    public string LastName { get; init set; };
-}
-```
-
-At the point a `init set` member is invoked the instance is known to be 
-in the open construction phase. Hence an `init set` is free to call other 
-`init set` members as well as modify `init` or `readonly` fields.
+At the point a `init` accessor is invoked the instance is known to be 
+in the open construction phase. Hence an `init` accessor is allowed to take 
+the following actions:
+1. Call other `init` accessors available through `this`
+1. Assign `readonly` fields declared on the same type
 
 ```cs
 class Complex
 {
     readonly int Field1;
     int Field2;
-    int Prop1 { get; init set; }
+    int Prop1 { get; init ; }
     int Prop2
     {
         get => 42;
@@ -152,9 +143,47 @@ class Complex
 }
 ```
 
-When `init set` is used in a virtual property then all the overrides must also
-be marked as `init set`. Likewise it is not possible to override a simple 
-`set` with `init set`.
+The ability to assign fields from an `init` accessor is limited to fields
+declared on the same type as the accessor. It cannot be used to assign fields
+in a base type. This rule ensures that type authors remain in control over the
+mutability behavior of their type. Developers who do not wish to utilize 
+`init` cannot be impacted from other types choosing to do so:
+
+```cs
+class Base
+{
+    internal readonly int Field;
+    internal int Property
+    {
+        get => Field;
+        init => Field = value; // Okay
+    }
+}
+
+class Derived : Base
+{
+    internal readonly int DerivedField;
+    internal int DerivedProperty
+    {
+        get => DerivedField;
+        init
+        {
+            DerivedField = 42; // Okay
+            Field = 13; // Error Field is readonly
+        }
+    }
+
+    public Derived()
+    {
+        Property = 42; // Okay 
+        Field = 13; // Error Field is readonly
+    }
+}
+```
+
+When `init` is used in a virtual property then all the overrides must also
+be marked as `init`. Likewise it is not possible to override a simple 
+`set` with `init`.
 
 An `interface` declaration can also particpate in `init` style initalization 
 via the following pattern:
@@ -162,7 +191,7 @@ via the following pattern:
 ```cs
 interface IPerson
 {
-    string Name { get; init set; }
+    string Name { get; init; }
 }
 
 class Init
@@ -179,13 +208,10 @@ class Init
 ```
 
 Restrictions of this feature:
-- The `init` modifier can only be used on:
-    - Instance fields of a `class` or `struct`. Use on `static` fields are 
-    illegal
-    - Instance property `set` accessors on `class`, `struct` or `interface`.
-- The `init` modifier cannot be paired with `readonly`. 
-- All overrides of a property `set` must match the original declaration with
-respect to `init`. This includes implementing interface members.
+- The `init` accessor can only be used instance properties
+- A property cannot contain both an `init` and `set` accessor
+- All overrides of a property must have `init` if the base had `init`. This rule
+also applies to interface implementation.
 
 ### Metadata encoding 
 The `init` members will be encoded using the attribute
@@ -387,6 +413,38 @@ it confusing for users.
 
 Given that `init` is only valid on certain aspects of a type we rejected the 
 idea of having it as a type modifier.
+
+## Allow init as a field modifier
+In the same way `init` can server as a property accessor it could also serve as
+a designation on fields to give them similar behaviors as `init` properties.
+That would allow for the field to be assigned before construction was complete
+by the type, derived types or object initializers.
+
+```cs
+class Student
+{
+    public init string FirstName;
+    public init string LastName;
+}
+
+var s = new Student()
+{
+    FirstName = "Jarde",
+    LastName = "Parsons",
+}
+
+s.FirstName = "Jared"; // Error FirstName is readonly
+```
+
+In metadata these fields would be marked in the same way as `readonly` fields 
+but with an additional attribute or modreq to indicate they are `init` style
+fields. 
+
+**Resolution**
+LDM agrees this proposal is sound but overal the scenario felt disjoint from 
+properties. The decision was to proceed with properties only for now but this 
+will be reconsidered if there is significant customer feedback that justifies
+the scenario.
 
 ## Considerations
 
