@@ -2,7 +2,7 @@ Init Only Members
 =====
 
 ## Summary
-This proposal adds the concept of init-only members to C#. Init-only members 
+This proposal adds the concept of init only members to C#. Init only members 
 can be  at the point of objection creation but become `readonly` once object
 creation has completed. This allows for a much more flexible immutable model
 in C#. 
@@ -78,6 +78,9 @@ the following circumstances:
 - Inside an instance constructor of the containing or derived type
 - Inside the `init` accessor of any property on `this`
 
+The times above in which the `init` accessors are settable are collectively
+referred to in this document as the construction phase of the object.
+
 This means the `Student` class can be used in the following ways:
 
 ```cs
@@ -121,7 +124,8 @@ class Consumption
 
 At the point a `init` accessor is invoked the instance is known to be 
 in the open construction phase. Hence an `init` accessor is allowed to take 
-the following actions:
+the following actions in addition to what a normal `set` accessor cand do:
+
 1. Call other `init` accessors available through `this`
 1. Assign `readonly` fields declared on the same type
 
@@ -144,11 +148,12 @@ class Complex
 }
 ```
 
-The ability to assign fields from an `init` accessor is limited to fields
-declared on the same type as the accessor. It cannot be used to assign fields
-in a base type. This rule ensures that type authors remain in control over the
-mutability behavior of their type. Developers who do not wish to utilize 
-`init` cannot be impacted from other types choosing to do so:
+The ability to assign `readonly` fields from an `init` accessor is limited to 
+those fields declared on the same type as the accessor. It cannot be used to 
+assign `readonly` fields in a base type. This rule ensures that type authors
+remain in control over the mutability behavior of their type. Developers who do
+not wish to utilize `init` cannot be impacted from other types choosing to
+do so:
 
 ```cs
 class Base
@@ -159,6 +164,8 @@ class Base
         get => Field;
         init => Field = value; // Okay
     }
+
+    internal int OtherProperty { get; init; }
 }
 
 class Derived : Base
@@ -169,15 +176,16 @@ class Derived : Base
         get => DerivedField;
         init
         {
-            DerivedField = 42; // Okay
-            Field = 13; // Error Field is readonly
+            DerivedField = 42;  // Okay
+            Property = 0;       // Okay
+            Field = 13;         // Error Field is readonly
         }
     }
 
     public Derived()
     {
-        Property = 42; // Okay 
-        Field = 13; // Error Field is readonly
+        Property = 42;  // Okay 
+        Field = 13;     // Error Field is readonly
     }
 }
 ```
@@ -185,6 +193,24 @@ class Derived : Base
 When `init` is used in a virtual property then all the overrides must also
 be marked as `init`. Likewise it is not possible to override a simple 
 `set` with `init`.
+
+```cs
+class Base
+{
+    public virtual int Property { get; init; }
+}
+
+class C1 : Base
+{
+    public override int Property { get; init; }
+}
+
+class C2 : Base
+{
+    // Error: Property must have init to override Base.Property
+    public override int Property { get; set; }
+}
+```
 
 An `interface` declaration can also particpate in `init` style initalization 
 via the following pattern:
@@ -222,8 +248,7 @@ which will have the following definition:
 ```cs
 namespace System.Runtime.CompilerServices
 {
-    [AttributeUsage(AttributeTargets.All)]
-    public sealed class InitOnlyAttribute : Attribute
+    public sealed class IsInitOnly
     {
 
     }
@@ -231,9 +256,11 @@ namespace System.Runtime.CompilerServices
 ```
 
 The compiler will match the type by full name. There is no requirement
-that it appear in the core library. In the case there are mulitple attributes
-by this name available then the compiler will pick the one defined in the core 
+that it appear in the core library. If there are mulitple types by this name
+available then the compiler will pick the one defined in the core 
 library should one exist.
+
+The design for `IsInitOnly` is futher covered in [this issue](https://github.com/dotnet/runtime/issues/34978)
 
 ## Questions
 
