@@ -7,7 +7,7 @@
 
 ## Schedule when convenient
 
-- Allow `if (x is not string y)` pattern.  (Cyrus + Neal)
+- https://github.com/dotnet/csharplang/issues/3369 Allow `if (x is not string y)` pattern.  (Cyrus + Neal)
 - https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
 - https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
 - Triage (focus on features championed by Neal)
