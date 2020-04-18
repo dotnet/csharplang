@@ -2,8 +2,8 @@ Init Only Members
 =====
 
 ## Summary
-This proposal adds the concept of init-only members to C#. Members which can be
-written at the point of objection creation but become `readonly` once object
+This proposal adds the concept of init-only members to C#. Init-only members 
+can be  at the point of objection creation but become `readonly` once object
 creation has completed. This allows for a much more flexible immutable model
 in C#. 
 
@@ -17,9 +17,9 @@ since 1.0. They remain:
 These mechanisms are effective at allowing the construction of immutable data
 but they do so by adding cost to the boiler plate code of types and opting
 such types out of features like object and collection initializers. This means
-developers must choose between easy of use and immutability.
+developers must choose between ease of use and immutability.
 
-Simple immutable object like `Point` requires twice as much boiler plate code
+A simple immutable object like `Point` requires twice as much boiler plate code
 to support construction as it does to declare the type. The bigger the type 
 the bigger the cost of this boiler plate:
 
@@ -38,9 +38,10 @@ struct Point
 ```
 
 The `init` modifier makes immutable objects more flexible by allowing the
-caller to mutate the members during the act of construction. That means the 
-object can participate in object initialzers and thus removes the need for 
-all boiler plate code in the type. The `Point` type is now simply:
+caller to mutate the members during the act of construction. That means the
+object's immutable properties can participate in object initialzers and thus
+removes the need for all constructor boiler plate in the type. The `Point`
+type is now simply:
 
 ```cs
 struct Point
@@ -208,7 +209,7 @@ class Init
 ```
 
 Restrictions of this feature:
-- The `init` accessor can only be used instance properties
+- The `init` accessor can only be used on instance properties
 - A property cannot contain both an `init` and `set` accessor
 - All overrides of a property must have `init` if the base had `init`. This rule
 also applies to interface implementation.
@@ -229,7 +230,7 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-The compiler will match the attribute by full name. There is no requirement
+The compiler will match the type by full name. There is no requirement
 that it appear in the core library. In the case there are mulitple attributes
 by this name available then the compiler will pick the one defined in the core 
 library should one exist.
@@ -277,14 +278,13 @@ of `init` will see it as a simple read / write property and allow access.
 
 This would seemingly mean this decision is a choice between extra safety at 
 the expense of binary compatibility. Digging in a bit the extra safety is not
-exactly what it seems. It will not for instance protect against the following
-circumstances:
+exactly what it seems. It will not protect against the following circumstances:
 
 1. Reflection over `public` members
 1. The use of `dynamic` 
 1. Compilers that don't recognize modreqs
 
-It should also be considered that when we complete the IL verification rules 
+It should also be considered that, when we complete the IL verification rules 
 for .NET 5, `init` will be one of those rules. that means extra enforcement 
 will be gained from simply verifying compilers emitting verifiable IL.
 
@@ -304,8 +304,8 @@ that write access can be extended in certain circumstances.
 The feature will use a modreq to encode the property `init` setter. The
 compelling factors were (in no particular order):
 
-1. Desire to discourage older compilers from violating `init` semantics
-1. Desire to make adding or removing `init` in a `virtual` declaratio or 
+* Desire to discourage older compilers from violating `init` semantics
+* Desire to make adding or removing `init` in a `virtual` declaratio or 
 `interface` both a source and binary breaking change.
 
 Given there was also no significant support for removing `init` to be a 
@@ -372,7 +372,7 @@ init struct Point
 This feature is too *cute* here and conflicts with the `readonly struct` 
 feature on which it is based. The `readonly struct` feature is simple in that 
 it applies `readonly` to all members: fields, methods, etc ... The 
-`init struct` feature would only apply to fields. This actually ends up making
+`init struct` feature would only apply to properties. This actually ends up making
 it confusing for users. 
 
 Given that `init` is only valid on certain aspects of a type we rejected the 
@@ -449,11 +449,11 @@ class Name
 }
 ```
 
-The same applies for changing a `get` only property to have an `init set` 
+The same applies for changing a `get` only property to have an `init` 
 accessor.
 
 ### IL verification
-When .NET Core decides to re-implement IL verify the rules will need to be 
+When .NET Core decides to re-implement IL verification the rules will need to be 
 adjusted to account for `init` members. This will need to be included in the 
 rule changes for non-mutating acess to `readonly` data.
 
@@ -463,7 +463,7 @@ would generalize the concept of `init` during object construction and allow
 types to declare helper methods that could partipate in the construction 
 process to initialize `init` fields and properties.
 
-Such members would have all the restricions that an `init set` accessor does
+Such members would have all the restricions that an `init` accessor does
 in this design. The need is questionable though and this can be safely added
 in a future version of the language in a compatible manner.
 
