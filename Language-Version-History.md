@@ -88,7 +88,7 @@ Features Added in C# Language Versions
 - Auto-Implemented properties
 - Anonymous types
 - Extension methods
-- Query expressions
+- Query expressions, a.k.a LINQ (Language Integrated Query)
 - Lambda expression
 - Expression trees
 - Partial methods
@@ -103,6 +103,7 @@ Features Added in C# Language Versions
 - Method group conversions (delegates)
 - Static classes
 - Delegate inference
+- Type and namespace aliases
 
 # [C# 1.2](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-version-history#c-version-12) - Visual Studio .NET 2003
 - Dispose in foreach
@@ -111,11 +112,23 @@ Features Added in C# Language Versions
 # [C# 1.0](https://en.wikipedia.org/wiki/Microsoft_Visual_Studio#.NET_.282002.29) - Visual Studio .NET 2002
 - Classes
 - Structs
+- Enums
 - Interfaces
 - Events
+- [Operator overloading](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/operator-overloading)
+- [User-defined conversion operators](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/user-defined-conversion-operators)
 - Properties
+- [Indexers](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/indexers/)
+- Output parameters (out and ref)
+- [Array trailing parameter (params)](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/params)
 - Delegates
 - Expressions
-- Statements
+- [Statements](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/statements)
+- [using statement](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/statements#the-using-statement)
+- [goto statement](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/goto)
+- [Preprocessor Directives](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/)
+- [Unsafe code and pointers](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/unsafe-code-pointers/)
 - Attributes
 - Literals
+- [Verbatim identifier](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/verbatim)
+- Unsigned integer types
