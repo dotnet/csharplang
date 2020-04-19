@@ -257,8 +257,12 @@ namespace System.Runtime.CompilerServices
 
 The compiler will match the type by full name. There is no requirement
 that it appear in the core library. If there are mulitple types by this name
-available then the compiler will pick the one defined in the core 
-library should one exist.
+then the compiler will tie break in the following order:
+
+1. The one defined in the project being compiled
+1. The one defined in corelib
+
+If neither of these exist then a type ambiguity error will be issued.
 
 The design for `IsInitOnly` is futher covered in [this issue](https://github.com/dotnet/runtime/issues/34978)
 
@@ -268,18 +272,18 @@ The design for `IsInitOnly` is futher covered in [this issue](https://github.com
 One of the main pivot points in how this feature is encoded will come down to
 the following question: 
 
-> Is it a binary breaking change to remove `init` from a `set`?
+> Is it a binary breaking change to replace `init` with `set`?
 
-Removing `init`, and thus making a field or property fully writable is never
-a source breaking change. For fields it is never a binary breaking change 
-either. Additionally removing it from a field is never a binary breaking 
-change. The only behavior up in question is whether or not this remains 
-true for a property. 
+Replacing `init` with `set` and thus making a property fully writable is never
+a source breaking change on a non-virtual property. It simply expands the set
+of scenarios where the property can be written. The only behavior in question is
+whether or not this remains a binary breaking change.
 
-If we want to make the removal of `init` from a property a compatible change
-then it will force our hand on the modreq vs. attributes decision below. If 
-one the other hand this is seen as a non-interesting scenario then this will 
-make the modreq vs. attribute decision less impactful.
+If we want to make the change of `init` to `set` a source and binary compatible
+change then it will force our hand on the modreq vs. attributes decision
+below because it will rule out modreqs as a soulution. If on the other hand
+this is seen as a non-interesting then this will make the modreq vs. attribute
+decision less impactful.
 
 **Resolution**
 This scenario is not seen as compelling by LDM.
@@ -312,20 +316,23 @@ exactly what it seems. It will not protect against the following circumstances:
 1. Compilers that don't recognize modreqs
 
 It should also be considered that, when we complete the IL verification rules 
-for .NET 5, `init` will be one of those rules. that means extra enforcement 
+for .NET 5, `init` will be one of those rules. That means extra enforcement 
 will be gained from simply verifying compilers emitting verifiable IL.
 
 The primary languages for .NET (C#, F# and VB) will all be updated to 
 recognize these `init` accessors. Hence the only realistic scenario here is 
-when a C# 9 compiler emits `init` properties and they are seen by a C# 8 
-compiler. That is the trade off to consider and weigh against binary 
-compatibility.
+when a C# 9 compiler emits `init` properties and they are seen by an older 
+toolset such as C# 8, VB 15, etc ... C# 8. That is the trade off to consider
+and weigh against binary compatibility.
 
-Note: this discussion applies to the accessor members only, not to fields. There
-is no value to be gained by using a modreq on a field. The `init` feature for 
-fields is a relaxation of an existing rule. All existing compilers already 
-support `readonly` and hence an attribute serves fine as a way to alert them
-that write access can be extended in certain circumstances.
+**Note**
+This discussion primarily applies to members only, not to fields. While `init`
+fields were rejected by LDM they are still interesting to consider for the 
+modreq vs. attribute discussion. The `init` feature for fields is a relaxation
+of the existing restriction of `readonly`. That means if we emit the fields as
+`readonly` + an attribute there is no risk of older compilers mis-using the 
+field because they would already recognize `readonly`. Hence using a modreq here
+doesn't add any extra protection.
 
 **Resolution**
 The feature will use a modreq to encode the property `init` setter. The
@@ -339,13 +346,37 @@ Given there was also no significant support for removing `init` to be a
 binary compatible change it made the choice of using modreq straight forward.
 
 ### init vs. initonly
-Syntax debate time.
+There were three syntax forms which got significant consideration during our
+LDM meeting:
+
+```cs
+// 1. Use init 
+int Option1 { get; init; }
+// 2. Use init set
+int Option2 { get; init set; }
+// 3. Use initonly
+int Option3 { get; initonly; }
+```
 
 **Resolution**
-There was no other syntax which was overwelming favored in LDM. For the time 
-being we will be moving forward with the initial design laid out in this 
-document. This may change as the feature progresses and LDM members have time
-to digest the design here.
+There was no syntax which was overwelmingly favored in LDM.
+
+One point which got significant attention was how the choice of syntax would
+impact our ability to do `init` members as a general feature in the future.
+Choosing option 1 would mean that it would be difficult to define a property
+which had a `init` style `get` method in the future. Eventually it was decided
+that if we decided to go forward with general `init` members in future we could
+allow `init` to be a modifier in the property accessor list as well as a short
+hand for `init set`. Essentially the following two declarations would be
+identical.
+
+```cs
+int Property1 { get; init; }
+int Property1 { get; init set; }
+```
+
+The decision was made to move forward with `init` as a standalone accessor in
+the property accessor list.
 
 ### Warn on failed init
 Consider the following scenario. A type declares an `init` only member which
@@ -372,6 +403,40 @@ There will be no warning on consumption of `init` fields and properties.
 LDM wants to have a broader discussion on the idea of required fields and
 properties. That may cause us to come back and reconsider our position on
 `init` members and validation.
+
+## Allow init as a field modifier
+In the same way `init` can server as a property accessor it could also serve as
+a designation on fields to give them similar behaviors as `init` properties.
+That would allow for the field to be assigned before construction was complete
+by the type, derived types or object initializers.
+
+```cs
+class Student
+{
+    public init string FirstName;
+    public init string LastName;
+}
+
+var s = new Student()
+{
+    FirstName = "Jarde",
+    LastName = "Parsons",
+}
+
+s.FirstName = "Jared"; // Error FirstName is readonly
+```
+
+In metadata these fields would be marked in the same way as `readonly` fields 
+but with an additional attribute or modreq to indicate they are `init` style
+fields. 
+
+**Resolution**
+LDM agrees this proposal is sound but overal the scenario felt disjoint from 
+properties. The decision was to proceed only with `init` properties for now. 
+This has a suitable level of flexibility as an `init` property can mutate a 
+`readonly` field on the declaring type of the property. This will be
+reconsidered if there is significant customer feedback that justifies the 
+scenario.
 
 ### Allow init as a type modifier
 In the same way the `readonly` modifier can be applied to a `struct` to 
@@ -405,52 +470,21 @@ it confusing for users.
 Given that `init` is only valid on certain aspects of a type we rejected the 
 idea of having it as a type modifier.
 
-## Allow init as a field modifier
-In the same way `init` can server as a property accessor it could also serve as
-a designation on fields to give them similar behaviors as `init` properties.
-That would allow for the field to be assigned before construction was complete
-by the type, derived types or object initializers.
-
-```cs
-class Student
-{
-    public init string FirstName;
-    public init string LastName;
-}
-
-var s = new Student()
-{
-    FirstName = "Jarde",
-    LastName = "Parsons",
-}
-
-s.FirstName = "Jared"; // Error FirstName is readonly
-```
-
-In metadata these fields would be marked in the same way as `readonly` fields 
-but with an additional attribute or modreq to indicate they are `init` style
-fields. 
-
-**Resolution**
-LDM agrees this proposal is sound but overal the scenario felt disjoint from 
-properties. The decision was to proceed with properties only for now but this 
-will be reconsidered if there is significant customer feedback that justifies
-the scenario.
-
 ## Considerations
 
 ### Compatibility
-The `init` feature is designed to be compatible with existing data types. 
-Specifically it is meant to be a completely additive change for data which is
-`readonly` today but desires more flexible object creation semantics.
+The `init` feature is designed to be compatible with existin `get` only 
+properties. Specifically it is meant to be a completely addiditive change for 
+a property which is `get` only today but desires more flexbile object creation
+semantics.
 
 For example consider the following type:
 
 ```cs
 class Name
 {
-    public readonly string First;
-    public readonly string Last;
+    public string First { get; }
+    public string Last { get; }
 
     public Name(string first, string last)
     {
@@ -460,13 +494,13 @@ class Name
 }
 ```
 
-It is not a breaking change to use `init` in place of `readonly` here:
+Adding `init` to these properties is a non-breaking change:
 
 ```cs
 class Name
 {
-    public init string First;
-    public init string Last;
+    public string First { get; init; }
+    public string Last { get; init; }
 
     public Name(string first, string last)
     {
@@ -475,14 +509,45 @@ class Name
     }
 }
 ```
-
-The same applies for changing a `get` only property to have an `init` 
-accessor.
 
 ### IL verification
 When .NET Core decides to re-implement IL verification the rules will need to be 
 adjusted to account for `init` members. This will need to be included in the 
 rule changes for non-mutating acess to `readonly` data.
+
+The IL verification rules will need to be broken into two parts: 
+
+1. Allowing `init` members to set a `readonly` field.
+1. Determining when an `init` member can be legally called.
+
+The first is a simple adjustmetn to the existing rules. The IL verifier can 
+be taught to recognize `init` members and from there it just needs to consider
+a `readonly` field to be settable on `this` in such a member.
+
+The second rule is more complicated. In the simple case of object initializers
+the rule is straight forward. It should be legal to call `init` members when 
+the result of a `new` expression is still on the stack. That is until the 
+value has been stored in a local, array element or field or passed as an
+argument to another method it will still be legal to call `init` members. This
+ensures that once the result of the `new` expression is published to a named
+identifier (other than `this`) then it will no longer be legal to call `init`
+members. 
+
+The more complicated case though is when we mix `init` members, object
+initializers and `await`. That can cause the newly craeted object to be
+temporarily hoisted into a state machine and hence put into a field.
+
+```cs
+var student = new Student() 
+{
+    Name = await SomeMethod()
+};
+```
+
+Here the result of `new Student()` will be hoised into a state machine as a 
+field before the set of `Name` occurs. The compiler will need to mark such
+hoisted fields in a way that the IL verifier understands they're not user 
+accessible and hence doesn't violate the intended semantics of `init`.
 
 ## init members
 The `init` modifier could be extended to apply to all instance members. This 
