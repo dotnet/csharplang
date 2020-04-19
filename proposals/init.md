@@ -2,10 +2,10 @@ Init Only Members
 =====
 
 ## Summary
-This proposal adds the concept of init only members to C#. Init only members 
-can be  at the point of objection creation but become `readonly` once object
-creation has completed. This allows for a much more flexible immutable model
-in C#. 
+This proposal adds the concept of init only properties to C#. These properties
+can be set at the point of object creation but become effectively `get` only 
+once object creation has completed. This allows for a much more flexible
+immutable model in C#. 
 
 ## Motivation
 The underlying mechanisms for building immutable data in C# haven't changed
