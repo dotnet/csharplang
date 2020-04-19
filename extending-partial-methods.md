@@ -108,14 +108,106 @@ their call sites to a new method + refactor the regex to pass the string literal
 as an argument. It's pretty messy.
 
 ## Detailed Design
-The compiler will allow `partial` methods to be annotated with an explicit 
-accessibility. 
+The language will change to allow `partial` methods to be annotated with an 
+explicit accessibility modifier. This means they can be labeled as `private`, 
+`public`, etc ... 
+
+When a `partial` method has an explicit accessibility modifier 
+though the language will require that the declaration has a matching
+definition even when the accessibility is `private`:
+
+```cs
+partial class C
+{
+    // Okay because no definition is required here
+    partial void M1();
+
+    // Okay because M2 has a definition
+    private partial void M2();
+
+    // Error: partial method M3 must have a definition
+    private partial void M3();
+}
+
+partial class C
+{
+    private partial void M2() { }
+}
+```
+
+Further the language will remove all restrictions on what can appear on a 
+`partial` method which has an explicit accessibility. Such declarations can 
+contain non-void return types, `ref` or `out` parameters, `extern` modifier, 
+etc ... These signatures will have the full expressivity of the C# language.
+
+```cs
+partial class D
+{
+    // Okay
+    internal partial bool TryParse(string s, out int i); 
+}
+
+partial class D
+{
+    internal partial bool TryParse(string s, out int i) { }
+}
+```
+
+This explicitly allows for `partial` methods to participate in `overrides` and 
+`interface` implementations:
+
+```cs
+interface IStudent
+{
+    string GetName();
+}
+
+partial class C : IStudent
+{
+    public virtual partial string GetName(); 
+}
+
+partial class C
+{
+    public virtual partial string GetName() => "Jarde";
+}
+```
+
+The compiler will change the error it emits when a `partial` method contains
+an illegal element to essentially say:
+
+> Cannot use `ref` on a `partial` method that lacks explicit accessibility 
+
+This will help point developers in the right direction when using this feature.
+
+Restrictions:
+- `partial` declarations with explicit accessibility must have a definition
+- `partial` declarations and definition signatures must match on all method
+and parameter modifiers. The only aspects which can differ are parameter names
+and attribute lists (this is not new but rather an existing requirement of
+`partial methods).
 
 ## Questions
 
 ### partial on all members
+Given that we're expanding `partial` to be more friendly to source generators
+should we also expand it to work on all class members? For example should we 
+be able to declare `partial` constructors, operators, etc ...
 
-### abstract or virtual
+**Resolution**
+The idea is sound but at this point we're trying to avoid feature creep here.
+Want to solve the immediate problem of expanding the feature to work with 
+modern source generators. Will consider expanding to other members if we 
+receive significant feedback about it from customers
 
-## Considerations
+### Use abstract instead of partial
+The crux of this proposal is essentially ensuring that a declaration has a
+corresponding definition / implementation. Given that should we use `abstract`
+since it's already a language keyword that forces the developer to think about
+having an implementation?
 
+**Resolution**
+There was a healthy discussion about this but eventually it was decided against.
+Yes the requirements are familiar but the concepts are significantly different.
+Could easily lead the developer to believe they were creating virtual slots when
+they were not doing so.
