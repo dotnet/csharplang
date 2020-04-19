@@ -124,7 +124,7 @@ class Consumption
 
 At the point a `init` accessor is invoked the instance is known to be 
 in the open construction phase. Hence an `init` accessor is allowed to take 
-the following actions in addition to what a normal `set` accessor cand do:
+the following actions in addition to what a normal `set` accessor can do:
 
 1. Call other `init` accessors available through `this`
 1. Assign `readonly` fields declared on the same type
@@ -138,7 +138,7 @@ class Complex
     int Prop2
     {
         get => 42;
-        set
+        init
         {
             Field1 = 13; // okay
             Field2 = 13; // okay
