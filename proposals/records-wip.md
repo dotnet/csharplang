@@ -96,8 +96,8 @@ parameterless instance method called `Clone` whose return type must be the recei
 
 On the right hand side of the `with` expression is an `anonymous_object_initializer` with a
 sequence of assignments, each with an `initonly` property (see [Properties](#Properties)) of the `Clone`
-return type on the left-hand side of the assignment, and an arbitrary expression on the right-hand side which is 
-implicitly convertible to the type of the property.
+return type on the left-hand side of the assignment (as a property invocation), and an arbitrary expression 
+on the right-hand side which is implicitly convertible to the type of the property.
 
 The evaluation of a `with` expression calls the `Clone` method exactly once,
 and then sets the backing field of each `initonly` property in the argument list to 
