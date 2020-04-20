@@ -15,7 +15,7 @@ since 1.0. They remain:
 1. Declaring properties that contain only a `get` accessor.
 
 These mechanisms are effective at allowing the construction of immutable data
-but they do so by adding cost to the boiler plate code of types and opting
+but they do so by adding cost to the boilerplate code of types and opting
 such types out of features like object and collection initializers. This means
 developers must choose between ease of use and immutability.
 
@@ -37,10 +37,10 @@ struct Point
 }
 ```
 
-The `init` modifier makes immutable objects more flexible by allowing the
+The `init` accessor makes immutable objects more flexible by allowing the
 caller to mutate the members during the act of construction. That means the
 object's immutable properties can participate in object initializers and thus
-removes the need for all constructor boiler plate in the type. The `Point`
+removes the need for all constructor boilerplate in the type. The `Point`
 type is now simply:
 
 ```cs
@@ -75,8 +75,8 @@ An instance property containing an `init` accessor is considered settable in
 the following circumstances:
 
 - During an object initializer
-- Inside an instance constructor of the containing or derived type
-- Inside the `init` accessor of any property on `this`
+- Inside an instance constructor of the containing or derived type, on `this` or `base`
+- Inside the `init` accessor of any property, on `this` or `base`
 
 The times above in which the `init` accessors are settable are collectively
 referred to in this document as the construction phase of the object.
@@ -126,7 +126,7 @@ At the point a `init` accessor is invoked the instance is known to be
 in the open construction phase. Hence an `init` accessor is allowed to take 
 the following actions in addition to what a normal `set` accessor can do:
 
-1. Call other `init` accessors available through `this`
+1. Call other `init` accessors available through `this` or `base`
 1. Assign `readonly` fields declared on the same type
 
 ```cs
@@ -212,7 +212,7 @@ class C2 : Base
 }
 ```
 
-An `interface` declaration can also participate in `init` style initalization 
+An `interface` declaration can also participate in `init` style initialization 
 via the following pattern:
 
 ```cs
@@ -250,7 +250,6 @@ namespace System.Runtime.CompilerServices
 {
     public sealed class IsInitOnly
     {
-
     }
 }
 ```
@@ -408,7 +407,7 @@ properties. That may cause us to come back and reconsider our position on
 In the same way `init` can serve as a property accessor it could also serve as
 a designation on fields to give them similar behaviors as `init` properties.
 That would allow for the field to be assigned before construction was complete
-by the type, derived types or object initializers.
+by the type, derived types, or object initializers.
 
 ```cs
 class Student
@@ -474,7 +473,7 @@ idea of having it as a type modifier.
 
 ### Compatibility
 The `init` feature is designed to be compatible with existing `get` only 
-properties. Specifically it is meant to be a completely addiditive change for 
+properties. Specifically it is meant to be a completely additive change for 
 a property which is `get` only today but desires more flexbile object creation
 semantics.
 
