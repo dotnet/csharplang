@@ -243,6 +243,26 @@ The better function member specification will be changed to include the followin
 
 This means that it is possible to overload on `void*` and a `delegate*` and still sensibly use the address-of operator.
 
+## Metadata representation of `in`, `out`, and `ref readonly` parameters and return types
+
+Function pointer signatures have no parameter flags location, so we must encode whether parameters and the return type are `in`, `out`, or `ref readonly` by using modreqs.
+
+### `in`
+
+We reuse `System.Runtime.InteropServices.InAttribute`, applied as a `modreq` to the ref specifier on a parameter or return type, to mean the following:
+* If applied to a parameter ref specifier, this parameter is treated as `in`.
+* If applied to the return type ref specifier, the return type is treated as `ref readonly`.
+
+### `out`
+
+We use `System.Runtime.InteropServices.OutAttribute`, applied as a `modreq` to the ref specifier on a parameter type, to mean that the parameter is an `out` parameter.
+
+### Errors
+
+* It is an error to apply `OutAttribute` as a modreq to a return type.
+* It is an error to apply both `InAttribute` and `OutAttribute` as a modreq to a parameter type.
+* If either are specified via modopt, they are ignored.
+
 ## Open Issues
 
 ### NativeCallableAttribute
