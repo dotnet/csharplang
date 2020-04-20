@@ -48,6 +48,8 @@
 
 ## April 22, 2020
 
+- https://github.com/dotnet/csharplang/projects/4 Triage for C# 10.0 (Mads)
+
 ## April 20, 2020
 
 - Record Monday (Andy, Mads, Jared): Factories
