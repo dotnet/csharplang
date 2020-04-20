@@ -31,7 +31,7 @@
 
 ## April 20, 2020
 
-- Record Monday (Andy, Mads)
+- Record Monday (Andy, Mads, Jared): Factories
 
 ## April 15, 2020
 
