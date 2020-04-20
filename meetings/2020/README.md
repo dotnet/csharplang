@@ -50,10 +50,6 @@
 
 - https://github.com/dotnet/csharplang/projects/4 Triage for C# 10.0 (Mads)
 
-## April 20, 2020
-
-- Record Monday (Andy, Mads, Jared): Factories
-
 ## April 15, 2020
 
 - https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
@@ -78,6 +74,12 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## April 20, 2020
+
+[C# Language Design Notes for April 20, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-20.md)
+
+Records: Factories
 
 ## April 13. 2020
 
