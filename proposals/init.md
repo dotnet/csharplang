@@ -39,7 +39,7 @@ struct Point
 
 The `init` modifier makes immutable objects more flexible by allowing the
 caller to mutate the members during the act of construction. That means the
-object's immutable properties can participate in object initialzers and thus
+object's immutable properties can participate in object initializers and thus
 removes the need for all constructor boiler plate in the type. The `Point`
 type is now simply:
 
@@ -212,7 +212,7 @@ class C2 : Base
 }
 ```
 
-An `interface` declaration can also particpate in `init` style initalization 
+An `interface` declaration can also participate in `init` style initalization 
 via the following pattern:
 
 ```cs
@@ -256,7 +256,7 @@ namespace System.Runtime.CompilerServices
 ```
 
 The compiler will match the type by full name. There is no requirement
-that it appear in the core library. If there are mulitple types by this name
+that it appear in the core library. If there are multiple types by this name
 then the compiler will tie break in the following order:
 
 1. The one defined in the project being compiled
@@ -339,7 +339,7 @@ The feature will use a modreq to encode the property `init` setter. The
 compelling factors were (in no particular order):
 
 * Desire to discourage older compilers from violating `init` semantics
-* Desire to make adding or removing `init` in a `virtual` declaratio or 
+* Desire to make adding or removing `init` in a `virtual` declaration or 
 `interface` both a source and binary breaking change.
 
 Given there was also no significant support for removing `init` to be a 
@@ -359,7 +359,7 @@ int Option3 { get; initonly; }
 ```
 
 **Resolution**
-There was no syntax which was overwelmingly favored in LDM.
+There was no syntax which was overwhelmingly favored in LDM.
 
 One point which got significant attention was how the choice of syntax would
 impact our ability to do `init` members as a general feature in the future.
@@ -405,7 +405,7 @@ properties. That may cause us to come back and reconsider our position on
 `init` members and validation.
 
 ## Allow init as a field modifier
-In the same way `init` can server as a property accessor it could also serve as
+In the same way `init` can serve as a property accessor it could also serve as
 a designation on fields to give them similar behaviors as `init` properties.
 That would allow for the field to be assigned before construction was complete
 by the type, derived types or object initializers.
@@ -431,7 +431,7 @@ but with an additional attribute or modreq to indicate they are `init` style
 fields. 
 
 **Resolution**
-LDM agrees this proposal is sound but overal the scenario felt disjoint from 
+LDM agrees this proposal is sound but overall the scenario felt disjoint from 
 properties. The decision was to proceed only with `init` properties for now. 
 This has a suitable level of flexibility as an `init` property can mutate a 
 `readonly` field on the declaring type of the property. This will be
@@ -473,7 +473,7 @@ idea of having it as a type modifier.
 ## Considerations
 
 ### Compatibility
-The `init` feature is designed to be compatible with existin `get` only 
+The `init` feature is designed to be compatible with existing `get` only 
 properties. Specifically it is meant to be a completely addiditive change for 
 a property which is `get` only today but desires more flexbile object creation
 semantics.
@@ -520,7 +520,7 @@ The IL verification rules will need to be broken into two parts:
 1. Allowing `init` members to set a `readonly` field.
 1. Determining when an `init` member can be legally called.
 
-The first is a simple adjustmetn to the existing rules. The IL verifier can 
+The first is a simple adjustment to the existing rules. The IL verifier can 
 be taught to recognize `init` members and from there it just needs to consider
 a `readonly` field to be settable on `this` in such a member.
 
@@ -534,7 +534,7 @@ identifier (other than `this`) then it will no longer be legal to call `init`
 members. 
 
 The more complicated case though is when we mix `init` members, object
-initializers and `await`. That can cause the newly craeted object to be
+initializers and `await`. That can cause the newly created object to be
 temporarily hoisted into a state machine and hence put into a field.
 
 ```cs
@@ -549,7 +549,7 @@ field before the set of `Name` occurs. The compiler will need to mark such
 hoisted fields in a way that the IL verifier understands they're not user 
 accessible and hence doesn't violate the intended semantics of `init`.
 
-## init members
+### init members
 The `init` modifier could be extended to apply to all instance members. This 
 would generalize the concept of `init` during object construction and allow
 types to declare helper methods that could partipate in the construction 
