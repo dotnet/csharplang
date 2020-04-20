@@ -19,13 +19,32 @@
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+
+## May 27, 2020
+
+## May 18, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## May 13, 2020
+
+## May 11, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## May 6, 2020
+
+## May 4, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
 ## April 29, 2020
 
 - Design review
 
 ## April 27, 2020
 
-- Record Monday (Andy, Mads)
+- Record Monday (Andy, Jared, Mads)
 
 ## April 22, 2020
 
