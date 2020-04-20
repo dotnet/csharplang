@@ -1,6 +1,11 @@
 ﻿# Target-Typed Conditional Expression
 
-For a conditional expression `c ? e1 : e2`, when there is no common type for `e1` and `e2`, we define a new *conditional expression conversion* that permits an implicit conversion from the conditional expression to any type `T` for which there is a conversion-from-expression from `e1` to `T` and also from `e2` to `T`.  It is an error if a conditional expression neither has a common type between `e1` and `e2` nor is subject to a *conditional expression conversion*.
+For a conditional expression `c ? e1 : e2`, when
+
+1. there is no common type for `e1` and `e2`, or
+2. for which a common type exists but one of the expressions `e1` or `e2` has no implicit conversion to that type
+
+we define a new *conditional expression conversion* that permits an implicit conversion from the conditional expression to any type `T` for which there is a conversion-from-expression from `e1` to `T` and also from `e2` to `T`.  It is an error if a conditional expression neither has a common type between `e1` and `e2` nor is subject to a *conditional expression conversion*.
 
 ### Open Issues
 
@@ -29,7 +34,7 @@ M(short, short);
 M(long, long);
 ```
 
-This becomes ambiguous because the conversion to `long` is better for the first argument (because it does not use the *conditional expression conversion*), but the conversion to `short` is better for the second argument (because `short` is a *better conversion target* than `long`).
+This becomes ambiguous because the conversion to `long` is better for the first argument (because it does not use the *conditional expression conversion*), but the conversion to `short` is better for the second argument (because `short` is a *better conversion target* than `long`). This breaking change seems less serious because it does not silently change the behavior of an existing program.
 
 Should we elect to make this change to the proposal, we would change
 
