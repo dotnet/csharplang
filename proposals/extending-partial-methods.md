@@ -195,10 +195,12 @@ should we also expand it to work on all class members? For example should we
 be able to declare `partial` constructors, operators, etc ...
 
 **Resolution**
-The idea is sound but at this point we're trying to avoid feature creep here.
-Want to solve the immediate problem of expanding the feature to work with 
-modern source generators. Will consider expanding to other members if we 
-receive significant feedback about it from customers
+The idea is sound but at this point in the C# 9 schedule we're trying to avoid
+unnecessary feature creep. Want to solve the immediate problem of expanding
+the feature to work with modern source generators. 
+
+Extending `partial` to support other members will be considered for the C# 10
+release. Seems likely that we will consider this extension.
 
 ### Use abstract instead of partial
 The crux of this proposal is essentially ensuring that a declaration has a
