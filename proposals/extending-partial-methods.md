@@ -185,7 +185,7 @@ Restrictions:
 - `partial` declarations and definition signatures must match on all method
 and parameter modifiers. The only aspects which can differ are parameter names
 and attribute lists (this is not new but rather an existing requirement of
-`partial methods).
+`partial` methods).
 
 ## Questions
 
