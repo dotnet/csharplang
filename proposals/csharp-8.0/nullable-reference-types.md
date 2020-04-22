@@ -87,7 +87,7 @@ In the previous example, the `DoWork` function accepts a `Worker` and guards aga
 
 ### Express intent
 
-A more compelling use of the previous example is to express that the `Worker` parameter could be `null`, thus making the null guard more appropriate. Regardless, both null guards are still valid.
+A more compelling use of the previous example is to express that the `Worker` parameter could be `null`, thus making the null guard more appropriate. If you remove the null guard in the following example, the compiler warns that you may be dereferencing null. Regardless, both null guards are still valid.
 
 ```csharp
 public void DoWork(Worker? worker)
