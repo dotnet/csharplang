@@ -25,7 +25,7 @@ partial class C
 }
 ```
 
-One behavior of `partial` methods is that when the definition is abscent then
+One behavior of `partial` methods is that when the definition is absent then
 the language will simply erase any calls to the `partial` method. Essentially 
 it behaves like a call to a `[Conditional]` method where the condition was 
 evaluated to false. 
@@ -45,7 +45,7 @@ partial class D
 ```
 
 The original motivation for this feature was source generation in the form of 
-designer generated code. Users were constantly editting the generated code 
+designer generated code. Users were constantly editing the generated code 
 because they wanted to hook some aspect of the generated code. Most notably 
 parts of the Windows Forms startup process, after components were initialized.
 
