@@ -1,4 +1,4 @@
-Init Only Members
+Init Only Setters
 =====
 
 ## Summary
@@ -242,13 +242,13 @@ also applies to interface implementation.
 
 ### Metadata encoding 
 Property `init` accessors will be emitted as a standard `set` accessor with
-the return type marked with a modreq of `IsInitOnly`. This is a new type
+the return type marked with a modreq of `IsExternalInit`. This is a new type
 which will have the following definition:
 
 ```cs
 namespace System.Runtime.CompilerServices
 {
-    public sealed class IsInitOnly
+    public sealed class IsExternalInit
     {
     }
 }
@@ -263,7 +263,7 @@ then the compiler will tie break in the following order:
 
 If neither of these exist then a type ambiguity error will be issued.
 
-The design for `IsInitOnly` is futher covered in [this issue](https://github.com/dotnet/runtime/issues/34978)
+The design for `IsExternalInit` is futher covered in [this issue](https://github.com/dotnet/runtime/issues/34978)
 
 ## Questions
 
