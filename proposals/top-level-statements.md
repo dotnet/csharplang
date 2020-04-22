@@ -1,4 +1,4 @@
-# Simple programs
+# Top-level statements
 
 * [x] Proposed
 * [x] Prototype: Started
