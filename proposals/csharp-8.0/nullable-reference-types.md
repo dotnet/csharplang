@@ -15,7 +15,7 @@ It is assumed that the intent of an unadorned reference type `T` is for it to be
 
 A flow analysis tracks nullable reference variables. Where the analysis deems that they would not be null (e.g. after a check or an assignment), their value will be considered a non-null reference.
 
-A nullable reference can also explicitly be treated as non-null with the postfix `x!` operator (the "dammit" operator), for when flow analysis cannot establish a non-null situation that the developer knows is there.
+A nullable reference can also explicitly be treated as non-null with the postfix `x!` operator (the "damnit" operator), for when flow analysis cannot establish a non-null situation that the developer knows is there.
 
 Otherwise, a warning is given if a nullable reference is dereferenced, or is converted to a non-null type.
 
@@ -23,7 +23,7 @@ A warning is given when converting from `S[]` to `T?[]` and from `S?[]` to `T[]`
 
 A warning is given when converting from `C<S>` to `C<T?>` except when the type parameter is covariant (`out`), and when converting from `C<S?>` to `C<T>` except when the type parameter is contravariant (`in`).
 
-A warning is given on `C<T?>` if the type parameter has non-null constraints. 
+A warning is given on `C<T?>` if the type parameter has non-null constraints.
 
 ## Checking of non-null references
 
@@ -55,7 +55,7 @@ The `class` constraint is non-null. We can consider whether `class?` should be a
 
 In type inference, if a contributing type is a nullable reference type, the resulting type should be nullable. In other words, nullness is propagated.
 
-We should consider whether the `null` literal as a participating expression should contribute nullness. It doesn't today: for value types it leads to an error, whereas for reference types the null successfully converts to the plain type. 
+We should consider whether the `null` literal as a participating expression should contribute nullness. It doesn't today: for value types it leads to an error, whereas for reference types the null successfully converts to the plain type.
 
 ```csharp
 string? n = "world";
@@ -63,6 +63,46 @@ var x = b ? "Hello" : n; // string?
 var y = b ? "Hello" : null; // string? or error
 var z = b ? 7 : null; // Error today, could be int?
 ```
+
+## Null guard guidance
+
+As a feature, nullable reference types allow developers to express their intent, and provide warnings through flow analysis if that intent is contradicted. There is a common question as to whether or not null guards are necessary.
+
+### Example of null guard
+
+```csharp
+public void DoWork(Worker worker)
+{
+    // Guard against worker being null
+    if (worker is null)
+    {
+        throw new ArgumentNullException(nameof(worker));
+    }
+
+    // Otherwise use worker argument
+}
+```
+
+In the previous example, the `DoWork` function accepts a `Worker` and guards against it potentially being `null`. If the `worker` argument is `null`, the `DoWork` function will `throw`. With nullable reference types, the code in the previous example makes the intent that the `Worker` parameter would *not* be `null`. If the `DoWork` function was a public API, such as a NuGet package or a shared library - as guidance you should leave null guards in place. As a public API, the only guarantee that a caller isn't passing `null` is to guard against it.
+
+### Express intent
+
+A more compelling use of the previous example is to express that the `Worker` parameter could be `null`, thus making the null guard more appropriate. If you remove the null guard in the following example, the compiler warns that you may be dereferencing null. Regardless, both null guards are still valid.
+
+```csharp
+public void DoWork(Worker? worker)
+{
+    // Guard against worker being null
+    if (worker is null)
+    {
+        throw new ArgumentNullException(nameof(worker));
+    }
+
+    // Otherwise use worker argument
+}
+```
+
+For non-public APIs, such as source code entirely in control by a developer or dev team - the nullable reference types could allow for the safe removal of null guards where the developers can guarantee it is not necessary. The feature can help with warnings, but it cannot guarantee that at runtime code execution could result in a `NullReferenceException`.
 
 ## Breaking changes
 
