@@ -7,6 +7,8 @@ methods in C#. The goal being to expand the set of scenarios in which these
 methods can work with source generators as well as being a more general 
 declaration form for C# methods.
 
+See also the [original partial methods specification](/spec/classes.md#partial-methods).
+
 ## Motivation
 C# has limited support for developers splitting methods into declarations and 
 definitions / implementations. 
@@ -62,7 +64,7 @@ process could hook in as needed.
 This does mean that partial methods have several restrictions:
 
 1. Must have a `void` return type.
-1. Cannot have `ref` or `out` parameters. 
+1. Cannot have `out` parameters. 
 1. Cannot have any accessibility (implicitly `private`).
 
 These restrictions exist because the language must be able to emit code when
@@ -137,7 +139,7 @@ partial class C
 
 Further the language will remove all restrictions on what can appear on a 
 `partial` method which has an explicit accessibility. Such declarations can 
-contain non-void return types, `ref` or `out` parameters, `extern` modifier, 
+contain non-void return types, `out` parameters, `extern` modifier, 
 etc ... These signatures will have the full expressivity of the C# language.
 
 ```cs
