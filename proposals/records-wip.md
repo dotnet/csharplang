@@ -102,5 +102,6 @@ on the right-hand side which is implicitly convertible to the type of the proper
 The evaluation of a `with` expression calls the `Clone` method exactly once,
 and then sets the backing field of each `initonly` property in the argument list to 
 the value of its corresponding expression, in lexical order, using the result of the `Clone` method
-invocation as the receiver.
+invocation as the receiver. The type of the `with` expression is the same as the return type of
+the `Clone` method.
 
