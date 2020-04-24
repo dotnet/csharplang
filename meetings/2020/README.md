@@ -44,7 +44,7 @@
 
 ## April 27, 2020
 
-- Record Monday (Andy, Jared, Mads)
+- Record Monday (Andy, Jared, Mads): Positional records
 
 ## April 22, 2020
 
