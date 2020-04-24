@@ -2,7 +2,7 @@
 
 * [x] Proposed
 * [ ] Prototype: [In Progress](https://github.com/jnm2/roslyn/tree/module_initializer)
-* [ ] Implementation: [Not Started](https://github.com/dotnet/roslyn/BRANCH_NAME)
+* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/tree/features/module-initializers)
 * [ ] Specification: [Not Started]()
 
 ## Summary
@@ -177,4 +177,5 @@ If we do not implement this feature, then:
 
 ## Design meetings
 
-Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to.
+### [April 8th, 2020](/meetings/2020/LDM-2020-04-08.md#module-initializers)
+Let's let any static method be a module initializer (option 4 in the above proposal), and mark that method using a well-known attribute. We'll also allow multiple module initializer methods, and they will each be called in a reserved, but deterministic order.
