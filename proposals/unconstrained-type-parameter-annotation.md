@@ -112,3 +112,4 @@ constraints of the `ITypeParameterSymbol` which might involve checking constrain
 ## Design meetings
 
 https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-11-25.md
+https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-01-08.md#unconstrained-type-parameter-annotation-t
