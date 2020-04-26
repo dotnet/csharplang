@@ -128,7 +128,7 @@ in the open construction phase. Hence an `init` accessor is allowed to take
 the following actions in addition to what a normal `set` accessor can do:
 
 1. Call other `init` accessors available through `this` or `base`
-1. Assign `readonly` fields declared on the same type
+1. Assign `readonly` fields declared on the same type through `this`
 
 ```cs
 class Complex
