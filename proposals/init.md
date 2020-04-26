@@ -296,7 +296,7 @@ trade offs that need to be considered.
 Annotating a property set accessor with a modreq declaration means CLI compliant
 compilers will ignore the accessor unless it understands the modreq. That means
 only compilers aware of `init` will read the member. Compilers unaware of 
-`init` will ignore the `set` member and hence will not accidentally treat the
+`init` will ignore the `set` accessor and hence will not accidentally treat the
 property as read / write. 
 
 The downside of modreq is `init` becomes a part of the binary signature of 
