@@ -60,7 +60,7 @@ var p = new Point() { X = 42, Y = 13 };
 ## Detailed Design
 
 ### init accessors
-An init only property is declared by using the `init` accessor in place of the 
+An init only property (or indexer) is declared by using the `init` accessor in place of the 
 `set` accessor:
 
 ```cs
