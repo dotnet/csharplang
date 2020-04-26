@@ -2,10 +2,10 @@ Init Only Setters
 =====
 
 ## Summary
-This proposal adds the concept of init only properties to C#. These properties
-can be set at the point of object creation but become effectively `get` only 
-once object creation has completed. This allows for a much more flexible
-immutable model in C#. 
+This proposal adds the concept of init only properties and indexers to C#. 
+These properties and indexers can be set at the point of object creation 
+but become effectively `get` only once object creation has completed.
+This allows for a much more flexible immutable model in C#. 
 
 ## Motivation
 The underlying mechanisms for building immutable data in C# haven't changed
@@ -59,8 +59,8 @@ var p = new Point() { X = 42, Y = 13 };
 
 ## Detailed Design
 
-### init members
-An init only property is declared by using the `init` accessor in place of the 
+### init accessors
+An init only property (or indexer) is declared by using the `init` accessor in place of the 
 `set` accessor:
 
 ```cs
@@ -75,6 +75,7 @@ An instance property containing an `init` accessor is considered settable in
 the following circumstances:
 
 - During an object initializer
+- During a `with` expression initializer
 - Inside an instance constructor of the containing or derived type, on `this` or `base`
 - Inside the `init` accessor of any property, on `this` or `base`
 
@@ -295,7 +296,7 @@ trade offs that need to be considered.
 Annotating a property set accessor with a modreq declaration means CLI compliant
 compilers will ignore the accessor unless it understands the modreq. That means
 only compilers aware of `init` will read the member. Compilers unaware of 
-`init` will ignore the `set` member and hence will not accidentally treat the
+`init` will ignore the `set` accessor and hence will not accidentally treat the
 property as read / write. 
 
 The downside of modreq is `init` becomes a part of the binary signature of 
