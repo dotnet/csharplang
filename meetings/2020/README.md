@@ -42,10 +42,6 @@
 
 - Design review
 
-## April 27, 2020
-
-- Record Monday (Andy, Jared, Mads): Positional records
-
 ## April 22, 2020
 
 - https://github.com/dotnet/csharplang/projects/4 Triage for C# 10.0 (Mads)
@@ -74,6 +70,13 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## April 27, 2020
+
+[C# Language Design Notes for April 27, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-27.md)
+
+Records: positional & primary constructors
+
 
 ## April 20, 2020
 
