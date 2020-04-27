@@ -14,14 +14,13 @@ Although the .NET platform has a feature that directly supports writing initiali
 [motivation]: #motivation
 
 - Enable libraries to do eager, one-time initialization when loaded, with minimal overhead and without the user needing to explicitly call anything
-- One particular pain point is that the runtime must do additional checks on usage of a type with a static constructor, in order to decide whether the static constructor needs to be run or not. This adds measurable overhead.
+- One particular pain point of current `static` constructor approaches is that the runtime must do additional checks on usage of a type with a static constructor, in order to decide whether the static constructor needs to be run or not. This adds measurable overhead.
 - Enable source generators to run some global initialization logic without the user needing to explicitly call anything
-  - (in which scenarios is a static constructor insufficient/undesirable for this?)
 
 ## Detailed design
 [design]: #detailed-design
 
-Add a tiny feature to support this without any explicit syntax, by having the C# compiler recognize a module attribute with a well-known name, like the following:
+The C# compiler will recognize the following attribute:
 
 ``` c#
 namespace System.Runtime.CompilerServices
