@@ -63,6 +63,8 @@ void .cctor()
 }
 ```
 
+Note that the overhead of checking whether the static constructor has run on a module initializer type (`MyModuleInitializer` in this example) can be kept to a minimum by referencing the type only in the `[module: ModuleInitializer(typeof(MyModuleInitializer))]` attribute.
+
 This proposal uses `AttributeUsage(AllowMultiple = false)` to disallow the user from declaring more than one initializer class without adding any special language rules to accomplish that. It is very lightweight in that it uses existing syntax and semantic rules for attributes. On the other hand, it may make it more difficult for users to realize that the static constructor they are looking at is the module initializer, because the attribute may be far away from the class that actually contains the module initializer, and it also requires us to decide what happens if the attribute is used to reference a type from another assembly.
 
 ## Unresolved questions
