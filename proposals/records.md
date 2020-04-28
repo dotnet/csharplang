@@ -338,8 +338,8 @@ public struct Pair : IEquatable<Pair>
     public Pair With(object First = this.First, object Second = this.Second) => new Pair(First, Second);
     public void Deconstruct(out object First, out object Second)
     {
-        First = self.First;
-        Second = self.Second;
+        First = this.First;
+        Second = this.Second;
     }
 }
 ```
@@ -394,8 +394,8 @@ public sealed class Student : IEquatable<Student>
     public Student With(string Name = this.Name, decimal Gpa = this.Gpa) => new Student(Name, Gpa);
     public void Deconstruct(out string Name, out decimal Gpa)
     {
-        Name = self.Name;
-        Gpa = self.Gpa;
+        Name = this.Name;
+        Gpa = this.Gpa;
     }
 }
 ```
@@ -431,9 +431,9 @@ public abstract class Person : IEquatable<Person>
         return (Name?.GetHashCode()).GetValueOrDefault();
     }
     public abstract Person With(string Name = this.Name);
-    public void Deconstruct(Person self, out string Name)
+    public void Deconstruct(out string Name)
     {
-        Name = self.Name;
+        Name = this.Name;
     }
 }
 ```
@@ -476,10 +476,10 @@ public sealed class Student : Person, IEquatable<Student>
     }
     public Student With(string Name = this.Name, decimal Gpa = this.Gpa) => new Student(Name, Gpa);
     public override Person With(string Name = this.Name) => new Student(Name, Gpa);
-    public void Deconstruct(Student self, out string Name, out decimal Gpa)
+    public void Deconstruct(out string Name, out decimal Gpa)
     {
-        Name = self.Name;
-        Gpa = self.Gpa;
+        Name = this.Name;
+        Gpa = this.Gpa;
     }
 }
 ```
