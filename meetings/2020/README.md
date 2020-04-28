@@ -46,11 +46,6 @@
 
 - https://github.com/dotnet/csharplang/projects/4 Triage for C# 10.0 (Mads)
 
-## April 15, 2020
-
-- https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
-- https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Top-level programs (Aleksey)
-
 ## March 18, 2020
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
@@ -83,6 +78,13 @@ Records: positional & primary constructors
 [C# Language Design Notes for April 20, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-20.md)
 
 Records: Factories
+
+## April 15, 2020
+
+[C# Language Design Notes for April 13, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-15.md)
+
+1. Non-void and non-private partial methods
+2. Top-level programs
 
 ## April 13. 2020
 
