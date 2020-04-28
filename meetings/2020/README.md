@@ -81,7 +81,7 @@ Records: Factories
 
 ## April 15, 2020
 
-[C# Language Design Notes for April 13, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-15.md)
+[C# Language Design Notes for April 15, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-15.md)
 
 1. Non-void and non-private partial methods
 2. Top-level programs
