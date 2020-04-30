@@ -59,6 +59,8 @@ For a record struct or a record class:
 
 * A public get-only auto-property is created. Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
 
+  * This property is also `initonly`, meaning the backing field can be modified in the [with](#With) expression below, if the corresponding `get` accessor is accessible
+
 ### Equality members
 
 Record types produce synthesized implementations for the following methods:
@@ -89,13 +91,17 @@ A `with` expression allows for "non-destructive mutation", designed to
 produce a copy of the receiver expression with modifications to properties
 listed in the `anonymous_object_initializer`.
 
-A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible parameterless instance method called `Clone` whose return type must be the type of the receiver express type, or a base type thereof.
+A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible
+parameterless instance method called `Clone` whose return type must be the receiver type, or a base type thereof.
 
 On the right hand side of the `with` expression is an `anonymous_object_initializer` with a
-sequence of assignments with a compiler-generated record property of the receiver on the left-hand side of the
-assignment, and an arbitrary expression on the right-hand side which is implicitly convertible to the type
-of the left-hand side.
+sequence of assignments, each with an `initonly` property (see [Properties](#Properties)) of the `Clone`
+return type on the left-hand side of the assignment (as a property invocation), and an arbitrary expression 
+on the right-hand side which is implicitly convertible to the type of the property.
 
-The evaluation of a `with` expression is equivalent to calling the `Clone` method exactly once,
-and then setting the backing field of each record property in the argument list to its corresponding
-expression, in lexical order, using the result of the `Clone` method as the receiver.
+The evaluation of a `with` expression calls the `Clone` method exactly once,
+and then sets the backing field of each `initonly` property in the argument list to 
+the value of its corresponding expression, in lexical order, using the result of the `Clone` method
+invocation as the receiver. The type of the `with` expression is the same as the return type of
+the `Clone` method.
+
