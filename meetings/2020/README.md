@@ -15,11 +15,14 @@
 
 ## May 27, 2020
 
+- https://github.com/dotnet/csharplang/issues/1711 Roles, extensions and static interfaces (Mads)
 ## May 18, 2020
 
 - Record Monday (Andy, Jared, Mads)
 
 ## May 13, 2020
+
+- [Triage](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone)
 
 ## May 11, 2020
 
@@ -34,7 +37,7 @@
 
 ## May 4, 2020
 
-- Record Monday (Andy, Jared, Mads)
+- Record Monday: feedback from design review (Andy, Jared, Mads)
 
 ## April 29, 2020
 
