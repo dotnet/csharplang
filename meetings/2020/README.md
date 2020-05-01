@@ -2,13 +2,10 @@
 
 ## Schedule ASAP
 
-- Continued: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
+
 
 ## Schedule when convenient
 
-- https://github.com/dotnet/csharplang/issues/3369 Allow `if (x is not string y)` pattern.  (Cyrus + Neal)
-- https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
-- https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Args in top-level programs (Aleksey, Mads)
 
 ## Recurring topics
 
@@ -29,6 +26,11 @@
 - Record Monday (Andy, Jared, Mads)
 
 ## May 6, 2020
+
+- Continued: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
+- https://github.com/dotnet/csharplang/issues/3369 Allow `if (x is not string y)` pattern.  (Cyrus + Neal)
+- https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
+- https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Args in top-level programs (Aleksey, Mads)
 
 ## May 4, 2020
 
