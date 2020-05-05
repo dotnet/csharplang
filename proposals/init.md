@@ -78,6 +78,7 @@ the following circumstances:
 - During a `with` expression initializer
 - Inside an instance constructor of the containing or derived type, on `this` or `base`
 - Inside the `init` accessor of any property, on `this` or `base`
+- Inside attribute usages with named parameters
 
 The times above in which the `init` accessors are settable are collectively
 referred to in this document as the construction phase of the object.
