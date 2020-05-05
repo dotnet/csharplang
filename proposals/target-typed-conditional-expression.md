@@ -2,7 +2,8 @@
 
 For a conditional expression `c ? e1 : e2`, when
 
-1. there is no common type for `e1` and `e2`
+1. there is no common type for `e1` and `e2`, or
+2. for which a common type exists but one of the expressions `e1` or `e2` has no implicit conversion to that type
 
 we define a new *conditional expression conversion* that permits an implicit conversion from the conditional expression to any type `T` for which there is a conversion-from-expression from `e1` to `T` and also from `e2` to `T`.  It is an error if a conditional expression neither has a common type between `e1` and `e2` nor is subject to a *conditional expression conversion*.
 
