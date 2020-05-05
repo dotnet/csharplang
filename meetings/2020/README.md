@@ -27,6 +27,7 @@
 ## May 11, 2020
 
 - Record Monday (Andy, Jared, Mads)
+    - https://gist.github.com/MadsTorgersen/3fb6b7461e211c8458044ad5115f2117 Primary constructors and records (Mads)
 
 ## May 6, 2020
 
