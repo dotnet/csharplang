@@ -37,10 +37,6 @@
 - https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
 - https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Args in top-level programs (Aleksey, Mads)
 
-## May 4, 2020
-
-- Record Monday: feedback from design review (Andy, Jared, Mads)
-
 ## April 29, 2020
 
 - Design review
@@ -69,12 +65,17 @@
 
 Overview of meetings and agendas for 2020
 
+## May 4, 2020
+
+[C# Language Design Notes for May 4, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-04.md)
+
+1. Reviewing design review feedback
+
 ## April 27, 2020
 
 [C# Language Design Notes for April 27, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-27.md)
 
 Records: positional & primary constructors
-
 
 ## April 20, 2020
 
