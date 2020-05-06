@@ -30,13 +30,6 @@
 - Record Monday (Andy, Jared, Mads)
     - https://gist.github.com/MadsTorgersen/3fb6b7461e211c8458044ad5115f2117 Primary constructors and records (Mads)
 
-## May 6, 2020
-
-- Continued: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
-- https://github.com/dotnet/csharplang/issues/3369 Allow `if (x is not string y)` pattern.  (Cyrus + Neal)
-- https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
-- https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Args in top-level programs (Aleksey, Mads)
-
 ## April 29, 2020
 
 - Design review
@@ -64,6 +57,15 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## May 6, 2020
+
+[C# Language Design Notes for May 6, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-06.md)
+
+1. Target-typing ?: when the natural type isn't convertible to the target type.
+1. Allow `if (x is not string y)` pattern.
+1. Open issues in extension `GetEnumerator`
+1. Args in top-level programs
 
 ## May 4, 2020
 
