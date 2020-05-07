@@ -1,8 +1,8 @@
 ﻿# Upcoming meetings for 2020
 
 ## Schedule ASAP
-- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`?
-- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications
+- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
+- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
 
 ## Schedule when convenient
 
