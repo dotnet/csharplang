@@ -3,6 +3,7 @@
 ## Schedule ASAP
 - init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
 - init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
+- init-only: init-only methods ? `init void Init()` (Jared/Julien)
 
 ## Schedule when convenient
 
