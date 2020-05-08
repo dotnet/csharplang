@@ -1,51 +1,53 @@
 ﻿# Upcoming meetings for 2020
 
 ## Schedule ASAP
-
-- Mandatory properties
+- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
+- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
+- init-only: init-only methods ? `init void Init()` (Jared/Julien)
 
 ## Schedule when convenient
+
 
 ## Recurring topics
 
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+
+## May 27, 2020
+
+- https://github.com/dotnet/csharplang/issues/1711 Roles, extensions and static interfaces (Mads)
+## May 18, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## May 13, 2020
+
+- [Triage](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone)
+
+## May 11, 2020
+
+- Record Monday (Andy, Jared, Mads)
+    - https://gist.github.com/MadsTorgersen/3fb6b7461e211c8458044ad5115f2117 Primary constructors and records (Mads)
+
+## May 6, 2020
+
+- Continued: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
+- https://github.com/dotnet/csharplang/issues/3369 Allow `if (x is not string y)` pattern.  (Cyrus + Neal)
+- https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
+- https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Args in top-level programs (Aleksey, Mads)
+
+## May 4, 2020
+
+- Record Monday: feedback from design review (Andy, Jared, Mads)
+
 ## April 29, 2020
 
 - Design review
 
-## April 27, 2020
-
-- Record Monday (Andy, Mads)
-
 ## April 22, 2020
 
-## April 20, 2020
-
-- Record Monday (Andy, Mads)
-
-## April 15, 2020
-
-- https://github.com/dotnet/csharplang/issues/3301 Non-void and non-private partial methods (Jared)
-
-## April 13, 2020
-
-- Record Monday (Andy, Mads)
-
-## April 8, 2020
-
-- Is `e is dynamic` a "pure" null check? (Neal)
-- Reconsider: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
-- Reconsider: Inferred type of an or pattern is the "common type" of the two inferred types (Neal)
-- https://github.com/dotnet/csharplang/issues/2608 module initializers (Neal)
-- https://github.com/dotnet/csharplang/issues/2926 Target-typed simple identifier (Neal)
-- Triage (focus on features championed by Neal)
-- https://github.com/dotnet/csharplang/issues/2910 base(T) (Neal)
-
-## April 6, 2020
-
-- Record Monday: Init-only properties deep dive (Jared)
+- https://github.com/dotnet/csharplang/projects/4 Triage for C# 10.0 (Mads)
 
 ## March 18, 2020
 
@@ -66,6 +68,48 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## April 27, 2020
+
+[C# Language Design Notes for April 27, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-27.md)
+
+Records: positional & primary constructors
+
+
+## April 20, 2020
+
+[C# Language Design Notes for April 20, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-20.md)
+
+Records: Factories
+
+## April 15, 2020
+
+[C# Language Design Notes for April 15, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-15.md)
+
+1. Non-void and non-private partial methods
+2. Top-level programs
+
+## April 13. 2020
+
+[C# Language Design Notes for April 13, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-13.md)
+
+1. Roadmap for records
+2. Init-only properties
+
+## April 8, 2020
+
+[C# Language Design Notes for April 8, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-08.md)
+
+1. `e is dynamic` pure null check
+2. Target typing `?:`
+3. Inferred type of an `or` pattern
+4. Module initializers
+
+## April 6, 2020
+
+[C# Language Design Notes for April 6, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-06.md)
+
+1. Record Monday: Init-only members
 
 ## April 1, 2020
 

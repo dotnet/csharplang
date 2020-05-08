@@ -44,7 +44,7 @@ declaration_pattern
     : type simple_designation
     ;
 constant_pattern
-    : expression
+    : constant_expression
     ;
 var_pattern
     : 'var' designation

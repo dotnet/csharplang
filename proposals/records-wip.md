@@ -41,9 +41,10 @@ In addition to the members declared in the class or struct body, a record type h
 
 A record type has a public constructor whose signature corresponds to the value parameters of the
 type declaration. This is called the primary constructor for the type, and causes the implicitly
-declared default constructor to be suppressed (including the struct parameterless constructor).
-It is an error to have a primary constructor and a constructor with the same signature already
-present in the class. At runtime the primary constructor
+declared default class constructor, if present, to be suppressed. It is an error to have a primary
+constructor and a constructor with the same signature already present in the class.
+
+At runtime the primary constructor
 
 1. executes the instance field initializers appearing in the class-body; and then
     invokes the base class constructor with no arguments.
@@ -57,6 +58,8 @@ For each record parameter of a record type declaration there is a corresponding 
 For a record struct or a record class:
 
 * A public get-only auto-property is created. Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
+
+  * This property is also `initonly`, meaning the backing field can be modified in the [with](#With) expression below, if the corresponding `get` accessor is accessible
 
 ### Equality members
 
@@ -88,32 +91,17 @@ A `with` expression allows for "non-destructive mutation", designed to
 produce a copy of the receiver expression with modifications to properties
 listed in the `anonymous_object_initializer`.
 
-A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible instance method called `With` with
-the appropriate parameters and return type. It is an error if there are multiple non-override `With` methods. If there are multiple `With` overrides,
-there must be a non-override `With` method, which is the target method. Otherwise, there must be exactly one `With` method.
+A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible
+parameterless instance method called `Clone` whose return type must be the receiver type, or a base type thereof.
 
 On the right hand side of the `with` expression is an `anonymous_object_initializer` with a
-sequence of assignments with a field or property of the receiver on the left-hand side of the
-assignment, and an arbitrary expression on the right-hand side which is implicitly convertible to the type
-of the left-hand side.
+sequence of assignments, each with an `initonly` property (see [Properties](#Properties)) of the `Clone`
+return type on the left-hand side of the assignment (as a property invocation), and an arbitrary expression 
+on the right-hand side which is implicitly convertible to the type of the property.
 
-Given a target `With` method, the return type must be the type of the receiver expression type, or a base type thereof. For each parameter of
-the `With` method, there must be an accessible corresponding instance field or readable property on the
-receiver type with the same name and the same type. Each property or field in the right-hand side of the With
-expression must also correspond to a parameter of the same name in the `With` method.
+The evaluation of a `with` expression calls the `Clone` method exactly once,
+and then sets the backing field of each `initonly` property in the argument list to 
+the value of its corresponding expression, in lexical order, using the result of the `Clone` method
+invocation as the receiver. The type of the `with` expression is the same as the return type of
+the `Clone` method.
 
-Given a valid `With` method, the evaluation of a `with` expression is equivalent to calling the `With` method with the expressions in the
-`anonymous_object_initializer` substituted for the parameter of the same
-name as the property on the left hand side. If there is no matching property
-for a given parameter in the `anonymous_object_initializer`, the argument
-is the evaluation of the field or property of the same name on the receiver.
-
-The order of evaluation of side effects is as follows, with each expression
-evaluated exactly once:
-
-1. Receiver expression
-
-2. Expressions in the `anonymous_object_initializer`, in lexical order
-
-3. The evaluation of any properties matching the `With` method parameters,
-in order of definition of the `With` method parameters.

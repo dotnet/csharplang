@@ -212,6 +212,29 @@ Restrictions of this feature:
   deliberately not specified by the language. This includes whether they are static vs. instance or
   exactly what signature they are emitted with.
 
+
+### Operators on Function Pointer Types
+
+The section in unsafe code on operators is modified as such:
+
+> In an unsafe context, several constructs are available for operating on all _pointer\_type_s that are not _funcptr\_type_s:
+>
+> *  The `*` operator may be used to perform pointer indirection ([Pointer indirection](unsafe-code.md#pointer-indirection)).
+> *  The `->` operator may be used to access a member of a struct through a pointer ([Pointer member access](unsafe-code.md#pointer-member-access)).
+> *  The `[]` operator may be used to index a pointer ([Pointer element access](unsafe-code.md#pointer-element-access)).
+> *  The `&` operator may be used to obtain the address of a variable ([The address-of operator](unsafe-code.md#the-address-of-operator)).
+> *  The `++` and `--` operators may be used to increment and decrement pointers ([Pointer increment and decrement](unsafe-code.md#pointer-increment-and-decrement)).
+> *  The `+` and `-` operators may be used to perform pointer arithmetic ([Pointer arithmetic](unsafe-code.md#pointer-arithmetic)).
+> *  The `==`, `!=`, `<`, `>`, `<=`, and `=>` operators may be used to compare pointers ([Pointer comparison](unsafe-code.md#pointer-comparison)).
+> *  The `stackalloc` operator may be used to allocate memory from the call stack ([Fixed size buffers](unsafe-code.md#fixed-size-buffers)).
+> *  The `fixed` statement may be used to temporarily fix a variable so its address can be obtained ([The fixed statement](unsafe-code.md#the-fixed-statement)).
+> 
+> In an unsafe context, several constructs are available for operating on all _funcptr\_type_s:
+> *  The `&` operator may be used to obtain the address of static methods ([Allow address-of to target methods](function-pointers.md#allow-address-of-to-target-methods))
+> *  The `==`, `!=`, `<`, `>`, `<=`, and `=>` operators may be used to compare pointers ([Pointer comparison](unsafe-code.md#pointer-comparison)).
+
+Additionally, we modify all the sections in `Pointers in expressions` to forbid function pointer types, except `Pointer comparison` and `The sizeof operator`.
+
 ### Better function member
 
 The better function member specification will be changed to include the following line:
@@ -219,6 +242,26 @@ The better function member specification will be changed to include the followin
 > A `delegate*` is more specific than `void*`
 
 This means that it is possible to overload on `void*` and a `delegate*` and still sensibly use the address-of operator.
+
+## Metadata representation of `in`, `out`, and `ref readonly` parameters and return types
+
+Function pointer signatures have no parameter flags location, so we must encode whether parameters and the return type are `in`, `out`, or `ref readonly` by using modreqs.
+
+### `in`
+
+We reuse `System.Runtime.InteropServices.InAttribute`, applied as a `modreq` to the ref specifier on a parameter or return type, to mean the following:
+* If applied to a parameter ref specifier, this parameter is treated as `in`.
+* If applied to the return type ref specifier, the return type is treated as `ref readonly`.
+
+### `out`
+
+We use `System.Runtime.InteropServices.OutAttribute`, applied as a `modreq` to the ref specifier on a parameter type, to mean that the parameter is an `out` parameter.
+
+### Errors
+
+* It is an error to apply `OutAttribute` as a modreq to a return type.
+* It is an error to apply both `InAttribute` and `OutAttribute` as a modreq to a parameter type.
+* If either are specified via modopt, they are ignored.
 
 ## Open Issues
 
