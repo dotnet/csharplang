@@ -296,7 +296,7 @@ function pointer.
 
 ### UnmanagedCallersOnlyAttribute
 
-`UnamangedCallersOnlyAttribute` is an attribute used by the CLR to indicate that a method should be called with a specific
+`UnmanagedCallersOnlyAttribute` is an attribute used by the CLR to indicate that a method should be called with a specific
 calling convention. Because of this, we introduce the following support for working with the attribute:
 
 * It is an error to directly call a method annotated with this attribute from C#. Users must obtain a function pointer to
