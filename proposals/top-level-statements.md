@@ -15,7 +15,7 @@ The semantics are that if such a sequence of *statements* is present, the follow
 ``` c#
 static class Program
 {
-    static async Task Main()
+    static async Task Main(string[] args)
     {
         // statements
     }
@@ -52,8 +52,8 @@ Only one *compilation_unit* is allowed to have *statement*s.
 Example:
 
 ``` c#
-if (System.Environment.CommandLine.Length == 0
-    || !int.TryParse(System.Environment.CommandLine, out int n)
+if (args.Length == 0
+    || !int.TryParse(args[0], out int n)
     || n < 0) return;
 Console.WriteLine(Fib(n).curr);
 
@@ -74,7 +74,7 @@ as follows:
 ``` c#
 static class Program
 {
-    static async Task Main()
+    static async Task Main(string[] args)
     {
         // statements
     }
@@ -89,6 +89,8 @@ The method is designated as the entry point of the program. Explicitly declared 
 could be considered as an entry point candidates are ignored. A warning is reported when that happens. It is
 an error to specify `-main:<type>` compiler switch when there are top-level statements.
 
+The entry point method always has one formal parameter, ```string[] args```. The execution environment creates and passes a ```string[]``` argument containing the command-line arguments that were specified when the application was started. The ```string[]``` argument is never null, but it may have a length of zero if no command-line arguments were specified. The ‘args’ parameter is in scope  within top-level statements and is not in scope outside of them. Regular name conflict/shadowing rules apply.
+
 Async operations are allowed in top-level statements to the degree they are allowed in statements within
 a regular async entry point method. However, they are not required, if `await` expressions and other async
 operations are omitted, no warning is produced.
@@ -97,18 +99,18 @@ The signature of the generated entry point method is determined based on operati
 statements as follows:
 **Async-operations\Return-with-expression** | **Present** | **Absent**
 ----------------------------------------| -------------|-------------
-**Present** | ```static Task<int> Main()```| ```static Task Main()```
-**Absent**  | ```static int Main()``` | ```static void Main()```
+**Present** | ```static Task<int> Main(string[] args)```| ```static Task Main(string[] args)```
+**Absent**  | ```static int Main(string[] args)``` | ```static void Main(string[] args)```
 
 The example above would yield the following `$Main` method declaration:
 
 ``` c#
 static class $Program
 {
-    static void $Main()
+    static void $Main(string[] args)
     {
-        if (System.Environment.CommandLine.Length == 0
-            || !int.TryParse(System.Environment.CommandLine, out int n)
+        if (args.Length == 0
+            || !int.TryParse(args[0], out int n)
             || n < 0) return;
         Console.WriteLine(Fib(n).curr);
         
@@ -132,7 +134,7 @@ would  yield:
 ``` c#
 static class $Program
 {
-    static async Task $Main()
+    static async Task $Main(string[] args)
     {
         await System.Threading.Tasks.Task.Delay(1000);
         System.Console.WriteLine("Hi!");
@@ -151,7 +153,7 @@ would  yield:
 ``` c#
 static class $Program
 {
-    static async Task<int> $Main()
+    static async Task<int> $Main(string[] args)
     {
         await System.Threading.Tasks.Task.Delay(1000);
         System.Console.WriteLine("Hi!");
@@ -170,7 +172,7 @@ would  yield:
 ``` c#
 static class $Program
 {
-    static int $Main()
+    static int $Main(string[] args)
     {
         System.Console.WriteLine("Hi!");
         return 2;
