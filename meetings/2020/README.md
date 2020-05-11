@@ -4,7 +4,7 @@
 - init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
 - init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
 - init-only: init-only methods ? `init void Init()` (Jared/Julien)
-- allow suppression on `return someBoolValue!;` (Julien)
+- allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
 - record decision on side-effect of `M(someMaybeNullValue); // warns` and effect of suppression `expr!` (issue https://github.com/dotnet/roslyn/issues/43383, Julien)
 
 ## Schedule when convenient
