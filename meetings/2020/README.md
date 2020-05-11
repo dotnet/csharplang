@@ -41,10 +41,6 @@
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
 
-## March 11, 2020
-
-- Records design (Mads, Andy)
-
 ## Jan 29, 2020
 
 - Records: drilling in to individual features (Mads)
@@ -56,6 +52,12 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## March 11, 2020
+
+[C# Language Design Notes for May 11, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-11.md)
+
+Records
 
 ## May 6, 2020
 
