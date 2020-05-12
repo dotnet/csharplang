@@ -24,10 +24,6 @@
 
 - Record Monday (Andy, Jared, Mads)
 
-## May 13, 2020
-
-- [Triage](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone)
-
 ## May 11, 2020
 
 - Record Monday (Andy, Jared, Mads)
