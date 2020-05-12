@@ -1,8 +1,8 @@
 # null coalescing assignment
 
-* [ ] Proposed
-* [ ] Prototype: Completed
-* [ ] Implementation: Completed
+* [x] Proposed
+* [x] Prototype: Completed
+* [x] Implementation: Completed
 * [x] Specification: Below
 
 ## Summary
