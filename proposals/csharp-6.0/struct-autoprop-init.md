@@ -1,4 +1,4 @@
-﻿# Relaxed rules for auto-properties in structs 
+# Relaxed rules for auto-properties in structs 
 
 Before C# 6.0 you could not write code like this: 
 
@@ -54,4 +54,4 @@ struct S
 
 Unfortunately, both methods effectively disabled definite assignment analysis for instance fields for the given constructor. 
 
-C# 6.0 relaxes this rules by tracking assignments to instance auto-properties as if they were assignments to their backing fields, so the code in the beginning of this section is now valid. 
+C# 6.0 relaxes these rules by tracking assignments to instance auto-properties as if they were assignments to their backing fields, so the code in the beginning of this section is now valid. 
