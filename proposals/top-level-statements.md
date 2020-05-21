@@ -124,7 +124,7 @@ static class $Program
 }
 ```
 
-At the same time an example like this:
+At the same time an example like this;
 ``` c#
 await System.Threading.Tasks.Task.Delay(1000);
 System.Console.WriteLine("Hi!");
@@ -142,7 +142,7 @@ static class $Program
 }
 ```
 
-An example like this:
+An example like this;
 ``` c#
 await System.Threading.Tasks.Task.Delay(1000);
 System.Console.WriteLine("Hi!");
@@ -162,7 +162,7 @@ static class $Program
 }
 ```
 
-And an example like this:
+And an example like this;
 ``` c#
 System.Console.WriteLine("Hi!");
 return 2;
