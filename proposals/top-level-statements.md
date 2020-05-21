@@ -183,7 +183,7 @@ static class $Program
 ### Scope of top-level local variables and local functions
 
 Even though top-level local variables and functions are "wrapped" 
-into the generated entry point method, they should still be in scope throughout the program in
+into the generated entry point method, they should still be in-scope throughout the program in
 every compilation unit.
 For the purpose of simple-name evaluation, once the global namespace is reached:
 - First, an attempt is made to evaluate the name within the generated entry point method and 
