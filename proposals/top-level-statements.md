@@ -102,7 +102,7 @@ statements as follows:
 **Present** | ```static Task<int> Main(string[] args)```| ```static Task Main(string[] args)```
 **Absent**  | ```static int Main(string[] args)``` | ```static void Main(string[] args)```
 
-The example above would yield the following `$Main` method declaration:
+The example above would yield the following `$Main` method declaration;
 
 ``` c#
 static class $Program
