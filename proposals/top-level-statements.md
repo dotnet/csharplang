@@ -29,7 +29,7 @@ See also https://github.com/dotnet/csharplang/issues/3117.
 
 There's a certain amount of boilerplate surrounding even the simplest of programs
 because of the need for an explicit `Main` method. This seems to get in the way of
-language learning and program clarity. The primary goal of the feature therefore is
+language learning and program clarity. The primary goal of the feature, therefore, is
 to allow C# programs without unnecessary boilerplate around them, for the sake of
 learners and the clarity of code.
 
