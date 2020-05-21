@@ -89,7 +89,7 @@ The method is designated as the entry point of the program. Explicitly declared 
 could be considered as entry point candidates are ignored. A warning is reported when that happens. It is
 an error to specify the `-main:<type>` compiler switch when there are top-level statements.
 
-The entry point method always has one formal parameter, ```string[] args```. The execution environment creates and passes a ```string[]``` argument containing the command-line arguments that were specified when the application was started. The ```string[]``` argument is never null, but it may have a length of zero if no command-line arguments were specified. The ‘args’ parameter is in scope  within top-level statements and is not in scope outside of them. Regular name conflict/shadowing rules apply.
+The entry point method always has one formal parameter; ```string[] args```. The execution environment creates and passes a ```string[]``` argument containing the command-line arguments that were specified when the application was started. The ```string[]``` argument is never null, but it may have a length of zero if no command-line arguments were specified. The ‘args’ parameter is in scope  within top-level statements and is not in scope outside of them. Regular name conflict/shadowing rules apply.
 
 Async operations are allowed in top-level statements to the degree they are allowed in statements within
 a regular async entry point method. However, they are not required, if `await` expressions and other async
