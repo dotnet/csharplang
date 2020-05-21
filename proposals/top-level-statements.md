@@ -68,7 +68,7 @@ Console.WriteLine(Fib(n).curr);
 ### Semantics
 
 If any top-level statements are present in any compilation unit of the program, the meaning is as if
-they were combined in the block body of a `Main` method of a `Program` class in the global namespace,
+they were combined in the block body of a `Main` method of a `Program` class in the global namespace
 as follows:
 
 ``` c#
