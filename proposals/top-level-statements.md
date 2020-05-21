@@ -81,7 +81,7 @@ static class Program
 }
 ```
 
-Note that the names "Program" and "Main" are used only for illustration purposes, actual names used by
+Note that the names "Program" and "Main" are used only for illustration purposes, actual names used by the
 compiler are implementation dependent and neither the type, nor the method can be referenced by name from
 source code.
 
