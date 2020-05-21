@@ -52,4 +52,5 @@ to
 > Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if `E` does not exactly match `T2` and at least one of the following holds:
 > 
 > * `E` exactly matches `T1` ([Exactly matching Expression](expressions.md#exactly-matching-expression))
-> * `T1` is a better conversion target than `T2` ([Better conversion target](expressions.md#better-conversion-target)) **and either `C1` is not a *conditional expression conversion* or `C2` is a *conditional expression conversion***.
+> * **`C1` is not a *conditional expression conversion* and `C2` is a *conditional expression conversion***.
+> * `T1` is a better conversion target than `T2` ([Better conversion target](expressions.md#better-conversion-target)) **and either `C1` and `C2` are both *conditional expression conversions* or neither is a *conditional expression conversion***.
