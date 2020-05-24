@@ -69,8 +69,10 @@ Record types produce synthesized implementations for the following methods:
 * `object.Equals(object)` override, unless it is sealed or user provided
 * `T Equals(T)` method, where `T` is the current type
 
-`T Equals(T)` is specified to perform value equality, comparing the property with same name as
-each primary constructor parameter to the corresponding property of the other type.
+`T Equals(T)` is specified to perform value equality such that `Equals` is
+true if and only if all the instance fields declared in the receiver type
+are equal to the fields of the other type.
+
 `object.Equals` performs the equivalent of
 
 ```C#
