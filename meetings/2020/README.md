@@ -17,9 +17,33 @@
 - *Triage milestones*
 - *Design review*
 
-## May 27, 2020
+# Jun 10, 2020
 
 - https://github.com/dotnet/csharplang/issues/1711 Roles, extensions and static interfaces (Mads)
+
+## Jun 8, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## Jun 3, 2020
+
+## Jun 1, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## May 27, 2020
+
+- Record "Monday" (Andy, Jared, Mads)
+    - Record structs?
+    - Record syntax/keyword
+    - Details on property shorthand syntax
+    - Member restrictions in records?
+    - Positional records
+        - base calls? 
+        - what gets generated?
+    - Equality and inheritance, details
+    - Guard clone method strategy against lack of covariance
+
 ## May 18, 2020
 
 - Record Monday (Andy, Jared, Mads)
