@@ -57,9 +57,7 @@ For each record parameter of a record type declaration there is a corresponding 
 
 For a record struct or a record class:
 
-* A public get-only auto-property is created. Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
-
-  * This property is also `initonly`, meaning the backing field can be modified in the [with](#With) expression below, if the corresponding `get` accessor is accessible
+* A public `get` and `init` auto-property is created (see separate `init` accessor specification). Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
 
 ### Equality members
 
@@ -79,6 +77,19 @@ are equal to the fields of the other type.
 override Equals(object o) => Equals(o as T);
 ```
 
+### Copy and Clone members
+
+A record type contains two synthesized copying members if methods with the same
+signature are not already declared within the record type:
+
+* A protected constructor taking a single argument of the record type.
+* A public parameterless instance method called `Clone` which returns the record type.
+
+The protected constructor is referred to as the "copy constructor" and the synthesized
+body copies the values of all fields of the input type to the corresponding fields of `this`.
+
+The `Clone` method returns the result of a call to a constructor with the same signature as the
+copy constructor.
 ## `with` expression
 
 A `with` expression is a new expression using the following syntax.
@@ -86,24 +97,29 @@ A `with` expression is a new expression using the following syntax.
 ```antlr
 with_expression
     : switch_expression
-    | switch_expression 'with' anonymous_object_initializer
+    | switch_expression 'with' '{' member_initializer_list? '}'
+    ;
+    
+member_initializer_list
+    : member_initializer (',' member_initializer)*
+    ;
+
+member_initializer
+    : identifier '=' expression
+    ;
 ```
 
 A `with` expression allows for "non-destructive mutation", designed to
-produce a copy of the receiver expression with modifications to properties
-listed in the `anonymous_object_initializer`.
+produce a copy of the receiver expression with modifications in assignments
+in the `member_initializer_list`.
 
 A valid `with` expression has a receiver with a non-void type. The receiver type must contain an accessible
 parameterless instance method called `Clone` whose return type must be the receiver type, or a base type thereof.
 
-On the right hand side of the `with` expression is an `anonymous_object_initializer` with a
-sequence of assignments, each with an `initonly` property (see [Properties](#Properties)) of the `Clone`
-return type on the left-hand side of the assignment (as a property invocation), and an arbitrary expression 
-on the right-hand side which is implicitly convertible to the type of the property.
+On the right hand side of the `with` expression is an `member_initializer_list` with a
+sequence of assignments to *identifier*, which must an accessible instance field or property of the return
+type of the `Clone()` method.
 
-The evaluation of a `with` expression calls the `Clone` method exactly once,
-and then sets the backing field of each `initonly` property in the argument list to 
-the value of its corresponding expression, in lexical order, using the result of the `Clone` method
-invocation as the receiver. The type of the `with` expression is the same as the return type of
-the `Clone` method.
-
+Each `member_initializer` is processed the same way as an assignment to the field or property target on the return
+value of the `Clone()` method. The `Clone()` method is executed only once and the assignments are processed in
+lexical order.
