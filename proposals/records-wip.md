@@ -86,7 +86,8 @@ signature are not already declared within the record type:
 * A public parameterless instance method called `Clone` which returns the record type.
 
 The protected constructor is referred to as the "copy constructor" and the synthesized
-body copies the values of all fields of the input type to the corresponding fields of `this`.
+body copies the values of all instance fields declared in the input type to the corresponding 
+fields of `this`.
 
 The `Clone` method returns the result of a call to a constructor with the same signature as the
 copy constructor.
