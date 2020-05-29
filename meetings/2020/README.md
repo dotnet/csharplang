@@ -1,4 +1,4 @@
-﻿# Upcoming meetings for 2020
+# Upcoming meetings for 2020
 
 ## Schedule ASAP
 - init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
@@ -16,6 +16,24 @@
 - *Triage championed features*
 - *Triage milestones*
 - *Design review*
+
+## Jul 1, 2020
+
+## Jun 29, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## Jun 24, 2020
+
+## Jun 22, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## Jun 17, 2020
+
+## Jun 15, 2020
+
+- Record Monday (Andy, Jared, Mads)
 
 # Jun 10, 2020
 
