@@ -1,12 +1,6 @@
 # Upcoming meetings for 2020
 
 ## Schedule ASAP
-- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
-- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
-- init-only: init-only methods ? `init void Init()` (Jared/Julien)
-- allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
-- record decision on side-effect of `M(someMaybeNullValue); // warns` and effect of suppression `expr!` (issue https://github.com/dotnet/roslyn/issues/43383, Julien)
-- improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
 
 ## Schedule when convenient
 
@@ -45,9 +39,22 @@
 
 ## Jun 3, 2020
 
+- allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
+- record decision on side-effect of `M(someMaybeNullValue); // warns` and effect of suppression `expr!` (issue https://github.com/dotnet/roslyn/issues/43383, Julien)
+- improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
+- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
+- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
+- init-only: init-only methods ? `init void Init()` (Jared/Julien)
+
 ## Jun 1, 2020
 
 - Record Monday (Andy, Jared, Mads)
+    - Member restrictions in records?
+    - Positional records
+        - base calls? 
+        - what gets generated?
+    - Equality and inheritance, details
+    - Guard clone method strategy against lack of covariance
 
 ## May 27, 2020
 
@@ -55,12 +62,6 @@
     - Record structs?
     - Record syntax/keyword
     - Details on property shorthand syntax
-    - Member restrictions in records?
-    - Positional records
-        - base calls? 
-        - what gets generated?
-    - Equality and inheritance, details
-    - Guard clone method strategy against lack of covariance
 
 ## May 18, 2020
 
