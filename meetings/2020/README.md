@@ -56,13 +56,6 @@
     - Equality and inheritance, details
     - Guard clone method strategy against lack of covariance
 
-## May 27, 2020
-
-- Record "Monday" (Andy, Jared, Mads)
-    - Record structs?
-    - Record syntax/keyword
-    - Details on property shorthand syntax
-
 ## May 18, 2020
 
 - Record Monday (Andy, Jared, Mads)
@@ -95,6 +88,15 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## May 27, 2020
+
+[C# Language Design Notes for May 27, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-27.md)
+
+Record syntax
+    1. Record structs?
+    2. Record syntax/keyword
+    3. Details on property shorthand syntax
 
 ## March 11, 2020
 
