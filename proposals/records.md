@@ -24,6 +24,10 @@ record_body
     ;
 ```
 
+Record types are reference types, similar to a class declaration. It is an error for a record to provide
+a `record_base` `argument_list` if the `record_declaration` does not contain a `parameter_list`.
+a 
+
 ## Members of a record type
 
 In addition to the members declared in the record body, a record type has the following additional members:
