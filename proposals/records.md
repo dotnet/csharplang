@@ -32,7 +32,10 @@ a
 
 In addition to the members declared in the record body, a record type has additional synthesized members.
 Members are synthesized unless a concrete (non-abstract) member with a "matching" signature is either
-inherited or declared in the record body. The synthesized members are as follows:
+inherited or declared in the record body. Two members are considered matching if they have the same
+signature or would be considered "hiding" in an inheritance scenario.
+
+The synthesized members are as follows:
 
 ### Equality members
 
@@ -51,7 +54,7 @@ is present in the base type, the synthesized property overrides the base. If the
 `EqualityContract` is sealed or non-virtual, an error is produced.
 
 `T Equals(T)` is specified to perform value equality such that `Equals` is true if and only if
-all the instance fields declared in the receiver type are equal to the fields of the other type,
+all accessible instance fields in the receiver are equal to the fields of the parameter
 and `this.EqualityContract` equals `other.EqualityContract`.
 
 `object.Equals` performs the equivalent of
@@ -82,8 +85,7 @@ produced if the base type clone method is sealed.
 ## Positional record members
 
 In addition to the above members, records with a parameter list ("positional records") synthesize
-the following members, if a concrete (i.e. non-abstract) member with the same signature (or name
-if the member is a field or property) is not already present:
+additional members with the same conditions as the members above.
 
 ### Primary Constructor
 
