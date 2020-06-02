@@ -30,21 +30,25 @@ a
 
 ## Members of a record type
 
-In addition to the members declared in the record body, a record type has the following additional members:
+In addition to the members declared in the record body, a record type has additional synthesized members.
+Members are synthesized unless a concrete (non-abstract) member with a "matching" signature is either
+inherited or declared in the record body. The synthesized members are as follows:
 
 ### Equality members
 
 Record types produce synthesized implementations for the following methods, where `T` is the
 containing type:
 
-* `object.GetHashCode()` override, unless it is sealed (error) or user provided
-* `object.Equals(object)` override, unless it is sealed (error) or user provided
+* `object.GetHashCode()` override
+* `object.Equals(object)` override
 * `T Equals(T)` method, where `T` is the current type
 * `Type EqualityContract` get-only property
 
+If either `object.GetHashCode()` or `object.Equals(object)` are sealed, an error is produced.
+
 `EqualityContract` is a virtual instance property which returns `typeof(T)`. If it
 is present in the base type, the synthesized property overrides the base. If the base
-is sealed or non-virtual, an error is produced.
+`EqualityContract` is sealed or non-virtual, an error is produced.
 
 `T Equals(T)` is specified to perform value equality such that `Equals` is true if and only if
 all the instance fields declared in the receiver type are equal to the fields of the other type,
