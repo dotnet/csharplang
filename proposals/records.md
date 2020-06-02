@@ -1,3 +1,4 @@
+
 # Records Work-in-Progress
 
 Unlike the other records proposals, this is not a proposal in itself, but a work-in-progress designed to record consensus design
@@ -31,33 +32,11 @@ The `attributes` non-terminal will also permit a new contextual attribute, `data
 
 A class (struct) declared with a parameter list or `data` modifier is called a record class (record struct), either of which is a record type.
 
-It is an error to declare a record type without both a parameter list and the `data` modifier.
+It is an error to declare a record type without the `data` modifier.
 
 ## Members of a record type
 
 In addition to the members declared in the class or struct body, a record type has the following additional members:
-
-### Primary Constructor
-
-A record type has a public constructor whose signature corresponds to the value parameters of the
-type declaration. This is called the primary constructor for the type, and causes the implicitly
-declared default class constructor, if present, to be suppressed. It is an error to have a primary
-constructor and a constructor with the same signature already present in the class.
-
-At runtime the primary constructor
-
-1. executes the instance field initializers appearing in the class-body; and then
-    invokes the base class constructor with no arguments.
-
-1. initializes compiler-generated backing fields for the properties corresponding to the value parameters (if these properties are compiler-provided
-
-### Properties
-
-For each record parameter of a record type declaration there is a corresponding public property member whose name and type are taken from the value parameter declaration. If no concrete (i.e. non-abstract) property with a get accessor and with this name and type is explicitly declared or inherited, it is produced by the compiler as follows:
-
-For a record struct or a record class:
-
-* A public `get` and `init` auto-property is created (see separate `init` accessor specification). Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
 
 ### Equality members
 
@@ -91,6 +70,34 @@ fields of `this`.
 
 The `Clone` method returns the result of a call to a constructor with the same signature as the
 copy constructor.
+
+## Positional record members
+
+In addition to the above members, records with a parameter list ("positional records") have the following members:
+
+### Primary Constructor
+
+A record type has a public constructor whose signature corresponds to the value parameters of the
+type declaration. This is called the primary constructor for the type, and causes the implicitly
+declared default class constructor, if present, to be suppressed. It is an error to have a primary
+constructor and a constructor with the same signature already present in the class.
+
+At runtime the primary constructor
+
+1. executes the instance field initializers appearing in the class-body; and then
+    invokes the base class constructor with no arguments.
+
+1. initializes compiler-generated backing fields for the properties corresponding to the value parameters (if these properties are compiler-provided
+
+### Properties
+
+For each record parameter of a record type declaration there is a corresponding public property member whose name and type are taken from the value parameter declaration. If no concrete (i.e. non-abstract) property with a get accessor and with this name and type is explicitly declared or inherited, it is produced by the compiler as follows:
+
+For a record struct or a record class:
+
+* A public `get` and `init` auto-property is created (see separate `init` accessor specification). Its value is initialized during construction with the value of the corresponding primary constructor parameter. Each "matching" inherited abstract property's get accessor is overridden.
+
+
 ## `with` expression
 
 A `with` expression is a new expression using the following syntax.
