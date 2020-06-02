@@ -95,11 +95,13 @@ constructor and a constructor with the same signature already present in the cla
 
 At runtime the primary constructor
 
-1. executes the instance initializers appearing in the class-body; and then
-   invokes the base class constructor with the arguments provided in the `record_base` clause, if present
+1. assigns synthesized fields or properties (see [Properties](#properties)) with the value of a primary constructor
+   parameter of the same name
 
-1. assigns fields or properties declared in the record body with the value of a primary constructor
-   parameter of the same name, if one is present and the member is assignable
+1. executes the instance initializers appearing in the class-body
+
+2. invokes the base class constructor with the arguments provided in the `record_base` clause, if present
+
 
 ### Properties
 
