@@ -95,12 +95,9 @@ constructor and a constructor with the same signature already present in the cla
 
 At runtime the primary constructor
 
-1. assigns synthesized fields or properties (see [Properties](#properties)) with the value of a primary constructor
-   parameter of the same name
-
 1. executes the instance initializers appearing in the class-body
 
-2. invokes the base class constructor with the arguments provided in the `record_base` clause, if present
+1. invokes the base class constructor with the arguments provided in the `record_base` clause, if present
 
 
 ### Properties
@@ -111,7 +108,8 @@ member whose name and type are taken from the value parameter declaration.
 For a record:
 
 * A public `get` and `init` auto-property is created (see separate `init` accessor specification).
-  Each "matching" inherited abstract accessor is overridden.
+  Each "matching" inherited abstract accessor is overridden. The auto-property is initialized to
+  the value of the corresponding primary constructor parameter.
 
 ### Deconstruct
 
