@@ -26,13 +26,12 @@ record_body
 
 Record types are reference types, similar to a class declaration. It is an error for a record to provide
 a `record_base` `argument_list` if the `record_declaration` does not contain a `parameter_list`.
-a 
 
 ## Members of a record type
 
 In addition to the members declared in the record body, a record type has additional synthesized members.
-Members are synthesized unless a concrete (non-abstract) member with a "matching" signature is either
-inherited or declared in the record body. Two members are considered matching if they have the same
+Members are synthesized unless an accessible concrete (non-abstract) member with a "matching" signature is 
+either inherited or declared in the record body. Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 
 The synthesized members are as follows:
