@@ -49,9 +49,9 @@ containing type:
 
 If either `object.GetHashCode()` or `object.Equals(object)` are sealed, an error is produced.
 
-`EqualityContract` is a virtual instance property which returns `typeof(T)`. If it
-is present in the base type, the synthesized property overrides the base. If the base
-`EqualityContract` is sealed or non-virtual, an error is produced.
+`EqualityContract` is a virtual instance property which returns `typeof(T)`. If the base type
+defines an `EqualityContract` it is overridden in the derived record. If the base `EqualityContract`
+is sealed or non-virtual, an error is produced.
 
 `T Equals(T)` is specified to perform value equality such that `Equals` is true if and only if
 all accessible instance fields in the receiver are equal to the fields of the parameter
@@ -65,14 +65,13 @@ override Equals(object o) => Equals(o as T);
 
 ### Copy and Clone members
 
-A record type contains two synthesized copying members if methods with the same
-signature are not already declared within the record type:
+A record type contains two synthesized copying members:
 
 * A protected constructor taking a single argument of the record type.
-* A public parameter-less virtual instance "clone" method with a compiler-reserved name
+* A public parameterless virtual instance "clone" method with a compiler-reserved name
 
 The protected constructor is referred to as the "copy constructor" and the synthesized
-body copies the values of all instance fields declared in the input type to the corresponding
+body copies the values of all accessible instance fields in the input type to the corresponding
 fields of `this`.
 
 The "clone" method returns the result of a call to a constructor with the same signature as the
@@ -146,10 +145,10 @@ in the `member_initializer_list`.
 A valid `with` expression has a receiver with a non-void type. The receiver type must contain an
 accessible synthesized record "clone" method.
 
-On the right hand side of the `with` expression is an `member_initializer_list` with a sequence
-of assignments to *identifier*, which must an accessible instance field or property of the return
+On the right hand side of the `with` expression is a `member_initializer_list` with a sequence
+of assignments to *identifier*, which must be an accessible instance field or property of the return
 type of the `Clone()` method.
 
-Each `member_initializer` is processed the same way as an assignment to the field or property
-target on the return value of the record clone method. The clone method is executed only once
+Each `member_initializer` is processed the same way as an assignment to a field or property
+access of the return value of the record clone method. The clone method is executed only once
 and the assignments are processed in lexical order.
