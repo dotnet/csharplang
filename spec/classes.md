@@ -1809,7 +1809,8 @@ default_argument
     ;
 
 parameter_modifier
-    : 'ref'
+    : 'in'
+    | 'ref'
     | 'out'
     | 'this'
     ;
