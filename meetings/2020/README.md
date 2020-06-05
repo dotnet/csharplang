@@ -27,17 +27,15 @@
 
 ## Jun 17, 2020
 
+https://github.com/dotnet/csharplang/issues/3214 Nullability of iteration variable in non-generic foreach (Stephen)
+
 ## Jun 15, 2020
 
 - Record Monday (Andy, Jared, Mads)
 
-# Jun 10, 2020
+## Jun 10, 2020
 
 - https://github.com/dotnet/csharplang/issues/1711 Roles, extensions and static interfaces (Mads)
-
-## Jun 8, 2020
-
-- Record Monday (Andy, Jared, Mads)
 
 ## Jun 3, 2020
 
