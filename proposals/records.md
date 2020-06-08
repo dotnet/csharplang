@@ -64,14 +64,20 @@ override Equals(object o) => Equals(o as T);
 
 ### Copy and Clone members
 
-A record type contains two synthesized copying members:
+A record type contains two copying members:
 
-* A protected constructor taking a single argument of the record type.
-* A public parameterless virtual instance "clone" method with a compiler-reserved name
+* A constructor taking a single argument of the record type. It is refered to as a "copy constructor".
+* A synthesized public parameterless virtual instance "clone" method with a compiler-reserved name
 
-The protected constructor is referred to as the "copy constructor" and the synthesized
-body copies the values of all accessible instance fields in the input type to the corresponding
-fields of `this`.
+The purpose of the copy constructor is to copy the state from the parameter to the new instance being
+created. This constructor doesn't run any instance field/property initializers present in the record
+declaration. If the constructor is not explicitly declared, a protected constructor will be synthesized
+by the compiler.
+The first thing the constructor must do, is to call a copy constructor of the base, or a parameter-less
+object constructor if the record inherits from object. An error is reported if a user-defined copy
+constructor uses an implicit or explicit constructor initializer that doesn't fulfill this requirement.
+After a base copy constructor is invoked, a synthesized copy constructor copies values for all instance
+fields implicitly or explicitly declared within the record type.
 
 The "clone" method returns the result of a call to a constructor with the same signature as the
 copy constructor. The return type of the clone method is the containing type, unless a virtual
@@ -98,6 +104,18 @@ At runtime the primary constructor
 
 1. invokes the base class constructor with the arguments provided in the `record_base` clause, if present
 
+If a record has a primary constructor, any user-defined constructor, except "copy constructor" must have an
+explicit `this` constructor initializer. 
+
+Parameters of the primary constructor as well as members of the record are in scope within the `argument_list`
+of the `record_base` clause and within initializers of instance fields or properties. Instance members would
+be an error in these locations (similar to how instance members are in scope in regular constructor initializers
+today, but an error to use), but the parameters of the primary constructor would be in scope and useable and
+would shadow members. Static members would also be useable, similar to how base calls and initializers work in
+ordinary constructors today. 
+
+Expression variables declared in the `argument_list` are in scope within the `argument_list`. The same shadowing
+rules as within an argument list of a regular constructor initializer apply.
 
 ### Properties
 
