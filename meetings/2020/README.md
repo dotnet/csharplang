@@ -1,9 +1,8 @@
 ﻿# Upcoming meetings for 2020
 
 ## Schedule ASAP
-- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
-- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
-- init-only: init-only methods ? `init void Init()` (Jared/Julien)
+
+- Parameter null checking
 
 ## Schedule when convenient
 
@@ -14,32 +13,47 @@
 - *Triage milestones*
 - *Design review*
 
-## May 27, 2020
+## Jul 1, 2020
 
-- https://github.com/dotnet/csharplang/issues/1711 Roles, extensions and static interfaces (Mads)
-## May 18, 2020
+## Jun 29, 2020
 
 - Record Monday (Andy, Jared, Mads)
 
-## May 13, 2020
+## Jun 24, 2020
 
-- [Triage](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone)
+## Jun 22, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## Jun 17, 2020
+
+https://github.com/dotnet/csharplang/issues/3214 Nullability of iteration variable in non-generic foreach (Stephen)
+
+## Jun 15, 2020
+
+- Record Monday (Andy, Jared, Mads)
+
+## Jun 10, 2020
+
+- https://github.com/dotnet/csharplang/issues/1711 Roles, extensions and static interfaces (Mads)
+
+## Jun 3, 2020
+
+- allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
+- record decision on side-effect of `M(someMaybeNullValue); // warns` and effect of suppression `expr!` (issue https://github.com/dotnet/roslyn/issues/43383, Julien)
+- improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
+- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
+- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
+- init-only: init-only methods ? `init void Init()` (Jared/Julien)
+
+## May 18, 2020
+
+- Record Monday (Andy, Jared, Mads)
 
 ## May 11, 2020
 
 - Record Monday (Andy, Jared, Mads)
     - https://gist.github.com/MadsTorgersen/3fb6b7461e211c8458044ad5115f2117 Primary constructors and records (Mads)
-
-## May 6, 2020
-
-- Continued: Target-typing ?: when the natural type isn't convertible to the target type. (Neal)
-- https://github.com/dotnet/csharplang/issues/3369 Allow `if (x is not string y)` pattern.  (Cyrus + Neal)
-- https://github.com/dotnet/roslyn/issues/43147 Open issues in extension `GetEnumerator` (Fred)
-- https://github.com/dotnet/csharplang/blob/master/proposals/Simple-programs.md Args in top-level programs (Aleksey, Mads)
-
-## May 4, 2020
-
-- Record Monday: feedback from design review (Andy, Jared, Mads)
 
 ## April 29, 2020
 
@@ -53,10 +67,6 @@
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
 
-## March 11, 2020
-
-- Records design (Mads, Andy)
-
 ## Jan 29, 2020
 
 - Records: drilling in to individual features (Mads)
@@ -69,12 +79,50 @@
 
 Overview of meetings and agendas for 2020
 
+## Jun 1, 2020
+
+[C# Language Design Notes for June 1, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-01.md)
+
+Records:
+    1. Base call syntax
+    2. Synthesizing positional record members and assignments
+    3. Record equality through inheritance
+
+## May 27, 2020
+
+[C# Language Design Notes for May 27, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-27.md)
+
+Record syntax
+    1. Record structs?
+    2. Record syntax/keyword
+    3. Details on property shorthand syntax
+
+## March 11, 2020
+
+[C# Language Design Notes for May 11, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-11.md)
+
+Records
+
+## May 6, 2020
+
+[C# Language Design Notes for May 6, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-06.md)
+
+1. Target-typing ?: when the natural type isn't convertible to the target type.
+1. Allow `if (x is not string y)` pattern.
+1. Open issues in extension `GetEnumerator`
+1. Args in top-level programs
+
+## May 4, 2020
+
+[C# Language Design Notes for May 4, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-04.md)
+
+1. Reviewing design review feedback
+
 ## April 27, 2020
 
 [C# Language Design Notes for April 27, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-27.md)
 
 Records: positional & primary constructors
-
 
 ## April 20, 2020
 
