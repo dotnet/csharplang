@@ -80,6 +80,8 @@ type if the "covariant returns" feature is supported and the override return typ
 synthesized clone method is an override of the base type clone method if one exists. An error is
 produced if the base type clone method is sealed.
 
+If the containing record is abstract, the synthesized clone method is also abstract.
+
 ## Positional record members
 
 In addition to the above members, records with a parameter list ("positional records") synthesize
