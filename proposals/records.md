@@ -66,7 +66,7 @@ override Equals(object o) => Equals(o as T);
 
 A record type contains two copying members:
 
-* A constructor taking a single argument of the record type. It is refered to as a "copy constructor".
+* A constructor taking a single argument of the record type. It is referred to as a "copy constructor".
 * A synthesized public parameterless virtual instance "clone" method with a compiler-reserved name
 
 The purpose of the copy constructor is to copy the state from the parameter to the new instance being
