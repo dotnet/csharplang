@@ -45,6 +45,7 @@ public override int GetHashCode();
 public override bool Equals(object other);
 public virtual bool Equals(T other);
 ```
+The record type implicitly implements `System.IEquatable<T>` where `T` is the containing type.
 
 Derived record types also override the `Equals(T other)` method from each base record type.
 
