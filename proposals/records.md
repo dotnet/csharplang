@@ -57,17 +57,18 @@ protected virtual Type EqualityContract { get; }
 If the base implementations of any of the overridden members is sealed or non-virtual,
 or does not match the expected signature and accessibility, an error is produced.
 
-`Equals(T other)` performs value equality of the instance fields in this type with the fields of `other`,
-combined with the value of `base.Equals(other)` if there is a base record.
-The base record `Equals(T other)` includes `EqualityContract.Equals(other.EqualityContract)`.
+`Equals(T other)` performs value equality of the instance fields in this type with the fields of `other`.
+If there is a base record type, the field equality value is combined with `base.Equals(other)`.
+Otherwise the field equality value is combined with `EqualityContract.Equals(other.EqualityContract)`.
 
 The overrides of `Equals(T other)` for the base methods, including `object.Equals(object other)`, perform the equivalent of:
 ```C#
 public override bool Equals(object other) => Equals(other as T);
 ```
 
-`GetHashCode()` generates a hash code by combining the values of `GetHashCode()` of the instance fields in this type,
-combined with the value of `base.GetHashCode()` if there is a base record.
+`GetHashCode()` generates a hash code by combining the values of `GetHashCode()` of the instance fields in this type.
+If there is a base record type, the field hash code is combined with `base.GetHashCode()`.
+Otherwise the field hash code is combined with `EqualityContract.GetHashCode()`.
 
 ### Copy and Clone members
 
