@@ -23,11 +23,11 @@
 
 ## Jun 22, 2020
 
-- Record Monday (Andy, Jared, Mads)
+- https://github.com/Partydonk/partydonk/issues/1 Static interface members (Miguel, Aaron, Mads, Carol)
 
 ## Jun 17, 2020
 
-https://github.com/dotnet/csharplang/issues/3214 Nullability of iteration variable in non-generic foreach (Stephen)
+- https://github.com/dotnet/csharplang/issues/3214 Nullability of iteration variable in non-generic foreach (Stephen)
 
 ## Jun 15, 2020
 
