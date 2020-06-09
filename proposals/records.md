@@ -40,27 +40,34 @@ The synthesized members are as follows:
 
 Record types produce synthesized implementations for the following methods, where `T` is the
 containing type:
-
-* `object.GetHashCode()` override
-* `object.Equals(object)` override
-* `T Equals(T)` method, where `T` is the current type
-* `Type EqualityContract` get-only property
-
-If either `object.GetHashCode()` or `object.Equals(object)` are sealed, an error is produced.
-
-`EqualityContract` is a virtual instance property which returns `typeof(T)`. If the base type
-defines an `EqualityContract` it is overridden in the derived record. If the base `EqualityContract`
-is sealed or non-virtual, an error is produced.
-
-`T Equals(T)` is specified to perform value equality such that `Equals` is true if and only if
-all accessible instance fields in the receiver are equal to the fields of the parameter
-and `this.EqualityContract` equals `other.EqualityContract`.
-
-`object.Equals` performs the equivalent of
-
 ```C#
-override Equals(object o) => Equals(o as T);
+public override int GetHashCode();
+public override bool Equals(object other);
+public virtual bool Equals(T other);
 ```
+
+Derived record types also override the `Equals(T other)` method from each base record type.
+
+The base record class synthesizes an `EqualityContract` property. The property is overridden in
+derived record classes. The synthesized implementations return `typeof(T)`.
+```C#
+protected virtual Type EqualityContract { get; }
+```
+
+If the base implementations of any of the overridden members is sealed or non-virtual,
+or does not match the expected signature and accessibility, an error is produced.
+
+`Equals(T other)` performs value equality of the instance fields in this type with the fields of `other`,
+combined with the value of `base.Equals(other)` if there is a base record.
+The base record `Equals(T other)` includes `EqualityContract.Equals(other.EqualityContract)`.
+
+The overrides of `Equals(T other)` for the base methods, including `object.Equals(object other)`, perform the equivalent of:
+```C#
+public override bool Equals(object other) => Equals(other as T);
+```
+
+`GetHashCode()` generates a hash code by combining the values of `GetHashCode()` of the instance fields in this type,
+combined with the value of `base.GetHashCode()` if there is a base record.
 
 ### Copy and Clone members
 
