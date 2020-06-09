@@ -35,7 +35,7 @@
 
 ## Jun 10, 2020
 
-- https://github.com/dotnet/csharplang/issues/1711 Roles, extensions and static interfaces (Mads)
+- https://github.com/dotnet/csharplang/issues/1711 Roles and extensions (Mads)
 
 ## Jun 3, 2020
 
