@@ -30,8 +30,9 @@ a `record_base` `argument_list` if the `record_declaration` does not contain a `
 ## Members of a record type
 
 In addition to the members declared in the record body, a record type has additional synthesized members.
-Members are synthesized unless an accessible concrete non-virtual member with a "matching" signature is 
-either inherited or declared in the record body. Two members are considered matching if they have the same
+Members are synthesized unless a member with a "matching" signature is declared in the record body or
+an accessible concrete non-virtual member with a "matching" signature is inherited.
+Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 
 The synthesized members are as follows:
@@ -79,8 +80,7 @@ public override bool Equals(object other) => Equals(other as T);
 - For each field declared in the record type, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` where `TN` is the field type, and
 - If there is a base record type, the value of `base.GetHashCode()`; otherwise
-the value of `EqualityContract.GetHashCode(other.EqualityContract)`.
-`System.Collections.Generic.EqualityComparer<System.Type>.Default.GetHashCode(EqualityContract)`.
+the value of `System.Collections.Generic.EqualityComparer<System.Type>.Default.GetHashCode(EqualityContract)`.
 
 ### Copy and Clone members
 
