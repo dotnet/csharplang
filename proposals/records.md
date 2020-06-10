@@ -76,7 +76,7 @@ public override bool Equals(object other) => Equals(other as T);
 `GetHashCode()` returns the sum of the following terms where each term may be multiplied by a constant:
 - For each field declared in the record type, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` where `TN` is the field type, and
-- If there is a base record type, the value of `base.GetHashCode())`; otherwise
+- If there is a base record type, the value of `base.GetHashCode()`; otherwise
 the value of `EqualityContract.Equals(other.EqualityContract)`.
 `System.Collections.Generic.EqualityComparer<System.Type>.Default.GetHashCode(EqualityContract)`.
 
