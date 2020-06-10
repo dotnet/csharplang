@@ -30,7 +30,7 @@ a `record_base` `argument_list` if the `record_declaration` does not contain a `
 ## Members of a record type
 
 In addition to the members declared in the record body, a record type has additional synthesized members.
-Members are synthesized unless an accessible concrete (non-abstract) member with a "matching" signature is 
+Members are synthesized unless an accessible concrete non-virtual member with a "matching" signature is 
 either inherited or declared in the record body. Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 
@@ -50,8 +50,9 @@ Any methods on intermediate base classes that would hide those methods are ignor
 
 Derived record types also override the `Equals(TBase other)` method from each base record type.
 
-The record type implicitly implements `System.IEquatable<T>` where `T` is the containing type.
-Record types do not re-implement `System.IEquatable<TBase>` for any base type `TBase`.
+The record type synthesizes an implementation of `System.IEquatable<T>` that is implicitly implemented by `Equals(T other)` where `T` is the containing type.
+Record types do not synthesize implementations of `System.IEquatable<TBase>` for any base type `TBase`,
+although those interfaces are implemented by the base record types.
 
 The base record class synthesizes an `EqualityContract` property. The property is overridden in
 derived record classes. The synthesized implementations return `typeof(T)` where `T` is containing type.
@@ -63,6 +64,7 @@ It is an error if the base implementations of any of the overridden members is s
 or do not match the expected signature and accessibility.
 
 `Equals(T other)` returns true if and only if each of the following terms are true:
+- `other` is not `null, and
 - For each field declared in the record type, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.Equals(fieldN, other.fieldN)` where `TN` is the field type, and
 - If there is a base record type, the value of `base.Equals(other)`; otherwise
@@ -73,7 +75,7 @@ The overrides of `Equals(T other)` for the base methods, including `object.Equal
 public override bool Equals(object other) => Equals(other as T);
 ```
 
-`GetHashCode()` returns the sum of the following terms where each term may be multiplied by a constant:
+`GetHashCode()` returns the `int` result of a deterministic function taking the following values:
 - For each field declared in the record type, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` where `TN` is the field type, and
 - If there is a base record type, the value of `base.GetHashCode()`; otherwise
