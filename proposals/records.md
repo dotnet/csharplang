@@ -52,7 +52,7 @@ Derived record types also override the `Equals(TBase other)` method from each ba
 
 The record type synthesizes an implementation of `System.IEquatable<T>` that is implicitly implemented by `Equals(T other)` where `T` is the containing type.
 Record types do not synthesize implementations of `System.IEquatable<TBase>` for any base type `TBase`,
-although those interfaces are implemented by the base record types.
+even if those interfaces are implemented by the base record types.
 
 The base record class synthesizes an `EqualityContract` property. The property is overridden in
 derived record classes. The synthesized implementations return `typeof(T)` where `T` is containing type.
@@ -79,7 +79,7 @@ public override bool Equals(object other) => Equals(other as T);
 - For each field declared in the record type, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` where `TN` is the field type, and
 - If there is a base record type, the value of `base.GetHashCode()`; otherwise
-the value of `EqualityContract.Equals(other.EqualityContract)`.
+the value of `EqualityContract.GetHashCode(other.EqualityContract)`.
 `System.Collections.Generic.EqualityComparer<System.Type>.Default.GetHashCode(EqualityContract)`.
 
 ### Copy and Clone members
