@@ -66,13 +66,13 @@ override Equals(object o) => Equals(o as T);
 
 A record contains two synthesized copying members:
 
-* A constructor taking a single argument of the record type, referred to as the "copy constructor"
+* A constructor taking a single argument of the record type, referred to as the _copy constructor_
 * A public parameterless virtual instance "clone" method with a compiler-reserved name
 
 #### Copy constructor
 
-If a user-defined copy constructor is present, it is used instead of a synthesized one. It must use
-the base's copy constructor as its initializer if the base type is a record.
+If a user-defined copy constructor is present, it must use the base's copy constructor as its
+initializer if the base type is a record.
 
 The synthesized body of the copy constructor first invokes a base constructor and then copies the
 fields from the record itself:
@@ -80,7 +80,7 @@ fields from the record itself:
 Otherwise, it invokes the copy constructor on the direct base record, passing its argument through. An error is
 produced if that base copy constructor is not accessible.
 2. The copy constructor then copies the values of all the instance fields in the input record to the corresponding
-fields of `this`, considering only the fields declared by the record.
+fields of `this`, considering only the fields synthesized in or declared by the record.
 
 Note: the synthesized copy constructor does not include field initialization.
 
