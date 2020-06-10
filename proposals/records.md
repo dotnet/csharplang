@@ -30,37 +30,57 @@ a `record_base` `argument_list` if the `record_declaration` does not contain a `
 ## Members of a record type
 
 In addition to the members declared in the record body, a record type has additional synthesized members.
-Members are synthesized unless an accessible concrete (non-abstract) member with a "matching" signature is 
-either inherited or declared in the record body. Two members are considered matching if they have the same
+Members are synthesized unless a member with a "matching" signature is declared in the record body or
+an accessible concrete non-virtual member with a "matching" signature is inherited.
+Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 
 The synthesized members are as follows:
 
 ### Equality members
 
-Record types produce synthesized implementations for the following methods, where `T` is the
+Record types produce synthesized implementations of the following methods, where `T` is the
 containing type:
-
-* `object.GetHashCode()` override
-* `object.Equals(object)` override
-* `T Equals(T)` method, where `T` is the current type
-* `Type EqualityContract` get-only property
-
-If either `object.GetHashCode()` or `object.Equals(object)` are sealed, an error is produced.
-
-`EqualityContract` is a virtual instance property which returns `typeof(T)`. If the base type
-defines an `EqualityContract` it is overridden in the derived record. If the base `EqualityContract`
-is sealed or non-virtual, an error is produced.
-
-`T Equals(T)` is specified to perform value equality such that `Equals` is true if and only if
-all accessible instance fields in the receiver are equal to the fields of the parameter
-and `this.EqualityContract` equals `other.EqualityContract`.
-
-`object.Equals` performs the equivalent of
-
 ```C#
-override Equals(object o) => Equals(o as T);
+public override int GetHashCode();
+public override bool Equals(object other);
+public virtual bool Equals(T other);
 ```
+`GetHashCode()` and `Equals(object other)` are overrides of the virtual methods in `System.Object`.
+Any methods on intermediate base classes that would hide those methods are ignored when overriding.
+
+Derived record types also override the `Equals(TBase other)` method from each base record type.
+
+The record type synthesizes an implementation of `System.IEquatable<T>` that is implicitly implemented by `Equals(T other)` where `T` is the containing type.
+Record types do not synthesize implementations of `System.IEquatable<TBase>` for any base type `TBase`,
+even if those interfaces are implemented by the base record types.
+
+The base record class synthesizes an `EqualityContract` property. The property is overridden in
+derived record classes. The synthesized implementations return `typeof(T)` where `T` is containing type.
+```C#
+protected virtual Type EqualityContract { get; }
+```
+
+It is an error if the base implementations of any of the overridden members is sealed or non-virtual,
+or do not match the expected signature and accessibility.
+
+`Equals(T other)` returns true if and only if each of the following terms are true:
+- `other` is not `null`, and
+- For each field declared in the record type, the value of
+`System.Collections.Generic.EqualityComparer<TN>.Default.Equals(fieldN, other.fieldN)` where `TN` is the field type, and
+- If there is a base record type, the value of `base.Equals(other)`; otherwise
+the value of `EqualityContract.Equals(other.EqualityContract)`.
+
+The overrides of `Equals(T other)` for the base methods, including `object.Equals(object other)`, perform the equivalent of:
+```C#
+public override bool Equals(object other) => Equals(other as T);
+```
+
+`GetHashCode()` returns the `int` result of a deterministic function taking the following values:
+- For each field declared in the record type, the value of
+`System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` where `TN` is the field type, and
+- If there is a base record type, the value of `base.GetHashCode()`; otherwise
+the value of `System.Collections.Generic.EqualityComparer<System.Type>.Default.GetHashCode(EqualityContract)`.
 
 ### Copy and Clone members
 
