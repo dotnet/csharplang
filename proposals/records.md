@@ -30,7 +30,7 @@ a `record_base` `argument_list` if the `record_declaration` does not contain a `
 ## Members of a record type
 
 In addition to the members declared in the record body, a record type has additional synthesized members.
-Members are synthesized unless an accessible concrete (non-abstract) member with a "matching" signature is 
+Members are synthesized unless an accessible concrete (non-abstract) member with a "matching" signature is
 either inherited or declared in the record body. Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 
@@ -64,14 +64,27 @@ override Equals(object o) => Equals(o as T);
 
 ### Copy and Clone members
 
-A record type contains two synthesized copying members:
+A record contains two synthesized copying members:
 
-* A protected constructor taking a single argument of the record type.
+* A constructor taking a single argument of the record type, referred to as the "copy constructor"
 * A public parameterless virtual instance "clone" method with a compiler-reserved name
 
-The protected constructor is referred to as the "copy constructor" and the synthesized
-body copies the values of all accessible instance fields in the input type to the corresponding
-fields of `this`.
+#### Copy constructor
+
+If a user-defined copy constructor is present, it is used instead of a synthesized one. It must use
+the base's copy constructor as its initializer if the base type is a record.
+
+The synthesized body of the copy constructor first invokes a base constructor and then copies the
+fields from the record itself:
+1. If the record derives from `System.Object`, the copy constructor invokes the default constructor on the base type.
+Otherwise, it invokes the copy constructor on the direct base record, passing its argument through. An error is
+produced if that base copy constructor is not accessible.
+2. The copy constructor then copies the values of all the instance fields in the input record to the corresponding
+fields of `this`, considering only the fields declared by the record.
+
+Note: the synthesized copy constructor does not include field initialization.
+
+#### Clone method
 
 The "clone" method returns the result of a call to a constructor with the same signature as the
 copy constructor. The return type of the clone method is the containing type, unless a virtual
