@@ -41,8 +41,8 @@ The synthesized members are as follows:
 Record types produce synthesized implementations of the following methods, where `T` is the
 containing type:
 ```C#
-public override int GetHashCode();         // object.GetHashCode()
-public override bool Equals(object other); // object.Equals(object)
+public override int GetHashCode();
+public override bool Equals(object other);
 public virtual bool Equals(T other);
 ```
 `GetHashCode()` and `Equals(object other)` are overrides of the virtual methods in `System.Object`.
@@ -73,7 +73,7 @@ The overrides of `Equals(T other)` for the base methods, including `object.Equal
 public override bool Equals(object other) => Equals(other as T);
 ```
 
-`GetHashCode()` returns the sum of the following terms where each term may be multipled by a constant:
+`GetHashCode()` returns the sum of the following terms where each term may be multiplied by a constant:
 - For each field declared in the record type, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` where `TN` is the field type, and
 - If there is a base record type, the value of `base.GetHashCode())`; otherwise
