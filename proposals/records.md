@@ -65,7 +65,7 @@ It is an error if the base implementations of any of the overridden members is s
 or do not match the expected signature and accessibility.
 
 `Equals(T other)` returns true if and only if each of the following terms are true:
-- `other` is not `null, and
+- `other` is not `null`, and
 - For each field declared in the record type, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.Equals(fieldN, other.fieldN)` where `TN` is the field type, and
 - If there is a base record type, the value of `base.Equals(other)`; otherwise
