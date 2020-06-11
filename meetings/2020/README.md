@@ -17,13 +17,13 @@
 
 ## Jun 29, 2020
 
-- Record Monday (Andy, Jared, Mads)
+- https://github.com/Partydonk/partydonk/issues/1 Static interface members (Miguel, Aaron, Mads, Carol)
 
 ## Jun 24, 2020
 
 ## Jun 22, 2020
 
-- https://github.com/Partydonk/partydonk/issues/1 Static interface members (Miguel, Aaron, Mads, Carol)
+- Record Monday (Andy, Jared, Mads)
 
 ## Jun 17, 2020
 
