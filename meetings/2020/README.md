@@ -30,6 +30,7 @@
 - nullability: improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
 - nullability: allow suppression on return someBoolValue!; (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
 - https://github.com/dotnet/csharplang/issues/3214 Nullability of iteration variable in non-generic foreach (Stephen)
+- `T??` parsing problems
 - null-checked parameters syntax
 
 ## Jun 15, 2020
