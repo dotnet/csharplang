@@ -29,7 +29,6 @@
 
 - nullability: improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
 - nullability: allow suppression on return someBoolValue!; (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
-- https://github.com/dotnet/csharplang/issues/3214 Nullability of iteration variable in non-generic foreach (Stephen)
 - `T??` parsing ambiguities: `(X?? x, Y?? y) t;`, `using (T?? t = u) { }`, `F((T?? t) => t);`
 - null-checked parameters syntax
 
@@ -38,6 +37,7 @@
 - init-only: confirm metadata encoding (IsExternalInit modreq) with compat implications on records (Jared/Julien)
 - init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type C? (Jared/Julien)
 - init-only: init-only methods ? `init void Init()` (Jared/Julien)
+- https://github.com/dotnet/csharplang/issues/3214 Nullability of iteration variable in non-generic foreach (Stephen)
 
 ## Jun 10, 2020
 
