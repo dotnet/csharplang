@@ -36,9 +36,9 @@ This proposal represents the next logical step for constant string generation, w
 ## Detailed design
 [design]: #detailed-design
 
-The [specifications](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#interpolated-strings) for interpolated strings remain the same. We permit the interpolated strings construct to be used in constants in the [spec](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#constant-expressions).
+The [specifications](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#interpolated-strings) for interpolated strings remain the same, with the restriction that all operations must be completed in compile time. We permit the interpolated strings construct to be used in constants in the [spec](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#constant-expressions).
 
-These interpolated strings are restricted in that their consituent strings also must be constant.
+These interpolated strings are restricted in that their consituent components also must be constant and of type string.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
