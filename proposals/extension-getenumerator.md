@@ -43,6 +43,8 @@ The spec change is relatively straightforward. We modify `The foreach statement`
 >    * The ***collection type*** is `X`, the ***enumerator type*** is `E`, and the ***element type*** is the type of the `Current` property.
 >*  Otherwise, an error is produced and no further steps are taken.
 
+For `await foreach`, the rules are similarly modified. The only change that is required to that spec is removing the `Extension methods do not contribute.` line from the description, as the rest of that spec is based on the above rules with different names substituted for the pattern methods.
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 
