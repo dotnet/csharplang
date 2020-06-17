@@ -39,48 +39,118 @@ The synthesized members are as follows:
 
 ### Equality members
 
-Record types produce synthesized implementations of the following methods, where `T` is the
-containing type:
+The record type includes a synthesized `EqualityContract` readonly virtual property. The property is overridden in each derived record type.
+The property can be declared explicitly.
+It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration is not `virtual` and the record type is not `sealed`.
+The synthesized property returns `typeof(R)` where `R` is the record type.
 ```C#
-public override int GetHashCode();
-public override bool Equals(object other);
-public virtual bool Equals(T other);
+protected virtual Type EqualityContract { get; };
 ```
-`GetHashCode()` and `Equals(object other)` are overrides of the virtual methods in `System.Object`.
-Any methods on intermediate base classes that would hide those methods are ignored when overriding.
+_Can we omit `EqualityContract` if the record type is `sealed` and derives from `System.Object`?_
 
-Derived record types also override the `Equals(TBase other)` method from each base record type.
-
-The record type synthesizes an implementation of `System.IEquatable<T>` that is implicitly implemented by `Equals(T other)` where `T` is the containing type.
-Record types do not synthesize implementations of `System.IEquatable<TBase>` for any base type `TBase`,
-even if those interfaces are implemented by the base record types.
-
-The base record class synthesizes an `EqualityContract` property. The property is overridden in
-derived record classes. The synthesized implementations return `typeof(T)` where `T` is containing type.
+The record type implements `System.IEquatable<R>` and includes a synthesized strongly-typed overload of `Equals(R? other)` where `R` is the record type.
+The method is `public`, and the method is `virtual` unless the record type is `sealed`.
+The method can be declared explicitly.
+It is an error if the explicit declaration does not match the expected signature or accessibility, or the explicit declaration is not `virtual` and the record type is not `sealed`.
 ```C#
-protected virtual Type EqualityContract { get; }
+public virtual bool Equals(R? other);
 ```
-
-It is an error if the base implementations of any of the overridden members is sealed or non-virtual,
-or do not match the expected signature and accessibility.
-
-`Equals(T other)` returns true if and only if each of the following terms are true:
+The synthesized `Equals(R?)` returns `true` if and only if each of the following are `true`:
 - `other` is not `null`, and
-- For each field declared in the record type, the value of
+- For each instance field in the record type that is not inherited, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.Equals(fieldN, other.fieldN)` where `TN` is the field type, and
-- If there is a base record type, the value of `base.Equals(other)`; otherwise
+- If there is a base record type, the value of `base.Equals(other)` (a non-virtual call to `public virtual bool Equals(Base? other)`); otherwise
 the value of `EqualityContract.Equals(other.EqualityContract)`.
 
-The overrides of `Equals(T other)` for the base methods, including `object.Equals(object other)`, perform the equivalent of:
+If the record type is derived from a base record type `Base`, the record type includes a synthesized override of the strongly-typed `Equals(Base other)`.
+The synthesized override is `sealed`.
+It is an error if the override is declared explicitly.
+The synthesized override returns `Equals((object?)other)`.
+
+The record type includes a synthesized override of `object.Equals(object? obj)`.
+It is an error if the override is declared explicitly.
+The synthesized override returns `Equals(other as R)` where `R` is the record type.
 ```C#
-public override bool Equals(object other) => Equals(other as T);
+public override bool Equals(object? obj);
 ```
 
-`GetHashCode()` returns the `int` result of a deterministic function taking the following values:
-- For each field declared in the record type, the value of
+The record type includes a synthesized override of `object.GetHashCode()`.
+The method can be declared explicitly.
+It is an error if the explicit declaration is `sealed` unless the record type is `sealed`.
+```C#
+public override int GetHashCode();
+```
+A warning is reported if one of `Equals(R?)` and `GetHashCode()` is explicitly declared but the other method is not explicit.
+
+The synthesized override of `GetHashCode()` returns an `int` result of a deterministic function combining the following values:
+- For each instance field in the record type that is not inherited, the value of
 `System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` where `TN` is the field type, and
 - If there is a base record type, the value of `base.GetHashCode()`; otherwise
 the value of `System.Collections.Generic.EqualityComparer<System.Type>.Default.GetHashCode(EqualityContract)`.
+
+For example, consider the following record types:
+```C#
+record R1(T1 P1);
+record R2(T1 P1, T2 P2) : R1(P1);
+record R2(T1 P1, T2 P2, T3 P3) : R2(P1, P2);
+```
+
+For those record types, the synthesized members would be something like:
+```C#
+class R1 : IEquatable<R1>
+{
+    public T1 P1 { get; set; }
+    protected virtual Type EqualityContract => typeof(R1);
+    public override bool Equals(object? obj) => Equals(obj as R1);
+    public virtual bool Equals(R1? other)
+    {
+        return !(other is null) &&
+            EqualityContract == other.EqualityContract &&
+            EqualityComparer<T1>.Default.Equals(P1, other.P1);
+    }
+    public override int GetHashCode()
+    {
+        return Combine(EqualityComparer<Type>.Default.GetHashCode(EqualityContract),
+            EqualityComparer<T1>.Default.GetHashCode(P1));
+    }
+}
+
+class R2 : R1, IEquatable<R2>
+{
+    public T2 P2 { get; set; }
+    protected override Type EqualityContract => typeof(R2);
+    public override bool Equals(object? obj) => Equals(obj as R2);
+    public sealed override bool Equals(R1? other) => Equals((object?)other);
+    public virtual bool Equals(R2? other)
+    {
+        return base.Equals((R1?)other) &&
+            EqualityComparer<T2>.Default.Equals(P2, other.P2);
+    }
+    public override int GetHashCode()
+    {
+        return Combine(base.GetHashCode(),
+            EqualityComparer<T2>.Default.GetHashCode(P2));
+    }
+}
+
+class R3 : R2, IEquatable<R3>
+{
+    public T3 P3 { get; set; }
+    protected override Type EqualityContract => typeof(R3);
+    public override bool Equals(object? obj) => Equals(obj as R3);
+    public sealed override bool Equals(R2? other) => Equals((object?)other);
+    public virtual bool Equals(R3? other)
+    {
+        return base.Equals((R2?)other) &&
+            EqualityComparer<T3>.Default.Equals(P3, other.P3);
+    }
+    public override int GetHashCode()
+    {
+        return Combine(base.GetHashCode(),
+            EqualityComparer<T3>.Default.GetHashCode(P3));
+    }
+}
+```
 
 ### Copy and Clone members
 
