@@ -32,17 +32,6 @@
 - `T??` parsing ambiguities: `(X?? x, Y?? y) t;`, `using (T?? t = u) { }`, `F((T?? t) => t);`
 - null-checked parameters syntax (https://github.com/dotnet/csharplang/issues/2145)
 
-## Jun 15, 2020
-
-- init-only: confirm metadata encoding (IsExternalInit modreq) with compat implications on records (Jared/Julien)
-- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type C? (Jared/Julien)
-- init-only: init-only methods ? `init void Init()` (Jared/Julien)
-- https://github.com/dotnet/csharplang/issues/3214 Nullability of iteration variable in non-generic foreach (Stephen)
-
-## Jun 10, 2020
-
-- https://github.com/dotnet/csharplang/issues/1711 Roles and extensions (Mads)
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -84,6 +73,30 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Jun 15, 2020
+
+[C# Language Design Notes for June 15, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-15.md)
+
+Record:
+
+1. `modreq` for init accessors
+
+1. Initializing `readonly` fields in same type
+
+1. `init` methods
+
+1. Equality dispatch
+
+1. Confirming some previous design decisions
+
+1. `IEnumerable.Current`
+
+## Jun 10, 2020
+
+[C# Language Design Notes for June 15, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-15.md)
+
+- https://github.com/dotnet/csharplang/issues/1711 Roles and extensions
 
 ## Jun 1, 2020
 
