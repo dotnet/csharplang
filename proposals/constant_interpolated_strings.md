@@ -36,9 +36,68 @@ This proposal represents the next logical step for constant string generation, w
 ## Detailed design
 [design]: #detailed-design
 
-The [specifications](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#interpolated-strings) for interpolated strings remain the same, with the restriction that all operations must be completed in compile time. We permit the interpolated strings construct to be used in constants in the [spec](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#constant-expressions).
+The following represent the updated specifications for constant expressions under this new proposal.
 
-These interpolated strings are restricted in that their consituent components also must be constant and of type string.
+### Constant Expressions
+
+A *constant_expression* is an expression that can be fully evaluated at compile-time.
+
+```antlr
+constant_expression
+    : expression
+    ;
+```
+
+A constant expression must be the `null` literal or a value with one of  the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool`, `object`, `string`, or any enumeration type. Only the following constructs are permitted in constant expressions:
+
+*  Literals (including the `null` literal).
+*  References to `const` members of class and struct types.
+*  References to members of enumeration types.
+*  References to `const` parameters or local variables
+*  Parenthesized sub-expressions, which are themselves constant expressions.
+*  Cast expressions, provided the target type is one of the types listed above.
+*  `checked` and `unchecked` expressions
+*  Default value expressions
+*  Nameof expressions
+*  The predefined `+`, `-`, `!`, and `~` unary operators.
+*  The predefined `+`, `-`, `*`, `/`, `%`, `<<`, `>>`, `&`, `|`, `^`, `&&`, `||`, `==`, `!=`, `<`, `>`, `<=`, and `>=` binary operators, provided each operand is of a type listed above.
+*  The `?:` conditional operator.
+*  *Interpolated strings `${}`, provided that all components are `constant strings` and the expression lacks format specifiers.*
+
+The following conversions are permitted in constant expressions:
+
+*  Identity conversions
+*  Numeric conversions
+*  Enumeration conversions
+*  Constant expression conversions
+*  Implicit and explicit reference conversions, provided that the source of the conversions is a constant expression that evaluates to the null value.
+
+Other conversions including boxing, unboxing and implicit reference conversions of non-null values are not permitted in constant expressions. For example:
+```csharp
+class C {
+    const object i = 5;         // error: boxing conversion not permitted
+    const object str = "hello"; // error: implicit reference conversion
+}
+```
+the initialization of i is an error because a boxing conversion is required. The initialization of str is an error because an implicit reference conversion from a non-null value is required.
+
+Whenever an expression fulfills the requirements listed above, the expression is evaluated at compile-time. This is true even if the expression is a sub-expression of a larger expression that contains non-constant constructs.
+
+The compile-time evaluation of constant expressions uses the same rules as run-time evaluation of non-constant expressions, except that where run-time evaluation would have thrown an exception, compile-time evaluation causes a compile-time error to occur.
+
+Unless a constant expression is explicitly placed in an `unchecked` context, overflows that occur in integral-type arithmetic operations and conversions during the compile-time evaluation of the expression always cause compile-time errors ([Constant expressions](expressions.md#constant-expressions)).
+
+Constant expressions occur in the contexts listed below. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
+
+*  Constant declarations ([Constants](classes.md#constants)).
+*  Enumeration member declarations ([Enum members](enums.md#enum-members)).
+*  Default arguments of formal parameter lists ([Method parameters](classes.md#method-parameters))
+*  `case` labels of a `switch` statement ([The switch statement](statements.md#the-switch-statement)).
+*  `goto case` statements ([The goto statement](statements.md#the-goto-statement)).
+*  Dimension lengths in an array creation expression ([Array creation expressions](expressions.md#array-creation-expressions)) that includes an initializer.
+*  Attributes ([Attributes](attributes.md)).
+
+An implicit constant expression conversion ([Implicit constant expression conversions](conversions.md#implicit-constant-expression-conversions)) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
