@@ -62,7 +62,7 @@ A constant expression must be the `null` literal or a value with one of  the fol
 *  The predefined `+`, `-`, `!`, and `~` unary operators.
 *  The predefined `+`, `-`, `*`, `/`, `%`, `<<`, `>>`, `&`, `|`, `^`, `&&`, `||`, `==`, `!=`, `<`, `>`, `<=`, and `>=` binary operators, provided each operand is of a type listed above.
 *  The `?:` conditional operator.
-*  *Interpolated strings `${}`, provided that all components are `constant strings` and the expression lacks format specifiers.*
+*  *Interpolated strings `${}`, provided that all components are constant expressions of type `string` and all interpolated components lack format specifiers.*
 
 The following conversions are permitted in constant expressions:
 
