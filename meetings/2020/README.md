@@ -30,7 +30,7 @@
 - nullability: improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
 - nullability: allow suppression on return someBoolValue!; (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
 - `T??` parsing ambiguities: `(X?? x, Y?? y) t;`, `using (T?? t = u) { }`, `F((T?? t) => t);`
-- null-checked parameters syntax
+- null-checked parameters syntax (https://github.com/dotnet/csharplang/issues/2145)
 
 ## Jun 15, 2020
 
