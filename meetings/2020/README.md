@@ -25,13 +25,6 @@
 
 - Record Monday (Andy, Jared, Mads)
 
-## Jun 17, 2020
-
-- nullability: improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
-- nullability: allow suppression on return someBoolValue!; (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
-- `T??` parsing ambiguities: `(X?? x, Y?? y) t;`, `using (T?? t = u) { }`, `F((T?? t) => t);`
-- null-checked parameters syntax (https://github.com/dotnet/csharplang/issues/2145)
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -73,6 +66,12 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Jun 17, 2020
+
+1. Null-suppression & null-conditional operator
+1. `parameter!` syntax
+1. `T??`
 
 ## Jun 15, 2020
 
