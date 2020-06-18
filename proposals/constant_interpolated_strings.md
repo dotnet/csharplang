@@ -36,7 +36,7 @@ This proposal represents the next logical step for constant string generation, w
 ## Detailed design
 [design]: #detailed-design
 
-The following represent the updated specifications for constant expressions under this new proposal.
+The following represent the updated specifications for constant expressions under this new proposal. Current specifications from which this was directly based on can be found [here](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#constant-expressions).
 
 ### Constant Expressions
 
@@ -62,7 +62,7 @@ A constant expression must be the `null` literal or a value with one of  the fol
 *  The predefined `+`, `-`, `!`, and `~` unary operators.
 *  The predefined `+`, `-`, `*`, `/`, `%`, `<<`, `>>`, `&`, `|`, `^`, `&&`, `||`, `==`, `!=`, `<`, `>`, `<=`, and `>=` binary operators, provided each operand is of a type listed above.
 *  The `?:` conditional operator.
-*  *Interpolated strings `${}`, provided that all components are constant expressions of type `string` and all interpolated components lack format specifiers.*
+*  *Interpolated strings `${}`, provided that all components are constant expressions of type `string` and all interpolated components lack alignment and format specifiers.*
 
 The following conversions are permitted in constant expressions:
 
@@ -74,7 +74,8 @@ The following conversions are permitted in constant expressions:
 
 Other conversions including boxing, unboxing and implicit reference conversions of non-null values are not permitted in constant expressions. For example:
 ```csharp
-class C {
+class C 
+{
     const object i = 5;         // error: boxing conversion not permitted
     const object str = "hello"; // error: implicit reference conversion
 }
