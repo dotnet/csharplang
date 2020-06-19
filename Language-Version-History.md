@@ -92,12 +92,13 @@ Features Added in C# Language Versions
 - Lambda expression
 - Expression trees
 - Partial methods
+- [Lock statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/lock-statement)
 
 # [C# 2](https://msdn.microsoft.com/library/7cz8t42e(v=vs.80).aspx) - Visual Studio 2005
 - Generics
 - Partial types
 - Anonymous methods
-- Iterators
+- [Iterators, a.k.a yield statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/yield)
 - Nullable types
 - Getter/setter separate accessibility
 - Method group conversions (delegates)
