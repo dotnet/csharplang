@@ -76,13 +76,13 @@ Features Added in C# Language Versions
 - Caller info attributes
 - foreach loop was changed to generates a new loop variable rather than closing over the same variable every time
 
-# [C# 4](https://msdn.microsoft.com/en-us/magazine/ff796223.aspx) - Visual Studio 2010
+# [C# 4](https://msdn.microsoft.com/magazine/ff796223.aspx) - Visual Studio 2010
 - Dynamic binding
 - Named and optional arguments
 - Co- and Contra-variance for generic delegates and interfaces
 - Embedded interop types ("NoPIA")
 
-# [C# 3](https://msdn.microsoft.com/en-us/library/bb308966.aspx) - Visual Studio 2008
+# [C# 3](https://msdn.microsoft.com/library/bb308966.aspx) - Visual Studio 2008
 - Implicitly typed local variables
 - Object and collection initializers
 - Auto-Implemented properties
@@ -93,7 +93,7 @@ Features Added in C# Language Versions
 - Expression trees
 - Partial methods
 
-# [C# 2](https://msdn.microsoft.com/en-us/library/7cz8t42e(v=vs.80).aspx) - Visual Studio 2005
+# [C# 2](https://msdn.microsoft.com/library/7cz8t42e(v=vs.80).aspx) - Visual Studio 2005
 - Generics
 - Partial types
 - Anonymous methods
@@ -105,7 +105,7 @@ Features Added in C# Language Versions
 - Delegate inference
 - Type and namespace aliases
 
-# [C# 1.2](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-version-history#c-version-12) - Visual Studio .NET 2003
+# [C# 1.2](https://docs.microsoft.com/dotnet/csharp/whats-new/csharp-version-history#c-version-12) - Visual Studio .NET 2003
 - Dispose in foreach
 - foreach over string specialization
 
@@ -115,20 +115,20 @@ Features Added in C# Language Versions
 - Enums
 - Interfaces
 - Events
-- [Operator overloading](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/operator-overloading)
-- [User-defined conversion operators](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/user-defined-conversion-operators)
+- [Operator overloading](https://docs.microsoft.com/dotnet/csharp/language-reference/operators/operator-overloading)
+- [User-defined conversion operators](https://docs.microsoft.com/dotnet/csharp/language-reference/operators/user-defined-conversion-operators)
 - Properties
-- [Indexers](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/indexers/)
+- [Indexers](https://docs.microsoft.com/dotnet/csharp/programming-guide/indexers/)
 - Output parameters (out and ref)
-- [Array trailing parameter (params)](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/params)
+- [Array trailing parameter (params)](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/params)
 - Delegates
 - Expressions
-- [Statements](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/statements)
-- [using statement](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/statements#the-using-statement)
-- [goto statement](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/goto)
-- [Preprocessor Directives](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/)
-- [Unsafe code and pointers](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/unsafe-code-pointers/)
+- [Statements](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/statements)
+- [using statement](https://docs.microsoft.com/dotnet/csharp/language-reference/language-specification/statements#the-using-statement)
+- [goto statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/goto)
+- [Preprocessor Directives](https://docs.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives/)
+- [Unsafe code and pointers](https://docs.microsoft.com/dotnet/csharp/programming-guide/unsafe-code-pointers/)
 - Attributes
 - Literals
-- [Verbatim identifier](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/verbatim)
+- [Verbatim identifier](https://docs.microsoft.com/dotnet/csharp/language-reference/tokens/verbatim)
 - Unsigned integer types
