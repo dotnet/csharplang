@@ -123,7 +123,6 @@ Features Added in C# Language Versions
 - [`params` arrays](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/params)
 - Delegates
 - Expressions
-- [Statements](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/statements)
 - [using statement](https://docs.microsoft.com/dotnet/csharp/language-reference/language-specification/statements#the-using-statement)
 - [goto statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/goto)
 - [Preprocessor Directives](https://docs.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives/)
