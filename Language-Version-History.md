@@ -60,49 +60,49 @@ Features Added in C# Language Versions
 # [C# 6](https://github.com/dotnet/roslyn/wiki/New-Language-Features-in-C%23-6) - Visual Studio 2015
 - [Draft Specification online](https://github.com/dotnet/csharplang/blob/master/spec/README.md)
 - Compiler-as-a-service (Roslyn)
-- Import of static type members into namespace
+- [Import of static type members into namespace](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/using-static)
 - Exception filters
 - Await in catch/finally blocks
 - Auto property initializers
 - Default values for getter-only properties
 - Expression-bodied members
 - Null propagator (null-conditional operator, succinct null checking)
-- String interpolation
-- nameof operator
+- [String interpolation](https://docs.microsoft.com/dotnet/csharp/language-reference/tokens/interpolated)
+- [nameof operator](https://docs.microsoft.com/dotnet/csharp/language-reference/operators/nameof)
 - Dictionary initializer
 
 # [C# 5](https://blogs.msdn.microsoft.com/mvpawardprogram/2012/03/26/an-introduction-to-new-features-in-c-5-0/) - Visual Studio 2012
-- Asynchronous methods
-- Caller info attributes
+- [Asynchronous methods](https://docs.microsoft.com/dotnet/csharp/programming-guide/concepts/async/)
+- [Caller info attributes](https://docs.microsoft.com/dotnet/csharp/language-reference/attributes/caller-information)
 - foreach loop was changed to generates a new loop variable rather than closing over the same variable every time
 
 # [C# 4](https://msdn.microsoft.com/magazine/ff796223.aspx) - Visual Studio 2010
-- Dynamic binding
-- Named and optional arguments
+- [Dynamic binding](https://docs.microsoft.com/dotnet/csharp/programming-guide/types/using-type-dynamic)
+- [Named and optional arguments](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments)
 - Co- and Contra-variance for generic delegates and interfaces
 - Embedded interop types ("NoPIA")
 
 # [C# 3](https://msdn.microsoft.com/library/bb308966.aspx) - Visual Studio 2008
-- Implicitly typed local variables
-- Object and collection initializers
-- Auto-Implemented properties
-- Anonymous types
-- Extension methods
-- Query expressions, a.k.a LINQ (Language Integrated Query)
-- Lambda expression
-- Expression trees
+- [Implicitly typed local variables](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/implicitly-typed-local-variables)
+- [Object and collection initializers](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/object-and-collection-initializers)
+- [Auto-Implemented properties](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/auto-implemented-properties)
+- [Anonymous types](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/anonymous-types)
+- [Extension methods](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods)
+- [Query expressions, a.k.a LINQ (Language Integrated Query)](https://docs.microsoft.com/dotnet/csharp/linq/query-expression-basics)
+- [Lambda expression](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/lambda-expressions)
+- [Expression trees](https://docs.microsoft.com/dotnet/csharp/programming-guide/concepts/expression-trees/)
 - Partial methods
 - [Lock statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/lock-statement)
 
 # [C# 2](https://msdn.microsoft.com/library/7cz8t42e(v=vs.80).aspx) - Visual Studio 2005
-- Generics
-- Partial types
-- Anonymous methods
+- [Generics](https://docs.microsoft.com/dotnet/csharp/programming-guide/generics/)
+- [Partial types](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/partial-type)
+- [Anonymous methods](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/anonymous-functions)
 - [Iterators, a.k.a yield statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/yield)
-- Nullable types
+- [Nullable types](https://docs.microsoft.com/dotnet/csharp/language-reference/builtin-types/nullable-value-types)
 - Getter/setter separate accessibility
 - Method group conversions (delegates)
-- Static classes
+- [Static classes](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members)
 - Delegate inference
 - Type and namespace aliases
 
@@ -111,24 +111,24 @@ Features Added in C# Language Versions
 - foreach over string specialization
 
 # [C# 1.0](https://en.wikipedia.org/wiki/Microsoft_Visual_Studio#.NET_.282002.29) - Visual Studio .NET 2002
-- Classes
-- Structs
-- Enums
-- Interfaces
-- Events
+- [Classes](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/classes)
+- [Structs](https://docs.microsoft.com/dotnet/csharp/language-reference/builtin-types/struct)
+- [Enums](https://docs.microsoft.com/dotnet/csharp/language-reference/builtin-types/enum)
+- [Interfaces](https://docs.microsoft.com/dotnet/csharp/programming-guide/interfaces/)
+- [Events](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/event)
 - [Operator overloading](https://docs.microsoft.com/dotnet/csharp/language-reference/operators/operator-overloading)
 - [User-defined conversion operators](https://docs.microsoft.com/dotnet/csharp/language-reference/operators/user-defined-conversion-operators)
-- Properties
+- [Properties](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/properties)
 - [Indexers](https://docs.microsoft.com/dotnet/csharp/programming-guide/indexers/)
-- Output parameters (out and ref)
+- Output parameters ([out](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/out) and [ref](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/ref))
 - [`params` arrays](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/params)
-- Delegates
+- [Delegates](https://docs.microsoft.com/dotnet/csharp/programming-guide/delegates/)
 - Expressions
 - [using statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/using-statement)
 - [goto statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/goto)
 - [Preprocessor Directives](https://docs.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives/)
 - [Unsafe code and pointers](https://docs.microsoft.com/dotnet/csharp/programming-guide/unsafe-code-pointers/)
-- Attributes
+- [Attributes](https://docs.microsoft.com/dotnet/csharp/programming-guide/concepts/attributes/)
 - Literals
 - [Verbatim identifier](https://docs.microsoft.com/dotnet/csharp/language-reference/tokens/verbatim)
 - Unsigned integer types
