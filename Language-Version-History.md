@@ -124,7 +124,7 @@ Features Added in C# Language Versions
 - [`params` arrays](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/params)
 - Delegates
 - Expressions
-- [using statement](https://docs.microsoft.com/dotnet/csharp/language-reference/language-specification/statements#the-using-statement)
+- [using statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/using-statement)
 - [goto statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/goto)
 - [Preprocessor Directives](https://docs.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives/)
 - [Unsafe code and pointers](https://docs.microsoft.com/dotnet/csharp/programming-guide/unsafe-code-pointers/)
