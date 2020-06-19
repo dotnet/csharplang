@@ -120,7 +120,7 @@ Features Added in C# Language Versions
 - Properties
 - [Indexers](https://docs.microsoft.com/dotnet/csharp/programming-guide/indexers/)
 - Output parameters (out and ref)
-- [Array trailing parameter (params)](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/params)
+- [`params` arrays](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/params)
 - Delegates
 - Expressions
 - [Statements](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/statements)
