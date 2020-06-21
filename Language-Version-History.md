@@ -52,20 +52,20 @@ Features Added in C# Language Versions
 - [Local Functions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/local-functions.md)
 - [Binary Literals](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/binary-literals.md)
 - [Digit Separators](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/digit-separators.md)
-- Ref returns and locals
+- [Ref returns and locals](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/ref-returns)
 - [Generalized async return types](https://github.com/dotnet/roslyn/blob/master/docs/features/task-types.md)
-- More expression-bodied members
+- [More expression-bodied members](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/expression-bodied-members)
 - [Throw expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/throw-expression.md)
 
 # [C# 6](https://github.com/dotnet/roslyn/wiki/New-Language-Features-in-C%23-6) - Visual Studio 2015
 - [Draft Specification online](https://github.com/dotnet/csharplang/blob/master/spec/README.md)
 - Compiler-as-a-service (Roslyn)
 - [Import of static type members into namespace](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/using-static)
-- Exception filters
+- [Exception filters](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/when)
 - Await in catch/finally blocks
 - Auto property initializers
 - Default values for getter-only properties
-- Expression-bodied members
+- [Expression-bodied members](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/expression-bodied-members)
 - Null propagator (null-conditional operator, succinct null checking)
 - [String interpolation](https://docs.microsoft.com/dotnet/csharp/language-reference/tokens/interpolated)
 - [nameof operator](https://docs.microsoft.com/dotnet/csharp/language-reference/operators/nameof)
@@ -91,7 +91,7 @@ Features Added in C# Language Versions
 - [Query expressions, a.k.a LINQ (Language Integrated Query)](https://docs.microsoft.com/dotnet/csharp/linq/query-expression-basics)
 - [Lambda expression](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/lambda-expressions)
 - [Expression trees](https://docs.microsoft.com/dotnet/csharp/programming-guide/concepts/expression-trees/)
-- Partial methods
+- [Partial methods](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/partial-method)
 - [Lock statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/lock-statement)
 
 # [C# 2](https://msdn.microsoft.com/library/7cz8t42e(v=vs.80).aspx) - Visual Studio 2005
@@ -126,7 +126,7 @@ Features Added in C# Language Versions
 - Expressions
 - [using statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/using-statement)
 - [goto statement](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/goto)
-- [Preprocessor Directives](https://docs.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives/)
+- [Preprocessor directives](https://docs.microsoft.com/dotnet/csharp/language-reference/preprocessor-directives/)
 - [Unsafe code and pointers](https://docs.microsoft.com/dotnet/csharp/programming-guide/unsafe-code-pointers/)
 - [Attributes](https://docs.microsoft.com/dotnet/csharp/programming-guide/concepts/attributes/)
 - Literals
