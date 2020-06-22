@@ -2,8 +2,6 @@
 
 ## Schedule ASAP
 
-- Parameter null checking
-
 ## Schedule when convenient
 
 
@@ -21,9 +19,16 @@
 
 ## Jun 24, 2020
 
+- Parameter null checking: finalize syntax
+- https://github.com/dotnet/csharplang/issues/3275 Variance on static interface members (Aleksey)
+- Function pointer question (Fred)
+
 ## Jun 22, 2020
 
-- Record Monday (Andy, Jared, Mads)
+Record Monday (Andy, Jared, Mads), e.g.:
+- Deriving between records and non-records
+- Record functionality on structs
+- Primary constructors on non-records
 
 ## Jun 3, 2020
 
