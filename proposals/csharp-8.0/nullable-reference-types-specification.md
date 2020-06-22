@@ -162,6 +162,13 @@ Type parameters additionally take their constraints into account:
 
 For a type parameter `T`, `T?` is only allowed if `T` is known to be a value type or known to be a reference type.
 
+### Nested functions
+
+Nested functions (lambdas and local functions) are treated like methods, except in regards to their captured variables.
+The default state of a captured variable inside a lambda or local function is the intersection of the nullable state
+of the variable at all the "uses" of that nested function. A use of a function is either a call to that function, or
+where it is converted to a delegate.
+
 ### Oblivious vs nonnullable
 
 A `type` is deemed to occur in a given annotation context when the last token of the type is within that context.
