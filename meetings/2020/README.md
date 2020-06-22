@@ -21,7 +21,7 @@
 
 - Parameter null checking: finalize syntax
 - https://github.com/dotnet/csharplang/issues/3275 Variance on static interface members (Aleksey)
-- Function pointer question (Fred)
+- [Function pointer question](https://github.com/dotnet/roslyn/issues/39865#issuecomment-647692516) (Fred)
 
 ## Jun 22, 2020
 
