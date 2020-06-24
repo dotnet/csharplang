@@ -79,8 +79,8 @@ Features Added in C# Language Versions
 # [C# 4](https://msdn.microsoft.com/magazine/ff796223.aspx) - Visual Studio 2010
 - [Dynamic binding](https://docs.microsoft.com/dotnet/csharp/programming-guide/types/using-type-dynamic)
 - [Named and optional arguments](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments)
-- Co- and Contra-variance for generic delegates and interfaces
-- Embedded interop types ("NoPIA")
+- [Co- and Contra-variance for generic delegates and interfaces](https://docs.microsoft.com/dotnet/standard/generics/covariance-and-contravariance)
+- [Embedded interop types ("NoPIA")](https://docs.microsoft.com/dotnet/framework/interop/type-equivalence-and-embedded-interop-types)
 
 # [C# 3](https://msdn.microsoft.com/library/bb308966.aspx) - Visual Studio 2008
 - [Implicitly typed local variables](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/implicitly-typed-local-variables)
@@ -105,6 +105,7 @@ Features Added in C# Language Versions
 - [Static classes](https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members)
 - Delegate inference
 - Type and namespace aliases
+- [Covariance and contravariance](https://docs.microsoft.com/dotnet/csharp/programming-guide/concepts/covariance-contravariance/)
 
 # [C# 1.2](https://docs.microsoft.com/dotnet/csharp/whats-new/csharp-version-history#c-version-12) - Visual Studio .NET 2003
 - Dispose in foreach
