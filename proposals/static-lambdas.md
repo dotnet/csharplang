@@ -27,6 +27,4 @@ No guarantee is made as to whether a `static` lambda definition is emitted as a 
 
 A non-`static` local function or lambda can capture state from an enclosing `static` lambda but cannot capture state outside the enclosing `static` lambda.
 
-A `static` lambda can be used in an expression tree.
-
 Removing the `static` modifier from a lambda in a valid program does not change the meaning of the program.
