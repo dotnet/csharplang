@@ -1,7 +1,6 @@
 ﻿# Upcoming meetings for 2020
 
 ## Schedule ASAP
-- Confirm unspeakable `Clone` method and long-term implications (Jared/Julien)
 
 ## Schedule when convenient
 
@@ -13,6 +12,8 @@
 - *Design review*
 
 ## Jul 1, 2020
+
+- Confirm unspeakable `Clone` method and long-term implications (Jared/Julien)
 
 ## Jun 29, 2020
 
