@@ -13,11 +13,12 @@
 
 ## Jul 1, 2020
 
+- [Non-defaultable struct types](https://github.com/dotnet/csharplang/issues/99#issuecomment-601792573) (Sam, Chuck)
 - Confirm unspeakable `Clone` method and long-term implications (Jared/Julien)
 
 ## Jun 29, 2020
 
-- https://github.com/Partydonk/partydonk/issues/1 Static interface members (Miguel, Aaron, Mads, Carol)
+- [Static interface members](https://github.com/Partydonk/partydonk/issues/1)  (Miguel, Aaron, Mads, Carol)
 
 ## Jun 24, 2020
 
