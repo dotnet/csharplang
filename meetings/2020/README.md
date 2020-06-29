@@ -26,13 +26,6 @@
 - https://github.com/dotnet/csharplang/issues/3275 Variance on static interface members (Aleksey)
 - [Function pointer question](https://github.com/dotnet/roslyn/issues/39865#issuecomment-647692516) (Fred)
 
-## Jun 22, 2020
-
-Record Monday (Andy, Jared, Mads), e.g.:
-- Deriving between records and non-records
-- Record functionality on structs
-- Primary constructors on non-records
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -74,6 +67,18 @@ Record Monday (Andy, Jared, Mads), e.g.:
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Jun 22, 2020
+
+[C# Language Design Notes for June 22, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-22.md)
+
+1. Data properties
+
+1. Clarifying what's supported in records for C# 9
+
+    - Structs
+
+    - Inheritance with records and classes
 
 ## Jun 17, 2020
 
