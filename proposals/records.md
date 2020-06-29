@@ -217,8 +217,9 @@ member whose name and type are taken from the value parameter declaration.
 For a record:
 
 * A public `get` and `init` auto-property is created (see separate `init` accessor specification).
-  Each "matching" inherited abstract accessor is overridden. The auto-property is initialized to
-  the value of the corresponding primary constructor parameter.
+  An inherited `abstract` property with matching type is overridden.
+  It is an error if the inherited property does not have `public` overridable `get` and `init` accessors.
+  The auto-property is initialized to the value of the corresponding primary constructor parameter.
 
 ### Deconstruct
 
