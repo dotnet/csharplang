@@ -11,6 +11,16 @@
 - *Triage milestones*
 - *Design review*
 
+## Aug 26, 2020
+
+## Aug 24, 2020
+
+## Jul 20, 2020
+
+## Jul 13, 2020
+
+## Jul 6, 2020
+
 ## Jul 1, 2020
 
 - [Non-defaultable struct types](https://github.com/dotnet/csharplang/issues/99#issuecomment-601792573) (Sam, Chuck)
