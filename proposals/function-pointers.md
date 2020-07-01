@@ -48,10 +48,10 @@ delegate* managed<int, int>;
 
 // This method will be invoked using whatever the default unmanaged calling convention on the runtime
 // platform is. This is platform and architecture dependent and is determined by the CLR at runtime.
-delegate* unmanged<int, int>;
+delegate* unmanaged<int, int>;
 
 // This method will be invoked using the cdecl calling convention
-delegate* unmanged[CallConvCdecl] <int, int>;
+delegate* unmanaged[CallConvCdecl] <int, int>;
 
 // This method will be invoked using the stdcall calling convention, and suppresses GC transition
 delegate* unmanaged[CallConvStdCall, CallConvSuppressGCTransition] <int, int>;
@@ -333,7 +333,7 @@ If lookup succeeds on all of the `identifier`s specified in an `unmanaged_callin
 signature. As a note, these rules mean that users cannot prefix these `identifier`s with `CallConv`, as that will result
 in looking up `CallConvCallConvVectorCall`.
 
-When interpreting metadata, the we first look at the `CallKind`. If it is anything other than `unmanaged ext`, we ignore all
+When interpreting metadata, we first look at the `CallKind`. If it is anything other than `unmanaged ext`, we ignore all
 `modopt`s on the return type for the purposes of determining the calling convention, and use only the `CallKind`. If the
 `CallKind` is `unmanaged ext`, we look at the modopts at the start of the function pointer type, taking the union of all
 types that meet the following requirements:
