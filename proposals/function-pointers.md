@@ -36,15 +36,25 @@ of a `delegate*` will use `calli` where invocation of a `delegate` will use `cal
 Syntactically though invocation is identical for both constructs.
 
 The ECMA-335 definition of method pointers includes the calling convention as part of the type signature (section 7.1).
-The default calling convention will be `managed`. Alternate forms can be specified by adding the appropriate modifier
-after the `delegate*` syntax: `managed`, `cdecl`, `stdcall`, `thiscall`, or `unmanaged`. Example:
+The default calling convention will be `managed`. Unmanaged calling conventions can by specified by putting an `unmanaged`
+keyword afer the `delegate*` syntax, which will use the runtime platform default. Specific unmanaged conventions can then
+be specified in brackets to the `unmanaged` keyword by specifying any type starting with `CallConv` in the
+`System.Runtime.CompilerServices` namespace. These types must come from the program's core library, and the set of valid
+combinations is platform-dependent.
 
 ``` csharp
-// This method will be invoked using the cdecl calling convention
-delegate* cdecl<int, int>;
+//This method has a managed calling convention. This is the same as leaving the managed keyword off.
+delegate* managed<int, int>;
 
-// This method will be invoked using the stdcall calling convention
-delegate* stdcall<int, int>;
+// This method will be invoked using whatever the default unmanaged calling convention on the runtime
+// platform is. This is platform and architecture dependent and is determined by the CLR at runtime.
+delegate* unmanaged<int, int>;
+
+// This method will be invoked using the cdecl calling convention
+delegate* unmanaged[CallConvCdecl] <int, int>;
+
+// This method will be invoked using the stdcall calling convention, and suppresses GC transition
+delegate* unmanaged[CallConvStdCall, CallConvSuppressGCTransition] <int, int>;
 ```
 
 Conversions between `delegate*` types is done based on their signature including the calling convention.
@@ -54,7 +64,7 @@ unsafe class Example {
     void Conversions() {
         delegate*<int, int, int> p1 = ...;
         delegate* managed<int, int, int> p2 = ...;
-        delegate* cdecl<int, int, int> p3 = ...;
+        delegate* unmanaged<int, int, int> p3 = ...;
 
         p1 = p2; // okay p1 and p2 have compatible signatures
         Console.WriteLine(p2 == p1); // True
@@ -78,6 +88,7 @@ Restrictions:
 - Custom attributes cannot be applied to a `delegate*` or any of its elements.
 - A `delegate*` parameter cannot be marked as `params`
 - A `delegate*` type has all of the restrictions of a normal pointer type.
+- Pointer arithmetic cannot be performed directly on function pointer types.
 
 ### Function pointer syntax
 
@@ -90,15 +101,31 @@ pointer_type
     ;
 
 funcptr_type
-    : 'delegate' '*' calling_convention? '<' (funcptr_parameter_modifier? type ',')* funcptr_return_modifier? return_type '>'
+    : 'delegate' '*' calling_convention_specifier? '<' funcptr_parameter_list funcptr_return_type '>'
     ;
 
-calling_convention
-    : 'cdecl'
-    | 'managed'
-    | 'stdcall'
-    | 'thiscall'
-    | 'unmanaged'
+calling_convention_specifier
+    : 'managed'
+    | 'unmanaged' ('[' unmanaged_calling_convention ']')?
+    ;
+
+unmanaged_calling_convention
+    : 'Cdecl'
+    | 'Stdcall'
+    | 'Thiscall'
+    | 'Fastcall'
+    | identifier (',' identifier)*
+
+funptr_parameter_list
+    : (funcptr_parameter ',')*
+    ;
+
+funcptr_parameter
+    : funcptr_parameter_modifier? type
+    ;
+
+funcptr_return_type
+    : funcptr_return_modifier? return_type
     ;
 
 funcptr_parameter_modifier
@@ -113,8 +140,9 @@ funcptr_return_modifier
     ;
 ```
 
-The `unmanaged` calling convention represents the default calling convention for native code on the current platform, and is encoded as winapi.
-All `calling_convention`s are contextual keywords when preceded by a `delegate*`.
+If no `calling_convention_specifier` is provided, the default is `managed`. The precise metadata encoding
+of the `calling_convention_specifier` and what `identifier`s are valid in the `unmanaged_calling_convention` is
+covered in [Metadata Representation of Calling Conventions](#Metadata-Representation-of-Calling-Conventions).
 
 ``` csharp
 delegate int Func1(string s);
@@ -164,26 +192,22 @@ unsafe class Util {
 ```
 
 In an unsafe context, a method `M` is compatible with a function pointer type `F` if all of the following are true:
-- `M` and `F` have the same number of parameters, and each parameter in `D` has the same `ref`, `out`, or `in` modifiers as the corresponding parameter in `F`.
+- `M` and `F` have the same number of parameters, and each parameter in `M` has the same `ref`, `out`, or `in` modifiers as the corresponding parameter in `F`.
 - For each value parameter (a parameter with no `ref`, `out`, or `in` modifier), an identity conversion, implicit reference conversion, or implicit pointer conversion exists from the parameter type in `M` to the corresponding parameter type in `F`.
 - For each `ref`, `out`, or `in` parameter, the parameter type in `M` is the same as the corresponding parameter type in `F`.
 - If the return type is by value (no `ref` or `ref readonly`), an identity, implicit reference, or implicit pointer conversion exists from the return type of `F` to the return type of `M`.
 - If the return type is by reference (`ref` or `ref readonly`), the return type and `ref` modifiers of `F` are the same as the return type and `ref` modifiers of `M`.
-- The calling convention of `M` is the same as the calling convention of `F`.
+- The calling convention of `M` is the same as the calling convention of `F`. This includes both the calling convention bit, as well as any calling convention flags specified in the unmanaged identifier.
 - `M` is a static method.
 
 In an unsafe context, an implicit conversion exists from an address-of expression whose target is a method group `E` to a compatible function pointer type `F` if `E` contains at least one method that is applicable in its normal form to an argument list constructed by use of the parameter types and modifiers of `F`, as described in the following.
 - A single method `M` is selected corresponding to a method invocation of the form `E(A)` with the following modifications:
-   - The arguments list `A` is a list of expressions, each classified as a variable and with the type and modifier (`ref`, `out`, or `in`) of the corresponding _formal\_parameter\_list_ of `D`.
+   - The arguments list `A` is a list of expressions, each classified as a variable and with the type and modifier (`ref`, `out`, or `in`) of the corresponding _funcptr\_parameter\_list_ of `F`.
    - The candidate methods are only those methods that are applicable in their normal form, not those applicable in their expanded form.
    - The candidate methods are only those methods that are static.
-- If the algorithm of Method invocations produces an error, then a compile-time error occurs. Otherwise, the algorithm produces a single best method `M` having the same number of parameters as `F` and the conversion is considered to exist.
+- If the algorithm of overload resolution produces an error, then a compile-time error occurs. Otherwise, the algorithm produces a single best method `M` having the same number of parameters as `F` and the conversion is considered to exist.
 - The selected method `M` must be compatible (as defined above) with the function pointer type `F`. Otherwise, a compile-time error occurs.
 - The result of the conversion is a function pointer of type `F`.
-
-An implicit conversion exists from an address-of expression whose target is a method group `E` to `void*` if there is only one static method `M` in `E`.
-If there is one static method, then the single best method from `E` is `M`.
-Otherwise, a compile-time error occurs.
 
 This means developers can depend on overload resolution rules to work in conjunction with the
 address-of operator:
@@ -263,62 +287,107 @@ We use `System.Runtime.InteropServices.OutAttribute`, applied as a `modreq` to t
 * It is an error to apply both `InAttribute` and `OutAttribute` as a modreq to a parameter type.
 * If either are specified via modopt, they are ignored.
 
-## Open Issues
+### Metadata Representation of Calling Conventions
 
-### NativeCallableAttribute
+Calling conventions are encoded in a method signature in metadata by a combination of the `CallKind` flag in the signature
+and zero or more `modopt`s at the start of the signature. ECMA-335 currently declares the following elements in the
+`CallKind` flag:
 
-This is an attribute used by the CLR to avoid the managed to native prologue when invoking. Methods marked by this
-attribute are only callable from native code, not managed (can’t call methods, create a delegate, etc …). The attribute
-is not special to mscorlib; the runtime will treat any attribute with this name with the same semantics.
-
-It's possible for the runtime and language to work together to fully support this. The language could choose to treat
-address-of `static` members with a `NativeCallable` attribute as a `delegate*` with the specified calling convention.
-
-``` csharp
-unsafe class NativeCallableExample {
-    [NativeCallable(CallingConvention.CDecl)]
-    static void CloseHandle(IntPtr p) => Marshal.FreeHGlobal(p);
-
-    void Use() {
-        delegate*<IntPtr, void> p1 = &CloseHandle; // Error: Invalid calling convention
-
-        delegate* cdecl<IntPtr, void> p2 = &CloseHandle; // Okay
-    }
-}
-
+```antlr
+CallKind
+   : default
+   | unmanaged cdecl
+   | unmanaged fastcall
+   | unmanaged thiscall
+   | unmanaged stdcall
+   | varargs
+   ;
 ```
 
-Additionally the language would likely also want to:
+Of these, function pointers in C# will support all but `varargs`.
 
-- Flag any managed calls to a method tagged with `NativeCallable` as an error. Given the function can't be invoked from
-managed code the compiler should prevent developers from attempting such an invocation.
-- Prevent method group conversions to `delegate` when the method is tagged with `NativeCallable`.
+In addition, the runtime (and eventually 335) will be updated to include a new `CallKind` on new platforms. This does
+not have a formal name currently, but this document will use `unmanaged ext` as a placeholder to stand for the new
+extensible calling convention format. With no `modopt`s, `unmanaged ext` is the platform default calling convention,
+`unmanaged` without the square brackets.
 
-This is not necessary to support `NativeCallable` though. The compiler can support the `NativeCallable` attribute as is
-using the existing syntax. The program would simply need to cast to `void*` before casting to the correct `delegate*`
-signature. That would be no worse than the support today.
+#### Mapping the `calling_convention_specifier` to a `CallKind`
 
-``` csharp
-void* v = &CloseHandle;
-delegate* cdecl<IntPtr, bool> f1 = (delegate* cdecl<IntPtr, bool>)v;
-```
+A `calling_convention_specifier` that is omitted, or specified as `managed`, maps to the `default` `CallKind`. This is
+default `CallKind` of any method not attributed with `UnmanagedCallersOnly`.
 
-### Extensible set of unmanaged calling conventions
+C# recognizes 4 special identifiers that map to specific existing unmanaged `CallKind`s from ECMA 335. In order for this
+mapping to occur, these identifiers must be specified on their own, with no other identifiers, and this requirement is
+encoded into the spec for `unmanaged_calling_convention`s. These identifiers are `Cdecl`, `Thiscall`, `Stdcall`, and
+`Fastcall`, which correspond to `unmanaged cdecl`, `unmanaged thiscall`, `unmanaged stdcall`, and `unmanaged fastcall`,
+respectively. If more than one `identifer` is specified, or the single `identifier` is not of the specially recognized
+identifiers, we perform special name lookup on the identifier with the following rules:
 
-The set of unmanaged calling conventions supported by the current ECMA-335 encodings is outdated. We have seen requests to add support
-for more unmanaged calling conventions, for example:
+* We prepend the `identifier` with the string `CallConv`
+* We look only at types defined in the `System.Runtime.CompilerServices` namespace.
+* We look only at types defined in the core library of the application, which is the library that defines `System.Object`
+and has no dependencies.
 
-- [vectorcall](https://docs.microsoft.com/cpp/cpp/vectorcall) https://github.com/dotnet/coreclr/issues/12120
-- StdCall with explicit this https://github.com/dotnet/coreclr/pull/23974#issuecomment-482991750
+If lookup succeeds on all of the `identifier`s specified in an `unmanaged_calling_convention`, we encode the `CallKind` as
+`unmanaged ext`, and encode each of the resolved types in the set of `modopt`s at the beginning of the function pointer
+signature. As a note, these rules mean that users cannot prefix these `identifier`s with `CallConv`, as that will result
+in looking up `CallConvCallConvVectorCall`.
 
-The design of this feature should allow extending the set of unmanaged calling conventions as needed in future. The problems include
-limited space for encoding calling conventions (12 out of 16 values are taken in `IMAGE_CEE_CS_CALLCONV_MASK`) and number of places
-that need to be touched in order to add a new calling convention. A potential solution is to introduce a new encoding that represents
-the calling convention using [`System.Runtime.InteropServices.CallingConvention`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.callingconvention) enum.
+When interpreting metadata, we first look at the `CallKind`. If it is anything other than `unmanaged ext`, we ignore all
+`modopt`s on the return type for the purposes of determining the calling convention, and use only the `CallKind`. If the
+`CallKind` is `unmanaged ext`, we look at the modopts at the start of the function pointer type, taking the union of all
+types that meet the following requirements:
 
-For reference, https://github.com/llvm/llvm-project/blob/master/llvm/include/llvm/IR/CallingConv.h has the list of calling conventions
-supported by LLVM. While it is unlikely that .NET will ever need to support all of them, it demonstrates that the space of calling
-conventions is very rich.
+* The is defined in the core library, which is the library that references no other libraries and defines `System.Object`.
+* The type is defined in the `System.Runtime.CompilerServices` namespace.
+* The type starts with the prefix `CallConv`.
+
+ These represent the types that must be found when performing lookup on the `identifier`s in an
+`unmanaged_calling_convention` when defining a function pointer type in source.
+
+It is an error to attempt to use a function pointer with a `CallKind` of `unmanaged ext` if the target runtime does not
+support the feature. This will be determined by looking for the presence of the
+`System.Runtime.CompilerServices.RuntimeFeature.UnmanagedCallKind` constant. If this constant is present, the runtime is
+considered to support the feature.
+
+### `System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute`
+
+`System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute` is an attribute used by the CLR to indicate that a method
+should be called with a specific calling convention. Because of this, we introduce the following support for working with
+the attribute:
+
+* It is an error to directly call a method annotated with this attribute from C#. Users must obtain a function pointer to
+the method and then invoke that pointer.
+* It is an error to apply the attribute to anything other than a static method. The C# compiler will mark any non-static
+methods imported from metadata with this attribute as unsupported by the language.
+* It is an error to have non-unmanaged types as parameters or the return type of a method marked with the attribute.
+* It is an error to convert a method marked with the attribute to a delegate type.
+* It is an error to specify any types for `UnmanagedCallersOnly.CallConvs` that do not meet the requirements for calling
+convention `modopt`s in metadata.
+
+When determining the calling convention of a method marked with a valid `UnmanagedCallersOnly` attribute, the compiler
+performs the following checks on the types specified in the `CallConvs` property to determine the effective `CallKind`
+and `modopt`s that should be used to determine the calling convention:
+
+* If no types are specified, the `CallKind` is treated as `unmanaged ext`, with no calling convention `modopt`s at the start
+of the function pointer type.
+* If there is one type specified, and that type is named `CallConvCdecl`, `CallConvThiscall`, `CallConvStdcall`, or
+`CallConvFastcall`, the `CallKind` is treated as `unmanaged cdecl`, `unmanaged thiscall`, `unmanaged stdcall`, or
+`unmanaged fastcall`, respectively, with no calling convention `modopt`s at the start of the function pointer type.
+* If multiple types are specified or the single type is not named one of the specially called out types above, the `CallKind`
+is treated as `unmanaged ext`, with the union of the types specified treated as `modopt`s at the start of the function pointer
+type.
+
+The compiler then looks at this effective `CallKind` and `modopt` collection and uses normal metadata rules to determine the
+final calling convention of the function pointer type.
+
+## Open Questions
+
+### Detecting runtime support for `unmanaged ext`
+
+https://github.com/dotnet/runtime/issues/38135 tracks adding this flag. Depending on the feedback from review, we will either
+use the property specified in the issue, or use the presence of `UnmanagedCallersOnlyAttribute` as the flag that determines
+whether the runtimes supports `unmanaged ext`.
 
 ## Considerations
 
@@ -439,13 +508,6 @@ tuples, generics, etc ... This is likely to be similar in form to other suggesti
 the language.
 
 ## Future Considerations
-
-### static local functions
-
-This refers to [the proposal](https://github.com/dotnet/csharplang/issues/1565) to allow the
-`static` modifier on local functions. Such a function would be guaranteed to be emitted as
-`static` and with the exact signature specified in source code. Such a function should be a valid
-argument to `&` as it contains none of the problems local functions have today
 
 ### static delegates
 
