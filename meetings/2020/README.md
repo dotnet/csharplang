@@ -21,11 +21,12 @@
 
 ## Jul 6, 2020
 
+- [Required properties](https://github.com/dotnet/csharplang/issues/3630) (Fred)
+
 ## Jul 1, 2020
 
 - [Non-defaultable struct types](https://github.com/dotnet/csharplang/issues/99#issuecomment-601792573) (Sam, Chuck)
 - Confirm unspeakable `Clone` method and long-term implications (Jared/Julien)
-- [Required properties](https://github.com/dotnet/csharplang/issues/3630) (Fred)
 
 ## Jun 29, 2020
 
