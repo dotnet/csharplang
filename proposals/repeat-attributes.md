@@ -37,7 +37,7 @@ A partial member typically facilitates the relationship between a code generator
 
 ## Solution
 
-Allow a non-AllowMultiple attribute to be used once in each partial declaration. Since attribute arguments are all constants, this should not be very difficult to verify at compile time. When attributes are unioned across declarations, each non-AllowMultiple attribute will be de-duplicated and only one instance of the attribute will be emitted.
+Allow a non-AllowMultiple attribute to be used once in each partial declaration, as long as the attribute arguments are identical. Since attribute arguments are all constants, this should not be very difficult to verify at compile time. When attributes are unioned across declarations, each non-AllowMultiple attribute will be de-duplicated and only one instance of the attribute will be emitted.
 
 ```cs
 public partial bool TryGetValue([NotNullWhen(true)] out object? value);
