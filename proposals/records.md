@@ -27,6 +27,10 @@ record_body
 Record types are reference types, similar to a class declaration. It is an error for a record to provide
 a `record_base` `argument_list` if the `record_declaration` does not contain a `parameter_list`.
 
+## Inheritance
+
+Records cannot inherit from classes, unless the class is `object`, and classes cannot inherit from records.
+
 ## Members of a record type
 
 In addition to the members declared in the record body, a record type has additional synthesized members.
@@ -39,13 +43,20 @@ The synthesized members are as follows:
 
 ### Equality members
 
-The record type includes a synthesized `EqualityContract` readonly virtual property. The property is overridden in each derived record type.
-The property can be declared explicitly.
-It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration is not `virtual` and the record type is not `sealed`.
-The synthesized property returns `typeof(R)` where `R` is the record type.
+If the record is derived from `object`, the record type includes a synthesized readonly property
 ```C#
 protected virtual Type EqualityContract { get; };
 ```
+The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration is not `virtual` and the record type is not `sealed`.
+
+If the record type is derived from a base record type `Base`, the record type includes a synthesized readonly property
+```C#
+protected override Type EqualityContract { get; };
+```
+
+The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration is `sealed` and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared property cannot override a property with this signature in the record type `Base` (for example, if the property is missing in the `Base`, or sealed, or not virtual, etc.).
+The synthesized property returns `typeof(R)` where `R` is the record type.
+
 _Can we omit `EqualityContract` if the record type is `sealed` and derives from `System.Object`?_
 
 The record type implements `System.IEquatable<R>` and includes a synthesized strongly-typed overload of `Equals(R? other)` where `R` is the record type.
@@ -62,24 +73,27 @@ The synthesized `Equals(R?)` returns `true` if and only if each of the following
 - If there is a base record type, the value of `base.Equals(other)` (a non-virtual call to `public virtual bool Equals(Base? other)`); otherwise
 the value of `EqualityContract == other.EqualityContract`.
 
-If the record type is derived from a base record type `Base`, the record type includes a synthesized override of the strongly-typed `Equals(Base other)`.
-The synthesized override is `sealed`.
-It is an error if the override is declared explicitly.
+If the record type is derived from a base record type `Base`, the record type includes a synthesized override 
+```C#
+public sealed override bool Equals(Base? other);
+```
+It is an error if the override is declared explicitly. It is an error if the method cannot override a method with same signature in record type `Base` (for example, if the method is missing in the `Base`, or sealed, or not virtual, etc.).
 The synthesized override returns `Equals((object?)other)`.
 
-The record type includes a synthesized override of `object.Equals(object? obj)`.
-It is an error if the override is declared explicitly.
-The synthesized override returns `Equals(other as R)` where `R` is the record type.
+The record type includes a synthesized override
 ```C#
 public override bool Equals(object? obj);
 ```
+It is an error if the override is declared explicitly. It is an error if the method doesn't override `object.Equals(object? obj)` (for example, due to shadowing in intermediate base types, etc.).
+The synthesized override returns `Equals(other as R)` where `R` is the record type.
 
-The record type includes a synthesized override of `object.GetHashCode()`.
-The method can be declared explicitly.
-It is an error if the explicit declaration is `sealed` unless the record type is `sealed`.
+The record type includes a synthesized override
 ```C#
 public override int GetHashCode();
 ```
+The method can be declared explicitly.
+It is an error if the explicit declaration is `sealed` unless the record type is `sealed`. It is an error if either synthesized, or explicitly declared method doesn't override `object.GetHashCode()` (for example, due to shadowing in intermediate base types, etc.).
+ 
 A warning is reported if one of `Equals(R?)` and `GetHashCode()` is explicitly declared but the other method is not explicit.
 
 The synthesized override of `GetHashCode()` returns an `int` result of a deterministic function combining the following values:
