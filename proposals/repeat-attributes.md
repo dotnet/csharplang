@@ -26,7 +26,7 @@ partial void M();
 partial void M() { }
 ```
 
-Many attributes are designed to inform the user and/or maintainer of the method of what pre/postconditions the method requires. For example:
+This presents a usability/readability issue, because some attributes are designed to inform the user and/or maintainer of the method of what pre/postconditions or invariants the method requires. For example:
 
 ```cs
 public partial bool TryGetValue([NotNullWhen(true)] out object? value);
