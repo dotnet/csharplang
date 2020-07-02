@@ -21,6 +21,7 @@
 
 ## Jul 6, 2020
 
+- [Repeat Attributes in Partial Members](https://github.com/RikkiGibson/csharplang/blob/repeated-attributes/proposals/repeat-attributes.md) (Rikki)
 - [Required properties](https://github.com/dotnet/csharplang/issues/3630) (Fred)
 
 ## Jul 1, 2020
