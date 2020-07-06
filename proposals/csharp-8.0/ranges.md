@@ -79,7 +79,7 @@ unary_expression
 We call this the *index from end* operator. The predefined *index from end* operators are as follows:
 
 ```csharp
-    System.Index operator ^(int fromEnd);
+System.Index operator ^(int fromEnd);
 ```
 
 The behavior of this operator is only defined for input values greater than or equal to zero.
@@ -87,10 +87,9 @@ The behavior of this operator is only defined for input values greater than or e
 Examples:
 
 ```csharp
-var thirdItem = list[2];                // list[2]
-var lastItem = list[^1];                // list[Index.CreateFromEnd(1)]
-
-var multiDimensional = list[3, ^2]      // list[3, Index.CreateFromEnd(2)]
+var array = new int[] { 1, 2, 3, 4, 5 };
+var thirdItem = array[2];    // array[2]
+var lastItem = array[^1];    // array[new Index(1, fromEnd: true)]
 ```
 
 #### System.Range
@@ -115,26 +114,25 @@ multiplicative_expression
     ;
 ```
 
-All forms of the *range operator* have the same precedence. This new precedence group is lower than the *unary operators* and higher than the *mulitiplicative arithmetic operators*.
+All forms of the *range operator* have the same precedence. This new precedence group is lower than the *unary operators* and higher than the *multiplicative arithmetic operators*.
 
 We call the `..` operator the *range operator*. The built-in range operator can roughly be understood to correspond to the invocation of a built-in operator of this form:
 
 ```csharp
-    System.Range operator ..(Index start = 0, Index end = ^0);
+System.Range operator ..(Index start = 0, Index end = ^0);
 ```
 
 Examples:
 
 ```csharp
-var slice1 = list[2..^3];               // list[Range.Create(2, Index.CreateFromEnd(3))]
-var slice2 = list[..^3];                // list[Range.ToEnd(Index.CreateFromEnd(3))]
-var slice3 = list[2..];                 // list[Range.FromStart(2)]
-var slice4 = list[..];                  // list[Range.All]
-
-var multiDimensional = list[1..2, ..]   // list[Range.Create(1, 2), Range.All]
+var array = new int[] { 1, 2, 3, 4, 5 };
+var slice1 = array[2..^3];    // array[new Range(2, new Index(3, fromEnd: true))]
+var slice2 = array[..^3];     // array[Range.EndAt(new Index(3, fromEnd: true))]
+var slice3 = array[2..];      // array[Range.StartAt(2)]
+var slice4 = array[..];       // array[Range.All]
 ```
 
-Moreover, `System.Index` should have an implicit conversion from `System.Int32`, in order not to need to overload for mixing integers and indexes over multi-dimensional signatures.
+Moreover, `System.Index` should have an implicit conversion from `System.Int32`, in order to avoid the need to overload mixing integers and indexes over multi-dimensional signatures.
 
 ## Adding Index and Range support to existing library types
 
@@ -149,7 +147,7 @@ The language will provide an instance indexer member with a single parameter of 
 A type is ***Countable*** if it  has a property named `Length` or `Count` with an accessible getter and a return type of `int`. The language can make use of this property to convert an expression of type `Index` into an `int` at the point of the expression without the need to use the type `Index` at all. In case both `Length` and `Count`
 are present, `Length` will be preferred. For simplicity going forward, the proposal will use the name `Length` to represent `Count` or `Length`.
 
-For such types, the language will act as if there is an indexer member of the form `T this[Index index]` where `T` is the return type of the `int` based indexer including any `ref` style annotations. The new member will have the same `get` and `set` members with matching accessibility as the `int` indexer. 
+For such types, the language will act as if there is an indexer member of the form `T this[Index index]` where `T` is the return type of the `int` based indexer including any `ref` style annotations. The new member will have the same `get` and `set` members with matching accessibility as the `int` indexer.
 
 The new indexer will be implemented by converting the argument of type `Index` into an `int` and emitting a call to the `int` based indexer. For discussion purposes, let's use the example of `receiver[expr]`. The conversion of `expr` to `int` will occur as follows:
 
@@ -160,10 +158,10 @@ This allows for developers to use the `Index` feature on existing types without 
 
 ``` csharp
 List<char> list = ...;
-var value = list[^1]; 
+var value = list[^1];
 
-// Gets translated to 
-var value = list[list.Count - 1]; 
+// Gets translated to
+var value = list[list.Count - 1];
 ```
 
 The `receiver` and `Length` expressions will be spilled as appropriate to ensure any side effects are only executed once. For example:
@@ -188,7 +186,7 @@ class SideEffect {
         return new Collection();
     }
 
-    void Use() { 
+    void Use() {
         int i = Get()[^1];
         Console.WriteLine(i);
     }
@@ -205,7 +203,7 @@ The language will provide an instance indexer member with a single parameter of 
 - The type has an accessible member named `Slice` which has two parameters of type `int`.
 - The type does not have an instance indexer which takes a single `Range` as the first parameter. The `Range` must be the only parameter or the remaining parameters must be optional.
 
-For such types, the language will bind as if there is an indexer member of the form `T this[Range range]` where `T` is the return type of the `Slice` method including any `ref` style annotations. The new member will also have matching accessibility with `Slice`. 
+For such types, the language will bind as if there is an indexer member of the form `T this[Range range]` where `T` is the return type of the `Slice` method including any `ref` style annotations. The new member will also have matching accessibility with `Slice`.
 
 When the `Range` based indexer is bound on an expression named `receiver`, it will be lowered by converting the `Range` expression into two values that are then passed to the `Slice` method. For discussion purposes, let's use the example of `receiver[expr]`.
 
@@ -236,7 +234,7 @@ class Collection {
         }
     }
 
-    int[] Slice(int start, int length) { 
+    int[] Slice(int start, int length) {
         var slice = new int[length];
         Array.Copy(_array, start, slice, 0, length);
         return slice;
@@ -249,7 +247,7 @@ class SideEffect {
         return new Collection();
     }
 
-    void Use() { 
+    void Use() {
         var array = Get()[0..2];
         Console.WriteLine(array.length);
     }
@@ -258,7 +256,7 @@ class SideEffect {
 
 This code will print "Get Length 2".
 
-The language will special case the following known types: 
+The language will special case the following known types:
 
 - `string`: the method `Substring` will be used instead of `Slice`.
 - `array`: the method `System.Reflection.CompilerServices.GetSubArray` will be used instead of `Slice`.
@@ -286,10 +284,10 @@ The inspiration for this behavior was collection initializers. Using the structu
 
 This proposal initially required that types implement `ICollection` in order to qualify as Indexable. That required a number of special cases though:
 
-- `ref struct`: these cannot implement interfaces yet types like `Span<T>` are ideal for index / range support. 
+- `ref struct`: these cannot implement interfaces yet types like `Span<T>` are ideal for index / range support.
 - `string`: does not implement `ICollection` and adding that `interface` has a large cost.
 
-This means to support key types special casing is already needed. The special casing of `string` is less interesting as the language does this in other areas (`foreach` lowering, constants, etc ...). The special casing of `ref struct` is more concerning as it's special casing an entire class of types. They get labeled as Indexable if they simply have a property named `Count` with a return type of `int`. 
+This means to support key types special casing is already needed. The special casing of `string` is less interesting as the language does this in other areas (`foreach` lowering, constants, etc ...). The special casing of `ref struct` is more concerning as it's special casing an entire class of types. They get labeled as Indexable if they simply have a property named `Count` with a return type of `int`.
 
 After consideration the design was normalized to say that any type which has a property `Count` / `Length` with a return type of `int` is Indexable. That removes all special casing, even for `string` and arrays.
 
@@ -304,15 +302,15 @@ The extra complication on the initial detection of Indexable types is outweighed
 
 ### Choice of Slice as a name
 
-The name `Slice` was chosen as it's the de-facto standard name for slice style operations in .NET. Starting with netcoreapp2.1 all span style types use the name `Slice` for slicing operations. Prior to netcoreapp2.1 there really aren't any examples of slicing to look to for an example. Types like `List<T>`, `ArraySegment<T>`, `SortedList<T>` would've been ideal for slicing but the concept didn't exist when types were added. 
+The name `Slice` was chosen as it's the de-facto standard name for slice style operations in .NET. Starting with netcoreapp2.1 all span style types use the name `Slice` for slicing operations. Prior to netcoreapp2.1 there really aren't any examples of slicing to look to for an example. Types like `List<T>`, `ArraySegment<T>`, `SortedList<T>` would've been ideal for slicing but the concept didn't exist when types were added.
 
 Thus, `Slice` being the sole example, it was chosen as the name.
 
 ### Index target type conversion
 
-Another way to view the `Index` transformation in an indexer expression is as a target type conversion. Instead of binding as if there is a member of the form `return_type this[Index]`, the language instead assigns a target typed conversion to `int`. 
+Another way to view the `Index` transformation in an indexer expression is as a target type conversion. Instead of binding as if there is a member of the form `return_type this[Index]`, the language instead assigns a target typed conversion to `int`.
 
-This concept could be generalized to all member access on Countable types. Whenever an expression with type `Index` is used as an argument to an instance member invocation and the receiver is Countable then the expression will have a target type conversion to `int`. The member invocations applicable for this conversion include methods, indexers, properties, extension methods, etc ... Only constructors are excluded as they have no receiver. 
+This concept could be generalized to all member access on Countable types. Whenever an expression with type `Index` is used as an argument to an instance member invocation and the receiver is Countable then the expression will have a target type conversion to `int`. The member invocations applicable for this conversion include methods, indexers, properties, extension methods, etc ... Only constructors are excluded as they have no receiver.
 
 The target type conversion will be implemented as follows for any expression which has a type of `Index`. For discussion purposes lets use the example of `receiver[expr]`:
 
@@ -341,16 +339,16 @@ class SideEffect {
         return new Collection();
     }
 
-    void Use() { 
+    void Use() {
         int i = Get().GetAt(^1);
         Console.WriteLine(i);
     }
 }
 ```
 
-This code will print "Get Length 3". 
+This code will print "Get Length 3".
 
-This feature would be beneficial to any member which had a parameter that represented an index. For example `List<T>.InsertAt`. This also has the potential for confusion as the language can't give any guidance as to whether or not an expression is meant for indexing. All it can do is convert any `Index` expression to `int` when invoking a member on a Countable type. 
+This feature would be beneficial to any member which had a parameter that represented an index. For example `List<T>.InsertAt`. This also has the potential for confusion as the language can't give any guidance as to whether or not an expression is meant for indexing. All it can do is convert any `Index` expression to `int` when invoking a member on a Countable type.
 
 Restrictions:
 
@@ -364,8 +362,12 @@ Restrictions:
 - The Slice method used for the Range pattern must have exactly two int parameters
 - When looking for the pattern members, we look for original definitions, not constructed members
 
-## Design Meetings
+## Design meetings
 
-- https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-04-01.md
-
-## Questions
+- [Jan 10, 2018](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-01-10.md)
+- [Jan 18, 2018](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-01-18.md)
+- [Jan 22, 2018](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-01-22.md)
+- [Dec 3, 2018](https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-12-03.md)
+- [Mar 25, 2019](https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-03-25.md#pattern-based-indexing-with-index-and-range)
+- [April 1st, 2019](https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-04-01.md)
+- [April 15, 2019](https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-04-15.md#follow-up-decisions-for-pattern-based-indexrange)
