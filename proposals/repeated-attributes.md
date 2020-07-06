@@ -1,4 +1,4 @@
-# Repeat Attributes in Partial Members
+# Repeated Attributes in Partial Members
 
 ## Summary
 
