@@ -40,6 +40,7 @@ to
 
 > If `A` exists and is not a nullable type, reference type or pointer type, a compile-time error occurs.
 
+Currently the rules for `??=` do not prohibit pointer types; however, the operator was not implemented like that.
 
 
 ## Drawbacks
