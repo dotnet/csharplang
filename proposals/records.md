@@ -45,8 +45,9 @@ The synthesized members are as follows:
 
 If the record is derived from `object`, the record type includes a synthesized readonly property equivalent to a property declared as follows:
 ```C#
-protected virtual Type EqualityContract { get; };
+protected Type EqualityContract { get; };
 ```
+The property is `virtual` unless the record type is `sealed`.
 The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`.
 
 If the record type is derived from a base record type `Base`, the record type includes a synthesized readonly property equivalent to a property declared as follows:
