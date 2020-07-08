@@ -27,6 +27,6 @@ Accessibility rules for `private` members in the enclosing scope are the same fo
 
 No guarantee is made as to whether a *static anonymous function* definition is emitted as a `static` method in metadata. This is left up to the compiler implementation to optimize.
 
-A non-`static` local function or anonymous function can capture state from an enclosing `static` lambda but cannot capture state outside the enclosing `static` lambda.
+A non-`static` local function or anonymous function can capture state from an enclosing *static anonymous function* but cannot capture state outside the enclosing *static anonymous function*.
 
 Removing the `static` modifier from an anonymous function in a valid program does not change the meaning of the program.
