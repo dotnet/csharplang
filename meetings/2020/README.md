@@ -21,26 +21,6 @@
 
 ## Jul 13, 2020
 
-## Jul 6, 2020
-
-- [Repeat Attributes in Partial Members](https://github.com/RikkiGibson/csharplang/blob/repeated-attributes/proposals/repeat-attributes.md) (Rikki)
-- [Required properties](https://github.com/dotnet/csharplang/issues/3630) (Fred)
-
-## Jul 1, 2020
-
-- [Non-defaultable struct types](https://github.com/dotnet/csharplang/issues/99#issuecomment-601792573) (Sam, Chuck)
-- Confirm unspeakable `Clone` method and long-term implications (Jared/Julien)
-
-## Jun 29, 2020
-
-- [Static interface members](https://github.com/Partydonk/partydonk/issues/1)  (Miguel, Aaron, Mads, Carol)
-
-## Jun 24, 2020
-
-- Parameter null checking: finalize syntax
-- https://github.com/dotnet/csharplang/issues/3275 Variance on static interface members (Aleksey)
-- [Function pointer question](https://github.com/dotnet/roslyn/issues/39865#issuecomment-647692516) (Fred)
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -54,11 +34,6 @@
 
 - Record Monday (Andy, Jared, Mads)
 
-## May 11, 2020
-
-- Record Monday (Andy, Jared, Mads)
-    - https://gist.github.com/MadsTorgersen/3fb6b7461e211c8458044ad5115f2117 Primary constructors and records (Mads)
-
 ## April 29, 2020
 
 - Design review
@@ -71,10 +46,6 @@
 
 - https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
 
-## Jan 29, 2020
-
-- Records: drilling in to individual features (Mads)
-
 ## Jan 13, 2020
 
 - Records: Paging back in the previous proposal (Andy)
@@ -82,6 +53,37 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Jul 6, 2020
+
+[C# Language Design Notes for July 1, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-06.md)
+
+- [Repeat Attributes in Partial Members](https://github.com/RikkiGibson/csharplang/blob/repeated-attributes/proposals/repeat-attributes.md) (Rikki)
+- `sealed` on `data` members
+- [Required properties](https://github.com/dotnet/csharplang/issues/3630) (Fred)
+
+
+## Jul 1, 2020
+
+[C# Language Design Notes for July 1, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-01.md)
+
+- [Non-defaultable struct types](https://github.com/dotnet/csharplang/issues/99#issuecomment-601792573) (Sam, Chuck)
+- Confirm unspeakable `Clone` method and long-term implications (Jared/Julien)
+
+## Jun 29, 2020
+
+[C# Language Design Notes for June 29, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-29.md)
+
+- [Static interface members](https://github.com/Partydonk/partydonk/issues/1)  (Miguel, Aaron, Mads, Carol)
+
+## Jun 24, 2020
+
+[C# Language Design Notes for June 24, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-22.md)
+
+- Parameter null checking: finalize syntax
+- https://github.com/dotnet/csharplang/issues/3275 Variance on static interface members (Aleksey)
+- [Function pointer question](https://github.com/dotnet/roslyn/issues/39865#issuecomment-647692516) (Fred)
+
 
 ## Jun 22, 2020
 
@@ -96,6 +98,8 @@ Overview of meetings and agendas for 2020
     - Inheritance with records and classes
 
 ## Jun 17, 2020
+
+[C# Language Design Notes for June 17, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-17.md)
 
 1. Null-suppression & null-conditional operator
 1. `parameter!` syntax
@@ -143,7 +147,7 @@ Record syntax
     2. Record syntax/keyword
     3. Details on property shorthand syntax
 
-## March 11, 2020
+## May 11, 2020
 
 [C# Language Design Notes for May 11, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-11.md)
 
