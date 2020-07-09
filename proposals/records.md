@@ -38,6 +38,7 @@ Members are synthesized unless a member with a "matching" signature is declared 
 an accessible concrete non-virtual member with a "matching" signature is inherited.
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
+It is an error for a member of a record to be named "Clone".
 
 The synthesized members are as follows:
 
