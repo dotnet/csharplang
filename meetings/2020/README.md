@@ -21,6 +21,8 @@
 
 ## Jul 13, 2020
 
+- Triage [championed features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone)
+
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
