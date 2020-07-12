@@ -238,13 +238,13 @@ For a record:
 
 ### Deconstruct
 
-A positional record synthesizes a public void-returning method called Deconstruct with an out
+A positional record synthesizes a public void-returning instance method called Deconstruct with an out
 parameter declaration for each parameter of the primary constructor declaration. Each parameter
 of the Deconstruct method has the same type as the corresponding parameter of the primary
 constructor declaration. The body of the method assigns each parameter of the Deconstruct method
 to the value from an instance member access to a member of the same name.
 The method can be declared explicitly. It is an error if the explicit declaration does not match
-the expected signature or accessibility.
+the expected signature or accessibility, or is static.
 
 ## `with` expression
 
