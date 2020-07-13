@@ -19,9 +19,7 @@
 
 ## Jul 20, 2020
 
-## Jul 13, 2020
-
-- Triage [championed features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone)
+- [struct private fields in definite assignment](https://github.com/dotnet/csharplang/issues/3431) (Neal/Julien)
 
 ## Jun 3, 2020
 
@@ -54,11 +52,17 @@
 
 # C# Language Design Notes for 2020
 
-Overview of meetings and agendas for 2020
+[Overview of meetings and agendas for 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-13.md)
+
+- Triage open issues
+
+## Jul 13, 2020
+
+[C# Language Design Notes for July 13th, 2020]
 
 ## Jul 6, 2020
 
-[C# Language Design Notes for July 1, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-06.md)
+[C# Language Design Notes for July 6, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-06.md)
 
 - [Repeat Attributes in Partial Members](https://github.com/RikkiGibson/csharplang/blob/repeated-attributes/proposals/repeat-attributes.md) (Rikki)
 - `sealed` on `data` members
