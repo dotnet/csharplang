@@ -52,13 +52,13 @@
 
 # C# Language Design Notes for 2020
 
-[Overview of meetings and agendas for 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-13.md)
-
-- Triage open issues
+Overview of meetings and agendas for 2020
 
 ## Jul 13, 2020
 
-[C# Language Design Notes for July 13th, 2020]
+[C# Language Design Notes for July 13th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-13.md)
+
+- Triage open issues
 
 ## Jul 6, 2020
 
