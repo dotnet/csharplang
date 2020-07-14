@@ -72,7 +72,7 @@ class Student
 ```
 
 An instance property containing an `init` accessor is considered settable in
-the following circumstances:
+the following circumstances, except when in a local function or lambda:
 
 - During an object initializer
 - During a `with` expression initializer
