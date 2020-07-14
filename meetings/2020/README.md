@@ -20,6 +20,8 @@
 ## Jul 20, 2020
 
 - [struct private fields in definite assignment](https://github.com/dotnet/csharplang/issues/3431) (Neal/Julien)
+    - [Proposal 1](https://github.com/dotnet/roslyn/issues/30194#issuecomment-657858716)
+    - [Proposal 2](https://github.com/dotnet/roslyn/issues/30194#issuecomment-657900257)
 
 ## Jun 3, 2020
 
