@@ -27,6 +27,8 @@ record_body
 Record types are reference types, similar to a class declaration. It is an error for a record to provide
 a `record_base` `argument_list` if the `record_declaration` does not contain a `parameter_list`.
 
+Record parameters cannot use `ref`, `out` or `this` modifiers (but `in` and `params` are allowed).
+
 ## Inheritance
 
 Records cannot inherit from classes, unless the class is `object`, and classes cannot inherit from records.
