@@ -178,8 +178,9 @@ A record type contains two copying members:
 
 The purpose of the copy constructor is to copy the state from the parameter to the new instance being
 created. This constructor doesn't run any instance field/property initializers present in the record
-declaration. If the constructor is not explicitly declared, a protected constructor will be synthesized
-by the compiler. An explicitly declared copy constructor must be either public or protected, unless the
+declaration. If the constructor is not explicitly declared, a constructor will be synthesized
+by the compiler. If the record is sealed, the constructor will be private, otherwise it will be protected.
+An explicitly declared copy constructor must be either public or protected, unless the
 record is sealed.
 The first thing the constructor must do, is to call a copy constructor of the base, or a parameter-less
 object constructor if the record inherits from object. An error is reported if a user-defined copy
