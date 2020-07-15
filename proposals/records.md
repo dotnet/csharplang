@@ -174,7 +174,7 @@ class R3 : R2, IEquatable<R3>
 A record type contains two copying members:
 
 * A constructor taking a single argument of the record type. It is referred to as a "copy constructor".
-* A synthesized public parameterless virtual instance "clone" method with a compiler-reserved name
+* A synthesized public parameterless instance "clone" method with a compiler-reserved name
 
 The purpose of the copy constructor is to copy the state from the parameter to the new instance being
 created. This constructor doesn't run any instance field/property initializers present in the record
@@ -186,14 +186,14 @@ constructor uses an implicit or explicit constructor initializer that doesn't fu
 After a base copy constructor is invoked, a synthesized copy constructor copies values for all instance
 fields implicitly or explicitly declared within the record type.
 
-The "clone" method returns the result of a call to a constructor with the same signature as the
-copy constructor. The return type of the clone method is the containing type, unless a virtual
-clone method is present in the base class. In that case, the return type is the current containing
-type if the "covariant returns" feature is supported and the override return type otherwise. The
-synthesized clone method is an override of the base type clone method if one exists. An error is
-produced if the base type clone method is sealed.
-
+If a virtual "clone" method is present in the base record, the synthesized "clone" method overrides it and
+the return type of the method is the current containing type if the "covariant returns" feature is supported
+and the override return type otherwise. An error is produced if the base record clone method is sealed.
+If a virtual "clone" method is not present in the base record, the return type of the clone method
+is the containing type and the method is virtual, unless the record is sealed or abstract.
 If the containing record is abstract, the synthesized clone method is also abstract.
+If the "clone" method is not abstract, it returns the result of a call to a copy constructor. 
+
 
 ## Positional record members
 
