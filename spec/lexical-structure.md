@@ -698,7 +698,7 @@ single_regular_balanced_text_character
     ;
     
 interpolation_format
-    : interpolation_format_character+
+    : ':' interpolation_format_character+
     ;
     
 interpolation_format_character
