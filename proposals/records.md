@@ -275,13 +275,12 @@ A `with` expression allows for "non-destructive mutation", designed to
 produce a copy of the receiver expression with modifications in assignments
 in the `member_initializer_list`.
 
-A valid `with` expression has a receiver with a non-void type. The receiver type must contain an
-accessible synthesized record "clone" method.
+A valid `with` expression has a receiver with a non-void type. The receiver type must be a record.
 
 On the right hand side of the `with` expression is a `member_initializer_list` with a sequence
-of assignments to *identifier*, which must be an accessible instance field or property of the return
-type of the `Clone()` method.
+of assignments to *identifier*, which must be an accessible instance field or property of the receiver's
+type.
 
-Each `member_initializer` is processed the same way as an assignment to a field or property
-access of the return value of the record clone method. The clone method is executed only once
-and the assignments are processed in lexical order.
+First, receiver's "clone" method (specified above) is invoked and its result is converted to the
+receiver's type. Then, each `member_initializer` is processed the same way as an assignment to
+a field or property access of the result of the conversion. Assignments are processed in lexical order.
