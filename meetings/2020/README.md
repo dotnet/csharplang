@@ -86,7 +86,7 @@ Overview of meetings and agendas for 2020
 
 ## Jun 24, 2020
 
-[C# Language Design Notes for June 24, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-22.md)
+[C# Language Design Notes for June 24, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-24.md)
 
 - Parameter null checking: finalize syntax
 - https://github.com/dotnet/csharplang/issues/3275 Variance on static interface members (Aleksey)
