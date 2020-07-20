@@ -2,10 +2,10 @@
 
 ## Schedule ASAP
 
-## Schedule when convenient
-
 - `.ToString()` or `GetDebuggerDisplay()` on records?
 - Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }`
+
+## Schedule when convenient
 
 ## Recurring topics
 
