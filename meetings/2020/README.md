@@ -20,14 +20,6 @@
 
 ## Jul 27, 2020
 
-## Jul 20, 2020
-
-- [struct private fields in definite assignment](https://github.com/dotnet/csharplang/issues/3431) (Neal/Julien)
-    - [Proposal 1](https://github.com/dotnet/roslyn/issues/30194#issuecomment-657858716)
-    - [Proposal 2](https://github.com/dotnet/roslyn/issues/30194#issuecomment-657900257)
-- Finish [Triage](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone)
-- Records-related features to pick up in the next version of C# (Mads)
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -60,6 +52,19 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Jul 20, 2020
+
+## Jul 20, 2020
+
+[C# Language Design Notes for July 20th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-20.md)
+
+- [struct private fields in definite assignment](https://github.com/dotnet/csharplang/issues/3431) (Neal/Julien)
+    - [Proposal 1](https://github.com/dotnet/roslyn/issues/30194#issuecomment-657858716)
+    - [Proposal 2](https://github.com/dotnet/roslyn/issues/30194#issuecomment-657900257)
+- Finish [Triage](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone)
+- Records-related features to pick up in the next version of C# (Mads)
+
 
 ## Jul 13, 2020
 
