@@ -327,6 +327,7 @@ identifiers, we perform special name lookup on the identifier with the following
 * We look only at types defined in the `System.Runtime.CompilerServices` namespace.
 * We look only at types defined in the core library of the application, which is the library that defines `System.Object`
 and has no dependencies.
+* We look only at public types.
 
 If lookup succeeds on all of the `identifier`s specified in an `unmanaged_calling_convention`, we encode the `CallKind` as
 `unmanaged ext`, and encode each of the resolved types in the set of `modopt`s at the beginning of the function pointer
@@ -341,6 +342,7 @@ types that meet the following requirements:
 * The is defined in the core library, which is the library that references no other libraries and defines `System.Object`.
 * The type is defined in the `System.Runtime.CompilerServices` namespace.
 * The type starts with the prefix `CallConv`.
+* The type is public.
 
  These represent the types that must be found when performing lookup on the `identifier`s in an
 `unmanaged_calling_convention` when defining a function pointer type in source.
