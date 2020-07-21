@@ -2,9 +2,10 @@
 
 ## Schedule ASAP
 
-- `.ToString()` or `GetDebuggerDisplay()` on records?
-- Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }`
-- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`.
+- synthesize equality operator on records? 
+- `.ToString()` or `GetDebuggerDisplay()` on records? (Julien)
+- Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }` (Julien)
+- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
 
 ## Schedule when convenient
 
