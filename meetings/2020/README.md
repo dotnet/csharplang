@@ -20,6 +20,8 @@
 
 ## Jul 27, 2020
 
+- [Equality operators (`==` and `!=`) in records](https://github.com/dotnet/csharplang/issues/3707#issuecomment-661800278) (Fred)
+
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
