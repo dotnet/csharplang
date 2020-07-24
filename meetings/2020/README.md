@@ -2,11 +2,6 @@
 
 ## Schedule ASAP
 
-- synthesize equality operator on records? 
-- `.ToString()` or `GetDebuggerDisplay()` on records? (Julien)
-- Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }` (Julien)
-- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
-
 ## Schedule when convenient
 
 ## Recurring topics
@@ -22,6 +17,9 @@
 ## Jul 27, 2020
 
 - [Equality operators (`==` and `!=`) in records](https://github.com/dotnet/csharplang/issues/3707#issuecomment-661800278) (Fred)
+- `.ToString()` or `GetDebuggerDisplay()` on records? (Julien)
+- Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }` (Julien)
+- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
 
 ## Jun 3, 2020
 
