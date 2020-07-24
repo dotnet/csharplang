@@ -27,9 +27,9 @@ See also https://github.com/dotnet/csharplang/issues/3117.
 ## Motivation
 [motivation]: #motivation
 
-There's a certain amount of boilerplate surrounding even the simplest of programs,
+There's a certain amount of boilerplate surrounding even the simplest of programs
 because of the need for an explicit `Main` method. This seems to get in the way of
-language learning and program clarity. The primary goal of the feature therefore is
+language learning and program clarity. The primary goal of the feature, therefore, is
 to allow C# programs without unnecessary boilerplate around them, for the sake of
 learners and the clarity of code.
 
@@ -68,7 +68,7 @@ Console.WriteLine(Fib(n).curr);
 ### Semantics
 
 If any top-level statements are present in any compilation unit of the program, the meaning is as if
-they were combined in the block body of a `Main` method of a `Program` class in the global namespace,
+they were combined in the block body of a `Main` method of a `Program` class in the global namespace
 as follows:
 
 ``` c#
@@ -81,15 +81,15 @@ static class Program
 }
 ```
 
-Note that the names "Program" and "Main" are used only for illustrations purposes, actual names used by
-compiler are implementation dependent and neither the type, nor the method can be referenced by name from
+Note that the names "Program" and "Main" are used only for illustration purposes, actual names used by the
+compiler are implementation-dependent and neither the type, nor the method can be referenced by name from
 source code.
 
 The method is designated as the entry point of the program. Explicitly declared methods that by convention 
-could be considered as an entry point candidates are ignored. A warning is reported when that happens. It is
-an error to specify `-main:<type>` compiler switch when there are top-level statements.
+could be considered as entry point candidates are ignored. A warning is reported when that happens. It is
+an error to specify the `-main:<type>` compiler switch when there are top-level statements.
 
-The entry point method always has one formal parameter, ```string[] args```. The execution environment creates and passes a ```string[]``` argument containing the command-line arguments that were specified when the application was started. The ```string[]``` argument is never null, but it may have a length of zero if no command-line arguments were specified. The ‘args’ parameter is in scope  within top-level statements and is not in scope outside of them. Regular name conflict/shadowing rules apply.
+The entry point method always has one formal parameter; ```string[] args```. The execution environment creates and passes a ```string[]``` argument containing the command-line arguments that were specified when the application was started. The ```string[]``` argument is never null, but it may have a length of zero if no command-line arguments were specified. The ‘args’ parameter is in scope  within top-level statements and is not in scope outside of them. Regular name conflict/shadowing rules apply.
 
 Async operations are allowed in top-level statements to the degree they are allowed in statements within
 a regular async entry point method. However, they are not required, if `await` expressions and other async
@@ -102,7 +102,7 @@ statements as follows:
 **Present** | ```static Task<int> Main(string[] args)```| ```static Task Main(string[] args)```
 **Absent**  | ```static int Main(string[] args)``` | ```static void Main(string[] args)```
 
-The example above would yield the following `$Main` method declaration:
+The example above would yield the following `$Main` method declaration;
 
 ``` c#
 static class $Program
@@ -124,7 +124,7 @@ static class $Program
 }
 ```
 
-At the same time an example like this:
+At the same time, an example like this;
 ``` c#
 await System.Threading.Tasks.Task.Delay(1000);
 System.Console.WriteLine("Hi!");
@@ -142,7 +142,7 @@ static class $Program
 }
 ```
 
-An example like this:
+An example like this;
 ``` c#
 await System.Threading.Tasks.Task.Delay(1000);
 System.Console.WriteLine("Hi!");
@@ -162,7 +162,7 @@ static class $Program
 }
 ```
 
-And an example like this:
+And, an example like this;
 ``` c#
 System.Console.WriteLine("Hi!");
 return 2;
@@ -183,7 +183,7 @@ static class $Program
 ### Scope of top-level local variables and local functions
 
 Even though top-level local variables and functions are "wrapped" 
-into the generated entry point method, they should still be in scope throughout the program in
+into the generated entry point method, they should still be in-scope throughout the program in
 every compilation unit.
 For the purpose of simple-name evaluation, once the global namespace is reached:
 - First, an attempt is made to evaluate the name within the generated entry point method and 
