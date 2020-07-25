@@ -21,6 +21,7 @@
 - `.ToString()` or `GetDebuggerDisplay()` on records? (Julien)
 - Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }` (Julien)
 - nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
+- Restore W-warning to `T t = default;` for generic `T`, now you can write `T?`? (Julien) 
 
 ## Jun 3, 2020
 
