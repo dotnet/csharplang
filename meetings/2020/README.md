@@ -2,6 +2,9 @@
 
 ## Schedule ASAP
 
+- Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }` (Julien)
+- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
+
 ## Schedule when convenient
 
 - How can we improve the capture of unfinished business, both in terms of making sure the LDM comes back to remaining open issues, and in terms of keeping the feature specs in sync with LDM decisions?
@@ -21,8 +24,6 @@
 - [Improved nullable analysis in constructors](https://github.com/RikkiGibson/csharplang/blob/nullable-ctor/proposals/nullable-constructor-analysis.md) (Rikki)
 - [Equality operators (`==` and `!=`) in records](https://github.com/dotnet/csharplang/issues/3707#issuecomment-661800278) (Fred)
 - `.ToString()` or `GetDebuggerDisplay()` on records? (Julien)
-- Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }` (Julien)
-- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
 - Restore W-warning to `T t = default;` for generic `T`, now you can write `T?`? (Julien) 
 
 ## Jun 3, 2020
