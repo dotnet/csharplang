@@ -4,6 +4,7 @@
 
 - Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }` (Julien)
 - nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
+- Allow mixed declaration and assignment in deconstruction (Julien, community [PR](https://github.com/dotnet/roslyn/pull/44476))
 
 ## Schedule when convenient
 
