@@ -20,13 +20,6 @@
 
 ## Aug 24, 2020
 
-## Jul 27, 2020
-
-- [Improved nullable analysis in constructors](https://github.com/RikkiGibson/csharplang/blob/nullable-ctor/proposals/nullable-constructor-analysis.md) (Rikki)
-- [Equality operators (`==` and `!=`) in records](https://github.com/dotnet/csharplang/issues/3707#issuecomment-661800278) (Fred)
-- `.ToString()` or `GetDebuggerDisplay()` on records? (Julien)
-- Restore W-warning to `T t = default;` for generic `T`, now you can write `T?`? (Julien) 
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -60,7 +53,14 @@
 
 Overview of meetings and agendas for 2020
 
-## Jul 20, 2020
+## Jul 27, 2020
+
+[C# Language Design Notes for July 27th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-07-27.md)
+
+- [Improved nullable analysis in constructors](https://github.com/RikkiGibson/csharplang/blob/nullable-ctor/proposals/nullable-constructor-analysis.md) (Rikki)
+- [Equality operators (`==` and `!=`) in records](https://github.com/dotnet/csharplang/issues/3707#issuecomment-661800278) (Fred)
+- `.ToString()` or `GetDebuggerDisplay()` on records? (Julien)
+- Restore W-warning to `T t = default;` for generic `T`, now you can write `T?`? (Julien) 
 
 ## Jul 20, 2020
 
