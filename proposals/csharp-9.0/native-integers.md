@@ -189,7 +189,7 @@ Compound assignment operations `x op= y` where `x` or `y` are native ints follow
 Specifically the expression is bound as `x = (T)(x op y)` where `T` is the type of `x` and where `x` is only evaluated once.
 
 The shift operators should mask the number of bits to shift - to 5 bits if `sizeof(nint)` is 4, and to 6 bits if `sizeof(nint)` is 8.
-(see [shift operators](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#shift-operators) in C# spec).
+(see [shift operators](../../spec/expressions.md#shift-operators) in C# spec).
 
 ### Dynamic
 
