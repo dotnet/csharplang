@@ -142,7 +142,7 @@ funcptr_return_modifier
 
 If no `calling_convention_specifier` is provided, the default is `managed`. The precise metadata encoding
 of the `calling_convention_specifier` and what `identifier`s are valid in the `unmanaged_calling_convention` is
-covered in [Metadata Representation of Calling Conventions](#Metadata-Representation-of-Calling-Conventions).
+covered in [Metadata Representation of Calling Conventions](#metadata-representation-of-calling-conventions).
 
 ``` csharp
 delegate int Func1(string s);
