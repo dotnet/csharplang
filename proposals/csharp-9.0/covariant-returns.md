@@ -42,7 +42,7 @@ This is a first draft, so it was necessarily invented from scratch.  Many of the
 
 ### Class Method Override
 
-The [existing constraint on class override](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#override-methods) methods
+The [existing constraint on class override](../../spec/classes.md#override-methods) methods
 
 > - The override method and the overridden base method have the same return type.
 
@@ -53,19 +53,19 @@ is modified to
 And the following additional requirements are appended to that list:
 
 > - The override method must have have a return type that is convertible by an identity or implicit reference conversion to the return type of every override of the overridden base method that is declared in a (direct or indirect) base type of the override method.
-> - The override method's return type must be at least as accessible as the override method  ([Accessibility domains](https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#accessibility-domains)).
+> - The override method's return type must be at least as accessible as the override method  ([Accessibility domains](../../spec/basic-concepts.md#accessibility-domains)).
 
 This constraint permits an override method in a `private` class to have a `private` return type.  However it requires a `public` override method in a `public` type to have a `public` return type.
 
 ### Class Property and Indexer Override
 
-The [existing constraint on class override](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#virtual-sealed-override-and-abstract-property-accessors) properties
+The [existing constraint on class override](../../spec/classes.md#virtual-sealed-override-and-abstract-property-accessors) properties
 
 > An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion ~~between the type of the overriding and the inherited property~~. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors.
 
 is modified to
 
-> An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion **or (if the inherited property is read-only) implicit reference conversion from the type of the overriding property to the type of the inherited property**. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors. **The overriding property's type must be at least as accessible as the overriding property ([Accessibility domains](https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#accessibility-domains)).**
+> An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion **or (if the inherited property is read-only) implicit reference conversion from the type of the overriding property to the type of the inherited property**. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors. **The overriding property's type must be at least as accessible as the overriding property ([Accessibility domains](../../spec/basic-concepts.md#accessibility-domains)).**
 
 ***The remainder of the draft specification below proposes a further extension to covariant returns of interface methods to be considered later.***
 
