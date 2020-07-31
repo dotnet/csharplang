@@ -229,7 +229,7 @@ The method can be declared explicitly. It is an error if the explicit declaratio
 
 The synthesized method:
 1. creates a `StringBuilder` instance,
-2. appends the record named to the builder, followed by " { ",
+2. appends the record name to the builder, followed by " { ",
 3. invokes the record's "PrintMembers" method giving it the builder, 'includeSeparator` as false,
 4. appends " }",
 3. returns the builder's contents with `builder.ToString()`.
