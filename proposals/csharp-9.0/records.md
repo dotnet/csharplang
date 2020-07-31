@@ -225,7 +225,7 @@ The record includes a synthesized method equivalent to a method declared as foll
 public override string ToString();
 ```
 
-The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared method doesn't override a property with this signature in the record `Base` (for example, if the method is missing in the `Base`, or sealed, or not virtual, etc.).
+The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`. It is an error if the method doesn't override a method with this signature in the record `Base` (for example, if the method is missing in the `Base`, or sealed, or not virtual, etc.).
 
 The synthesized method:
 1. creates a `StringBuilder` instance,
