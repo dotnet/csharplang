@@ -26,6 +26,8 @@ record_body
 
 Record types are reference types, similar to a class declaration. It is an error for a record to provide
 a `record_base` `argument_list` if the `record_declaration` does not contain a `parameter_list`.
+At most one partial type declaration of a partial record may provide a `parameter_list`.
+It is an error for a `parameter_list` to be empty.
 
 Record parameters cannot use `ref`, `out` or `this` modifiers (but `in` and `params` are allowed).
 
@@ -60,8 +62,6 @@ protected override Type EqualityContract { get; };
 
 The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared property doesn't override a property with this signature in the record type `Base` (for example, if the property is missing in the `Base`, or sealed, or not virtual, etc.).
 The synthesized property returns `typeof(R)` where `R` is the record type.
-
-_Can we omit `EqualityContract` if the record type is `sealed` and derives from `System.Object`?_
 
 The record type implements `System.IEquatable<R>` and includes a synthesized strongly-typed overload of `Equals(R? other)` where `R` is the record type.
 The method is `public`, and the method is `virtual` unless the record type is `sealed`.
@@ -270,6 +270,7 @@ member_initializer
     : identifier '=' expression
     ;
 ```
+A `with` expression is not permitted as a statement.
 
 A `with` expression allows for "non-destructive mutation", designed to
 produce a copy of the receiver expression with modifications in assignments
