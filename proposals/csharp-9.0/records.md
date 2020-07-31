@@ -112,11 +112,11 @@ record R2(T1 P1, T2 P2) : R1(P1);
 record R2(T1 P1, T2 P2, T3 P3) : R2(P1, P2);
 ```
 
-For those record types, the synthesized members would be something like:
+For those record types, the synthesized equality members would be something like:
 ```C#
 class R1 : IEquatable<R1>
 {
-    public T1 P1 { get; set; }
+    public T1 P1 { get; init; }
     protected virtual Type EqualityContract => typeof(R1);
     public override bool Equals(object? obj) => Equals(obj as R1);
     public virtual bool Equals(R1? other)
@@ -134,7 +134,7 @@ class R1 : IEquatable<R1>
 
 class R2 : R1, IEquatable<R2>
 {
-    public T2 P2 { get; set; }
+    public T2 P2 { get; init; }
     protected override Type EqualityContract => typeof(R2);
     public override bool Equals(object? obj) => Equals(obj as R2);
     public sealed override bool Equals(R1? other) => Equals((object?)other);
@@ -152,7 +152,7 @@ class R2 : R1, IEquatable<R2>
 
 class R3 : R2, IEquatable<R3>
 {
-    public T3 P3 { get; set; }
+    public T3 P3 { get; init; }
     protected override Type EqualityContract => typeof(R3);
     public override bool Equals(object? obj) => Equals(obj as R3);
     public sealed override bool Equals(R2? other) => Equals((object?)other);
@@ -196,6 +196,130 @@ is the containing type and the method is virtual, unless the record is sealed or
 If the containing record is abstract, the synthesized clone method is also abstract.
 If the "clone" method is not abstract, it returns the result of a call to a copy constructor. 
 
+
+### Printing members: PrintMembers and ToString
+
+If the record is derived from `object`, the record includes a synthesized method equivalent to a method declared as follows:
+```C#
+protected virtual void PrintMembers(System.StringBuilder builder, bool includeSeparator, bool includeName);
+```
+The method is `virtual` and `protected`.
+It is an error if the method is declared explicitly.
+
+The method:
+1. appends the record name to `builder` followed by " { ", if `includeName` is true
+2. appends a separator ", " to `builder` if `includeSeparator` is true and the record has public fields or properties,
+3. for each of the record's public field and property member, appends that member's name followed by " = " followed by the result of invoking `object.ToString()` on that member's value: `this.member.ToString()`, separated with ", ",
+4. appends " }" if `includeName` is true
+
+If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a method declared as follows:
+```C#
+protected override void PrintMembers(StringBuilder builder, bool includeSeparator, bool includeName);
+```
+It is an error if the override is declared explicitly.
+
+The method appends the same contents to `builder` as described above, but calls `base.PrintMembers` between steps 3 and 4 with three arguments:
+1. its `builder` parameter,
+2. a true `includeSeparator` argument if either (a) the record has public fields or properties, or (b) its `includeSeparator` parameter was given as true,
+3. a false `includeName` argument.
+
+The record includes a synthesized method equivalent to a method declared as follows:
+```C#
+public override string ToString();
+```
+
+The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared method doesn't override a property with this signature in the record `Base` (for example, if the method is missing in the `Base`, or sealed, or not virtual, etc.).
+
+The synthesized method:
+1. creates a `StringBuilder` instance,
+2. invokes the record's "PrintMembers" method giving it the builder, `includeSeparator` as false, and `includeName` as true
+3. returns the builder's contents with `builder.ToString()`.
+
+For example, consider the following record types:
+
+``` csharp
+record R1(T1 P1);
+record R2(T1 P1, T2 P2, T3 P3) : R1(P1);
+```
+
+For those record types, the synthesized printing members would be something like:
+
+```C#
+class R1
+{
+    public T1 P1 { get; init; }
+    
+    protected virtual PrintMembers(StringBuilder builder, bool includeSeparator, bool includeName)
+    {
+        if (includeName)
+        {
+            builder.Append(nameof(R1));
+            builder.Append(" { ");
+        }
+        
+        if (includeSeparator)
+            builder.Append(", ");
+            
+        builder.Append(nameof(P1));
+        builder.Append(" = ");
+        builder.Append(this.P1.ToString());
+        
+        if (includeName)
+        {
+            builder.Append(" }");
+        }
+    }
+    
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+        PrintMembers(builder, includeSeparator: false, includeName: true);
+        return builder.ToString();
+    }
+}
+
+class R2 : R1
+{
+    public T2 P2 { get; init; }
+    public T3 P3 { get; init; }
+    
+    protected virtual PrintMembers(StringBuilder builder, bool includeSeparator, bool includeName)
+    {
+        if (includeName)
+        {
+            builder.Append(nameof(R1));
+            builder.Append(" { ");
+        }
+        
+        if (includeSeparator)
+            builder.Append(", ");
+            
+        builder.Append(nameof(P2));
+        builder.Append(" = ");
+        builder.Append(this.P2.ToString());
+        
+        builder.Append(", ");
+        
+        builder.Append(nameof(P3));
+        builder.Append(" = ");
+        builder.Append(this.P3.ToString());
+        
+        base.PrintMembers(builder, includeSeparator: true, includeName: false)
+        
+        if (includeName)
+        {
+            builder.Append(" }");
+        }
+    }
+    
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+        PrintMembers(builder, includeSeparator: false, includeName: true);
+        return builder.ToString();
+    }
+}
+```
 
 ## Positional record members
 
