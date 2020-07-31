@@ -208,7 +208,7 @@ It is an error if the method is declared explicitly.
 
 The method:
 1. appends a separator ", " to `builder` if `includeSeparator` is true and the record has public fields or properties,
-2. for each of the record's public field and property member, appends that member's name followed by " = " followed by the result of invoking `object.ToString()` on that member's value: `this.member.ToString()`, separated with ", ",
+2. for each of the record's public field and property members, appends that member's name followed by " = " followed by the result of invoking `object.ToString()` on that member's value: `this.member.ToString()`, separated with ", ",
 
 If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a method declared as follows:
 ```C#
