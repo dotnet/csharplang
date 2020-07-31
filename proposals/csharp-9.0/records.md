@@ -197,26 +197,24 @@ If the containing record is abstract, the synthesized clone method is also abstr
 If the "clone" method is not abstract, it returns the result of a call to a copy constructor. 
 
 
-### Printing members: PrintMembers and ToString
+### Printing members: print and ToString methods
 
-If the record is derived from `object`, the record includes a synthesized method equivalent to a method declared as follows:
+If the record is derived from `object`, the record includes a synthesized "print" method equivalent to a method declared as follows, but with a compiler-reserved name:
 ```C#
-protected virtual void PrintMembers(System.StringBuilder builder, bool includeSeparator);
+void print(System.StringBuilder builder, bool includeSeparator);
 ```
-The method is `virtual` and `protected`.
-It is an error if the method is declared explicitly.
+The property is `private` if the record type is `sealed`. Otherwise, the property is `virtual` and `protected`.
 
 The method:
 1. appends a separator ", " to `builder` if `includeSeparator` is true and the record has public fields or properties,
-2. for each of the record's public field and property members, appends that member's name followed by " = " followed by the result of invoking `object.ToString()` on that member's value: `this.member.ToString()`, separated with ", ",
+2. for each of the record's public field and property members, appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
 
-If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a method declared as follows:
+If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a "print" method declared as follows:
 ```C#
-protected override void PrintMembers(StringBuilder builder, bool includeSeparator);
+protected override void print(StringBuilder builder, bool includeSeparator);
 ```
-It is an error if the override is declared explicitly.
 
-The method appends the same contents to `builder` as described above, but also then calls `base.PrintMembers` with two arguments:
+The method appends the same contents to `builder` as described above, but also then calls the base "print" method with two arguments:
 1. its `builder` parameter,
 2. a true `includeSeparator` argument if either (a) the record has public fields or properties, or (b) its `includeSeparator` parameter was given as true.
 
@@ -230,7 +228,7 @@ The method can be declared explicitly. It is an error if the explicit declaratio
 The synthesized method:
 1. creates a `StringBuilder` instance,
 2. appends the record name to the builder, followed by " { ",
-3. invokes the record's "PrintMembers" method giving it the builder, 'includeSeparator` as false,
+3. invokes the record's "print" method giving it the builder, 'includeSeparator` as false,
 4. appends " }",
 3. returns the builder's contents with `builder.ToString()`.
 
@@ -307,7 +305,6 @@ class R2 : R1, IEquatable<R2>
     }
 }
 ```
-
 
 ## Positional record members
 
