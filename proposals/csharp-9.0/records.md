@@ -253,7 +253,7 @@ class R1 : IEquatable<R1>
             
         builder.Append(nameof(P1));
         builder.Append(" = ");
-        builder.Append(this.P1.ToString());
+        builder.Append(this.P1);
     }
     
     public override string ToString()
@@ -281,13 +281,13 @@ class R2 : R1, IEquatable<R2>
             
         builder.Append(nameof(P2));
         builder.Append(" = ");
-        builder.Append(this.P2.ToString());
+        builder.Append(this.P2);
         
         builder.Append(", ");
         
         builder.Append(nameof(P3));
         builder.Append(" = ");
-        builder.Append(this.P3.ToString());
+        builder.Append(this.P3);
         
         base.PrintMembers(builder, includeSeparator: true)
     }
