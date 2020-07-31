@@ -33,7 +33,7 @@ Record parameters cannot use `ref`, `out` or `this` modifiers (but `in` and `par
 
 ## Inheritance
 
-Records cannot inherit from classes, unless the class is `object`, and classes cannot inherit from records.
+Records cannot inherit from classes, unless the class is `object`, and classes cannot inherit from records. Records can inherit from other records.
 
 ## Members of a record type
 
@@ -76,6 +76,15 @@ The synthesized `Equals(R?)` returns `true` if and only if each of the following
 - If there is a base record type, the value of `base.Equals(other)` (a non-virtual call to `public virtual bool Equals(Base? other)`); otherwise
 the value of `EqualityContract == other.EqualityContract`.
 
+The record type includes synthesized `==` and `!=` operators equivalent to operators declared as follows:
+```C#
+pubic static bool operator==(R? r1, R? r2)
+    => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
+public static bool operator!=(R? r1, R? r2)
+    => !(r1 == r2);
+```
+The `Equals` method called by the `==` operator is the `Equals(R? other)` method specified above. The `!=` operator delegates to the `==` operator. It is an error if the operators are declared explicitly.
+    
 If the record type is derived from a base record type `Base`, the record type includes a synthesized override equivalent to a method declared as follows:
 ```C#
 public sealed override bool Equals(Base? other);
@@ -109,7 +118,7 @@ For example, consider the following record types:
 ```C#
 record R1(T1 P1);
 record R2(T1 P1, T2 P2) : R1(P1);
-record R2(T1 P1, T2 P2, T3 P3) : R2(P1, P2);
+record R3(T1 P1, T2 P2, T3 P3) : R2(P1, P2);
 ```
 
 For those record types, the synthesized members would be something like:
@@ -125,6 +134,10 @@ class R1 : IEquatable<R1>
             EqualityContract == other.EqualityContract &&
             EqualityComparer<T1>.Default.Equals(P1, other.P1);
     }
+    pubic static bool operator==(R1? r1, R1? r2)
+        => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
+    public static bool operator!=(R1? r1, R1? r2)
+        => !(r1 == r2);    
     public override int GetHashCode()
     {
         return Combine(EqualityComparer<Type>.Default.GetHashCode(EqualityContract),
@@ -143,6 +156,10 @@ class R2 : R1, IEquatable<R2>
         return base.Equals((R1?)other) &&
             EqualityComparer<T2>.Default.Equals(P2, other.P2);
     }
+    pubic static bool operator==(R2? r1, R2? r2)
+        => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
+    public static bool operator!=(R2? r1, R2? r2)
+        => !(r1 == r2)`;    
     public override int GetHashCode()
     {
         return Combine(base.GetHashCode(),
@@ -161,6 +178,10 @@ class R3 : R2, IEquatable<R3>
         return base.Equals((R2?)other) &&
             EqualityComparer<T3>.Default.Equals(P3, other.P3);
     }
+    pubic static bool operator==(R3? r1, R3? r2)
+        => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
+    public static bool operator!=(R3? r1, R3? r2)
+        => !(r1 == r2);    
     public override int GetHashCode()
     {
         return Combine(base.GetHashCode(),
