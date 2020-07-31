@@ -291,7 +291,7 @@ class R2 : R1, IEquatable<R2>
         builder.Append(" = ");
         builder.Append(this.P3.ToString());
         
-        base.PrintMembers(builder, includeSeparator: true, includeName: false)
+        base.PrintMembers(builder, includeSeparator: true)
     }
     
     public override string ToString()
