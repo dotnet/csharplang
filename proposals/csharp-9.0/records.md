@@ -159,7 +159,7 @@ class R2 : R1, IEquatable<R2>
     pubic static bool operator==(R2? r1, R2? r2)
         => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
     public static bool operator!=(R2? r1, R2? r2)
-        => !(r1 == r2)`;    
+        => !(r1 == r2);    
     public override int GetHashCode()
     {
         return Combine(base.GetHashCode(),
