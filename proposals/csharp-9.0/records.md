@@ -201,34 +201,38 @@ If the "clone" method is not abstract, it returns the result of a call to a copy
 
 If the record is derived from `object`, the record includes a synthesized "print" method equivalent to a method declared as follows, but with a compiler-reserved name:
 ```C#
-void print(System.StringBuilder builder, bool includeSeparator);
+bool print(System.StringBuilder builder);
 ```
-The property is `private` if the record type is `sealed`. Otherwise, the property is `virtual` and `protected`.
+The method is `private` if the record type is `sealed`. Otherwise, the method is `virtual` and `protected`.
 
 The method:
-1. appends a separator ", " to `builder` if `includeSeparator` is true and the record has public fields or properties,
-2. for each of the record's public field and property members, appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+1. for each of the record's printable members (public field and property members), appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+2. return true if the record has printable members.
 
 If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a "print" method declared as follows:
 ```C#
-protected override void print(StringBuilder builder, bool includeSeparator);
+protected override bool print(StringBuilder builder);
 ```
 
-The method appends the same contents to `builder` as described above, but also then calls the base "print" method with two arguments:
-1. its `builder` parameter,
-2. a true `includeSeparator` argument if either (a) the record has public fields or properties, or (b) its `includeSeparator` parameter was given as true.
+If the record has no printable members, the method calls the base "print" method with one argument (its `builder` parameter) and returns the result.
+
+Otherwise, the method:
+1. calls the base "print" method with one argument (its `builder` parameter),
+2. if the "print" method returned true, append ", " to the builder,
+3. for each of the record's printable members, appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+4. return true.
 
 The record includes a synthesized method equivalent to a method declared as follows:
 ```C#
 public override string ToString();
 ```
 
-The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`. It is an error if the method doesn't override a method with this signature in the record `Base` (for example, if the method is missing in the `Base`, or sealed, or not virtual, etc.).
+The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared method doesn't override `object.ToString()` (for example, due to shadowing in intermediate base types, etc.).
 
 The synthesized method:
 1. creates a `StringBuilder` instance,
 2. appends the record name to the builder, followed by " { ",
-3. invokes the record's "print" method giving it the builder, 'includeSeparator` as false,
+3. invokes the record's "print" method giving it the builder,
 4. appends " }",
 3. returns the builder's contents with `builder.ToString()`.
 
@@ -246,14 +250,13 @@ class R1 : IEquatable<R1>
 {
     public T1 P1 { get; init; }
     
-    protected virtual void PrintMembers(StringBuilder builder, bool includeSeparator)
+    protected virtual bool print(StringBuilder builder)
     {
-        if (includeSeparator)
-            builder.Append(", ");
-            
         builder.Append(nameof(P1));
         builder.Append(" = ");
         builder.Append(this.P1);
+        
+        return true;
     }
     
     public override string ToString()
@@ -262,7 +265,7 @@ class R1 : IEquatable<R1>
         builder.Append(nameof(R1));
         builder.Append(" { ");
 
-        PrintMembers(builder, includeSeparator: false);
+        print(builder);
 
         builder.Append(" }");
         return builder.ToString();
@@ -274,9 +277,9 @@ class R2 : R1, IEquatable<R2>
     public T2 P2 { get; init; }
     public T3 P3 { get; init; }
     
-    protected override void PrintMembers(StringBuilder builder, bool includeSeparator)
+    protected override void print(StringBuilder builder)
     {
-        if (includeSeparator)
+        if (base.print(builder))
             builder.Append(", ");
             
         builder.Append(nameof(P2));
@@ -289,7 +292,7 @@ class R2 : R1, IEquatable<R2>
         builder.Append(" = ");
         builder.Append(this.P3);
         
-        base.PrintMembers(builder, includeSeparator: true)
+        return true;
     }
     
     public override string ToString()
@@ -298,7 +301,7 @@ class R2 : R1, IEquatable<R2>
         builder.Append(nameof(R2));
         builder.Append(" { ");
 
-        PrintMembers(builder, includeSeparator: false);
+        print(builder);
 
         builder.Append(" }");
         return builder.ToString();
