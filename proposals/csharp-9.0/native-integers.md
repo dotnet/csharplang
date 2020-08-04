@@ -303,19 +303,12 @@ namespace System.Runtime.CompilerServices
         {
             TransformFlags = flags;
         }
-        public IList<bool> TransformFlags { get; }
+        public readonly bool[] TransformFlags;
     }
 }
 ```
 
-The encoding uses the approach as used to encode `DynamicAttribute`, although obviously `DynamicAttribute` is encoding which types within the type reference are `dynamic` rather than which types are native ints.
-If the encoding results in an array of `false` values, no `NativeIntegerAttribute` is needed.
-The parameterless `NativeIntegerAttribute` constructor generates an encoding with a single `true` value.
-
-```C#
-nuint A;                    // [NativeInteger] UIntPtr A
-(Stream, nint) B;           // [NativeInteger(new[] { false, false, true })] ValueType<Stream, IntPtr> B
-```
+The encoding of type references with `NativeIntegerAttribute` is covered in [NativeIntegerAttribute.md](https://github.com/dotnet/roslyn/blob/master/docs/features/NativeIntegerAttribute.md).
 
 ## Alternatives
 [alternatives]: #alternatives
