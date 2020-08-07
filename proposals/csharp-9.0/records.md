@@ -53,19 +53,19 @@ If the record is derived from `object`, the record type includes a synthesized r
 Type EqualityContract { get; };
 ```
 The property is `private` if the record type is `sealed`. Otherwise, the property is `virtual` and `protected`.
-The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`.
+The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`.
 
 If the record type is derived from a base record type `Base`, the record type includes a synthesized readonly property equivalent to a property declared as follows:
 ```C#
 protected override Type EqualityContract { get; };
 ```
 
-The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared property doesn't override a property with this signature in the record type `Base` (for example, if the property is missing in the `Base`, or sealed, or not virtual, etc.).
+The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared property doesn't override a property with this signature in the record type `Base` (for example, if the property is missing in the `Base`, or sealed, or not virtual, etc.).
 The synthesized property returns `typeof(R)` where `R` is the record type.
 
 The record type implements `System.IEquatable<R>` and includes a synthesized strongly-typed overload of `Equals(R? other)` where `R` is the record type.
 The method is `public`, and the method is `virtual` unless the record type is `sealed`.
-The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`.
+The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`.
 ```C#
 public virtual bool Equals(R? other);
 ```
@@ -104,7 +104,7 @@ The record type includes a synthesized override equivalent to a method declared 
 public override int GetHashCode();
 ```
 The method can be declared explicitly.
-It is an error if the explicit declaration doesn't allow overiding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared method doesn't override `object.GetHashCode()` (for example, due to shadowing in intermediate base types, etc.).
+It is an error if the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared method doesn't override `object.GetHashCode()` (for example, due to shadowing in intermediate base types, etc.).
  
 A warning is reported if one of `Equals(R?)` and `GetHashCode()` is explicitly declared but the other method is not explicit.
 
@@ -121,11 +121,11 @@ record R2(T1 P1, T2 P2) : R1(P1);
 record R3(T1 P1, T2 P2, T3 P3) : R2(P1, P2);
 ```
 
-For those record types, the synthesized members would be something like:
+For those record types, the synthesized equality members would be something like:
 ```C#
 class R1 : IEquatable<R1>
 {
-    public T1 P1 { get; set; }
+    public T1 P1 { get; init; }
     protected virtual Type EqualityContract => typeof(R1);
     public override bool Equals(object? obj) => Equals(obj as R1);
     public virtual bool Equals(R1? other)
@@ -147,7 +147,7 @@ class R1 : IEquatable<R1>
 
 class R2 : R1, IEquatable<R2>
 {
-    public T2 P2 { get; set; }
+    public T2 P2 { get; init; }
     protected override Type EqualityContract => typeof(R2);
     public override bool Equals(object? obj) => Equals(obj as R2);
     public sealed override bool Equals(R1? other) => Equals((object?)other);
@@ -169,7 +169,7 @@ class R2 : R1, IEquatable<R2>
 
 class R3 : R2, IEquatable<R3>
 {
-    public T3 P3 { get; set; }
+    public T3 P3 { get; init; }
     protected override Type EqualityContract => typeof(R3);
     public override bool Equals(object? obj) => Equals(obj as R3);
     public sealed override bool Equals(R2? other) => Equals((object?)other);
@@ -217,6 +217,121 @@ is the containing type and the method is virtual, unless the record is sealed or
 If the containing record is abstract, the synthesized clone method is also abstract.
 If the "clone" method is not abstract, it returns the result of a call to a copy constructor. 
 
+
+### Printing members: PrintMembers and ToString methods
+
+If the record is derived from `object`, the record includes a synthesized method equivalent to a method declared as follows:
+```C#
+bool PrintMembers(System.StringBuilder builder);
+```
+The method is `private` if the record type is `sealed`. Otherwise, the method is `virtual` and `protected`.
+
+The method:
+1. for each of the record's printable members (public field and property members), appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+2. return true if the record has printable members.
+
+If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a method declared as follows:
+```C#
+protected override bool PrintMembers(StringBuilder builder);
+```
+
+If the record has no printable members, the method calls the base `PrintMembers` method with one argument (its `builder` parameter) and returns the result.
+
+Otherwise, the method:
+1. calls the base `PrintMembers` method with one argument (its `builder` parameter),
+2. if the `PrintMembers` method returned true, append ", " to the builder,
+3. for each of the record's printable members, appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+4. return true.
+
+The `PrintMembers` method can be declared explicitly.
+It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`.
+
+The record includes a synthesized method equivalent to a method declared as follows:
+```C#
+public override string ToString();
+```
+
+The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared method doesn't override `object.ToString()` (for example, due to shadowing in intermediate base types, etc.).
+
+The synthesized method:
+1. creates a `StringBuilder` instance,
+2. appends the record name to the builder, followed by " { ",
+3. invokes the record's `PrintMembers` method giving it the builder,
+4. appends " }",
+3. returns the builder's contents with `builder.ToString()`.
+
+For example, consider the following record types:
+
+``` csharp
+record R1(T1 P1);
+record R2(T1 P1, T2 P2, T3 P3) : R1(P1);
+```
+
+For those record types, the synthesized printing members would be something like:
+
+```C#
+class R1 : IEquatable<R1>
+{
+    public T1 P1 { get; init; }
+    
+    protected virtual bool PrintMembers(StringBuilder builder)
+    {
+        builder.Append(nameof(P1));
+        builder.Append(" = ");
+        builder.Append(this.P1);
+        
+        return true;
+    }
+    
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+        builder.Append(nameof(R1));
+        builder.Append(" { ");
+
+        PrintMembers(builder);
+
+        builder.Append(" }");
+        return builder.ToString();
+    }
+}
+
+class R2 : R1, IEquatable<R2>
+{
+    public T2 P2 { get; init; }
+    public T3 P3 { get; init; }
+    
+    protected override void PrintMembers(StringBuilder builder)
+    {
+        if (base.PrintMembers(builder))
+            builder.Append(", ");
+            
+        builder.Append(nameof(P2));
+        builder.Append(" = ");
+        builder.Append(this.P2);
+        
+        builder.Append(", ");
+        
+        builder.Append(nameof(P3));
+        builder.Append(" = ");
+        builder.Append(this.P3);
+        
+        return true;
+    }
+    
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+        builder.Append(nameof(R2));
+        builder.Append(" { ");
+
+        PrintMembers(builder);
+
+        builder.Append(" }");
+        return builder.ToString();
+    }
+}
+```
 
 ## Positional record members
 
