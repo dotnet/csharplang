@@ -56,6 +56,8 @@ Some requirements are imposed on the method targeted with this attribute:
     
 When one or more valid methods with this attribute are found in a compilation, the compiler will emit a module initializer which calls each of the attributed methods. The calls will be emitted in a reserved, but deterministic order.
 
+No custom attribute will be emitted when ModuleInitializerAttribute is applied to a method. This is consistent with how other compiler-recognized attributes are consumed, such as IndexerNameAttribute or MethodImplAttribute. The attribute has no meaning to the runtime. Its presence in metadata isn't even a canonical way to answer the question, "Is this method called by the module initializer?" which would depend on the compiler and version used to create the metadata.
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 
