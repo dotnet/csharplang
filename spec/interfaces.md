@@ -1,4 +1,4 @@
-﻿# Interfaces
+﻿# Interfaces - C# specifications
 
 An interface defines a contract. A class or struct that implements an interface must adhere to its contract. An interface may inherit from multiple base interfaces, and a class or struct may implement multiple interfaces.
 
