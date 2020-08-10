@@ -1,4 +1,4 @@
-﻿# Delegates - C# specifications
+# Delegates - C# specification
 
 Delegates enable scenarios that other languages—such as C++, Pascal, and Modula -- have addressed with function pointers. Unlike C++ function pointers, however, delegates are fully object oriented, and unlike C++ pointers to member functions, delegates encapsulate both an object instance and a method.
 

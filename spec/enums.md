@@ -1,4 +1,4 @@
-﻿# Enums - C# specifications
+# Enums - C# specification
 
 An ***enum type*** is a distinct value type ([Value types](types.md#value-types)) that declares a set of named constants.
 

@@ -1,4 +1,4 @@
-﻿# Attributes - C# specifications
+# Attributes - C# specification
 
 Much of the C# language enables the programmer to specify declarative information about the entities defined in the program. For example, the accessibility of a method in a class is specified by decorating it with the *method_modifier*s `public`, `protected`, `internal`, and `private`.
 

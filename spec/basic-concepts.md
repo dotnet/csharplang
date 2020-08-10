@@ -1,4 +1,4 @@
-﻿# Basic concepts - C# specifications
+# Basic concepts - C# specification
 
 ## Application Startup
 

@@ -1,4 +1,4 @@
-﻿# Lexical structure - C# specifications
+# Lexical structure - C# specification
 
 ## Programs
 

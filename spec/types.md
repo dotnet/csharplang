@@ -1,4 +1,4 @@
-﻿# Types - C# specifications
+# Types - C# specification
 
 The types of the C# language are divided into two main categories: ***value types*** and ***reference types***. Both value types and reference types may be ***generic types***, which take one or more ***type parameters***. Type parameters can designate both value types and reference types.
 
@@ -660,4 +660,3 @@ Two things are important to make explicit:
     ```
 
     After executing this code,  `i1` and `i2` will both have the value `2`.
-

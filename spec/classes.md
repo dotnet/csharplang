@@ -1,4 +1,4 @@
-﻿# Classes - C# specifications
+# Classes - C# specification
 
 A class is a data structure that may contain data members (constants and fields), function members (methods, properties, events, indexers, operators, instance constructors, destructors and static constructors), and nested types. Class types support inheritance, a mechanism whereby a derived class can extend and specialize a base class.
 
