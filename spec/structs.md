@@ -1,4 +1,4 @@
-﻿# Structs
+﻿# Structs - C# specifications
 
 Structs are similar to classes in that they represent data structures that can contain data members and function members. However, unlike classes, structs are value types and do not require heap allocation. A variable of a struct type directly contains the data of the struct, whereas a variable of a class type contains a reference to the data, the latter known as an object.
 
