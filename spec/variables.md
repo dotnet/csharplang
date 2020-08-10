@@ -1,4 +1,4 @@
-﻿# Variables
+﻿# Variables - C# specifications
 
 Variables represent storage locations. Every variable has a type that determines what values can be stored in the variable. C# is a type-safe language, and the C# compiler guarantees that values stored in variables are always of the appropriate type. The value of a variable can be changed through assignment or through use of the `++` and `--` operators.
 
