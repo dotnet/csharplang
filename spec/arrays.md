@@ -1,4 +1,4 @@
-﻿# Arrays - C# specification
+﻿# Arrays - C# specifications
 
 An array is a data structure that contains a number of variables which are accessed through computed indices. The variables contained in an array, also called the elements of the array, are all of the same type, and this type is called the element type of the array.
 
