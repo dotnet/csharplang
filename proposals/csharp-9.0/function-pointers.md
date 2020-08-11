@@ -184,10 +184,7 @@ unsafe class Util {
         delegate*<void> ptr1 = &Util.Log;
 
         // Error: type "delegate*<void>" not compatible with "delegate*<int>";
-        delegate*<int> ptr2 = &Util.Log;
 
-        // Okay. Conversion to void* is always allowed.
-        void* v = &Util.Log;
    }
 }
 ```
