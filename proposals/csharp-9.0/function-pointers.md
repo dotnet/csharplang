@@ -115,6 +115,7 @@ unmanaged_calling_convention
     | 'Thiscall'
     | 'Fastcall'
     | identifier (',' identifier)*
+    ;
 
 funptr_parameter_list
     : (funcptr_parameter ',')*
