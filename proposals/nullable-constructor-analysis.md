@@ -50,7 +50,9 @@ We can address this by instead taking an approach similar to `[MemberNotNull]` a
 **A constructor on a reference type with no initializer** *or*  
 **A constructor on a reference type with a `: base(...)` initializer** has an initial nullable flow state determined by:
 - Initializing base type members to their declared state, since we expect the base constructor to initialize the base members.
-- Then initializing all applicable members in the type to the state given by assigning a `default` literal to the member. A member is applicable if it is instance and the constructor being analyzed is instance, or if the member is static and the constructor being analyzed is static. 
+- Then initializing all applicable members in the type to the state given by assigning a `default` literal to the member. A member is applicable if:
+  - It does not have oblivious nullability, *and*
+  - It is instance and the constructor being analyzed is instance, or the member is static and the constructor being analyzed is static.
   - We expect the `default` literal to yield a `NotNull` state for non-nullable value types, a `MaybeNull` state for reference types or nullable value types, and a `MaybeDefault` state for unconstrained generics.
 - Then visiting the initializers for the applicable members, updating the flow state accordingly.
   - This allows some non-nullable reference members to be initialized using a field/property initializer, and others to be initialized within the constructor.
