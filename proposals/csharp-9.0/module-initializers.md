@@ -2,7 +2,7 @@
 
 * [x] Proposed
 * [ ] Prototype: [In Progress](https://github.com/jnm2/roslyn/tree/module_initializer)
-* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/tree/features/module-initializers)
+* [ ] Implementation: In Progress
 * [ ] Specification: [Not Started]()
 
 ## Summary
