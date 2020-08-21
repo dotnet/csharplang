@@ -2,7 +2,7 @@
 
 * [x] Proposed
 * [ ] Prototype: [In Progress](https://github.com/jnm2/roslyn/tree/module_initializer)
-* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/tree/features/module-initializers)
+* [ ] Implementation: In Progress
 * [ ] Specification: [Not Started]()
 
 ## Summary
@@ -65,4 +65,4 @@ Why should we *not* do this?
 
 ## Design meetings
 
-### [April 8th, 2020](/meetings/2020/LDM-2020-04-08.md#module-initializers)
+### [April 8th, 2020](https://github.com/dotnet/csharplang/meetings/2020/LDM-2020-04-08.md#module-initializers)
