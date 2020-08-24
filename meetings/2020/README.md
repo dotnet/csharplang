@@ -26,20 +26,6 @@
 
 ## Sep 2, 2020
 
-## Aug 24, 2020
-
-- [`ToString` on records](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md#printing-members-printmembers-and-tostring-methods): 
-    - should we always print a trailing comma `R { Property1 = 42, Property2 = 43, }`?
-    - can we deal with stack overflow potential?
-    - should we try to quote/escape values, for example `R { IntProperty = 42, StringProperty = "hello" }`?
-    - should we omit `ToString` on abstract records?
-    - should `PrintMembers` call `ToString()` on values to avoid boxing them in `builder.Append((object)value)`?
-    - should we try and avoid the double space in empty record `R { }`?
-    - do we want to economize a call to `StringBuilder.Append` to print `<name> {` ?
-- warn on declaring type named "`record`" in C# 9?
-- Can we omit `EqualityContract` if the record type is sealed and derives from `System.Object`?
-- Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }`
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -72,6 +58,22 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Aug 24, 2020
+
+[C# Language Design Notes for August 24th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-08-24.md)
+
+- Warnings on types named `record`
+- `base` calls on parameterless `record`s
+- Omitting unnecessary synthesized `record` members
+- [`record` `ToString` behavior review](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md#printing-members-printmembers-and-tostring-methods)
+    - Behavior of trailing commas
+    - Handling stack overflows
+    - Should we omit the implementation of `ToString` on `abstract` records
+    - Should we call `ToString` prior to `StringBuilder.Append` on value types
+    - Should we try and avoid the double-space in an empty record
+    - Should we try and make the typename header print more economic
+- Reference equality short circuiting
 
 ## Jul 27, 2020
 
