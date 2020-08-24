@@ -240,7 +240,7 @@ If the record has no printable members, the method calls the base `PrintMembers`
 Otherwise, the method:
 1. calls the base `PrintMembers` method with one argument (its `builder` parameter),
 2. if the `PrintMembers` method returned true, append ", " to the builder,
-3. for each of the record's printable members, appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+3. for each of the record's printable members, appends that member's name followed by " = " followed by the member's value: `this.member` (or `this.member.ToString()` for value types), separated with ", ",
 4. return true.
 
 The `PrintMembers` method can be declared explicitly.
@@ -256,8 +256,8 @@ The method can be declared explicitly. It is an error if the explicit declaratio
 The synthesized method:
 1. creates a `StringBuilder` instance,
 2. appends the record name to the builder, followed by " { ",
-3. invokes the record's `PrintMembers` method giving it the builder,
-4. appends " }",
+3. invokes the record's `PrintMembers` method giving it the builder, followed by " " if it returned true,
+4. appends "}",
 3. returns the builder's contents with `builder.ToString()`.
 
 For example, consider the following record types:
@@ -278,7 +278,7 @@ class R1 : IEquatable<R1>
     {
         builder.Append(nameof(P1));
         builder.Append(" = ");
-        builder.Append(this.P1);
+        builder.Append(this.P1); // or builder.Append(this.P1); if P1 has a value type
         
         return true;
     }
@@ -289,9 +289,10 @@ class R1 : IEquatable<R1>
         builder.Append(nameof(R1));
         builder.Append(" { ");
 
-        PrintMembers(builder);
+        if (PrintMembers(builder))
+            builder.Append(" ");
 
-        builder.Append(" }");
+        builder.Append("}");
         return builder.ToString();
     }
 }
@@ -308,13 +309,13 @@ class R2 : R1, IEquatable<R2>
             
         builder.Append(nameof(P2));
         builder.Append(" = ");
-        builder.Append(this.P2);
+        builder.Append(this.P2); // or builder.Append(this.P2); if P2 has a value type
         
         builder.Append(", ");
         
         builder.Append(nameof(P3));
         builder.Append(" = ");
-        builder.Append(this.P3);
+        builder.Append(this.P3); // or builder.Append(this.P3); if P3 has a value type
         
         return true;
     }
@@ -325,9 +326,10 @@ class R2 : R1, IEquatable<R2>
         builder.Append(nameof(R2));
         builder.Append(" { ");
 
-        PrintMembers(builder);
+        if (PrintMembers(builder))
+            builder.Append(" ");
 
-        builder.Append(" }");
+        builder.Append("}");
         return builder.ToString();
     }
 }
