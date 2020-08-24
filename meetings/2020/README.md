@@ -16,6 +16,16 @@
 - *Triage milestones*
 - *Design review*
 
+## Sep 16, 2020
+
+## Sep 14, 2020
+
+## Sep 9, 2020
+
+- Design review
+
+## Sep 2, 2020
+
 ## Aug 24, 2020
 
 - [`ToString` on records](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md#printing-members-printmembers-and-tostring-methods): 
