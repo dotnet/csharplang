@@ -16,9 +16,19 @@
 - *Triage milestones*
 - *Design review*
 
-## Aug 26, 2020
-
 ## Aug 24, 2020
+
+- [`ToString` on records](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md#printing-members-printmembers-and-tostring-methods): 
+    - should we always print a trailing comma `R { Property1 = 42, Property2 = 43, }`?
+    - can we deal with stack overflow potential?
+    - should we try to quote/escape values, for example `R { IntProperty = 42, StringProperty = "hello" }`?
+    - should we omit `ToString` on abstract records?
+    - should `PrintMembers` call `ToString()` on values to avoid boxing them in `builder.Append((object)value)`?
+    - should we try and avoid the double space in empty record `R { }`?
+    - do we want to economize a call to `StringBuilder.Append` to print `<name> {` ?
+- warn on declaring type named "`record`" in C# 9?
+- Can we omit `EqualityContract` if the record type is sealed and derives from `System.Object`?
+- Should we allow base syntax on record without parameter list? `record Derived : Base(0) { }`
 
 ## Jun 3, 2020
 
