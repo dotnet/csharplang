@@ -360,10 +360,12 @@ the attribute:
 the method and then invoke that pointer.
 * It is an error to apply the attribute to anything other than an ordinary static method or ordinary static local function.
 The C# compiler will mark any non-static methods imported from metadata with this attribute as unsupported by the language.
-* It is an error to have managed types as parameters or the return type of a method marked with the attribute. This includes
-types with type parameters, even if those type parameters are constrained to `unmanaged` or substituted with `unmanaged` types.
-* It is an error for a method attributed with `UnmanagedCallersOnlyAttribute` to have type parameters, even if those type
-parameters are constrained to `unmanaged`.
+* It is an error to have managed types as parameters or the return type of a method marked with the attribute. If the parameter
+or return types are unmanaged except for generic type parameters, they are only allowed if those parameters are substituted
+with unmanaged types themselves.
+* It is an error for a method marked with the attribute to have type parameters, even if those type parameters are
+constrained to `unmanaged`.
+* It is an error for a method in a generic type to be marked with the attribute.
 * It is an error to convert a method marked with the attribute to a delegate type.
 * It is an error to specify any types for `UnmanagedCallersOnly.CallConvs` that do not meet the requirements for calling
 convention `modopt`s in metadata.
