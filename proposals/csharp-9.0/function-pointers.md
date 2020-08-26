@@ -39,8 +39,8 @@ The ECMA-335 definition of method pointers includes the calling convention as pa
 The default calling convention will be `managed`. Unmanaged calling conventions can by specified by putting an `unmanaged`
 keyword afer the `delegate*` syntax, which will use the runtime platform default. Specific unmanaged conventions can then
 be specified in brackets to the `unmanaged` keyword by specifying any type starting with `CallConv` in the
-`System.Runtime.CompilerServices` namespace. These types must come from the program's core library, and the set of valid
-combinations is platform-dependent.
+`System.Runtime.CompilerServices` namespace, leaving off the `CallConv` prefix. These types must come from the program's
+core library, and the set of valid combinations is platform-dependent.
 
 ``` csharp
 //This method has a managed calling convention. This is the same as leaving the managed keyword off.
@@ -51,10 +51,13 @@ delegate* managed<int, int>;
 delegate* unmanaged<int, int>;
 
 // This method will be invoked using the cdecl calling convention
-delegate* unmanaged[CallConvCdecl] <int, int>;
+// Cdecl maps to System.Runtime.CompilerServices.CallConvCdecl
+delegate* unmanaged[Cdecl] <int, int>;
 
 // This method will be invoked using the stdcall calling convention, and suppresses GC transition
-delegate* unmanaged[CallConvStdCall, CallConvSuppressGCTransition] <int, int>;
+// Stdcall maps to System.Runtime.CompilerServices.CallConvStdcall
+// SuppressGCTransition maps to System.Runtime.CompilerServices.CallConvSuppressGCTransition
+delegate* unmanaged[Stdcall, SuppressGCTransition] <int, int>;
 ```
 
 Conversions between `delegate*` types is done based on their signature including the calling convention.
@@ -358,9 +361,13 @@ the attribute:
 
 * It is an error to directly call a method annotated with this attribute from C#. Users must obtain a function pointer to
 the method and then invoke that pointer.
-* It is an error to apply the attribute to anything other than a static method. The C# compiler will mark any non-static
-methods imported from metadata with this attribute as unsupported by the language.
-* It is an error to have managed types as parameters or the return type of a method marked with the attribute.
+* It is an error to apply the attribute to anything other than an ordinary static method or ordinary static local function.
+The C# compiler will mark any non-static or static non-ordinary methods imported from metadata with this attribute as
+unsupported by the language.
+* It is an error for a method marked with the attribute to have a parameter or return type that is not an `unmanaged_type`.
+* It is an error for a method marked with the attribute to have type parameters, even if those type parameters are
+constrained to `unmanaged`.
+* It is an error for a method in a generic type to be marked with the attribute.
 * It is an error to convert a method marked with the attribute to a delegate type.
 * It is an error to specify any types for `UnmanagedCallersOnly.CallConvs` that do not meet the requirements for calling
 convention `modopt`s in metadata.
