@@ -359,10 +359,9 @@ the attribute:
 * It is an error to directly call a method annotated with this attribute from C#. Users must obtain a function pointer to
 the method and then invoke that pointer.
 * It is an error to apply the attribute to anything other than an ordinary static method or ordinary static local function.
-The C# compiler will mark any non-static methods imported from metadata with this attribute as unsupported by the language.
-* It is an error to have managed types as parameters or the return type of a method marked with the attribute. If the parameter
-or return types are unmanaged except for generic type parameters, they are only allowed if those parameters are substituted
-with unmanaged types themselves.
+The C# compiler will mark any non-static or static non-ordinary methods imported from metadata with this attribute as
+unsupported by the language.
+* It is an error for a method marked with the attribute to have a parameter or return type that is not an `unmanaged_type`.
 * It is an error for a method marked with the attribute to have type parameters, even if those type parameters are
 constrained to `unmanaged`.
 * It is an error for a method in a generic type to be marked with the attribute.
