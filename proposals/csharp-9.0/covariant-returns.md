@@ -1,14 +1,7 @@
-# covariant return types
-
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [X] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 
-Support _covariant return types_. Specifically, permit the override of a method to return a more derived return type than the method it overrides, and similarly to permit the override of a read-only property to return a more derived return type. Callers of the method or property would statically receive the more refined return type from an invocation, and overrides appearing in more derived types would be required to provide a return type at least as specific as that appearing in overrides in its base types.
+Support _covariant return types_. Specifically, permit the override of a method to declare a more derived return type than the method it overrides, and similarly to permit the override of a read-only property to declare a more derived type. Override declarations appearing in more derived types would be required to provide a return type at least as specific as that appearing in overrides in its base types. Callers of the method or property would statically receive the more refined return type from an invocation.
 
 ## Motivation
 [motivation]: #motivation
@@ -20,23 +13,21 @@ This would be useful in the factory pattern. For example, in the Roslyn code bas
 ``` cs
 class Compilation ...
 {
-    virtual Compilation WithOptions(Options options)...
+    public virtual Compilation WithOptions(Options options)...
 }
 ```
 
 ``` cs
 class CSharpCompilation : Compilation
 {
-    override CSharpCompilation WithOptions(Options options)...
+    public override CSharpCompilation WithOptions(Options options)...
 }
 ```
 
 ## Detailed design
 [design]: #detailed-design
 
-This is a draft proposed specification for [covariant return types](https://github.com/dotnet/csharplang/issues/49) in C#.  Our intent is to permit the override of a method to return a more derived return type than the method it overrides, and similarly to permit the override of a read-only property to return a more derived return type.  Callers of the method or property would statically receive the more refined return type from an invocation, and overrides appearing in more derived types would be required to provide a return type at least as specific as that appearing in overrides in its base types.
-
-This is a first draft, so it was necessarily invented from scratch.  Many of the ideas introduced are tentative and may be revised or eliminated in future revisions.
+This is a specification for [covariant return types](https://github.com/dotnet/csharplang/issues/49) in C#.  Our intent is to permit the override of a method to return a more derived return type than the method it overrides, and similarly to permit the override of a read-only property to return a more derived return type.  Callers of the method or property would statically receive the more refined return type from an invocation, and overrides appearing in more derived types would be required to provide a return type at least as specific as that appearing in overrides in its base types.
 
 --------------
 
@@ -48,11 +39,11 @@ The [existing constraint on class override](../../spec/classes.md#override-metho
 
 is modified to
 
-> - The override method must have have a return type that is convertible by an identity or implicit reference conversion to the return type of the overridden base method.
+> - The override method must have have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion to the return type of the overridden base method.
 
 And the following additional requirements are appended to that list:
 
-> - The override method must have have a return type that is convertible by an identity or implicit reference conversion to the return type of every override of the overridden base method that is declared in a (direct or indirect) base type of the override method.
+> - The override method must have have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion to the return type of every override of the overridden base method that is declared in a (direct or indirect) base type of the override method.
 > - The override method's return type must be at least as accessible as the override method  ([Accessibility domains](../../spec/basic-concepts.md#accessibility-domains)).
 
 This constraint permits an override method in a `private` class to have a `private` return type.  However it requires a `public` override method in a `public` type to have a `public` return type.
@@ -65,7 +56,9 @@ The [existing constraint on class override](../../spec/classes.md#virtual-sealed
 
 is modified to
 
-> An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion **or (if the inherited property is read-only) implicit reference conversion from the type of the overriding property to the type of the inherited property**. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors. **The overriding property's type must be at least as accessible as the overriding property ([Accessibility domains](../../spec/basic-concepts.md#accessibility-domains)).**
+> An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion **or (if the inherited property is read-only and has a value type - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) type) implicit reference conversion from the type of the overriding property to the type of the inherited property**. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors. **The overriding property's type must be at least as accessible as the overriding property ([Accessibility domains](../../spec/basic-concepts.md#accessibility-domains)).**
+
+-----------------
 
 ***The remainder of the draft specification below proposes a further extension to covariant returns of interface methods to be considered later.***
 
