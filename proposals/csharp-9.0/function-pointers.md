@@ -185,9 +185,6 @@ unsafe class Util {
 
     void Use() {
         delegate*<void> ptr1 = &Util.Log;
-
-        // Error: type "delegate*<void>" not compatible with "delegate*<int>";
-
    }
 }
 ```
