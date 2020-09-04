@@ -1,3 +1,5 @@
+# Covariant returns
+
 ## Summary
 [summary]: #summary
 
@@ -223,4 +225,3 @@ class Digit : Cloneable
 - some discussion at <https://github.com/dotnet/roslyn/issues/357>.
 - https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-01-08.md
 - Offline discussion toward a decision to support overriding of class methods only in C# 9.0.
-
