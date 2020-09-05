@@ -1,6 +1,24 @@
 Features Added in C# Language Versions
 ====================
 
+# C# 9.0 - .NET 5 and Visual Studio 2019 version 16.8 
+- [Records](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md) and `with` expressions: succinctly declare reference types with value semantics (`record Point(int X, int Y);`, `var newPoint = point with { X: 100 }`).
+- [Init-only setters](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/init.md): init-only properties can be set during object creation (`int Property { get; init; }`).
+- [Top-level statements](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/top-level-statements.md): the entry point logic of a program can be written without declaring an explicit type or `Main` method.
+- [Pattern matching enhancements](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/patterns3.md): relational patterns (`is < 30`), combinator patterns (`is >= 0 and <= 100`, `case 3 or 4:`, `is not null`), parenthesized patterns (`is int and (< 0 or > 100)`), type patterns (`case Type:`).
+- [Native sized integers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/native-integers.md): the numeric types `nint` and `nuint` match the platform memory size.
+- [Function pointers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/function-pointers.md): enable high-performance code leveraging IL instructions `ldftn` and `calli` (`delegate* <int, void> local;`)
+- [Suppress emitting `localsinit` flag](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/skip-localsinit.md): attributing a method with `[SkipLocalsInit]` will suppress emitting the `localsinit` flag to reduce cost of zero-initialization.
+- [Target-typed new expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/target-typed-new.md): `Point p = new(42, 43);`.
+- [Static anonymous functions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/static-anonymous-functions.md): ensure that anonymous functions don't capture `this` or local variables (`static () => { ... };`).
+- [Target-typed conditional expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/target-typed-conditional-expression.md): conditional expressions which lack a natural type can be target-typed (`int? x = b ? 1 : null;`).
+- [Covariant return types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/covariant-returns.md): a method override on reference types can declare a more derived return type.
+- [Lambda discard parameters](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/lambda-discard-parameters.md): multiple parameters `_` appearing in a lambda are allowed and are discards.
+- Attributes on local functions
+- [Module initializers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/module-initializers.md): a method attributed with `[ModuleInitializer]` will be executed when the assembly is loaded.
+- Extension `GetEnumerator`: an extension `GetEnumerator` method can be used in a `foreach`.
+- [Partial methods with returned values](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/extending-partial-methods.md): partial methods can have any accessibility, return a type other than `void` and use `out` parameters, but must be implemented.
+
 # C# 8.0 - .NET Core 3.0 and Visual Studio 2019 version 16.3 
 - [Nullable reference types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/nullable-reference-types-specification.md): express nullability intent on reference types with `?`, `notnull` constraint and annotations attributes in APIs, the compiler will use those to try and detect possible `null` values being dereferenced or passed to unsuitable APIs.
 - [Default interface members](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/default-interface-methods.md): interfaces can now have members with default implementations, as well as static/private/protected/internal members except for state (ie. no fields).
