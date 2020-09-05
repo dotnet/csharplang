@@ -14,9 +14,9 @@ Features Added in C# Language Versions
 - [Target-typed conditional expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/target-typed-conditional-expression.md): conditional expressions which lack a natural type can be target-typed (`int? x = b ? 1 : null;`).
 - [Covariant return types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/covariant-returns.md): a method override on reference types can declare a more derived return type.
 - [Lambda discard parameters](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/lambda-discard-parameters.md): multiple parameters `_` appearing in a lambda are allowed and are discards.
-- Attributes on local functions
-- [Module initializers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/module-initializers.md): a method attributed with `[ModuleInitializer]` will be executed when the assembly is loaded.
-- Extension `GetEnumerator`: an extension `GetEnumerator` method can be used in a `foreach`.
+- [Attributes on local functions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/local-function-attributes.md).
+- [Module initializers](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/module-initializers.md): a method attributed with `[ModuleInitializer]` will be executed before any other code in the assembly.
+- [Extension `GetEnumerator`](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/extension-getenumerator.md): an extension `GetEnumerator` method can be used in a `foreach`.
 - [Partial methods with returned values](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/extending-partial-methods.md): partial methods can have any accessibility, return a type other than `void` and use `out` parameters, but must be implemented.
 
 # C# 8.0 - .NET Core 3.0 and Visual Studio 2019 version 16.3 
