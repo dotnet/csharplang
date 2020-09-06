@@ -191,6 +191,29 @@ Specifically the expression is bound as `x = (T)(x op y)` where `T` is the type 
 The shift operators should mask the number of bits to shift - to 5 bits if `sizeof(nint)` is 4, and to 6 bits if `sizeof(nint)` is 8.
 (see [shift operators](../../spec/expressions.md#shift-operators) in C# spec).
 
+The C#9 compiler will report errors binding to predefined native integer operators when compiling with an earlier language version,
+but will allow use of predefined conversions to and from native integers.
+
+`csc -langversion:9 -t:library A.cs`
+```C#
+public class A
+{
+    public static nint F;
+}
+```
+
+`csc -langversion:8 -r:A.dll B.cs`
+```C#
+class B : A
+{
+    static void Main()
+    {
+        F = F + 1; // error: nint operator+ not available with -langversion:8
+        F = (System.IntPtr)F + 1; // ok
+    }
+}
+```
+
 ### Dynamic
 
 The conversions and operators are synthesized by the compiler and are not part of the underlying `IntPtr` and `UIntPtr` types.
