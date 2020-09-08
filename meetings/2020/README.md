@@ -16,15 +16,21 @@
 - *Triage milestones*
 - *Design review*
 
+## Sep 30, 2020
+
+## Sep 28, 2020
+
+## Sep 23, 2020
+
+## Sep 21, 2020
+
 ## Sep 16, 2020
 
 ## Sep 14, 2020
 
 ## Sep 9, 2020
 
-- Design review
-
-## Sep 2, 2020
+- Planning and triage of features to work on during the C# 10 cycle.
 
 ## Jun 3, 2020
 
