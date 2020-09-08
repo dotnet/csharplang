@@ -65,4 +65,4 @@ Why should we *not* do this?
 
 ## Design meetings
 
-### [April 8th, 2020](https://github.com/dotnet/csharplang/meetings/2020/LDM-2020-04-08.md#module-initializers)
+### [April 8th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-04-08.md#module-initializers)
