@@ -17,23 +17,27 @@ If you discover bugs or deficiencies in the above, please leave an issue to rais
 
 For *new feature proposals*, however, please raise them for [discussion](https://github.com/dotnet/csharplang/labels/Discussion), and *only* submit a proposal as a pull request if invited to do so by a member of the Language Design Team (a "champion").
 
-## Discussion
+## Discussions
 
-Discussion pertaining to language features takes place in the form of issues in this repo, under the [Discussion label](https://github.com/dotnet/csharplang/labels/Discussion).
+Debate pertaining to language features takes place in the form of [Discussions](https://github.com/dotnet/csharplang/discussions) in this repo.
 
-If you want to suggest a feature, discuss current design notes or proposals, etc., please [open a new issue](https://github.com/dotnet/csharplang/issues/new), and it will be tagged Discussion.
+If you want to suggest a feature, discuss current design notes or proposals, etc., please [open a new Discussion topic](https://github.com/dotnet/csharplang/discussions/new).
 
-GitHub is not ideal for discussions, but it is beneficial to have language features discussed nearby to where the design artifacts are. Comment threads that are short and stay on topic are much more likely to be read. If you leave comment number fifty, chances are that only a few people will read it. To make discussions easier to navigate and benefit from, please observe a few rules of thumb:
+Discussions that are short and stay on topic are much more likely to be read. If you leave comment number fifty, chances are that only a few people will read it. To make discussions easier to navigate and benefit from, please observe a few rules of thumb:
 
-- Discussion should be relevant to C# language design. Issues that are not will be summarily closed.
-- Choose a descriptive title for the issue, that clearly communicates the scope of discussion.
-- Stick to the topic of the issue title. If a comment is tangential, start a new issue and link back.
-- If a comment goes into detail on a subtopic, also consider starting a new issue and linking back.
+- Discussion should be relevant to C# language design. If they are not, they will be summarily closed.
+- Choose a descriptive topic that clearly communicates the scope of discussion.
+- Stick to the topic of the discussion. If a comment is tangential, or goes into detail on a subtopic, start a new discussion and link back.
 - Is your comment useful for others to read, or can it be adequately expressed with an emoji reaction to an existing comment?
+
+## Proposals
+Once you have a fully fleshed out proposal describing a new language feature in syntactic and semantic detail, please [open an issue for it](https://github.com/dotnet/csharplang/issues/new/choose), and it will be labeled as a [Proposal](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3AProposal). The comment thread on the issue can be used to hash out or briefly discuss details of the proposal, as well as pros and cons of adopting it into C#. If an issue does not meet the bar of being a full proposal, we may move it to a discussion, so that it can be "baked" further. Specific open issues or more expansive discussion with a proposal will often warrant opening a side discussion rather than cluttering the comment section on the issue.
+
+When a member of the C# LDM finds that a proposal merits discussion, they can [Champion](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22) it, which means that they will bring it to the C# Language Design Meeting. If the LDM decides to work on adopting the feature, the proposer, the champion and others can collaborate on adding it as a document to the [Proposals](proposals) folder, where its evolution can be tracked over time.
 
 ## Design Process
 
-[Proposals](proposals) are raised by, or on invitation from, "champions" on the LDT. They evolve as a result of decisions in [Language Design Meetings](meetings), which are informed by [discussion](https://github.com/dotnet/csharplang/labels/Discussion), experiments, and offline design work.
+[Proposals](proposals) evolve as a result of decisions in [Language Design Meetings](meetings), which are informed by [discussions](https://github.com/dotnet/csharplang/discussions), experiments, and offline design work.
 
 In many cases it will be necessary to implement and share a prototype of a feature in order to land on the right design, and ultimately decide whether to adopt the feature. Prototypes help discover both implementation and usability issues of a feature. A prototype should be implemented in a fork of the [Roslyn repo](https://github.com/dotnet/roslyn) and meet the following bar:
 
