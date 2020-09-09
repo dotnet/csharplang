@@ -28,9 +28,6 @@
 
 ## Sep 14, 2020
 
-## Sep 9, 2020
-
-- Planning and triage of features to work on during the C# 10 cycle.
 
 ## Jun 3, 2020
 
@@ -64,6 +61,13 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Sep 9, 2020
+
+[C# Language Design Notes for September 9th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-09.md)
+
+- Triage issues still in C# 9.0 candidate
+- Triage issues in C# 10.0 candidate
 
 ## Aug 24, 2020
 
