@@ -125,7 +125,7 @@ class Consumption
 ```
 
 At the point an `init` accessor is invoked, the instance is known to be 
-in the open construction phase. Hence, an `init` accessor is allowed to take 
+in the open construction phase. Hence an `init` accessor is allowed to take 
 the following actions in addition to what a normal `set` accessor can do:
 
 1. Call other `init` accessors available through `this` or `base`
@@ -570,7 +570,7 @@ correctness while maintaining binary compatibility. The implementation would
 roughly be the following:
 
 1. An `init` accessor is always emitted if there is a `set`. When not defined 
-by the developer, it is simply a reference to `set`. 
+by the developer it is simply a reference to `set`. 
 1. The set of a property in an object initializer will always use `init` if 
 present but fall back to `set` if it's missing.
 
