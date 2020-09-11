@@ -25,6 +25,7 @@
 ## Sep 16, 2020
 
 - Required properties (Fred)
+- Triage for C# 10 continued (Mads)
 
 ## Sep 14, 2020
 
