@@ -30,6 +30,7 @@
 ## Sep 14, 2020
 
 - C# 9.0: [Interaction between null-conditional operators and the suppression operator](https://github.com/dotnet/csharplang/issues/3393) (Rikki, Julien, Mads)
+- C# 9.0: [Require partial method declaration and definition signatures to match](https://github.com/dotnet/roslyn/issues/45519) (Chuck, Rikki, Julien, Mads)
 - Allow mixed declaration and assignment in deconstruction (Julien, community [PR](https://github.com/dotnet/roslyn/pull/44476))
 - Triage for C# 10 continued (Mads)
 
