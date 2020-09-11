@@ -2,8 +2,7 @@
 
 ## Schedule ASAP
 
-- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
-- how to annotate `IEnumerable<TResult_> Cast<TResult>(this IEnumerable)` and mitigate annoying warnings? ([issue](https://github.com/dotnet/runtime/issues/40518)) (Stephen/Julien)
+
 
 ## Schedule when convenient
 
@@ -31,6 +30,8 @@
 
 - C# 9.0: [Interaction between null-conditional operators and the suppression operator](https://github.com/dotnet/csharplang/issues/3393) (Rikki, Julien, Mads)
 - C# 9.0: [Require partial method declaration and definition signatures to match](https://github.com/dotnet/roslyn/issues/45519) (Chuck, Rikki, Julien, Mads)
+- how to annotate `IEnumerable<TResult_> Cast<TResult>(this IEnumerable)` and mitigate annoying warnings? ([issue](https://github.com/dotnet/runtime/issues/40518)) (Stephen/Julien)
+- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
 - Allow mixed declaration and assignment in deconstruction (Julien, community [PR](https://github.com/dotnet/roslyn/pull/44476))
 - Triage for C# 10 continued (Mads)
 
