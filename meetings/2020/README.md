@@ -3,6 +3,7 @@
 ## Schedule ASAP
 
 - nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
+- how to annotate `TResult_ Cast<TResult>(this IEnumerable)` and mitigate annoying warnings? ([issue](https://github.com/dotnet/runtime/issues/40518)) (Stephen/Julien)
 
 ## Schedule when convenient
 
