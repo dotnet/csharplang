@@ -26,8 +26,12 @@
 
 ## Sep 16, 2020
 
+- Required properties (Fred)
+
 ## Sep 14, 2020
 
+- C# 9.0: [Interaction between null-conditional operators and the suppression operator](https://github.com/dotnet/csharplang/issues/3393) (Rikki, Julien, Mads)
+- Triage for C# 10 continued (Mads)
 
 ## Jun 3, 2020
 
