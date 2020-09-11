@@ -3,7 +3,6 @@
 ## Schedule ASAP
 
 - nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
-- Allow mixed declaration and assignment in deconstruction (Julien, community [PR](https://github.com/dotnet/roslyn/pull/44476))
 
 ## Schedule when convenient
 
@@ -30,6 +29,7 @@
 ## Sep 14, 2020
 
 - C# 9.0: [Interaction between null-conditional operators and the suppression operator](https://github.com/dotnet/csharplang/issues/3393) (Rikki, Julien, Mads)
+- Allow mixed declaration and assignment in deconstruction (Julien, community [PR](https://github.com/dotnet/roslyn/pull/44476))
 - Triage for C# 10 continued (Mads)
 
 ## Jun 3, 2020
