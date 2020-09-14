@@ -30,15 +30,6 @@
 - Required properties (Fred)
 - Triage for C# 10 continued (Mads)
 
-## Sep 14, 2020
-
-- C# 9.0: [Interaction between null-conditional operators and the suppression operator](https://github.com/dotnet/csharplang/issues/3393) (Rikki, Julien, Mads)
-- C# 9.0: [Require partial method declaration and definition signatures to match](https://github.com/dotnet/roslyn/issues/45519) (Chuck, Rikki, Julien, Mads)
-- how to annotate `IEnumerable<TResult_> Cast<TResult>(this IEnumerable)` and mitigate annoying warnings? ([issue](https://github.com/dotnet/runtime/issues/40518)) (Stephen/Julien)
-- nullability expectations for `bool Equals(R? other)` and `Type EqualityContract { get; }` and `R? <Clone>$()` and `void Deconstruct(out string? NotNullableStringProperty)`. (Julien)
-- Allow mixed declaration and assignment in deconstruction (Julien, community [PR](https://github.com/dotnet/roslyn/pull/44476))
-- Triage for C# 10 continued (Mads)
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -71,6 +62,16 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Sep 14, 2020
+
+[C# Language Design Notes for September 14th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-14.md)
+
+- Partial method signature matching
+- Null-conditional handling of the nullable suppression operator
+- Annotating IEnumerable.Cast
+- Nullability warnings in user-written record code
+- Tuple deconstruction mixed assignment and declaration
 
 ## Sep 9, 2020
 
@@ -192,7 +193,7 @@ Record:
 
 ## Jun 10, 2020
 
-[C# Language Design Notes for June 15, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-15.md)
+[C# Language Design Notes for June 10, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-10.md)
 
 - https://github.com/dotnet/csharplang/issues/1711 Roles and extensions
 
