@@ -7,6 +7,9 @@
 ## Schedule when convenient
 
 - How can we improve the capture of unfinished business, both in terms of making sure the LDM comes back to remaining open issues, and in terms of keeping the feature specs in sync with LDM decisions?
+- https://github.com/dotnet/roslyn/issues/15936 (Fred)
+    - Should we keep the existing CA warning or move it to the compiler?
+    - What about float.NaN, Half.NaN?
 
 ## Recurring topics
 
