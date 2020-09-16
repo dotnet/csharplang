@@ -137,6 +137,10 @@ primary_pattern
     ;
 ```
 
+## Change to 7.5.4.2 Grammar Ambiguities
+
+Due to the introduction of the *type pattern*, it is possible for a generic type to appear before the token `=>`.  We therefore add `=>` to the set of tokens listed in *7.5.4.2 Grammar Ambiguities* to permit disambiguation of the `<` that begins the type argument list.  See also https://github.com/dotnet/roslyn/issues/47614.
+
 ## Open Issues with Proposed Changes
 
 ### Syntax for relational operators
