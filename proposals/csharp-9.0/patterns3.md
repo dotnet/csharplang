@@ -178,7 +178,7 @@ Here, the *input type* to the second pattern is narrowed by the *type narrowing*
 1. If `P` is a type pattern, the *narrowed type* is the type of the type pattern's type.
 2. If `P` is a declaration pattern, the *narrowed type* is the type of the declaration pattern's type.
 3. If `P` is a recursive pattern that gives an explicit type, the *narrowed type* is that type.
-4. If `P` is [matched via the rules for](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/patterns.md#positional-pattern) `ITuple`, the *narrowed type* is the type `System.ITuple`.
+4. If `P` is [matched via the rules for](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/patterns.md#positional-pattern) `ITuple`, the *narrowed type* is the type `System.Runtime.CompilerServices.ITuple`.
 5. If `P` is a constant pattern where the constant is not the null constant and where the expression has no *constant expression conversion* to the *input type*, the *narrowed type* is the type of the constant.
 6. If `P` is a relational pattern where the constant expression has no *constant expression conversion* to the *input type*, the *narrowed type* is the type of the constant.
 7. If `P` is an `or` pattern, the *narrowed type* is the common type of the *narrowed type* of the subpatterns if such a common type exists. For this purpose, the common type algorithm considers only identity, boxing, and implicit reference conversions, and it considers all subpatterns of a sequence of `or` patterns (ignoring parenthesized patterns).
