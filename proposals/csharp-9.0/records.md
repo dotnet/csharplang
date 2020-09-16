@@ -27,7 +27,6 @@ record_body
 Record types are reference types, similar to a class declaration. It is an error for a record to provide
 a `record_base` `argument_list` if the `record_declaration` does not contain a `parameter_list`.
 At most one partial type declaration of a partial record may provide a `parameter_list`.
-It is an error for a `parameter_list` to be empty.
 
 Record parameters cannot use `ref`, `out` or `this` modifiers (but `in` and `params` are allowed).
 
