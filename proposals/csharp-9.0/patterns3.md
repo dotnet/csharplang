@@ -137,6 +137,10 @@ primary_pattern
     ;
 ```
 
+## Change to 7.5.4.2 Grammar Ambiguities
+
+Due to the introduction of the *type pattern*, it is possible for a generic type to appear before the token `=>`.  We therefore add `=>` to the set of tokens listed in *7.5.4.2 Grammar Ambiguities* to permit disambiguation of the `<` that begins the type argument list.  See also https://github.com/dotnet/roslyn/issues/47614.
+
 ## Open Issues with Proposed Changes
 
 ### Syntax for relational operators
@@ -178,11 +182,12 @@ Here, the *input type* to the second pattern is narrowed by the *type narrowing*
 1. If `P` is a type pattern, the *narrowed type* is the type of the type pattern's type.
 2. If `P` is a declaration pattern, the *narrowed type* is the type of the declaration pattern's type.
 3. If `P` is a recursive pattern that gives an explicit type, the *narrowed type* is that type.
-4. If `P` is a constant pattern where the constant is not the null constant and where the expression has no *constant expression conversion* to the *input type*, the *narrowed type* is the type of the constant.
-5. If `P` is a relational pattern where the constant expression has no *constant expression conversion* to the *input type*, the *narrowed type* is the type of the constant.
-6. If `P` is an `or` pattern, the *narrowed type* is the common type of the *narrowed type* of the subpatterns if such a common type exists. For this purpose, the common type algorithm considers only identity, boxing, and implicit reference conversions, and it considers all subpatterns of a sequence of `or` patterns (ignoring parenthesized patterns).
-7. If `P` is an `and` pattern, the *narrowed type* is the *narrowed type* of the right pattern. Moreover, the *narrowed type* of the left pattern is the *input type* of the right pattern.
-8. Otherwise the *narrowed type* of `P` is `P`'s input type.
+4. If `P` is [matched via the rules for](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/patterns.md#positional-pattern) `ITuple`, the *narrowed type* is the type `System.Runtime.CompilerServices.ITuple`.
+5. If `P` is a constant pattern where the constant is not the null constant and where the expression has no *constant expression conversion* to the *input type*, the *narrowed type* is the type of the constant.
+6. If `P` is a relational pattern where the constant expression has no *constant expression conversion* to the *input type*, the *narrowed type* is the type of the constant.
+7. If `P` is an `or` pattern, the *narrowed type* is the common type of the *narrowed type* of the subpatterns if such a common type exists. For this purpose, the common type algorithm considers only identity, boxing, and implicit reference conversions, and it considers all subpatterns of a sequence of `or` patterns (ignoring parenthesized patterns).
+8. If `P` is an `and` pattern, the *narrowed type* is the *narrowed type* of the right pattern. Moreover, the *narrowed type* of the left pattern is the *input type* of the right pattern.
+9. Otherwise the *narrowed type* of `P` is `P`'s input type.
 
 ### Variable definitions and definite assignment
 

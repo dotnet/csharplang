@@ -6,9 +6,13 @@
 
     [![Join the chat at https://gitter.im/dotnet/csharplang](https://badges.gitter.im/dotnet/csharplang.svg)](https://gitter.im/dotnet/csharplang?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-- [Discord](https://aka.ms/csharp-discord) - Any discussion related to the C# language up to the application level.
+- [Dotnet Discord](https://aka.ms/dotnet-discord-csharp) - github.com/dotnet discord for discussing dotnet repositories (including csharplang).
 
-    [![Join the chat at https://aka.ms/csharp-discord](https://img.shields.io/discord/102860784329052160.svg)](https://aka.ms/csharp-discord)
+    [![Chat on Discord](https://discordapp.com/api/guilds/143867839282020352/widget.png)](https://aka.ms/dotnet-discord-csharp)
+
+- [C# Discord](https://aka.ms/csharp-discord) - General C# discussion not limited to the dotnet repositories.
+
+    [![Chat on Discord](https://discordapp.com/api/guilds/102860784329052160/widget.png)](https://aka.ms/csharp-discord)
 
 - IRC - Any discussion related to the C# language up to the application level.
 

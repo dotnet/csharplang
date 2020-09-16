@@ -10,7 +10,7 @@ validation. Given that NRT doesn't affect code execution developers still must a
 plate code even in projects which are fully `null` clean. This gave us the desire to explore a minimal syntax for 
 argument `null` validation in the language. 
 
-While this `null` parameter validation syntax is expected to pair frequently with NRT the proposal is fully independent
+While this `null` parameter validation syntax is expected to pair frequently with NRT, the proposal is fully independent
 of it. The syntax can be used independent of `#nullable` directives.
 
 ## Detailed Design 
@@ -63,7 +63,7 @@ void G<T>(T arg!) where T : struct {
 }
 ```
 
-In the case of a constructor the `null` validation will occur before any other code in the constructor. That includes: 
+In the case of a constructor, the `null` validation will occur before any other code in the constructor. That includes: 
 
 - Chaining to other constructors with `this` or `base` 
 - Field initializers which implicitly occur in the constructor

@@ -189,7 +189,30 @@ Compound assignment operations `x op= y` where `x` or `y` are native ints follow
 Specifically the expression is bound as `x = (T)(x op y)` where `T` is the type of `x` and where `x` is only evaluated once.
 
 The shift operators should mask the number of bits to shift - to 5 bits if `sizeof(nint)` is 4, and to 6 bits if `sizeof(nint)` is 8.
-(see [shift operators](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#shift-operators) in C# spec).
+(see [shift operators](../../spec/expressions.md#shift-operators) in C# spec).
+
+The C#9 compiler will report errors binding to predefined native integer operators when compiling with an earlier language version,
+but will allow use of predefined conversions to and from native integers.
+
+`csc -langversion:9 -t:library A.cs`
+```C#
+public class A
+{
+    public static nint F;
+}
+```
+
+`csc -langversion:8 -r:A.dll B.cs`
+```C#
+class B : A
+{
+    static void Main()
+    {
+        F = F + 1; // error: nint operator+ not available with -langversion:8
+        F = (System.IntPtr)F + 1; // ok
+    }
+}
+```
 
 ### Dynamic
 
@@ -303,19 +326,12 @@ namespace System.Runtime.CompilerServices
         {
             TransformFlags = flags;
         }
-        public IList<bool> TransformFlags { get; }
+        public readonly bool[] TransformFlags;
     }
 }
 ```
 
-The encoding uses the approach as used to encode `DynamicAttribute`, although obviously `DynamicAttribute` is encoding which types within the type reference are `dynamic` rather than which types are native ints.
-If the encoding results in an array of `false` values, no `NativeIntegerAttribute` is needed.
-The parameterless `NativeIntegerAttribute` constructor generates an encoding with a single `true` value.
-
-```C#
-nuint A;                    // [NativeInteger] UIntPtr A
-(Stream, nint) B;           // [NativeInteger(new[] { false, false, true })] ValueType<Stream, IntPtr> B
-```
+The encoding of type references with `NativeIntegerAttribute` is covered in [NativeIntegerAttribute.md](https://github.com/dotnet/roslyn/blob/master/docs/features/NativeIntegerAttribute.md).
 
 ## Alternatives
 [alternatives]: #alternatives

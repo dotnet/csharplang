@@ -97,10 +97,11 @@ operations are omitted, no warning is produced.
 
 The signature of the generated entry point method is determined based on operations used by the top level
 statements as follows:
-**Async-operations\Return-with-expression** | **Present** | **Absent**
-----------------------------------------| -------------|-------------
-**Present** | ```static Task<int> Main(string[] args)```| ```static Task Main(string[] args)```
-**Absent**  | ```static int Main(string[] args)``` | ```static void Main(string[] args)```
+
+| **Async-operations\Return-with-expression** | **Present** | **Absent** |
+|----------------------------------------|-------------|-------------|
+| **Present** | ```static Task<int> Main(string[] args)```| ```static Task Main(string[] args)``` |
+| **Absent**  | ```static int Main(string[] args)``` | ```static void Main(string[] args)``` |
 
 The example above would yield the following `$Main` method declaration:
 

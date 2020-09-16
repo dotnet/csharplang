@@ -7,7 +7,7 @@ methods in C#. The goal being to expand the set of scenarios in which these
 methods can work with source generators as well as being a more general 
 declaration form for C# methods.
 
-See also the [original partial methods specification](/spec/classes.md#partial-methods).
+See also the [original partial methods specification](../../spec/classes.md#partial-methods).
 
 ## Motivation
 C# has limited support for developers splitting methods into declarations and 

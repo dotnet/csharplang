@@ -72,7 +72,7 @@ class Student
 ```
 
 An instance property containing an `init` accessor is considered settable in
-the following circumstances:
+the following circumstances, except when in a local function or lambda:
 
 - During an object initializer
 - During a `with` expression initializer
@@ -124,7 +124,7 @@ class Consumption
 
 ```
 
-At the point a `init` accessor is invoked the instance is known to be 
+At the point an `init` accessor is invoked, the instance is known to be 
 in the open construction phase. Hence an `init` accessor is allowed to take 
 the following actions in addition to what a normal `set` accessor can do:
 
@@ -365,8 +365,8 @@ There was no syntax which was overwhelmingly favored in LDM.
 One point which got significant attention was how the choice of syntax would
 impact our ability to do `init` members as a general feature in the future.
 Choosing option 1 would mean that it would be difficult to define a property
-which had a `init` style `get` method in the future. Eventually it was decided
-that if we decided to go forward with general `init` members in future we could
+which had an `init` style `get` method in the future. Eventually it was decided
+that if we decided to go forward with general `init` members in future, we could
 allow `init` to be a modifier in the property accessor list as well as a short
 hand for `init set`. Essentially the following two declarations would be
 identical.
@@ -468,7 +468,7 @@ it applies `readonly` to all members: fields, methods, etc ... The
 `init struct` feature would only apply to properties. This actually ends up making
 it confusing for users. 
 
-Given that `init` is only valid on certain aspects of a type we rejected the 
+Given that `init` is only valid on certain aspects of a type, we rejected the 
 idea of having it as a type modifier.
 
 ## Considerations
@@ -512,7 +512,7 @@ class Name
 ```
 
 ### IL verification
-When .NET Core decides to re-implement IL verification the rules will need to be 
+When .NET Core decides to re-implement IL verification, the rules will need to be 
 adjusted to account for `init` members. This will need to be included in the 
 rule changes for non-mutating acess to `readonly` data.
 
@@ -563,7 +563,7 @@ in a future version of the language in a compatible manner.
 ### Generate three accessors
 One potential implementation of `init` properties is to make `init` completely
 separate from `set`. That means that a property can potentially have three 
-different accessors: `get`, `set` and `init`.
+different accessors: `get`, `set`, and `init`.
 
 This has the potential advantage of allowing the use of modreq to enforce 
 correctness while maintaining binary compatibility. The implementation would

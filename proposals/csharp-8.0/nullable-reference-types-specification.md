@@ -1,6 +1,6 @@
 ﻿# Nullable Reference Types Specification
 
-*** This is a work in progress - several parts are missing or incomplete. ***
+***This is a work in progress - several parts are missing or incomplete.***
 
 ## Syntax
 
@@ -161,6 +161,13 @@ Type parameters additionally take their constraints into account:
     - *nullable* in an *enabled* annotation context
 
 For a type parameter `T`, `T?` is only allowed if `T` is known to be a value type or known to be a reference type.
+
+### Nested functions
+
+Nested functions (lambdas and local functions) are treated like methods, except in regards to their captured variables.
+The default state of a captured variable inside a lambda or local function is the intersection of the nullable state
+of the variable at all the "uses" of that nested function. A use of a function is either a call to that function, or
+where it is converted to a delegate.
 
 ### Oblivious vs nonnullable
 
