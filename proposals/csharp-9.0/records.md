@@ -384,7 +384,7 @@ For a record:
 
 ### Deconstruct
 
-A positional record synthesizes a public void-returning instance method called Deconstruct with an out
+A positional record with at least one parameter synthesizes a public void-returning instance method called Deconstruct with an out
 parameter declaration for each parameter of the primary constructor declaration. Each parameter
 of the Deconstruct method has the same type as the corresponding parameter of the primary
 constructor declaration. The body of the method assigns each parameter of the Deconstruct method
