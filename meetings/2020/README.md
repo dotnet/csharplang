@@ -21,7 +21,7 @@
 
 ## Sep 23, 2020
 
-- General improvements to the `struct` experience: 
+- General improvements to the `struct` experience (Jared) 
     - `ref` fields
     - returning fields by ref
     - safe fixed arrays
