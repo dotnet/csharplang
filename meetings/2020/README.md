@@ -7,23 +7,33 @@
 ## Schedule when convenient
 
 - How can we improve the capture of unfinished business, both in terms of making sure the LDM comes back to remaining open issues, and in terms of keeping the feature specs in sync with LDM decisions?
-- https://github.com/dotnet/roslyn/issues/15936 (Fred)
-    - Should we keep the existing CA warning or move it to the compiler?
-    - What about float.NaN, Half.NaN?
 
 ## Recurring topics
 
-- *Triage championed features*
-- *Triage milestones*
+- *Triage championed features and milestones*
 - *Design review*
 
 ## Sep 30, 2020
+
+- *Design review*
 
 ## Sep 28, 2020
 
 ## Sep 23, 2020
 
+- General improvements to the `struct` experience: 
+    - `ref` fields
+    - returning fields by ref
+    - safe fixed arrays
+    - `where T : ref struct`
+    - ref structs implementing interfaces.
+
 ## Sep 21, 2020
+
+- https://github.com/dotnet/roslyn/issues/15936 (Fred)
+    - Should we keep the existing CA warning or move it to the compiler?
+    - What about float.NaN, Half.NaN?
+- *Triage championed features and milestones*
 
 ## Jun 3, 2020
 
