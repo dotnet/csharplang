@@ -25,11 +25,6 @@
 
 ## Sep 21, 2020
 
-## Sep 16, 2020
-
-- Required properties (Fred)
-- Triage for C# 10 continued (Mads)
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -62,6 +57,13 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Sep 16, 2020
+
+[C# Language Design Notes for September 16th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-16.md)
+
+- Required Properties
+- Triage
 
 ## Sep 14, 2020
 
