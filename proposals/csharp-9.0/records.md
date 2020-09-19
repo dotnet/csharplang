@@ -66,7 +66,7 @@ The record type implements `System.IEquatable<R>` and includes a synthesized str
 The method is `public`, and the method is `virtual` unless the record type is `sealed`.
 The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`.
 
-If either `Equals(R? other)` or `GetHashCode` are user-defined (not synthesized), but not both, a warning is produced.
+If `Equals(R? other)` is user-defined (not synthesized) but `GetHashCode` is not, a warning is produced.
 
 ```C#
 public virtual bool Equals(R? other);
