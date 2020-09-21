@@ -209,7 +209,9 @@ The first thing the constructor must do, is to call a copy constructor of the ba
 object constructor if the record inherits from object. An error is reported if a user-defined copy
 constructor uses an implicit or explicit constructor initializer that doesn't fulfill this requirement.
 After a base copy constructor is invoked, a synthesized copy constructor copies values for all instance
-fields implicitly or explicitly declared within the record type.
+fields implicitly or explicitly declared within the record type. 
+The sole presence of a copy constructor, whether explicit or implicit, doesn't prevent an automatic
+addition of a default instance constructor.
 
 If a virtual "clone" method is present in the base record, the synthesized "clone" method overrides it and
 the return type of the method is the current containing type if the "covariant returns" feature is supported
