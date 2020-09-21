@@ -231,7 +231,7 @@ bool PrintMembers(System.StringBuilder builder);
 The method is `private` if the record type is `sealed`. Otherwise, the method is `virtual` and `protected`.
 
 The method:
-1. for each of the record's printable members (public field and property members), appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+1. for each of the record's printable members (non-static public field and readable property members), appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
 2. return true if the record has printable members.
 
 If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a method declared as follows:
