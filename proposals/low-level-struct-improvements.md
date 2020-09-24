@@ -201,7 +201,7 @@ contains a `ref` field as follows:
 then the *safe-to-escape* of the return will be the current scope
 - Else the *safe-to-escape* will be the outside the method scope
 
-Lets examine these rules in the context of samples to better understand their
+Let's examine these rules in the context of samples to better understand their
 impact.
 
 ```cs
@@ -381,7 +381,7 @@ rules account for this. Whether that was implemented as `ByReference<T>` or `ref
 fields is immaterial to those rules. As a part of allowing `ref` fields though 
 we must define their rules such that they fit into the existing consumption 
 rules for `ref struct`. Specifically this must account for the fact that it's 
-legal *today* for a `ref struct` to return it's `ref` state as `ref` to the 
+legal *today* for a `ref struct` to return its `ref` state as `ref` to the 
 consumer. 
 
 To understand the proposed changes it's helpful to first review the existing 
@@ -425,9 +425,9 @@ adjusted to the following:
 
 > An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
 > - If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
-> - Else if `F` is a `ref` field it's *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
+> - Else if `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
 > - Else if `e` is of a reference type, it is *ref-safe-to-escape* from the enclosing method.
-> - Else it's *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
+> - Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
 
 This explicitly allows for `ref` fields being returned as `ref` from a 
 `ref struct` but not normal fields (that will be covered later). 
@@ -600,7 +600,7 @@ Misc Notes:
 type.
 - The reference assembly generation process must preserve the presence of a 
 `ref` field inside a `ref struct` 
-- A `ref readonly struct` must declare it's `ref` fields as `ref readonly`
+- A `ref readonly struct` must declare its `ref` fields as `ref readonly`
 - The span safety rules for constructors, fields and assignment must be updated
 as outlined in this document.
 
