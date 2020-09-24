@@ -749,7 +749,7 @@ Misc Notes:
 `System.Runtime.CompilerServices` namespace.
 
 ### Safe fixed size buffers
-The language will relax the restrictions on fixed sized arrays such that the 
+The language will relax the restrictions on fixed sized arrays such that they 
 can be declared in safe code and the element type can be managed or unmanaged. 
 This will make types like the following legal:
 
@@ -879,7 +879,7 @@ struct RS
 
         // Okay: The parameter here is not a part of the calculated "must match"
         // set because it can't be returned hence this is legal.
-        p.Set(span);
+        rs2.Set(span);
 
         // Error: the *safe-to-escape* scope of 'rs2' is the top scope of this
         // method
