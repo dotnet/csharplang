@@ -698,7 +698,7 @@ struct FrugalList<T>
             {
                 case 0: return ref _item1;
                 case 1: return ref _item2;
-                case 1: return ref _item3;
+                case 2: return ref _item3;
                 default: throw null;
             }
         }
