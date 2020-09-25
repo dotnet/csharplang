@@ -13,12 +13,31 @@
 - *Triage championed features and milestones*
 - *Design review*
 
+## Oct 28, 2020
+
+## Oct 26, 2020
+
+## Oct 21, 2020
+
+## Oct 19, 2020
+
+## Oct 14, 2020
+
+## Oct 12, 2020
+
+## Oct 7, 2020
+
+## Oct 5, 2020
+
 ## Sep 30, 2020
 
-- *Design review*
+- Records and structs (Mads)
+- Affirm low-hanging record/initialization fruit (Mads)
+    - Data properties
+    - Primary constructors on non-records
+    - Primary constructor bodies
 
 ## Sep 28, 2020
-
 
 - https://github.com/dotnet/roslyn/issues/15936 (Fred)
     - Should we keep the existing CA warning or move it to the compiler?
