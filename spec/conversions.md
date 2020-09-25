@@ -50,8 +50,8 @@ The implicit numeric conversions are:
 *  From `byte` to `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
 *  From `short` to `int`, `long`, `float`, `double`, or `decimal`.
 *  From `ushort` to `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
-*  From `int` to `long`, `float`, `double`, or `decimal`.
-*  From `uint` to `long`, `ulong`, `float`, `double`, or `decimal`.
+*  From `int` to `nint`, `long`, `float`, `double`, or `decimal`.
+*  From `uint` to `nuint`, `long`, `ulong`, `float`, `double`, or `decimal`.
 *  From `long` to `float`, `double`, or `decimal`.
 *  From `ulong` to `float`, `double`, or `decimal`.
 *  From `char` to `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
@@ -246,7 +246,7 @@ The explicit numeric conversions possibly lose information or possibly cause exc
 The explicit enumeration conversions are:
 
 *  From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `nint`, `nuint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal` to any *enum_type*.
-*  From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
+*  From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `nint`, `nuint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
 *  From any *enum_type* to any other *enum_type*.
 
 An explicit enumeration conversion between two types is processed by treating any participating *enum_type* as the underlying type of that *enum_type*, and then performing an implicit or explicit numeric conversion between the resulting types. For example, given an *enum_type* `E` with and underlying type of `int`, a conversion from `E` to `byte` is processed as an explicit numeric conversion ([Explicit numeric conversions](conversions.md#explicit-numeric-conversions)) from `int` to `byte`, and a conversion from `byte` to `E` is processed as an implicit numeric conversion ([Implicit numeric conversions](conversions.md#implicit-numeric-conversions)) from `byte` to `int`.
