@@ -77,6 +77,8 @@ The tables below cover the conversions between special types.
 | `decimal` | `nuint` | ExplicitNumeric | `ulong decimal.op_Explicit(decimal) conv.u` / `... conv.ovf.u.un`  |
 | `IntPtr` | `nuint` | None | |
 | `UIntPtr` | `nuint` | Identity | |
+|Enumeration|`nint`|ExplicitEnumeration||
+|Enumeration|`nuint`|ExplicitEnumeration||
 
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
@@ -97,6 +99,7 @@ The tables below cover the conversions between special types.
 | `nint` | `decimal` | ImplicitNumeric | `conv.i8 decimal decimal.op_Implicit(long)` |
 | `nint` | `IntPtr` | Identity | |
 | `nint` | `UIntPtr` | None | |
+| `nint` |Enumeration|ExplicitEnumeration||
 | `nuint` | `object` | Boxing | `box` |
 | `nuint` | `void*` | PointerToVoid | `conv.u` |
 | `nuint` | `nint` | ExplicitNumeric | `conv.i` / `conv.ovf.i` |
@@ -114,6 +117,7 @@ The tables below cover the conversions between special types.
 | `nuint` | `decimal` | ImplicitNumeric | `conv.u8 decimal decimal.op_Implicit(ulong)` |
 | `nuint` | `IntPtr` | None | |
 | `nuint` | `UIntPtr` | Identity | |
+| `nuint` |Enumeration|ExplicitEnumeration||
 
 Conversion from `A` to `Nullable<B>` is:
 - an implicit nullable conversion if there is an identity conversion or implicit conversion from `A` to `B`;
@@ -353,8 +357,8 @@ But the language would not provide keywords, constants, or `checked` operations.
 
 ## Design meetings
 
-https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-05-26.md
-https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-06-13.md
-https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-07-05.md#native-int-and-intptr-operators
-https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-10-23.md
-https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-03-25.md
+- https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-05-26.md
+- https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-06-13.md
+- https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-07-05.md#native-int-and-intptr-operators
+- https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-10-23.md
+- https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-03-25.md
