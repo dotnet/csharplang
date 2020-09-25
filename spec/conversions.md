@@ -245,7 +245,7 @@ The explicit numeric conversions possibly lose information or possibly cause exc
 
 The explicit enumeration conversions are:
 
-*  From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal` to any *enum_type*.
+*  From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `nint`, `nuint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal` to any *enum_type*.
 *  From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
 *  From any *enum_type* to any other *enum_type*.
 
