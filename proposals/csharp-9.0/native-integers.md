@@ -357,8 +357,8 @@ But the language would not provide keywords, constants, or `checked` operations.
 
 ## Design meetings
 
-https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-05-26.md
-https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-06-13.md
-https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-07-05.md#native-int-and-intptr-operators
-https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-10-23.md
-https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-03-25.md
+- https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-05-26.md
+- https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-06-13.md
+- https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-07-05.md#native-int-and-intptr-operators
+- https://github.com/dotnet/csharplang/blob/master/meetings/2019/LDM-2019-10-23.md
+- https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-03-25.md
