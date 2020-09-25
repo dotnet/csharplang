@@ -19,16 +19,6 @@
 
 ## Sep 28, 2020
 
-## Sep 23, 2020
-
-- General improvements to the `struct` experience (Jared) 
-    - `ref` fields
-    - returning fields by ref
-    - safe fixed arrays
-    - `where T : ref struct`
-    - ref structs implementing interfaces.
-
-## Sep 21, 2020
 
 - https://github.com/dotnet/roslyn/issues/15936 (Fred)
     - Should we keep the existing CA warning or move it to the compiler?
@@ -67,6 +57,12 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Sep 23, 2020
+
+[C# Language Design Notes for September 23rd, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-23.md)
+
+- General improvements to the `struct` experience
 
 ## Sep 16, 2020
 
