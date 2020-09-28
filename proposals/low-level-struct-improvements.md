@@ -980,6 +980,8 @@ This holds together but does require us to extend the syntax for locals a bit.
 Unclear if this is or isn't worth the extra complexity. Possible we could decide
 no for now and bring back later if sufficient need is demonstrated.
 
+Example of where this would be beneficial: https://github.com/dotnet/runtime/pull/34149
+
 ### Allow multi-dimensional fixed buffers
 Should the design for `fixed` buffers be extended to include multi-dimensional
 style arrays? Essentially allowing for declarations like the following:
