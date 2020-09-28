@@ -770,7 +770,10 @@ method is annotated with `[ThisRefEscapes]` in which case it is *ref-safe-to-esc
 outside the enclosing method.
 
 Misc Notes:
-- A member marked as `[ThisRefEscapes]` can not implement an `interface` method.
+- A member marked as `[ThisRefEscapes]` can not implement an `interface` method
+or be `overrides`
+- A member marked as `[ThisRefEscapes]` will be emitted with a `modreq` on that
+attribute.
 - The `RefEscapesAttribute` will be defined in the 
 `System.Runtime.CompilerServices` namespace.
 
