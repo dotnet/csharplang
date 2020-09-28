@@ -37,13 +37,6 @@
     - Primary constructors on non-records
     - Primary constructor bodies
 
-## Sep 28, 2020
-
-- https://github.com/dotnet/roslyn/issues/15936 (Fred)
-    - Should we keep the existing CA warning or move it to the compiler?
-    - What about float.NaN, Half.NaN?
-- *Triage championed features and milestones*
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -76,6 +69,13 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Sep 28, 2020
+
+[C# Language Design Notes for September 28th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-28.md)
+
+- Warning on `double.NaN`
+- Triage
 
 ## Sep 23, 2020
 
