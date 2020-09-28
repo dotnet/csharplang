@@ -197,8 +197,11 @@ is a key pivot point in the design of `ref` fields.
 To do this we will change the escape rules for a constructor invocation, which
 today are the same as method invocation, on a `ref struct` that **directly** 
 contains a `ref` field as follows:
-- If the constructor contains any `ref struct`, `ref`, `out` or `in` parameters 
-then the *safe-to-escape* of the return will be the current scope
+- If the constructor contains any `ref`, `out` or `in` parameters, and the 
+arguments do not all refer to the heap, then the *safe-to-escape* of the return
+will be the current scope
+- Else if the constructor contains any `ref struct` parameters then the 
+*safe-to-escape* of the return will be the current scope
 - Else the *safe-to-escape* will be the outside the method scope
 
 Let's examine these rules in the context of samples to better understand their
@@ -488,17 +491,24 @@ ref struct RS
 
 The rules for assignment also need to be adjusted to account for `ref` fields.
 This design only allows for `ref` assignment of a `ref` field during object 
-construction. Specifically in the constructor of the declaring type, inside 
+construction or when the value is known to refer to the heap. Object 
+construction includes in the constructor of the declaring type, inside 
 `init` accessors and inside object initializer expressions. Further the `ref` 
-being assigned to the `ref` field must have *ref-safe-to-escape* greater than 
-the receiver of the field: 
+being assigned to the `ref` field in this case must have *ref-safe-to-escape* 
+greater than the receiver of the field: 
 
 - Constructors: The value must be *ref-safe-to-escape* outside the constructor
-- `init` accessors:  The value limited to heap values as accessors can't have 
-`ref` parameters, and for object
+- `init` accessors:  The value limited to values that are known to refer to the 
+heap as accessors can't have `ref` parameters
 - object initializers: The value can have any *ref-safe-to-escape* value as this
 will feed into the calculation of the *safe-to-escape* of the constructed 
 object by existing rules.
+
+A `ref` field can only be assigned outside a constructor when the value is known
+to refer to the heap. That is allowed because it is both safe at the assignment
+location (meets the field assignment rules for ensuring the value being 
+assigned has a lifetime at least as large as the receiver) as well as requires
+no updates to the existing method invocation rules. 
 
 This design does not allow for general `ref` field assignment outside object
 construction due to existing limitations on lifetimes. Specifically it poses 
@@ -527,6 +537,19 @@ ref struct SmallSpan
         return s;
     }
 
+    SmallSpan SafeRefAssignment()
+    {
+        int[] array = new int[] { 42, 13 };
+        SmallSpan s = default;
+
+        // Okay: the value being assigned here is known to refer to the heap 
+        // hence it is allowed by our rules above because it requires no changes
+        // to existing method invocation rules (hence preserves compat)
+        ref s._field = ref array[i];
+
+        return s;
+    }
+
     SmallSpan BadUsage()
     {
         // Legal today and must remain legal (and safe)
@@ -546,7 +569,8 @@ However extra complexity of such rules do not seem to be worth the limited cases
 this enables. Should compelling samples come up we can revisit this decision.
 
 This means though that `ref` fields are largely in practice `ref readonly`. The
-one exception being inside object initializers.
+main exceptions being object initializers and when the value is known to refer 
+to the heap.
 
 A `ref` field will be emitted into metadata using the `ELEMENT_TYPE_BYREF` 
 signature. This is no different than how we emit `ref` locals or `ref` 
@@ -603,6 +627,8 @@ type.
 - A `ref readonly struct` must declare its `ref` fields as `ref readonly`
 - The span safety rules for constructors, fields and assignment must be updated
 as outlined in this document.
+- The span safety rules need to include the definition of `ref` values that 
+"refer to the heap". 
 
 ### Provide struct this escape annotation
 The rules for the scope of `this` in a `struct` limit the *ref-safe-to-escape*
