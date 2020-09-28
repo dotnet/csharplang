@@ -672,7 +672,7 @@ enclosing method scope except in cases where there are `ref` parameters or a
 Hence the solution here is not as easy as allowing `ref` return of fields in 
 non-interface methods.
 
-To remove this friction the language will provide the attribute `[RefEscapes]`.
+To remove this friction the language will provide the attribute `[ThisRefEscapes]`.
 When this attribute is applied to an instance method, instance property or 
 instance accessor of a `struct` or `ref struct` then the `this` parameter will
 be considered *ref-safe-to-escape* outside the enclosing method.
@@ -691,7 +691,7 @@ struct FrugalList<T>
 
     public ref T this[int index]
     {
-        [RefEscapes]
+        [ThisRefEscapes]
         get
         {
             switch (index)
@@ -717,7 +717,7 @@ struct ListWithDefault<T>
 
     public ref T this[int index]
     {
-        [RefEscapes]
+        [ThisRefEscapes]
         get
         {
             if (index >= _list.Count)
@@ -731,7 +731,7 @@ struct ListWithDefault<T>
 }
 ```
 
-Members which contain the `[RefEscapes]` attribute cannot be used to implement 
+Members which contain the `[ThisRefEscapes]` attribute cannot be used to implement 
 interface members. This would hide the lifetime nature of the member at 
 the `interface` call site and would lead to incorrect lifetime calculations.
 
@@ -740,11 +740,11 @@ will be updated to include the following:
 
 - If the parameter is the `this` parameter of a `struct` type, it is 
 *ref-safe-to-escape* to the top scope of the enclosing method unless the 
-method is annotated with `[RefEscapes]` in which case it is *ref-safe-to-escape*
+method is annotated with `[ThisRefEscapes]` in which case it is *ref-safe-to-escape*
 outside the enclosing method.
 
 Misc Notes:
-- A member marked as `[RefEscapes]` can not implement an `interface` method.
+- A member marked as `[ThisRefEscapes]` can not implement an `interface` method.
 - The `RefEscapesAttribute` will be defined in the 
 `System.Runtime.CompilerServices` namespace.
 
@@ -781,7 +781,7 @@ be equal to the *safe-to-escape* scope of the container.
 
 For each `fixed` declaration in a type where the element type is `T` the 
 language will generate a corresponding `get` only indexer method whose return
-type is `ref T`. The indexer will be annotated with the `[RefEscapes]` attribute
+type is `ref T`. The indexer will be annotated with the `[ThisRefEscapes]` attribute
 as the implementation will be returning fields of the declaring type. The 
 accessibility of the member will match the accessibility on the `fixed` field.
 
@@ -789,7 +789,7 @@ For example, the signature of the indexer for `CharBuffer.Data` will be the
 following:
 
 ```cs
-[RefEscapes]
+[ThisRefEscapes]
 internal ref char <>DataIndexer(int index) => ...;
 ```
 
@@ -898,7 +898,7 @@ Misc Notes:
 This design calls for using attributes to annotate the new lifetime rules for 
 `struct` members. This also could've been done just as easily with
 contextual keywords. For instance: `scoped` and `escapes` could have been 
-used instead of `DoesNotEscape` and `RefEscapes`.
+used instead of `DoesNotEscape` and `ThisRefEscapes`.
 
 Keywords, even the contextual ones, have a much heavier weight in the language
 than attributes. The use cases these features solve, while very valuable, 
