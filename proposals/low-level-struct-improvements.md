@@ -825,6 +825,21 @@ provided then it will be replaced with a direct reference to the appropriate
 element. Unless the constant is outside the declared bounds in which case a 
 compile time error would occur.
 
+There will also be a named accessor generated for each `fixed` buffer that 
+provides by value `get` and `set` operations. Having this means that `fixed` 
+buffers will more closely resemble existing array semantics by having a `ref`
+accessor as well as byval `get` and `set` operations. This means compilers will
+have the same flexibility when emitting code consuming `fixed` buffers as they 
+do when consuming arrays. This should be operations like `await` over `fixed` 
+buffers easier to emit. 
+
+This also has the added benefit that it will make `fixed` buffers easier to 
+consume from other languages. Named indexers is a feature that has existed since
+the 1.0 release of .NET. Even languages which cannot directly emit a named 
+indexer can generally consume them (C# is actually a good example of this).
+
+There will also be a by value `get` and `set` accessor generated for every 
+
 The backing storage for the buffer will be generated using the 
 `[InlineArray]` attribute. This is a mechanism discussed in [isuse 12320](https://github.com/dotnet/runtime/issues/12320) 
 which allows specifically for the case of efficiently declaring sequence of 
@@ -938,6 +953,40 @@ though. That is a bit of a gray area for the language side of things but an
 established pattern for the runtime. 
 
 ## Open Issues
+
+### Allow fixed buffer locals
+This design allows for safe `fixed` buffers that can support any type. One 
+possible extension here is allowing such `fixed` buffers to be declared as 
+local variables. This would allow a number of existing `stackalloc` operations
+to be replaced with a `fixed` buffer. It would also expand the set of scenarios
+we could have stack style allocations as `stackalloc` is limited to unmanaged
+element types while `fixed` buffers are not. 
+
+```cs
+class FixedBufferLocals
+{
+    void Example()
+    {
+        Span<int> span = stakalloc int[42];
+        int buffer[42];
+    }
+}
+```
+
+This holds together but does require us to extend the syntax for locals a bit. 
+Unclear if this is or isn't worth the extra complexity. Possible we could decide
+no for now and bring back later if sufficient need is demonstrated.
+
+### Allow multi-dimensional fixed buffers
+Should the design for `fixed` buffers be extended to include multi-dimensional
+style arrays? Essentially allowing for declarations like the following:
+
+```cs
+struct Dimensions
+{
+    int array[42, 13];
+}
+```
 
 ## Future Considerations
 
