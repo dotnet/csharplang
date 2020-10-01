@@ -29,14 +29,6 @@
 
 ## Oct 5, 2020
 
-## Sep 30, 2020
-
-- Records and structs (Mads)
-- Affirm low-hanging record/initialization fruit (Mads)
-    - Data properties
-    - Primary constructors on non-records
-    - Primary constructor bodies
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -69,6 +61,15 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Sep 30, 2020
+
+[C# Language Design Notes for September 30th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-30.md)
+
+- `record structs`
+    - `struct` equality
+    - `with` expressions
+    - Primary constructors and `data` properties
 
 ## Sep 28, 2020
 
