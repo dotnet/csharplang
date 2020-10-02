@@ -27,7 +27,12 @@
 
 ## Oct 7, 2020
 
+- Triage for the [10.0 Working Set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%2210.0+Working+Set%22) (Mads)
+
 ## Oct 5, 2020
+
+- `record structs`, Primary constructors and `data` properties (Mads)
+- Triage for the [10.0 Working Set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%2210.0+Working+Set%22) (Mads)
 
 ## Jun 3, 2020
 
