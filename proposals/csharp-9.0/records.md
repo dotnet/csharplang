@@ -15,7 +15,7 @@ record_declaration
 record_base
     : ':' class_type argument_list?
     | ':' interface_type_list
-    | ':' class_type argument_list? interface_type_list
+    | ':' class_type argument_list? ',' interface_type_list
     ;
 
 record_body
