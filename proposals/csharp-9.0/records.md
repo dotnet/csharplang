@@ -80,7 +80,7 @@ the value of `EqualityContract == other.EqualityContract`.
 
 The record type includes synthesized `==` and `!=` operators equivalent to operators declared as follows:
 ```C#
-pubic static bool operator==(R? r1, R? r2)
+public static bool operator==(R? r1, R? r2)
     => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
 public static bool operator!=(R? r1, R? r2)
     => !(r1 == r2);
@@ -136,7 +136,7 @@ class R1 : IEquatable<R1>
             EqualityContract == other.EqualityContract &&
             EqualityComparer<T1>.Default.Equals(P1, other.P1);
     }
-    pubic static bool operator==(R1? r1, R1? r2)
+    public static bool operator==(R1? r1, R1? r2)
         => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
     public static bool operator!=(R1? r1, R1? r2)
         => !(r1 == r2);    
@@ -158,7 +158,7 @@ class R2 : R1, IEquatable<R2>
         return base.Equals((R1?)other) &&
             EqualityComparer<T2>.Default.Equals(P2, other.P2);
     }
-    pubic static bool operator==(R2? r1, R2? r2)
+    public static bool operator==(R2? r1, R2? r2)
         => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
     public static bool operator!=(R2? r1, R2? r2)
         => !(r1 == r2);    
@@ -180,7 +180,7 @@ class R3 : R2, IEquatable<R3>
         return base.Equals((R2?)other) &&
             EqualityComparer<T3>.Default.Equals(P3, other.P3);
     }
-    pubic static bool operator==(R3? r1, R3? r2)
+    public static bool operator==(R3? r1, R3? r2)
         => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
     public static bool operator!=(R3? r1, R3? r2)
         => !(r1 == r2);    
