@@ -226,7 +226,7 @@ If the "clone" method is not abstract, it returns the result of a call to a copy
 
 If the record is derived from `object`, the record includes a synthesized method equivalent to a method declared as follows:
 ```C#
-bool PrintMembers(System.StringBuilder builder);
+bool PrintMembers(System.Text.StringBuilder builder);
 ```
 The method is `private` if the record type is `sealed`. Otherwise, the method is `virtual` and `protected`.
 
