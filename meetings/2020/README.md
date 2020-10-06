@@ -29,11 +29,6 @@
 
 - Triage for the [10.0 Working Set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%2210.0+Working+Set%22) (Mads)
 
-## Oct 5, 2020
-
-- `record structs`, Primary constructors and `data` properties (Mads)
-- Triage for the [10.0 Working Set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%2210.0+Working+Set%22) (Mads)
-
 ## Jun 3, 2020
 
 - allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
@@ -66,6 +61,14 @@
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Oct 5, 2020
+
+[C# Language Design Notes for October 5th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-05.md)
+
+- `record struct` primary constructor defaults
+- Changing the member type of a primary constructor parameter
+- `data` members
 
 ## Sep 30, 2020
 
