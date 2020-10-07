@@ -15,6 +15,8 @@
 
 ## Oct 28, 2020
 
+- *Design review*
+
 ## Oct 26, 2020
 
 ## Oct 21, 2020
