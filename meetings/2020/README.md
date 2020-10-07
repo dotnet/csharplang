@@ -29,34 +29,6 @@
 
 - Triage for the [10.0 Working Set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%2210.0+Working+Set%22) (Mads)
 
-## Jun 3, 2020
-
-- allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
-- record decision on side-effect of `M(someMaybeNullValue); // warns` and effect of suppression `expr!` (issue https://github.com/dotnet/roslyn/issues/43383, Julien)
-- improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
-- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
-- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
-- init-only: init-only methods ? `init void Init()` (Jared/Julien)
-
-## May 18, 2020
-
-- Record Monday (Andy, Jared, Mads)
-
-## April 29, 2020
-
-- Design review
-
-## April 22, 2020
-
-- https://github.com/dotnet/csharplang/projects/4 Triage for C# 10.0 (Mads)
-
-## March 18, 2020
-
-- https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
-
-## Jan 13, 2020
-
-- Records: Paging back in the previous proposal (Andy)
 
 # C# Language Design Notes for 2020
 
