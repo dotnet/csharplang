@@ -27,14 +27,17 @@
 
 ## Oct 12, 2020
 
-## Oct 7, 2020
-
-- Triage for the [10.0 Working Set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%2210.0+Working+Set%22) (Mads)
-
-
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Oct 7, 2020
+
+[C# Language Design Notes for October 7th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-07.md)
+
+- `record struct` syntax
+- `data` members redux
+- `ReadOnlySpan<char>` patterns
 
 ## Oct 5, 2020
 
