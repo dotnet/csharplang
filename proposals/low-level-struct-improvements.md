@@ -961,7 +961,7 @@ void WriteData(ReadOnlySpan<char> data)
 ```
 
 This pattern is fairly common across .NET code and it works just fine when 
-`ref struct` are not involved. Once users adopt `ref struct` though it forces them
+a `ref struct` is not involved. Once users adopt `ref struct` though it forces them
 to change their patterns here and often they just resort to `unsafe` to work
 around the limitations here.
 
