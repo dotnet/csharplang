@@ -25,7 +25,11 @@
 
 ## Oct 14, 2020
 
+- Triage for [C# 10 working set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%2210.0+Working+Set%22) (Mads)
+
 ## Oct 12, 2020
+
+- [General improvements to structs](https://github.com/dotnet/csharplang/blob/master/proposals/low-level-struct-improvements.md), continued (Jared)
 
 # C# Language Design Notes for 2020
 
