@@ -1017,7 +1017,7 @@ class Test
     }
 }
 ```
-shows a nested class `M` that hides the method `M` defined in `Base`.
+shows a nested class `M` that hides the method `F` defined in `Base`.
 
 #### this access
 
