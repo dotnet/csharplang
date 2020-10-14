@@ -23,13 +23,16 @@
 
 ## Oct 19, 2020
 
-## Oct 14, 2020
-
-- Triage for [C# 10 working set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%2210.0+Working+Set%22) (Mads)
-
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Oct 14, 2020
+
+[C# Language Design Notes for October 14th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-14.md)
+
+- Triage
+- Milestone Simplification
 
 ## Oct 12, 2020
 
