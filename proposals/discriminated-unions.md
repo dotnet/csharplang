@@ -84,10 +84,10 @@ enum class Shape
 the `enum class` declaration has semantics equivalent to the following declaration
 
 ```C#
-partial abstract class Shape
+ abstract partial class Shape
 {
-    public data class Rectangle(float Width, float Length) : Shape,
-    public data class Circle(float Radius) : Shape
+    public record Rectangle(float Width, float Length) : Shape;
+    public record Circle(float Radius) : Shape;
 }
 ```
 
@@ -117,12 +117,12 @@ the nested enum class defines a nested root type, and everything below the neste
 class is a subtype of the nested root type, instead of the top-level root type.
 
 ```C#
-partial abstract class Expr
+abstract partial class Expr
 {
-    partial abstract class Binary : Expr
+    abstract partial class Binary : Expr
     {
-        public data class Addition(Expr left, Expr right) : Binary,
-        public data class Multiplication(Expr left, Expr right) : Binary
+        public record Addition(Expr left, Expr right) : Binary;
+        public record Multiplication(Expr left, Expr right) : Binary;
     }
 }
 ```
