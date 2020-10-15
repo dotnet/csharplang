@@ -54,20 +54,11 @@ Once approved, a feature should be fully implemented in [Roslyn](https://github.
 ### Milestones
 
 We have a few different milestones for issues on the repo:
-* [Working Set](https://github.com/dotnet/csharplang/milestone/19) is the set of proposals that the LDT is currently actively working on. Not
-everything in this milestone will make the next version of C#, but it will get design time during the upcoming release.
-* [Backlog](https://github.com/dotnet/csharplang/milestone/10) is the set of proposals that members of the LDT have championed, but are not
-actively working on. While discussion and ideas from the community are welcomed on these proposals, the cost of the design work and
-implementation review on these features are too high for us to consider community implementation until we are ready for it.
-* [Any Time](https://github.com/dotnet/csharplang/milestone/14) is the set of proposals that members of the LDT have championed, but are not
-being actively worked on and are open to community implementation. Issues in this can be in one of 2 states: needs approved specification, and
-needs implementation. Those that need a specification still need to be presented during LDM for approval of the spec, but we are willing to
-take the time to do so at our earliest convenience.
-* [Likely Never](https://github.com/dotnet/csharplang/milestone/13) is the set of proposals that the LDM has reject from the language. Without
-strong need or community feedback, these proposals will not be considered in the future.
-* Numbered milestones are the set of features that have been implemented for that particular language version. For closed milestones, these are
-the set of things that shipped with that release. For open milestones, features can be potentially pulled later if we discover compatability or
-other issues as we near release.
+* [Working Set](https://github.com/dotnet/csharplang/milestone/19) is the set of championed proposals that are currently being actively worked on. Not everything in this milestone will make the next version of C#, but it will get design time during the upcoming release.
+* [Backlog](https://github.com/dotnet/csharplang/milestone/10) is the set of championed proposals that have been triaged, but are not being actively worked on. While discussion and ideas from the community are welcomed on these proposals, the cost of the design work and implementation review on these features are too high for us to consider community implementation until we are ready for it.
+* [Any Time](https://github.com/dotnet/csharplang/milestone/14) is the set of championed proposals that have been triaged, but are not being actively worked on and are open to community implementation. Issues in this can be in one of 2 states: needs approved specification, and needs implementation. Those that need a specification still need to be presented during LDM for approval of the spec, but we are willing to take the time to do so at our earliest convenience.
+* [Likely Never](https://github.com/dotnet/csharplang/milestone/13) is the set of proposals that the LDM has rejected from the language. Without strong need or community feedback, these proposals will not be considered in the future.
+* Numbered milestones are the set of features that have been implemented for that particular language version. For closed milestones, these are the set of things that shipped with that release. For open milestones, features can be potentially pulled later if we discover compatability or other issues as we near release.
 
 ## Language Design Meetings
 
