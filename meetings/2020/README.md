@@ -21,7 +21,11 @@
 
 ## Oct 21, 2020
 
+- [Primary constructors](https://github.com/dotnet/csharplang/discussions/4025) (Mads)
 ## Oct 19, 2020
+
+- Triage [untriaged championed issues](https://github.com/dotnet/csharplang/issues?q=is%3Aissue+is%3Aopen+label%3A%22Proposal+champion%22+no%3Amilestone)
+- Triage [Backlog](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3ABacklog) for issues to promote to the [Working Set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22)
 
 # C# Language Design Notes for 2020
 
