@@ -10,13 +10,13 @@ With `-langversion:8`, names of locals, local functions, parameters, type parame
 
 Shadowing is supported for `static` and non-`static` local functions and lambdas.
 
-There is no change in behavior using `-langversion:7.3` or earlier: names in nested functions that shadow names from the enclosing scope are reported as errors in those cases.
+There is no change in behavior using `-langversion:7.3` or earlier: names in nested functions that shadow names from the enclosing method or function are reported as errors in those cases.
 
 Any shadowing previously permitted is still supported with `-langversion:8`. For instance: variable names may shadow type and member names; and variable names may shadow enclosing method or local function names.
 
 Shadowing a name declared in an enclosing scope in the same lambda or local function is still reported as an error.
 
-A warning is reported for a type parameter in a local function that shadows a type parameter in an enclosing scope.
+A warning is reported for a type parameter in a local function that shadows a type parameter in the enclosing type, method, or function.
 
 ## Design meetings
 
