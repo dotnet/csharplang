@@ -27,7 +27,9 @@ For argument values, `T?` is equivalent to `[AllowNull]T`.
 ## `default` constraint
 
 For compatibility with existing code where overridden and explicitly implemented generic methods could not include explicit constraint clauses, `T?` in an overridden or explicitly implemented method is treated as `Nullable<T>` where `T` is a value type.
+
 To allow annotations for type parameters constrained to reference types, C#8 allowed explicit `where T : class` and `where T : struct` constraints on the overridden or explicitly implemented method (see `B2.F1()` below).
+
 To allow annotations for type parameters that are not constrained to reference types or value types, C#9 allows `where T : default` (see `B2.F2()` below).
 ```C#
 #nullable enable
