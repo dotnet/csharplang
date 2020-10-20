@@ -4,7 +4,7 @@
 
 Allow nullable annotations for type parameters that are not constrained to value types or reference types: `T?`.
 ```C#
-static T? FirstOrDefault<T>(this IEnumerable<T> collection) { ... }`
+static T? FirstOrDefault<T>(this IEnumerable<T> collection) { ... }
 ```
 
 ## `?` annotation
@@ -28,31 +28,33 @@ For argument values, `T?` is equivalent to `[AllowNull]T`.
 
 For compatibility with existing code where overridden and explicitly implemented generic methods could not include explicit constraint clauses, `T?` in an overridden or explicitly implemented method is treated as `Nullable<T>` where `T` is a value type.
 
-To allow annotations for type parameters constrained to reference types, C#8 allowed explicit `where T : class` and `where T : struct` constraints on the overridden or explicitly implemented method (see `B2.F1()` below).
-
-To allow annotations for type parameters that are not constrained to reference types or value types, C#9 allows `where T : default` (see `B2.F2()` below).
+To allow annotations for type parameters constrained to reference types, C#8 allowed explicit `where T : class` and `where T : struct` constraints on the overridden or explicitly implemented method.
 ```C#
-#nullable enable
-
-class A
+class A1
 {
-    public virtual void F1<T>(T? t) where T : class { } // C#8
     public virtual void F1<T>(T? t) where T : struct { }
-    
-    public virtual void F2<T>(T? t) { } // C#9
-    public virtual void F2<T>(T? t) where T : struct { }
+    public virtual void F1<T>(T? t) where T : class { }
 }
 
-class B1 : A
+class B1 : A1
 {
     public override void F1<T>(T? t) /*where T : struct*/ { }
-    public override void F2<T>(T? t) /*where T : struct*/ { }
+    public override void F1<T>(T? t) where T : class { }
+}
+```
+
+To allow annotations for type parameters that are not constrained to reference types or value types, C#9 allows a new `where T : default` constraint.
+```C#
+class A2
+{
+    public virtual void F2<T>(T? t) where T : struct { }
+    public virtual void F2<T>(T? t) { }
 }
 
-class B2 : A
+class B2 : A2
 {
-    public override void F1<T>(T? t) where T : class { }   // C#8
-    public override void F2<T>(T? t) where T : default { } // C#9
+    public override void F2<T>(T? t) /*where T : struct*/ { }
+    public override void F2<T>(T? t) where T : default { }
 }
 ```
 
