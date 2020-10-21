@@ -13,6 +13,28 @@
 - *Triage championed features and milestones*
 - *Design review*
 
+## Dec 16, 2020
+
+## Dec 14, 2020
+
+## Dec 9, 2020
+
+## Dec 7, 2020
+
+## Nov 23, 2020
+
+## Nov 18, 2020
+
+## Nov 16, 2020
+
+## Nov 11, 2020
+
+## Nov 9, 2020
+
+## Nov 4, 2020
+
+## Nov 2, 2020
+
 ## Oct 28, 2020
 
 - *Design review*
