@@ -11,15 +11,19 @@ static T? FirstOrDefault<T>(this IEnumerable<T> collection) { ... }
 
 In C#8, `?` annotations could only be applied to type parameters that were explicitly constrained to value types or reference types.
 In C#9, `?` annotations can be applied to any type parameter, regardless of constraints.
-Unless a type parameter is explicitly constrained to value types, `?` annotations can only be applied within a nullable-enabled context (typically `#nullable enable`).
+
+Unless a type parameter is explicitly constrained to value types, annotations can only be applied within a `#nullable enable` context.
 
 If a type parameter `T` is substituted with a reference type, then `T?` represents a nullable instance of that reference type.
-If `T` is substituted with a value type, then `T?` represents an instance of `T`.
 ```C#
 var s1 = new string[0].FirstOrDefault();  // string? s1
 var s2 = new string?[0].FirstOrDefault(); // string? s2
-var i1 = new int[0].FirstOrDefault();     // int i1
-var i2 = new int?[0].FirstOrDefault();    // int? i2
+```
+
+If `T` is substituted with a value type, then `T?` represents an instance of `T`.
+```C#
+var i1 = new int[0].FirstOrDefault();  // int i1
+var i2 = new int?[0].FirstOrDefault(); // int? i2
 ```
 
 If `T` is substituted with an annotated type `U?`, then `T?` represents the annotated type `U?` rather than `U??`.
