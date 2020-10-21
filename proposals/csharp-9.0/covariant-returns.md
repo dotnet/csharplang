@@ -41,11 +41,11 @@ The [existing constraint on class override](../../spec/classes.md#override-metho
 
 is modified to
 
-> - The override method must have have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion to the return type of the overridden base method.
+> - The override method must have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion to the return type of the overridden base method.
 
 And the following additional requirements are appended to that list:
 
-> - The override method must have have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion to the return type of every override of the overridden base method that is declared in a (direct or indirect) base type of the override method.
+> - The override method must have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion to the return type of every override of the overridden base method that is declared in a (direct or indirect) base type of the override method.
 > - The override method's return type must be at least as accessible as the override method  ([Accessibility domains](../../spec/basic-concepts.md#accessibility-domains)).
 
 This constraint permits an override method in a `private` class to have a `private` return type.  However it requires a `public` override method in a `public` type to have a `public` return type.
@@ -58,7 +58,7 @@ The [existing constraint on class override](../../spec/classes.md#virtual-sealed
 
 is modified to
 
-> An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion **or (if the inherited property is read-only and has a value type - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) type) implicit reference conversion from the type of the overriding property to the type of the inherited property**. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors. **The overriding property's type must be at least as accessible as the overriding property ([Accessibility domains](../../spec/basic-concepts.md#accessibility-domains)).**
+> An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion **or (if the inherited property is read-only and has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion from the type of the overriding property to the type of the inherited property**. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors. **The overriding property's type must be at least as accessible as the overriding property ([Accessibility domains](../../spec/basic-concepts.md#accessibility-domains)).**
 
 -----------------
 
