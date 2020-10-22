@@ -19,7 +19,7 @@ record_base
     ;
 
 record_body
-    : '{' class_member_declaration* '}'
+    : '{' class_member_declaration* '}' ';'?
     | ';'
     ;
 ```
