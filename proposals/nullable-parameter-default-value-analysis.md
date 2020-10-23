@@ -54,11 +54,9 @@ public delegate void Del<T>(T t = default);
 
 public class C
 {
-    public static T M0<T>(T t) => t;
-
     public static void Main()
     {
-        Del<string> del = str => M0(str).ToString(); // expected warning, but didn't get one
+        Del<string> del = str => str.ToString(); // expected warning, but didn't get one
         del(); // throws NRE at runtime
     }
 }
