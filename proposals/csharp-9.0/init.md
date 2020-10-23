@@ -247,7 +247,7 @@ also applies to interface implementation.
 `init` accessors (both auto-implemented accessors and manually-implemented
 accessors) are permitted on properties of `readonly struct`s, as well as
 `readonly` properties. `init` accessors are not permitted to be marked
-`readonly` themselves.
+`readonly` themselves, in both `readonly` and non-`readonly` `struct` types.
 
 ```cs
 readonly struct ReadonlyStruct1
