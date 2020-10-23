@@ -10,7 +10,7 @@ void M(string s = null) // warning CS8600: Converting null literal or possible n
 }
 ```
 
-However, unconstrained generics present a problem where a bad value can go in but we don't warn about it for compat reasons. Therefore we adopted a strategy of simulating an assignment of the default value to the parameter, giving us the desired warnings in the method signature as well as the desired initial nullable state for the parameter.
+However, unconstrained generics present a problem where a bad value can go in but we don't warn about it for compat reasons. Therefore we adopted a strategy of simulating a assignment of the default value to the parameter in the method body, then joining in the resulting state, giving us the desired warnings in the method signature as well as the desired initial nullable state for the parameter.
 
 ```cs
 class C<T>
@@ -111,14 +111,14 @@ This last sample is just an annoyance. Here we synthesize a distinct parameter s
 ```cs
 public class Base<T>
 {
-    public virtual void M(T t = default) { } // no warning
+    public virtual void M(T t = default) { } // let's start warning here
 }
 
 public class Override : Base<string>
 {
     public override void M(string s)
     {
-        s.ToString(); // no warning today, but something in this sample ought to warn. :)
+        s.ToString(); // let's not warn here
     }
 }
 ```
@@ -128,73 +128,3 @@ As a user you'd probably find a warning on `s.ToString()` confusing and useless-
 
 As far as implementation strategy: we should just do this in SourceComplexParameterSymbol at the same time we bind the parameter's default value. We can ensure sufficient amount of consistency, as well as reasonable handling of suppression, perhaps by creating a NullableWalker and doing a "mini-analysis" of the assignment of the default value whose final state is discarded.
 
----
-
-## Analysis of calls
-It turns out there is another whole set of concerns here, which only overlap a bit with the declaration scenarios. Consider the following samples:
-
-```cs
-M1().ToString(); // no warning
-M1(null).ToString(); // warning
-M1("a").ToString(); // no warning
-
-[return: NotNullIfNotNull("s")]
-string? M1(string? s = "a") => s;
-```
-
-```cs
-M2().ToString(); // no warning
-M2(null).ToString(); // warning
-M2("a").ToString(); // no warning
-
-[return: NotNullIfNotNull("s")]
-string? M2([CallerMemberName] string? s = null) => s;
-```
-
-Here the constant value that we pass implicitly affects the result of the analysis. For quite some time the code that comes up with the "real" default argument, the one we will actually emit based on presence of `[CallerMemberName]`, `[CallerLineNumber]` etc. attributes, has lived in LocalRewriter. It is somewhat hacked up to make different decisions based on whether it is being called from lowering or from IOperation. The places that need to know this information are:
-1. The compiler lowering layer
-2. IOperation
-3. NullableWalker
-
-NullableWalker must call into the code in LocalRewriter to generate a BoundExpression that wraps the ConstantValue associated with the optional parameter. This tends to make behavior uniform between source and metadata methods, so I believe we should keep doing that. The following example illustrates what I mean:
-
-```cs
-M1().ToString(); // we warn here since the synthesized default argument just looks at ConstantValue.Null without considering the suppression
-
-[return: NotNullIfNotNull("s")]
-string? M1(string s = null!) => s; // default value warning is suppressed
-```
-
-Because we have no way of encoding suppression in constant values in metadata (and probably no desire to come up with such an encoding), this approach gets us the same behavior at the call site whether `M1` is from source or from metadata. It's also worth noting that nullable warnings from the synthesized implicit arguments are **always suppressed**, because they are only a symptom of a bad default value that needs to be fixed in the signature.
-
-Synthesizing the BoundExpression on the fly in NullableWalker has [negative impact on the implementation](https://github.com/dotnet/roslyn/blob/21ca45690196dfd7bd159636a9acf3fd2a86949b/src/Compilers/CSharp/Portable/FlowAnalysis/NullableWalker.cs#L5174-L5200), particularly because we must maintain a dictionary of `_defaultValuesOpt` and we have to use the `_disableNullabilityAnalysis` flag when visiting the synthesized arguments to keep from triggering debug assertions.
-
-## Suggested change to calls
-
-Instead of keeping the logic for "what's the actual implicit argument being passed" in LocalRewriter, let's determine what these arguments are *at the time the call is bound*. I propose modifying BoundCall roughly as follows:
-
-```xml
-<Node Name="BoundCall" Base="BoundExpression">
-    <!-- ...leave all existing properties as-is -->
-
-    <!-- Implicitly passed default arguments to the method. -->
-    <Field Name="DefaultArgumentsOpt" Type="ImmutableArray&lt;BoundDefaultArgument&gt;" Null="allow" />
-</Node>
-
-<Node Name="BoundDefaultArgument" Base="BoundNode">
-    <Field Name="Parameter" Type="ParameterSymbol" />
-    <Field Name="Argument" Type="BoundExpression" />
-</Node>
-```
-
-This can accomplish a few things:
-
-1. Fix the layering violation in IOperation and NullableWalker by making it so those components no longer need to reach into lowering.
-2. Simplify usages and allow removal of some ugly workarounds by making the set of "arguments that will actually be emitted" available in the bound tree.
-3. Reduce multiple binding of the default arguments, since we know the arguments will be needed to emit in batch scenarios, and the arguments will be needed if nullable is enabled or if the project uses IOperation-based analyzers.
-
-Lowering would handle the `BoundCall.DefaultArgumentsOpt` by simply folding them into the `BoundCall.Arguments` at the appropriate position when rewriting the call.
-
-# Summary
-- Don't use parameter default values to modify the parameter's initial state. Just warn on any bad default value.
-- Include the actual default arguments that will be passed in a BoundCall, accounting for any call-site dependent behavior from CallerMemberName and similar attributes.
