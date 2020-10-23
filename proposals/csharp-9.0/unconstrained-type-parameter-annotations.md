@@ -32,8 +32,28 @@ var u1 = new U[0].FirstOrDefault();  // U? u1
 var u2 = new U?[0].FirstOrDefault(); // U? u2
 ```
 
-For return values, `T?` is equivalent to `[MaybeNull]T`.
-For argument values, `T?` is equivalent to `[AllowNull]T`.
+If `T` is substituted with a type `U`, then `T?` represents `U?`, even within a `#nullable disable` context.
+```C#
+#nullable disable
+var u3 = new U[0].FirstOrDefault();  // U? u3
+```
+
+For return values, `T?` is equivalent to `[MaybeNull]T`;
+for argument values, `T?` is equivalent to `[AllowNull]T`.
+The equivalence is important when overriding or implementing interfaces from an assembly compiled with C#8.
+```C#
+public abstract class A
+{
+    [return: MaybeNull] public abstract T F1<T>();
+    public abstract void F2<T>([AllowNull] T t);
+}
+
+public class B : A
+{
+    public override T? F1<T>() where T : default { ... }       // matches A.F1<T>()
+    public override void F2<T>(T? t) where T : default { ... } // matches A.F2<T>()
+}
+```
 
 ## `default` constraint
 
