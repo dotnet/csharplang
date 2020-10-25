@@ -2,6 +2,7 @@
 
 ## Schedule ASAP
 
+- Pointer types for record members? (Julien, [issue](https://github.com/dotnet/roslyn/issues/48115))
 
 
 ## Schedule when convenient
