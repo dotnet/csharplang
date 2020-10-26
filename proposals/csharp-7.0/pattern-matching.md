@@ -61,6 +61,10 @@ Certain combinations of static type of the left-hand-side and the given type are
 > Note: [In C# 7.1 we extend this](../csharp-7.1/generics-pattern-match.md) to permit a pattern-matching operation if either the input type or the type `T` is an open type. This paragraph is replaced by the following:
 > 
 > Certain combinations of static type of the left-hand-side and the given type are considered incompatible and result in compile-time error. A value of static type `E` is said to be *pattern compatible* with the type `T` if there exists an identity conversion, an implicit reference conversion, a boxing conversion, an explicit reference conversion, or an unboxing conversion from `E` to `T`, **or if either `E` or `T` is an open type**. It is a compile-time error if an expression of type `E` is not pattern compatible with the type in a type pattern that it is matched with.
+>
+> [In C# 9.0 we extend this](../csharp-9.0/pattern-match-span-of-char-on-string.md) to permit a pattern-matching operation if the input type is `System.Span<char>` or `ReadOnlySpan<char>` and `T` is `string`. This paragraph is replaced by the following:
+> 
+> Certain combinations of static type of the left-hand-side and the given type are considered incompatible and result in compile-time error. A value of static type `E` is said to be *pattern compatible* with the type `T` if there exists an identity conversion, an implicit reference conversion, a boxing conversion, an explicit reference conversion, or an unboxing conversion from `E` to `T`, or if either `E` or `T` is an open type, or if `E` is `System.Span<char>` or `System.ReadOnlySpan<char>` and `T` is string. It is a compile-time error if an expression of type `E` is not pattern compatible with the type in a type pattern that it is matched with.
 
 The declaration pattern is useful for performing run-time type tests of reference types, and replaces the idiom
 
@@ -97,6 +101,10 @@ constant_pattern
 A constant pattern tests the value of an expression against a constant value. The constant may be any constant expression, such as a literal, the name of a declared `const` variable, or an enumeration constant, or a `typeof` expression.
 
 If both *e* and *c* are of integral types, the pattern is considered matched if the result of the expression `e == c` is `true`.
+
+> [In C# 9.0 we extend this](../csharp-9.0/pattern-match-span-of-char-on-string.md) to permit a pattern-matching operation if `e` is `System.Span<char>` or `ReadOnlySpan<char>` and c is a `string`. This paragraph is added:
+>
+> If *e* is of type `System.Span<char>` or `System.ReadOnlySpan<char>`, and `c` is a constant string, and `c` does not have a constant value of `null`, then the pattern is considered matching if `System.MemoryExtensions.SequenceEqual<char>(e, System.MemoryExtensions.AsSpan(c))` returns `true`.
 
 Otherwise the pattern is considered matching if `object.Equals(e, c)` returns `true`. In this case it is a compile-time error if the static type of *e* is not *pattern compatible* with the type of the constant.
 
