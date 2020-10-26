@@ -53,7 +53,7 @@ positional_pattern
     : type? '(' subpatterns? ')' property_subpattern? simple_designation?
     ;
 subpatterns
-    : subpattern
+    : subpattern ','?
     | subpattern ',' subpatterns
     ;
 subpattern
