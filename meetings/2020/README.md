@@ -40,14 +40,16 @@
 
 - *Design review*
 
-## Oct 26, 2020
-
-- Triage [untriaged championed issues](https://github.com/dotnet/csharplang/issues?q=is%3Aissue+is%3Aopen+label%3A%22Proposal+champion%22+no%3Amilestone)
-- Triage [Backlog](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3ABacklog) for issues to promote to the [Working Set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22)
-
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Oct 26, 2020
+
+[C# Language Design Notes for October 26st, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-26.md)
+
+- Pointer types in records
+- Triage
 
 ## Oct 21, 2020
 
