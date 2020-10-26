@@ -20,7 +20,7 @@ For perfomance, usage of `Span<char>` and `ReadOnlySpan<char>` is preferred over
 
 A common operation on strings is to use a switch to test if it is a particular value, and the compiler optimizes such a switch. However there is currently no way to do the same on a `ReadOnlySpan<char>` efficiently, other than implementing the switch and the optimization manually.
 
-In order to encourage adoption of `ReadOnlySpan<char>` we allow pattern matching a `ReadOnlySpan<char>`, on a constant `string`, and optimize such switches on `ReadOnlySpan<char>` in the same was as switches on `string`.
+In order to encourage adoption of `ReadOnlySpan<char>` we allow pattern matching a `ReadOnlySpan<char>`, on a constant `string`, and optimize such switches on `ReadOnlySpan<char>` in the same way as switches on `string`.
 
 ## Detailed design
 [design]: #detailed-design
