@@ -1,7 +1,7 @@
 <!--
 New language feature proposals should fully fill out this template. This should include a complete detailed design, which describes the syntax of the feature, what that syntax means, and how it affects current parts of the spec. Please make sure to point out specific spec sections that need to be updated for this feature. If you do not have the knowledge or experience to fill this out completely, that's perfectly alright: please open this proposal as a Discussion instead (https://github.com/dotnet/csharplang/discussions/new) and the community can generally discuss the proposal in less formal terms.
 -->
-# FEATURE_NAME
+# Pattern match `Span<char>` on a constant string
 
 * [x] Proposed
 * [x] Prototype: Completed
