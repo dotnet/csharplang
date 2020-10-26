@@ -4,8 +4,8 @@ New language feature proposals should fully fill out this template. This should 
 # FEATURE_NAME
 
 * [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
+* [x] Prototype: Completed
+* [x] Implementation: In Progress
 * [ ] Specification: Not Started
 
 ## Summary
