@@ -16,7 +16,7 @@ Permit pattern matching a `Span<char>` and a `ReadOnlySpan<char>` on a constant 
 ## Motivation
 [motivation]: #motivation
 
-For perfomance, usage of `Span<char>` and `ReadOnlySpan<char>` is preffered over string in many scenarios. The framework has added many new APIs to allow you to use `ReadOnlySpan<char>` in place of a `string`.
+For perfomance, usage of `Span<char>` and `ReadOnlySpan<char>` is preferred over string in many scenarios. The framework has added many new APIs to allow you to use `ReadOnlySpan<char>` in place of a `string`.
 
 A common operation on strings is to use a switch to test if it is a particular value, and the compiler optimizes such a switch. However there is currently no way to do the same on a `ReadOnlySpan<char>` efficiently, other than implementing the switch and the optimization manually.
 
