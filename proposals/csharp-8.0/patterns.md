@@ -50,23 +50,19 @@ var_pattern
     : 'var' designation
     ;
 positional_pattern
-    : type? '(' positional_subpatterns? ')' property_subpattern? simple_designation?
-    ; 
-positional_subpatterns
-    : subpattern
-    | subpattern ',' positional_subpatterns
-    ;  
+    : type? '(' subpatterns? ')' property_subpattern? simple_designation?
+    ;
+subpatterns
+    : subpattern ','?
+    | subpattern ',' subpatterns
+    ;
 subpattern
     : pattern
     | identifier ':' pattern
     ;
 property_subpattern
-    : '{' property_subpatterns? '}'
+    : '{' subpatterns? '}'
     ;
-property_subpatterns
-    : subpattern ','?
-    | subpattern ',' property_subpatterns
-    ; 
 property_pattern
     : type? property_subpattern simple_designation?
     ;
