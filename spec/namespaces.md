@@ -134,7 +134,7 @@ namespace Name
 
 Specifically, a *single_line_namespace_declaration* is treated the same as a *namespace_declaration* at the same location in the *compilation_unit* with the same *qualified_identifier*.  The *extern_alias_directive*s, *using_directive*s and *type_declaration*s of that *single_line_namespace_declaration* act as if they were declared in the same order inside the *namespace_body* of that *namespace_declaration*.
 
-A source file cannot contain both a *single_line_namespace_declaration* and a *namespace_declaration*.  A source file cannot contain multiple *single_line_namespace_declaration*s
+A source file cannot contain both a *single_line_namespace_declaration* and a *namespace_declaration*.  A source file cannot contain multiple *single_line_namespace_declaration*s.
 
 ## Extern aliases
 
