@@ -10,7 +10,7 @@ A *compilation_unit* defines the overall structure of a source file. A compilati
 
 ```antlr
 compilation_unit
-    : extern_alias_directive* using_directive* global_attributes? namespace_member_declaration*
+    : extern_alias_directive* using_directive* global_attributes? (single_line_namespace | (namespace_member_declaration*))
     ;
 ```
 
@@ -36,11 +36,15 @@ The two compilation units contribute to the single global namespace, in this cas
 
 ## Namespace declarations
 
-A *namespace_declaration* consists of the keyword `namespace`, followed by a namespace name and body, optionally followed by a semicolon.
+A *namespace_declaration* has two different forms.  The first consists of the keyword `namespace`, followed by a namespace name and body, optionally followed by a semicolon.  The second consists of the keyword `namespace`, followed by a namespace name, a semicolon and an optional list of directives and declarations.
 
 ```antlr
 namespace_declaration
     : 'namespace' qualified_identifier namespace_body ';'?
+    ;
+    
+single_line_namespace_declaration
+    : 'namespace' qualified_identifier ';' extern_alias_directive* using_directive* type_declaration*
     ;
 
 qualified_identifier
@@ -94,6 +98,32 @@ namespace N1.N2
 }
 ```
 the two namespace declarations above contribute to the same declaration space, in this case declaring two classes with the fully qualified names `N1.N2.A` and `N1.N2.B`. Because the two declarations contribute to the same declaration space, it would have been an error if each contained a declaration of a member with the same name.
+
+A *single_line_namespace_declaration* permits a namespace declaration to be written without the `{ ... }` block.  For example:
+
+```csharp
+namespace Name;
+extern alias X;
+using U;
+
+class C
+{
+}
+```
+is semantically equivalent to
+```csharp
+namespace Name
+{
+    extern alias X;
+    using U;
+
+    class C
+    {
+    }
+}
+```
+
+A source file cannot contain both a *single_line_namespace_declaration* and a *namespace_declaration*.  A source file cannot contain multiple *single_line_namespace_declaration*s
 
 ## Extern aliases
 
