@@ -102,9 +102,15 @@ the two namespace declarations above contribute to the same declaration space, i
 A *single_line_namespace_declaration* permits a namespace declaration to be written without the `{ ... }` block.  For example:
 
 ```csharp
+extern alias OuterAliases;
+using OuterUsings;
+
+[assembly: Attributes]
+
 namespace Name;
-extern alias X;
-using U;
+
+extern alias InnerAlias;
+using InnerUsing;
 
 class C
 {
@@ -112,10 +118,15 @@ class C
 ```
 is semantically equivalent to
 ```csharp
+extern alias OuterAliases;
+using OuterUsings;
+
+[assembly: Attributes]
+
 namespace Name
 {
-    extern alias X;
-    using U;
+    extern alias InnerAliases;
+    using InnerUsings;
 
     class C
     {
