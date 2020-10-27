@@ -124,6 +124,8 @@ namespace Name
 }
 ```
 
+Specifically, the *extern_alias_directive*s, *using_directive*s and *type_declaration*s of a *single_line_namespace_declaration* act as if they were declared inside the *namespace_body* of a *namespace_declaration* with the same *qualified_identifier* as the first *namespace_member_declaration* of the *compilation_unit*.
+
 A source file cannot contain both a *single_line_namespace_declaration* and a *namespace_declaration*.  A source file cannot contain multiple *single_line_namespace_declaration*s
 
 ## Extern aliases
