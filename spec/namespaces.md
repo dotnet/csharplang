@@ -36,7 +36,8 @@ The two compilation units contribute to the single global namespace, in this cas
 
 ## Namespace declarations
 
-A *namespace_declaration* has two different forms.  The first consists of the keyword `namespace`, followed by a namespace name and body, optionally followed by a semicolon.  The second consists of the keyword `namespace`, followed by a namespace name, a semicolon and an optional list of directives and declarations.
+A *namespace_declaration* consists of the keyword `namespace`, followed by a namespace name and body, optionally followed by a semicolon.
+A *single_line_namespace_declaration* consists of the keyword `namespace`, followed by a namespace name, a semicolon and an optional list of directives and type declarations.
 
 ```antlr
 namespace_declaration
