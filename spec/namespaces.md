@@ -6,11 +6,16 @@ Using directives ([Using directives](namespaces.md#using-directives)) are provid
 
 ## Compilation units
 
-A *compilation_unit* defines the overall structure of a source file. A compilation unit consists of zero or more *using_directive*s followed by zero or more *global_attributes* followed by zero or more *namespace_member_declaration*s.
+A *compilation_unit* defines the overall structure of a source file. A compilation unit consists of zero or more *using_directive*s followed by zero or more *global_attributes* followed by a *compilation_unit_body*. A *compilation_unit_body* can either be a *single_line_namespace* or zero or more *namespace_member_declaration*s.
 
 ```antlr
 compilation_unit
-    : extern_alias_directive* using_directive* global_attributes? (single_line_namespace | (namespace_member_declaration*))
+    : extern_alias_directive* using_directive* global_attributes? compilation_unit_body
+    ;
+
+compilation_unit_body
+    : namespace_member_declaration*
+    | single_line_namespace
     ;
 ```
 
@@ -33,6 +38,8 @@ class B {}
 ```
 
 The two compilation units contribute to the single global namespace, in this case declaring two classes with the fully qualified names `A` and `B`. Because the two compilation units contribute to the same declaration space, it would have been an error if each contained a declaration of a member with the same name.
+
+A *single_line_namespace* will contribute members corresponding to the *namespace_declaration* it is semanticall equivalent to.  See ([Namespace Declarations](#namespace-declarations)) for more details.
 
 ## Namespace declarations
 
