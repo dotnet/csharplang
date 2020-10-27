@@ -39,7 +39,7 @@ class B {}
 
 The two compilation units contribute to the single global namespace, in this case declaring two classes with the fully qualified names `A` and `B`. Because the two compilation units contribute to the same declaration space, it would have been an error if each contained a declaration of a member with the same name.
 
-A *single_line_namespace* will contribute members corresponding to the *namespace_declaration* it is semanticall equivalent to.  See ([Namespace Declarations](#namespace-declarations)) for more details.
+A *single_line_namespace* will contribute members corresponding to the *namespace_declaration* it is semantically equivalent to.  See ([Namespace Declarations](#namespace-declarations)) for more details.
 
 ## Namespace declarations
 
