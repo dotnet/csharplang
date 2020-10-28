@@ -42,6 +42,7 @@ an accessible concrete non-virtual member with a "matching" signature is inherit
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 It is an error for a member of a record to be named "Clone".
+It is an error for an instance field of a record to have a pointer type.
 
 The synthesized members are as follows:
 
@@ -365,7 +366,9 @@ of the `record_base` clause and within initializers of instance fields or proper
 be an error in these locations (similar to how instance members are in scope in regular constructor initializers
 today, but an error to use), but the parameters of the primary constructor would be in scope and useable and
 would shadow members. Static members would also be useable, similar to how base calls and initializers work in
-ordinary constructors today. 
+ordinary constructors today.
+
+A warning is produced is a parameter of the primary constructor is not read.
 
 Expression variables declared in the `argument_list` are in scope within the `argument_list`. The same shadowing
 rules as within an argument list of a regular constructor initializer apply.
