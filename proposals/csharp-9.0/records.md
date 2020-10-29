@@ -42,7 +42,7 @@ an accessible concrete non-virtual member with a "matching" signature is inherit
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 It is an error for a member of a record to be named "Clone".
-It is an error for an instance field of a record to have a pointer type.
+It is an error for an instance field of a record to have an unsafe type.
 
 The synthesized members are as follows:
 
