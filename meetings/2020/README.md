@@ -36,9 +36,8 @@
 
 ## Nov 2, 2020
 
-## Oct 28, 2020
+- [Nullable parameter default value analysis](https://github.com/RikkiGibson/csharplang/blob/nullable-param-default/proposals/nullable-parameter-default-value-analysis.md) (Rikki)
 
-- *Design review*
 
 # C# Language Design Notes for 2020
 
