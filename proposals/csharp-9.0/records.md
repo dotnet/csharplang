@@ -368,7 +368,7 @@ today, but an error to use), but the parameters of the primary constructor would
 would shadow members. Static members would also be useable, similar to how base calls and initializers work in
 ordinary constructors today.
 
-A warning is produced is a parameter of the primary constructor is not read.
+A warning is produced if a parameter of the primary constructor is not read.
 
 Expression variables declared in the `argument_list` are in scope within the `argument_list`. The same shadowing
 rules as within an argument list of a regular constructor initializer apply.
