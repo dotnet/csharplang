@@ -242,6 +242,27 @@ Restrictions of this feature:
 - All overrides of a property must have `init` if the base had `init`. This rule
 also applies to interface implementation.
 
+### Readonly structs
+
+`init` accessors (both auto-implemented accessors and manually-implemented
+accessors) are permitted on properties of `readonly struct`s, as well as
+`readonly` properties. `init` accessors are not permitted to be marked
+`readonly` themselves, in both `readonly` and non-`readonly` `struct` types.
+
+```cs
+readonly struct ReadonlyStruct1
+{
+    public int Prop1 { get; init; } // Allowed
+}
+
+struct ReadonlyStruct2
+{
+    public readonly int Prop2 { get; init; } // Allowed
+
+    public int Prop3 { get; readonly init; } // Error
+}
+```
+
 ### Metadata encoding 
 Property `init` accessors will be emitted as a standard `set` accessor with
 the return type marked with a modreq of `IsExternalInit`. This is a new type
