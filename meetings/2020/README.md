@@ -33,14 +33,18 @@
 
 ## Nov 9, 2020
 
-## Nov 4, 2020
-
-- [Nullable parameter default value analysis](https://github.com/RikkiGibson/csharplang/blob/nullable-param-default/proposals/nullable-parameter-default-value-analysis.md) (Rikki)
 - Triage continued (Mads)
 
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Nov 4, 2020
+
+[C# Language Design Notes for November 4th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-11-04.md)
+
+- Nullable parameter defaults
+- Argument state after call for AllowNull parameters
 
 ## Oct 26, 2020
 
