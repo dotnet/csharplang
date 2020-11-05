@@ -58,7 +58,7 @@ Nullable reference types and nullable type parameters cannot occur in the follow
 
 A warning is given on a `nullable_reference_type` and `nullable_type_parameter` in a *disabled* nullable annotation context.
 
-### Nullable and nonnullable class constraints
+### `class` and `class?` constraint
 
 The `class` constraint has a nullable counterpart `class?`:
 
@@ -69,9 +69,9 @@ primary_constraint
     ;
 ```
 
-A type parameter constrained with `class` (in an *enabled* annotation context) must be a nonnullable reference type.
+A type parameter constrained with `class` (in an *enabled* annotation context) must be instantiated with a nonnullable reference type.
 
-A type parameter constrained with `class?` (or `class` in a *disabled* annotation context) may either be a nullable or nonnullable reference type.
+A type parameter constrained with `class?` (or `class` in a *disabled* annotation context) may either be instantiated with a nullable or nonnullable reference type.
 
 A warning is given on a `class?` constraint in a *disabled* annotation context.
 
@@ -88,7 +88,7 @@ primary_constraint
 
 ### `default` constraint
 
-The `default` constraint can be used on a method override or explicit implementation to disambiguate `T?` meaning "nullable type parameter" from "nullable value type" (`Nullable<T>`).
+The `default` constraint can be used on a method override or explicit implementation to disambiguate `T?` meaning "nullable type parameter" from "nullable value type" (`Nullable<T>`). Lacking the `default` constraint a `T?` syntax in an override or explicit implementation will be interpreted as `Nullable<T>`
 
 See https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/unconstrained-type-parameter-annotations.md#default-constraint
 
@@ -265,7 +265,7 @@ tracked_expression
 
 Where the identifiers denote fields or properties.
 
-The null state for tracked variables is "not null" in unreachable code.
+The null state for tracked variables is "not null" in unreachable code. This follows other decisions around unreachable code like considering all locals to be definitely assigned.
 
 ***Describe null state transitions similar to definite assignment***
 
@@ -361,9 +361,9 @@ The null state of the following expression forms is always "not null":
 ### Nested functions
 
 Nested functions (lambdas and local functions) are treated like methods, except in regards to their captured variables.
-The default state of a captured variable inside a lambda or local function is the intersection of the nullable state
-of the variable at all the "uses" of that nested function. A use of a function is either a call to that function, or
-where it is converted to a delegate.
+The initial state of a captured variable inside a lambda or local function is the intersection of the nullable state
+of the variable at all the "uses" of that nested function or lambda. A use of a local function is either a call to that 
+function, or where it is converted to a delegate. A use of a lambda is the point at which it is defined in source.
 
 ## Type inference
 
@@ -448,5 +448,4 @@ The *Merge* function takes two candidate types and a direction (*+* or *-*):
 ### Override and implementation nullability mismatch
 
 ## Attributes for special null behavior
-
 
