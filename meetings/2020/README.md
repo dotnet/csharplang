@@ -31,8 +31,6 @@
 
 ## Nov 11, 2020
 
-## Nov 9, 2020
-
 - Triage continued (Mads)
 
 # C# Language Design Notes for 2020
