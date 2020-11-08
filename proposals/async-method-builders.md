@@ -52,11 +52,11 @@ the compiler will generate code akin to:
 [CompilerGenerated]
 static ValueTask<int> ExampleAsync()
 {
-	<ExampleAsync>d__29 stateMachine;
-	stateMachine.<>t__builder = AsyncValueTaskMethodBuilder<int>.Create();
-	stateMachine.<>1__state = -1;
-	stateMachine.<>t__builder.Start(ref stateMachine);
-	return stateMachine.<>t__builder.Task;
+    <ExampleAsync>d__29 stateMachine;
+    stateMachine.<>t__builder = AsyncValueTaskMethodBuilder<int>.Create();
+    stateMachine.<>1__state = -1;
+    stateMachine.<>t__builder.Start(ref stateMachine);
+    return stateMachine.<>t__builder.Task;
 }
 ```
 With this change, if the developer wrote:
@@ -71,11 +71,11 @@ it would instead be compiled to:
 [AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<int>))] // retained but not necessary anymore
 static ValueTask<int> ExampleAsync()
 {
-	<ExampleAsync>d__29 stateMachine;
-	stateMachine.<>t__builder = PoolingAsyncValueTaskMethodBuilder<int>.Create(); // <>t__builder now a different type
-	stateMachine.<>1__state = -1;
-	stateMachine.<>t__builder.Start(ref stateMachine);
-	return stateMachine.<>t__builder.Task;
+    <ExampleAsync>d__29 stateMachine;
+    stateMachine.<>t__builder = PoolingAsyncValueTaskMethodBuilder<int>.Create(); // <>t__builder now a different type
+    stateMachine.<>1__state = -1;
+    stateMachine.<>t__builder.Start(ref stateMachine);
+    return stateMachine.<>t__builder.Task;
 }
 ```
 
@@ -111,11 +111,11 @@ would be compiled to:
 [AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<>), 16)]
 static ValueTask<int> ExampleAsync()
 {
-	<ExampleAsync>d__29 stateMachine;
-	stateMachine.<>t__builder = PoolingAsyncValueTaskMethodBuilder<int>.Create(16); // attr arguments passed to Create
-	stateMachine.<>1__state = -1;
-	stateMachine.<>t__builder.Start(ref stateMachine);
-	return stateMachine.<>t__builder.Task;
+    <ExampleAsync>d__29 stateMachine;
+    stateMachine.<>t__builder = PoolingAsyncValueTaskMethodBuilder<int>.Create(16); // attr arguments passed to Create
+    stateMachine.<>1__state = -1;
+    stateMachine.<>t__builder.Start(ref stateMachine);
+    return stateMachine.<>t__builder.Task;
 }
 ```
 Such support would enable custom builders to be parameterized per call site, without requiring the builder to perform complicated and expensive reflection.
