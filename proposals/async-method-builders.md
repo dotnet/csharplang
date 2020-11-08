@@ -141,17 +141,7 @@ This would not only make it more convenient than putting the attribute on every 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-* The syntax for applying such an attribute to a method is verbose.  This is an advanced feature, but a developer using it frequently could create their own attribute derived from the one they care about, and then use that derived attribute to simplify, e.g.
-```C#
-class Pool<T> : AsyncMethodBuilderAttribute<T>
-{
-    public Pool() : base(typeof(AsyncValueTaskMethodBuilder<T>)) { }
-}
-...
-[Pool]
-internal async ValueTask<int> ExampleAsync() { ... }
-```
-I don't know exactly how this could be made to work with the createArguments support, though.  The derived attribute could also accept a params array and pass it down to the base, but the compiler would need to be able to recognize it.  Maybe a heuristic of special-casing any params object[] at the end of an AsyncMethodBuilder-derived attribute.
+* The syntax for applying such an attribute to a method is verbose.  The impact of this is lessened if a developer can apply it to multiple methods en mass, e.g. at the type or module level.
 
 ## Alternatives
 [alternatives]: #alternatives
