@@ -2,7 +2,7 @@
 
 ## Schedule ASAP
 
-- Pointer types for record members? (Julien, [issue](https://github.com/dotnet/roslyn/issues/48115))
+- IsRecord in metadata (https://github.com/dotnet/csharplang/issues/4121, Fred/Cyrus/Jared)
 
 
 ## Schedule when convenient
