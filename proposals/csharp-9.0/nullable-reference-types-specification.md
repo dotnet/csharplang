@@ -2,32 +2,52 @@
 
 ***This is a work in progress - several parts are missing or incomplete.***
 
+This feature adds two new kinds of nullable types (nullable reference types and nullable generic types) to the existing nullable value types, and introduces a static flow analysis for purpose of null-safety.
+
 ## Syntax
 
-### Nullable reference types
+### Nullable reference types and nullable type parameters
 
-Nullable reference types have the same syntax `T?` as the short form of nullable value types, but do not have a corresponding long form.
+Nullable reference types and nullable type parameters have the same syntax `T?` as the short form of nullable value types, but do not have a corresponding long form.
 
-For the purposes of the specification, the current `nullable_type` production is renamed to `nullable_value_type`, and a `nullable_reference_type` production is added:
+For the purposes of the specification, the current `nullable_type` production is renamed to `nullable_value_type`, and `nullable_reference_type` and `nullable_type_parameter` productions are added:
 
 ```antlr
+type
+    : value_type
+    | reference_type
+    | nullable_type_parameter
+    | type_parameter
+    | type_unsafe
+    ;
+
 reference_type
     : ...
     | nullable_reference_type
     ;
-    
+
 nullable_reference_type
     : non_nullable_reference_type '?'
     ;
-    
+
 non_nullable_reference_type
-    : type
+    : reference_type
+    ;
+
+nullable_type_parameter
+    : non_nullable_non_value_type_parameter '?'
+    ;
+
+non_nullable_non_value_type_parameter
+    : type_parameter
     ;
 ```
 
-The `non_nullable_reference_type` in a `nullable_reference_type` must be a non-nullable reference type (class, interface, delegate or array), or a type parameter that is constrained to be a non-nullable reference type (through the `class` constraint, or a class other than `object`).
+The `non_nullable_reference_type` in a `nullable_reference_type` must be a nonnullable reference type (class, interface, delegate or array).
 
-Nullable reference types cannot occur in the following positions:
+The `non_nullable_non_value_type_parameter` in `nullable_type_parameter` must be a type parameter that isn't constrained to be a value type.
+
+Nullable reference types and nullable type parameters cannot occur in the following positions:
 
 - as a base class or interface
 - as the receiver of a `member_access`
@@ -36,9 +56,9 @@ Nullable reference types cannot occur in the following positions:
 - as the `type` in an `is_expression`, a `catch_clause` or a `type_pattern`
 - as the `interface` in a fully qualified interface member name
 
-A warning is given on a `nullable_reference_type` where the nullable annotation context is disabled.
+A warning is given on a `nullable_reference_type` and `nullable_type_parameter` in a *disabled* nullable annotation context.
 
-### Nullable class constraint
+### `class` and `class?` constraint
 
 The `class` constraint has a nullable counterpart `class?`:
 
@@ -49,29 +69,75 @@ primary_constraint
     ;
 ```
 
+A type parameter constrained with `class` (in an *enabled* annotation context) must be instantiated with a nonnullable reference type.
+
+A type parameter constrained with `class?` (or `class` in a *disabled* annotation context) may either be instantiated with a nullable or nonnullable reference type.
+
+A warning is given on a `class?` constraint in a *disabled* annotation context.
+
+### `notnull` constraint
+
+A type parameter constrained with `notnull` may not be a nullable type (nullable value type, nullable reference type or nullable type parameter).
+
+```antlr
+primary_constraint
+    : ...
+    | 'notnull'
+    ;
+```
+
+### `default` constraint
+
+The `default` constraint can be used on a method override or explicit implementation to disambiguate `T?` meaning "nullable type parameter" from "nullable value type" (`Nullable<T>`). Lacking the `default` constraint a `T?` syntax in an override or explicit implementation will be interpreted as `Nullable<T>`
+
+See https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/unconstrained-type-parameter-annotations.md#default-constraint
+
 ### The null-forgiving operator
 
-The post-fix `!` operator is called the null-forgiving operator.
+The post-fix `!` operator is called the null-forgiving operator. It can be applied on a *primary_expression* or within a *null_conditional_expression*:
 
 ```antlr
 primary_expression
     : ...
     | null_forgiving_expression
     ;
-    
+
 null_forgiving_expression
     : primary_expression '!'
     ;
+
+null_conditional_expression
+    : primary_expression null_conditional_operations_no_suppression suppression?
+    ;
+
+null_conditional_operations_no_suppression
+    : null_conditional_operations? '?' '.' identifier type_argument_list?
+    | null_conditional_operations? '?' '[' argument_list ']'
+    | null_conditional_operations '.' identifier type_argument_list?
+    | null_conditional_operations '[' argument_list ']'
+    | null_conditional_operations '(' argument_list? ')'
+    ;
+
+null_conditional_operations
+    : null_conditional_operations_no_suppression suppression?
+    ;
+
+suppression
+    : '!'
+    ;
 ```
 
-The `primary_expression` must be of a reference type.  
+For example:
 
-The postfix `!` operator has no runtime effect - it evaluates to the result of the underlying expression. Its only role is to change the null state of the expression, and to limit warnings given on its use.
+```csharp
+var v = expr!;
+expr!.M();
+_ = a?.b!.c;
+```
 
-### nullable implicitly typed local variables
+The `primary_expression` and `null_conditional_operations_no_suppression` must be of a nullable type.
 
-`var` infers an annotated type for reference types.
-For instance, in `var s = "";` the `var` is inferred as `string?`.
+The postfix `!` operator has no runtime effect - it evaluates to the result of the underlying expression. Its only role is to change the null state of the expression to "not null", and to limit warnings given on its use.
 
 ### Nullable compiler directives
 
@@ -82,33 +148,37 @@ pp_directive
     : ...
     | pp_nullable
     ;
-    
+
 pp_nullable
-    : whitespace? '#' whitespace? 'nullable' whitespace nullable_action pp_new_line
+    : whitespace? '#' whitespace? 'nullable' whitespace nullable_action (whitespace nullable_target)? pp_new_line
     ;
-    
+
 nullable_action
     : 'disable'
     | 'enable'
     | 'restore'
     ;
+
+nullable_target
+    : 'warnings'
+    | 'annotations'
+    ;
 ```
 
-`#pragma warning` directives are expanded to allow changing the nullable warning context, and to allow individual warnings to be enabled on even when they're disabled by default:
+`#pragma warning` directives are expanded to allow changing the nullable warning context:
 
 ```antlr
 pragma_warning_body
     : ...
-    | 'warning' whitespace nullable_action whitespace 'nullable'
-    ;
-
-warning_action
-    : ...
-    | 'enable'
+    | 'warning' whitespace warning_action whitespace 'nullable'
     ;
 ```
 
-Note that the new form of `pragma_warning_body` uses `nullable_action`, not `warning_action`.
+For example:
+
+```csharp
+#pragma warning disable nullable
+```
 
 ## Nullable contexts
 
@@ -134,13 +204,13 @@ The effect of the directives is as follows:
 
 ## Nullability of types
 
-A given type can have one of four nullabilities: *Oblivious*, *nonnullable*, *nullable* and *unknown*. 
+A given type can have one of three nullabilities: *oblivious*, *nonnullable*, and *nullable*.
 
-*Nonnullable* and *unknown* types may cause warnings if a potential `null` value is assigned to them. *Oblivious* and *nullable* types, however, are "*null-assignable*" and can have `null` values assigned to them without warnings. 
+*Nonnullable* types may cause warnings if a potential `null` value is assigned to them. *Oblivious* and *nullable* types, however, are "*null-assignable*" and can have `null` values assigned to them without warnings.
 
-*Oblivious* and *nonnullable* types can be dereferenced or assigned without warnings. Values of *nullable* and *unknown* types, however, are "*null-yielding*" and may cause warnings when dereferenced or assigned without proper null checking. 
+Values of *oblivious* and *nonnullable* types can be dereferenced or assigned without warnings. Values of *nullable* types, however, are "*null-yielding*" and may cause warnings when dereferenced or assigned without proper null checking.
 
-The *default null state* of a null-yielding type is "maybe null". The default null state of a non-null-yielding type is "not null".
+The *default null state* of a null-yielding type is "maybe null" or "maybe default". The default null state of a non-null-yielding type is "not null".
 
 The kind of type and the nullable annotation context it occurs in determine its nullability:
 
@@ -152,22 +222,11 @@ The kind of type and the nullable annotation context it occurs in determine its 
 
 Type parameters additionally take their constraints into account:
 
-- A type parameter `T` where all constraints (if any) are either null-yielding types (*nullable* and *unknown*) or the `class?` constraint is *unknown*
-- A type parameter `T` where at least one constraint is either *oblivious* or *nonnullable* or one of the `struct` or `class` constraints is
+- A type parameter `T` where all constraints (if any) are either nullable types or the `class?` constraint is *nullable*
+- A type parameter `T` where at least one constraint is either *oblivious* or *nonnullable* or one of the `struct` or `class` or `notnull` constraints is
     - *oblivious* in a *disabled* annotation context
     - *nonnullable* in an *enabled* annotation context
-- A nullable type parameter `T?` where at least one of `T`'s constraints is *oblivious* or *nonnullable* or one of the `struct` or `class` constraints, is
-    - *nullable* in a *disabled* annotation context (but a warning is yielded)
-    - *nullable* in an *enabled* annotation context
-
-For a type parameter `T`, `T?` is only allowed if `T` is known to be a value type or known to be a reference type.
-
-### Nested functions
-
-Nested functions (lambdas and local functions) are treated like methods, except in regards to their captured variables.
-The default state of a captured variable inside a lambda or local function is the intersection of the nullable state
-of the variable at all the "uses" of that nested function. A use of a function is either a call to that function, or
-where it is converted to a delegate.
+- A nullable type parameter `T?` is *nullable*, but a warning is yielded in a *disabled* annotation context if `T` isn't a value type
 
 ### Oblivious vs nonnullable
 
@@ -177,15 +236,19 @@ Whether a given reference type `C` in source code is interpreted as oblivious or
 
 ## Constraints
 
-Nullable reference types can be used as generic constraints. Furthermore `object` is now valid as an explicit constraint. Absence of a constraint is now equivalent to an `object?` constraint (instead of `object`), but (unlike `object` before) `object?` is not prohibited as an explicit constraint.
+Nullable reference types can be used as generic constraints.
 
-`class?` is a new constraint denoting "possibly nullable reference type", whereas `class` denotes "nonnullable reference type".
+`class?` is a new constraint denoting "possibly nullable reference type", whereas `class` in an *enabled* annotation context denotes "nonnullable reference type".
+
+`default` is a new constraint denoting a type parameter that isn't known to be a reference or value type. It can only be used on overridden and explicitly implemented methods. With this constraint, `T?` means a nullable type parameter, as opposed to being a shorthand for `Nullable<T>`.
+
+`notnull` is a new constraint denoting a type parameter that is nonnullable.
 
 The nullability of a type argument or of a constraint does not impact whether the type satisfies the constraint, except where that is already the case today (nullable value types do not satisfy the `struct` constraint). However, if the type argument does not satisfy the nullability requirements of the constraint, a warning may be given.
 
 ## Null state and null tracking
 
-Every expression in a given source location has a *null state*, which indicated whether it is believed to potentially evaluate to null. The null state is either "not null" or "maybe null". The null state is used to determine whether a warning should be given about null-unsafe conversions and dereferences.
+Every expression in a given source location has a *null state*, which indicated whether it is believed to potentially evaluate to null. The null state is either "not null", "maybe null", or "maybe default". The null state is used to determine whether a warning should be given about null-unsafe conversions and dereferences.
 
 ### Null tracking for variables
 
@@ -202,6 +265,8 @@ tracked_expression
 
 Where the identifiers denote fields or properties.
 
+The null state for tracked variables is "not null" in unreachable code. This follows other decisions around unreachable code like considering all locals to be definitely assigned.
+
 ***Describe null state transitions similar to definite assignment***
 
 ### Null state for expressions
@@ -210,7 +275,7 @@ The null state of an expression is derived from its form and type, and from the 
 
 ### Literals
 
-The null state of a `null` literal is "maybe null". The null state of a `default` literal that is being converted to a type that is known not to be a nonnullable value type is "maybe null". The null state of any other literal is "not null".
+The null state of a `null` and `default` literals is "maybe default". The null state of any other literal is "not null".
 
 ### Simple names
 
@@ -234,7 +299,7 @@ If `B` denotes the base type of the enclosing type, `base.I` has the same null s
 
 ### Default expressions
 
-`default(T)` has the null state "non-null" if `T` is known to be a nonnullable value type. Otherwise it has the null state "maybe null".
+`default(T)` has the null state "not null" if `T` is known to be a nonnullable value type. Otherwise it has the null state "maybe default".
 
 ### Null-conditional expressions
 
@@ -242,7 +307,9 @@ A `null_conditional_expression` has the null state "maybe null".
 
 ### Cast expressions
 
-If a cast expression `(T)E` invokes a user-defined conversion, then the null state of the expression is the default null state for its type. Otherwise, if `T` is null-yielding (*nullable* or *unknown*) then the null state is "maybe null". Otherwise the null state is the same as the null state of `E`.
+If a cast expression `(T)E` invokes a user-defined conversion, then the null state of the expression is the default null state for its type. Otherwise, if `T` is *nullable* then the null state is "maybe null". Otherwise the null state is the same as the null state of `E`.
+
+***This needs upddating***
 
 ### Await expressions
 
@@ -291,39 +358,25 @@ The null state of the following expression forms is always "not null":
 - null-forgiving expressions
 - `is` expressions
 
+### Nested functions
+
+Nested functions (lambdas and local functions) are treated like methods, except in regards to their captured variables.
+The initial state of a captured variable inside a lambda or local function is the intersection of the nullable state
+of the variable at all the "uses" of that nested function or lambda. A use of a local function is either a call to that 
+function, or where it is converted to a delegate. A use of a lambda is the point at which it is defined in source.
+
 ## Type inference
 
-### Type inference for `var`
+### nullable implicitly typed local variables
 
-The type inferred for local variables declared with `var` is informed by the null state of the initializing expression.
-
-```csharp
-var x = E;
-```
-
-If the type of `E` is a nullable reference type `C?` and the null state of `E` is "not null" then the type inferred for `x` is `C`. Otherwise, the inferred type is the type of `E`.
-
-The nullability of the type inferred for `x` is determined as described above, based on the annotation context of the `var`, just as if the type had been given explicitly in that position.
-
-### Type inference for `var?`
-
-The type inferred for local variables declared with `var?` is independent of the null state of the initializing expression.
-
-```csharp
-var? x = E;
-```
-
-If the type `T` of `E` is a nullable value type or a nullable reference type then the type inferred for `x` is `T`. Otherwise, if `T` is a nonnullable value type `S` the type inferred is `S?`. Otherwise, if `T` is a nonnullable reference type `C` the type inferred is `C?`. Otherwise, the declaration is illegal.
-
-The nullability of the type inferred for `x` is always *nullable*.
+`var` infers an annotated type for reference types, and type parameters that aren't constrained to be a value type.
+For instance:
+- in `var s = "";` the `var` is inferred as `string?`.
+- in `var t = new T();` with an unconstrained `T` the `var` is inferred as `T?`.
 
 ### Generic type inference
 
-Generic type inference is enhanced to help decide whether inferred reference types should be nullable or not. This is a best effort, and does not in and of itself yield warnings, but may lead to nullable warnings when the inferred types of the selected overload are applied to the arguments.
-
-The type inference does not rely on the annotation context of incoming types. Instead a `type` is inferred which acquires its own annotation context from where it "would have been" if it had been expressed explicitly. This underscores the role of type inference as a convenience for what you could have written yourself.
-
-More precisely, the annotation context for an inferred type argument is the context of the token that would have been followed by the `<...>` type parameter list, had there been one; i.e. the name of the generic method being called. For query expressions that translate to such calls, the context is taken from the initial contextual keyword of the query clause from which the call is generated.
+Generic type inference is enhanced to help decide whether inferred reference types should be nullable or not. This is a best effort. It may yield warnings regarding nullability constraints, and may lead to nullable warnings when the inferred types of the selected overload are applied to the arguments.
 
 ### The first phase
 
@@ -353,7 +406,7 @@ The essence is that nullability that pertains directly to one of the unfixed typ
 
 The spec currently does not do a good job of describing what happens when multiple bounds are identity convertible to each other, but are different. This may happen between `object` and `dynamic`, between tuple types that differ only in element names, between types constructed thereof and now also between `C` and `C?` for reference types.
 
-In addition we need to propagate "nullness" from the input expressions to the result type. 
+In addition we need to propagate "nullness" from the input expressions to the result type.
 
 To handle these we add more phases to fixing, which is now:
 
@@ -392,6 +445,7 @@ The *Merge* function takes two candidate types and a direction (*+* or *-*):
 
 ### Nullable types in disabled annotation context
 
-## Attributes for special null behavior
+### Override and implementation nullability mismatch
 
+## Attributes for special null behavior
 
