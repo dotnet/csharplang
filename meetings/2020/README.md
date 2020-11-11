@@ -27,14 +27,18 @@
 
 ## Nov 16, 2020
 
-## Nov 11, 2020
-
-- IsRecord in metadata (https://github.com/dotnet/csharplang/issues/4121, Fred/Cyrus/Jared)
 - Triage continued (Mads)
 
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Nov 11, 2020
+
+[C# Language Design Notes for November 11th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-11-11.md)
+
+- IsRecord in metadata
+- Triage
 
 ## Nov 4, 2020
 
