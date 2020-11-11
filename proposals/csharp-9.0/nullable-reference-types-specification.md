@@ -250,9 +250,27 @@ The nullability of a type argument or of a constraint does not impact whether th
 
 Every expression in a given source location has a *null state*, which indicated whether it is believed to potentially evaluate to null. The null state is either "not null", "maybe null", or "maybe default". The null state is used to determine whether a warning should be given about null-unsafe conversions and dereferences.
 
+The distinction between "maybe null" and "maybe default" is subtle and applies to type parameters. The distinction is that a type parameter `T` which has the state "maybe null" means the value is in the domain of legal values for `T` however that legal value may include `null`. Where as a "maybe default" means that the value may be outside the legal domain of values for `T`. 
+
+Example: 
+
+```c#
+// The value `t` here has the state "maybe null". It's possible for `T` to be instantiated
+// with `string?` in which case `null` would be within the domain of legal values here. The 
+// assumption though is the value provided here is within the legal values of `T`. Hence 
+// if `T` is `string` then `null` will not be a value, just as we assume that `null` is not
+// provided for a normal `string` parameter
+void M<T>(T t)
+{
+    // There is no guarantee that default(T) is within the legal values for T hence the 
+    // state *must* be "maybe-default" and hence `local` must be `T?`
+    T? local = default(T);
+}
+```
+
 ### Null tracking for variables
 
-For certain expressions denoting variables or properties, the null state is tracked between occurrences, based on assignments to them, tests performed on them and the control flow between them. This is similar to how definite assignment is tracked for variables. The tracked expressions are the ones of the following form:
+For certain expressions denoting variables, fields or properties, the null state is tracked between occurrences, based on assignments to them, tests performed on them and the control flow between them. This is similar to how definite assignment is tracked for variables. The tracked expressions are the ones of the following form:
 
 ```antlr
 tracked_expression
@@ -275,7 +293,11 @@ The null state of an expression is derived from its form and type, and from the 
 
 ### Literals
 
-The null state of a `null` and `default` literals is "maybe default". The null state of any other literal is "not null".
+The null state of a `null` literal is "maybe null". 
+
+Teh null state of a `default` literal depends on the target type of the `default` literal. A `default` literal with target type `T` has the same null state as the `default(T)` expression.
+
+The null state of any other literal is "not null".
 
 ### Simple names
 
@@ -285,13 +307,85 @@ If a `simple_name` is not classified as a value, its null state is "not null". O
 
 If a `member_access` is not classified as a value, its null state is "not null". Otherwise, if it is a tracked expression, its null state is its tracked null state at this source location. Otherwise its null state is the default null state of its type.
 
+```c#
+var person = new Person();
+
+// The receiver is a tracked expression hence the member_access of the property 
+// is tracked as well 
+if (person.FirstName is not null)
+{
+    Use(person.FirstName);
+}
+
+// The return of an invocation is not a tracked expression hence the member_access
+// of the return is also not tracked
+if (GetPerson().FirstName is not null)
+{
+    Use(GetPerson().FirstName);
+}
+
+void Use(string s) 
+{ 
+    // ...
+}
+
+public class Person
+{
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+
+    private static Person s_anonymous = new Person();
+    public static Person GetAnonymous() => s_anonymous;
+}
+```
+
 ### Invocation expressions
 
 If an `invocation_expression` invokes a member that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
 
+The null state of an `invocation_expression` is not tracked by the compiler.
+
+```c#
+
+// The result of an invocation_expression is not tracked
+if (GetText() is not null)
+{
+    // Warning: Converting null literal or possible null value to non-nullable type.
+    string s = GetText();
+    // Warning: Dereference of a possibly null reference.
+    Use(s);
+}
+
+// Nullable friendly pattern
+if (GetText() is string s)
+{
+    Use(s);
+}
+
+string? GetText() => ... 
+Use(string s) {  }
+```
+
 ### Element access
 
 If an `element_access` invokes an indexer that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
+
+```c#
+object?[] array = ...;
+if (array[0] != null)
+{
+    // Warning: Converting null literal or possible null value to non-nullable type.
+    object o = array[0];
+    // Warning: Dereference of a possibly null reference.
+    Console.WriteLine(o.ToString());
+}
+
+// Nullable friendly pattern
+if (array[0] is {} o)
+{
+    Console.WriteLine(o.ToString());
+}
+```
 
 ### Base access
 
@@ -299,17 +393,33 @@ If `B` denotes the base type of the enclosing type, `base.I` has the same null s
 
 ### Default expressions
 
-`default(T)` has the null state "not null" if `T` is known to be a nonnullable value type. Otherwise it has the null state "maybe default".
+The `default(T)` has the null state based on the properties of the type `T`:
+
+- If the type is a known value type then it has the null state "not null"
+- Else if the type is a type parameter then it has the null state "maybe default"
+- Else it has the null state "maybe null"
 
 ### Null-conditional expressions
 
-A `null_conditional_expression` has the null state "maybe null".
+A `null_conditional_expression` has the null state based on the properties of expression type:
+
+- If the type is a known value type then it has the null state "maybe null"
+- Else if the type is a type parameter then it has the null state "maybe default"
+- Else it has the null state "maybe null"
 
 ### Cast expressions
 
-If a cast expression `(T)E` invokes a user-defined conversion, then the null state of the expression is the default null state for its type. Otherwise, if `T` is *nullable* then the null state is "maybe null". Otherwise the null state is the same as the null state of `E`.
+If a cast expression `(T)E` invokes a user-defined conversion, then the null state of the expression is the default null state for the type of the user-defined conversion. Otherwise:
 
-***This needs upddating***
+- If `T` is a *nullable* type in the form `U?` where `U` is a type parameter then the null state is "maybe default"
+- Else If `T` is a *nullable* type then the null state is "maybe null"
+- Else the null state is the same as the null state of `E`
+
+### Unary and binary operators
+
+If a unary or binary operator invokes an user-defined operator that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
+
+***Something special to do for binary `+` over strings and delegates?***
 
 ### Await expressions
 
@@ -317,29 +427,33 @@ The null state of `await E` is the default null state of its type.
 
 ### The `as` operator
 
-An `as` expression has the null state "maybe null".
+The null state of an `E as T` expression depends first on properties of the type `T`. If the type *nonnullable* then the null state is "not null". Otherwise the null state depends on the conversion from the type of `E` to type `T`:
+
+- If the conversion Identity, boxing, implicit reference or implicit nullable has the same null state as `E`
+- Else if `T` is a type parameter then it has the null state "maybe default"
+- Else it has the null state "maybe null"
 
 ### The null-coalescing operator
 
-`E1 ?? E2` has the same null state as `E2`
+The null state of `E1 ?? E2` is the null state of `E2`
 
 ### The conditional operator
 
-The null state of `E1 ? E2 : E3` is "not null" if the null state of both `E2` and `E3` are "not null". Otherwise it is "maybe null".
+The null state of `E1 ? E2 : E3` is based on the null state of `E2` and `E3`:
+
+- If both are "not null" then the null state is "not null"
+- Else if either is "maybe default" then the null state is "maybe default"
+- Else the null state is "not null"
 
 ### Query expressions
 
 The null state of a query expression is the default null state of its type.
 
+*Additional work needed here*
+
 ### Assignment operators
 
 `E1 = E2` and `E1 op= E2` have the same null state as `E2` after any implicit conversions have been applied.
-
-### Unary and binary operators
-
-If a unary or binary operator invokes an user-defined operator that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
-
-***Something special to do for binary `+` over strings and delegates?***
 
 ### Expressions that propagate null state
 
