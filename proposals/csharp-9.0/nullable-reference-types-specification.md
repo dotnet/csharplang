@@ -293,9 +293,9 @@ The null state of an expression is derived from its form and type, and from the 
 
 ### Literals
 
-The null state of a `null` literal is "maybe null". 
+The null state of a `null` literal depends on the target type of the expression. If the target type is a type parameter constrained to a reference type then it's "maybe default". Otherwise it is "maybe null".
 
-Teh null state of a `default` literal depends on the target type of the `default` literal. A `default` literal with target type `T` has the same null state as the `default(T)` expression.
+The null state of a `default` literal depends on the target type of the `default` literal. A `default` literal with target type `T` has the same null state as the `default(T)` expression.
 
 The null state of any other literal is "not null".
 
@@ -319,9 +319,10 @@ if (person.FirstName is not null)
 
 // The return of an invocation is not a tracked expression hence the member_access
 // of the return is also not tracked
-if (GetPerson().FirstName is not null)
+if (GetAnonymous().FirstName is not null)
 {
-    Use(GetPerson().FirstName);
+    // Warning: Cannot convert null literal to non-nullable reference type.
+    Use(GetAnonymous().FirstName);
 }
 
 void Use(string s) 
@@ -393,18 +394,18 @@ If `B` denotes the base type of the enclosing type, `base.I` has the same null s
 
 ### Default expressions
 
-The `default(T)` has the null state based on the properties of the type `T`:
+`default(T)` has the null state based on the properties of the type `T`:
 
-- If the type is a known value type then it has the null state "not null"
+- If the type is a *nonnullable* type then it has the null state "not null"
 - Else if the type is a type parameter then it has the null state "maybe default"
 - Else it has the null state "maybe null"
 
 ### Null-conditional expressions
 
-A `null_conditional_expression` has the null state based on the properties of expression type:
+A `null_conditional_expression` has the null state based on the properties of expression type. Note that this refers to the type of the `null_conditional_expression`, not the original type of the member being invoked:
 
-- If the type is a known value type then it has the null state "maybe null"
-- Else if the type is a type parameter then it has the null state "maybe default"
+- If the type is a *nullable* value type then it has the null state "maybe null"
+- Else if the type is a *nullable* type parameter then it has the null state "maybe default"
 - Else it has the null state "maybe null"
 
 ### Cast expressions
@@ -417,7 +418,7 @@ If a cast expression `(T)E` invokes a user-defined conversion, then the null sta
 
 ### Unary and binary operators
 
-If a unary or binary operator invokes an user-defined operator that is declared with one or more attributes for special null behavior, the null state is determined by those attributes. Otherwise the null state of the expression is the default null state of its type.
+If a unary or binary operator invokes an user-defined operator then the null state of the expression is the default null state for the type of the user-defined operator. Otherwise it is the null state of the expression.
 
 ***Something special to do for binary `+` over strings and delegates?***
 
