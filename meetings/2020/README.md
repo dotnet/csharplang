@@ -21,17 +21,15 @@
 
 ## Dec 7, 2020
 
-## Dec 2, 2020
-
-## Nov 23, 2020
-
-## Nov 16, 2020
-
-- Triage continued (Mads)
-
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Nov 16, 2020
+
+[C# Language Design Notes for November 16th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-11-16.md)
+
+- Triage
 
 ## Nov 11, 2020
 
