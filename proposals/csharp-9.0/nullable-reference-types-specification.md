@@ -400,9 +400,9 @@ If `B` denotes the base type of the enclosing type, `base.I` has the same null s
 - Else if the type is a type parameter then it has the null state "maybe default"
 - Else it has the null state "maybe null"
 
-### Null-conditional expressions
+### Null-conditional expressions ?.
 
-A `null_conditional_expression` has the null state based on the properties of expression type. Note that this refers to the type of the `null_conditional_expression`, not the original type of the member being invoked:
+A `null_conditional_expression` has the null state based on the expression type. Note that this refers to the type of the `null_conditional_expression`, not the original type of the member being invoked:
 
 - If the type is a *nullable* value type then it has the null state "maybe null"
 - Else if the type is a *nullable* type parameter then it has the null state "maybe default"
@@ -412,9 +412,12 @@ A `null_conditional_expression` has the null state based on the properties of ex
 
 If a cast expression `(T)E` invokes a user-defined conversion, then the null state of the expression is the default null state for the type of the user-defined conversion. Otherwise:
 
-- If `T` is a *nullable* type in the form `U?` where `U` is a type parameter then the null state is "maybe default"
-- Else If `T` is a *nullable* type then the null state is "maybe null"
-- Else the null state is the same as the null state of `E`
+- If `T` is a *nonnullable* value type then `T` has the null state "not null"
+- Else if `T` is a *nullable* value type then `T` has the null state "maybe null"
+- Else if `T` is a *nullable* type in the form `U?` where `U` is a type parameter then `T` has the null state "maybe default"
+- Else if `T` is a *nullable* type, and `E` has null state "maybe null" or "maybe default", then `T` has the null state "maybe null"
+- Else if `T` is a type parameter, and `E` has null state "maybe null" or "maybe default", then `T` has the null state "maybe default"
+- Else `T` has the same null state as `E`
 
 ### Unary and binary operators
 
@@ -428,9 +431,9 @@ The null state of `await E` is the default null state of its type.
 
 ### The `as` operator
 
-The null state of an `E as T` expression depends first on properties of the type `T`. If the type *nonnullable* then the null state is "not null". Otherwise the null state depends on the conversion from the type of `E` to type `T`:
+The null state of an `E as T` expression depends first on properties of the type `T`. If the type of `T` is *nonnullable* then the null state is "not null". Otherwise the null state depends on the conversion from the type of `E` to type `T`:
 
-- If the conversion Identity, boxing, implicit reference or implicit nullable has the same null state as `E`
+- If the conversion is an identity, boxing, implicit reference, or implicit nullable conversion, then the null state is the null state of `E`
 - Else if `T` is a type parameter then it has the null state "maybe default"
 - Else it has the null state "maybe null"
 
