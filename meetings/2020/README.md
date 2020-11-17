@@ -1,4 +1,4 @@
-﻿# Upcoming meetings for 2020
+# Upcoming meetings for 2020
 
 ## Schedule ASAP
 
@@ -6,7 +6,6 @@
 ## Schedule when convenient
 
 - How can we improve the capture of unfinished business, both in terms of making sure the LDM comes back to remaining open issues, and in terms of keeping the feature specs in sync with LDM decisions?
-- List patterns (Fred, https://github.com/dotnet/csharplang/pull/3245)
 
 ## Recurring topics
 
@@ -20,6 +19,12 @@
 ## Dec 9, 2020
 
 ## Dec 7, 2020
+
+- List patterns (Fred, https://github.com/dotnet/csharplang/pull/3245)
+
+## Dec 2, 2020
+
+- Scenarios in partner teams for roles and extensions (Mads)
 
 # C# Language Design Notes for 2020
 
