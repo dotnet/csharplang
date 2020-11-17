@@ -5,8 +5,6 @@
 
 ## Schedule when convenient
 
-- How can we improve the capture of unfinished business, both in terms of making sure the LDM comes back to remaining open issues, and in terms of keeping the feature specs in sync with LDM decisions?
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
