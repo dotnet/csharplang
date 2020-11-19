@@ -18,6 +18,7 @@
 
 ## Dec 7, 2020
 
+- Required Properties (Fred)
 - List patterns (Fred, https://github.com/dotnet/csharplang/pull/3245)
 
 ## Dec 2, 2020
