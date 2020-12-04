@@ -975,7 +975,7 @@ parameter.
 ```cs
 class C
 {
-    static Span<int> M1(Span<int> p1, [DoesNotEsacpe] Span<int> p2)
+    static Span<int> M1(Span<int> p1, [DoesNotEscape] Span<int> p2)
     {
         // Okay: the *safe-to-escape* here is still outside the enclosing scope
         // of the current method.
@@ -1150,7 +1150,7 @@ else
 This only works for `Span<T>` though, there is no general purpose mechanism for
 `ref struct` values. However the `[DoesNotEscape]` attribute provides exactly 
 the semantics that are desired here. If we decide in the future to allow 
-attributes to apply to local functions it would provide immediate relief to this
+attributes to apply to local variables it would provide immediate relief to this
 scenario.
 
 ## Related Information
