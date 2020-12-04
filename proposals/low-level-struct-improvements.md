@@ -852,19 +852,28 @@ This particular issue is still under active discussion and the expectation is
 that the implementation of this feature will follow however that discussion
 goes.
 
-### Provide parameter escape annotations
-**THIS SECTION STILL IN DEVELOPMENT**
-One of the rules that causes repeated friction in low level code is the 
-"Method Arguments must Match" rule. That rule states that in the case a a method
-call has at least one `ref struct` passed by `ref / out` then none of the 
-other parameters can have a *safe-to-escape* value narrower than that parameter.
-By extension if there are two such parameters then the *safe-to-escape* of 
-all parameters must be equal.
+### Provide parameter does not escape annotations
+One source of repeated friction in low level code is the default escape scope
+for parameters being *safe-to-escape* outside the enclosing method body. This
+is a sensible default because it lines up with the coding patterns of .NET as
+a whole. In low level code there is a larger usage of `ref struct` and this 
+default scope can cause friction with other parts of our span safety rules.
+
+The main friction point occurs because of the following constraint around method
+invocations:
+
+> For a method invocation if there is a ref or out argument of a ref struct type (including the receiver), with safe-to-escape E1, then no argument (including the receiver) may have a narrower safe-to-escape than E1
+
+This rule most commonly comes into play with instance methods on `ref struct` 
+where at least one parameter is also a `ref struct`. This is a common pattern
+in low level code where `ref struct` types commonly leverage `Span<T>` 
+parameters in their methods. Consider any builder or writer style object that 
+uses `Span<T>` to pass around buffers.
 
 This rule exists to prevent scenarios like the following:
 
 ```cs
-struct RS
+ref struct RS
 {
     Span<int> _field;
     void Set(Span<int> p)
@@ -876,65 +885,167 @@ struct RS
     {
         Span<int> span = stackalloc int[] { 42 };
 
-        // Error: if allowed this would let the method return a pointer to 
+        // Error: if allowed this would let the method return a reference to 
         // the stack
         p.Set(span);
     }
 }
 ```
 
-This rule exists because the language must assume that these values can escape
-to their maximum allowed lifetime. In many cases though the method 
-implementations do not escape these values. Hence the friction caused here is 
-unnecessary.
+Essentially this rule exists because the language must assume that all inputs 
+to a method escape to their maximum allowed scope. In the above case the 
+language must assume that parameters escape into fields of the receiver.
 
-To remove this friction the language will provide the attribute 
-`[DoesNotEscape]`. When applied to parameters the *safe-to-escape* scope of
-the parameter will be considered the top scope of the declaring method. 
-It cannot return outside of it. Likewise the attribute can be applied to 
-instance members, instance properties or instance accessors and it will have
-the same effect on the `this` parameter.
-
-To account for this change the "Parameters" section of the span safety document
-will be updated to include the following:
-
-- If the parameter is marked with `[DoesNotEscape]`it is *safe-to-escape* to the
-top scope of the containing method. Because this value cannot escape from the 
-method it is not considered a part of the general *safe-to-escape* input set 
-when calculating returns of this method.
-
-**THAT RULE ABOVE NEEDS WORK**
+In practice though there are many such methods which never escape the parameter.
+It is just a value that is used within the implementation. 
 
 ```cs
-struct RS
+ref struct JsonReader
 {
-    Span<int> _field;
-    void Set([DoesNotEscape] Span<int> p)
+    Span<char> _buffer;
+    int _position;
+
+    internal bool TextEquals(ReadOnySpan<char> text)
     {
-        // Error: the *safe-to-escape* of p is the top scope of the method while
-        // the *safe-to-escape* of 'this' is outside the method. Hence this is
-        // illegal by the standard assignment rules
-        _field = p; 
+        var current = _buffer.Slice(_position, text.Length);
+        return current == text;
     }
+}
 
-    static RS M(ref RS rs1, [DoesNotEscape]RS rs2)
+class C
+{
+    static void M(ref JsonReader reader)
     {
-        Span<int> span = stackalloc int[] { 42 };
+        Span<char> span = stackalloc char[4];
+        span[0] = 'd';
+        span[1] = 'o';
+        span[2] = 'g';
 
-        // Okay: The parameter here is not a part of the calculated "must match"
-        // set because it can't be returned hence this is legal.
-        rs2.Set(span);
-
-        // Error: the *safe-to-escape* scope of 'rs2' is the top scope of this
-        // method
-        return rs2;
+        // Error: The *safe-to-escape* of `span` is the current method scope 
+        // while `reader` is outside the current method scope hence this fails
+        // by the above rule.
+        if (reader.TextEquals(span)
+        {
+            ...
+        })
     }
 }
 ```
 
+In order to work around this low level code will resort to `unsafe` tricks to 
+lie to the compiler about the lifetime of their `ref struct`. This significantly
+reduces the value proposition of `ref struct` as they are meant to be a means 
+to avoid `unsafe` while continuing to write high performance code.
+
+The other place where parameter default escape scope causes friction is when 
+they are re-assigned within a method body. For instance if a method body decides
+to conditionally apply escaping to input by using stack allocated values. Once
+again this runs into some friction.
+
+```cs
+void WriteData(ReadOnlySpan<char> data)
+{
+    if (data.Contains(':'))
+    {
+        Span<char> buffer = stackalloc char[256];
+        Escape(data, buffer, out var length);
+
+        // Error: Cannot assign `buffer` to `data` here as the *safe-to-escape*
+        // scope of `buffer` is to the current method scope while `buffer` is
+        // outside the current method scope
+        data = buffer.Slice(0, length);
+    }
+
+    WriteDataCore(data);
+}
+```
+
+This pattern is fairly common across .NET code and it works just fine when 
+a `ref struct` is not involved. Once users adopt `ref struct` though it forces them
+to change their patterns here and often they just resort to `unsafe` to work
+around the limitations here.
+
+To remove this friction the language will provide the attribute 
+`[DoesNotEscape]`. This can be applied to parameters of any type or instance 
+members defined on `ref struct`. When applied to parameters the *safe-to-escape*
+and *ref-safe-to-escape* scope will be the current method scope. When applied to
+instance members of `ref struct` the same limitation will apply to the `this`
+parameter.
+
+```cs
+class C
+{
+    static Span<int> M1(Span<int> p1, [DoesNotEscape] Span<int> p2)
+    {
+        // Okay: the *safe-to-escape* here is still outside the enclosing scope
+        // of the current method.
+        return p1; 
+
+        // ERROR: the [DoesNotEscape] attribute changes the *safe-to-escape* 
+        // to be limited to the current method scope. Hence it cannot be 
+        // returned
+        return p2; 
+
+        // ERROR: `local` has the same *safe-to-escape* as `p2` hence it cannot
+        // be returned.
+        Span<int> local = p2;
+        return p2; 
+    }
+}
+```
+
+To account for this change the "Parameters" section of the span safety document
+will be updated to include the following bullet:
+
+- If the parameter is marked with `[DoesNotEscape]`it is *safe-to-escape* and
+*ref-safe-to-escape* to the scope of the containing method. 
+
+It's important to note that this will naturally block the ability for such 
+parameters to escape by being stored as fields. Receivers that are passed by 
+`ref`, or `this` on `ref struct`, have a *safe-to-escape* scope outside the 
+current method. Hence assignment from a `[DoesNotEscape]` parameter to a field
+on such a value fails by existing field assignment rules: the scope of the 
+receiver is greater than the value being assigned.
+
+```cs
+ref struct S
+{
+    Span<int> _field;
+
+    void M1(Span<int> p1, [DoesNotEscape] Span<int> p2)
+    {
+        // Okay: the *safe-to-escape* here is still outside the enclosing scope
+        // of the current method and hence the same as the receiver.
+        _field = p1;
+
+        // ERROR: the [DoesNotEscape] attribute changes the *safe-to-escape* 
+        // to be limited to the current method scope. Hence it cannot be 
+        // assigned to a receiver than has a *safe-to-escape* scope outside the 
+        // current method.
+        _field = p2;
+    }
+}
+```
+
+Given that parameters are restricted in this way we will also update the 
+"Method Invocation" section to relax its rules. In all cases where it is 
+considering the *ref-safe-to-escape* or *safe-to-escape* lifetimes of arguments
+the spec will change to ignore those arguments which line up to parameters 
+which are marked as `[DoesNotEscape]`. Because these arguments cannot escape 
+their lifetime does not need to be considered when considering the lifetime 
+of returned values.
+
+For example the last line of calculating *safe-to-escape* of returns will change
+to 
+
+> the safe-to-escape of all argument expressions including the receiver. **This will exclude all arguments that line up with parameters marked as [DoesNotEscape]**
+
 Misc Notes:
 - The  `DoesNotEscapeAttribute` will be defined in the 
 `System.Runtime.CompilerServices` namespace.
+- The `DoesNotEscapeAttribute` cannot be combined with the `[ThisRefEscapes]`
+attribute, doing so results in an error.
+- The `DoesNotEscapeAttribute` will be emitted as a `modreq`
 
 ## Considerations
 
@@ -995,6 +1106,53 @@ struct Dimensions
 
 ## Future Considerations
 
+### Allowing attributes on locals
+Another friction point for developers using `ref struct` is local variables 
+can suffer from the same issues as parameters with respect to their lifetimes 
+being decided at declaration. Than can make it difficult to work with 
+`ref struct` that are assigned on multiple paths where at least one of the 
+paths is a limited *safe-to-escape* scope. 
+
+```cs
+int length = ...;
+Span<byte> span;
+if (length > StackAllocLimit)
+{
+    span = new Span(new byte[length]);
+}
+else
+{
+    // Error: The *safe-to-escape* of `span` was decided to be outside the 
+    // current method scope hence it can't be the target of a stackalloc
+    span = stackalloc byte[length];
+}
+```
+
+For `Span<T>` specifically developers can work around this by initializing the 
+local with a `stackalloc` of size zero. This changes the *safe-to-escape* scope
+to be the current method and is optimized away by the compiler. It's effectively
+a syntax for making a `[DoesNotEscape]` local.
+
+```cs
+int length = ...;
+Span<byte> span = stackalloc byte[0];
+if (length > StackAllocLimit)
+{
+    span = new Span(new byte[length]);
+}
+else
+{
+    // Okay
+    span = stackalloc byte[length];
+}
+```
+
+This only works for `Span<T>` though, there is no general purpose mechanism for
+`ref struct` values. However the `[DoesNotEscape]` attribute provides exactly 
+the semantics that are desired here. If we decide in the future to allow 
+attributes to apply to local variables it would provide immediate relief to this
+scenario.
+
 ## Related Information
 
 ### Issues
@@ -1011,6 +1169,24 @@ The following issues are all related to this proposal:
 The following proposals are related to this proposal:
 
 - https://github.com/dotnet/csharplang/blob/725763343ad44a9251b03814e6897d87fe553769/proposals/fixed-sized-buffers.md
+
+### Existing samples
+
+[Utf8JsonReader](https://github.com/dotnet/runtime/blob/f1a7cb3fdd7ffc4ce7d996b7ac6867ffe2c953b9/src/libraries/System.Text.Json/src/System/Text/Json/Reader/Utf8JsonReader.cs#L523-L528)
+
+This particular snippet requires unsafe because it runs into issues with passing
+around a `Span<T>` which can be stack allocated to an instance method on a 
+`ref struct`. Even though this parameter is not captured the language must assume
+it is and hence needlessly causes friction here.
+
+[Utf8JsonWriter](https://github.com/dotnet/runtime/blob/f1a7cb3fdd7ffc4ce7d996b7ac6867ffe2c953b9/src/libraries/System.Text.Json/src/System/Text/Json/Writer/Utf8JsonWriter.WriteProperties.String.cs#L122-L127)
+
+This snippet wants to mutate a parameter by escaping elements of the data. The
+escaped data can be stack allocated for efficiency. Even though the parameter
+is not escaped the compiler assigns it a *safe-to-escape* scope of outside the
+enclosing method because it is a parameter. This means in order to use stack
+allocation the implementation must use `unsafe` in order to assign back to the 
+parameter after escaping the data.
 
 ### Fun Samples
 
