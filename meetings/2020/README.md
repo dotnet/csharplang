@@ -1,7 +1,6 @@
-# Upcoming meetings for 2020
+﻿# Upcoming meetings for 2020
 
 ## Schedule ASAP
-
 
 ## Schedule when convenient
 
@@ -21,13 +20,15 @@
 - Required Properties (Fred)
 - List patterns (Fred, https://github.com/dotnet/csharplang/pull/3245)
 
-## Dec 2, 2020
-
-- Scenarios in partner teams for roles and extensions (Mads)
-
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Dec 2, 2020
+
+[C# Language Design Notes for December 2nd, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-12-02.md)
+
+- Partner scenarios in roles and extensions
 
 ## Nov 16, 2020
 
