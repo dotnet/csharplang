@@ -13,12 +13,11 @@
 
 ## Dec 14, 2020
 
-## Dec 9, 2020
+- List patterns (Fred, https://github.com/dotnet/csharplang/pull/3245)
 
 ## Dec 7, 2020
 
 - Required Properties (Fred)
-- List patterns (Fred, https://github.com/dotnet/csharplang/pull/3245)
 
 # C# Language Design Notes for 2020
 
