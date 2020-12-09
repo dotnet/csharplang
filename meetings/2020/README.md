@@ -15,13 +15,15 @@
 
 - List patterns (Fred, https://github.com/dotnet/csharplang/pull/3245)
 
-## Dec 7, 2020
-
-- Required Properties (Fred)
-
 # C# Language Design Notes for 2020
 
 Overview of meetings and agendas for 2020
+
+## Dec 7, 2020
+
+[C# Language Design Notes for December 7th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-12-07.md)
+
+- Required Properties
 
 ## Dec 2, 2020
 
