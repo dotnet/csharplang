@@ -370,6 +370,8 @@ ordinary constructors today.
 
 A warning is produced if a parameter of the primary constructor is not read.
 
+An error is produced if the parameter list has a single parameter and its type is the record type.
+
 Expression variables declared in the `argument_list` are in scope within the `argument_list`. The same shadowing
 rules as within an argument list of a regular constructor initializer apply.
 
