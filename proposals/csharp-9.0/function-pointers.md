@@ -421,8 +421,8 @@ simple work around: use a `static` local function.
 ``` csharp
 unsafe class Instance {
     void Use() {
-        static string toString(Instance i) = i.ToString();
-        delgate*<Instance, string> f = &toString;
+        static string toString(Instance i) => i.ToString();
+        delegate*<Instance, string> f = &toString;
         f(this);
     }
 }
