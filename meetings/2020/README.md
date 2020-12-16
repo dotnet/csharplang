@@ -14,6 +14,7 @@
 ## Dec 16, 2020
 
 - Improved definite assignment analysis (Rikki) (https://github.com/RikkiGibson/csharplang/blob/improved-definite-assignment/proposals/improved-definite-assignment.md)
+- List patterns continued (Fred) (https://github.com/dotnet/csharplang/pull/3245)
 - File scoped namespaces (Mads) (https://github.com/dotnet/csharplang/issues/137)
 
 # C# Language Design Notes for 2020
