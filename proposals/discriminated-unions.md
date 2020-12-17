@@ -168,7 +168,7 @@ members of the enum, then the switch will be considered exhaustive.
 
 Since value members are not constants and do not define new static types, they currently cannot
 be matched by pattern. To make this possible, a new pattern using the constant pattern syntax
-will be added to allow matching against `enum class` value members. A match is defined to succeed
+will be added to allow matching against `enum class` value members. The match is defined to succeed
 if and only if the argument to the pattern match and the value returned by the `enum class` value
 member are reference equal, although the implementation is not required to perform this check.
 
