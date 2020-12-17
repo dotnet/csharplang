@@ -2,7 +2,7 @@
 # Discriminated unions / `enum class`
 
 `enum class`es are a new kind of type declaration, sometimes referred to as discriminated unions,
-where each every possible instance the type is listed, and each instance is non-overlapping.
+where every possible instance of the type is listed, and instances do not overlap.
 
 An `enum class` is defined using the following syntax:
 
@@ -50,7 +50,7 @@ considered members of the enum class definition. Unlike a user-defined abstract 
 the `enum class` root type is partial by default and defined to have a default *private*
 parameter-less constructor.
 
-Note that, since the root type is defined to be a partial abstract class, partial definitions of
+Since the root type is defined to be a partial abstract class, partial definitions of
 the *root type* may also be added, where standard syntax forms for a class body are allowed.
 However, no types may directly inherit from the root type in any declaration, aside from those
 specified as `enum class` members. In addition, no user-defined constructors are permitted for
@@ -84,7 +84,7 @@ enum class Shape
 the `enum class` declaration has semantics equivalent to the following declaration
 
 ```C#
- abstract partial class Shape
+abstract partial class Shape
 {
     public record Rectangle(float Width, float Length) : Shape;
     public record Circle(float Radius) : Shape;
@@ -114,7 +114,7 @@ enum class Expr
 
 This is almost identical to the semantics of a top-level `enum class`, except that
 the nested enum class defines a nested root type, and everything below the nested enum
-class is a subtype of the nested root type, instead of the top-level root type.
+class is a subtype of the nested root type, rather than of the top-level root type.
 
 ```C#
 abstract partial class Expr
@@ -129,7 +129,7 @@ abstract partial class Expr
 
 ### Value members
 
-`enum classes` can also contain value members. Value members define public get-only static
+An `enum class` can also contain value members. Value members define public get-only static
 properties on the root type that also return the root type, e.g.
 
 ```C#
@@ -157,21 +157,20 @@ on repeated invocations.
 
 ### Switch expression and patterns
 
-There are some proposed adjustments to pattern matching and the switch expression to handle
+There are some proposed adjustments to pattern matching and the `switch` expression to handle
 `enum classes`. Switch expressions can already match types through the variable pattern, but
-for currently for reference types, no set of switch arms in the switch expression are considered
+for reference types, currently no set of switch arms in the switch expression are considered
 complete, except for matching against the static type of the argument, or a subtype.
 
-Switch expressions would be changed such that, if the root type of an `enum class` is the static
+Switch expressions would be changed such that if the root type of an `enum class` is the static
 type of the argument to the switch expression, and there is a set of patterns matching all
 members of the enum, then the switch will be considered exhaustive.
 
 Since value members are not constants and do not define new static types, they currently cannot
 be matched by pattern. To make this possible, a new pattern using the constant pattern syntax
-will be added to allow match against `enum class` value members. The match is defined to succeed
+will be added to allow matching against `enum class` value members. A match is defined to succeed
 if and only if the argument to the pattern match and the value returned by the `enum class` value
-member would be reference equal, although the implementation is not required to perform this
-check.
+member are reference equal, although the implementation is not required to perform this check.
 
 
 ## Open questions
