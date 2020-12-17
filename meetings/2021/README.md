@@ -4,6 +4,10 @@
 
 ## Schedule when convenient
 
+- File scoped namespaces (Mads) (https://github.com/dotnet/csharplang/issues/137)
+- IEnumerable and Length patterns - (Fred)
+- Required properties simple form - (Fred)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
