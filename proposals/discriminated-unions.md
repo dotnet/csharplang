@@ -2,7 +2,7 @@
 # Discriminated unions / `enum class`
 
 `enum class`es are a new kind of type declaration, sometimes referred to as discriminated unions,
-where every possible instance of the type is listed, and instances do not overlap.
+where every possible instance of the type is listed, and each instance is non-overlapping.
 
 An `enum class` is defined using the following syntax:
 
