@@ -38,6 +38,6 @@ Overview of meetings and agendas for 2021
 
 ## Jan 6, 2021
 
-[C# Language Design Notes for January 5th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2021-01-05.md)
+[C# Language Design Notes for January 5th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-01-05.md)
 
 - File scoped namespaces
