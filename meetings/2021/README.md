@@ -32,13 +32,12 @@
 
 ## Jan 11, 2021
 
-## Jan 6, 2021
-
-- C# 10 Priorities (Mads)
-- File scoped namespaces (Mads) (https://github.com/dotnet/csharplang/issues/137)
-
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
 
+## Jan 6, 2021
+
+[C# Language Design Notes for January 5th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2021-01-05.md)
+
+- File scoped namespaces
