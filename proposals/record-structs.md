@@ -77,7 +77,7 @@ The record struct includes a synthesized override equivalent to a method declare
 public override bool Equals(object? obj);
 ```
 It is an error if the override is declared explicitly. 
-The synthesized override returns `other is R && Equals((R)other)` where `R` is the record struct.
+The synthesized override returns `other is R temp && Equals(temp)` where `R` is the record struct.
 
 The record struct includes a synthesized override equivalent to a method declared as follows:
 ```C#
@@ -100,8 +100,8 @@ struct R1 : IEquatable<R1>
 {
     public T1 P1 { get; set; }
     public T1 P1 { get; set; }
-    public override bool Equals(object? obj) => obj is R1 && Equals((R1)obj);
-    public virtual bool Equals(R1 other)
+    public override bool Equals(object? obj) => obj is R1 temp && Equals(temp);
+    public bool Equals(R1 other)
     {
         return
             EqualityComparer<T1>.Default.Equals(P1, other.P1) &&
@@ -162,7 +162,7 @@ struct R1 : IEquatable<R1>
     public T1 P1 { get; set; }
     public T2 P2 { get; set; }
 
-    protected virtual bool PrintMembers(StringBuilder builder)
+    private bool PrintMembers(StringBuilder builder)
     {
         builder.Append(nameof(P1));
         builder.Append(" = ");
@@ -237,14 +237,14 @@ For a record struct:
 
 * A public `get` and `set` auto-property is created.
   An inherited `abstract` property with matching type is overridden.
-  It is an error if the inherited property does not have `public` overridable `get` and `set` accessors.
+  It is an error if the inherited property does not have `public` `get` and `set` accessors.
   The auto-property is initialized to the value of the corresponding primary constructor parameter.
   Attributes can be applied to the synthesized auto-property and its backing field by using `property:` or `field:`
   targets for attributes syntactically applied to the corresponding record struct parameter.  
 
 ### Deconstruct
 
-A positional record struct with at least one parameter synthesizes a public void-returning instance method called Deconstruct with an out
+A positional record struct with at least one parameter synthesizes a public void-returning instance method called `Deconstruct` with an out
 parameter declaration for each parameter of the primary constructor declaration. Each parameter
 of the Deconstruct method has the same type as the corresponding parameter of the primary
 constructor declaration. The body of the method assigns each parameter of the Deconstruct method
@@ -300,4 +300,5 @@ See https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-0
 - confirm that we want to disallow members named "Clone".
 - why did we disallow unsafe types in instance fields in records? I assume we also want to disallow in record structs.
 - `with` on generics? (may affect the design for record structs)
+- should we also allow `record ref struct`?
 
