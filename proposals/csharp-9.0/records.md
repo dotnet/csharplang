@@ -283,7 +283,7 @@ class R1 : IEquatable<R1>
     {
         builder.Append(nameof(P1));
         builder.Append(" = ");
-        builder.Append(this.P1); // or builder.Append(this.P1); if P1 has a value type
+        builder.Append(this.P1); // or builder.Append(this.P1.ToString()); if P1 has a value type
         
         return true;
     }

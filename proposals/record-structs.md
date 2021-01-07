@@ -36,7 +36,9 @@ Members are synthesized unless a member with a "matching" signature is declared 
 an accessible concrete non-virtual member with a "matching" signature is inherited.
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
+
 It is an error for a member of a record struct to be named "Clone".
+
 It is an error for an instance field of a record struct to have an unsafe type.
 
 A record struct is not permitted to declare a destructor.
@@ -96,8 +98,8 @@ For this record struct, the synthesized equality members would be something like
 ```C#
 struct R1 : IEquatable<R1>
 {
-    public T1 P1 { get; init; }
-    public T1 P1 { get; init; }
+    public T1 P1 { get; set; }
+    public T1 P1 { get; set; }
     public override bool Equals(object? obj) => obj is R1 && Equals((R1)obj);
     public virtual bool Equals(R1 other)
     {
@@ -157,19 +159,19 @@ For this record struct, the synthesized printing members would be something like
 ```C#
 struct R1 : IEquatable<R1>
 {
-    public T1 P1 { get; init; }
-    public T2 P2 { get; init; }
+    public T1 P1 { get; set; }
+    public T2 P2 { get; set; }
 
     protected virtual bool PrintMembers(StringBuilder builder)
     {
         builder.Append(nameof(P1));
         builder.Append(" = ");
-        builder.Append(this.P1); // or builder.Append(this.P1); if P1 has a value type
+        builder.Append(this.P1); // or builder.Append(this.P1.ToString()); if P1 has a value type
         builder.Append(", ");
 
         builder.Append(nameof(P2));
         builder.Append(" = ");
-        builder.Append(this.P2); // or builder.Append(this.P2); if P2 has a value type
+        builder.Append(this.P2); // or builder.Append(this.P2.ToString()); if P2 has a value type
 
         return true;
     }
@@ -233,9 +235,9 @@ member whose name and type are taken from the value parameter declaration.
 
 For a record struct:
 
-* A public `get` and `init` auto-property is created (see separate `init` accessor specification).
+* A public `get` and `set` auto-property is created.
   An inherited `abstract` property with matching type is overridden.
-  It is an error if the inherited property does not have `public` overridable `get` and `init` accessors.
+  It is an error if the inherited property does not have `public` overridable `get` and `set` accessors.
   The auto-property is initialized to the value of the corresponding primary constructor parameter.
   Attributes can be applied to the synthesized auto-property and its backing field by using `property:` or `field:`
   targets for attributes syntactically applied to the corresponding record struct parameter.  
