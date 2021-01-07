@@ -24,6 +24,8 @@ See https://github.com/dotnet/csharplang/blob/master/spec/structs.md
 But instance field declarations for a record struct are permitted to include variable initializers when there is a primary constructor.
 (TODO: need to confirm, since default values still possible)
 
+Record structs cannot use `ref` modifier.
+
 At most one partial type declaration of a partial record struct may provide a `parameter_list`.
 The `parameter_list` may not be empty.
 
@@ -235,9 +237,11 @@ member whose name and type are taken from the value parameter declaration.
 
 For a record struct:
 
-* A public `get` and `set` auto-property is created.
+* A public `get` and `init` auto-property is created if the record struct has `readonly` modifier, `get` and `set` otherwise.
+  Both kinds of set accessors (`set` and `init`) are considered "matching". So the user may declare an init-only property
+  in place of a synthesized mutable one.
   An inherited `abstract` property with matching type is overridden.
-  It is an error if the inherited property does not have `public` `get` and `set` accessors.
+  It is an error if the inherited property does not have `public` `get` and `set`/`init` accessors.
   The auto-property is initialized to the value of the corresponding primary constructor parameter.
   Attributes can be applied to the synthesized auto-property and its backing field by using `property:` or `field:`
   targets for attributes syntactically applied to the corresponding record struct parameter.  
@@ -300,6 +304,5 @@ See https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-0
 - confirm that we want to disallow members named "Clone".
 - why did we disallow unsafe types in instance fields in records? I assume we also want to disallow in record structs.
 - `with` on generics? (may affect the design for record structs)
-- should we also allow `record ref struct`?
-- how are we going to allow user-defined positional init-only properties?
-- should we also allow `readonly record struct`?
+- confirm we won't allow `record ref struct`.
+
