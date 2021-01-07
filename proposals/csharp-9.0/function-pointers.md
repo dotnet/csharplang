@@ -268,6 +268,75 @@ The better function member specification will be changed to include the followin
 
 This means that it is possible to overload on `void*` and a `delegate*` and still sensibly use the address-of operator.
 
+### Type Inference
+
+In unsafe code, the following changes are made to the type inference algorithms:
+
+#### Input types
+
+https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#input-types
+
+The following is added:
+
+> If `E` is an address-of method group and `T` is a function pointer type then all the parameter types of `T` are input types of `E` with type `T`.
+
+#### Output types
+
+https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#output-types
+
+The following is added:
+
+> If `E` is an address-of method group and `T` is a function pointer type then the return type of `T` is an output type of `E` with type `T`.
+
+#### Output type inferences
+
+https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#output-type-inferences
+
+The following bullet is added between bullets 2 and 3:
+
+> * If `E` is an address-of method group and `T` is a function pointer type with parameter types `T1..Tk` and return type `Tb`, and overload resolution
+of `E` with the types `T1..Tk` yields a single method with return type `U`, then a _lower-bound inference_ is made from `U` to `Tb`.
+
+#### Lower-bound inferences
+
+https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#lower-bound-inferences
+
+The following case is added to bullet 3:
+
+> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and there is a unique type `delegate*<U2..Uk, U1>` such that `U` (or, if `U` is a type parameter,
+it's effective base class or any member of its effective interface set) is identical to, inherits from (directly or indirectly), implements (directly or
+indirectly), or has an implicit pointer conversion to `delegate*<U2..Uk, U1>`.
+
+Then, added to the inference from `Ui` to `Vi`:
+
+> * Otherwise, if `V` is `delegate*<V2..Vk, V1>` then inference depends on the i-th parameter of `delegate*<V2..Vk, V1>`:
+>    * If V1:
+>        * If the return is by value, then a _lower-bound inference_ is made.
+>        * If the return is by reference, then an _exact inference_ is made.
+>    * If V2..Vk:
+>        * If the parameter is by value, then an _upper-bound inference_ is made.
+>        * If the parameter is by reference, then an _exact inference_ is made.
+
+#### Upper-bound inferences
+
+https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#upper-bound-inferences
+
+The following case is added to bullet 3:
+
+> * `U` is a function pointer type `delegate*<U2..Uk, U1>` and there is a unique type `delegate*<V2..Vk, V1>` and `V` a class, struct, interface, delegate type,
+or function pointer type which is identical to, inherits from (directly or indirectly), implements (directly or indirectly), or has an implicit pointer conversion
+to `delegate*<U2..Uk, U1>`.
+
+Then added to the inference from `Ui` to `Vi`:
+
+> * Otherwise, if `U` is `delegate*<U2..Uk, U1>` then inference depends on the i-th parameter of `delegate*<U2..Uk, U1>`:
+>    * If U1:
+>        * If the return is by value, then an _upper-bound inference_ is made.
+>        * If the return is by reference, then an _exact inference_ is made.
+>    * If U2..Uk:
+>        * If the parameter is by value, then a _lower-bound inference_ is made.
+>        * If the parameter is by reference, then an _exact inference_ is made.
+
 ## Metadata representation of `in`, `out`, and `ref readonly` parameters and return types
 
 Function pointer signatures have no parameter flags location, so we must encode whether parameters and the return type are `in`, `out`, or `ref readonly` by using modreqs.
