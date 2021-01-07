@@ -301,4 +301,5 @@ See https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-0
 - why did we disallow unsafe types in instance fields in records? I assume we also want to disallow in record structs.
 - `with` on generics? (may affect the design for record structs)
 - should we also allow `record ref struct`?
-
+- how are we going to allow user-defined positional init-only properties?
+- should we also allow `readonly record struct`?
