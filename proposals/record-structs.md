@@ -304,5 +304,5 @@ See https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-0
 - confirm that we want to disallow members named "Clone".
 - why did we disallow unsafe types in instance fields in records? I assume we also want to disallow in record structs.
 - `with` on generics? (may affect the design for record structs)
-- confirm we won't allow `record ref struct`.
-
+- confirm we won't allow `record ref struct` (issue with `IEquatable<RefStruct>` and ref fields)
+- confirm implementation of equality members. Alternative is that synthesized `bool Equals(R other)`, `bool Equals(object? other)` and operators all just delegate to `ValueType.Equals`.
