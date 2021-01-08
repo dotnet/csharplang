@@ -101,7 +101,7 @@ For this record struct, the synthesized equality members would be something like
 struct R1 : IEquatable<R1>
 {
     public T1 P1 { get; set; }
-    public T1 P1 { get; set; }
+    public T2 P2 { get; set; }
     public override bool Equals(object? obj) => obj is R1 temp && Equals(temp);
     public bool Equals(R1 other)
     {
