@@ -4,7 +4,7 @@
 
 ## Schedule when convenient
 
-
+- IEnumerable and Length patterns - (Fred)
 
 ## Recurring topics
 
@@ -32,14 +32,15 @@
 - [#3428](https://github.com/dotnet/csharplang/issues/3428) Global usings for namespaces, types and aliases with command line switch (Mads/Aleksey)
 - [#137](https://github.com/dotnet/csharplang/issues/137) File scoped namespaces (Mads/Cyrus)
 
-## Jan 11, 2021
-
-- IEnumerable and Length patterns - (Fred)
-- Required properties simple form - (Fred)
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jan 11, 2021
+
+[C# Language Design Notes for January 11th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-01-11.md)
+
+- Required properties simple form
 
 ## Jan 6, 2021
 
