@@ -2,7 +2,7 @@
 
 ## Schedule ASAP
 
-- record struct (https://github.com/dotnet/csharplang/pull/4307)
+- record structs (https://github.com/dotnet/csharplang/issues/4334)
 
 ## Schedule when convenient
 
