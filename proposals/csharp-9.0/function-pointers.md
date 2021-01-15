@@ -303,7 +303,7 @@ https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#exact-infer
 
 The following sub-bullet is added as a case to bullet 2:
 
-> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and `U` is a function pointer type `delegate*<V2..Vk, V1>`, and the calling convention of `V`
+> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and `U` is a function pointer type `delegate*<U2..Uk, U1>`, and the calling convention of `V`
 is identical to `U`, and the refness of `Vi` is identical to `Ui`.
 
 #### Lower-bound inferences
