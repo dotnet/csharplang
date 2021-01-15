@@ -303,9 +303,12 @@ https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#lower-bound
 
 The following case is added to bullet 3:
 
-> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and there is a unique type `delegate*<U2..Uk, U1>` such that `U` (or, if `U` is a type parameter,
-it's effective base class or any member of its effective interface set) is identical to, inherits from (directly or indirectly), implements (directly or
-indirectly), or has an implicit function pointer conversion to `delegate*<U2..Uk, U1>`.
+> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and there is a function pointer type `delegate*<U2..Uk, U1>` such that `U` has an implicit
+function pointer conversion to `delegate*<U2..Uk, U1>`.
+
+The first bullet of inference from `Ui` to `Vi` is modified to:
+
+> * If `Ui` is not known to be a reference type or a function pointer type then an _exact inference_ is made
 
 Then, added to the inference from `Ui` to `Vi`:
 
@@ -323,9 +326,12 @@ https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#upper-bound
 
 The following case is added to bullet 3:
 
-> * `U` is a function pointer type `delegate*<U2..Uk, U1>` and there is a unique type `delegate*<V2..Vk, V1>` and `V` a class, struct, interface, delegate type,
-or function pointer type which is identical to, inherits from (directly or indirectly), implements (directly or indirectly), or has an implicit function pointer
-conversion to `delegate*<U2..Uk, U1>`.
+> * `U` is a function pointer type `delegate*<U2..Uk, U1>` and there is a unique type `delegate*<V2..Vk, V1>` and `V` is a function pointer type which 
+has an implicit function pointer conversion to `delegate*<U2..Uk, U1>`.
+
+The first bullet of inference from `Ui` to `Vi` is modified to:
+
+> * If `Ui` is not known to be a reference type or a function pointer type then an _exact inference_ is made
 
 Then added to the inference from `Ui` to `Vi`:
 
