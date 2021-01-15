@@ -297,20 +297,28 @@ The following bullet is added between bullets 2 and 3:
 > * If `E` is an address-of method group and `T` is a function pointer type with parameter types `T1..Tk` and return type `Tb`, and overload resolution
 of `E` with the types `T1..Tk` yields a single method with return type `U`, then a _lower-bound inference_ is made from `U` to `Tb`.
 
+#### Exact inferences
+
+https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#exact-inferences
+
+The following sub-bullet is added as a case to bullet 2:
+
+> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and `U` is a function pointer type `delegate*<V2..Vk, V1>`
+
 #### Lower-bound inferences
 
 https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#lower-bound-inferences
 
 The following case is added to bullet 3:
 
-> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and there is a function pointer type `delegate*<U2..Uk, U1>` such that `U` has an implicit
-function pointer conversion to `delegate*<U2..Uk, U1>`.
+> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and there is a function pointer type `delegate*<U2..Uk, U1>` such that `U` is identical to
+`delegate*<U2..Uk, U1>`.
 
 The first bullet of inference from `Ui` to `Vi` is modified to:
 
 > * If `Ui` is not known to be a reference type or a function pointer type then an _exact inference_ is made
 
-Then, added to the inference from `Ui` to `Vi`:
+Then, added after the 3rd bullet of inference from `Ui` to `Vi`:
 
 > * Otherwise, if `V` is `delegate*<V2..Vk, V1>` then inference depends on the i-th parameter of `delegate*<V2..Vk, V1>`:
 >    * If V1:
@@ -326,14 +334,13 @@ https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#upper-bound
 
 The following case is added to bullet 3:
 
-> * `U` is a function pointer type `delegate*<U2..Uk, U1>` and there is a unique type `delegate*<V2..Vk, V1>` and `V` is a function pointer type which 
-has an implicit function pointer conversion to `delegate*<U2..Uk, U1>`.
+> * `U` is a function pointer type `delegate*<U2..Uk, U1>` and `V` is a function pointer type which is identical to `delegate*<V2..Vk, V1>`.
 
 The first bullet of inference from `Ui` to `Vi` is modified to:
 
 > * If `Ui` is not known to be a reference type or a function pointer type then an _exact inference_ is made
 
-Then added to the inference from `Ui` to `Vi`:
+Then added after the 3rd bullet of inference from `Ui` to `Vi`:
 
 > * Otherwise, if `U` is `delegate*<U2..Uk, U1>` then inference depends on the i-th parameter of `delegate*<U2..Uk, U1>`:
 >    * If U1:
