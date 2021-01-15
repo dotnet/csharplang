@@ -2,6 +2,8 @@
 
 ## Schedule ASAP
 
+- record struct (https://github.com/dotnet/csharplang/pull/4307)
+
 ## Schedule when convenient
 
 - IEnumerable and Length patterns - (Fred)
