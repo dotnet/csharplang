@@ -3,7 +3,7 @@
 The syntax for a record struct is as follows:
 
 ```antlr
-struct_record_declaration
+record_struct_declaration
     : attributes? struct_modifier* 'partial'? 'record' 'struct' identifier type_parameter_list?
       parameter_list? struct_interfaces? type_parameter_constraints_clause* record_struct_body
     ;
@@ -22,7 +22,6 @@ The modifiers and members of a record struct are subject to the same restriction
 See https://github.com/dotnet/csharplang/blob/master/spec/structs.md
 
 But instance field declarations for a record struct are permitted to include variable initializers when there is a primary constructor.
-(TODO: need to confirm, since default values still possible)
 
 Record structs cannot use `ref` modifier.
 
@@ -38,6 +37,7 @@ Members are synthesized unless a member with a "matching" signature is declared 
 an accessible concrete non-virtual member with a "matching" signature is inherited.
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
+See https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#signatures-and-overloading
 
 It is an error for a member of a record struct to be named "Clone".
 
@@ -130,8 +130,10 @@ private bool PrintMembers(System.Text.StringBuilder builder);
 ```
 
 The method does the following:
-1. for each of the record struct's printable members (non-static public field and readable property members), appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+1. for each of the record struct's printable members (non-static public field and readable property members), appends that member's name followed by " = " followed by the member's value separated with ", ",
 2. return true if the record struct has printable members.
+
+For a member that has a value type, we will convert its value to a string representation using the most efficient method available to the target platform. At present that means calling `ToString` before passing to `StringBuilder.Append`.
 
 The `PrintMembers` method can be declared explicitly.
 It is an error if the explicit declaration does not match the expected signature or accessibility.
@@ -203,7 +205,6 @@ additional members with the same conditions as the members above.
 A record struct has a public constructor whose signature corresponds to the value parameters of the
 type declaration. This is called the primary constructor for the type. It is an error to have a primary
 constructor and a constructor with the same signature already present in the struct.
-
 A record struct is not permitted to declare a parameterless primary constructor.
 
 Instance field declarations for a record struct are permitted to include variable initializers when there is a primary constructor. 
@@ -283,19 +284,17 @@ record_declaration
 
 ## Allow user-defined positional members to be fields
 
-TODO
-
 See https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-05.md#changing-the-member-type-of-a-primary-constructor-parameter
 
-# References
+There is a back compat issue, so we may either drop this feature or we need to implement it fast (as a bug fix).
 
-- https://github.com/dotnet/csharplang/edit/master/proposals/csharp-9.0/records.md 
-- https://github.com/dotnet/csharplang/blob/master/spec/structs.md
-- https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-05-04.md#structs-as-records
-- https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-22.md#struct-records
-- https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-30.md#struct-equality
-- https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-05.md#record-struct-primary-constructor-defaults
-- https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-07.md#record-struct-syntax
+```csharp
+public record Base
+{
+    public int Field;
+}
+public record Derived(int Field);
+```
 
 # Open questions
 
@@ -306,3 +305,5 @@ See https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-0
 - `with` on generics? (may affect the design for record structs)
 - confirm we won't allow `record ref struct` (issue with `IEquatable<RefStruct>` and ref fields)
 - confirm implementation of equality members. Alternative is that synthesized `bool Equals(R other)`, `bool Equals(object? other)` and operators all just delegate to `ValueType.Equals`.
+- confirm that we want to allow field initializers when there is a primary constructor. Do we also want to allow parameterless struct constructors while we're at it (the Activator issue was apparently fixed)?
+
