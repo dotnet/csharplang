@@ -197,3 +197,41 @@ Enum members have the type of their containing enum type (except within other en
 The following operators can be used on values of enum types: `==`, `!=`, `<`, `>`, `<=`, `>=` ([Enumeration comparison operators](expressions.md#enumeration-comparison-operators)), binary `+` ([Addition operator](expressions.md#addition-operator)), binary `-` ([Subtraction operator](expressions.md#subtraction-operator)), `^`, `&`, `|` ([Enumeration logical operators](expressions.md#enumeration-logical-operators)), `~` ([Bitwise complement operator](expressions.md#bitwise-complement-operator)), `++` and `--` ([Postfix increment and decrement operators](expressions.md#postfix-increment-and-decrement-operators) and [Prefix increment and decrement operators](expressions.md#prefix-increment-and-decrement-operators)).
 
 Every enum type automatically derives from the class `System.Enum` (which, in turn, derives from `System.ValueType` and `object`). Thus, inherited methods and properties of this class can be used on values of an enum type.
+
+Enums can be used in [switch expressions](/dotnet/csharp/language-reference/operators/switch-expression). The following example translates values from an enum representing visual directions in an online map to the corresponding cardinal direction:
+
+```csharp
+public static class SwitchExample
+{
+    public enum Directions
+    {
+        Up,
+        Down,
+        Right,
+        Left
+    }
+
+    public enum Orientation
+    {
+        North,
+        South,
+        East,
+        West
+    }
+
+    public static void Main()
+    {
+        var direction = Directions.Right;
+        Console.WriteLine($"Map view direction is {direction}");
+
+        var orientation = direction switch
+        {
+            Directions.Up    => Orientation.North,
+            Directions.Right => Orientation.East,
+            Directions.Down  => Orientation.South,
+            Directions.Left  => Orientation.West,
+        };
+        Console.WriteLine($"Cardinal orientation is {orientation}");
+    }
+}
+```
