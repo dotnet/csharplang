@@ -232,8 +232,10 @@ bool PrintMembers(System.Text.StringBuilder builder);
 The method is `private` if the record type is `sealed`. Otherwise, the method is `virtual` and `protected`.
 
 The method:
-1. for each of the record's printable members (non-static public field and readable property members), appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+1. for each of the record's printable members (non-static public field and readable property members), appends that member's name followed by " = " followed by the member's value separated with ", ",
 2. return true if the record has printable members.
+
+For a member that has a value type, we will convert its value to a string representation using the most efficient method available to the target platform. At present that means calling `ToString` before passing to `StringBuilder.Append`.
 
 If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a method declared as follows:
 ```C#
@@ -283,7 +285,7 @@ class R1 : IEquatable<R1>
     {
         builder.Append(nameof(P1));
         builder.Append(" = ");
-        builder.Append(this.P1); // or builder.Append(this.P1); if P1 has a value type
+        builder.Append(this.P1); // or builder.Append(this.P1.ToString()); if P1 has a value type
         
         return true;
     }
