@@ -306,4 +306,5 @@ public record Derived(int Field);
 - confirm we won't allow `record ref struct` (issue with `IEquatable<RefStruct>` and ref fields)
 - confirm implementation of equality members. Alternative is that synthesized `bool Equals(R other)`, `bool Equals(object? other)` and operators all just delegate to `ValueType.Equals`.
 - confirm that we want to allow field initializers when there is a primary constructor. Do we also want to allow parameterless struct constructors while we're at it (the Activator issue was apparently fixed)?
+- how much do we want to say about `Combine` method?
 
