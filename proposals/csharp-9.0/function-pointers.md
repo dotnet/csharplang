@@ -317,7 +317,8 @@ The following case is added to bullet 3:
 
 The first bullet of inference from `Ui` to `Vi` is modified to:
 
-> * If `Ui` is not known to be a reference type or a function pointer type then an _exact inference_ is made
+> * If `U` is not a function pointer type and `Ui` is not known to be a reference type, or if `U` is a function pointer type and `Ui` is not known to be
+>   a function pointer type or a reference type, then an _exact inference_ is made
 
 Then, added after the 3rd bullet of inference from `Ui` to `Vi`:
 
@@ -340,7 +341,8 @@ calling convention of `U` is identical to `V`, and the refness of `Ui` is identi
 
 The first bullet of inference from `Ui` to `Vi` is modified to:
 
-> * If `Ui` is not known to be a reference type or a function pointer type then an _exact inference_ is made
+> * If `U` is not a function pointer type and `Ui` is not known to be a reference type, or if `U` is a function pointer type and `Ui` is not known to be
+>   a function pointer type or a reference type, then an _exact inference_ is made
 
 Then added after the 3rd bullet of inference from `Ui` to `Vi`:
 
