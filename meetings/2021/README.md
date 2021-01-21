@@ -2,11 +2,7 @@
 
 ## Schedule ASAP
 
-- record structs (https://github.com/dotnet/csharplang/issues/4334)
-
 ## Schedule when convenient
-
-- IEnumerable and Length patterns - (Fred)
 
 ## Recurring topics
 
@@ -25,9 +21,13 @@
 
 ## Feb 1, 2021
 
+- Statics in interfaces
+
 ## Jan 27, 2021
 
-## Jan 25, 2021
+- record structs (Julien - https://github.com/dotnet/csharplang/issues/4334)
+- IEnumerable and Length patterns - (Fred)
+
 
 # C# Language Design Notes for 2021
 
