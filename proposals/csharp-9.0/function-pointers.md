@@ -294,7 +294,7 @@ https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#output-type
 
 The following bullet is added between bullets 2 and 3:
 
-> * If `E` is an address-of method group and `T` is a function pointer type with parameter types `T1..Tk` and return type `Tb`, and overload resolution
+> * If `E` is an address-of method group and `T` is a function pointer type with parameter types `T1...Tk` and return type `Tb`, and overload resolution
 of `E` with the types `T1..Tk` yields a single method with return type `U`, then a _lower-bound inference_ is made from `U` to `Tb`.
 
 #### Exact inferences
@@ -334,7 +334,7 @@ Then, added after the 3rd bullet of inference from `Ui` to `Vi`:
 
 https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#upper-bound-inferences
 
-The following case is added to bullet 3:
+The following case is added to bullet 2:
 
 > * `U` is a function pointer type `delegate*<U2..Uk, U1>` and `V` is a function pointer type which is identical to `delegate*<V2..Vk, V1>`, and the
 calling convention of `U` is identical to `V`, and the refness of `Ui` is identical to `Vi`.
