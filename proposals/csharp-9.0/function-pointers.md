@@ -312,8 +312,8 @@ https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#lower-bound
 
 The following case is added to bullet 3:
 
-> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and there is a function pointer type `delegate*<U2..Uk, U1>` such that `U` is identical to
-`delegate*<U2..Uk, U1>`, and the calling convention of `V` is identical to `U`, and the refness of `Vi` is identical to `Ui`.
+> * `V` is a function pointer type `delegate*<V2..Vk, V1>` and `U` is a function pointer type `delegate*<U2..Uk, U1>`, and the
+>   calling convention of `V` is identical to the calling convention of `U`, and the refkind of `Vi` is identical to the refkind of `Ui`.
 
 The first bullet of inference from `Ui` to `Vi` is modified to:
 
@@ -336,8 +336,8 @@ https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#upper-bound
 
 The following case is added to bullet 2:
 
-> * `U` is a function pointer type `delegate*<U2..Uk, U1>` and `V` is a function pointer type which is identical to `delegate*<V2..Vk, V1>`, and the
-calling convention of `U` is identical to `V`, and the refness of `Ui` is identical to `Vi`.
+> * `U` is a function pointer type `delegate*<U2..Uk, U1>` and `V` is a function pointer type `delegate*<V2..Vk, V1>`, and the calling convention of `U`
+>   is identical to the calling convention of `V`, and the refkind of `Ui` is identical to the refkind of `Vi`.
 
 The first bullet of inference from `Ui` to `Vi` is modified to:
 
