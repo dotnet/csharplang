@@ -2,6 +2,8 @@
 
 ## Schedule ASAP
 
+- init-only access on conversion of `this` (Julien, issue https://github.com/dotnet/roslyn/issues/50053)
+
 ## Schedule when convenient
 
 ## Recurring topics
