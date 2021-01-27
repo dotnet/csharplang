@@ -2,8 +2,6 @@
 
 ## Schedule ASAP
 
-- init-only access on conversion of `this` (Julien, issue https://github.com/dotnet/roslyn/issues/50053)
-
 ## Schedule when convenient
 
 ## Recurring topics
@@ -21,12 +19,15 @@
 
 ## Feb 3, 2021
 
+- Global usings
+
 ## Feb 1, 2021
 
 - Statics in interfaces
 
 ## Jan 27, 2021
 
+- init-only access on conversion of `this` (Julien, issue https://github.com/dotnet/roslyn/issues/50053)
 - record structs (Julien - https://github.com/dotnet/csharplang/issues/4334)
 - IEnumerable and Length patterns - (Fred)
 
