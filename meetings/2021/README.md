@@ -4,6 +4,8 @@
 
 ## Schedule when convenient
 
+- IEnumerable and Length patterns - (Fred)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -25,16 +27,21 @@
 
 - Statics in interfaces
 
-## Jan 27, 2021
-
-- init-only access on conversion of `this` (Julien, issue https://github.com/dotnet/roslyn/issues/50053)
-- record structs (Julien - https://github.com/dotnet/csharplang/issues/4334)
-- IEnumerable and Length patterns - (Fred)
-
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jan 27, 2021
+
+[C# Language Design Notes for January 27th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-01-27.md)
+
+1. Init-only access on conversion on `this`
+2. Record structs
+    1. Copy constructors and Clone methods
+    2. `PrintMembers`
+    3. Implemented equality algorithms
+    4. Field initializers
+    5. GetHashcode determinism
 
 ## Jan 13, 2021
 
