@@ -4,8 +4,6 @@
 
 ## Schedule when convenient
 
-- IEnumerable and Length patterns - (Fred)
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -17,15 +15,15 @@
 
 ## Feb 10, 2021
 
+- IEnumerable and Length patterns - (Fred)
+
 ## Feb 8, 2021
+
+- Statics in interfaces
 
 ## Feb 3, 2021
 
 - Global usings
-
-## Feb 1, 2021
-
-- Statics in interfaces
 
 # C# Language Design Notes for 2021
 
