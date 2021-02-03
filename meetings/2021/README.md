@@ -15,8 +15,6 @@
 
 ## Feb 10, 2021
 
-- IEnumerable and Length patterns - (Fred)
-
 ## Feb 8, 2021
 
 - Statics in interfaces
@@ -24,6 +22,8 @@
 ## Feb 3, 2021
 
 - Global usings
+- Namespace directives
+- IEnumerable and Length patterns - (Fred)
 
 # C# Language Design Notes for 2021
 
