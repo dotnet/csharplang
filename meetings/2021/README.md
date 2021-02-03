@@ -4,6 +4,8 @@
 
 ## Schedule when convenient
 
+- Namespace directives
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -19,15 +21,16 @@
 
 - Statics in interfaces
 
-## Feb 3, 2021
-
-- Global usings
-- Namespace directives
-- IEnumerable and Length patterns - (Fred)
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Feb 3, 2021
+
+[C# Language Design Notes for February 3rd, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-03.md)
+
+1. List patterns on `IEnumerable`
+2. Global usings
 
 ## Jan 27, 2021
 
