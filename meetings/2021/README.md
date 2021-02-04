@@ -2,6 +2,8 @@
 
 ## Schedule ASAP
 
+First class native integer support - https://github.com/dotnet/csharplang/issues/4385
+
 ## Schedule when convenient
 
 - Namespace directives
