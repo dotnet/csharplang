@@ -2,6 +2,7 @@ Features Added in C# Language Versions
 ====================
 
 # C# 9.0 - .NET 5 and Visual Studio 2019 version 16.8 
+- [Source Generators](https://devblogs.microsoft.com/dotnet/introducing-c-source-generators/)
 - [Records](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md) and `with` expressions: succinctly declare reference types with value semantics (`record Point(int X, int Y);`, `var newPoint = point with { X: 100 }`).
 - [Init-only setters](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/init.md): init-only properties can be set during object creation (`int Property { get; init; }`).
 - [Top-level statements](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/top-level-statements.md): the entry point logic of a program can be written without declaring an explicit type or `Main` method.
