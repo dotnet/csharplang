@@ -13,15 +13,40 @@ First class native integer support - https://github.com/dotnet/csharplang/issues
 - *Triage championed features and milestones*
 - *Design review*
 
+## Mar 31, 2021
+
+## Mar 29, 2021
+
+## Mar 24, 2021
+
+## Mar 22, 2021
+
+## Mar 15, 2021
+
+## Mar 10, 2021
+
+- *Design review*
+
+## Mar 8, 2021
+
+## Mar 3, 2021
+
+## Mar 1, 2021
+
 ## Feb 24, 2021
 
 ## Feb 22, 2021
 
 ## Feb 10, 2021
 
+- Confirm namespace directives design
+- Global usings
+- *Triage championed features and milestones*
+
 ## Feb 8, 2021
 
 - Statics in interfaces
+
 
 # C# Language Design Notes for 2021
 
