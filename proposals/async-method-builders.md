@@ -105,6 +105,12 @@ Just those small additions enable:
 
 and with minimal surface area changes or feature work in the compiler.
 
+
+Note that we need the emitted code to allow a different type being returned from `Create` method:
+```
+AsyncPooledBuilder _builder = AsyncPooledBuilderWithSize4.Create();
+```
+
 #### P1: Passing state to the builder instantiation
 
 In some scenarios, it would be useful to pass some information to the builder.  This could be static (e.g. constants configuring the size of the pool to use) or dynamic (e.g. reference to cache or singleton to use).
@@ -121,11 +127,6 @@ public struct AsyncPooledBuilderWithSize4
 {
     AsyncPooledBuilder Create() => AsyncPooledBuilder.Create(4);
 }
-```
-
-Note that we need the emitted code to allow a different type being returned from `Create` method:
-```
-AsyncPooledBuilder _builder = AsyncPooledBuilderWithSize4.Create();
 ```
 
 ##### Option 1: use constants in attribute as arguments for `Create`
@@ -231,6 +232,22 @@ class MyClass
     public async ValueTask Method1Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder
     public async ValueTask<int> Method2Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder<int>
     public async ValueTask<string> Method3Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder<string>
+}
+```
+
+For this we would add the following members to the attribute:
+```C#
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Module, Inherited = false, AllowMultiple = false)]
+    public sealed class AsyncMethodBuilderOverrideAttribute : Attribute
+    {
+        ...
+        // for scoped application (use property for targetReturnType? have compiler check that it's provided)
+        public AsyncMethodBuilderOverrideAttribute(Type builderType, Type targetReturnType) => ...
+
+        public Type TargetReturnType { get; }
+    }
 }
 ```
 
