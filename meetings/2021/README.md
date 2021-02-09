@@ -43,14 +43,19 @@ First class native integer support - https://github.com/dotnet/csharplang/issues
 - Global usings
 - *Triage championed features and milestones*
 
-## Feb 8, 2021
-
-- Statics in interfaces
-
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Feb 8, 2021
+
+[C# Language Design Notes for February 8th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-08.md)
+
+1. Virtual statics in interfaces
+    1. Syntax Clashes
+    2. Self-applicability as a constraint
+    3. Relaxed operator operand types
+    4. Constructors
 
 ## Feb 3, 2021
 
