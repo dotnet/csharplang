@@ -1,4 +1,4 @@
-# Per-Method AsyncMethodBuilders
+# AsyncMethodBuilder override
 
 * [x] Proposed
 * [ ] Prototype: Not Started
@@ -8,7 +8,13 @@
 ## Summary
 [summary]: #summary
 
-Extend the existing async method builder to support attribution per-method in addition to the existing per-return type support.
+Allow per-method override of the async method builder to use.
+For some async methods we want to customize the invocation of `Builder.Create()` to use a different _builder type_ and possibly pass some additional state information.
+
+```C#
+[AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder<int>))] // new, referring to some custom builder type
+static async ValueTask<int> ExampleAsync() { ... }
+```
 
 ## Motivation
 [motivation]: #motivation
@@ -17,7 +23,7 @@ Today, async method builders are tied to a given type used as a return type of a
 
 In .NET 5, an experimental feature was shipped that provides two modes in which `AsyncValueTaskMethodBuilder` and `AsyncValueTaskMethodBuilder<T>` operate.  The on-by-default mode is the same as has been there since the functionality was introduced: when the state machine needs to be lifted to the heap, an object is allocated to store the state, and the async method returns a `ValueTask{<T>}` backed by a `Task{<T>}`.  However, if an environment variable is set, all builders in the process switch to a mode where, instead, the `ValueTask{<T>}` instances are backed by reusable `IValueTaskSource{<T>}` implementations that are pooled.  Each async method has its own pool with a fixed maximum number of instances allowed to be pooled, and as long as no more than that number are ever returned to the pool to be pooled at the same time, `async ValueTask<{T}>` methods effectively become free of any GC allocation overhead.
 
-There are several problems with this experimental mode, however, which is both why a) it's off by default and b) we're likely to remove it in a future release unless very compelling new information emerges (https://github.com/dotnet/runtime/issues/13633).  
+There are several problems with this experimental mode, however, which is both why a) it's off by default and b) we're likely to remove it in a future release unless very compelling new information emerges (https://github.com/dotnet/runtime/issues/13633).
 - It introduces a behavioral difference for consumers of the returned `ValueTask{<T>}` if that `ValueTask` isn't being consumed according to spec.  When it's backed by a `Task`, you can do with the `ValueTask` things you can do with a `Task`, like await it multiple times, await it concurrently, block waiting for it to complete, etc.  But when it's backed by an arbitrary `IValueTaskSource`, such operations are prohibited, and automatically switching from the former to the latter can lead to bugs.  With the switch at the process level and affecting all `async ValueTask` methods in the process, whether you control them or not, it's too big a hammer.
 - It's not necessarily a performance win, and could represent a regression in some situations.  The implementation is trading the cost of pooling (accessing a pool isn't free) with the cost of GC, and in various situations the GC can win.  Again, applying the pooling to all `async ValueTask` methods in the process rather than being selective about the ones it would most benefit is too big a hammer.
 - It adds to the IL size of a trimmed application, even if the flag isn't set, and then to the resulting asm size.  It's possible that can be worked around with improvements to the implementation to teach it that for a given deployment the environment variable will always be false, but as it stands today, every `async ValueTask` method saw for example an ~2K binary footprint increase in aot images due to this option, and, again, that applies to all `async ValueTask` methods in the whole application closure.
@@ -30,17 +36,31 @@ We need a way to have an individual async method opt-in to a specific builder.
 ## Detailed design
 [design]: #detailed-design
 
-#### P0: AsyncMethodBuilderAttribute applicable to methods
+#### P0: AsyncMethodBuilderOverrideAttribute applied on async methods
 
-In dotnet/runtime, change `AsyncMethodBuilderAttribute`'s AttributeUsage from:
-```C#
-AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Delegate | AttributeTargets.Enum
+In `dotnet/runtime`, add `AsyncMethodBuilderOverrideAttribute`:
+```csharp
+namespace System.Runtime.CompilerServices
+{
+    /// <summary>
+    /// Indicates the type of the async method builder that should be used by a language compiler to
+    /// build the attributed method.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Module, Inherited = false, AllowMultiple = false)]
+    public sealed class AsyncMethodBuilderOverrideAttribute : Attribute
+    {
+        /// <summary>Initializes the <see cref="AsyncMethodBuilderOverrideAttribute"/>.</summary>
+        /// <param name="builderType">The <see cref="Type"/> of the associated builder.</param>
+        public AsyncMethodBuilderOverrideAttribute(Type builderType) => BuilderType = builderType;
+
+        // for scoped application (use property for targetReturnType? have compiler check that it's provided)
+        public AsyncMethodBuilderOverrideAttribute(Type builderType, Type targetReturnType) => ...
+
+        /// <summary>Gets the <see cref="Type"/> of the associated builder.</summary>
+        public Type BuilderType { get; }
+    }
+}
 ```
-to also include Method:
-```C#
-AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Delegate | AttributeTargets.Enum | AttributeTargets.Method
-```
-so that it may be applied to methods as well.  (Alternatively, introduce a new attribute specific to methods, if that's deemed better for some reason.)
 
 In the C# compiler, prefer the attribute on the method when determining what builder to use over the one defined on the type.  For example, today if a method is defined as:
 ```C#
@@ -61,7 +81,7 @@ static ValueTask<int> ExampleAsync()
 ```
 With this change, if the developer wrote:
 ```C#
-[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<int>))] // new, referring to some custom builder type
+[AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder<int>))] // new, referring to some custom builder type
 static async ValueTask<int> ExampleAsync() { ... }
 ```
 it would instead be compiled to:
@@ -80,58 +100,154 @@ static ValueTask<int> ExampleAsync()
 ```
 
 Just those small additions enable:
-- Anyone to write their own builder that can be applied to async methods that return `Task{T}` and `ValueTask{<T>}`
+- Anyone to write their own builder that can be applied to async methods that return `Task<T>` and `ValueTask<T>`
 - As "anyone", the runtime to ship the experimental builder support as new public builder types that can be opted into on a method-by-method basis; the existing support would be removed from the existing builders.  Methods (including some we care about in the core libraries) can then be attributed on a case-by-case basis to use the pooling support, without impacting any other unattributed methods.
 
 and with minimal surface area changes or feature work in the compiler.
 
-#### P1: AsyncMethodBuilderAttribute arguments forward to Create
 
-The attribute would be given an additional constructor:
+Note that we need the emitted code to allow a different type being returned from `Create` method:
+```
+AsyncPooledBuilder _builder = AsyncPooledBuilderWithSize4.Create();
+```
+
+#### P1: Passing state to the builder instantiation
+
+In some scenarios, it would be useful to pass some information to the builder.  This could be static (e.g. constants configuring the size of the pool to use) or dynamic (e.g. reference to cache or singleton to use).
+
+We brainstormed a few options (documented below for the record) but end up recommending doing nothing (option #0) until we determine that supporting dynamic state would be worthwhile.
+
+##### Option 0: no extra state
+
+It is possible to approximate passing static information by wrapping builder types.
+For instance, one could create a custom builder type that hardcodes a certain configuration:
+
 ```C#
-public AsyncMethodBuilderAttribute(Type builderType, params object[] createArguments);
-```
-If any such arguments are specified, the compiler would expect the builder to have a `Create` method that could bind with those arguments, e.g. if a developer used:
-```C#
-[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<>), 16)]
-```
-the compiler would allow compilation due to `PoolingAsyncValueTaskMethodBuilder<>` exposing the following `Create` overload:
-```
-public static PoolingAsyncValueTaskMethodBuilder<T> Create(int poolCapacity);
-```
-and would use that `Create` overload instead of a parameterless `Create` that it would otherwise expect and use, e.g. this:
-```C#
-[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<>), 16)]
-static async ValueTask<int> ExampleAsync() { ... }
-```
-would be compiled to:
-```C#
-[AsyncStateMachine(typeof(<ExampleAsync>d__29))]
-[CompilerGenerated]
-[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<>), 16)]
-static ValueTask<int> ExampleAsync()
+public struct AsyncPooledBuilderWithSize4
 {
-    <ExampleAsync>d__29 stateMachine;
-    stateMachine.<>t__builder = PoolingAsyncValueTaskMethodBuilder<int>.Create(16); // attr arguments passed to Create
-    stateMachine.<>1__state = -1;
-    stateMachine.<>t__builder.Start(ref stateMachine);
-    return stateMachine.<>t__builder.Task;
+    AsyncPooledBuilder Create() => AsyncPooledBuilder.Create(4);
 }
 ```
-Such support would enable custom builders to be parameterized per call site, without requiring the builder to perform complicated and expensive reflection.
+
+##### Option 1: use constants in attribute as arguments for `Create`
+
+The `AsyncMethodBuilderOverrideAttribute` would have accept some additional information:
+```C#
+	public AsyncMethodBuilderOverrideAttribute(Type builderType, params object[] args)
+```
+
+The arguments collected in the attribute:
+```C#
+[AsyncMethodBuilderOverride(typeof(AsyncPooledBuilder), 4)]
+```
+would be used in invocation of the `Create` method:
+```C#
+AsyncPooledBuilder.Create(4);
+```
+
+##### Option 2: use arguments of the async method
+
+In addition to `AsyncMethodBuilderOverrideAttribute` we would have an attribute to tag one of the async method's parameters:
+```C#
+[AsyncMethodBuilderOverride(typeof(AsyncPooledBuilder))]
+async ValueTask MyMethodAsync(/* regular arguments */, [FOR_BUILDER] int i)
+```
+
+This would result in the value for that parameter being passed to the `Create` invocation:
+```C#
+BuilderType.Create(i);
+```
+
+In most cases, the user would end up writing a wrapper to achieve the desired signature:
+```C#
+public ValueTask MyMethodWrapperAsync(/* regular parameters */)
+{
+    return MyMethodAsync(/* pass values from regular parameters through */, 4); // static or dynamic value for the builder
+}
+```
+
+One could even pass cached delegates this way:
+```C#
+.ctor()
+{
+    s_func_take = () => get_item();
+    s_action_put = t => free_item(t);
+}
+
+public ValueTask MyMethodWrapperAsync(/* regular parameters */)
+{
+   return MyMethodAsync(/* pass values from regular parameters through */, (s_func_take, s_action_put));
+}
+```
+
+This approach resembles how `EnumeratorCancellationAttribute` works. But the extra parameter isn't useful to user code, so we're polluting the signature and state machine.
+This approach overlaps with option #1, so we probably wouldn't want to support both.
+
+##### Option 3: pass a lambda that instantiates builders
+
+As a replacement for `AsyncMethodBuilderOverrideAttribute` (or possibly in addition to it) we would have an attribute to tag one of the async method's parameters:
+```C#
+async ValueTask MyMethodAsync(/* regular parameters */, [FOR_BUILDER] Func<AsyncPooledBuilder> lambda)
+```
+That parameter would need to have a delegate type with no parameters and returning a builder type.
+
+The compiler could them generate:
+```C#
+...
+static ValueTask<int> MyMethodAsync(/* regular parameters */, [FOR_BUILDER] Func<AsyncPooledBuilder> lambda)
+{
+    <MyMethodAsync>d__29 stateMachine;
+    stateMachine.<>t__builder = lambda();
+    ...
+}
+```
+
+We still have the problem of polluting the method signature and the state machine.
+
+In the case where we want a builder holding two cached delegates
+
+```C#
+.ctor()
+{
+    s_func_take = () => get_item();
+    s_action_put = t => free_item(t);
+    s_func = () => Builder.Create(take: s_func_take, put: s_action_put);
+}
+
+public ValueTask MyMethodWrapperAsync(...)
+{
+    return MyMethodAsync(..., s_func);
+}
+```
 
 #### P2: Enable at the module (and type?) level as well
 
 A developer that wants to using a specific custom builder for all of their methods can do so by putting the relevant attribute on each method.  But we could also enable attributing at the module or type level, in which case every relevant method within that scope would behave as if it were directly annotated, e.g.
 ```C#
-[module: PoolingAsyncValueTaskMethodBuilder]
-[module: PoolingAsyncValueTaskMethodBuilder<>]
+[module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder), typeof(ValueTask)]
+[module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder<>), typeof(ValueTask<>)]
 
 class MyClass
 {
     public async ValueTask Method1Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder
     public async ValueTask<int> Method2Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder<int>
     public async ValueTask<string> Method3Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder<string>
+}
+```
+
+For this we would add the following members to the attribute:
+```C#
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Module, Inherited = false, AllowMultiple = false)]
+    public sealed class AsyncMethodBuilderOverrideAttribute : Attribute
+    {
+        ...
+        // for scoped application (use property for targetReturnType? have compiler check that it's provided)
+        public AsyncMethodBuilderOverrideAttribute(Type builderType, Type targetReturnType) => ...
+
+        public Type TargetReturnType { get; }
+    }
 }
 ```
 
