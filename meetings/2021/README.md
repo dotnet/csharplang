@@ -31,7 +31,13 @@
 
 ## Feb 24, 2021
 
+- Static virtual members (Mads)
+
 ## Feb 22, 2021
+
+- `using` directive enhancements
+    - global usings (Aleksey)
+    - improved using aliases (Chuck)
 
 # C# Language Design Notes for 2021
 
