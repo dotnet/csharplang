@@ -29,6 +29,8 @@
 
 ## Mar 1, 2021
 
+- async method builder override (Stephen/Julien): https://github.com/dotnet/csharplang/blob/master/proposals/async-method-builders.md
+
 ## Feb 24, 2021
 
 - Static virtual members (Mads): https://github.com/dotnet/csharplang/issues/4436
