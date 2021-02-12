@@ -31,7 +31,7 @@
 
 ## Feb 24, 2021
 
-- Static virtual members (Mads)
+- Static virtual members (Mads): https://github.com/dotnet/csharplang/issues/4436
 
 ## Feb 22, 2021
 
