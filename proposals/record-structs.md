@@ -16,12 +16,12 @@ record_struct_body
 
 Record struct types are value types, like other struct types. They implicitly inherit from the class `System.ValueType`.
 The modifiers and members of a record struct are subject to the same restrictions as those of structs
-(accessibility on type, modifiers on members, parameterless instance constructors,
-`base(...)` instance constructor initializers, definite assignment for `this` in constructor, destructors, ...).
+(accessibility on type, modifiers on members, `base(...)` instance constructor initializers,
+definite assignment for `this` in constructor, destructors, ...).
+Record structs will also follow the same rules as structs for parameterless instance constructors and field initializers,
+but this document assumes that we will lift those restrictions for structs generally.
 
 See https://github.com/dotnet/csharplang/blob/master/spec/structs.md
-
-But instance field declarations for a record struct are permitted to include variable initializers when there is a primary constructor.
 
 Record structs cannot use `ref` modifier.
 
@@ -89,7 +89,7 @@ The method can be declared explicitly.
 
 A warning is reported if one of `Equals(R)` and `GetHashCode()` is explicitly declared but the other method is not explicit.
 
-The synthesized override of `GetHashCode()` returns an `int` result of a deterministic function combining the values of `System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` for each instance field `fieldN` with `TN` being the type of `fieldN`.
+The synthesized override of `GetHashCode()` returns an `int` result of combining the values of `System.Collections.Generic.EqualityComparer<TN>.Default.GetHashCode(fieldN)` for each instance field `fieldN` with `TN` being the type of `fieldN`.
 
 For example, consider the following record struct:
 ```C#
@@ -207,8 +207,9 @@ type declaration. This is called the primary constructor for the type. It is an 
 constructor and a constructor with the same signature already present in the struct.
 A record struct is not permitted to declare a parameterless primary constructor.
 
-Instance field declarations for a record struct are permitted to include variable initializers when there is a primary constructor. 
-At runtime the primary constructor executes the instance initializers appearing in the record-struct-body.
+Instance field declarations for a record struct are permitted to include variable initializers.
+If there is no primary constructor, the instance initializers execute as part of the parameterless constructor.
+Otherwise, at runtime the primary constructor executes the instance initializers appearing in the record-struct-body.
 
 If a record struct has a primary constructor, any user-defined constructor, except "copy constructor" must have an
 explicit `this` constructor initializer.
@@ -296,15 +297,27 @@ public record Base
 public record Derived(int Field);
 ```
 
+# Allow parameterless constructors and member initializers in structs
+
+We are going to support both parameterless constructors and member initializers in structs.
+This will be specified in more details.
+
+Raw notes:  
+Allow parameterless ctors on structs and also field initializers (no runtime detection)  
+We will enumerate scenarios where initializers aren't evaluated: arrays, generics, default, ...  
+Consider diagnostics for using struct with parameterless ctor in some of those cases?  
+
 # Open questions
 
 - should we disallow a user-defined constructor with a copy constructor signature?
-- confirm that we want to keep PrintMembers design (separate method returning `bool`)
 - confirm that we want to disallow members named "Clone".
-- why did we disallow unsafe types in instance fields in records? I assume we also want to disallow in record structs.
 - `with` on generics? (may affect the design for record structs)
-- confirm we won't allow `record ref struct` (issue with `IEquatable<RefStruct>` and ref fields)
-- confirm implementation of equality members. Alternative is that synthesized `bool Equals(R other)`, `bool Equals(object? other)` and operators all just delegate to `ValueType.Equals`.
-- confirm that we want to allow field initializers when there is a primary constructor. Do we also want to allow parameterless struct constructors while we're at it (the Activator issue was apparently fixed)?
-- how much do we want to say about `Combine` method?
+- double-check that synthesized `Equals` logic is functionally equivalent to runtime implementation (e.g. float.NaN)
 
+## Answered
+
+- confirm that we want to keep PrintMembers design (separate method returning `bool`) (answer: yes)
+- confirm we won't allow `record ref struct` (issue with `IEquatable<RefStruct>` and ref fields) (answer: yes)
+- confirm implementation of equality members. Alternative is that synthesized `bool Equals(R other)`, `bool Equals(object? other)` and operators all just delegate to `ValueType.Equals`. (answer: yes)
+- confirm that we want to allow field initializers when there is a primary constructor. Do we also want to allow parameterless struct constructors while we're at it (the Activator issue was apparently fixed)? (answer: yes, updated spec should be reviewed in LDM)
+- how much do we want to say about `Combine` method? (answer: as little as possible)
