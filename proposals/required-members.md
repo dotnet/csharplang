@@ -123,7 +123,25 @@ public class C
     // Advertises that just Prop1 is required.
     public C() : init(Prop2)
     {
-        Prop1 = 1;
+        Prop2 = 2;
+        Console.WriteLine($"Prop2 is {Prop1}")
+    }
+}
+```
+
+An init clause can also provide the initialization value for the property inline. These assignments are run before the body of the constructor is executed, after the base call
+if one exists:
+
+```cs
+public class C
+{
+    public required int Prop1 { get; init; }
+    public required int Prop2 { get; init; }
+
+    // Sets Prop2 to 2 before the constructor body is run
+    public C() : init(Prop2 = 2)
+    {
+        Console.WriteLine($"Prop2 is {Prop1}")
     }
 }
 ```
@@ -145,25 +163,9 @@ public class C
 }
 ```
 
-An init clause can also provide the initialization value for the property inline. These assignments are run before the body of the constructor is executed:
-
-```cs
-public class C
-{
-    public required int Prop1 { get; init; }
-    public required int Prop2 { get; init; }
-
-    // Sets Prop1 to 1 before the constructor body is run
-    public C() : init(Prop1 = 1)
-    {
-        Console.WriteLine($"Prop1 is {Prop1}")
-    }
-}
-```
-
-_required\_member\_lists_ chain across a type hierarchy. A constructor's _contract_ not only includes the required members from the current type, but also the
-required members from the base type and any interfaces that it implements. If derived constructor calls a base constructor that removes some of those members
-from the list, the derived constructor also removes those members from the list.
+_required\_member\_lists_ chain across a type hierarchy. A constructor's _contract_ not only includes the required members from the current type, but also the required members
+from the base type and any interfaces that it implements. If derived constructor calls a base constructor that removes some of those members from the list, the derived constructor
+also removes those members from the list.
 
 ```cs
 public class Base
@@ -184,8 +186,10 @@ public class Derived
 }
 ```
 
-Members specified in an init clause must be definitely assigned at the end of the constructor body. If they are not, an error is produced. To support more
-complicated initialization logic, this error can be suppressed using the `!` operator:
+### Initialization Requirement
+
+Members specified in an init clause must be definitely assigned at the end of the constructor body. If they are not, an error is produced. To support more complicated
+initialization logic, this error can be suppressed using the `!` operator:
 
 ```cs
 public class C
@@ -256,14 +260,15 @@ init_argument_initializer
 
 ### `new()` constraint
 
-A type with a parameterless constructor that advertises a _contract_ is not allowed to be substituted for a type parameter constrained to `new()`, as there
-is no way for the generic instantiation to ensure that the requirements are satisfied.
+A type with a parameterless constructor that advertises a _contract_ is not allowed to be substituted for a type parameter constrained to `new()`, as there is no way
+for the generic instantiation to ensure that the requirements are satisfied.
 
 ## Open Questions
 
 ### Syntax questions
 
-* Is `init` the right word? Other possibilities:
+* Is `init` the right word? `init` as a postfix modifier on the constructor might interfere if we ever want to reuse it for factories and also enable `init`
+methods with a prefix modifier. Other possibilities:
     * `set`
 * Is `required` the right modifier for specifying that all members are initialized? Others suggested:
     * `default`
@@ -281,38 +286,40 @@ is no way for the generic instantiation to ensure that the requirements are sati
 
 ### Init clause restrictions
 
-Should we allow access to `this` in the init clause? If we want the assignment in `init` to be a shorthand for assigning the member in the constructor
-itself, it seems like we should.
+Should we allow access to `this` in the init clause? If we want the assignment in `init` to be a shorthand for assigning the member in the constructor itself, it seems
+like we should.
 
 ### Base requirement chaining representation in metadata
 
-An ideal implementation of the metadata representation would have each constructor mark the base constructor that they call in some fashion, which would
-ensure that, if the base and derived types are in different assemblies, an version update in the base assembly would be accurate reflected in usage of the
-derived type without the derived assembly having to upgrade. However, we don't have a way to encode a method token into a signature, so we'd have to find
-some other encoding strategy. This strategy will be inherently fragile to a number of potential scenarios, so it may be more pragmatic to simply repeat any
-removed members in the removed member list of the derived constructor.
+An ideal implementation of the metadata representation would have each constructor mark the base constructor that they call in some fashion, which would ensure that, if
+the base and derived types are in different assemblies, a version update in the base assembly would be accurately reflected in usage of the derived type without the
+derived assembly having to upgrade. However, we don't have a way to encode a method token into a signature, so we'd have to find some other encoding strategy. This
+strategy will be inherently fragile to a number of potential scenarios, so it may be more pragmatic to simply repeat any removed members in the removed member list of
+the derived constructor.
 
 ## Discussed Questions
 
 ### Level of enforcement for `init` clauses
 
-Do we strictly enforce that members specified in a `init` clause without an initializer must initialize all members? It seems likely that we do, otherwise
-we create an easy pit-of-failure. However, we also run the risk of reintroducing the same problems we solved with `MemberNotNull` in C# 9. If we want to
-strictly enforce this, we will likely need a way for a helper method to indicate that it sets a member. Some possible syntaxes we've discussed for this:
+Do we strictly enforce that members specified in a `init` clause without an initializer must initialize all members? It seems likely that we do, otherwise we create an
+easy pit-of-failure. However, we also run the risk of reintroducing the same problems we solved with `MemberNotNull` in C# 9. If we want to strictly enforce this, we
+will likely need a way for a helper method to indicate that it sets a member. Some possible syntaxes we've discussed for this:
 
-* Allow `init` methods. These methods are only allowed to be called from a constructor or from another `init` method, and can access `this` as if it's in
-the constructor (ie, set `readonly` and `init` fields/properties). Combine with allowing `init` clauses for methods. A `init` clause would be considered
-satisfied if the member in the clause is definitely assigned in the body of the method/constructor. Calling a method with a `init` clause that includes a
-member counts as assigning to that member.
-* Allow the `!` operator to suppress the warning/error explicitly. If initializing a member in a complicated way (such as in a shared method), the user
-can add a `!` to the init clause to indicate the compiler should not check for initialization.
+* Allow `init` methods. These methods are only allowed to be called from a constructor or from another `init` method, and can access `this` as if it's in the constructor
+(ie, set `readonly` and `init` fields/properties). This can be combined with `init` clauses on such methods. A `init` clause would be considered satisfied if the member
+in the clause is definitely assigned in the body of the method/constructor. Calling a method with a `init` clause that includes a member counts as assigning to that member.
+If we do decided that this is a route we want to pursue, now or in the future, it seems likely that we should not use `init` as the keyword for the init clause on a
+constructor, as that would be confusing.
+* Allow the `!` operator to suppress the warning/error explicitly. If initializing a member in a complicated way (such as in a shared method), the user can add a `!`
+to the init clause to indicate the compiler should not check for initialization.
 
-After discussion we like the idea of the `!` operator. It allows the user to be intentional about more complicated scenarios while also not creating a
-large design hole around init methods and annotating every method as setting members X or Y.
+After discussion we like the idea of the `!` operator. It allows the user to be intentional about more complicated scenarios while also not creating a large design hole
+around init methods and annotating every method as setting members X or Y. `!` was chosen because we already use it for suppressing nullable warnings, and using it to
+tell the compiler "I'm smarter than you" in another place is a natural extension of the syntax form.
 
 ### Required interface members
 
-This proposal does not allow interfaces to mark members as required. This protects us from having to figure out complex scenarios around `new()` and
-interface constraints in generics right now, and is directly related to both factories and generic construction. In order to ensure that we have design
-space in this area, we forbid `required` in interfaces, and forbid types with _required\_member\_lists_ from being substituted for type parameters
-constrained to `new()`. When we want to take a broader look at generic construction scenarios with factories, we can revisit this issue.
+This proposal does not allow interfaces to mark members as required. This protects us from having to figure out complex scenarios around `new()` and interface
+constraints in generics right now, and is directly related to both factories and generic construction. In order to ensure that we have design space in this area, we
+forbid `required` in interfaces, and forbid types with _required\_member\_lists_ from being substituted for type parameters constrained to `new()`. When we want to
+take a broader look at generic construction scenarios with factories, we can revisit this issue.
