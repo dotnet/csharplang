@@ -302,10 +302,10 @@ public record Derived(int Field);
 We are going to support both parameterless constructors and member initializers in structs.
 This will be specified in more details.
 
-Raw notes:
-Allow parameterless ctors on structs and also field initializers (no runtime detection)
-We will enumerate scenarios where initializers aren't evaluated: arrays, generics, default, ...
-Consider diagnostics for using struct with parameterless ctor in some of those cases?
+Raw notes:  
+Allow parameterless ctors on structs and also field initializers (no runtime detection)  
+We will enumerate scenarios where initializers aren't evaluated: arrays, generics, default, ...  
+Consider diagnostics for using struct with parameterless ctor in some of those cases?  
 
 # Open questions
 
