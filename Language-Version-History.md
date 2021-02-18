@@ -75,7 +75,7 @@ Features Added in C# Language Versions
 - [More expression-bodied members](https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/expression-bodied-members)
 - [Throw expressions](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/throw-expression.md)
 
-# [C# 6](https://github.com/dotnet/roslyn/wiki/New-Language-Features-in-C%23-6) - Visual Studio 2015
+# [C# 6](https://github.com/dotnet/roslyn/blob/master/docs/wiki/New-Language-Features-in-C%23-6.md) - Visual Studio 2015
 - [Draft Specification online](https://github.com/dotnet/csharplang/blob/master/spec/README.md)
 - Compiler-as-a-service (Roslyn)
 - [Import of static type members into namespace](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/using-static)

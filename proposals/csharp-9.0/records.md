@@ -15,11 +15,11 @@ record_declaration
 record_base
     : ':' class_type argument_list?
     | ':' interface_type_list
-    | ':' class_type argument_list? interface_type_list
+    | ':' class_type argument_list? ',' interface_type_list
     ;
 
 record_body
-    : '{' class_member_declaration* '}'
+    : '{' class_member_declaration* '}' ';'?
     | ';'
     ;
 ```
@@ -42,6 +42,7 @@ an accessible concrete non-virtual member with a "matching" signature is inherit
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 It is an error for a member of a record to be named "Clone".
+It is an error for an instance field of a record to have an unsafe type.
 
 The synthesized members are as follows:
 
@@ -66,7 +67,7 @@ The record type implements `System.IEquatable<R>` and includes a synthesized str
 The method is `public`, and the method is `virtual` unless the record type is `sealed`.
 The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`.
 
-If either `Equals(R? other)` or `GetHashCode` are user-defined (not synthesized), but not both, a warning is produced.
+If `Equals(R? other)` is user-defined (not synthesized) but `GetHashCode` is not, a warning is produced.
 
 ```C#
 public virtual bool Equals(R? other);
@@ -80,7 +81,7 @@ the value of `EqualityContract == other.EqualityContract`.
 
 The record type includes synthesized `==` and `!=` operators equivalent to operators declared as follows:
 ```C#
-pubic static bool operator==(R? r1, R? r2)
+public static bool operator==(R? r1, R? r2)
     => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
 public static bool operator!=(R? r1, R? r2)
     => !(r1 == r2);
@@ -136,7 +137,7 @@ class R1 : IEquatable<R1>
             EqualityContract == other.EqualityContract &&
             EqualityComparer<T1>.Default.Equals(P1, other.P1);
     }
-    pubic static bool operator==(R1? r1, R1? r2)
+    public static bool operator==(R1? r1, R1? r2)
         => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
     public static bool operator!=(R1? r1, R1? r2)
         => !(r1 == r2);    
@@ -158,7 +159,7 @@ class R2 : R1, IEquatable<R2>
         return base.Equals((R1?)other) &&
             EqualityComparer<T2>.Default.Equals(P2, other.P2);
     }
-    pubic static bool operator==(R2? r1, R2? r2)
+    public static bool operator==(R2? r1, R2? r2)
         => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
     public static bool operator!=(R2? r1, R2? r2)
         => !(r1 == r2);    
@@ -180,7 +181,7 @@ class R3 : R2, IEquatable<R3>
         return base.Equals((R2?)other) &&
             EqualityComparer<T3>.Default.Equals(P3, other.P3);
     }
-    pubic static bool operator==(R3? r1, R3? r2)
+    public static bool operator==(R3? r1, R3? r2)
         => (object)r1 == r2 || (r1?.Equals(r2) ?? false);
     public static bool operator!=(R3? r1, R3? r2)
         => !(r1 == r2);    
@@ -209,7 +210,9 @@ The first thing the constructor must do, is to call a copy constructor of the ba
 object constructor if the record inherits from object. An error is reported if a user-defined copy
 constructor uses an implicit or explicit constructor initializer that doesn't fulfill this requirement.
 After a base copy constructor is invoked, a synthesized copy constructor copies values for all instance
-fields implicitly or explicitly declared within the record type.
+fields implicitly or explicitly declared within the record type. 
+The sole presence of a copy constructor, whether explicit or implicit, doesn't prevent an automatic
+addition of a default instance constructor.
 
 If a virtual "clone" method is present in the base record, the synthesized "clone" method overrides it and
 the return type of the method is the current containing type if the "covariant returns" feature is supported
@@ -224,13 +227,15 @@ If the "clone" method is not abstract, it returns the result of a call to a copy
 
 If the record is derived from `object`, the record includes a synthesized method equivalent to a method declared as follows:
 ```C#
-bool PrintMembers(System.StringBuilder builder);
+bool PrintMembers(System.Text.StringBuilder builder);
 ```
 The method is `private` if the record type is `sealed`. Otherwise, the method is `virtual` and `protected`.
 
 The method:
-1. for each of the record's printable members (public field and property members), appends that member's name followed by " = " followed by the member's value: `this.member`, separated with ", ",
+1. for each of the record's printable members (non-static public field and readable property members), appends that member's name followed by " = " followed by the member's value separated with ", ",
 2. return true if the record has printable members.
+
+For a member that has a value type, we will convert its value to a string representation using the most efficient method available to the target platform. At present that means calling `ToString` before passing to `StringBuilder.Append`.
 
 If the record type is derived from a base record `Base`, the record includes a synthesized override equivalent to a method declared as follows:
 ```C#
@@ -280,7 +285,7 @@ class R1 : IEquatable<R1>
     {
         builder.Append(nameof(P1));
         builder.Append(" = ");
-        builder.Append(this.P1); // or builder.Append(this.P1); if P1 has a value type
+        builder.Append(this.P1); // or builder.Append(this.P1.ToString()); if P1 has a value type
         
         return true;
     }
@@ -363,7 +368,9 @@ of the `record_base` clause and within initializers of instance fields or proper
 be an error in these locations (similar to how instance members are in scope in regular constructor initializers
 today, but an error to use), but the parameters of the primary constructor would be in scope and useable and
 would shadow members. Static members would also be useable, similar to how base calls and initializers work in
-ordinary constructors today. 
+ordinary constructors today.
+
+A warning is produced if a parameter of the primary constructor is not read.
 
 Expression variables declared in the `argument_list` are in scope within the `argument_list`. The same shadowing
 rules as within an argument list of a regular constructor initializer apply.

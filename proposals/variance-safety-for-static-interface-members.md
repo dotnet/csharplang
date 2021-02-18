@@ -65,6 +65,6 @@ A type is ***output-safe*** if it is not output-unsafe, and ***input-safe*** if 
 
 We also considered whether this could potentially interfere with some of the other
 enhancements we hope to make regarding roles, type classes, and extensions. These should all be
-fine: we won't be able to retconn the existing static members to be virtual-by-default for interfaces,
+fine: we won't be able to retcon the existing static members to be virtual-by-default for interfaces,
 as that would end up being a breaking change on multiple levels, even without changing the variance
 behavior here.

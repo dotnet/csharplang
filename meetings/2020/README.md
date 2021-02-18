@@ -1,62 +1,116 @@
-﻿# Upcoming meetings for 2020
+﻿# C# Language Design Notes for 2020
 
-## Schedule ASAP
+Overview of meetings and agendas for 2020
 
+## Dec 16, 2020
 
+[C# Language Design Notes for December 16th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-12-16.md)
 
-## Schedule when convenient
+- List patterns
+- Definite assignment changes
 
-- How can we improve the capture of unfinished business, both in terms of making sure the LDM comes back to remaining open issues, and in terms of keeping the feature specs in sync with LDM decisions?
-- https://github.com/dotnet/roslyn/issues/15936 (Fred)
-    - Should we keep the existing CA warning or move it to the compiler?
-    - What about float.NaN, Half.NaN?
+## Dec 14, 2020
 
-## Recurring topics
+[C# Language Design Notes for December 14th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-12-14.md)
 
-- *Triage championed features*
-- *Triage milestones*
-- *Design review*
+- List patterns
+
+## Dec 7, 2020
+
+[C# Language Design Notes for December 7th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-12-07.md)
+
+- Required Properties
+
+## Dec 2, 2020
+
+[C# Language Design Notes for December 2nd, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-12-02.md)
+
+- Partner scenarios in roles and extensions
+
+## Nov 16, 2020
+
+[C# Language Design Notes for November 16th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-11-16.md)
+
+- Triage
+
+## Nov 11, 2020
+
+[C# Language Design Notes for November 11th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-11-11.md)
+
+- IsRecord in metadata
+- Triage
+
+## Nov 4, 2020
+
+[C# Language Design Notes for November 4th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-11-04.md)
+
+- Nullable parameter defaults
+- Argument state after call for AllowNull parameters
+
+## Oct 26, 2020
+
+[C# Language Design Notes for October 26st, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-26.md)
+
+- Pointer types in records
+- Triage
+
+## Oct 21, 2020
+
+[C# Language Design Notes for October 21st, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-21.md)
+
+- Primary Constructors
+- Direct Parameter Constructors
+
+## Oct 14, 2020
+
+[C# Language Design Notes for October 14th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-14.md)
+
+- Triage
+- Milestone Simplification
+
+## Oct 12, 2020
+
+[C# Language Design Notes for October 12th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-12.md)
+
+- General improvements to the `struct` experience (continued)
+
+## Oct 7, 2020
+
+[C# Language Design Notes for October 7th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-07.md)
+
+- `record struct` syntax
+- `data` members redux
+- `ReadOnlySpan<char>` patterns
+
+## Oct 5, 2020
+
+[C# Language Design Notes for October 5th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-05.md)
+
+- `record struct` primary constructor defaults
+- Changing the member type of a primary constructor parameter
+- `data` members
 
 ## Sep 30, 2020
 
+[C# Language Design Notes for September 30th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-30.md)
+
+- `record structs`
+    - `struct` equality
+    - `with` expressions
+    - Primary constructors and `data` properties
+
 ## Sep 28, 2020
+
+[C# Language Design Notes for September 28th, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-28.md)
+
+- Warning on `double.NaN`
+- Triage
 
 ## Sep 23, 2020
 
-## Sep 21, 2020
+[C# Language Design Notes for September 23rd, 2020](https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-09-23.md)
 
-## Jun 3, 2020
-
-- allow suppression on `return someBoolValue!;` (issue https://github.com/dotnet/roslyn/issues/44080, Julien)
-- record decision on side-effect of `M(someMaybeNullValue); // warns` and effect of suppression `expr!` (issue https://github.com/dotnet/roslyn/issues/43383, Julien)
-- improving suppression in the middle of null-coalescing (https://github.com/dotnet/csharplang/issues/3393, Neal/Julien)
-- init-only: should `_ = new C() { readonlyField = null };` be allowed in a method on type `C`? (Jared/Julien)
-- init-only: confirm metadata encoding (`IsExternalInit` modreq) with compat implications (Jared/Julien)
-- init-only: init-only methods ? `init void Init()` (Jared/Julien)
-
-## May 18, 2020
-
-- Record Monday (Andy, Jared, Mads)
-
-## April 29, 2020
-
-- Design review
-
-## April 22, 2020
-
-- https://github.com/dotnet/csharplang/projects/4 Triage for C# 10.0 (Mads)
-
-## March 18, 2020
-
-- https://github.com/jaredpar/csharplang/blob/record/proposals/recordsv3.md clone-style records (Jared)
-
-## Jan 13, 2020
-
-- Records: Paging back in the previous proposal (Andy)
-
-# C# Language Design Notes for 2020
-
-Overview of meetings and agendas for 2020
+- General improvements to the `struct` experience
 
 ## Sep 16, 2020
 

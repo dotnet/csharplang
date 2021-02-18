@@ -1,6 +1,6 @@
 ﻿# Nullable Reference Types Specification
 
-***This is a work in progress - several parts are missing or incomplete.***
+***This is a work in progress - several parts are missing or incomplete. An updated version of this document can be found in the C# 9 folder. ***
 
 ## Syntax
 

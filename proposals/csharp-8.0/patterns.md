@@ -61,7 +61,8 @@ subpattern
     | identifier ':' pattern
     ;
 property_subpattern
-    : '{' subpatterns? '}'
+    : '{' '}'
+    | '{' subpatterns ','? '}'
     ;
 property_pattern
     : type? property_subpattern simple_designation?
