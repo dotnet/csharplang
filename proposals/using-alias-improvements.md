@@ -2,24 +2,7 @@
 
 ## Summary
 
-Support extensions to `using` aliases: assembly-wide aliases; generic type aliases; and additional alias targets.
-
-## Assembly-wide aliases
-
-`using` aliases with a `global` modifier are assembly-wide aliases that apply to all compilation units in the assembly.
-
-Assembly-wide aliases may be declared at the root scope, not within a `namespace`.
-```C#
-global using MyInt = System.Int32; // ok
-namespace MyNamespace
-{
-    global using MyString = System.String; // error: declared in 'MyNamespace'
-}
-```
-It is an error if there are multiple declarations of the same assembly-wide alias in the compilation, even if the declarations are identical.
-Assembly-wide aliases can be hidden by names in the compilation unit, including local `using` aliases, although it is an error if the assembly-wide alias and local alias are declared in the same compilation unit.
-
-Aliases are not represented in metadata and are not available outside the assembly, not even in assemblies with `[InternalsVisibleTo]` access.
+Extend `using` aliases to allow generic type aliases and additional alias target types.
 
 ## Generic type aliases
 
@@ -93,7 +76,7 @@ using MyType2 = IEnumerable<MyType1>;
 ```antlr
 using_directive
     : 'using' ('static')? name ';'
-    | ('global')? 'using' identifier_token type_parameter_list? '=' (name | type) ';'
+    | 'using' identifier_token type_parameter_list? '=' (name | type) ';'
     ;
 ```
 
