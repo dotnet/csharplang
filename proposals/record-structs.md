@@ -313,6 +313,7 @@ Consider diagnostics for using struct with parameterless ctor in some of those c
 - confirm that we want to disallow members named "Clone".
 - `with` on generics? (may affect the design for record structs)
 - double-check that synthesized `Equals` logic is functionally equivalent to runtime implementation (e.g. float.NaN)
+- how to recognize record structs in metadata? (we don't have an unspeakable clone method to leverage...)
 
 ## Answered
 
