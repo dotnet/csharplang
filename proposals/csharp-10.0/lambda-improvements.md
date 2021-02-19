@@ -1,7 +1,10 @@
 ﻿# Lambda improvements
 
 ## Summary
-Support lambdas with attributes, explicit return type, and natural type.
+Proposed changes:
+1. Allow lambdas with attributes
+2. Allow lambdas with explicit return type
+3. Infer a natural delegate type for lambdas and method groups
 
 ## Motivation
 Support for attributes on lambdas would provide parity with methods and local functions.
@@ -32,13 +35,13 @@ f = [MyAttribute] delegate { return 1; };         // syntax error
 f = delegate ([MyAttribute] int x) { return x; }; // syntax error
 ```
 
-Attributes on the lambda or lambda parameters will be emitted to metadata on the method that maps to the lambda. (If the lambda does not require a closure class, the lambda is emitted as a method on the containing type. Otherwise the lambda is as a method on the generated closure class.)
+Attributes on the lambda or lambda parameters will be emitted to metadata on the method that maps to the lambda.
 
 ## Explicit return type
 An explicit return type may be specified after the parameter list.
 ```csharp
 f = () : T => default;              // () : T
-f = x : int => 1;                   // <unknown> : int
+f = x : short => 1;                 // <unknown> : short
 f = (ref int x) : ref int => ref x; // ref int : ref int
 f = static _ : void => { };         // <unknown> : void
 ```
@@ -49,10 +52,10 @@ f = delegate : int { return 1; };         // syntax error
 f = delegate (int x) : int { return x; }; // syntax error
 ```
 
-## Natural type
+## Natural delegate type
 A lambda expression has a natural type if the parameters types are explicit and either the return type is explicit or there is a common type from the natural types of all `return` expressions in the body. Otherwise there is no natural type.
 
-A method group has a natural type if the method group contains a single method and the method or reduced extension method has no unbound type parameters.
+A method group has a natural type if the method group contains a single method and the method has no unbound type parameters.
 
 Lambdas or method groups with natural types can be used as initializers in `var` declarations.
 
@@ -96,7 +99,39 @@ var fA = (ref char c) => ref c; // delegate ref char <anonymous2><char, char>(re
 var fB = (ref int i) => ref i;  // delegate ref int <anonymous2><int, int>(ref int <unnamed>);
 ```
 
-_Issue: Is it necessary to use `System.Action<>` and `System.Func<>` for the delegate types or should the compiler always generate an anonymous delegate type? There is an observable difference since the anonymous delegate types are not co- or contra-variant._
+_Issue: Should the compiler always generate anonymous delegate types rather than using `System.Action<>` and `System.Func<>`? There are observable differences: 1. the anonymous delegate types are not co- or contra-variant; and 2. using a synthesized delegate type would mean the following assignment to `y` would fail: `var x = () => { }; Action y = x;`._
+
+### Implicit conversion to `System.Delegate`
+A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate`.
+```csharp
+static void Invoke(Func<string> f) { }
+static void Invoke(Delegate d) { }
+
+static string GetString() => "";
+static int GetInt() => 0;
+
+Invoke(() => "");  // Invoke(Func<string>)
+Invoke(() => 0);   // Invoke(Delegate) [new]
+
+Invoke(GetString); // Invoke(Func<string>)
+Invoke(GetInt);    // Invoke(Delegate) [new]
+```
+
+To avoid a breaking change, overload resolution will be updated to prefer lambda and method group conversions that do not use the natural type.
+_The example below demonstrates the tie-breaking rule for lambdas. Is there an equivalent example for method groups?_
+```csharp
+static void Execute(Expression<Func<string>> e) { }
+static void Execute(Delegate d) { }
+
+static string GetString() => "";
+static int GetInt() => 0;
+
+Execute(() => "");  // Execute(Expression<Func<string>>) [tie-breaker]
+Execute(() => 0);   // Execute(Delegate)
+
+Execute(GetString); // Execute(Delegate)
+Execute(GetInt);    // Execute(Delegate)
+```
 
 ## Syntax
 
