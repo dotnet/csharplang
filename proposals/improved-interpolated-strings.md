@@ -82,6 +82,7 @@ public class Logger
         internal LoggerImpl(LogLevel myLogLevel, Logger parent)
         {
             _myLogLevel = myLogLevel;
+            _parent = parent;
         }
 
         public LoggerParamsBuilder GetInterpolatedStringBuilder(int baseLength, int formatHoleCount)
