@@ -242,7 +242,7 @@ methods that take a `Span<char>`, instead of just the count version. However, we
 iterations. We know this is safe, as `Span<T>` is a ref struct that can't be stored on the heap, and users would have to be pretty devious to manage to extract a
 reference to that `Span` (such as creating a method that accepts such a builder then deliberately retrieving the `Span` from the builder and returning it to the
 caller). However, allocating ahead of time produces other questions:
-    * Should we eagerly stackalloc? What if the loop is never entered, or exists before it needs the space?
+    * Should we eagerly stackalloc? What if the loop is never entered, or exits before it needs the space?
     * If we don't eagerly stackalloc, does that mean we introduce a hidden branch on every loop? Most loops likely won't care about this, but it could affect some tight loops that don't
     want to pay the cost.
 * Some strings can be quite big, and the appropriate amount to `stackalloc` is dependent on a number of factors, including runtime factors. We don't really want the C# compiler and
