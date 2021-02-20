@@ -38,7 +38,7 @@
 ## Feb 22, 2021
 
 - `using` directive enhancements
-    - global usings (Aleksey)
+    - global usings (Aleksey): https://github.com/dotnet/csharplang/blob/master/proposals/GlobalUsingDirective.md
     - improved using aliases (Chuck): https://github.com/cston/csharplang/blob/using-aliases/proposals/csharp-10.0/using-alias-improvements.md
 
 # C# Language Design Notes for 2021
