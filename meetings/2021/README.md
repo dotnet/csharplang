@@ -39,7 +39,7 @@
 
 - `using` directive enhancements
     - global usings (Aleksey)
-    - improved using aliases (Chuck)
+    - improved using aliases (Chuck): https://github.com/cston/csharplang/blob/using-aliases/proposals/csharp-10.0/using-alias-improvements.md
 
 # C# Language Design Notes for 2021
 
