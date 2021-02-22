@@ -19,8 +19,8 @@ using MyType2<T, U> = T;          // ok
 
 Type parameter references in an alias target have the same restrictions as type parameter references in other generic contexts.
 ```C#
-using MyType3<T, U> = T.U;  // error: reported at use site only?
-using MyType3<T, U> = T<U>; // error: reported at use site only?
+using MyType3<T, U> = T.U;  // error: type or namespace 'T' not found
+using MyType3<T, U> = T<U>; // error: type or namespace 'T<>' not found
 ```
 
 The same name may be used for multiple aliases with distinct arity.
@@ -31,11 +31,12 @@ using MyDictionary<U> = System.Collections.Generic.Dictionary<string, U>; // err
 ```
 
 A partially bound type is not valid.
+The `using` aliases below are both valid, and the use of `MyList<>` is valid because the expansion `List<>` is an unbound type, but the use of `MyDictionary<>` invalid because `Dictionary<string,>` is a partially bound type.
 ```C#
 using MyList<T> = System.Collections.Generic.List<T>;
 using MyDictionary<T> = System.Collections.Generic.Dictionary<string, T>;
 
-_ = typef(MyList<>);        // ok: 'List<>'
+_ = typeof(MyList<>);       // ok: 'List<>'
 _ = typeof(MyDictionary<>); // error: 'Dictionary<string,>' is not valid
 ```
 
@@ -52,6 +53,12 @@ The alternative is to allow explicit type parameter constraints, perhaps using t
 ```C#
 using MaybeNull<T> = T? where T : class;
 using Option<T> = System.Nullable<T> where T : struct;
+```
+
+Explicit constraints would also allow restricting the use of the target type.
+```C#
+using ValueTypeList<T> = List<T> where T : struct;
+static void F<T>(ValueTypeList<T> list) { ... } // error: 'T' must be a value type
 ```
 
 ### Variance
