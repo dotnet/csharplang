@@ -4,6 +4,8 @@
 
 ## Schedule when convenient
 
+- List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
