@@ -27,23 +27,27 @@
 
 ## Mar 3, 2021
 
+- Required properties (Fred)
+
 ## Mar 1, 2021
 
 - async method builder override (Stephen/Julien): https://github.com/dotnet/csharplang/blob/master/proposals/async-method-builders.md
+- interpolated string improvements (Fred)
 
 ## Feb 24, 2021
 
 - Static virtual members (Mads): https://github.com/dotnet/csharplang/issues/4436
 
-## Feb 22, 2021
-
-- `using` directive enhancements
-    - global usings (Aleksey): https://github.com/dotnet/csharplang/blob/master/proposals/GlobalUsingDirective.md
-    - improved using aliases (Chuck): https://github.com/cston/csharplang/blob/using-aliases/proposals/csharp-10.0/using-alias-improvements.md
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Feb 22, 2021
+
+[C# Language Design Notes for February 22nd, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-22.md)
+
+1. Global `using`s
+2. `using` alias improvements
 
 ## Feb 10, 2021
 
