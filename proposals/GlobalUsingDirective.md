@@ -1,9 +1,9 @@
 # Global Using Directive
 
-Syntax for a using directive is extended with an optional `global` keyword that can follow the `using` keyword:
+Syntax for a using directive is extended with an optional `global` keyword that can precede the `using` keyword:
 ```antlr
 using_directive
-  : 'using' 'global'? ('static' | name_equals)? name ';'
+  : 'global'? 'using' ('static' | name_equals)? name ';'
   ;
 ```
 
