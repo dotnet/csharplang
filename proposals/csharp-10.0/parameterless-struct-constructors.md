@@ -2,100 +2,138 @@
 
 ## Summary
 
-Support explicit parameterless constructors for value types.
+Support explicit parameterless constructors and instance field initializers for struct types.
 
 ## Proposal
 
-If the parameterless constructor is less accessible than the value type, a warning is reported and the constructor is ignored when inaccessible.
+### Instance field initializers
+Instance field declarations for a struct may include variable initializers.
+
+As with [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-field-initialization):
+> A variable initializer for an instance field cannot reference the instance being created. 
+
+### Constructors
+A struct may declare a parameterless instance constructor.
+
+If the struct does not declare a parameterless instance constructor, and the struct has no fields with variable initializers, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors))
+> implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
+
+If the struct does not declare a parameterless instance constructor, and the struct has field initializers, a `public` parameterless instance constructor is synthesized.
+The parameterless constructor is synthesized even if all initializer values are zeros.
+
+### Modifiers
+A parameterless instance constructor may be less accessible than the struct.
+
+A parameterless instance constructor may be declared `extern`.
+
+### Executing field initializers
+Execution of struct instance field initializers matches initialization for [classes](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-variable-initializers):
+> When an instance constructor has no constructor initializer, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class constructor. The variable initializers are executed in the textual order in which they appear in the ... declaration.
+
+### Definite assignment
+Instance fields must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)).
+
+Definite assignment is required for explicit parameterless constructors as well.
+Definite assignment _is not required_ for synthesized parameterless constructors.
 ```csharp
-struct NoConstructor
+struct S0
 {
+    object x = null;
+    object y;
     // ok
 }
-struct PublicConstructor
+
+struct S1
 {
-    internal PublicConstructor() { } // ok: always accessible
+    object x = null;
+    object y;
+    S() { } // error: field 'y' must be assigned
 }
-struct PrivateConstructor
+
+struct S2
 {
-    private PrivateConstructor() { } // warning: parameterless .ctor will be ignored if inaccessible
+    object x = null;
+    object y;
+    S() : this(null) { }        // ok
+    S(object y) { this.y = y; } // ok
 }
 ```
 
-`default(S)` ignores any parameterless constructor and generates a zeroed `S`.
+_The synthesized parameterless constructor may need to emit `ldarg.0 initobj S` before any field initializers. Describe the specifics. How is this handled in Visual Basic?_
+
+### No `base()` initializer
+A `base()` initializer is disallowed in struct constructors.
+
+The compiler will not emit a call to the base `System.ValueType` constructor for any struct instance constructors including explicit and synthesized parameterless constructors.
+
+### Constructor use
+
+The parameterless constructor may be less accessible than the containing value type.
 ```csharp
-NoConstructor x = default;      // ok
-PublicConstructor y = default;  // ok
-PrivateConstructor z = default; // ok
+struct NoConstructor { }
+struct PublicConstructor { public PublicConstructor() { } }
+struct InternalConstructor { internal InternalConstructor() { } }
+struct PrivateConstructor { private PrivateConstructor() { } }
 ```
 
-For a type parameter `T` with a `new()` constraint, `new T()` is emitted as a call to `System.Activator.CreateInstance<T>()` which ignores any explicit parameterless constructor.
-A warning is reported if there is an accessible parameterless constructor.
+`default` ignores the parameterless constructor and generates a zeroed instance.
+```csharp
+_ = default(NoConstructor);      // ok
+_ = default(PublicConstructor);  // ok: constructor ignored
+_ = default(PrivateConstructor); // ok: constructor ignored
+```
 
-_Should `Activator.CreateInstance()` call the parameterless constructor if available and accessible?_
+Object creation expressions require the parameterless constructor to be accessible if defined.
+The parameterless constructor is invoked explicitly.
+_This is a breaking change if the struct type with parameterless constructor is from an existing assembly._
+```csharp
+_ = new NoConstructor();       // ok: initobj NoConstructor
+_ = new InternalConstructor(); // ok: call InternalConstructor::.ctor()
+_ = new PrivateConstructor();  // error: 'PrivateConstructor..ctor()' is inaccessible
+```
+
+A `new()` constraint requires the parameterless constructor to be `public` if defined.
+
+`new T()` is emitted as a call to `System.Activator.CreateInstance<T>()`.
+The compiler assumes the implementation of `CreateInstance<T>()` invokes the `public` parameterless constructor if defined.
 ```csharp
 static T Create<T>() where T : new() => new T();
 
-x = Create<NoConstructor>();      // ok
-y = Create<PublicConstructor>();  // warning: constructor ignored
-z = Create<PrivateConstructor>(); // ok
+_ = Create<NoConstructor>();       // ok
+_ = Create<PublicConstructor>();   // ok
+_ = Create<InternalConstructor>(); // error: 'InternalConstructor..ctor()' is not public
 ```
 
-A local or field of value type `S` that is not explicitly initialized is zeroed.
-The compiler already reports `error: use of unassigned local` for uninitialized locals of a value type that is not empty, and there is no additional handling beyond that for value types with explicit parameterless constructors.
+A local or field of a struct type that is not explicitly initialized is zeroed.
+The compiler reports a definite assignment error for an uninitialized struct that is not empty. 
 ```csharp
-NoConstructor x;
-PublicConstructor y;
-PrivateConstructor z;
-x.ToString(); // error: use of unassigned local (unless type is empty)
-y.ToString(); // error: use of unassigned local (unless type is empty)
-z.ToString(); // error: use of unassigned local (unless type is empty)
+NoConstructor s1;
+PublicConstructor s2;
+s1.ToString(); // error: use of unassigned local (unless type is empty)
+s2.ToString(); // error: use of unassigned local (unless type is empty)
 ```
 
 Array allocation ignores any parameterless constructor and generates zeroed elements.
-A warning is reported if there is an accessible parameterless constructor.
 ```csharp
-var a = new NoConstructor[1];      // ok
-var b = new PublicConstructor[1];  // warning: constructor ignored
-var c = new PrivateConstructor[1]; // ok
+_ = new NoConstructor[1];      // ok
+_ = new PublicConstructor[1];  // ok: constructor ignored
+_ = new PrivateConstructor[1]; // ok: constructor ignored
 ```
 
-### Instance field initializers
-_[Adapted from [classes.md#instance-variable-initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-variable-initializers).]_
-When an instance constructor has no constructor initializer `this(...)`, that constructor implicitly performs the initializations specified in the _variable_initializers_ of the instance fields.
-This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class.
-The variable initializers are executed in the textual order in which they appear in the `struct` declaration.
-
-If there are instance field initializers but no explicit parameterless constructor, a `public` parameterless constructor is synthesized. The parameterless constructor is synthesized even if all initializer values are zeros.
-
+Parameterless constructors cannot be used as parameter default values.
+_This is a breaking change if the struct type with parameterless constructor is from an existing assembly._
 ```csharp
-struct P0
-{
-    private int _x;
-    private object _y;
-    // no synthesized constructor
-}
-struct P1
-{
-    private int _x;
-    private object _y = 1;
-    public P1() { _x = 2; }
-    // no synthesized constructor
-}
-struct P2
-{
-    private int _x = 0;
-    private object _y = null;
-    // synthesized: public P2() { _x = 0; _y = null; base(); }
-}
-struct P3
-{
-    private int _x;
-    private object _y = 3;
-    public P3(int x, int y) { }
-    // synthesized: public P3() { _y = 3; base(); }
-}
+static void F1(NoConstructor s1 = new()) { }     // ok
+static void F2(PublicConstructor s1 = new()) { } // error: default value must be constant
 ```
+
+### Metadata
+Explicit and synthesized parameterless struct instance constructors will be emitted to metadata.
+
+Parameterless struct instance constructors will be imported from metadata.
+This represents a potential breaking change for consumers of existing assemblies with structs with parameterless constructors.
+
+Parameterless struct instance constructors will be emitted to ref assemblies regardless of accessibility to allow consumers to differentiate between no parameterless constructor an inaccessible constructor.
 
 ## See also
 
