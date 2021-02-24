@@ -97,6 +97,10 @@ struct P3
 }
 ```
 
+## See also
+
+- https://github.com/dotnet/roslyn/issues/1029
+
 ## Design meetings
 
-- _None_
+- https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-01-27.md#field-initializers
