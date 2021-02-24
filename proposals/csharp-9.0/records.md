@@ -309,7 +309,7 @@ class R2 : R1, IEquatable<R2>
     public T2 P2 { get; init; }
     public T3 P3 { get; init; }
     
-    protected override void PrintMembers(StringBuilder builder)
+    protected override bool PrintMembers(StringBuilder builder)
     {
         if (base.PrintMembers(builder))
             builder.Append(", ");
