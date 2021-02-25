@@ -31,13 +31,13 @@
 
 ## Mar 3, 2021
 
-- Required properties (Fred)
+- Required properties (Fred): https://github.com/333fred/csharplang/blob/required-properties/proposals/required-members.md
 - Parameterless struct constructors (Chuck): https://github.com/cston/csharplang/blob/struct-ctor/proposals/csharp-10.0/parameterless-struct-constructors.md
 
 ## Mar 1, 2021
 
 - async method builder override (Stephen/Julien): https://github.com/dotnet/csharplang/blob/master/proposals/async-method-builders.md
-- interpolated string improvements (Fred)
+- interpolated string improvements (Fred): https://github.com/333fred/csharplang/blob/improved-interpolated-strings/proposals/improved-interpolated-strings.md
 
 ## Feb 24, 2021
 
