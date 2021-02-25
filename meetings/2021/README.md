@@ -39,13 +39,15 @@
 - async method builder override (Stephen/Julien): https://github.com/dotnet/csharplang/blob/master/proposals/async-method-builders.md
 - interpolated string improvements (Fred): https://github.com/333fred/csharplang/blob/improved-interpolated-strings/proposals/improved-interpolated-strings.md
 
-## Feb 24, 2021
-
-- Static virtual members (Mads): https://github.com/dotnet/csharplang/issues/4436
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Feb 24, 2021
+
+[C# Language Design Notes for February 24th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-24.md)
+
+1. Static abstract members in interfaces
 
 ## Feb 22, 2021
 
