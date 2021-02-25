@@ -2,7 +2,7 @@
 
 ## Summary
 
-Support explicit parameterless constructors and instance field initializers for struct types.
+Support parameterless constructors and instance field initializers for struct types.
 
 ## Proposal
 
@@ -27,7 +27,7 @@ A parameterless instance constructor may be less accessible than the struct.
 A parameterless instance constructor may be declared `extern`.
 
 ### Executing field initializers
-Execution of struct instance field initializers matches initialization for [classes](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-variable-initializers):
+Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-variable-initializers):
 > When an instance constructor has no constructor initializer, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class constructor. The variable initializers are executed in the textual order in which they appear in the ... declaration.
 
 ### Definite assignment
@@ -92,10 +92,8 @@ _ = new InternalConstructor(); // ok: call InternalConstructor::.ctor()
 _ = new PrivateConstructor();  // error: 'PrivateConstructor..ctor()' is inaccessible
 ```
 
-A `new()` constraint requires the parameterless constructor to be `public` if defined.
-
-`new T()` is emitted as a call to `System.Activator.CreateInstance<T>()`.
-The compiler assumes the implementation of `CreateInstance<T>()` invokes the `public` parameterless constructor if defined.
+The `new()` type parameter constraint requires the parameterless constructor to be `public` if defined.
+`new T()` is emitted as a call to `System.Activator.CreateInstance<T>()`, and the compiler assumes the implementation of `CreateInstance<T>()` invokes the `public` parameterless constructor if defined.
 ```csharp
 static T Create<T>() where T : new() => new T();
 
