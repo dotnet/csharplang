@@ -7,7 +7,7 @@ Support parameterless constructors and instance field initializers for struct ty
 ## Proposal
 
 ### Instance field initializers
-Instance field declarations for a struct may include variable initializers.
+Instance field declarations for a struct may include initializers.
 
 As with [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-field-initialization):
 > A variable initializer for an instance field cannot reference the instance being created. 
@@ -15,7 +15,7 @@ As with [class field initializers](https://github.com/dotnet/csharplang/blob/mas
 ### Constructors
 A struct may declare a parameterless instance constructor.
 
-If the struct does not declare a parameterless instance constructor, and the struct has no fields with variable initializers, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors))
+If the struct does not declare a parameterless instance constructor, and the struct has no fields with variable initializers, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)) ...
 > implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
 
 If the struct does not declare a parameterless instance constructor, and the struct has field initializers, a `public` parameterless instance constructor is synthesized.
@@ -92,16 +92,6 @@ _ = new InternalConstructor(); // ok: call InternalConstructor::.ctor()
 _ = new PrivateConstructor();  // error: 'PrivateConstructor..ctor()' is inaccessible
 ```
 
-The `new()` type parameter constraint requires the parameterless constructor to be `public` if defined.
-`new T()` is emitted as a call to `System.Activator.CreateInstance<T>()`, and the compiler assumes the implementation of `CreateInstance<T>()` invokes the `public` parameterless constructor if defined.
-```csharp
-static T Create<T>() where T : new() => new T();
-
-_ = Create<NoConstructor>();       // ok
-_ = Create<PublicConstructor>();   // ok
-_ = Create<InternalConstructor>(); // error: 'InternalConstructor..ctor()' is not public
-```
-
 A local or field of a struct type that is not explicitly initialized is zeroed.
 The compiler reports a definite assignment error for an uninitialized struct that is not empty. 
 ```csharp
@@ -125,11 +115,35 @@ static void F1(NoConstructor s1 = new()) { }     // ok
 static void F2(PublicConstructor s1 = new()) { } // error: default value must be constant
 ```
 
+### Constraints
+The `new()` type parameter constraint requires the parameterless constructor to be `public` if defined (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/master/spec/types.md#satisfying-constraints)).
+```csharp
+static T CreateNew<T>() where T : new() => new T();
+
+_ = CreateNew<NoConstructor>();       // ok
+_ = CreateNew<PublicConstructor>();   // ok
+_ = CreateNew<InternalConstructor>(); // error: 'InternalConstructor..ctor()' is not public
+_ = CreateNew<PrivateConstructor>();  // error: 'PrivateConstructor..ctor()' is not public
+```
+
+`new T()` is emitted as a call to `System.Activator.CreateInstance<T>()`, and the compiler assumes the implementation of `CreateInstance<T>()` invokes the `public` parameterless constructor if defined.
+
+There is a gap in type parameter constraint checking because the `new()` constraint is satisfied by a type parameter with a `struct` constraint (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/master/spec/types.md#satisfying-constraints)).
+
+As a result, the following will be allowed by the compiler but the `Activator.CreateInstance<InternalConstructor>()` call will fail at runtime.
+The issue is not introduced by this proposal though - the issue exists with C# 9 if the struct type with inaccessible parameterless constructor is from metadata.
+```csharp
+static T CreateNew<T>() where T : new() => new T();
+static T CreateStruct<T>() where T : struct => CreateNew<T>();
+
+_ = CreateStruct<InternalConstructor>(); // compiles; 'MissingMethodException' at runtime
+```
+
 ### Metadata
 Explicit and synthesized parameterless struct instance constructors will be emitted to metadata.
 
 Parameterless struct instance constructors will be imported from metadata.
-This represents a potential breaking change for consumers of existing assemblies with structs with parameterless constructors.
+_This is a breaking change for consumers of existing assemblies with structs with parameterless constructors._
 
 Parameterless struct instance constructors will be emitted to ref assemblies regardless of accessibility to allow consumers to differentiate between no parameterless constructor an inaccessible constructor.
 
