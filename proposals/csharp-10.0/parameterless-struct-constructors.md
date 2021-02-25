@@ -14,6 +14,7 @@ As with [class field initializers](https://github.com/dotnet/csharplang/blob/mas
 
 ### Constructors
 A struct may declare a parameterless instance constructor.
+The struct can be declared as `struct`, `readonly struct`, or `ref struct`.
 
 If the struct does not declare a parameterless instance constructor, and the struct has no fields with variable initializers, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)) ...
 > implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
@@ -130,7 +131,7 @@ _ = CreateNew<PrivateConstructor>();  // error: 'PrivateConstructor..ctor()' is 
 
 There is a gap in type parameter constraint checking because the `new()` constraint is satisfied by a type parameter with a `struct` constraint (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/master/spec/types.md#satisfying-constraints)).
 
-As a result, the following will be allowed by the compiler but the `Activator.CreateInstance<InternalConstructor>()` call will fail at runtime.
+As a result, the following will be allowed by the compiler but `Activator.CreateInstance<InternalConstructor>()` will fail at runtime.
 The issue is not introduced by this proposal though - the issue exists with C# 9 if the struct type with inaccessible parameterless constructor is from metadata.
 ```csharp
 static T CreateNew<T>() where T : new() => new T();
