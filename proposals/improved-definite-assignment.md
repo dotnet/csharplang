@@ -140,15 +140,53 @@ For an expression *expr* of the form `expr_cond ? expr_true : expr_false`:
 - ...
 - The definite assignment state of *v* after *expr* is determined by:
   - ...
-  - If *expr_false* is a constant expression ([Constant expressions](../spec/expressions.md#constant-expressions)) with value `false`, and the state of *v* after *expr_true* is "definitely assigned when true", then the state of *v* after *expr* is "definitely assigned when true".
-  - If *expr_false* is a constant expression ([Constant expressions](../spec/expressions.md#constant-expressions)) with value `true`, and the state of *v* after *expr_true* is "definitely assigned when false", then the state of *v* after *expr* is "definitely assigned when false".
-  - If *expr_true* is a constant expression ([Constant expressions](../spec/expressions.md#constant-expressions)) with value `false`, and the state of *v* after *expr_false* is "definitely assigned when true", then the state of *v* after *expr* is "definitely assigned when true".
-  - If *expr_true* is a constant expression ([Constant expressions](../spec/expressions.md#constant-expressions)) with value `true`, and the state of *v* after *expr_false* is "definitely assigned when false", then the state of *v* after *expr* is "definitely assigned when false".
+  - If the state of *v* after *expr_true* is "definitely assigned when true", and the state of *v* after *expr_false* is "definitely assigned when true", then the state of *v* after *expr* is "definitely assigned when true".
+  - If the state of *v* after *expr_true* is "definitely assigned when false", and the state of *v* after *expr_false* is "definitely assigned when false", then the state of *v* after *expr* is "definitely assigned when false".
 
 ### Remarks
 
-Essentially, when one arm of a conditional expression is a bool constant `b`, the only way the value `!b` can be produced is if the other arm produced it. So we thread the appropriate conditional state through the expression-- if `b` is `false`, we thread the when-true state from the other arm through, and if `b` is `true`, we thread the when-false state from the other arm through.
+This makes it so when both arms of a conditional expression result in a conditional state, we join the corresponding conditional states and propagate it out instead of unsplitting the state and allowing the final state to be non-conditional. This enables scenarios like the following:
 
+```cs
+bool b = true;
+object x = null;
+int y;
+if (b ? x != null && Set(out y) : x != null && Set(out y))
+{
+  y.ToString();
+}
+
+bool Set(out int x) { x = 0; return true; }
+```
+
+This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification. See [internal issue](http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/529603).
+
+## Boolean constant expressions
+We introduce a new section "Boolean constant expressions":
+
+For an expression *expr* where *expr* is a constant expression with a bool value:
+- The definite assignment state of *v* after *expr* is determined by:
+  - If *expr* is a constant expression with value *true*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when false".
+  - If *expr* is a constant expression with value *false*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when true".
+
+### Remarks
+
+This change, put together with the above change to `?:` analysis, causes us to handle scenarios like the following:
+```cs
+bool b = true;
+object x = null;
+int y;
+if (b ? x != null && Set(out y) : false)
+{
+    y.ToString();
+}
+
+bool Set(out int y) { y = 0; return true; }
+```
+
+We assume that if an expression has a constant value bool `false`, for example, it's impossible to reach any branch that requires the expression to return `true`. Therefore variables are assumed to be definitely assigned in such branches. In the above example, for both the `x != null && Set(out y)` and the `false` arms, the state of `y` is "definitely assigned when true", and we simply join that state together and propagate it out.
+
+It's also worth noting that we never expect to be in a conditional state *before* visiting a constant expression. That's why we do not account for scenarios such as "*expr* is a constant expression with value *true*, and the state of *v* before *expr* is "definitely assigned when true".
 
 ## ==/!= (relational equality operator) expressions
 We introduce a new section **==/!= (relational equality operator) expressions**.
