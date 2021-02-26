@@ -27,12 +27,12 @@
 
 ## Mar 8, 2021
 
-- Lambda improvements (Chuck, Jared): https://github.com/cston/csharplang/blob/lambdas/proposals/csharp-10.0/lambda-improvements.md
+- Parameterless struct constructors (Chuck): https://github.com/cston/csharplang/blob/struct-ctor/proposals/csharp-10.0/parameterless-struct-constructors.md
 
 ## Mar 3, 2021
 
+- Lambda improvements (Chuck, Jared): https://github.com/cston/csharplang/blob/lambdas/proposals/csharp-10.0/lambda-improvements.md
 - Required properties (Fred): https://github.com/333fred/csharplang/blob/required-properties/proposals/required-members.md
-- Parameterless struct constructors (Chuck): https://github.com/cston/csharplang/blob/struct-ctor/proposals/csharp-10.0/parameterless-struct-constructors.md
 
 ## Mar 1, 2021
 
