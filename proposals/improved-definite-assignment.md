@@ -120,6 +120,20 @@ When we consider whether a variable is assigned at a given point within a null-c
 
 For example, given a conditional expression `a?.b(out x)?.c(x)`, the non-conditional counterpart is `a.b(out x).c(x)`. If we want to know the definite assignment state of `x` before `?.c(x)`, for example, then we perform a "hypothetical" analysis of `a.b(out x)` and use the resulting state as an input to `?.c(x)`.
 
+## Boolean constant expressions
+We introduce a new section "Boolean constant expressions":
+
+For an expression *expr* where *expr* is a constant expression with a bool value:
+- The definite assignment state of *v* after *expr* is determined by:
+  - If *expr* is a constant expression with value *true*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when false".
+  - If *expr* is a constant expression with value *false*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when true".
+
+### Remarks
+
+We assume that if an expression has a constant value bool `false`, for example, it's impossible to reach any branch that requires the expression to return `true`. Therefore variables are assumed to be definitely assigned in such branches. This ends up combining nicely with the spec changes for expressions like `??` and `?:` and enabling a lot of useful scenarios.
+
+It's also worth noting that we never expect to be in a conditional state *before* visiting a constant expression. That's why we do not account for scenarios such as "*expr* is a constant expression with value *true*, and the state of *v* before *expr* is "definitely assigned when true".
+
 ## ?? (null-coalescing expressions) augment
 We augment the section [?? (null coalescing) expressions](../spec/variables.md#-null-coalescing-expressions) as follows:
 
@@ -127,11 +141,15 @@ For an expression *expr* of the form `expr_first ?? expr_second`:
 - ...
 - The definite assignment state of *v* after *expr* is determined by:
   - ...
-  - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is a constant expression with value `false`, and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is "definitely assigned when true".
-  - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is a constant expression with value `true`, and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is "definitely assigned when false".
+  - If *expr_first* directly contains a null-conditional expression *E*, and the state of *v* after *expr_second* is "definitely assigned when true", and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is "definitely assigned when true".
+  - If *expr_first* directly contains a null-conditional expression *E* and the state of *v* after *expr_second* is "definitely assigned when false", and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is "definitely assigned when false".
 
 ### Remarks
 This handles the `dict?.TryGetValue(key, out var value) ?? false` scenario, by taking the resulting state of a "hypothetical" `dict.TryGetValue(key, out var value)` call and using it as the resulting state-when-true of the `dict?.TryGetValue(key, out var value) ?? false` expression.
+
+The more general formulation also allows us to handle some more unusual scenarios, such as:
+- `if (x?.M(out y) ?? (b && z.M(out y))) y.ToString();`
+- `if (x?.M(out y) ?? z?.M(out y) ?? false) y.ToString();`
 
 ## ?: (conditional) expressions
 We augment the section [**?: (conditional) expressions**](../spec/variables.md#-conditional-expressions) as follows:
@@ -160,33 +178,6 @@ bool Set(out int x) { x = 0; return true; }
 ```
 
 This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification. See [internal issue](http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/529603).
-
-## Boolean constant expressions
-We introduce a new section "Boolean constant expressions":
-
-For an expression *expr* where *expr* is a constant expression with a bool value:
-- The definite assignment state of *v* after *expr* is determined by:
-  - If *expr* is a constant expression with value *true*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when false".
-  - If *expr* is a constant expression with value *false*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when true".
-
-### Remarks
-
-This change, put together with the above change to `?:` analysis, causes us to handle scenarios like the following:
-```cs
-bool b = true;
-object x = null;
-int y;
-if (b ? x != null && Set(out y) : false)
-{
-    y.ToString();
-}
-
-bool Set(out int y) { y = 0; return true; }
-```
-
-We assume that if an expression has a constant value bool `false`, for example, it's impossible to reach any branch that requires the expression to return `true`. Therefore variables are assumed to be definitely assigned in such branches. In the above example, for both the `x != null && Set(out y)` and the `false` arms, the state of `y` is "definitely assigned when true", and we simply join that state together and propagate it out.
-
-It's also worth noting that we never expect to be in a conditional state *before* visiting a constant expression. That's why we do not account for scenarios such as "*expr* is a constant expression with value *true*, and the state of *v* before *expr* is "definitely assigned when true".
 
 ## ==/!= (relational equality operator) expressions
 We introduce a new section **==/!= (relational equality operator) expressions**.
