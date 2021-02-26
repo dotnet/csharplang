@@ -14,7 +14,7 @@ As with [class field initializers](https://github.com/dotnet/csharplang/blob/mas
 
 ### Constructors
 A struct may declare a parameterless instance constructor.
-The struct can be declared as `struct`, `readonly struct`, or `ref struct`.
+A parameterless instance constructor is valid for all struct kinds including `struct`, `readonly struct`, `ref struct`, and `record struct`.
 
 If the struct does not declare a parameterless instance constructor, and the struct has no fields with variable initializers, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)) ...
 > implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
@@ -23,9 +23,10 @@ If the struct does not declare a parameterless instance constructor, and the str
 The parameterless constructor is synthesized even if all initializer values are zeros.
 
 ### Modifiers
-A parameterless instance constructor may be less accessible than the struct.
+A parameterless instance constructor may be less accessible than the containing struct.
+This has consequences for certain scenarios detailed later.
 
-A parameterless instance constructor may be declared `extern`.
+The same set of modifiers can be used for parameterless constructors as other constructors: `static`, `extern`, and `unsafe`.
 
 ### Executing field initializers
 Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-variable-initializers):
@@ -34,8 +35,8 @@ Execution of struct instance field initializers matches execution of [class fiel
 ### Definite assignment
 Instance fields must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)).
 
-Definite assignment is required for explicit parameterless constructors as well.
-Definite assignment _is not required_ for synthesized parameterless constructors.
+Definite assignment of instance fields is required within explicit parameterless constructors as well.
+Definite assignment of instance fields _is not required_ within synthesized parameterless constructors.
 ```csharp
 struct S0
 {
@@ -65,16 +66,16 @@ _The synthesized parameterless constructor may need to emit `ldarg.0 initobj S` 
 ### No `base()` initializer
 A `base()` initializer is disallowed in struct constructors.
 
-The compiler will not emit a call to the base `System.ValueType` constructor for any struct instance constructors including explicit and synthesized parameterless constructors.
+The compiler will not emit a call to the base `System.ValueType` constructor from any struct instance constructors including explicit and synthesized parameterless constructors.
 
 ### Constructor use
 
 The parameterless constructor may be less accessible than the containing value type.
 ```csharp
-struct NoConstructor { }
-struct PublicConstructor { public PublicConstructor() { } }
-struct InternalConstructor { internal InternalConstructor() { } }
-struct PrivateConstructor { private PrivateConstructor() { } }
+public struct NoConstructor { }
+public struct PublicConstructor { public PublicConstructor() { } }
+public struct InternalConstructor { internal InternalConstructor() { } }
+public struct PrivateConstructor { private PrivateConstructor() { } }
 ```
 
 `default` ignores the parameterless constructor and generates a zeroed instance.
