@@ -111,10 +111,14 @@ The specese needed for this is a bit complicated, and is expanded below.
 A type is said to be an _applicable\_interpolated\_string\_builder\_type_ if, given an _interpolated\_string\_literal_ `S`, the following is true:
 
 * Overload resolution with an identifier of `TryFormat` and a parameter type of `string` succeeds, and contains a single instance method that returns a `bool`.
-* For every _regular\_balanced\_text_ component of `S` (`Si`) without an _interpolation\_format_ component, overload resolution with an identifier of `TryFormat` and parameter
-of the type of `Si` succeeds, and contains a single instance method that returns a `bool`.
-* For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component, overload resolution with an identifier of `TryFormat` and parameter
-types of `Si` and `string` succeeds, and contains a single instance method that returns a `bool`.
+* For every _regular\_balanced\_text_ component of `S` (`Si`) without an _interpolation\_format_ component or _constant\_expression_ (alignment) component, overload resolution
+with an identifier of `TryFormat` and parameter of the type of `Si` succeeds, and contains a single instance method that returns a `bool`.
+* For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and no _constant\_expression_ (alignment) component, overload resolution
+with an identifier of `TryFormat` and parameter types of `Si` and `string`(in that order) succeeds, and contains a single instance method that returns a `bool`.
+* For every _regular\_balanced\_text_ component of `S` (`Si`) with a _constant\_expression_ (alignment) component and no _interpolation\_format_ component, overload resolution
+with an identifier of `TryFormat` and parameter types of `Si` and `int` (in that order) succeeds, and contains a single instance method that returns a `bool`.
+* For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and a _constant\_expression_ (alignment) component, overload resolution
+with an identifier of `TryFormat` and parameter types of `Si`, `int`, and `string` (in that order) succeeds, and contains a single instance method that returns a `bool`.
 
 Note that these rules do not permit extension methods for the `TryFormat` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
 pattern, where we allow `GetEnumerator` to be an extension method, but not `Current` or `MoveNext()`.
