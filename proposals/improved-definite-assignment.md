@@ -159,7 +159,7 @@ if (b ? x != null && Set(out y) : x != null && Set(out y))
 bool Set(out int x) { x = 0; return true; }
 ```
 
-This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification. See [internal issue](http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/529603).
+This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification at the time. See [internal issue](http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/529603).
 
 ## Boolean constant expressions
 We introduce a new section "Boolean constant expressions":
