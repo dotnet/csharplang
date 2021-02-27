@@ -141,15 +141,15 @@ For an expression *expr* of the form `expr_first ?? expr_second`:
 - ...
 - The definite assignment state of *v* after *expr* is determined by:
   - ...
-  - If *expr_first* directly contains a null-conditional expression *E*, and the state of *v* after *expr_second* is "definitely assigned when true", and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is "definitely assigned when true".
-  - If *expr_first* directly contains a null-conditional expression *E* and the state of *v* after *expr_second* is "definitely assigned when false", and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is "definitely assigned when false".
+  - If *expr_first* directly contains a null-conditional expression *E*, and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after *expr_second*.
 
 ### Remarks
-This handles the `dict?.TryGetValue(key, out var value) ?? false` scenario, by taking the resulting state of a "hypothetical" `dict.TryGetValue(key, out var value)` call and using it as the resulting state-when-true of the `dict?.TryGetValue(key, out var value) ?? false` expression.
+This handles the `dict?.TryGetValue(key, out var value) ?? false` scenario, by observing that *v* is definitely assigned after `dict.TryGetValue(key, out var value)`, and *v* is "definitely assigned when true" after `false`, and concluding that *v* must be "definitely assigned when true".
 
 The more general formulation also allows us to handle some more unusual scenarios, such as:
 - `if (x?.M(out y) ?? (b && z.M(out y))) y.ToString();`
 - `if (x?.M(out y) ?? z?.M(out y) ?? false) y.ToString();`
+- `_ = x?.M(out y) ?? y = 0; y.ToString()`
 
 ## ?: (conditional) expressions
 We augment the section [**?: (conditional) expressions**](../spec/variables.md#-conditional-expressions) as follows:
