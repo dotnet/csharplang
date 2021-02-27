@@ -53,17 +53,27 @@ f = delegate (int x) : int { return x; }; // syntax error
 ```
 
 ## Natural delegate type
-A lambda expression has a natural type if the parameters types are explicit and either the return type is explicit or there is a common type from the natural types of all `return` expressions in the body. Otherwise there is no natural type.
+A lambda expression has a natural type if the parameters types are explicit and either the return type is explicit or there is a common type from the natural types of all `return` expressions in the body.
+
+The natural type is a delegate type where the parameter types are the explicit lambda parameter types and the return type `R` is:
+- if the lambda return type is explicit, that type is used;
+- if the lambda has no return expressions, the return type is `void` or `System.Threading.Tasks.Task` if `async`;
+- if the common type from the natural type of all `return` expressions in the body is the type `R0`, the return type is `R0` or `System.Threading.Tasks.Task<R0>` if `async`.
 
 A method group has a natural type if the method group contains a single method and the method has no unbound type parameters.
 
+The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
+- if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
+- if `R` is `void`, then the delegate type is `System.Action<P1, ..., Pn>`;
+- otherwise the delegate type is `System.Func<P1, ..., Pn, R>`.
+
+`modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
+
+If synthesized delegate types are required, the compiler will attempt to reuse delegate types across multiple use sites. The compiler could generate generic delegate types parameterized by parameter types and return type similar to the generic types synthesized for anonymous types. But reuse might be limited to simply reusing delegate types when lambda or method group signatures match exactly.
+
+The anonymous delegate types will not be co- or contra-variant unlike the delegates constructed from `System.Action<>` and `System.Func<>`.
+
 Lambdas or method groups with natural types can be used as initializers in `var` declarations.
-
-If the lambda or method group has no more than 16 parameters and no return value, and all parameters are passed by value, the natural type will be `delegate void System.Action<P1, ..., Pn>(P1, ..., Pn)` where `P1, ..., Pn` are the lambda parameter types.
-
-If the lambda or method group has no more than 16 parameters and a by-value return type, and all parameters are passed by value, the natural type will be `delegate R System.Func<P1, ..., Pn, R>(P1, ..., Pn)` where `P1, ..., Pn` are the lambda parameter types, and `R` is the lambda return type.
-
-Otherwise the natural type will be a synthesized `internal` anonymous `delegate` type with a signature that matches the lambda or method group.
 
 ```csharp
 var f1 = () => default;        // error: no natural type
@@ -82,24 +92,6 @@ var f6 = F1;    // error: multiple methods
 var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
-
-### Anonymous delegate type
-If synthesized delegate types are required, the compiler generates generic anonymous delegate types that are shared across all anonymous delegates in the module that have the same number of parameters and same parameter ref kinds.
-
-The names of the synthesized delegate types and the names of the parameters are unspeakable.
-
-The anonymous delegate types are not co- or contra-variant unlike the delegates constructed from `System.Action<>` and `System.Func<>`.
-
-The natural type of a method group does not include any `modopt()` or `modreq()` on the method group.
-
-`fA` and `fB` share a common generic type `internal delegate ref R <anonymous2><P1>(ref P1 <unnamed>)` below:
-```csharp
-var f9 = (ref int i) => { };    // delegate void <anonymous1><int>(ref int <unnamed>);
-var fA = (ref char c) => ref c; // delegate ref char <anonymous2><char, char>(ref char <unnamed>);
-var fB = (ref int i) => ref i;  // delegate ref int <anonymous2><int, int>(ref int <unnamed>);
-```
-
-_Issue: Should the compiler always generate anonymous delegate types rather than using `System.Action<>` and `System.Func<>`? There are observable differences: 1. the anonymous delegate types are not co- or contra-variant; and 2. using a synthesized delegate type would mean the following assignment to `y` would fail: `var x = () => { }; Action y = x;`._
 
 ### Implicit conversion to `System.Delegate`
 A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate`.
