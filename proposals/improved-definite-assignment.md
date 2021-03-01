@@ -120,6 +120,20 @@ When we consider whether a variable is assigned at a given point within a null-c
 
 For example, given a conditional expression `a?.b(out x)?.c(x)`, the non-conditional counterpart is `a.b(out x).c(x)`. If we want to know the definite assignment state of `x` before `?.c(x)`, for example, then we perform a "hypothetical" analysis of `a.b(out x)` and use the resulting state as an input to `?.c(x)`.
 
+## Boolean constant expressions
+We introduce a new section "Boolean constant expressions":
+
+For an expression *expr* where *expr* is a constant expression with a bool value:
+- The definite assignment state of *v* after *expr* is determined by:
+  - If *expr* is a constant expression with value *true*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when false".
+  - If *expr* is a constant expression with value *false*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when true".
+
+### Remarks
+
+We assume that if an expression has a constant value bool `false`, for example, it's impossible to reach any branch that requires the expression to return `true`. Therefore variables are assumed to be definitely assigned in such branches. This ends up combining nicely with the spec changes for expressions like `??` and `?:` and enabling a lot of useful scenarios.
+
+It's also worth noting that we never expect to be in a conditional state *before* visiting a constant expression. That's why we do not account for scenarios such as "*expr* is a constant expression with value *true*, and the state of *v* before *expr* is "definitely assigned when true".
+
 ## ?? (null-coalescing expressions) augment
 We augment the section [?? (null coalescing) expressions](../spec/variables.md#-null-coalescing-expressions) as follows:
 
@@ -127,11 +141,16 @@ For an expression *expr* of the form `expr_first ?? expr_second`:
 - ...
 - The definite assignment state of *v* after *expr* is determined by:
   - ...
-  - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is a constant expression with value `false`, and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is "definitely assigned when true".
-  - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is a constant expression with value `true`, and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is "definitely assigned when false".
+  - If *expr_first* directly contains a null-conditional expression *E*, and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after *expr_second*.
 
 ### Remarks
-This handles the `dict?.TryGetValue(key, out var value) ?? false` scenario, by taking the resulting state of a "hypothetical" `dict.TryGetValue(key, out var value)` call and using it as the resulting state-when-true of the `dict?.TryGetValue(key, out var value) ?? false` expression.
+The above rule formalizes that for an expression like `a?.M(out x) ?? (x = false)`, either the `a?.M(out x)` was fully evaluated and produced a non-null value, in which case `x` was assigned, or the `x = false` was evaluated, in which case `x` was also assigned. Therefore `x` is always assigned after this expression.
+
+This also handles the `dict?.TryGetValue(key, out var value) ?? false` scenario, by observing that *v* is definitely assigned after `dict.TryGetValue(key, out var value)`, and *v* is "definitely assigned when true" after `false`, and concluding that *v* must be "definitely assigned when true".
+
+The more general formulation also allows us to handle some more unusual scenarios, such as:
+- `if (x?.M(out y) ?? (b && z.M(out y))) y.ToString();`
+- `if (x?.M(out y) ?? z?.M(out y) ?? false) y.ToString();`
 
 ## ?: (conditional) expressions
 We augment the section [**?: (conditional) expressions**](../spec/variables.md#-conditional-expressions) as follows:
@@ -140,15 +159,26 @@ For an expression *expr* of the form `expr_cond ? expr_true : expr_false`:
 - ...
 - The definite assignment state of *v* after *expr* is determined by:
   - ...
-  - If *expr_false* is a constant expression ([Constant expressions](../spec/expressions.md#constant-expressions)) with value `false`, and the state of *v* after *expr_true* is "definitely assigned when true", then the state of *v* after *expr* is "definitely assigned when true".
-  - If *expr_false* is a constant expression ([Constant expressions](../spec/expressions.md#constant-expressions)) with value `true`, and the state of *v* after *expr_true* is "definitely assigned when false", then the state of *v* after *expr* is "definitely assigned when false".
-  - If *expr_true* is a constant expression ([Constant expressions](../spec/expressions.md#constant-expressions)) with value `false`, and the state of *v* after *expr_false* is "definitely assigned when true", then the state of *v* after *expr* is "definitely assigned when true".
-  - If *expr_true* is a constant expression ([Constant expressions](../spec/expressions.md#constant-expressions)) with value `true`, and the state of *v* after *expr_false* is "definitely assigned when false", then the state of *v* after *expr* is "definitely assigned when false".
+  - If the state of *v* after *expr_true* is "definitely assigned when true", and the state of *v* after *expr_false* is "definitely assigned when true", then the state of *v* after *expr* is "definitely assigned when true".
+  - If the state of *v* after *expr_true* is "definitely assigned when false", and the state of *v* after *expr_false* is "definitely assigned when false", then the state of *v* after *expr* is "definitely assigned when false".
 
 ### Remarks
 
-Essentially, when one arm of a conditional expression is a bool constant `b`, the only way the value `!b` can be produced is if the other arm produced it. So we thread the appropriate conditional state through the expression-- if `b` is `false`, we thread the when-true state from the other arm through, and if `b` is `true`, we thread the when-false state from the other arm through.
+This makes it so when both arms of a conditional expression result in a conditional state, we join the corresponding conditional states and propagate it out instead of unsplitting the state and allowing the final state to be non-conditional. This enables scenarios like the following:
 
+```cs
+bool b = true;
+object x = null;
+int y;
+if (b ? x != null && Set(out y) : x != null && Set(out y))
+{
+  y.ToString();
+}
+
+bool Set(out int x) { x = 0; return true; }
+```
+
+This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification at the time. See [internal issue](http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/529603).
 
 ## ==/!= (relational equality operator) expressions
 We introduce a new section **==/!= (relational equality operator) expressions**.
