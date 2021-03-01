@@ -144,12 +144,13 @@ For an expression *expr* of the form `expr_first ?? expr_second`:
   - If *expr_first* directly contains a null-conditional expression *E*, and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after *expr_second*.
 
 ### Remarks
-This handles the `dict?.TryGetValue(key, out var value) ?? false` scenario, by observing that *v* is definitely assigned after `dict.TryGetValue(key, out var value)`, and *v* is "definitely assigned when true" after `false`, and concluding that *v* must be "definitely assigned when true".
+The above rule formalizes that for an expression like `a?.M(out x) ?? (x = false)`, either the `a?.M(out x)` was fully evaluated and produced a non-null value, in which case `x` was assigned, or the `x = false` was evaluated, in which case `x` was also assigned. Therefore `x` is always assigned after this expression.
+
+This also handles the `dict?.TryGetValue(key, out var value) ?? false` scenario, by observing that *v* is definitely assigned after `dict.TryGetValue(key, out var value)`, and *v* is "definitely assigned when true" after `false`, and concluding that *v* must be "definitely assigned when true".
 
 The more general formulation also allows us to handle some more unusual scenarios, such as:
 - `if (x?.M(out y) ?? (b && z.M(out y))) y.ToString();`
 - `if (x?.M(out y) ?? z?.M(out y) ?? false) y.ToString();`
-- `_ = x?.M(out y) ?? y = 0; y.ToString()`
 
 ## ?: (conditional) expressions
 We augment the section [**?: (conditional) expressions**](../spec/variables.md#-conditional-expressions) as follows:
