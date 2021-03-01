@@ -96,7 +96,7 @@ Logger logger = GetLogger(LogLevel.Info);
 logger.LogTrace($"{"this"} will never be printed because info is < trace!");
 
 // This is converted to:
-var receiverTemp = logger.Trace;
+var receiverTemp = logger;
 TraceLoggerParamsBuilder.GetInterpolatedStringBuilder(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builder);
 _ = builder.TryFormat("this") && builder.TryFormat(" will never be printed because info is < trace!");
 receiverTemp.Log(builder);
@@ -197,8 +197,8 @@ intended for direct use by the C# compiler. This struct would look approximately
 ```cs
 public ref struct InterpolatedStringBuilder
 {
-    public void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount)
-        => new InterpolatedStringBuilder(baseLength, formatHoleCount);
+    public void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, out InterpolatedStringBuilder builder)
+        => builder = new InterpolatedStringBuilder(baseLength, formatHoleCount);
 
     private char[] _array;
     internal int _count;
@@ -311,8 +311,8 @@ public static class MemoryExtensions
  
 public ref struct SpanInterpolatedStringBuilder
 {
-    public static void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Span<char> span, out SpanInterpolatedStringBuilder builder) =>
-        builder = new SpanInterpolatedStringBuilder(span, baseLength + formatHoleCount * AverageFormatHoleLengthConst);
+    public static void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Span<char> span, out SpanInterpolatedStringBuilder builder)
+        => builder = new SpanInterpolatedStringBuilder(span, baseLength + formatHoleCount * AverageFormatHoleLengthConst);
 
     private Span<char> _span;
     internal bool _success;
