@@ -15,6 +15,30 @@ Allowing explicit return types would also provide control over compiler performa
 A natural type for lambda expressions and method groups will allow more scenarios where lambdas and method groups may be used without an explicit delegate type, including as initializers in `var` declarations.
 Requiring explicit delegate types for lambdas and method groups has been a friction point for customers, and has become an impediment to progress in ASP.NET with recent work on [MapAction](https://github.com/dotnet/aspnetcore/pull/29878).
 
+[ASP.NET MapAction](https://github.com/dotnet/aspnetcore/pull/29878) without proposed changes (`MapAction()` takes a `System.Delegate` argument):
+```csharp
+[HttpGet("/")] Todo GetTodo() => new(Id: 0, Name: "Name");
+app.MapAction((Func<Todo>)GetTodo);
+
+[HttpPost("/")] Todo PostTodo([FromBody] Todo todo) => todo);
+app.MapAction((Func<Todo, Todo>)PostTodo);
+```
+
+[ASP.NET MapAction](https://github.com/dotnet/aspnetcore/pull/29878) with natural types for method groups:
+```csharp
+[HttpGet("/")] Todo GetTodo() => new(Id: 0, Name: "Name");
+app.MapAction(GetTodo);
+
+[HttpPost("/")] Todo PostTodo([FromBody] Todo todo) => todo);
+app.MapAction(PostTodo);
+```
+
+[ASP.NET MapAction](https://github.com/dotnet/aspnetcore/pull/29878) with attributes and natural types for lambda expressions:
+```csharp
+app.MapAction([HttpGet("/")] () => new Todo(Id: 0, Name: "Name"));
+app.MapAction([HttpPost("/")] ([FromBody] Todo todo) => todo);
+```
+
 ## Attributes
 Attributes may be added to lambda expressions.
 ```csharp
