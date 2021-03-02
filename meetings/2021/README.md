@@ -2,6 +2,8 @@
 
 ## Schedule ASAP
 
+- Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
+
 ## Schedule when convenient
 
 - List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
@@ -34,14 +36,17 @@
 - Lambda improvements (Chuck, Jared): https://github.com/cston/csharplang/blob/lambdas/proposals/csharp-10.0/lambda-improvements.md
 - Required properties (Fred): https://github.com/333fred/csharplang/blob/required-properties/proposals/required-members.md
 
-## Mar 1, 2021
-
-- async method builder override (Stephen/Julien): https://github.com/dotnet/csharplang/blob/master/proposals/async-method-builders.md
-- interpolated string improvements (Fred): https://github.com/333fred/csharplang/blob/improved-interpolated-strings/proposals/improved-interpolated-strings.md
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Mar 1, 2021
+
+[C# Language Design Notes for March 1st, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-03-01.md)
+
+1. [Async method builder override](#async-method-builder-override)
+2. [Async exception filters](#async-exception-filters)
+3. [Interpolated string improvements](#interpolated-string-improvements)
 
 ## Feb 24, 2021
 
