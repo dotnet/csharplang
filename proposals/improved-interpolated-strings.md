@@ -345,7 +345,7 @@ public static class MemoryExtensions
 public ref struct SpanInterpolatedStringBuilder
 {
     public static void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Span<char> span, out SpanInterpolatedStringBuilder builder)
-        => builder = new SpanInterpolatedStringBuilder(span, baseLength + formatHoleCount * AverageFormatHoleLengthConst);
+        => builder = new SpanInterpolatedStringBuilder(span, baseLength);
 
     private Span<char> _span;
     internal bool _success;
