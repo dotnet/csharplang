@@ -154,7 +154,7 @@ A function member is said to be an ***applicable function member*** with respect
 For a function member that includes a parameter array, if the function member is applicable by the above rules, it is said to be applicable in its ***normal form***. If a function member that includes a parameter array is not applicable in its normal form, the function member may instead be applicable in its ***expanded form***:
 *  The expanded form is constructed by replacing the parameter array in the function member declaration with zero or more value parameters of the element type of the parameter array such that the number of arguments in the argument list `A` matches the total number of parameters. If `A` has fewer arguments than the number of fixed parameters in the function member declaration, the expanded form of the function member cannot be constructed and is thus not applicable.
 *  Otherwise, the expanded form is applicable if for each argument in `A` the parameter passing mode of the argument is identical to the parameter passing mode of the corresponding parameter, and
-   *  **for an interpolated string argument to a fixed value parameter or a value parameter created by the expansion when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and overload resolution on `Ai` with the identifier `GetInterpolatedStringBuilder` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `Ai` succeeds with 1 invocable member. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an implicit _interpolated\_string\_builder\_conversion_. Or,**
+   *  **for an interpolated string argument to a fixed value parameter or a value parameter created by the expansion when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and overload resolution on `Ai` with the identifier `GetInterpolatedStringBuilder` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `Ai` succeeds with 1 invocable member. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
    *  for a fixed value parameter or a value parameter created by the expansion, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the type of the argument to the type of the corresponding parameter, or
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter.
 
@@ -171,7 +171,7 @@ We change the [better conversion from expression](https://github.com/dotnet/csha
 following:
 
 Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if:
-1. `E` is a non-constant _interpolated\_string\_expression_, `C1` is an _interpolated\_string\_builder\_conversion_, `T1` is an _applicable\_interpolated\_string\_builder\_type_, and `C2` is not an _interpolated\_string\_builder\_conversion_, or
+1. `E` is a non-constant _interpolated\_string\_expression_, `C1` is an _implicit\_string\_builder\_conversion_, `T1` is an _applicable\_interpolated\_string\_builder\_type_, and `C2` is not an _implicit\_string\_builder\_conversion_, or
 2. `E` does not exactly match `T2` and at least one of the following holds:
     * `E` exactly matches `T1` ([Exactly matching Expression](expressions.md#exactly-matching-expression))
     * `T1` is a better conversion target than `T2` ([Better conversion target](expressions.md#better-conversion-target))
@@ -242,7 +242,7 @@ If the type of an interpolated string is `System.IFormattable` or `System.Format
 ### Lowering
 
 Both the general pattern and the specific changes for interpolated strings directly converted to `string`s follow the same lowering pattern. The `GetInterpolatedStringBuilder` method is
-invoked on the receiver (whether that's the temporary method receiver for an _interpolated\_string\_builder\_conversion_ derived from the applicable function member algorithm, or a
+invoked on the receiver (whether that's the temporary method receiver for an _implicit\_string\_builder\_conversion_ derived from the applicable function member algorithm, or a
 standard conversion derived from the target type), and stored into a temp local. `TryFormat` is then repeatedly invoked on that temp, with each part of the interpolated string, in order,
 stopping subsequent calls if a `TryFormat` call returns `false`. The temp is then evaluated as the result of the expression.
 
@@ -290,6 +290,39 @@ For simplicity, this spec currently just proposes recognizing a `TryFormat` meth
 This was done to support partial formatting scenarios where the user wants to stop formatting if an error occurs or if it's unnecessary, such as the logging case, but could potentially
 introduce a bunch of unnecessary branches in standard interpolated string usage. We could consider an addendum where we use just `Format` methods if no `TryFormat` method is present, but
 it does present questions about what we do if there's a mix of both TryFormat and Format calls.
+
+### Passing previous arguments to the builder
+
+There is unfortunate lack of symmetry in the proposal at it currently exists: invoking an extension method in reduced form produces different semantics than invoking the extension method in
+normal form. This is different from most other locations in the language, where reduced form is just a sugar. We have a couple of potential options for resolving this:
+
+* Special case extension methods called in normal form. This feels pretty icky: why are extensions special here?
+* Allow other previous parameters to be passed to the builder. This gets complicated quickly: how do we determine what to pass to the builder? What if the builder has a `GetInterpolatedString`
+method that accepts the first parameter, but not the receiver, of an instance method?
+* Pass parameters to the builder marked with a specific attribute, a la `EnumeratorCancellation` support. This would need rules about whether we pass the receiver (maybe if the method is marked
+we pass the receiver, and we don't in the general case?), and what we do if parameters _after_ the string parameter are annotated, but it seems like a potential option.
+
+Some compromise is likely needed here, but either direction has complications. Some scenarios that would be affected by this is the `Utf8Formatter` below, or existing api patterns that have
+an `IFormatProvider` as the first argument.
+
+### `await` usage in interpolation holes
+
+Because `$"{await A()}"` is a valid expression today, we need to rationalize how interpolation holes with await. We could solve this with a few rules:
+
+1. If an interpolated string used as a `string`, `IFormattable`, or `FormattableString` has an `await` in an interpolation hole, fall back to old-style formatter.
+2. If an interpolated string is subject to an _implicit\_string\_builder\_conversion_ and _applicable\_interpolated\_string\_builder\_type_ is a `ref struct`, `await` is not allowed to be used
+in the format holes.
+
+Fundamentally, this desugaring could use a ref struct in an async method as long as we guarantee that the `ref struct` will not need to be saved to the heap, which should be possible if we forbid
+`await`s in the interpolation holes.
+
+Alternatively, we could simply make all builder types non-ref structs, including the framework builder for interpolated strings. This would, however, preclude us from someday recognizing a `Span`
+version that does not need to allocate any scratch space at all.
+
+### Builders as ref parameters
+
+Some builders might want to be passed as ref parameters (either `in` or `ref`). Should we allow either? And if so, what will a `ref` builder look like? `ref $""` is confusing, as you're not actually
+passing the string by ref, you're passing the builder that is created from the ref by ref, and has similar potential issues with async methods.
 
 ## Other use cases
 
