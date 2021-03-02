@@ -99,7 +99,7 @@ logger.LogTrace($"{"this"} will never be printed because info is < trace!");
 var receiverTemp = logger;
 TraceLoggerParamsBuilder.GetInterpolatedStringBuilder(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builder);
 _ = builder.TryFormat("this") && builder.TryFormat(" will never be printed because info is < trace!");
-receiverTemp.Log(builder);
+receiverTemp.LogTrace(builder);
 ```
 
 Here, because `TraceLoggerParamsBuilder` has static method called `GetInterpolatedStringBuilder` with the correct parameters, including an out param that is the type
