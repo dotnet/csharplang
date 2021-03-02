@@ -37,6 +37,8 @@ Instance fields must be definitely assigned in struct instance constructors that
 
 Definite assignment of instance fields is required within explicit parameterless constructors as well.
 Definite assignment of instance fields _is not required_ within synthesized parameterless constructors.
+
+_Should the definite assignment rule be applied consistently? That is, should we require that all instance fields of a struct are explicitly assigned even when the parameterless constructor is synthesized, or should we drop the existing requirement that all fields are explicitly assigned in struct constructors?_
 ```csharp
 struct S0
 {
@@ -104,6 +106,7 @@ s2.ToString(); // error: use of unassigned local (unless type is empty)
 ```
 
 Array allocation ignores any parameterless constructor and generates zeroed elements.
+_Should the compiler warn that the parameterless constructor is ignored? How would such a warning be avoided?_
 ```csharp
 _ = new NoConstructor[1];      // ok
 _ = new PublicConstructor[1];  // ok: constructor ignored
