@@ -44,9 +44,9 @@ Overview of meetings and agendas for 2021
 
 [C# Language Design Notes for March 1st, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-03-01.md)
 
-1. [Async method builder override](#async-method-builder-override)
-2. [Async exception filters](#async-exception-filters)
-3. [Interpolated string improvements](#interpolated-string-improvements)
+1. Async method builder override
+2. Async exception filters
+3. Interpolated string improvements
 
 ## Feb 24, 2021
 
