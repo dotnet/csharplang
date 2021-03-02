@@ -13,6 +13,7 @@ Support for explicit return types would provide symmetry with lambda parameters 
 Allowing explicit return types would also provide control over compiler performance in nested lambdas where overload resolution must bind the lambda body currently to determine the signature.
 
 A natural type for lambda expressions and method groups will allow more scenarios where lambdas and method groups may be used without an explicit delegate type, including as initializers in `var` declarations.
+
 Requiring explicit delegate types for lambdas and method groups has been a friction point for customers, and has become an impediment to progress in ASP.NET with recent work on [MapAction](https://github.com/dotnet/aspnetcore/pull/29878).
 
 [ASP.NET MapAction](https://github.com/dotnet/aspnetcore/pull/29878) without proposed changes (`MapAction()` takes a `System.Delegate` argument):
@@ -59,7 +60,13 @@ f = [MyAttribute] delegate { return 1; };         // syntax error
 f = delegate ([MyAttribute] int x) { return x; }; // syntax error
 ```
 
-Attributes on the lambda or lambda parameters will be emitted to metadata on the method that maps to the lambda.
+Attributes on the lambda expression or lambda parameters will be emitted to metadata on the method that maps to the lambda.
+
+In general, customers should not depend on how lambda expressions and local functions map from source to metadata. How lambdas and local functions are emitted can, and has, changed between compiler versions.
+
+The changes proposed here are targeted at the `Delegate` driven scenario.
+It should be valid to inspect the `MethodInfo` associated with a `Delegate` instance to determine the signature of the lambda expression or local function including any explicit attributes and additional metadata emitted by the compiler such as default parameters.
+This allows teams such as ASP.NET to make available the same behaviors for lambdas and local functions as ordinary methods.
 
 ## Explicit return type
 An explicit return type may be specified after the parameter list.
@@ -84,7 +91,9 @@ The natural type is a delegate type where the parameter types are the explicit l
 - if the lambda has no return expressions, the return type is `void` or `System.Threading.Tasks.Task` if `async`;
 - if the common type from the natural type of all `return` expressions in the body is the type `R0`, the return type is `R0` or `System.Threading.Tasks.Task<R0>` if `async`.
 
-A method group has a natural type if the method group contains a single method and the method has no unbound type parameters.
+A method group has a natural type if the method group contains a single method.
+
+_A method group might refer to extension methods. Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine that a method group contains a single method the compiler may need to search all namespace scopes. To minimize unnecessary binding, perhaps natural type should be calculated only in cases where there is no target type - that is, only calculate the natural type in cases where it is needed._
 
 The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
 - if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
@@ -94,8 +103,6 @@ The delegate type for the lambda or method group and parameter types `P1, ..., P
 `modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
 
 If synthesized delegate types are required, the compiler will attempt to reuse delegate types across multiple use sites. The compiler could generate generic delegate types parameterized by parameter types and return type similar to the generic types synthesized for anonymous types. But reuse might be limited to simply reusing delegate types when lambda or method group signatures match exactly.
-
-The anonymous delegate types will not be co- or contra-variant unlike the delegates constructed from `System.Action<>` and `System.Func<>`.
 
 Lambdas or method groups with natural types can be used as initializers in `var` declarations.
 
@@ -117,6 +124,15 @@ var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
 
+The synthesized delegate types are implicitly co- and contra-variant.
+```csharp
+var fA = (IEnumerable<string> e, ref int i) => { }; // void DA$(IEnumerable<string>, ref int);
+fA = (IEnumerable<object> e, ref int i) => { };     // ok
+
+var fB = (IEnumerable<object> e, ref int i) => { }; // void DB$(IEnumerable<object>, ref int);
+fB = (IEnumerable<string> e, ref int i) => { };     // error: parameter type mismatch
+```
+
 ### Implicit conversion to `System.Delegate`
 A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate`.
 ```csharp
@@ -131,6 +147,14 @@ Invoke(() => 0);   // Invoke(Delegate) [new]
 
 Invoke(GetString); // Invoke(Func<string>)
 Invoke(GetInt);    // Invoke(Delegate) [new]
+```
+
+If a natural type cannot be inferred, there is no implicit conversion to `System.Delegate`.
+```csharp
+static void Invoke(Delegate d) { }
+
+Invoke(Console.WriteLine); // error: cannot to 'Delegate'; multiple candidate methods
+Invoke(x => x);            // error: cannot to 'Delegate'; no natural type for 'x'
 ```
 
 To avoid a breaking change, overload resolution will be updated to prefer lambda and method group conversions that do not use the natural type.
@@ -166,6 +190,10 @@ lambda_parameter
   | (attribute_list* modifier* type)? identifier equals_value_clause?
   ;
 ```
+
+_Does the `: type` return type syntax introduce ambiguities with `?:` that cannot be resolved easily?_
+
+_Should we allow attributes on parameters without explicit types, such as `([MyAttribute] x) => { }`? (We don't allow modifiers on parameters without explicit types, such as `(ref x) => { }`.)_
 
 ## Design meetings
 
