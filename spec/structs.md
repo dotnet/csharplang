@@ -84,7 +84,7 @@ struct_member_declaration
     ;
 ```
 
-Except for the differences noted in [Class and struct differences](structs.md#class-and-struct-differences), the descriptions of class members provided in [Class members](classes.md#class-members) through [Iterators](classes.md#iterators) apply to struct members as well.
+Except for the differences noted in [Class and struct differences](structs.md#class-and-struct-differences), the descriptions of class members provided in [Class members](classes.md#class-members) through [Async functions](classes.md#async-functions) apply to struct members as well.
 
 ## Class and struct differences
 
