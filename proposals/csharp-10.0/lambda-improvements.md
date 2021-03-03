@@ -93,7 +93,7 @@ The natural type is a delegate type where the parameter types are the explicit l
 
 A method group has a natural type if the method group contains a single method.
 
-_A method group might refer to extension methods. Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine that a method group contains a single method the compiler may need to search all namespace scopes. To minimize unnecessary binding, perhaps natural type should be calculated only in cases where there is no target type - that is, only calculate the natural type in cases where it is needed._
+A method group might refer to extension methods. Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine the natural type will require searching all namespace scopes. _To minimize unnecessary binding, perhaps natural type should be calculated only in cases where there is no target type - that is, only calculate the natural type in cases where it is needed._
 
 The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
 - if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
@@ -157,7 +157,7 @@ Invoke(Console.WriteLine); // error: cannot to 'Delegate'; multiple candidate me
 Invoke(x => x);            // error: cannot to 'Delegate'; no natural type for 'x'
 ```
 
-To avoid a breaking change, overload resolution will be updated to prefer lambda and method group conversions that do not use the natural type.
+To avoid a breaking change, overload resolution will be updated to prefer strongly-typed delegates and expressions over `System.Delegate`.
 _The example below demonstrates the tie-breaking rule for lambdas. Is there an equivalent example for method groups?_
 ```csharp
 static void Execute(Expression<Func<string>> e) { }
@@ -167,10 +167,10 @@ static string GetString() => "";
 static int GetInt() => 0;
 
 Execute(() => "");  // Execute(Expression<Func<string>>) [tie-breaker]
-Execute(() => 0);   // Execute(Delegate)
+Execute(() => 0);   // Execute(Delegate) [new]
 
-Execute(GetString); // Execute(Delegate)
-Execute(GetInt);    // Execute(Delegate)
+Execute(GetString); // Execute(Delegate) [new]
+Execute(GetInt);    // Execute(Delegate) [new]
 ```
 
 ## Syntax
