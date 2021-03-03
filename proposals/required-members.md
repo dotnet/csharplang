@@ -124,7 +124,7 @@ public class C
     public C() : init(Prop2)
     {
         Prop2 = 2;
-        Console.WriteLine($"Prop2 is {Prop1}")
+        Console.WriteLine($"Prop2 is {Prop2}")
     }
 }
 ```
@@ -289,6 +289,9 @@ methods with a prefix modifier. Other possibilities:
 Should we allow access to `this` in the init clause? If we want the assignment in `init` to be a shorthand for assigning the member in the constructor itself, it seems
 like we should.
 
+Additionally, does it create a new scope, like `base()` does, or does it share the same scope as the method body? This is particularly important for things like local
+functions, which the init clause may want to access, or for name shadowing, if an init expression introduces a variable via `out` parameter.
+
 ### Base requirement chaining representation in metadata
 
 An ideal implementation of the metadata representation would have each constructor mark the base constructor that they call in some fashion, which would ensure that, if
@@ -296,6 +299,28 @@ the base and derived types are in different assemblies, a version update in the 
 derived assembly having to upgrade. However, we don't have a way to encode a method token into a signature, so we'd have to find some other encoding strategy. This
 strategy will be inherently fragile to a number of potential scenarios, so it may be more pragmatic to simply repeat any removed members in the removed member list of
 the derived constructor.
+
+### Warning vs Error
+
+Should not setting a required member be a warning or an error? It is certainly possible to trick the system, via `Activator.CreateInstance(typeof(C))` or similar, which
+means we may not be able to fully guarantee all properties are always set. We also allow suppression of the diagnostics at the constructor-site by using the `!`, which
+we generally do not allow for errors. However, the feature is similar to readonly fields or init properties, in that we hard error if users attempt to set such a member
+after initialization, but they can be circumvented by reflection.
+
+### "Silly" diagnostics
+
+Given this code:
+
+```cs
+class C
+{
+    public required object? O;
+    public C() : init(O = null) {}
+}
+```
+
+Should issue some kind of diagnostic that `O` is marked required, but never required in a contract? Developers might find marking properties as required to be useful
+as a safety net.
 
 ## Discussed Questions
 
