@@ -2,13 +2,53 @@
 
 Syntax for a using directive is extended with an optional `global` keyword that can precede the `using` keyword:
 ```antlr
-using_directive
-  : 'global'? 'using' ('static' | name_equals)? name ';'
-  ;
+compilation_unit
+    : extern_alias_directive* global_using_directive* using_directive* global_attributes? namespace_member_declaration*
+    ;
+
+global_using_directive
+    : global_using_alias_directive
+    | global_using_namespace_directive
+    | global_using_static_directive
+    ;
+
+global_using_alias_directive
+    : 'global' 'using' identifier '=' namespace_or_type_name ';'
+    ;
+
+global_using_namespace_directive
+    : 'global' 'using' namespace_name ';'
+    ;
+    
+global_using_static_directive
+    : 'global' 'using' 'static' type_name ';'
+    ;
 ```
 
-- Global Using Directives are allowed only on the Compilation Unit level (cannot be used inside a namespace declaration).
-- Global Using directives, if any, must precede any non-global using directives. 
+- The *global_using_directive*s are allowed only on the Compilation Unit level (cannot be used inside a namespace declaration).
+- The *global_using_directive*s, if any, must precede any *using_directive*s. 
 - The scope of a Global Using Directive extends over the namespace member declarations and non-global using directives of all compilation units within the program.
 The scope of a Global Using Directive specifically does not include other Global Using Directives. Thus, peer Global Using Directives or those from a different
 compilation unit do not affect each other, and the order in which they are written is insignificant.
+
+
+# Simple names
+
+The following changes are made to the *simple_name* evaluation rules (https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#simple-names) as follows.
+
+This is the current state of the relevant bullet point with proposed additions (which are **in bold**):
+*  Otherwise, for each namespace `N`, starting with the namespace in which the *simple_name* occurs, continuing with each enclosing namespace (if any), and ending with the global namespace, the following steps are evaluated until an entity is located:
+   *  If `K` is zero and `I` is the name of a namespace in `N`, then:
+      * If the location where the *simple_name* occurs is enclosed by a namespace declaration for `N` and the namespace declaration contains an *extern_alias_directive* or *using_alias_directive* that associates the name `I` with a namespace or type, **or any namespace declaration for `N` in the program contains a *global_using_alias_directive* that associates the name `I` with a namespace or type,** then the *simple_name* is ambiguous and a compile-time error occurs.
+      * Otherwise, the *simple_name* refers to the namespace named `I` in `N`.
+   *  Otherwise, if `N` contains an accessible type having name `I` and `K` type parameters, then:
+      * If `K` is zero and the location where the *simple_name* occurs is enclosed by a namespace declaration for `N` and the namespace declaration contains an *extern_alias_directive* or *using_alias_directive* that associates the name `I` with a namespace or type, **or any namespace declaration for `N` in the program contains a *global_using_alias_directive* that associates the name `I` with a namespace or type,** then the *simple_name* is ambiguous and a compile-time error occurs.
+      * Otherwise, the *namespace_or_type_name* refers to the type constructed with the given type arguments.
+   *  Otherwise, if the location where the *simple_name* occurs is enclosed by a namespace declaration for `N`:
+      * If `K` is zero and the namespace declaration contains an *extern_alias_directive* or *using_alias_directive* that associates the name `I` with an imported namespace or type, **or any namespace declaration for `N` in the program contains a *global_using_alias_directive* that associates the name `I` with an imported namespace or type,** then the *simple_name* refers to that namespace or type.
+      * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_static_directive*s of the namespace declaration contain exactly one accessible type or non-extension static member having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.
+      * Otherwise, if the namespaces and types imported by the *using_namespace_directive*s of the namespace declaration contain more than one accessible type or non-extension-method static member having name `I` and `K` type parameters, then the *simple_name* is ambiguous and an error occurs.
+      * **Otherwise, if the namespaces and type declarations imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program contain exactly one accessible type or non-extension static member having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.**
+      * **Otherwise, if the namespaces and types imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program contain more than one accessible type or non-extension-method static member having name `I` and `K` type parameters, then the *simple_name* is ambiguous and an error occurs.**
+
+
