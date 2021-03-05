@@ -21,15 +21,14 @@
 
 ## Mar 22, 2021
 
+- *Design review*
+- 
 ## Mar 15, 2021
 
 ## Mar 10, 2021
 
-- *Design review*
-
-## Mar 8, 2021
-
 - Parameterless struct constructors (Chuck): https://github.com/dotnet/csharplang/blob/master/proposals/parameterless-struct-constructors.md
+- Property-scoped fields (Cyrus)
 
 # C# Language Design Notes for 2021
 
