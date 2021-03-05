@@ -84,4 +84,12 @@ This is the relevant bullet point with proposed additions (which are **in bold**
       * **Otherwise, if the namespaces and type declarations imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program contain exactly one accessible type or non-extension static member having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.**
       * **Otherwise, if the namespaces and types imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program contain more than one accessible type or non-extension-method static member having name `I` and `K` type parameters, then the *simple_name* is ambiguous and an error occurs.**
 
+# Extension method invocations
+https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#extension-method-invocations
 
+Changes are made to the algorithm to find the best *type_name* `C` as follows.
+This is the relevant bullet point with proposed additions (which are **in bold**):
+*  Starting with the closest enclosing namespace declaration, continuing with each enclosing namespace declaration, and ending with the containing compilation unit, successive attempts are made to find a candidate set of extension methods:
+   * If the given namespace or compilation unit directly contains non-generic type declarations `Ci` with eligible extension methods `Mj`, then the set of those extension methods is the candidate set.
+   * If types `Ci` imported by *using_static_declarations* and directly declared in namespaces imported by *using_namespace_directive*s in the given namespace or compilation unit directly contain eligible extension methods `Mj`, then the set of those extension methods is the candidate set.
+   * **If containing compilation unit is reached and if types `Ci` imported by *global_using_static_declarations* and directly declared in namespaces imported by *global_using_namespace_directive*s in the program directly contain eligible extension methods `Mj`, then the set of those extension methods is the candidate set.**
