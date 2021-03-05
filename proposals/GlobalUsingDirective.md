@@ -93,3 +93,21 @@ This is the relevant bullet point with proposed additions (which are **in bold**
    * If the given namespace or compilation unit directly contains non-generic type declarations `Ci` with eligible extension methods `Mj`, then the set of those extension methods is the candidate set.
    * If types `Ci` imported by *using_static_declarations* and directly declared in namespaces imported by *using_namespace_directive*s in the given namespace or compilation unit directly contain eligible extension methods `Mj`, then the set of those extension methods is the candidate set.
    * **If containing compilation unit is reached and if types `Ci` imported by *global_using_static_declarations* and directly declared in namespaces imported by *global_using_namespace_directive*s in the program directly contain eligible extension methods `Mj`, then the set of those extension methods is the candidate set.**
+
+# Compilation units
+https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#compilation-units
+
+```antlr
+compilation_unit
+    : extern_alias_directive* global_using_directive* using_directive* global_attributes? namespace_member_declaration*
+    ;
+```
+
+The *global_using_directive*s of a compilation unit affect the *using_directive*s, *global_attributes* and *namespace_member_declaration*s of all compilation units in the program.
+
+# Extern aliases
+https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#extern-aliases
+
+The scope of an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body.
+
+
