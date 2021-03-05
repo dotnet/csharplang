@@ -29,16 +29,21 @@
 
 ## Mar 8, 2021
 
-- Parameterless struct constructors (Chuck): https://github.com/cston/csharplang/blob/struct-ctor/proposals/csharp-10.0/parameterless-struct-constructors.md
-
-## Mar 3, 2021
-
-- Lambda improvements (Chuck, Jared): https://github.com/cston/csharplang/blob/lambdas/proposals/csharp-10.0/lambda-improvements.md
-- Required properties (Fred): https://github.com/333fred/csharplang/blob/required-properties/proposals/required-members.md
+- Parameterless struct constructors (Chuck): https://github.com/dotnet/csharplang/blob/master/proposals/parameterless-struct-constructors.md
 
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Mar 3, 2021
+
+[C# Language Design Notes for March 3rd, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-03-03.md)
+
+1. Natural type for lambdas
+    1. Attributes
+    2. Return types
+    3. Natural delegate types
+2. Required members
 
 ## Mar 1, 2021
 
