@@ -102,7 +102,7 @@ The delegate type for the lambda or method group and parameter types `P1, ..., P
 
 `modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
 
-If synthesized delegate types are required, the compiler will attempt to reuse delegate types across multiple use sites. The compiler could generate generic delegate types parameterized by parameter types and return type similar to the generic types synthesized for anonymous types. But reuse might be limited to simply reusing delegate types when lambda or method group signatures match exactly.
+If two lambda expressions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
 
 Lambdas or method groups with natural types can be used as initializers in `var` declarations.
 
