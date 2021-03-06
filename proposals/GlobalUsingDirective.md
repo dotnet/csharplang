@@ -97,11 +97,15 @@ This is the relevant bullet point with proposed additions (which are **in bold**
 # Compilation units
 https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#compilation-units
 
+A *compilation_unit* defines the overall structure of a source file. A compilation unit consists of **zero or more *global_using_directive*s followed by** zero or more *using_directive*s followed by zero or more *global_attributes* followed by zero or more *namespace_member_declaration*s.
+
 ```antlr
 compilation_unit
     : extern_alias_directive* global_using_directive* using_directive* global_attributes? namespace_member_declaration*
     ;
 ```
+
+A C# program consists of one or more compilation units, each contained in a separate source file. When a C# program is compiled, all of the compilation units are processed together. Thus, compilation units can depend on each other, possibly in a circular fashion.
 
 The *global_using_directive*s of a compilation unit affect the *using_directive*s, *global_attributes* and *namespace_member_declaration*s of all compilation units in the program.
 
@@ -110,4 +114,27 @@ https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#extern-alias
 
 The scope of an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body.
 
+# Global Using alias directives
+
+A *global_using_alias_directive* introduces an identifier that serves as an alias for a namespace or type within the program.
+
+```antlr
+global_using_alias_directive
+    : 'global' 'using' identifier '=' namespace_or_type_name ';'
+    ;
+```
+
+Within member declarations in any compilation unit of a program that contains a *global_using_alias_directive*, the identifier introduced by the *global_using_alias_directive* can be used to reference the given namespace or type.
+
+The *identifier* of a *global_using_alias_directive* must be unique within the declaration space of any compilation unit of a program that contains the *global_using_alias_directive*.
+
+Just like regular members, names introduced by *global_using_alias_directive*s are hidden by similarly named members in nested scopes.
+
+The order in which *global_using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *global_using_alias_directive* is not affected by the *global_using_alias_directive* itself or by other *global_using_directive*s or *using_directive*s in the program. In other words, the *namespace_or_type_name* of a *global_using_alias_directive* is resolved as if the immediately containing compilation unit had no *using_directive*s and the entire containig program had no *global_using_directive*s. A *global_using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit.
+
+A *global_using_alias_directive* can create an alias for any namespace or type.
+
+Accessing a namespace or type through an alias yields exactly the same result as accessing that namespace or type through its declared name.
+
+Using aliases can name a closed constructed type, but cannot name an unbound generic type declaration without supplying type arguments.
 
