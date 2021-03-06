@@ -48,6 +48,9 @@ f = [MyAttribute] (int x) => x;    // [MyAttribute]lambda
 f = [MyAttribute] static x => x;   // [MyAttribute]lambda
 f = [return: MyAttribute] () => 1; // [return: MyAttribute]lambda
 ```
+
+_Should parentheses be required for the parameter list if attributes are added to the entire expression? (Should `[MyAttribute] x => x` be disallowed? If so, what about `[MyAttribute] static x => x`?)_
+
 Attributes may be added to lambda parameters that are declared with explicit types.
 ```csharp
 f = ([MyAttribute] x) => x;      // syntax error
