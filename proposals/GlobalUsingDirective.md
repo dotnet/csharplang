@@ -138,3 +138,25 @@ Accessing a namespace or type through an alias yields exactly the same result as
 
 Using aliases can name a closed constructed type, but cannot name an unbound generic type declaration without supplying type arguments.
 
+# Global Using namespace directives
+
+A *global_using_namespace_directive* imports the types contained in a namespace into the program, enabling the identifier of each type to be used without qualification.
+
+```antlr
+global_using_namespace_directive
+    : 'global' 'using' namespace_name ';'
+    ;
+```
+
+Within member declarations in a program that contains a *global_using_namespace_directive*, the types contained in the given namespace can be referenced directly.
+
+A *global_using_namespace_directive* imports the types contained in the given namespace, but specifically does not import nested namespaces.
+
+Unlike a *global_using_alias_directive*, a *global_using_namespace_directive* may import types whose identifiers are already defined within a compilation unit of the program. In effect, in a given compilation unit, names imported by any *global_using_namespace_directive* in the program are hidden by similarly named members in the compilation unit.
+
+When more than one namespace or type imported by *global_using_namespace_directive*s or *global_using_static_directive*s in the same program contain types by the same name, references to that name as a *type_name* are considered ambiguous.
+
+Furthermore, when more than one namespace or type imported by *global_using_namespace_directive*s or *global_using_static_directive*s in the same program contain types or members by the same name, references to that name as a *simple_name* are considered ambiguous.
+
+The *namespace_name* referenced by a *global_using_namespace_directive* is resolved in the same way as the *namespace_or_type_name* referenced by a *global_using_alias_directive*. Thus, *global_using_namespace_directive*s in the same program do not affect each other and can be written in any order.
+
