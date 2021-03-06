@@ -34,7 +34,7 @@ compilation unit do not affect each other, and the order in which they are writt
 # Scopes 
 https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#scopes
 
-This are the relevant bullet points with proposed additions (which are **in bold**):
+These are the relevant bullet points with proposed additions (which are **in bold**):
 *  The scope of name defined by an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body. An *extern_alias_directive* does not contribute any new members to the underlying declaration space. In other words, an *extern_alias_directive* is not transitive, but, rather, affects only the compilation unit or namespace body in which it occurs.
 *  **The scope of a name defined or imported by a *global_using_directive* extends over the *using_directive*s, *global_attributes* and *namespace_member_declaration*s of all the *compilation_unit*s in the program.**
 
@@ -179,3 +179,17 @@ A *global_using_static_directive* only imports members and types declared direct
 
 Ambiguities between multiple *global_using_namespace_directive*s and *global_using_static_directives* are discussed in the section for *global_using_namespace_directive*s (above).
 
+# Namespace alias qualifiers
+https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#namespace-alias-qualifiers
+
+Changes are made to the algorithm determining the meaning of a *qualified_alias_member* as follows.
+
+This is the relevant bullet point with proposed additions (which are **in bold**):
+*  Otherwise, starting with the namespace declaration ([Namespace declarations](namespaces.md#namespace-declarations)) immediately containing the *qualified_alias_member* (if any), continuing with each enclosing namespace declaration (if any), and ending with the compilation unit containing the *qualified_alias_member*, the following steps are evaluated until an entity is located:
+
+   * If the namespace declaration or compilation unit contains a *using_alias_directive* that associates `N` with a type, **or, when a compilation unit is reached, the program contains a *global_using_alias_directive* that associates `N` with a type,** then the *qualified_alias_member* is undefined and a compile-time error occurs.
+   * Otherwise, if the namespace declaration or compilation unit contains an *extern_alias_directive* or *using_alias_directive* that associates `N` with a namespace, ***or, when a compilation unit is reached, the program contains a *global_using_alias_directive* that associates `N` with a namespace,** then:
+     * If the namespace associated with `N` contains a namespace named `I` and `K` is zero, then the *qualified_alias_member* refers to that namespace.
+     * Otherwise, if the namespace associated with `N` contains a non-generic type named `I` and `K` is zero, then the *qualified_alias_member* refers to that type.
+     * Otherwise, if the namespace associated with `N` contains a type named `I` that has `K` type parameters, then the *qualified_alias_member* refers to that type constructed with the given type arguments.
+     * Otherwise, the *qualified_alias_member* is undefined and a compile-time error occurs.
