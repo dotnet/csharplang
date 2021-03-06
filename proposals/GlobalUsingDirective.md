@@ -160,3 +160,22 @@ Furthermore, when more than one namespace or type imported by *global_using_name
 
 The *namespace_name* referenced by a *global_using_namespace_directive* is resolved in the same way as the *namespace_or_type_name* referenced by a *global_using_alias_directive*. Thus, *global_using_namespace_directive*s in the same program do not affect each other and can be written in any order.
 
+
+# Global Using static directives
+
+A *global_using_static_directive* imports the nested types and static members contained directly in a type declaration into the containing program, enabling the identifier of each member and type to be used without qualification.
+
+```antlr
+global_using_static_directive
+    : 'global' 'using' 'static' type_name ';'
+    ;
+```
+
+Within member declarations in a program that contains a *global_using_static_directive*, the accessible nested types and static members (except extension methods) contained directly in the declaration of the given type can be referenced directly.
+
+A *global_using_static_directive* specifically does not import extension methods directly as static methods, but makes them available for extension method invocation.
+
+A *global_using_static_directive* only imports members and types declared directly in the given type, not members and types declared in base classes.
+
+Ambiguities between multiple *global_using_namespace_directive*s and *global_using_static_directives* are discussed in the section for *global_using_namespace_directive*s (above).
+
