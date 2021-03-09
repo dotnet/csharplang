@@ -1,4 +1,3 @@
-
 # List patterns
 
 ## Summary
@@ -54,8 +53,6 @@ Notes:
 - All other combinations are valid, for instance `T (p0, p1) [p2] { name: p3 } v` or `T (p0, p1) [p2] { p3 } v` where each clause can be omitted.
 
 > **Open question**: Should we support all these combinations?
-
-
 
 #### Pattern compatibility
 
@@ -121,7 +118,6 @@ Beyond the pattern-based mechanism outlined above, there are an additional two s
 - **Foreach-able types**: This includes pattern-based and extension `GetEnumerator`.
 
 A slice subpattern (i.e. the pattern following `..` in a *slice_pattern*) is disallowed for either of the above.
-
 
 ## Unresolved questions
 
