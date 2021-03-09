@@ -211,7 +211,7 @@ Instance field declarations for a record struct are permitted to include variabl
 If there is no primary constructor, the instance initializers execute as part of the parameterless constructor.
 Otherwise, at runtime the primary constructor executes the instance initializers appearing in the record-struct-body.
 
-If a record struct has a primary constructor, any user-defined constructor, except "copy constructor" must have an
+If a record struct has a primary constructor, any user-defined constructor must have an
 explicit `this` constructor initializer.
 
 Parameters of the primary constructor as well as members of the record struct are in scope within initializers of instance fields or properties. 
