@@ -37,6 +37,7 @@ slice_pattern
 primary_pattern
   : recursive_pattern
   | slice_pattern
+  | // all of the pattern forms previously defined
   ;
 ```
 There are two new additions to the *recursive_pattern* syntax as well as a *slice_pattern*:
