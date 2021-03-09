@@ -1,10 +1,12 @@
 ---
-name: Language Proposal
-about: Fully specified language proposal
+name: Create a language specification
+about: For proposals that already have support in community discussions or from a team member.
 title: "[Proposal]: [FEATURE_NAME]"
 ---
 <!--
-New language feature proposals should fully fill out this template. This should include a complete detailed design, which describes the syntax of the feature, what that syntax means, and how it affects current parts of the spec. Please make sure to point out specific spec sections that need to be updated for this feature. If you do not have the knowledge or experience to fill this out completely, that's perfectly alright: please open this proposal as a Discussion instead (https://github.com/dotnet/csharplang/discussions/new) and the community can generally discuss the proposal in less formal terms.
+Hi! Without existing community discussions or invitation from a team member, we will likely convert this issue into a discussion. If this is your first time opening an issue, please open a discussion marked [draft issue] at https://github.com/dotnet/csharplang/discussions/new and we'll try to give you feedback on how to get to an issue-ready proposal.
+
+New language feature proposals should fully fill out this template. This should include a complete detailed design, which describes the syntax of the feature, what that syntax means, and how it affects current parts of the spec. Please make sure to point out specific spec sections that need to be updated for this feature.
 -->
 # FEATURE_NAME
 
