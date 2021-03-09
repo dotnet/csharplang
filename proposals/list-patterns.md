@@ -1,4 +1,3 @@
-
 # List patterns
 
 ## Summary
