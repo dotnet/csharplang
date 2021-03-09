@@ -81,7 +81,7 @@ class MyClass
 }
 ```
 
-### Determining the builder type for an async methd
+### Determining the builder type for an async method
 
 When compiling an async method, the builder type is determined by:
 1. looking in the containing scopes for an override attribute that specifies a builder type compatible with the method's return type.
