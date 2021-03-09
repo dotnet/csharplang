@@ -3,6 +3,7 @@
 ## Schedule ASAP
 
 - Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
+- Review scoping and name lookup rules around Global Using directives. (Aleksey) Link TBD 
 
 ## Schedule when convenient
 
