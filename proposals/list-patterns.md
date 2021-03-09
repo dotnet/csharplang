@@ -39,7 +39,7 @@ primary_pattern
   | slice_pattern
   ;
 ```
-There are two new additions to the *recursive_pattern* syntax as well as a *slice pattern*:
+There are two new additions to the *recursive_pattern* syntax as well as a *slice_pattern*:
 
 - The *list_pattern_clause* is used to match elements and the *length_pattern_clause* is used to match the length.
 - A *slice_pattern* is only permitted once and only directly in a *list_pattern_clause* and discards _**zero or more**_ elements.
