@@ -70,8 +70,8 @@ static async ValueTask<int> ExampleAsync() { ... }
 A developer that wants to using a specific custom builder for all of their methods can do so by putting the relevant attribute on each method.  
 Example of usage on module:  
 ```C#
-[module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder), typeof(ValueTask)]
-[module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder<>), typeof(ValueTask<>)]
+[module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder))]
+[module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder<>))]
 
 class MyClass
 {
@@ -87,7 +87,7 @@ When compiling an async method, the builder type is determined by:
 1. looking in the containing scopes for an override attribute that specifies a builder type compatible with the method's return type.
 2. otherwise, falling back to the builder type determined by previous approach. (see [spec for task-like types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/task-types.md)) 
 
-The containing scope are considered starting from the method, then its containing types and finally the module. Each scope is considered
+The containing scopes are considered starting from the method, then its containing types and finally the module. Each scope is considered
 in turn.  
 If a scope has one or more override attributes, the following process is used to determine if it is compatible with the current async method:
 1. take the override type specified by the attribute and construct it if necessary.  
@@ -100,7 +100,8 @@ If a scope has one or more override attributes, the following process is used to
 4. consider the type of that `Task` property (a task-like type):  
   If the task-like type matches the return type of the async method, then the override is compatible. Otherwise, it is not compatible.
 
-If no compatible override is found on a given scope, then look at the next scope.  
+If the attribute was specified on a method, but it turned out to be incompatible, an error is produced.
+If no compatible override is found on a given scope then look at the next scope.  
 If one override is found compatible, we have successfully found the builder type override to use.  
 If more than one override is found to be compatible on a given scope, an error is produced.
 
