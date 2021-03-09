@@ -1,3 +1,4 @@
+
 # List patterns
 
 ## Summary
@@ -9,8 +10,20 @@ Lets you to match an array or a list with a sequence of patterns e.g. `array is 
 The pattern syntax is modified as follow:
 
 ```antlr
-recursive_pattern
-  : type? positional_pattern_clause? length_pattern_clause? property_or_list_pattern_clause? simple_designation?
+positional_pattern
+  : type? positional_pattern_clause length_pattern_clause? property_or_list_pattern_clause? simple_designation?
+  ;
+
+length_pattern
+  : type? length_pattern_clause property_or_list_pattern_clause? simple_designation?
+  ;
+
+list_pattern
+  : type? list_pattern_clause simple_designation?
+  ;
+
+property_pattern
+  : type? property_pattern_clause simple_designation?
   ;
 
 length_pattern_clause
@@ -35,20 +48,21 @@ slice_pattern
   ;
 
 primary_pattern
-  : recursive_pattern
+  : list_pattern
+  | length_pattern
   | slice_pattern
   | // all of the pattern forms previously defined
   ;
 ```
-There are two new additions to the *recursive_pattern* syntax as well as a *slice_pattern*:
+There are three new patterns:
 
-- The *list_pattern_clause* is used to match elements and the *length_pattern_clause* is used to match the length.
+- The *list_pattern* is used to match elements and the *length_pattern* is used to match the length.
 - A *slice_pattern* is only permitted once and only directly in a *list_pattern_clause* and discards _**zero or more**_ elements.
 
 Notes:
 
-- Due to the ambiguity with *property_pattern_clause*, the *list_pattern_clause* cannot be empty and a *length_pattern_clause* should be used instead to match a list with the length of zero, e.g. `[0]`. 
-- The *length_pattern_clause* must be in agreement with the inferred length from the pattern (if any), e.g. `[0] {1}` is an error.
+- Due to the ambiguity with *property_pattern*, a *list_pattern* cannot be empty and a *length_pattern* should be used instead to match a list with the length of zero, e.g. `[0]`. 
+- The *length_pattern_clause* must be in agreement with the inferred length from the *list_pattern_clause* (if any), e.g. `[0] {1}` is an error.
 	- However, `[1] {}` is **not** an error due to the length mismatch, rather, `{}` would be always parsed as an empty *property_pattern_clause*. We may want to add a warning for it so it would not be confused that way.
 - If the *type* is an *array_type*, the *length_pattern_clause* is disambiguated so that `int[] [0]` would match an empty integer array.
 - All other combinations are valid, for instance `T (p0, p1) [p2] { name: p3 } v` or `T (p0, p1) [p2] { p3 } v` where each clause can be omitted.
@@ -57,18 +71,18 @@ Notes:
 
 #### Pattern compatibility
 
-A *length_pattern_clause* is compatible with any type that is *countable*, i.e. has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.
+A *length_pattern* is compatible with any type that is *countable*, i.e. has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.
 
-A *list_pattern_clause* is compatible with any type that conforms to the following rules:
+A *list_pattern* is compatible with any type that conforms to the following rules:
 
-1. Is compatible with the *length_pattern_clause*
+1. Is compatible with the *length_pattern*
 2. Has an accessible indexer with a single `int` parameter
 
  > **Open question**: Should we support `this[Index]` indexers? If so, which one is preferred if `this[int]` is also present?
 
 A *slice_pattern* is compatible with any type that conforms to the following rules:
 
-1. Is compatible with the *length_pattern_clause*
+1. Is compatible with the *length_pattern*
 2. Has an accessible `Slice` method that takes two `int` parameters (required only if a subpattern is specified)
 
  > **Open question**: Should we support `this[Range]` indexers? If so, which one is preferred if `Slice(int, int)` is also present?
@@ -77,7 +91,7 @@ This set of rules is already specified as the [***range indexer pattern***](http
 
 #### Subsumption checking
 
-Subsumption checking works just like recursive patterns with `ITuple` - corresponding subpatterns are matched by position plus an additional node for testing length.
+Subsumption checking works just like positional patterns with `ITuple` - corresponding subpatterns are matched by position plus an additional node for testing length.
 
 #### Lowering
 
