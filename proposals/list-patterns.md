@@ -66,11 +66,11 @@ This set of rules is already specified as the ***range indexer pattern*** and re
 
 #### Subsumption checking
 
-  Subsumption checking works just like recursive patterns with `ITuple` - corresponding subpatterns are matched by position plus an additional node for testing length.
+Subsumption checking works just like recursive patterns with `ITuple` - corresponding subpatterns are matched by position plus an additional node for testing length.
 
 #### Lowering
 
- A pattern of the form `expr is {1, 2, 3}` is equivalent to the following code:
+A pattern of the form `expr is {1, 2, 3}` is equivalent to the following code:
 ```cs
 expr.Length is 3
 && expr[0] is 1
