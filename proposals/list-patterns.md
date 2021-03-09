@@ -73,7 +73,7 @@ A *slice_pattern* is compatible with any type that conforms to the following rul
 1. Is compatible with the *length_pattern_clause*
 2. Has an accessible `Slice` method that takes two `int` parameters (required only if a subpattern is specified)
 
- > **Open question**: Should we support `this[Range]` indexers? If so, which one is preferred if `this[int]` is also present?
+ > **Open question**: Should we support `this[Range]` indexers? If so, which one is preferred if `Slice(int, int)` is also present?
 
 This set of rules is already specified as the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support) and required for range indexers.
 
