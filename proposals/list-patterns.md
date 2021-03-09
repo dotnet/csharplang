@@ -11,53 +11,53 @@ The pattern syntax is modified as follow:
 ```antlr
 recursive_pattern
   : type? positional_pattern_clause? length_pattern_clause? property_or_list_pattern_clause? simple_designation?
+  ;
 
 length_pattern_clause
   : '[' pattern ']'
+  ;
 
 property_or_list_pattern_clause
   : list_pattern_clause
   | property_pattern_clause
+  ;
 
 property_pattern_clause
   : '{' (subpattern (',' subpattern)* ','?)? '}'
-  
+  ;
+
 list_pattern_clause
   : '{' pattern (',' pattern)* ','? '}'
+  ;
 
 slice_pattern
   : '..' negated_pattern?
-	
+  ;
+
 primary_pattern
   : recursive_pattern
   | slice_pattern
-
+  ;
 ```
-There are two new additions to the *recursive pattern* syntax as well as a *slice pattern*: 
+There are two new additions to the *recursive_pattern* syntax as well as a *slice pattern*:
 
-- The *list pattern clause* is used to match elements and the *length pattern clause* is used to match the length.
-- A _slice pattern_ is only permitted once and only directly in a *list pattern* and discards _**zero or more**_ elements.
+- The *list_pattern_clause* is used to match elements and the *length_pattern_clause* is used to match the length.
+- A *slice_pattern* is only permitted once and only directly in a *list_pattern_clause* and discards _**zero or more**_ elements.
 
-
-Due to the ambiguity with *property pattern clause*, the *list pattern clause* cannot be empty and a *length pattern* should be used. 
-
-
-
-
-
+Due to the ambiguity with *property_pattern_clause*, the *list_pattern_clause* cannot be empty and a *length_pattern_clause* should be used instead.
 
 #### Pattern compatibility
 
-A *length pattern* is compatible with any type that conforms to the following rules:
+A *length_pattern_clause* is compatible with any type that conforms to the following rules:
 
 1. Has an accessible property getter that returns an `int` and has the name `Length` or `Count`
 
-A *list pattern* is compatible with any type that conforms to the following rules:
+A *list_pattern_clause* is compatible with any type that conforms to the following rules:
 
 1. Is compatible with the length pattern
 2. Has an accessible indexer with a single `int` parameter
 
-A *slice pattern* is compatible with any type that conforms to the following rules:
+A *slice_pattern* is compatible with any type that conforms to the following rules:
 
 1. Is compatible with the list pattern
 2. Has an accessible `Slice` method that takes two `int` parameters (required only if a subpattern is specified)
@@ -77,7 +77,7 @@ expr.Length is 3
 && expr[1] is 2
 && expr[2] is 3
 ```
-A *slice pattern* acts like a proper discard i.e. no tests will be emitted for such pattern, rather it only affects other nodes, namely the length and indexer. For instance, a pattern of the form `expr is {1, .. var s, 3}`  is equivalent to the following code: 
+A *slice_pattern* acts like a proper discard i.e. no tests will be emitted for such pattern, rather it only affects other nodes, namely the length and indexer. For instance, a pattern of the form `expr is {1, .. var s, 3}`  is equivalent to the following code:
 ```cs
 expr.Length    is >= 2
 && expr[0]     is 1
@@ -102,10 +102,10 @@ Note: The pattern `{..}` lowers to `expr.Length >= 0` so it would not be conside
 
 Beyond the pattern-based mechanism outlined above, there are an additional two set of types that can be covered as a special case.
 
-- **Multi-dimensional arrays**: All nested list patterns must agree to a length range. 
+- **Multi-dimensional arrays**: All nested list patterns must agree to a length range.
 - **Foreach-able types**: This includes pattern-based and extension `GetEnumerator`.
 
-A slice subpattern is disallowed for either of the above.
+A slice subpattern (i.e. the pattern followed by `..` in a *slice_pattern*) is disallowed for either of the above.
 
 ## Unresolved questions
 
