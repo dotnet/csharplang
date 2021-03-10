@@ -1,8 +1,29 @@
 # Parameterless struct constructors
 
 ## Summary
-
 Support parameterless constructors and instance field initializers for struct types.
+
+## Motivation
+Explicit parameterless constructors would give more control over "default" instances of the struct type.
+Instance field initializers would allow simplified initialization across multiple constructors.
+Together these would close an obvious gap between `struct` and `class` declarations.
+
+Support for field initializers would also allow initialization of fields in `record struct` declarations without explicitly implementing the primary constructor.
+```csharp
+record struct Person(string Name)
+{
+    public object Id { get; init; } = GetNextId();
+}
+```
+
+If struct field initializers are supported for constructors with parameters, it seems natural to extend that to parameterless constructors as well.
+```csharp
+record struct Person()
+{
+    public string Name { get; init; }
+    public object Id { get; init; } = GetNextId();
+}
+```
 
 ## Proposal
 
