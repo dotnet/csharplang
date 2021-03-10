@@ -28,7 +28,7 @@
 
 ## Mar 10, 2021
 
-- Parameterless struct constructors (Chuck): https://github.com/dotnet/csharplang/blob/master/proposals/parameterless-struct-constructors.md
+- Parameterless struct constructors (Chuck): https://github.com/cston/csharplang/blob/struct-ctor-updates/proposals/parameterless-struct-constructors.md
 - Property-scoped fields (Cyrus): https://gist.github.com/CyrusNajmabadi/b370fdc6c7f52922e3df845989c7b522
 
 # C# Language Design Notes for 2021
