@@ -4,7 +4,7 @@
 Support parameterless constructors and instance field initializers for struct types.
 
 ## Motivation
-Explicit parameterless constructors would give more control over "default" instances of the struct type.
+Explicit parameterless constructors would give more control over minimally constructed instances of the struct type.
 Instance field initializers would allow simplified initialization across multiple constructors.
 Together these would close an obvious gap between `struct` and `class` declarations.
 
@@ -53,13 +53,13 @@ public struct InternalConstructor { internal InternalConstructor() { } }
 public struct PrivateConstructor { private PrivateConstructor() { } }
 ```
 
-The same set of modifiers can be used for parameterless constructors as other constructors: `static`, `extern`, and `unsafe`.
+The same set of modifiers can be used for parameterless constructors as other instance constructors: `extern`, and `unsafe`.
 
 Constructors cannot be `partial`.
 
 ### Executing field initializers
 Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-variable-initializers):
-> When an instance constructor has no constructor initializer, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class constructor. The variable initializers are executed in the textual order in which they appear in the ... declaration.
+> When an instance constructor has no constructor initializer, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor ... . The variable initializers are executed in the textual order in which they appear in the ... declaration.
 
 ### Definite assignment
 Instance fields must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)).
@@ -154,9 +154,9 @@ The parameterless constructor is invoked explicitly.
 _This is a breaking change if the struct type with parameterless constructor is from an existing assembly._
 _Should the compiler report a warning rather than an error for `new()` if the constructor is inaccessible, and emit `initobj`, for compatability?_
 ```csharp
-_ = new NoConstructor();       // ok: initobj NoConstructor
-_ = new InternalConstructor(); // ok: call InternalConstructor::.ctor()
-_ = new PrivateConstructor();  // error: 'PrivateConstructor..ctor()' is inaccessible
+_ = new NoConstructor();      // ok: initobj NoConstructor
+_ = new PublicConstructor();  // ok: call PublicConstructor::.ctor()
+_ = new PrivateConstructor(); // error: 'PrivateConstructor..ctor()' is inaccessible
 ```
 
 ### Uninitialized values
@@ -197,7 +197,6 @@ static T CreateNew<T>() where T : new() => new T();
 _ = CreateNew<NoConstructor>();       // ok
 _ = CreateNew<PublicConstructor>();   // ok
 _ = CreateNew<InternalConstructor>(); // error: 'InternalConstructor..ctor()' is not public
-_ = CreateNew<PrivateConstructor>();  // error: 'PrivateConstructor..ctor()' is not public
 ```
 _Should the compiler report a warning rather than an error when substituting a struct with a non-public constructor for a type parameter with a `new()` constraint, for compatability and to avoid assuming the type is actually instantiated?_
 
@@ -230,7 +229,7 @@ _ = new S2(); // ok: ignores constructor
 Explicit and synthesized parameterless struct instance constructors will be emitted to metadata.
 
 Parameterless struct instance constructors will be imported from metadata regardless of accessibility.
-_This is a breaking change for consumers of existing assemblies with structs with private parameterless constructors._
+_This might be a breaking change for consumers of existing assemblies with structs with private parameterless constructors if additional errors or warnings are reported._
 
 Parameterless struct instance constructors will be emitted to ref assemblies regardless of accessibility to allow consumers to differentiate between no parameterless constructor an inaccessible constructor.
 
