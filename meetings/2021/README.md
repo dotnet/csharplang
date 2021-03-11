@@ -23,7 +23,7 @@
 ## Mar 22, 2021
 
 - *Design review*
-- 
+
 ## Mar 15, 2021
 
 ## Mar 10, 2021
