@@ -86,17 +86,17 @@ Whenever an expression fulfills the requirements listed above, the expression is
 
 The compile-time evaluation of constant expressions uses the same rules as run-time evaluation of non-constant expressions, except that where run-time evaluation would have thrown an exception, compile-time evaluation causes a compile-time error to occur.
 
-Unless a constant expression is explicitly placed in an `unchecked` context, overflows that occur in integral-type arithmetic operations and conversions during the compile-time evaluation of the expression always cause compile-time errors ([Constant expressions](expressions.md#constant-expressions)).
+Unless a constant expression is explicitly placed in an `unchecked` context, overflows that occur in integral-type arithmetic operations and conversions during the compile-time evaluation of the expression always cause compile-time errors ([Constant expressions](../spec/expressions.md#constant-expressions)).
 
 Constant expressions occur in the contexts listed below. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
 
-*  Constant declarations ([Constants](classes.md#constants)).
-*  Enumeration member declarations ([Enum members](enums.md#enum-members)).
-*  Default arguments of formal parameter lists ([Method parameters](classes.md#method-parameters))
-*  `case` labels of a `switch` statement ([The switch statement](statements.md#the-switch-statement)).
-*  `goto case` statements ([The goto statement](statements.md#the-goto-statement)).
-*  Dimension lengths in an array creation expression ([Array creation expressions](expressions.md#array-creation-expressions)) that includes an initializer.
-*  Attributes ([Attributes](attributes.md)).
+*  Constant declarations ([Constants](../spec/classes.md#constants)).
+*  Enumeration member declarations ([Enum members](../spec/enums.md#enum-members)).
+*  Default arguments of formal parameter lists ([Method parameters](../spec/classes.md#method-parameters))
+*  `case` labels of a `switch` statement ([The switch statement](../spec/statements.md#the-switch-statement)).
+*  `goto case` statements ([The goto statement](../spec/statements.md#the-goto-statement)).
+*  Dimension lengths in an array creation expression ([Array creation expressions](../spec/expressions.md#array-creation-expressions)) that includes an initializer.
+*  Attributes ([Attributes](../spec/attributes.md)).
 
 An implicit constant expression conversion ([Implicit constant expression conversions](conversions.md#implicit-constant-expression-conversions)) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
 

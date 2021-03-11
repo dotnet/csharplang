@@ -36,7 +36,7 @@ More precisely, we change the following sections of the specification (insertion
 > 
 > An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 > 
-> *  If `E` is an anonymous function with inferred return type  `U` ([Inferred return type](expressions.md#inferred-return-type)) and `T` is a delegate type or expression tree type with return type `Tb`, then a *lower-bound inference* ([Lower-bound inferences](expressions.md#lower-bound-inferences)) is made *from* `U` *to* `Tb`.
+> *  If `E` is an anonymous function with inferred return type  `U` ([Inferred return type](../spec/expressions.md#inferred-return-type)) and `T` is a delegate type or expression tree type with return type `Tb`, then a *lower-bound inference* ([Lower-bound inferences](../spec/expressions.md#lower-bound-inferences)) is made *from* `U` *to* `Tb`.
 > *  Otherwise, if `E` is a method group and `T` is a delegate type or expression tree type with parameter types `T1...Tk` and return type `Tb`, and overload resolution of `E` with the types `T1...Tk` yields a single method with return type `U`, then a *lower-bound inference* is made *from* `U` *to* `Tb`.
 > *  **Otherwise, if `E` is an expression with nullable value type `U?`, then a *lower-bound inference* is made *from* `U` *to* `T` and a *null bound* is added to `T`. **
 > *  Otherwise, if `E` is an expression with type `U`, then a *lower-bound inference* is made *from* `U` *to* `T`.
