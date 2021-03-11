@@ -26,14 +26,18 @@
 
 ## Mar 15, 2021
 
-## Mar 10, 2021
-
-- Parameterless struct constructors (Chuck): https://github.com/cston/csharplang/blob/struct-ctor-updates/proposals/parameterless-struct-constructors.md
-- Property-scoped fields (Cyrus): https://gist.github.com/CyrusNajmabadi/b370fdc6c7f52922e3df845989c7b522
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Mar 10, 2021
+
+[C# Language Design Notes for March 10th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-03-10.md)
+
+1. Property improvements
+    1. `field` keyword
+    2. Property scoped fields
+2. Parameterless struct constructors
 
 ## Mar 3, 2021
 
