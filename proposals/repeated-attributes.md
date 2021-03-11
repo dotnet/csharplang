@@ -57,7 +57,7 @@ public partial bool TryGetValue([NotNullWhen(false)] out object? value) { ... } 
 2. Should attributes which *do* allow multiple usages on a symbol be permitted to "opt in" to de-duplication of equivalent usages of an attribute?
 
 ### Design meetings
-#### [6th July 2020](/meetings/2020/LDM-2020-07-06.md#repeated-attributes-on-partial-members)
+#### [6th July 2020](../meetings/2020/LDM-2020-07-06.md#repeated-attributes-on-partial-members)
 The proposal is accepted.
   - Repetition of non-AllowMultiple attributes will be permitted across partial type declarations (open question 1).
   - Repeated application of AllowMultiple attributes will not change in behavior, and an "opt in" mechanism for de-duplication may be considered in a future proposal (open question 2).
