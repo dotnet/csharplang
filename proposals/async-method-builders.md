@@ -67,7 +67,9 @@ Example of usage on a method:
 static async ValueTask<int> ExampleAsync() { ... }
 ```
 
-A developer that wants to using a specific custom builder for all of their methods can do so by putting the relevant attribute on each method.  
+It is an error to apply the attribute multiple times on a given method or local function.
+
+A developer who wants to use a specific custom builder for all of their methods can do so by putting the relevant attribute on each method.  
 Example of usage on module:  
 ```C#
 [module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder), typeof(ValueTask)]
@@ -83,12 +85,13 @@ class MyClass
 
 ### Determining the builder type for an async methd
 
-When compiling an async method, the builder type is determined by:
+When compiling an async method (or local function or lambda), the builder type is determined by:
 1. looking in the containing scopes for an override attribute that specifies a builder type compatible with the method's return type.
 2. otherwise, falling back to the builder type determined by previous approach. (see [spec for task-like types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/task-types.md)) 
 
-The containing scope are considered starting from the method, then its containing types and finally the module. Each scope is considered
-in turn.  
+Any member or type that may have the override attribute is considered a scope. This includes local functions, methods, containing types and finally the module.  
+Each scope is considered in turn, walking outwards.
+
 If a scope has one or more override attributes, the following process is used to determine if it is compatible with the current async method:
 1. take the override type specified by the attribute and construct it if necessary.  
   If the override type is an open generic type, take the single type argument of the async method's return type and substitute it into the override type. If
@@ -100,6 +103,7 @@ If a scope has one or more override attributes, the following process is used to
 4. consider the type of that `Task` property (a task-like type):  
   If the task-like type matches the return type of the async method, then the override is compatible. Otherwise, it is not compatible.
 
+If the current async method (or local function) has an override attribute but it is found incompatible, an error is produced and the search is interrupted.  
 If no compatible override is found on a given scope, then look at the next scope.  
 If one override is found compatible, we have successfully found the builder type override to use.  
 If more than one override is found to be compatible on a given scope, an error is produced.
@@ -174,12 +178,12 @@ Note that when the synthesized entry-point for top-level statements is async, it
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-1. Should the compiler produce a diagnostic if the method-level attribute was found not compatible?
-2. Should the compiler produce a diagnostic if multiple override attributes are specified on a method?
+1. Confirm that the compiler should produce a diagnostic if the method-level attribute was found not compatible? (recommend yes)
+2. Confirm that the compiler should produce a diagnostic if multiple override attributes are specified on a method? (recommend yes)
 3. **Attribute.** Should we reuse `[AsyncMethodBuilder(typeof(...))]` or introduce yet another attribute? (answer: we need a new attribute)
 4. **Replace or also create.** All of the examples in this proposal are about replacing a buildable task-like's builder.  Should the feature be scoped to just that? Or should you be able to use this attribute on a method with a return type that doesn't already have a builder (e.g. some common interface)?  That could impact overload resolution.
 5. **Virtuals / Interfaces.** What is the behavior if the attribute is specified on an interface method?  I think it should either be a nop or a compiler warning/error, but it shouldn't impact implementations of the interface.  A similar question exists for base methods that are overridden, and there again I don't think the attribute on the base method should impact how an override implementation behaves. Note the current attribute has Inherited = false on its AttributeUsage.
 6. **Precedence.** If we wanted to do the module/type-level annotation, we would need to decide on which attribution wins in the case where multiple ones applied (e.g. one on the method, one on the containing module).  We would also need to determine if this would necessitate using a different attribute (see (1) above), e.g. what would the behavior be if a task-like type was in the same scope?  Or if a buildable task-like itself had async methods on it, would they be influenced by the attributed applied to the task-like type to specify its default builder?
 7. **Private Builders**. Should the compiler support non-public async method builders? This is not spec'd today, but experimentally we only support public ones.  That makes some sense when the attribute is applied to a type to control what builder is used with that type, since anyone writing an async method with that type as the return type would need access to the builder.  However, with this new feature, when that attribute is applied to a method, it only impacts the implementation of that method, and thus could reasonably reference a non-public builder.  Likely we will want to support library authors who have non-public ones they want to use.
 8. **Passthrough state to enable more efficient pooling**.  Consider a type like SslStream or WebSocket.  These expose read/write async operations, and allow for reading and writing to happen concurrently but at most 1 read operation at a time and at most 1 write operation at a time.  That makes these ideal for pooling, as each SslStream or WebSocket instance would need at most one pooled object for reads and one pooled object for writes.  Further, a centralized pool is overkill: rather than paying the costs of having a central pool that needs to be managed and access synchronized, every SslStream/WebSocket could just maintain a field to store the singleton for the reader and a singleton for the writer, eliminating all contention for pooling and eliminating all management associated with pool limits.  The problem is, how to connect an arbitrary field on the instance with the pooling mechanism employed by the builder.  We could at least make it possible if we passed through all arguments to the async method into a corresponding signature on the builder's Create method (or maybe a separate Bind method, or some such thing), but then the builder would need to be specialized for that specific type, knowing about its fields.  The Create method could potentially take a rent delegate and a return delegate, and the async method could be specially crafted to accept such arguments (along with an object state to be passed in).  It would be great to come up with a good solution here, as it would make the mechanism significantly more powerful and valuable.
-
+9. Should we allow **assembly** target for the override attribute? (recommend no)
