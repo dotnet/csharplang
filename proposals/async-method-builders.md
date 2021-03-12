@@ -75,11 +75,13 @@ Example of usage on module:
 [module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder))]
 [module: AsyncMethodBuilderOverride(typeof(PoolingAsyncValueTaskMethodBuilder<>))]
 
+[AsyncMethodBuilderOverride(typeof(PoolingAsyncTaskMethodBuilder<>))]
 class MyClass
 {
     public async ValueTask Method1Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder
     public async ValueTask<int> Method2Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder<int>
     public async ValueTask<string> Method3Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder<string>
+    public async Task<string> Method4Async() { ... } // would use PoolingAsyncTaskMethodBuilder<string>
 }
 ```
 
