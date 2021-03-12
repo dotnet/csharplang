@@ -82,6 +82,7 @@ class MyClass
     public async ValueTask<int> Method2Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder<int>
     public async ValueTask<string> Method3Async() { ... } // would use PoolingAsyncValueTaskMethodBuilder<string>
     public async Task<string> Method4Async() { ... } // would use PoolingAsyncTaskMethodBuilder<string>
+    public async Task Method5Async() { ... } // would use AsyncTaskMethodBuilder (no override)
 }
 ```
 
