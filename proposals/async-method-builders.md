@@ -46,7 +46,7 @@ namespace System.Runtime.CompilerServices
     /// Indicates the type of the async method builder that should be used by a language compiler to
     /// build the attributed method.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Module, Inherited = false, AllowMultiple = true)]
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Interface | System.AttributeTargets.Method | System.AttributeTargets.Constructor | System.AttributeTargets.Event | System.AttributeTargets.Property | System.AttributeTargets.Module, Inherited = false, AllowMultiple = true)]
     public sealed class AsyncMethodBuilderOverrideAttribute : Attribute
     {
         /// <summary>Initializes the <see cref="AsyncMethodBuilderOverrideAttribute"/>.</summary>
@@ -59,7 +59,7 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-The attribute can be applied on methods, types and modules.
+The attribute can be applied on methods (or local function), constructors, events, properties, types and modules.
 
 Example of usage on a method:  
 ```C#
@@ -67,7 +67,7 @@ Example of usage on a method:
 static async ValueTask<int> ExampleAsync() { ... }
 ```
 
-It is an error to apply the attribute multiple times on a given method or local function.
+It is an error to apply the attribute multiple times on a given method (or local function).
 
 A developer who wants to use a specific custom builder for all of their methods can do so by putting the relevant attribute on each method.  
 Example of usage on module:  
@@ -83,7 +83,7 @@ class MyClass
 }
 ```
 
-### Determining the builder type for an async method
+### Determining the builder type for an async method (or local function or lambda)
 
 When compiling an async method (or local function or lambda), the builder type is determined by:
 1. looking in the containing scopes for an override attribute that specifies a builder type compatible with the method's return type.
@@ -178,8 +178,8 @@ Note that when the synthesized entry-point for top-level statements is async, it
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-1. Confirm that the compiler should produce a diagnostic if the method-level attribute was found not compatible? (recommend yes)
-2. Confirm that the compiler should produce a diagnostic if multiple override attributes are specified on a method? (recommend yes)
+1. Confirm that the compiler should produce a diagnostic if the method-level attribute was found not compatible. (recommend yes)
+2. Confirm that the compiler should produce a diagnostic if multiple override attributes are specified on a method. (recommend yes)
 3. **Attribute.** Should we reuse `[AsyncMethodBuilder(typeof(...))]` or introduce yet another attribute? (answer: we need a new attribute)
 4. **Replace or also create.** All of the examples in this proposal are about replacing a buildable task-like's builder.  Should the feature be scoped to just that? Or should you be able to use this attribute on a method with a return type that doesn't already have a builder (e.g. some common interface)?  That could impact overload resolution.
 5. **Virtuals / Interfaces.** What is the behavior if the attribute is specified on an interface method?  I think it should either be a nop or a compiler warning/error, but it shouldn't impact implementations of the interface.  A similar question exists for base methods that are overridden, and there again I don't think the attribute on the base method should impact how an override implementation behaves. Note the current attribute has Inherited = false on its AttributeUsage.
@@ -187,3 +187,5 @@ Note that when the synthesized entry-point for top-level statements is async, it
 7. **Private Builders**. Should the compiler support non-public async method builders? This is not spec'd today, but experimentally we only support public ones.  That makes some sense when the attribute is applied to a type to control what builder is used with that type, since anyone writing an async method with that type as the return type would need access to the builder.  However, with this new feature, when that attribute is applied to a method, it only impacts the implementation of that method, and thus could reasonably reference a non-public builder.  Likely we will want to support library authors who have non-public ones they want to use.
 8. **Passthrough state to enable more efficient pooling**.  Consider a type like SslStream or WebSocket.  These expose read/write async operations, and allow for reading and writing to happen concurrently but at most 1 read operation at a time and at most 1 write operation at a time.  That makes these ideal for pooling, as each SslStream or WebSocket instance would need at most one pooled object for reads and one pooled object for writes.  Further, a centralized pool is overkill: rather than paying the costs of having a central pool that needs to be managed and access synchronized, every SslStream/WebSocket could just maintain a field to store the singleton for the reader and a singleton for the writer, eliminating all contention for pooling and eliminating all management associated with pool limits.  The problem is, how to connect an arbitrary field on the instance with the pooling mechanism employed by the builder.  We could at least make it possible if we passed through all arguments to the async method into a corresponding signature on the builder's Create method (or maybe a separate Bind method, or some such thing), but then the builder would need to be specialized for that specific type, knowing about its fields.  The Create method could potentially take a rent delegate and a return delegate, and the async method could be specially crafted to accept such arguments (along with an object state to be passed in).  It would be great to come up with a good solution here, as it would make the mechanism significantly more powerful and valuable.
 9. Should we allow **Assembly** target for the override attribute? (recommend no)
+10. Confirm that we should we allow **Property**, **Event**, **Constructor** targets for the override attribute. (recommend yes)
+11. Confirm that we should allow using an open generic type as override even when the attribute is used directly on a method. (recommend yes)
