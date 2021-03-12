@@ -2,12 +2,7 @@
 
 ## Schedule ASAP
 
-- Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
-- Review scoping and name lookup rules around Global Using directives. (Aleksey) Link TBD 
-
 ## Schedule when convenient
-
-- List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
 
 ## Recurring topics
 
@@ -20,11 +15,17 @@
 
 ## Mar 24, 2021
 
+- List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
+- `field` in auto-properties (Cyrus)
+
 ## Mar 22, 2021
 
 - *Design review*
 
 ## Mar 15, 2021
+
+- Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
+- Review scoping and name lookup rules around Global Using directives. (Aleksey) Link TBD 
 
 # C# Language Design Notes for 2021
 
