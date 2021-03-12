@@ -46,7 +46,7 @@ namespace System.Runtime.CompilerServices
     /// Indicates the type of the async method builder that should be used by a language compiler to
     /// build the attributed method.
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Interface | System.AttributeTargets.Method | System.AttributeTargets.Constructor | System.AttributeTargets.Event | System.AttributeTargets.Property | System.AttributeTargets.Module, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Event | AttributeTargets.Property | AttributeTargets.Module, Inherited = false, AllowMultiple = true)]
     public sealed class AsyncMethodBuilderOverrideAttribute : Attribute
     {
         /// <summary>Initializes the <see cref="AsyncMethodBuilderOverrideAttribute"/>.</summary>
