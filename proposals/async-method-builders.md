@@ -59,7 +59,7 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-The attribute can be applied on methods (or local function), constructors, events, properties, types and modules.
+The attribute can be applied on methods (or local functions), constructors, events, properties, types and modules.
 
 Example of usage on a method:  
 ```C#
