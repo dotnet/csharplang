@@ -27,16 +27,19 @@ global_using_static_directive
 
 - The *global_using_directive*s are allowed only on the Compilation Unit level (cannot be used inside a *namespace_declaration*).
 - The *global_using_directive*s, if any, must precede any *using_directive*s. 
-- The scope of a *global_using_directive*s extends over the namespace member declarations and *using_directive*s of all compilation units within the program.
+- The scope of a *global_using_directive*s extends over the *namespace_member_declaration*s of all compilation units within the program.
 The scope of a *global_using_directive* specifically does not include other *global_using_directive*s. Thus, peer *global_using_directive*s or those from a different
 compilation unit do not affect each other, and the order in which they are written is insignificant.
+The scope of a *global_using_directive* specifically does not include *using_directive*s immediately contained in any compilation unit of the program.
+
+The effect of adding a *global_using_directive* to a program can be thought of as the effect of adding a similar *using_directive* that resolves to the same target namespace or type to every compilation unit of the program. However, the target of a *global_using_directive* is resolved in context of the compilation unit that contains it. 
 
 # Scopes 
 https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#scopes
 
 These are the relevant bullet points with proposed additions (which are **in bold**):
 *  The scope of name defined by an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body. An *extern_alias_directive* does not contribute any new members to the underlying declaration space. In other words, an *extern_alias_directive* is not transitive, but, rather, affects only the compilation unit or namespace body in which it occurs.
-*  **The scope of a name defined or imported by a *global_using_directive* extends over the *using_directive*s, *global_attributes* and *namespace_member_declaration*s of all the *compilation_unit*s in the program.**
+*  **The scope of a name defined or imported by a *global_using_directive* extends over the *global_attributes* and *namespace_member_declaration*s of all the *compilation_unit*s in the program.**
 
 # Namespace and type names
 https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#namespace-and-type-names
@@ -102,12 +105,17 @@ compilation_unit
 
 A C# program consists of one or more compilation units, each contained in a separate source file. When a C# program is compiled, all of the compilation units are processed together. Thus, compilation units can depend on each other, possibly in a circular fashion.
 
-The *global_using_directive*s of a compilation unit affect the *using_directive*s, *global_attributes* and *namespace_member_declaration*s of all compilation units in the program.
+The *global_using_directive*s of a compilation unit affect the *global_attributes* and *namespace_member_declaration*s of all compilation units in the program.
 
 # Extern aliases
 https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#extern-aliases
 
 The scope of an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body.
+
+# Using alias directives
+https://github.com/dotnet/csharplang/blob/main/spec/namespaces.md#using-alias-directives
+
+The order in which *using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *using_alias_directive* is not affected by the *using_alias_directive* itself or by other *using_directive*s in the immediately containing compilation unit or namespace body, **and, if the *using_alias_directive* is immediately contained in a compilation unit, is not affected by the *global_using_directive*s in the program**. In other words, the *namespace_or_type_name* of a *using_alias_directive* is resolved as if the immediately containing compilation unit or namespace body had no *using_directive*s **and, if the *using_alias_directive* is immediately contained in a compilation unit, the program had no *global_using_directive*s**. A *using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit or namespace body.
 
 # Global Using alias directives
 
