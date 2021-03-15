@@ -32,7 +32,7 @@ The scope of a *global_using_directive* specifically does not include other *glo
 compilation unit do not affect each other, and the order in which they are written is insignificant.
 The scope of a *global_using_directive* specifically does not include *using_directive*s immediately contained in any compilation unit of the program.
 
-The effect of adding a *global_using_directive* to a program can be thought of as the effect of adding a similar *using_directive* that resolves to the same target namespace or type to every compilation unit of the program. However, the target of a *global_using_directive* is resolved in context of the compilatio unit that contains it. 
+The effect of adding a *global_using_directive* to a program can be thought of as the effect of adding a similar *using_directive* that resolves to the same target namespace or type to every compilation unit of the program. However, the target of a *global_using_directive* is resolved in context of the compilation unit that contains it. 
 
 # Scopes 
 https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#scopes
