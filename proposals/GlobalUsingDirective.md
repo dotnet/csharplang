@@ -105,7 +105,7 @@ compilation_unit
 
 A C# program consists of one or more compilation units, each contained in a separate source file. When a C# program is compiled, all of the compilation units are processed together. Thus, compilation units can depend on each other, possibly in a circular fashion.
 
-The *global_using_directive*s of a compilation unit affect the *using_directive*s, *global_attributes* and *namespace_member_declaration*s of all compilation units in the program.
+The *global_using_directive*s of a compilation unit affect the *global_attributes* and *namespace_member_declaration*s of all compilation units in the program.
 
 # Extern aliases
 https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#extern-aliases
