@@ -25,7 +25,7 @@
 ## Mar 15, 2021
 
 - Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
-- Review scoping and name lookup rules around Global Using directives. (Aleksey) Link TBD 
+- Review scoping and name lookup rules around Global Using directives. (Aleksey) https://github.com/dotnet/csharplang/blob/main/proposals/GlobalUsingDirective.md 
 
 # C# Language Design Notes for 2021
 
