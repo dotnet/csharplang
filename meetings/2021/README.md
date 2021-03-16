@@ -4,6 +4,8 @@
 
 ## Schedule when convenient
 
+- List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -15,21 +17,23 @@
 
 ## Mar 24, 2021
 
-- List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
+- Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
 - `field` in auto-properties (Cyrus)
 
 ## Mar 22, 2021
 
 - *Design review*
 
-## Mar 15, 2021
-
-- Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
-- Review scoping and name lookup rules around Global Using directives. (Aleksey) https://github.com/dotnet/csharplang/blob/main/proposals/GlobalUsingDirective.md 
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Mar 15, 2021
+
+[C# Language Design Notes for March 15th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-03-15.md)
+
+1. Interpolated string improvements
+2. Global usings
 
 ## Mar 10, 2021
 
