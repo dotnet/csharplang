@@ -303,7 +303,7 @@ whether or not this remains a binary breaking change.
 
 If we want to make the change of `init` to `set` a source and binary compatible
 change then it will force our hand on the modreq vs. attributes decision
-below because it will rule out modreqs as a soulution. If on the other hand
+below because it will rule out modreqs as a solution. If on the other hand
 this is seen as a non-interesting then this will make the modreq vs. attribute
 decision less impactful.
 
