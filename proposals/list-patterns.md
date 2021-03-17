@@ -80,7 +80,7 @@ A *slice_pattern* is compatible with any type that is *countable* as well as *sl
 
 This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support) but relaxed to ignore optional or `params` parameters, if any.
 
-> *Open question*: We should define the exact binding rules for any of these members and decide how much we're willing to diverge from the range spec.
+> **Open question**: We should define the exact binding rules for any of these members and decide if we can diverge from the range spec.
 
 #### Subsumption checking
 
