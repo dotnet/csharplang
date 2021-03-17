@@ -4,7 +4,7 @@
 
 Lets you to match an array or a list with a sequence of patterns e.g. `array is {1, 2, 3}` will match an integer array of the length three with 1, 2, 3 as its elements, respectively.
 
-## Detailed Design
+## Detailed design
 
 The pattern syntax is modified as follow:
 
@@ -80,7 +80,7 @@ A *slice_pattern* is compatible with any type that is *countable* as well as *sl
 
 This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support) but relaxed to ignore optional or `params` parameters, if any.
 
-> **Open question**: We should define the exact binding rules for any of these members and decide if we can diverge from the range spec.
+> **Open question**: We should define the exact binding rules for any of these members and decide if we want to diverge from the range spec.
 
 #### Subsumption checking
 
@@ -104,19 +104,19 @@ The order in which subpatterns are matched at runtime is unspecified, and a fail
 > 
 #### Lowering
 
-A pattern of the form `expr is {1, 2, 3}` is equivalent to the following code:
+A pattern of the form `expr is {1, 2, 3}` is equivalent to the following code (if compatible via implicit `Index` support):
 ```cs
 expr.Length is 3
 && expr[0] is 1
 && expr[1] is 2
 && expr[2] is 3
 ```
-A *slice_pattern* acts like a proper discard i.e. no tests will be emitted for such pattern, rather it only affects other nodes, namely the length and indexer. For instance, a pattern of the form `expr is {1, .. var s, 3}`  is equivalent to the following code:
+A *slice_pattern* acts like a proper discard i.e. no tests will be emitted for such pattern, rather it only affects other nodes, namely the length and indexer. For instance, a pattern of the form `expr is {1, .. var s, 3}`  is equivalent to the following code (if compatible via explicit `Index` and `Range` support):
 ```cs
-expr.Length    is >= 2
-&& expr[0]     is 1
-&& expr[1..^1] is var s
-&& expr[^1]    is 3
+expr.Length is >= 2
+&& expr[new Index(0)] is 1
+&& expr[new Range(1, new Index(1, true))] is var s
+&& expr[new Index(1, true)] is 3
 ```
 The *input type* for the *slice_pattern* is the return type of the underlying `this[Range]` or `Slice` method with two exceptions: For `string` and arrays, `string.Substring` and `RuntimeHelpers.GetSubArray` will be used, respectively.
 
