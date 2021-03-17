@@ -2873,9 +2873,16 @@ the underlying `TextWriter` for the output device is created. But if the applica
 
 ### Automatically implemented properties
 
-An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with semicolon-only accessor bodies. Auto-properties must have a get accessor and can optionally have a set accessor.
+An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with at least:
 
-When a property is specified as an automatically implemented property, a hidden backing field is automatically available for the property, and the accessors are implemented to read from and write to that backing field. If the auto-property has no set accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
+a. one semicolon-only body
+b. usage of the `field` contextual keyword ([Keywords](lexical-structure.md#keywords)) within the `property_body` of the `property`. The `field` identifier is only considered the `field` contextual when there is no symbol named `field` in scope at that location. For the purposes of simplicity, from this point on any usages of `field` in the specification description will assume there is no `field` symbol in scope at that location.
+
+Auto-properties must have a get accessor and can optionally have a set accessor. Because an expression-bodied property defines a get accessor, if the expression-bodied property refers to `field`, it satisfies the requirements and is considered an auto-property.
+
+When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property, and any semicolon-only accessors are implemented to read from and write to that backing field. The hidden backing field is in scope in all accessors and can be referenced directly using `field`.  Because the field is unnamed, it cannot be used in a `nameof` expression.
+
+ If the auto-property has no set accessor, and does not use `field`, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
 
 An auto-property may optionally have a *property_initializer*, which is applied directly to the backing field as a *variable_initializer* ([Variable initializers](classes.md#variable-initializers)).
 
@@ -2919,6 +2926,56 @@ public class ReadOnlyPoint
 
 Notice that the assignments to the readonly field are legal, because they occur within the constructor.
 
+
+The following example:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+	public int X { get; set; }
+	public int Y { get; set; }
+}
+```
+is equivalent to the following declaration:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+	public int X { get { return field; } set { field = value; } }
+	public int Y { get { return field; } set { field = value; } }
+}
+```
+which is equivalent to:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    private int __x;
+    private int __y;
+    public int X { get { return __x; } set { __x = value; } }
+    public int Y { get { return __y; } set { __y = value; } }
+}
+```
+
+The following example:
+```csharp
+// No 'field' symbol in scope.
+public class LazyInit
+{
+	public string Value => field ??= ComputeValue();
+    private static string ComputeValue() { /*...*/ }
+}
+```
+is equivalent to the following declaration:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    private string __value;
+	public string Value { get { return __value ??= ComputeValue(); } }
+    private static string ComputeValue() { /*...*/ }
+}
+```
 
 ### Accessibility
 
