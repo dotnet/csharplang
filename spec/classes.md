@@ -2934,8 +2934,8 @@ The following example:
 // No 'field' symbol in scope.
 public class Point
 {
-	public int X { get; set; }
-	public int Y { get; set; }
+    public int X { get; set; }
+    public int Y { get; set; }
 }
 ```
 is equivalent to the following declaration:
@@ -2943,8 +2943,8 @@ is equivalent to the following declaration:
 // No 'field' symbol in scope.
 public class Point
 {
-	public int X { get { return field; } set { field = value; } }
-	public int Y { get { return field; } set { field = value; } }
+    public int X { get { return field; } set { field = value; } }
+    public int Y { get { return field; } set { field = value; } }
 }
 ```
 which is equivalent to:
