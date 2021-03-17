@@ -2964,7 +2964,7 @@ The following example:
 // No 'field' symbol in scope.
 public class LazyInit
 {
-	public string Value => field ??= ComputeValue();
+    public string Value => field ??= ComputeValue();
     private static string ComputeValue() { /*...*/ }
 }
 ```
@@ -2974,7 +2974,7 @@ is equivalent to the following declaration:
 public class Point
 {
     private string __value;
-	public string Value { get { return __value ??= ComputeValue(); } }
+    public string Value { get { return __value ??= ComputeValue(); } }
     private static string ComputeValue() { /*...*/ }
 }
 ```
