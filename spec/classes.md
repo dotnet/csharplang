@@ -2873,9 +2873,9 @@ the underlying `TextWriter` for the output device is created. But if the applica
 
 ### Automatically implemented properties
 
-An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with at least:
+An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with either or both:
 
-1. one semicolon-only body
+1. an accessor with semicolon-only body
 2. usage of the `field` contextual keyword ([Keywords](lexical-structure.md#keywords)) within the `property_body` of the `property`. The `field` identifier is only considered the `field` keyword when there is no existing symbol named `field` in scope at that location.
 
 Auto-properties must have a get accessor and can optionally have a set accessor. Because an expression-bodied property defines a get accessor, if the expression-bodied property refers to `field` keyword, it satisfies the requirements and is considered an auto-property.
