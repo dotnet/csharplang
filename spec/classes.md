@@ -2876,11 +2876,11 @@ the underlying `TextWriter` for the output device is created. But if the applica
 An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with either or both:
 
 1. an accessor with semicolon-only body
-2. usage of the `field` contextual keyword ([Keywords](lexical-structure.md#keywords)) within the `property_body` of the `property`. The `field` identifier is only considered the `field` keyword when there is no existing symbol named `field` in scope at that location.
+2. usage of the `field` contextual keyword ([Keywords](lexical-structure.md#keywords)) within the accessors or expression body of the property. The `field` identifier is only considered the `field` keyword when there is no existing symbol named `field` in scope at that location.
 
 Auto-properties must have a get accessor and can optionally have a set accessor. Because an expression-bodied property defines a get accessor, if the expression-bodied property refers to the `field` keyword, it satisfies the requirements and is considered an auto-property.
 
-When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property, and any semicolon-only accessors are implemented to read from and write to that backing field. The backing field is in scope in all accessors, the `property_initializer`, the property expression body, and can be referenced directly using the `field` keyword. Because the field is unnamed, it cannot be used in a `nameof` expression.
+When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property, and any semicolon-only accessors are implemented to read from and write to that backing field. The backing field is in scope in all accessors, and the property expression body, and can be referenced directly using the `field` keyword. Because the field is unnamed, it cannot be used in a `nameof` expression.
 
 If the auto-property does not have a set accessor, the backing field can still be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
 
