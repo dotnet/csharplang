@@ -2882,7 +2882,7 @@ Auto-properties must have a get accessor and can optionally have a set accessor.
 
 When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property, and any semicolon-only accessors are implemented to read from and write to that backing field. The hidden backing field is in scope in all accessors and can be referenced directly using the `field` keyword.  Because the field is unnamed, it cannot be used in a `nameof` expression.
 
- If the auto-property has no set accessor, and does not use the `field` keyword, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
+If the auto-property has no set accessor, and does not use the `field` keyword, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
 
 An auto-property may optionally have a *property_initializer*, which is applied directly to the backing field as a *variable_initializer* ([Variable initializers](classes.md#variable-initializers)).
 
