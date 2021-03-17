@@ -2882,7 +2882,9 @@ Auto-properties must have a get accessor and can optionally have a set accessor.
 
 When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property, and any semicolon-only accessors are implemented to read from and write to that backing field. The hidden backing field is in scope in all accessors and can be referenced directly using the `field` keyword.  Because the field is unnamed, it cannot be used in a `nameof` expression.
 
-If the auto-property has only a semicolon-only get accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
+If the auto-property does not have a set accessor the backing field can still be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
+
+If the auto-property has only a semicolon-only get accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)).
 
 An auto-property may optionally have a *property_initializer*, which is applied directly to the backing field as a *variable_initializer* ([Variable initializers](classes.md#variable-initializers)).
 
@@ -2907,19 +2909,19 @@ The following example:
 ```csharp
 public class ReadOnlyPoint
 {
-	public int X { get; }
-	public int Y { get; }
-	public ReadOnlyPoint(int x, int y) { X = x; Y = y; }
+    public int X { get; }
+    public int Y { get; }
+    public ReadOnlyPoint(int x, int y) { X = x; Y = y; }
 }
 ```
 is equivalent to the following declaration:
 ```csharp
 public class ReadOnlyPoint
 {
-	private readonly int __x;
-	private readonly int __y;
-	public int X { get { return __x; } }
-	public int Y { get { return __y; } }
+    private readonly int __x;
+    private readonly int __y;
+    public int X { get { return __x; } }
+    public int Y { get { return __y; } }
     public ReadOnlyPoint(int x, int y) { __x = x; __y = y; }
 }
 ```
