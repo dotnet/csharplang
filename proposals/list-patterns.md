@@ -58,6 +58,8 @@ There are three new patterns:
 - The *list_pattern* is used to match elements and the *length_pattern* is used to match the length.
 - A *slice_pattern* is only permitted once and only directly in a *list_pattern_clause* and discards _**zero or more**_ elements.
 
+> **Open question**: Should we accept a general *pattern* following `..` in a *slice_pattern*?
+
 Notes:
 
 - Due to the ambiguity with *property_pattern*, a *list_pattern* cannot be empty and a *length_pattern* should be used instead to match a list with the length of zero, e.g. `[0]`. 
@@ -70,28 +72,34 @@ Notes:
 
 #### Pattern compatibility
 
-A *length_pattern* is compatible with any type that is *countable*, i.e. has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.
+A *length_pattern* is compatible with any type that is *countable* - it has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.
 
-A *list_pattern* is compatible with any type that conforms to the following rules:
+A *list_pattern* is compatible with any type that is *countable* as well as *indexable* - it has an accessible indexer that takes an `Index` or `int` argument. If both indexers are present, the former is preferred.
 
-1. Is compatible with the *length_pattern*
-2. Has an accessible indexer with a single `int` parameter
+A *slice_pattern* is compatible with any type that is *countable* as well as *sliceable* - it has an accessible indexer that takes a `Range` argument or otherwise an accessible `Slice` method that takes two `int` arguments. If both are present, the former is preferred.
 
- > **Open question**: Should we support `this[Index]` indexers? If so, which one is preferred if `this[int]` is also present?
-
-A *slice_pattern* is compatible with any type that conforms to the following rules:
-
-1. Is compatible with the *length_pattern*
-2. Has an accessible `Slice` method that takes two `int` parameters (required only if a subpattern is specified)
-
- > **Open question**: Should we support `this[Range]` indexers? If so, which one is preferred if `Slice(int, int)` is also present?
-
-This set of rules is already specified as the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support) and required for range indexers.
+This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support) but relaxed to ignore optional or `params` parameters, if any.
 
 #### Subsumption checking
 
-Subsumption checking works just like positional patterns with `ITuple` - corresponding subpatterns are matched by position plus an additional node for testing length.
+Subsumption checking works just like [positional patterns with `ITuple`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/patterns.md#positional-pattern) - corresponding subpatterns are matched by position plus an additional node for testing length.
 
+For example, the following code produces an error because both patterns yield the same DAG:
+
+```cs
+case {_, .., 1}: // expr.Length is >= 2 && expr[^1] is 1
+case {.., _, 1}: // expr.Length is >= 2 && expr[^1] is 1
+```
+Unlike:
+```cs
+case {_, 1, ..}: // expr.Length is >= 2 && expr[1] is 1
+case {.., 1, _}: // expr.Length is >= 2 && expr[^2] is 1
+```
+
+The order in which subpatterns are matched at runtime is unspecified, and a failed match may not attempt to match all subpatterns.
+
+> **Open question**: The pattern `{..}` tests for  `expr.Length >= 0`. Should we omit such test (assuming `Length` is always non-negative)?
+> 
 #### Lowering
 
 A pattern of the form `expr is {1, 2, 3}` is equivalent to the following code:
@@ -108,21 +116,7 @@ expr.Length    is >= 2
 && expr[1..^1] is var s
 && expr[^1]    is 3
 ```
-The *input type* for the *slice_pattern* is the return type of the underlying `Slice` method with two exceptions: For `string` and arrays, `string.Substring` and `RuntimeHelpers.GetSubArray` will be used, respectively.
-
-Note: the lowering is presented in the pattern form here to show how subsumption checking works, for example, the following code produces an error because both patterns yield the same DAG:
-
-```cs
-case {_, .., 1}: // expr.Length is >= 2 && expr[^1] is 1
-case {.., _, 1}: // expr.Length is >= 2 && expr[^1] is 1
-```
-Unlike:
-```cs
-case {_, 1, ..}: // expr.Length is >= 2 && expr[1] is 1
-case {.., 1, _}: // expr.Length is >= 2 && expr[^2] is 1
-```
-
-> **Open question**: The pattern `{..}` lowers to `expr.Length >= 0` so it would not be considered as a catch-all. Should we omit such test (assuming `Length` is always non-negative)?
+The *input type* for the *slice_pattern* is the return type of the underlying `this[Range]` or `Slice` method with two exceptions: For `string` and arrays, `string.Substring` and `RuntimeHelpers.GetSubArray` will be used, respectively.
 
 ### Additional types
 
