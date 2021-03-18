@@ -11,7 +11,24 @@
 - *Triage championed features and milestones*
 - *Design review*
 
-## Mar 31, 2021
+
+## Apr 28, 2021
+
+## Apr 26, 2021
+
+## Apr 21, 2021
+
+## Apr 19, 2021
+
+## Apr 14, 2021
+
+## Apr 12, 2021
+
+## Apr 7, 2021
+
+- MVP session
+
+## Apr 5, 2021
 
 ## Mar 29, 2021
 
