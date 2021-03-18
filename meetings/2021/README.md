@@ -15,6 +15,9 @@
 
 ## Mar 29, 2021
 
+- Parameterless struct constructors (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/parameterless-struct-constructors.md
+- *Available*
+
 ## Mar 24, 2021
 
 - Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
