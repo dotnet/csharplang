@@ -117,7 +117,31 @@ In subsequent sections we will refer to *E<sub>0</sub>* as the *non-conditional 
 ### Remarks
 We use the concept of "directly contains" to allow us to skip over relatively simple "wrapper" expressions when analyzing conditional accesses that are compared to other values. For example, `((a?.b(out x))!) == true` is expected to result in the same flow state as `a?.b == true` in general.
 
-We also want to allow analysis to function in the presence of a number of possible conversions on a conditional access. Propagating out "state when not null" is not possible when the conversion is user-defined, though, since we can't count on user-defined conversions to honor the constraint that the output is non-null only if the input is non-null. The only exception to this is when the user-defined conversion's input and output are non-nullable value types, and the conversion is lifted--for example, a user-defined conversion exists from `struct S1` to `struct S2`, and a value of type `S1?` is converted to `S2?`.
+We also want to allow analysis to function in the presence of a number of possible conversions on a conditional access. Propagating out "state when not null" is not possible when the conversion is user-defined, though, since we can't count on user-defined conversions to honor the constraint that the output is non-null only if the input is non-null. The only exception to this is when the user-defined conversion's input is a non-nullable value type. For example:
+```cs
+public struct S1 { }
+public struct S2 { public static implicit operator S2?(S1 s1) => null; }
+```
+
+This also includes lifted conversions like the following:
+```cs
+string x;
+
+S1? s1 = null;
+_ = s1?.M1(x = "a") ?? s1.Value.M2(x = "a");
+
+x.ToString(); // ok
+
+public struct S1
+{
+    public S1 M1(object obj) => this;
+    public S2 M2(object obj) => new S2();
+}
+public struct S2
+{
+    public static implicit operator S2(S1 s1) => null;
+}
+```
 
 When we consider whether a variable is assigned at a given point within a null-conditional expression, we simply assume that any preceding null-conditional operations within the same null-conditional expression succeeded.
 
