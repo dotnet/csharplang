@@ -5,6 +5,7 @@
 ## Schedule when convenient
 
 - List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
+- Async method builder override (Julien/Stephen): https://github.com/dotnet/csharplang/blob/main/proposals/async-method-builders.md
 
 ## Recurring topics
 
