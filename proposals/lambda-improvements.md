@@ -21,7 +21,7 @@ Requiring explicit delegate types for lambdas and method groups has been a frict
 [HttpGet("/")] Todo GetTodo() => new(Id: 0, Name: "Name");
 app.MapAction((Func<Todo>)GetTodo);
 
-[HttpPost("/")] Todo PostTodo([FromBody] Todo todo) => todo);
+[HttpPost("/")] Todo PostTodo([FromBody] Todo todo) => todo;
 app.MapAction((Func<Todo, Todo>)PostTodo);
 ```
 
@@ -41,26 +41,36 @@ app.MapAction([HttpPost("/")] ([FromBody] Todo todo) => todo);
 ```
 
 ## Attributes
-Attributes may be added to lambda expressions.
+Attributes may be added to lambda expressions and lambda parameters.
+To avoid ambiguity between method attributes and parameter attributes, a lambda expression with attributes must use a parenthesized parameter list.
+Parameter types are not required.
 ```csharp
-f = [MyAttribute] x => x;          // [MyAttribute]lambda
-f = [MyAttribute] (int x) => x;    // [MyAttribute]lambda
-f = [MyAttribute] static x => x;   // [MyAttribute]lambda
-f = [return: MyAttribute] () => 1; // [return: MyAttribute]lambda
-```
+f = [A] () => { };        // [A]lambda
+f = [return:A] x => x;    // syntax error at '=>'
+f = [return:A] (x) => x;  // [A]lambda
+f = [A] static x => x;    // syntax error at '=>'
 
-_Should parentheses be required for the parameter list if attributes are added to the entire expression? (Should `[MyAttribute] x => x` be disallowed? If so, what about `[MyAttribute] static x => x`?)_
-
-Attributes may be added to lambda parameters that are declared with explicit types.
-```csharp
-f = ([MyAttribute] x) => x;      // syntax error
-f = ([MyAttribute] int x) => x;  // [MyAttribute]x
+f = ([A] x) => x;         // [A]x
+f = ([A] ref int x) => x; // [A]x
 ```
 
 Attributes are not supported for anonymous methods declared with `delegate { }` syntax.
 ```csharp
-f = [MyAttribute] delegate { return 1; };         // syntax error
-f = delegate ([MyAttribute] int x) { return x; }; // syntax error
+f = [A] delegate { return 1; };         // syntax error at 'delegate'
+f = delegate ([A] int x) { return x; }; // syntax error at '['
+```
+
+The parser will look ahead to differentiate a lambda with an attribute from a dictionary initializer.
+```csharp
+var a = new { [A] x => y }; // ok: a[0] = [A] x => y
+var b = new { [A] = y };    // ok: b[A] = y
+```
+_Add the types to the comments in the above examples._
+
+The parser will treat `?[` as the start of a conditional element access qualifier.
+```csharp
+x = b ? [A];               // ok
+y = b ? [A] () => { } : z; // syntax error at '('
 ```
 
 Attributes on the lambda expression or lambda parameters will be emitted to metadata on the method that maps to the lambda.
@@ -72,18 +82,21 @@ It should be valid to inspect the `MethodInfo` associated with a `Delegate` inst
 This allows teams such as ASP.NET to make available the same behaviors for lambdas and local functions as ordinary methods.
 
 ## Explicit return type
-An explicit return type may be specified after the parameter list.
+An explicit return type may be specified before the parenthesized parameter list.
 ```csharp
-f = () : T => default;              // () : T
-f = x : short => 1;                 // <unknown> : short
-f = (ref int x) : ref int => ref x; // ref int : ref int
-f = static _ : void => { };         // <unknown> : void
+f = T () => default;                    // ok
+f = short x => 1;                       // syntax error at '=>'
+f = ref int (ref int x) => ref x;       // ok
+f = static void (_) => { };             // ok
+f = async async (async async) => async; // ok
 ```
+
+The parser will look ahead to differentiate a method call `T()` from a lambda expression `T () => e`.
 
 Explicit return types are not supported for anonymous methods declared with `delegate { }` syntax.
 ```csharp
-f = delegate : int { return 1; };         // syntax error
-f = delegate (int x) : int { return x; }; // syntax error
+f = delegate int { return 1; };         // syntax error
+f = delegate int (int x) { return x; }; // syntax error
 ```
 
 ## Natural delegate type
@@ -96,28 +109,31 @@ The natural type is a delegate type where the parameter types are the explicit l
 
 A method group has a natural type if the method group contains a single method.
 
-A method group might refer to extension methods. Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine the natural type will require searching all namespace scopes. _To minimize unnecessary binding, perhaps natural type should be calculated only in cases where there is no target type - that is, only calculate the natural type in cases where it is needed._
+A method group might refer to extension methods. Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine the natural type will require searching all namespace scopes. To minimize unnecessary binding, natural type should be calculated only in cases where there is no target type.
+
+Requiring a method group to contain a single method means that adding an overload (including an extension method overload) for a method that previously had no overloads is a breaking change.
 
 The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
 - if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
 - if `R` is `void`, then the delegate type is `System.Action<P1, ..., Pn>`;
 - otherwise the delegate type is `System.Func<P1, ..., Pn, R>`.
 
+The compiler may allow more signatures to bind to `System.Action<>` and `System.Func<>` types in the future (if `ref struct` types are allowed type arguments for instance).
+
+_Should the compiler bind to a matching `System.Action<>` or `System.Func<>` type regardless of arity and synthesize a delegate type otherwise? If so, should the compiler warn if the expected delegate types are missing?_
+
 `modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
 
 If two lambda expressions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
 
-Lambdas or method groups with natural types can be used as initializers in `var` declarations.
-
+Lambda expressions and method groups with natural types can be used as initializers in `var` declarations.
 ```csharp
 var f1 = () => default;        // error: no natural type
 var f2 = x => { };             // error: no natural type
 var f3 = x => x;               // error: no natural type
 var f4 = () => 1;              // System.Func<int>
 var f5 = () : string => null;  // System.Func<string>
-```
 
-```csharp
 static void F1() { }
 static void F1<T>(this T t) { }
 static void F2(this string s) { }
@@ -127,17 +143,13 @@ var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
 
-The synthesized delegate types are implicitly co- and contra-variant.
+Lambda expressions with natural types can be invoked directly.
 ```csharp
-var fA = (IEnumerable<string> e, ref int i) => { }; // void DA$(IEnumerable<string>, ref int);
-fA = (IEnumerable<object> e, ref int i) => { };     // ok
-
-var fB = (IEnumerable<object> e, ref int i) => { }; // void DB$(IEnumerable<object>, ref int);
-fB = (IEnumerable<string> e, ref int i) => { };     // error: parameter type mismatch
+int zero = ((int x) => x)(0); // ok
 ```
 
-### Implicit conversion to `System.Delegate`
-A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate`.
+### Implicit conversions
+A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate` and any base classes or interfaces implemented by `System.Delegate` such as `System.Object` or `System.ICloneable`.
 ```csharp
 static void Invoke(Func<string> f) { }
 static void Invoke(Delegate d) { }
@@ -152,16 +164,21 @@ Invoke(GetString); // Invoke(Func<string>)
 Invoke(GetInt);    // Invoke(Delegate) [new]
 ```
 
-If a natural type cannot be inferred, there is no implicit conversion to `System.Delegate`.
+If a natural type cannot be inferred, there is no implicit conversion to `System.Delegate` or base classes or interfaces.
 ```csharp
-static void Invoke(Delegate d) { }
-
-Invoke(Console.WriteLine); // error: cannot to 'Delegate'; multiple candidate methods
-Invoke(x => x);            // error: cannot to 'Delegate'; no natural type for 'x'
+Delegate d = 1.ToString; // error: cannot convert to 'System.Delegate'; multiple 'ToString' methods
+object o = x => x;       // error: cannot convert to 'System.Object'; no natural type for 'x => x'
 ```
 
-To avoid a breaking change, overload resolution will be updated to prefer strongly-typed delegates and expressions over `System.Delegate`.
-_The example below demonstrates the tie-breaking rule for lambdas. Is there an equivalent example for method groups?_
+The compiler will also treat lambda expressions with natural type as implicitly convertible to `System.Linq.Expressions.Expression` as an expression tree. Base classes or interfaces implemented by `System.Linq.Expressions.Expression` are ignored when calculating conversions to expression trees.
+```csharp
+// ... example ...
+```
+
+Overload resolution already prefers a strongly-typed delegate over `System.Delegate` and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<T>` type over a strongly-typed delegate.
+To avoid a breaking change from inferring a natural type, overload resolution will be updated to prefer binding a lambda expression to `System.Linq.Expressions.Expression` over `System.Delegate`. A strongly-typed delegate will still be preferred over the weakly-typed `System.Linq.Expressions.Expression` however.
+
+_Does this example need updating?_
 ```csharp
 static void Execute(Expression<Func<string>> e) { }
 static void Execute(Delegate d) { }
@@ -180,7 +197,8 @@ Execute(GetInt);    // Execute(Delegate) [new]
 
 ```antlr
 lambda_expression
-  : attribute_list* modifier* lambda_parameters (':' type)? '=>' (block | body)
+  : modifier* identifier '=>' (block | expression)
+  | attribute_list* modifier* type? lambda_parameters '=>' (block | expression)
   ;
 
 lambda_parameters
@@ -190,13 +208,9 @@ lambda_parameters
 
 lambda_parameter
   : identifier
-  | (attribute_list* modifier* type)? identifier equals_value_clause?
+  | attribute_list* modifier* type? identifier equals_value_clause?
   ;
 ```
-
-_Does the `: type` return type syntax introduce ambiguities with `?:` that cannot be resolved easily?_
-
-_Should we allow attributes on parameters without explicit types, such as `([MyAttribute] x) => { }`? (We don't allow modifiers on parameters without explicit types, such as `(ref x) => { }`.)_
 
 ## Design meetings
 
