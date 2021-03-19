@@ -192,3 +192,4 @@ Note that when the synthesized entry-point for top-level statements is async, it
 9. Should we allow **Assembly** target for the override attribute? (recommend no)
 10. Confirm that we should we allow **Property**, **Event**, **Constructor** targets for the override attribute. (recommend yes)
 11. Confirm that we should allow using an open generic type as override even when the attribute is used directly on a method. (recommend yes)
+12. Can we help users tell which builder override is used? (may need some tooling help)
