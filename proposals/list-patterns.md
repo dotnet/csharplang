@@ -13,22 +13,6 @@ positional_pattern
   : type? positional_pattern_clause length_pattern_clause? property_or_list_pattern_clause? simple_designation?
   ;
 
-length_pattern
-  : type? length_pattern_clause property_or_list_pattern_clause? simple_designation?
-  ;
-
-list_pattern
-  : type? list_pattern_clause simple_designation?
-  ;
-
-property_pattern
-  : type? property_pattern_clause simple_designation?
-  ;
-
-length_pattern_clause
-  : '[' pattern ']'
-  ;
-
 property_or_list_pattern_clause
   : list_pattern_clause
   | property_pattern_clause
@@ -40,6 +24,22 @@ property_pattern_clause
 
 list_pattern_clause
   : '{' pattern (',' pattern)* ','? '}'
+  ;
+
+length_pattern_clause
+  : '[' pattern ']'
+  ;
+
+length_pattern
+  : type? length_pattern_clause property_or_list_pattern_clause? simple_designation?
+  ;
+
+list_pattern
+  : type? list_pattern_clause simple_designation?
+  ;
+
+property_pattern
+  : type? property_pattern_clause simple_designation?
   ;
 
 slice_pattern
@@ -55,7 +55,8 @@ primary_pattern
 ```
 There are three new patterns:
 
-- The *list_pattern* is used to match elements and the *length_pattern* is used to match the length.
+- The *list_pattern* is used to match elements.
+- The *length_pattern* is used to match the length.
 - A *slice_pattern* is only permitted once and only directly in a *list_pattern_clause* and discards _**zero or more**_ elements.
 
 > **Open question**: Should we accept a general *pattern* following `..` in a *slice_pattern*?
@@ -101,7 +102,7 @@ case {.., 1, _}: // expr.Length is >= 2 && expr[^2] is 1
 The order in which subpatterns are matched at runtime is unspecified, and a failed match may not attempt to match all subpatterns.
 
 > **Open question**: The pattern `{..}` tests for  `expr.Length >= 0`. Should we omit such test (assuming `Length` is always non-negative)?
-> 
+ 
 #### Lowering
 
 A pattern of the form `expr is {1, 2, 3}` is equivalent to the following code (if compatible via implicit `Index` support):
