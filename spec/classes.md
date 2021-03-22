@@ -597,9 +597,16 @@ The ordering of members within a type is rarely significant to C# code, but may 
 
 ### Partial methods
 
-Partial methods can be defined in one part of a type declaration and implemented in another. The implementation is optional; if no part implements the partial method, the partial method declaration and all calls to it are removed from the type declaration resulting from the combination of the parts.
+Partial methods can be defined in one part of a type declaration and implemented in another. The implementation may be optional or required, depending on method signature; if no part implements the partial method, the partial method declaration and all calls to it are removed from the type declaration resulting from the combination of the parts.
 
-Partial methods cannot define access modifiers, but are implicitly `private`. Their return type must be `void`, and their parameters cannot have the `out` modifier. The identifier `partial` is recognized as a special keyword in a method declaration only if it appears right before the `void` type; otherwise it can be used as a normal identifier. A partial method cannot explicitly implement interface methods.
+The identifier `partial` is recognized as a special keyword in a method declaration only if it appears right before the return type; otherwise it can be used as a normal identifier.
+
+Partial method must have an implementation part in following cases:
+
+* It has any accessibility modifiers (even `private`).
+* It has any return type other than `void`.
+* It has `out` parameter.
+* It has a `virtual`, `override`, `sealed`, `new`, or `extern` modifier.
 
 There are two kinds of partial method declarations: If the body of the method declaration is a semicolon, the declaration is said to be a ***defining partial method declaration***. If the body is given as a *block*, the declaration is said to be an ***implementing partial method declaration***. Across the parts of a type declaration there can be only one defining partial method declaration with a given signature, and there can be only one implementing partial method declaration with a given signature. If an implementing partial method declaration is given, a corresponding defining partial method declaration must exist, and the declarations must match as specified in the following:
 
@@ -609,9 +616,9 @@ There are two kinds of partial method declarations: If the body of the method de
 
 An implementing partial method declaration can appear in the same part as the corresponding defining partial method declaration.
 
-Only a defining partial method participates in overload resolution. Thus, whether or not an implementing declaration is given, invocation expressions may resolve to invocations of the partial method. Because a partial method always returns `void`, such invocation expressions will always be expression statements. Furthermore, because a partial method is implicitly `private`, such statements will always occur within one of the parts of the type declaration within which the partial method is declared.
+Only a defining partial method participates in overload resolution. Thus, whether or not an implementing declaration is given, invocation expressions may resolve to invocations of the partial method.
 
-If no part of a partial type declaration contains an implementing declaration for a given partial method, any expression statement invoking it is simply removed from the combined type declaration. Thus the invocation expression, including any constituent expressions, has no effect at run-time. The partial method itself is also removed and will not be a member of the combined type declaration.
+Because a partial method **with optional implementation** always returns `void`, such invocation expressions will always be expression statements. Furthermore, because a such method is implicitly `private`, such statements will always occur within one of the parts of the type declaration within which the partial method is declared. If no part of a partial type declaration contains an implementing declaration for a given partial method, any expression statement invoking it is simply removed from the combined type declaration. Thus the invocation expression, including any constituent expressions, has no effect at run-time. The partial method itself is also removed and will not be a member of the combined type declaration.
 
 If an implementing declaration exist for a given partial method, the invocations of the partial methods are retained. The partial method gives rise to a method declaration similar to the implementing partial method declaration except for the following:
 
