@@ -712,8 +712,7 @@ class Customer
 }
 ```
 
-Partial methods can also be useful in combination with source generators. For example a regex
-could be defined using the following pattern:
+Partial methods can also be useful in combination with source generators. For example a regex could be defined using the following pattern:
 
 ```csharp
 [RegexGenerated("(dog|cat|fish)")]
