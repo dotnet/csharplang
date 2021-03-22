@@ -712,6 +712,14 @@ class Customer
 }
 ```
 
+Partial methods can also be useful in combination with source generators. For example a regex
+could be defined using the following pattern:
+
+```csharp
+[RegexGenerated("(dog|cat|fish)")]
+partial bool IsPetMatch(string input);
+```
+
 ### Name binding
 
 Although each part of an extensible type must be declared within the same namespace, the parts are typically written within different namespace declarations. Thus, different `using` directives ([Using directives](namespaces.md#using-directives)) may be present for each part. When interpreting simple names ([Type inference](expressions.md#type-inference)) within one part, only the `using` directives of the namespace declaration(s) enclosing that part are considered. This may result in the same identifier having different meanings in different parts:
