@@ -105,7 +105,7 @@ We introduce the concept of "directly contains". An expression *E* is said to "d
 - *E* is *E<sub>1</sub>*. For example, `a?.b()` directly contains the expression `a?.b()`.
 - If *E* is a parenthesized expression `(E2)`, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
 - If *E* is a null-forgiving operator expression `E2!`, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
-- If *E* is a cast expression `(T)E2`, and the cast does not subject E<sub>2</sub> to a non-lifted user-defined conversion, and E<sub>2</sub> directly contains E<sub>1</sub>.
+- If *E* is a cast expression `(T)E2`, and the cast does not subject *E<sub>2</sub>* to a non-lifted user-defined conversion, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
 
 For an expression *E* of the form `primary_expression null_conditional_operations`, let *E<sub>0</sub>* be the expression obtained by textually removing the leading ? from each of the *null_conditional_operations* of *E* that have one, as in the linked specification above.
 
