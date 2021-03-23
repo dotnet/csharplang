@@ -101,10 +101,11 @@ We introduce a new section **?. (null-conditional operator) expressions**. See t
 
 As in the definite assignment rules linked above, we refer to a given initially unassigned variable as *v*.
 
-We introduce the concept of "directly contains". An expression *E* is said to "directly contain" a subexpression *E<sub>1</sub>* if one of the following conditions holds:
+We introduce the concept of "directly contains". An expression *E* is said to "directly contain" a subexpression *E<sub>1</sub>* if it is not subject to a [user-defined conversion](../spec/conversions.md#user-defined-conversions) whose parameter is not of a non-nullable value type, and one of the following conditions holds:
 - *E* is *E<sub>1</sub>*. For example, `a?.b()` directly contains the expression `a?.b()`.
 - If *E* is a parenthesized expression `(E2)`, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
 - If *E* is a null-forgiving operator expression `E2!`, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
+- If *E* is a cast expression `(T)E2`, and the cast does not subject *E<sub>2</sub>* to a non-lifted user-defined conversion whose parameter is not of a non-nullable value type, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
 
 For an expression *E* of the form `primary_expression null_conditional_operations`, let *E<sub>0</sub>* be the expression obtained by textually removing the leading ? from each of the *null_conditional_operations* of *E* that have one, as in the linked specification above.
 
@@ -115,6 +116,32 @@ In subsequent sections we will refer to *E<sub>0</sub>* as the *non-conditional 
 
 ### Remarks
 We use the concept of "directly contains" to allow us to skip over relatively simple "wrapper" expressions when analyzing conditional accesses that are compared to other values. For example, `((a?.b(out x))!) == true` is expected to result in the same flow state as `a?.b == true` in general.
+
+We also want to allow analysis to function in the presence of a number of possible conversions on a conditional access. Propagating out "state when not null" is not possible when the conversion is user-defined, though, since we can't count on user-defined conversions to honor the constraint that the output is non-null only if the input is non-null. The only exception to this is when the user-defined conversion's input is a non-nullable value type. For example:
+```cs
+public struct S1 { }
+public struct S2 { public static implicit operator S2?(S1 s1) => null; }
+```
+
+This also includes lifted conversions like the following:
+```cs
+string x;
+
+S1? s1 = null;
+_ = s1?.M1(x = "a") ?? s1.Value.M2(x = "a");
+
+x.ToString(); // ok
+
+public struct S1
+{
+    public S1 M1(object obj) => this;
+    public S2 M2(object obj) => new S2();
+}
+public struct S2
+{
+    public static implicit operator S2(S1 s1) => null;
+}
+```
 
 When we consider whether a variable is assigned at a given point within a null-conditional expression, we simply assume that any preceding null-conditional operations within the same null-conditional expression succeeded.
 
