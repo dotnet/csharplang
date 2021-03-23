@@ -200,13 +200,15 @@ class ListPatternHelper
 
   private void MoveNextIfNeeded(int targetCount)
   {
+    int modulo = endBuffer.Length;
     while (count < targetCount && enumerator.MoveNext())
     {
       count++;
       if (count < startBuffer.Length)
-      {
         startBuffer[count] = enumerator.Current;
-      }
+
+      if (modulo > 0)
+        endBuffer[count % modulo] = enumerator.Current;
     }
   }
 
@@ -238,11 +240,11 @@ class ListPatternHelper
   }
 
   // fulfills the role of `[^hatIndex]` for end elements when enough elements are available
-  public bool TryGetEndElement(int hatIndex, out ElementType value)
+  public bool TryGetEndElement(int hatIndex, int minCount, out ElementType value)
   {
     Debug.Assert(hatIndex > 0 && hatIndex <= endBuffer.Length);
-    Count();
-    if (count < startBuffer.Length + endBuffer.Length)
+    _ = Count();
+    if (count < minCount)
     {
       value = default;
       return false;
@@ -268,7 +270,7 @@ class ListPatternHelper
 @{
   var helper = new ListPatternHelper(collection, 2, 0);
 
-  helper.TryGetStartElement(0, out var element0) && element0 is 0 &&
+  helper.TryGetStartElement(index: 0, out var element0) && element0 is 0 &&
   helper.TryGetStartElement(1, out var element1) && element1 is 1 &&
   helper.count == 2
 }
@@ -279,7 +281,7 @@ class ListPatternHelper
 @{
   var helper = new ListPatternHelper(collection, 2, 0);
 
-  helper.TryGetStartElement(0, out var element0) && element0 is 0 &&
+  helper.TryGetStartElement(index: 0, out var element0) && element0 is 0 &&
   helper.TryGetStartElement(1, out var element1) && element1 is 1
 }
 ```
@@ -289,8 +291,8 @@ class ListPatternHelper
 @{
   var helper = new ListPatternHelper(collection, 0, 2);
 
-  helper.TryGetEndElement(2, out var hatElement2) && hatElement2 is 3 &&
-  helper.TryGetEndElement(1, out var hatElement1) && hatElement1 is 4
+  helper.TryGetEndElement(hatIndex: 2, minCount: 2, out var hatElement2) && hatElement2 is 3 &&
+  helper.TryGetEndElement(1, 2, out var hatElement1) && hatElement1 is 4
 }
 ```
 
@@ -299,10 +301,10 @@ class ListPatternHelper
 @{
   var helper = new ListPatternHelper(collection, 2, 2);
 
-  helper.TryGetStartElement(0, out var element0) && element0 is 1 &&
+  helper.TryGetStartElement(index: 0, out var element0) && element0 is 1 &&
   helper.TryGetStartElement(1, out var element1) && element1 is 2 &&
-  helper.TryGetEndElement(2, out var hatElement2) && hatElement2 is 3 &&
-  helper.TryGetEndElement(1, out var hatElement1) && hatElement1 is 4
+  helper.TryGetEndElement(hatIndex: 2, minCount: 4, out var hatElement2) && hatElement2 is 3 &&
+  helper.TryGetEndElement(1, 4, out var hatElement1) && hatElement1 is 4
 }
 ```
 
