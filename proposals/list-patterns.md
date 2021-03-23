@@ -93,18 +93,18 @@ This set of rules is derived from the [***range indexer pattern***](https://gith
 
 #### Semantics on enumerable type
 
-If the input type is *enumerable* but not *countable*, then the *length-pattern* is checked on the number of elements obtained from enumerating the collection.
+If the input type is *enumerable* but not *countable*, then the *length_pattern* is checked on the number of elements obtained from enumerating the collection.
 
-If the input type is *enumerable* but not *indexable*, then the *list-pattern* enumerates elements from the collection and checks them against the listed patterns:  
-Patterns at the start of the *list-pattern* — that are before the `..` *slice-pattern* if one is present, or all otherwise — are matched against the elements produced at the start of the enumeration.  
+If the input type is *enumerable* but not *indexable*, then the *list_pattern* enumerates elements from the collection and checks them against the listed patterns:  
+Patterns at the start of the *list_pattern* — that are before the `..` *slice_pattern* if one is present, or all otherwise — are matched against the elements produced at the start of the enumeration.  
 If the collection does not produce enough elements to get a value corresponding to a starting pattern, the match fails. So the *constant-pattern* `3` in `{ 1, 2, 3, .. }` doesn't match when the collection has fewer than 3 elements.  
-Patterns at the end of the *list-pattern* (that are following the `..` *slice-pattern* if one is present) are matched against the elements produced at the end of the enumeration.  
+Patterns at the end of the *list_pattern* (that are following the `..` *slice_pattern* if one is present) are matched against the elements produced at the end of the enumeration.  
 If the collection does not produce enough elements to get a value corresponding to an ending pattern, the match fails. So the *constant-pattern* `3` in `{ 1, .., 3 }` doesn't match when the collection has fewer than 2 elements.  
-A *list-pattern* without a *splice-pattern* only matches if the number of elements produced by complete enumeration and the number of patterns are equals. So `{ _, _, _ }` only matches when the collection produces exactly 3 elements.
+A *list_pattern* without a *splice-pattern* only matches if the number of elements produced by complete enumeration and the number of patterns are equals. So `{ _, _, _ }` only matches when the collection produces exactly 3 elements.
 
 Note that those implicit checks for number of elements in the collection are unaffected by the collection type being *countable*. So `{ _, _, _ }` will not make use of `Length` or `Count` even if one is available.
 
-When multiple *list-patterns* are applied to one input value the collection will be enumerated once at most:  
+When multiple *list_patterns* are applied to one input value the collection will be enumerated once at most:  
 ```
 _ = collection switch
 {
@@ -121,9 +121,9 @@ _ = collectionContainer switch
 };
 ```
 
-It is possible that the collection will not be completely enumerated. For example, if one of the patterns in the *list-pattern* doesn't match or when there are no ending patterns in a *list-pattern* (e.g. `collection is { 1, 2, .. }`).
+It is possible that the collection will not be completely enumerated. For example, if one of the patterns in the *list_pattern* doesn't match or when there are no ending patterns in a *list_pattern* (e.g. `collection is { 1, 2, .. }`).
 
-If an enumerator is produced when a *list-pattern* is applied to an enumerable type and that enumerator is disposable it will be disposed when a top-level pattern containing the *list-pattern* successfully matches, or when none of the patterns matches (in the case of a `switch` statement or expression). It is possible for an enumerator to be disposed more than once and the enumerator must ignore all calls to `Dispose` after the first one.
+If an enumerator is produced when a *list_pattern* is applied to an enumerable type and that enumerator is disposable it will be disposed when a top-level pattern containing the *list_pattern* successfully matches, or when none of the patterns match (in the case of a `switch` statement or expression). It is possible for an enumerator to be disposed more than once and the enumerator must ignore all calls to `Dispose` after the first one.
 ```
 // any enumerator used to evaluate this switch statement is disposed at the indicated locations
 _ = collection switch
@@ -226,8 +226,8 @@ class ListPatternHelper
   // fulfills the role of `[index]` for start elements when enough elements are available
   public bool TryGetStartElement(int index, out ElementType value)
   {
-    Debug.Assert(index < startBuffer.Length);
-    PullStart(index);
+    Debug.Assert(index >= 0 && index < startBuffer.Length);
+    MoveNextIfNeeded(index);
     if (count > index)
     {
       value = startBuffer[index];
@@ -240,7 +240,7 @@ class ListPatternHelper
   // fulfills the role of `[^hatIndex]` for end elements when enough elements are available
   public bool TryGetEndElement(int hatIndex, out ElementType value)
   {
-    Debug.Assert(hatIndex < endBuffer.Length);
+    Debug.Assert(hatIndex > 0 && hatIndex <= endBuffer.Length);
     Count();
     if (count < startBuffer.Length + endBuffer.Length)
     {
@@ -306,7 +306,7 @@ class ListPatternHelper
 }
 ```
 
-The same way that a `Type { name: pattern }` *property-pattern* checks that the input has the expected type and isn't null before using that as receiver for the property checks, so can we have the `{ ..., ... }` *list-pattern* initialize a helper and use that as the pseudo-receiver for element accesses.  
+The same way that a `Type { name: pattern }` *property-pattern* checks that the input has the expected type and isn't null before using that as receiver for the property checks, so can we have the `{ ..., ... }` *list_pattern* initialize a helper and use that as the pseudo-receiver for element accesses.  
 This should allow merging branches of the patterns DAG, thus avoiding creating multiple enumerators.
 
 ### Additional types
