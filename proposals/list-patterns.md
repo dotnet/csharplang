@@ -80,7 +80,7 @@ A *list_pattern* is compatible with any type that is *countable* as well as *ind
 A *list_pattern* is also compatible with any type that is *enumerable*.
 
 A *slice_pattern* is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` argument or otherwise an accessible `Slice` method that takes two `int` arguments. If both are present, the former is preferred.  
-A *slice_pattern* without a sub-pattern is also compatible with any type that is *enumerable*.
+A *slice_pattern* without a sub_pattern is also compatible with any type that is *enumerable*.
 
 ```
 enumerable is { 1, 2, .. } // okay
@@ -97,10 +97,10 @@ If the input type is *enumerable* but not *countable*, then the *length_pattern*
 
 If the input type is *enumerable* but not *indexable*, then the *list_pattern* enumerates elements from the collection and checks them against the listed patterns:  
 Patterns at the start of the *list_pattern* — that are before the `..` *slice_pattern* if one is present, or all otherwise — are matched against the elements produced at the start of the enumeration.  
-If the collection does not produce enough elements to get a value corresponding to a starting pattern, the match fails. So the *constant-pattern* `3` in `{ 1, 2, 3, .. }` doesn't match when the collection has fewer than 3 elements.  
+If the collection does not produce enough elements to get a value corresponding to a starting pattern, the match fails. So the *constant_pattern* `3` in `{ 1, 2, 3, .. }` doesn't match when the collection has fewer than 3 elements.  
 Patterns at the end of the *list_pattern* (that are following the `..` *slice_pattern* if one is present) are matched against the elements produced at the end of the enumeration.  
-If the collection does not produce enough elements to get a value corresponding to an ending pattern, the match fails. So the *constant-pattern* `3` in `{ 1, .., 3 }` doesn't match when the collection has fewer than 2 elements.  
-A *list_pattern* without a *splice-pattern* only matches if the number of elements produced by complete enumeration and the number of patterns are equals. So `{ _, _, _ }` only matches when the collection produces exactly 3 elements.
+If the collection does not produce enough elements to get values corresponding to the ending patterns, the *splice_pattern* does not match. So the *splice_pattern* in `{ 1, .., 3 }` doesn't match when the collection has fewer than 2 elements.  
+A *list_pattern* without a *splice_pattern* only matches if the number of elements produced by complete enumeration and the number of patterns are equals. So `{ _, _, _ }` only matches when the collection produces exactly 3 elements.
 
 Note that those implicit checks for number of elements in the collection are unaffected by the collection type being *countable*. So `{ _, _, _ }` will not make use of `Length` or `Count` even if one is available.
 
@@ -175,7 +175,7 @@ The *input type* for the *slice_pattern* is the return type of the underlying `t
 #### Lowering on enumerable type
 
 > **Open question**: Confirm that async enumerables are out-of-scope.  
-> **Open question**: Confirm that slice patterns with a sub-pattern (such as `..var x`) are out-of-scope.  
+> **Open question**: Confirm that slice patterns with a sub_pattern (such as `..var x`) are out-of-scope.  
 
 Although a helper type is not necessary, it helps simplify and illustrate the logic.
 
@@ -220,6 +220,11 @@ class ListPatternHelper
     return count;
   }
 
+  public int Count()
+  {
+    return MoveNextIfNeeded(-1);
+  }
+
   // fulfills the role of `[index]` for start elements when enough elements are available
   public bool TryGetStartElement(int index, out ElementType value)
   {
@@ -235,18 +240,12 @@ class ListPatternHelper
   }
 
   // fulfills the role of `[^hatIndex]` for end elements when enough elements are available
-  public bool TryGetEndElement(int hatIndex, int minCount, out ElementType value)
+  public ElementType GetEndElement(int hatIndex)
   {
     Debug.Assert(endCircularBuffer is not null && hatIndex > 0 && hatIndex <= endCircularBuffer.Length);
-    if (MoveNextIfNeeded(-1) < minCount)
-    {
-      value = default;
-      return false;
-    }
     int endSize = endCircularBuffer.Length;
     Debug.Assert(endSize > 0);
-    value = endCircularBuffer[(count - hatIndex) % endSize];
-    return true;
+    return endCircularBuffer[(count - hatIndex) % endSize];
   }
 }
 ```
@@ -267,7 +266,7 @@ class ListPatternHelper
 
   helper.TryGetStartElement(index: 0, out var element0) && element0 is 0 &&
   helper.TryGetStartElement(1, out var element1) && element1 is 1 &&
-  helper.count == 2
+  helper.Count() == 2
 }
 ```
 
@@ -286,8 +285,9 @@ class ListPatternHelper
 @{
   var helper = new ListPatternHelper(collection, 0, 2);
 
-  helper.TryGetEndElement(hatIndex: 2, minCount: 2, out var hatElement2) && hatElement2 is 3 &&
-  helper.TryGetEndElement(1, 2, out var hatElement1) && hatElement1 is 4
+  helper.Count() > 2 && // `..` with 2 ending patterns
+  helper.GetEndElement(hatIndex: 2) is 3 && // [^2] is 3
+  helper.GetEndElement(1) is 4 // [^1] is 4
 }
 ```
 
@@ -298,12 +298,13 @@ class ListPatternHelper
 
   helper.TryGetStartElement(index: 0, out var element0) && element0 is 1 &&
   helper.TryGetStartElement(1, out var element1) && element1 is 2 &&
-  helper.TryGetEndElement(hatIndex: 2, minCount: 4, out var hatElement2) && hatElement2 is 3 &&
-  helper.TryGetEndElement(1, 4, out var hatElement1) && hatElement1 is 4
+  helper.Count() > 4 && // `..` with 2 starting patterns and 2 ending patterns
+  helper.TryGetEndElement(hatIndex: 2) is 3 &&
+  helper.TryGetEndElement(1) is 4
 }
 ```
 
-The same way that a `Type { name: pattern }` *property-pattern* checks that the input has the expected type and isn't null before using that as receiver for the property checks, so can we have the `{ ..., ... }` *list_pattern* initialize a helper and use that as the pseudo-receiver for element accesses.  
+The same way that a `Type { name: pattern }` *property_pattern* checks that the input has the expected type and isn't null before using that as receiver for the property checks, so can we have the `{ ..., ... }` *list_pattern* initialize a helper and use that as the pseudo-receiver for element accesses.  
 This should allow merging branches of the patterns DAG, thus avoiding creating multiple enumerators.
 
 ### Additional types
