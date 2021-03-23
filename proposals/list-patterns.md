@@ -185,6 +185,7 @@ class ListPatternHelper
   // Notes: 
   // We could inline this logic to avoid creating a new type and to handle the pattern-based enumeration scenarios.
   // We may only need one element in start buffer, or maybe none at all, if we can control the order of checks in the patterns DAG.
+  // We could emit a count check for a non-terminal `..` and economize on count checks a bit.
   private EnumeratorType enumerator;
   private int count;
   private ElementType[] startBuffer;
@@ -195,40 +196,34 @@ class ListPatternHelper
     count = 0;
     enumerator = enumerable.GetEnumerator();
     startBuffer = startPatternsCount == 0 ? null : new ElementType[startPatternsCount];
-    endBuffer = endPatternsCount == 0 ? null : new ElementType[endPatternsCount];
+    endCircularBuffer = endPatternsCount == 0 ? null : new ElementType[endPatternsCount];
   }
 
-  private void MoveNextIfNeeded(int targetCount)
+  // targetIndex = -1 means we want to enumerate completely
+  private int MoveNextIfNeeded(int targetIndex)
   {
-    int modulo = endBuffer.Length;
-    while (count < targetCount && enumerator.MoveNext())
+    int startSize = startBuffer?.Length ?? 0;
+    int endSize = endCircularBuffer?.Length ?? 0;
+    Debug.Assert(targetIndex == -1 || (targetIndex >= 0 && targetIndex < startSize));
+
+    while ((targetIndex == -1 || count <= targetIndex) && enumerator.MoveNext())
     {
-      count++;
-      if (count < startBuffer.Length)
+      if (count < startSize)
         startBuffer[count] = enumerator.Current;
 
-      if (modulo > 0)
-        endBuffer[count % modulo] = enumerator.Current;
-    }
-  }
+      if (endSize > 0)
+        endCircularBuffer[count % endSize] = enumerator.Current;
 
-  public int Count()
-  {
-    MoveNextIfNeeded(startBuffer.Length);
-    int modulo = endBuffer.Length;
-    while (enumerator.MoveNext())
-    {
       count++;
-      if (modulo > 0)
-        endBuffer[count % modulo] = enumerator.Current;
     }
+
     return count;
   }
 
   // fulfills the role of `[index]` for start elements when enough elements are available
   public bool TryGetStartElement(int index, out ElementType value)
   {
-    Debug.Assert(index >= 0 && index < startBuffer.Length);
+    Debug.Assert(startBuffer is not null && index >= 0 && index < startBuffer.Length);
     MoveNextIfNeeded(index);
     if (count > index)
     {
@@ -242,15 +237,15 @@ class ListPatternHelper
   // fulfills the role of `[^hatIndex]` for end elements when enough elements are available
   public bool TryGetEndElement(int hatIndex, int minCount, out ElementType value)
   {
-    Debug.Assert(hatIndex > 0 && hatIndex <= endBuffer.Length);
-    _ = Count();
-    if (count < minCount)
+    Debug.Assert(endCircularBuffer is not null && hatIndex > 0 && hatIndex <= endCircularBuffer.Length);
+    if (MoveNextIfNeeded(-1) < minCount)
     {
       value = default;
       return false;
     }
-    int modulo = endBuffer.Length;
-    value = endBuffer[(count - hatIndex + 1) % modulo];
+    int endSize = endCircularBuffer.Length;
+    Debug.Assert(endSize > 0);
+    value = endCircularBuffer[(count - hatIndex) % endSize];
     return true;
   }
 }
