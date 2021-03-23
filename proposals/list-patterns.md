@@ -299,8 +299,8 @@ class ListPatternHelper
   helper.TryGetStartElement(index: 0, out var element0) && element0 is 1 &&
   helper.TryGetStartElement(1, out var element1) && element1 is 2 &&
   helper.Count() > 4 && // `..` with 2 starting patterns and 2 ending patterns
-  helper.TryGetEndElement(hatIndex: 2) is 3 &&
-  helper.TryGetEndElement(1) is 4
+  helper.GetEndElement(hatIndex: 2) is 3 &&
+  helper.GetEndElement(1) is 4
 }
 ```
 
