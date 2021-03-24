@@ -1,9 +1,9 @@
 ## File Scoped Namespaces
 
-- [] Proposed
-- [] Prototype: Started
-- []Implementation: Started
-- [] Specification: Started
+- [ ] Proposed
+- [ ] Prototype: Started
+- [ ] Implementation: Started
+- [ ] Specification: Started
 
 ### Summary
 
