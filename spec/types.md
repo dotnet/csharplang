@@ -188,7 +188,7 @@ C# supports two floating point types: `float` and `double`. The `float` and `dou
 *  Positive zero and negative zero. In most situations, positive zero and negative zero behave identically as the simple value zero, but certain operations distinguish between the two ([Division operator](expressions.md#division-operator)).
 *  Positive infinity and negative infinity. Infinities are produced by such operations as dividing a non-zero number by zero. For example, `1.0 / 0.0` yields positive infinity, and `-1.0 / 0.0` yields negative infinity.
 *  The ***Not-a-Number*** value, often abbreviated NaN. NaNs are produced by invalid floating-point operations, such as dividing zero by zero.
-*  The finite set of non-zero values of the form `s * m * 2^e`, where `s` is 1 or -1, and `m` and `e` are determined by the particular floating-point type: For `float`, `0 < m < 2^24` and `-149 <= e <= 104`, and for `double`, `0 < m < 2^53` and `1075 <= e <= 970`. Denormalized floating-point numbers are considered valid non-zero values.
+*  The finite set of non-zero values of the form `s * m * 2^e`, where `s` is 1 or -1, and `m` and `e` are determined by the particular floating-point type: For `float`, `0 < m < 2^24` and `-149 <= e <= 104`, and for `double`, `0 < m < 2^53` and `-1075 <= e <= 970`. Denormalized floating-point numbers are considered valid non-zero values.
 
 The `float` type can represent values ranging from approximately `1.5 * 10^-45` to `3.4 * 10^38` with a precision of 7 digits.
 
@@ -309,7 +309,7 @@ A reference type value is a reference to an ***instance*** of the type, the latt
 
 A class type defines a data structure that contains data members (constants and fields), function members (methods, properties, events, indexers, operators, instance constructors, destructors and static constructors), and nested types. Class types support inheritance, a mechanism whereby derived classes can extend and specialize base classes. Instances of class types are created using *object_creation_expression*s ([Object creation expressions](expressions.md#object-creation-expressions)).
 
-Class types are described in [Classes](classes.md#classes).
+Class types are described in [Classes](classes.md).
 
 Certain predefined class types have special meaning in the C# language, as described in the table below.
 
@@ -319,10 +319,10 @@ Certain predefined class types have special meaning in the C# language, as descr
 | `System.Object`    | The ultimate base class of all other types. See [The object type](types.md#the-object-type). | 
 | `System.String`    | The string type of the C# language. See [The string type](types.md#the-string-type).         |
 | `System.ValueType` | The base class of all value types. See [The System.ValueType type](types.md#the-systemvaluetype-type).          |
-| `System.Enum`      | The base class of all enum types. See [Enums](enums.md#enums).              |
-| `System.Array`     | The base class of all array types. See [Arrays](arrays.md#arrays).             |
-| `System.Delegate`  | The base class of all delegate types. See [Delegates](delegates.md#delegates).          |
-| `System.Exception` | The base class of all exception types. See [Exceptions](exceptions.md#exceptions).         |
+| `System.Enum`      | The base class of all enum types. See [Enums](enums.md).              |
+| `System.Array`     | The base class of all array types. See [Arrays](arrays.md).             |
+| `System.Delegate`  | The base class of all delegate types. See [Delegates](delegates.md).          |
+| `System.Exception` | The base class of all exception types. See [Exceptions](exceptions.md).         |
 
 ### The object type
 
@@ -361,13 +361,13 @@ The keyword `string` is simply an alias for the predefined class `System.String`
 
 An interface defines a contract. A class or struct that implements an interface must adhere to its contract. An interface may inherit from multiple base interfaces, and a class or struct may implement multiple interfaces.
 
-Interface types are described in [Interfaces](interfaces.md#interfaces).
+Interface types are described in [Interfaces](interfaces.md).
 
 ### Array types
 
 An array is a data structure that contains zero or more variables which are accessed through computed indices. The variables contained in an array, also called the elements of the array, are all of the same type, and this type is called the element type of the array.
 
-Array types are described in [Arrays](arrays.md#arrays).
+Array types are described in [Arrays](arrays.md).
 
 ### Delegate types
 
@@ -375,7 +375,7 @@ A delegate is a data structure that refers to one or more methods. For instance 
 
 The closest equivalent of a delegate in C or C++ is a function pointer, but whereas a function pointer can only reference static functions, a delegate can reference both static and instance methods. In the latter case, the delegate stores not only a reference to the method's entry point, but also a reference to the object instance on which to invoke the method.
 
-Delegate types are described in [Delegates](delegates.md#delegates).
+Delegate types are described in [Delegates](delegates.md).
 
 ## Boxing and unboxing
 
@@ -541,7 +541,7 @@ type_argument
     ;
 ```
 
-In unsafe code ([Unsafe code](unsafe-code.md#unsafe-code)), a *type_argument* may not be a pointer type. Each type argument must satisfy any constraints on the corresponding type parameter ([Type parameter constraints](classes.md#type-parameter-constraints)).
+In unsafe code ([Unsafe code](unsafe-code.md)), a *type_argument* may not be a pointer type. Each type argument must satisfy any constraints on the corresponding type parameter ([Type parameter constraints](classes.md#type-parameter-constraints)).
 
 ### Open and closed types
 
@@ -626,11 +626,11 @@ As a type, type parameters are purely a compile-time construct. At run-time, eac
 
 If a conversion exists from a lambda expression to a delegate type `D`, a conversion also exists to the expression tree type `Expression<D>`. Whereas the conversion of a lambda expression to a delegate type generates a delegate that references executable code for the lambda expression, conversion to an expression tree type creates an expression tree representation of the lambda expression.
 
-Expression trees are efficient in-memory data representations of lambda expressionsand make the structure of the lambda expressiontransparent and explicit.
+Expression trees are efficient in-memory data representations of lambda expressions and make the structure of the lambda expression transparent and explicit.
 
 Just like a delegate type `D`, `Expression<D>` is said to have parameter and return types, which are the same as those of `D`.
 
-The following example represents a lambda expressionboth as executable code and as an expression tree. Because a conversion exists to `Func<int,int>`, a conversion also exists to `Expression<Func<int,int>>`:
+The following example represents a lambda expression both as executable code and as an expression tree. Because a conversion exists to `Func<int,int>`, a conversion also exists to `Expression<Func<int,int>>`:
 
 ```csharp
 Func<int,int> del = x => x + 1;                    // Code
@@ -640,7 +640,7 @@ Expression<Func<int,int>> exp = x => x + 1;        // Data
 
 Following these assignments, the delegate `del` references a method that returns `x + 1`, and the expression tree `exp` references a data structure that describes the expression `x => x + 1`.
 
-The exact definition of the generic type `Expression<D>` as well as the precise rules for constructing an expression tree when a lambda expressionis converted to an expression tree type, are both outside the scope of this specification.
+The exact definition of the generic type `Expression<D>` as well as the precise rules for constructing an expression tree when a lambda expression is converted to an expression tree type, are both outside the scope of this specification.
 
 Two things are important to make explicit:
 

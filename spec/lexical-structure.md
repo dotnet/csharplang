@@ -110,7 +110,7 @@ new_line_character
     ;
 
 delimited_comment
-    : '/*' delimited_comment_section* asterisk* '/'
+    : '/*' delimited_comment_section* asterisk+ '/'
     ;
 
 delimited_comment_section
@@ -346,7 +346,7 @@ keyword
     ;
 ```
 
-In some places in the grammar, specific identifiers have special meaning, but are not keywords. Such identifiers are sometimes referred to as "contextual keywords". For example, within a property declaration, the "`get`" and "`set`" identifiers have special meaning ([Accessors](classes.md#accessors)). An identifier other than `get` or `set` is never permitted in these locations, so this use does not conflict with a use of these words as identifiers. In other cases, such as with the identifier "`var`" in implicitly typed local variable declarations ([Local variable declarations](statements.md#local-variable-declarations)), a contectual keyword can conflict with declared names. In such cases, the declared name takes precedence over the use of the identifier as a contextual keyword.
+In some places in the grammar, specific identifiers have special meaning, but are not keywords. Such identifiers are sometimes referred to as "contextual keywords". For example, within a property declaration, the "`get`" and "`set`" identifiers have special meaning ([Accessors](classes.md#accessors)). An identifier other than `get` or `set` is never permitted in these locations, so this use does not conflict with a use of these words as identifiers. In other cases, such as with the identifier "`var`" in implicitly typed local variable declarations ([Local variable declarations](statements.md#local-variable-declarations)), a contextual keyword can conflict with declared names. In such cases, the declared name takes precedence over the use of the identifier as a contextual keyword.
 
 ### Literals
 
@@ -673,7 +673,7 @@ open_brace_escape_sequence
     : '{{'
     ;
 
-    close_brace_escape_sequence
+close_brace_escape_sequence
     : '}}'
     ;
     
@@ -698,7 +698,7 @@ single_regular_balanced_text_character
     ;
     
 interpolation_format
-    : interpolation_format_character+
+    : ':' interpolation_format_character+
     ;
     
 interpolation_format_character
@@ -774,8 +774,8 @@ single_verbatim_balanced_text_character
 
 An *interpolated_string_literal* token is reinterpreted as multiple tokens and other input elements as follows, in order of occurrence in the *interpolated_string_literal*:
 
-* Occurences of the following are reinterpreted as separate individual tokens: the leading `$` sign, *interpolated_regular_string_whole*, *interpolated_regular_string_start*, *interpolated_regular_string_mid*, *interpolated_regular_string_end*, *interpolated_verbatim_string_whole*, *interpolated_verbatim_string_start*, *interpolated_verbatim_string_mid* and *interpolated_verbatim_string_end*.
-* Occurences of *regular_balanced_text* and *verbatim_balanced_text* between these are reprocessed as an *input_section* ([Lexical analysis](lexical-structure.md#lexical-analysis)) and are reinterpreted as the resulting sequence of input elements. These may in turn include interpolated string literal tokens to be reinterpreted.
+* Occurrences of the following are reinterpreted as separate individual tokens: the leading `$` sign, *interpolated_regular_string_whole*, *interpolated_regular_string_start*, *interpolated_regular_string_mid*, *interpolated_regular_string_end*, *interpolated_verbatim_string_whole*, *interpolated_verbatim_string_start*, *interpolated_verbatim_string_mid* and *interpolated_verbatim_string_end*.
+* Occurrences of *regular_balanced_text* and *verbatim_balanced_text* between these are reprocessed as an *input_section* ([Lexical analysis](lexical-structure.md#lexical-analysis)) and are reinterpreted as the resulting sequence of input elements. These may in turn include interpolated string literal tokens to be reinterpreted.
 
 Syntactic analysis will recombine the tokens into an *interpolated_string_expression* ([Interpolated strings](expressions.md#interpolated-strings)).
 
@@ -1107,7 +1107,7 @@ class Hello
 }
 ```
 results in the output:
-```
+```console
 hello,
 #if Debug
         world
@@ -1258,7 +1258,7 @@ warning_list
     ;
 ```
 
-A `#pragma warning` directive that omits the warning list affects all warnings. A `#pragma warning` directive the includes a warning list affects only those warnings that are specified in the list.
+A `#pragma warning` directive that omits the warning list affects all warnings. A `#pragma warning` directive that includes a warning list affects only those warnings that are specified in the list.
 
 A `#pragma warning disable` directive disables all or the given set of warnings.
 

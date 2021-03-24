@@ -14,13 +14,13 @@ In the example
 ```csharp
 class A
 {
-public static int x;
-int y;
+    public static int x;
+    int y;
 
-void F(int[] v, int a, ref int b, out int c) {
-int i = 1;
-c = a + b++;
-}
+    void F(int[] v, int a, ref int b, out int c) {
+        int i = 1;
+        c = a + b++;
+    }
 }
 ```
 `x` is a static variable, `y` is an instance variable, `v[0]` is an array element, `a` is a value parameter, `b` is a reference parameter, `c` is an output parameter, and `i` is a local variable.
@@ -105,7 +105,7 @@ If the parent *block*, *for_statement*, *switch_statement*, *using_statement*, *
 
 A local variable introduced by a *local_variable_declaration* is not automatically initialized and thus has no default value. For the purpose of definite assignment checking, a local variable introduced by a *local_variable_declaration* is considered initially unassigned. A *local_variable_declaration* may include a *local_variable_initializer*, in which case the variable is considered definitely assigned only after the initializing expression ([Declaration statements](variables.md#declaration-statements)).
 
-Within the scope of a local variableintroduced by a *local_variable_declaration*, it is a compile-time error to refer to that local variable in a textual position that precedes its *local_variable_declarator*. If the local variable declaration is implicit ([Local variable declarations](statements.md#local-variable-declarations)), it is also an error to refer to the variable within its *local_variable_declarator*.
+Within the scope of a local variable introduced by a *local_variable_declaration*, it is a compile-time error to refer to that local variable in a textual position that precedes its *local_variable_declarator*. If the local variable declaration is implicit ([Local variable declarations](statements.md#local-variable-declarations)), it is also an error to refer to the variable within its *local_variable_declarator*.
 
 A local variable introduced by a *foreach_statement* or a *specific_catch_clause* is considered definitely assigned in its entire scope.
 
@@ -140,7 +140,7 @@ At a given location in the executable code of a function member, a variable is s
 
 The formal specification underlying the above informal rules is described in [Initially assigned variables](variables.md#initially-assigned-variables), [Initially unassigned variables](variables.md#initially-unassigned-variables), and [Precise rules for determining definite assignment](variables.md#precise-rules-for-determining-definite-assignment).
 
-The definite assignment states of instance variables of a *struct_type* variable are tracked individually as well as collectively. In additional to the rules above, the following rules apply to *struct_type* variables and their instance variables:
+The definite assignment states of instance variables of a *struct_type* variable are tracked individually as well as collectively. In addition to the rules above, the following rules apply to *struct_type* variables and their instance variables:
 
 *  An instance variable is considered definitely assigned if its containing *struct_type* variable is considered definitely assigned.
 *  A *struct_type* variable is considered definitely assigned if each of its instance variables is considered definitely assigned.
@@ -272,11 +272,11 @@ for ( for_initializer ; for_condition ; for_iterator ) embedded_statement
 is done as if the statement were written:
 ```csharp
 {
-for_initializer ;
-while ( for_condition ) {
-embedded_statement ;
-for_iterator ;
-}
+    for_initializer ;
+    while ( for_condition ) {
+        embedded_statement ;
+        for_iterator ;
+    }
 }
 ```
 
@@ -358,10 +358,10 @@ finally *finally_block*
 is done as if the statement were a `try`-`finally` statement enclosing a `try`-`catch` statement:
 ```csharp
 try {
-try try_block
-catch(...) catch_block_1
-...
-catch(...) catch_block_n
+    try try_block
+    catch(...) catch_block_1
+    ...
+    catch(...) catch_block_n
 }
 finally finally_block
 ```
@@ -370,31 +370,31 @@ The following example demonstrates how the different blocks of a `try` statement
 ```csharp
 class A
 {
-static void F() {
-int i, j;
-try {
-goto LABEL;
-// neither i nor j definitely assigned
-i = 1;
-// i definitely assigned
-}
+    static void F() {
+        int i, j;
+        try {
+            goto LABEL;
+            // neither i nor j definitely assigned
+            i = 1;
+            // i definitely assigned
+        }
 
-catch {
-// neither i nor j definitely assigned
-i = 3;
-// i definitely assigned
-}
+        catch {
+            // neither i nor j definitely assigned
+            i = 3;
+            // i definitely assigned
+        }
 
-finally {
-// neither i nor j definitely assigned
-j = 5;
-// j definitely assigned
-}
-// i and j definitely assigned
-LABEL:;
-// j definitely assigned
+        finally {
+            // neither i nor j definitely assigned
+            j = 5;
+            // j definitely assigned
+            }
+        // i and j definitely assigned
+        LABEL:;
+        // j definitely assigned
 
-}
+    }
 }
 ```
 
@@ -447,8 +447,7 @@ The following rule applies to these kinds of expressions: literals ([Literals](e
 
 #### General rules for expressions with embedded expressions
 
-The following rules apply to these kinds of expressions: parenthesized expressions ([Parenthesized expressions](expressions.md#parenthesized-expressions)), element access expressions ([Element access](expressions.md#element-access)), base access expressions with indexing ([Base access](expressions.md#base-access)), increment and decrement expressions ([Postfix increment and decrement operators](expressions.md#postfix-increment-and-decrement-operators), [Prefix increment and decrement operators](expressions.md#prefix-increment-and-decrement-operators)), cast expressions ([Cast expressions](expressions.md#cast-expressions)), unary `+`, `-`, `~`, `*` expressions, binary `+`, `-`, `*`, `/`, `%`, `<<`, `>
-    >`, `<`, `<=`, `>`, `>=`, `==`, `!=`, `is`, `as`, `&`, `|`, `^` expressions ([Arithmetic operators](expressions.md#arithmetic-operators), [Shift operators](expressions.md#shift-operators), [Relational and type-testing operators](expressions.md#relational-and-type-testing-operators), [Logical operators](expressions.md#logical-operators)), compound assignment expressions ([Compound assignment](expressions.md#compound-assignment)), `checked` and `unchecked` expressions ([The checked and unchecked operators](expressions.md#the-checked-and-unchecked-operators)), plus array and delegate creation expressions ([The new operator](expressions.md#the-new-operator)).
+The following rules apply to these kinds of expressions: parenthesized expressions ([Parenthesized expressions](expressions.md#parenthesized-expressions)), element access expressions ([Element access](expressions.md#element-access)), base access expressions with indexing ([Base access](expressions.md#base-access)), increment and decrement expressions ([Postfix increment and decrement operators](expressions.md#postfix-increment-and-decrement-operators), [Prefix increment and decrement operators](expressions.md#prefix-increment-and-decrement-operators)), cast expressions ([Cast expressions](expressions.md#cast-expressions)), unary `+`, `-`, `~`, `*` expressions, binary `+`, `-`, `*`, `/`, `%`, `<<`, `>>`, `<`, `<=`, `>`, `>=`, `==`, `!=`, `is`, `as`, `&`, `|`, `^` expressions ([Arithmetic operators](expressions.md#arithmetic-operators), [Shift operators](expressions.md#shift-operators), [Relational and type-testing operators](expressions.md#relational-and-type-testing-operators), [Logical operators](expressions.md#logical-operators)), compound assignment expressions ([Compound assignment](expressions.md#compound-assignment)), `checked` and `unchecked` expressions ([The checked and unchecked operators](expressions.md#the-checked-and-unchecked-operators)), plus array and delegate creation expressions ([The new operator](expressions.md#the-new-operator)).
 
 Each of these expressions has one or more sub-expressions that are unconditionally evaluated in a fixed order. For example, the binary `%` operator evaluates the left hand side of the operator, then the right hand side. An indexing operation evaluates the indexed expression, and then evaluates each of the index expressions, in order from left to right. For an expression *expr*, which has sub-expressions *e1, e2, ..., eN*, evaluated in that order:
 
@@ -567,7 +566,7 @@ For an expression *expr* of the form `expr_first ?? expr_second`:
 *  The definite assignment state of *v* before *expr_first* is the same as the definite assignment state of *v* before *expr*.
 *  The definite assignment state of *v* before *expr_second* is the same as the definite assignment state of *v* after *expr_first*.
 *  The definite assignment statement of *v* after *expr* is determined by:
-    * If *expr_first* is a constant expression ([Constant expressions](expressions.md#constant-expressions)) with value null, then the the state of *v* after *expr* is the same as the state of *v* after *expr_second*.
+    * If *expr_first* is a constant expression ([Constant expressions](expressions.md#constant-expressions)) with value null, then the state of *v* after *expr* is the same as the state of *v* after *expr_second*.
 *  Otherwise, the state of *v* after *expr* is the same as the definite assignment state of *v* after *expr_first*.
 
 #### ?: (conditional) expressions

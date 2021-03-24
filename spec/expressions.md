@@ -44,7 +44,7 @@ The following operations in C# are subject to binding:
 
 *  Member access: `e.M`
 *  Method invocation: `e.M(e1, ..., eN)`
-*  Delegate invocaton:`e(e1, ..., eN)`
+*  Delegate invocation:`e(e1, ..., eN)`
 *  Element access: `e[e1, ..., eN]`
 *  Object creation: `new C(e1, ..., eN)`
 *  Overloaded unary operators: `+`, `-`, `!`, `~`, `++`, `--`, `true`, `false`
@@ -84,7 +84,7 @@ The following sections describe for each construct in the language exactly when 
 
 ### Types of constituent expressions
 
-When an operation is statically bound, the type of a constituent expression (e.g. a receiver, and argument, an index or an operand) is always considered to be the compile-time type of that expression.
+When an operation is statically bound, the type of a constituent expression (e.g. a receiver, an argument, an index or an operand) is always considered to be the compile-time type of that expression.
 
 When an operation is dynamically bound, the type of a constituent expression is determined in different ways depending on the compile-time type of the constituent expression:
 
@@ -117,7 +117,7 @@ The following table summarizes all operators in order of precedence from highest
 | __Section__                                                                                   | __Category__                | __Operators__ | 
 |-----------------------------------------------------------------------------------------------|-----------------------------|---------------|
 | [Primary expressions](expressions.md#primary-expressions)                                     | Primary                     | `x.y`  `f(x)`  `a[x]`  `x++`  `x--`  `new`  `typeof`  `default`  `checked`  `unchecked`  `delegate` | 
-| [Unary operators](expressions.md#unary-operators)                                             | Unary                       | `+`  `*`  `!`  `~`  `++x`  `--x`  `(T)x` | 
+| [Unary operators](expressions.md#unary-operators)                                             | Unary                       | `+`  `-`  `!`  `~`  `++x`  `--x`  `(T)x` | 
 | [Arithmetic operators](expressions.md#arithmetic-operators)                                   | Multiplicative              | `*`  `/`  `%` | 
 | [Arithmetic operators](expressions.md#arithmetic-operators)                                   | Additive                    | `+`  `-`      | 
 | [Shift operators](expressions.md#shift-operators)                                             | Shift                       | `<<`  `>>`    | 
@@ -125,12 +125,12 @@ The following table summarizes all operators in order of precedence from highest
 | [Relational and type-testing operators](expressions.md#relational-and-type-testing-operators) | Equality                    | `==`  `!=`    | 
 | [Logical operators](expressions.md#logical-operators)                                         | Logical AND                 | `&`           | 
 | [Logical operators](expressions.md#logical-operators)                                         | Logical XOR                 | `^`           | 
-| [Logical operators](expressions.md#logical-operators)                                         | Logical OR                  | `\|`          |
+| [Logical operators](expressions.md#logical-operators)                                         | Logical OR                  | <code>&#124;</code>           |
 | [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional AND             | `&&`          | 
-| [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional OR              | `\|\|`        | 
+| [Conditional logical operators](expressions.md#conditional-logical-operators)                 | Conditional OR              | <code>&#124;&#124;</code>          | 
 | [The null coalescing operator](expressions.md#the-null-coalescing-operator)                   | Null coalescing             | `??`          | 
 | [Conditional operator](expressions.md#conditional-operator)                                   | Conditional                 | `?:`          | 
-| [Assignment operators](expressions.md#assignment-operators), [Anonymous function expressions](expressions.md#anonymous-function-expressions)  | Assignment and lambda expression | `=`  `*=`  `/=`  `%=`  `+=`  `-=`  `<<=`  `>>=`  `&=`  `^=`  `\|=`  `=>` | 
+| [Assignment operators](expressions.md#assignment-operators), [Anonymous function expressions](expressions.md#anonymous-function-expressions)  | Assignment and lambda expression | `=`  `*=`  `/=`  `%=`  `+=`  `-=`  `<<=`  `>>=`  `&=`  `^=`  <code>&#124;=</code>  `=>` | 
 
 When an operand occurs between two operators with the same precedence, the associativity of the operators controls the order in which the operations are performed:
 
@@ -300,7 +300,7 @@ decimal AddPercent(decimal x, double percent) {
 
 A member lookup is the process whereby the meaning of a name in the context of a type is determined. A member lookup can occur as part of evaluating a *simple_name* ([Simple names](expressions.md#simple-names)) or a *member_access* ([Member access](expressions.md#member-access)) in an expression. If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression* ([Method invocations](expressions.md#method-invocations)), the member is said to be invoked.
 
-If a member is a method or event, or if it is a constant, field or property of either a delegate type ([Delegates](delegates.md#delegates)) or the type `dynamic` ([The dynamic type](types.md#the-dynamic-type)), then the member is said to be *invocable*.
+If a member is a method or event, or if it is a constant, field or property of either a delegate type ([Delegates](delegates.md)) or the type `dynamic` ([The dynamic type](types.md#the-dynamic-type)), then the member is said to be *invocable*.
 
 Member lookup considers not only the name of a member but also the number of type parameters the member has and whether the member is accessible. For the purposes of member lookup, generic methods and nested generic types have the number of type parameters indicated in their respective declarations and all other members have zero type parameters.
 
@@ -479,7 +479,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 x = 0, y = 1, z = 2
 x = 4, y = -1, z = 3
 ```
@@ -879,7 +879,7 @@ interface I2<T> {...}
 
 class G1<U>
 {
-    int F1(U u);                  // Overload resulotion for G<int>.F1
+    int F1(U u);                  // Overload resolution for G<int>.F1
     int F1(int i);                // will pick non-generic
 
     void F2(I1<U> a);             // Valid overload
@@ -971,7 +971,7 @@ primary_expression
 
 primary_no_array_creation_expression
     : literal
-    | interpolated_string
+    | interpolated_string_expression
     | simple_name
     | parenthesized_expression
     | member_access
@@ -1093,7 +1093,7 @@ A *simple_name* is either of the form `I` or of the form `I<A1,...,Ak>`, where `
       * Otherwise, the *namespace_or_type_name* refers to the type constructed with the given type arguments.
    *  Otherwise, if the location where the *simple_name* occurs is enclosed by a namespace declaration for `N`:
       * If `K` is zero and the namespace declaration contains an *extern_alias_directive* or *using_alias_directive* that associates the name `I` with an imported namespace or type, then the *simple_name* refers to that namespace or type.
-      * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_static_directive*s of the namespace declaration contain exactly one accessible type or non-extension static membre having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.
+      * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_static_directive*s of the namespace declaration contain exactly one accessible type or non-extension static member having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.
       * Otherwise, if the namespaces and types imported by the *using_namespace_directive*s of the namespace declaration contain more than one accessible type or non-extension-method static member having name `I` and `K` type parameters, then the *simple_name* is ambiguous and an error occurs.
 
    Note that this entire step is exactly parallel to the corresponding step in the processing of a *namespace_or_type_name* ([Namespace and type names](basic-concepts.md#namespace-and-type-names)).
@@ -1201,7 +1201,7 @@ class A
 #### Grammar ambiguities
 
 The productions for *simple_name* ([Simple names](expressions.md#simple-names)) and *member_access* ([Member access](expressions.md#member-access)) can give rise to ambiguities in the grammar for expressions. For example, the statement:
-```
+```csharp
 F(G<A,B>(7));
 ```
 could be interpreted as a call to `F` with two arguments, `G < A` and `B > (7)`. Alternatively, it could be interpreted as a call to `F` with one argument, which is a call to a generic method `G` with two type arguments and one regular argument.
@@ -1402,12 +1402,12 @@ namespace N2
 ```
 
 The output of this example is:
-```
+```console
 E.F(1)
 D.G(2)
 C.H(3)
 ```
-`D.G` takes precendece over `C.G`, and `E.F` takes precedence over both `D.F` and `C.F`.
+`D.G` takes precedence over `C.G`, and `E.F` takes precedence over both `D.F` and `C.F`.
 
 #### Delegate invocations
 
@@ -2135,7 +2135,7 @@ class Test
 }
 ```
 produces the following output:
-```
+```console
 System.Int32
 System.Int32
 System.String
@@ -2481,7 +2481,7 @@ For an operation of the form `-x`, unary operator overload resolution ([Unary op
    long operator -(long x);
    ```
 
-   The result is computed by subtracting `x` from zero. If the value of of `x` is the smallest representable value of the operand type (-2^31 for `int` or -2^63 for `long`), then the mathematical negation of `x` is not representable within the operand type. If this occurs within a `checked` context, a `System.OverflowException` is thrown; if it occurs within an `unchecked` context, the result is the value of the operand and the overflow is not reported.
+   The result is computed by subtracting `x` from zero. If the value of `x` is the smallest representable value of the operand type (-2^31 for `int` or -2^63 for `long`), then the mathematical negation of `x` is not representable within the operand type. If this occurs within a `checked` context, a `System.OverflowException` is thrown; if it occurs within an `unchecked` context, the result is the value of the operand and the overflow is not reported.
 
    If the operand of the negation operator is of type `uint`, it is converted to type `long`, and the type of the result is `long`. An exception is the rule that permits the `int` value -2147483648 (-2^31) to be written as a decimal integer literal ([Integer literals](lexical-structure.md#integer-literals)).
 
@@ -2602,7 +2602,7 @@ await_expression
     ;
 ```
 
-An *await_expression* is only allowed in the body of an async function ([Iterators](classes.md#iterators)). Within the nearest enclosing async function, an *await_expression* may not occur in these places:
+An *await_expression* is only allowed in the body of an async function ([Async functions](classes.md#async-functions)). Within the nearest enclosing async function, an *await_expression* may not occur in these places:
 
 *  Inside a nested (non-async) anonymous function
 *  Inside the block of a *lock_statement*
@@ -2642,7 +2642,7 @@ At runtime, the expression `await t` is evaluated as follows:
 
 *  An awaiter `a` is obtained by evaluating the expression `(t).GetAwaiter()`.
 *  A `bool` `b` is obtained by evaluating the expression `(a).IsCompleted`.
-*  If `b` is `false` then evaluation depends on whether `a` implements the interface `System.Runtime.CompilerServices.ICriticalNotifyCompletion` (hereafter known as `ICriticalNotifyCompletion` for brevity). This check is done at binding time; i.e. at runtime if `a` has the compile time type `dynamic`, and at compile time otherwise. Let `r` denote the resumption delegate ([Iterators](classes.md#iterators)):
+*  If `b` is `false` then evaluation depends on whether `a` implements the interface `System.Runtime.CompilerServices.ICriticalNotifyCompletion` (hereafter known as `ICriticalNotifyCompletion` for brevity). This check is done at binding time; i.e. at runtime if `a` has the compile time type `dynamic`, and at compile time otherwise. Let `r` denote the resumption delegate ([Async functions](classes.md#async-functions)):
     * If `a` does not implement `ICriticalNotifyCompletion`, then the expression 
 `(a as (INotifyCompletion)).OnCompleted(r)` is evaluated.
     * If `a` does implement `ICriticalNotifyCompletion`, then the expression 
@@ -2769,7 +2769,7 @@ The predefined division operators are listed below. The operators all compute th
    decimal operator /(decimal x, decimal y);
    ```
 
-   If the value of the right operand is zero, a `System.DivideByZeroException` is thrown. If the resulting value is too large to represent in the `decimal` format, a `System.OverflowException` is thrown. If the result value is too small to represent in the `decimal` format, the result is zero. The scale of the result is the smallest scale that will preserve a result equal to the nearest representantable decimal value to the true mathematical result.
+   If the value of the right operand is zero, a `System.DivideByZeroException` is thrown. If the resulting value is too large to represent in the `decimal` format, a `System.OverflowException` is thrown. If the result value is too small to represent in the `decimal` format, the result is zero. The scale of the result is the smallest scale that will preserve a result equal to the nearest representable decimal value to the true mathematical result.
 
    Decimal division is equivalent to using the division operator of type `System.Decimal`.
 
@@ -2945,7 +2945,7 @@ The predefined subtraction operators are listed below. The operators all subtrac
 
    |      |      |      |      |      |      |     |
    |:----:|:----:|:----:|:----:|:----:|:----:|:---:|
-   | NaN  | y    | +0   | -0   | +inf | -inf | NaN | 
+   |      | y    | +0   | -0   | +inf | -inf | NaN | 
    | x    | z    | x    | x    | -inf | +inf | NaN | 
    | +0   | -y   | +0   | +0   | -inf | +inf | NaN | 
    | -0   | -y   | -0   | +0   | -inf | +inf | NaN | 
@@ -3183,7 +3183,7 @@ The operators compare the operands according to the rules of the IEEE 754 standa
 *  If either operand is NaN, the result is `false` for all operators except `!=`, for which the result is `true`. For any two operands, `x != y` always produces the same result as `!(x == y)`. However, when one or both operands are NaN, the `<`, `>`, `<=`, and `>=` operators do not produce the same results as the logical negation of the opposite operator. For example, if either of `x` and `y` is NaN, then `x < y` is `false`, but `!(x >= y)` is `true`.
 *  When neither operand is NaN, the operators compare the values of the two floating-point operands with respect to the ordering
 
-   ```
+   ```csharp
    -inf < -max < ... < -min < -0.0 == +0.0 < +min < ... < +max < +inf
    ```
 
@@ -3286,7 +3286,7 @@ class Test
 }
 ```
 produces the output
-```
+```console
 True
 False
 False
@@ -3505,7 +3505,7 @@ bool? operator |(bool? x, bool? y);
 
 The following table lists the results produced by these operators for all combinations of the values `true`, `false`, and `null`.
 
-| `x`     | `y`     | `x & y` | `x \| y`|
+| `x`     | `y`     | `x & y` | <code>x &#124; y</code> |
 |:-------:|:-------:|:-------:|:-------:|
 | `true`  | `true`  | `true`  | `true`  | 
 | `true`  | `false` | `false` | `true`  | 
@@ -3687,7 +3687,7 @@ anonymous_function_body
 
 The `=>` operator has the same precedence as assignment (`=`) and is right-associative.
 
-An anonymous function with the `async` modifier is an async function and follows the rules described in [Iterators](classes.md#iterators).
+An anonymous function with the `async` modifier is an async function and follows the rules described in [Async functions](classes.md#async-functions).
 
 The parameters of an anonymous function in the form of a *lambda_expression* can be explicitly or implicitly typed. In an explicitly typed parameter list, the type of each parameter is explicitly stated. In an implicitly typed parameter list, the types of the parameters are inferred from the context in which the anonymous function occurs—specifically, when the anonymous function is converted to a compatible delegate type or expression tree type, that type provides the parameter types ([Anonymous function conversions](conversions.md#anonymous-function-conversions)).
 
@@ -3830,7 +3830,7 @@ class Test
 }
 ```
 the local variable `x` is captured by the anonymous function, and the lifetime of `x` is extended at least until the delegate returned from `F` becomes eligible for garbage collection (which doesn't happen until the very end of the program). Since each invocation of the anonymous function operates on the same instance of `x`, the output of the example is:
-```
+```console
 1
 2
 3
@@ -3864,7 +3864,7 @@ static void F() {
 }
 ```
 
-When not captured, there is no way to observe exactly how often a local variable is instantiated—because the lifetimes of the instantiations are disjoint, it is possible for each instantation to simply use the same storage location. However, when an anonymous function captures a local variable, the effects of instantiation become apparent.
+When not captured, there is no way to observe exactly how often a local variable is instantiated—because the lifetimes of the instantiations are disjoint, it is possible for each instantiation to simply use the same storage location. However, when an anonymous function captures a local variable, the effects of instantiation become apparent.
 
 The example
 ```csharp
@@ -3889,7 +3889,7 @@ class Test
 }
 ```
 produces the output:
-```
+```console
 1
 3
 5
@@ -3908,7 +3908,7 @@ static D[] F() {
 }
 ```
 the output is:
-```
+```console
 5
 5
 5
@@ -3926,7 +3926,7 @@ static D[] F() {
 }
 ```
 only one instance of the iteration variable is captured, which produces the output:
-```
+```console
 3
 3
 3
@@ -3945,7 +3945,7 @@ static D[] F() {
 }
 ```
 the three delegates capture the same instance of `x` but separate instances of `y`, and the output is:
-```
+```console
 1 1
 2 1
 3 1
@@ -3973,7 +3973,7 @@ class Test
 }
 ```
 the two anonymous functions capture the same instance of the local variable `x`, and they can thus "communicate" through that variable. The output of the example is:
-```
+```console
 5
 10
 ```
@@ -4070,7 +4070,7 @@ A query expression begins with a `from` clause and ends with either a `select` o
 
 Query expressions contain a number of "contextual keywords", i.e., identifiers that have special meaning in a given context. Specifically these are `from`, `where`, `join`, `on`, `equals`, `into`, `let`, `orderby`, `ascending`, `descending`, `select`, `group` and `by`. In order to avoid ambiguities in query expressions caused by mixed use of these identifiers as keywords or simple names, these identifiers are considered keywords when occurring anywhere within a query expression.
 
-For this purpose, a query expression is any expression that starts with "`from dentifier`" followed by any token except "`;`", "`=`" or "`,`".
+For this purpose, a query expression is any expression that starts with "`from identifier`" followed by any token except "`;`", "`=`" or "`,`".
 
 In order to use these words as identifiers within a query expression, they can be prefixed with "`@`" ([Identifiers](lexical-structure.md#identifiers)).
 
@@ -4131,11 +4131,11 @@ from x in ( e ) . Cast < T > ( )
 ```
 
 A `join` clause that explicitly specifies a range variable type
-```
+```csharp
 join T x in e on k1 equals k2
 ```
 is translated into
-```
+```csharp
 join x in ( e ) . Cast < T > ( ) on k1 equals k2
 ```
 
@@ -4859,7 +4859,7 @@ Constant expressions occur in the contexts listed below. In these contexts, a co
 *  `case` labels of a `switch` statement ([The switch statement](statements.md#the-switch-statement)).
 *  `goto case` statements ([The goto statement](statements.md#the-goto-statement)).
 *  Dimension lengths in an array creation expression ([Array creation expressions](expressions.md#array-creation-expressions)) that includes an initializer.
-*  Attributes ([Attributes](attributes.md#attributes)).
+*  Attributes ([Attributes](attributes.md)).
 
 An implicit constant expression conversion ([Implicit constant expression conversions](conversions.md#implicit-constant-expression-conversions)) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
 

@@ -1,4 +1,4 @@
-﻿# Documentation comments
+# Documentation comments
 
 C# provides a mechanism for programmers to document their code using a special comment syntax that contains XML text. In source code files, comments having a certain form can be used to direct a tool to produce XML from those comments and the source code elements, which they precede. Comments using such syntax are called ***documentation comments***. They must immediately precede a user-defined type (such as a class, delegate, or interface) or a member (such as a field, event, property, or method). The XML generation tool is called the ***documentation generator***. (This generator could be, but need not be, the C# compiler itself.) The output produced by the documentation generator is called the ***documentation file***. A documentation file is used as input to a ***documentation viewer***; a tool intended to produce some sort of visual display of type information and its associated documentation.
 
@@ -37,12 +37,12 @@ public class Point
 }
 ```
 
-The text within documentation comments must be well formed according to the rules of XML (http://www.w3.org/TR/REC-xml). If the XML is ill formed, a warning is generated and the documentation file will contain a comment saying that an error was encountered.
+The text within documentation comments must be well formed according to the rules of XML (https://www.w3.org/TR/REC-xml). If the XML is ill formed, a warning is generated and the documentation file will contain a comment saying that an error was encountered.
 
 Although developers are free to create their own set of tags, a recommended set is defined in [Recommended tags](documentation-comments.md#recommended-tags). Some of the recommended tags have special meanings:
 
 *  The `<param>` tag is used to describe parameters. If such a tag is used, the documentation generator must verify that the specified parameter exists and that all parameters are described in documentation comments. If such verification fails, the documentation generator issues a warning.
-*  The `cref` attribute can be attached to any tag to provide a reference to a code element. The documentation generator must verify that this code element exists. If the verification fails, the documentation generator issues a warning. When looking for a name described in a `cref` attribute, the documentation generator must respect namespace visibility according to `using` statements appearing within the source code. For code elements that are generic, the normal generic syntax (ie "`List<T>`") cannot be used because it produces invalid XML. Braces can be used instead of brackets (ie "`List{T}`"), or the XML escape syntax can be used (ie "`List&lt;T&gt;`").
+*  The `cref` attribute can be attached to any tag to provide a reference to a code element. The documentation generator must verify that this code element exists. If the verification fails, the documentation generator issues a warning. When looking for a name described in a `cref` attribute, the documentation generator must respect namespace visibility according to `using` statements appearing within the source code. For code elements that are generic, the normal generic syntax (that is, "`List<T>`") cannot be used because it produces invalid XML. Braces can be used instead of brackets (that is, "`List{T}`"), or the XML escape syntax can be used (that is, "`List&lt;T&gt;`").
 *  The `<summary>` tag is intended to be used by a documentation viewer to display additional information about a type or member.
 *  The `<include>` tag includes information from an external XML file.
 
@@ -65,7 +65,7 @@ The documentation generator must accept and process any tag that is valid accord
 | `<param>`        | [`<param>`](documentation-comments.md#param)           | Describe a parameter for a method or constructor       |
 | `<paramref>`     | [`<paramref>`](documentation-comments.md#paramref)     | Identify that a word is a parameter name               |
 | `<permission>`   | [`<permission>`](documentation-comments.md#permission) | Document the security accessibility of a member        |
-| `<remark>`       | [`<remark>`](documentation-comments.md#remark)         | Describe additional information about a type           |
+| `<remarks>`      | [`<remarks>`](documentation-comments.md#remarks)       | Describe additional information about a type           |
 | `<returns>`      | [`<returns>`](documentation-comments.md#returns)       | Describe the return value of a method                  |
 | `<see>`          | [`<see>`](documentation-comments.md#see)               | Specify a link                                         |
 | `<seealso>`      | [`<seealso>`](documentation-comments.md#seealso)       | Generate a See Also entry                              |
@@ -178,7 +178,7 @@ This tag allows including information from an XML document that is external to t
 
 __Syntax:__
 
-```
+```xml
 <include file="filename" path="xpath" />
 ```
 
@@ -192,7 +192,7 @@ __Example:__
 If the source code contained a declaration like:
 
 ```csharp
-/// <include file="docs.xml" *path=*'extradoc/class[@name="IntList"]/*' />
+/// <include file="docs.xml" path='extradoc/class[@name="IntList"]/*' />
 public class IntList { ... }
 ```
 
@@ -277,7 +277,7 @@ public class MyClass
 
 ### `<para>`
 
-This tag is for use inside other tags, such as `<summary>` ([`<remark>`](documentation-comments.md#remark)) or `<returns>` ([`<returns>`](documentation-comments.md#returns)), and permits structure to be added to text.
+This tag is for use inside other tags, such as `<summary>` ([`<remarks>`](documentation-comments.md#remarks)) or `<returns>` ([`<returns>`](documentation-comments.md#returns)), and permits structure to be added to text.
 
 __Syntax:__
 
@@ -292,7 +292,7 @@ __Example:__
 ```csharp
 /// <summary>This is the entry point of the Point class testing program.
 /// <para>This program tests each method and operator, and
-/// is intended to be run after any non-trvial maintenance has
+/// is intended to be run after any non-trivial maintenance has
 /// been performed on the Point class.</para></summary>
 public static void Main() {
     // ...
@@ -379,14 +379,14 @@ public static void Test() {
 }
 ```
 
-### `<remark>`
+### `<remarks>`
 
 This tag is used to specify extra information about a type. (Use `<summary>` ([`<summary>`](documentation-comments.md#summary)) to describe the type itself and the members of a type.)
 
 __Syntax:__
 
 ```xml
-<remark>description</remark>
+<remarks>description</remarks>
 ```
 
 where `description` is the text of the remark.
@@ -396,7 +396,7 @@ __Example:__
 ```csharp
 /// <summary>Class <c>Point</c> models a point in a 
 /// two-dimensional plane.</summary>
-/// <remark>Uses polar coordinates</remark>
+/// <remarks>Uses polar coordinates</remarks>
 public class Point 
 {
     // ...
@@ -485,7 +485,7 @@ public override bool Equals(object o) {
 
 ### `<summary>`
 
-This tag can be used to describe a type or a member of a type. Use `<remark>` ([`<remark>`](documentation-comments.md#remark)) to describe the type itself.
+This tag can be used to describe a type or a member of a type. Use `<remarks>` ([`<remarks>`](documentation-comments.md#remarks)) to describe the type itself.
 
 __Syntax:__
 
@@ -597,13 +597,13 @@ The documentation generator observes the following rules when it generates the I
 *  The second part of the string is the fully qualified name of the element, starting at the root of the namespace. The name of the element, its enclosing type(s), and namespace are separated by periods. If the name of the item itself has periods, they are replaced by `#(U+0023)` characters. (It is assumed that no element has this character in its name.)
 *  For methods and properties with arguments, the argument list follows, enclosed in parentheses. For those without arguments, the parentheses are omitted. The arguments are separated by commas. The encoding of each argument is the same as a CLI signature, as follows:
    *  Arguments are represented by their documentation name, which is based on their fully qualified name, modified as follows:
-      * Arguments that represent generic types have an appended "'" character followed by the number of type parameters
+      * Arguments that represent generic types have an appended `` ` `` (backtick) character followed by the number of type parameters
       * Arguments having the `out` or `ref` modifier have an `@` following their type name. Arguments passed by value or via `params` have no special notation.
-      * Arguments that are arrays are represented as `[lowerbound:size, ... , lowerbound:size]` where the number of commas is the rank less one, and the lower bounds and size of each dimension, if known, are represented in decimal. If a lower bound or size is not specified, it is omitted. If the lower bound and size for a particular dimension are omitted, the "`:`" is omitted as well. Jagged arrays are represented by one "`[]`" per level.
+      * Arguments that are arrays are represented as `[lowerbound:size, ... , lowerbound:size]` where the number of commas is the rank less one, and the lower bounds and size of each dimension, if known, are represented in decimal. If a lower bound or size is not specified, it is omitted. If the lower bound and size for a particular dimension are omitted, the `:` is omitted as well. Jagged arrays are represented by one `[]` per level.
       * Arguments that have pointer types other than void are represented using a `*` following the type name. A void pointer is represented using a type name of `System.Void`.
-      * Arguments that refer to generic type parameters defined on types are encoded using the "`" character followed by the zero-based index of the type parameter.
-      * Arguments that use generic type parameters defined in methods use a double-backtick "\`\`" instead of the "\`" used for types.
-      * Arguments that refer to constructed generic types are encoded using the generic type, followed by "{", followed by a comma-separated list of type arguments, followed by "}".
+      * Arguments that refer to generic type parameters defined on types are encoded using the `` ` `` (backtick) character followed by the zero-based index of the type parameter.
+      * Arguments that use generic type parameters defined in methods use a double-backtick ``` `` ``` instead of the `` ` `` used for types.
+      * Arguments that refer to constructed generic types are encoded using the generic type, followed by `{`, followed by a comma-separated list of type arguments, followed by `}`.
 
 ### ID string examples
 
@@ -994,7 +994,7 @@ public class Point
     /// <summary>This is the entry point of the Point class testing
     /// program.
     /// <para>This program tests each method and operator, and
-    /// is intended to be run after any non-trvial maintenance has
+    /// is intended to be run after any non-trivial maintenance has
     /// been performed on the Point class.</para></summary>
     public static void Main() {
         // class test code goes here
@@ -1121,7 +1121,7 @@ Here is the output produced by one documentation generator when given the source
             <summary>This is the entry point of the Point class testing
             program.
             <para>This program tests each method and operator, and
-            is intended to be run after any non-trvial maintenance has
+            is intended to be run after any non-trivial maintenance has
             been performed on the Point class.</para></summary>
         </member>
 

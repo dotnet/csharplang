@@ -151,7 +151,7 @@ Here, because `F`'s signature includes a pointer type, it can only be written in
 
 ## Pointer types
 
-In an unsafe context, a *type* ([Types](types.md#types)) may be a *pointer_type* as well as a *value_type* or a *reference_type*. However, a *pointer_type* may also be used in a `typeof` expression ([Anonymous object creation expressions](expressions.md#anonymous-object-creation-expressions)) outside of an unsafe context as such usage is not unsafe.
+In an unsafe context, a *type* ([Types](types.md)) may be a *pointer_type* as well as a *value_type* or a *reference_type*. However, a *pointer_type* may also be used in a `typeof` expression ([Anonymous object creation expressions](expressions.md#anonymous-object-creation-expressions)) outside of an unsafe context as such usage is not unsafe.
 
 ```antlr
 type_unsafe
@@ -270,7 +270,7 @@ In an unsafe context, several constructs are available for operating on pointers
 *  The `&` operator may be used to obtain the address of a variable ([The address-of operator](unsafe-code.md#the-address-of-operator)).
 *  The `++` and `--` operators may be used to increment and decrement pointers ([Pointer increment and decrement](unsafe-code.md#pointer-increment-and-decrement)).
 *  The `+` and `-` operators may be used to perform pointer arithmetic ([Pointer arithmetic](unsafe-code.md#pointer-arithmetic)).
-*  The `==`, `!=`, `<`, `>`, `<=`, and `=>` operators may be used to compare pointers ([Pointer comparison](unsafe-code.md#pointer-comparison)).
+*  The `==`, `!=`, `<`, `>`, `<=`, and `>=` operators may be used to compare pointers ([Pointer comparison](unsafe-code.md#pointer-comparison)).
 *  The `stackalloc` operator may be used to allocate memory from the call stack ([Fixed size buffers](unsafe-code.md#fixed-size-buffers)).
 *  The `fixed` statement may be used to temporarily fix a variable so its address can be obtained ([The fixed statement](unsafe-code.md#the-fixed-statement)).
 
@@ -619,7 +619,7 @@ class Test
 
 which produces the output:
 
-```
+```console
 p - q = -14
 q - p = 14
 ```
@@ -679,7 +679,7 @@ When applied to an operand that has struct type, the result is the total number 
 
 ## The fixed statement
 
-In an unsafe context, the *embedded_statement* ([Statements](statements.md#statements)) production permits an additional construct, the `fixed` statement, which is used to "fix" a moveable variable such that its address remains constant for the duration of the statement.
+In an unsafe context, the *embedded_statement* ([Statements](statements.md)) production permits an additional construct, the `fixed` statement, which is used to "fix" a moveable variable such that its address remains constant for the duration of the statement.
 
 ```antlr
 fixed_statement
@@ -795,7 +795,7 @@ class Test
 
 which produces the output:
 
-```
+```console
 [0,0,0] =  0 [0,0,1] =  1 [0,0,2] =  2 [0,0,3] =  3
 [0,1,0] =  4 [0,1,1] =  5 [0,1,2] =  6 [0,1,3] =  7
 [0,2,0] =  8 [0,2,1] =  9 [0,2,2] = 10 [0,2,3] = 11
@@ -898,7 +898,7 @@ fixed_size_buffer_declarator
     ;
 ```
 
-A fixed size buffer declaration may include a set of attributes ([Attributes](attributes.md#attributes)), a `new` modifier ([Modifiers](classes.md#modifiers)), a valid combination of the four access modifiers ([Type parameters and constraints](classes.md#type-parameters-and-constraints)) and an `unsafe` modifier ([Unsafe contexts](unsafe-code.md#unsafe-contexts)). The attributes and modifiers apply to all of the members declared by the fixed size buffer declaration. It is an error for the same modifier to appear multiple times in a fixed size buffer declaration.
+A fixed size buffer declaration may include a set of attributes ([Attributes](attributes.md)), a `new` modifier ([Modifiers](classes.md#modifiers)), a valid combination of the four access modifiers ([Type parameters and constraints](classes.md#type-parameters-and-constraints)) and an `unsafe` modifier ([Unsafe contexts](unsafe-code.md#unsafe-contexts)). The attributes and modifiers apply to all of the members declared by the fixed size buffer declaration. It is an error for the same modifier to appear multiple times in a fixed size buffer declaration.
 
 A fixed size buffer declaration is not permitted to include the `static` modifier.
 
@@ -908,7 +908,7 @@ The buffer element type is followed by a list of fixed size buffer declarators, 
 
 The elements of a fixed size buffer are guaranteed to be laid out sequentially in memory.
 
-A fixed size buffer declaration that declares multiple fixed size buffers is equivalent to multiple declarations of a single fixed size buffer declation with the same attributes, and element types. For example
+A fixed size buffer declaration that declares multiple fixed size buffers is equivalent to multiple declarations of a single fixed size buffer declaration with the same attributes, and element types. For example
 
 ```csharp
 unsafe struct A
@@ -1040,75 +1040,79 @@ Except for the `stackalloc` operator, C# provides no predefined constructs for m
 using System;
 using System.Runtime.InteropServices;
 
-public unsafe class Memory
+public static unsafe class Memory
 {
     // Handle for the process heap. This handle is used in all calls to the
     // HeapXXX APIs in the methods below.
-    static int ph = GetProcessHeap();
-
-    // Private instance constructor to prevent instantiation.
-    private Memory() {}
+    private static readonly IntPtr s_heap = GetProcessHeap();
 
     // Allocates a memory block of the given size. The allocated memory is
     // automatically initialized to zero.
-    public static void* Alloc(int size) {
-        void* result = HeapAlloc(ph, HEAP_ZERO_MEMORY, size);
+    public static void* Alloc(int size)
+    {
+        void* result = HeapAlloc(s_heap, HEAP_ZERO_MEMORY, (UIntPtr)size);
         if (result == null) throw new OutOfMemoryException();
         return result;
     }
 
     // Copies count bytes from src to dst. The source and destination
     // blocks are permitted to overlap.
-    public static void Copy(void* src, void* dst, int count) {
+    public static void Copy(void* src, void* dst, int count)
+    {
         byte* ps = (byte*)src;
         byte* pd = (byte*)dst;
-        if (ps > pd) {
+        if (ps > pd)
+        {
             for (; count != 0; count--) *pd++ = *ps++;
         }
-        else if (ps < pd) {
+        else if (ps < pd)
+        {
             for (ps += count, pd += count; count != 0; count--) *--pd = *--ps;
         }
     }
 
     // Frees a memory block.
-    public static void Free(void* block) {
-        if (!HeapFree(ph, 0, block)) throw new InvalidOperationException();
+    public static void Free(void* block)
+    {
+        if (!HeapFree(s_heap, 0, block)) throw new InvalidOperationException();
     }
 
     // Re-allocates a memory block. If the reallocation request is for a
     // larger size, the additional region of memory is automatically
     // initialized to zero.
-    public static void* ReAlloc(void* block, int size) {
-        void* result = HeapReAlloc(ph, HEAP_ZERO_MEMORY, block, size);
+    public static void* ReAlloc(void* block, int size)
+    {
+        void* result = HeapReAlloc(s_heap, HEAP_ZERO_MEMORY, block, (UIntPtr)size);
         if (result == null) throw new OutOfMemoryException();
         return result;
     }
 
     // Returns the size of a memory block.
-    public static int SizeOf(void* block) {
-        int result = HeapSize(ph, 0, block);
+    public static int SizeOf(void* block)
+    {
+        int result = (int)HeapSize(s_heap, 0, block);
         if (result == -1) throw new InvalidOperationException();
         return result;
     }
 
     // Heap API flags
-    const int HEAP_ZERO_MEMORY = 0x00000008;
+    private const int HEAP_ZERO_MEMORY = 0x00000008;
 
     // Heap API functions
     [DllImport("kernel32")]
-    static extern int GetProcessHeap();
+    private static extern IntPtr GetProcessHeap();
 
     [DllImport("kernel32")]
-    static extern void* HeapAlloc(int hHeap, int flags, int size);
+    private static extern void* HeapAlloc(IntPtr hHeap, int flags, UIntPtr size);
 
     [DllImport("kernel32")]
-    static extern bool HeapFree(int hHeap, int flags, void* block);
+    private static extern bool HeapFree(IntPtr hHeap, int flags, void* block);
 
     [DllImport("kernel32")]
-    static extern void* HeapReAlloc(int hHeap, int flags, void* block, int size);
+    private static extern void* HeapReAlloc(IntPtr hHeap, int flags, void* block, UIntPtr size);
 
     [DllImport("kernel32")]
-    static extern int HeapSize(int hHeap, int flags, void* block);
+    private static extern UIntPtr HeapSize(IntPtr hHeap, int flags, void* block);
 }
 ```
 
@@ -1117,18 +1121,21 @@ An example that uses the `Memory` class is given below:
 ```csharp
 class Test
 {
-    static void Main() {
-        unsafe {
-            byte* buffer = (byte*)Memory.Alloc(256);
-            try {
-                for (int i = 0; i < 256; i++) buffer[i] = (byte)i;
-                byte[] array = new byte[256];
-                fixed (byte* p = array) Memory.Copy(buffer, p, 256); 
-            }
-            finally {
-                Memory.Free(buffer);
-            }
-            for (int i = 0; i < 256; i++) Console.WriteLine(array[i]);
+    static unsafe void Main()
+    {
+        byte* buffer = null;
+        try
+        {
+            const int Size = 256;
+            buffer = (byte*)Memory.Alloc(Size);
+            for (int i = 0; i < Size; i++) buffer[i] = (byte)i;
+            byte[] array = new byte[Size];
+            fixed (byte* p = array) Memory.Copy(buffer, p, Size);
+            for (int i = 0; i < Size; i++) Console.WriteLine(array[i]);
+        }
+        finally
+        {
+            if (buffer != null) Memory.Free(buffer);
         }
     }
 }

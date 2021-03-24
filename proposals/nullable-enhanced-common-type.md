@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-There is a situation in which the current common-type algorithm results are counter-intuitive, and results in the programmer adding what feels like a redundant cast to the code. With this change, an expression such as `condition ? 1 : null` would result in a value of type `int?`.
+There is a situation in which the current common-type algorithm results are counter-intuitive, and results in the programmer adding what feels like a redundant cast to the code. With this change, an expression such as `condition ? 1 : null` would result in a value of type `int?`, and an expression such as `condition ? x : 1.0` where `x` is of type `int?` would result in a value of type `double?`.
 
 ## Motivation
 [motivation]: #motivation
@@ -18,9 +18,10 @@ This is a common cause of what feels to the programmer like needless boilerplate
 ## Detailed design
 [design]: #detailed-design
 
-We modify the specification for [finding the best common type of a set of expressions](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions) to affect the following situation:
+We modify the specification for [finding the best common type of a set of expressions](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions) to affect the following situations:
 
 - If one expression is of a non-nullable value type `T` and the other is a null literal, the result is of type `T?`.
+- If one expression is of a nullable value type `T?` and the other is of a value type `U`, and there is an implicit conversion from `T` to `U`, then the result is of type `U?`.
 
 This is expected to affect the following aspects of the language:
 
@@ -35,8 +36,9 @@ More precisely, we change the following sections of the specification (insertion
 > 
 > An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 > 
-> *  If `E` is an anonymous function with inferred return type  `U` ([Inferred return type](expressions.md#inferred-return-type)) and `T` is a delegate type or expression tree type with return type `Tb`, then a *lower-bound inference* ([Lower-bound inferences](expressions.md#lower-bound-inferences)) is made *from* `U` *to* `Tb`.
+> *  If `E` is an anonymous function with inferred return type  `U` ([Inferred return type](../spec/expressions.md#inferred-return-type)) and `T` is a delegate type or expression tree type with return type `Tb`, then a *lower-bound inference* ([Lower-bound inferences](../spec/expressions.md#lower-bound-inferences)) is made *from* `U` *to* `Tb`.
 > *  Otherwise, if `E` is a method group and `T` is a delegate type or expression tree type with parameter types `T1...Tk` and return type `Tb`, and overload resolution of `E` with the types `T1...Tk` yields a single method with return type `U`, then a *lower-bound inference* is made *from* `U` *to* `Tb`.
+> *  **Otherwise, if `E` is an expression with nullable value type `U?`, then a *lower-bound inference* is made *from* `U` *to* `T` and a *null bound* is added to `T`. **
 > *  Otherwise, if `E` is an expression with type `U`, then a *lower-bound inference* is made *from* `U` *to* `T`.
 > *  **Otherwise, if `E` is a constant expression with value `null`, then a *null bound* is added to `T`** 
 > *  Otherwise, no inferences are made.
@@ -65,7 +67,7 @@ None.
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- [ ] What is the severity of incompatibility introduced by this proposal, and how can it be moderated?
+- [ ] What is the severity of incompatibility introduced by this proposal, if any, and how can it be moderated?
 
 ## Design meetings
 

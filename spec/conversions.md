@@ -16,7 +16,8 @@ The following conversions are classified as implicit conversions:
 
 *  Identity conversions
 *  Implicit numeric conversions
-*  Implicit enumeration conversions.
+*  Implicit enumeration conversions
+*  Implicit interpolated string conversions
 *  Implicit nullable conversions
 *  Null literal conversions
 *  Implicit reference conversions
@@ -39,7 +40,7 @@ However, dynamic conversions ([Implicit dynamic conversions](conversions.md#impl
 
 An identity conversion converts from any type to the same type. This conversion exists such that an entity that already has a required type can be said to be convertible to that type.
 
-*  Because object and dynamic are considered equivalent there is an identity conversion between `object` and `dynamic`, and between constructed types that are the same when replacing all occurences of `dynamic` with `object`.
+*  Because `object` and `dynamic` are considered equivalent there is an identity conversion between `object` and `dynamic`, and between constructed types that are the same when replacing all occurrences of `dynamic` with `object`.
 
 ### Implicit numeric conversions
 
@@ -395,7 +396,7 @@ The following implicit conversions are classified as standard implicit conversio
 *  Implicit nullable conversions ([Implicit nullable conversions](conversions.md#implicit-nullable-conversions))
 *  Implicit reference conversions ([Implicit reference conversions](conversions.md#implicit-reference-conversions))
 *  Boxing conversions ([Boxing conversions](conversions.md#boxing-conversions))
-*  Implicit constant expression conversions ([Implicit dynamic conversions](conversions.md#implicit-dynamic-conversions))
+*  Implicit constant expression conversions ([Implicit constant expression conversions](conversions.md#implicit-constant-expression-conversions))
 *  Implicit conversions involving type parameters ([Implicit conversions involving type parameters](conversions.md#implicit-conversions-involving-type-parameters))
 
 The standard implicit conversions specifically exclude user-defined implicit conversions.
@@ -503,9 +504,9 @@ An *anonymous_method_expression* or *lambda_expression* is classified as an anon
 *  If `F` does not contain an *anonymous_function_signature*, then `D` may have zero or more parameters of any type, as long as no parameter of `D` has the `out` parameter modifier.
 *  If `F` has an explicitly typed parameter list, each parameter in `D` has the same type and modifiers as the corresponding parameter in `F`.
 *  If `F` has an implicitly typed parameter list, `D` has no `ref` or `out` parameters.
-*  If the body of `F` is an expression, and either `D` has a `void` return type or `F` is async and `D` has the return type `Task`, then when each parameter of `F` is given the type of the corresponding parameter in `D`, the body of `F` is a valid expression (wrt [Expressions](expressions.md#expressions)) that would be permitted as a *statement_expression* ([Expression statements](statements.md#expression-statements)).
+*  If the body of `F` is an expression, and either `D` has a `void` return type or `F` is async and `D` has the return type `Task`, then when each parameter of `F` is given the type of the corresponding parameter in `D`, the body of `F` is a valid expression (wrt [Expressions](expressions.md)) that would be permitted as a *statement_expression* ([Expression statements](statements.md#expression-statements)).
 *  If the body of `F` is a statement block, and either `D` has a `void` return type or `F` is async and `D` has the return type `Task`, then when each parameter of `F` is given the type of the corresponding parameter in `D`, the body of `F` is a valid statement block (wrt [Blocks](statements.md#blocks)) in which no `return` statement specifies an expression.
-*  If the body of `F` is an expression, and *either* `F` is non-async and `D` has a non-void return type `T`, *or* `F` is async and `D` has a return type `Task<T>`, then when each parameter of `F` is given the type of the corresponding parameter in `D`, the body of `F` is a valid expression (wrt [Expressions](expressions.md#expressions)) that is implicitly convertible to `T`.
+*  If the body of `F` is an expression, and *either* `F` is non-async and `D` has a non-void return type `T`, *or* `F` is async and `D` has a return type `Task<T>`, then when each parameter of `F` is given the type of the corresponding parameter in `D`, the body of `F` is a valid expression (wrt [Expressions](expressions.md)) that is implicitly convertible to `T`.
 *  If the body of `F` is a statement block, and *either* `F` is non-async and `D` has a non-void return type `T`, *or* `F` is async and `D` has a return type `Task<T>`, then when each parameter of `F` is given the type of the corresponding parameter in `D`, the body of `F` is a valid statement block (wrt [Blocks](statements.md#blocks)) with a non-reachable end point in which each `return` statement specifies an expression that is implicitly convertible to `T`.
 
 For the purpose of brevity, this section uses the short form for the task types `Task` and `Task<T>` ([Async functions](classes.md#async-functions)).
@@ -770,7 +771,7 @@ class Test
 
 The assignment to `d1` implicitly converts the method group `F` to a value of type `D1`.
 
-The assignment to `d2` shows how it is possible to create a delegate to a method that has less derived (contra-variant) parameter types and a more derived (covariant) return type.
+The assignment to `d2` shows how it is possible to create a delegate to a method that has less derived (contravariant) parameter types and a more derived (covariant) return type.
 
 The assignment to `d3` shows how no conversion exists if the method is not applicable.
 

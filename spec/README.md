@@ -3,7 +3,7 @@ C# Language Specification
 
 __Version 6__
 
-This is an unofficial draft, posted here for convenience. When we submit a C# 6.0 spec proposal to ECMA (who is currently finalizing the C# 5.0 Standard), it will be shared here.
+This is an unofficial draft, posted here for convenience. When we submit a C# 6.0 spec proposal to ECMA, it will be shared here.
 
 <!--
 (This document is also available for download: [csharp.pdf](CSharp%20Language%20Specification.pdf?raw=true) and [csharp.docx](CSharp%20Language%20Specification.docx?raw=true))
@@ -113,6 +113,7 @@ This is an unofficial draft, posted here for convenience. When we submit a C# 6.
     * [Static constructors](classes.md#static-constructors)
     * [Destructors](classes.md#destructors)
     * [Iterators](classes.md#iterators)
+    * [Async functions](classes.md#async-functions)
 * [Structs](structs.md)
     * [Struct declarations](structs.md#struct-declarations)
     * [Struct members](structs.md#struct-members)

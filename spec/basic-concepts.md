@@ -44,7 +44,7 @@ Prior to an application's termination, destructors for all of its objects that h
 
 ## Declarations
 
-Declarations in a C# program define the constituent elements of the program. C# programs are organized using namespaces ([Namespaces](namespaces.md#namespaces)), which can contain type declarations and nested namespace declarations. Type declarations ([Type declarations](namespaces.md#type-declarations)) are used to define classes ([Classes](classes.md#classes)), structs ([Iterators](classes.md#iterators)), interfaces ([Interfaces](interfaces.md#interfaces)), enums ([Enums](enums.md#enums)), and delegates ([Delegates](delegates.md#delegates)). The kinds of members permitted in a type declaration depend on the form of the type declaration. For instance, class declarations can contain declarations for constants ([Constants](classes.md#constants)), fields ([Fields](classes.md#fields)), methods ([Methods](classes.md#methods)), properties ([Properties](classes.md#properties)), events ([Events](classes.md#events)), indexers ([Indexers](classes.md#indexers)), operators ([Operators](classes.md#operators)), instance constructors ([Instance constructors](classes.md#instance-constructors)), static constructors ([Static constructors](classes.md#static-constructors)), destructors ([Destructors](classes.md#destructors)), and nested types([Nested types](classes.md#nested-types)).
+Declarations in a C# program define the constituent elements of the program. C# programs are organized using namespaces ([Namespaces](namespaces.md)), which can contain type declarations and nested namespace declarations. Type declarations ([Type declarations](namespaces.md#type-declarations)) are used to define classes ([Classes](classes.md)), structs ([Structs](structs.md)), interfaces ([Interfaces](interfaces.md)), enums ([Enums](enums.md)), and delegates ([Delegates](delegates.md)). The kinds of members permitted in a type declaration depend on the form of the type declaration. For instance, class declarations can contain declarations for constants ([Constants](classes.md#constants)), fields ([Fields](classes.md#fields)), methods ([Methods](classes.md#methods)), properties ([Properties](classes.md#properties)), events ([Events](classes.md#events)), indexers ([Indexers](classes.md#indexers)), operators ([Operators](classes.md#operators)), instance constructors ([Instance constructors](classes.md#instance-constructors)), static constructors ([Static constructors](classes.md#static-constructors)), destructors ([Destructors](classes.md#destructors)), and nested types ([Nested types](classes.md#nested-types)).
 
 A declaration defines a name in the ***declaration space*** to which the declaration belongs. Except for overloaded members ([Signatures and overloading](basic-concepts.md#signatures-and-overloading)), it is a compile-time error to have two or more declarations that introduce members with the same name in a declaration space. It is never possible for a declaration space to contain different kinds of members with the same name. For example, a declaration space can never contain a field and a method by the same name.
 
@@ -420,7 +420,7 @@ Signatures are the enabling mechanism for ***overloading*** of members in classe
 
 Although `out` and `ref` parameter modifiers are considered part of a signature, members declared in a single type cannot differ in signature solely by `ref` and `out`. A compile-time error occurs if two members are declared in the same type with signatures that would be the same if all parameters in both methods with `out` modifiers were changed to `ref` modifiers. For other purposes of signature matching (e.g., hiding or overriding), `ref` and `out` are considered part of the signature and do not match each other. (This restriction is to allow C#  programs to be easily translated to run on the Common Language Infrastructure (CLI), which does not provide a way to define methods that differ solely in `ref` and `out`.)
 
-For the purposes of singatures, the types `object` and `dynamic` are considered the same. Members declared in a single type can therefore not differ in signature solely by `object` and `dynamic`.
+For the purposes of signatures, the types `object` and `dynamic` are considered the same. Members declared in a single type can therefore not differ in signature solely by `object` and `dynamic`.
 
 The following example shows a set of overloaded method declarations along with their signatures.
 ```csharp
@@ -790,12 +790,13 @@ class Test
 }
 ```
 creates an instance of class `A` and an instance of class `B`. These objects become eligible for garbage collection when the variable `b` is assigned the value `null`, since after this time it is impossible for any user-written code to access them. The output could be either
-```
+
+```console
 Destruct instance of A
 Destruct instance of B
 ```
 or
-```
+```console
 Destruct instance of B
 Destruct instance of A
 ```
@@ -851,7 +852,7 @@ class Test
 ```
 
 In the above program, if the garbage collector chooses to run the destructor of `A` before the destructor of `B`, then the output of this program might be:
-```
+```console
 Destruct instance of A
 Destruct instance of B
 A.F

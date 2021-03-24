@@ -15,15 +15,15 @@ Agenda
 4. Tuples
 5. Records
 6. Pattern matching
-1. Overall direction
-====================
+
+1\. Overall direction
+=====================
 
 In these first two months of design on C# 7 we've adopted a mix of deep dive and breadth scouring. There's agreement that we should be ambitious and try to solve hard problems, being willing to throw the result away if it's not up to snuff. We should keep an open mind for a while still, and not lock down too soon on a specific feature set or specific designs.
 
  
-
-2. Nullability features
-=======================
+2\. Nullability features
+========================
 
 Non-nullable types are the number one request on UserVoice. We take it that the *underlying problem* is trying to avoid null reference exceptions. Non-nullable types are at best only part of the solution to this. We'd also need to help prevent access when something is *nullable*.
 
@@ -53,9 +53,8 @@ TypeScript uses information about type guards to track union types in if branche
 A core nuisance with nullability checking is that it raises a wealth of compat questions that limit the design in different ways. There may need to be some sort of opt-in to at least some of the diagnostics you'd get, since you wouldn't want them if you were just recompiling old code that used to "work".
 
 
-
-3. Performance and reliability
-==============================
+3\. Performance and reliability
+===============================
 
 The list produced at a recent design meeting (#1898) looks sensible.
 
@@ -112,20 +111,18 @@ Destructible types
 The scenario is good, not the current proposal.
 
 
-
-4. Tuple types
-==============
+4\. Tuple types
+===============
 
 There's agreement on wanting the feature and on the syntax (#347, #1207).
 
-We probably prefer a value type version of Tuple<T>. Of course those would be subject to tearing, like all structs. We're willing to be swayed.
+We probably prefer a value type version of Tuple\<T>. Of course those would be subject to tearing, like all structs. We're willing to be swayed.
 
 There are performance trade offs around allocation vs copying, and also around generic instantiation. We could do some experiments in F# source code, which already has tuples.
 
 
-
-5. Records
-==========
+5\. Records
+===========
 
 See #180, #206, #396, #1303, #1572.
 
@@ -144,9 +141,8 @@ Serialization has to work *somehow*, even though many of the members will be gen
 We should not be *too* concerned about the ability to grow up to represent all kinds of things. Start from it being the POD feature, and work from there.
 
 
-
-6. Pattern matching
-===================
+6\. Pattern matching
+====================
 
 See #180, #206, #1572.
 

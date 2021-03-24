@@ -28,11 +28,11 @@ class Hello
 ```
 
 C# source files typically have the file extension `.cs`. Assuming that the "Hello, World" program is stored in the file `hello.cs`, the program can be compiled with the Microsoft C# compiler using the command line
-```
+```console
 csc hello.cs
 ```
 which produces an executable assembly named `hello.exe`. The output produced by this application when it is run is
-```
+```console
 Hello, World
 ```
 
@@ -83,7 +83,7 @@ namespace Acme.Collections
 ```
 declares a class named `Stack` in a namespace called `Acme.Collections`. The fully qualified name of this class is `Acme.Collections.Stack`. The class contains several members: a field named `top`, two methods named `Push` and `Pop`, and a nested class named `Entry`. The `Entry` class further contains three members: a field named `next`, a field named `data`, and a constructor. Assuming that the source code of the example is stored in the file `acme.cs`, the command line
 
-```
+```console
 csc /t:library acme.cs
 ```
 compiles the example as a library (code without a `Main` entry point) and produces an assembly named `acme.dll`.
@@ -111,12 +111,12 @@ class Test
 ```
 If the program is stored in the file `test.cs`, when `test.cs` is compiled, the `acme.dll` assembly can be referenced using the compiler's `/r` option:
 
-```
+```console
 csc /r:acme.dll test.cs
 ```
 This creates an executable assembly named `test.exe`, which, when run, produces the output:
 
-```
+```console
 100
 10
 1
@@ -277,13 +277,13 @@ The following table summarizes C#'s operators, listing the operator categories i
 |                                  | `x != y`          | Not equal |
 | Logical AND                      | `x & y`           | Integer bitwise AND, boolean logical AND |
 | Logical XOR                      | `x ^ y`           | Integer bitwise XOR, boolean logical XOR |
-| Logical OR                       | `x | y`           | Integer bitwise OR, boolean logical OR |
+| Logical OR                       | <code>x &#124; y</code> | Integer bitwise OR, boolean logical OR |
 | Conditional AND                  | `x && y`          | Evaluates `y` only if `x` is `true` |
-| Conditional OR                   | `x || y`          | Evaluates `y` only if `x` is `false` |
-| Null coalescing                  | `X ?? y`          | Evaluates to `y` if `x` is `null`, to `x` otherwise |
+| Conditional OR                   | <code>x &#124;&#124; y</code> | Evaluates `y` only if `x` is `false` |
+| Null coalescing                  | `x ?? y`          | Evaluates to `y` if `x` is `null`, to `x` otherwise |
 | Conditional                      | `x ? y : z`       | Evaluates `y` if `x` is `true`, `z` if `x` is `false` |
 | Assignment or anonymous function | `x = y`           | Assignment |
-|                                  | `x op= y`         | Compound assignment; supported operators are `*=` `/=` `%=` `+=` `-=` `<<=` `>>=` `&=` `^=` `|=` |
+|                                  | `x op= y`         | Compound assignment; supported operators are `*=` `/=` `%=` `+=` `-=` `<<=` `>>=` `&=` `^=` <code>&#124;=</code> |
 |                                  | `(T x) => y`      | Anonymous function (lambda expression) |
 
 ## Statements
@@ -376,7 +376,6 @@ static void Main(string[] args) {
         default:
             Console.WriteLine("{0} arguments", n);
             break;
-        }
     }
 }
 ```
@@ -582,7 +581,7 @@ public class Point
 ```
 Instances of classes are created using the `new` operator, which allocates memory for a new instance, invokes a constructor to initialize the instance, and returns a reference to the instance. The following statements create two `Point` objects and store references to those objects in two variables:
 
-```
+```csharp
 Point p1 = new Point(0, 0);
 Point p2 = new Point(10, 20);
 ```
@@ -623,7 +622,7 @@ Each member of a class has an associated accessibility, which controls the regio
 
 ### Type parameters
 
-A class definition may specify a set of type parameters by following the class name with angle brackets enclosing a list of type parameter names. The type parameters can the be used in the body of the class declarations to define the members of the class. In the following example, the type parameters of `Pair` are `TFirst` and `TSecond`:
+A class definition may specify a set of type parameters by following the class name with angle brackets enclosing a list of type parameter names. The type parameters can then be used in the body of the class declarations to define the members of the class. In the following example, the type parameters of `Pair` are `TFirst` and `TSecond`:
 
 ```csharp
 public class Pair<TFirst,TSecond>
@@ -641,8 +640,7 @@ Pair<int,string> pair = new Pair<int,string> { First = 1, Second = "two" };
 int i = pair.First;     // TFirst is int
 string s = pair.Second; // TSecond is string
 ```
-A generic type with type arguments provided, like `Pair<int,string>
-    ` above, is called a constructed type.
+A generic type with type arguments provided, like `Pair<int,string>` above, is called a constructed type.
 
 ### Base classes
 
@@ -1124,9 +1122,7 @@ C# supports both instance and static constructors. An ***instance constructor***
 
 A constructor is declared like a method with no return type and the same name as the containing class. If a constructor declaration includes a `static` modifier, it declares a static constructor. Otherwise, it declares an instance constructor.
 
-Instance constructors can be overloaded. For example, the `List<T>
-` class declares two instance constructors, one with no parameters and one that takes an `int` parameter. Instance constructors are invoked using the `new` operator. The following statements allocate two `List<string>
-` instances using each of the constructors of the `List` class.
+Instance constructors can be overloaded. For example, the `List<T>` class declares two instance constructors, one with no parameters and one that takes an `int` parameter. Instance constructors are invoked using the `new` operator. The following statements allocate two `List<string>` instances using each of the constructors of the `List` class.
 
 ```csharp
 List<string> list1 = new List<string>();
@@ -1144,8 +1140,7 @@ A `get` accessor corresponds to a parameterless method with a return value of th
 
 A `set` accessor corresponds to a method with a single parameter named `value` and no return type. When a property is referenced as the target of an assignment or as the operand of `++` or `--`, the `set` accessor is invoked with an argument that provides the new value.
 
-The `List<T>
-` class declares two properties, `Count` and `Capacity`, which are read-only and read-write, respectively. The following is an example of use of these properties.
+The `List<T>` class declares two properties, `Count` and `Capacity`, which are read-only and read-write, respectively. The following is an example of use of these properties.
 
 ```csharp
 List<string> names = new List<string>();
@@ -1181,11 +1176,9 @@ An ***event*** is a member that enables a class or object to provide notificatio
 
 Within a class that declares an event member, the event behaves just like a field of a delegate type (provided the event is not abstract and does not declare accessors). The field stores a reference to a delegate that represents the event handlers that have been added to the event. If no event handles are present, the field is `null`.
 
-The `List<T>
-` class declares a single event member called `Changed`, which indicates that a new item has been added to the list. The `Changed` event is raised by the `OnChanged` virtual method, which first checks whether the event is `null` (meaning that no handlers are present). The notion of raising an event is precisely equivalent to invoking the delegate represented by the event—thus, there are no special language constructs for raising events.
+The `List<T>` class declares a single event member called `Changed`, which indicates that a new item has been added to the list. The `Changed` event is raised by the `OnChanged` virtual method, which first checks whether the event is `null` (meaning that no handlers are present). The notion of raising an event is precisely equivalent to invoking the delegate represented by the event—thus, there are no special language constructs for raising events.
 
-Clients react to events through ***event handlers***. Event handlers are attached using the `+=` operator and removed using the `-=` operator. The following example attaches an event handler to the `Changed` event of a `List<string>
-`.
+Clients react to events through ***event handlers***. Event handlers are attached using the `+=` operator and removed using the `-=` operator. The following example attaches an event handler to the `Changed` event of a `List<string>`.
 
 ```csharp
 using System;
@@ -1214,10 +1207,7 @@ For advanced scenarios where control of the underlying storage of an event is de
 
 An ***operator*** is a member that defines the meaning of applying a particular expression operator to instances of a class. Three kinds of operators can be defined: unary operators, binary operators, and conversion operators. All operators must be declared as `public` and `static`.
 
-The `List<T>
-` class declares two operators, `operator==` and `operator!=`, and thus gives new meaning to expressions that apply those operators to `List` instances. Specifically, the operators define equality of two `List<T>
-` instances as comparing each of the contained objects using their `Equals` methods. The following example uses the `==` operator to compare two `List<int>
-` instances.
+The `List<T>` class declares two operators, `operator==` and `operator!=`, and thus gives new meaning to expressions that apply those operators to `List` instances. Specifically, the operators define equality of two `List<T>` instances as comparing each of the contained objects using their `Equals` methods. The following example uses the `==` operator to compare two `List<int>` instances.
 
 ```csharp
 using System;
@@ -1238,9 +1228,7 @@ class Test
 }
 ```
 
-The first `Console.WriteLine` outputs `True` because the two lists contain the same number of objects with the same values in the same order. Had `List<T>
-` not defined `operator==`, the first `Console.WriteLine` would have output `False` because `a` and `b` reference different `List<int>
-` instances.
+The first `Console.WriteLine` outputs `True` because the two lists contain the same number of objects with the same values in the same order. Had `List<T>` not defined `operator==`, the first `Console.WriteLine` would have output `False` because `a` and `b` reference different `List<int>` instances.
 
 #### Destructors
 
@@ -1551,7 +1539,7 @@ An instance of the `Function` delegate type can reference any method that takes 
 
 A delegate can reference either a static method (such as `Square` or `Math.Sin` in the previous example) or an instance method (such as `m.Multiply` in the previous example). A delegate that references an instance method also references a particular object, and when the instance method is invoked through the delegate, that object becomes `this` in the invocation.
 
-Delegates can also be created using anonymous functions, which are "inline methods" that are created on the fly. Anonymous functions can see the local variables of the sourrounding methods. Thus, the multiplier example above can be written more easily without using a `Multiplier` class:
+Delegates can also be created using anonymous functions, which are "inline methods" that are created on the fly. Anonymous functions can see the local variables of the surrounding methods. Thus, the multiplier example above can be written more easily without using a `Multiplier` class:
 
 ```csharp
 double[] doubles =  Apply(a, (double x) => x * 2.0);

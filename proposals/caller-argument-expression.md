@@ -15,7 +15,7 @@ Allow developers to capture the expressions passed to a method, to enable better
 
 When an assertion or argument validation fails, the developer wants to know as much as possible about where and why it failed. However, today's diagnostic APIs do not fully facilitate this. Consider the following method:
 
-```cs
+```csharp
 T Single<T>(this T[] array)
 {
     Debug.Assert(array != null);
@@ -31,7 +31,7 @@ This is also the reason testing frameworks have to provide a variety of assert m
 
 While the situation is a bit better for argument validation because the names of invalid arguments are shown to the developer, the developer must pass these names to exceptions manually. If the above example were rewritten to use traditional argument validation instead of `Debug.Assert`, it would look like
 
-```cs
+```csharp
 T Single<T>(this T[] array)
 {
     if (array == null)
@@ -55,7 +55,7 @@ Notice that `nameof(array)` must be passed to each exception, although it's alre
 
 In the above examples, including the string `"array != null"` or `"array.Length == 1"` in the assert message would help the developer determine what failed. Enter `CallerArgumentExpression`: it's an attribute the framework can use to obtain the string associated with a particular method argument. We would add it to `Debug.Assert` like so
 
-```cs
+```csharp
 public static class Debug
 {
     public static void Assert(bool condition, [CallerArgumentExpression("condition")] string message = null);
@@ -64,7 +64,7 @@ public static class Debug
 
 The source code in the above example would stay the same. However, the code the compiler actually emits would correspond to
 
-```cs
+```csharp
 T Single<T>(this T[] array)
 {
     Debug.Assert(array != null, "array != null");
@@ -78,7 +78,7 @@ The compiler specially recognizes the attribute on `Debug.Assert`. It passes the
 
 For argument validation, the attribute cannot be used directly, but can be made use of through a helper class:
 
-```cs
+```csharp
 public static class Verify
 {
     public static void Argument(bool condition, string message, [CallerArgumentExpression("condition")] string conditionExpression = null)
@@ -133,12 +133,26 @@ T ElementAt(this T[] array, int index)
 
 A proposal to add such a helper class to the framework is underway at https://github.com/dotnet/corefx/issues/17068. If this language feature was implemented, the proposal could be updated to take advantage of this feature.
 
+### Extension methods
+
+The `this` parameter in an extension method may be referenced by `CallerArgumentExpression`. For example:
+
+```csharp
+public static void ShouldBe<T>(this T @this, T expected, [CallerArgumentExpression("this")] string thisExpression = null) {}
+
+contestant.Points.ShouldBe(1337); // thisExpression: "contestant.Points"
+```
+
+`thisExpression` will receive the expression corresponding to the object before the dot. If it's called with static method syntax, e.g. `Ext.ShouldBe(contestant.Points, 1337)`, it will behave as if first parameter wasn't marked `this`.
+
+There should always be an expression corresponding to the `this` parameter. Even if an instance of a class calls an extension method on itself, e.g. `this.Single()` from inside a collection type, the `this` is mandated by the compiler so `"this"` will get passed. If this rule is changed in the future, we can consider passing `null` or the empty string.
+
 ### Extra details
 
 - Like the other `Caller*` attributes, such as `CallerMemberName`, this attribute may only be used on parameters with default values.
 - Multiple parameters marked with `CallerArgumentExpression` are permitted, as shown above.
 - The attribute's namespace will be `System.Runtime.CompilerServices`.
-- In the case of `null` or a string that does not correspond to a parameter name (e.g. `"condition"`) is provided, an error will be raised during compilation.
+- If `null` or a string that is not a parameter name (e.g. `"notAParameterName"`) is provided, the compiler will pass in an empty string.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
@@ -153,7 +167,7 @@ A proposal to add such a helper class to the framework is underway at https://gi
 - If being able to see source code at call sites for methods that use this attribute proves to be a problem, we can make the attribute's effects opt-in. Developers will enable it through an assembly-wide `[assembly: EnableCallerArgumentExpression]` attribute they put in `AssemblyInfo.cs`.
   - In the case the attribute's effects are not enabled, calling methods marked with the attribute would not be an error, to allow existing methods to use the attribute and maintain source compatibility. However, the attribute would be ignored and the method would be called with whatever default value was provided.
 
-```cs
+```csharp
 // Assembly1
 
 void Foo(string bar); // V1
@@ -175,7 +189,7 @@ Foo(a, "provided"); // V2, V3: Compiles to Foo(a, "provided")
 
 - To prevent the [binary compatibility problem][drawbacks] from occurring every time we want to add new caller info to `Debug.Assert`, an alternative solution would be to add a `CallerInfo` struct to the framework that contains all the necessary information about the caller.
 
-```cs
+```csharp
 struct CallerInfo
 {
     public string MemberName { get; set; }
@@ -233,7 +247,7 @@ There are a few disadvantages of this approach:
 
 - Despite being pay-for-play friendly by allowing you to specify which properties you need, it could still hurt perf significantly by allocating an array for the expressions/calling `MethodBase.GetCurrentMethod` even when the assert passes.
 
-- Additionally, while passing a new flag to the `CallerInfo` attribute won't be a breaking change, `Debug.Assert` won't be guaranteed to actually receive that new parameter from call sites that compiled against an old verion of the method.
+- Additionally, while passing a new flag to the `CallerInfo` attribute won't be a breaking change, `Debug.Assert` won't be guaranteed to actually receive that new parameter from call sites that compiled against an old version of the method.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions

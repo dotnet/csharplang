@@ -249,3 +249,149 @@ Several issues related to default implementations of interface members
 2. Deconstruction without `ValueTuple`
 3. Non-trailing named arguments
 
+
+## Jul 5, 2017
+[C# Language Design Notes for Jul 5, 2017](LDM-2017-07-05.md)
+
+Triage of features in the C# 7.2 milestone. They don't all fit: which should be dropped, which should be kept, and which should be pushed out?
+
+1. Static delegates *(8.0)*
+2. Native int and IntPtr operators *(7.X)*
+3. Field target *(anytime)*
+4. Utf8 strings *(8.0)*
+5. Slicing *(7.X)*
+6. Blittable *(7.2)*
+7. Ref structs *(7.2)*
+8. Ref readonly *(7.2)*
+9. Conditional ref *(7.2)*
+10. Ref extensions on structs *(7.2)*
+11. Readonly locals and params *(X.X)*
+12. ref structs in tuples *(don't)*
+13. Overload resolution tie breakers with long tuples *(use underlying generics)*
+
+
+## Jul 26, 2017
+[C# Language Design Notes for Jul 24 and 26, 2017](LDM-2017-07-26.md)
+
+We started putting a series of stakes in the ground for nullable reference types, based on the evolving strawman proposal [here](https://github.com/dotnet/csharplang/issues/790). We're doing our first implementation of the feature based on this, and can then refine as we learn things from usage.
+
+1. Goals
+2. Nullable reference types
+3. Rarely-null members
+
+
+## Aug 7, 2017
+[C# Language Design Notes for Aug 7, 2017](LDM-2017-08-07.md)
+
+We continued refining the nullable reference types feature set with the aim of producing a public prototype for experimentation and learning.
+
+1. Warnings
+2. Local variables revisited
+3. Opt-in mechanisms
+
+
+## Aug 9, 2017
+
+[C# Language Design Notes for Aug 9, 2017](LDM-2017-08-09.md)
+
+We discussed how nullable reference types should work in a number of different situations.
+
+1. Default expressions
+2. Array creation
+3. Struct fields
+4. Unconstrained type parameters
+
+
+## Aug 14, 2017
+
+[C# Language Design Notes for Aug 14, 2017](LDM-2017-08-14.md)
+
+We looked at the interaction between generics and nullable reference types
+
+1. Unconstrained type parameters
+2. Nullable constraints
+3. Conversions between constructed types
+
+
+## Aug 16, 2017
+
+[C# Language Design Notes for Aug 16, 2017](LDM-2017-08-16.md)
+
+1. The null-forgiving operator
+
+
+## Aug 23, 2017
+
+[C# Language Design Notes for Aug 23, 2017](LDM-2017-08-23.md)
+
+We discussed various aspects of nullable reference types
+
+1. How does flow analysis silence the warning
+2. Problems with dotted names
+3. Type inference
+4. Structs with fields of non-nullable type
+
+
+## Oct 4, 2017
+
+[C# Language Design Review, Oct 4, 2017](LDM-2017-10-04.md)
+
+We looked at nullable reference types with the reviewers, Anders Hejlsberg and Kevin Pilch.
+
+1. Overall philosophy
+2. Switches
+3. Libraries
+4. Dotted names
+5. Type narrowing
+6. The dammit operator
+7. Array covariance
+8. Null warnings
+9. Special methods
+10. Conclusion
+
+
+## Oct 11, 2017
+
+[C# Language Design Notes for Oct 11, 2017](LDM-2017-10-11.md)
+
+We looked at the Oct 4 design review feedback for nullable reference types, and considered how to react to it.
+
+1. Philosophy
+2. Switches
+3. Dotted names
+4. Type narrowing
+5. Dammit operator type narrowing
+6. Dammit operator stickiness
+7. Array covariance
+8. Null warnings
+
+
+## Nov 8, 2017
+
+[C# Language Design Notes for Nov 8, 2017](LDM-2017-11-08.md)
+
+We went over the status of the prototype for nullable reference types, to address outstanding questions and make any last minute calls before release.
+
+1. Constructors
+2. Dotted names
+3. Default expressions
+4. Should we track null state for nonnullable ref types?
+5. Inferred types for method type inference
+6. Inferred nullability in hover tips
+7. Smaller things not yet done
+8. Unconstrained generics
+9. Other issues
+
+
+## Nov 27, 2017
+
+[C# Language Design Notes for Nov 27, 2017](LDM-2017-11-27.md)
+
+We went over the feedback on the nullable reference types prototype, and discussed how to address the top issues that people had found using the feature on their own source code.
+
+1. Interacting with existing, unannotated APIs
+2. Accommodating alternative initialization patterns
+3. Tracking nullable value types
+4. Tracking dotted names
+5. Special methods
+6. Filtering out nulls
