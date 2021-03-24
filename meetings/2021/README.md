@@ -5,6 +5,7 @@
 ## Schedule when convenient
 
 - List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
+- List pattern on enumerables (Julien): https://github.com/dotnet/csharplang/pull/4575
 
 ## Recurring topics
 
