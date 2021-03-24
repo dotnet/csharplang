@@ -2,7 +2,7 @@
 
 - [] Proposed
 - [] Prototype: Started
-- Implementation: Started
+- []Implementation: Started
 - [] Specification: Started
 
 ### Summary
