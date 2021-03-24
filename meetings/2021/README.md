@@ -5,13 +5,11 @@
 ## Schedule when convenient
 
 - List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
-- Async method builder override (Julien/Stephen): https://github.com/dotnet/csharplang/blob/main/proposals/async-method-builders.md
 
 ## Recurring topics
 
 - *Triage championed features and milestones*
 - *Design review*
-
 
 ## Apr 28, 2021
 
@@ -34,7 +32,7 @@
 ## Mar 29, 2021
 
 - Parameterless struct constructors (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/parameterless-struct-constructors.md
-- *Available*
+- Async method builder override (Julien/Stephen): https://github.com/dotnet/csharplang/blob/main/proposals/async-method-builders.md
 
 ## Mar 24, 2021
 
