@@ -122,7 +122,7 @@ namespace Name
 
 Specifically, a *single_line_namespace_declaration* is treated the same as a *namespace_declaration* at the same location in the *compilation_unit* with the same *qualified_identifier*.  The *using_directive*s and *type_declaration*s of that *single_line_namespace_declaration* act as if they were declared in the same order inside the *namespace_body* of that *namespace_declaration*.
 
-A source file cannot contain both a *single_line_namespace_declaration* and a *namespace_declaration*.  A source file cannot contain multiple *single_line_namespace_declaration*s. A *compilation_unit* cannot contain both a *single_line_namespace_declaration* and any *statement* at the top level.
+A source file cannot contain both a *single_line_namespace_declaration* and a *namespace_declaration*.  A source file cannot contain multiple *single_line_namespace_declaration*s. A *compilation_unit* cannot contain both a *single_line_namespace_declaration* and any top level *statement*. *type_declaration*s cannot precede a *single_line_namespace_declaration*.  
 
 ## Extern aliases
 
