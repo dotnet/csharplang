@@ -78,7 +78,7 @@ A *single_line_namespace_declaration* will contribute members corresponding to t
 ## Namespace declarations
 
 A *namespace_declaration* consists of the keyword `namespace`, followed by a namespace name and body, optionally followed by a semicolon.
-A *single_line_namespace_declaration* consists of the keyword `namespace`, followed by a namespace name, a semicolon and an optional list of directives and type declarations.
+A *single_line_namespace_declaration* consists of the keyword `namespace`, followed by a namespace name, a semicolon and an optional list of *using_directives*s and *type_declaration*s.
 
 ```antlr
 namespace_declaration
