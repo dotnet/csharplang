@@ -78,7 +78,7 @@ A *file_scoped_namespace_declaration* will contribute members corresponding to t
 ## Namespace declarations
 
 A *namespace_declaration* consists of the keyword `namespace`, followed by a namespace name and body, optionally followed by a semicolon.
-A *file_scoped_namespace_declaration* consists of the keyword `namespace`, followed by a namespace name, a semicolon and an optional list of *using_directives*s and *type_declaration*s.
+A *file_scoped_namespace_declaration* consists of the keyword `namespace`, followed by a namespace name, a semicolon and an optional list of *extern_alias_directive*s, *using_directive*s and *type_declaration*s.
 
 ```antlr
 namespace_declaration
@@ -86,7 +86,7 @@ namespace_declaration
     ;
     
 file_scoped_namespace_declaration
-    : 'namespace' qualified_identifier ';' using_directive* type_declaration*
+    : 'namespace' qualified_identifier ';' extern_alias_directive* using_directive* type_declaration*
     ;
 
 ... unchanged ...
@@ -120,7 +120,7 @@ namespace Name
 }
 ```
 
-Specifically, a *file_scoped_namespace_declaration* is treated the same as a *namespace_declaration* at the same location in the *compilation_unit* with the same *qualified_identifier*.  The *using_directive*s and *type_declaration*s of that *file_scoped_namespace_declaration* act as if they were declared in the same order inside the *namespace_body* of that *namespace_declaration*.
+Specifically, a *file_scoped_namespace_declaration* is treated the same as a *namespace_declaration* at the same location in the *compilation_unit* with the same *qualified_identifier*.  The *extern_alias_directive*s, *using_directive*s and *type_declaration*s of that *file_scoped_namespace_declaration* act as if they were declared in the same order inside the *namespace_body* of that *namespace_declaration*.
 
 A source file cannot contain both a *file_scoped_namespace_declaration* and a *namespace_declaration*.  A source file cannot contain multiple *file_scoped_namespace_declaration*s. A *compilation_unit* cannot contain both a *file_scoped_namespace_declaration* and any top level *statement*s. *type_declaration*s cannot precede a *file_scoped_namespace_declaration*.  
 
