@@ -18,7 +18,8 @@ The pattern syntax is modified as follow:
 ```diff
 property_pattern
   : type? property_pattern_clause simple_designation?
-  
+  ;
+
 property_pattern_clause
   : '{' (subpattern (',' subpattern)* ','?)? '}'
   ;
