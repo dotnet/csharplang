@@ -46,6 +46,6 @@ The receiver for each name lookup is the type of the previous member *T0*, start
 
 For example, a pattern of the form `{ Prop1.Prop2: pattern }` is exactly equivalent to `{ Prop1: { Prop1: pattern } }`.
 
-Note that this will include the null check for `Nullable<T>` values as it is the case for the expanded form, so we only see the underlying type's members when we dot off of a name in a *property_ pattern*.
+Note that this will include the null check for `Nullable<T>` values as it is the case for the expanded form, so we only see the underlying type's members when we dot off of a name in a *property_pattern*.
 
 Repeated member paths are allowed. Under the hood, such member accesses are simplified to be evaluated once.
