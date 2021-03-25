@@ -1,5 +1,3 @@
-  
-
 # Extended property patterns
 
 ## Summary
