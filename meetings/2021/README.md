@@ -2,9 +2,10 @@
 
 ## Schedule ASAP
 
+- Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
+
 ## Schedule when convenient
 
-- List pattern open questions (Fred): https://github.com/dotnet/roslyn/pull/49080#issuecomment-777026383
 - List pattern on enumerables (Julien): https://github.com/dotnet/csharplang/pull/4575
 
 ## Recurring topics
@@ -35,18 +36,20 @@
 - Parameterless struct constructors (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/parameterless-struct-constructors.md
 - Async method builder override (Julien/Stephen): https://github.com/dotnet/csharplang/blob/main/proposals/async-method-builders.md
 
-## Mar 24, 2021
-
-- Interpolated string open questions (Fred): https://github.com/dotnet/csharplang/pull/4486
-- `field` in auto-properties (Cyrus)
-
-## Mar 22, 2021
-
-- *Design review*
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Mar 24, 2021
+
+[C# Language Design Notes for March 24th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-03-24.md)
+
+1. Improved interpolated strings
+2. `field` keyword
+
+## Mar 22, 2021
+
+- *Design review* (No notes published)
 
 ## Mar 15, 2021
 
