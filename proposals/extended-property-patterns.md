@@ -24,14 +24,14 @@ property_pattern_clause
   ;
 
 subpattern
--  : identifier ':' pattern
-+  : subpattern_name ':' pattern
-   ;
+- : identifier ':' pattern
++ : subpattern_name ':' pattern
+  ;
 
 +subpattern_name
-+  : identifier 
-+  | subpattern_name '.' identifier
-+  ;
++ : identifier 
++ | subpattern_name '.' identifier
++ ;
 ```
 
 The receiver for each name lookup is the stripped type of the previous member starting from the *input type* of the *property_pattern*.
