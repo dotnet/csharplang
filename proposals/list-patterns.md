@@ -220,6 +220,11 @@ class ListPatternHelper
     return count;
   }
 
+  public bool Last()
+  {
+    return !enumerator.MoveNext();
+  }
+
   public int Count()
   {
     return MoveNextIfNeeded(-1);
@@ -266,7 +271,7 @@ class ListPatternHelper
 
   helper.TryGetStartElement(index: 0, out var element0) && element0 is 0 &&
   helper.TryGetStartElement(1, out var element1) && element1 is 1 &&
-  helper.Count() == 2
+  helper.Last()
 }
 ```
 
