@@ -44,9 +44,16 @@ picturing this:
 // The builder that will actually "build" the interpolated string"
 public ref struct TraceLoggerParamsBuilder
 {
-    public static void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Logger logger, out TraceLoggerParamsBuilder builder)
+    public static bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Logger logger, out TraceLoggerParamsBuilder builder)
     {
+        if (!logger._logLevelEnabled)
+        {
+            builder = default;
+            return false;
+        }
+
         builder = TraceLoggerParamsBuilder(baseLength, formatHoleCount, logger.EnabledLevel);
+        return true;
     }
 
     // Storage for the built-up string
@@ -61,16 +68,12 @@ public ref struct TraceLoggerParamsBuilder
 
     public bool TryFormat(string s)
     {
-        if (!_logLevelEnabled) return false;
-
         // Store and format part as required
         return true;
     }
 
     public bool TryFormat<T>(T t)
     {
-        if (!_logLevelEnabled) return false;
-
         // Store and format part as required
         return true;
     }
@@ -85,7 +88,6 @@ public class Logger
 
     public void LogTrace(TraceLoggerParamsBuilder builder)
     {
-
         // Impl of logging
     }
 }
@@ -93,12 +95,14 @@ public class Logger
 Logger logger = GetLogger(LogLevel.Info);
 
 // Given the above definitions, usage looks like this:
-logger.LogTrace($"{"this"} will never be printed because info is < trace!");
+var name = "Fred Silberberg";
+logger.LogTrace($"{name} will never be printed because info is < trace!");
 
 // This is converted to:
 var receiverTemp = logger;
-TraceLoggerParamsBuilder.GetInterpolatedStringBuilder(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builder);
-_ = builder.TryFormat("this") && builder.TryFormat(" will never be printed because info is < trace!");
+_ = TraceLoggerParamsBuilder.GetInterpolatedStringBuilder(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builder) &&
+    builder.TryFormat("Fred Silberberg") &&
+    builder.TryFormat(" will never be printed because info is < trace!");
 receiverTemp.LogTrace(builder);
 ```
 
@@ -123,6 +127,9 @@ with an identifier of `TryFormat` and parameter types of `Si`, `int`, and `strin
 Note that these rules do not permit extension methods for the `TryFormat` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
 pattern, where we allow `GetEnumerator` to be an extension method, but not `Current` or `MoveNext()`.
 
+These rules _do_ permit default parameters for the `TryFormat` calls, which will work with things like `CallerLineNumber` or `CallerArgumentExpression` (when supported by
+the language).
+
 #### Interpolated string builder conversion
 
 We add a new implicit conversion type: The _implicit\_string\_builder\_conversion_. An _implicit\_string\_builder\_conversion_ permits an _interpolated\_string\_expression_
@@ -131,14 +138,14 @@ to be converted to an _applicable\_interpolated\_string\_builder\_type_. There a
 1. A method argument is converted as part of determining applicable function members (covered below), or
 2. Given an _interpolated\_string\_expression_ `S` being converted to type `T`, the following is true:
     * `T` is an _applicable\_interpolated\_string\_builder\_type_, and
-    * `T` has an accessible static void-returning method `GetInterpolatedStringBuilder` that takes 2 int parameters and 1 out parameter of type `T`, in that order.
+    * `T` has an accessible static bool-returning method `GetInterpolatedStringBuilder` that takes 2 int parameters and 1 out parameter of type `T`, in that order.
 
 We want to make `GetInterpolatedStringBuilder` a static method with an `out` parameter for 2 reasons:
 
 1. By making it a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to. If we limited the pattern to constructors,
 then the implementation would be required to always return new instances.
-2. By making the builder an `out` parameter we allow overloading of the `GetInterpolatedStringBuilder` method by builder type, which is useful for scenarios like the logger
-above, which could have `TraceLoggerParamsBuilder`/`DebugLoggerParamsBuilder`/`WarningLoggerParamsBuilder`/etc.
+2. By making the builder an `out` parameter we allow the `GetInterpolatedStringBuilder` method to return a bool indicating whether to continue formatting, which is useful
+for scenarios like the logger above that may want to skip any argument evaluation at all for cases when the log level isn't enabled.
 
 #### Applicable function member adjustments
 
@@ -197,8 +204,11 @@ intended for direct use by the C# compiler. This struct would look approximately
 ```cs
 public ref struct InterpolatedStringBuilder
 {
-    public void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, out InterpolatedStringBuilder builder)
-        => builder = new InterpolatedStringBuilder(baseLength, formatHoleCount);
+    public bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, out InterpolatedStringBuilder builder)
+    {
+        builder = new InterpolatedStringBuilder(baseLength, formatHoleCount);
+        return true;
+    }
 
     private char[] _array;
     internal int _count;
@@ -243,8 +253,8 @@ If the type of an interpolated string is `System.IFormattable` or `System.Format
 
 Both the general pattern and the specific changes for interpolated strings directly converted to `string`s follow the same lowering pattern. The `GetInterpolatedStringBuilder` method is
 invoked on the receiver (whether that's the temporary method receiver for an _implicit\_string\_builder\_conversion_ derived from the applicable function member algorithm, or a
-standard conversion derived from the target type), and stored into a temp local. `TryFormat` is then repeatedly invoked on that temp, with each part of the interpolated string, in order,
-stopping subsequent calls if a `TryFormat` call returns `false`. The temp is then evaluated as the result of the expression.
+standard conversion derived from the target type). If the call returned `true`, `TryFormat` is repeatedly invoked on the builder out parameter, with each part of the interpolated string,
+in order, stopping subsequent calls if a `TryFormat` call returns `false`. Finally, the original method is called, passing the initialized builder in place of the interpolated string expression.
 
 **Open Question**
 
@@ -255,6 +265,8 @@ non-intuitive for the general case.
 
 Another alternative, if we want to always evaluate all format holes, is to remove the `TryFormat` version of the API and just do repeated `Format` calls. The builder can track whether it
 should just be dropping the argument and immediately returning for this version.
+
+_Answer_: We will have conditional evaluation of the holes.
 
 ## Other considerations
 
@@ -344,8 +356,16 @@ public static class MemoryExtensions
  
 public ref struct SpanInterpolatedStringBuilder
 {
-    public static void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Span<char> span, out SpanInterpolatedStringBuilder builder)
-        => builder = new SpanInterpolatedStringBuilder(span, baseLength);
+    public static bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Span<char> span, out SpanInterpolatedStringBuilder builder)
+    {
+        if (baseLength > span.Length)
+        {
+            builder = default;
+            return false;
+        }
+        builder = new SpanInterpolatedStringBuilder(span, baseLength);
+        return true;
+    }
 
     private Span<char> _span;
     internal bool _success;
@@ -381,8 +401,11 @@ bool success = destinationSpan.TryWrite($”{a} = {b}”, out int charsWritten);
 // Maps to
 
 var receiverTemp = destinationSpan;
-SpanInterpolatedStringBuilder.GetInterpolatedStringBuilder(baseLength: 3, formatHoleCount: 2, receiverTemp, out var builder);
-_ = builder.TryFormat(a) && builder.TryFormat(“ = “) && builder.TryFormat(b);
+
+_ = SpanInterpolatedStringBuilder.GetInterpolatedStringBuilder(baseLength: 3, formatHoleCount: 2, receiverTemp, out var builder) &&
+    builder.TryFormat(a) &&
+    builder.TryFormat(“ = “) &&
+    builder.TryFormat(b);
 bool success = receiverTemp.TryWrite(builder, out int charsWritten);
 ```
 
@@ -401,9 +424,16 @@ public ref struct Utf8StringBuilder
     private Span<byte> _bytes;
     public Utf8StringBuilder(Span<byte> bytes) => _bytes = bytes;
 
-    public static void GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Utf8StringBuilder instance, out Utf8StringBuilder builder)
+    public static bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Utf8StringBuilder instance, out Utf8StringBuilder builder)
     {
+        if (baseLength > instance._bytes.Length)
+        {
+            builder = default;
+            return false;
+        }
+
         builder = instance;
+        return true;
     }
 
     public bool TryFormat(Utf8StringBuilder builder, out int bytesWritten)
@@ -425,8 +455,9 @@ bool success = Utf8Formatter.WithSpan(myBytes).TryFormat($"Hello world! {myVar}"
 // Maps to
 
 var receiverTemp = Utf8Formatter.WithSpan(myBytes);
-Utf8StringBuilder.GetInterpolatedStringBuilder(baseLength: 13, formatHoleCount: 1, receiverTemp, out var builder);
-_ = builder.TryFormat("Hello world! ") && builder.TryFormat(myVar);
+_ = Utf8StringBuilder.GetInterpolatedStringBuilder(baseLength: 13, formatHoleCount: 1, receiverTemp, out var builder) &&
+    builder.TryFormat("Hello world! ") &&
+    builder.TryFormat(myVar);
 bool success = receiverTemp.TryFormat(builder, out int bytesWritten);
 ```
 
