@@ -80,7 +80,7 @@ A *list_pattern* is compatible with any type that is *countable* as well as *ind
 A *list_pattern* is also compatible with any type that is *enumerable*.
 
 A *slice_pattern* is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` argument or otherwise an accessible `Slice` method that takes two `int` arguments. If both are present, the former is preferred.  
-A *slice_pattern* without a sub_pattern is also compatible with any type that is *enumerable*.
+A *slice_pattern* without a sub-pattern is also compatible with any type that is *enumerable*.
 
 ```
 enumerable is { 1, 2, .. } // okay
@@ -99,8 +99,8 @@ If the input type is *enumerable* but not *indexable*, then the *list_pattern* e
 Patterns at the start of the *list_pattern* — that are before the `..` *slice_pattern* if one is present, or all otherwise — are matched against the elements produced at the start of the enumeration.  
 If the collection does not produce enough elements to get a value corresponding to a starting pattern, the match fails. So the *constant_pattern* `3` in `{ 1, 2, 3, .. }` doesn't match when the collection has fewer than 3 elements.  
 Patterns at the end of the *list_pattern* (that are following the `..` *slice_pattern* if one is present) are matched against the elements produced at the end of the enumeration.  
-If the collection does not produce enough elements to get values corresponding to the ending patterns, the *splice_pattern* does not match. So the *splice_pattern* in `{ 1, .., 3 }` doesn't match when the collection has fewer than 2 elements.  
-A *list_pattern* without a *splice_pattern* only matches if the number of elements produced by complete enumeration and the number of patterns are equals. So `{ _, _, _ }` only matches when the collection produces exactly 3 elements.
+If the collection does not produce enough elements to get values corresponding to the ending patterns, the *slice_pattern* does not match. So the *slice_pattern* in `{ 1, .., 3 }` doesn't match when the collection has fewer than 2 elements.  
+A *list_pattern* without a *slice_pattern* only matches if the number of elements produced by complete enumeration and the number of patterns are equals. So `{ _, _, _ }` only matches when the collection produces exactly 3 elements.
 
 Note that those implicit checks for number of elements in the collection are unaffected by the collection type being *countable*. So `{ _, _, _ }` will not make use of `Length` or `Count` even if one is available.
 
@@ -285,7 +285,7 @@ class ListPatternHelper
 @{
   var helper = new ListPatternHelper(collection, 0, 2);
 
-  helper.Count() > 2 && // `..` with 2 ending patterns
+  helper.Count() >= 2 && // `..` with 2 ending patterns
   helper.GetEndElement(hatIndex: 2) is 3 && // [^2] is 3
   helper.GetEndElement(1) is 4 // [^1] is 4
 }
@@ -298,7 +298,7 @@ class ListPatternHelper
 
   helper.TryGetStartElement(index: 0, out var element0) && element0 is 1 &&
   helper.TryGetStartElement(1, out var element1) && element1 is 2 &&
-  helper.Count() > 4 && // `..` with 2 starting patterns and 2 ending patterns
+  helper.Count() >= 4 && // `..` with 2 starting patterns and 2 ending patterns
   helper.GetEndElement(hatIndex: 2) is 3 &&
   helper.GetEndElement(1) is 4
 }
@@ -323,3 +323,5 @@ All multi-dimensional arrays can be non-zero-based. We can either:
 1. Add a runtime helper to check if the array is zero-based across all dimensions.
 2. Call `GetLowerBound` and add it to each indexer access to pass the *correct* index.
 3. Assume all arrays are zero-based since that's the default for arrays created by `new` expressions.
+4. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`...
+5. Should we try to enumeration short for length-patterns on enumerables in some cases? (computing max acceptable count and checking partial count against that)
