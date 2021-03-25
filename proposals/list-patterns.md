@@ -325,3 +325,4 @@ All multi-dimensional arrays can be non-zero-based. We can either:
 3. Assume all arrays are zero-based since that's the default for arrays created by `new` expressions.
 4. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`...
 5. Should we try to cut the enumeration short for length-patterns on enumerables in some cases? (computing min/max acceptable count and checking partial count against that)
+  What if the enumerable type has some sort of `TryGetNonEnumeratedCount` API?
