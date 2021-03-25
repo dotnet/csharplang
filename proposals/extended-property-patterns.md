@@ -42,7 +42,7 @@ subpattern
 + ;
 ```
 
-The receiver for each name lookup is the stripped type of the previous member starting from the *input type* of the *property_pattern*.
+The receiver for each name lookup is the type of the previous member *T0*, starting from the *input type* of the *property_pattern*. if *T* is a nullable type, *T0* is its underlying type, otherwise *T0* is equal to *T*.
 
 For example, a pattern of the form `{ Prop1.Prop2: pattern }` is exactly equivalent to `{ Prop1: { Prop1: pattern } }`.
 
