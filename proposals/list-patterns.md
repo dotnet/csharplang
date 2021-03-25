@@ -73,15 +73,66 @@ Notes:
 
 #### Pattern compatibility
 
-A *length_pattern* is compatible with any type that is *countable* - it has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.
+A *length_pattern* is compatible with any type that is *countable* — it has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.  
+A *length_pattern* is also compatible with any type that is *enumerable* — it can be used in `foreach`.
 
-A *list_pattern* is compatible with any type that is *countable* as well as *indexable* - it has an accessible indexer that takes an `Index` or `int` argument. If both indexers are present, the former is preferred.
+A *list_pattern* is compatible with any type that is *countable* as well as *indexable* — it has an accessible indexer that takes an `Index` or `int` argument. If both indexers are present, the former is preferred.  
+A *list_pattern* is also compatible with any type that is *enumerable*.
 
-A *slice_pattern* is compatible with any type that is *countable* as well as *sliceable* - it has an accessible indexer that takes a `Range` argument or otherwise an accessible `Slice` method that takes two `int` arguments. If both are present, the former is preferred.
+A *slice_pattern* is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` argument or otherwise an accessible `Slice` method that takes two `int` arguments. If both are present, the former is preferred.  
+A *slice_pattern* without a subpattern is also compatible with any type that is *enumerable*.
+
+```
+enumerable is { 1, 2, .. } // okay
+enumerable is { 1, 2, ..var x } // error
+```
 
 This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support) but relaxed to ignore optional or `params` parameters, if any.
 
 > **Open question**: We should define the exact binding rules for any of these members and decide if we want to diverge from the range spec.
+
+#### Semantics on enumerable type
+
+If the input type is *enumerable* but not *countable*, then the *length_pattern* is checked on the number of elements obtained from enumerating the collection.
+
+If the input type is *enumerable* but not *indexable*, then the *list_pattern* enumerates elements from the collection and checks them against the listed patterns:  
+Patterns at the start of the *list_pattern* — that are before the `..` *slice_pattern* if one is present, or all otherwise — are matched against the elements produced at the start of the enumeration.  
+If the collection does not produce enough elements to get a value corresponding to a starting pattern, the match fails. So the *constant_pattern* `3` in `{ 1, 2, 3, .. }` doesn't match when the collection has fewer than 3 elements.  
+Patterns at the end of the *list_pattern* (that are following the `..` *slice_pattern* if one is present) are matched against the elements produced at the end of the enumeration.  
+If the collection does not produce enough elements to get values corresponding to the ending patterns, the *slice_pattern* does not match. So the *slice_pattern* in `{ 1, .., 3 }` doesn't match when the collection has fewer than 2 elements.  
+A *list_pattern* without a *slice_pattern* only matches if the number of elements produced by complete enumeration and the number of patterns are equals. So `{ _, _, _ }` only matches when the collection produces exactly 3 elements.
+
+Note that those implicit checks for number of elements in the collection are unaffected by the collection type being *countable*. So `{ _, _, _ }` will not make use of `Length` or `Count` even if one is available.
+
+When multiple *list_patterns* are applied to one input value the collection will be enumerated once at most:  
+```
+_ = collection switch
+{
+  { 1 } => ...,
+  { 2 } => ...,
+  { .., 3 } => ...,
+};
+
+_ = collectionContainer switch
+{
+  { Collection: { 1 } } => ...,
+  { Collection: { 2 } } => ...,
+  { Collection: { .., 3 } } => ...,
+};
+```
+
+It is possible that the collection will not be completely enumerated. For example, if one of the patterns in the *list_pattern* doesn't match or when there are no ending patterns in a *list_pattern* (e.g. `collection is { 1, 2, .. }`).
+
+If an enumerator is produced when a *list_pattern* is applied to an enumerable type and that enumerator is disposable it will be disposed when a top-level pattern containing the *list_pattern* successfully matches, or when none of the patterns match (in the case of a `switch` statement or expression). It is possible for an enumerator to be disposed more than once and the enumerator must ignore all calls to `Dispose` after the first one.
+```
+// any enumerator used to evaluate this switch statement is disposed at the indicated locations
+_ = collection switch
+{
+  { 1 } => /* here */  ...,
+  _ => /* here */ ...,
+};
+/* here too, with a spilled try/finally around the switch expression */
+```
 
 #### Subsumption checking
 
@@ -103,7 +154,7 @@ The order in which subpatterns are matched at runtime is unspecified, and a fail
 
 > **Open question**: The pattern `{..}` tests for  `expr.Length >= 0`. Should we omit such test (assuming `Length` is always non-negative)?
  
-#### Lowering
+#### Lowering on countable/indexeable/sliceable type
 
 A pattern of the form `expr is {1, 2, 3}` is equivalent to the following code (if compatible via implicit `Index` support):
 ```cs
@@ -121,6 +172,146 @@ expr.Length is >= 2
 ```
 The *input type* for the *slice_pattern* is the return type of the underlying `this[Range]` or `Slice` method with two exceptions: For `string` and arrays, `string.Substring` and `RuntimeHelpers.GetSubArray` will be used, respectively.
 
+#### Lowering on enumerable type
+
+> **Open question**: Confirm that async enumerables are out-of-scope.  
+> **Open question**: Confirm that slice patterns with a sub_pattern (such as `..var x`) are out-of-scope.  
+
+Although a helper type is not necessary, it helps simplify and illustrate the logic.
+
+```
+class ListPatternHelper
+{
+  // Notes: 
+  // We could inline this logic to avoid creating a new type and to handle the pattern-based enumeration scenarios.
+  // We may only need one element in start buffer, or maybe none at all, if we can control the order of checks in the patterns DAG.
+  // We could emit a count check for a non-terminal `..` and economize on count checks a bit.
+  private EnumeratorType enumerator;
+  private int count;
+  private ElementType[] startBuffer;
+  private ElementType[] endCircularBuffer;
+
+  public ListPatternHelper(EnumerableType enumerable, int startPatternsCount, int endPatternsCount)
+  {
+    count = 0;
+    enumerator = enumerable.GetEnumerator();
+    startBuffer = startPatternsCount == 0 ? null : new ElementType[startPatternsCount];
+    endCircularBuffer = endPatternsCount == 0 ? null : new ElementType[endPatternsCount];
+  }
+
+  // targetIndex = -1 means we want to enumerate completely
+  private int MoveNextIfNeeded(int targetIndex)
+  {
+    int startSize = startBuffer?.Length ?? 0;
+    int endSize = endCircularBuffer?.Length ?? 0;
+    Debug.Assert(targetIndex == -1 || (targetIndex >= 0 && targetIndex < startSize));
+
+    while ((targetIndex == -1 || count <= targetIndex) && enumerator.MoveNext())
+    {
+      if (count < startSize)
+        startBuffer[count] = enumerator.Current;
+
+      if (endSize > 0)
+        endCircularBuffer[count % endSize] = enumerator.Current;
+
+      count++;
+    }
+
+    return count;
+  }
+
+  public bool Last()
+  {
+    return !enumerator.MoveNext();
+  }
+
+  public int Count()
+  {
+    return MoveNextIfNeeded(-1);
+  }
+
+  // fulfills the role of `[index]` for start elements when enough elements are available
+  public bool TryGetStartElement(int index, out ElementType value)
+  {
+    Debug.Assert(startBuffer is not null && index >= 0 && index < startBuffer.Length);
+    MoveNextIfNeeded(index);
+    if (count > index)
+    {
+      value = startBuffer[index];
+      return true;
+    }
+    value = default;
+    return false;
+  }
+
+  // fulfills the role of `[^hatIndex]` for end elements when enough elements are available
+  public ElementType GetEndElement(int hatIndex)
+  {
+    Debug.Assert(endCircularBuffer is not null && hatIndex > 0 && hatIndex <= endCircularBuffer.Length);
+    int endSize = endCircularBuffer.Length;
+    Debug.Assert(endSize > 0);
+    return endCircularBuffer[(count - hatIndex) % endSize];
+  }
+}
+```
+
+`collection is [3]` is lowered to
+```
+@{
+  var helper = new ListPatternHelper(collection, 0, 0);
+
+  helper.Count() == 3
+}
+```
+
+`collection is { 0, 1 }` is lowered to
+```
+@{
+  var helper = new ListPatternHelper(collection, 2, 0);
+
+  helper.TryGetStartElement(index: 0, out var element0) && element0 is 0 &&
+  helper.TryGetStartElement(1, out var element1) && element1 is 1 &&
+  helper.Last()
+}
+```
+
+`collection is { 0, 1, .. }` is lowered to
+```
+@{
+  var helper = new ListPatternHelper(collection, 2, 0);
+
+  helper.TryGetStartElement(index: 0, out var element0) && element0 is 0 &&
+  helper.TryGetStartElement(1, out var element1) && element1 is 1
+}
+```
+
+`collection is { .., 3, 4 }` is lowered to
+```
+@{
+  var helper = new ListPatternHelper(collection, 0, 2);
+
+  helper.Count() >= 2 && // `..` with 2 ending patterns
+  helper.GetEndElement(hatIndex: 2) is 3 && // [^2] is 3
+  helper.GetEndElement(1) is 4 // [^1] is 4
+}
+```
+
+`collection is { 1, 2, .., 3, 4 }` is lowered to
+```
+@{
+  var helper = new ListPatternHelper(collection, 2, 2);
+
+  helper.TryGetStartElement(index: 0, out var element0) && element0 is 1 &&
+  helper.TryGetStartElement(1, out var element1) && element1 is 2 &&
+  helper.Count() >= 4 && // `..` with 2 starting patterns and 2 ending patterns
+  helper.GetEndElement(hatIndex: 2) is 3 &&
+  helper.GetEndElement(1) is 4
+}
+```
+
+The same way that a `Type { name: pattern }` *property_pattern* checks that the input has the expected type and isn't null before using that as receiver for the property checks, so can we have the `{ ..., ... }` *list_pattern* initialize a helper and use that as the pseudo-receiver for element accesses.  
+This should allow merging branches of the patterns DAG, thus avoiding creating multiple enumerators.
+
 ### Additional types
 
 Beyond the pattern-based mechanism outlined above, there are an additional two set of types that can be covered as a special case.
@@ -137,3 +328,6 @@ All multi-dimensional arrays can be non-zero-based. We can either:
 1. Add a runtime helper to check if the array is zero-based across all dimensions.
 2. Call `GetLowerBound` and add it to each indexer access to pass the *correct* index.
 3. Assume all arrays are zero-based since that's the default for arrays created by `new` expressions.
+4. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`...
+5. Should we try to cut the enumeration short for length-patterns on enumerables in some cases? (computing min/max acceptable count and checking partial count against that)
+  What if the enumerable type has some sort of `TryGetNonEnumeratedCount` API?
