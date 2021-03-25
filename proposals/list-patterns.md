@@ -80,7 +80,7 @@ A *list_pattern* is compatible with any type that is *countable* as well as *ind
 A *list_pattern* is also compatible with any type that is *enumerable*.
 
 A *slice_pattern* is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` argument or otherwise an accessible `Slice` method that takes two `int` arguments. If both are present, the former is preferred.  
-A *slice_pattern* without a sub-pattern is also compatible with any type that is *enumerable*.
+A *slice_pattern* without a subpattern is also compatible with any type that is *enumerable*.
 
 ```
 enumerable is { 1, 2, .. } // okay
