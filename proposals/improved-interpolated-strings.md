@@ -204,7 +204,7 @@ intended for direct use by the C# compiler. This struct would look approximately
 ```cs
 public ref struct InterpolatedStringBuilder
 {
-    public bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, out InterpolatedStringBuilder builder)
+    public static bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, out InterpolatedStringBuilder builder)
     {
         builder = new InterpolatedStringBuilder(baseLength, formatHoleCount);
         return true;
@@ -228,7 +228,7 @@ public ref struct InterpolatedStringBuilder
     public bool TryFormat(ReadOnlySpan<char> s)
     {
         if (s.Length >= _array.Length - _count) Grow();
-        s.AsSpan().CopyTo(_array);
+        s.CopyTo(_array);
         _count += s.Length;
         return true;
     }
@@ -249,6 +249,15 @@ We make a slight change to the rules for the meaning of an [_interpolated\_strin
 
 If the type of an interpolated string is `System.IFormattable` or `System.FormattableString`, the meaning is a call to `System.Runtime.CompilerServices.FormattableStringFactory.Create`. If the type is `string`, the meaning of the expression is a call to `string.Format`. In both cases **if there exists an overload that takes a single argument and there exists an _implicit\_string\_builder\_conversion_ from the interpolated string to the parameter type, that overload is used according to the builder pattern. Otherwise**, the argument list of the call consists of a format string literal with placeholders for each interpolation, and an argument for each expression corresponding to the place holders.
 
+**Open Question**:
+
+Do we want to instead just make the compiler know about `InterpolatedStringBuilder` and skip the `string.Format` call entirely? It would allow us to hide a method that we don't necessarily
+want to put in people's faces when they manually call `string.Format`.
+
+**Open Question**:
+
+Do we want to have builders for `System.IFormattable` and `System.FormattableString` as well?
+
 ### Lowering
 
 Both the general pattern and the specific changes for interpolated strings directly converted to `string`s follow the same lowering pattern. The `GetInterpolatedStringBuilder` method is
@@ -256,7 +265,7 @@ invoked on the receiver (whether that's the temporary method receiver for an _im
 standard conversion derived from the target type). If the call returned `true`, `TryFormat` is repeatedly invoked on the builder out parameter, with each part of the interpolated string,
 in order, stopping subsequent calls if a `TryFormat` call returns `false`. Finally, the original method is called, passing the initialized builder in place of the interpolated string expression.
 
-**Open Question**
+**~~Open~~ Question**
 
 This lowering means that subsequent parts of the interpolated string after a false-returning `TryFormat` call don't get evaluated. This could potentially be very confusing, particularly
 if the format hole is side-effecting. We could instead evaluate all format holes first, then repeatedly call `TryFormat` with the results, stopping if it returns false. This would ensure
