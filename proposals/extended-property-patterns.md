@@ -3,7 +3,14 @@
 ## Summary
 [summary]: #summary
 
-Allow property subpatterns to reference nested members.
+Allow property subpatterns to reference nested members, for instance:
+```cs
+if (e is MethodCallExpression { Method.Name: "MethodName" })
+``` 
+Instead of:
+```cs
+if (e is MethodCallExpression { Method: { Name: "MethodName" } })
+```
 
 ## Motivation
 [motivation]: #motivation
@@ -13,7 +20,7 @@ When you want to match a child property, nesting another recursive pattern adds 
 ## Detailed design
 [design]: #detailed-design
 
-The pattern syntax is modified as follow:
+The [*property_pattern*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/patterns.md#property-pattern) syntax is modified as follow:
 
 ```diff
 property_pattern
