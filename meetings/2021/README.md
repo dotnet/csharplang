@@ -2,11 +2,7 @@
 
 ## Schedule ASAP
 
-- Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
-
 ## Schedule when convenient
-
-- List pattern on enumerables (Julien): https://github.com/dotnet/csharplang/pull/4575
 
 ## Recurring topics
 
@@ -25,11 +21,16 @@
 
 ## Apr 12, 2021
 
+- List pattern on enumerables (Julien): https://github.com/dotnet/csharplang/pull/4575
+
 ## Apr 7, 2021
 
 - MVP session
 
 ## Apr 5, 2021
+
+- Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
+- Statics in interfaces (Mads): https://github.com/dotnet/csharplang/issues/4436
 
 ## Mar 29, 2021
 
