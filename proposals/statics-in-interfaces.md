@@ -72,7 +72,7 @@ interface I<T> where T : I<T>
 ***Open question:** Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be allowed?*
 
 #### Explicitly non-virtual static members
-Todau's non-virtual static methods are allowed to optionally have the `sealed` modifier for symmetry with non-virtual instance members.
+For symmetry with non-virtual instance members, static members should be allowed an optional `sealed` modifier, even though they are non-virtual by default:
 
 ``` c#
 interface I0
