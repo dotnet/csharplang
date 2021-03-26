@@ -328,6 +328,7 @@ All multi-dimensional arrays can be non-zero-based. We can either:
 1. Add a runtime helper to check if the array is zero-based across all dimensions.
 2. Call `GetLowerBound` and add it to each indexer access to pass the *correct* index.
 3. Assume all arrays are zero-based since that's the default for arrays created by `new` expressions.
-4. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`...
-5. Should we try to cut the enumeration short for length-patterns on enumerables in some cases? (computing min/max acceptable count and checking partial count against that)
+4. Should we limit the list-pattern to `IEnumerable` types? Then we could allow `{ 1, 2, ..var x }` (`x` would be an `IEnumerable` we would cook up)
+5. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`. Can we assume that `Count` agrees with enumerated count?
+6. Should we try to cut the enumeration short for length-patterns on enumerables in some cases? (computing min/max acceptable count and checking partial count against that)
   What if the enumerable type has some sort of `TryGetNonEnumeratedCount` API?
