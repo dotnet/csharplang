@@ -136,4 +136,4 @@ Definite assignment specification in any other case is unchanged. For instance, 
 	if (true ? x is int i : y is int i)
 	```
 
-This document does not propose any changes to definite assignment rules for a *conditional_expression* to propagage conditional states when *cond_expr* is not a constant as it is covered by [improved definite assignment](https://github.com/dotnet/csharplang/blob/main/proposals/improved-definite-assignment.md#specification) proposal.
+This document does not propose any changes to definite assignment rules for a *conditional_expression* to propagate conditional states when *cond_expr* is not a constant as it is covered by [improved definite assignment](https://github.com/dotnet/csharplang/blob/main/proposals/improved-definite-assignment.md#specification) proposal.
