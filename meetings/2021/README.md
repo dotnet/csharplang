@@ -34,7 +34,7 @@
 
 ## Mar 29, 2021
 
-- Parameterless struct constructors (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/parameterless-struct-constructors.md
+- Parameterless struct constructors (Chuck): https://github.com/cston/csharplang/blob/struct-ctor-more/proposals/parameterless-struct-constructors.md
 - Async method builder override (Julien/Stephen): https://github.com/dotnet/csharplang/blob/main/proposals/async-method-builders.md
 
 # C# Language Design Notes for 2021
