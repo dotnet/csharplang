@@ -33,14 +33,16 @@
 - Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
 - Statics in interfaces (Mads): https://github.com/dotnet/csharplang/issues/4436
 
-## Mar 29, 2021
-
-- Parameterless struct constructors (Chuck): https://github.com/cston/csharplang/blob/struct-ctor-more/proposals/parameterless-struct-constructors.md
-- Async method builder override (Julien/Stephen): https://github.com/dotnet/csharplang/blob/main/proposals/async-method-builders.md
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Mar 29, 2021
+
+[C# Language Design Notes for March 29th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-03-29.md)
+
+1. Parameterless struct constructors
+2. AsyncMethodBuilder
 
 ## Mar 24, 2021
 
