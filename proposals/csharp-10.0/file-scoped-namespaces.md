@@ -47,7 +47,7 @@ namespace X.Y.Z
 
 However, both these forms force the user to indent the majority of their code and add a fair amount of ceremony for what is effectively a very basic concept.  This affects clarity, uses horizontal and vertical space, and is often unsatisfying for users both used to C# and coming from other languages (which commonly have less ceremony here).
 
-The primary goal of the feature therefor is to meet the needs of the majority of the ecosystem with less unnecessary boilerplate.
+The primary goal of the feature therefore is to meet the needs of the majority of the ecosystem with less unnecessary boilerplate.
 
 ### Detailed design
 
