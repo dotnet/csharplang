@@ -44,16 +44,16 @@ picturing this:
 // The builder that will actually "build" the interpolated string"
 public ref struct TraceLoggerParamsBuilder
 {
-    public static bool Create(int baseLength, int formatHoleCount, Logger logger, out TraceLoggerParamsBuilder builder)
+    public static TraceLoggerParamsBuilder Create(int baseLength, int formatHoleCount, Logger logger, out bool builderIsValid)
     {
         if (!logger._logLevelEnabled)
         {
-            builder = default;
-            return false;
+            builderIsValid = false;
+            return default;
         }
 
-        builder = TraceLoggerParamsBuilder(baseLength, formatHoleCount, logger.EnabledLevel);
-        return true;
+        builderIsValid = true;
+        return TraceLoggerParamsBuilder(baseLength, formatHoleCount, logger.EnabledLevel);
     }
 
     // Storage for the built-up string
@@ -99,16 +99,18 @@ var name = "Fred Silberberg";
 logger.LogTrace($"{name} will never be printed because info is < trace!");
 
 // This is converted to:
+var name = "Fred Silberberg";
 var receiverTemp = logger;
-_ = TraceLoggerParamsBuilder.Create(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builder) &&
-    builder.TryFormatInterpolationHole("Fred Silberberg") &&
+var builder = TraceLoggerParamsBuilder.Create(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builderIsValid);
+_ = builderIsValid &&
+    builder.TryFormatInterpolationHole(name) &&
     builder.TryFormatBaseString(" will never be printed because info is < trace!");
 receiverTemp.LogTrace(builder);
 ```
 
-Here, because `TraceLoggerParamsBuilder` has static method called `Create` with the correct parameters, including an out param that is the type
-the `LogTrace` call was expecting, we say that the interpolated string has an implicit builder conversion to that parameter, and it lowers to the pattern shown above.
-The specese needed for this is a bit complicated, and is expanded below.
+Here, because `TraceLoggerParamsBuilder` has static method called `Create` with the correct parameters and returns the type the `LogTrace` call was expecting,
+we say that the interpolated string has an implicit builder conversion to that parameter, and it lowers to the pattern shown above. The specese needed for this
+is a bit complicated, and is expanded below.
 
 #### Builder type applicability
 
@@ -153,20 +155,21 @@ to be converted to an _applicable\_interpolated\_string\_builder\_type_. There a
 1. A method argument is converted as part of determining applicable function members (covered below), or
 2. Given an _interpolated\_string\_expression_ `S` being converted to type `T`, the following is true:
     * `T` is an _applicable\_interpolated\_string\_builder\_type_, and
-    * `T` has an accessible static bool-returning method `Create` that takes 2 int parameters and 1 out parameter of type `T`, in that order.
+    * One of the following is true:
+        * `T` has an accessible static T-returning method `Create` that takes 2 int parameters and 1 out parameter of type `bool`, in that order.
+        * `T` has an accessible static T-returning method `Create` that takes 2 int parameters, in that order.
 
-We want to make `Create` a static method with an `out` parameter for 2 reasons:
+We want to make `Create` a static method because by making it a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to.
+If we limited the pattern to constructors, then the implementation would be required to always return new instances.
 
-1. By making it a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to. If we limited the pattern to constructors,
-then the implementation would be required to always return new instances.
-2. By making the builder an `out` parameter we allow the `Create` method to return a bool indicating whether to continue formatting, which is useful
-for scenarios like the logger above that may want to skip any argument evaluation at all for cases when the log level isn't enabled.
+Additionally, by returning the builder type instead of requiring it to go in an out parameter, we marginally improve the codegen and significantly simplify the rules around
+ref struct lifetimes vs the traditional .NET `TryX` pattern, and we expect a number of these builder types to be ref structs.
+
+This can and will be impacted by abstract statics in interfaces for generic contexts. We will need to make sure the interactions are considered and tested.
 
 **Open Question**
 
-Should we swap the out parameter and return? IE, make the return the builder type, and have an optional bool out parameter for whether the builder was successfully created? This
-might be easier for authoring and have better perf characteristics. While it does differ from the standard `TryX` pattern in C#, this method isn't intended for direct usage, so
-diverging may be fine.
+Need to confirm this pattern.
 
 #### Applicable function member adjustments
 
@@ -176,13 +179,17 @@ as follows (a new sub-bullet is added at the front of each section, in bold):
 A function member is said to be an ***applicable function member*** with respect to an argument list `A` when all of the following are true:
 *  Each argument in `A` corresponds to a parameter in the function member declaration as described in [Corresponding parameters](expressions.md#corresponding-parameters), and any parameter to which no argument corresponds is an optional parameter.
 *  For each argument in `A`, the parameter passing mode of the argument (i.e., value, `ref`, or `out`) is identical to the parameter passing mode of the corresponding parameter, and
-   *  **for an interpolated string argument to a value parameter when `A` is an instance method or static extension method invoked in reduced from, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `Ai` succeeds with 1 invocable member. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+   *  **for an interpolated string argument to a value parameter when `A` is an instance method or static extension method invoked in reduced from, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and one of the following overload resolutions succeeds. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `bool` succeeds with 1 invocable member, and the return type of that member is `Ai`, or**
+      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters and the receiver type of `A` succeeds with 1 invocable member, and the return type of that member is `Ai`.**
    *  for a value parameter or a parameter array, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter. After all, a `ref` or `out` parameter is an alias for the argument passed.
 For a function member that includes a parameter array, if the function member is applicable by the above rules, it is said to be applicable in its ***normal form***. If a function member that includes a parameter array is not applicable in its normal form, the function member may instead be applicable in its ***expanded form***:
 *  The expanded form is constructed by replacing the parameter array in the function member declaration with zero or more value parameters of the element type of the parameter array such that the number of arguments in the argument list `A` matches the total number of parameters. If `A` has fewer arguments than the number of fixed parameters in the function member declaration, the expanded form of the function member cannot be constructed and is thus not applicable.
 *  Otherwise, the expanded form is applicable if for each argument in `A` the parameter passing mode of the argument is identical to the parameter passing mode of the corresponding parameter, and
-   *  **for an interpolated string argument to a fixed value parameter or a value parameter created by the expansion when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `Ai` succeeds with 1 invocable member. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+   *  **for an interpolated string argument to a fixed value parameter or a value parameter created by the expansion when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and one of the following overload resolutions succeeds. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `bool` succeeds with 1 invocable member, and the return type of that member is `Ai`, or**
+      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters and the receiver type of `A` succeeds with 1 invocable member, and the return type of that member is `Ai`.**
    *  for a fixed value parameter or a value parameter created by the expansion, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the type of the argument to the type of the corresponding parameter, or
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter.
 
@@ -225,10 +232,9 @@ intended for direct use by the C# compiler. This struct would look approximately
 ```cs
 public ref struct InterpolatedStringBuilder
 {
-    public static bool Create(int baseLength, int formatHoleCount, out InterpolatedStringBuilder builder)
+    public static InterpolatedStringBuilder Create(int baseLength, int formatHoleCount)
     {
-        builder = new InterpolatedStringBuilder(baseLength, formatHoleCount);
-        return true;
+        return new InterpolatedStringBuilder(baseLength, formatHoleCount);
     }
 
     private char[] _array;
@@ -396,15 +402,15 @@ public static class MemoryExtensions
  
 public ref struct SpanInterpolatedStringBuilder
 {
-    public static bool Create(int baseLength, int formatHoleCount, Span<char> span, out SpanInterpolatedStringBuilder builder)
+    public static SpanInterpolatedStringBuilder Create(int baseLength, int formatHoleCount, Span<char> span, out bool builderIsValid)
     {
         if (baseLength > span.Length)
         {
-            builder = default;
-            return false;
+            builderIsValid = false;
+            return default;
         }
-        builder = new SpanInterpolatedStringBuilder(span, baseLength);
-        return true;
+        builderIsValid = true;
+        return new SpanInterpolatedStringBuilder(span, baseLength);
     }
 
     private Span<char> _span;
@@ -442,7 +448,8 @@ bool success = destinationSpan.TryWrite($”{a} = {b}”, out int charsWritten);
 
 var receiverTemp = destinationSpan;
 
-_ = SpanInterpolatedStringBuilder.Create(baseLength: 3, formatHoleCount: 2, receiverTemp, out var builder) &&
+var builder = SpanInterpolatedStringBuilder.Create(baseLength: 3, formatHoleCount: 2, receiverTemp, out var builderIsValid);
+_ = builderIsValid &&
     builder.TryFormatInterpolationHole(a) &&
     builder.TryFormatBaseString(“ = “) &&
     builder.TryFormatInterpolationHole(b);
@@ -464,16 +471,16 @@ public ref struct Utf8StringBuilder
     private Span<byte> _bytes;
     public Utf8StringBuilder(Span<byte> bytes) => _bytes = bytes;
 
-    public static bool Create(int baseLength, int formatHoleCount, Utf8StringBuilder instance, out Utf8StringBuilder builder)
+    public static Utf8StringBuilder Create(int baseLength, int formatHoleCount, Utf8StringBuilder instance, out bool builderIsValid)
     {
         if (baseLength > instance._bytes.Length)
         {
-            builder = default;
-            return false;
+            builderIsValid = false;
+            return default;
         }
 
-        builder = instance;
-        return true;
+        builderIsValid = false;
+        return instance;
     }
 
     public bool TryFormat(Utf8StringBuilder builder, out int bytesWritten)
@@ -495,7 +502,8 @@ bool success = Utf8Formatter.WithSpan(myBytes).TryFormat($"Hello world! {myVar}"
 // Maps to
 
 var receiverTemp = Utf8Formatter.WithSpan(myBytes);
-_ = Utf8StringBuilder.Create(baseLength: 13, formatHoleCount: 1, receiverTemp, out var builder) &&
+var builder = Utf8StringBuilder.Create(baseLength: 13, formatHoleCount: 1, receiverTemp, out var builderIsValid);
+_ = builderIsValid &&
     builder.TryFormatBaseString("Hello world! ") &&
     builder.TryFormatInterpolationHole(myVar);
 bool success = receiverTemp.TryFormat(builder, out int bytesWritten);
