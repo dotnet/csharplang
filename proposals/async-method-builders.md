@@ -36,7 +36,7 @@ We need a way to have an individual async method opt-in to a specific builder.
 ## Detailed design
 [design]: #detailed-design
 
-### AsyncMethodBuilderAttribute usage
+### Using AsyncMethodBuilderAttribute on methods
 
 In `dotnet/runtime`, add `AttributeTargets.Method` to the targets for `System.Runtime.CompilerServices.AsyncMethodBuilderAttribute`:
 ```csharp
@@ -68,13 +68,13 @@ Example of usage on a method:
 static async ValueTask<int> ExampleAsync() { ... }
 ```
 
-It is an error to apply the attribute multiple times on a given method (or local function or lambda).
+It is an error to apply the attribute multiple times on a given method.
 
 A developer who wants to use a specific custom builder for all of their methods can do so by putting the relevant attribute on each method.  
 
-### Determining the builder type for an async method (or local function or lambda)
+### Determining the builder type for an async method
 
-When compiling an async method (or local function or lambda), the builder type is determined by:
+When compiling an async method, the builder type is determined by:
 1. using the builder type from the `AsyncMethodBuilder` attribute if one is present,
 2. otherwise, falling back to the builder type determined by previous approach. (see [spec for task-like types](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/task-types.md)).  
 
@@ -88,11 +88,11 @@ We verify that the builder type is compatible with the return type of the async 
 2. consider the return type of that `Create` method (a builder type) and look for the public `Task` property.  
   It is an error if the property is not found.
 3. consider the type of that `Task` property (a task-like type):  
-  If the task-like type matches the return type of the async method, then the override is compatible. Otherwise, it is not compatible.
+  It is an error if the task-like type does not matches the return type of the async method.
 
 ### Execution 
 
-The override type determined above is used as part of the existing async method design.
+The builder type determined above is used as part of the existing async method design.
 
 For example, today if a method is defined as:
 ```C#
