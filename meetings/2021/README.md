@@ -22,6 +22,7 @@
 ## Apr 12, 2021
 
 - List pattern on enumerables (Julien): https://github.com/dotnet/csharplang/pull/4575
+- Lambda improvements (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/lambda-improvements.md
 
 ## Apr 7, 2021
 
