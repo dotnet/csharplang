@@ -19,6 +19,8 @@
 
 ## Apr 14, 2021
 
+- Auto-props V2 decisions (cyrusn)
+
 ## Apr 12, 2021
 
 - List pattern on enumerables (Julien): https://github.com/dotnet/csharplang/pull/4575
