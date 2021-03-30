@@ -170,14 +170,14 @@ The `receiver` and `Length` expressions will be spilled as appropriate to ensure
 class Collection {
     private int[] _array = new[] { 1, 2, 3 };
 
-    int Length {
+    public int Length {
         get {
             Console.Write("Length ");
             return _array.Length;
         }
     }
 
-    int this[int index] => _array[index];
+    public int this[int index] => _array[index];
 }
 
 class SideEffect {
@@ -227,14 +227,14 @@ The `receiver`, `Length`, and `expr` expressions will be spilled as appropriate 
 class Collection {
     private int[] _array = new[] { 1, 2, 3 };
 
-    int Length {
+    public int Length {
         get {
             Console.Write("Length ");
             return _array.Length;
         }
     }
 
-    int[] Slice(int start, int length) {
+    public int[] Slice(int start, int length) {
         var slice = new int[length];
         Array.Copy(_array, start, slice, 0, length);
         return slice;
@@ -323,14 +323,14 @@ The `receiver` and `Length` expressions will be spilled as appropriate to ensure
 class Collection {
     private int[] _array = new[] { 1, 2, 3 };
 
-    int Length {
+    public int Length {
         get {
             Console.Write("Length ");
             return _array.Length;
         }
     }
 
-    int GetAt(int index) => _array[index];
+    public int GetAt(int index) => _array[index];
 }
 
 class SideEffect {
