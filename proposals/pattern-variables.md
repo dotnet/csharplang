@@ -97,23 +97,25 @@ The following rules applies to any *primary_pattern* that declares a variable:
 
 #### Definite assignment rules for pattern variables in pattern combinators
 
-Note: This section is derived by definite assignment rules for expressions with an exception: for patterns we strictly require both operands to assign the same set of variables. For example, even though `e is var x or 1` is logically valid, the variable `x` is not definitely assigned. That said, some of cases might still result in impossible or irrefutable patterns by other measures.
+Note: This section is derived by definite assignment rules for expressions.
+
+> *Open question*: We should confirm if we want to allow patterns like `var x and 1`.
 
 For a *disjunctive_pattern* of the form `left_pattern or right_pattern`:
 
 - The definite assignment state of *v* after *disjunctive_pattern* is determined by:
-    - If the state of *v* after *left_pattern* is definitely assigned, and the state of *v* after *right_pattern* is conditionally or unconditionally definitely assigned, then the state of *v* after *disjunctive_pattern* is definitely assigned.
+    - If the state of *v* after *left_pattern* is definitely assigned, then the state of *v* after *disjunctive_pattern* is definitely assigned.
     - Otherwise, if the state of *v* after *right_pattern* is definitely assigned, and the state of *v* after *left_pattern* is "definitely assigned when true", then the state of *v* after *disjunctive_pattern* is definitely assigned.
-    - Otherwise, if the state of *v* after *right_pattern* is definitely assigned or "definitely assigned when false", and the state of *v* after *left_pattern* is conditionally or unconditionally definitely assigned, then the state of *v* after *disjunctive_pattern* is "definitely assigned when false".
+    - Otherwise, if the state of *v* after *right_pattern* is definitely assigned or "definitely assigned when false", then the state of *v* after *disjunctive_pattern* is "definitely assigned when false".
     - Otherwise, if the state of *v* after *left_pattern* is "definitely assigned when true", and the state of *v* after *right_pattern* is "definitely assigned when true", then the state of *v* after *disjunctive_pattern* is "definitely assigned when true".
     - Otherwise, the state of *v* after *disjunctive_pattern* is not definitely assigned.
 
 For a *conjunctive_pattern* of the form `left_pattern and right_pattern`:
 
 - The definite assignment state of *v* after *conjunctive_pattern* is determined by:
-    - If the state of *v* after *left_pattern* is definitely assigned, and the state of *v* after *right_pattern* is conditionally or unconditionally definitely assigned, then the state of *v* after *conjunctive_pattern* is definitely assigned.
+    - If the state of *v* after *left_pattern* is definitely assigned, then the state of *v* after *conjunctive_pattern* is definitely assigned.
     - Otherwise, if the state of *v* after *right_pattern* is definitely assigned, and the state of *v* after *left_pattern* is "definitely assigned when false", then the state of *v* after *conjunctive_pattern* is definitely assigned.
-    - Otherwise, if the state of *v* after *right_pattern* is definitely assigned or "definitely assigned when true", and the state of *v* after *left_pattern* is conditionally or unconditionally definitely assigned, then the state of *v* after *conjunctive_pattern* is "definitely assigned when true".
+    - Otherwise, if the state of *v* after *right_pattern* is definitely assigned or "definitely assigned when true", then the state of *v* after *conjunctive_pattern* is "definitely assigned when true".
     - Otherwise, if the state of *v* after *left_pattern* is "definitely assigned when false", and the state of *v* after *right_pattern* is "definitely assigned when false", then the state of *v* after *conjunctive_pattern* is "definitely assigned when false".
     - Otherwise, the state of *v* after *conjunctive_pattern* is not definitely assigned.
 
