@@ -73,7 +73,22 @@ Note: This section is unchanged and included for the sake of completeness.
 
 For an *is_pattern_expression* of the form `e is pattern`:
 
-- The state of *v* after *is_pattern_expression* is the same as the state of *v* after *pattern*.
+- The state of *v* after *is_pattern_expression* is definitely assigned, if the *pattern* is irrefutable. permitting use after:
+    
+    ```cs
+    _ = x is var x;
+    _ = 1 is int x;
+    _ = (1, 2) is var (x, y) and var z;
+    ```
+
+- Otherwise, the state of *v* after *is_pattern_expression* is the same as the state of *v* after *pattern*.
+
+For a *var_pattern* of the form `var variable_designation`:
+
+- The definite assignment state of *v* after *var_pattern* is determined by:
+
+    - The state of *v* after *var-pattern* is definitely assigned if *variable_designation* is a *single_variable_designation*.
+    - Otherwise, the state of *v* after *var-pattern* is "definitely assigned when true".
 
 #### General rules for pattern variables in simple patterns 
 
@@ -81,15 +96,7 @@ Note: This section is unchanged and included for the sake of completeness.
 
 The following rules applies to any *primary_pattern* that declares a variable:
 
-- The state of *v* is definitely assigned after *primary_pattern* if the pattern is irrefutable; permitting use after:
-    
-    ```cs
-    _ = x is var x;
-    _ = 1 is int x;
-    _ = (1, 2) is var (x, y);
-    ```
-
-- Otherwise, the state of *v* is "definitely assigned when true" after *primary_pattern*; permitting use after:
+- The state of *v* is "definitely assigned when true" after *primary_pattern*; permitting use after:
 
     ```cs
     if (o is int x)
