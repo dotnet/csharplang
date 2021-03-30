@@ -87,8 +87,8 @@ For a *var_pattern* of the form `var variable_designation`:
 
 - The definite assignment state of *v* after *var_pattern* is determined by:
 
-    - The state of *v* after *var-pattern* is definitely assigned if *variable_designation* is a *single_variable_designation*.
-    - Otherwise, the state of *v* after *var-pattern* is "definitely assigned when true".
+    - The state of *v* after *var_pattern* is definitely assigned if *variable_designation* is a *single_variable_designation*.
+    - Otherwise, the state of *v* after *var_pattern* is "definitely assigned when true".
 
 #### General rules for pattern variables in simple patterns 
 
