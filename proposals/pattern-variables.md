@@ -73,15 +73,17 @@ Note: This section is unchanged and included for the sake of completeness.
 
 For an *is_pattern_expression* of the form `e is pattern`:
 
-- The state of *v* after *is_pattern_expression* is definitely assigned, if the *pattern* is irrefutable. permitting use after:
-    
-    ```cs
-    _ = x is var x;
-    _ = 1 is int x;
-    _ = (1, 2) is var (x, y) and var z;
-    ```
+- The definite assignment state of *v* after *is_pattern_expression* is determined by:
 
-- Otherwise, the state of *v* after *is_pattern_expression* is the same as the state of *v* after *pattern*.
+    - The state of *v* after *is_pattern_expression* is definitely assigned, if the *pattern* is irrefutable. permitting use after:
+    
+        ```cs
+        _ = x is var x;
+        _ = 1 is int x;
+        _ = (1, 2) is var (x, y) and var z;
+       ```
+
+    - Otherwise, the state of *v* after *is_pattern_expression* is the same as the state of *v* after *pattern*.
 
 For a *var_pattern* of the form `var variable_designation`:
 
