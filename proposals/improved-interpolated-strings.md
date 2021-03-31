@@ -11,7 +11,7 @@ Today, string interpolation mainly lowers down to a call to `string.Format`. Thi
 
 1. It boxes any struct arguments, unless the runtime has happened to introduce an overload of `string.Format` that takes exactly the correct types of arguments
 in exactly the correct order.
-    * This ordering is why the runtime is hesitant to introduce generic versions of the method, as it would lead to combinatoric explosion of generic instanciations
+    * This ordering is why the runtime is hesitant to introduce generic versions of the method, as it would lead to combinatoric explosion of generic instantiations
     of a very common method.
 2. It has to allocate an array for the arguments in most cases.
 3. There is no opportunity to avoid instanciating the instance if it's not needed. Logging frameworks, for example, will recommend avoiding string interpolation
@@ -35,25 +35,25 @@ convenient interpolation syntax.
 We introduce a new builder pattern that can represent an interpolated string passed as an argument to a method. The simple English of the pattern is as follows:
 
 When an _interpolated\_string\_expression_ is passed as an argument to a method, we look at the type of the parameter. If the parameter type has a static method
-`GetInterpolatedStringBuilder` that can invoked with 2 int parameters, `baseLength` and `formatHoleCount`, optionally takes a parameter the receiver is convertible to,
-and has an out parameter of the type of original method's parameter and that type has instance `TryFormat` methods can be invoked for every part of the interpolated
-string, then we lower the interpolation using that, instead of into a traditional call to `string.Format(formatStr, args)`. A more concrete example is helpful for
-picturing this:
+`Create` that can be invoked with 2 int parameters, `baseLength` and `formatHoleCount`, optionally takes a parameter the receiver is convertible to,
+and has an out parameter of the type of original method's parameter and that type has instance `TryFormatBaseString` and `TryFormatInterpolationHole` methods that
+can be invoked for every part of the interpolated string, then we lower the interpolation using that, instead of into a traditional call to
+`string.Format(formatStr, args)`. A more concrete example is helpful for picturing this:
 
 ```cs
 // The builder that will actually "build" the interpolated string"
 public ref struct TraceLoggerParamsBuilder
 {
-    public static bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Logger logger, out TraceLoggerParamsBuilder builder)
+    public static TraceLoggerParamsBuilder Create(int baseLength, int formatHoleCount, Logger logger, out bool builderIsValid)
     {
         if (!logger._logLevelEnabled)
         {
-            builder = default;
-            return false;
+            builderIsValid = false;
+            return default;
         }
 
-        builder = TraceLoggerParamsBuilder(baseLength, formatHoleCount, logger.EnabledLevel);
-        return true;
+        builderIsValid = true;
+        return TraceLoggerParamsBuilder(baseLength, formatHoleCount, logger.EnabledLevel);
     }
 
     // Storage for the built-up string
@@ -66,13 +66,13 @@ public ref struct TraceLoggerParamsBuilder
         _logLevelEnabled = logLevelEnabled
     }
 
-    public bool TryFormat(string s)
+    public bool TryFormatBaseString(string s)
     {
         // Store and format part as required
         return true;
     }
 
-    public bool TryFormat<T>(T t)
+    public bool TryFormatInterpolationHole<T>(T t)
     {
         // Store and format part as required
         return true;
@@ -99,36 +99,53 @@ var name = "Fred Silberberg";
 logger.LogTrace($"{name} will never be printed because info is < trace!");
 
 // This is converted to:
+var name = "Fred Silberberg";
 var receiverTemp = logger;
-_ = TraceLoggerParamsBuilder.GetInterpolatedStringBuilder(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builder) &&
-    builder.TryFormat("Fred Silberberg") &&
-    builder.TryFormat(" will never be printed because info is < trace!");
+var builder = TraceLoggerParamsBuilder.Create(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builderIsValid);
+_ = builderIsValid &&
+    builder.TryFormatInterpolationHole(name) &&
+    builder.TryFormatBaseString(" will never be printed because info is < trace!");
 receiverTemp.LogTrace(builder);
 ```
 
-Here, because `TraceLoggerParamsBuilder` has static method called `GetInterpolatedStringBuilder` with the correct parameters, including an out param that is the type
-the `LogTrace` call was expecting, we say that the interpolated string has an implicit builder conversion to that parameter, and it lowers to the pattern shown above.
-The specese needed for this is a bit complicated, and is expanded below.
+Here, because `TraceLoggerParamsBuilder` has static method called `Create` with the correct parameters and returns the type the `LogTrace` call was expecting,
+we say that the interpolated string has an implicit builder conversion to that parameter, and it lowers to the pattern shown above. The specese needed for this
+is a bit complicated, and is expanded below.
 
 #### Builder type applicability
 
 A type is said to be an _applicable\_interpolated\_string\_builder\_type_ if, given an _interpolated\_string\_literal_ `S`, the following is true:
 
-* Overload resolution with an identifier of `TryFormat` and a parameter type of `string` succeeds, and contains a single instance method that returns a `bool`.
+* Overload resolution with an identifier of `TryFormatBaseString` and a parameter type of `string` succeeds, and contains a single instance method that returns a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) without an _interpolation\_format_ component or _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `TryFormat` and parameter of the type of `Si` succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `TryFormatInterpolationHole` and parameter of the type of `Si` and name  succeeds, and contains a single instance method that returns a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and no _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `TryFormat` and parameter types of `Si` and `string`(in that order) succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `TryFormatInterpolationHole` and parameter types of `Si` and `string`(in that order) succeeds, and contains a single instance method that returns a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with a _constant\_expression_ (alignment) component and no _interpolation\_format_ component, overload resolution
-with an identifier of `TryFormat` and parameter types of `Si` and `int` (in that order) succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `TryFormatInterpolationHole` and parameter types of `Si` and `int` (in that order) succeeds, and contains a single instance method that returns a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and a _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `TryFormat` and parameter types of `Si`, `int`, and `string` (in that order) succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `TryFormatInterpolationHole` and parameter types of `Si`, `int`, and `string` (in that order) succeeds, and contains a single instance method that returns a `bool`.
 
-Note that these rules do not permit extension methods for the `TryFormat` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
+The rest of this proposal will use `TryFormat...` to refer to either of `TryFormatBaseString` or `TryFormatInterpolationHoles` in cases when both are applicable.
+
+Note that these rules do not permit extension methods for the `TryFormat...` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
 pattern, where we allow `GetEnumerator` to be an extension method, but not `Current` or `MoveNext()`.
 
-These rules _do_ permit default parameters for the `TryFormat` calls, which will work with things like `CallerLineNumber` or `CallerArgumentExpression` (when supported by
+These rules _do_ permit default parameters for the `TryFormat...` calls, which will work with things like `CallerLineNumber` or `CallerArgumentExpression` (when supported by
 the language).
+
+We have separate overload lookup rules for base elements vs interpolation holes because some builders will want to be able to understand the difference between the components
+that were interpolated and the components that were part of the base string.
+
+**Open Question**
+
+Some scenarios, like structured logging, want to be able to provide names for interpolation elements. For example, today a logging call might look like
+`Log("{name} bought {itemCount} items", name, items.Count);`. The names inside the `{}` provide important structure information for loggers that help with ensuring output
+is consistent and uniform. Some cases might be able to reuse the `:format` component of an interpolation hole for this, but many loggers already understand format specifiers
+and have existing behavior for output formatting based on this info. Is there some syntax we can use to enable putting these named specifiers in?
+
+Some cases may be able to get away with `CallerArgumentExpression`, provided that support does land in C# 10. But for cases that invoke a method/property, that may not be
+sufficient.
 
 #### Interpolated string builder conversion
 
@@ -138,14 +155,21 @@ to be converted to an _applicable\_interpolated\_string\_builder\_type_. There a
 1. A method argument is converted as part of determining applicable function members (covered below), or
 2. Given an _interpolated\_string\_expression_ `S` being converted to type `T`, the following is true:
     * `T` is an _applicable\_interpolated\_string\_builder\_type_, and
-    * `T` has an accessible static bool-returning method `GetInterpolatedStringBuilder` that takes 2 int parameters and 1 out parameter of type `T`, in that order.
+    * One of the following is true:
+        * `T` has an accessible static T-returning method `Create` that takes 2 int parameters and 1 out parameter of type `bool`, in that order.
+        * `T` has an accessible static T-returning method `Create` that takes 2 int parameters, in that order.
 
-We want to make `GetInterpolatedStringBuilder` a static method with an `out` parameter for 2 reasons:
+By requiring `Create` to be a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to.
+If we limited the pattern to constructors, then the implementation would be required to always return new instances.
 
-1. By making it a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to. If we limited the pattern to constructors,
-then the implementation would be required to always return new instances.
-2. By making the builder an `out` parameter we allow the `GetInterpolatedStringBuilder` method to return a bool indicating whether to continue formatting, which is useful
-for scenarios like the logger above that may want to skip any argument evaluation at all for cases when the log level isn't enabled.
+Additionally, by returning the builder type instead of requiring it to go in an out parameter, we marginally improve the codegen and significantly simplify the rules around
+ref struct lifetimes vs the traditional .NET `TryX` pattern, and we expect a number of these builder types to be ref structs.
+
+This can and will be impacted by abstract statics in interfaces for generic contexts. We will need to make sure the interactions are considered and tested.
+
+**Open Question**
+
+Need to confirm this pattern.
 
 #### Applicable function member adjustments
 
@@ -155,13 +179,17 @@ as follows (a new sub-bullet is added at the front of each section, in bold):
 A function member is said to be an ***applicable function member*** with respect to an argument list `A` when all of the following are true:
 *  Each argument in `A` corresponds to a parameter in the function member declaration as described in [Corresponding parameters](expressions.md#corresponding-parameters), and any parameter to which no argument corresponds is an optional parameter.
 *  For each argument in `A`, the parameter passing mode of the argument (i.e., value, `ref`, or `out`) is identical to the parameter passing mode of the corresponding parameter, and
-   *  **for an interpolated string argument to a value parameter when `A` is an instance method or static extension method invoked in reduced from, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and overload resolution on `Ai` with the identifier `GetInterpolatedStringBuilder` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `Ai` succeeds with 1 invocable member. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+   *  **for an interpolated string argument to a value parameter when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and one of the following overload resolutions succeeds. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `bool` succeeds with 1 invocable member, and the return type of that member is `Ai`, or**
+      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters and the receiver type of `A` succeeds with 1 invocable member, and the return type of that member is `Ai`.**
    *  for a value parameter or a parameter array, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter. After all, a `ref` or `out` parameter is an alias for the argument passed.
 For a function member that includes a parameter array, if the function member is applicable by the above rules, it is said to be applicable in its ***normal form***. If a function member that includes a parameter array is not applicable in its normal form, the function member may instead be applicable in its ***expanded form***:
 *  The expanded form is constructed by replacing the parameter array in the function member declaration with zero or more value parameters of the element type of the parameter array such that the number of arguments in the argument list `A` matches the total number of parameters. If `A` has fewer arguments than the number of fixed parameters in the function member declaration, the expanded form of the function member cannot be constructed and is thus not applicable.
 *  Otherwise, the expanded form is applicable if for each argument in `A` the parameter passing mode of the argument is identical to the parameter passing mode of the corresponding parameter, and
-   *  **for an interpolated string argument to a fixed value parameter or a value parameter created by the expansion when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and overload resolution on `Ai` with the identifier `GetInterpolatedStringBuilder` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `Ai` succeeds with 1 invocable member. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+   *  **for an interpolated string argument to a fixed value parameter or a value parameter created by the expansion when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and one of the following overload resolutions succeeds. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `bool` succeeds with 1 invocable member, and the return type of that member is `Ai`, or**
+      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters and the receiver type of `A` succeeds with 1 invocable member, and the return type of that member is `Ai`.**
    *  for a fixed value parameter or a value parameter created by the expansion, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the type of the argument to the type of the corresponding parameter, or
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter.
 
@@ -204,10 +232,9 @@ intended for direct use by the C# compiler. This struct would look approximately
 ```cs
 public ref struct InterpolatedStringBuilder
 {
-    public static bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, out InterpolatedStringBuilder builder)
+    public static InterpolatedStringBuilder Create(int baseLength, int formatHoleCount)
     {
-        builder = new InterpolatedStringBuilder(baseLength, formatHoleCount);
-        return true;
+        return new InterpolatedStringBuilder(baseLength, formatHoleCount);
     }
 
     private char[] _array;
@@ -224,15 +251,15 @@ public ref struct InterpolatedStringBuilder
         ArrayPool<char>.Shared.Return(_array);
         Return result;
     }
-    public bool TryFormat(string s) => TryFormat((ReadOnlySpan<char>)s);
-    public bool TryFormat(ReadOnlySpan<char> s)
+    public bool TryFormatBaseString(string s) => TryFormatInterpolationHole(s);
+    public bool TryFormatInterpolationHole(ReadOnlySpan<char> s)
     {
         if (s.Length >= _array.Length - _count) Grow();
         s.CopyTo(_array);
         _count += s.Length;
         return true;
     }
-    … // other TryFormat overloads for other types (including ReadOnlySpan<T>), a generic, etc.
+    … // other TryFormatInterpolationHole overloads for other types, a generic, etc.
 }
 ```
 
@@ -247,7 +274,12 @@ public class String
 
 We make a slight change to the rules for the meaning of an [_interpolated\_string\_expression_](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#interpolated-strings):
 
-If the type of an interpolated string is `System.IFormattable` or `System.FormattableString`, the meaning is a call to `System.Runtime.CompilerServices.FormattableStringFactory.Create`. If the type is `string`, the meaning of the expression is a call to `string.Format`. In both cases **if there exists an overload that takes a single argument and there exists an _implicit\_string\_builder\_conversion_ from the interpolated string to the parameter type, that overload is used according to the builder pattern. Otherwise**, the argument list of the call consists of a format string literal with placeholders for each interpolation, and an argument for each expression corresponding to the place holders.
+If the type of an interpolated string is `System.IFormattable` or `System.FormattableString`, the meaning is a call to `System.Runtime.CompilerServices.FormattableStringFactory.Create`. If the type is `string`, the meaning of the expression is a call to `string.Format`. In both cases **if there exists an overload that takes a single argument, there exists an _implicit\_string\_builder\_conversion_ from the interpolated string to the parameter type, and the current context supports using that type, that overload is used according to the builder pattern, calling `ToString()` on the builder to obtain the final result. Otherwise**, the argument list of the call consists of a format string literal with placeholders for each interpolation, and an argument for each expression corresponding to the place holders.
+
+The "and the current context supports using that type" rule is intentionally vague to give the compiler leeway in optimizing usage of this pattern. The builder type is likely to be a ref struct
+type, and ref struct types are normally not permitted in async methods. For this particular case, the compiler would be allowed to make use the builder if none of the interpolation holes contain
+an `await` expression, as we can statically determine that the builder type is safely used without additional complicated analysis because the builder will be dropped after the interpolated string
+expression is evaluated.
 
 **Open Question**:
 
@@ -260,22 +292,27 @@ Do we want to have builders for `System.IFormattable` and `System.FormattableStr
 
 ### Lowering
 
-Both the general pattern and the specific changes for interpolated strings directly converted to `string`s follow the same lowering pattern. The `GetInterpolatedStringBuilder` method is
+Both the general pattern and the specific changes for interpolated strings directly converted to `string`s follow the same lowering pattern. The `Create` method is
 invoked on the receiver (whether that's the temporary method receiver for an _implicit\_string\_builder\_conversion_ derived from the applicable function member algorithm, or a
-standard conversion derived from the target type). If the call returned `true`, `TryFormat` is repeatedly invoked on the builder out parameter, with each part of the interpolated string,
-in order, stopping subsequent calls if a `TryFormat` call returns `false`. Finally, the original method is called, passing the initialized builder in place of the interpolated string expression.
+standard conversion derived from the target type). If the call returned `true`, `TryFormat...` is repeatedly invoked on the builder out parameter, with each part of the interpolated string,
+in order, stopping subsequent calls if a `TryFormat...` call returns `false`. Finally, the original method is called, passing the initialized builder in place of the interpolated string expression.
 
 **~~Open~~ Question**
 
-This lowering means that subsequent parts of the interpolated string after a false-returning `TryFormat` call don't get evaluated. This could potentially be very confusing, particularly
-if the format hole is side-effecting. We could instead evaluate all format holes first, then repeatedly call `TryFormat` with the results, stopping if it returns false. This would ensure
+This lowering means that subsequent parts of the interpolated string after a false-returning `TryFormat...` call don't get evaluated. This could potentially be very confusing, particularly
+if the format hole is side-effecting. We could instead evaluate all format holes first, then repeatedly call `TryFormat...` with the results, stopping if it returns false. This would ensure
 that all expressions get evaluated as one might expect, but we call as few methods as we need to. While the partial evaluation might be desirable for some more advanced cases, it is perhaps
 non-intuitive for the general case.
 
-Another alternative, if we want to always evaluate all format holes, is to remove the `TryFormat` version of the API and just do repeated `Format` calls. The builder can track whether it
+Another alternative, if we want to always evaluate all format holes, is to remove the `TryFormat...` version of the API and just do repeated `Format` calls. The builder can track whether it
 should just be dropping the argument and immediately returning for this version.
 
 _Answer_: We will have conditional evaluation of the holes.
+
+**Open Question**
+
+Do we need to dispose of disposable builder types, and wrap calls with try/finally to ensure that Dispose is called? For example, the interpolated string builder in the bcl might have a
+rented array inside it, and if one of the interpolation holes throws an exception during evaluation, that rented array could be leaked if it wasn't disposed.
 
 ## Other considerations
 
@@ -307,10 +344,10 @@ also adds more pros and cons to the points from the previous loop, where we don'
 
 ### Non-try version of the API
 
-For simplicity, this spec currently just proposes recognizing a `TryFormat` method, and things that always succeed (like `InterpolatedStringBuilder`) would always return true from the method.
+For simplicity, this spec currently just proposes recognizing a `TryFormat...` method, and things that always succeed (like `InterpolatedStringBuilder`) would always return true from the method.
 This was done to support partial formatting scenarios where the user wants to stop formatting if an error occurs or if it's unnecessary, such as the logging case, but could potentially
-introduce a bunch of unnecessary branches in standard interpolated string usage. We could consider an addendum where we use just `Format` methods if no `TryFormat` method is present, but
-it does present questions about what we do if there's a mix of both TryFormat and Format calls.
+introduce a bunch of unnecessary branches in standard interpolated string usage. We could consider an addendum where we use just `FormatX` methods if no `TryFormat...` method is present, but
+it does present questions about what we do if there's a mix of both `TryFormat...` and `FormatX` calls.
 
 ### Passing previous arguments to the builder
 
@@ -347,7 +384,7 @@ passing the string by ref, you're passing the builder that is created from the r
 
 ## Other use cases
 
-### `TryFormat` on `Span` receivers
+### `TryFormat...` on `Span` receivers
 
 The BCL has a number of helper methods that and usages of `ValueStringBuilder` that attempt to format a given string into a `Span`, and instead of moving to the heap if needed, give up if
 the `Span` isn't big enough to hold the resulting text. With this proposal, it would be possible to support these cases by defining an extension method that looks like this:
@@ -365,15 +402,15 @@ public static class MemoryExtensions
  
 public ref struct SpanInterpolatedStringBuilder
 {
-    public static bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Span<char> span, out SpanInterpolatedStringBuilder builder)
+    public static SpanInterpolatedStringBuilder Create(int baseLength, int formatHoleCount, Span<char> span, out bool builderIsValid)
     {
         if (baseLength > span.Length)
         {
-            builder = default;
-            return false;
+            builderIsValid = false;
+            return default;
         }
-        builder = new SpanInterpolatedStringBuilder(span, baseLength);
-        return true;
+        builderIsValid = true;
+        return new SpanInterpolatedStringBuilder(span, baseLength);
     }
 
     private Span<char> _span;
@@ -387,7 +424,7 @@ public ref struct SpanInterpolatedStringBuilder
         _count = 0;
     }
  
-    public bool TryFormat(string s)
+    public bool TryFormatBaseString(string s)
     {
         if (!_success)
             return false;
@@ -402,7 +439,7 @@ public ref struct SpanInterpolatedStringBuilder
         return true;
     }
  
-    … // other TryFormat overloads for other types, a generic, etc.
+    … // other TryFormatInterpolationHole overloads for other types, a generic, etc.
 }
 
 bool success = destinationSpan.TryWrite($”{a} = {b}”, out int charsWritten);
@@ -411,10 +448,11 @@ bool success = destinationSpan.TryWrite($”{a} = {b}”, out int charsWritten);
 
 var receiverTemp = destinationSpan;
 
-_ = SpanInterpolatedStringBuilder.GetInterpolatedStringBuilder(baseLength: 3, formatHoleCount: 2, receiverTemp, out var builder) &&
-    builder.TryFormat(a) &&
-    builder.TryFormat(“ = “) &&
-    builder.TryFormat(b);
+var builder = SpanInterpolatedStringBuilder.Create(baseLength: 3, formatHoleCount: 2, receiverTemp, out var builderIsValid);
+_ = builderIsValid &&
+    builder.TryFormatInterpolationHole(a) &&
+    builder.TryFormatBaseString(“ = “) &&
+    builder.TryFormatInterpolationHole(b);
 bool success = receiverTemp.TryWrite(builder, out int charsWritten);
 ```
 
@@ -433,16 +471,16 @@ public ref struct Utf8StringBuilder
     private Span<byte> _bytes;
     public Utf8StringBuilder(Span<byte> bytes) => _bytes = bytes;
 
-    public static bool GetInterpolatedStringBuilder(int baseLength, int formatHoleCount, Utf8StringBuilder instance, out Utf8StringBuilder builder)
+    public static Utf8StringBuilder Create(int baseLength, int formatHoleCount, Utf8StringBuilder instance, out bool builderIsValid)
     {
         if (baseLength > instance._bytes.Length)
         {
-            builder = default;
-            return false;
+            builderIsValid = false;
+            return default;
         }
 
-        builder = instance;
-        return true;
+        builderIsValid = false;
+        return instance;
     }
 
     public bool TryFormat(Utf8StringBuilder builder, out int bytesWritten)
@@ -450,12 +488,12 @@ public ref struct Utf8StringBuilder
         ...
     }
 
-    public bool TryFormat(string s)
+    public bool TryFormatBaseString(string s)
     {
         ...
     }
  
-    … // other TryFormat overloads for other types, a generic, etc.
+    … // other TryFormatInterpolationHole overloads for other types, a generic, etc.
 }
 
 Span<byte> myBytes = stackalloc[50];
@@ -464,13 +502,14 @@ bool success = Utf8Formatter.WithSpan(myBytes).TryFormat($"Hello world! {myVar}"
 // Maps to
 
 var receiverTemp = Utf8Formatter.WithSpan(myBytes);
-_ = Utf8StringBuilder.GetInterpolatedStringBuilder(baseLength: 13, formatHoleCount: 1, receiverTemp, out var builder) &&
-    builder.TryFormat("Hello world! ") &&
-    builder.TryFormat(myVar);
+var builder = Utf8StringBuilder.Create(baseLength: 13, formatHoleCount: 1, receiverTemp, out var builderIsValid);
+_ = builderIsValid &&
+    builder.TryFormatBaseString("Hello world! ") &&
+    builder.TryFormatInterpolationHole(myVar);
 bool success = receiverTemp.TryFormat(builder, out int bytesWritten);
 ```
 
-This differs from the existing patterns in the Utf8Formatter type, which take the `Span` to write into as an argument to the `TryFormat` method itself. This proposal is somewhat incompatible
+This differs from the existing patterns in the Utf8Formatter type, which take the `Span` to write into as an argument to the `TryFormat...` method itself. This proposal is somewhat incompatible
 with that approach, as it uses the receiver of the method to inform the builder of context, rather than using arguments to the method. It could theoretically be feasible to thread arguments
 from the current method into the implicit call to `GetInterpolatedString`, but that raises a host of thorny issues around figuring out what corresponds to what in the signature, and significantly
 complicates the determination of _applicable\_interpolated\_string\_builder\_types_.
