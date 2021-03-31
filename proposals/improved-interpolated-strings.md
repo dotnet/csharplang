@@ -251,7 +251,7 @@ public ref struct InterpolatedStringBuilder
         ArrayPool<char>.Shared.Return(_array);
         Return result;
     }
-    public bool TryFormatBaseString(string s) => TryFormatInterpolationHole((ReadOnlySpan<char>)s);
+    public bool TryFormatBaseString(string s) => TryFormatInterpolationHole(s);
     public bool TryFormatInterpolationHole(ReadOnlySpan<char> s)
     {
         if (s.Length >= _array.Length - _count) Grow();
