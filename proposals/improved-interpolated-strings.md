@@ -35,7 +35,7 @@ convenient interpolation syntax.
 We introduce a new builder pattern that can represent an interpolated string passed as an argument to a method. The simple English of the pattern is as follows:
 
 When an _interpolated\_string\_expression_ is passed as an argument to a method, we look at the type of the parameter. If the parameter type has a static method
-`Create` that can invoked with 2 int parameters, `baseLength` and `formatHoleCount`, optionally takes a parameter the receiver is convertible to,
+`Create` that can be invoked with 2 int parameters, `baseLength` and `formatHoleCount`, optionally takes a parameter the receiver is convertible to,
 and has an out parameter of the type of original method's parameter and that type has instance `TryFormatX` methods can be invoked for every part of the interpolated
 string, then we lower the interpolation using that, instead of into a traditional call to `string.Format(formatStr, args)`. A more concrete example is helpful for
 picturing this:
@@ -122,7 +122,7 @@ with an identifier of `TryFormatInterpolationHole` and parameter of the type of 
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and no _constant\_expression_ (alignment) component, overload resolution
 with an identifier of `TryFormatInterpolationHole` and parameter types of `Si` and `string`(in that order) succeeds, and contains a single instance method that returns a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with a _constant\_expression_ (alignment) component and no _interpolation\_format_ component, overload resolution
-with an identifier of `TryFormatInterpolationHole and parameter types of `Si` and `int` (in that order) succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `TryFormatInterpolationHole` and parameter types of `Si` and `int` (in that order) succeeds, and contains a single instance method that returns a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and a _constant\_expression_ (alignment) component, overload resolution
 with an identifier of `TryFormatInterpolationHole` and parameter types of `Si`, `int`, and `string` (in that order) succeeds, and contains a single instance method that returns a `bool`.
 
@@ -159,7 +159,7 @@ to be converted to an _applicable\_interpolated\_string\_builder\_type_. There a
         * `T` has an accessible static T-returning method `Create` that takes 2 int parameters and 1 out parameter of type `bool`, in that order.
         * `T` has an accessible static T-returning method `Create` that takes 2 int parameters, in that order.
 
-We want to make `Create` a static method because by making it a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to.
+By requiring `Create` to be a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to.
 If we limited the pattern to constructors, then the implementation would be required to always return new instances.
 
 Additionally, by returning the builder type instead of requiring it to go in an out parameter, we marginally improve the codegen and significantly simplify the rules around
@@ -179,7 +179,7 @@ as follows (a new sub-bullet is added at the front of each section, in bold):
 A function member is said to be an ***applicable function member*** with respect to an argument list `A` when all of the following are true:
 *  Each argument in `A` corresponds to a parameter in the function member declaration as described in [Corresponding parameters](expressions.md#corresponding-parameters), and any parameter to which no argument corresponds is an optional parameter.
 *  For each argument in `A`, the parameter passing mode of the argument (i.e., value, `ref`, or `out`) is identical to the parameter passing mode of the corresponding parameter, and
-   *  **for an interpolated string argument to a value parameter when `A` is an instance method or static extension method invoked in reduced from, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and one of the following overload resolutions succeeds. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
+   *  **for an interpolated string argument to a value parameter when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and one of the following overload resolutions succeeds. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
       * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `bool` succeeds with 1 invocable member, and the return type of that member is `Ai`, or**
       * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters and the receiver type of `A` succeeds with 1 invocable member, and the return type of that member is `Ai`.**
    *  for a value parameter or a parameter array, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
