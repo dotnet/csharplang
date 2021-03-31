@@ -1,4 +1,4 @@
-# Static abstract members in interfaces
+# Static virtual members in interfaces
 
 * [x] Proposed
 * [ ] Prototype: Not Started
@@ -7,7 +7,7 @@
 
 # Summary
 
-An interface is allowed to specify abstract static members that implementing classes and structs are then required to provide an explicit or implicit implementation of. The members can be accessed off of type parameters that are constrained by the interface.
+An interface is allowed to specify virtual static members that implementing classes and structs are then required to provide an explicit or implicit implementation of. The members can be accessed off of type parameters that are constrained by the interface.
 
 # Motivation
 [motivation]: #motivation
@@ -20,7 +20,7 @@ This feature allows generic algorithms over numeric types, represented by interf
 // Interface specifies static properties and operators
 interface IAddable<T> where T : IAddable<T>
 {
-    static abstract T Zero { get; }
+    static virtual T Zero { get; } => default(T);
     static abstract T operator +(T t1, T t2);
 }
 
@@ -47,7 +47,7 @@ int sixtyThree = AddAll(new [] { 1, 2, 4, 8, 16, 32 });
 
 ## Interface members
 
-The feature would allow static interface members to be declared virtual. 
+The feature would allow static interface members to be declared `abstract` or `virtual`. 
 
 ### Today's rules
 Today, instance members in interfaces are implicitly abstract (or virtual if they have a default implementation), but can optionally have an `abstract` (or `virtual`) modifier. Non-virtual instance members must be explicitly marked as `sealed`. 
@@ -56,24 +56,59 @@ Static interface members today are implicitly non-virtual, and do not allow `abs
 
 ### Proposal
 
-#### Abstract virtual members
-Static interface members other than fields are allowed to also have the `abstract` modifier. Abstract static members are not allowed to have a body (or in the case of properties, the accessors are not allowed to have a body). 
+#### Static virtual members
+Static interface members other than fields are allowed to have an `abstract` or `virtual` modifier.
+
+Static virtual members declared `abstract` are not allowed to have a body (or in the case of properties, the accessors are not allowed to have a body). 
+
+Static virtual members declared `virtual` must provide a default implementation in the form of a member body (or in the case of properties, accessor bodies).
 
 ``` c#
-interface I<T> where T : I<T>
+interface I1<T> where T : I1<T>
 {
-    static abstract void M();
-    static abstract T P { get; set; }
-    static abstract event Action E;
+    static abstract void M1();
+    static virtual void M2() => Console.WriteLine("Default behavior");
+    
+    static abstract T P1 { get; set; }
+    static virtual T P2 { get => T.P1; set => T.P1 = value; }
+    
+    static abstract event Action E1;
+    static virtual event Action E2 { add => T.E1 += value; remove => T.E1 -= value; }
+    
     static abstract T operator +(T l, T r);
+    static virtual T operator -(T l, T r) => l;
     static abstract bool operator ==(T l, T r);
-    static abstract bool operator !=(T l, T r);
+    static virtual bool operator !=(T l, T r) => !(l == r);
     static abstract implicit operator T(string s);
-    static abstract explicit operator string(T t);
+    static virtual explicit operator string(T t) => t.ToString();
 }
 ```
 
+Default implementations cannot be in the form of auto-properties or field-like events.
+
 ***Open question:** Non-virtual operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as virtual members?*
+
+#### Static virtual member overrides
+A derived interface can override an inherited static virtual member by declaring it with a qualified name, and providing either a default implementation or an `abstract` modifier.
+
+``` c#
+interface I2<T> : I1<T> where T : I2<T>
+{
+    static void I1<T>.M1() => Console.WriteLine("Default behavior");
+    static abstract void I1<T>.M2();
+    
+    static T I1<T>.P1 { get => T.P2; set => T.P2 = value; }
+    static abstract T I1<T>.P2 { get; set; }
+    
+    static event Action I1<T>.E1 { add => T.E2 += value; remove => T.E2 -= value; }
+    static abstract event Action I1<T>.E2;
+    
+    static T I1<T>.operator +(T l, T r) => r;
+    static abstract T I1<T>.operator -(T l, T r);
+}
+```
+
+***Open question:** Should the qualifying `I1<T>.` go before the `operator` keyword or the operator symbol `+` and `-` itself?* I've chosen the former in the examples, as the latter doesn't work well with conversion operators.
 
 #### Explicitly non-virtual static members
 For symmetry with non-virtual instance members, static members should be allowed an optional `sealed` modifier, even though they are non-virtual by default:
@@ -99,33 +134,35 @@ interface I0
 
 ### Today's rules
 
-Classes and structs can implement abstract instance members of interfaces either implicitly or explicitly. An implicitly implemented interface member is a normal (virtual or non-virtual) member declaration of the class or struct that just "happens" to also implement the interface member. The member can even be inherited from a base class and thus not even be present in the class declaration.
+Classes and structs can implement virtual instance members of interfaces either implicitly or explicitly. An implicitly implemented interface member is a normal (virtual or non-virtual) member declaration of the class or struct that just "happens" to also implement the interface member. The member can even be inherited from a base class and thus not even be present in the class declaration.
 
 An explicitly implemented interface member uses a qualified name to identify the interface member in question. The implementation is not directly accessible as a member on the class or struct, but only through the interface.
 
 ### Proposal
 
-No new syntax is needed in classes and structs to facilitate implicit implementation of static abstract interface members. Existing static member declarations serve that purpose.
+No new syntax is needed in classes and structs to facilitate implicit implementation of static virtual interface members. Existing static member declarations serve that purpose.
 
-Explicit implementations of static abstract interface members use a qualified name along with the `static` modifier.
+Explicit implementations of static virtual interface members use a qualified name along with the `static` modifier.
 
 ``` c#
-class C : I<C>
+class C : I2<C>
 {
     string _s;
     public C(string s) => _s = s;
-    static void I<C>.M() => Console.WriteLine("Implementation");
-    static C I<C>.P { get; set; }
-    static event Action I<C>.E;
-    static C I<C>.operator +(C l, C r) => new C($"{l._s} {r._s}");
-    static bool I<C>.operator ==(C l, C r) => l._s == r._s;
-    static bool I<C>.operator !=(C l, C r) => l._s != r._s;
-    static implicit I<C>.operator C(string s) => new C(s);
-    static explicit I<C>.operator string(C c) => c._s;
+    static void I2<C>.M() => Console.WriteLine("Implementation");
+    static C I2<C>.P { get; set; }
+    static event Action I2<C>.E;
+    static C I2<C>.operator +(C l, C r) => new C($"{l._s} {r._s}");
+    static bool I2<C>.operator ==(C l, C r) => l._s == r._s;
+    static bool I2<C>.operator !=(C l, C r) => l._s != r._s;
+    static implicit I2<C>.operator C(string s) => new C(s);
+    static explicit I2<C>.operator string(C c) => c._s;
 }
 ```
 
-***Open question:** Should the qualifying `I<C>.` go before the `operator` keyword or the operator symbol (e.g. `+`) itself?* I've chosen the former here, as it also works for the conversion operators.
+If a static virtual member of the interface has a most specific default implementation, then the implementing class or struct does not need to implement the member.
+
+***Open question:** Should the qualifying `I2<C>.` go before the `operator` keyword or the operator symbol (e.g. `+`) itself?* I've chosen the former here, as it also works for the conversion operators.
 
 # Semantics
 
@@ -137,38 +174,38 @@ These requirements need to be relaxed so that a restricted operand is allowed to
 
 ***Open question:** Should we relax this further so that the restricted operand can be of any type that derives from, or has one of some set of implicit conversions to `T`?*
 
-## Implementing static abstract members
+## Implementing static virtual members
 
-The rules for when a static member declaration in a class or struct is considered to implement a static abstract interface member, and for what requirements apply when it does, are the same as for instance members.
+The rules for when a static member declaration in a class or struct is considered to implement a static virtual interface member, and for what requirements apply when it does, are the same as for instance members.
 
 ***TBD:** There may be additional or different rules necessary here that we haven't yet thought of.*
 
-## Interface constraints with static abstract members
+## Interface constraints with static virtual members
 
 Today, when an interface `I` is used as a generic constraint, any type `T` with an implicit reference or boxing conversion to `I` is considered to satisfy that constraint.
 
-When `I` has static abstract members this needs to be further restricted so that `T` cannot itself be an interface.
+When `I` has static virtual members this needs to be further restricted so that `T` cannot itself be an interface.
 
 For instance:
 
 ``` c#
-// I and C as above
-void M<T>() where T : I<T> { ... }
+// I2<T> and C as above
+void M<T>() where T : I2<T> { ... }
 M<C>();  // Allowed: C is not an interface
-M<I<C>>(); // Disallowed: I is an interface
+M<I2<C>>(); // Disallowed: I is an interface
 ```
 
-## Accessing static abstract interface members
+## Accessing static virtual interface members
 
-A static abstract interface member `M` may be accessed on a type parameter `T` using the expression `T.M` when `T` is constrained by an interface `I` and `M` is an accessible static abstract member of `I`.
+A static virtual interface member `M` may be accessed on a type parameter `T` using the expression `T.M` when `T` is constrained (directly or indirectly) by an interface `I` and `M` is an accessible static virtual member of `I`.
 
 ``` c#
-T M<T>() where T : I<T>
+T M<T>() where T : I2<T>
 {
-    T.M();
-    T t = T.P;
-    T.E += () => { };
-    return t + T.P;
+    T.M1();
+    T t = T.P1;
+    T.E1 += () => { };
+    return t + T.P2;
 }
 ```
 
@@ -181,7 +218,7 @@ C c = M<C>(); // The static members of C get called
 # Drawbacks
 [drawbacks]: #drawbacks
 
-- "static abstract" is a new concept and will meaningfully add to the conceptual load of C#.
+- "static virtual" is a new concept and will meaningfully add to the conceptual load of C#.
 - It's not a cheap feature to build. We should make sure it's worth it.
 
 # Alternatives
@@ -202,14 +239,14 @@ This seems like a further improvement that can be done independently later, if t
 
 ## Virtual static members in classes
 
-Another *additional* feature would be to allow static members to be abstract and virtual in classes as well. This runs into similar complicating factors as the default implementations, and again seems like it can be saved for later, if and when the need and the design insights occur.
+Another *additional* feature would be to allow static members to be declared abstract and virtual in classes as well. This runs into complicating factors around which types can satisfy constraints that contain static virtual members. It seems like it can be saved for later, if and when the need and the design insights occur.
 
 # Unresolved questions
 [unresolved]: #unresolved-questions
 
 Called out above, but here's a list:
 
-- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as static abstract members as well?
+- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as static virtual members as well?
 - Should the qualifying `I.` in an explicit operator implementation go before the `operator` keyword or the operator symbol (e.g. `+`) itself?
 - Should we relax the operator restrictions further so that the restricted operand can be of any type that derives from, or has one of some set of implicit conversions to the enclosing type?
 
