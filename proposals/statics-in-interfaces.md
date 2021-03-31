@@ -66,10 +66,14 @@ interface I<T> where T : I<T>
     static abstract T P { get; set; }
     static abstract event Action E;
     static abstract T operator +(T l, T r);
+    static abstract bool operator ==(T l, T r);
+    static abstract bool operator !=(T l, T r);
+    static abstract implicit operator T(string s);
+    static abstract explicit operator string(T t);
 }
 ```
 
-***Open question:** Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be allowed?*
+***Open question:** Non-virtual operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as virtual members?*
 
 #### Explicitly non-virtual static members
 For symmetry with non-virtual instance members, static members should be allowed an optional `sealed` modifier, even though they are non-virtual by default:
@@ -108,14 +112,20 @@ Explicit implementations of static abstract interface members use a qualified na
 ``` c#
 class C : I<C>
 {
-    static void I.M() => Console.WriteLine("Implementation");
-    static C I.P { get; set; }
-    static event Action I.E;
-    static C I.operator +(C l, C r) => r;
+    string _s;
+    public C(string s) => _s = s;
+    static void I<C>.M() => Console.WriteLine("Implementation");
+    static C I<C>.P { get; set; }
+    static event Action I<C>.E;
+    static C I<C>.operator +(C l, C r) => new C($"{l._s} {r._s}");
+    static bool I<C>.operator ==(C l, C r) => l._s == r._s;
+    static bool I<C>.operator !=(C l, C r) => l._s != r._s;
+    static implicit I<C>.operator C(string s) => new C(s);
+    static explicit I<C>.operator string(C c) => c._s;
 }
 ```
 
-***Open question:** Should the qualifying `I.` go before the `operator` keyword or the operator symbol `+` itself?* I've chosen the former here. The latter may clash if we choose to allow conversion operators.
+***Open question:** Should the qualifying `I<C>.` go before the `operator` keyword or the operator symbol (e.g. `+`) itself?* I've chosen the former here, as it also works for the conversion operators.
 
 # Semantics
 
@@ -158,7 +168,7 @@ T M<T>() where T : I<T>
     T.M();
     T t = T.P;
     T.E += () => { };
-    return t1 + T.P;
+    return t + T.P;
 }
 ```
 
@@ -199,8 +209,8 @@ Another *additional* feature would be to allow static members to be abstract and
 
 Called out above, but here's a list:
 
-- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be allowed?
-- Should the qualifying `I.` in an explicit operator implenentation go before the `operator` keyword or the operator symbol (e.g. `+`) itself?
+- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as static abstract members as well?
+- Should the qualifying `I.` in an explicit operator implementation go before the `operator` keyword or the operator symbol (e.g. `+`) itself?
 - Should we relax the operator restrictions further so that the restricted operand can be of any type that derives from, or has one of some set of implicit conversions to the enclosing type?
 
 # Design meetings
