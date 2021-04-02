@@ -249,7 +249,7 @@ public ref struct InterpolatedStringBuilder
     {
         string result = _array.AsSpan(0, _count).ToString();
         ArrayPool<char>.Shared.Return(_array);
-        Return result;
+        return result;
     }
     public bool TryFormatBaseString(string s) => TryFormatInterpolationHole(s);
     public bool TryFormatInterpolationHole(ReadOnlySpan<char> s)
