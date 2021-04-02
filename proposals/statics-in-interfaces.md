@@ -175,11 +175,11 @@ Variance safety rules should apply to signatures of static abstract members. The
 https://github.com/dotnet/csharplang/blob/main/proposals/variance-safety-for-static-interface-members.md#variance-safety
 should be adjusted from
 
-*These restrictions do not apply to ocurrances of types within declarations of static members.* 
+*These restrictions do not apply to occurrences of types within declarations of static members.* 
 
 to
 
-*These restrictions do not apply to ocurrances of types within declarations of **non-virtual, non-abstract** static members.*
+*These restrictions do not apply to occurrences of types within declarations of **non-virtual, non-abstract** static members.*
 
 
 # Drawbacks
