@@ -40,8 +40,8 @@ Overview of meetings and agendas for 2021
 
 [C# Language Design Notes for April 5th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-04-05.md)
 
-1. [Interpolated string improvements](#interpolated-string-improvements)
-2. [Abstract statics in interfaces](#abstract-statics-in-interfaces)
+1. Interpolated string improvements
+2. Abstract statics in interfaces
 
 ## Mar 29, 2021
 
