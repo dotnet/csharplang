@@ -4,6 +4,8 @@
 
 ## Schedule when convenient
 
+- Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -30,14 +32,16 @@
 
 - MVP session
 
-## Apr 5, 2021
-
-- Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
-- Statics in interfaces (Mads): https://github.com/dotnet/csharplang/issues/4436
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Apr 5, 2021
+
+[C# Language Design Notes for April 5th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-04-05.md)
+
+1. [Interpolated string improvements](#interpolated-string-improvements)
+2. [Abstract statics in interfaces](#abstract-statics-in-interfaces)
 
 ## Mar 29, 2021
 
