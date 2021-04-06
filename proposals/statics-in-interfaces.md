@@ -196,9 +196,13 @@ An alternative approach would be to have "structural constraints" directly and e
     
 ## Default implementations
 
-An *additional* feature to this proposal is to allow static virtual members in interfaces to have default implementations, just as instance virtual members do. We're investigating this, but the semantics get very complicated: default implementations will want to call other static virtual members, but what syntax, semantics and implementation strategies should we use to ensure that those calls can in turn be virtual?
+An *additional* feature to this proposal is to allow static virtual members in interfaces to have default implementations, just as instance virtual members do. 
 
-This seems like a further improvement that can be done independently later, if the need and the solutions arise.
+One complication here is that default implementations would want to call other static virtual members "virtually". Allowing static virtual members to be called directly on the interface would require flowing a hidden type parameter representing the "self" type that the current static method really got invoked on. This seems complicated, expensive and potentially confusing.
+
+We discussed a simpler version which maintains the limitations of the current proposal that static virtual members can *only* be invoked on type parameters. Since interfaces with static virtual members will often have an explicit type parameter representing a "self" type, this wouldn't be a big loss: other static virtual members could just be called on that self type. This version is a lot simpler, and seems quite doable.
+
+However, it seems rare in practice that a default implementation would be beneficial, at least in our main driving scenario of numeric abstraction. Default implementations are *explicitly* implemented on implementing classes and structs, so they wouldn't result in a public member. Why would you want e.g. an operator implementation that only surfaces in a generic context, but is hidden on the concrete type? The main reason would be if we want to evolve some of the interfaces in a later release to e.g. expose more operators. In that case, we can add the language feature at that time.
 
 ## Virtual static members in classes
 
@@ -215,5 +219,6 @@ Called out above, but here's a list:
 
 # Design meetings
 
+- https://github.com/dotnet/csharplang/tree/main/meetings/2021#apr-5-2021
 - https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-08.md
 - https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-29.md
