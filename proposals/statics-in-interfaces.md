@@ -66,10 +66,14 @@ interface I<T> where T : I<T>
     static abstract T P { get; set; }
     static abstract event Action E;
     static abstract T operator +(T l, T r);
+    static abstract bool operator ==(T l, T r);
+    static abstract bool operator !=(T l, T r);
+    static abstract implicit operator T(string s);
+    static abstract explicit operator string(T t);
 }
 ```
 
-***Open question:** Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be allowed?*
+***Open question:** Non-virtual operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as virtual members?*
 
 #### Explicitly non-virtual static members
 For symmetry with non-virtual instance members, static members should be allowed an optional `sealed` modifier, even though they are non-virtual by default:
@@ -108,14 +112,20 @@ Explicit implementations of static abstract interface members use a qualified na
 ``` c#
 class C : I<C>
 {
-    static void I.M() => Console.WriteLine("Implementation");
-    static C I.P { get; set; }
-    static event Action I.E;
-    static C I.operator +(C l, C r) => r;
+    string _s;
+    public C(string s) => _s = s;
+    static void I<C>.M() => Console.WriteLine("Implementation");
+    static C I<C>.P { get; set; }
+    static event Action I<C>.E;
+    static C I<C>.operator +(C l, C r) => new C($"{l._s} {r._s}");
+    static bool I<C>.operator ==(C l, C r) => l._s == r._s;
+    static bool I<C>.operator !=(C l, C r) => l._s != r._s;
+    static implicit I<C>.operator C(string s) => new C(s);
+    static explicit I<C>.operator string(C c) => c._s;
 }
 ```
 
-***Open question:** Should the qualifying `I.` go before the `operator` keyword or the operator symbol `+` itself?* I've chosen the former here. The latter may clash if we choose to allow conversion operators.
+***Open question:** Should the qualifying `I<C>.` go before the `operator` keyword or the operator symbol (e.g. `+`) itself?* I've chosen the former here, as it also works for the conversion operators.
 
 # Semantics
 
@@ -158,7 +168,7 @@ T M<T>() where T : I<T>
     T.M();
     T t = T.P;
     T.E += () => { };
-    return t1 + T.P;
+    return t + T.P;
 }
 ```
 
@@ -186,9 +196,13 @@ An alternative approach would be to have "structural constraints" directly and e
     
 ## Default implementations
 
-An *additional* feature to this proposal is to allow static virtual members in interfaces to have default implementations, just as instance virtual members do. We're investigating this, but the semantics get very complicated: default implementations will want to call other static virtual members, but what syntax, semantics and implementation strategies should we use to ensure that those calls can in turn be virtual?
+An *additional* feature to this proposal is to allow static virtual members in interfaces to have default implementations, just as instance virtual members do. 
 
-This seems like a further improvement that can be done independently later, if the need and the solutions arise.
+One complication here is that default implementations would want to call other static virtual members "virtually". Allowing static virtual members to be called directly on the interface would require flowing a hidden type parameter representing the "self" type that the current static method really got invoked on. This seems complicated, expensive and potentially confusing.
+
+We discussed a simpler version which maintains the limitations of the current proposal that static virtual members can *only* be invoked on type parameters. Since interfaces with static virtual members will often have an explicit type parameter representing a "self" type, this wouldn't be a big loss: other static virtual members could just be called on that self type. This version is a lot simpler, and seems quite doable.
+
+However, it seems rare in practice that a default implementation would be beneficial, at least in our main driving scenario of numeric abstraction. Default implementations are *explicitly* implemented on implementing classes and structs, so they wouldn't result in a public member. Why would you want e.g. an operator implementation that only surfaces in a generic context, but is hidden on the concrete type? The main reason would be if we want to evolve some of the interfaces in a later release to e.g. expose more operators. In that case, we can add the language feature at that time.
 
 ## Virtual static members in classes
 
@@ -199,11 +213,12 @@ Another *additional* feature would be to allow static members to be abstract and
 
 Called out above, but here's a list:
 
-- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be allowed?
-- Should the qualifying `I.` in an explicit operator implenentation go before the `operator` keyword or the operator symbol (e.g. `+`) itself?
+- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as static abstract members as well?
+- Should the qualifying `I.` in an explicit operator implementation go before the `operator` keyword or the operator symbol (e.g. `+`) itself?
 - Should we relax the operator restrictions further so that the restricted operand can be of any type that derives from, or has one of some set of implicit conversions to the enclosing type?
 
 # Design meetings
 
+- https://github.com/dotnet/csharplang/tree/main/meetings/2021#apr-5-2021
 - https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-08.md
 - https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-29.md
