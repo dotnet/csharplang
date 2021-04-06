@@ -315,6 +315,7 @@ Consider diagnostics for using struct with parameterless ctor in some of those c
 - double-check that synthesized `Equals` logic is functionally equivalent to runtime implementation (e.g. float.NaN)
 - how to recognize record structs in metadata? (we don't have an unspeakable clone method to leverage...)
 - should `GetHashCode` include a hash of the type itself, to get different values between `record struct S1;` and `record struct S2;`?
+- could field- or property-targeting attributes be placed in the positional parameter list?
 
 ## Answered
 
