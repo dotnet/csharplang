@@ -1,4 +1,4 @@
-# Variable declarations under pattern combinators
+# Variable declarations under disjunctive patterns
 
 ## Summary  
 
