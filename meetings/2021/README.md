@@ -4,8 +4,6 @@
 
 ## Schedule when convenient
 
-- Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -22,6 +20,7 @@
 ## Apr 14, 2021
 
 - Auto-props V2 decisions (cyrusn)
+- Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
 
 ## Apr 12, 2021
 
