@@ -51,9 +51,9 @@ public struct Vector2
         return tmp;
     }
 
-    public float LengthSquared
+    public readonly float LengthSquared
     {
-        readonly get
+        get
         {
             return (x * x) +
                    (y * y);
@@ -89,13 +89,13 @@ public static class MyClass
 Readonly can be applied to property accessors to indicate that `this` will not be mutated in the accessor. The following examples have readonly setters because those accessors modify the state of member field, but do not modify the value of that member field.
 
 ```csharp
-public int Prop1
+public readonly int Prop1
 {
-    readonly get
+    get
     {
         return this._store["Prop1"];
     }
-    readonly set
+    set
     {
         this._store["Prop1"] = value;
     }
