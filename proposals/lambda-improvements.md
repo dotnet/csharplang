@@ -45,13 +45,13 @@ Attributes may be added to lambda expressions and lambda parameters.
 To avoid ambiguity between method attributes and parameter attributes, a lambda expression with attributes must use a parenthesized parameter list.
 Parameter types are not required.
 ```csharp
-f = [A] () => { };        // [A]lambda
+f = [A] () => { };        // [A] lambda
 f = [return:A] x => x;    // syntax error at '=>'
-f = [return:A] (x) => x;  // [A]lambda
+f = [return:A] (x) => x;  // [A] lambda
 f = [A] static x => x;    // syntax error at '=>'
 
-f = ([A] x) => x;         // [A]x
-f = ([A] ref int x) => x; // [A]x
+f = ([A] x) => x;         // [A] x
+f = ([A] ref int x) => x; // [A] x
 ```
 
 Attributes are not supported for anonymous methods declared with `delegate { }` syntax.
@@ -62,10 +62,9 @@ f = delegate ([A] int x) { return x; }; // syntax error at '['
 
 The parser will look ahead to differentiate a lambda with an attribute from a dictionary initializer.
 ```csharp
-var a = new { [A] x => y }; // ok: a[0] = [A] x => y
-var b = new { [A] = y };    // ok: b[A] = y
+var y = new C { [A] x => x }; // ok: y[0] = [A] x => x
+var z = new C { [A] = y };    // ok: z[A] = y
 ```
-_Add the types to the comments in the above examples._
 
 The parser will treat `?[` as the start of a conditional element access qualifier.
 ```csharp
@@ -126,6 +125,8 @@ _Should the compiler bind to a matching `System.Action<>` or `System.Func<>` typ
 
 If two lambda expressions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
 
+### `var`
+
 Lambda expressions and method groups with natural types can be used as initializers in `var` declarations.
 ```csharp
 var f1 = () => default;        // error: no natural type
@@ -149,18 +150,26 @@ int zero = ((int x) => x)(0); // ok
 ```
 
 ### Implicit conversions
-A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate` and any base classes or interfaces implemented by `System.Delegate` such as `System.Object` or `System.ICloneable`.
+A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate` and to base classes and interfaces implemented by `System.Delegate` (such as `System.Object` and `System.ICloneable`).
+
+The compiler will also treat lambda expressions with natural type as implicitly convertible to `System.Linq.Expressions.Expression` as an expression tree. Base classes or interfaces implemented by `System.Linq.Expressions.Expression` are ignored when calculating conversions to expression trees.
+
+Overload resolution already prefers a strongly-typed delegate over `System.Delegate` and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<T>` type over a strongly-typed delegate.
+To avoid a breaking change from inferring a natural type, overload resolution will be updated to prefer binding a lambda expression to `System.Linq.Expressions.Expression` over `System.Delegate`. A strongly-typed delegate will still be preferred over the weakly-typed `System.Linq.Expressions.Expression` however.
+
 ```csharp
 static void Invoke(Func<string> f) { }
 static void Invoke(Delegate d) { }
+static void Invoke(Expression e) { }
 
 static string GetString() => "";
 static int GetInt() => 0;
 
-Invoke(() => "");  // Invoke(Func<string>)
+Invoke(() => "");  // Invoke(Func<string>) [unchanged]
 Invoke(() => 0);   // Invoke(Delegate) [new]
+Invoke(() => 0);  // Invoke(Expression) [new]
 
-Invoke(GetString); // Invoke(Func<string>)
+Invoke(GetString); // Invoke(Func<string>) [unchanged]
 Invoke(GetInt);    // Invoke(Delegate) [new]
 ```
 
@@ -168,29 +177,6 @@ If a natural type cannot be inferred, there is no implicit conversion to `System
 ```csharp
 Delegate d = 1.ToString; // error: cannot convert to 'System.Delegate'; multiple 'ToString' methods
 object o = x => x;       // error: cannot convert to 'System.Object'; no natural type for 'x => x'
-```
-
-The compiler will also treat lambda expressions with natural type as implicitly convertible to `System.Linq.Expressions.Expression` as an expression tree. Base classes or interfaces implemented by `System.Linq.Expressions.Expression` are ignored when calculating conversions to expression trees.
-```csharp
-// ... example ...
-```
-
-Overload resolution already prefers a strongly-typed delegate over `System.Delegate` and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<T>` type over a strongly-typed delegate.
-To avoid a breaking change from inferring a natural type, overload resolution will be updated to prefer binding a lambda expression to `System.Linq.Expressions.Expression` over `System.Delegate`. A strongly-typed delegate will still be preferred over the weakly-typed `System.Linq.Expressions.Expression` however.
-
-_Does this example need updating?_
-```csharp
-static void Execute(Expression<Func<string>> e) { }
-static void Execute(Delegate d) { }
-
-static string GetString() => "";
-static int GetInt() => 0;
-
-Execute(() => "");  // Execute(Expression<Func<string>>) [tie-breaker]
-Execute(() => 0);   // Execute(Delegate) [new]
-
-Execute(GetString); // Execute(Delegate) [new]
-Execute(GetInt);    // Execute(Delegate) [new]
 ```
 
 ## Syntax
