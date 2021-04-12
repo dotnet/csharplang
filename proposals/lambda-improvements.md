@@ -174,12 +174,11 @@ static void Invoke(Expression e) { }
 static string GetString() => "";
 static int GetInt() => 0;
 
-Invoke(() => "");  // Invoke(Func<string>) [unchanged]
-Invoke(() => 0);   // Invoke(Delegate) [new]
-Invoke(() => 0);   // Invoke(Expression) [new]
-
 Invoke(GetString); // Invoke(Func<string>) [unchanged]
 Invoke(GetInt);    // Invoke(Delegate) [new]
+
+Invoke(() => "");  // Invoke(Func<string>) [unchanged]
+Invoke(() => 0);   // Invoke(Expression) [new]
 ```
 
 ## Syntax
