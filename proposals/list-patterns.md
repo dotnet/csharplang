@@ -175,7 +175,7 @@ The *input type* for the *slice_pattern* is the return type of the underlying `t
 
 #### Lowering on enumerable type
 
-> **Open question**: Need to investigate how to reduce allocation for the end circular buffer. `stackalloc` is bad in loops. Maybe we'll just have to fall back to locals and a `switch`.  
+> **Open question**: Need to investigate how to reduce allocation for the end circular buffer. `stackalloc` is bad in loops. Maybe we'll just have to fall back to locals and a `switch`.  (see [`params` feature discussion](https://github.com/dotnet/csharplang/blob/main/proposals/format.md#extending-params) also)
 
 Although a helper type is not necessary, it helps simplify and illustrate the logic.
 
