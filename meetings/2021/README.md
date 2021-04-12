@@ -22,11 +22,6 @@
 - Auto-props V2 decisions (cyrusn)
 - Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
 
-## Apr 12, 2021
-
-- List pattern on enumerables (Julien): https://github.com/dotnet/csharplang/pull/4575
-- Lambda improvements (Chuck): https://github.com/dotnet/csharplang/pull/4642
-
 ## Apr 7, 2021
 
 - MVP session
@@ -34,6 +29,13 @@
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Apr 12, 2021
+
+[C# Language Design Notes for April 12th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-04-12.md)
+
+1. List patterns
+2. Lambda improvements
 
 ## Apr 5, 2021
 
