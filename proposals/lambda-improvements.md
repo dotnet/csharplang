@@ -152,10 +152,19 @@ int zero = ((int x) => x)(0); // ok
 ### Implicit conversions
 A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate` and to base classes and interfaces implemented by `System.Delegate` (such as `System.Object` and `System.ICloneable`).
 
+If a natural type cannot be inferred, there is no implicit conversion to `System.Delegate` or base classes or interfaces.
+```csharp
+Delegate d1 = 1.GetHashCode; // ok
+Delegate d2 = 2.ToString;    // error: cannot convert to 'System.Delegate'; multiple 'ToString' methods
+object o1 = (int x) => x;    // ok
+object o2 = x => x;          // error: cannot convert to 'System.Object'; no natural type for 'x => x'
+```
+
 The compiler will also treat lambda expressions with natural type as implicitly convertible to `System.Linq.Expressions.Expression` as an expression tree. Base classes or interfaces implemented by `System.Linq.Expressions.Expression` are ignored when calculating conversions to expression trees.
 
-Overload resolution already prefers a strongly-typed delegate over `System.Delegate` and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<T>` type over a strongly-typed delegate.
-To avoid a breaking change from inferring a natural type, overload resolution will be updated to prefer binding a lambda expression to `System.Linq.Expressions.Expression` over `System.Delegate`. A strongly-typed delegate will still be preferred over the weakly-typed `System.Linq.Expressions.Expression` however.
+Overload resolution already prefers binding to a strongly-typed delegate over `System.Delegate`, and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<Func<...>>` over the corresponding strongly-typed delegate `Func<...>`.
+
+Overload resolution will be updated to prefer binding a lambda expression to `System.Linq.Expressions.Expression` over `System.Delegate`. A strongly-typed delegate will still be preferred over the weakly-typed `System.Linq.Expressions.Expression` however.
 
 ```csharp
 static void Invoke(Func<string> f) { }
@@ -167,16 +176,10 @@ static int GetInt() => 0;
 
 Invoke(() => "");  // Invoke(Func<string>) [unchanged]
 Invoke(() => 0);   // Invoke(Delegate) [new]
-Invoke(() => 0);  // Invoke(Expression) [new]
+Invoke(() => 0);   // Invoke(Expression) [new]
 
 Invoke(GetString); // Invoke(Func<string>) [unchanged]
 Invoke(GetInt);    // Invoke(Delegate) [new]
-```
-
-If a natural type cannot be inferred, there is no implicit conversion to `System.Delegate` or base classes or interfaces.
-```csharp
-Delegate d = 1.ToString; // error: cannot convert to 'System.Delegate'; multiple 'ToString' methods
-object o = x => x;       // error: cannot convert to 'System.Object'; no natural type for 'x => x'
 ```
 
 ## Syntax
