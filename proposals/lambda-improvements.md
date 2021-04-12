@@ -60,13 +60,13 @@ f = [A] delegate { return 1; };         // syntax error at 'delegate'
 f = delegate ([A] int x) { return x; }; // syntax error at '['
 ```
 
-The parser will look ahead to differentiate a lambda with an attribute from a dictionary initializer.
+The parser will look ahead to differentiate a collection initializer with an element assignment from a collection initializer with a lambda expression.
 ```csharp
-var y = new C { [A] x => x }; // ok: y[0] = [A] x => x
-var z = new C { [A] = y };    // ok: z[A] = y
+var y = new C { [A] = x };    // ok: y[A] = x
+var z = new C { [A] x => x }; // ok: z[0] = [A] x => x
 ```
 
-The parser will treat `?[` as the start of a conditional element access qualifier.
+The parser will treat `?[` as the start of a conditional element access.
 ```csharp
 x = b ? [A];               // ok
 y = b ? [A] () => { } : z; // syntax error at '('
@@ -110,7 +110,7 @@ A method group has a natural type if the method group contains a single method.
 
 A method group might refer to extension methods. Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine the natural type will require searching all namespace scopes. To minimize unnecessary binding, natural type should be calculated only in cases where there is no target type.
 
-Requiring a method group to contain a single method means that adding an overload (including an extension method overload) for a method that previously had no overloads is a breaking change.
+Requiring a method group to contain a single method means that adding an overload (including an extension method overload) for a method that previously had no overloads is a breaking change if the original method was used as a method group with inferred type.
 
 The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
 - if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
@@ -126,7 +126,6 @@ _Should the compiler bind to a matching `System.Action<>` or `System.Func<>` typ
 If two lambda expressions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
 
 ### `var`
-
 Lambda expressions and method groups with natural types can be used as initializers in `var` declarations.
 ```csharp
 var f1 = () => default;        // error: no natural type
@@ -144,6 +143,7 @@ var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
 
+### Invoking lambdas
 Lambda expressions with natural types can be invoked directly.
 ```csharp
 int zero = ((int x) => x)(0); // ok
@@ -162,7 +162,8 @@ object o2 = x => x;          // error: cannot convert to 'System.Object'; no nat
 
 The compiler will also treat lambda expressions with natural type as implicitly convertible to `System.Linq.Expressions.Expression` as an expression tree. Base classes or interfaces implemented by `System.Linq.Expressions.Expression` are ignored when calculating conversions to expression trees.
 
-Overload resolution already prefers binding to a strongly-typed delegate over `System.Delegate`, and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<Func<...>>` over the corresponding strongly-typed delegate `Func<...>`.
+### Overload resolution
+Overload resolution already prefers binding to a strongly-typed delegate over `System.Delegate`, and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<TDelegate>` over the corresponding strongly-typed delegate `TDelegate`.
 
 Overload resolution will be updated to prefer binding a lambda expression to `System.Linq.Expressions.Expression` over `System.Delegate`. A strongly-typed delegate will still be preferred over the weakly-typed `System.Linq.Expressions.Expression` however.
 
