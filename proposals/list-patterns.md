@@ -89,7 +89,8 @@ enumerable is { 1, 2, ..var x } // error
 
 This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support) but relaxed to ignore optional or `params` parameters, if any.
 
-> **Open question**: We should define the exact binding rules for any of these members and decide if we want to diverge from the range spec.
+> **Open question**: We should define the exact binding rules for any of these members and decide if we want to diverge from the range spec.  
+> **Open question**: Should extension methods play a role in sliceability?  
 
 #### Semantics on enumerable type
 
@@ -174,8 +175,7 @@ The *input type* for the *slice_pattern* is the return type of the underlying `t
 
 #### Lowering on enumerable type
 
-> **Open question**: Confirm that async enumerables are out-of-scope.  
-> **Open question**: Confirm that slice patterns with a sub_pattern (such as `..var x`) are out-of-scope.  
+> **Open question**: Need to investigate how to reduce allocation for the end circular buffer. `stackalloc` is bad in loops. Maybe we'll just have to fall back to locals and a `switch`.  
 
 Although a helper type is not necessary, it helps simplify and illustrate the logic.
 
@@ -312,6 +312,9 @@ class ListPatternHelper
 The same way that a `Type { name: pattern }` *property_pattern* checks that the input has the expected type and isn't null before using that as receiver for the property checks, so can we have the `{ ..., ... }` *list_pattern* initialize a helper and use that as the pseudo-receiver for element accesses.  
 This should allow merging branches of the patterns DAG, thus avoiding creating multiple enumerators.
 
+Note: async enumerables are out-of-scope. (Confirmed in LDM 4/12/2021)
+Note: sub-patterns are disallowed in list-patterns on enumerables for now despite some desirable uses: `e is { 1, 2, ..[var count] }` (LDM 4/12/2021)
+
 ### Additional types
 
 Beyond the pattern-based mechanism outlined above, there are an additional two set of types that can be covered as a special case.
@@ -328,7 +331,8 @@ All multi-dimensional arrays can be non-zero-based. We can either:
 1. Add a runtime helper to check if the array is zero-based across all dimensions.
 2. Call `GetLowerBound` and add it to each indexer access to pass the *correct* index.
 3. Assume all arrays are zero-based since that's the default for arrays created by `new` expressions.
-4. Should we limit the list-pattern to `IEnumerable` types? Then we could allow `{ 1, 2, ..var x }` (`x` would be an `IEnumerable` we would cook up)
+4. Should we limit the list-pattern to `IEnumerable` types? Then we could allow `{ 1, 2, ..var x }` (`x` would be an `IEnumerable` we would cook up) (answer [LDM 4/12/2021]: no, we'll disallow sub-pattern in slice pattern on enumerable for now)
 5. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`. Can we assume that `Count` agrees with enumerated count?
 6. Should we try to cut the enumeration short for length-patterns on enumerables in some cases? (computing min/max acceptable count and checking partial count against that)
-  What if the enumerable type has some sort of `TryGetNonEnumeratedCount` API?
+  What if the enumerable type has some sort of `TryGetNonEnumeratedCount` API?  
+7. Can we detect at runtime that the input type is sliceable, so as to avoid enumeration? .NET 6 may be adding some LINQ methods/extensions that would help. 
