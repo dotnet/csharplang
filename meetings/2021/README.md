@@ -24,10 +24,6 @@
 - Auto-props V2 decisions (cyrusn)
 - Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
 
-## Apr 7, 2021
-
-- MVP session
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
@@ -38,6 +34,12 @@ Overview of meetings and agendas for 2021
 
 1. List patterns
 2. Lambda improvements
+
+## Apr 7, 2021
+
+[C# Language Design Notes for April 7th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-04-07.md)
+
+- MVP session
 
 ## Apr 5, 2021
 
