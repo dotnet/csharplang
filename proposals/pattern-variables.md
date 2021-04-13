@@ -33,13 +33,18 @@ For a *logical_or_expression* of the form `left_expr || right_expr`:
   Note: This is the expression variation of the previous case.
 
 For a *negated_pattern* of the form `not pattern_operand`:
-- Pattern variables declared in the *pattern_operand* **must be redeclared** inside any other *negated_pattern* in the containing expression; permitting:
+- Pattern variables declared in the *pattern_operand* **must be redeclared** inside any other *negated_pattern* in the containing pattern; permitting:
 
-	```cs
-	e is not (0, var x) and not (var x, 0)
-	e is not (0, var x) && e is not (var x, 0)
-	```
+  ```cs
+  e is not (0, var x) and not (var x, 0)
+  ```
    Note: This is the DeMorgan's transformation of the previous case.
+- Pattern variables declared in the *pattern_operand* **can be redeclared** anywhere in the containing expression; permitting:
+
+  ```cs
+  e is not (0, var x) && e is not (var x, 0)
+  ```
+  Note: This is the expression variation of the previous case.
 
 For a *logical_not_expression* of the form `!expr_operand`:
 - Pattern variables declared in the *expr_operand* **can be redeclared** anywhere in the containing expression; permitting:
