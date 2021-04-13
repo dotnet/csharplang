@@ -118,8 +118,6 @@ The following rules applies to any *primary_pattern* that declares a variable:
 
 Note: This section is derived by definite assignment rules for expressions.
 
-> **Open question**: We should confirm if we want to allow patterns like `var x or 1`.
-
 For a *disjunctive_pattern* of the form `left_pattern or right_pattern`:
 
 - The definite assignment state of *v* after *disjunctive_pattern* is determined by:
