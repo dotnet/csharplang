@@ -12,15 +12,20 @@
 
 Introducing a new concept similar to *name hiding*, but these names can possibly reference either of variables based on the result of the pattern-matching at runtime.
 
+There's two degrees of enforcement as to whether variables may be redeclared:
+
+- Pattern variables within pattern boundaries *must* be redeclared because assignment of such variables depend on the order of evaluation which is undefined for patterns.
+- Pattern variables outside pattern boundaries *can* be redeclared, definitive assignment rules for the containing expression specify where such variables are usable.
+
 For a *disjunctive_pattern* of the form `left_pattern or right_pattern`:
-- Pattern variables declared in the *left_pattern* can be redeclared in the *right_pattern*; permitting:
+- Pattern variables declared in the *left_pattern* **must be redeclared** in the *right_pattern*; permitting:
 
   ```cs
   e is (0, var x) or (var x, 0)
   ```
 
 For a *logical_or_expression* of the form `left_expr || right_expr`:
-- Pattern variables declared in *left_expr* can be redeclared in the *right_expr*; permitting:
+- Pattern variables declared in *left_expr* **can be redeclared** in the *right_expr*; permitting:
 
   ```cs
   e is (0, var x) || e is (var x, 0)
@@ -28,7 +33,7 @@ For a *logical_or_expression* of the form `left_expr || right_expr`:
   Note: This is the expression variation of the previous case.
 
 For a *negated_pattern* of the form `not pattern_operand`:
-- Pattern variables declared in the *pattern_operand* can be redeclared anywhere in the containing expression; permitting:
+- Pattern variables declared in the *pattern_operand* **must be redeclared** inside any other *negated_pattern* in the containing expression; permitting:
 
 	```cs
 	e is not (0, var x) and not (var x, 0)
@@ -37,7 +42,7 @@ For a *negated_pattern* of the form `not pattern_operand`:
    Note: This is the DeMorgan's transformation of the previous case.
 
 For a *logical_not_expression* of the form `!expr_operand`:
-- Pattern variables declared in the *expr_operand* can be redeclared anywhere in the containing expression; permitting:
+- Pattern variables declared in the *expr_operand* **can be redeclared** anywhere in the containing expression; permitting:
 
   ```cs
   !(e is (0, var x)) && !(e is (var x, 0))
@@ -45,7 +50,7 @@ For a *logical_not_expression* of the form `!expr_operand`:
   Note: This is the expression variation of the previous case.
 
 For a *switch_case_label* of the form `case case_pattern when when_expr`:
-- Pattern variables declared in the *case_pattern* or *when_expr* can be redeclared in other case labels; permitting:
+- Pattern variables declared in the *case_pattern* or *when_expr* **can be redeclared** in other case labels; permitting:
 
 	```cs
 	case (var x, 0) when e is int i:
@@ -55,7 +60,7 @@ For a *switch_case_label* of the form `case case_pattern when when_expr`:
 	Note: This rule is currently defined for each individual *switch_section* only.
 	
 For a *conditional_expression* of the form `expr_cond ? expr_true : expr_false`:
-- Pattern variables declared in *expr_true* can be redeclared in *expr_false*; permitting:
+- Pattern variables declared in *expr_true* **can be redeclared** in *expr_false*; permitting:
 
 	```cs
 	b ? x is int i : y is int i
