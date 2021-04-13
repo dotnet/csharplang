@@ -35,8 +35,8 @@ convenient interpolation syntax.
 We introduce a new builder pattern that can represent an interpolated string passed as an argument to a method. The simple English of the pattern is as follows:
 
 When an _interpolated\_string\_expression_ is passed as an argument to a method, we look at the type of the parameter. If the parameter type has a static method
-`Create` that can be invoked with 2 int parameters, `baseLength` and `formatHoleCount`, optionally takes a parameter the receiver is convertible to,
-and has an out parameter of the type of original method's parameter and that type has instance `TryFormatBaseString` and `TryFormatInterpolationHole` methods that
+`Create` that can be invoked with 2 int parameters, `literalLength` and `formattedCount`, optionally takes a parameter the receiver is convertible to,
+and has an out parameter of the type of original method's parameter and that type has instance `AppendLiteral` and `AppendFormatted` methods that
 can be invoked for every part of the interpolated string, then we lower the interpolation using that, instead of into a traditional call to
 `string.Format(formatStr, args)`. A more concrete example is helpful for picturing this:
 
@@ -44,7 +44,7 @@ can be invoked for every part of the interpolated string, then we lower the inte
 // The builder that will actually "build" the interpolated string"
 public ref struct TraceLoggerParamsBuilder
 {
-    public static TraceLoggerParamsBuilder Create(int baseLength, int formatHoleCount, Logger logger, out bool builderIsValid)
+    public static TraceLoggerParamsBuilder Create(int literalLength, int formattedCount, Logger logger, out bool builderIsValid)
     {
         if (!logger._logLevelEnabled)
         {
@@ -53,26 +53,26 @@ public ref struct TraceLoggerParamsBuilder
         }
 
         builderIsValid = true;
-        return TraceLoggerParamsBuilder(baseLength, formatHoleCount, logger.EnabledLevel);
+        return TraceLoggerParamsBuilder(literalLength, formattedCount, logger.EnabledLevel);
     }
 
     // Storage for the built-up string
 
     private bool _logLevelEnabled;
 
-    private TraceLoggerParamsBuilder(int baseLength, int formatHoleCount, bool logLevelEnabled)
+    private TraceLoggerParamsBuilder(int literalLength, int formattedCount, bool logLevelEnabled)
     {
         // Initialization logic
         _logLevelEnabled = logLevelEnabled
     }
 
-    public bool TryFormatBaseString(string s)
+    public bool AppendLiteral(string s)
     {
         // Store and format part as required
         return true;
     }
 
-    public bool TryFormatInterpolationHole<T>(T t)
+    public bool AppendFormatted<T>(T t)
     {
         // Store and format part as required
         return true;
@@ -101,10 +101,10 @@ logger.LogTrace($"{name} will never be printed because info is < trace!");
 // This is converted to:
 var name = "Fred Silberberg";
 var receiverTemp = logger;
-var builder = TraceLoggerParamsBuilder.Create(baseLength: 47, formatHoleCount: 1, receiverTemp, out var builderIsValid);
+var builder = TraceLoggerParamsBuilder.Create(literalLength: 47, formattedCount: 1, receiverTemp, out var builderIsValid);
 _ = builderIsValid &&
-    builder.TryFormatInterpolationHole(name) &&
-    builder.TryFormatBaseString(" will never be printed because info is < trace!");
+    builder.AppendFormatted(name) &&
+    builder.AppendLiteral(" will never be printed because info is < trace!");
 receiverTemp.LogTrace(builder);
 ```
 
@@ -116,22 +116,25 @@ is a bit complicated, and is expanded below.
 
 A type is said to be an _applicable\_interpolated\_string\_builder\_type_ if, given an _interpolated\_string\_literal_ `S`, the following is true:
 
-* Overload resolution with an identifier of `TryFormatBaseString` and a parameter type of `string` succeeds, and contains a single instance method that returns a `bool`.
+* Overload resolution with an identifier of `AppendLiteral` and a parameter type of `string` succeeds, and contains a single instance method that returns a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) without an _interpolation\_format_ component or _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `TryFormatInterpolationHole` and parameter of the type of `Si` and name  succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `AppendFormatted` and parameter of the type of `Si`  succeeds, and contains a single instance method that returns a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and no _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `TryFormatInterpolationHole` and parameter types of `Si` and `string`(in that order) succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `AppendFormatted` and parameter types of `Si` and `string` with name `format` (in that order) succeeds, and contains a single instance method that returns
+a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with a _constant\_expression_ (alignment) component and no _interpolation\_format_ component, overload resolution
-with an identifier of `TryFormatInterpolationHole` and parameter types of `Si` and `int` (in that order) succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `AppendFormatted` and parameter types of `Si` and `int` with name `alignment` (in that order) succeeds, and contains a single instance method that returns
+a `bool`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and a _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `TryFormatInterpolationHole` and parameter types of `Si`, `int`, and `string` (in that order) succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `AppendFormatted` and parameter types of `Si`, `int` with name `format`, and `string` with name `alignment` (in that order) succeeds, and contains a
+single instance method that returns a `bool`.
 
-The rest of this proposal will use `TryFormat...` to refer to either of `TryFormatBaseString` or `TryFormatInterpolationHoles` in cases when both are applicable.
+The rest of this proposal will use `Append...` to refer to either of `AppendLiteral` or `AppendFormatted` in cases when both are applicable.
 
-Note that these rules do not permit extension methods for the `TryFormat...` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
+Note that these rules do not permit extension methods for the `Append...` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
 pattern, where we allow `GetEnumerator` to be an extension method, but not `Current` or `MoveNext()`.
 
-These rules _do_ permit default parameters for the `TryFormat...` calls, which will work with things like `CallerLineNumber` or `CallerArgumentExpression` (when supported by
+These rules _do_ permit default parameters for the `Append...` calls, which will work with things like `CallerLineNumber` or `CallerArgumentExpression` (when supported by
 the language).
 
 We have separate overload lookup rules for base elements vs interpolation holes because some builders will want to be able to understand the difference between the components
@@ -167,9 +170,11 @@ ref struct lifetimes vs the traditional .NET `TryX` pattern, and we expect a num
 
 This can and will be impacted by abstract statics in interfaces for generic contexts. We will need to make sure the interactions are considered and tested.
 
-**Open Question**
+**~~Open~~ Question**
 
 Need to confirm this pattern.
+
+_Answer_: Confirmed.
 
 #### Applicable function member adjustments
 
@@ -230,89 +235,82 @@ We introduce a new type in `System.Runtime.CompilerServices`: `InterpolatedStrin
 intended for direct use by the C# compiler. This struct would look approximately like this:
 
 ```cs
-public ref struct InterpolatedStringBuilder
+// API Proposal issue: https://github.com/dotnet/runtime/issues/50601
+namespace System.Runtime.CompilerServices
 {
-    public static InterpolatedStringBuilder Create(int baseLength, int formatHoleCount)
+    public ref struct InterpolatedStringBuilder
     {
-        return new InterpolatedStringBuilder(baseLength, formatHoleCount);
-    }
+        public static InterpolatedStringBuilder Create(int literalLength, int formattedCount);
+        public string ToStringAndClear();
 
-    private char[] _array;
-    internal int _count;
+        public void AppendLiteral(string value);
 
-    private InterpolatedStringBuilder(int baseLength, int formatHoleCount)
-    {
-        _array = ArrayPool<char>.Shared.Rent(baseLength /* Or some calculation based on what we see on average for the length of format holes */);
-        _count = 0;
-    }
-    public string ToString()
-    {
-        string result = _array.AsSpan(0, _count).ToString();
-        ArrayPool<char>.Shared.Return(_array);
-        return result;
-    }
-    public bool TryFormatBaseString(string s) => TryFormatInterpolationHole(s);
-    public bool TryFormatInterpolationHole(ReadOnlySpan<char> s)
-    {
-        if (s.Length >= _array.Length - _count) Grow();
-        s.CopyTo(_array);
-        _count += s.Length;
-        return true;
-    }
-    … // other TryFormatInterpolationHole overloads for other types, a generic, etc.
-}
-```
+        public void AppendFormatted<T>(T value);
+        public void AppendFormatted<T>(T value, string? format);
+        public void AppendFormatted<T>(T value, int alignment);
+        public void AppendFormatted<T>(T value, int alignment, string? format);
 
-We also provide a new `string.Format` overload, as follows:
+        public void AppendFormatted(ReadOnlySpan<char> value);
+        public void AppendFormatted(ReadOnlySpan<char> value, int alignment = 0, string? format = null);
 
-```cs
-public class String
-{
-    public static string Format(InterpolatedStringBuilder builder) => builder.ToString();
+        public void AppendFormatted(string? value);
+        public void AppendFormatted(string? value, int alignment = 0, string? format = null);
+
+        public void AppendFormatted(object? value, int alignment = 0, string? format = null);
+    }
 }
 ```
 
 We make a slight change to the rules for the meaning of an [_interpolated\_string\_expression_](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#interpolated-strings):
 
-If the type of an interpolated string is `System.IFormattable` or `System.FormattableString`, the meaning is a call to `System.Runtime.CompilerServices.FormattableStringFactory.Create`. If the type is `string`, the meaning of the expression is a call to `string.Format`. In both cases **if there exists an overload that takes a single argument, there exists an _implicit\_string\_builder\_conversion_ from the interpolated string to the parameter type, and the current context supports using that type, that overload is used according to the builder pattern, calling `ToString()` on the builder to obtain the final result. Otherwise**, the argument list of the call consists of a format string literal with placeholders for each interpolation, and an argument for each expression corresponding to the place holders.
+**If the type of an interpolated string is `string` and the type `System.Runtime.CompilerServices.InterpolatedStringBuilder` exists, and the current context supports using that type, the string**
+**is lowered using the builder pattern. The final `string` value is then obtained by calling `ToStringAndClear()` on the builder type.**
+**Otherwise, if** the type of an interpolated string is `System.IFormattable` or `System.FormattableString` [the rest is unchanged]
 
 The "and the current context supports using that type" rule is intentionally vague to give the compiler leeway in optimizing usage of this pattern. The builder type is likely to be a ref struct
 type, and ref struct types are normally not permitted in async methods. For this particular case, the compiler would be allowed to make use the builder if none of the interpolation holes contain
 an `await` expression, as we can statically determine that the builder type is safely used without additional complicated analysis because the builder will be dropped after the interpolated string
 expression is evaluated.
 
-**Open Question**:
+**~~Open~~ Question**:
 
 Do we want to instead just make the compiler know about `InterpolatedStringBuilder` and skip the `string.Format` call entirely? It would allow us to hide a method that we don't necessarily
 want to put in people's faces when they manually call `string.Format`.
 
-**Open Question**:
+_Answer_: Yes.
+
+**~~Open~~ Question**:
 
 Do we want to have builders for `System.IFormattable` and `System.FormattableString` as well?
+
+_Answer_: No.
 
 ### Lowering
 
 Both the general pattern and the specific changes for interpolated strings directly converted to `string`s follow the same lowering pattern. The `Create` method is
 invoked on the receiver (whether that's the temporary method receiver for an _implicit\_string\_builder\_conversion_ derived from the applicable function member algorithm, or a
-standard conversion derived from the target type). If the call returned `true`, `TryFormat...` is repeatedly invoked on the builder out parameter, with each part of the interpolated string,
-in order, stopping subsequent calls if a `TryFormat...` call returns `false`. Finally, the original method is called, passing the initialized builder in place of the interpolated string expression.
+standard conversion derived from the target type). If the call returned `true`, `Append...` is repeatedly invoked on the builder out parameter, with each part of the interpolated string,
+in order, stopping subsequent calls if a `Append...` call returns `false`. Finally, the original method is called, passing the initialized builder in place of the interpolated string expression.
 
 **~~Open~~ Question**
 
-This lowering means that subsequent parts of the interpolated string after a false-returning `TryFormat...` call don't get evaluated. This could potentially be very confusing, particularly
-if the format hole is side-effecting. We could instead evaluate all format holes first, then repeatedly call `TryFormat...` with the results, stopping if it returns false. This would ensure
+This lowering means that subsequent parts of the interpolated string after a false-returning `Append...` call don't get evaluated. This could potentially be very confusing, particularly
+if the format hole is side-effecting. We could instead evaluate all format holes first, then repeatedly call `Append...` with the results, stopping if it returns false. This would ensure
 that all expressions get evaluated as one might expect, but we call as few methods as we need to. While the partial evaluation might be desirable for some more advanced cases, it is perhaps
 non-intuitive for the general case.
 
-Another alternative, if we want to always evaluate all format holes, is to remove the `TryFormat...` version of the API and just do repeated `Format` calls. The builder can track whether it
+Another alternative, if we want to always evaluate all format holes, is to remove the `Append...` version of the API and just do repeated `Format` calls. The builder can track whether it
 should just be dropping the argument and immediately returning for this version.
 
 _Answer_: We will have conditional evaluation of the holes.
 
-**Open Question**
+**~~Open~~ Question**
 
 Do we need to dispose of disposable builder types, and wrap calls with try/finally to ensure that Dispose is called? For example, the interpolated string builder in the bcl might have a
 rented array inside it, and if one of the interpolation holes throws an exception during evaluation, that rented array could be leaked if it wasn't disposed.
+
+_Answer_: No. Builders can be assigned to locals (such as `MyBuilder builder = $"{MyCode()};`), and the lifetime of such builders is unclear. Unlike foreach enumerators, where the lifetime
+is obvious and no user-defined local is created for the enumerator.
 
 ## Other considerations
 
@@ -344,24 +342,73 @@ also adds more pros and cons to the points from the previous loop, where we don'
 
 ### Non-try version of the API
 
-For simplicity, this spec currently just proposes recognizing a `TryFormat...` method, and things that always succeed (like `InterpolatedStringBuilder`) would always return true from the method.
+For simplicity, this spec currently just proposes recognizing a `Append...` method, and things that always succeed (like `InterpolatedStringBuilder`) would always return true from the method.
 This was done to support partial formatting scenarios where the user wants to stop formatting if an error occurs or if it's unnecessary, such as the logging case, but could potentially
-introduce a bunch of unnecessary branches in standard interpolated string usage. We could consider an addendum where we use just `FormatX` methods if no `TryFormat...` method is present, but
-it does present questions about what we do if there's a mix of both `TryFormat...` and `FormatX` calls.
+introduce a bunch of unnecessary branches in standard interpolated string usage. We could consider an addendum where we use just `FormatX` methods if no `Append...` method is present, but
+it does present questions about what we do if there's a mix of both `Append...` and `FormatX` calls.
+
+_Answer_:
+
+We want the non-try version of the API. The proposal has been updated to reflect this.
 
 ### Passing previous arguments to the builder
 
 There is unfortunate lack of symmetry in the proposal at it currently exists: invoking an extension method in reduced form produces different semantics than invoking the extension method in
-normal form. This is different from most other locations in the language, where reduced form is just a sugar. We have a couple of potential options for resolving this:
+normal form. This is different from most other locations in the language, where reduced form is just a sugar. We propose adding an attribute to the framework that we will recognize when
+binding a method, that informs the compiler that certain parameters should be passed to the `Create` method on the builder. Usage looks like this:
 
-* Special case extension methods called in normal form. This feels pretty icky: why are extensions special here?
-* Allow other previous parameters to be passed to the builder. This gets complicated quickly: how do we determine what to pass to the builder? What if the builder has a `GetInterpolatedString`
-method that accepts the first parameter, but not the receiver, of an instance method?
-* Pass parameters to the builder marked with a specific attribute, a la `EnumeratorCancellation` support. This would need rules about whether we pass the receiver (maybe if the method is marked
-we pass the receiver, and we don't in the general case?), and what we do if parameters _after_ the string parameter are annotated, but it seems like a potential option.
+```cs
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+    public sealed class InterpolatedBuilderArgumentAttribute : Attribute
+    {
+        public InterpolatedBuilderArgumentAttribute(string argument);
+        public InterpolatedBuilderArgumentAttribute(params string[] arguments);
 
-Some compromise is likely needed here, but either direction has complications. Some scenarios that would be affected by this is the `Utf8Formatter` below, or existing api patterns that have
-an `IFormatProvider` as the first argument.
+        public string[] Arguments { get; }
+    }
+}
+```
+
+Usage of this is then:
+
+```cs
+namespace System
+{
+    public sealed class String
+    {
+        public static string Format(IFormatProvider? provider, [InterpolatedBuilderArgument("provider")] InterpolatedStringBuilder builder);
+        …
+    }
+}
+
+namespace System.Runtime.CompilerServices
+{
+    public ref struct InterpolatedStringBuilder
+    {
+        public static InterpolatedStringBuilder Create(int baseLength, int holeCount, IFormatProvider? provider); // additional factory
+        …
+    }
+}
+
+var formatted = string.Format(CultureInfo.InvariantCulture, $"{X} = {Y}");
+
+// Is lowered to
+
+var tmp1 = CultureInfo.InvariantCulture;
+var builder = InterpolatedStringBuilder.Create(3, 2, tmp1);
+builder.AppendFormatted(X);
+builder.AppendLiteral(" = ");
+builder.AppendFormatted(Y);
+var formatted = string.Format(tmp1, builder);
+```
+
+The questions we need to answer:
+
+1. Do we like this pattern in general?
+2. Do we want to allow these arguments to come from after the builder parameter? Some existing patterns in the BCL, such as `Utf8Formatter`, put the value to be formatted _before_ the thing
+needed to format into. To fit in best with these patterns, we'd likely want to allow this, but we need to decide if this out-of-order evaluate is ok.
 
 ### `await` usage in interpolation holes
 
@@ -382,134 +429,49 @@ version that does not need to allocate any scratch space at all.
 Some builders might want to be passed as ref parameters (either `in` or `ref`). Should we allow either? And if so, what will a `ref` builder look like? `ref $""` is confusing, as you're not actually
 passing the string by ref, you're passing the builder that is created from the ref by ref, and has similar potential issues with async methods.
 
+### Interpolated strings through binary expressions and conversions
+
+Because this proposal makes interpolated strings context sensitive, we would like to allow the compiler to treat a binary expression composed entirely of interpolated strings,
+or an interpolated string subjected to a cast, as an interpolated string literal for the purposes of overload resolution. For example, take the following scenario:
+
+```cs
+struct Builder1
+{
+    public static Builder1 Create(int literalLength, int formattedCount, C c) => ...;
+    // AppendX... methods as necessary
+}
+struct Builder2
+{
+    public static Builder2 Create(int literalLength, int formattedCount, C c) => ...;
+    // AppendX... methods as necessary
+}
+
+class C
+{
+    void M(Builder1 builder) => ...;
+    void M(Builder2 builder) => ...;
+}
+
+c.M($"{X}"); // Ambiguous between the M overloads
+```
+
+This would be ambiguous, necessitating a cast to either `Builder1` or `Builder2` in order to resolve. However, in making that cast, we would potentially throw away the information
+that there is context from the method receiver, meaning that the cast would fail because there is nothing to fill in the information of `c`. A similar issue arises with binary concatenation
+of strings: the user could want to format the literal across several lines to avoid line wrapping, but would not be able to because that would no longer be an interpolated string literal
+convertible to the builder type.
+
+To resolve these cases, we make the following changes:
+
+* An _additive\_expression_ composed entirely of _interpolated\_string\_expressions_ and using only `+` operators is considered to be an _interpolated\_string\_literal_ for the purposes of
+conversions and overload resolution. The final interpolated string is created by logically concatinating all individual _interpolated\_string\_expression_ components, from left to right.
+* A _cast\_expression_ or a _relational\_expression_ with operator `as` whose operand is an _interpolated\_string\_expressions_ is considered an _interpolated\_string\_expressions_ for the
+purposes of conversions and overload resolution.
+
+**Open Questions**:
+
+Do we want to do this? We don't do this for `System.FormattableString`, for example, but that can be broken out onto a different line, whereas this can be context-dependent and therefore not
+able to be broken out into a different line. There are also no overload resolution concerns with `FormattableString` and `IFormattable`.
+
 ## Other use cases
 
-### `TryFormat...` on `Span` receivers
-
-The BCL has a number of helper methods that and usages of `ValueStringBuilder` that attempt to format a given string into a `Span`, and instead of moving to the heap if needed, give up if
-the `Span` isn't big enough to hold the resulting text. With this proposal, it would be possible to support these cases by defining an extension method that looks like this:
-
-```cs
-public static class MemoryExtensions
-{
-    public static bool TryWrite(this Span<char> span, SpanInterpolatedStringBuilder builder, out int charsWritten)
-    {
-        charsWritten = builder._count;
-        return builder._success;
-    }
- 
-}
- 
-public ref struct SpanInterpolatedStringBuilder
-{
-    public static SpanInterpolatedStringBuilder Create(int baseLength, int formatHoleCount, Span<char> span, out bool builderIsValid)
-    {
-        if (baseLength > span.Length)
-        {
-            builderIsValid = false;
-            return default;
-        }
-        builderIsValid = true;
-        return new SpanInterpolatedStringBuilder(span, baseLength);
-    }
-
-    private Span<char> _span;
-    internal bool _success;
-    internal int _count;
- 
-    private SpanInterpolatedStringBuilder(Span<char> span, int baseLength)
-    {
-        _span = span;
-        _success = baseLength <= span.Length;
-        _count = 0;
-    }
- 
-    public bool TryFormatBaseString(string s)
-    {
-        if (!_success)
-            return false;
-        if (s.Length > _span.Length)
-        {
-            _success = false;
-            return false;
-        }
-        s.AsSpan().CopyTo(_span);
-        _span = _span.Slice(s.Length);
-        _count += s.Length;
-        return true;
-    }
- 
-    … // other TryFormatInterpolationHole overloads for other types, a generic, etc.
-}
-
-bool success = destinationSpan.TryWrite($”{a} = {b}”, out int charsWritten);
-
-// Maps to
-
-var receiverTemp = destinationSpan;
-
-var builder = SpanInterpolatedStringBuilder.Create(baseLength: 3, formatHoleCount: 2, receiverTemp, out var builderIsValid);
-_ = builderIsValid &&
-    builder.TryFormatInterpolationHole(a) &&
-    builder.TryFormatBaseString(“ = “) &&
-    builder.TryFormatInterpolationHole(b);
-bool success = receiverTemp.TryWrite(builder, out int charsWritten);
-```
-
-### Utf8Formatter.TryFormat
-
-We could enable utf8-encoding of interpolated strings via a pattern similar to this:
-
-```cs
-public static partial class Utf8Formatter
-{
-    public Utf8StringBuilder WithSpan(Span<byte> span) => new Utf8StringBuilder(span);
-}
-
-public ref struct Utf8StringBuilder
-{
-    private Span<byte> _bytes;
-    public Utf8StringBuilder(Span<byte> bytes) => _bytes = bytes;
-
-    public static Utf8StringBuilder Create(int baseLength, int formatHoleCount, Utf8StringBuilder instance, out bool builderIsValid)
-    {
-        if (baseLength > instance._bytes.Length)
-        {
-            builderIsValid = false;
-            return default;
-        }
-
-        builderIsValid = false;
-        return instance;
-    }
-
-    public bool TryFormat(Utf8StringBuilder builder, out int bytesWritten)
-    {
-        ...
-    }
-
-    public bool TryFormatBaseString(string s)
-    {
-        ...
-    }
- 
-    … // other TryFormatInterpolationHole overloads for other types, a generic, etc.
-}
-
-Span<byte> myBytes = stackalloc[50];
-bool success = Utf8Formatter.WithSpan(myBytes).TryFormat($"Hello world! {myVar}");
-
-// Maps to
-
-var receiverTemp = Utf8Formatter.WithSpan(myBytes);
-var builder = Utf8StringBuilder.Create(baseLength: 13, formatHoleCount: 1, receiverTemp, out var builderIsValid);
-_ = builderIsValid &&
-    builder.TryFormatBaseString("Hello world! ") &&
-    builder.TryFormatInterpolationHole(myVar);
-bool success = receiverTemp.TryFormat(builder, out int bytesWritten);
-```
-
-This differs from the existing patterns in the Utf8Formatter type, which take the `Span` to write into as an argument to the `TryFormat...` method itself. This proposal is somewhat incompatible
-with that approach, as it uses the receiver of the method to inform the builder of context, rather than using arguments to the method. It could theoretically be feasible to thread arguments
-from the current method into the implicit call to `GetInterpolatedString`, but that raises a host of thorny issues around figuring out what corresponds to what in the signature, and significantly
-complicates the determination of _applicable\_interpolated\_string\_builder\_types_.
+See https://github.com/dotnet/runtime/issues/50635 for examples of proposed builder APIs using this pattern.
