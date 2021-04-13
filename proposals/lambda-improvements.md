@@ -80,6 +80,12 @@ The changes proposed here are targeted at the `Delegate` driven scenario.
 It should be valid to inspect the `MethodInfo` associated with a `Delegate` instance to determine the signature of the lambda expression or local function including any explicit attributes and additional metadata emitted by the compiler such as default parameters.
 This allows teams such as ASP.NET to make available the same behaviors for lambdas and local functions as ordinary methods.
 
+### Well-known attributes
+_Should `System.Diagnostics.ConditionalAttribute` be disallowed on lambda expressions since there are few scenarios where a lambda expression could be used conditionally?_
+```csharp
+([Conditional("DEBUG")] static (x, y) => Assert(x == y))(a, b); // ok?
+```
+
 ## Explicit return type
 An explicit return type may be specified before the parenthesized parameter list.
 ```csharp
@@ -87,7 +93,7 @@ f = T () => default;                    // ok
 f = short x => 1;                       // syntax error at '=>'
 f = ref int (ref int x) => ref x;       // ok
 f = static void (_) => { };             // ok
-f = async async (async async) => async; // ok
+f = async async (async async) => async; // ok?
 ```
 
 The parser will look ahead to differentiate a method call `T()` from a lambda expression `T () => e`.
