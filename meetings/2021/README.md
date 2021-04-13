@@ -17,6 +17,8 @@
 
 ## Apr 19, 2021
 
+- Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
+
 ## Apr 14, 2021
 
 - Auto-props V2 decisions (cyrusn)
