@@ -15,9 +15,11 @@
 
 ## Apr 21, 2021
 
+- Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
+
 ## Apr 19, 2021
 
-- Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
+- More open questions in interpolated strings (Fred, Stephen, Kathleen)
 
 ## Apr 14, 2021
 
