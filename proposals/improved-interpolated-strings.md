@@ -116,18 +116,20 @@ is a bit complicated, and is expanded below.
 
 A type is said to be an _applicable\_interpolated\_string\_builder\_type_ if, given an _interpolated\_string\_literal_ `S`, the following is true:
 
-* Overload resolution with an identifier of `AppendLiteral` and a parameter type of `string` succeeds, and contains a single instance method that returns a `bool`.
+* Overload resolution with an identifier of `AppendLiteral` and a parameter type of `string` succeeds, and contains a single instance method that returns a `bool` or `void`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) without an _interpolation\_format_ component or _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `AppendFormatted` and parameter of the type of `Si`  succeeds, and contains a single instance method that returns a `bool`.
+with an identifier of `AppendFormatted` and parameter of the type of `Si`  succeeds, and contains a single instance method that returns a `bool` or `void`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and no _constant\_expression_ (alignment) component, overload resolution
 with an identifier of `AppendFormatted` and parameter types of `Si` and `string` with name `format` (in that order) succeeds, and contains a single instance method that returns
-a `bool`.
+a `bool` or `void`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with a _constant\_expression_ (alignment) component and no _interpolation\_format_ component, overload resolution
 with an identifier of `AppendFormatted` and parameter types of `Si` and `int` with name `alignment` (in that order) succeeds, and contains a single instance method that returns
-a `bool`.
+a `bool` or `void`.
 * For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and a _constant\_expression_ (alignment) component, overload resolution
 with an identifier of `AppendFormatted` and parameter types of `Si`, `int` with name `format`, and `string` with name `alignment` (in that order) succeeds, and contains a
-single instance method that returns a `bool`.
+single instance method that returns a `bool` or `void`.
+
+Addionally, all calls to `AppendLiteral` or `AppendFormat` must return the same type. It is not permitted to mix `bool` and `void` returning methods.
 
 The rest of this proposal will use `Append...` to refer to either of `AppendLiteral` or `AppendFormatted` in cases when both are applicable.
 
