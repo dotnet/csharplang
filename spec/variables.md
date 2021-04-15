@@ -579,7 +579,7 @@ For an expression *expr* of the form `expr_cond ? expr_true : expr_false`:
     * the state of *v* after *expr_cond* is definitely assigned or "definitely assigned after true expression".
 *  The definite assignment state of *v* before *expr_false* is definitely assigned if and only if one of the following holds:
     * *expr_cond* is a constant expression with the value `true`
-*  the state of *v* after *expr_cond* is definitely assigned or "definitely assigned after false expression".
+    *  the state of *v* after *expr_cond* is definitely assigned or "definitely assigned after false expression".
 *  The definite assignment state of *v* after *expr* is determined by:
     * If *expr_cond* is a constant expression ([Constant expressions](expressions.md#constant-expressions)) with value `true` then the state of *v* after *expr* is the same as the state of *v* after *expr_true*.
     * Otherwise, if *expr_cond* is a constant expression ([Constant expressions](expressions.md#constant-expressions)) with value `false` then the state of *v* after *expr* is the same as the state of *v* after *expr_false*.
