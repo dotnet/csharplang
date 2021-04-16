@@ -23,12 +23,17 @@
 
 ## Apr 14, 2021
 
-- Auto-props V2 decisions (cyrusn)
-- Open questions in interpolated strings (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/improved-interpolated-strings.md
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Apr 14, 2021
+
+[C# Language Design Notes for April 14th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-04-14.md)
+
+1. Shadowing in record types
+2. `field` keyword
+3. Improved interpolated strings
 
 ## Apr 12, 2021
 
