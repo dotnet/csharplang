@@ -380,7 +380,7 @@ namespace System
 {
     public sealed class String
     {
-        public static string Format(IFormatProvider? provider, [InterpolatedBuilderArgument("provider")] InterpolatedStringBuilder builder);
+        public static string Format(IFormatProvider? provider, [InterpolatedBuilderArgument("provider")] ref InterpolatedStringBuilder builder);
         …
     }
 }
