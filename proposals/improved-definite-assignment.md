@@ -252,8 +252,8 @@ For an expression *expr* of the form `E is T`, where *T* is any type or pattern
 - The definite assignment state of *v* after *expr* is determined by:
   - If *E* directly contains a null-conditional expression, and the state of *v* after the non-conditional counterpart *E<sub>0</sub>* is "definitely assigned", and `T` is any type or a pattern that only matches a non-null input, then the state of *v* after *expr* is "definitely assigned when true".
   - If *E* directly contains a null-conditional expression, and the state of *v* after the non-conditional counterpart *E<sub>0</sub>* is "definitely assigned", and `T` is a pattern which only matches a null input, then the state of *v* after *expr* is "definitely assigned when false".
-  - If *E* is of type boolean and `T` is the constant pattern `true`, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after E.
-  - If *E* is of type boolean and `T` is the constant pattern `false`, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after the logical negation expression `!expr`.
+  - If *E* is of type boolean and `T` is a pattern which only matches a `true` input, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after E.
+  - If *E* is of type boolean and `T` is a pattern which only matches a `false` input, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after the logical negation expression `!expr`.
   - Otherwise, if the definite assignment state of *v* after E is "definitely assigned", then the definite assignment state of *v* after *expr* is "definitely assigned".
 
 ### Remarks
