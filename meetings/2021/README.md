@@ -16,7 +16,7 @@
 ## Apr 21, 2021
 
 - Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
-- Lambda improvements open issues (Chuck)
+- Lambda improvements - method group inferred type breaking change (Chuck)
 
 ## Apr 19, 2021
 
