@@ -156,9 +156,9 @@ int zero = ((int x) => x)(0); // ok
 ```
 
 ### Implicit conversions
-A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.MulticastDelegate` and to base classes and interfaces implemented by `System.MulticastDelegate` (including `System.Delegate`, `System.Object` and `System.ICloneable`).
+A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.MulticastDelegate` and to base classes and interfaces implemented by `System.MulticastDelegate` (including `System.Delegate`, `System.Object`, and `System.ICloneable`).
 
-If a natural type cannot be inferred, there is no implicit conversion to `System.Delegate` or base classes or interfaces.
+If a natural type cannot be inferred, there is no implicit conversion to `System.MulticastDelegate` or base classes or interfaces.
 ```csharp
 Delegate d1 = 1.GetHashCode; // ok
 Delegate d2 = 2.ToString;    // error: cannot convert to 'System.Delegate'; multiple 'ToString' methods
@@ -166,7 +166,7 @@ object o1 = (int x) => x;    // ok
 object o2 = x => x;          // error: cannot convert to 'System.Object'; no natural type for 'x => x'
 ```
 
-The compiler will also treat lambda expressions with natural type as implicitly convertible to `System.Linq.Expressions.Expression` as an expression tree. Base classes or interfaces implemented by `System.Linq.Expressions.Expression` are ignored when calculating conversions to expression trees.
+The compiler will also treat lambda expressions with natural type as implicitly convertible to `System.Linq.Expressions.Expression` as an expression tree. Base classes and interfaces implemented by `System.Linq.Expressions.Expression` are ignored when calculating conversions to expression trees.
 
 ### Overload resolution
 Overload resolution already prefers binding to a strongly-typed delegate over `System.Delegate`, and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<TDelegate>` over the corresponding strongly-typed delegate `TDelegate`.
