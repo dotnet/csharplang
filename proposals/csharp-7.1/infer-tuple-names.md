@@ -10,7 +10,7 @@ This parallels the behavior of  anonymous types, which allow inferring member na
 This is particularly handy when using tuples in LINQ:
 
 ```csharp
-// "c" and "result" have element names "f1" and "f2"
+// "c" and "result" have elements named "f1" and "f2"
 var result = list.Select(c => (c.f1, c.f2)).Where(t => t.f2 == 1); 
 ```
 
