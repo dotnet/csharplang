@@ -243,7 +243,9 @@ For a record struct:
   Both kinds of set accessors (`set` and `init`) are considered "matching". So the user may declare an init-only property
   in place of a synthesized mutable one.
   An inherited `abstract` property with matching type is overridden.
+  No auto-property is created if the record struct has an instance field with expected name and type.
   It is an error if the inherited property does not have `public` `get` and `set`/`init` accessors.
+  It is an error if the inherited property or field is hidden.  
   The auto-property is initialized to the value of the corresponding primary constructor parameter.
   Attributes can be applied to the synthesized auto-property and its backing field by using `property:` or `field:`
   targets for attributes syntactically applied to the corresponding record struct parameter.  
@@ -287,15 +289,7 @@ record_declaration
 
 See https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-10-05.md#changing-the-member-type-of-a-primary-constructor-parameter
 
-There is a back compat issue, so we may either drop this feature or we need to implement it fast (as a bug fix).
-
-```csharp
-public record Base
-{
-    public int Field;
-}
-public record Derived(int Field);
-```
+No auto-property is created if the record has or inherits an instance field with expected name and type.
 
 # Allow parameterless constructors and member initializers in structs
 

@@ -385,6 +385,7 @@ For a record:
 * A public `get` and `init` auto-property is created (see separate `init` accessor specification).
   An inherited `abstract` property with matching type is overridden.
   It is an error if the inherited property does not have `public` overridable `get` and `init` accessors.
+  It is an error if the inherited property is hidden.  
   The auto-property is initialized to the value of the corresponding primary constructor parameter.
   Attributes can be applied to the synthesized auto-property and its backing field by using `property:` or `field:`
   targets for attributes syntactically applied to the corresponding record parameter.  
