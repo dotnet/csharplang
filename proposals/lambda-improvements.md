@@ -156,7 +156,7 @@ int zero = ((int x) => x)(0); // ok
 ```
 
 ### Implicit conversions
-A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.Delegate` and to base classes and interfaces implemented by `System.Delegate` (such as `System.Object` and `System.ICloneable`).
+A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.MulticastDelegate` and to base classes and interfaces implemented by `System.MulticastDelegate` (including `System.Delegate`, `System.Object` and `System.ICloneable`).
 
 If a natural type cannot be inferred, there is no implicit conversion to `System.Delegate` or base classes or interfaces.
 ```csharp
