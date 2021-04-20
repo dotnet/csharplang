@@ -249,7 +249,7 @@ class SideEffect {
 
     void Use() {
         var array = Get()[0..2];
-        Console.WriteLine(array.length);
+        Console.WriteLine(array.Length);
     }
 }
 ```
