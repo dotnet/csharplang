@@ -15,8 +15,9 @@
 
 ## Apr 21, 2021
 
-- Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
 - Inferred lambda / method group delegate type: potential breaking change (Chuck): https://github.com/dotnet/csharplang/issues/4674
+- Interpolated strings: more open questions (Fred, Stephen)
+- Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
 
 ## Apr 19, 2021
 
