@@ -16,7 +16,7 @@
 ## Apr 21, 2021
 
 - Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
-- Lambda improvements - method group inferred type breaking change (Chuck)
+- Inferred lambda / method group delegate type: potential breaking change (Chuck): https://github.com/dotnet/csharplang/issues/4674
 
 ## Apr 19, 2021
 
