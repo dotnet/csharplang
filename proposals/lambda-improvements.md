@@ -112,11 +112,15 @@ The natural type is a delegate type where the parameter types are the explicit l
 - if the lambda has no return expressions, the return type is `void` or `System.Threading.Tasks.Task` if `async`;
 - if the common type from the natural type of all `return` expressions in the body is the type `R0`, the return type is `R0` or `System.Threading.Tasks.Task<R0>` if `async`.
 
-A method group has a natural type if the method group contains a single method.
+The natural type of an _individual method_ in a method group is a delegate type with the parameter types, ref kinds, and return type and ref kind, of that method. Parameter names and custom modifiers are ignored.
 
-A method group might refer to extension methods. Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine the natural type will require searching all namespace scopes. To minimize unnecessary binding, natural type should be calculated only in cases where there is no target type.
+A method group may contain multiple methods across the containing type and all extension methods.
+The natural type of the _method group_ is the common natural type for all methods in the method group.
+If there is no common type, the method group has no natural type.
 
-Requiring a method group to contain a single method means that adding an overload (including an extension method overload) for a method that previously had no overloads is a breaking change if the original method was used as a method group with inferred type.
+Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine the common natural type will require searching all namespace scopes.
+
+The requirement of a common type across all methods in the method group means that adding an overload (including an extension method overload) for a method may be a breaking change if the original method was used as a method group with inferred type.
 
 The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
 - if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
@@ -206,6 +210,9 @@ lambda_parameter
   | attribute_list* modifier* type? identifier equals_value_clause?
   ;
 ```
+
+## Open issues
+- Inferring a delegate type for lambdas and method groups might result in breaking changes in overload resolution: see [issues/4674](https://github.com/dotnet/csharplang/issues/4674) for examples.
 
 ## Design meetings
 
