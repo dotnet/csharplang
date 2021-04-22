@@ -174,7 +174,7 @@ public static readonly event Event4
 Some other syntax examples:
 
 * Expression bodied members: `public readonly float ExpressionBodiedMember => (x * x) + (y * y);`
-* Generic constraints: `public static readonly void GenericMethod<T>(T value) where T : struct { }`
+* Generic constraints: `public readonly void GenericMethod<T>(T value) where T : struct { }`
 
 The compiler would emit the instance member, as usual, and would additionally emit a compiler recognized attribute indicating that the instance member does not modify state. This effectively causes the hidden `this` parameter to become `in T` instead of `ref T`.
 
