@@ -33,9 +33,6 @@
 - Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
 - Improved interpolated strings (Fred, Stephen)
 
-## Apr 26, 2021
-
-- (Cancelled?)
 
 # C# Language Design Notes for 2021
 
