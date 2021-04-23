@@ -4,6 +4,8 @@
 
 ## Schedule when convenient
 
+- Open questions in interpolated strings (Fred)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -35,16 +37,16 @@
 
 - (Cancelled?)
 
-## Apr 21, 2021
-
-- Inferred lambda / method group delegate type: potential breaking change (Chuck): https://github.com/dotnet/csharplang/issues/4674
-- Improved interpolated strings (Fred, Stephen)
-
-## Apr 14, 2021
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Apr 21, 2021
+
+[C# Language Design Notes for April 21st, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-04-21.md)
+
+1. Inferred types for lambdas and method groups
+2. Improved interpolated strings
 
 ## Apr 19, 2021
 
