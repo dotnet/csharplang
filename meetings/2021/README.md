@@ -9,6 +9,23 @@
 - *Triage championed features and milestones*
 - *Design review*
 
+
+## Jun 2, 2021
+
+## May 26, 2021
+
+## May 24, 2021
+
+## May 19, 2021
+
+## May 17, 2021
+
+## May 12, 2021
+
+## May 5, 2021
+
+## May 3, 2021
+
 ## Apr 28, 2021
 
 - Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
