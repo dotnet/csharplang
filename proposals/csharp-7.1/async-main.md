@@ -48,14 +48,14 @@ static int Main(string[])
 We extend the list of allowed entrypoints to include:
 
 ```csharp
-static Task Main()
-static Task<int> Main()
-static Task Main(string[])
-static Task<int> Main(string[])
+static async Task Main()
+static async Task<int> Main()
+static async Task Main(string[])
+static async Task<int> Main(string[])
 ```
 
 To avoid compatibility risks, these new signatures will only be considered as valid entrypoints if no overloads of the previous set are present.
-The language / compiler will not require that the entrypoint be marked as `async`, though we expect the vast majority of uses will be marked as such.
+The language / compiler will require that the entrypoint be marked as `async`.
 
 When one of these is identified as the entrypoint, the compiler will synthesize an actual entrypoint method that calls one of these coded methods:
 - ```static Task Main()``` will result in the compiler emitting the equivalent of ```private static void $GeneratedMain() => Main().GetAwaiter().GetResult();```
