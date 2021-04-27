@@ -250,7 +250,7 @@ namespace System.Runtime.CompilerServices
 
 We make a slight change to the rules for the meaning of an [_interpolated\_string\_expression_](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#interpolated-strings):
 
-**If the type of an interpolated string is `string` and the type `System.Runtime.CompilerServices.InterpolatedStringBuilder` exists, and the current context supports using that type, the string**
+**If the type of an interpolated string is `string` and the type `System.Runtime.CompilerServices.InterpolatedStringDefaultBuilder` exists, and the current context supports using that type, the string**
 **is lowered using the builder pattern. The final `string` value is then obtained by calling `ToStringAndClear()` on the builder type.**
 **Otherwise, if** the type of an interpolated string is `System.IFormattable` or `System.FormattableString` [the rest is unchanged]
 
@@ -282,7 +282,7 @@ is performed as follows:
 1. Member lookup for members with the name `Create` is performed on `T`. The resulting method group is called `M`.
 2. The argument list `A` is constructed as follows:
     1. The first two arguments are integer constants, representing the literal length of the `i`, and the number of _interpolation_ components in the `i`, respectively.
-    2. If `i` is used as an argument to some parameter `pi` in method `M1`, and parameter `pi` is attributed with `System.Runtime.CompilerServices.InterpolatedStringBuilderAttribute`,
+    2. If `i` is used as an argument to some parameter `pi` in method `M1`, and parameter `pi` is attributed with `System.Runtime.CompilerServices.InterpolatedStringBuilderArgumentAttribute`,
     then for every name `Argx` in the `Arguments` array of that attribute the compiler matches it to a parameter `px` that has the same name. The empty string is matched to the receiver
     of `M1`.
         * If any `Argx` is not able to be matched to a parameter of `M1`, or an `Argx` requests the receiver of `M1` and `M1` is a static method, an error is produced and no further
@@ -316,8 +316,8 @@ performed as follows:
     1. Member lookup on `T` with the name `AppendLiteral` is performed. The resulting method group is called `Ml`.
     2. The argument list `Al` is constructed with one value parameter of type `string`.
     3. Traditional method invocation resolution is performed with method group `Ml` and argument list `Al`.
-        * If a single-best method is not found, or final validation produced errors, and error is reported.
-        * If a single-best method `Fi` is found, the result of lookup is `Fi`.
+        * If a single-best method `Fi` is found and no errors were found in final validation, the result of lookup is `Fi`.
+        * Otherwise, an error is reported.
 2. For every _interpolation_ `ix` component of `i`:
     1. Member lookup on `T` with the name `AppendFormatted` is performed. The resulting method group is called `Mf`.
     2. The argument list `Af` is constructed:
@@ -325,11 +325,11 @@ performed as follows:
         2. If `ix` contains a _constant\_expression_ component, then an integer parameter value parameter is added, with the name `alignment` specified.
         3. If `ix` is followed by an _interpolation\_format_, then a string value parameter is added, with the name `format` specified.
     3. Traditional method invocation resolution is performed with method group `Mf` and argument list `Af`.
-        * If a single-best method is not found, or final validation produced errors, and error is reported.
-        * If a single-best method `Fi` is found, the result of lookup is `Fi`.
+        * If a single-best method `Fi` is found and no errors were found in final validation, the result of lookup is `Fi`.
+        * Otherwise, an error is reported.
 3. Finally, for every `Fi` discovered in steps 1 and 2, final validation is performed:
     1. If any `Fi` does not return `bool` by value or `void`, and error is reported.
-    2. If all `Fi` do not return the same type, and error is reported.
+    2. If all `Fi` do not return the same type, an error is reported.
 
 Note that these rules do not permit extension methods for the `Append...` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
 pattern, where we allow `GetEnumerator` to be an extension method, but not `Current` or `MoveNext()`.
@@ -352,8 +352,8 @@ sufficient.
 
 #### Lowering
 
-Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i` that has had a valid `Create` method `Fc` and `Append...` methods
-`Fa` resolved, lowering for `i` is performed as follows:
+Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i` that had a valid `Create` method `Fc` and `Append...` methods `Fa` resolved,
+lowering for `i` is performed as follows:
 
 1. If the `InterpolatedStringBuilderAttribute` on `T` specifies false for `UseLazyComputation`, the following steps are taken:
     1. Any arguments to `Fc` that occur lexically before `i` are evaluated and stored into temporary variables in lexical order.
