@@ -211,6 +211,46 @@ Explicit and synthesized parameterless struct instance constructors will be emit
 Public parameterless struct instance constructors will be imported from metadata; non-public struct instance constructors will be ignored.
 _No change from C#9._
 
+## Open issues
+1. Is a parameterless constructor synthesized if there are initializers but no explicit parameterless constructor?
+    If not synthesized, should the compiler warn that `new()` will ignore any initializers?
+
+    ```csharp
+    struct S
+    {
+        // synthesize 'public S() { }' or warn?
+        public object F = 42;
+    }
+    ```
+1. Confirm `record struct` will allow parameterless primary constructors.
+
+    ```csharp
+    record struct R0;   // no parameterless .ctor
+    
+    record struct R1(); // public R1() { }
+
+    record struct R2()  // public R2() { F = 42; }
+    {
+        public object F = 42;
+    }
+    ```
+
+1. Confirm the `record struct` parameterless constructor calls the primary constructor.
+
+    ```csharp
+    record struct R3(string s)
+    {
+        // synthesize 'public R3() : this(s: null) { }'?
+        public string S = s.ToLower();
+    }
+
+    record struct R4(string s)
+    {
+        public R4() { } // error: must call 'this(string s)'
+        public string S = s.ToLower();
+    }
+    ```
+
 ## See also
 
 - https://github.com/dotnet/roslyn/issues/1029
