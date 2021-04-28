@@ -238,16 +238,16 @@ _No change from C#9._
 1. Confirm the `record struct` parameterless constructor calls the primary constructor.
 
     ```csharp
-    record struct R3(string s)
+    record struct R3(string S)
     {
-        // synthesize 'public R3() : this(s: null) { }'?
-        public string S = s.ToLower();
+        // synthesize 'public R3() : this(S: null) { }'?
+        public string S = S.ToLower();
     }
 
-    record struct R4(string s)
+    record struct R4(string S)
     {
-        public R4() { } // error: must call 'this(string s)'
-        public string S = s.ToLower();
+        public R4() { } // error: must call 'this(string S)'
+        public string S = S.ToLower();
     }
     ```
 
