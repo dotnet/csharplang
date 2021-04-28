@@ -42,7 +42,7 @@ can be invoked for every part of the interpolated string, then we lower the inte
 
 ```cs
 // The builder that will actually "build" the interpolated string"
-[InterpolatedStringBuilder(UseLazyComputation = true)]
+[InterpolatedStringBuilder]
 public ref struct TraceLoggerParamsBuilder
 {
     public static TraceLoggerParamsBuilder Create(int literalLength, int formattedCount, Logger logger, out bool builderIsValid)
@@ -129,21 +129,19 @@ namespace System.Runtime.CompilerServices
         public InterpolatedStringBuilderAttribute()
         {
         }
-
-        public bool UseLazyComputation { get; }
     }
 }
 ```
 
 This attribute is used by the compiler to determine if a type is a valid interpolated string builder type.
 
-The compiler also recognizes the `System.Runtime.CompilerServices.InterpolatedStringBuilderAttribute`:
+The compiler also recognizes the `System.Runtime.CompilerServices.InterpolatedStringBuilderArgumentAttribute`:
 
 ```cs
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    public sealed class InterpolatedBuilderArgumentAttribute : Attribute
+    public sealed class InterpolatedStringBuilderArgumentAttribute : Attribute
     {
         public InterpolatedBuilderArgumentAttribute(string argument);
         public InterpolatedBuilderArgumentAttribute(params string[] arguments);
@@ -274,9 +272,11 @@ _Answer_: No.
 
 ### Builder pattern codegen
 
-#### `Create` method overload resolution
+In this section, method invocation resolution refers to the steps listed [here](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#method-invocations).
 
-Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i`, overload resolution and validation for a valid `Create` method on `T`
+#### `Create` method invocation resolution
+
+Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i`, method invocation resolution and validation for a valid `Create` method on `T`
 is performed as follows:
 
 1. Member lookup for members with the name `Create` is performed on `T`. The resulting method group is called `M`.
@@ -289,9 +289,9 @@ is performed as follows:
         steps are taken.
         * Otherwise, the type of every resolved `px` is added to the argument list, in the order specified by the `Arguments` array. These are all passed by value.
     3. The final argument is a `bool`, passed as an `out` parameter.
-3. Traditional method invocation resolution is performed with method group `M` and argument list `A`.
-    * If a single-best method `F` was found and errors were reported during final validation, those errors are reported and no further steps are taken.
-    * If a single-best method `F` was found and no errors were reported during final validation, the result of overload resolution is `F`.
+3. Traditional method invocation resolution is performed with method group `M` and argument list `A`. For the purposes of method invocation final validation, the context of `M` is treated
+as a _member\_access_ through type `T`.
+    * If a single-best method `F` was found, the result of overload resolution is `F`.
     * If no applicable methods were found, step 3 is retried, removing the final `bool` parameter from `A`. If this retry also finds no applicable members, an error is produced and
     no further steps are taken.
     * If no single-best method was found, the result of overload resolution is ambiguous, an error is produced, and no further steps are taken.
@@ -315,21 +315,24 @@ performed as follows:
 1. If there are any _interpolated\_regular\_string\_character_ components in `i`:
     1. Member lookup on `T` with the name `AppendLiteral` is performed. The resulting method group is called `Ml`.
     2. The argument list `Al` is constructed with one value parameter of type `string`.
-    3. Traditional method invocation resolution is performed with method group `Ml` and argument list `Al`.
-        * If a single-best method `Fi` is found and no errors were found in final validation, the result of lookup is `Fi`.
+    3. Traditional method invocation resolution is performed with method group `Ml` and argument list `Al`. For the purposes of method invocation final validation, the context of `Ml`
+    is treated as a _member\_access_ through an instance of `T`.
+        * If a single-best method `Fi` is found and no errors were produced, the result of lookup is `Fi`.
         * Otherwise, an error is reported.
 2. For every _interpolation_ `ix` component of `i`:
     1. Member lookup on `T` with the name `AppendFormatted` is performed. The resulting method group is called `Mf`.
     2. The argument list `Af` is constructed:
         1. The first parameter is the `expression` of `ix`, passed by value.
-        2. If `ix` contains a _constant\_expression_ component, then an integer parameter value parameter is added, with the name `alignment` specified.
-        3. If `ix` is followed by an _interpolation\_format_, then a string value parameter is added, with the name `format` specified.
-    3. Traditional method invocation resolution is performed with method group `Mf` and argument list `Af`.
-        * If a single-best method `Fi` is found and no errors were found in final validation, the result of lookup is `Fi`.
+        2. If `ix` directly contains a _constant\_expression_ component, then an integer value parameter is added, with the name `alignment` specified.
+        3. If `ix` is directly followed by an _interpolation\_format_, then a string value parameter is added, with the name `format` specified.
+    3. Traditional method invocation resolution is performed with method group `Mf` and argument list `Af`. For the purposes of method invocation final validation, the context of `Mf`
+    is treated as a _member\_access_ through an instance of `T`.
+        * If a single-best method `Fi` is found, the result of lookup is `Fi`.
         * Otherwise, an error is reported.
 3. Finally, for every `Fi` discovered in steps 1 and 2, final validation is performed:
-    1. If any `Fi` does not return `bool` by value or `void`, and error is reported.
-    2. If all `Fi` do not return the same type, an error is reported.
+    * If any `Fi` does not return `bool` by value or `void`, an error is reported.
+    * If all `Fi` do not return the same type, an error is reported.
+
 
 Note that these rules do not permit extension methods for the `Append...` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
 pattern, where we allow `GetEnumerator` to be an extension method, but not `Current` or `MoveNext()`.
@@ -350,28 +353,24 @@ and have existing behavior for output formatting based on this info. Is there so
 Some cases may be able to get away with `CallerArgumentExpression`, provided that support does land in C# 10. But for cases that invoke a method/property, that may not be
 sufficient.
 
-#### Lowering
+_Answer_:
+
+While there are some interesting parts to templated strings we could explore in an orthogonal language feature, we don't think a specific syntax here has much benefit over
+solutions such as using a tuple: `$"{("StructuredCategory", myExpression)}"`.
+
+#### Performing the conversion
 
 Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i` that had a valid `Create` method `Fc` and `Append...` methods `Fa` resolved,
 lowering for `i` is performed as follows:
 
-1. If the `InterpolatedStringBuilderAttribute` on `T` specifies false for `UseLazyComputation`, the following steps are taken:
-    1. Any arguments to `Fc` that occur lexically before `i` are evaluated and stored into temporary variables in lexical order.
-    2. All _interpolation_ components of `i` are evaluated in lexical order and stored into temporary variables.
-    3. `Fc` is called with the length of the interpolated string literal components, the number of _interpolation_ holes, any previously evaluated arguments, and an a `bool` out argument
-    (if `Fc` was resolved with one as the last parameter). The result is stored into a temporary value `ib`.
-    4. If `Fc` ended with a `bool` out argument, a check on that `bool` value is generated. If true, `Fa` will be called. Otherwise, they will not be called.
-    5. For every `Fax` in `Fa`, `Fax` is called on `ib` with either the current literal component or the saved temporary variable, as appropriate. If `Fax` returns a `bool`, the result is
-    logically anded with all preceeding `Fax` calls.
-    6. The result of the expression is `ib`.
-2. Otherwise, the following steps are taken:
-    1. Any arguments to `Fc` that occur lexically before `i` are evaluated and stored into temporary variables in lexical order.
-    2. `Fc` is called with the length of the interpolated string literal components, the number of _interpolation_ holes, any previously evaluated arguments, and an a `bool` out argument
-    (if `Fc` was resolved with one as the last parameter). The result is stored into a temporary value `ib`.
-    3. If `Fc` ended with a `bool` out argument, a check on that `bool` value is generated. If true, `Fa` will be called. Otherwise, they will not be called.
-    4. For every `Fax` in `Fa`, `Fax` is called on `ib` with either the current literal component or _interpolation_ expression, as appropriate. If `Fax` returns a `bool`, the result is
-    logically anded with all preceeding `Fax` calls.
-    5. The result of the expression is `ib`.
+1. Any arguments to `Fc` that occur lexically before `i` are evaluated and stored into temporary variables in lexical order. In order to preserve lexical ordering, if `i` occurred as part
+of a larger expression `e`, any components of `e` that occurred before `i` will be evaluated as well, again in lexical order.
+2. `Fc` is called with the length of the interpolated string literal components, the number of _interpolation_ holes, any previously evaluated arguments, and a `bool` out argument
+(if `Fc` was resolved with one as the last parameter). The result is stored into a temporary value `ib`.
+3. If `Fc` ended with a `bool` out argument, a check on that `bool` value is generated. If true, the methods in `Fa` will be called. Otherwise, they will not be called.
+4. For every `Fax` in `Fa`, `Fax` is called on `ib` with either the current literal component or _interpolation_ expression, as appropriate. If `Fax` returns a `bool`, the result is
+logically anded with all preceeding `Fax` calls.
+5. The result of the conversion is `ib`.
 
 **~~Open~~ Question**
 
