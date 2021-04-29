@@ -64,17 +64,7 @@ Execution of struct instance field initializers matches execution of [class fiel
 ### Definite assignment
 Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)).
 
-Definite assignment of struct instance fields is required within _explicit_ parameterless constructors.
-```csharp
-struct S
-{
-    int x = 1;
-    object y;
-    public S() { } // error: field 'y' must be assigned
-}
-```
-
-Definite assignment of struct instance fields is required within _synthesized_ parameterless constructors.
+Definite assignment of struct instance fields is required within synthesized and explicit parameterless constructors.
 ```csharp
 struct S0 // ok: no synthesized constructor
 {
@@ -85,7 +75,14 @@ struct S0 // ok: no synthesized constructor
 struct S1
 {
     int x = 1;
-    object y;  // error: field 'y' must be assigned from synthesized constructor
+    object y;  // error: field 'y' must be assigned
+}
+
+struct S2
+{
+    int x = 1;
+    object y;
+    public S2() { } // error: field 'y' must be assigned
 }
 ```
 
@@ -112,7 +109,7 @@ An explicit parameterless constructor in a `record struct` must call the primary
 ```csharp
 record struct R5(int F)
 {
-    public R5() { } // error: must call 'this(string S)'
+    public R5() { } // error: must call 'this(int F)'
     public int F =  F;
 }
 ```
