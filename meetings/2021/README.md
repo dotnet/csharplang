@@ -28,15 +28,17 @@
 
 ## May 3, 2021
 
-## Apr 28, 2021
-
-- Record-structs multiple small clarifications (Julien): https://github.com/dotnet/roslyn/issues/51199
-- Improved interpolated strings (Fred, Stephen)
-
 
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Apr 28, 2021
+
+[C# Language Design Notes for April 28th, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-04-28.md)
+
+1. Open questions in record and parameterless structs
+2. Improved interpolated strings
 
 ## Apr 21, 2021
 
