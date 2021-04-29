@@ -307,6 +307,10 @@ ref struct lifetimes vs the traditional .NET `TryX` pattern, and we expect a num
 
 This can and will be impacted by abstract statics in interfaces for generic contexts. We will need to make sure the interactions are considered and tested.
 
+**Open Question**:
+
+If we use a constructor instead of `Create`, we'd improve runtime codegen, at the expense of narrowing the pattern a bit.
+
 #### `Append...` method overload resolution
 
 Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i`, overload resolution for a set of valid `Append...` methods on `T` is
@@ -317,7 +321,7 @@ performed as follows:
     2. The argument list `Al` is constructed with one value parameter of type `string`.
     3. Traditional method invocation resolution is performed with method group `Ml` and argument list `Al`. For the purposes of method invocation final validation, the context of `Ml`
     is treated as a _member\_access_ through an instance of `T`.
-        * If a single-best method `Fi` is found and no errors were produced, the result of lookup is `Fi`.
+        * If a single-best method `Fi` is found and no errors were produced, the result of method invocation resolution is `Fi`.
         * Otherwise, an error is reported.
 2. For every _interpolation_ `ix` component of `i`:
     1. Member lookup on `T` with the name `AppendFormatted` is performed. The resulting method group is called `Mf`.
@@ -327,7 +331,7 @@ performed as follows:
         3. If `ix` is directly followed by an _interpolation\_format_, then a string value parameter is added, with the name `format` specified.
     3. Traditional method invocation resolution is performed with method group `Mf` and argument list `Af`. For the purposes of method invocation final validation, the context of `Mf`
     is treated as a _member\_access_ through an instance of `T`.
-        * If a single-best method `Fi` is found, the result of lookup is `Fi`.
+        * If a single-best method `Fi` is found, the result of method invocation resolution is `Fi`.
         * Otherwise, an error is reported.
 3. Finally, for every `Fi` discovered in steps 1 and 2, final validation is performed:
     * If any `Fi` does not return `bool` by value or `void`, an error is reported.
@@ -343,7 +347,7 @@ the language).
 We have separate overload lookup rules for base elements vs interpolation holes because some builders will want to be able to understand the difference between the components
 that were interpolated and the components that were part of the base string.
 
-**Open Question**
+**~~Open~~ Question**
 
 Some scenarios, like structured logging, want to be able to provide names for interpolation elements. For example, today a logging call might look like
 `Log("{name} bought {itemCount} items", name, items.Count);`. The names inside the `{}` provide important structure information for loggers that help with ensuring output
