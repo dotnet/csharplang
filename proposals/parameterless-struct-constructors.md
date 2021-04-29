@@ -30,7 +30,7 @@ record struct Person()
 ### Instance field initializers
 Instance field declarations for a struct may include initializers.
 
-As with [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-field-initialization):
+As with [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-field-initialization):
 > A variable initializer for an instance field cannot reference the instance being created. 
 
 ### Constructors
@@ -38,76 +38,51 @@ A struct may declare a parameterless instance constructor.
 
 A parameterless instance constructor is valid for all struct kinds including `struct`, `readonly struct`, `ref struct`, and `record struct`.
 
-If the struct does not declare a parameterless instance constructor, and the struct has no fields with variable initializers, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)) ...
+If the struct declaration does not contain any explicit instance constructors, and the struct has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
+The parameterless constructor may be synthesized even if all initializer values are zeros.
+
+Otherwise, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)) ...
 > implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
 
-If the struct does not declare a parameterless instance constructor, and the struct has field initializers, a `public` parameterless instance constructor is synthesized.
-The parameterless constructor is synthesized even if all initializer values are zeros.
-
 ### Modifiers
-A parameterless instance constructor may be less accessible than the containing struct.
+A parameterless instance struct constructor must be declared `public`.
 ```csharp
-public struct NoConstructor { }
-public struct PublicConstructor { public PublicConstructor() { } }
-public struct InternalConstructor { internal InternalConstructor() { } }
-public struct PrivateConstructor { private PrivateConstructor() { } }
+struct S0 { }                   // ok
+struct S1 { public S1() { } }   // ok
+struct S2 { internal S2() { } } // error: parameterless constructor must be 'public'
 ```
 
-The same set of modifiers can be used for parameterless constructors as other instance constructors: `extern`, and `unsafe`.
+Non-public constructors are ignored when importing types from metadata.
 
+Constructors can be declared `extern` or `unsafe`.
 Constructors cannot be `partial`.
 
 ### Executing field initializers
-Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-variable-initializers):
+Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-variable-initializers):
 > When an instance constructor has no constructor initializer, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor ... . The variable initializers are executed in the textual order in which they appear in the ... declaration.
 
 ### Definite assignment
-Instance fields must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)).
+Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)).
 
-Definite assignment of instance fields is required within explicit parameterless constructors as well.
+Definite assignment of struct instance fields is required within synthesized and explicit parameterless constructors.
 ```csharp
+struct S0 // ok: no synthesized constructor
+{
+    int x;
+    object y;
+}
+
 struct S1
 {
     int x = 1;
-    object y;
-    S() { } // error: field 'y' must be assigned
+    object y;  // error: field 'y' must be assigned
 }
 
 struct S2
 {
-    int x = 2;
+    int x = 1;
     object y;
-    S() : this(null) { }        // ok
-    S(object y) { this.y = y; } // ok
-}
-```
-
-_Should definite assignment of struct instance fields be required within synthesized parameterless constructors?_
-_If so, then if any instance fields have initializers, all instance fields must have initializers._
-```csharp
-struct S0
-{
-    int x = 0;
-    object y;
-    // ok?
-}
-```
-
-If fields are not explicitly initialized, the constructor will need to zero the instance before executing any field initializers.
-```
-.class S0 extends System.ValueType
-{
-    .field int32 x
-    .field object y
-    .method public instance void .ctor()
-    {
-        ldarg.0
-        initobj S0
-        ldarg.0
-        ldc.i4.0
-        stfld int32 S0::x
-        ret
-    }
+    public S2() { } // error: field 'y' must be assigned
 }
 ```
 
@@ -116,10 +91,33 @@ A `base()` initializer is disallowed in struct constructors.
 
 The compiler will not emit a call to the base `System.ValueType` constructor from any struct instance constructors including explicit and synthesized parameterless constructors.
 
-### Fields
-The synthesized parameterless constructor will zero fields rather than calling any parameterless constructors for the field types.
+### `record struct`
+If a `record struct` does not contain a primary constructor nor any instance constructors, and the `record struct` has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
+```csharp
+record struct R0;                      // no parameterless .ctor
+record struct R1 { int F = 42; }       // synthesized .ctor: public R1() { F = 42; }
+record struct R2(int F) { int F = F; } // no parameterless .ctor
+```
 
-_Should the compiler report a warning when constructors for fields are ignored?_
+A `record struct` with an empty parameter list will have a parameterless primary constructor.
+```csharp
+record struct R3();                // primary .ctor: public R3() { }
+record struct R4() { int F = 42; } // primary .ctor: public R4() { F = 42; }
+```
+
+An explicit parameterless constructor in a `record struct` must call the primary constructor.
+```csharp
+record struct R5(int F)
+{
+    public R5() { } // error: must call 'this(int F)'
+    public int F =  F;
+}
+```
+
+### Fields
+The implicitly-defined parameterless constructor will zero fields rather than calling any parameterless constructors for the field types. No warnings are reported that field constructors are ignored.
+_No change from C#9._
+
 ```csharp
 struct S0
 {
@@ -128,40 +126,49 @@ struct S0
 
 struct S1
 {
-    S0 F; // S0::.ctor() ignored
+    S0 F; // S0 constructor ignored
 }
 
 struct S<T> where T : struct
 {
-    T F; // constructor ignored
+    T F; // constructor (if any) ignored
 }
 ```
 
 ### `default` expression
 `default` ignores the parameterless constructor and generates a zeroed instance.
-
-_Should the compiler report a warning when a constructor is ignored?_
+_No change from C#9._
 ```csharp
-_ = default(NoConstructor);      // ok
-_ = default(PublicConstructor);  // ok: constructor ignored
-_ = default(PrivateConstructor); // ok: constructor ignored
+// struct S { public S() { } }
+
+_ = default(S); // constructor ignored, no warning
 ```
 
-### Object creation
-Object creation expressions require the parameterless constructor to be accessible if defined.
-The parameterless constructor is invoked explicitly.
-
-_This is a breaking change if the struct type with parameterless constructor is from an existing assembly._
-_Should the compiler report a warning rather than an error for `new()` if the constructor is inaccessible, and emit `initobj`, for compatability?_
+### `new()`
+Object creation invokes the parameterless constructor if public; otherwise the instance is zeroed.
+_No change from C#9._
 ```csharp
-_ = new NoConstructor();      // ok: initobj NoConstructor
-_ = new PublicConstructor();  // ok: call PublicConstructor::.ctor()
-_ = new PrivateConstructor(); // error: 'PrivateConstructor..ctor()' is inaccessible
+// public struct PublicConstructor { public PublicConstructor() { } }
+// public struct PrivateConstructor { private PrivateConstructor() { } }
+
+_ = new PublicConstructor();  // call PublicConstructor::.ctor()
+_ = new PrivateConstructor(); // initobj PrivateConstructor
+```
+
+A warning wave may report a warning for use of `new()` with a struct type that has constructors but no parameterless constructor.
+No warning will be reported when using substituting such a struct type for a type parameter with a `new()` or `struct` constraint.
+```csharp
+struct S { public S(int i) { } }
+static T CreateNew<T>() where T : new() => new T();
+
+_ = new S();        // warning: no constructor called
+_ = CreateNew<S>(); // ok
 ```
 
 ### Uninitialized values
 A local or field of a struct type that is not explicitly initialized is zeroed.
 The compiler reports a definite assignment error for an uninitialized struct that is not empty. 
+_No change from C#9._
 ```csharp
 NoConstructor s1;
 PublicConstructor s2;
@@ -171,52 +178,50 @@ s2.ToString(); // error: use of unassigned local (unless type is empty)
 
 ### Array allocation
 Array allocation ignores any parameterless constructor and generates zeroed elements.
-
-_Should the compiler warn that the parameterless constructor is ignored? How would such a warning be avoided?_
+_No change from C#9._
 ```csharp
-_ = new NoConstructor[1];      // ok
-_ = new PublicConstructor[1];  // ok: constructor ignored
-_ = new PrivateConstructor[1]; // ok: constructor ignored
+// struct S { public S() { } }
+
+var a = new S[1]; // constructor ignored, no warning
 ```
 
-### Parameter default values
-Parameterless constructors cannot be used as parameter default values.
-
-_This is a breaking change if the struct type with parameterless constructor is from an existing assembly._
-_Should the compiler report a warning rather than an error for `new()` if the constructor is inaccessible, and emit `default`, for compatability?_
+### Parameter default value `new()`
+A parameter default value of `new()` binds to the parameterless constructor if public (and reports an error that the value is not constant); otherwise the instance is zeroed.
+_No change from C#9._
 ```csharp
-static void F1(NoConstructor s1 = new()) { }     // ok
-static void F2(PublicConstructor s1 = new()) { } // error: default value must be constant
+// public struct PublicConstructor { public PublicConstructor() { } }
+// public struct PrivateConstructor { private PrivateConstructor() { } }
+
+static void F1(PublicConstructor s1 = new()) { }  // error: default value must be constant
+static void F2(PrivateConstructor s2 = new()) { } // ok: initobj
 ```
 
-### Constraints
-The `new()` type parameter constraint requires the parameterless constructor to be `public` if defined (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/master/spec/types.md#satisfying-constraints)).
+### Type parameter constraints: `new()` and `struct`
+The `new()` and `struct` type parameter constraints require the parameterless constructor to be `public` if defined (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/main/spec/types.md#satisfying-constraints)).
+
+The compiler assumes all structs satisfy `new()` and `struct` constraints.
+_No change from C#9._
 ```csharp
+// public struct PublicConstructor { public PublicConstructor() { } }
+// public struct InternalConstructor { internal InternalConstructor() { } }
+
 static T CreateNew<T>() where T : new() => new T();
+static T CreateStruct<T>() where T : struct => new T();
 
-_ = CreateNew<NoConstructor>();       // ok
-_ = CreateNew<PublicConstructor>();   // ok
-_ = CreateNew<InternalConstructor>(); // error: 'InternalConstructor..ctor()' is not public
+_ = CreateNew<PublicConstructor>();      // ok
+_ = CreateStruct<PublicConstructor>();   // ok
+
+_ = CreateNew<InternalConstructor>();    // compiles; may fail at runtime
+_ = CreateStruct<InternalConstructor>(); // compiles; may fail at runtime
 ```
-_Should the compiler report a warning rather than an error when substituting a struct with a non-public constructor for a type parameter with a `new()` constraint, for compatability and to avoid assuming the type is actually instantiated?_
 
 `new T()` is emitted as a call to `System.Activator.CreateInstance<T>()`, and the compiler assumes the implementation of `CreateInstance<T>()` invokes the `public` parameterless constructor if defined.
 
 _With .NET Framework, `Activator.CreateInstance<T>()` invokes the parameterless constructor if the constraint is `where T : new()` but appears to ignore the parameterless constructor if the constraint is `where T : struct`._
 
-There is a gap in type parameter constraint checking because the `new()` constraint is satisfied by a type parameter with a `struct` constraint (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/master/spec/types.md#satisfying-constraints)).
-
-As a result, the following will be allowed by the compiler but `Activator.CreateInstance<InternalConstructor>()` will fail at runtime.
-The issue is not introduced by this proposal though - the issue exists with C# 9 if the struct type with inaccessible parameterless constructor is from metadata.
-```csharp
-static T CreateNew<T>() where T : new() => new T();
-static T CreateStruct<T>() where T : struct => CreateNew<T>();
-
-_ = CreateStruct<InternalConstructor>(); // compiles; 'MissingMethodException' at runtime
-```
-
 ### Optional parameters
-Constructors with optional parameters are not considered parameterless constructors. This behavior is unchanged from earlier compiler versions.
+Constructors with optional parameters are not considered parameterless constructors.
+_No change from C#9._
 ```csharp
 struct S1 { public S1(string s = "") { } }
 struct S2 { public S2(params object[] args) { } }
@@ -228,10 +233,8 @@ _ = new S2(); // ok: ignores constructor
 ### Metadata
 Explicit and synthesized parameterless struct instance constructors will be emitted to metadata.
 
-Parameterless struct instance constructors will be imported from metadata regardless of accessibility.
-_This might be a breaking change for consumers of existing assemblies with structs with private parameterless constructors if additional errors or warnings are reported._
-
-Parameterless struct instance constructors will be emitted to ref assemblies regardless of accessibility to allow consumers to differentiate between no parameterless constructor an inaccessible constructor.
+Public parameterless struct instance constructors will be imported from metadata; non-public struct instance constructors will be ignored.
+_No change from C#9._
 
 ## See also
 
@@ -239,4 +242,6 @@ Parameterless struct instance constructors will be emitted to ref assemblies reg
 
 ## Design meetings
 
-- https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-01-27.md#field-initializers
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-28.md#open-questions-in-record-and-parameterless-structs
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#parameterless-struct-constructors
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-01-27.md#field-initializers
