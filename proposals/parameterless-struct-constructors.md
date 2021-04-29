@@ -39,7 +39,7 @@ A struct may declare a parameterless instance constructor.
 A parameterless instance constructor is valid for all struct kinds including `struct`, `readonly struct`, `ref struct`, and `record struct`.
 
 If the struct declaration does not contain any explicit instance constructors, and the struct has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
-The parameterless constructor is synthesized even if all initializer values are zeros.
+The parameterless constructor may be synthesized even if all initializer values are zeros.
 
 Otherwise, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)) ...
 > implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
@@ -95,27 +95,6 @@ A `base()` initializer is disallowed in struct constructors.
 
 The compiler will not emit a call to the base `System.ValueType` constructor from any struct instance constructors including explicit and synthesized parameterless constructors.
 
-### Fields
-The synthesized parameterless constructor will zero fields rather than calling any parameterless constructors for the field types. No warnings are reported that field constructors are ignored.
-_No change from C#9._
-
-```csharp
-struct S0
-{
-    public S0() { }
-}
-
-struct S1
-{
-    S0 F; // S0 constructor ignored
-}
-
-struct S<T> where T : struct
-{
-    T F; // constructor (if any) ignored
-}
-```
-
 ### `record struct`
 If a `record struct` does not contain a primary constructor nor any instance constructors, and the `record struct` has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
 ```csharp
@@ -139,6 +118,27 @@ record struct R5(int F)
 }
 ```
 
+### Fields
+The synthesized parameterless constructor will zero fields rather than calling any parameterless constructors for the field types. No warnings are reported that field constructors are ignored.
+_No change from C#9._
+
+```csharp
+struct S0
+{
+    public S0() { }
+}
+
+struct S1
+{
+    S0 F; // S0 constructor ignored
+}
+
+struct S<T> where T : struct
+{
+    T F; // constructor (if any) ignored
+}
+```
+
 ### `default` expression
 `default` ignores the parameterless constructor and generates a zeroed instance.
 _No change from C#9._
@@ -159,7 +159,7 @@ _ = new PublicConstructor();  // call PublicConstructor::.ctor()
 _ = new PrivateConstructor(); // initobj PrivateConstructor
 ```
 
-A warning wave may report a warning when using `new()` on a struct type that has constructors but no parameterless constructor.
+A warning wave may report a warning for use of `new()` with a struct type that has constructors but no parameterless constructor.
 No warning will be reported when using substituting such a struct type for a type parameter with a `new()` or `struct` constraint.
 
 ### Uninitialized values
