@@ -104,43 +104,60 @@ f = delegate int { return 1; };         // syntax error
 f = delegate int (int x) { return x; }; // syntax error
 ```
 
-## Natural delegate type
-A lambda expression has a natural type if the parameters types are explicit and either the return type is explicit or there is a common type from the natural types of all `return` expressions in the body.
+## Natural (function) type
+A lambda expression has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [inferred return type](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#inferred-return-type)).
 
-The natural type is a delegate type where the parameter types are the explicit lambda parameter types and the return type `R` is:
-- if the lambda return type is explicit, that type is used;
-- if the lambda has no return expressions, the return type is `void` or `System.Threading.Tasks.Task` if `async`;
-- if the common type from the natural type of all `return` expressions in the body is the type `R0`, the return type is `R0` or `System.Threading.Tasks.Task<R0>` if `async`.
+A method group has a natural type if all candidate methods in the method group have a common signature. (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
 
-The natural type of an _individual method_ in a method group is a delegate type with the parameter types, ref kinds, and return type and ref kind, of that method. Parameter names and custom modifiers are ignored.
+The natural type of a lambda expression of method group is a _function_type_ that represents the method signature: the parameter types and ref kinds, and return type and ref kind.
+Lambda expressions or method groups with the same signature have the same _function_type_.
 
-A method group may contain multiple methods across the containing type and all extension methods.
-The natural type of the _method group_ is the common natural type for all methods in the method group.
-If there is no common type, the method group has no natural type.
+A _function_type_ exists at compile time only: _function_types_ do not appear in source or metadata, and are not available from the compiler API.
 
-Normally method group resolution searches for extension methods lazily, only iterating through successive namespace scopes until extension methods are found that match the target type. But to determine the common natural type will require searching all namespace scopes.
+### Conversions
+From a _function_type_ `F` there are implicit conversions:
+- To a _function_type_ `G` if the parameters and return types of `F` are variance-convertible to the parameters and return type of `G`
+- To a _delegate_type_ `D` if the parameters and return types of `F` are variance-convertible to the parameters and return type of `D`
+- To `System.MulticastDelegate` or `System.Delegate`
+- To `System.Linq.Expressions.Expression<TDelegate>`, `System.Linq.Expressions.LambdaExpression`, or `System.Linq.Expressions.Expression`
+- _To any base type or interface of `System.Delegate`_
 
-The requirement of a common type across all methods in the method group means that adding an overload (including an extension method overload) for a method may be a breaking change if the original method was used as a method group with inferred type.
+There are no conversions to a _function_type_ from a type other than a _function_type_.
+There are no explicit conversions for _function_types_ since _function_types_ cannot be referenced in source.
 
-The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
-- if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
-- if `R` is `void`, then the delegate type is `System.Action<P1, ..., Pn>`;
-- otherwise the delegate type is `System.Func<P1, ..., Pn, R>`.
+A conversion to `System.MulticastDelegate` or base type or interface realizes the lambda or method group as an instance of an appropriate delegate type.
+A conversion to `System.Linq.Expressions.Expression<TDelegate>` or base type realizes the lambda expression as an expression tree with an appropriate delegate type.
 
-The compiler may allow more signatures to bind to `System.Action<>` and `System.Func<>` types in the future (if `ref struct` types are allowed type arguments for instance).
+_Open issue: Should we disallow conversion to `System.Object` since that means generating a delegate instance, and leave open the possibility of generating a distinct function object in the future?_
 
-_Should the compiler bind to a matching `System.Action<>` or `System.Func<>` type regardless of arity and synthesize a delegate type otherwise? If so, should the compiler warn if the expected delegate types are missing?_
+### Type inference
+The existing rules for type inference are mostly unchanged (see [type inference](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#type-inference)). The one change ***below*** is to the [first phase](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-first-phase) of type inference, to allow an anonymous function to bind to `Ti` even if `Ti` is not a delegate type (perhaps a type parameter constrained to `System.Delegate` for instance):
 
-`modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
+> For each of the method arguments `Ei`:
+> 
+> *   If `Ei` is an anonymous function ***and `Ti` is a delegate type or expression tree type***, an *explicit parameter type inference* is made from `Ei` to `Ti`
+> *   Otherwise, if `Ei` has a type `U` and `xi` is a value parameter then a *lower-bound inference* is made *from* `U` *to* `Ti`.
+> *   Otherwise, if `Ei` has a type `U` and `xi` is a `ref` or `out` parameter then an *exact inference* is made *from* `U` *to* `Ti`.
+> *   Otherwise, no inference is made for this argument.
 
-If two lambda expressions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
+### Best common type
+The existing rules for best common type are unchanged (see [finding the best common type](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions)).
+
+### Direct invocation
+Lambda expressions may be invoked directly.
+The compiler will generate a call to the underlying method without generating a delegate instance or synthesizing a delegate type.
+Directly invoked lambda expressions would not require explicit parameter types.
+```csharp
+int zero = ((int x) => x)(0); // ok
+int one = (x => x)(1);        // ok
+```
 
 ### `var`
 Lambda expressions and method groups with natural types can be used as initializers in `var` declarations.
 ```csharp
-var f1 = () => default;        // error: no natural type
-var f2 = x => { };             // error: no natural type
-var f3 = x => x;               // error: no natural type
+var f1 = () => default;        // error: cannot infer type
+var f2 = x => { };             // error: cannot infer type
+var f3 = x => x;               // error: cannot infer type
 var f4 = () => 1;              // System.Func<int>
 var f5 = () : string => null;  // System.Func<string>
 
@@ -153,24 +170,19 @@ var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
 
-### Invoking lambdas
-Lambda expressions with natural types can be invoked directly.
-```csharp
-int zero = ((int x) => x)(0); // ok
-```
+### Delegate types
+The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
+- if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
+- if `R` is `void`, then the delegate type is `System.Action<P1, ..., Pn>`;
+- otherwise the delegate type is `System.Func<P1, ..., Pn, R>`.
 
-### Implicit conversions
-A consequence of inferring a natural type is that lambda expressions and method groups with natural type are implicitly convertible to `System.MulticastDelegate` and to base classes and interfaces implemented by `System.MulticastDelegate` (including `System.Delegate`, `System.Object`, and `System.ICloneable`).
+The compiler may allow more signatures to bind to `System.Action<>` and `System.Func<>` types in the future (if `ref struct` types are allowed type arguments for instance).
 
-If a natural type cannot be inferred, there is no implicit conversion to `System.MulticastDelegate` or base classes or interfaces.
-```csharp
-Delegate d1 = 1.GetHashCode; // ok
-Delegate d2 = 2.ToString;    // error: cannot convert to 'System.Delegate'; multiple 'ToString' methods
-object o1 = (int x) => x;    // ok
-object o2 = x => x;          // error: cannot convert to 'System.Object'; no natural type for 'x => x'
-```
+_Should the compiler bind to a matching `System.Action<>` or `System.Func<>` type regardless of arity and synthesize a delegate type otherwise? If so, should the compiler warn if the expected delegate types are missing?_
 
-The compiler will also treat lambda expressions with natural type as implicitly convertible to `System.Linq.Expressions.Expression` as an expression tree. Base classes and interfaces implemented by `System.Linq.Expressions.Expression` are ignored when calculating conversions to expression trees.
+`modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
+
+If two lambda expressions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
 
 ### Overload resolution
 Overload resolution already prefers binding to a strongly-typed delegate over `System.Delegate`, and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<TDelegate>` over the corresponding strongly-typed delegate `TDelegate`.
