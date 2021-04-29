@@ -161,6 +161,13 @@ _ = new PrivateConstructor(); // initobj PrivateConstructor
 
 A warning wave may report a warning for use of `new()` with a struct type that has constructors but no parameterless constructor.
 No warning will be reported when using substituting such a struct type for a type parameter with a `new()` or `struct` constraint.
+```csharp
+struct S { public S(int i) { } }
+static T CreateNew<T>() where T : new() => new T();
+
+_ = new S();        // warning: no constructor called
+_ = CreateNew<S>(); // ok
+```
 
 ### Uninitialized values
 A local or field of a struct type that is not explicitly initialized is zeroed.
