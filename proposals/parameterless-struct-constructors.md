@@ -86,7 +86,6 @@ struct S1
 {
     int x = 1;
     object y;  // error: field 'y' must be assigned from synthesized constructor
-    S(object y) { this.y = y; } // ok
 }
 ```
 
@@ -119,7 +118,7 @@ record struct R5(int F)
 ```
 
 ### Fields
-The synthesized parameterless constructor will zero fields rather than calling any parameterless constructors for the field types. No warnings are reported that field constructors are ignored.
+The implicitly-defined parameterless constructor will zero fields rather than calling any parameterless constructors for the field types. No warnings are reported that field constructors are ignored.
 _No change from C#9._
 
 ```csharp
