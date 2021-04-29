@@ -42,6 +42,7 @@ can be invoked for every part of the interpolated string, then we lower the inte
 
 ```cs
 // The builder that will actually "build" the interpolated string"
+[InterpolatedStringBuilder]
 public ref struct TraceLoggerParamsBuilder
 {
     public static TraceLoggerParamsBuilder Create(int literalLength, int formattedCount, Logger logger, out bool builderIsValid)
@@ -86,7 +87,7 @@ public class Logger
     // Initialization code omitted
     public LogLevel EnabledLevel;
 
-    public void LogTrace(TraceLoggerParamsBuilder builder)
+    public void LogTrace([InterpolatedStringBuilderArguments("")]TraceLoggerParamsBuilder builder)
     {
         // Impl of logging
     }
@@ -112,100 +113,81 @@ Here, because `TraceLoggerParamsBuilder` has static method called `Create` with 
 we say that the interpolated string has an implicit builder conversion to that parameter, and it lowers to the pattern shown above. The specese needed for this
 is a bit complicated, and is expanded below.
 
-#### Builder type applicability
-
-A type is said to be an _applicable\_interpolated\_string\_builder\_type_ if, given an _interpolated\_string\_literal_ `S`, the following is true:
-
-* Overload resolution with an identifier of `AppendLiteral` and a parameter type of `string` succeeds, and contains a single instance method that returns a `bool` or `void`.
-* For every _regular\_balanced\_text_ component of `S` (`Si`) without an _interpolation\_format_ component or _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `AppendFormatted` and parameter of the type of `Si`  succeeds, and contains a single instance method that returns a `bool` or `void`.
-* For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and no _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `AppendFormatted` and parameter types of `Si` and `string` with name `format` (in that order) succeeds, and contains a single instance method that returns
-a `bool` or `void`.
-* For every _regular\_balanced\_text_ component of `S` (`Si`) with a _constant\_expression_ (alignment) component and no _interpolation\_format_ component, overload resolution
-with an identifier of `AppendFormatted` and parameter types of `Si` and `int` with name `alignment` (in that order) succeeds, and contains a single instance method that returns
-a `bool` or `void`.
-* For every _regular\_balanced\_text_ component of `S` (`Si`) with an _interpolation\_format_ component and a _constant\_expression_ (alignment) component, overload resolution
-with an identifier of `AppendFormatted` and parameter types of `Si`, `int` with name `format`, and `string` with name `alignment` (in that order) succeeds, and contains a
-single instance method that returns a `bool` or `void`.
-
-Addionally, all calls to `AppendLiteral` or `AppendFormat` must return the same type. It is not permitted to mix `bool` and `void` returning methods.
-
 The rest of this proposal will use `Append...` to refer to either of `AppendLiteral` or `AppendFormatted` in cases when both are applicable.
 
-Note that these rules do not permit extension methods for the `Append...` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
-pattern, where we allow `GetEnumerator` to be an extension method, but not `Current` or `MoveNext()`.
+#### New attributes
 
-These rules _do_ permit default parameters for the `Append...` calls, which will work with things like `CallerLineNumber` or `CallerArgumentExpression` (when supported by
-the language).
+The compiler recognizes the `System.Runtime.CompilerServices.InterpolatedStringBuilderAttribute`:
 
-We have separate overload lookup rules for base elements vs interpolation holes because some builders will want to be able to understand the difference between the components
-that were interpolated and the components that were part of the base string.
+```cs
+using System;
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+    public sealed class InterpolatedStringBuilderAttribute : Attribute
+    {
+        public InterpolatedStringBuilderAttribute()
+        {
+        }
+    }
+}
+```
 
-**Open Question**
+This attribute is used by the compiler to determine if a type is a valid interpolated string builder type.
 
-Some scenarios, like structured logging, want to be able to provide names for interpolation elements. For example, today a logging call might look like
-`Log("{name} bought {itemCount} items", name, items.Count);`. The names inside the `{}` provide important structure information for loggers that help with ensuring output
-is consistent and uniform. Some cases might be able to reuse the `:format` component of an interpolation hole for this, but many loggers already understand format specifiers
-and have existing behavior for output formatting based on this info. Is there some syntax we can use to enable putting these named specifiers in?
+The compiler also recognizes the `System.Runtime.CompilerServices.InterpolatedStringBuilderArgumentAttribute`:
 
-Some cases may be able to get away with `CallerArgumentExpression`, provided that support does land in C# 10. But for cases that invoke a method/property, that may not be
-sufficient.
+```cs
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+    public sealed class InterpolatedStringBuilderArgumentAttribute : Attribute
+    {
+        public InterpolatedBuilderArgumentAttribute(string argument);
+        public InterpolatedBuilderArgumentAttribute(params string[] arguments);
+
+        public string[] Arguments { get; }
+    }
+}
+```
+
+This attribute is used on parameters, to inform the compiler how to lower an interpolated string builder pattern used in a parameter position.
 
 #### Interpolated string builder conversion
 
-We add a new implicit conversion type: The _implicit\_string\_builder\_conversion_. An _implicit\_string\_builder\_conversion_ permits an _interpolated\_string\_expression_
-to be converted to an _applicable\_interpolated\_string\_builder\_type_. There are 2 ways that this conversion can occur:
+Type `T` is said to be an _applicable\_interpolated\_string\_builder\_type_ if it is attributed with `System.Runtime.CompilerServices.InterpolatedStringBuilderAttribute`.
+There exists an implicit _interpolated\_string\_builder\_conversion_ to `T` from an _interpolated\_string\_expression_, or an _additive\_expression_ composed entirely of
+_interpolated\_string\_expression_s and using only `+` operators.
 
-1. A method argument is converted as part of determining applicable function members (covered below), or
-2. Given an _interpolated\_string\_expression_ `S` being converted to type `T`, the following is true:
-    * `T` is an _applicable\_interpolated\_string\_builder\_type_, and
-    * One of the following is true:
-        * `T` has an accessible static T-returning method `Create` that takes 2 int parameters and 1 out parameter of type `bool`, in that order.
-        * `T` has an accessible static T-returning method `Create` that takes 2 int parameters, in that order.
+For simplicity in the rest of this speclet, _interpolated\_string\_expression_ refers to both a simple _interpolated\_string\_expression_, and to an _additive\_expression_ composed
+entirely of _interpolated\_string\_expression_s and using only `+` operators.
 
-By requiring `Create` to be a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to.
-If we limited the pattern to constructors, then the implementation would be required to always return new instances.
-
-Additionally, by returning the builder type instead of requiring it to go in an out parameter, we marginally improve the codegen and significantly simplify the rules around
-ref struct lifetimes vs the traditional .NET `TryX` pattern, and we expect a number of these builder types to be ref structs.
-
-This can and will be impacted by abstract statics in interfaces for generic contexts. We will need to make sure the interactions are considered and tested.
-
-**~~Open~~ Question**
-
-Need to confirm this pattern.
-
-_Answer_: Confirmed.
+Note that this conversion always exists, regardless of whether there will be later errors when actually attempting to lower the interpolation using the builder pattern. This is
+done to help ensure that there are predictable and useful errors and that runtime behavior doesn't change based on the content of an interpolated string.
 
 #### Applicable function member adjustments
 
 We adjust the wording of the [applicable function member algorithm](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#applicable-function-member)
-as follows (a new sub-bullet is added at the front of each section, in bold):
+as follows (a new sub-bullet is added to each section, in bold):
 
 A function member is said to be an ***applicable function member*** with respect to an argument list `A` when all of the following are true:
 *  Each argument in `A` corresponds to a parameter in the function member declaration as described in [Corresponding parameters](expressions.md#corresponding-parameters), and any parameter to which no argument corresponds is an optional parameter.
 *  For each argument in `A`, the parameter passing mode of the argument (i.e., value, `ref`, or `out`) is identical to the parameter passing mode of the corresponding parameter, and
-   *  **for an interpolated string argument to a value parameter when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and one of the following overload resolutions succeeds. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
-      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `bool` succeeds with 1 invocable member, and the return type of that member is `Ai`, or**
-      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters and the receiver type of `A` succeeds with 1 invocable member, and the return type of that member is `Ai`.**
    *  for a value parameter or a parameter array, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
+   *  **for a `ref` parameter whose type is a struct type, an implicit _interpolated\_string\_builder\_conversion_ exists from the argument to the type of the corresponding parameter, or**
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter. After all, a `ref` or `out` parameter is an alias for the argument passed.
+
 For a function member that includes a parameter array, if the function member is applicable by the above rules, it is said to be applicable in its ***normal form***. If a function member that includes a parameter array is not applicable in its normal form, the function member may instead be applicable in its ***expanded form***:
 *  The expanded form is constructed by replacing the parameter array in the function member declaration with zero or more value parameters of the element type of the parameter array such that the number of arguments in the argument list `A` matches the total number of parameters. If `A` has fewer arguments than the number of fixed parameters in the function member declaration, the expanded form of the function member cannot be constructed and is thus not applicable.
 *  Otherwise, the expanded form is applicable if for each argument in `A` the parameter passing mode of the argument is identical to the parameter passing mode of the corresponding parameter, and
-   *  **for an interpolated string argument to a fixed value parameter or a value parameter created by the expansion when `A` is an instance method or static extension method invoked in reduced form, the type of the corresponding parameter is an _applicable\_interpolated\_string\_builder\_type_ `Ai`, and one of the following overload resolutions succeeds. An interpolated string argument applicable in this way is said to be immediately converted to the corresponding parameter type with an _implicit\_string\_builder\_conversion_. Or,**
-      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters, the receiver type of `A`, and an out parameter of type `bool` succeeds with 1 invocable member, and the return type of that member is `Ai`, or**
-      * **Overload resolution on `Ai` with the identifier `Create` and a parameter list of 2 int parameters and the receiver type of `A` succeeds with 1 invocable member, and the return type of that member is `Ai`.**
    *  for a fixed value parameter or a value parameter created by the expansion, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the type of the argument to the type of the corresponding parameter, or
+   *  **for a `ref` parameter whose type is a struct type, an implicit _interpolated\_string\_builder\_conversion_ exists from the argument to the type of the corresponding parameter, or**
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter.
 
 Important note: this means that if there are 2 otherwise equivalent overloads, that only differ by the type of the _applicable\_interpolated\_string\_builder\_type_, these overloads will
-be considered ambiguous. We could potentially make changes to the better function member algorithm to resolve this if we so choose, but this scenario unlikely to occur and isn't a priority
-to address.
-
-Another important note is that, for a single overload, priority will be given to the builder construction method that takes a receiver type over builder construction that does not. This is
-because the receiver version is checked for applicability before we look for general conversions, and this ordering is desirable.
+be considered ambiguous. Further, because we do not see through explicit casts, it is possible that there could arise an unresolvable scenario where both applicable overloads use
+`InterpolatedStringBuilderArguments` and are totally uncallable without manually performing the builder lowering pattern. We could potentially make changes to the better function member
+algorithm to resolve this if we so choose, but this scenario unlikely to occur and isn't a priority to address.
 
 #### Better conversion from expression adjustments
 
@@ -240,9 +222,10 @@ intended for direct use by the C# compiler. This struct would look approximately
 // API Proposal issue: https://github.com/dotnet/runtime/issues/50601
 namespace System.Runtime.CompilerServices
 {
-    public ref struct InterpolatedStringBuilder
+    [InterpolatedStringBuilder]
+    public ref struct InterpolatedStringDefaultBuilder
     {
-        public static InterpolatedStringBuilder Create(int literalLength, int formattedCount);
+        public static InterpolatedStringDefaultBuilder Create(int literalLength, int formattedCount);
         public string ToStringAndClear();
 
         public void AppendLiteral(string value);
@@ -265,7 +248,7 @@ namespace System.Runtime.CompilerServices
 
 We make a slight change to the rules for the meaning of an [_interpolated\_string\_expression_](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#interpolated-strings):
 
-**If the type of an interpolated string is `string` and the type `System.Runtime.CompilerServices.InterpolatedStringBuilder` exists, and the current context supports using that type, the string**
+**If the type of an interpolated string is `string` and the type `System.Runtime.CompilerServices.InterpolatedStringDefaultBuilder` exists, and the current context supports using that type, the string**
 **is lowered using the builder pattern. The final `string` value is then obtained by calling `ToStringAndClear()` on the builder type.**
 **Otherwise, if** the type of an interpolated string is `System.IFormattable` or `System.FormattableString` [the rest is unchanged]
 
@@ -287,12 +270,111 @@ Do we want to have builders for `System.IFormattable` and `System.FormattableStr
 
 _Answer_: No.
 
-### Lowering
+### Builder pattern codegen
 
-Both the general pattern and the specific changes for interpolated strings directly converted to `string`s follow the same lowering pattern. The `Create` method is
-invoked on the receiver (whether that's the temporary method receiver for an _implicit\_string\_builder\_conversion_ derived from the applicable function member algorithm, or a
-standard conversion derived from the target type). If the call returned `true`, `Append...` is repeatedly invoked on the builder out parameter, with each part of the interpolated string,
-in order, stopping subsequent calls if a `Append...` call returns `false`. Finally, the original method is called, passing the initialized builder in place of the interpolated string expression.
+In this section, method invocation resolution refers to the steps listed [here](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#method-invocations).
+
+#### `Create` method invocation resolution
+
+Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i`, method invocation resolution and validation for a valid `Create` method on `T`
+is performed as follows:
+
+1. Member lookup for members with the name `Create` is performed on `T`. The resulting method group is called `M`.
+2. The argument list `A` is constructed as follows:
+    1. The first two arguments are integer constants, representing the literal length of the `i`, and the number of _interpolation_ components in the `i`, respectively.
+    2. If `i` is used as an argument to some parameter `pi` in method `M1`, and parameter `pi` is attributed with `System.Runtime.CompilerServices.InterpolatedStringBuilderArgumentAttribute`,
+    then for every name `Argx` in the `Arguments` array of that attribute the compiler matches it to a parameter `px` that has the same name. The empty string is matched to the receiver
+    of `M1`.
+        * If any `Argx` is not able to be matched to a parameter of `M1`, or an `Argx` requests the receiver of `M1` and `M1` is a static method, an error is produced and no further
+        steps are taken.
+        * Otherwise, the type of every resolved `px` is added to the argument list, in the order specified by the `Arguments` array. These are all passed by value.
+    3. The final argument is a `bool`, passed as an `out` parameter.
+3. Traditional method invocation resolution is performed with method group `M` and argument list `A`. For the purposes of method invocation final validation, the context of `M` is treated
+as a _member\_access_ through type `T`.
+    * If a single-best method `F` was found, the result of overload resolution is `F`.
+    * If no applicable methods were found, step 3 is retried, removing the final `bool` parameter from `A`. If this retry also finds no applicable members, an error is produced and
+    no further steps are taken.
+    * If no single-best method was found, the result of overload resolution is ambiguous, an error is produced, and no further steps are taken.
+4. Final validation on `F` is performed.
+    * If `F`'s return type is not a `T`, an error is produced and no further steps are taken.
+    * If any element of `A` occurred lexically after `i`, an error is produced and no further steps are taken.
+
+By requiring `Create` to be a `static` method instead of a constructor, we allow the implementation to pool builders if it so decides to.
+If we limited the pattern to constructors, then the implementation would be required to always return new instances.
+
+Additionally, by returning the builder type instead of requiring it to go in an out parameter, we marginally improve the codegen and significantly simplify the rules around
+ref struct lifetimes vs the traditional .NET `TryX` pattern, and we expect a number of these builder types to be ref structs.
+
+This can and will be impacted by abstract statics in interfaces for generic contexts. We will need to make sure the interactions are considered and tested.
+
+**Open Question**:
+
+If we use a constructor instead of `Create`, we'd improve runtime codegen, at the expense of narrowing the pattern a bit.
+
+#### `Append...` method overload resolution
+
+Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i`, overload resolution for a set of valid `Append...` methods on `T` is
+performed as follows:
+
+1. If there are any _interpolated\_regular\_string\_character_ components in `i`:
+    1. Member lookup on `T` with the name `AppendLiteral` is performed. The resulting method group is called `Ml`.
+    2. The argument list `Al` is constructed with one value parameter of type `string`.
+    3. Traditional method invocation resolution is performed with method group `Ml` and argument list `Al`. For the purposes of method invocation final validation, the context of `Ml`
+    is treated as a _member\_access_ through an instance of `T`.
+        * If a single-best method `Fi` is found and no errors were produced, the result of method invocation resolution is `Fi`.
+        * Otherwise, an error is reported.
+2. For every _interpolation_ `ix` component of `i`:
+    1. Member lookup on `T` with the name `AppendFormatted` is performed. The resulting method group is called `Mf`.
+    2. The argument list `Af` is constructed:
+        1. The first parameter is the `expression` of `ix`, passed by value.
+        2. If `ix` directly contains a _constant\_expression_ component, then an integer value parameter is added, with the name `alignment` specified.
+        3. If `ix` is directly followed by an _interpolation\_format_, then a string value parameter is added, with the name `format` specified.
+    3. Traditional method invocation resolution is performed with method group `Mf` and argument list `Af`. For the purposes of method invocation final validation, the context of `Mf`
+    is treated as a _member\_access_ through an instance of `T`.
+        * If a single-best method `Fi` is found, the result of method invocation resolution is `Fi`.
+        * Otherwise, an error is reported.
+3. Finally, for every `Fi` discovered in steps 1 and 2, final validation is performed:
+    * If any `Fi` does not return `bool` by value or `void`, an error is reported.
+    * If all `Fi` do not return the same type, an error is reported.
+
+
+Note that these rules do not permit extension methods for the `Append...` calls. We could consider enabling that if we choose, but this is analogous to the enumerator
+pattern, where we allow `GetEnumerator` to be an extension method, but not `Current` or `MoveNext()`.
+
+These rules _do_ permit default parameters for the `Append...` calls, which will work with things like `CallerLineNumber` or `CallerArgumentExpression` (when supported by
+the language).
+
+We have separate overload lookup rules for base elements vs interpolation holes because some builders will want to be able to understand the difference between the components
+that were interpolated and the components that were part of the base string.
+
+**~~Open~~ Question**
+
+Some scenarios, like structured logging, want to be able to provide names for interpolation elements. For example, today a logging call might look like
+`Log("{name} bought {itemCount} items", name, items.Count);`. The names inside the `{}` provide important structure information for loggers that help with ensuring output
+is consistent and uniform. Some cases might be able to reuse the `:format` component of an interpolation hole for this, but many loggers already understand format specifiers
+and have existing behavior for output formatting based on this info. Is there some syntax we can use to enable putting these named specifiers in?
+
+Some cases may be able to get away with `CallerArgumentExpression`, provided that support does land in C# 10. But for cases that invoke a method/property, that may not be
+sufficient.
+
+_Answer_:
+
+While there are some interesting parts to templated strings we could explore in an orthogonal language feature, we don't think a specific syntax here has much benefit over
+solutions such as using a tuple: `$"{("StructuredCategory", myExpression)}"`.
+
+#### Performing the conversion
+
+Given an _applicable\_interpolated\_string\_builder\_type_ `T` and an _interpolated\_string\_expression_ `i` that had a valid `Create` method `Fc` and `Append...` methods `Fa` resolved,
+lowering for `i` is performed as follows:
+
+1. Any arguments to `Fc` that occur lexically before `i` are evaluated and stored into temporary variables in lexical order. In order to preserve lexical ordering, if `i` occurred as part
+of a larger expression `e`, any components of `e` that occurred before `i` will be evaluated as well, again in lexical order.
+2. `Fc` is called with the length of the interpolated string literal components, the number of _interpolation_ holes, any previously evaluated arguments, and a `bool` out argument
+(if `Fc` was resolved with one as the last parameter). The result is stored into a temporary value `ib`.
+3. If `Fc` ended with a `bool` out argument, a check on that `bool` value is generated. If true, the methods in `Fa` will be called. Otherwise, they will not be called.
+4. For every `Fax` in `Fa`, `Fax` is called on `ib` with either the current literal component or _interpolation_ expression, as appropriate. If `Fax` returns a `bool`, the result is
+logically anded with all preceeding `Fax` calls.
+5. The result of the conversion is `ib`.
 
 **~~Open~~ Question**
 
@@ -342,6 +424,10 @@ caller). However, allocating ahead of time produces other questions:
 specification to have to determine this ahead of time, so we'd want to resolve https://github.com/dotnet/runtime/issues/25423 and add an API for the compiler to call in these cases. It
 also adds more pros and cons to the points from the previous loop, where we don't want to potentially allocate large arrays on the heap many times or before one is needed.
 
+_Answer_:
+
+This is out of scope for C# 10. We can look at this in general when we look at the more general `params Span<T>` feature.
+
 ### Non-try version of the API
 
 For simplicity, this spec currently just proposes recognizing a `Append...` method, and things that always succeed (like `InterpolatedStringBuilder`) would always return true from the method.
@@ -363,10 +449,10 @@ binding a method, that informs the compiler that certain parameters should be pa
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    public sealed class InterpolatedBuilderArgumentAttribute : Attribute
+    public sealed class InterpolatedStringBuilderArgumentAttribute : Attribute
     {
-        public InterpolatedBuilderArgumentAttribute(string argument);
-        public InterpolatedBuilderArgumentAttribute(params string[] arguments);
+        public InterpolatedStringBuilderArgumentAttribute(string argument);
+        public InterpolatedStringBuilderArgumentAttribute(params string[] arguments);
 
         public string[] Arguments { get; }
     }
@@ -380,7 +466,7 @@ namespace System
 {
     public sealed class String
     {
-        public static string Format(IFormatProvider? provider, [InterpolatedBuilderArgument("provider")] ref InterpolatedStringBuilder builder);
+        public static string Format(IFormatProvider? provider, [InterpolatedStringBuilderArgument("provider")] ref InterpolatedStringBuilder builder);
         …
     }
 }
@@ -412,6 +498,11 @@ The questions we need to answer:
 2. Do we want to allow these arguments to come from after the builder parameter? Some existing patterns in the BCL, such as `Utf8Formatter`, put the value to be formatted _before_ the thing
 needed to format into. To fit in best with these patterns, we'd likely want to allow this, but we need to decide if this out-of-order evaluate is ok.
 
+_Answer_:
+
+We want to support this. The spec has been updated to reflect this. Arguments will be required to be specified in lexical order at the call site, and if a needed argument to the create method
+is specified after the interpolated string literal, an error is produced.
+
 ### `await` usage in interpolation holes
 
 Because `$"{await A()}"` is a valid expression today, we need to rationalize how interpolation holes with await. We could solve this with a few rules:
@@ -430,6 +521,10 @@ version that does not need to allocate any scratch space at all.
 
 Some builders might want to be passed as ref parameters (either `in` or `ref`). Should we allow either? And if so, what will a `ref` builder look like? `ref $""` is confusing, as you're not actually
 passing the string by ref, you're passing the builder that is created from the ref by ref, and has similar potential issues with async methods.
+
+_Answer_:
+
+We want to support this. The spec has been updated to reflect this. The rules should reflect the same rules that apply to extension methods on value types.
 
 ### Interpolated strings through binary expressions and conversions
 
@@ -473,6 +568,11 @@ purposes of conversions and overload resolution.
 
 Do we want to do this? We don't do this for `System.FormattableString`, for example, but that can be broken out onto a different line, whereas this can be context-dependent and therefore not
 able to be broken out into a different line. There are also no overload resolution concerns with `FormattableString` and `IFormattable`.
+
+_Answer_:
+
+We think that this is a valid use case for additive expressions, but that the cast version is not compelling enough at this time. We can add it later if necessary. The spec has been updated to
+reflect this decision.
 
 ## Other use cases
 
