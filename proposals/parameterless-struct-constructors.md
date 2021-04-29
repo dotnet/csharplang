@@ -30,7 +30,7 @@ record struct Person()
 ### Instance field initializers
 Instance field declarations for a struct may include initializers.
 
-As with [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-field-initialization):
+As with [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-field-initialization):
 > A variable initializer for an instance field cannot reference the instance being created. 
 
 ### Constructors
@@ -38,13 +38,11 @@ A struct may declare a parameterless instance constructor.
 
 A parameterless instance constructor is valid for all struct kinds including `struct`, `readonly struct`, `ref struct`, and `record struct`.
 
-If the struct does not declare a parameterless instance constructor, and the struct has no fields with variable initializers, the compiler will not synthesize a parameterless instance constructor. The struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)) ...
-> implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
-
-If the struct does not declare a parameterless instance constructor, and the struct has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
+If the struct declaration does not contain any explicit instance constructors, and the struct has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
 The parameterless constructor is synthesized even if all initializer values are zeros.
 
-_Open issue: Should an explicit parameterless constructor be required rather than synthesizing, to ensure the user has opted-in to a change in `new()` behavior? If not required, should the compiler warn that `new()` will ignore any field initializers? This would allow existing code to switch to field initializers without behavior change._
+Otherwise, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)) ...
+> implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
 
 ### Modifiers
 A parameterless instance struct constructor must be declared `public`.
@@ -60,11 +58,11 @@ Constructors can be declared `extern` or `unsafe`.
 Constructors cannot be `partial`.
 
 ### Executing field initializers
-Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#instance-variable-initializers):
+Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-variable-initializers):
 > When an instance constructor has no constructor initializer, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor ... . The variable initializers are executed in the textual order in which they appear in the ... declaration.
 
 ### Definite assignment
-Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/master/spec/structs.md#constructors)).
+Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)).
 
 Definite assignment of struct instance fields is required within _explicit_ parameterless constructors.
 ```csharp
@@ -92,8 +90,6 @@ struct S1
 }
 ```
 
-_Open issue: Should definite assignment be relaxed for all struct constructors? No, not as part of this proposal. Relaxing definite assignment in struct constructors can be proposed and handled separately since the benefits and implications apply to all struct constructors not just parameterless constructors._
-
 ### No `base()` initializer
 A `base()` initializer is disallowed in struct constructors.
 
@@ -120,6 +116,29 @@ struct S<T> where T : struct
 }
 ```
 
+### `record struct`
+If a `record struct` does not contain a primary constructor nor any instance constructors, and the `record struct` has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
+```csharp
+record struct R0;                      // no parameterless .ctor
+record struct R1 { int F = 42; }       // synthesized .ctor: public R1() { F = 42; }
+record struct R2(int F) { int F = F; } // no parameterless .ctor
+```
+
+A `record struct` with an empty parameter list will have a parameterless primary constructor.
+```csharp
+record struct R3();                // primary .ctor: public R3() { }
+record struct R4() { int F = 42; } // primary .ctor: public R4() { F = 42; }
+```
+
+An explicit parameterless constructor in a `record struct` must call the primary constructor.
+```csharp
+record struct R5(int F)
+{
+    public R5() { } // error: must call 'this(string S)'
+    public int F =  F;
+}
+```
+
 ### `default` expression
 `default` ignores the parameterless constructor and generates a zeroed instance.
 _No change from C#9._
@@ -139,6 +158,9 @@ _No change from C#9._
 _ = new PublicConstructor();  // call PublicConstructor::.ctor()
 _ = new PrivateConstructor(); // initobj PrivateConstructor
 ```
+
+A warning wave may report a warning when using `new()` on a struct type that has constructors but no parameterless constructor.
+No warning will be reported when using substituting such a struct type for a type parameter with a `new()` or `struct` constraint.
 
 ### Uninitialized values
 A local or field of a struct type that is not explicitly initialized is zeroed.
@@ -172,7 +194,7 @@ static void F2(PrivateConstructor s2 = new()) { } // ok: initobj
 ```
 
 ### Type parameter constraints: `new()` and `struct`
-The `new()` and `struct` type parameter constraints require the parameterless constructor to be `public` if defined (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/master/spec/types.md#satisfying-constraints)).
+The `new()` and `struct` type parameter constraints require the parameterless constructor to be `public` if defined (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/main/spec/types.md#satisfying-constraints)).
 
 The compiler assumes all structs satisfy `new()` and `struct` constraints.
 _No change from C#9._
@@ -211,51 +233,12 @@ Explicit and synthesized parameterless struct instance constructors will be emit
 Public parameterless struct instance constructors will be imported from metadata; non-public struct instance constructors will be ignored.
 _No change from C#9._
 
-## Open issues
-1. Is a parameterless constructor synthesized if there are initializers but no explicit parameterless constructor?
-    If not synthesized, should the compiler warn that `new()` will ignore any initializers?
-
-    ```csharp
-    struct S
-    {
-        // synthesize 'public S() { }' or warn?
-        public object F = 42;
-    }
-    ```
-1. Confirm `record struct` will allow parameterless primary constructors.
-
-    ```csharp
-    record struct R0;   // no parameterless .ctor
-    
-    record struct R1(); // public R1() { }
-
-    record struct R2()  // public R2() { F = 42; }
-    {
-        public object F = 42;
-    }
-    ```
-
-1. Confirm the `record struct` parameterless constructor calls the primary constructor.
-
-    ```csharp
-    record struct R3(string S)
-    {
-        // synthesize 'public R3() : this(S: null) { }'?
-        public string S = S.ToLower();
-    }
-
-    record struct R4(string S)
-    {
-        public R4() { } // error: must call 'this(string S)'
-        public string S = S.ToLower();
-    }
-    ```
-
 ## See also
 
 - https://github.com/dotnet/roslyn/issues/1029
 
 ## Design meetings
 
-- https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-03-10.md#parameterless-struct-constructors
-- https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-01-27.md#field-initializers
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-28.md#open-questions-in-record-and-parameterless-structs
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#parameterless-struct-constructors
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-01-27.md#field-initializers
