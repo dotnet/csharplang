@@ -25,6 +25,7 @@
 ## May 10, 2021
 
 - *Triage championed features and milestones*
+- Lambda / method group natural type
 
 ## May 3, 2021
 
