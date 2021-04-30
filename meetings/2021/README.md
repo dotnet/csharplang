@@ -4,8 +4,6 @@
 
 ## Schedule when convenient
 
-- Open questions in interpolated strings (Fred)
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -24,10 +22,14 @@
 
 ## May 12, 2021
 
-## May 5, 2021
+## May 10, 2021
+
+- *Triage championed features and milestones*
 
 ## May 3, 2021
 
+- Open questions in interpolated strings (Fred)
+- Open questions in record structs (Julien)
 
 # C# Language Design Notes for 2021
 
