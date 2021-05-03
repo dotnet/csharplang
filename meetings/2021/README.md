@@ -22,7 +22,7 @@
 
 ## May 12, 2021
 
-- Experimental attribute (Immo)
+- Experimental attribute (Immo): https://github.com/dotnet/designs/blob/main/accepted/2021/preview-features/preview-features.md
 - Simple C# programs (Phillip): https://github.com/dotnet/designs/pull/213
 
 ## May 10, 2021
