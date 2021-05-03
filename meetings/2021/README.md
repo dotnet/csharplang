@@ -23,6 +23,7 @@
 ## May 12, 2021
 
 - Experimental attribute (Immo)
+- Simple C# programs (Phillip): https://github.com/dotnet/designs/pull/213
 
 ## May 10, 2021
 
