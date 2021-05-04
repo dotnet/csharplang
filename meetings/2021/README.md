@@ -20,6 +20,8 @@
 
 ## May 17, 2021
 
+- Raw string literals (cyrusn): https://github.com/dotnet/csharplang/issues/4304
+
 ## May 12, 2021
 
 - Experimental attribute (Immo): https://github.com/dotnet/designs/blob/main/accepted/2021/preview-features/preview-features.md
