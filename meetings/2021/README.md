@@ -9,7 +9,6 @@
 - *Triage championed features and milestones*
 - *Design review*
 
-
 ## Jun 2, 2021
 
 ## May 26, 2021
@@ -32,14 +31,16 @@
 - *Triage championed features and milestones*
 - Lambda / method group natural type
 
-## May 3, 2021
-
-- Open questions in interpolated strings (Fred)
-- Open questions in record structs (Julien)
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## May 3, 2021
+
+[C# Language Design Notes for May 3rd, 2021](https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-05-03.md)
+
+1. Improved interpolated strings
+2. Open questions in record structs
 
 ## Apr 28, 2021
 
