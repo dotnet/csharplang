@@ -326,13 +326,12 @@ A slice subpattern (i.e. the pattern following `..` in a *slice_pattern*) is dis
 
 ## Unresolved questions
 
-All multi-dimensional arrays can be non-zero-based. We can either:
-
-1. Add a runtime helper to check if the array is zero-based across all dimensions.
-2. Call `GetLowerBound` and add it to each indexer access to pass the *correct* index.
-3. Assume all arrays are zero-based since that's the default for arrays created by `new` expressions.
-4. Should we limit the list-pattern to `IEnumerable` types? Then we could allow `{ 1, 2, ..var x }` (`x` would be an `IEnumerable` we would cook up) (answer [LDM 4/12/2021]: no, we'll disallow sub-pattern in slice pattern on enumerable for now)
-5. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`. Can we assume that `Count` agrees with enumerated count?
-6. Should we try to cut the enumeration short for length-patterns on enumerables in some cases? (computing min/max acceptable count and checking partial count against that)
+1. All multi-dimensional arrays can be non-zero-based. We can either:  
+    1. Add a runtime helper to check if the array is zero-based across all dimensions.
+    2. Call `GetLowerBound` and add it to each indexer access to pass the *correct* index.
+    3. Assume all arrays are zero-based since that's the default for arrays created by `new` expressions.
+1. Should we limit the list-pattern to `IEnumerable` types? Then we could allow `{ 1, 2, ..var x }` (`x` would be an `IEnumerable` we would cook up) (answer [LDM 4/12/2021]: no, we'll disallow sub-pattern in slice pattern on enumerable for now)
+2. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`. Can we assume that `Count` agrees with enumerated count?
+3. Should we try to cut the enumeration short for length-patterns on enumerables in some cases? (computing min/max acceptable count and checking partial count against that)
   What if the enumerable type has some sort of `TryGetNonEnumeratedCount` API?  
-7. Can we detect at runtime that the input type is sliceable, so as to avoid enumeration? .NET 6 may be adding some LINQ methods/extensions that would help. 
+4. Can we detect at runtime that the input type is sliceable, so as to avoid enumeration? .NET 6 may be adding some LINQ methods/extensions that would help. 
