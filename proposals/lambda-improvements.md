@@ -117,10 +117,10 @@ A _function_type_ exists at compile time only: _function_types_ do not appear in
 ### Conversions
 From a _function_type_ `F` there are implicit conversions:
 - To a _function_type_ `G` if the parameters and return types of `F` are variance-convertible to the parameters and return type of `G`
-- To a _delegate_type_ `D` if the parameters and return types of `F` are variance-convertible to the parameters and return type of `D`
-- To `System.MulticastDelegate` or `System.Delegate`
-- To `System.Linq.Expressions.Expression<TDelegate>`, `System.Linq.Expressions.LambdaExpression`, or `System.Linq.Expressions.Expression`
-- _To any base type or interface of `System.Delegate`_
+- To `System.Delegate` or `System.MulticastDelegate`
+- To `System.Linq.Expressions.Expression` or `System.Linq.Expressions.LambdaExpression`
+
+Lambda expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see [anonymous function conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#anonymous-function-conversions) and [method group conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
 
 There are no conversions to a _function_type_ from a type other than a _function_type_.
 There are no explicit conversions for _function_types_ since _function_types_ cannot be referenced in source.
@@ -128,10 +128,13 @@ There are no explicit conversions for _function_types_ since _function_types_ ca
 A conversion to `System.MulticastDelegate` or base type or interface realizes the lambda or method group as an instance of an appropriate delegate type.
 A conversion to `System.Linq.Expressions.Expression<TDelegate>` or base type realizes the lambda expression as an expression tree with an appropriate delegate type.
 
-_Open issue: Should we disallow conversion to `System.Object` since that means generating a delegate instance, and leave open the possibility of generating a distinct function object in the future?_
+_Open issue: Should we disallow conversion to `System.Object` for now - or to any base type or interface of `System.Delegate` - since those conversions currently imply generating a delegate instance, and leave open the possibility of generating a lighterweight function object in the future?_
 
 ### Type inference
-The existing rules for type inference are mostly unchanged (see [type inference](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#type-inference)). The one change ***below*** is to the [first phase](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-first-phase) of type inference, to allow an anonymous function to bind to `Ti` even if `Ti` is not a delegate type (perhaps a type parameter constrained to `System.Delegate` for instance):
+The existing rules for type inference are mostly unchanged (see [type inference](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#type-inference)). There are however a ***couple of changes*** below to specific phases of type inference.
+
+#### First phase
+The [first phase](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-first-phase) allows an anonymous function to bind to `Ti` even if `Ti` is not a delegate or expression tree type (perhaps a type parameter constrained to `System.Delegate` for instance).
 
 > For each of the method arguments `Ei`:
 > 
@@ -140,16 +143,20 @@ The existing rules for type inference are mostly unchanged (see [type inference]
 > *   Otherwise, if `Ei` has a type `U` and `xi` is a `ref` or `out` parameter then an *exact inference* is made *from* `U` *to* `Ti`.
 > *   Otherwise, no inference is made for this argument.
 
-### Best common type
-The existing rules for best common type are unchanged (see [finding the best common type](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions)).
+#### Fixing
+[Fixing](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#fixing) ensures other conversions are preferred over _function_type_ conversions. (Lambda expressions and method group expressions only contribute to lower bounds so handling of _function_types_ is needed for lower bounds only.)
 
-### Direct invocation
-Lambda expressions may be invoked directly.
-The compiler will generate a call to the underlying method without generating a delegate instance or synthesizing a delegate type.
-Directly invoked lambda expressions would not require explicit parameter types.
+> An *unfixed* type variable `Xi` with a set of bounds is *fixed* as follows:
+> 
+> *  The set of *candidate types* `Uj` starts out as the set of all types in the set of bounds for `Xi` ***where function types are ignored in lower bounds if there any types that are not function types***.
+> *  We then examine each bound for `Xi` in turn: For each exact bound `U` of `Xi` all types `Uj` which are not identical to `U` are removed from the candidate set. For each lower bound `U` of `Xi` all types `Uj` to which there is *not* an implicit conversion from `U` are removed from the candidate set. For each upper bound `U` of `Xi` all types `Uj` from which there is *not* an implicit conversion to `U` are removed from the candidate set.
+> *  If among the remaining candidate types `Uj` there is a unique type `V` from which there is an implicit conversion to all the other candidate types, then `Xi` is fixed to `V`.
+> *  Otherwise, type inference fails.
+
+### Best common type
+Best common type is defined in terms of type inference (see [finding the best common type](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions)) so the changes above apply to best common type as well.
 ```csharp
-int zero = ((int x) => x)(0); // ok
-int one = (x => x)(1);        // ok
+var fs = new[] { (string s) => s.Length; (string s) => int.Parse(s) } // Func<string, int>[]
 ```
 
 ### `var`
@@ -169,6 +176,8 @@ var f6 = F1;    // error: multiple methods
 var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
+
+_Open issue: Should we disallow `var` for now since it currently implies generating a delegate instance, and leave open the possibility of generating a lighterweight function object in the future?_
 
 ### Delegate types
 The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
@@ -203,6 +212,17 @@ Invoke(GetInt);    // Invoke(Delegate) [new]
 Invoke(() => "");  // Invoke(Func<string>) [unchanged]
 Invoke(() => 0);   // Invoke(Expression) [new]
 ```
+
+## Direct invocation
+Lambda expressions may be invoked directly.
+The compiler will generate a call to the underlying method without generating a delegate instance or synthesizing a delegate type.
+Directly invoked lambda expressions do not require explicit parameter types.
+```csharp
+int zero = ((int x) => x)(0); // ok
+int one = (x => x)(1);        // ok
+```
+
+_Open issue: Should direct invocation be handled separately? The feature does not depend on other changes in this proposal._
 
 ## Syntax
 
