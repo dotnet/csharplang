@@ -28,8 +28,8 @@
 
 ## May 10, 2021
 
+- Lambda / method group natural type (Chuck, Mads): https://github.com/dotnet/csharplang/pull/4728
 - *Triage championed features and milestones*
-- Lambda / method group natural type
 
 # C# Language Design Notes for 2021
 
