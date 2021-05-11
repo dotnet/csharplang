@@ -141,7 +141,7 @@ etc ... The code generation will be different only in that there will not be a c
 		    // statements
 	  }
 	  finally {
-		    if (resource != null) resource.Dispose();
+		    if (r != null) r.Dispose();
 	  }
 }
 ```
