@@ -23,14 +23,16 @@
 
 - Raw string literals (cyrusn): https://github.com/dotnet/csharplang/issues/4304
 
-## May 12, 2021
-
-- Experimental attribute (Immo): https://github.com/dotnet/designs/blob/main/accepted/2021/preview-features/preview-features.md
-- Simple C# programs (Phillip): https://github.com/dotnet/designs/pull/213
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## May 12, 2021
+
+[C# Language Design Notes for May 12th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-05-12.md)
+
+1. Experimental attribute
+2. Simple C# programs
 
 ## May 10, 2021
 
