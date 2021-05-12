@@ -17,10 +17,11 @@
 
 ## May 19, 2021
 
+- *Triage championed features and milestones*
+
 ## May 17, 2021
 
 - Raw string literals (cyrusn): https://github.com/dotnet/csharplang/issues/4304
-- *Triage championed features and milestones*
 
 ## May 12, 2021
 
