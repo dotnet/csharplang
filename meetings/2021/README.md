@@ -18,6 +18,7 @@
 ## May 19, 2021
 
 - *Triage championed features and milestones*
+- Error around default implementation of non-public members (Aleksey): https://github.com/dotnet/csharplang/discussions/4718
 
 ## May 17, 2021
 
