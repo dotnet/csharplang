@@ -80,6 +80,8 @@ The changes proposed here are targeted at the `Delegate` driven scenario.
 It should be valid to inspect the `MethodInfo` associated with a `Delegate` instance to determine the signature of the lambda expression or local function including any explicit attributes and additional metadata emitted by the compiler such as default parameters.
 This allows teams such as ASP.NET to make available the same behaviors for lambdas and local functions as ordinary methods.
 
+_Open issue: Should default values be supported for lambda expression parameters for completeness?_
+
 ### Well-known attributes
 _Should `System.Diagnostics.ConditionalAttribute` be disallowed on lambda expressions since there are few scenarios where a lambda expression could be used conditionally?_
 ```csharp
