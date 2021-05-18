@@ -34,13 +34,15 @@
 - *Triage championed features and milestones*
 - Error around default implementation of non-public members (Aleksey): https://github.com/dotnet/csharplang/discussions/4718
 
-## May 17, 2021
-
-- Raw string literals (cyrusn): https://github.com/dotnet/csharplang/issues/4304
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## May 17, 2021
+
+[C# Language Design Notes for May 17th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-05-17.md)
+
+1. Raw string literals
 
 ## May 12, 2021
 
