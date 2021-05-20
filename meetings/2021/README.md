@@ -27,16 +27,23 @@
 
 ## May 26, 2021
 
-## May 24, 2021
-
-## May 19, 2021
-
-- *Triage championed features and milestones*
-- Error around default implementation of non-public members (Aleksey): https://github.com/dotnet/csharplang/discussions/4718
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## May 19, 2021
+
+[C# Language Design Notes for May 19th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-05-19.md)
+
+1. Triage
+    1. Checked operators
+    2. Relaxing shift operator requirements
+    3. Unsigned right shift operator
+    4. Opaque parameters
+    5. Column mapping directive
+    6. Only allow lexical keywords
+    7. Allow nullable types in declaration patterns
+2. Protected interface methods
 
 ## May 17, 2021
 
