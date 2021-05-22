@@ -191,6 +191,32 @@ to
 
 *These restrictions do not apply to occurrences of types within declarations of **non-virtual, non-abstract** static members.*
 
+## Processing of user-defined implicit conversions
+https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#processing-of-user-defined-implicit-conversions
+
+The following bullet points
+
+*  Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), and `T0` (if `T0` is a class or struct).
+*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing `S` to a type encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+
+are adjusted as follows (additions/removals are in bold):
+
+*  Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), and `T0` (if `T0` is a class or struct). **If `S0` is a type parameter with *effective base class* System.Object, System.ValueType, System.Array or System.Enum, interfaces from its *effective interface set* and their base interfaces are added to the set. If `T0` is a type parameter with *effective base class*  System.Object, System.ValueType, System.Array or System.Enum, interfaces from its *effective interface set* and their base interfaces are added to the set.**
+*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit conversion operators declared by the **~~classes or structs~~types** in `D` that convert from a type encompassing `S` to a type encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+
+## Processing of user-defined explicit conversions
+https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#processing-of-user-defined-explicit-conversions
+
+The following bullet points
+
+*  Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), `T0` (if `T0` is a class or struct), and the base classes of `T0` (if `T0` is a class).
+*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+
+are adjusted as follows (additions/removals are in bold):
+
+*  Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), `T0` (if `T0` is a class or struct), and the base classes of `T0` (if `T0` is a class). **If `S0` is a type parameter with *effective base class* System.Object, System.ValueType, System.Array or System.Enum, interfaces from its *effective interface set* and their base interfaces are added to the set. If `T0` is a type parameter with *effective base class*  System.Object, System.ValueType, System.Array or System.Enum, interfaces from its *effective interface set* and their base interfaces are added to the set.**
+*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the **~~classes or structs~~types** in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+
 
 # Drawbacks
 [drawbacks]: #drawbacks
