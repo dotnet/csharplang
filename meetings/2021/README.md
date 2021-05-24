@@ -25,9 +25,11 @@
 
 ## Jun 2, 2021
 
+- Extended `#line` directives (Tomas): https://github.com/dotnet/csharplang/issues/4747
+
 ## May 26, 2021
 
-- List patterns
+- List patterns (Julien): https://gist.github.com/jcouv/fa62923b3ee36de7f8553d2c1c58ec43
 
 # C# Language Design Notes for 2021
 
