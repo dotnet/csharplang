@@ -27,6 +27,8 @@
 
 ## May 26, 2021
 
+- List patterns
+
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
