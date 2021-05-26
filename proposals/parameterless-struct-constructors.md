@@ -58,8 +58,8 @@ Constructors can be declared `extern` or `unsafe`.
 Constructors cannot be `partial`.
 
 ### Executing field initializers
-Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-variable-initializers):
-> When an instance constructor has no constructor initializer, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor ... . The variable initializers are executed in the textual order in which they appear in the ... declaration.
+Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-variable-initializers) with **one qualifier**:
+> When an instance constructor has no constructor initializer, **or when the constructor initializer `this()` represents the default parameterless constructor**, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor ... . The variable initializers are executed in the textual order in which they appear in the ... declaration.
 
 ### Definite assignment
 Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)).
