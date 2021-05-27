@@ -4,6 +4,8 @@
 
 ## Schedule when convenient
 
+- Open questions in CallerArgumentExpression (Fred, Julien): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
