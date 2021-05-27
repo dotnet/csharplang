@@ -26,6 +26,7 @@
 ## Jun 2, 2021
 
 - Extended `#line` directives (Tomas): https://github.com/dotnet/csharplang/issues/4747
+- `record` with circular reference - `ToString()`, `GetHashCode()`, `Equals(object)` implementations (Chuck): https://github.com/dotnet/roslyn/issues/48646
 
 ## May 26, 2021
 
