@@ -30,13 +30,15 @@
 - Extended `#line` directives (Tomas): https://github.com/dotnet/csharplang/issues/4747
 - `record` with circular reference - `ToString()`, `GetHashCode()`, `Equals(object)` implementations (Chuck): https://github.com/dotnet/roslyn/issues/48646
 
-## May 26, 2021
-
-- List patterns (Julien): https://gist.github.com/jcouv/fa62923b3ee36de7f8553d2c1c58ec43
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## May 26, 2021
+
+[C# Language Design Notes for May 26th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-05-26.md)
+
+1. Open questions in list patterns
 
 ## May 19, 2021
 
