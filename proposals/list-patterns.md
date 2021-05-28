@@ -74,10 +74,10 @@ Notes:
 A *length_pattern* is compatible with any type that is *countable* — it has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.  
 A *length_pattern* is also compatible with any type that is *enumerable* — it can be used in `foreach`.
 
-A *list_pattern* is compatible with any type that is *countable* as well as *indexable* — it has an accessible indexer that takes an `Index` as the argument or otherwise an accessible indexer with a single `int` parameter. If both indexers are present, the former is preferred.  
+A *list_pattern* is compatible with any type that is *countable* as well as *indexable* — it has an accessible indexer that takes an `Index` as an argument or otherwise an accessible indexer with a single `int` parameter. If both indexers are present, the former is preferred.  
 A *list_pattern* is also compatible with any type that is *enumerable*.
 
-A *slice_pattern* with a subpattern is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` argument or otherwise an accessible `Slice` method with two `int` parameters. If both are present, the former is preferred.
+A *slice_pattern* with a subpattern is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` as an argument or otherwise an accessible `Slice` method with two `int` parameters. If both are present, the former is preferred.
 A *slice_pattern* without a subpattern is compatible with any type that is compatible with a *list_pattern*.
 
 ```
