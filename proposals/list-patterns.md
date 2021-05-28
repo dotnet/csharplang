@@ -43,7 +43,7 @@ property_pattern
   ;
 
 slice_pattern
-  : '..' negated_pattern?
+  : '..' pattern?
   ;
 
 primary_pattern
@@ -59,7 +59,7 @@ There are three new patterns:
 - The *length_pattern* is used to match the length.
 - A *slice_pattern* is only permitted once and only directly in a *list_pattern_clause* and discards _**zero or more**_ elements.
 
-> **Open question**: Should we accept a general *pattern* following `..` in a *slice_pattern*?
+> **Open question**: Should we accept a general *pattern* following `..` in a *slice_pattern*? (answer [LDM 2021-05-26]: Yes, any pattern is allowed after a slice.)
 
 Notes:
 
@@ -69,28 +69,23 @@ Notes:
 - If the *type* is an *array_type*, the *length_pattern_clause* is disambiguated so that `int[] [0]` would match an empty integer array.
 - All other combinations are valid, for instance `T (p0, p1) [p2] { name: p3 } v` or `T (p0, p1) [p2] { p3 } v` where each clause can be omitted.
 
-> **Open question**: Should we support all these combinations?
-
 #### Pattern compatibility
 
 A *length_pattern* is compatible with any type that is *countable* — it has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.  
 A *length_pattern* is also compatible with any type that is *enumerable* — it can be used in `foreach`.
 
-A *list_pattern* is compatible with any type that is *countable* as well as *indexable* — it has an accessible indexer that takes an `Index` or `int` argument. If both indexers are present, the former is preferred.  
+A *list_pattern* is compatible with any type that is *countable* as well as *indexable* — it has an accessible indexer that takes an `Index` as an argument or otherwise an accessible indexer with a single `int` parameter. If both indexers are present, the former is preferred.  
 A *list_pattern* is also compatible with any type that is *enumerable*.
 
-A *slice_pattern* is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` argument or otherwise an accessible `Slice` method that takes two `int` arguments. If both are present, the former is preferred.  
-A *slice_pattern* without a subpattern is also compatible with any type that is *enumerable*.
+A *slice_pattern* with a subpattern is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` as an argument or otherwise an accessible `Slice` method with two `int` parameters. If both are present, the former is preferred.
+A *slice_pattern* without a subpattern is compatible with any type that is compatible with a *list_pattern*.
 
 ```
 enumerable is { 1, 2, .. } // okay
 enumerable is { 1, 2, ..var x } // error
 ```
 
-This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support) but relaxed to ignore optional or `params` parameters, if any.
-
-> **Open question**: We should define the exact binding rules for any of these members and decide if we want to diverge from the range spec.  
-> **Open question**: Should extension methods play a role in sliceability?  
+This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support).
 
 #### Semantics on enumerable type
 
@@ -153,7 +148,7 @@ case {.., 1, _}: // expr.Length is >= 2 && expr[^2] is 1
 
 The order in which subpatterns are matched at runtime is unspecified, and a failed match may not attempt to match all subpatterns.
 
-> **Open question**: The pattern `{..}` tests for  `expr.Length >= 0`. Should we omit such test (assuming `Length` is always non-negative)?
+> **Open question**: By this definition, the pattern `{..}` tests for `expr.Length >= 0`. Should we omit such test, assuming `Length` is always non-negative? (answer [LDM 2021-05-26]: `{ .. }` will not emit a Length check)
  
 #### Lowering on countable/indexeable/sliceable type
 
@@ -315,21 +310,9 @@ This should allow merging branches of the patterns DAG, thus avoiding creating m
 Note: async enumerables are out-of-scope. (Confirmed in LDM 4/12/2021)
 Note: sub-patterns are disallowed in list-patterns on enumerables for now despite some desirable uses: `e is { 1, 2, ..[var count] }` (LDM 4/12/2021)
 
-### Additional types
-
-Beyond the pattern-based mechanism outlined above, there are an additional two set of types that can be covered as a special case.
-
-- **Multi-dimensional arrays**: All nested list patterns must agree to a length range.
-- **Foreach-able types**: This includes pattern-based and extension `GetEnumerator`.
-
-A slice subpattern (i.e. the pattern following `..` in a *slice_pattern*) is disallowed for either of the above.
-
 ## Unresolved questions
 
-1. All multi-dimensional arrays can be non-zero-based. We can either:  
-    1. Add a runtime helper to check if the array is zero-based across all dimensions.
-    2. Call `GetLowerBound` and add it to each indexer access to pass the *correct* index.
-    3. Assume all arrays are zero-based since that's the default for arrays created by `new` expressions.
+1. Should we support multi-dimensional arrays? (answer [LDM 2021-05-26]: Not supported. If we want to make a general MD-array focused release, we would want to revisit all the areas they're currently lacking, not just list patterns.)
 1. Should we limit the list-pattern to `IEnumerable` types? Then we could allow `{ 1, 2, ..var x }` (`x` would be an `IEnumerable` we would cook up) (answer [LDM 4/12/2021]: no, we'll disallow sub-pattern in slice pattern on enumerable for now)
 2. Should we try and optimize list-patterns like `{ 1, _, _ }` on a countable enumerable type? We could just check the first enumerated element then check `Length`/`Count`. Can we assume that `Count` agrees with enumerated count?
 3. Should we try to cut the enumeration short for length-patterns on enumerables in some cases? (computing min/max acceptable count and checking partial count against that)
