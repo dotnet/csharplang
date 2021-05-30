@@ -96,7 +96,7 @@ case {.., 1, _}: // expr.Length is >= 2 && expr[^2] is 1
 
 The order in which subpatterns are matched at runtime is unspecified, and a failed match may not attempt to match all subpatterns.
  
-#### Lowering on countable/indexeable/sliceable type
+#### Lowering
 
 A pattern of the form `expr is {1, 2, 3}` is equivalent to the following code (if compatible via implicit `Index` support):
 ```cs
@@ -118,4 +118,4 @@ The *input type* for the *slice_pattern* is the return type of the underlying `t
 
 1. Should we support multi-dimensional arrays? (answer [LDM 2021-05-26]: Not supported. If we want to make a general MD-array focused release, we would want to revisit all the areas they're currently lacking, not just list patterns.)
 2. Should we accept a general *pattern* following `..` in a *slice_pattern*? (answer [LDM 2021-05-26]: Yes, any pattern is allowed after a slice.)
-3. By this definition, the pattern `{..}` tests for `expr.Length >= 0`. Should we omit such test, assuming `Length` is always non-negative? (answer [LDM 2021-05-26]: `{ .. }` will not emit a Length check)
+3. By this definition, the pattern `{..}` tests for `expr.Length >= 0`. Should we omit such test, assuming `Length` is always non-negative? (answer [LDM 2021-05-26]: `{..}` will not emit a Length check)
