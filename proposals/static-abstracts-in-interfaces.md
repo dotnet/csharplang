@@ -253,9 +253,15 @@ Another *additional* feature would be to allow static members to be abstract and
 
 Called out above, but here's a list:
 
-- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as static abstract members as well?
+- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as static abstract members as well? Note, the current implementation is adjusted to allow them only in abstract form. If we don't want this behavior after all, there is work to disallow it.
 - Should the qualifying `I.` in an explicit operator implementation go before the `operator` keyword or the operator symbol (e.g. `+`) itself?
 - Should we relax the operator restrictions further so that the restricted operand can be of any type that derives from, or has one of some set of implicit conversions to the enclosing type?
+- The "Operator restrictions" section must provide more precise rules for: "These requirements need to be relaxed so that a restricted operand is allowed to be of a type parameter that is constrained to `T`." What type parameters are allowed, what exactly does it mean to be constraint to `T`, etc. The current implementation allows only type parameters that belong to the immediate contatining type and only those that have containing type as one of the directly specified type constraints (https://github.com/dotnet/roslyn/issues/53801). 
+
+Not called out above:
+
+- Confirm whether we would like to support use of static abstract methods declared in interfaces as operators in query expressions (https://github.com/dotnet/roslyn/issues/53796).
+- Confirm the rules outlined in "Processing of user-defined implicit conversions" and "Processing of user-defined explicit conversions" sections above.
 
 # Design meetings
 
