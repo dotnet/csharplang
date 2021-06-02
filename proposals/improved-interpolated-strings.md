@@ -466,7 +466,7 @@ namespace System.Runtime.CompilerServices
 {
     public ref struct DefaultInterpolatedStringHandler
     {
-        public static DefaultInterpolatedStringHandler(int baseLength, int holeCount, IFormatProvider? provider); // additional factory
+        public DefaultInterpolatedStringHandler(int baseLength, int holeCount, IFormatProvider? provider); // additional factory
         …
     }
 }
