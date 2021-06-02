@@ -209,7 +209,7 @@ This is introduced so that things that can simply be emitted as constants do so,
 
 ### InterpolatedStringHandler and Usage
 
-We introduce a new type in `System.Runtime.CompilerServices`: `InterpolatedStringHandler`. This is a ref struct with many of the same semantics as `ValueStringBuilder`,
+We introduce a new type in `System.Runtime.CompilerServices`: `DefaultInterpolatedStringHandler`. This is a ref struct with many of the same semantics as `ValueStringBuilder`,
 intended for direct use by the C# compiler. This struct would look approximately like this:
 
 ```cs
