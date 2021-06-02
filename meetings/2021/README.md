@@ -24,12 +24,13 @@
 ## Jun 14, 2021
 
 ## Jun 7, 2021
+- Runtime check on desktop for parameterless struct constructors (Chuck)
+- misc list-patterns questions (syntax, exhaustiveness) (Julien)
 
 ## Jun 2, 2021
 
 - Extended `#line` directives (Tomas): https://github.com/dotnet/csharplang/issues/4747
 - `record` with circular reference - `ToString()`, `GetHashCode()`, `Equals(object)` implementations (Chuck): https://github.com/dotnet/roslyn/issues/48646
-- Runtime check on desktop for parameterless struct constructors (Chuck)
 - Parsing ambiguities for lambda return types (Chuck)
 
 # C# Language Design Notes for 2021
