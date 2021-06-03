@@ -48,4 +48,4 @@ For example, a pattern of the form `{ Prop1.Prop2: pattern }` is exactly equival
 
 Note that this will include the null check when *T* is a nullable value type or a reference type. This null check means that the nested properties available will be the properties of *T0*, not of *T*.
 
-Repeated member paths are allowed. Under the hood, such member accesses are simplified to be evaluated once.
+Repeated member paths are allowed. The compilation of pattern matching can take advantage of common parts of patterns.
