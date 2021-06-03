@@ -292,6 +292,9 @@ as a _member\_access_ through type `T`.
 4. Final validation on `F` is performed.
     * If any element of `A` occurred lexically after `i`, an error is produced and no further steps are taken.
 
+Note: the resolution here intentionally do _not_ use the actual expressions passed as other arguments for `Argx` elements. We only consider the types post-conversion. This makes sure that we
+don't have double-conversion issues, or unexpected cases where a lambda is bound to one delegate type when passed to `M1` and bound to a different delegate type when passed to `M`.
+
 **~~Open Question~~**:
 
 If we use a constructor instead of `Create`, we'd improve runtime codegen, at the expense of narrowing the pattern a bit.
@@ -362,6 +365,9 @@ of a larger expression `e`, any components of `e` that occurred before `i` will 
 4. For every `Fax` in `Fa`, `Fax` is called on `ib` with either the current literal component or _interpolation_ expression, as appropriate. If `Fax` returns a `bool`, the result is
 logically anded with all preceeding `Fax` calls.
 5. The result of the conversion is `ib`.
+
+Again, note that arguments passed to `Fc` and arguments passed to `e` are the same temp. Conversions may occur on top of the temp to convert to a form that `Fc` requires, but for example
+lambdas cannot be bound to a different delegate type between `Fc` and `e`.
 
 **~~Open~~ Question**
 
@@ -510,8 +516,9 @@ version that does not need to allocate any scratch space at all.
 
 _Answer_:
 
-We will treat interpolated string handlers the same as any other type: this means ref struct usage in holes is disallowed. The spec around lowering of string literals used as strings
-is intentionally vague to allow the compiler to decide on what rules it deems appropriate, but for custom handler types they will have to follow the same rules as the rest of the language.
+We will treat interpolated string handlers the same as any other type: this means that if the handler type is a ref struct and the current context doesn't allow the usage of ref structs, it is
+illegal to use handler here. The spec around lowering of string literals used as strings is intentionally vague to allow the compiler to decide on what rules it deems appropriate, but for custom
+handler types they will have to follow the same rules as the rest of the language.
 
 ### Handlers as ref parameters
 
