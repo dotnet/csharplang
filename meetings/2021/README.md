@@ -23,14 +23,18 @@
 - Open questions in CallerArgumentExpression (Fred): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
 - list-patterns syntax (Julien)
 
-## Jun 7, 2021
-- Runtime check on desktop for parameterless struct constructors (Chuck)
-- misc list-patterns questions (syntax, exhaustiveness) (Julien)
-- Open questions in CallerArgumentExpression (Fred): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jun 7, 2021
+
+[C# Language Design Notes for June 7th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-07.md)
+
+1. Runtime checks for parameterless struct constructors
+2. List patterns
+    a. Exhaustiveness
+    b. Length pattern feedback
 
 ## Jun 2, 2021
 
