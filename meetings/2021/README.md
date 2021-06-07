@@ -4,8 +4,6 @@
 
 ## Schedule when convenient
 
-- Open questions in CallerArgumentExpression (Fred, Julien): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -26,6 +24,8 @@
 ## Jun 7, 2021
 - Runtime check on desktop for parameterless struct constructors (Chuck)
 - misc list-patterns questions (syntax, exhaustiveness) (Julien)
+- Open questions in CallerArgumentExpression (Fred, Julien): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
+
 
 # C# Language Design Notes for 2021
 
