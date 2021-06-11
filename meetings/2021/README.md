@@ -21,7 +21,7 @@
 
 ## Jun 14, 2021
 - Open questions in CallerArgumentExpression (Fred): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
-- list-patterns syntax (Julien)
+- list-patterns syntax (Julien): https://github.com/alrz/csharplang/blob/list-patterns/proposals/list-patterns.md
 
 # C# Language Design Notes for 2021
 
