@@ -18,7 +18,7 @@
 ## Jun 28, 2021
 
 ## Jun 21, 2021
-- async method builder overrides (Julien)
+- async method builder overrides (Julien): https://github.com/dotnet/roslyn/issues/51999
 
 ## Jun 14, 2021
 - Open questions in CallerArgumentExpression (Fred): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
