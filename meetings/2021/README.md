@@ -19,13 +19,16 @@
 
 ## Jun 21, 2021
 
-## Jun 14, 2021
-- Open questions in CallerArgumentExpression (Fred): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
-- list-patterns syntax (Julien): https://github.com/alrz/csharplang/blob/list-patterns/proposals/list-patterns.md
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jun 14, 2021
+
+[C# Language Design Notes for June 14th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-14.md)
+
+1. Open questions in CallerArgumentExpressionAttribute
+2. List pattern syntax
 
 ## Jun 7, 2021
 
