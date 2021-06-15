@@ -259,7 +259,7 @@ This code will print "Get Length 2".
 The language will special case the following known types:
 
 - `string`: the method `Substring` will be used instead of `Slice`.
-- `array`: the method `System.Reflection.CompilerServices.GetSubArray` will be used instead of `Slice`.
+- `array`: the method `System.Runtime.CompilerServices.RuntimeHelpers.GetSubArray` will be used instead of `Slice`.
 
 ## Alternatives
 
