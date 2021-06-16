@@ -64,7 +64,7 @@ Features Added in C# Language Versions
 
 # [C# 7.0](https://blogs.msdn.microsoft.com/dotnet/2017/03/09/new-features-in-c-7-0/) - Visual Studio 2017
 - [Out variables](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/out-var.md)
-- [Pattern matching](https://github.com/dotnet/csharplang/blob/master/proposals/patterns.md)
+- [Pattern matching](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.0/pattern-matching.md)
 - [Tuples](https://github.com/dotnet/roslyn/blob/master/docs/features/tuples.md)
 - [Deconstruction](https://github.com/dotnet/roslyn/blob/master/docs/features/deconstruction.md)
 - [Discards](https://github.com/dotnet/roslyn/blob/master/docs/features/discards.md)
