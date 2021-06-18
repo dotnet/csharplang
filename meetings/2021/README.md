@@ -15,8 +15,6 @@
 
 ## Jul 12, 2021
 
-## Jun 28, 2021
-
 ## Jun 21, 2021
 
 - Open questions for explicit lambda return types (Chuck): https://github.com/dotnet/csharplang/blob/c642f43b43aee24f51642878eac9a03777cc34f5/proposals/lambda-improvements.md#explicit-return-type
