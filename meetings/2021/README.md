@@ -20,7 +20,7 @@
 ## Jun 21, 2021
 
 - Open questions for explicit lambda return types (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/lambda-improvements.md#explicit-return-type
-- _Available_
+- Are list patterns a part of recursive patterns? (Julien/Mads): https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-14.md#list-pattern-syntax
 
 # C# Language Design Notes for 2021
 
