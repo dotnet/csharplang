@@ -104,6 +104,24 @@ f = delegate int { return 1; };         // syntax error
 f = delegate int (int x) { return x; }; // syntax error
 ```
 
+_Open issue: Should method type inference make inferences from lambda return types?_
+```csharp
+static void F<T>(Func<T, T> f) { ... }
+F(int (i) => i); // error?
+```
+
+_Open issue: Are variance conversions allowed from lambda return type to delegate return type?_
+```csharp
+Func<object> f1 = string () => null; // error?
+Func<object?> f2 = object () => x;   // warning? 
+```
+
+_Open issue: Should parser allow ref return types in assignment without parentheses?_
+```csharp
+Delegate d1 = (ref int () => x); // ok
+Delegate d2 = ref int () => x;   // error?
+```
+
 ## Natural (function) type
 A lambda expression has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [inferred return type](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#inferred-return-type)).
 
