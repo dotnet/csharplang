@@ -37,6 +37,7 @@ There are two new patterns:
 A *list_pattern* is compatible with any type that is *countable* as well as *indexable* — it has an accessible indexer that takes an `Index` as an argument or otherwise an accessible indexer with a single `int` parameter. If both indexers are present, the former is preferred.  
 
 A *slice_pattern* with a subpattern is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` as an argument or otherwise an accessible `Slice` method with two `int` parameters. If both are present, the former is preferred.
+
 A *slice_pattern* without a subpattern is compatible with any type that is compatible with a *list_pattern*.
 
 This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support).
