@@ -10,7 +10,7 @@ The pattern syntax is modified as follow:
 
 ```antlr
 list_pattern_clause
-  : '[' (subpattern (',' subpattern)* ','?)? ']'
+  : '[' (pattern (',' pattern)* ','?)? ']'
   ;
 
 list_pattern
