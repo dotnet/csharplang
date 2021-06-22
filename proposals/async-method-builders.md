@@ -68,7 +68,8 @@ Example of usage on a method:
 static async ValueTask<int> ExampleAsync() { ... }
 ```
 
-It is an error to apply the attribute multiple times on a given method.
+It is an error to apply the attribute multiple times on a given method.  
+It is an error to apply the attribute to a lambda with an implicit return type.  
 
 A developer who wants to use a specific custom builder for all of their methods can do so by putting the relevant attribute on each method.  
 
@@ -83,12 +84,15 @@ If an `AsyncMethodBuilder` attribute is present, we take the builder type specif
   If the async method's return type does not have a single type argument, then we produce an error.  
 
 We verify that the builder type is compatible with the return type of the async method:
-1. look for the public `Create` method with no type parameters and no parameters on the constructed override type.  
+1. look for the public `Create` method with no type parameters and no parameters on the constructed builder type.  
   It is an error if the method is not found.
-2. consider the return type of that `Create` method (a builder type) and look for the public `Task` property.  
+  It is an error if the method returns a type other than the constructed builder type.  
+2. look for the public `Task` property.  
   It is an error if the property is not found.
 3. consider the type of that `Task` property (a task-like type):  
   It is an error if the task-like type does not matches the return type of the async method.
+
+Note that it is not necessary for the return type of the method to be a task-like type.
 
 ### Execution 
 
