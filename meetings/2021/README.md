@@ -15,14 +15,17 @@
 
 ## Jul 12, 2021
 
-## Jun 21, 2021
-
-- Open questions for explicit lambda return types (Chuck): https://github.com/dotnet/csharplang/blob/c642f43b43aee24f51642878eac9a03777cc34f5/proposals/lambda-improvements.md#explicit-return-type
-- Are list patterns a part of recursive patterns? (Julien/Mads): https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-14.md#list-pattern-syntax
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jun 21, 2021
+
+[C# Language Design Notes for June 21st, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-21.md)
+
+1. Open questions for lambda return types
+2. List patterns in recursive patterns
+3. Open questions in async method builder
 
 ## Jun 14, 2021
 
