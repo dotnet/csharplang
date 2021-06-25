@@ -26,6 +26,7 @@ Overview of meetings and agendas for 2021
 1. Open questions for lambda return types
 2. List patterns in recursive patterns
 3. Open questions in async method builder
+4. Email Decision: Duplicate global using warnings
 
 ## Jun 14, 2021
 
