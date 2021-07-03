@@ -89,7 +89,7 @@ Examples:
 ```csharp
 var array = new int[] { 1, 2, 3, 4, 5 };
 var thirdItem = array[2];    // array[2]
-var lastItem = array[^1];    // array[new Index(1, fromEnd: true)]
+var lastItem = array[^1];    // array[new Index(1, fromEnd: true).GetOffset(array.Length)]
 ```
 
 #### System.Range
