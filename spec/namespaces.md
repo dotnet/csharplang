@@ -496,7 +496,32 @@ the *using_static_directive* imports the extension method `M` contained in `N1.A
 
 A *using_static_directive* only imports members and types declared directly in the given type, not members and types declared in base classes.
 
-TODO: Example
+```csharp
+namespace N1
+{
+    class D
+    {
+        public static D H() { return new D(); }
+    }
+
+    class A : D
+    {
+        public class B { }
+        public static B M() { return new B(); }
+    }
+}
+
+namespace N2
+{
+    using static N1.A;
+    class C
+    {
+        void N() { B b = M(); }
+        void J() { N1.D d = H(); } // Error, H unknown
+        void K() { N1.D d = N1.D.H(); } // Ok, fully qualified
+    }
+}
+```
 
 Ambiguities between multiple *using_namespace_directives* and *using_static_directives* are discussed in [Using namespace directives](namespaces.md#using-namespace-directives).
 
