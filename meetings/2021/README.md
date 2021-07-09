@@ -4,6 +4,8 @@
 
 ## Schedule when convenient
 
+- Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
