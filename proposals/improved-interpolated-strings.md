@@ -361,7 +361,7 @@ lowering for `i` is performed as follows:
 of a larger expression `e`, any components of `e` that occurred before `i` will be evaluated as well, again in lexical order.
 2. `Fc` is called with the length of the interpolated string literal components, the number of _interpolation_ holes, any previously evaluated arguments, and a `bool` out argument
 (if `Fc` was resolved with one as the last parameter). The result is stored into a temporary value `ib`.
-    1. The length of the literal components is calculated after replacing replacing any _open_brace_escape_sequence_ with a single `{`, and any _close_brace_escape_sequence_
+    1. The length of the literal components is calculated after replacing any _open_brace_escape_sequence_ with a single `{`, and any _close_brace_escape_sequence_
     with a single `}`.
 3. If `Fc` ended with a `bool` out argument, a check on that `bool` value is generated. If true, the methods in `Fa` will be called. Otherwise, they will not be called.
 4. For every `Fax` in `Fa`, `Fax` is called on `ib` with either the current literal component or _interpolation_ expression, as appropriate. If `Fax` returns a `bool`, the result is
