@@ -364,6 +364,8 @@ of a larger expression `e`, any components of `e` that occurred before `i` will 
 3. If `Fc` ended with a `bool` out argument, a check on that `bool` value is generated. If true, the methods in `Fa` will be called. Otherwise, they will not be called.
 4. For every `Fax` in `Fa`, `Fax` is called on `ib` with either the current literal component or _interpolation_ expression, as appropriate. If `Fax` returns a `bool`, the result is
 logically anded with all preceeding `Fax` calls.
+    1. If `Fax` is a call to `AppendLiteral`, the literal component is unescaped by replacing any _open_brace_escape_sequence_ with a single `{`, and any _close_brace_escape_sequence_s
+    with a single `}`.
 5. The result of the conversion is `ib`.
 
 Again, note that arguments passed to `Fc` and arguments passed to `e` are the same temp. Conversions may occur on top of the temp to convert to a form that `Fc` requires, but for example
