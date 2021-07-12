@@ -1,4 +1,4 @@
-﻿# Namespaces
+# Namespaces - C# specification
 
 C# programs are organized using namespaces. Namespaces are used both as an "internal" organization system for a program, and as an "external" organization system—a way of presenting program elements that are exposed to other programs.
 

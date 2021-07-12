@@ -1,4 +1,4 @@
-﻿# Expressions
+# Expressions - C# specification
 
 An expression is a sequence of operators and operands. This chapter defines the syntax, order of evaluation of operands and operators, and meaning of expressions.
 
