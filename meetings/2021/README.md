@@ -15,14 +15,16 @@
 
 ## Jul 19, 2021
 
-## Jul 12, 2021
-
-- C# 10 feature status (Mads, Jared, Julien): https://github.com/dotnet/roslyn/blob/main/docs/Language%20Feature%20Status.md#c-next
-
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jul 12, 2021
+
+[C# Language Design Notes for June 21st, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-21.md)
+
+1. C# 10 Feature Status
+2. Speakable names for top-level statements
 
 ## Jun 21, 2021
 
