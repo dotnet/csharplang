@@ -21,7 +21,7 @@ Overview of meetings and agendas for 2021
 
 ## Jul 12, 2021
 
-[C# Language Design Notes for June 21st, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-21.md)
+[C# Language Design Notes for July 12th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-12.md)
 
 1. C# 10 Feature Status
 2. Speakable names for top-level statements
