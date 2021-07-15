@@ -122,7 +122,7 @@ A boxing conversion exists from a *nullable_type* to a reference type, if and on
 
 A value type has a boxing conversion to an interface type `I` if it has a boxing conversion to an interface type `I0` and `I0` has an identity conversion to `I`.
 
-A value type has a boxing conversion to an interface type `I` if it has a boxing conversion to an interface or delegate type `I0` and `I0` is variance-convertible ([Variance conversion](interfaces.md#variance-conversion)) to `I`.
+A value type has a boxing conversion to an interface type `I` if it has a boxing conversion to an interface type `I0` and `I0` is variance-convertible ([Variance conversion](interfaces.md#variance-conversion)) to `I`.
 
 Boxing a value of a *non_nullable_value_type* consists of allocating an object instance and copying the *value_type* value into that instance. A struct can be boxed to the type `System.ValueType`, since that is a base class for all structs ([Inheritance](structs.md#inheritance)).
 
@@ -308,7 +308,7 @@ An unboxing conversion exists from a reference type to a *nullable_type* if an u
 
 A value type `S` has an unboxing conversion from an interface type `I` if it has an unboxing conversion from an interface type `I0` and `I0` has an identity conversion to `I`.
 
-A value type `S` has an unboxing conversion from an interface type `I` if it has an unboxing conversion from an interface or delegate type `I0` and either `I0` is variance-convertible to `I` or `I` is variance-convertible to `I0` ([Variance conversion](interfaces.md#variance-conversion)).
+A value type `S` has an unboxing conversion from an interface type `I` if it has an unboxing conversion from an interface type `I0` and either `I0` is variance-convertible to `I` or `I` is variance-convertible to `I0` ([Variance conversion](interfaces.md#variance-conversion)).
 
 An unboxing operation consists of first checking that the object instance is a boxed value of the given *value_type*, and then copying the value out of the instance. Unboxing a null reference to a *nullable_type* produces the null value of the *nullable_type*. A struct can be unboxed from the type `System.ValueType`, since that is a base class for all structs ([Inheritance](structs.md#inheritance)).
 
