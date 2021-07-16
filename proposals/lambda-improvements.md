@@ -106,10 +106,10 @@ f = delegate int { return 1; };         // syntax error
 f = delegate int (int x) { return x; }; // syntax error
 ```
 
-_Open issue: Should method type inference make inferences from lambda return types?_
+Method type inference should make an exact inference from an explicit lambda return type.
 ```csharp
 static void F<T>(Func<T, T> f) { ... }
-F(int (i) => i); // error?
+F(int (i) => i); // Func<int, int>
 ```
 
 _Open issue: Are variance conversions allowed from lambda return type to delegate return type?_
