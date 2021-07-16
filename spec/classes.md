@@ -2873,9 +2873,18 @@ the underlying `TextWriter` for the output device is created. But if the applica
 
 ### Automatically implemented properties
 
-An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with semicolon-only accessor bodies. Auto-properties must have a get accessor and can optionally have a set accessor.
+An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with either or both:
 
-When a property is specified as an automatically implemented property, a hidden backing field is automatically available for the property, and the accessors are implemented to read from and write to that backing field. If the auto-property has no set accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
+1. an accessor with a semicolon-only body
+2. usage of the `field` contextual keyword ([Keywords](lexical-structure.md#keywords)) within the accessors or expression body of the property. The `field` identifier is only considered the `field` keyword when there is no existing symbol named `field` in scope at that location.
+
+When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property, and any semicolon-only `get` accessor is implemented to read from, and any semicolon-only `set` accessor to write to that backing field. The backing field can be referenced directly using the `field` keyword within all accessors and within the property expression body. Because the field is unnamed, it cannot be used in a `nameof` expression.
+
+If the auto-property does not have a set accessor, the backing field can still be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the backing field of the property.
+
+If the auto-property has only a semicolon-only get accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)).
+
+An auto-property is not allowed to only have a single semicolon-only `set` accessor without a `get` accessor.
 
 An auto-property may optionally have a *property_initializer*, which is applied directly to the backing field as a *variable_initializer* ([Variable initializers](classes.md#variable-initializers)).
 
@@ -2900,25 +2909,75 @@ The following example:
 ```csharp
 public class ReadOnlyPoint
 {
-	public int X { get; }
-	public int Y { get; }
-	public ReadOnlyPoint(int x, int y) { X = x; Y = y; }
+    public int X { get; }
+    public int Y { get; }
+    public ReadOnlyPoint(int x, int y) { X = x; Y = y; }
 }
 ```
 is equivalent to the following declaration:
 ```csharp
 public class ReadOnlyPoint
 {
-	private readonly int __x;
-	private readonly int __y;
-	public int X { get { return __x; } }
-	public int Y { get { return __y; } }
+    private readonly int __x;
+    private readonly int __y;
+    public int X { get { return __x; } }
+    public int Y { get { return __y; } }
     public ReadOnlyPoint(int x, int y) { __x = x; __y = y; }
 }
 ```
 
 Notice that the assignments to the readonly field are legal, because they occur within the constructor.
 
+
+The following example:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+}
+```
+is equivalent to the following declaration:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    public int X { get { return field; } set { field = value; } }
+    public int Y { get { return field; } set { field = value; } }
+}
+```
+which is equivalent to:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    private int __x;
+    private int __y;
+    public int X { get { return __x; } set { __x = value; } }
+    public int Y { get { return __y; } set { __y = value; } }
+}
+```
+
+The following example:
+```csharp
+// No 'field' symbol in scope.
+public class LazyInit
+{
+    public string Value => field ??= ComputeValue();
+    private static string ComputeValue() { /*...*/ }
+}
+```
+is equivalent to the following declaration:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    private string __value;
+    public string Value { get { return __value ??= ComputeValue(); } }
+    private static string ComputeValue() { /*...*/ }
+}
+```
 
 ### Accessibility
 
