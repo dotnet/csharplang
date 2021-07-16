@@ -112,16 +112,16 @@ static void F<T>(Func<T, T> f) { ... }
 F(int (i) => i); // Func<int, int>
 ```
 
-_Open issue: Are variance conversions allowed from lambda return type to delegate return type?_
+Variance conversions are not allowed from lambda return type to delegate return type (matching similar behavior for parameter types).
 ```csharp
-Func<object> f1 = string () => null; // error?
-Func<object?> f2 = object () => x;   // warning? 
+Func<object> f1 = string () => null; // error
+Func<object?> f2 = object () => x;   // warning
 ```
 
-_Open issue: Should parser allow ref return types in assignment without parentheses?_
+The parser should allow ref return types in assignment without parentheses.
 ```csharp
 Delegate d1 = (ref int () => x); // ok
-Delegate d2 = ref int () => x;   // error?
+Delegate d2 = ref int () => x;   // ok
 ```
 
 ## Natural (function) type
@@ -270,4 +270,6 @@ lambda_parameter
 
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-03.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-12.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-02.md#lambda-return-type-parsing
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-21.md#open-questions-for-lambda-return-types
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-12.md
