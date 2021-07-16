@@ -270,6 +270,7 @@ lambda_parameter
 
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-03.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-12.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-05-10.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-02.md#lambda-return-type-parsing
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-21.md#open-questions-for-lambda-return-types
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-12.md
