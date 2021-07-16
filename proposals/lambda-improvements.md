@@ -129,10 +129,13 @@ A lambda expression has a natural type if the parameters types are explicit and 
 
 A method group has a natural type if all candidate methods in the method group have a common signature. (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
 
-The natural type of a lambda expression of method group is a _function_type_ that represents the method signature: the parameter types and ref kinds, and return type and ref kind.
+The natural type of a lambda expression or method group is a _function_type_.
+A _function_type_ represents a method signature: the parameter types and ref kinds, and return type and ref kind.
 Lambda expressions or method groups with the same signature have the same _function_type_.
 
-A _function_type_ exists at compile time only: _function_types_ do not appear in source or metadata, and are not available from the compiler API.
+A _function_type_ exists at compile time only: _function_types_ do not appear in source or metadata.
+
+_Open issue: Should the _function_type_ be available from the compiler API?_
 
 ### Conversions
 From a _function_type_ `F` there are implicit conversions:
