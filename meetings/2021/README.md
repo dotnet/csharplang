@@ -15,6 +15,8 @@
 
 ## Jul 19, 2021
 
+- Scope of global usings revisited (Daniel): https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-15.md#global-usings
+
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
