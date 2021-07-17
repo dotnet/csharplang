@@ -135,7 +135,7 @@ Lambda expressions or method groups with the same signature have the same _funct
 
 A _function_type_ exists at compile time only: _function_types_ do not appear in source or metadata.
 
-_Open issue: Should the _function_type_ be available from the compiler API?_
+_Open issue: Should the function_type be available from the compiler API?_
 
 ### Conversions
 From a _function_type_ `F` there are implicit conversions:
@@ -150,8 +150,6 @@ There are no explicit conversions for _function_types_ since _function_types_ ca
 
 A conversion to `System.MulticastDelegate` or base type or interface realizes the lambda or method group as an instance of an appropriate delegate type.
 A conversion to `System.Linq.Expressions.Expression<TDelegate>` or base type realizes the lambda expression as an expression tree with an appropriate delegate type.
-
-_Open issue: Should we disallow conversion to `System.Object` for now - or to any base type or interface of `System.Delegate` - since those conversions currently imply generating a delegate instance, and leave open the possibility of generating a lighterweight function object in the future?_
 
 ### Type inference
 The existing rules for type inference are mostly unchanged (see [type inference](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#type-inference)). There are however a ***couple of changes*** below to specific phases of type inference.
@@ -200,8 +198,6 @@ var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
 
-_Open issue: Should we disallow `var` for now since it currently implies generating a delegate instance, and leave open the possibility of generating a lighterweight function object in the future?_
-
 ### Delegate types
 The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
 - if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
@@ -210,7 +206,7 @@ The delegate type for the lambda or method group and parameter types `P1, ..., P
 
 The compiler may allow more signatures to bind to `System.Action<>` and `System.Func<>` types in the future (if `ref struct` types are allowed type arguments for instance).
 
-_Should the compiler bind to a matching `System.Action<>` or `System.Func<>` type regardless of arity and synthesize a delegate type otherwise? If so, should the compiler warn if the expected delegate types are missing?_
+_Open issue: Should the compiler bind to a matching `System.Action<>` or `System.Func<>` type regardless of arity and synthesize a delegate type otherwise? If so, should the compiler warn if the expected delegate types are missing?_
 
 `modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
 
@@ -236,6 +232,8 @@ Invoke(() => "");  // Invoke(Func<string>) [unchanged]
 Invoke(() => 0);   // Invoke(Expression) [new]
 ```
 
+_Inferring a delegate type for lambdas and method groups will result in some breaking changes in overload resolution: see [issues/4674](https://github.com/dotnet/csharplang/issues/4674)._
+
 ## Direct invocation
 Lambda expressions may be invoked directly.
 The compiler will generate a call to the underlying method without generating a delegate instance or synthesizing a delegate type.
@@ -245,7 +243,7 @@ int zero = ((int x) => x)(0); // ok
 int one = (x => x)(1);        // ok
 ```
 
-_Open issue: Should direct invocation be handled separately? The feature does not depend on other changes in this proposal._
+_Direct invocation will be addressed separately since the feature does not depend on other changes in this proposal: see [issues/4748](https://github.com/dotnet/csharplang/issues/4748)._
 
 ## Syntax
 
@@ -266,13 +264,11 @@ lambda_parameter
   ;
 ```
 
-## Open issues
-- Inferring a delegate type for lambdas and method groups might result in breaking changes in overload resolution: see [issues/4674](https://github.com/dotnet/csharplang/issues/4674) for examples.
-
 ## Design meetings
 
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-03.md
-- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-12.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-12.md#lambda-improvements
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-21.md#inferred-types-for-lambdas-and-method-groups
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-05-10.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-02.md#lambda-return-type-parsing
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-21.md#open-questions-for-lambda-return-types
