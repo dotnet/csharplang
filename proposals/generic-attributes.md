@@ -1,10 +1,5 @@
 # Generic Attributes
 
-* [x] Proposed
-* [x] Prototype: [N/A](#)
-* [x] Implementation: [In Progress](https://github.com/dotnet/roslyn/tree/features/generic-attributes)
-* [ ] Specification: [Not Started](#)
-
 ## Summary
 [summary]: #summary
 
