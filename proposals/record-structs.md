@@ -143,7 +143,7 @@ The record struct includes a synthesized method equivalent to a method declared 
 public override string ToString();
 ```
 
-If the record's printable members do not include a readable property with a non-`readonly` `get` accessor, then the synthesized `PrintMembers` and `ToString` methods are `readonly`.
+If the record's printable members do not include a readable property with a non-`readonly` `get` accessor, then the synthesized `PrintMembers` and `ToString` methods are `readonly`. There is no requirement for the record's fields to be `readonly` for the `PrintMembers` and `ToString` methods to be `readonly`.
 
 The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility.
 
