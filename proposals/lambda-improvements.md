@@ -183,11 +183,11 @@ var fs = new[] { (string s) => s.Length; (string s) => int.Parse(s) } // Func<st
 ### `var`
 Lambda expressions and method groups with natural types can be used as initializers in `var` declarations.
 ```csharp
-var f1 = () => default;        // error: cannot infer type
-var f2 = x => { };             // error: cannot infer type
-var f3 = x => x;               // error: cannot infer type
-var f4 = () => 1;              // System.Func<int>
-var f5 = () : string => null;  // System.Func<string>
+var f1 = () => default;     // error: cannot infer type
+var f2 = x => { };          // error: cannot infer type
+var f3 = x => x;            // error: cannot infer type
+var f4 = () => 1;           // System.Func<int>
+var f5 = string () => null; // System.Func<string>
 
 static void F1() { }
 static void F1<T>(this T t) { }
