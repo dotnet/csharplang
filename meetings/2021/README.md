@@ -13,6 +13,8 @@
 
 ## Jul 26, 2021
 
+- Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. (cyrusn) https://github.com/dotnet/csharplang/issues/4935
+
 ## Jul 19, 2021
 
 - Scope of global usings revisited (Daniel): https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-15.md#global-usings
