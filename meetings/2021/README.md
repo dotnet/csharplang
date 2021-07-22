@@ -5,6 +5,7 @@
 ## Schedule when convenient
 
 - Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
+- Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. (cyrusn) https://github.com/dotnet/csharplang/issues/4935
 
 ## Recurring topics
 
@@ -12,8 +13,6 @@
 - *Design review*
 
 ## Jul 26, 2021
-
-- Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. (cyrusn) https://github.com/dotnet/csharplang/issues/4935
 
 ## Jul 19, 2021
 
