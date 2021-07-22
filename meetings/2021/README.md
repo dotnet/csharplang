@@ -12,6 +12,27 @@
 - *Triage championed features and milestones*
 - *Design review*
 
+
+## Sep 29, 2021
+
+## Sep 27, 2021
+
+## Sep 22, 2021
+
+## Sep 20, 2021
+
+## Sep 15, 2021
+
+## Sep 13, 2021
+
+## Sep 8, 2021
+
+## Sep 1, 2021
+
+## Aug 30, 2021
+
+## Aug 23, 2021
+
 ## Jul 26, 2021
 
 ## Jul 19, 2021
