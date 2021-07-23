@@ -135,6 +135,8 @@ The method does the following:
 
 For a member that has a value type, we will convert its value to a string representation using the most efficient method available to the target platform. At present that means calling `ToString` before passing to `StringBuilder.Append`.
 
+If the record's printable members do not include a readable property with a non-`readonly` `get` accessor, then the synthesized `PrintMembers` is `readonly`. There is no requirement for the record's fields to be `readonly` for the `PrintMembers` method to be `readonly`.
+
 The `PrintMembers` method can be declared explicitly.
 It is an error if the explicit declaration does not match the expected signature or accessibility.
 
@@ -143,7 +145,7 @@ The record struct includes a synthesized method equivalent to a method declared 
 public override string ToString();
 ```
 
-If the record's printable members do not include a readable property with a non-`readonly` `get` accessor, then the synthesized `PrintMembers` and `ToString` methods are `readonly`. There is no requirement for the record's fields to be `readonly` for the `PrintMembers` and `ToString` methods to be `readonly`.
+If the record struct's `PrintMembers` method is `readonly`, then the synthesized `ToString()` method is `readonly`.
 
 The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility.
 
