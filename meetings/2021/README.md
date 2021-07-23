@@ -35,6 +35,9 @@
 
 ## Jul 26, 2021
 
+- Lambda conversion to System.Delegate (Chuck)
+- Using filename to inform speakable type for top-level statements (Julien)
+
 ## Jul 19, 2021
 
 - Scope of global usings revisited (Daniel): https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-15.md#global-usings
