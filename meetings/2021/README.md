@@ -33,18 +33,23 @@
 
 ## Aug 23, 2021
 
-## Jul 26, 2021
-
-- Lambda conversion to System.Delegate (Chuck)
-- Using filename to inform speakable type for top-level statements (Julien)
-
-## Jul 19, 2021
-
-- Scope of global usings revisited (Daniel): https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-15.md#global-usings
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jul 26, 2021
+
+[C# Language Design Notes for July 26th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-26.md)
+
+1. Lambda conversion to System.Delegate
+2. Direct invocation of lambdas
+3. Speakable names for top-level statements
+
+## Jul 19, 2021
+
+[C# Language Design Notes for July 19th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-19.md)
+
+1. Global using scoping revisited
 
 ## Jul 12, 2021
 
