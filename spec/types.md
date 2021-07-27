@@ -1,4 +1,4 @@
-﻿# Types
+﻿# Types in C/#
 
 The types of the C# language are divided into two main categories: ***value types*** and ***reference types***. Both value types and reference types may be ***generic types***, which take one or more ***type parameters***. Type parameters can designate both value types and reference types.
 
