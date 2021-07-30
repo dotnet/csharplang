@@ -1,10 +1,5 @@
 # Top-level statements
 
-* [x] Proposed
-* [x] Prototype: Started
-* [x] Implementation: Started
-* [ ] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 

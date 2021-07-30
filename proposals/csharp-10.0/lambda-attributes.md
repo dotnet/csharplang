@@ -1,10 +1,5 @@
 # Lambda Attributes
 
-* [x] Proposed
-* [ ] Prototype
-* [ ] Implementation
-* [ ] Specification
-
 ## Summary
 [summary]: #summary
 

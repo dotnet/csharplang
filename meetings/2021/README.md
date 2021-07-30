@@ -4,29 +4,75 @@
 
 ## Schedule when convenient
 
+- Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
+- Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. (cyrusn) https://github.com/dotnet/csharplang/issues/4935
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
 - *Design review*
 
-## Jul 26, 2021
 
-## Jul 19, 2021
+## Sep 29, 2021
 
-## Jul 12, 2021
+## Sep 27, 2021
 
-## Jun 28, 2021
+## Sep 22, 2021
 
-## Jun 21, 2021
-- async method builder overrides (Julien): https://github.com/dotnet/roslyn/issues/51999
+## Sep 20, 2021
 
-## Jun 14, 2021
-- Open questions in CallerArgumentExpression (Fred): https://github.com/dotnet/roslyn/issues/52745#issuecomment-849961999
-- list-patterns syntax (Julien): https://github.com/alrz/csharplang/blob/list-patterns/proposals/list-patterns.md
+## Sep 15, 2021
+
+## Sep 13, 2021
+
+## Sep 8, 2021
+
+## Sep 1, 2021
+
+## Aug 30, 2021
+
+## Aug 23, 2021
 
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jul 26, 2021
+
+[C# Language Design Notes for July 26th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-26.md)
+
+1. Lambda conversion to System.Delegate
+2. Direct invocation of lambdas
+3. Speakable names for top-level statements
+
+## Jul 19, 2021
+
+[C# Language Design Notes for July 19th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-19.md)
+
+1. Global using scoping revisited
+
+## Jul 12, 2021
+
+[C# Language Design Notes for July 12th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-12.md)
+
+1. C# 10 Feature Status
+2. Speakable names for top-level statements
+
+## Jun 21, 2021
+
+[C# Language Design Notes for June 21st, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-21.md)
+
+1. Open questions for lambda return types
+2. List patterns in recursive patterns
+3. Open questions in async method builder
+4. Email Decision: Duplicate global using warnings
+
+## Jun 14, 2021
+
+[C# Language Design Notes for June 14th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-14.md)
+
+1. Open questions in CallerArgumentExpressionAttribute
+2. List pattern syntax
 
 ## Jun 7, 2021
 

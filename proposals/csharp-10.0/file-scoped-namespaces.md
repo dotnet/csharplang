@@ -1,10 +1,5 @@
 ## File Scoped Namespaces
 
-- [ ] Proposed
-- [ ] Prototype: Started
-- [ ] Implementation: Started
-- [ ] Specification: Started
-
 ### Summary
 
 Allow a simpler format for the common case of file containing only one namespace in it.  This format is `namespace X.Y.Z;` (note the semicolon and lack of braces).  This allows for files like so:
