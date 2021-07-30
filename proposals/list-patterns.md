@@ -72,6 +72,14 @@ For instance, `[_, >0, ..] or [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (
 
 Conversely, `[_, >0, ..] and [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length != 3 && [^1] <= 0)` where the length value of 3 disallows the other test.
 
+If a slice subpattern matches a list or a length value, subpatterns are analysed as if they were a direct subpattern of the containing list.
+
+For instance, `[..[1, 2, 3]]` subsumes a pattern of the form `[1, 2, 3]`.
+
+`Length` or `Count` properties are assumed to always return non-negative values, if only if the type is *indexable*.
+
+For instance, the pattern `array is { Length: -1 }` can never match.
+
 #### Lowering
 
 A pattern of the form `expr is [1, 2, 3]` is equivalent to the following code (if compatible via implicit `Index` support):
