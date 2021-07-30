@@ -59,7 +59,12 @@ case [.., 1, _]: // expr.Length is >= 2 && expr[^2] is 1
 ```
 
 The order in which subpatterns are matched at runtime is unspecified, and a failed match may not attempt to match all subpatterns.
- 
+
+Given a specific length, it's possible that two subpatterns refer to the same element, in which case a test for this value is inserted into the decision DAG.
+
+For instance, `[_, >0, ..] or [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length == 3 || [^1] <= 0)`
+Conversely, `[_, >0, ..] and [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length != 3 && [^1] <= 0)`
+
 #### Lowering
 
 A pattern of the form `expr is [1, 2, 3]` is equivalent to the following code (if compatible via implicit `Index` support):
