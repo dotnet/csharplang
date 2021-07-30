@@ -69,6 +69,7 @@ The order in which subpatterns are matched at runtime is unspecified, and a fail
 Given a specific length, it's possible that two subpatterns refer to the same element, in which case a test for this value is inserted into the decision DAG.
 
 For instance, `[_, >0, ..] or [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length == 3 || [^1] <= 0)` where the length value of 3 implies the other test.
+
 Conversely, `[_, >0, ..] and [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length != 3 && [^1] <= 0)` where the length value of 3 disallows the other test.
 
 #### Lowering
