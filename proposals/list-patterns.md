@@ -76,9 +76,9 @@ If a slice subpattern matches a list or a length value, subpatterns are analysed
 
 For instance, `[..[1, 2, 3]]` subsumes a pattern of the form `[1, 2, 3]`.
 
-`Length` or `Count` properties are assumed to always return non-negative values, if only if the type is *indexable*.
+`Length` or `Count` properties are assumed to always return a non-negative value, if and only if the type is *indexable*.
 
-For instance, the pattern `array is { Length: -1 }` can never match.
+For instance, the pattern `{ Length: -1 }` can never match an array.
 
 #### Lowering
 
