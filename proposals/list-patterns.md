@@ -34,11 +34,17 @@ There are two new patterns:
 
 #### Pattern compatibility
 
-A *list_pattern* is compatible with any type that is *countable* as well as *indexable* — it has an accessible indexer that takes an `Index` as an argument or otherwise an accessible indexer with a single `int` parameter. If both indexers are present, the former is preferred.  
+A *list_pattern* is compatible with any type that is *countable* and *indexable*.
 
-A *slice_pattern* with a subpattern is compatible with any type that is *countable* as well as *sliceable* — it has an accessible indexer that takes a `Range` as an argument or otherwise an accessible `Slice` method with two `int` parameters. If both are present, the former is preferred.
+A *slice_pattern* with a subpattern is compatible with any type that is *countable* and *sliceable*.
 
 A *slice_pattern* without a subpattern is compatible with any type that is compatible with a *list_pattern*.
+
+A type is *countable* if it has an accessible property getter that returns an `int` and has the name `Length` or `Count`. If both properties are present, the former is preferred.
+
+A type is *indexable* if it has an accessible indexer that takes an `Index` as an argument or otherwise an accessible indexer with a single `int` parameter. If both indexers are present, the former is preferred.  
+
+A type is *sliceable* it has an accessible indexer that takes a `Range` as an argument or otherwise an accessible `Slice` method with two `int` parameters. If both are present, the former is preferred.
 
 This set of rules is derived from the [***range indexer pattern***](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-8.0/ranges.md#implicit-index-support).
 
@@ -62,8 +68,8 @@ The order in which subpatterns are matched at runtime is unspecified, and a fail
 
 Given a specific length, it's possible that two subpatterns refer to the same element, in which case a test for this value is inserted into the decision DAG.
 
-For instance, `[_, >0, ..] or [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length == 3 || [^1] <= 0)`
-Conversely, `[_, >0, ..] and [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length != 3 && [^1] <= 0)`
+For instance, `[_, >0, ..] or [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length == 3 || [^1] <= 0)` where the length value of 3 implies the other test.
+Conversely, `[_, >0, ..] and [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length != 3 && [^1] <= 0)` where the length value of 3 disallows the other test.
 
 #### Lowering
 
