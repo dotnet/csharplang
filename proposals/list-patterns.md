@@ -71,7 +71,7 @@ Given a specific length, it's possible that two subpatterns refer to the same el
 - For instance, `[_, >0, ..] or [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length == 3 || [^2] <= 0)` where the length value of 3 implies the other test.
 - Conversely, `[_, >0, ..] and [.., <=0, _]` becomes `length >= 2 && [1] > 0 && (length != 3 && [^2] <= 0)` where the length value of 3 disallows the other test.
 
-As a result, an error is produced for something like `case [.., p]: case [p]` because at runtime, we're matching the same element in each case.
+As a result, an error is produced for something like `case [.., p]: case [p]` because at runtime, we're matching the same element in the second case.
 
 If a slice subpattern matches a list or a length value, subpatterns are treated as if they were a direct subpattern of the containing list. For instance, `[..[1, 2, 3]]` subsumes a pattern of the form `[1, 2, 3]`.
 
