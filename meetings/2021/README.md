@@ -2,6 +2,8 @@
 
 ## Schedule ASAP
 
+- Should we change binding behavior for interpolated string handlers in lower language versions? (333fred, stephentoub) https://github.com/dotnet/roslyn/issues/55345
+
 ## Schedule when convenient
 
 - Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
