@@ -59,7 +59,18 @@ case [.., 1, _]: // expr.Length is >= 2 && expr[^2] is 1
 ```
 
 The order in which subpatterns are matched at runtime is unspecified, and a failed match may not attempt to match all subpatterns.
- 
+
+Given a specific length, it's possible that two subpatterns refer to the same element, in which case a test for this value is inserted into the decision DAG.
+
+- For instance, `[_, >0, ..] or [.., <=0, _]` becomes `length >= 2 && ([1] > 0 || length == 3 || [^2] <= 0)` where the length value of 3 implies the other test.
+- Conversely, `[_, >0, ..] and [.., <=0, _]` becomes `length >= 2 && [1] > 0 && length != 3 && [^2] <= 0` where the length value of 3 disallows the other test.
+
+As a result, an error is produced for something like `case [.., p]: case [p]:` because at runtime, we're matching the same element in the second case.
+
+If a slice subpattern matches a list or a length value, subpatterns are treated as if they were a direct subpattern of the containing list. For instance, `[..[1, 2, 3]]` subsumes a pattern of the form `[1, 2, 3]`.
+
+`Length` or `Count` properties are assumed to always return a non-negative value, if and only if the type is *indexable*. For instance, the pattern `{ Length: -1 }` can never match an array. The behavior of a pattern-matching operation is undefined if this assumption doesn't hold.
+
 #### Lowering
 
 A pattern of the form `expr is [1, 2, 3]` is equivalent to the following code (if compatible via implicit `Index` support):
