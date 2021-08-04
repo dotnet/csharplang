@@ -2,22 +2,56 @@
 
 ## Schedule ASAP
 
+- Should we change binding behavior for interpolated string handlers in lower language versions? (333fred, stephentoub) https://github.com/dotnet/roslyn/issues/55345
+
 ## Schedule when convenient
 
 - Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
+- Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines. (cyrusn) https://github.com/dotnet/csharplang/issues/4935
 
 ## Recurring topics
 
 - *Triage championed features and milestones*
 - *Design review*
 
-## Jul 26, 2021
 
-## Jul 19, 2021
+## Sep 29, 2021
+
+## Sep 27, 2021
+
+## Sep 22, 2021
+
+## Sep 20, 2021
+
+## Sep 15, 2021
+
+## Sep 13, 2021
+
+## Sep 8, 2021
+
+## Sep 1, 2021
+
+## Aug 30, 2021
+
+## Aug 23, 2021
 
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Jul 26, 2021
+
+[C# Language Design Notes for July 26th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-26.md)
+
+1. Lambda conversion to System.Delegate
+2. Direct invocation of lambdas
+3. Speakable names for top-level statements
+
+## Jul 19, 2021
+
+[C# Language Design Notes for July 19th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-19.md)
+
+1. Global using scoping revisited
 
 ## Jul 12, 2021
 
