@@ -6,7 +6,7 @@ Features Added in C# Language Versions
 - [Record structs](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/record-structs.md) and `with` expressions on structs (`record struct Point(int X, int Y);`, `var newStructPoint = structPoint with { X: 100 };`).
 - [Global using directives](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/GlobalUsingDirective.md): `global using` directives avoid repeating the same `using` directives across many files in your program.
 - [Improved definite assignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-definite-assignment.md): definite assignment and nullability analysis better handle common patterns such as `dictionary?.TryGetValue(key, out value) == true`.
-- Constant interpolated strings: interpolated strings composed of constants are themselves constants.
+- [Constant interpolated strings](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/constant_interpolated_strings.md): interpolated strings composed of constants are themselves constants.
 - [Extended property patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/extended-property-patterns.md): property patterns allow accessing nested members (`if (e is MethodCallExpression { Method.Name: "MethodName" })`).
 - [Sealed record ToString](https://github.com/dotnet/csharplang/issues/4174): a record can inherit a base record with a sealed `ToString`.
 - [Incremental source generators](https://github.com/dotnet/roslyn/blob/main/docs/features/incremental-generators.md): improve the source generation experience in large projects by breaking down the source generation pipeline and caching intermediate results.
