@@ -138,9 +138,9 @@ A _function_type_ exists at compile time only: _function_types_ do not appear in
 _Open issue: Should the function_type be available from the compiler API?_
 
 ### Conversions
-From a _function_type_ `F` there are implicit conversions:
+From a _function_type_ `F` there are implicit _function_type_ conversions:
 - To a _function_type_ `G` if the parameters and return types of `F` are variance-convertible to the parameters and return type of `G`
-- To `System.Delegate` or `System.MulticastDelegate`
+- To `System.MulticastDelegate` or base classes or interfaces of `System.MulticastDelegate`
 - To `System.Linq.Expressions.Expression` or `System.Linq.Expressions.LambdaExpression`
 
 Lambda expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see [anonymous function conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#anonymous-function-conversions) and [method group conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
