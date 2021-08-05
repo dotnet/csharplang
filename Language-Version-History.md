@@ -3,7 +3,7 @@ Features Added in C# Language Versions
 
 # C# 10.0 - .NET 6 and Visual Studio 2022 version 17.0
 
-- [Record structs](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/record-structs.md) and `with` expressions on structs (`record struct Point(int X, int Y);`, `var newStructPoint = structPoint with { X = 100 };`).
+- [Record structs](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/record-structs.md) and `with` expressions on structs (`record struct Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
 - [Global using directives](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/GlobalUsingDirective.md): `global using` directives avoid repeating the same `using` directives across many files in your program.
 - [Improved definite assignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-definite-assignment.md): definite assignment and nullability analysis better handle common patterns such as `dictionary?.TryGetValue(key, out value) == true`.
 - [Constant interpolated strings](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/constant_interpolated_strings.md): interpolated strings composed of constants are themselves constants.
@@ -17,10 +17,10 @@ Features Added in C# Language Versions
 - [Interpolated string handlers](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-interpolated-strings.md): interpolated string handler types allow efficient formatting of interpolated strings in assignments and invocations.
 - [File-scoped namespaces](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/file-scoped-namespaces.md): files with a single namespace don't need extra braces or indentation (`namespace X.Y.Z;`).
 - [Parameterless struct constructors](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/parameterless-struct-constructors.md): support parameterless constructors and instance field initializers for struct types.
-- [CallerArgumentExpression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/caller-argument-expression.md): this attribute allows capturing the expressions passed to a method.
+- [CallerArgumentExpression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/caller-argument-expression.md): this attribute allows capturing the expressions passed to a method as strings.
 
 # C# 9.0 - .NET 5 and Visual Studio 2019 version 16.8 
-- [Records](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md) and `with` expressions: succinctly declare reference types with value semantics (`record Point(int X, int Y);`, `var newPoint = point with { X: 100 };`).
+- [Records](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/records.md) and `with` expressions: succinctly declare reference types with value semantics (`record Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
 - [Init-only setters](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/init.md): init-only properties can be set during object creation (`int Property { get; init; }`).
 - [Top-level statements](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/top-level-statements.md): the entry point logic of a program can be written without declaring an explicit type or `Main` method.
 - [Pattern matching enhancements](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/patterns3.md): relational patterns (`is < 30`), combinator patterns (`is >= 0 and <= 100`, `case 3 or 4:`, `is not null`), parenthesized patterns (`is int and (< 0 or > 100)`), type patterns (`case Type:`).
