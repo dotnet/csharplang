@@ -1,10 +1,5 @@
 # AsyncMethodBuilder override
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 
@@ -12,7 +7,7 @@ Allow per-method override of the async method builder to use.
 For some async methods we want to customize the invocation of `Builder.Create()` to use a different _builder type_.
 
 ```C#
-[AsyncMethodBuilderAttribute(typeof(PoolingAsyncValueTaskMethodBuilder<int>))] // new usage of AsyncMethodBuilderAttribute type
+[AsyncMethodBuilderAttribute(typeof(PoolingAsyncValueTaskMethodBuilder<>))] // new usage of AsyncMethodBuilderAttribute type
 static async ValueTask<int> ExampleAsync() { ... }
 ```
 
@@ -64,7 +59,7 @@ This allows the attribute to be applied on methods or local functions or lambdas
 
 Example of usage on a method:  
 ```C#
-[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<int>))] // new usage, referring to some custom builder type
+[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<>))] // new usage, referring to some custom builder type
 static async ValueTask<int> ExampleAsync() { ... }
 ```
 
@@ -81,6 +76,7 @@ When compiling an async method, the builder type is determined by:
 
 If an `AsyncMethodBuilder` attribute is present, we take the builder type specified by the attribute and construct it if necessary.  
   If the override type is an open generic type, take the single type argument of the async method's return type and substitute it into the override type.  
+  If the override type is a bound generic type, then we produce an error.  
   If the async method's return type does not have a single type argument, then we produce an error.  
 
 We verify that the builder type is compatible with the return type of the async method:
@@ -118,14 +114,14 @@ static ValueTask<int> ExampleAsync()
 
 With this change, if the developer wrote:
 ```C#
-[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<int>))] // new usage, referring to some custom builder type
+[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<>))] // new usage, referring to some custom builder type
 static async ValueTask<int> ExampleAsync() { ... }
 ```
 it would instead be compiled to:
 ```C#
 [AsyncStateMachine(typeof(<ExampleAsync>d__29))]
 [CompilerGenerated]
-[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<int>))] // retained but not necessary anymore
+[AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder<>))] // retained but not necessary anymore
 static ValueTask<int> ExampleAsync()
 {
     <ExampleAsync>d__29 stateMachine;

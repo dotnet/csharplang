@@ -1,10 +1,5 @@
 # Pattern match `Span<char>` on a constant string
 
-* [x] Proposed
-* [x] Prototype: Completed
-* [x] Implementation: In Progress
-* [ ] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 

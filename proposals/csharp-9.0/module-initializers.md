@@ -1,10 +1,5 @@
 # Module Initializers
 
-* [x] Proposed
-* [ ] Prototype: [In Progress](https://github.com/jnm2/roslyn/tree/module_initializer)
-* [ ] Implementation: In Progress
-* [ ] Specification: [Not Started]()
-
 ## Summary
 [summary]: #summary
 

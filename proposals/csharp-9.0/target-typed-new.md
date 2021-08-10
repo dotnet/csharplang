@@ -1,10 +1,4 @@
-
 # Target-typed `new` expressions
-
-* [x] Proposed
-* [x] Prototype
-* [ ] Implementation
-* [ ] Specification
 
 ## Summary
 [summary]: #summary
