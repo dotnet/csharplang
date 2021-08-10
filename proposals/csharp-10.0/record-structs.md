@@ -59,7 +59,7 @@ The method can be declared explicitly. It is an error if the explicit declaratio
 If `Equals(R other)` is user-defined (not synthesized) but `GetHashCode` is not, a warning is produced.
 
 ```C#
-public bool Equals(R other);
+public readonly bool Equals(R other);
 ```
 
 The synthesized `Equals(R)` returns `true` if and only if for each instance field `fieldN` in the record struct
@@ -76,14 +76,14 @@ The `Equals` method called by the `==` operator is the `Equals(R other)` method 
 
 The record struct includes a synthesized override equivalent to a method declared as follows:
 ```C#
-public override bool Equals(object? obj);
+public override readonly bool Equals(object? obj);
 ```
 It is an error if the override is declared explicitly. 
 The synthesized override returns `other is R temp && Equals(temp)` where `R` is the record struct.
 
 The record struct includes a synthesized override equivalent to a method declared as follows:
 ```C#
-public override int GetHashCode();
+public override readonly int GetHashCode();
 ```
 The method can be declared explicitly.
 
@@ -135,6 +135,8 @@ The method does the following:
 
 For a member that has a value type, we will convert its value to a string representation using the most efficient method available to the target platform. At present that means calling `ToString` before passing to `StringBuilder.Append`.
 
+If the record's printable members do not include a readable property with a non-`readonly` `get` accessor, then the synthesized `PrintMembers` is `readonly`. There is no requirement for the record's fields to be `readonly` for the `PrintMembers` method to be `readonly`.
+
 The `PrintMembers` method can be declared explicitly.
 It is an error if the explicit declaration does not match the expected signature or accessibility.
 
@@ -142,6 +144,8 @@ The record struct includes a synthesized method equivalent to a method declared 
 ```C#
 public override string ToString();
 ```
+
+If the record struct's `PrintMembers` method is `readonly`, then the synthesized `ToString()` method is `readonly`.
 
 The method can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility.
 
@@ -257,6 +261,8 @@ parameter declaration for each parameter of the primary constructor declaration.
 of the Deconstruct method has the same type as the corresponding parameter of the primary
 constructor declaration. The body of the method assigns each parameter of the Deconstruct method
 to the value from an instance member access to a member of the same name.
+If the instance members accessed in the body do not include a property with
+a non-`readonly` `get` accessor, then the synthesized `Deconstruct` method is `readonly`.
 The method can be declared explicitly. It is an error if the explicit declaration does not match
 the expected signature or accessibility, or is static.
 
