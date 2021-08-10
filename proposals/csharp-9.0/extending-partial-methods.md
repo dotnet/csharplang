@@ -1,5 +1,4 @@
-Extending Partial Methods
-=====
+# Extending Partial Methods
 
 ## Summary
 This proposal aims to remove all restrictions around the signatures of `partial`
