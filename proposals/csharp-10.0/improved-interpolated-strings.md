@@ -165,16 +165,16 @@ We adjust the wording of the [applicable function member algorithm](https://gith
 as follows (a new sub-bullet is added to each section, in bold):
 
 A function member is said to be an ***applicable function member*** with respect to an argument list `A` when all of the following are true:
-*  Each argument in `A` corresponds to a parameter in the function member declaration as described in [Corresponding parameters](expressions.md#corresponding-parameters), and any parameter to which no argument corresponds is an optional parameter.
+*  Each argument in `A` corresponds to a parameter in the function member declaration as described in [Corresponding parameters](../../spec/expressions.md#corresponding-parameters), and any parameter to which no argument corresponds is an optional parameter.
 *  For each argument in `A`, the parameter passing mode of the argument (i.e., value, `ref`, or `out`) is identical to the parameter passing mode of the corresponding parameter, and
-   *  for a value parameter or a parameter array, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
+   *  for a value parameter or a parameter array, an implicit conversion ([Implicit conversions](../../spec/conversions.md#implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
    *  **for a `ref` parameter whose type is a struct type, an implicit _interpolated\_string\_handler\_conversion_ exists from the argument to the type of the corresponding parameter, or**
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter. After all, a `ref` or `out` parameter is an alias for the argument passed.
 
 For a function member that includes a parameter array, if the function member is applicable by the above rules, it is said to be applicable in its ***normal form***. If a function member that includes a parameter array is not applicable in its normal form, the function member may instead be applicable in its ***expanded form***:
 *  The expanded form is constructed by replacing the parameter array in the function member declaration with zero or more value parameters of the element type of the parameter array such that the number of arguments in the argument list `A` matches the total number of parameters. If `A` has fewer arguments than the number of fixed parameters in the function member declaration, the expanded form of the function member cannot be constructed and is thus not applicable.
 *  Otherwise, the expanded form is applicable if for each argument in `A` the parameter passing mode of the argument is identical to the parameter passing mode of the corresponding parameter, and
-   *  for a fixed value parameter or a value parameter created by the expansion, an implicit conversion ([Implicit conversions](conversions.md#implicit-conversions)) exists from the type of the argument to the type of the corresponding parameter, or
+   *  for a fixed value parameter or a value parameter created by the expansion, an implicit conversion ([Implicit conversions](../../spec/conversions.md#implicit-conversions)) exists from the type of the argument to the type of the corresponding parameter, or
    *  **for a `ref` parameter whose type is a struct type, an implicit _interpolated\_string\_handler\_conversion_ exists from the argument to the type of the corresponding parameter, or**
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter.
 
@@ -191,8 +191,8 @@ following:
 Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if:
 1. `E` is a non-constant _interpolated\_string\_expression_, `C1` is an _implicit\_string\_handler\_conversion_, `T1` is an _applicable\_interpolated\_string\_handler\_type_, and `C2` is not an _implicit\_string\_handler\_conversion_, or
 2. `E` does not exactly match `T2` and at least one of the following holds:
-    * `E` exactly matches `T1` ([Exactly matching Expression](expressions.md#exactly-matching-expression))
-    * `T1` is a better conversion target than `T2` ([Better conversion target](expressions.md#better-conversion-target))
+    * `E` exactly matches `T1` ([Exactly matching Expression](../../spec/expressions.md#exactly-matching-expression))
+    * `T1` is a better conversion target than `T2` ([Better conversion target](../../spec/expressions.md#better-conversion-target))
 
 This does mean that there are some potentially non-obvious overload resolution rules, depending on whether the interpolated string in question is a constant-expression or not. For example:
 
