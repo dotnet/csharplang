@@ -94,9 +94,9 @@ if (c != null ? c.M(out object obj4) : false)
 }
 ```
 
-# Specification
+## Specification
 
-## ?. (null-conditional operator) expressions
+### ?. (null-conditional operator) expressions
 We introduce a new section **?. (null-conditional operator) expressions**. See the [null-conditional operator](../../spec/expressions.md#null-conditional-operator) specification and [definite assignment rules](../../spec/variables.md#precise-rules-for-determining-definite-assignment) for context.
 
 As in the definite assignment rules linked above, we refer to a given initially unassigned variable as *v*.
@@ -114,7 +114,7 @@ In subsequent sections we will refer to *E<sub>0</sub>* as the *non-conditional 
 - The definite assignment state of *v* at any point within *E* is the same as the definite assignment state at the corresponding point within *E0*.
 - The definite assignment state of *v* after *E* is the same as the definite assignment state of *v* after *primary_expression*.
 
-### Remarks
+#### Remarks
 We use the concept of "directly contains" to allow us to skip over relatively simple "wrapper" expressions when analyzing conditional accesses that are compared to other values. For example, `((a?.b(out x))!) == true` is expected to result in the same flow state as `a?.b == true` in general.
 
 We also want to allow analysis to function in the presence of a number of possible conversions on a conditional access. Propagating out "state when not null" is not possible when the conversion is user-defined, though, since we can't count on user-defined conversions to honor the constraint that the output is non-null only if the input is non-null. The only exception to this is when the user-defined conversion's input is a non-nullable value type. For example:
@@ -147,7 +147,7 @@ When we consider whether a variable is assigned at a given point within a null-c
 
 For example, given a conditional expression `a?.b(out x)?.c(x)`, the non-conditional counterpart is `a.b(out x).c(x)`. If we want to know the definite assignment state of `x` before `?.c(x)`, for example, then we perform a "hypothetical" analysis of `a.b(out x)` and use the resulting state as an input to `?.c(x)`.
 
-## Boolean constant expressions
+### Boolean constant expressions
 We introduce a new section "Boolean constant expressions":
 
 For an expression *expr* where *expr* is a constant expression with a bool value:
@@ -155,13 +155,13 @@ For an expression *expr* where *expr* is a constant expression with a bool value
   - If *expr* is a constant expression with value *true*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when false".
   - If *expr* is a constant expression with value *false*, and the state of *v* before *expr* is "not definitely assigned", then the state of *v* after *expr* is "definitely assigned when true".
 
-### Remarks
+#### Remarks
 
 We assume that if an expression has a constant value bool `false`, for example, it's impossible to reach any branch that requires the expression to return `true`. Therefore variables are assumed to be definitely assigned in such branches. This ends up combining nicely with the spec changes for expressions like `??` and `?:` and enabling a lot of useful scenarios.
 
 It's also worth noting that we never expect to be in a conditional state *before* visiting a constant expression. That's why we do not account for scenarios such as "*expr* is a constant expression with value *true*, and the state of *v* before *expr* is "definitely assigned when true".
 
-## ?? (null-coalescing expressions) augment
+### ?? (null-coalescing expressions) augment
 We augment the section [?? (null coalescing) expressions](../../spec/variables.md#-null-coalescing-expressions) as follows:
 
 For an expression *expr* of the form `expr_first ?? expr_second`:
@@ -170,7 +170,7 @@ For an expression *expr* of the form `expr_first ?? expr_second`:
   - ...
   - If *expr_first* directly contains a null-conditional expression *E*, and *v* is definitely assigned after the non-conditional counterpart *E<sub>0</sub>*, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after *expr_second*.
 
-### Remarks
+#### Remarks
 The above rule formalizes that for an expression like `a?.M(out x) ?? (x = false)`, either the `a?.M(out x)` was fully evaluated and produced a non-null value, in which case `x` was assigned, or the `x = false` was evaluated, in which case `x` was also assigned. Therefore `x` is always assigned after this expression.
 
 This also handles the `dict?.TryGetValue(key, out var value) ?? false` scenario, by observing that *v* is definitely assigned after `dict.TryGetValue(key, out var value)`, and *v* is "definitely assigned when true" after `false`, and concluding that *v* must be "definitely assigned when true".
@@ -179,7 +179,7 @@ The more general formulation also allows us to handle some more unusual scenario
 - `if (x?.M(out y) ?? (b && z.M(out y))) y.ToString();`
 - `if (x?.M(out y) ?? z?.M(out y) ?? false) y.ToString();`
 
-## ?: (conditional) expressions
+### ?: (conditional) expressions
 We augment the section [**?: (conditional) expressions**](../../spec/variables.md#-conditional-expressions) as follows:
 
 For an expression *expr* of the form `expr_cond ? expr_true : expr_false`:
@@ -189,7 +189,7 @@ For an expression *expr* of the form `expr_cond ? expr_true : expr_false`:
   - If the state of *v* after *expr_true* is "definitely assigned when true", and the state of *v* after *expr_false* is "definitely assigned when true", then the state of *v* after *expr* is "definitely assigned when true".
   - If the state of *v* after *expr_true* is "definitely assigned when false", and the state of *v* after *expr_false* is "definitely assigned when false", then the state of *v* after *expr* is "definitely assigned when false".
 
-### Remarks
+#### Remarks
 
 This makes it so when both arms of a conditional expression result in a conditional state, we join the corresponding conditional states and propagate it out instead of unsplitting the state and allowing the final state to be non-conditional. This enables scenarios like the following:
 
@@ -207,7 +207,7 @@ bool Set(out int x) { x = 0; return true; }
 
 This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification at the time. See [internal issue](http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/529603).
 
-## ==/!= (relational equality operator) expressions
+### ==/!= (relational equality operator) expressions
 We introduce a new section **==/!= (relational equality operator) expressions**.
 
 The [general rules for expressions with embedded expressions](../../spec/variables.md#general-rules-for-expressions-with-embedded-expressions) apply, except for the scenarios described below.
@@ -226,7 +226,7 @@ For an expression *expr* of the form `expr_first != expr_second`, where `!=` is 
 
 All of the above rules in this section are commutative, meaning that if a rule applies when evaluated in the form `expr_second op expr_first`, it also applies in the form `expr_first op expr_second`.
 
-### Remarks
+#### Remarks
 The general idea expressed by these rules is:
 - if a conditional access is compared to `null`, then we know the operations definitely occurred if the result of the comparison is `false`
 - if a conditional access is compared to a non-nullable value type or a non-null constant, then we know the operations definitely occurred if the result of the comparison is `true`.
@@ -244,7 +244,7 @@ Some consequences of these rules:
 - `if (a?.b(out var x) != false)) x() else x();` will error in the 'then' branch
 - `if (a?.b(out var x) != null)) x() else x();` will error in the 'else' branch
 
-## `is` operator and `is` pattern expressions
+### `is` operator and `is` pattern expressions
 We introduce a new section **`is` operator and `is` pattern expressions**.
 
 For an expression *expr* of the form `E is T`, where *T* is any type or pattern
@@ -256,7 +256,7 @@ For an expression *expr* of the form `E is T`, where *T* is any type or pattern
   - If *E* is of type boolean and `T` is a pattern which only matches a `false` input, then the definite assignment state of *v* after *expr* is the same as the definite assignment state of *v* after the logical negation expression `!expr`.
   - Otherwise, if the definite assignment state of *v* after E is "definitely assigned", then the definite assignment state of *v* after *expr* is "definitely assigned".
 
-### Remarks
+#### Remarks
 
 This section is meant to address similar scenarios as in the `==`/`!=` section above.
 This specification does not address recursive patterns, e.g. `(a?.b(out x), c?.d(out y)) is (object, object)`. Such support may come later if time permits.
