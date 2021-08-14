@@ -3362,7 +3362,7 @@ where `x` is an expression of a nullable type, if operator overload resolution (
 The `is` operator is used to dynamically check if the run-time type of an object is compatible with a given type. The result of the operation `E is T`, where `E` is an expression and `T` is a type, is a boolean value indicating whether `E` can successfully be converted to type `T` by a reference conversion, a boxing conversion, or an unboxing conversion. The operation is evaluated as follows, after type arguments have been substituted for all type parameters:
 
 *  If `E` is an anonymous function, a compile-time error occurs
-*  If `E` is a method group or the `null` literal, of if the type of `E` is a reference type or a nullable type and the value of `E` is null, the result is false.
+*  If `E` is a method group or the `null` literal, or if the type of `E` is a reference type or a nullable type and the value of `T` is null, the result is false.
 *  Otherwise, let `D` represent the dynamic type of `E` as follows:
    * If the type of `E` is a reference type, `D` is the run-time type of the instance reference by `E`.
    * If the type of `E` is a nullable type, `D` is the underlying type of that nullable type.
