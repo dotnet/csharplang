@@ -28,7 +28,8 @@ embedded_statement
 
 The *embedded_statement* nonterminal is used for statements that appear within other statements. The use of *embedded_statement* rather than *statement* excludes the use of declaration statements and labeled statements in these contexts. The example
 ```csharp
-void F(bool b) {
+void F(bool b) 
+{
     if (b)
         int i = 44;
 }
@@ -43,7 +44,8 @@ If a statement can possibly be reached by execution, the statement is said to be
 
 In the example
 ```csharp
-void F() {
+void F() 
+{
     Console.WriteLine("reachable");
     goto Label;
     Console.WriteLine("unreachable");
@@ -59,16 +61,20 @@ To determine whether a particular statement or end point is reachable, the compi
 
 In the example
 ```csharp
-void F() {
+void F() 
+{
     const int i = 1;
-    if (i == 2) Console.WriteLine("unreachable");
+    if (i == 2) 
+        Console.WriteLine("unreachable");
 }
 ```
 the boolean expression of the `if` statement is a constant expression because both operands of the `==` operator are constants. As the constant expression is evaluated at compile-time, producing the value `false`, the `Console.WriteLine` invocation is considered unreachable. However, if `i` is changed to be a local variable
 ```csharp
-void F() {
+void F()
+{
     int i = 1;
-    if (i == 2) Console.WriteLine("reachable");
+    if (i == 2) 
+        Console.WriteLine("reachable");
 }
 ```
 the `Console.WriteLine` invocation is considered reachable, even though, in reality, it will never be executed.
@@ -77,9 +83,11 @@ The *block* of a function member is always considered reachable. By successively
 
 In the example
 ```csharp
-void F(int x) {
+void F(int x) 
+{
     Console.WriteLine("start");
-    if (x < 0) Console.WriteLine("negative");
+    if (x < 0) 
+        Console.WriteLine("negative");
 }
 ```
 the reachability of the second `Console.WriteLine` is determined as follows:
@@ -158,9 +166,13 @@ Execution of an empty statement simply transfers control to the end point of the
 
 An empty statement can be used when writing a `while` statement with a null body:
 ```csharp
-bool ProcessMessage() {...}
+bool ProcessMessage() 
+{
+...
+}
 
-void ProcessMessages() {
+void ProcessMessages() 
+{
     while (ProcessMessage())
         ;
 }
@@ -168,11 +180,14 @@ void ProcessMessages() {
 
 Also, an empty statement can be used to declare a label just before the closing "`}`" of a block:
 ```csharp
-void F() {
+void F() 
+{
     ...
-    if (done) goto exit;
+    if (done) 
+        goto exit;
     ...
-    exit: ;
+    exit: 
+        ;
 }
 ```
 
@@ -192,10 +207,13 @@ A label can be referenced from `goto` statements ([The goto statement](statement
 
 Labels have their own declaration space and do not interfere with other identifiers. The example
 ```csharp
-int F(int x) {
-    if (x >= 0) goto x;
+int F(int x) 
+{
+    if (x >= 0) 
+        goto x;
     x = -x;
-    x: return x;
+    x:
+        return x;
 }
 ```
 is valid and uses the name `x` as both a parameter and a label.
@@ -274,13 +292,15 @@ A local variable declaration that declares multiple variables is equivalent to m
 
 The example
 ```csharp
-void F() {
+void F() 
+{
     int x = 1, y, z = x * 2;
 }
 ```
 corresponds exactly to
 ```csharp
-void F() {
+void F() 
+{
     int x; x = 1;
     int y;
     int z; z = x * 2;
@@ -387,11 +407,14 @@ if (x) if (y) F(); else G();
 ```
 is equivalent to
 ```csharp
-if (x) {
-    if (y) {
+if (x) 
+{
+    if (y) 
+    {
         F();
     }
-    else {
+    else 
+    {
         G();
     }
 }
@@ -454,104 +477,112 @@ A `switch` statement is executed as follows:
 
 If the end point of the statement list of a switch section is reachable, a compile-time error occurs. This is known as the "no fall through" rule. The example
 ```csharp
-switch (i) {
-case 0:
-    CaseZero();
-    break;
-case 1:
-    CaseOne();
-    break;
-default:
-    CaseOthers();
-    break;
+switch (i) 
+{
+    case 0:
+        CaseZero();
+        break;
+    case 1:
+        CaseOne();
+        break;
+    default:
+        CaseOthers();
+        break;
 }
 ```
 is valid because no switch section has a reachable end point. Unlike C and C++, execution of a switch section is not permitted to "fall through" to the next switch section, and the example
 ```csharp
-switch (i) {
-case 0:
-    CaseZero();
-case 1:
-    CaseZeroOrOne();
-default:
-    CaseAny();
+switch (i) 
+{
+    case 0:
+        CaseZero();
+    case 1:
+        CaseZeroOrOne();
+    default:
+        CaseAny();
 }
 ```
 results in a compile-time error. When execution of a switch section is to be followed by execution of another switch section, an explicit `goto case` or `goto default` statement must be used:
 ```csharp
-switch (i) {
-case 0:
-    CaseZero();
-    goto case 1;
-case 1:
-    CaseZeroOrOne();
-    goto default;
-default:
-    CaseAny();
-    break;
+switch (i) 
+{
+    case 0:
+        CaseZero();
+        goto case 1;
+    case 1:
+        CaseZeroOrOne();
+        goto default;
+    default:
+        CaseAny();
+        break;
 }
 ```
 
 Multiple labels are permitted in a *switch_section*. The example
 ```csharp
-switch (i) {
-case 0:
-    CaseZero();
-    break;
-case 1:
-    CaseOne();
-    break;
-case 2:
-default:
-    CaseTwo();
-    break;
+switch (i) 
+{
+    case 0:
+        CaseZero();
+        break;
+    case 1:
+        CaseOne();
+        break;
+    case 2:
+    default:
+        CaseTwo();
+        break;
 }
 ```
 is valid. The example does not violate the "no fall through" rule because the labels `case 2:` and `default:` are part of the same *switch_section*.
 
 The "no fall through" rule prevents a common class of bugs that occur in C and C++ when `break` statements are accidentally omitted. In addition, because of this rule, the switch sections of a `switch` statement can be arbitrarily rearranged without affecting the behavior of the statement. For example, the sections of the `switch` statement above can be reversed without affecting the behavior of the statement:
 ```csharp
-switch (i) {
-default:
-    CaseAny();
-    break;
-case 1:
-    CaseZeroOrOne();
-    goto default;
-case 0:
-    CaseZero();
-    goto case 1;
+switch (i) 
+{
+    default:
+        CaseAny();
+        break;
+    case 1:
+        CaseZeroOrOne();
+        goto default;
+    case 0:
+        CaseZero();
+        goto case 1;
 }
 ```
 
 The statement list of a switch section typically ends in a `break`, `goto case`, or `goto default` statement, but any construct that renders the end point of the statement list unreachable is permitted. For example, a `while` statement controlled by the boolean expression `true` is known to never reach its end point. Likewise, a `throw` or `return` statement always transfers control elsewhere and never reaches its end point. Thus, the following example is valid:
 ```csharp
-switch (i) {
-case 0:
-    while (true) F();
-case 1:
-    throw new ArgumentException();
-case 2:
-    return;
+switch (i) 
+{
+    case 0:
+        while (true) F();
+    case 1:
+        throw new ArgumentException();
+    case 2:
+        return;
 }
 ```
 
 The governing type of a `switch` statement may be the type `string`. For example:
 ```csharp
-void DoCommand(string command) {
-    switch (command.ToLower()) {
-    case "run":
-        DoRun();
-        break;
-    case "save":
-        DoSave();
-        break;
-    case "quit":
-        DoQuit();
-        break;
-    default:
-        InvalidCommand(command);
-        break;
+void DoCommand(string command) 
+{
+    switch (command.ToLower()) 
+    {
+        case "run":
+            DoRun();
+            break;
+        case "save":
+            DoSave();
+            break;
+        case "quit":
+            DoQuit();
+            break;
+        default:
+            InvalidCommand(command);
+            break;
     }
 }
 ```
@@ -724,19 +755,23 @@ The compile-time processing of a foreach statement first determines the ***colle
 
 The above steps, if successful, unambiguously produce a collection type `C`, enumerator type `E` and element type `T`. A foreach statement of the form
 ```csharp
-foreach (V v in x) embedded_statement
+foreach (V v in x) 
+    embedded_statement
 ```
 is then expanded to:
 ```csharp
 {
     E e = ((C)(x)).GetEnumerator();
-    try {
-        while (e.MoveNext()) {
+    try 
+    {
+        while (e.MoveNext()) 
+        {
             V v = (V)(T)e.Current;
             embedded_statement
         }
     }
-    finally {
+    finally 
+    {
         ... // Dispose e
     }
 }
@@ -755,7 +790,8 @@ Action f = null;
 
 foreach (var value in values)
 {
-    if (f == null) f = () => Console.WriteLine("First value: " + value);
+    if (f == null) 
+        f = () => Console.WriteLine("First value: " + value);
 }
 
 f();
@@ -768,7 +804,8 @@ The body of the finally block is constructed according to the following steps:
    *  If `E` is a non-nullable value type then the finally clause is expanded to the semantic equivalent  of:
 
       ```csharp
-      finally {
+      finally 
+      {
           ((System.IDisposable)e).Dispose();
       }
       ```
@@ -776,8 +813,10 @@ The body of the finally block is constructed according to the following steps:
    *  Otherwise the finally clause is expanded to the semantic equivalent of:
 
       ```csharp
-      finally {
-          if (e != null) ((System.IDisposable)e).Dispose();
+      finally 
+      {
+          if (e != null)
+            ((System.IDisposable)e).Dispose();
       }
       ```
 
@@ -786,14 +825,17 @@ The body of the finally block is constructed according to the following steps:
 *  Otherwise, if `E` is a sealed type, the finally clause is expanded to an empty block:
 
    ```csharp
-   finally {
+   finally 
+   {
+        ;
    }
    ```
 
 *  Otherwise, the finally clause is expanded to:
 
    ```csharp
-   finally {
+   finally 
+   {
        System.IDisposable d = e as System.IDisposable;
        if (d != null) d.Dispose();
    }
@@ -809,8 +851,10 @@ using System;
 
 class Test
 {
-    static void Main() {
-        double[,] values = {
+    static void Main() 
+    {
+        double[,] values = 
+        {
             {1.2, 2.3, 3.4, 4.5},
             {5.6, 6.7, 7.8, 8.9}
         };
@@ -830,7 +874,8 @@ The output produced is as follows:
 In the example
 ```csharp
 int[] numbers = { 1, 3, 5, 7, 9 };
-foreach (var n in numbers) Console.WriteLine(n);
+foreach (var n in numbers) 
+    Console.WriteLine(n);
 ```
 the type of `n` is inferred to be `int`, the element type of `numbers`.
 
@@ -860,18 +905,24 @@ using System;
 
 class Test
 {
-    static void Main() {
-        while (true) {
-            try {
-                try {
+    static void Main() 
+    {
+        while (true) 
+        {
+            try 
+            {
+                try 
+                {
                     Console.WriteLine("Before break");
                     break;
                 }
-                finally {
+                finally 
+                {
                     Console.WriteLine("Innermost finally block");
                 }
             }
-            finally {
+            finally 
+            {
                 Console.WriteLine("Outermost finally block");
             }
         }
@@ -953,13 +1004,16 @@ using System;
 
 class Test
 {
-    static void Main(string[] args) {
-        string[,] table = {
+    static void Main(string[] args) 
+    {
+        string[,] table = 
+        {
             {"Red", "Blue", "Green"},
             {"Monday", "Wednesday", "Friday"}
         };
 
-        foreach (string str in args) {
+        foreach (string str in args) 
+        {
             int row, colm;
             for (row = 0; row <= 1; ++row)
                 for (colm = 0; colm <= 2; ++colm)
@@ -968,8 +1022,8 @@ class Test
 
             Console.WriteLine("{0} not found", str);
             continue;
-    done:
-            Console.WriteLine("Found {0} at [{1}][{2}]", str, row, colm);
+            done:
+                Console.WriteLine("Found {0} at [{1}][{2}]", str, row, colm);
         }
     }
 }
@@ -1104,26 +1158,33 @@ using System;
 
 class Test
 {
-    static void F() {
-        try {
+    static void F() 
+    {
+        try 
+        {
             G();
         }
-        catch (Exception e) {
+        catch (Exception e) 
+        {
             Console.WriteLine("Exception in F: " + e.Message);
             e = new Exception("F");
             throw;                // re-throw
         }
     }
 
-    static void G() {
+    static void G() 
+    {
         throw new Exception("G");
     }
 
-    static void Main() {
-        try {
+    static void Main() 
+    {
+        try 
+        {
             F();
         }
-        catch (Exception e) {
+        catch (Exception e) 
+        {
             Console.WriteLine("Exception in Main: " + e.Message);
         }
     }
@@ -1237,14 +1298,18 @@ class Cache
 {
     private static readonly object synchronizationObject = new object();
 
-    public static void Add(object x) {
-        lock (Cache.synchronizationObject) {
+    public static void Add(object x) 
+    {
+        lock (Cache.synchronizationObject)
+        {
             ...
         }
     }
 
-    public static void Remove(object x) {
-        lock (Cache.synchronizationObject) {
+    public static void Remove(object x) 
+    {
+        lock (Cache.synchronizationObject) 
+        {
             ...
         }
     }
@@ -1282,10 +1347,12 @@ corresponds to one of three possible expansions. When `ResourceType` is a non-nu
 ```csharp
 {
     ResourceType resource = expression;
-    try {
+    try 
+    {
         statement;
     }
-    finally {
+    finally 
+    {
         ((IDisposable)resource).Dispose();
     }
 }
@@ -1295,11 +1362,14 @@ Otherwise, when `ResourceType` is a nullable value type or a reference type othe
 ```csharp
 {
     ResourceType resource = expression;
-    try {
+    try 
+    {
         statement;
     }
-    finally {
-        if (resource != null) ((IDisposable)resource).Dispose();
+    finally 
+    {
+        if (resource != null) 
+            ((IDisposable)resource).Dispose();
     }
 }
 ```
@@ -1309,11 +1379,14 @@ Otherwise, when `ResourceType` is `dynamic`, the expansion is
 {
     ResourceType resource = expression;
     IDisposable d = (IDisposable)resource;
-    try {
+    try 
+    {
         statement;
     }
-    finally {
-        if (d != null) d.Dispose();
+    finally 
+    {
+        if (d != null) 
+            d.Dispose();
     }
 }
 ```
@@ -1348,15 +1421,19 @@ using System.IO;
 
 class Test
 {
-    static void Main() {
-        using (TextWriter w = File.CreateText("log.txt")) {
+    static void Main() 
+    {
+        using (TextWriter w = File.CreateText("log.txt")) 
+        {
             w.WriteLine("This is line one");
             w.WriteLine("This is line two");
         }
 
-        using (TextReader r = File.OpenText("log.txt")) {
+        using (TextReader r = File.OpenText("log.txt")) 
+        {
             string s;
-            while ((s = r.ReadLine()) != null) {
+            while ((s = r.ReadLine()) != null) 
+            {
                 Console.WriteLine(s);
             }
 
@@ -1392,31 +1469,38 @@ The following example shows some valid and invalid uses of `yield` statements.
 ```csharp
 delegate IEnumerable<int> D();
 
-IEnumerator<int> GetEnumerator() {
-    try {
+IEnumerator<int> GetEnumerator() 
+{
+    try 
+    {
         yield return 1;        // Ok
         yield break;           // Ok
     }
-    finally {
+    finally 
+    {
         yield return 2;        // Error, yield in finally
         yield break;           // Error, yield in finally
     }
 
-    try {
+    try 
+    {
         yield return 3;        // Error, yield return in try...catch
         yield break;           // Ok
     }
-    catch {
+    catch 
+    {
         yield return 4;        // Error, yield return in try...catch
         yield break;           // Ok
     }
 
-    D d = delegate { 
+    D d = delegate 
+    { 
         yield return 5;        // Error, yield in an anonymous function
     }; 
 }
 
-int MyMethod() {
+int MyMethod() 
+{
     yield return 1;            // Error, wrong return type for an iterator block
 }
 ```
