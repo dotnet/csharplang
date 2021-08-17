@@ -3,6 +3,7 @@
 ## Schedule ASAP
 
 - Should we change binding behavior for interpolated string handlers in lower language versions? (333fred, stephentoub) https://github.com/dotnet/roslyn/issues/55345
+- Should we recommend implicit user-defined conversions for interpolated string handlers? (333fred, stephentoub) https://github.com/dotnet/csharplang/issues/5077
 
 ## Schedule when convenient
 
