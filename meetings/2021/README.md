@@ -37,6 +37,7 @@
 ## Aug 23, 2021
 
 1. Resolving nullability differences in base types and interfaces on partial types (Rikki) (https://github.com/dotnet/roslyn/issues/45960)
+2. Accessibility of `Program` from top-level statements (Julien/David)
 
 # C# Language Design Notes for 2021
 
