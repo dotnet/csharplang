@@ -279,7 +279,7 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 
 - For an assignment `e1 = e2`, if the type of `e1` is a `ref struct` type, then the *safe-to-escape* of `e2` must be at least as wide a scope as the *safe-to-escape* of `e1`.
 
-- For a method invocation if there is a `ref` or `out` argument of a `ref struct` type (including the receiver), with *safe-to-escape* E1, then no argument (including the receiver) may have a narrower *safe-to-escape* than E1. [Sample](#method-arguments-must-match)
+- For a method invocation if there is a `ref` or `out` argument of a `ref struct` type (including the receiver unless the type is `readonly`), with *safe-to-escape* E1, then no argument (including the receiver) may have a narrower *safe-to-escape* than E1. [Sample](#method-arguments-must-match)
 
 - A local function or anonymous function may not refer to a local or parameter of `ref struct` type declared in an enclosing scope.
 
@@ -292,9 +292,9 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 These explanations and samples help explain why many of the safety rules above exist
 
 ### Method Arguments Must Match
-When invoking a method where there is an `out`, `ref` parameter that is a `ref struct` including the receiver then all of the `ref struct` need to have the same lifetime. This is necessary because C# must make all of its decisions around lifetime safety based on the information available in the signature of the method and the lifetime of the values at the call site. 
+When invoking a method where there is an `out` or `ref` parameter that is a `ref struct` then all of the `ref struct` parameters need to have the same lifetime. This is necessary because C# must make all of its decisions around lifetime safety based on the information available in the signature of the method and the lifetime of the values at the call site. 
 
-When there are `ref` parameters that are `ref struct` then there is the possiblity they could swap around their contents. Hence at the call site we must ensure all of these **potential** swaps are compatible. If the language didn't enforce that then it will allow for bad code like the following.
+When there are `ref` parameters that are `ref struct` then there is the potential that they could swap around their contents. Hence at the call site we must ensure all of these **potential** swaps are compatible. If the language didn't enforce that then it will allow for bad code like the following.
 
 ```csharp
 void M1(ref Span<int> s1)
@@ -311,7 +311,7 @@ void Swap(ref Span<int> x, ref Span<int> y)
 }
 ```
 
-The restriction on the receiver is necessary because while none of its contents are ref-safe-to-escape it can store the provided values. This means with mismatched lifetimes you could create a type safety hole in the following way:
+This analysis of `ref` parameters includes the receiver in instance methods. This is necessary because it can be used to store values passed in as parameters, just as a `ref` parameter could`. This means with mismatched lifetimes you could create a type safety hole in the following way:
 
 ```csharp
 ref struct S
@@ -333,6 +333,8 @@ void Broken(ref S s)
     s.Set(span); 
 }
 ```
+
+For the purpose of this analysis the receiver is considered an `in`, not a `ref`, if the type is a `readonly struct`. In that case the receiver cannot be used to store values from other parameters, it is effectively an `in` parameter for analysis purposes. Hence the same example above is legal when `S` is `readonly` because the `span` cannot be stored anywhere.
 
 ### Struct This Escape
 When it comes to span safety rules, the `this` value in an instance member is modeled as a parameter to the member. Now for a `struct` the type of `this` is actually `ref S` where in a `class` it's simply `S` (for members of a `class / struct` named S). 
