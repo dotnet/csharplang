@@ -38,6 +38,7 @@
 
 1. Resolving nullability differences in base types and interfaces on partial types (Rikki) (https://github.com/dotnet/roslyn/issues/45960)
 2. Accessibility of `Program` from top-level statements (Julien/David)
+3. Open issues with lambda expression and method group type inference (Chuck)
 
 # C# Language Design Notes for 2021
 
