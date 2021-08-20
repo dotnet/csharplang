@@ -50,6 +50,12 @@ var xml = """
 """;
 ```
 
+A single line form is also supported.  It starts with a minimum of three `"""` characters (but no maximum), the content of the string (which cannot contain any `new_line` characters), and then ends with the same number of quotes that the literal started with.  For example:
+
+```
+var xml = """<summary><element attr="content"/></summary>""";
+```
+
 ## Motivation
 
 C# lacks a general way to create simple string literals that can contain effectively any arbitrary text.  All C# string literal forms today need some form of escaping in case the contents use some special character (always if a delimiter is used).  This prevents easily having literals containing other languages in them (for example, an XML, HTML or JSON literal).  
