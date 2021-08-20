@@ -2,9 +2,6 @@
 
 ## Schedule ASAP
 
-- Should we change binding behavior for interpolated string handlers in lower language versions? (333fred, stephentoub) https://github.com/dotnet/roslyn/issues/55345
-- Should we recommend implicit user-defined conversions for interpolated string handlers? (333fred, stephentoub) https://github.com/dotnet/csharplang/issues/5077
-
 ## Schedule when convenient
 
 - Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
@@ -34,11 +31,17 @@
 
 ## Aug 30, 2021
 
+## Aug 25, 2021
+
+- Should we change binding behavior for interpolated string handlers in lower language versions? (333fred, stephentoub) https://github.com/dotnet/roslyn/issues/55345
+- Should we recommend implicit user-defined conversions for interpolated string handlers? (333fred, stephentoub) https://github.com/dotnet/csharplang/issues/5077
+
 ## Aug 23, 2021
 
 1. Resolving nullability differences in base types and interfaces on partial types (Rikki) (https://github.com/dotnet/roslyn/issues/45960)
 2. Accessibility of `Program` from top-level statements (Julien/David)
 3. Open issues for lambda expression and method group type inference (Chuck) (https://github.com/dotnet/csharplang/issues/5095)
+
 
 # C# Language Design Notes for 2021
 
