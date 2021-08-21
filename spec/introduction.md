@@ -618,6 +618,7 @@ Each member of a class has an associated accessibility, which controls the regio
 | `protected`          | Access limited to this class or classes derived from this class |
 | `internal`           | Access limited to this program |
 | `protected internal` | Access limited to this program or classes derived from this class |
+| `private protected`  | Access limited to this class or classes derived from this class and declared in this program |
 | `private`            | Access limited to this class |
 
 ### Type parameters
