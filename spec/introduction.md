@@ -131,7 +131,7 @@ C#'s value types are further divided into ***simple types***, ***enum types***, 
 
 The following table provides an overview of C#'s type system.
 
-| __Category__    |                 | __Description__ |
+| __Category__    | __Types__       | __Description__ |
 |-----------------|-----------------|-----------------|
 | Value types     | Simple types    | Signed integral: `sbyte`, `short`, `int`, `long` |
 |                 |                 | Unsigned integral: `byte`, `ushort`, `uint`, `ulong` |

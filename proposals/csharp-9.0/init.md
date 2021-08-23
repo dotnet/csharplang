@@ -1,5 +1,4 @@
-Init Only Setters
-=====
+# Init Only Setters
 
 ## Summary
 This proposal adds the concept of init only properties and indexers to C#. 
