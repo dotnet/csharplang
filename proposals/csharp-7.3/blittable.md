@@ -120,7 +120,7 @@ There are a couple of alternatives to consider:
 The F# language encodes the constraint in the signature file which means C# cannot re-use their representation. A new attribute will need to be chosen for this constraint. Additionally a method which has this constraint must be protected by a mod-req.
 
 ### Blittable vs. Unmanaged
-The F# language has a very [similar feature](https://docs.microsoft.com/dotnet/articles/fsharp/language-reference/generics/constraints) which uses the keyword unmanaged. The blittable name comes from the use in Midori.  May want to look to precedence here and use unmanaged instead. 
+The F# language has a very [similar feature](https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/generics/constraints.md) which uses the keyword unmanaged. The blittable name comes from the use in Midori.  May want to look to precedence here and use unmanaged instead. 
 
 **Resolution** The language decide to use unmanaged 
 
