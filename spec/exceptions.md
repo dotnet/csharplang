@@ -41,7 +41,7 @@ Exceptions that occur during destructor execution are worth special mention. If 
 
 The following exceptions are thrown by certain C# operations.
 
-|                                      |                |
+| Exception type                       | Description    |
 |--------------------------------------|----------------|
 | `System.ArithmeticException`         | A base class for exceptions that occur during arithmetic operations, such as `System.DivideByZeroException` and `System.OverflowException`. | 
 | `System.ArrayTypeMismatchException`  | Thrown when a store into an array fails because the actual type of the stored element is incompatible with the actual type of the array. | 
