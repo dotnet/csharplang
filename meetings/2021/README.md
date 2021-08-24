@@ -1,5 +1,7 @@
 # Upcoming meetings for 2021
 
+All schedule items must have a public issue or checked in proposal that can be linked from the notes.
+
 ## Schedule ASAP
 
 ## Schedule when convenient
