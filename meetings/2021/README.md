@@ -37,16 +37,20 @@
 - Should we recommend implicit user-defined conversions for interpolated string handlers? (333fred, stephentoub) https://github.com/dotnet/csharplang/issues/5077
 - Symmetry of "additive expression" (Julien/Fred) "an additive_expression composed entirely of _interpolated_string_expression_s and using only + operators."
 
-## Aug 23, 2021
-
-1. Resolving nullability differences in base types and interfaces on partial types (Rikki) (https://github.com/dotnet/roslyn/issues/45960)
-2. Accessibility of `Program` from top-level statements (Julien/David)
-3. Open issues for lambda expression and method group type inference (Chuck) (https://github.com/dotnet/csharplang/issues/5095)
-
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Aug 23, 2021
+
+[C# Language Design Notes for August 23rd, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-08-23.md)
+
+1. Nullability differences in partial type base clauses
+2. Top-level statements default type accessibility
+3. Lambda expression and method group type inference issues
+    1. Better function member now ambiguous in some cases
+    2. Conversions from method group to `object`
+4. Interpolated string betterness in older language versions
 
 ## Jul 26, 2021
 
