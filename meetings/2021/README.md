@@ -35,9 +35,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Aug 25, 2021
 
-- Should we change binding behavior for interpolated string handlers in lower language versions? (333fred, stephentoub) https://github.com/dotnet/roslyn/issues/55345
 - Should we recommend implicit user-defined conversions for interpolated string handlers? (333fred, stephentoub) https://github.com/dotnet/csharplang/issues/5077
-- Symmetry of "additive expression" (Julien/Fred) "an additive_expression composed entirely of _interpolated_string_expression_s and using only + operators."
+- Symmetry of "additive expression" (Julien/Fred) https://github.com/dotnet/csharplang/issues/5106
 
 # C# Language Design Notes for 2021
 
