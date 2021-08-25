@@ -14,7 +14,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
-
 ## Sep 29, 2021
 
 ## Sep 27, 2021
@@ -33,14 +32,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Aug 30, 2021
 
-## Aug 25, 2021
-
-- Should we recommend implicit user-defined conversions for interpolated string handlers? (333fred, stephentoub) https://github.com/dotnet/csharplang/issues/5077
-- Symmetry of "additive expression" (Julien/Fred) https://github.com/dotnet/csharplang/issues/5106
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Aug 25, 2021
+
+[C# Language Design Notes for August 25th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-08-25.md)
+
+1. Interpolated string handler user-defined conversion recommendations
+2. Interpolated string handler additive expressions
 
 ## Aug 23, 2021
 
