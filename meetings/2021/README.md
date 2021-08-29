@@ -30,7 +30,15 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Sep 1, 2021
 
+- Continue initial triage for C# 11 (Mads)
+
 ## Aug 30, 2021
+
+- Initial triage for C# 11 (Mads)
+    - Triage championed proposals without a milestone: https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
+    - Select an initial set of C# 11 timeframe focus features from **Working Set** milestone: https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22
+    - Consider promotions from the **Backlog** milestone: https://github.com/dotnet/csharplang/issues?page=1&q=is%3Aopen+is%3Aissue+milestone%3ABacklog
+
 
 # C# Language Design Notes for 2021
 
