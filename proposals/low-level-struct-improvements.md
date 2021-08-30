@@ -3,9 +3,9 @@ Low Level Struct Improvements
 
 ## Summary
 This proposal is an aggregation of several different proposals for `struct` 
-performance improvements. The goal being a design which takes into account the
-various proposals to create a single overarching feature set for `struct` 
-improvements.
+performance improvements: ref fields and attributes to override lifetime defaults. 
+The goal being a design which takes into account the various proposals to create 
+a single overarching feature set for `struct` improvements.
 
 ## Motivation
 Over the last few releases C# has added a number of low level performance 
