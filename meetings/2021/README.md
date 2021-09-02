@@ -37,6 +37,8 @@ Overview of meetings and agendas for 2021
 
 ## Sep 1, 2021
 
+[C# Language Design Notes for September 1st, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-09-01.md)
+
 1. Lambda expression conversions to `Delegate`
 2. C# 11 Initialization Triage
     1. Required properties
@@ -44,6 +46,8 @@ Overview of meetings and agendas for 2021
     3. Immutable collection initializers
 
 ## Aug 30, 2021
+
+[C# Language Design Notes for August 30th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-08-30.md)
 
 1. C# 11 Initial Triage
     1. Generic attributes
