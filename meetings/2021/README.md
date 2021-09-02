@@ -25,6 +25,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Sep 15, 2021
 
+- The C# Standard (Bill, Rex): https://github.com/dotnet/csharpstandard
+
 ## Sep 13, 2021
 
 ## Sep 8, 2021
