@@ -31,21 +31,31 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Generic math and static abstracts feedback (Tanner): https://devblogs.microsoft.com/dotnet/preview-features-in-net-6-generic-math/
 
-## Sep 1, 2021
-
-- Continue initial triage for C# 11 (Mads)
-
-## Aug 30, 2021
-
-- Initial triage for C# 11 (Mads)
-    - Triage championed proposals without a milestone: https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
-    - Select an initial set of C# 11 timeframe focus features from **Working Set** milestone: https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22
-    - Consider promotions from the **Backlog** milestone: https://github.com/dotnet/csharplang/issues?page=1&q=is%3Aopen+is%3Aissue+milestone%3ABacklog
-
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Sep 1, 2021
+
+1. Lambda expression conversions to `Delegate`
+2. C# 11 Initialization Triage
+    1. Required properties
+    2. Primary constructors
+    3. Immutable collection initializers
+
+## Aug 30, 2021
+
+1. C# 11 Initial Triage
+    1. Generic attributes
+    2. List patterns
+    3. Static abstracts in interfaces
+    4. Declarations under `or` patterns
+    5. Records and initialization
+    6. Discriminated unions
+    7. Params `Span<T>`
+    8. Statements as expressions
+    9. Expression trees
+    10. Type system extensions
 
 ## Aug 25, 2021
 
