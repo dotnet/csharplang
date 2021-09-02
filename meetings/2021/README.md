@@ -31,8 +31,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Generic math and static abstracts feedback (Tanner): https://devblogs.microsoft.com/dotnet/preview-features-in-net-6-generic-math/
 
-## Sep 8, 2021
-
 ## Sep 1, 2021
 
 - Continue initial triage for C# 11 (Mads)
