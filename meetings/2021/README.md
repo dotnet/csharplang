@@ -15,6 +15,14 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
+## Oct 06, 2021
+
+- "PGI" with MVPs
+
+## Oct 04, 2021
+
+- *Design review*
+
 ## Sep 29, 2021
 
 ## Sep 27, 2021
