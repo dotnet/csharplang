@@ -75,7 +75,7 @@ the type author, with various customizations to allow flexibility for multiple c
 
 `class`, `struct`, and `record` types gain the ability to declare a _required\_member\_list_. This list is the list of all the properties and fields of a type that are considered
 _required_, and must be initialized during the construction and initialization of an instance of the type. Types inherit these lists from their base types automatically, providing
-a seemless experience that removes boilerplate and repetitive code.
+a seamless experience that removes boilerplate and repetitive code.
 
 ### `required` modifier
 
