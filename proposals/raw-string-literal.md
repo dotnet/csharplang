@@ -12,9 +12,9 @@ var xml = """
 Because the nested contents might itself want to use `"""` then the starting/ending delimiters can be longer like so:
 
 ```
-var xml = """"
+var xml = """""
           Ok to use """ here
-          """";
+          """"";
 ```
 
 To make the text easy to read and allow for indentation that developers like in code, these string literals will naturally remove the indentation specified on the last line when producing the final literal value.  For example, a literal of the form:
