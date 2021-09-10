@@ -32,7 +32,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Sep 15, 2021
 
 - Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
-- Permit variable declarations under disjunctive patterns (Julien): https://github.com/dotnet/csharplang/issues/4018 
+- Permit variable declarations under disjunctive patterns (Julien): draft proposal https://github.com/dotnet/csharplang/pull/4592
 
 ## Sep 13, 2021
 
