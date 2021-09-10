@@ -20,7 +20,7 @@ using_alias_directive
     ;
 ```
 
-Interestingly, most of the spec language in [using_alias_directive](https://github.com/dotnet/csharplang/blob/main/spec/namespaces.md#using-alias-directives) needs to change.  Most language in it already refers to 'namespace or type', for example:
+Interestingly, most of the spec language in [using_alias_directive](https://github.com/dotnet/csharplang/blob/main/spec/namespaces.md#using-alias-directives) does not need to change.  Most language in it already refers to 'namespace or type', for example:
 
 > A using_alias_directive introduces an identifier that serves as an alias for a namespace or type within the immediately enclosing compilation unit or namespace body.
 
