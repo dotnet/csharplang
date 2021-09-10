@@ -50,3 +50,8 @@ using MyPointer = My*;
 ```
 
 The spec is currently unclear if this would be ok or not.  Technically, the `using_alias_directive` here is not in an `unsafe` context, so the `My*` could be considered an error.  However, the spirit of this specification is that should be allowed, and only the *usages* of `MyPointer` would themselves have to either be in another `using_alias_directive` or in an `unsafe` context.  Another way this could be formalized is that the `(namespace_name | type)` portion of a `using_alias_directive` would always be an `unsafe` context, but that wouldn't negate the fact that any place that alias was referenced would also need to be an `unsafe` context.
+
+
+--
+
+Similarly what should be done about `using NullablePerson = Person?; // Person is a reference type`?  My intuition is that this is fine (though should only be legal if the *using* is in a `#nullable enable` section).  The meaning of `NullablePerson` in all reference locations is `Person?` (even if that location is `#nullable disable`).  However, depending on the nullability region where it is referenced you may or may not get nullable warnings around it.
