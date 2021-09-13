@@ -498,7 +498,7 @@ Generic type inference is enhanced to help decide whether inferred reference typ
 
 ### The first phase
 
-Nullable reference types flow into the bounds from the initial expressions, as described below. In addition, two new kinds of bounds, namely `null` and `default` are introduced. Their purpose is to carry through occurrences of `null` or `default` in the input expressions, which may cause an inferred type to be nullable, even when it otherwise wouldn't. This works even for nullable *value* types, which are enhanced to pick up "nullness" in the inference process.
+Nullable reference types flow into the bounds from the initial expressions, as described below. In addition, two new kinds of bounds, namely `null` and `default` are introduced. Their purpose is to carry through occurrences of `null` or `default` in the input expressions, which may cause an inferred type to be nullable, even when it otherwise wouldn't.
 
 The determination of what bounds to add in the first phase are enhanced as follows:
 
@@ -533,7 +533,7 @@ To handle these we add more phases to fixing, which is now:
 3. Eliminate candidates that do not have an implicit conversion to all the other candidates
 4. If the remaining candidates do not all have identity conversions to one another, then type inference fails
 5. *Merge* the remaining candidates as described below
-6. If the resulting candidate is a reference type or a nonnullable value type and *all* of the exact bounds or *any* of the lower bounds are nullable value types, nullable reference types, `null` or `default`, then `?` is added to the resulting candidate, making it a nullable value type or reference type.
+6. If the resulting candidate is a reference type and *all* of the exact bounds or *any* of the lower bounds are nullable reference types, `null` or `default`, then `?` is added to the resulting candidate, making it a nullable reference type.
 
 *Merging* is described between two candidate types. It is transitive and commutative, so the candidates can be merged in any order with the same ultimate result. It is undefined if the two candidate types are not identity convertible to each other.
 
