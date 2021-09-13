@@ -34,13 +34,15 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
 - Permit variable declarations under disjunctive patterns (Julien): draft proposal https://github.com/dotnet/csharplang/pull/4592
 
-## Sep 13, 2021
-
-- Generic math and static abstracts feedback (Tanner): https://devblogs.microsoft.com/dotnet/preview-features-in-net-6-generic-math/
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Sep 13, 2021
+
+[C# Language Design Notes for September 13th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-09-13.md)
+
+1. Feedback on static abstracts in interfaces
 
 ## Sep 1, 2021
 
