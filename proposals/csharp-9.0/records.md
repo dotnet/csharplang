@@ -38,7 +38,7 @@ Records cannot inherit from classes, unless the class is `object`, and classes c
 
 In addition to the members declared in the record body, a record type has additional synthesized members.
 Members are synthesized unless a member with a "matching" signature is declared in the record body or
-an accessible concrete non-virtual member with a "matching" signature is inherited.
+an accessible concrete non-virtual member with a "matching" signature is inherited. A matching member prevents the compiler from generating that member, not any other synthesized members.
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
 It is an error for a member of a record to be named "Clone".
