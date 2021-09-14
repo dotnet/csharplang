@@ -71,7 +71,7 @@ once `ref` fields are supported.
 // language
 readonly ref struct Span<T>
 {
-    ref readonly T _field;
+    readonly ref T _field;
     int _length;
 
     // This constructor does not exist today however will be added as a
@@ -80,7 +80,7 @@ readonly ref struct Span<T>
     // requires unsafe code.
     public Span(ref T value)
     {
-        ref _field = ref value;
+        _field = ref value;
         _length = 1;
     }
 }
@@ -214,12 +214,12 @@ ref struct RS
 
     public RS(int[] array, int index)
     {
-        ref _field = ref array[index];
+        _field = ref array[index];
     }
 
     public RS(ref int i)
     {
-        ref _field = ref i;
+        _field = ref i;
     }
 
     static RS CreateRS(ref int i)
@@ -269,7 +269,7 @@ ref struct RS1
     ref int _field;
     public RS1(ref int p)
     {
-        ref _field = ref p;
+        _field = ref p;
     }
 }
 
@@ -450,12 +450,12 @@ ref struct RS
 
     public RS(int[] array)
     {
-        ref _refField = ref array[0];
+        _refField = ref array[0];
     }
 
     public RS(ref int i)
     {
-        ref _refField = ref i;
+        _refField = ref i;
     }
 
     public RS CreateRS() => ...;
@@ -529,7 +529,7 @@ ref struct SmallSpan
 
         // The *ref-safe-to-escape* of 'i' is the same as the *safe-to-escape*
         // of 's' hence most assignment rules would allow it.
-        ref s._field = ref i;
+        s._field = ref i;
 
         // ERROR: this must be disallowed for the exact same reasons we can't 
         // return a Span<T> wrapping the parameter: the consumption rules
@@ -545,7 +545,7 @@ ref struct SmallSpan
         // Okay: the value being assigned here is known to refer to the heap 
         // hence it is allowed by our rules above because it requires no changes
         // to existing method invocation rules (hence preserves compat)
-        ref s._field = ref array[i];
+        s._field = ref array[i];
 
         return s;
     }
@@ -568,7 +568,7 @@ restricted to the current method. Such a design is discussed [here](https://gith
 However extra complexity of such rules do not seem to be worth the limited cases
 this enables. Should compelling samples come up we can revisit this decision.
 
-This means though that `ref` fields are largely in practice `ref readonly`. The
+This means though that `ref` fields are largely in practice `readonly ref`. The
 main exceptions being object initializers and when the value is known to refer 
 to the heap.
 
@@ -624,7 +624,7 @@ Misc Notes:
 type.
 - The reference assembly generation process must preserve the presence of a 
 `ref` field inside a `ref struct` 
-- A `ref readonly struct` must declare its `ref` fields as `ref readonly`
+- A `readonly ref struct` must declare its `ref` fields as `readonly ref`
 - The span safety rules for constructors, fields and assignment must be updated
 as outlined in this document.
 - The span safety rules need to include the definition of `ref` values that 
@@ -1222,7 +1222,7 @@ ref struct StackLinkedListNode<T>
     public StackLinkedListNode(T value, ref StackLinkedListNode<T> next)
     {
         _value = value;
-        ref _next = ref next;
+        _next = ref next;
     }
 }
 ```
