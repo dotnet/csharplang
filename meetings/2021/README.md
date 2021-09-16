@@ -21,10 +21,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - *Design review*
 
-## Sep 29, 2021
-
-## Sep 27, 2021
-
 ## Sep 22, 2021
 
 ## Sep 20, 2021
