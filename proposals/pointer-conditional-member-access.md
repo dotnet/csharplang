@@ -46,7 +46,7 @@ The expression `a?[b]`, where `a` is a pointer-typed expression, and `b` is a si
 a is null ? null : a[b]
 ```
 
-It should be noted that indexing a pointer with `?[` follows the same rules as indexing it normally with `[`, meaning that only exactly one non-named argument is accepted. Additionally, indexing cannot occur in `void` pointer types (`void*`, `void**`, etc.). Generally, all rules applied to the normal indexing with `[` are applied to `?[` as well.
+It should be noted that indexing a pointer with `?[` follows the same rules as indexing it normally with `[`, meaning that only exactly one non-named argument is accepted. Additionally, indexing cannot occur for the `void*` pointer type. Generally, all rules applied to the normal indexing with `[` are applied to `?[` as well.
 
 ---
 
