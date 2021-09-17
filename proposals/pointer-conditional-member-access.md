@@ -1,8 +1,8 @@
 # Conditional member access and null-coalescing for pointers
 
 * [x] Proposed
-* [ ] Prototype: [In Progress](https://github.com/AlFasGD/roslyn/tree/conditional-access-pointers)
-* [ ] Implementation: [In Progress](https://github.com/AlFasGD/roslyn/tree/conditional-access-pointers)
+* [ ] Prototype: In Progress ([null-conditional access](https://github.com/AlFasGD/roslyn/tree/conditional-access-pointers))
+* [ ] Implementation: In Progress ([null-coalescing](https://github.com/AlFasGD/roslyn/tree/pointer-null-coalescing))
 * [ ] Specification: Below
 
 ## Summary
@@ -64,10 +64,14 @@ The expression `a ?? b`, where `a` and `b` are pointer-typed expressions, is equ
 a is null ? b : a
 ```
 
+Assuming `A`, `B` the pointer types of `a`, `b` respectively, `A` and `B` must either match, or any of the two being implicitly convertible to the other, meaning that any of `A` and `B` must be `void*`, with the other being any pointer type.
+
 Similarly, the expression `a ??= b`, where `a` and `b` are pointer-typed expressions, is equivalent to the following:
 ```csharp
 a = (a is null ? b : a)
 ```
+
+Similarly to the `??` case, `B` must be implicitly convertible to `A`, which only leaves the possibility of `A` being a `void*` and `B` being any pointer type.
 
 ### Requirement relaxation
 
