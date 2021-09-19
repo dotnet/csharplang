@@ -21,13 +21,12 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Sep 22, 2021
 
-- Spill over from Monday
+- Open questions with list patterns (Julien): https://github.com/dotnet/csharplang/issues/5201
 - Triage (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
 
 ## Sep 20, 2021
 
 - C# 10: Open questions with lambdas (Chuck): see spec changes in https://github.com/dotnet/roslyn/pull/56341 description
-- Open questions with list patterns (Julien): https://github.com/dotnet/csharplang/issues/5201
 - Type aliases (Cyrus): https://github.com/dotnet/csharplang/issues/4284
 - `+=` for events in object initializers (Cyrus): https://github.com/dotnet/csharplang/issues/5176
 - Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines (cyrusn): https://github.com/dotnet/csharplang/issues/4935
