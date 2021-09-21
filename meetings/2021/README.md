@@ -24,21 +24,25 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Open questions with list patterns (Julien): https://github.com/dotnet/csharplang/issues/5201
 - Triage (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
 
-## Sep 20, 2021
-
-- C# 10: Open questions with lambdas (Chuck): see spec changes in https://github.com/dotnet/roslyn/pull/56341 description
-- Type aliases (Cyrus): https://github.com/dotnet/csharplang/issues/4284
-- `+=` for events in object initializers (Cyrus): https://github.com/dotnet/csharplang/issues/5176
-- Remove restriction that interpolations within a non-verbatim interpolated string cannot contain new-lines (cyrusn): https://github.com/dotnet/csharplang/issues/4935
-
-## Sep 15, 2021
-
-- Feature specs and the C# Standard (Mads, Bill, Rex): https://github.com/dotnet/csharpstandard
-- Permit variable declarations under disjunctive patterns (Julien): draft proposal https://github.com/dotnet/csharplang/pull/4592
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Sep 20, 2021
+
+[C# Language Design Notes for September 20th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-09-20.md)
+
+1. Lambda breaking changes
+2. Newlines in non-verbatim interpolated strings
+3. Object initializer event hookup
+4. Type alias improvements
+
+## Sep 15, 2021
+
+[C# Language Design Notes for September 15th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-09-15.md)
+
+* Feedback from the C# standardization committee
+* Permit pattern variables under disjunctive patterns
 
 ## Sep 13, 2021
 
