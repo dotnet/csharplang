@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Schedule ASAP
 
 ## Schedule when convenient
+- Open questions with `Length`/`Count` assumptions in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5137
 
 ## Recurring topics
 
