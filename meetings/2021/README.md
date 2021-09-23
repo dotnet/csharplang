@@ -20,14 +20,23 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - *Design review*
 
-## Sep 22, 2021
-
-- Open questions with list patterns (Julien): https://github.com/dotnet/csharplang/issues/5201
-- Triage (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Sep 22, 2021
+
+[C# Language Design Notes for September 22nd, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-09-22.md)
+
+1. Open questions in list patterns
+    1. Breaking change confirmation
+    2. Positional patterns on ITuple
+    3. Slicing rules
+    4. [Slice syntax recommendations]
+    5. Other list pattern features
+2. Nested members in `with` and object creation
+3. CallerIdentityAttribute
+4. Attributes on `Main` for top level programs
 
 ## Sep 20, 2021
 
