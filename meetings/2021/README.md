@@ -32,7 +32,7 @@ Overview of meetings and agendas for 2021
     1. Breaking change confirmation
     2. Positional patterns on ITuple
     3. Slicing rules
-    4. [Slice syntax recommendations]
+    4. Slice syntax recommendations
     5. Other list pattern features
 2. Nested members in `with` and object creation
 3. CallerIdentityAttribute
