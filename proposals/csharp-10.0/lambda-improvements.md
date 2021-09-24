@@ -152,24 +152,30 @@ A conversion to `System.MulticastDelegate` or base type or interface realizes th
 A conversion to `System.Linq.Expressions.Expression<TDelegate>` or base type realizes the lambda expression as an expression tree with an appropriate delegate type.
 
 ### Type inference
-The existing rules for type inference are mostly unchanged (see [type inference](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#type-inference)). There are however a ***couple of changes*** below to specific phases of type inference.
+The existing rules for type inference are mostly unchanged (see [type inference](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#type-inference)). There are however a **couple of changes** below to specific phases of type inference.
 
 #### First phase
 The [first phase](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-first-phase) allows an anonymous function to bind to `Ti` even if `Ti` is not a delegate or expression tree type (perhaps a type parameter constrained to `System.Delegate` for instance).
 
 > For each of the method arguments `Ei`:
 > 
-> *   If `Ei` is an anonymous function ***and `Ti` is a delegate type or expression tree type***, an *explicit parameter type inference* is made from `Ei` to `Ti`
+> *   If `Ei` is an anonymous function **and `Ti` is a delegate type or expression tree type**, an *explicit parameter type inference* is made from `Ei` to `Ti` **and an *explicit return type inference* is made from `Ei` to `Ti`.**
 > *   Otherwise, if `Ei` has a type `U` and `xi` is a value parameter then a *lower-bound inference* is made *from* `U` *to* `Ti`.
 > *   Otherwise, if `Ei` has a type `U` and `xi` is a `ref` or `out` parameter then an *exact inference* is made *from* `U` *to* `Ti`.
 > *   Otherwise, no inference is made for this argument.
+
+> #### **Explicit return type inference**
+> 
+> **An *explicit return type inference* is made *from* an expression `E` *to* a type `T` in the following way:**
+> 
+> *  **If `E` is an anonymous function with explicit return type `Ur` and `T` is a delegate type or expression tree type with return type `Vr` then an *exact inference* ([Exact inferences](expressions.md#exact-inferences)) is made *from* `Ur` *to* `Vr`.**
 
 #### Fixing
 [Fixing](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#fixing) ensures other conversions are preferred over _function_type_ conversions. (Lambda expressions and method group expressions only contribute to lower bounds so handling of _function_types_ is needed for lower bounds only.)
 
 > An *unfixed* type variable `Xi` with a set of bounds is *fixed* as follows:
 > 
-> *  The set of *candidate types* `Uj` starts out as the set of all types in the set of bounds for `Xi` ***where function types are ignored in lower bounds if there any types that are not function types***.
+> *  The set of *candidate types* `Uj` starts out as the set of all types in the set of bounds for `Xi` **where function types are ignored in lower bounds if there any types that are not function types**.
 > *  We then examine each bound for `Xi` in turn: For each exact bound `U` of `Xi` all types `Uj` which are not identical to `U` are removed from the candidate set. For each lower bound `U` of `Xi` all types `Uj` to which there is *not* an implicit conversion from `U` are removed from the candidate set. For each upper bound `U` of `Xi` all types `Uj` from which there is *not* an implicit conversion to `U` are removed from the candidate set.
 > *  If among the remaining candidate types `Uj` there is a unique type `V` from which there is an implicit conversion to all the other candidate types, then `Xi` is fixed to `V`.
 > *  Otherwise, type inference fails.
