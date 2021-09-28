@@ -1,10 +1,5 @@
 # null coalescing assignment
 
-* [x] Proposed
-* [x] Prototype: Completed
-* [x] Implementation: Completed
-* [x] Specification: Below
-
 ## Summary
 [summary]: #summary
 

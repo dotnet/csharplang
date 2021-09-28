@@ -1,10 +1,5 @@
 # Target-typed "default" literal
 
-* [x] Proposed
-* [x] Prototype
-* [x] Implementation
-* [ ] Specification
-
 ## Summary
 [summary]: #summary
 

@@ -1,10 +1,5 @@
 # pattern-matching with generics
 
-* [x] Proposed
-* [ ] Prototype:
-* [ ] Implementation:
-* [ ] Specification:
-
 ## Summary
 [summary]: #summary
 
