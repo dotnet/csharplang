@@ -1,10 +1,5 @@
 # Async Streams
 
-* [x] Proposed
-* [x] Prototype
-* [ ] Implementation
-* [ ] Specification
-
 ## Summary
 [summary]: #summary
 

@@ -1,10 +1,5 @@
 # Readonly references
 
-* [x] Proposed
-* [x] Prototype
-* [x] Implementation: Started
-* [ ] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 

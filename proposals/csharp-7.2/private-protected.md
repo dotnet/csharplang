@@ -1,10 +1,5 @@
 # private protected
 
-* [x] Proposed
-* [x] Prototype: [Complete](https://github.com/dotnet/roslyn/blob/master/docs/features/private-protected.md)
-* [x] Implementation: [Complete](https://github.com/dotnet/roslyn/blob/master/docs/features/private-protected.md)
-* [x] Specification: [Complete](#detailed-design)
-
 ## Summary
 [summary]: #summary
 
