@@ -25,7 +25,7 @@ Instead of:
 if (e is (int x1, 0))
     Use(x1);
 else if (e is (0, int x2))
-    Use(x2)
+    Use(x2);
   
 switch (e)
 {
