@@ -15,17 +15,17 @@ switch (e)
 {
     case (int x, 0):
     case (0, int x):
-	Use(x);
-	break;
+        Use(x);
+        break;
 }
 ```
 Instead of:
 
 ```cs
-if (e is (int x, 0))
-    Use(x);
-else
-    Use(x)
+if (e is (int x1, 0))
+    Use(x1);
+else (e is (0, int x2))
+    Use(x2)
   
 switch (e)
 {
@@ -55,16 +55,19 @@ Redeclaring pattern variables is only permitted for variables of the same type.
 
 - How identical these types should be?
 - Could we support variable declarations under `not` patterns?
+    ```cs
+    if (e is not (int x, 0) and not (0, int x))
+    ```
 - Could we relax the scoping rules beyond pattern boundaries?
- 	```cs
-	  if (e is (int x, 0) || a is (0, int x))
-	```
+    ```cs
+    if (e is (int x, 0) || a is (0, int x))
+    ```
 - Could we relax the redeclaration requirement in a switch section? 
-	```cs
-	  case (int x, 0) a when Use(x, a): // ok
-	  case (0, int x) b when Use(x, b): // ok
-	     Use(x); // ok
-	     Use(a); // error; not definitely assigned
-	     Use(b); // error; not definitely assigned
-	     break;
-	```
+    ```cs
+    case (int x, 0) a when Use(x, a): // ok
+    case (0, int x) b when Use(x, b): // ok
+        Use(x); // ok
+        Use(a); // error; not definitely assigned
+        Use(b); // error; not definitely assigned
+        break;
+    ```
