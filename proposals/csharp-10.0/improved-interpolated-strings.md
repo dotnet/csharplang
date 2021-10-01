@@ -35,8 +35,8 @@ convenient interpolation syntax.
 We introduce a new handler pattern that can represent an interpolated string passed as an argument to a method. The simple English of the pattern is as follows:
 
 When an _interpolated\_string\_expression_ is passed as an argument to a method, we look at the type of the parameter. If the parameter type has a constructor
-that can be invoked with 2 int parameters, `literalLength` and `formattedCount`, optionally takes a parameter the receiver is convertible to,
-and has an out parameter of the type of original method's parameter and that type has instance `AppendLiteral` and `AppendFormatted` methods that
+that can be invoked with 2 int parameters, `literalLength` and `formattedCount`, optionally takes additional parameters specified by an attribute on the original
+parameter, optionally has an out boolean trailing parameter, and the type of the original parameter has instance `AppendLiteral` and `AppendFormatted` methods that
 can be invoked for every part of the interpolated string, then we lower the interpolation using that, instead of into a traditional call to
 `string.Format(formatStr, args)`. A more concrete example is helpful for picturing this:
 
@@ -61,16 +61,14 @@ public ref struct TraceLoggerParamsInterpolatedStringHandler
         _logLevelEnabled = logger.EnabledLevel;
     }
 
-    public bool AppendLiteral(string s)
+    public void AppendLiteral(string s)
     {
         // Store and format part as required
-        return true;
     }
 
-    public bool AppendFormatted<T>(T t)
+    public void AppendFormatted<T>(T t)
     {
         // Store and format part as required
-        return true;
     }
 }
 
@@ -97,15 +95,17 @@ logger.LogTrace($"{name} will never be printed because info is < trace!");
 var name = "Fred Silberberg";
 var receiverTemp = logger;
 var handler = new TraceLoggerParamsInterpolatedStringHandler(literalLength: 47, formattedCount: 1, receiverTemp, out var handlerIsValid);
-_ = handlerIsValid &&
-    handler.AppendFormatted(name) &&
+if (handlerIsValid)
+{
+    handler.AppendFormatted(name);
     handler.AppendLiteral(" will never be printed because info is < trace!");
+}
 receiverTemp.LogTrace(handler);
 ```
 
-Here, because `TraceLoggerParamsInterpolatedStringHandler` has a constructor with the correct parameters and returns the type the `LogTrace` call was expecting,
-we say that the interpolated string has an implicit handler conversion to that parameter, and it lowers to the pattern shown above. The specese needed for this
-is a bit complicated, and is expanded below.
+Here, because `TraceLoggerParamsInterpolatedStringHandler` has a constructor with the correct parameters, we say that the interpolated string
+has an implicit handler conversion to that parameter, and it lowers to the pattern shown above. The specese needed for this is a bit complicated,
+and is expanded below.
 
 The rest of this proposal will use `Append...` to refer to either of `AppendLiteral` or `AppendFormatted` in cases when both are applicable.
 
