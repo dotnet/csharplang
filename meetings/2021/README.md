@@ -3,6 +3,7 @@
 All schedule items must have a public issue or checked in proposal that can be linked from the notes.
 
 ## Schedule ASAP
+- Warning wave warning for lower-cased name (Julien): https://github.com/dotnet/roslyn/issues/56653
 
 ## Schedule when convenient
 - Mitigating the break for `Length` property pattern in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5226
