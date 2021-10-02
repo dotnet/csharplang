@@ -42,7 +42,7 @@ switch (e)
 
 Variables *must* be redeclared under all disjuncitve patterns because assignment of such variables depend on the order of evaluation which is undefined in the context of pattern-matching.
 
-- In a *disjunctive_pattern*, pattern variables declared under the left-hand-side must be redeclared under the right-hand-side.
+- In a *disjunctive_pattern*, pattern variables declared on one side must be redeclared on the other side.
 - In a *switch_section*, pattern variables declared under each case label must be redeclared under every other case label.
 
 In any other case, variable declaration follows the usual scoping rules and is disallowed.
