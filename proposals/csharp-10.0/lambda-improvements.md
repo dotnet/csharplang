@@ -125,7 +125,7 @@ Delegate d2 = ref int () => x;   // ok
 ```
 
 ## Natural (function) type
-A lambda expression has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [inferred return type](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#inferred-return-type)).
+A lambda expression has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [inferred return type](../../spec//spec/expressions.md#inferred-return-type)).
 
 A method group has a natural type if all candidate methods in the method group have a common signature. (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
 
@@ -152,10 +152,10 @@ A conversion to `System.MulticastDelegate` or base type or interface realizes th
 A conversion to `System.Linq.Expressions.Expression<TDelegate>` or base type realizes the lambda expression as an expression tree with an appropriate delegate type.
 
 ### Type inference
-The existing rules for type inference are mostly unchanged (see [type inference](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#type-inference)). There are however a **couple of changes** below to specific phases of type inference.
+The existing rules for type inference are mostly unchanged (see [type inference](../../spec//spec/expressions.md#type-inference)). There are however a **couple of changes** below to specific phases of type inference.
 
 #### First phase
-The [first phase](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-first-phase) allows an anonymous function to bind to `Ti` even if `Ti` is not a delegate or expression tree type (perhaps a type parameter constrained to `System.Delegate` for instance).
+The [first phase](../../spec/expressions.md#the-first-phase) allows an anonymous function to bind to `Ti` even if `Ti` is not a delegate or expression tree type (perhaps a type parameter constrained to `System.Delegate` for instance).
 
 > For each of the method arguments `Ei`:
 > 
@@ -168,10 +168,10 @@ The [first phase](https://github.com/dotnet/csharplang/blob/main/spec/expression
 > 
 > **An *explicit return type inference* is made *from* an expression `E` *to* a type `T` in the following way:**
 > 
-> *  **If `E` is an anonymous function with explicit return type `Ur` and `T` is a delegate type or expression tree type with return type `Vr` then an *exact inference* ([Exact inferences](expressions.md#exact-inferences)) is made *from* `Ur` *to* `Vr`.**
+> *  **If `E` is an anonymous function with explicit return type `Ur` and `T` is a delegate type or expression tree type with return type `Vr` then an *exact inference* ([Exact inferences](../../spec/expressions.md#exact-inferences)) is made *from* `Ur` *to* `Vr`.**
 
 #### Fixing
-[Fixing](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#fixing) ensures other conversions are preferred over _function_type_ conversions. (Lambda expressions and method group expressions only contribute to lower bounds so handling of _function_types_ is needed for lower bounds only.)
+[Fixing](../../spec//spec/expressions.md#fixing) ensures other conversions are preferred over _function_type_ conversions. (Lambda expressions and method group expressions only contribute to lower bounds so handling of _function_types_ is needed for lower bounds only.)
 
 > An *unfixed* type variable `Xi` with a set of bounds is *fixed* as follows:
 > 
@@ -181,7 +181,7 @@ The [first phase](https://github.com/dotnet/csharplang/blob/main/spec/expression
 > *  Otherwise, type inference fails.
 
 ### Best common type
-Best common type is defined in terms of type inference (see [finding the best common type](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions)) so the changes above apply to best common type as well.
+Best common type is defined in terms of type inference (see [finding the best common type](../../spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions)) so the changes above apply to best common type as well.
 ```csharp
 var fs = new[] { (string s) => s.Length; (string s) => int.Parse(s) } // Func<string, int>[]
 ```
