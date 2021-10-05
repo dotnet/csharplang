@@ -261,7 +261,7 @@ Called out above, but here's a list:
 Not called out above:
 
 - Confirm whether we would like to support use of static abstract methods declared in interfaces as operators in query expressions (https://github.com/dotnet/roslyn/issues/53796).
-- Confirm the rules outlined in "Processing of user-defined implicit conversions" and "Processing of user-defined explicit conversions" sections above.
+- Confirm the rules outlined in "Processing of user-defined implicit conversions" and "Processing of user-defined explicit conversions" sections above. Some feedback on the current rules https://github.com/dotnet/roslyn/issues/56753.
 
 # Design meetings
 
