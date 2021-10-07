@@ -60,9 +60,6 @@ The difference is, for those well known types, the _builder types_ are also know
 
 `Builder.Create()` is invoked to create an instance of the _builder type_.
 
-If the state machine is implemented as a `struct`, then `builder.SetStateMachine(stateMachine)` is called
-with a boxed instance of the state machine that the builder can cache if necessary.
-
 `builder.Start(ref stateMachine)` is invoked to associate the builder with compiler-generated state machine instance.
 The builder must call `stateMachine.MoveNext()` either in `Start()` or after `Start()` has returned to advance the state machine.
 After `Start()` returns, the `async` method calls `builder.Task` for the task to return from the async method.
@@ -74,8 +71,12 @@ If an exception is thrown in the state machine, `builder.SetException(exception)
 If the state machine reaches an `await expr` expression, `expr.GetAwaiter()` is invoked.
 If the awaiter implements `ICriticalNotifyCompletion` and `IsCompleted` is false,
 the state machine invokes `builder.AwaitUnsafeOnCompleted(ref awaiter, ref stateMachine)`.
-`AwaitUnsafeOnCompleted()` should call `awaiter.OnCompleted(action)` with an action that calls `stateMachine.MoveNext()`
+`AwaitUnsafeOnCompleted()` should call `awaiter.UnsafeOnCompleted(action)` with an `Action` that calls `stateMachine.MoveNext()`
 when the awaiter completes. Similarly for `INotifyCompletion` and `builder.AwaitOnCompleted()`.
+
+`SetStateMachine(IAsyncStateMachine)` is called by the compiler-generated `IAsyncStateMachine` implementation.
+That can be used to identify the instance of the builder associated with a state machine instance, particularly for cases where the state machine is implemented as a value type:
+if the builder calls `stateMachine.SetStateMachine(stateMachine)`, the `stateMachine` will call `builder.SetStateMachine(stateMachine)` on the _builder instance associated with `stateMachine`_.
 
 ## Overload Resolution
 Overload resolution is extended to recognize _task types_ in addition to `Task` and `Task<T>`.
