@@ -8,7 +8,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Schedule when convenient
 - Mitigating the break for `Length` property pattern in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5226
 - Open questions with `Length`/`Count` assumptions in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5137
-- Should [DoesNotReturn] inform other flow analyses too? (Chuck): https://github.com/dotnet/csharplang/issues/5231
+- Should [DoesNotReturn] warning be reported in nullable-disabled context? (Chuck): https://github.com/dotnet/csharplang/issues/5231
 
 ## Recurring topics
 
