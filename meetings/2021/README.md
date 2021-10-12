@@ -3,12 +3,8 @@
 All schedule items must have a public issue or checked in proposal that can be linked from the notes.
 
 ## Schedule ASAP
-- Warning wave warning for lower-cased name (Julien): https://github.com/dotnet/roslyn/issues/56653
 
 ## Schedule when convenient
-- Mitigating the break for `Length` property pattern in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5226
-- Open questions with `Length`/`Count` assumptions in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5137
-- Should [DoesNotReturn] warning be reported in nullable-disabled context? (Chuck): https://github.com/dotnet/csharplang/issues/5231
 
 ## Recurring topics
 
@@ -24,6 +20,11 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Oct 18, 2021
 
 ## Oct 13, 2021
+
+- Warning wave warning for lower-cased name (Julien): https://github.com/dotnet/roslyn/issues/56653
+- Mitigating the break for `Length` property pattern in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5226
+- Open questions with `Length`/`Count` assumptions in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5137
+- Should [DoesNotReturn] warning be reported in nullable-disabled context? (Chuck): https://github.com/dotnet/csharplang/issues/5231
 
 ## Oct 06, 2021
 
