@@ -2878,7 +2878,7 @@ An automatically implemented property (or ***auto-property*** for short), is a n
 1. an accessor with a semicolon-only body
 2. usage of the `field` contextual keyword ([Keywords](lexical-structure.md#keywords)) within the accessors or expression body of the property. The `field` identifier is only considered the `field` keyword when there is no existing symbol named `field` in scope at that location.
 
-When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property, and any semicolon-only `get` accessor is implemented to read from, and any semicolon-only `set` accessor to write to that backing field. The backing field can be referenced directly using the `field` keyword within all accessors and within the property expression body. Because the field is unnamed, it cannot be used in a `nameof` expression.
+When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property. For auto-properties, any semicolon-only `get` accessor is implemented to read from, and any semicolon-only `set` accessor to write to its backing field. The backing field can be referenced directly using the `field` keyword within all accessors and within the property expression body. Because the field is unnamed, it cannot be used in a `nameof` expression.
 
 If the auto-property does not have a set accessor, the backing field can still be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the backing field of the property.
 
