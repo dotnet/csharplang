@@ -14,7 +14,7 @@ This is all reasonable and will not change with this proposal.
 What is unreasonable today is that we extend the restriction on 'no newlines' in a non-verbatim interpolated string *beyond* its text segments into the *interpolations* themselves.  This means, for example, that you cannot write the following:
 
 ```c#
-var v = $"Count is\t: { this.Is.A.Really()
+var v = $"Count is\t: { this.Is.A.Really(long(expr))
                             .That.I.Should(
                                 be + able)[
                                     to.Wrap()] }.";
