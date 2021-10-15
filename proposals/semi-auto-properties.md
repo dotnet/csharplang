@@ -18,18 +18,32 @@ The following changes are to be made to classes.md:
 ```
 
 ```diff
-- An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with semicolon-only accessor bodies. Auto-properties must have a get accessor and can optionally have a set accessor.
-+ An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern property with either or both of:
+- An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern
+- property with semicolon-only accessor bodies. Auto-properties must have a get accessor and can optionally
+- have a set accessor.
++ An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern
++ property with either or both of:
 ```
 
 ```diff
-- When a property is specified as an automatically implemented property, a hidden backing field is automatically available for the property, and the accessors are implemented to read from and write to that backing field. If the auto-property has no set accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
+- When a property is specified as an automatically implemented property, a hidden backing field is automatically
+- available for the property, and the accessors are implemented to read from and write to that backing field. If
+- the auto-property has no set accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)).
+- Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor 
+- of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
 + 1. an accessor with a semicolon-only body
-+ 2. usage of the `field` contextual keyword ([Keywords](lexical-structure.md#keywords)) within the accessors or expression body of the property. The `field` identifier is only considered the `field` keyword when there is no existing symbol named `field` in scope at that location.
++ 2. usage of the `field` contextual keyword ([Keywords](lexical-structure.md#keywords)) within the accessors or
++    expression body of the property. The `field` identifier is only considered the `field` keyword when there is
++    no existing symbol named `field` in scope at that location.
 +
-+ When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for the property. For auto-properties, any semicolon-only `get` accessor is implemented to read from, and any semicolon-only `set` accessor to write to its backing field. The backing field can be referenced directly using the `field` keyword within all accessors and within the property expression body. Because the field is unnamed, it cannot be used in a `nameof` expression.
++ When a property is specified as an auto-property, a hidden, unnamed, backing field is automatically available for
++ the property. For auto-properties, any semicolon-only `get` accessor is implemented to read from, and any semicolon-only
++ `set` accessor to write to its backing field. The backing field can be referenced directly using the `field` keyword
++ within all accessors and within the property expression body. Because the field is unnamed, it cannot be used in a
++ `nameof` expression.
 +
-+ If the auto-property does not have a set accessor, the backing field can still be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the backing field of the property.
++ If the auto-property does not have a set accessor, the backing field can still be assigned to in the body of a 
++ constructor of the enclosing class. Such an assignment assigns directly to the backing field of the property.
 +
 + If the auto-property has only a semicolon-only get accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)).
 +
