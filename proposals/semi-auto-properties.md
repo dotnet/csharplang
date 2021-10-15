@@ -12,7 +12,7 @@ In these cases by now you always have to create an instance field and write the 
 
 ## Specification changes
 
-The following changes are to be made to classes.md:
+The following changes are to be made to https://github.com/dotnet/csharplang/blob/main/spec/classes.md:
 ```
 ### Automatically implemented properties
 ```
