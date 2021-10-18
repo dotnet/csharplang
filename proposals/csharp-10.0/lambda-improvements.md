@@ -54,6 +54,13 @@ f = ([A] x) => x;         // [A] x
 f = ([A] ref int x) => x; // [A] x
 ```
 
+Multiple attributes may be specified, either comma-separated within the same attribute list or as separate attribute lists.
+```csharp
+var f = [A1, A2][A3] () => { };    // ok
+var g = ([A1][A2, A3] int x) => x; // ok
+
+``` 
+
 Attributes are not supported for anonymous methods declared with `delegate { }` syntax.
 ```csharp
 f = [A] delegate { return 1; };         // syntax error at 'delegate'
