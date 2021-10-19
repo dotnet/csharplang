@@ -18,7 +18,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Oct 20, 2021
 
 - Open questions with `Length`/`Count` assumptions in context of list-patterns (Julien): https://github.com/dotnet/csharplang/issues/5137
-- Primary constructors (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
+- Primary constructors (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/non-record-primary-constructors.md
 
 # C# Language Design Notes for 2021
 
