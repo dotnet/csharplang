@@ -11,7 +11,7 @@
 Primary constructors, currently only available on [record types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#primary-constructor), will be generalized to non-record classes and structs. They have the following differences in behavior from primary constructors in records:
 
 - Instead of public members, a private field is generated for each parameter of the primary constructor.
-- If the field is unused within the body of the class or struct declaration, it is not emitted.
+- If the field is unreferenced (as a field) within the body of the class or struct declaration, it is not emitted. (The parameter can still be used in e.g. initializers).
 - No corresponding deconstructor is generated.
 
 ## Motivation
