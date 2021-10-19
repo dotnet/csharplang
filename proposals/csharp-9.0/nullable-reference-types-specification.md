@@ -135,8 +135,6 @@ expr!.M();
 _ = a?.b!.c;
 ```
 
-The `primary_expression` and `null_conditional_operations_no_suppression` must be of a nullable type.
-
 The postfix `!` operator has no runtime effect - it evaluates to the result of the underlying expression. Its only role is to change the null state of the expression to "not null", and to limit warnings given on its use.
 
 ### Nullable compiler directives
