@@ -58,7 +58,6 @@ Multiple attributes may be specified, either comma-separated within the same att
 ```csharp
 var f = [A1, A2][A3] () => { };    // ok
 var g = ([A1][A2, A3] int x) => x; // ok
-
 ``` 
 
 Attributes are not supported for anonymous methods declared with `delegate { }` syntax.
