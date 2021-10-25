@@ -28,14 +28,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Utf8 strings (Jared): _writeup in the works_
 - Primary constructors and readonly fields feedback (Fred, Cyrus): https://github.com/dotnet/csharplang/discussions/5314
 
-## Oct 25, 2021
-
-- Required properties recap (Fred): https://github.com/dotnet/csharplang/blob/main/proposals/required-members.md
-- Improved delegate type arguments (Rikki): https://github.com/dotnet/csharplang/issues/5321
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Oct 25, 2021
+
+[C# Language Design Notes for October 25th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-10-25.md)
+
+1. Required members
+2. Delegate type argument improvements
 
 ## Oct 20, 2021
 
