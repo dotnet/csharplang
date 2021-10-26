@@ -21,6 +21,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Nov 3, 2021
 
+- Name shadowing in nested functions (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/shadowing-in-nested-functions.md
+
 ## Nov 1, 2021
 
 ## Oct 27, 2021
