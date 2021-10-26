@@ -43,6 +43,15 @@ Given the implementation it is better to call `Write(ReadOnlySpan<byte>)` and th
 
 Still this is a convenience item, the feature can exist without it and it is non-breaking to add it at a later time. 
 
+### Wait for Utf8String type
+While the .NET ecosystem is standardizing on `ReadOnlySpan<byte>` as the defacto Utf8 string type today it's possible the runtime will introduce an actual `Utf8String` type is the future.
+
+We should evaluate our design here in the face of this possible change and reflect on whether we'd regret the decisions we've made. This should be weighed though against the realistic probability we'll introduce `Utf8String`, a probability which seems to decrease every day we find `ReadOnlySpan<byte>` as an acceptable alternative.
+
+It seems unlikely that we would regret the target type conversion between string literals and `ReadOnlySpan<byte>`. The use of `ReadOnlySpan<byte>` as utf8 is embedded in our APIs now and hence there is still value in the conversion even if `Utf8String` comes along and is a "better" type. The language could simply prefer conversions to `Utf8String` over `ReadOnlySpan<byte>`.
+
+It seems more likely that we'd regret the `u8` suffix pointing to `ReadOnlySpan<byte>` instead of `Utf8String`. It would be similar to how we regret that `stackalloc int[]` has a natural type of `int*` instead of `Span<int>`. This is not a deal breaker though, just an inconvenience.
+
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
