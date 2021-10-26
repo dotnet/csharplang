@@ -2,6 +2,7 @@ Utf8 String Literals
 ===
 
 ## Summary
+This 
 [summary]: #summary
 
 <!-- One paragraph explanation of the feature. -->
@@ -14,12 +15,24 @@ Utf8 String Literals
 ## Detailed design
 [design]: #detailed-design
 
-<!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement, and include examples of how the feature is used. Please include syntax and desired semantics for the change, including linking to the relevant parts of the existing C# spec to describe the changes necessary to implement this feature. An initial proposal does not need to cover all cases, but it should have enough detail to enable a language team member to bring this proposal to design if they so choose. -->
+The lowered code will be emitted exactly as if the developer had typed the resulting `byte[]` literal in code. For example: 
+
+```c#
+ReadOnlySpan<byte> span = "hello"; 
+
+// Equivalent to 
+
+ReadOnlySpan<byte> span = new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20 };
+```
+
+That means all optimizations that apply to the `new byte[] { ... }` form will apply to utf8 literals as well. This means the call site will be allocation free as C# will optimize this be stored in the `.data` section of the PE file.
+
+**REMAINING***
+- Levi's case for combining malformed strings
+    - Call out that it's still bad when both have the `u8` suffix
 
 ## Drawbacks
-[drawbacks]: #drawbacks
-
-<!-- Why should we *not* do this? -->
+N/A
 
 ## Alternatives
 ### Target type only
@@ -53,9 +66,7 @@ It seems unlikely that we would regret the target type conversion between string
 It seems more likely that we'd regret the `u8` suffix pointing to `ReadOnlySpan<byte>` instead of `Utf8String`. It would be similar to how we regret that `stackalloc int[]` has a natural type of `int*` instead of `Span<int>`. This is not a deal breaker though, just an inconvenience.
 
 ## Unresolved questions
-[unresolved]: #unresolved-questions
-
-<!-- What parts of the design are still undecided? -->
+N/A
 
 ## Design meetings
 
