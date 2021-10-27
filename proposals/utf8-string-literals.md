@@ -10,13 +10,15 @@ UTF8 is the language of the web and its use is necessary in significant portions
 Today there is no efficient syntax for doing this as C# represents all strings using UTF16 encoding. That means developers have to choose between the convenience of encoding at runtime which incurs overhead, including the time spent at startup actually performing the encoding operation (and allocations if targeting a type that doesn't actually require them), or manually translating the bytes and storing in a `byte[]`. 
 
 ```c# 
-// UTF8 for "AUTH "
-static readonly byte[] s_authWithTrailingSpace = new { 0x41, 0x55, 0x54, 0x48, 0x20 };
+// Efficient but verbose and error prone
+static ReadOnlySpan<byte> AuthWithTrailingSpace => new byte[] { 0x41, 0x55, 0x54, 0x48, 0x20 };
+WriteBytes(AuthWithTrailingSpace);
 
-// Efficient 
+// Incurs allocation and startup costs performing an encoding that could have been done at compile-time
+static readonly byte[] s_authWithTrailingSpace = Encoding.UTF8.GetBytes("AUTH ");
 WriteBytes(s_authWithTrailingSpace);
 
-// Convenient
+// Simplest / most convenient but terribly inefficient
 WriteBytes(Encoding.UTF8.GetBytes("AUTH "));
 ```
 
@@ -36,7 +38,7 @@ ReadOnlySpan<byte> span = "cat";    // new byte[] { 0x63, 0x61, 0x74 }
 When the input text for the conversion is a malformed UTF16 string then the language will emit an error: 
 
 ```c#
-var text = "hello \uD801\uD802";
+const string text = "hello \uD801\uD802";
 byte[] bytes = text; // Error: the input string is not valid UTF16
 ```
 
@@ -129,6 +131,18 @@ It seems unlikely that we would regret the target type conversion between string
 It seems more likely that we'd regret the `u8` suffix pointing to `ReadOnlySpan<byte>` instead of `Utf8String`. It would be similar to how we regret that `stackalloc int[]` has a natural type of `int*` instead of `Span<int>`. This is not a deal breaker though, just an inconvenience.
 
 ## Unresolved questions
+### Depth of the conversion
+Will it also work anywhere that a byte[] could work? Consider: 
+
+```c# 
+static readonly ReadOnlyMemory<byte> s_data1 = "Data"u8;
+static readonly ReadOnlyMemory<byte> s_data2 = "Data";
+```
+
+The first example likely should work because of the natural type that comes from `u8`.
+
+The second example is hard to make work because it requires conversions in both directions. That is unless we add `ReadOnlyMemory<byte>` as one of the allowed conversion types. 
+
 
 ## Examples today
 Examples of where runtime has manually encoded the UTF8 bytes today
