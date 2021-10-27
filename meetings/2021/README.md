@@ -6,6 +6,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule when convenient
 
+- Collection literals (cyrus): https://github.com/dotnet/csharplang/issues/5354
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -29,6 +31,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Utf8 strings (Jared): _writeup in the works_
 - Primary constructors and readonly fields feedback (Fred, Cyrus): https://github.com/dotnet/csharplang/discussions/5314
+- Collection literals (if time). (Cyrus): https://github.com/dotnet/csharplang/issues/5354
 
 # C# Language Design Notes for 2021
 
