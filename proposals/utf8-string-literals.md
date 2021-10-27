@@ -7,7 +7,7 @@ This proposal adds the ability to write UTF8 string literals in C# and have them
 ## Motivation
 UTF8 is the language of the web and its use is necessary in significant portions of the .NET stack. While much of data comes in the form of `byte[]` off the network stack there is still significant uses of constants in the code. For example networking stack has to commonly write constants like `"HTTP/1.0\r\n"`, `" AUTH"` or . `"Content-Length: "`. 
 
-Today there is no efficient syntax for doing this as C# represents all strings using UTF16 encoding. That means developers have to choose between the convenience of encoding at runtime which incurs allocations or manually translating the bytes and storing in a `byte[]`. 
+Today there is no efficient syntax for doing this as C# represents all strings using UTF16 encoding. That means developers have to choose between the convenience of encoding at runtime which incurs overhead, including the time spent at startup actually performing the encoding operation (and allocations if targeting a type that doesn't actually require them), or manually translating the bytes and storing in a `byte[]`. 
 
 ```c# 
 // UTF8 for "AUTH "
