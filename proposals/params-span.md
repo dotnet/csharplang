@@ -1,17 +1,102 @@
-# Stack allocation of arrays of managed types
+# `params Span<T>` and implicit stack allocation of arrays
 
 ## Summary
-Allow explicit stack allocation of short-lived arrays regardless of type, similar to the current support for arrays of managed types using `stackalloc` and `Span<T>`.
-And allow implicit stack allocation of arrays, including `params` arguments, in cases where the arrays are only used as `ReadOnlySpan<T>` or `Span<T>`.
+Allow implicit stack allocation of arrays in specific scenarios such as `params` arguments.
 
-## Explicit stack allocation
-Explicit stack allocation will be supported for arrays of any type with `stackalloc`.
+## Motivation
+`params` array parameters provide a convenient way to call a method that takes an arbitrary length list of arguments.
+However, using an array type for the parameter means the compiler must implicitly allocate an array on the heap at each call site.
 
-The expression `stackalloc T[length]` will allocate `T[]` on the call stack unconditionally, regardless of `length`.
-The type of the expression is `Span<T>` unless `T` is an _unmanaged type_ target-typed to `T*`.
+If we extend `params` types to include the `ref struct` types `Span<T>` and `ReadOnlySpan<T>`, where values of those types cannot escape the call stack, the array at the call site could be allocated on the stack instead.
 
-`length` must be a non-negative `int` but does not need to be compile-time constant.
+And if we're extending `params` to other types, we  could also allow `params IEnumerable<T>` to avoid allocating and copying collections at call sites that have an `IEnumerable<T>` rather than `T[]`.
 
+## Detailed design
+
+### Extending `params`
+`params` parameters will be supported with types `Span<T>`, `ReadOnlySpan<T>`, and `IEnumerable<T>`.
+
+A call in _expanded_ form to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
+
+A call in _expanded_ form to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` allocated on the stack if the `params` array has no more than 8 arguments (an arbitrary limit).
+Otherwise the array will be allocated on the heap.
+
+```csharp
+Console.WriteLine(fmt, x, y, z); // WriteLine(string format, params ReadOnlySpan<object?> arg)
+```
+
+The compiler will report an error when compiling the method declaring the `params` parameter if the `ReadOnlySpan<T>` or `Span<T>` parameter value is returned from the method or assigned to an `out` parameter.
+That ensures call-sites can allocate the underlying array on the stack and reuse the array across call-sites without concern for aliases.
+
+A `params` parameter must be last parameter in the method signature.
+
+Two overloads cannot differ by `params` modifier alone.
+
+`params` parameters will be marked in metadata with a `System.ParamArrayAttribute` regardless of type.
+
+### Overload resolution
+Overload resolution will continue to prefer overloads that are applicable in _normal_ form rather than _expanded_ form.
+
+For overloads that are applicable in _expanded_ form, [Better function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#better-function-member) will be updated to treat certain `params` types as more specific:
+
+> When performing this evaluation, if `Mp` or `Mq` is applicable in its expanded form, then `Px` or `Qx` refers to a parameter in the expanded form of the parameter list.
+> 
+> In case the parameter type sequences `{P1, P2, ..., Pn}` and `{Q1, Q2, ..., Qn}` are equivalent (i.e. each `Pi` has an identity conversion to the corresponding `Qi`), the following tie-breaking rules are applied, in order, to determine the better function member.
+> 
+> *  ...
+> *  Otherwise, if `Mp` has more specific parameter types than `Mq`, then `Mp` is better than `Mq`:
+>    *  ...
+>    *  **A `params` parameter `ReadOnlySpan<T>` is more specific than `Span<T>`, which is more specific than `T[]`, which is more specific than `IEnumerable<T>`.**
+
+### Implicit stack allocation of arrays
+Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be allocated on the stack if the length of the array is a constant value no more than 8 (an arbitrary limit).
+Otherwise the array will be allocated on the heap.
+
+```csharp
+var s = (Span<int>)new[] { i, j, k }; // stack allocation of int[]
+WriteLine(fmt, new[] { x, y, z });    // stack allocation of object[] for WriteLine(string fmt, ReadOnlySpan<object> args);
+```
+
+### Array re-use
+The compiler _may_ reuse an implicitly allocated array across multiple uses within a single thread executing a method:
+- At the same call-site (within a loop) or
+- At distinct call-sites if the lifetime of the spans do not overlap, and the array length is sufficient, and
+  - the element types are managed types that are considered identical by the runtime, or
+  - the element types are unmanaged types of the same size.
+
+An implicitly allocated array may be reused regardless of whether the array was allocated on the stack or the heap.
+
+### Lowering implicit stack allocation
+For an array `T[]` of constant length `N`, the compiler will synthesize a `struct` with `N` fields of type `T` where the layout and alignment of the fields matches the alignment of elements in `T[]`.
+The array will be represented with a value of the synthesized `struct`, and a `Span<T>` created from a `ref` to the first field.
+
+For example, a call to `Console.WriteLine(fmt, x, y, z);` would be emitted as:
+```csharp
+[StructLayout(LayoutKind.Sequential)]
+internal struct $Values3<T> { public T Item1, Item2, Item3; };
+
+var values = new $Values3<object>() { Item1 = x, Item2 = y, Item3 = z };
+var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
+Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
+```
+
+The synthesized `struct` type will be `internal`, with an unspeakable name.
+
+Since `T` is a valid type argument (and used in `Span<T>`), the synthesized type will be a constructed generic type where the underlying generic type is shared across other call sites in the compilation with the same number of arguments.
+
+## Open issues
+### Is `params Span<T>` necessary?
+Is there a reason to support `params` parameters of type `Span<T>` in addition to `ReadOnlySpan<T>`? Is allowing mutation within the `params` method useful?
+
+### Is `params IEnumerable<T>` necessary?
+If the compiler allows `params ReadOnlySpan<T>`, then new APIs that require `params` could use `params ReadOnlySpan<T>` instead of `params T[]` because `T[]` is implicitly convertible to `ReadOnlySpan<T>`. And even legacy APIs could add a `params ReadOnlySpan<T>` overload where the existing `params T[]` simply delegates to the new overload.
+
+There is no conversion from `IEnumerable<T>` to `ReadOnlySpan<T>` however, so allowing `params IEnumerable<T>` is essentially asking APIs to provide two overloads for `params` methods: `params ReadOnlySpan<T>` and `params IEnumerable<T>`. 
+
+Are scenarios for `params IEnumerable<T>` sufficiently compelling to justify that?
+
+### Explicit stack allocation
+Should we allow explicit stack allocation of arrays of managed types with `stackalloc` as well?
 ```csharp
 public static ImmutableArray<TResult> Select<TSource, TResult>(this ImmutableArray<TSource> source, Func<TSource, TResult> map)
 {
@@ -23,131 +108,13 @@ public static ImmutableArray<TResult> Select<TSource, TResult>(this ImmutableArr
 }
 ```
 
-### Lowering `stackalloc`
-The runtime will provide a `StackAlloc<T>(int length)` method that unconditionally allocates an array of `T[length]` on the call stack.
-```csharp
-namespace System.Runtime.CompilerServices
-{
-    public static class RuntimeHelpers
-    {
-        public static Span<T> StackAlloc<T>(int length);
-    }
-}
-```
+This would require runtime support for stack allocation of arrays of non-constant length and any type, and GC tracking of the elements.
 
-A call to `Console.WriteLine(fmt, stackalloc object[] { x, y, z });` could be emitted as:
-```csharp
-var span = RuntimeHelpers.StackAlloc<object>(3);
-span[0] = x;
-span[1] = y;
-span[2] = z;
-Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
-```
+Direct runtime support for stack allocation of arrays of managed types might be useful for lowering implicit stack allocation as well.
 
-_Can we use `localloc` for managed types?_
-
-## Implicit stack allocation
-Stack allocation of arrays is extended to implicit allocations as well.
-In particular, array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be allocated on the stack if:
-- The length of the array is a constant integer <= 8 (the actual limit is arbitrary), and
-- The call-site has not explicitly _opted-out_ of implicit stack allocation.
-
-```csharp
-Span<int> s = new[] { i, j, k }; // stack allocation of int[]
-WriteLine(fmt, new[] { x, y });  // stack allocation of object[] for WriteLine(string fmt, ReadOnlySpan<object> args);
-```
-
-### `params Span<T>`
-The C# compiler will support parameters declared as `params ReadOnlySpan<T>` and `params Span<T>`.
-
-_Include the restrictions from `params T[]`._
-
-A call in _expanded_ form to a method with `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` allocated on the stack if the following hold; otherwise the array will be allocated on the heap.
-- The number of arguments in the `params` array is <= 8 (the actual limit is arbitrary), and
-- The call-site has not explicitly _opted-out_ of implicit stack allocation.
-
-The compiler will report an error for the method declaring the `params` parameter if the `ReadOnlySpan<T>` or `Span<T>` parameter value is returned from the method or assigned to an `out` parameter.
-That ensures call-sites can allocate the underlying array on the stack and reuse the array across call-sites without concern for aliases.
-
-### Overload resolution
-Overload resolution will continue to prefer overloads that are applicable in _normal_ form rather than _expanded_ form.
-
-For overloads that are applicable in _expanded_ form, overload resolution will prefer `params` parameter types in the following order.
-1. `params ReadOnlySpan<T>`
-2. `params Span<T>`
-3. `params T[]`
-
-```csharp
-Console.WriteLine(fmt, x, y);       // WriteLine(string format, object? arg0, object? arg1)
-Console.WriteLine(fmt, x, y, z, w); // WriteLine(string format, params ReadOnlySpan<object?> arg)
-```
-
-If there are two applicable overload `M1` and `M2` with `params` element types `T1` and `T2` but otherwise identical signatures, the preferred overload is `M1` if the preferred type is `T1` regardless of whether the span type in `M1` is preferred over the span type in `M2`. _Quote from spec here._
-
-### Opt-in and opt-out
-To enforce stack allocation at a call-site, use `stackalloc` explicitly.
-```csharp
-Span<int> s = stackalloc[] { 1, 2, ..., 100 };
-Console.WriteLine(fmt, stackalloc[] { x, y, z });
-```
-
-To opt-out of implicit stack allocation at all call-sites within a method, the compiler will support an attribute such as `[MethodImpl(MethodImplOptions.NoImplicitStackAlloc)]`, and a similar attribute for an entire type or assembly.
-
-### Lowering implicit allocation
-There are several approaches that have been discussed for lowering implicit stack allocations.
-
-#### Approach 1: Value type array
-Implicit stack allocation is limited to arrays where the length is known at compile-time. 
-For an array of length `N`, the compiler can generate an equivalent `struct` with at least `N` fields of type `T` where the layout and alignment matches the alignment of an equivalent `T[]`, and a `Span<T>` can be created from the `ref` to the first field in the `struct`.
-
-The _array_ of `N` argument values on the callstack will be a `struct` with at least `N` fields of type `T` where the layout and alignment of the fields matches the layout and alignment of the equivalent `T[]`.
-
-The `struct` type could be an `internal` synthesized type shared across call-sites in the compilation with the same number of arguments.
-The synthesized type will have an unspeakable name.
-If `T` is a valid type argument, the synthesized type will be a constructed generic type.
-
-A call to `Console.WriteLine(fmt, x, y, z);` could be emitted as:
-```csharp
-[StructLayout(LayoutKind.Sequential)]
-internal struct $Values3<T> { public T Item1, Item2, Item3; };
-
-var values = new $Values3<object>() { Item1 = x, Item2 = y, Item3 = z };
-var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
-Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
-```
-
-#### Approach 2: `StackAlloc<T>(int length)`
-The runtime will provide a `StackAlloc<T>(int length)` method that unconditionally allocates an array of `T[length]` on the call stack.
-
-To avoid repeated calls within loops, values returned from `StackAlloc<T>(int)` will need to be shared across calls, potentially requiring moving calls to `StackAlloc<T>(int)` ahead of any loops.
-
-And even without loops there may be many distinct call-sites within a method (for instance, many sequential calls to `Console.WriteLine()`), so ideally allocations will be shared across distinct call-sites as well.
-
-The heuristics for sharing allocations may get tricky and will almost certainly be opaque to the C# author however.
-
-A call to `Console.WriteLine(fmt, x, y, z);` could be emitted as:
-```csharp
-var span = RuntimeHelpers.StackAlloc<object>(3);
-span[0] = x;
-span[1] = y;
-span[2] = z;
-Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
-```
-
-#### Approach 3: `StackAlloc<T>(int)` and `StackFree<T>(Span<T>)`
-The runtime might provide a `StackAlloc<T>(int length)` method _and also a corresponding `StackFree<T>(Span<T> span)`.
-
-A pair of methods would avoid the need to share allocations from approach #2.
-
-A call to `Console.WriteLine(fmt, x, y, z);` could be emitted as:
-```csharp
-var span = RuntimeHelpers.StackAlloc<object>(3);
-span[0] = x;
-span[1] = y;
-span[2] = z;
-Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
-RuntimeHelpers.StackFree(span);
-```
+### Opting out
+Should we allow opt-ing out of _implicit stack allocation_?
+Perhaps an attribute that can be applied to a method, type, or assembly.
 
 ## Related proposals
 - https://github.com/dotnet/csharplang/issues/1757
