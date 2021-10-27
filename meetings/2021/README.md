@@ -29,7 +29,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Oct 27, 2021
 
-- Utf8 strings (Jared): _writeup in the works_
+- Utf8 strings (Jared): https://github.com/dotnet/csharplang/blob/main/proposals/utf8-string-literals.md
 - Primary constructors and readonly fields feedback (Fred, Cyrus): https://github.com/dotnet/csharplang/discussions/5314
 - Collection literals (if time). (Cyrus): https://github.com/dotnet/csharplang/issues/5354
 
