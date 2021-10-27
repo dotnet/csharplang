@@ -24,7 +24,7 @@ WriteBytes(Encoding.UTF8.GetBytes("AUTH "));
 
 This trade off is a pain point that comes up frequently for our partners in the runtime, ASP.NET and Azure. Often times it causes them to leave performance on the table because they don't want to go through the hassle of writing out the `byte[]` encoding by hand.
 
-To fix this we're going to allow for UTF8 literals in the language and encode them into the UTF8 `byte[]` at compile time.
+To fix this we will allow for UTF8 literals in the language and encode them into the UTF8 `byte[]` at compile time.
 
 ## Detailed design
 The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow for implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. 
@@ -35,7 +35,7 @@ Span<byte> span = "dog";            // new byte[] { 0x64, 0x6f, 0x67 }
 ReadOnlySpan<byte> span = "cat";    // new byte[] { 0x63, 0x61, 0x74 }
 ```
 
-When the input text for the conversion is a malformed UTF16 string then the language will emit an error: 
+When the input text for the conversion is a malformed UTF16 string then the language will emit an error:
 
 ```c#
 const string text = "hello \uD801\uD802";
@@ -57,9 +57,9 @@ const string second = "\uDE00"; // low surrogate
 ReadOnlySpan<byte> span = first + second;
 ```
 
-The two parts here are invalid on their own as they are incomplete portions of a surrogate pair. Individually there is no correct translation to UTF8 but together they form a complete surrogate pair that can be successfully translated to UTF8
+The two parts here are invalid on their own as they are incomplete portions of a surrogate pair. Individually there is no correct translation to UTF8 but together they form a complete surrogate pair that can be successfully translated to UTF8.
 
-Once implemented string literals will have the same problem that other literals have in the language: what type they represent depends on how they are used. C# provides a literal suffix to disambiguate the meaning for other literals. For example developers can write `3.14f` to force the value to be a `float` or `1l` to force the value to be a `long`. Similarly the language will provide the `u8` suffix on string literals to force the type to be UTF8. 
+Once implemented string literals will have the same problem that other literals have in the language: what type they represent depends on how they are used. C# provides a literal suffix to disambiguate the meaning for other literals. For example developers can write `3.14f` to force the value to be a `float` or `1l` to force the value to be a `long`. Similarly the language will provide the `u8` suffix on string literals to force the type to be UTF8.
 
 When the `u8` suffix is used the literal can still be converted to any of the allowed types: `byte[]`, `Span<byte>` or `ReadOnlySpan<byte>`. The natural type though will be `ReadOnlySpan<byte>`.
 
@@ -77,12 +77,12 @@ While the inputs to these conversions are constants and the data is fully encode
 void Write(ReadOnlySpan<byte> message = "missing") { ... } 
 ```
 
-The language will lower the UTF8 encoded strings exactly as if the developer had typed the resulting `byte[]` literal in code. For example: 
+The language will lower the UTF8 encoded strings exactly as if the developer had typed the resulting `byte[]` literal in code. For example:
 
 ```c#
-ReadOnlySpan<byte> span = "hello"; 
+ReadOnlySpan<byte> span = "hello";
 
-// Equivalent to 
+// Equivalent to
 
 ReadOnlySpan<byte> span = new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20 };
 ```
@@ -143,6 +143,17 @@ The first example likely should work because of the natural type that comes from
 
 The second example is hard to make work because it requires conversions in both directions. That is unless we add `ReadOnlyMemory<byte>` as one of the allowed conversion types. 
 
+### Overload resolution breaks
+
+The following API would become ambiguous:
+
+```c#
+M("");
+static void M1(char[] charArray) => ...;
+static void M1(byte[] charArray) => ...;
+```
+
+What should we do to address this?
 
 ## Examples today
 Examples of where runtime has manually encoded the UTF8 bytes today
