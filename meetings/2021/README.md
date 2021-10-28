@@ -27,15 +27,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Nov 1, 2021
 
-## Oct 27, 2021
-
-- Utf8 strings (Jared): https://github.com/dotnet/csharplang/blob/main/proposals/utf8-string-literals.md
-- Primary constructors and readonly fields feedback (Fred, Cyrus): https://github.com/dotnet/csharplang/discussions/5314
-- Collection literals (if time). (Cyrus): https://github.com/dotnet/csharplang/issues/5354
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Oct 27, 2021
+
+[C# Language Design Notes for October 27th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-10-27.md)
+
+1. UTF-8 String Literals
+2. Readonly modifiers for primary constructors
 
 ## Oct 25, 2021
 
