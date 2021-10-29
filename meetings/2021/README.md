@@ -6,7 +6,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule when convenient
 
-- Collection literals (cyrus): https://github.com/dotnet/csharplang/issues/5354
 
 ## Recurring topics
 
@@ -27,6 +26,9 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Stack allocation of arrays of managed types (Chuck)
 
 ## Nov 1, 2021
+
+- Collection literals (Cyrus): https://github.com/dotnet/csharplang/issues/5354
+- Order of evaluation with Ranges (Aleksey): https://github.com/dotnet/roslyn/issues/57349
 
 # C# Language Design Notes for 2021
 
