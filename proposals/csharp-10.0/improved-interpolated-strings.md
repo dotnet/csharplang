@@ -291,9 +291,68 @@ as a _member\_access_ through type `T`.
     * If no single-best method was found, the result of overload resolution is ambiguous, an error is produced, and no further steps are taken.
 4. Final validation on `F` is performed.
     * If any element of `A` occurred lexically after `i`, an error is produced and no further steps are taken.
+    * If any `A` requests the receiver of `F`, and `F` is an indexer being used as an _initializer\_target_ in a _member\_initializer_, then an error is reported and no further steps are taken.
 
 Note: the resolution here intentionally do _not_ use the actual expressions passed as other arguments for `Argx` elements. We only consider the types post-conversion. This makes sure that we
 don't have double-conversion issues, or unexpected cases where a lambda is bound to one delegate type when passed to `M1` and bound to a different delegate type when passed to `M`.
+
+Note: We report an error for indexers uses as member initializers because of the order of evaluation for nested member initializers. Consider this code snippet:
+
+```cs
+
+var x1 = new C1 { C2 = { [GetString()] = { A = 2, B = 4 } } };
+
+/* Lowering:
+__c1 = new C1();
+string argTemp = GetString();
+__c1.C2[argTemp][1] = 2;
+__c1.C2[argTemp][3] = 4;
+
+Prints:
+GetString
+get_C2
+get_C2
+*/
+
+string GetString()
+{
+    Console.WriteLine("GetString");
+    return "";
+}
+
+class C1
+{
+    private C2 c2 = new C2();
+    public C2 C2 { get { Console.WriteLine("get_C2"); return c2; } set { } }
+}
+
+class C2
+{
+    public C3 this[string s]
+    {
+        get => new C3();
+        set { }
+    }
+}
+
+class C3
+{
+    public int A
+    {
+        get => 0;
+        set { }
+    }
+    public int B
+    {
+        get => 0;
+        set { }
+    }
+}
+```
+
+The arguments to `__c1.C2[]` are evaluated _before_ the receiver of the indexer. While we could come up with a lowering that works for this scenario (either by creating a temp for `__c1.C2`
+and sharing it across both indexer invocations, or only using it for the first indexer invocation and sharing the argument across both invocations) we think that any lowering would be
+confusing for what we believe is a pathological scenario. Therefore, we forbid the scenario entirely.
 
 **~~Open Question~~**:
 
