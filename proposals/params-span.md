@@ -11,6 +11,18 @@ If we extend `params` types to include the `ref struct` types `Span<T>` and `Rea
 
 And if we're extending `params` to other types, we  could also allow `params IEnumerable<T>` to avoid allocating and copying collections at call sites that have an `IEnumerable<T>` rather than `T[]`.
 
+The benefits of `params ReadOnlySpan<T>` and `params Span<T>` are primarily for new APIs. Existing commonly used APIs such as `Console.WriteLine()` and `StringBuilder.AppendFormat()` already have overloads that avoid array allocations for common cases.
+```csharp
+public static class Console
+{
+    public static void WriteLine(string value);
+    public static void WriteLine(string format, object arg0);
+    public static void WriteLine(string format, object arg0, object arg1);
+    public static void WriteLine(string format, object arg0, object arg1, object arg2);
+    public static void WriteLine(string format, params object[] arg);
+}
+```
+
 ## Detailed design
 
 ### Extending `params`
@@ -53,8 +65,8 @@ Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T
 Otherwise the array will be allocated on the heap.
 
 ```csharp
-var s = (Span<int>)new[] { i, j, k }; // stack allocation of int[]
-WriteLine(fmt, new[] { x, y, z });    // stack allocation of object[] for WriteLine(string fmt, ReadOnlySpan<object> args);
+Span<int> s = new[] { i, j, k };   // stack allocation of int[]
+WriteLine(fmt, new[] { x, y, z }); // stack allocation of object[] for WriteLine(string fmt, ReadOnlySpan<object> args);
 ```
 
 ### Array re-use
@@ -73,9 +85,9 @@ The array will be represented with a value of the synthesized `struct`, and a `S
 For example, a call to `Console.WriteLine(fmt, x, y, z);` would be emitted as:
 ```csharp
 [StructLayout(LayoutKind.Sequential)]
-internal struct $Values3<T> { public T Item1, Item2, Item3; };
+internal struct __Values3<T> { public T Item1, Item2, Item3; };
 
-var values = new $Values3<object>() { Item1 = x, Item2 = y, Item3 = z };
+var values = new __Values3<object>() { Item1 = x, Item2 = y, Item3 = z };
 var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
 Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
 ```
