@@ -90,9 +90,9 @@ The array will be represented with a value of the synthesized `struct`, and a `S
 For example, a call to `Console.WriteLine(fmt, x, y, z);` would be emitted as:
 ```csharp
 [StructLayout(LayoutKind.Sequential)]
-internal struct __Values3<T> { public T Item1, Item2, Item3; };
+internal struct __ValueArray3<T> { public T Item1, Item2, Item3; };
 
-var values = new __Values3<object>() { Item1 = x, Item2 = y, Item3 = z };
+var values = new __ValueArray3<object>() { Item1 = x, Item2 = y, Item3 = z };
 var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
 Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
 ```
