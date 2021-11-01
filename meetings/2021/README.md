@@ -25,14 +25,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Name shadowing in nested functions (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/shadowing-in-nested-functions.md
 - `params Span<T>` and implicit stack allocation of arrays (Chuck)
 
-## Nov 1, 2021
-
-- Collection literals (Cyrus): https://github.com/dotnet/csharplang/issues/5354
-- Order of evaluation with Ranges (Aleksey): https://github.com/dotnet/roslyn/issues/57349
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Nov 1, 2021
+
+[C# Language Design Notes for November 1st, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-11-01.md)
+
+1. Order of evaluation for Index and Range
+2. Collection literals
 
 ## Oct 27, 2021
 
