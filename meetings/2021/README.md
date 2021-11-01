@@ -16,7 +16,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Dec 1, 2021
 
-## Nov 29, 2021
+- Roles and extensions (Mads): https://github.com/dotnet/csharplang/issues/1711
 
 ## Nov 10, 2021
 
