@@ -49,16 +49,21 @@ Two overloads cannot differ by `params` modifier alone.
 ### Overload resolution
 Overload resolution will continue to prefer overloads that are applicable in _normal_ form rather than _expanded_ form.
 
-For overloads that are applicable in _expanded_ form, [Better function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#better-function-member) will be updated to treat certain `params` types as more specific:
+For overloads that are applicable in _expanded_ form, [Better function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#better-function-member) will be updated to prefer `params` types in a specific order:
 
 > When performing this evaluation, if `Mp` or `Mq` is applicable in its expanded form, then `Px` or `Qx` refers to a parameter in the expanded form of the parameter list.
 > 
 > In case the parameter type sequences `{P1, P2, ..., Pn}` and `{Q1, Q2, ..., Qn}` are equivalent (i.e. each `Pi` has an identity conversion to the corresponding `Qi`), the following tie-breaking rules are applied, in order, to determine the better function member.
 > 
+> *  If `Mp` is a non-generic method and `Mq` is a generic method, then `Mp` is better than `Mq`.
 > *  ...
-> *  Otherwise, if `Mp` has more specific parameter types than `Mq`, then `Mp` is better than `Mq`:
->    *  ...
->    *  **A `params` parameter `ReadOnlySpan<T>` is more specific than `Span<T>`, which is more specific than `T[]`, which is more specific than `IEnumerable<T>`.**
+> *  **Otherwise, if both methods have `params` parameters and are applicable only in their expanded forms, and the `params` types are distinct types with equivalent element type (there is an identity conversion between element types), the more specific `params` type is the first of:**
+>    *  **`ReadOnlySpan<T>`**
+>    *  **`Span<T>`**
+>    *  **`T[]`**
+>    *  **`IEnumerable<T>`**
+> *  Otherwise if one member is a non-lifted operator and  the other is a lifted operator, the non-lifted one is better.
+> *  Otherwise, neither function member is better.
 
 ### Implicit stack allocation of arrays
 Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be allocated on the stack if the length of the array is a constant value no more than 8 (an arbitrary limit).
