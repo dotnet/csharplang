@@ -65,7 +65,7 @@ For overloads that are applicable in _expanded_ form, [Better function member](h
 > *  Otherwise if one member is a non-lifted operator and  the other is a lifted operator, the non-lifted one is better.
 > *  Otherwise, neither function member is better.
 
-### Implicit allocation of arrays
+### Array creation expressions
 Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be created on the stack if the length of the array is a constant value no more than 8 (an arbitrary limit).
 Otherwise the array will be allocated on the heap.
 
@@ -84,10 +84,11 @@ The compiler _may_ reuse an implicitly allocated array across multiple uses with
 An implicitly allocated array may be reused regardless of whether the array was created on the stack or the heap.
 
 ### Lowering implicit allocation
-For an array `T[]` of constant length `N`, the compiler will synthesize a `struct` with `N` fields of type `T` where the layout and alignment of the fields matches the alignment of elements in `T[]`.
-The array will be represented with a value of the synthesized `struct`, and a `Span<T>` created from a `ref` to the first field.
+For the `params` and array creation cases above that are target typed to `Span<T>` or `ReadOnlySpan<T>`, the compiler is free to allocate the underlying data using an strategy that reduces allocations.
 
-For example, a call to `Console.WriteLine(fmt, x, y, z);` would be emitted as:
+For instance, to represent a `Span<T>` of constant length `N`, one potential approach is to synthesize a `struct` with `N` fields of type `T`
+where the layout and alignment of the fields matches the alignment of elements in `T[]`, and create the `Span<T>` from a `ref` to the first field of the `struct`.
+`Console.WriteLine(fmt, x, y, z);` would be emitted as:
 ```csharp
 [StructLayout(LayoutKind.Sequential)]
 internal struct __ValueArray3<T> { public T Item1, Item2, Item3; };
@@ -96,10 +97,6 @@ var values = new __ValueArray3<object>() { Item1 = x, Item2 = y, Item3 = z };
 var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
 Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
 ```
-
-The synthesized `struct` type will be `internal`, with an unspeakable name.
-
-Since `T` is a valid type argument (and used in `Span<T>`), the synthesized type will be a constructed generic type where the underlying generic type is shared across other call sites in the compilation with the same number of arguments.
 
 ## Open issues
 ### Is `params Span<T>` necessary?
@@ -112,6 +109,10 @@ There is no conversion from `IEnumerable<T>` to `ReadOnlySpan<T>` however, so al
 
 Are scenarios for `params IEnumerable<T>` sufficiently compelling to justify that?
 
+### Heuristics
+The proposed approach falls back to heap allocation if the array length exceeds an arbitrary limit.
+Do we need a limit, and if so, what are the heuristics?
+
 ### Explicit `stackalloc`
 Should we allow explicit stack allocation of arrays of managed types with `stackalloc` as well?
 ```csharp
@@ -121,7 +122,7 @@ public static ImmutableArray<TResult> Select<TSource, TResult>(this ImmutableArr
     Span<TResult> result = n <= 16 ? stackalloc TResult[n] : new TResult[n];
     for (int i = 0; i < n; i++)
         result[i] = map(source[i]);
-    return ImmutableArray.Create(result); // requires ImmutableArray.Create<T>(ReadOnlySpan<T>)
+    return ImmutableArray.Create(result); // requires ImmutableArray.Create<T>([DoesNotEscape] ReadOnlySpan<T> items)
 }
 ```
 
