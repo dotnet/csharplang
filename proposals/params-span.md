@@ -1,13 +1,13 @@
-# `params Span<T>` and implicit stack allocation of arrays
+# `params Span<T>` and implicit allocation of arrays
 
 ## Summary
-Allow implicit stack allocation of arrays in specific scenarios such as `params` arguments.
+Avoid heap allocation for implicit allocation of arrays in specific scenarios such as `params` arguments.
 
 ## Motivation
 `params` array parameters provide a convenient way to call a method that takes an arbitrary length list of arguments.
 However, using an array type for the parameter means the compiler must implicitly allocate an array on the heap at each call site.
 
-If we extend `params` types to include the `ref struct` types `Span<T>` and `ReadOnlySpan<T>`, where values of those types cannot escape the call stack, the array at the call site could be allocated on the stack instead.
+If we extend `params` types to include the `ref struct` types `Span<T>` and `ReadOnlySpan<T>`, where values of those types cannot escape the call stack, the array at the call site may be created on the stack instead.
 
 And if we're extending `params` to other types, we  could also allow `params IEnumerable<T>` to avoid allocating and copying collections at call sites that have an `IEnumerable<T>` rather than `T[]`.
 
@@ -30,7 +30,7 @@ public static class Console
 
 A call in _expanded_ form to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
 
-A call in _expanded_ form to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` allocated on the stack if the `params` array has no more than 8 arguments (an arbitrary limit).
+A call in _expanded_ form to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack if the `params` array has no more than 8 arguments (an arbitrary limit).
 Otherwise the array will be allocated on the heap.
 
 ```csharp
@@ -38,7 +38,7 @@ Console.WriteLine(fmt, x, y, z); // WriteLine(string format, params ReadOnlySpan
 ```
 
 The compiler will report an error when compiling the method declaring the `params` parameter if the `ReadOnlySpan<T>` or `Span<T>` parameter value is returned from the method or assigned to an `out` parameter.
-That ensures call-sites can allocate the underlying array on the stack and reuse the array across call-sites without concern for aliases.
+That ensures call-sites can create the underlying array on the stack and reuse the array across call-sites without concern for aliases.
 
 A `params` parameter must be last parameter in the method signature.
 
@@ -65,13 +65,13 @@ For overloads that are applicable in _expanded_ form, [Better function member](h
 > *  Otherwise if one member is a non-lifted operator and  the other is a lifted operator, the non-lifted one is better.
 > *  Otherwise, neither function member is better.
 
-### Implicit stack allocation of arrays
-Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be allocated on the stack if the length of the array is a constant value no more than 8 (an arbitrary limit).
+### Implicit allocation of arrays
+Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be created on the stack if the length of the array is a constant value no more than 8 (an arbitrary limit).
 Otherwise the array will be allocated on the heap.
 
 ```csharp
-Span<int> s = new[] { i, j, k };   // stack allocation of int[]
-WriteLine(fmt, new[] { x, y, z }); // stack allocation of object[] for WriteLine(string fmt, ReadOnlySpan<object> args);
+Span<int> s = new[] { i, j, k };   // int[] on the stack
+WriteLine(fmt, new[] { x, y, z }); // object[] on the stack for WriteLine(string fmt, ReadOnlySpan<object> args);
 ```
 
 ### Array re-use
@@ -81,9 +81,9 @@ The compiler _may_ reuse an implicitly allocated array across multiple uses with
   - the element types are managed types that are considered identical by the runtime, or
   - the element types are unmanaged types of the same size.
 
-An implicitly allocated array may be reused regardless of whether the array was allocated on the stack or the heap.
+An implicitly allocated array may be reused regardless of whether the array was created on the stack or the heap.
 
-### Lowering implicit stack allocation
+### Lowering implicit allocation
 For an array `T[]` of constant length `N`, the compiler will synthesize a `struct` with `N` fields of type `T` where the layout and alignment of the fields matches the alignment of elements in `T[]`.
 The array will be represented with a value of the synthesized `struct`, and a `Span<T>` created from a `ref` to the first field.
 
@@ -112,7 +112,7 @@ There is no conversion from `IEnumerable<T>` to `ReadOnlySpan<T>` however, so al
 
 Are scenarios for `params IEnumerable<T>` sufficiently compelling to justify that?
 
-### Explicit stack allocation
+### Explicit `stackalloc`
 Should we allow explicit stack allocation of arrays of managed types with `stackalloc` as well?
 ```csharp
 public static ImmutableArray<TResult> Select<TSource, TResult>(this ImmutableArray<TSource> source, Func<TSource, TResult> map)
@@ -127,10 +127,10 @@ public static ImmutableArray<TResult> Select<TSource, TResult>(this ImmutableArr
 
 This would require runtime support for stack allocation of arrays of non-constant length and any type, and GC tracking of the elements.
 
-Direct runtime support for stack allocation of arrays of managed types might be useful for lowering implicit stack allocation as well.
+Direct runtime support for stack allocation of arrays of managed types might be useful for lowering implicit allocation as well.
 
 ### Opting out
-Should we allow opt-ing out of _implicit stack allocation_?
+Should we allow opt-ing out of _implicit allocation_ on the call stack?
 Perhaps an attribute that can be applied to a method, type, or assembly.
 
 ## Related proposals
