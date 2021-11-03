@@ -233,7 +233,7 @@ Regardless of the specific conversion strategy, the order of evaluation should b
 3. `length` is evaluated, if needed;
 4. the `Slice` method is invoked. 
 
-The `receiver`, `length`, and `expr` expressions will be spilled as appropriate to ensure any side effects are only executed once. For example:
+The `receiver`, `expr`, and `length` expressions will be spilled as appropriate to ensure any side effects are only executed once. For example:
 
 ``` csharp
 class Collection {
