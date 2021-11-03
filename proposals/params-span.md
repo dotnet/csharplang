@@ -84,7 +84,7 @@ The compiler _may_ reuse an implicitly allocated array across multiple uses with
 An implicitly allocated array may be reused regardless of whether the array was created on the stack or the heap.
 
 ### Lowering implicit allocation
-For the `params` and array creation cases above that are target typed to `Span<T>` or `ReadOnlySpan<T>`, the compiler is free to allocate the underlying data using an strategy that reduces allocations.
+For the `params` and array creation cases above that are target typed to `Span<T>` or `ReadOnlySpan<T>`, the compiler is free to allocate the underlying data using a strategy that reduces allocations.
 
 For instance, to represent a `Span<T>` of constant length `N`, one potential approach is to synthesize a `struct` with `N` fields of type `T`
 where the layout and alignment of the fields matches the alignment of elements in `T[]`, and create the `Span<T>` from a `ref` to the first field of the `struct`.
