@@ -30,7 +30,7 @@ public static class Console
 
 A call in _expanded_ form to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
 
-A call in _expanded_ form to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack if the `params` array has no more than 8 arguments (an arbitrary limit).
+A call in _expanded_ form to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack _if the `params` array is within specific limits set by the compiler_.
 Otherwise the array will be allocated on the heap.
 
 ```csharp
@@ -66,7 +66,7 @@ For overloads that are applicable in _expanded_ form, [Better function member](h
 > *  Otherwise, neither function member is better.
 
 ### Array creation expressions
-Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be created on the stack if the length of the array is a constant value no more than 8 (an arbitrary limit).
+Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be created on the stack _if the length of the array is a constant value within specific limits set by the compiler_.
 Otherwise the array will be allocated on the heap.
 
 ```csharp
@@ -84,19 +84,9 @@ The compiler _may_ reuse an implicitly allocated array across multiple uses with
 An implicitly allocated array may be reused regardless of whether the array was created on the stack or the heap.
 
 ### Lowering implicit allocation
-For the `params` and array creation cases above that are target typed to `Span<T>` or `ReadOnlySpan<T>`, the compiler is free to allocate the underlying data using a strategy that reduces allocations.
-
-For instance, to represent a `Span<T>` of constant length `N`, one potential approach is to synthesize a `struct` with `N` fields of type `T`
-where the layout and alignment of the fields matches the alignment of elements in `T[]`, and create the `Span<T>` from a `ref` to the first field of the `struct`.
-`Console.WriteLine(fmt, x, y, z);` would be emitted as:
-```csharp
-[StructLayout(LayoutKind.Sequential)]
-internal struct __ValueArray3<T> { public T Item1, Item2, Item3; };
-
-var values = new __ValueArray3<object>() { Item1 = x, Item2 = y, Item3 = z };
-var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
-Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
-```
+For the `params` and array creation cases above that are target typed to `Span<T>` or `ReadOnlySpan<T>`, the compiler will lower the creation of spans using an efficient approach, specifically avoiding heap allocations when possible.
+The exact details are still to be determined and may differ based on the target framework and runtime.
+The guarantee the compiler gives is the span will be the expected size and will contain the expected items at any point in user code.
 
 ## Open issues
 ### Is `params Span<T>` necessary?
@@ -109,9 +99,24 @@ There is no conversion from `IEnumerable<T>` to `ReadOnlySpan<T>` however, so al
 
 Are scenarios for `params IEnumerable<T>` sufficiently compelling to justify that?
 
-### Heuristics
-The proposed approach falls back to heap allocation if the array length exceeds an arbitrary limit.
-Do we need a limit, and if so, what are the heuristics?
+### Array limits
+The compiler may use heuristics to determine when to fallback to heap allocation for the underlying data for spans.
+Experimentation should establish the limits we agree on.
+
+### Lowering approach
+Determine the particular approach used to lower `params` and array creation expressions to avoid heap allocation.
+
+For instance, to represent a `Span<T>` of constant length `N`, one potential approach is to synthesize a `struct` with `N` fields of type `T`
+where the layout and alignment of the fields matches the alignment of elements in `T[]`, and create the `Span<T>` from a `ref` to the first field of the `struct`.
+`Console.WriteLine(fmt, x, y, z);` would be emitted as:
+```csharp
+[StructLayout(LayoutKind.Sequential)]
+internal struct __ValueArray3<T> { public T Item1, Item2, Item3; };
+
+var values = new __ValueArray3<object>() { Item1 = x, Item2 = y, Item3 = z };
+var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
+Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
+```
 
 ### Explicit `stackalloc`
 Should we allow explicit stack allocation of arrays of managed types with `stackalloc` as well?
@@ -129,6 +134,8 @@ public static ImmutableArray<TResult> Select<TSource, TResult>(this ImmutableArr
 This would require runtime support for stack allocation of arrays of non-constant length and any type, and GC tracking of the elements.
 
 Direct runtime support for stack allocation of arrays of managed types might be useful for lowering implicit allocation as well.
+
+The GC does not currently track the lifetime of a `stackalloc` array so if the contents of the array have a shorter lifetime than the method, the compiler will need to zero the contents of the array so the lifetime of elements matches expectations.
 
 ### Opting out
 Should we allow opt-ing out of _implicit allocation_ on the call stack?
