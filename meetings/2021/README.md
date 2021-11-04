@@ -20,14 +20,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Nov 10, 2021
 
-## Nov 3, 2021
-
-- Name shadowing in nested functions (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/shadowing-in-nested-functions.md
-- `params Span<T>` and implicit stack allocation of arrays (Chuck)
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Nov 3, 2021
+
+[C# Language Design Notes for November 3rd, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-11-03.md)
+
+1. Name shadowing in local functions
+2. `params Span<T>`
 
 ## Nov 1, 2021
 
