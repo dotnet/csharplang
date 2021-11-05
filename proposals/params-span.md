@@ -11,7 +11,7 @@ If we extend `params` types to include the `ref struct` types `Span<T>` and `Rea
 
 And if we're extending `params` to other types, we  could also allow `params IEnumerable<T>` to avoid allocating and copying collections at call sites that have an `IEnumerable<T>` rather than `T[]`.
 
-The benefits of `params ReadOnlySpan<T>` and `params Span<T>` are primarily for new APIs. Existing commonly used APIs such as `Console.WriteLine()` and `StringBuilder.AppendFormat()` already have overloads that avoid array allocations for common cases and those overloads would be needed for backward compatibility.
+The benefits of `params ReadOnlySpan<T>` and `params Span<T>` are primarily for new APIs. Existing commonly used APIs such as `Console.WriteLine()` and `StringBuilder.AppendFormat()` already have overloads that avoid array allocations for common cases and those overloads would need to be retained for backward compatibility.
 ```csharp
 public static class Console
 {
@@ -28,9 +28,9 @@ public static class Console
 ### Extending `params`
 `params` parameters will be supported with types `Span<T>`, `ReadOnlySpan<T>`, and `IEnumerable<T>`.
 
-A call in _expanded form_ to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
+A call in [_expanded form_](../../spec/expressions.md#applicable-function-member) to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
 
-A call in _expanded form_ to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack _if the `params` array is within specific limits set by the compiler_.
+A call in [_expanded form_](../../spec/expressions.md#applicable-function-member) to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack _if the `params` array is within limits (if any) set by the compiler_.
 Otherwise the array will be allocated on the heap.
 
 ```csharp
@@ -49,7 +49,7 @@ Two overloads cannot differ by `params` modifier alone.
 ### Overload resolution
 Overload resolution will continue to prefer overloads that are applicable in [_normal form_](../../spec/expressions.md#applicable-function-member) rather than [_expanded form_](../../spec/expressions.md#applicable-function-member).
 
-For overloads that are applicable in _expanded form_, [Better function member](../../spec/expressions.md#better-function-member) will be updated to prefer `params` types in a specific order:
+For overloads that are applicable in _expanded form_, [better function member](../../spec/expressions.md#better-function-member) will be updated to prefer `params` types in a specific order:
 
 > When performing this evaluation, if `Mp` or `Mq` is applicable in its expanded form, then `Px` or `Qx` refers to a parameter in the expanded form of the parameter list.
 > 
@@ -66,7 +66,7 @@ For overloads that are applicable in _expanded form_, [Better function member](.
 > *  Otherwise, neither function member is better.
 
 ### Array creation expressions
-Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be created on the stack _if the length of the array is a constant value within specific limits set by the compiler_.
+Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be created on the stack _if the length of the array is a constant value within limits (if any) set by the compiler_.
 Otherwise the array will be allocated on the heap.
 
 ```csharp
@@ -86,6 +86,7 @@ An implicitly allocated array may be reused regardless of whether the array was 
 ### Lowering implicit allocation
 For the `params` and array creation cases above that are target typed to `Span<T>` or `ReadOnlySpan<T>`, the compiler will lower the creation of spans using an efficient approach, specifically avoiding heap allocations when possible.
 The exact details are still to be determined and may differ based on the target framework and runtime.
+
 The guarantee the compiler gives is the span will be the expected size and will contain the expected items at any point in user code.
 
 ## Open issues
@@ -93,7 +94,7 @@ The guarantee the compiler gives is the span will be the expected size and will 
 Is there a reason to support `params` parameters of type `Span<T>` in addition to `ReadOnlySpan<T>`? Is allowing mutation within the `params` method useful?
 
 ### Is `params IEnumerable<T>` necessary?
-If the compiler allows `params ReadOnlySpan<T>`, then new APIs that require `params` could use `params ReadOnlySpan<T>` instead of `params T[]` because `T[]` is implicitly convertible to `ReadOnlySpan<T>`. And even legacy APIs could add a `params ReadOnlySpan<T>` overload where the existing `params T[]` simply delegates to the new overload.
+If the compiler allows `params ReadOnlySpan<T>`, then new APIs that require `params` could use `params ReadOnlySpan<T>` instead of `params T[]` because `T[]` is implicitly convertible to `ReadOnlySpan<T>`. And existing APIs could add a `params ReadOnlySpan<T>` overload where the existing `params T[]` simply delegates to the new overload.
 
 There is no conversion from `IEnumerable<T>` to `ReadOnlySpan<T>` however, so allowing `params IEnumerable<T>` is essentially asking APIs to provide two overloads for `params` methods: `params ReadOnlySpan<T>` and `params IEnumerable<T>`. 
 
@@ -104,11 +105,12 @@ The compiler may use heuristics to determine when to fallback to heap allocation
 If heuristics are necessary, experimentation should establish the limits we agree on.
 
 ### Lowering approach
-Determine the particular approach used to lower `params` and array creation expressions to avoid heap allocation.
+We need to determine the particular approach used to lower `params` and array creation expressions to avoid heap allocation.
 
-For instance, to represent a `Span<T>` of constant length `N`, one potential approach is to synthesize a `struct` with `N` fields of type `T`
+For instance, one potential approach to represent a `Span<T>` of constant length `N` is to synthesize a `struct` with `N` fields of type `T`
 where the layout and alignment of the fields matches the alignment of elements in `T[]`, and create the `Span<T>` from a `ref` to the first field of the `struct`.
-`Console.WriteLine(fmt, x, y, z);` would be emitted as:
+
+With that approach, `Console.WriteLine(fmt, x, y, z);` would be emitted as:
 ```csharp
 [StructLayout(LayoutKind.Sequential)]
 internal struct __ValueArray3<T> { public T Item1, Item2, Item3; };
@@ -117,6 +119,8 @@ var values = new __ValueArray3<object>() { Item1 = x, Item2 = y, Item3 = z };
 var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
 Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
 ```
+
+Alternative approaches may require runtime support.
 
 ### Explicit `stackalloc`
 Should we allow explicit stack allocation of arrays of managed types with `stackalloc` as well?
