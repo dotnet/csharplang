@@ -159,7 +159,7 @@ From a _function_type_ `F` there are implicit _function_type_ conversions:
 - To `System.MulticastDelegate` or base classes or interfaces of `System.MulticastDelegate`
 - To `System.Linq.Expressions.Expression` or `System.Linq.Expressions.LambdaExpression`
 
-Anonymous function expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see [anonymous function conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#anonymous-function-conversions) and [method group conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
+Anonymous function expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see [anonymous function conversions](../../spec/conversions.md#anonymous-function-conversions) and [method group conversions](../../spec/conversions.md#method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
 
 There are no conversions to a _function_type_ from a type other than a _function_type_.
 There are no explicit conversions for _function_types_ since _function_types_ cannot be referenced in source.
@@ -170,7 +170,7 @@ A conversion to `System.Linq.Expressions.Expression<TDelegate>` or base type rea
 ```csharp
 Delegate d = delegate (object obj) { }; // Action<object>
 Expression e = () => "";                // Expression<Func<string>>
-object o = "".GetHashCode;              // Func<int>
+object o = "".Clone;                    // Func<object>
 ```
 
 ### Type inference
@@ -203,7 +203,7 @@ The [first phase](../../spec/expressions.md#the-first-phase) allows an anonymous
 > *  Otherwise, type inference fails.
 
 ### Best common type
-Best common type is defined in terms of type inference (see [finding the best common type](../../spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions)) so the changes above apply to best common type as well.
+[Best common type](../../spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions) is defined in terms of type inference so the type inference changes above apply to best common type as well.
 ```csharp
 var fs = new[] { (string s) => s.Length; (string s) => int.Parse(s) } // Func<string, int>[]
 ```
