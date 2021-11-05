@@ -154,6 +154,12 @@ The new indexer will be implemented by converting the argument of type `Index` i
 - When the argument is of the form `^expr2` and the type of `expr2` is `int`, it will be translated to `receiver.Length - expr2`.
 - Otherwise, it will be translated as `expr.GetOffset(receiver.Length)`.
 
+Regardless of the specific conversion strategy, the order of evaluation should be equivalent to the following:
+1. `receiver` is evaluated;
+2. `expr` is evaluated;
+3. `length` is evaluated, if needed;
+4. the `int` based indexer is invoked. 
+
 This allows for developers to use the `Index` feature on existing types without the need for modification. For example:
 
 ``` csharp
@@ -221,7 +227,13 @@ This value will be re-used in the calculation of the second `Slice` argument. Wh
 - When `expr` is of the form `expr1..` (where `expr1` can be omitted), then it will be emitted as `receiver.Length - start`.
 - Otherwise, it will be emitted as `expr.End.GetOffset(receiver.Length) - start`.
 
-The `receiver`, `Length`, and `expr` expressions will be spilled as appropriate to ensure any side effects are only executed once. For example:
+Regardless of the specific conversion strategy, the order of evaluation should be equivalent to the following:
+1. `receiver` is evaluated;
+2. `expr` is evaluated;
+3. `length` is evaluated, if needed;
+4. the `Slice` method is invoked. 
+
+The `receiver`, `expr`, and `length` expressions will be spilled as appropriate to ensure any side effects are only executed once. For example:
 
 ``` csharp
 class Collection {
