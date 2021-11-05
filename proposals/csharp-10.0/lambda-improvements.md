@@ -60,7 +60,7 @@ var f = [A1, A2][A3] () => { };    // ok
 var g = ([A1][A2, A3] int x) => x; // ok
 ``` 
 
-Attributes are not supported for anonymous methods declared with `delegate { }` syntax.
+Attributes are not supported for _anonymous methods_ declared with `delegate { }` syntax.
 ```csharp
 f = [A] delegate { return 1; };         // syntax error at 'delegate'
 f = delegate ([A] int x) { return x; }; // syntax error at '['
@@ -124,20 +124,20 @@ Func<object> f1 = string () => null; // error
 Func<object?> f2 = object () => x;   // warning
 ```
 
-The parser should allow ref return types in assignment without parentheses.
+The parser allows lambda expressions with `ref` return types within expressions without additional parentheses.
 ```csharp
-Delegate d1 = (ref int () => x); // ok
-Delegate d2 = ref int () => x;   // ok
+d = ref int () => x; // d = (ref int () => x)
+F(ref int () => x);  // F((ref int () => x))
 ```
 
 ## Natural (function) type
-A lambda expression has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [inferred return type](../../spec/expressions.md#inferred-return-type)).
+An [_anonymous function_ expression](../../spec/expressions.md#anonymous-function-expressions) (a _lambda expression_ or an _anonymous method_) has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [inferred return type](../../spec/expressions.md#inferred-return-type)).
 
-A method group has a natural type if all candidate methods in the method group have a common signature. (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
+A _method group_ has a natural type if all candidate methods in the method group have a common signature. (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
 
-The natural type of a lambda expression or method group is a _function_type_.
+The natural type of an anonymous function expression or method group is a _function_type_.
 A _function_type_ represents a method signature: the parameter types and ref kinds, and return type and ref kind.
-Lambda expressions or method groups with the same signature have the same _function_type_.
+Anonymous function expressions or method groups with the same signature have the same _function_type_.
 
 A _function_type_ exists at compile time only: _function_types_ do not appear in source or metadata.
 
@@ -149,13 +149,19 @@ From a _function_type_ `F` there are implicit _function_type_ conversions:
 - To `System.MulticastDelegate` or base classes or interfaces of `System.MulticastDelegate`
 - To `System.Linq.Expressions.Expression` or `System.Linq.Expressions.LambdaExpression`
 
-Lambda expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see [anonymous function conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#anonymous-function-conversions) and [method group conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
+Anonymous function expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see [anonymous function conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#anonymous-function-conversions) and [method group conversions](https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
 
 There are no conversions to a _function_type_ from a type other than a _function_type_.
 There are no explicit conversions for _function_types_ since _function_types_ cannot be referenced in source.
 
-A conversion to `System.MulticastDelegate` or base type or interface realizes the lambda or method group as an instance of an appropriate delegate type.
+A conversion to `System.MulticastDelegate` or base type or interface realizes the anonymous function or method group as an instance of an appropriate delegate type.
 A conversion to `System.Linq.Expressions.Expression<TDelegate>` or base type realizes the lambda expression as an expression tree with an appropriate delegate type.
+
+```csharp
+Delegate d = delegate (object obj) { }; // Action<object>
+Expression e = () => "";                // Expression<Func<string>>
+object o = "".GetHashCode;              // Func<int>
+```
 
 ### Type inference
 The existing rules for type inference are mostly unchanged (see [type inference](../../spec/expressions.md#type-inference)). There are however a **couple of changes** below to specific phases of type inference.
@@ -193,13 +199,13 @@ var fs = new[] { (string s) => s.Length; (string s) => int.Parse(s) } // Func<st
 ```
 
 ### `var`
-Lambda expressions and method groups with natural types can be used as initializers in `var` declarations.
+Anonymous functions and method groups with inferred types can be used as initializers in `var` declarations.
 ```csharp
-var f1 = () => default;     // error: cannot infer type
-var f2 = x => { };          // error: cannot infer type
-var f3 = x => x;            // error: cannot infer type
-var f4 = () => 1;           // System.Func<int>
-var f5 = string () => null; // System.Func<string>
+var f1 = () => default;           // error: cannot infer type
+var f2 = x => x;                  // error: cannot infer type
+var f3 = () => 1;                 // System.Func<int>
+var f4 = string () => null;       // System.Func<string>
+var f5 = delegate (object o) { }; // System.Action<object>
 
 static void F1() { }
 static void F1<T>(this T t) { }
@@ -211,8 +217,8 @@ var f8 = F2;    // System.Action<string>
 ```
 
 ### Delegate types
-The delegate type for the lambda or method group and parameter types `P1, ..., Pn` and return type `R` is:
-- if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the lambda or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
+The delegate type for the anonymous function or method group with parameter types `P1, ..., Pn` and return type `R` is:
+- if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the anonymous function or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
 - if `R` is `void`, then the delegate type is `System.Action<P1, ..., Pn>`;
 - otherwise the delegate type is `System.Func<P1, ..., Pn, R>`.
 
@@ -222,7 +228,7 @@ _Open issue: Should the compiler bind to a matching `System.Action<>` or `System
 
 `modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
 
-If two lambda expressions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
+If two anonymous functions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
 
 ### Overload resolution
 Overload resolution already prefers binding to a strongly-typed delegate over `System.Delegate`, and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<TDelegate>` over the corresponding strongly-typed delegate `TDelegate`.
@@ -244,7 +250,7 @@ Invoke(() => "");  // Invoke(Func<string>) [unchanged]
 Invoke(() => 0);   // Invoke(Expression) [new]
 ```
 
-_Inferring a delegate type for lambdas and method groups will result in some breaking changes in overload resolution: see [issues/4674](https://github.com/dotnet/csharplang/issues/4674)._
+_Inferring a delegate type for anonymous functions and method groups will result in some breaking changes in overload resolution: see [issues/4674](https://github.com/dotnet/csharplang/issues/4674)._
 
 ## Direct invocation
 Lambda expressions may be invoked directly.
