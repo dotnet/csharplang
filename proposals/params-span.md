@@ -1,7 +1,7 @@
 # `params Span<T>` and implicit allocation of arrays
 
 ## Summary
-Avoid heap allocation for implicit allocation of arrays in specific scenarios such as `params` arguments.
+Avoid heap allocation for implicit allocation of arrays in specific scenarios with `params` arguments.
 
 ## Motivation
 `params` array parameters provide a convenient way to call a method that takes an arbitrary length list of arguments.
@@ -11,7 +11,7 @@ If we extend `params` types to include the `ref struct` types `Span<T>` and `Rea
 
 And if we're extending `params` to other types, we  could also allow `params IEnumerable<T>` to avoid allocating and copying collections at call sites that have an `IEnumerable<T>` rather than `T[]`.
 
-The benefits of `params ReadOnlySpan<T>` and `params Span<T>` are primarily for new APIs. Existing commonly used APIs such as `Console.WriteLine()` and `StringBuilder.AppendFormat()` already have overloads that avoid array allocations for common cases.
+The benefits of `params ReadOnlySpan<T>` and `params Span<T>` are primarily for new APIs. Existing commonly used APIs such as `Console.WriteLine()` and `StringBuilder.AppendFormat()` already have overloads that avoid array allocations for common cases and those overloads would be needed for backward compatibility.
 ```csharp
 public static class Console
 {
@@ -28,9 +28,9 @@ public static class Console
 ### Extending `params`
 `params` parameters will be supported with types `Span<T>`, `ReadOnlySpan<T>`, and `IEnumerable<T>`.
 
-A call in _expanded_ form to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
+A call in _expanded form_ to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
 
-A call in _expanded_ form to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack _if the `params` array is within specific limits set by the compiler_.
+A call in _expanded form_ to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack _if the `params` array is within specific limits set by the compiler_.
 Otherwise the array will be allocated on the heap.
 
 ```csharp
@@ -47,9 +47,9 @@ Two overloads cannot differ by `params` modifier alone.
 `params` parameters will be marked in metadata with a `System.ParamArrayAttribute` regardless of type.
 
 ### Overload resolution
-Overload resolution will continue to prefer overloads that are applicable in _normal_ form rather than _expanded_ form.
+Overload resolution will continue to prefer overloads that are applicable in [_normal form_](../../spec/expressions.md#applicable-function-member) rather than [_expanded form_](../../spec/expressions.md#applicable-function-member).
 
-For overloads that are applicable in _expanded_ form, [Better function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#better-function-member) will be updated to prefer `params` types in a specific order:
+For overloads that are applicable in _expanded form_, [Better function member](../../spec/expressions.md#better-function-member) will be updated to prefer `params` types in a specific order:
 
 > When performing this evaluation, if `Mp` or `Mq` is applicable in its expanded form, then `Px` or `Qx` refers to a parameter in the expanded form of the parameter list.
 > 
@@ -101,7 +101,7 @@ Are scenarios for `params IEnumerable<T>` sufficiently compelling to justify tha
 
 ### Array limits
 The compiler may use heuristics to determine when to fallback to heap allocation for the underlying data for spans.
-Experimentation should establish the limits we agree on.
+If heuristics are necessary, experimentation should establish the limits we agree on.
 
 ### Lowering approach
 Determine the particular approach used to lower `params` and array creation expressions to avoid heap allocation.
