@@ -226,6 +226,12 @@ var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
 
+The type of an anonymous function or method group is not inferred for implicitly-typed discards.
+```csharp
+d = () => 0; // ok
+_ = () => 1; // error
+```
+
 ### Delegate types
 The delegate type for the anonymous function or method group with parameter types `P1, ..., Pn` and return type `R` is:
 - if any parameter or return value is not by value, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the anonymous function or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
