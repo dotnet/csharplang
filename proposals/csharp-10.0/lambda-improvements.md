@@ -252,17 +252,6 @@ Invoke(() => 0);   // Invoke(Expression) [new]
 
 _Inferring a delegate type for anonymous functions and method groups will result in some breaking changes in overload resolution: see [issues/4674](https://github.com/dotnet/csharplang/issues/4674)._
 
-## Direct invocation
-Lambda expressions may be invoked directly.
-The compiler will generate a call to the underlying method without generating a delegate instance or synthesizing a delegate type.
-Directly invoked lambda expressions do not require explicit parameter types.
-```csharp
-int zero = ((int x) => x)(0); // ok
-int one = (x => x)(1);        // ok
-```
-
-_Direct invocation will be addressed separately since the feature does not depend on other changes in this proposal: see [issues/4748](https://github.com/dotnet/csharplang/issues/4748)._
-
 ## Syntax
 
 ```antlr
