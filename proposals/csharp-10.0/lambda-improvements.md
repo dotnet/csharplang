@@ -130,6 +130,16 @@ d = ref int () => x; // d = (ref int () => x)
 F(ref int () => x);  // F((ref int () => x))
 ```
 
+`var` cannot be used as an explicit return type for lambda expressions.
+```csharp
+class var { }
+
+d = var (var v) => v;              // error: contextual keyword 'var' cannot be used as explicit lambda return type
+d = @var (var v) => v;             // ok
+d = ref var (ref var v) => ref v;  // error: contextual keyword 'var' cannot be used as explicit lambda return type
+d = ref @var (ref var v) => ref v; // ok
+```
+
 ## Natural (function) type
 An [_anonymous function_ expression](../../spec/expressions.md#anonymous-function-expressions) (a _lambda expression_ or an _anonymous method_) has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [inferred return type](../../spec/expressions.md#inferred-return-type)).
 
