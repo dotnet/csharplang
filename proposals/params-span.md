@@ -1,4 +1,4 @@
-# `params Span<T>` and implicit allocation of arrays
+# `params Span<T>`
 
 ## Summary
 Avoid heap allocation for implicit allocation of arrays in specific scenarios with `params` arguments.
