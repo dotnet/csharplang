@@ -118,6 +118,8 @@ Would a proper self constraint allow a simpler model for encoding the `call` in 
 
 Could the self type be represented as an associate type rather than as a type parameter to an interface?
 
+Obligatory general syntax questions: should we use a keyword other than `this`? Should the keyword go where the proposal puts it, or with the rest of the type constraints?
+
 ## Design meetings
 
 <!-- Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to. -->
