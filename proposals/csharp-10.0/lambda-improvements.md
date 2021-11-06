@@ -173,6 +173,22 @@ Expression e = () => "";                // Expression<Func<string>>
 object o = "".Clone;                    // Func<object>
 ```
 
+_Function_type_ conversions are not implicit or explicit [standard conversions](../../spec/conversions.md#standard-conversions) and are not considered when determining whether a user-defined conversion operator is applicable to an anonymous function or method group.
+From [evaluation of user defined conversions](../../spec/conversions.md#evaluation-of-user-defined-conversions):
+
+> For a conversion operator to be applicable, it must be possible to perform a standard conversion ([Standard conversions](../../spec/conversions.md#standard-conversions)) from the source type to the operand type of the operator, and it must be possible to perform a standard conversion from the result type of the operator to the target type.
+
+```csharp
+class C
+{
+    public static implicit operator C(Delegate d) { ... }
+}
+
+C c;
+c = () => 1;      // error: cannot convert lambda expression to type 'C'
+c = (C)(() => 2); // error: cannot convert lambda expression to type 'C'
+```
+
 ### Type inference
 The existing rules for type inference are mostly unchanged (see [type inference](../../spec/expressions.md#type-inference)). There are however a **couple of changes** below to specific phases of type inference.
 
