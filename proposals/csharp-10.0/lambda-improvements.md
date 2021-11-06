@@ -263,26 +263,28 @@ _Open issue: Should the compiler bind to a matching `System.Action<>` or `System
 If two anonymous functions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
 
 ### Overload resolution
-Overload resolution already prefers binding to a strongly-typed delegate over `System.Delegate`, and prefers binding a lambda expression to a strongly-typed `System.Linq.Expressions.Expression<TDelegate>` over the corresponding strongly-typed delegate `TDelegate`.
 
-Overload resolution will be updated to prefer binding a lambda expression to `System.Linq.Expressions.Expression` over `System.Delegate`. A strongly-typed delegate will still be preferred over the weakly-typed `System.Linq.Expressions.Expression` however.
+[Better function member](../../spec/expressions.md#better-function-member) is updated to prefer members where none of the conversions and none of the type arguments involved inferred types from lambda expressions or method groups.
 
-```csharp
-static void Invoke(Func<string> f) { }
-static void Invoke(Delegate d) { }
-static void Invoke(Expression e) { }
+> #### Better function member
+> ...
+> Given an argument list `A` with a set of argument expressions `{E1, E2, ..., En}` and two applicable function members `Mp` and `Mq` with parameter types `{P1, P2, ..., Pn}` and `{Q1, Q2, ..., Qn}`, `Mp` is defined to be a ***better function member*** than `Mq` if
+>
+> 1. **for each argument, the implicit conversion from `Ex` to `Px` is not a _function_type_conversion_, and**
+>    *  **`Mp` is a non-generic method or `Mp` is a generic method with type parameters `{X1, X2, ..., Xp}` and for each type parameter `Xi` the type argument is inferred from an expression or from a type other than a _function_type_, and**
+>    *  **for at least one argument, the implicit conversion from `Ex` to `Qx` is a _function_type_conversion_, or `Mq` is a generic method with type parameters `{Y1, Y2, ..., Yq}` and for at least one type parameter `Yi` the type argument is inferred from a _function_type_, or**
+> 2. for each argument, the implicit conversion from `Ex` to `Qx` is not better than the implicit conversion from `Ex` to `Px`, and for at least one argument, the conversion from `Ex` to `Px` is better than the conversion from `Ex` to `Qx`.
 
-static string GetString() => "";
-static int GetInt() => 0;
+[Better conversion from expression](../../spec/expressions.md#better-conversion-from-expression) is updated to prefer conversions that did not involve inferred types from lambda expressions or method groups.
 
-Invoke(GetString); // Invoke(Func<string>) [unchanged]
-Invoke(GetInt);    // Invoke(Delegate) [new]
-
-Invoke(() => "");  // Invoke(Func<string>) [unchanged]
-Invoke(() => 0);   // Invoke(Expression) [new]
-```
-
-_Inferring a delegate type for anonymous functions and method groups will result in some breaking changes in overload resolution: see [issues/4674](https://github.com/dotnet/csharplang/issues/4674)._
+> #### Better conversion from expression
+> 
+> Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if:
+> 1. **`C1` is not a _function_type_conversion_ and `C2` is a _function_type_conversion_, or**
+> 2. `E` is a non-constant _interpolated\_string\_expression_, `C1` is an _implicit\_string\_handler\_conversion_, `T1` is an _applicable\_interpolated\_string\_handler\_type_, and `C2` is not an _implicit\_string\_handler\_conversion_, or
+> 3. `E` does not exactly match `T2` and at least one of the following holds:
+>     * `E` exactly matches `T1` ([Exactly matching Expression](../../spec/expressions.md#exactly-matching-expression))
+>     * `T1` is a better conversion target than `T2` ([Better conversion target](../../spec/expressions.md#better-conversion-target))
 
 ## Syntax
 
