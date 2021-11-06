@@ -86,14 +86,6 @@ The changes proposed here are targeted at the `Delegate` driven scenario.
 It should be valid to inspect the `MethodInfo` associated with a `Delegate` instance to determine the signature of the lambda expression or local function including any explicit attributes and additional metadata emitted by the compiler such as default parameters.
 This allows teams such as ASP.NET to make available the same behaviors for lambdas and local functions as ordinary methods.
 
-_Open issue: Should default values be supported for lambda expression parameters for completeness?_
-
-### Well-known attributes
-_Should `System.Diagnostics.ConditionalAttribute` be disallowed on lambda expressions since there are few scenarios where a lambda expression could be used conditionally?_
-```csharp
-([Conditional("DEBUG")] static (x, y) => Assert(x == y))(a, b); // ok?
-```
-
 ## Explicit return type
 An explicit return type may be specified before the parenthesized parameter list.
 ```csharp
@@ -150,8 +142,6 @@ A _function_type_ represents a method signature: the parameter types and ref kin
 Anonymous function expressions or method groups with the same signature have the same _function_type_.
 
 A _function_type_ exists at compile time only: _function_types_ do not appear in source or metadata.
-
-_Open issue: Should the function_type be available from the compiler API?_
 
 ### Conversions
 From a _function_type_ `F` there are implicit _function_type_ conversions:
@@ -264,8 +254,6 @@ The delegate type for the anonymous function or method group with parameter type
 
 The compiler may allow more signatures to bind to `System.Action<>` and `System.Func<>` types in the future (if `ref struct` types are allowed type arguments for instance).
 
-_Open issue: Should the compiler bind to a matching `System.Action<>` or `System.Func<>` type regardless of arity and synthesize a delegate type otherwise? If so, should the compiler warn if the expected delegate types are missing?_
-
 `modopt()` or `modreq()` in the method group signature are ignored in the corresponding delegate type.
 
 If two anonymous functions or method groups in the same compilation require synthesized delegate types with the same parameter types and modifiers and the same return type and modifiers, the compiler will use the same synthesized delegate type.
@@ -312,6 +300,19 @@ lambda_parameter
   | attribute_list* modifier* type? identifier equals_value_clause?
   ;
 ```
+
+## Open issues
+
+Should default values be supported for lambda expression parameters for completeness?
+
+Should `System.Diagnostics.ConditionalAttribute` be disallowed on lambda expressions since there are few scenarios where a lambda expression could be used conditionally?
+```csharp
+([Conditional("DEBUG")] static (x, y) => Assert(x == y))(a, b); // ok?
+```
+
+Should the _function_type_ be available from the compiler API, in addition to the resulting delegate type?
+
+Currently, the inferred delegate type uses `System.Action<>` or `System.Func<>` when parameter and return types are valid type arguments _and_ there are no more than 16 parameters, and if the expected `Action<>` or `Func<>` type is missing, an error is reported. Instead, should the compiler use `System.Action<>` or `System.Func<>` regardless of arity? And if the expected type is missing, synthesize a delegate type otherwise?
 
 ## Design meetings
 
