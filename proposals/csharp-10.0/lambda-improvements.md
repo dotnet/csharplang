@@ -189,6 +189,14 @@ c = () => 1;      // error: cannot convert lambda expression to type 'C'
 c = (C)(() => 2); // error: cannot convert lambda expression to type 'C'
 ```
 
+A warning is reported for an implicit conversion of a method group to `object`, since the conversion is valid but perhaps unintentional.
+```csharp
+Random r = new Random();
+object obj;
+obj = r.NextDouble;         // warning: Converting method group to 'object'. Did you intend to invoke the method?
+obj = (object)r.NextDouble; // ok
+```
+
 ### Type inference
 The existing rules for type inference are mostly unchanged (see [type inference](../../spec/expressions.md#type-inference)). There are however a **couple of changes** below to specific phases of type inference.
 
