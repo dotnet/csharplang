@@ -4392,7 +4392,7 @@ GroupJoin(orders, c => c.CustomerID, o => o.CustomerID,
     (c, co) => new { c, co }).
 Select(x => new { x, n = x.co.Count() }).
 Where(y => y.n >= 10).
-Select(y => new { y.x.c.Name, OrderCount = y.n)
+Select(y => new { y.x.c.Name, OrderCount = y.n })
 ```
 where `x` and `y` are compiler generated identifiers that are otherwise invisible and inaccessible.
 
