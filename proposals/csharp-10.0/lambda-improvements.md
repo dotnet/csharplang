@@ -141,6 +141,11 @@ The natural type of an anonymous function expression or method group is a _funct
 A _function_type_ represents a method signature: the parameter types and ref kinds, and return type and ref kind.
 Anonymous function expressions or method groups with the same signature have the same _function_type_.
 
+_Function_types_ are used in a few specific contexts only:
+- implicit and explicit conversions
+- [method type inference](../../spec/expressions.md#type-inference) and [best common type](../../spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions)
+- `var` initializers
+
 A _function_type_ exists at compile time only: _function_types_ do not appear in source or metadata.
 
 ### Conversions
