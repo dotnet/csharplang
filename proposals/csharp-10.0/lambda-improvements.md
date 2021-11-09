@@ -228,7 +228,7 @@ var fs = new[] { (string s) => s.Length; (string s) => int.Parse(s) } // Func<st
 ```
 
 ### `var`
-Anonymous functions and method groups with inferred types can be used as initializers in `var` declarations.
+Anonymous functions and method groups with function types can be used as initializers in `var` declarations.
 ```csharp
 var f1 = () => default;           // error: cannot infer type
 var f2 = x => x;                  // error: cannot infer type
@@ -245,7 +245,7 @@ var f7 = "".F1; // System.Action
 var f8 = F2;    // System.Action<string> 
 ```
 
-The type of an anonymous function or method group is not inferred for implicitly-typed discards.
+Function types are not used in assignments to discards.
 ```csharp
 d = () => 0; // ok
 _ = () => 1; // error
@@ -318,13 +318,3 @@ Should `System.Diagnostics.ConditionalAttribute` be disallowed on lambda express
 Should the _function_type_ be available from the compiler API, in addition to the resulting delegate type?
 
 Currently, the inferred delegate type uses `System.Action<>` or `System.Func<>` when parameter and return types are valid type arguments _and_ there are no more than 16 parameters, and if the expected `Action<>` or `Func<>` type is missing, an error is reported. Instead, should the compiler use `System.Action<>` or `System.Func<>` regardless of arity? And if the expected type is missing, synthesize a delegate type otherwise?
-
-## Design meetings
-
-- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-03.md
-- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-12.md#lambda-improvements
-- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-21.md#inferred-types-for-lambdas-and-method-groups
-- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-05-10.md
-- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-02.md#lambda-return-type-parsing
-- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-06-21.md#open-questions-for-lambda-return-types
-- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-07-12.md
