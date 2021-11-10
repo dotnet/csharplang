@@ -26,7 +26,7 @@ void M(string name!!) {
 }
 ```
 
-Will be translated into code equivalent to:
+Will be translated into code similar to the following:
 
 ``` csharp
 void M(string name) {
@@ -37,7 +37,9 @@ void M(string name) {
 }
 ```
 
-Parameter null checks are used frequently in libraries with tight performance and size constraints. For this reason, the compiler implementation is free to define exactly how the above semantics are achieved. For example, to optimize code size, inlining, etc., the compiler may use helper methods to perform the null check a la the [ArgumentNullException.ThrowIfNull](https://github.com/dotnet/runtime/blob/1d08e154b942a41e72cbe044e01fff8b13c74496/src/libraries/System.Private.CoreLib/src/System/ArgumentNullException.cs#L56-L69) methods, or any other implementation strategy that achieves the required semantics.
+The implementation behavior must be that if the parameter is null, it creates and throws an `ArgumentNullException` with the parameter name as a constructor argument. The implementation is free to use any strategy that achieves this. This could result in observable differences between different compliant implementations, such as whether calls to helper methods are present above the call to the method with the null-checked parameter in the exception stack trace.
+
+We make these allowances because parameter null checks are used frequently in libraries with tight performance and size constraints. For example, to optimize code size, inlining, etc., the implementation may use helper methods to perform the null check a la the [ArgumentNullException.ThrowIfNull](https://github.com/dotnet/runtime/blob/1d08e154b942a41e72cbe044e01fff8b13c74496/src/libraries/System.Private.CoreLib/src/System/ArgumentNullException.cs#L56-L69) methods.
 
 The generated `null` check will occur before any developer authored code in the method. When multiple parameters contain
 the `!!` operator then the checks will occur in the same order as the parameters are declared.
