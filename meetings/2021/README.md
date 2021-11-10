@@ -20,6 +20,9 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Nov 10, 2021
 
+- Self-constraints (Tanner): https://github.com/dotnet/csharplang/pull/5387
+
+
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
