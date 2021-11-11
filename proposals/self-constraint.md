@@ -116,7 +116,7 @@ How does this play into variance for classes and possible eventual support for s
 
 Would a proper self constraint allow a simpler model for encoding the `call` in IL? That is, if the runtime also supports a proper self constraint then rather than requiring ``constrained. !!T call !0 class IAdditiveIdentity`1<!!T>.get_AdditiveIdentity()`` it could simply support ``call !0 class IAdditiveIdentity`1<!!T>.get_AdditiveIdentity()``.
 
-Could the self type be represented as an associate type rather than as a type parameter to an interface?
+Could the self type be represented as an associated type rather than as a type parameter to an interface?
 
 Obligatory general syntax questions: should we use a keyword other than `this`? Should the keyword go where the proposal puts it, or with the rest of the type constraints?
 
