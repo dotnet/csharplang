@@ -18,14 +18,15 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Roles and extensions (Mads): https://github.com/dotnet/csharplang/issues/1711
 
-## Nov 10, 2021
-
-- Self-constraints (Tanner): https://github.com/dotnet/csharplang/pull/5387
-
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Nov 10, 2021
+
+[C# Language Design Notes for November 10th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-11-10.md)
+
+1. Self types
 
 ## Nov 3, 2021
 
