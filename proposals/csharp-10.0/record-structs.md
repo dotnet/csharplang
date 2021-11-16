@@ -22,6 +22,7 @@ Record structs will also follow the same rules as structs for parameterless inst
 but this document assumes that we will lift those restrictions for structs generally.
 
 See https://github.com/dotnet/csharplang/blob/master/spec/structs.md
+See [parameterless struct constructors](./parameterless-struct-constructors.md) spec.
 
 Record structs cannot use `ref` modifier.
 
@@ -209,7 +210,6 @@ additional members with the same conditions as the members above.
 A record struct has a public constructor whose signature corresponds to the value parameters of the
 type declaration. This is called the primary constructor for the type. It is an error to have a primary
 constructor and a constructor with the same signature already present in the struct.
-A record struct is not permitted to declare a parameterless primary constructor.
 
 Instance field declarations for a record struct are permitted to include variable initializers.
 If there is no primary constructor, the instance initializers execute as part of the parameterless constructor.
@@ -299,24 +299,11 @@ No auto-property is created if the record has or inherits an instance field with
 
 ## Allow parameterless constructors and member initializers in structs
 
-We are going to support both parameterless constructors and member initializers in structs.
-This will be specified in more details.
-
-Raw notes:  
-Allow parameterless ctors on structs and also field initializers (no runtime detection)  
-We will enumerate scenarios where initializers aren't evaluated: arrays, generics, default, ...  
-Consider diagnostics for using struct with parameterless ctor in some of those cases?  
+See [parameterless struct constructors](./parameterless-struct-constructors.md) spec.
 
 ## Open questions
 
-- should we disallow a user-defined constructor with a copy constructor signature?
-- confirm that we want to disallow members named "Clone".
-- `with` on generics? (may affect the design for record structs)
-- double-check that synthesized `Equals` logic is functionally equivalent to runtime implementation (e.g. float.NaN)
 - how to recognize record structs in metadata? (we don't have an unspeakable clone method to leverage...)
-- should `GetHashCode` include a hash of the type itself, to get different values between `record struct S1;` and `record struct S2;`?
-- could field- or property-targeting attributes be placed in the positional parameter list?
-- how to place attributes on the properties of a record struct?  IDE has serialization types that would work nicely as record structs, but which need attributes on the members. Supporting `[property: DataMember(Order = 1)]` would solve this.
 
 ### Answered
 
@@ -325,3 +312,9 @@ Consider diagnostics for using struct with parameterless ctor in some of those c
 - confirm implementation of equality members. Alternative is that synthesized `bool Equals(R other)`, `bool Equals(object? other)` and operators all just delegate to `ValueType.Equals`. (answer: yes)
 - confirm that we want to allow field initializers when there is a primary constructor. Do we also want to allow parameterless struct constructors while we're at it (the Activator issue was apparently fixed)? (answer: yes, updated spec should be reviewed in LDM)
 - how much do we want to say about `Combine` method? (answer: as little as possible)
+- should we disallow a user-defined constructor with a copy constructor signature? (answer: no, there is no notion of copy constructor in the record structs spec)
+- confirm that we want to disallow members named "Clone". (answer: correct)
+- double-check that synthesized `Equals` logic is functionally equivalent to runtime implementation (e.g. float.NaN) (answer: confirmed in LDM)
+- could field- or property-targeting attributes be placed in the positional parameter list? (answer: yes, same as for record class)
+- `with` on generics? (answer: out of scope for C# 10)
+- should `GetHashCode` include a hash of the type itself, to get different values between `record struct S1;` and `record struct S2;`? (answer: no)
