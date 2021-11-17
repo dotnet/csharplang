@@ -148,6 +148,7 @@ There should always be an expression corresponding to the `this` parameter. Even
 - Multiple parameters marked with `CallerArgumentExpression` are permitted, as shown above.
 - The attribute's namespace will be `System.Runtime.CompilerServices`.
 - If `null` or a string that is not a parameter name (e.g. `"notAParameterName"`) is provided, the compiler will pass in an empty string.
+- The type of the parameter `CallerArgumentExpressionAttribute` is applied to must have a standard conversion from `string`. This means no user-defined conversions from `string` are allowed, and in practice means the type of such a parameter must be `string`, `object`, or an interface implemented by `string`.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
