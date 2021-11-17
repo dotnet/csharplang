@@ -2,7 +2,7 @@
 
 ## Summary
 
-File scoped namespaces use a less verbose format for the typical case of file containing only one namespace in it.  The file scoped namespace format is `namespace X.Y.Z;` (note the semicolon and lack of braces).  This allows for files like the following:
+File scoped namespaces use a less verbose format for the typical case of files containing only one namespace.  The file scoped namespace format is `namespace X.Y.Z;` (note the semicolon and lack of braces).  This allows for files like the following:
 
 ```c#
 namespace X.Y.Z;
