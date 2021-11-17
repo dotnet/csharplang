@@ -3,6 +3,7 @@ Features Added in C# Language Versions
 
 # C# 10.0 - .NET 6 and Visual Studio 2022 version 17.0
 
+- [With expression for anonymous type](https://docs.microsoft.com/dotnet/csharp/language-reference/operators/with-expression)
 - [Record structs](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/record-structs.md) and `with` expressions on structs (`record struct Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
 - [Global using directives](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/GlobalUsingDirective.md): `global using` directives avoid repeating the same `using` directives across many files in your program.
 - [Improved definite assignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-definite-assignment.md): definite assignment and nullability analysis better handle common patterns such as `dictionary?.TryGetValue(key, out value) == true`.
