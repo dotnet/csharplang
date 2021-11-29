@@ -20,7 +20,7 @@ The `switch` expression is meant to provide a quicker way to return values based
 
 A `switch` expression may return a `ref` value. The returning expression, if not a `throw` expression, must be a `ref` expression.
 
-A `switch` expression that returns a `ref` value **does not** need an extra `ref` in front of it when assigned/returned to a `ref` local. The examples below cover this case too. This decision is made since the `ref` is essentially included in the cases.
+A `switch` expression that returns a `ref` value needs an extra `ref` in front of it when assigned/returned to a `ref` local. The examples below cover this case too. This design aligns with the current design in the ternary operator.
 
 `throw` expressions can still be used normally.
 
@@ -28,7 +28,7 @@ A `switch` expression that returns a `ref` value **does not** need an extra `ref
 [examples]: #examples
 
 ```csharp
-private ref int GetDirectionField(Direction direction) => direction switch
+private ref int GetDirectionField(Direction direction) => ref direction switch
 {
      Direction.North => ref NorthField,
      Direction.South => ref SouthField,
@@ -39,7 +39,7 @@ private ref int GetDirectionField(Direction direction) => direction switch
 
 private void RefSwitchAssignLocal()
 {
-    ref int dimension = axis switch
+    ref int dimension = ref axis switch
     {
         Axis.X => ref X,
         Axis.Y => ref Y,
