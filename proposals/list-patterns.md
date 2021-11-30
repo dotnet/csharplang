@@ -81,16 +81,16 @@ The behavior of a pattern-matching operation is undefined if any of the above as
 A pattern of the form `expr is [1, 2, 3]` is equivalent to the following code (if compatible via implicit `Index` support):
 ```cs
 expr.Length is 3
-&& expr[0] is 1
-&& expr[1] is 2
-&& expr[2] is 3
+&& expr[new Index(0, fromEnd: false)] is 1
+&& expr[new Index(1, fromEnd: false)] is 2
+&& expr[new Index(2, fromEnd: false)] is 3
 ```
 A *slice_pattern* acts like a proper discard i.e. no tests will be emitted for such pattern, rather it only affects other nodes, namely the length and indexer. For instance, a pattern of the form `expr is [1, .. var s, 3]`  is equivalent to the following code (if compatible via explicit `Index` and `Range` support):
 ```cs
 expr.Length is >= 2
-&& expr[new Index(0)] is 1
-&& expr[new Range(1, new Index(1, true))] is var s
-&& expr[new Index(1, true)] is 3
+&& expr[new Index(0, fromEnd: false)] is 1
+&& expr[new Range(new Index(1, fromEnd: false), new Index(1, fromEnd: true))] is var s
+&& expr[new Index(1, fromEnd: true)] is 3
 ```
 The *input type* for the *slice_pattern* is the return type of the underlying `this[Range]` or `Slice` method with two exceptions: For `string` and arrays, `string.Substring` and `RuntimeHelpers.GetSubArray` will be used, respectively.
 
