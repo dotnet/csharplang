@@ -16,6 +16,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Dec 15, 2021
 
+- Assumptions around slice result in list-patterns (Julien)
+
 ## Dec 1, 2021
 
 - Roles and extensions (Mads): https://github.com/dotnet/csharplang/issues/5485
