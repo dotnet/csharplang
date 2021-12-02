@@ -18,13 +18,15 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Assumptions around slice result in list-patterns (Julien)
 
-## Dec 1, 2021
-
-- Roles and extensions (Mads): https://github.com/dotnet/csharplang/issues/5485
-
 # C# Language Design Notes for 2021
 
 Overview of meetings and agendas for 2021
+
+## Dec 1, 2021
+
+[C# Language Design Notes for December 1st, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-12-01.md)
+
+1. Roles and extensions
 
 ## Nov 10, 2021
 
