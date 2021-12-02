@@ -78,7 +78,7 @@ The behavior of a pattern-matching operation is undefined if any of the above as
 
 #### Lowering
 
-A pattern of the form `expr is [1, 2, 3]` is equivalent to the following code (if compatible via implicit `Index` support):
+A pattern of the form `expr is [1, 2, 3]` is equivalent to the following code:
 ```cs
 expr.Length is 3
 && expr[new Index(0, fromEnd: false)] is 1
