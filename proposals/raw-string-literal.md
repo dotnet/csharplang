@@ -420,7 +420,13 @@ var v1 = $$"""
          """
 ```
 
-Here, the `{{...}}` matches the requisite count of two braces specified by the `$$` delimiter prefix.  In the case of a single `$` that means the interpolation is specified just as `{...}` as in normal interpolated string literals.
+Here, the `{{...}}` matches the requisite count of two braces specified by the `$$` delimiter prefix.  In the case of a single `$` that means the interpolation is specified just as `{...}` as in normal interpolated string literals.  Importantly, this means that an interpolated literal with `N` `$` characters can have a sequence of `2*N-1` braces (of the same type in a row).  The last `N` braces will start (or end) an interpolation, and the remaining `N-1` braces will just be content.  For example:
+
+```
+var v1 = $$"""X{{{1+1}}}Z"""`;
+```
+
+In this case the inner two `{{` and `}}` braces belong to the interpolation, and the outer singular braces are just content.  So the above string is equivalent to the content `X{2}Z`. Having `2*N` (or more) braces is always an error.  To have longer sequences of braces as content, the number of `$` characters must be increased accordingly.
 
 Interpolated raw string literals are defined as:
 
