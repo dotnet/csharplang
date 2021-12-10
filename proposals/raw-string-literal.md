@@ -56,6 +56,17 @@ A single line form is also supported.  It starts with a minimum of three `"""` c
 var xml = """<summary><element attr="content"/></summary>""";
 ```
 
+Interpolated raw strings are also supported.  In this case, the string specifies the number of braces needed to start an interpolation (determined by the number of dollar signs present at the start of the literal).  Any brace sequence with fewer braces than that is just treated as content.  For example:
+
+```
+var json = $$"""
+             {
+                "summary": "text",
+                "length" : {{value.Length}},
+             };
+             """
+```
+
 ## Motivation
 
 C# lacks a general way to create simple string literals that can contain effectively any arbitrary text.  All C# string literal forms today need some form of escaping in case the contents use some special character (always if a delimiter is used).  This prevents easily having literals containing other languages in them (for example, an XML, HTML or JSON literal).  
