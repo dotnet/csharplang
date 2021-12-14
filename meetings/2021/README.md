@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
-- Required parsing (@333fred): https://github.com/dotnet/csharplang/issues/5439
 
 ## Schedule when convenient
 
@@ -16,7 +15,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Dec 15, 2021
 
-- Assumptions around slice result in list-patterns (Julien)
+- Required parsing (@333fred): https://github.com/dotnet/csharplang/issues/5439
 
 # C# Language Design Notes for 2021
 
