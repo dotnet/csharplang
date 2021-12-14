@@ -37,6 +37,32 @@ void M(string name) {
 }
 ```
 
+There are a few guidelines limiting where `!!` can be used:
+
+1. Only a parameter of something with an implementation can use it. For example, an abstract method parameter cannot use `!!`. Further examples include:
+   - extern method parameters
+   - delegate parameters
+   - interface method parameters when the method is not a DIM
+2. It must be possible to include an equivalent "check then throw" of the given parameter at the beginning of the method, ignoring syntactic limitations such as the need to replace an expression body with a block body.
+
+Because of (2), the `!!` operator cannot be used on a discard.
+``` csharp
+System.Action<string, string> lambda = (_!!, _!!) => { }; // error
+```
+
+Also because of (2), the `!!` operator cannot be used on an `out` parameter, but it can be used on a `ref` or `in` parameter.
+``` csharp
+void M1(ref string x!!) { } // ok
+void M2(in string y!!) { } // ok
+void M3(out string z!!) { } // error
+```
+
+Declarations that have parameters and implementations can generally use `!!`. Therefore, it's permitted to use it on an indexer parameter, and the behavior is that all the indexer's accessors will insert a null check.
+
+``` csharp
+public string this[string key!!] { get { ... } set { ... } } // ok
+```
+
 The implementation behavior must be that if the parameter is null, it creates and throws an `ArgumentNullException` with the parameter name as a constructor argument. The implementation is free to use any strategy that achieves this. This could result in observable differences between different compliant implementations, such as whether calls to helper methods are present above the call to the method with the null-checked parameter in the exception stack trace.
 
 We make these allowances because parameter null checks are used frequently in libraries with tight performance and size constraints. For example, to optimize code size, inlining, etc., the implementation may use helper methods to perform the null check a la the [ArgumentNullException.ThrowIfNull](https://github.com/dotnet/runtime/blob/1d08e154b942a41e72cbe044e01fff8b13c74496/src/libraries/System.Private.CoreLib/src/System/ArgumentNullException.cs#L56-L69) methods.
