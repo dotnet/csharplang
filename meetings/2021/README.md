@@ -4,7 +4,7 @@ Overview of meetings and agendas for 2021
 
 ## Dec 15, 2021
 
-[C# Language Design Notes for December 1st, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-12-15.md)
+[C# Language Design Notes for December 15th, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-12-15.md)
 
 1. Required parsing
 2. Warnings for parameterless struct constructor
