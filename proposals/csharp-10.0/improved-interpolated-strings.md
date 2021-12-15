@@ -452,6 +452,46 @@ rented array inside it, and if one of the interpolation holes throws an exceptio
 _Answer_: No. handlers can be assigned to locals (such as `MyHandler handler = $"{MyCode()};`), and the lifetime of such handlers is unclear. Unlike foreach enumerators, where the lifetime
 is obvious and no user-defined local is created for the enumerator.
 
+### Impact on nullable reference types
+
+To minimize complexity of the implementation, we have a few limitations on how we perform nullable analysis on interpolated string handler constructors used as arguments to a method or indexer.
+In particular, we do not flow information from the constructor back through to the original slots of parameters or arguments from the original context, and we do not use constructor parameter
+types to inform generic type inference for type parameters in the containing method. An example of where this can have an impact is:
+
+```cs
+string s = """";
+C c = new C();
+c.M(s, $"""", c.ToString(), s.ToString()); // No warnings on c.ToString() or s.ToString(), as the `MaybeNull` does not flow back.
+
+public class C
+{
+    public void M(string s1, [InterpolatedStringHandlerArgument("""", ""s1"")] CustomHandler c1, string s2, string s3) { }
+}
+
+[InterpolatedStringHandler]
+public partial struct CustomHandler
+{
+    public CustomHandler(int literalLength, int formattedCount, [MaybeNull] C c, [MaybeNull] string s) : this()
+    {
+    }
+}
+```
+
+```cs
+string? s = null;
+M(s, $""""); // Infers `string` for `T` because of the `T?` parameter, not `string?`, as flow analysis does not consider the unannotated `T` parameter of the constructor
+
+void M<T>(T? t, [InterpolatedStringHandlerArgument(""s1"")] CustomHandler<T> c) { }
+
+[InterpolatedStringHandler]
+public partial struct CustomHandler<T>
+{
+    public CustomHandler(int literalLength, int formattedCount, T t) : this()
+    {
+    }
+}
+```
+
 ## Other considerations
 
 ### Allow `string` types to be convertible to handlers as well
