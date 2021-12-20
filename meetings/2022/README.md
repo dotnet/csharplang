@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
+- Definite assignment in semi-autoproperties (Fred) - https://github.com/dotnet/csharplang/issues/5563
 
 ## Schedule when convenient
 
