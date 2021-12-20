@@ -109,7 +109,7 @@ An explicit parameterless constructor in a `record struct` must have a `this` in
 ```csharp
 record struct R5(int F)
 {
-    public R5() { }                  // error: must have 'this' initializer
+    public R5() { }                  // error: must have 'this' initializer that calls explicit .ctor
     public R5(object o) : this() { } // ok
     public int F =  F;
 }
