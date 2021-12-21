@@ -47,7 +47,7 @@ The following changes are to be made to [classes.md](https://github.com/dotnet/c
 +
 + If the auto-property has only a semicolon-only get accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)).
 +
-+ An auto-property is not allowed to only have a single semicolon-only `set` accessor without a `get` accessor.
++ An auto-property must have a `get` accessor, and can optionally have a `set` accessor.
 ```
 
 ...
