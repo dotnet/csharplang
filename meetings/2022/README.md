@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Schedule ASAP
 
 - Definite assignment in semi-autoproperties (Fred) - https://github.com/dotnet/csharplang/issues/5563
+- Open questions in required members (Fred) - https://github.com/dotnet/csharplang/blob/main/proposals/required-members.md#open-questions
 
 ## Schedule when convenient
 

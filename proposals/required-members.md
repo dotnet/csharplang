@@ -263,42 +263,131 @@ init_argument_initializer
 A type with a parameterless constructor that advertises a _contract_ is not allowed to be substituted for a type parameter constrained to `new()`, as there is no way
 for the generic instantiation to ensure that the requirements are satisfied.
 
+### Overriding, Hiding, and Inheriting
+
+It is an error to mark a member required if the member is not at least as visible as the containing member's type. This means the following cases are not allowed:
+
+```cs
+interface I
+{
+    int Prop1 { get; }
+}
+public class Base
+{
+    public virtual int Prop2 { get; }
+
+    protected required int _field; // Error: _field is not at least as visible as Base. Open question below about the protected constructor scenario
+    protected Base() { }
+}
+public class Derived : Base, I
+{
+    required int I.Prop1 { get; } // Error: explicit interface implementions cannot be required as they cannot be set in an object initializer
+
+    public required override int Prop2 { get; } // Error: this property is hidden by Derived.Prop2 and cannot be set in an object initializer
+    public new int Prop2 { get; }
+}
+```
+
+It is an error to hide a `required` member, as that member can no longer be set by a consumer.
+
+When overriding a `required` member, the `required` keyword must be included on the method signature. This is done so that if we ever want to allow
+unrequiring a property with an override in the future, we have design space to do so.
+
+Overrides are allowed to mark a member `required` where it was not `required` in the base type. A member so-marked is added to the required members
+list of derived type.
+
+### Metadata Representation
+
+The following 2 attributes are known to the C# compiler and required for this feature to function:
+
+```cs
+namespace System.Runtime.CompilerServices;
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
+public sealed class RequiredMembersAttribute : Attribute
+{
+    public RequiredMembersAttribute(string[] members) => Members = members;
+    public string[] Members { get; }
+}
+
+[AttributeUsage(AttributeTargets.Constructor)]
+public sealed class NoRequiredMembersAttribute : Attribute
+{
+    public NoRequiredMembersAttribute() {}
+}
+```
+
+It is an error to manually apply `RequiredMembersAttribute` to a type.
+
+All members that are required by a type are listed in a `RequiredMembersAttribute` on the type. Members from any base type are not included, except
+when an override adds `required` to a member that was not `required` in the base type. As these members can only be fields or properties, duplicate
+names cannot exist.
+
+Any constructor in a type with `required` members that does not have `NoRequiredMembers` applied to it is marked with an `Obsolete` attribute with
+the string `"Types with required members are not supported in this version of your compiler"`, and the attribute is marked as an error, to prevent
+any older compilers from using these constructors. We don't use a `modreq` here because it is a goal to maintain binary compat: if the last `required`
+property was removed from a type, the compiler would no longer synthesize this `modreq`, which is a binary-breaking change and all consumers would
+need to be recompiled. A compiler that understands `required` members will ignore this obsolete attribute. Note that members can come from base types
+as well: even there are no new `required` members in the current type, if any base type has `required` members, this `Obsolete` attribute will be
+generated. If the constructor already has an `Obsolete` attribute, no additional attribute will be generated. If a by-ref-like type also has `required`
+members, the generated `Obsolete` attribute will reference the `required` error message, under the assumption that if a compiler is new enough to
+understand `required` properties, it will also understand by-ref-like-types.
+
+To build the full list of all `required` members for a given type T, including all base types, all the `RequiredMembersAttribute`s from T and its
+base type Tb (recursively until reaching `System.Object`) are collected. At every Ti, if it has a `RequiredMembersAttribute` with members R1..Rn,
+the following algorithm is performed:
+
+1. Perform standard member lookup on Ti for name Ri with 0 arguments.
+2. If this lookup was ambiguous or did not produce a single field or property result, an error occurs and the required member list of T cannot be
+determined. No further steps are taken, and calling any constructor on `T` not marked with a `NoRequiredMembersAttribute` issues an error.
+3. Otherwise, the result of the member lookup is added to `T`'s list of required members.
+
 ## Open Questions
 
-### Syntax questions
+### Requiring less-public members
 
-* Is `init` the right word? `init` as a postfix modifier on the constructor might interfere if we ever want to reuse it for factories and also enable `init`
-methods with a prefix modifier. Other possibilities:
-    * `set`
-* Is `required` the right modifier for specifying that all members are initialized? Others suggested:
-    * `default`
-    * `all`
-    * With a ! to indicate complex logic
-* Should we require a separator between the `base`/`this` and the `init`?
-    * `:` separator
-    * ',' separator
-* Is `required` the right modifier? Other alternatives that have been suggested:
-    * `req`
-    * `require`
-    * `mustinit`
-    * `must`
-    * `explicit`
+In versions of this proposal with the `init` clause, we talked about being able to have the following scenario:
 
-### Init clause restrictions
+```cs
+public class Base
+{
+    protected required int _field;
 
-Should we allow access to `this` in the init clause? If we want the assignment in `init` to be a shorthand for assigning the member in the constructor itself, it seems
-like we should.
+    protected Base() {} // Contract required that _field is set
+}
+public class Derived : Base
+{
+    public Derived() : init(_field = 1) // Contract is fulfilled and _field is removed from the required members list
+    {
+    }
+}
+```
 
-Additionally, does it create a new scope, like `base()` does, or does it share the same scope as the method body? This is particularly important for things like local
-functions, which the init clause may want to access, or for name shadowing, if an init expression introduces a variable via `out` parameter.
+However, we have removed the `init` clause from the proposal at this point, so we need to decide whether to allow this scenario in a limited fashion. The options we
+have are:
 
-### Base requirement chaining representation in metadata
+1. Disallow the scenario. This is the most conservative approach, and the rules in the [OHI](#overriding-hiding-and-inheriting) are currently written with this assumption
+in mind. The rule is that any member that is required must be at least as visible as its containing type.
+2. Require that all constructors are either:
+    1. No more visible than the least-visible required member.
+    2. Have the `NoRequiredMembersAttribute` applied to the constructor.
+These would ensure that anyone who can see a constructor can either set all the things it exports, or there is nothing to set. This could be useful for types that are
+only ever created via static `Create` methods or similar builders, but the utility seems overall limited.
+3. Readd a way to remove specific parts of the contract to the proposal, as discussed in [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-10-25.md)
+previously.
 
-An ideal implementation of the metadata representation would have each constructor mark the base constructor that they call in some fashion, which would ensure that, if
-the base and derived types are in different assemblies, a version update in the base assembly would be accurately reflected in usage of the derived type without the
-derived assembly having to upgrade. However, we don't have a way to encode a method token into a signature, so we'd have to find some other encoding strategy. This
-strategy will be inherently fragile to a number of potential scenarios, so it may be more pragmatic to simply repeat any removed members in the removed member list of
-the derived constructor.
+### Override rules
+
+The current spec says that the `required` keyword needs to be copied over and that overrides can make a member _more_ required, but not less. Is that what we want to do?
+Allowing removal of requirements needs more contract modification abilities than we are currently proposing.
+
+### Metadata Representation
+
+The [Metadata Representation](#metadata-representation) needs to be approved. We additionally need to decide whether these attributes should be included in the BCL.
+
+1. For `RequiredMembersAttribute`, this attribute is more akin to the general embedded attributes we use for nullable/nint/tuple member names, and will not be manually
+applied by the user.
+2. `NoRequiredMembersAttribute`, on the other hand, is directly used by consumers, and thus should likely be in the BCL.
 
 ### Warning vs Error
 
@@ -315,7 +404,7 @@ Given this code:
 class C
 {
     public required object? O;
-    public C() : init(O = null) {}
+    public C() { O = null; }
 }
 ```
 
@@ -338,7 +427,7 @@ constructor, as that would be confusing.
 * Allow the `!` operator to suppress the warning/error explicitly. If initializing a member in a complicated way (such as in a shared method), the user can add a `!`
 to the init clause to indicate the compiler should not check for initialization.
 
-After discussion we like the idea of the `!` operator. It allows the user to be intentional about more complicated scenarios while also not creating a large design hole
+**Conclusion**: After discussion we like the idea of the `!` operator. It allows the user to be intentional about more complicated scenarios while also not creating a large design hole
 around init methods and annotating every method as setting members X or Y. `!` was chosen because we already use it for suppressing nullable warnings, and using it to
 tell the compiler "I'm smarter than you" in another place is a natural extension of the syntax form.
 
@@ -348,3 +437,34 @@ This proposal does not allow interfaces to mark members as required. This protec
 constraints in generics right now, and is directly related to both factories and generic construction. In order to ensure that we have design space in this area, we
 forbid `required` in interfaces, and forbid types with _required\_member\_lists_ from being substituted for type parameters constrained to `new()`. When we want to
 take a broader look at generic construction scenarios with factories, we can revisit this issue.
+
+### Syntax questions
+
+* Is `init` the right word? `init` as a postfix modifier on the constructor might interfere if we ever want to reuse it for factories and also enable `init`
+methods with a prefix modifier. Other possibilities:
+    * `set`
+* Is `required` the right modifier for specifying that all members are initialized? Others suggested:
+    * `default`
+    * `all`
+    * With a ! to indicate complex logic
+* Should we require a separator between the `base`/`this` and the `init`?
+    * `:` separator
+    * ',' separator
+* Is `required` the right modifier? Other alternatives that have been suggested:
+    * `req`
+    * `require`
+    * `mustinit`
+    * `must`
+    * `explicit`
+
+**Conclusion**: We have removed the `init` constructor clause for now, and are proceeding with `required` as the property modifier.
+
+### Init clause restrictions
+
+Should we allow access to `this` in the init clause? If we want the assignment in `init` to be a shorthand for assigning the member in the constructor itself, it seems
+like we should.
+
+Additionally, does it create a new scope, like `base()` does, or does it share the same scope as the method body? This is particularly important for things like local
+functions, which the init clause may want to access, or for name shadowing, if an init expression introduces a variable via `out` parameter.
+
+**Conclusion**: `init` clause has been removed.
