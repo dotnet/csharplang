@@ -110,6 +110,8 @@ Open LDM questions:
 
 2. Should initializers use the backing field or the property setter? If the latter, what about `public int P { get => field; } = 5;`?
 
+3. Can the field be written into in a property without setter?
+
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-14.md#field-keyword
