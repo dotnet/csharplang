@@ -216,7 +216,7 @@ If there is no primary constructor, the instance initializers execute as part of
 Otherwise, at runtime the primary constructor executes the instance initializers appearing in the record-struct-body.
 
 If a record struct has a primary constructor, any user-defined constructor must have an
-explicit `this` constructor initializer.
+explicit `this` constructor initializer that calls the primary constructor or an explicitly declared constructor.
 
 Parameters of the primary constructor as well as members of the record struct are in scope within initializers of instance fields or properties. 
 Instance members would be an error in these locations (similar to how instance members are in scope in regular constructor initializers
