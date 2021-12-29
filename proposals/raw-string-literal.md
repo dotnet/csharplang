@@ -409,7 +409,7 @@ Interpolations in normal interpolated strings (e.g. `$"..."`) are supported toda
 
 To support interpolations we introduce them in a different fashion than normal `$"` interpolated strings.  Specifically, an `interpolated_raw_string_literal` will start with some number of `$` characters.  The count of these indicates how many `{` (and `}`) characters are needed in the content of the literal to delimit the `interpolation`.  Importantly, there continues to be no escaping mechanism for curly braces.  Rather, just as with quotes (`"`) the literal itself can always ensure it specifies delimiters for the interpolations that are certain to not collide with any of the rest of the content of the string.  For example a JSON literal containing interpolation holes can be written like so:
 
-```
+```c#
 var v1 = $$"""
          {
             "orders": 
@@ -422,8 +422,8 @@ var v1 = $$"""
 
 Here, the `{{...}}` matches the requisite count of two braces specified by the `$$` delimiter prefix.  In the case of a single `$` that means the interpolation is specified just as `{...}` as in normal interpolated string literals.  Importantly, this means that an interpolated literal with `N` `$` characters can have a sequence of `2*N-1` braces (of the same type in a row).  The last `N` braces will start (or end) an interpolation, and the remaining `N-1` braces will just be content.  For example:
 
-```
-var v1 = $$"""X{{{1+1}}}Z"""`;
+```c#
+var v1 = $$"""X{{{1+1}}}Z""";
 ```
 
 In this case the inner two `{{` and `}}` braces belong to the interpolation, and the outer singular braces are just content.  So the above string is equivalent to the content `X{2}Z`. Having `2*N` (or more) braces is always an error.  To have longer sequences of braces as content, the number of `$` characters must be increased accordingly.
