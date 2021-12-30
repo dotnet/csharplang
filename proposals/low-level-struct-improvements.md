@@ -20,6 +20,72 @@ This proposal aims to address many of these concerns by building on top of our e
 ## Detailed Design 
 The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md).  This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.
 
+### Compat Considerations
+The biggest challenge in the proposals presented here is they must be compatible with our existing span safety rules.  To understand the challenges here let's first consider how `Span<T>` will look once `ref` fields are supported.
+
+```c#
+readonly ref struct Span<T>
+{
+    readonly ref T _field;
+    int _length;
+
+    // This constructor does not exist today however will be added as a
+    // part of changing Span<T> to have ref fields. It is a convenient, and
+    // safe, way to create a length one span over a stack value that today 
+    // requires unsafe code.
+    public Span(ref T value)
+    {
+        _field = ref value;
+        _length = 1;
+    }
+}
+```
+
+The span safety rules make a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that `Span<T>` has no such constructor. By extension this also introduced a hard assumption that `ref` fields do not exist. This resulted in a significant simplification of the rules but it allows for a number of patterns that make introducing `ref` fields significantly more difficult. 
+
+Consider the following method signature:
+
+```c#
+Span<T> CreateSpan<T>(ref T parameter)
+{
+    // Implemenation is irrelevant for lifetime considerations
+}
+```
+
+By the existing span safety rules the return of an invocation of this method always has a *safe-to-escape* value of *calling method*. That is because in the span safety document `ref` fields do not exist and hence there is no way for the return to capture `parameter` hence there is no constraint on the return. 
+
+The implementation of the method is completely irrelevant here, which is why it's omitted from the sample, because there is simply no way for the `ref` to be captured. This means no matter how this method is called the return is *safe-to-escape* to the *calling method*
+
+```c#
+Span<T> CompatExample(ref int p)
+{
+    int local = 42;
+    return CreateSpan<int>(ref local);
+
+    Span<T> span = stackalloc int[1];
+    return CreateSpan<int>(ref span[0]);
+
+    int[] array = new int[42];
+    return CreatSpan(ref array[0]);
+}
+```
+
+All of the above `return` statements are legal by our existing rules. The challenge in this document, which comes up many times, is they **must** remain legal in the version of the language which implements these features and / or when `Span<T>` moves to using `ref` fields.  The above patterns exist all over .NET code and they simply cannot become errors when moving to a new language version. 
+
+Further the design must ensure that once `ref` fields exist that implementations of `CreateSpan<T>` cannot suddenly begin capture the input arguments by `ref`. For example: 
+
+```c#
+Span<T> CreateSpan<T>(ref T parameter)
+{
+    // Error: if this works it breaks the above compat requirements.
+    return Span<T>(ref parameter);
+}
+```
+
+It will be possible for such methods to exist. Specifically methods which take `ref` parameters, capture them in `ref` fields and return them. But they require a specific opt-in annotation to let the compiler, and developer, know that it is happening. 
+
+It is important to understand these compat considerations before diving too far into the proposal here. These compat considerations are central to the design of these features.
+
 ### Provide ref fields
 The language will allow developers to declare `ref` fields inside of a `ref struct`. This can be useful for example when encapsulating large mutable `struct` instances or defining high performance types like `Span<T>` in libraries besides the runtime.
 
@@ -561,14 +627,12 @@ Detailed Notes:
     - Any `static` member or constructor on a `struct`
 
 ### RefFieldEscapes
-
-This flexbxlxty 
 Readers may have noticed that the existing defaults limit the usefulness of `ref` fields. The above section only provides for a `ref` value to be captured and returned from a constructor. No other method can do this because of our existing rules around `ref` capture. 
 
 ```c#
 ref struct MySpan<T>
 {
-    ref T _field;o
+    ref T _field;
 
     // Legal and returns a MySpan<T> as outlined in this document
     public MySpan(ref T field)
