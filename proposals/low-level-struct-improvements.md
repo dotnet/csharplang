@@ -37,6 +37,7 @@ readonly ref struct Span<T>
     // of changing Span<T> to have ref fields. It is a convenient, and
     // safe, way to create a length one span over a stack value that today 
     // requires unsafe code.
+    [RefFieldsEscape]
     public Span(ref T value)
     {
         _field = ref value;
@@ -130,7 +131,9 @@ Next the rules for method invocation will change as follows when the target meth
 - If the current method is not annotated with `[RefFieldsEscape]` then
     - If all arguments have a *ref-safe-to-escape* scope of *heap* then the *safe-to-escape* scope of the return is *calling method*
     - Else the *safe-to-escape* scope is *current method*
-- Else the *safe-to-escape* scope of the return is calculated normally
+- Else the *safe-to-escape* scope of the return is the minimum of 
+    - The existing *safe-to-escape* calculation 
+    - The minimum of the *ref-safe-to-escape* values of all `ref` and `in` arguments
 
 **TODO: think through out parameters**
 
@@ -145,138 +148,102 @@ ref struct RS
 
     public RS(int[] array, int index)
     {
+        // Okay: even though there is no [RefFieldsEscape] annotation the fields are initialized
+        // with known heap values
         _field = ref array[index];
     }
 
+    [RefFieldsEscape]
     public RS(ref int i)
     {
+        // Okay: the constructor is annotated with [RefFieldsEscape] which allows for fields to be
+        // initialized with any value that is ref-safe-to-escape to calling method. That is the 
+        // case for `i` hence this is legal
         _field = ref i;
     }
 
-    static RS CreateRS(ref int i)
+    public RS(ref (int, int) tuple)
     {
-        // The implementation of this method is irrelevant to the safety rule
-        // examples below. The returned value is always *safe-to-escape* outside
-        // the enclosing method scope
+        // Error: even though the ref-safe-to-escape of `tuple.Item1` is to the calling method, the 
+        // constructor is not annotated with [RefFieldsEscape] hence only known heap values are 
+        // allowed
+        _field = ref tuple.Item1;
     }
 
-    static RS RuleExamples(ref int i, int[] array)
+    static RS CreateRS(ref int parameter)
     {
-        var rs1 = new RS(ref i);
+        RS rs = new RS(ref parameter);
 
-        // ERROR by bullet 1: the safe-to-escape scope of 'rs1' is the current
-        // scope.
-        return rs1; 
+        // Error: the CreateRS method is not annotated as [RefFieldsEscape] hence the
+        // safe-to-escape scope of `rs` is the current method.
+        return rs;
 
-        var rs2 = new RS(array, 0);
+        // The RS(int[]) constructor is NOT marked as [RefFieldsEscape] hence it cannot capture
+        // any arguments by ref. It is implicitly safe-to-escape to calling method by all of our
+        // existing rules
+        return new RS(new int[1]);
+    }
 
-        // Okay by bullet 2: the safe-to-escape scope of 'rs2' is outside the 
-        // method scope.
-        return rs2; 
+    [RefFieldsEscape]
+    static RS CreateRS2(ref int parameter)
+    {
+        RS rs = new RS(ref parameter);
+
+        // Okay: the CreateRS2 method is annotated as [RefFieldsEscape] hence the safe-to-escape
+        // scope of `rs` is the min of the ref-safe-to-escape scope of all ref / in arguments. In
+        // this case that is simply `parameter`
+        return rs;
 
         int local = 42;
 
-        // ERROR by bullet 1: the safe-to-escape scope is the current scope
+        // Error: the ref-safe-to-escape scope of `local`is the current method hence the 
+        // safe-to-escape scope of the constructor return is also the same.
         return new RS(ref local);
-        return new RS(ref i);
 
-        // Okay because rules for method calls have not changed. This is legal
-        // today hence it must be legal in the presence of ref fields.
-        return CreateRS(ref local);
-        return CreateRS(ref i);
+        // The RS(int[]) constructor is NOT marked as [RefFieldsEscape] hence it cannot capture
+        // any arguments by ref. It is implicitly safe-to-escape to calling method by all of our
+        // existing rules
+        return new RS(new int[1]);
+    }
+
+    // This method demonstrates that calling CreateRS2 has the same restrictions as RS(ref int) 
+    // constructor
+    [RefFieldsEscape] 
+    static RS CreateRS3(ref int parameter)
+    {
+        RS rs = new CreateRS2(ref parameter);
+
+        // Okay
+        return rs;
+
+        int local = 42;
+
+        // Error
+        return new CreateRS2(ref local);
     }
 }
 ```
 
-It is important to note that for the purposes of the rule above any use of constructor chaining via `this` is considered a constructor invocation. The result of the chained constructor call is considered to be returning to the original constructor hence *safe-to-escape* rules come into play. That is important in avoiding unsafe examples like the following:
+Constructors that do not have the `[RefFieldsEscape]` annotation may not chain to constructors that do have the annotation. Doing so would effectively hide the capture from the caller and allow for trivial violations of span safety
 
 ```c#
-ref struct RS1
+ref struct RSChain
 {
     ref int _field;
-    public RS1(ref int p)
-    {
-        _field = ref p;
-    }
-}
 
-ref struct RS2
-{
-    RS1 _field;
-    public RS2(RS1 p)
+    [RefFieldsEscape]
+    public RSChain(ref int value)
     {
-        // Okay
-        _field = p;
+        _field = ref value;
     }
 
-    public RS2(ref int i)
-    {
-        // ERROR: The *safe-to-escape* scope of the constructor here is the 
-        // current method scope while the *safe-to-escape* scope of `this` is
-        // outside the current method scope hence this assignment is illegal
-        _field = new RS1(ref i);
-    }
-
-    public RS2(ref int i)  
-        // ERROR: the *safe-to-escape* return of :this the current method scope
-        // but the 'this' parameter has a *safe-to-escape* outside the current
-        // method scope
-        : this(new RS1(ref i))
+    public RSChain(ref int value, string message)
+        // Error: cannot chain to a [RefFieldsEscape] constructor from an unannotated one. The 
+        // capture of `value` by ref is hidden from invocations of this constructor
+        :this(ref int value) 
     {
 
     }
-}
-```
-
-The limiting of the constructor rules to just `ref struct` that directly contain `ref` field is another important compatibility concern. Consider that the majority of `ref struct` defined today indirectly contain `Span<T>` references.  That mean by extension they will indirectly contain `ref` fields once `Span<T>` adopts `ref` fields. Hence it's important to ensure the *safe-to-return* rules of constructors on these types do not change. That is why the restrictions must only apply to types that directly contain a `ref` field.
-
-Example of where this comes into play.
-
-```c#
-ref struct Container
-{
-    LargeStruct _largeStruct;
-    Span<int> _span;
-
-    public Container(in LargeStruct largeStruct, Span<int> span)
-    {
-        _largeStruct = largeStruct;
-        _span = span;
-    }
-}
-```
-
-Much like the `CreateSpan<T>` example before the *safe-to-escape* return of the `Container` constructor is not impacted by the `largeStruct` parameter. If the new constructor rules were applied to this type then it would break compatibility with existing code. The existing rules are also sufficient for existing constructors to prevent them from simulating `ref` fields by storing them into `Span<T>` fields.
-
-```c#
-ref struct RS4
-{
-    Span<int> _span;
-
-    public RS4(Span<int> span)
-    {
-        // Legal today and the rules for this constructor invocation 
-        // remain unchanged
-        _span = span;
-    }
-
-    public RS4(ref int i)
-    {
-        // ERROR. Bullet 1 of the new constructor rules gives this newly created
-        // Span<T> a *safe-to-escape* of the current scope. The 'this' parameter
-        // though has a *safe-to-escape* outside the current method. Hence this
-        // is illegal by assignment rules because it's assigning a smaller scope
-        // to a larger one.
-        _span = new Span(ref i);
-    }
-
-    // Legal today, must remain legal for compat. If the new constructor rules 
-    // applied to 'RS4' though this would be illegal. This is why the new 
-    // constructor rules have a restriction to directly defining a ref field
-    // 
-    // Only ref struct which explicitly opt into ref fields would see a breaking
-    // change here.
-    static RS4 CreateContainer(ref int i) => new RS4(ref i);
 }
 ```
 
@@ -289,7 +256,20 @@ readonly ref struct Span<T>
 }
 ```
 
-This directly exposes the `ref` state inside `Span<T>` and the span safety rules account for this. Whether that was implemented as `ByReference<T>` or `ref` fields is immaterial to those rules. As a part of allowing `ref` fields though we must define their rules such that they fit into the existing consumption rules for `ref struct`. Specifically this must account for the fact that it's legal *today* for a `ref struct` to return its `ref` state as `ref` to the consumer. 
+This directly exposes the `ref` state inside `Span<T>` and the span safety rules account for this. Whether that was implemented as `ByReference<T>` or `ref` fields is immaterial to those rules. This is true even though normal fields cannot be returned by `ref`. Effectively the rules have **always** allowed for the following: 
+
+```c#
+ref struct S
+{
+    int _field1;
+    ref int _field2;
+
+    internal ref int Prop1 => ref _field1;  // Error: can't escape `this` by ref
+    internal ref int Prop2 => ref _field2;  // Okay 
+}
+```
+
+As a part of allowing `ref` fields though we must define their rules such that they fit into the existing consumption rules for `ref struct`. Specifically this must account for the fact that it's legal *today* for a `ref struct` to return its `ref` state as `ref` to the consumer. 
 
 To understand the proposed changes it's helpful to first review the existing rules for method invocation around *ref-safe-to-escape* and how they account for a `ref struct` exposing `ref` state today:
 
@@ -307,12 +287,13 @@ Consider as an example the indexer on `Span<T>` which is returning `ref` fields 
 ref int Examples()
 {
     Span<int> s1 = stackalloc int[5];
-    // ERROR: illegal because the *safe-to-escape* scope of `s1` is the current
+
+    // Error: illegal because the *safe-to-escape* scope of `s1` is the current
     // method scope hence that limits the *ref-safe-to-escape" to the current
     // method scope as well.
     return ref s1[0];
 
-    // SUCCESS: legal because the *safe-to-escape* scope of `s2` is outside
+    // Okay: legal because the *safe-to-escape* scope of `s2` is outside
     // the current method scope hence the *ref-safe-to-escape* is as well
     Span<int> s2 = default;
     return ref s2[0];
@@ -322,10 +303,10 @@ ref int Examples()
 To account for `ref` fields the *ref-safe-to-escape* rules for fields will be adjusted to the following:
 
 > An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
-> - If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
-> - Else if `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
-> - Else if `e` is of a reference type, it is *ref-safe-to-escape* from the enclosing method.
-> - Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
+> 1. If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
+> 2. Else if `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
+> 3. Else if `e` is of a reference type, it is *ref-safe-to-escape* from the enclosing method.
+> 4. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
 
 This explicitly allows for `ref` fields being returned as `ref` from a `ref struct` but not normal fields (that will be covered later). 
 
@@ -338,7 +319,7 @@ ref struct RS
     // Okay: this falls into bullet one above. 
     public ref int Prop1 => ref _refField;
 
-    // ERROR: This is bullet four above and the *ref-safe-to-escape* of `this`
+    // Error: This is bullet four above and the *ref-safe-to-escape* of `this`
     // in a `struct` is the current method scope.
     public ref int Prop2 => ref _field;
 
@@ -478,7 +459,9 @@ struct S1
 Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
 - A `ref` field cannot be declared `static`
-- A `ref` field can only be `ref` assigned in the constructor of the declaring type.
+- A `ref` field can only be `ref` assigned 
+    - in the constructor of the declaring type
+    - when the RHS is known to be a heap location
 - The reference assembly generation process must preserve the presence of a `ref` field inside a `ref struct` 
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
 - The span safety rules for constructors, fields and assignment must be updated as outlined in this document.
