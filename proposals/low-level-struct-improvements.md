@@ -485,7 +485,7 @@ struct S1
 }
 ```
 
-Misc Notes:
+Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
 - A `ref` field cannot be declared `static`
 - A `ref` field can only be `ref` assigned in the constructor of the declaring type.
@@ -495,47 +495,74 @@ Misc Notes:
 - The span safety rules need to include the definition of `ref` values that "refer to the heap". 
 
 ### Provide lifetime annotations
-
-**TODO: break it into sections by annotation**
 The [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md) assigns escape scopes to locations based on their declaration: parameters are *ref-safe-to-escape* to calling method, `this` in a `struct` is *ref-safe-to-escape* within the current method, etc ... These defaults were chosen to make `Span<T>` and `ref` returns work with the predominant coding patterns in .NET.
 
-The lifetime decisions for these locations is not fundamental to correctness. For example parameters could default to *ref-safe-to-escape* to within the current method or `this` in a `struct` could be *ref-safe-to-escape* to the calling method in our span safety rules and it would not make `ref struct` usage unsafe. It would just make it significantly less usable.
-
-While the defaults have allowed broad adoption of `ref struct` within .NET they do create a number of friction points in low level code. These friction points often force developers to resort to using `unsafe` which de-values our `ref struct` efforts. 
-
-One of the most notable friction points in the inability to use `ref` returns within a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly.
+While the defaults have allowed broad adoption of `ref struct` within .NET they do create a number of friction points in low level code. For example the inability to return fields of `struct` by `ref` from instance methods. These friction points often force developers to resort to using `unsafe` which de-values our `ref struct` efforts. 
 
 ```c#
 struct S
 {
     int _field;
 
+    public ref int Prop => Unsafe.AsRef(in _field);
+}
+```
+
+The lifetime decisions for these locations is not fundamental to correctness. For example parameters could default to *ref-safe-to-escape* to within the current method or `this` in a `struct` could be *ref-safe-to-escape* to the calling method in our span safety rules and it would not make `ref struct` usage unsafe. It would just make it significantly less usable.
+
+This, and several other friction points, can be removed if the language provides developers a way to invert the defaults by applying attributes to specific locations. The language can recognize these attributes and simply adjust the lifetime calculation for locations when evaluating span safety.
+
+### RefThisEscapes
+One of the most notable friction points in the inability to return fields by `ref` in instance members of a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly. This reduces the usefulness of `ref` returns in `struct` where it is often the most desired. 
+
+```c#
+struct S
+{
+     _field;
+
     // Error: this, and hence _field, can't return by ref
     public ref int Prop => ref _field;
 }
 ```
 
-Again there is nothing inherently wrong with a `struct` escaping `this` by reference, it is simply the default chosen by the span safety rules. The justification for this rule is that it strikes a balance between the usability of `struct` and `interfaces`. If a `struct` could escape `this` by reference then it would significantly reduce the use of `ref` returns in interfaces.
+The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#struct-this-escape) for this default is reasonable but there is nothing inherently wrong with a `struct` escaping `this` by reference, it is simply the default chosen by the span safety rules. 
+
+To fix this the attribute `System.Runtime.CompilerServices.RefThisEscapesAttribute` will be used to specify that `this` is *ref-safe-to-escape* in the calling method. It can be applied to individual methods or properties in `struct`. When applied to `struct` declaration itself it is treated as if it were applied to all methods / properties in the type. 
 
 ```c#
-interface I1
-{
-    ref int Prop { get; }
-}
-
-struct S1 : I1
+// Option 1 
+struct S
 {
     int _field;
-    public ref int Prop => _ref field;
 
-    // When T is a struct type, like S1 this would end up returning a reference
-    // to the parameter
-    static ref int M<T>(T p) where T : I1 => ref p.Prop;
+    // The ref-safe-to-escape for this is now the calling method hence this is legal
+    [RefThisEscapes]
+    public ref int Prop => ref _field;
+}
+
+// Option 2 
+// The ref-safe-to-escape for this is now the calling method on all members
+[ThisRefEcapes]
+struct S
+{
+    int _field;
+
+    public ref int Prop => ref _field;
 }
 ```
 
-The justification here is reasonable but it also introduces unnecessary friction on `struct` members that don't participate in interface invocations. 
+Detailed Notes:
+- An instance method or property annotated with `[RefThisEscapes]` has *ref-safe-to-escape* of `this` set to the *calling method*
+- A `struct` annotated with `[RefThisEscapes]` has the same effect of annotating every instance method and property with `[RefThisEscapes]`
+- A member annotated with `[RefThisEscapes]` cannot implement an interface.
+- It is an error to use `[RefThisEscapes]` on 
+    - Any type other than a `struct` (although it is legal for all variations like `readonly struct`)
+    - Any member that is not declared on a `struct`
+    - Any `static` member or constructor on a `struct`
 
+### RefFieldEscapes
+
+This flexbxlxty 
 Readers may have noticed that the existing defaults limit the usefulness of `ref` fields. The above section only provides for a `ref` value to be captured and returned from a constructor. No other method can do this because of our existing rules around `ref` capture. 
 
 ```c#
@@ -560,31 +587,6 @@ ref struct MySpan<T>
 
 This, and several other friction points, can be removed if the language provides developers a way to invert the defaults by applying attributes to specific locations. 
 
-The `System.Runtime.CompilerServices.RefThisEscapesAttribute` will be used to specify that `this` is *ref-safe-to-escape* to the calling method. It can be applied to individual methods or properties in `struct`. When applied to `struct` itself it is treated as if it were applied to all methods / properties in the type. 
-
-```c#
-// Option 1 
-struct S
-{
-    int _field;
-
-    // The ref-safe-to-escape for this is now the calling method hence this is legal
-    [RefThisEscapes]
-    public ref int Prop => ref _field;
-}
-
-// Option 2 
-// The ref-safe-to-escape for this is now the calling method on all members
-[ThisRefEcapes]
-struct S
-{
-    int _field;
-
-    public ref int Prop => ref _field;
-}
-```
-
-This flexbxlxty 
 
 **BELOW WILL EVENTUALLY BE DELETED**
 
