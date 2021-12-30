@@ -4,23 +4,23 @@ Low Level Struct Improvements
 ***
 TODO
 types of lifetime capture we need to solve with annotations
-    - methods that capture a `ref` into a `ref` field (true for `ref` parameter or `ref`
-      field of an argument) and that is returned to the caller. Do we annotate the value
-      or the method
-    - `[RefEscapes]` `this` of a `struct` being ref-safe-to-escape (maybe this is a generalized `ref`
-      escape that could be applied to existing `ref` parameter)
-    - `[DoesNotRefEscape]` valuable once we have `ref` fields and we need to distinguish
-      which of the parameters is the captured ones 
-    - `[DoesNotEscape]` used to indicate that a `ref struct` can't escape from a method 
-      and that helps infer lifetime issues
+- methods that capture a `ref` into a `ref` field (true for `ref` parameter or `ref`
+    field of an argument) and that is returned to the caller. Do we annotate the value
+    or the method
+- `[RefEscapes]` `this` of a `struct` being ref-safe-to-escape (maybe this is a generalized `ref`
+    escape that could be applied to existing `ref` parameter)
+- `[DoesNotRefEscape]` valuable once we have `ref` fields and we need to distinguish
+    which of the parameters is the captured ones 
+- `[DoesNotEscape]` used to indicate that a `ref struct` can't escape from a method 
+    and that helps infer lifetime issues
 
 types of lifetime annotations that are not needed
-    - `[Escapes]` this is always true for non `ref struct` values and for a `ref struct`
-      it is the natural default. Can't think of a case where it would be needed
-    - `[DoesNotInput]` today `out` is treated no differently than `ref` and that can cause
-      confusion in places. This could be fixed by an annotation where we don't consider
-      the input of a `out` in lifetime calculation. This is narrow though and don't 
-      see the need to do it.
+- `[Escapes]` this is always true for non `ref struct` values and for a `ref struct`
+    it is the natural default. Can't think of a case where it would be needed
+- `[DoesNotInput]` today `out` is treated no differently than `ref` and that can cause
+    confusion in places. This could be fixed by an annotation where we don't consider
+    the input of a `out` in lifetime calculation. This is narrow though and don't 
+    see the need to do it.
 
 annotations need to be subject to verification. Consider marking a normal parameter
 as `[RefEscapes]` is non-sense and must be a compilation error. Likely need an allow
