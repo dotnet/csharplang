@@ -495,6 +495,8 @@ Misc Notes:
 - The span safety rules need to include the definition of `ref` values that "refer to the heap". 
 
 ### Provide lifetime annotations
+
+**TODO: break it into sections by annotation**
 The [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md) assigns escape scopes to locations based on their declaration: parameters are *ref-safe-to-escape* to calling method, `this` in a `struct` is *ref-safe-to-escape* within the current method, etc ... These defaults were chosen to make `Span<T>` and `ref` returns work with the predominant coding patterns in .NET.
 
 The lifetime decisions for these locations is not fundamental to correctness. For example parameters could default to *ref-safe-to-escape* to within the current method or `this` in a `struct` could be *ref-safe-to-escape* to the calling method in our span safety rules and it would not make `ref struct` usage unsafe. It would just make it significantly less usable.
@@ -558,7 +560,7 @@ ref struct MySpan<T>
 
 This, and several other friction points, can be removed if the language provides developers a way to invert the defaults by applying attributes to specific locations. 
 
-The `System.Runtime.CompilerServices.ThisRefEscapesAttribute` will be used to specify that `this` is *ref-safe-to-escape* to the calling method. It can be applied to individual methods or properties in `struct`. When applied to `struct` itself it is treated as if it were applied to all methods / properties in the type. 
+The `System.Runtime.CompilerServices.RefThisEscapesAttribute` will be used to specify that `this` is *ref-safe-to-escape* to the calling method. It can be applied to individual methods or properties in `struct`. When applied to `struct` itself it is treated as if it were applied to all methods / properties in the type. 
 
 ```c#
 // Option 1 
@@ -567,7 +569,7 @@ struct S
     int _field;
 
     // The ref-safe-to-escape for this is now the calling method hence this is legal
-    [ThisRefEscapes]
+    [RefThisEscapes]
     public ref int Prop => ref _field;
 }
 
@@ -582,9 +584,10 @@ struct S
 }
 ```
 
-
+This flexbxlxty 
 
 **BELOW WILL EVENTUALLY BE DELETED**
+
 One key compatibility scenario that we have to keep in mind when approaching changes here is the following:
 
 ```c#
@@ -606,35 +609,7 @@ class Example
 
 This works because the safety rules for `ref` return today do not take into account the lifetime of `this` (because it can't return a `ref` to internal state). This means that `ref` returns from a `struct` can return outside the enclosing method scope except in cases where there are `ref` parameters or a `ref struct` which is not *safe-to-escape* outside the enclosing method scope.  Hence the solution here is not as easy as allowing `ref` return of fields in non-interface methods.
 
-To remove this friction the language will provide the attribute `[ThisRefEscapes]`.  When this attribute is applied to an instance method, instance property or instance accessor of a `struct` or `ref struct` then the `this` parameter will be considered *ref-safe-to-escape* outside the enclosing method.
-
-This allows for greater flexibility in `struct` definitions as they can begin returning `ref` to their fields. That allows for types like `FrugalList<T>`:
-
-```c#
-struct FrugalList<T>
-{
-    private T _item0;
-    private T _item1;
-    private T _item2;
-
-    public int Count = 3;
-
-    public ref T this[int index]
-    {
-        [ThisRefEscapes]
-        get
-        {
-            switch (index)
-            {
-                case 0: return ref _item1;
-                case 1: return ref _item2;
-                case 2: return ref _item3;
-                default: throw null;
-            }
-        }
-    }
-}
-```
+To remove this friction the language will provide the attribute `[RefThisEscapes]`.  When this attribute is applied to an instance method, instance property or instance accessor of a `struct` or `ref struct` then the `this` parameter will be considered *ref-safe-to-escape* outside the enclosing method.
 
 This will naturally, by the existing rules in the span safety spec, allow for returning transitive fields in addition to direct fields.
 
@@ -646,7 +621,7 @@ struct ListWithDefault<T>
 
     public ref T this[int index]
     {
-        [ThisRefEscapes]
+        [RefThisEscapes]
         get
         {
             if (index >= _list.Count)
@@ -660,15 +635,15 @@ struct ListWithDefault<T>
 }
 ```
 
-Members which contain the `[ThisRefEscapes]` attribute cannot be used to implement interface members. This would hide the lifetime nature of the member at the `interface` call site and would lead to incorrect lifetime calculations.
+Members which contain the `[RefThisEscapes]` attribute cannot be used to implement interface members. This would hide the lifetime nature of the member at the `interface` call site and would lead to incorrect lifetime calculations.
 
 To account for this change the "Parameters" section of the span safety document will be updated to include the following:
 
-- If the parameter is the `this` parameter of a `struct` type, it is *ref-safe-to-escape* to the top scope of the enclosing method unless the method is annotated with `[ThisRefEscapes]` in which case it is *ref-safe-to-escape* outside the enclosing method.
+- If the parameter is the `this` parameter of a `struct` type, it is *ref-safe-to-escape* to the top scope of the enclosing method unless the method is annotated with `[RefThisEscapes]` in which case it is *ref-safe-to-escape* outside the enclosing method.
 
 Misc Notes:
-- A member marked as `[ThisRefEscapes]` can not implement an `interface` method or be `overrides`
-- A member marked as `[ThisRefEscapes]` will be emitted with a `modreq` on that attribute.
+- A member marked as `[RefThisEscapes]` can not implement an `interface` method or be `overrides`
+- A member marked as `[RefThisEscapes]` will be emitted with a `modreq` on that attribute.
 - The `RefEscapesAttribute` will be defined in the `System.Runtime.CompilerServices` namespace.
 
 ### Safe fixed size buffers
@@ -689,12 +664,12 @@ Accessing a `fixed` buffer without an indexer has no natural type however it is 
 
 The resulting `Span<T>` instance will have a length equal to the size declared on the `fixed` buffer. The *safe-to-escape* scope of the returned value will be equal to the *safe-to-escape* scope of the container.
 
-For each `fixed` declaration in a type where the element type is `T` the language will generate a corresponding `get` only indexer method whose return type is `ref T`. The indexer will be annotated with the `[ThisRefEscapes]` attribute as the implementation will be returning fields of the declaring type. The accessibility of the member will match the accessibility on the `fixed` field.
+For each `fixed` declaration in a type where the element type is `T` the language will generate a corresponding `get` only indexer method whose return type is `ref T`. The indexer will be annotated with the `[RefThisEscapes]` attribute as the implementation will be returning fields of the declaring type. The accessibility of the member will match the accessibility on the `fixed` field.
 
 For example, the signature of the indexer for `CharBuffer.Data` will be the following:
 
 ```c#
-[ThisRefEscapes]
+[RefThisEscapes]
 internal ref char <>DataIndexer(int index) => ...;
 ```
 
@@ -860,12 +835,12 @@ For example the last line of calculating *safe-to-escape* of returns will change
 
 Misc Notes:
 - The  `DoesNotEscapeAttribute` will be defined in the `System.Runtime.CompilerServices` namespace.
-- The `DoesNotEscapeAttribute` cannot be combined with the `[ThisRefEscapes]` attribute, doing so results in an error.
+- The `DoesNotEscapeAttribute` cannot be combined with the `[RefThisEscapes]` attribute, doing so results in an error.
 - The `DoesNotEscapeAttribute` will be emitted as a `modreq`
 ## Considerations
 
 ### Keywords vs. attributes
-This design calls for using attributes to annotate the new lifetime rules for `struct` members. This also could've been done just as easily with contextual keywords. For instance: `scoped` and `escapes` could have been used instead of `DoesNotEscape` and `ThisRefEscapes`.
+This design calls for using attributes to annotate the new lifetime rules for `struct` members. This also could've been done just as easily with contextual keywords. For instance: `scoped` and `escapes` could have been used instead of `DoesNotEscape` and `RefThisEscapes`.
 
 Keywords, even the contextual ones, have a much heavier weight in the language than attributes. The use cases these features solve, while very valuable, impact a small number of developers. Consider that only a fraction of high end developers are defining `ref struct` instances and then consider that only a fraction of those developers will be using these new lifetime features.  That doesn't seem to justify adding a new contextual keyword to the language.
 
@@ -982,6 +957,36 @@ This particular snippet requires unsafe because it runs into issues with passing
 This snippet wants to mutate a parameter by escaping elements of the data. The escaped data can be stack allocated for efficiency. Even though the parameter is not escaped the compiler assigns it a *safe-to-escape* scope of outside the enclosing method because it is a parameter. This means in order to use stack allocation the implementation must use `unsafe` in order to assign back to the parameter after escaping the data.
 
 ### Fun Samples
+
+#### Frugal list
+
+```c#
+struct FrugalList<T>
+{
+    private T _item0;
+    private T _item1;
+    private T _item2;
+
+    public int Count = 3;
+
+    public ref T this[int index]
+    {
+        [RefThisEscapes]
+        get
+        {
+            switch (index)
+            {
+                case 0: return ref _item1;
+                case 1: return ref _item2;
+                case 2: return ref _item3;
+                default: throw null;
+            }
+        }
+    }
+}
+```
+
+#### Stack based linked list
 
 ```c#
 ref struct StackLinkedListNode<T>
