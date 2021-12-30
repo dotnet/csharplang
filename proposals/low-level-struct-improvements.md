@@ -12,11 +12,10 @@ As these features have gained traction in the .NET ecosystem developers, both in
 This proposal aims to address many of these concerns by building on top of our existing low level features. Specifically it aims to:
 
 - Allow `ref struct` types to declare `ref` fields.
-- Allow the runtime to fully define `Span<T>` using the C# type system and 
-remove special case type like `ByReference<T>`
+- Allow the runtime to fully define `Span<T>` using the C# type system and remove special case type like `ByReference<T>`
 - Allow `struct` types to return `ref` to their fields.
-- Allow the declaration of safe `fixed` buffers for managed and unmanaged types
-in `struct`
+- Allow runtime to remove `unsafe` uses caused by limitations of lifetime defaults
+- Allow the declaration of safe `fixed` buffers for managed and unmanaged types in `struct`
 
 ## Detailed Design 
 The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md).  This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.
@@ -538,11 +537,13 @@ The justification here is reasonable but it also introduces unnecessary friction
 Readers may have noticed that the existing defaults limit the usefulness of `ref` fields. The above section only provides for a `ref` value to be captured and returned from a constructor. No other method can do this because of our existing rules around `ref` capture. 
 
 ```c#
-ref struct MySpan<T> {
+ref struct MySpan<T>
+{
     ref T _field;o
 
     // Legal and returns a MySpan<T> as outlined in this document
-    public MySpan(ref T field) {
+    public MySpan(ref T field)
+    {
         _field = ref field
     }
 
@@ -558,7 +559,6 @@ ref struct MySpan<T> {
 This, and several other friction points, can be removed if the language provides developers a way to invert the defaults by applying attributes to specific locations. 
 
 The `System.Runtime.CompilerServices.ThisRefEscapesAttribute` will be used to specify that `this` is *ref-safe-to-escape* to the calling method. It can be applied to individual methods or properties in `struct`. When applied to `struct` itself it is treated as if it were applied to all methods / properties in the type. 
-
 
 ```c#
 // Option 1 
@@ -581,6 +581,8 @@ struct S
     public ref int Prop => ref _field;
 }
 ```
+
+
 
 **BELOW WILL EVENTUALLY BE DELETED**
 One key compatibility scenario that we have to keep in mind when approaching changes here is the following:
@@ -869,6 +871,21 @@ Keywords, even the contextual ones, have a much heavier weight in the language t
 
 This does mean that program correctness will be defined in terms of attributes though. That is a bit of a gray area for the language side of things but an established pattern for the runtime. 
 
+### Why isn't assignability to ref field a scope?
+It may seem attractive to think of the ability to assign to a `ref` field as just another scope concept instead of an orthogonal concept. Essentially *assignable to field* as an escape scope between *heap* and *calling method*. This falls a part though when looking at practical examples. Consider for example the following: 
+
+```c#
+void M(ref int parameter)
+{
+    int local = 0;
+    Span<T> span = new(ref local);
+}
+```
+
+The design explicitly wants to ensure this is legal. Yet the *ref-safe-to-escape* scope of `local` is *current method* and it can't be anything greater. At the same time it must be assignable to a `ref` field. Further we need to ensure that `span` is itself assignable to a `ref` field of a different type and it also has *current method* as the *ref-safe-to-escape* scope.
+
+The only practical way to represent whether a location can assign to a `ref` field is as a separate concept from escape scopes.
+
 ## Open Issues
 
 ### Allow fixed buffer locals
@@ -1034,9 +1051,8 @@ intersection of annotations and the `[InlineArray]` attribute. Maybe it implies 
 / or requires `[RefEscapes]`
 https://github.com/dotnet/runtime/issues/61135
 
-- convert cs to c# in the code blocks
-- ensure the language is consistent for *to the calling method* and *within the current method*
+X convert cs to c# in the code blocks
+- ensure the language is consistent for *to the calling method* and *within the current method*, *to the heap*
 - consider naming the compat problem
 - how do we mark the return of a `ref` field ctor as not returnable in the compat case. Maybe the attributes save us here because 
-
-***
+X need a section to define the scopes: within method, to calling method, to ref field  (nope this is wrong cause its'n )
