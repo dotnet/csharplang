@@ -803,6 +803,39 @@ The only practical way to represent whether a location can assign to a `ref` fie
 
 ## Open Issues
 
+### Take the breaking change
+Consider for a minute a design where the compat problem was approached from the other direction. Effectively make it such that every method was implicitly `[RefFieldsEscape]` and then have an attribute that restores the span safety rules in place today. Say `[RefFieldDoesNotEsacpe]`. 
+
+This would be a breaking change and it's easy to construct code samples that trigger an error when upgrading to a new version of C# (as demonstrated [here](#new-span-challenges)). It's hard to determine though how prevelant these types of patterns are. Essentially methods which have both the following attributes:
+
+- Have a `Span<T>` or `ref struct` which has a `Span<T>` as
+    - The return type 
+    - A `ref` or `out` parameter
+- Take a `ref` or `in` parameter 
+
+If this is very low then it's possible that a breaking change could be acceptable here. 
+
+The challenge though is the breaking change and the fix for the breaking change are possible in different libraries. Consider the following:
+
+```c#
+// Widget.Library.dll
+Span<int> CreateSpan(ref int i)
+{
+    ...
+    return new Span<int>(new int[i]);
+}
+
+// App.exe
+Span<int> Method()
+{
+    int local = 42;
+    var span = new Span<int>(ref local);
+    return span;
+}
+```
+
+Imagine if the order here is `Widget.Library.dll` moved to C# 11 first. That implicitly moved `CreateSpan` to `[RefFieldEscapes]` behavior silently. The code was legal before hence the move to the new rules will silently succeed. A new version is shipped to NuGet.org. Now the App.exe author upgrades to the new version and suddenly they cannot compile. The compiler operating by the new rules says `span` is only *safe-to-escape* to the current method and flags the `return` as an error. The author of App.exe is stuck because the fix is for `CreateSpan` to be marked as `[RefFieldDoesNotEscape]`. The only recourse is `unsafe` code.
+
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
 
