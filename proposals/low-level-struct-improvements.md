@@ -53,37 +53,39 @@ Consider the following method signature:
 Span<T> CreateSpan<T>(ref T parameter)
 {
     // The implementation of this method is irrelevant when considering the lifetime of the 
-    // returned Span<T>. The rules disallow capture of `parameter` hence the return is always
-    // safe-to-escape to the calling method
+    // returned Span<T>. The rules disallow capture of `parameter` hence the return of 
+    // CreateSpan<T> is always safe-to-escape to the calling method
 }
 ```
 
-By the existing span safety rules the return of an invocation of this method always has a *safe-to-escape* value of *calling method*. That is because in the span safety document `ref` fields do not exist and hence there is no way for the return to capture `parameter` hence there is no constraint on the return. 
-
-The implementation of the method is completely irrelevant here, which is why it's omitted from the sample, because there is simply no way for the `ref` to be captured. This means no matter how this method is called the return is *safe-to-escape* to the *calling method*.
+By the existing span safety rules the return of an invocation of this method always has a //*safe-to-escape* value of *calling method*. That is because in the span safety document `ref` fields do not exist and hence there is no way for the return to capture `parameter` hence there is no constraint on the return.  The implementation of the method is completely irrelevant here, which is why it's omitted from the sample, because there is simply no way for the `ref` to be captured. This means no matter how this method is called the return is *safe-to-escape* to the *calling method*.
 
 ```c#
 Span<T> CompatExample(ref int p)
 {
+    // Okay
     int local = 42;
     return CreateSpan<int>(ref local);
 
+    // Okay
     Span<T> span = stackalloc int[1];
     return CreateSpan<int>(ref span[0]);
 
+    // Okay
     int[] array = new int[42];
     return CreatSpan(ref array[0]);
 }
 ```
 
-All of the above `return` statements are legal by our existing rules because the return of `CreateSpan` is always *safe-to-escape* to the *calling method*. The challenge in this proposal, which comes up many times, is they **must** remain legal in the version of the language which implements these features and / or when `Span<T>` moves to using `ref` fields.  The above patterns exist all over .NET code and they simply cannot become errors when moving to a new language version. 
+All of the above `return` statements are legal by our existing rules because the return of `CreateSpan` is always *safe-to-escape* to the *calling method*. The challenge in this proposal, which comes up many times, is they **must** remain legal in the version of the language which implements these features and / or when `Span<T>` moves to using `ref` fields. The above patterns can legally exist today and cannot become errors when moving to a new language version. 
 
 Further the design must ensure that once `ref` fields exist that implementations of `CreateSpan<T>` cannot suddenly begin capture the input arguments by `ref`. For example: 
 
 ```c#
 Span<T> CreateSpan<T>(ref T parameter)
 {
-    // Error: if this works it breaks the above compat requirements.
+    // Error: if this works it breaks the above compat requirements because the implementation
+    // is now capturing `ref` state.
     return Span<T>(ref parameter);
 }
 ```
@@ -141,8 +143,6 @@ Next the rules for method invocation will change as follows when the target meth
     - The existing *safe-to-escape* calculation for method invocation
     - All of the *ref-safe-to-escape* values of `ref` and `in` arguments
 
-**TODO: think through out parameters**
-
 The design of `[RefFieldEscape]` will be discussed in detail [later in the propsal](#reffieldescapes).
 
 Let's examine these rules in the context of samples to better understand their impact and how they maintain the required compat considerations.
@@ -178,37 +178,38 @@ ref struct RS
 
     static RS CreateRS(ref int parameter)
     {
+        // Error: The RS(ref int) ctor is annotated as [RefFieldEscapes] however CreateRS is 
+        // not annotated as [RefFieldEscapes] hence the safe-to-escape scope of `rs` is the
+        // current method
         RS rs = new RS(ref parameter);
-
-        // Error: the CreateRS method is not annotated as [RefFieldEscapes] hence the
-        // safe-to-escape scope of `rs` is the current method.
         return rs;
 
-        // The RS(int[]) constructor is NOT marked as [RefFieldEscapes] hence it cannot capture
-        // any arguments by ref. It is implicitly safe-to-escape to calling method by all of our
-        // existing rules
+        // Okay: The RS(int[]) constructor is NOT marked as [RefFieldEscapes] hence it 
+        // cannot capture any arguments by ref. It is implicitly safe-to-escape to calling 
+        // method by all of our existing rules
         return new RS(new int[1]);
     }
 
     [RefFieldEscapes]
     static RS CreateRS2(ref int parameter)
     {
+        // Okay: Both CreateRS2 and RS(ref int) are annotated as [RefFieldEscapes] hence the 
+        // safe-to-escape scope of the return is is the min of the ref-safe-to-escape scope of 
+        // the ref / in arguments. In that case this is simply `parameter` which has a
+        // ref-safe-to-escape scope of the calling method
         RS rs = new RS(ref parameter);
-
-        // Okay: the CreateRS2 method is annotated as [RefFieldEscapes] hence the safe-to-escape
-        // scope of `rs` is the min of the ref-safe-to-escape scope of all ref / in arguments. In
-        // this case that is simply `parameter`
         return rs;
 
         int local = 42;
 
-        // Error: the ref-safe-to-escape scope of `local`is the current method hence the 
-        // safe-to-escape scope of the constructor return is also the same.
+        // Error: This is the same analysis as above but in this case the ref-safe-to-escape 
+        // scope of `local`is the current method hence the safe-to-escape scope of the 
+        // constructor return is also the same.
         return new RS(ref local);
 
-        // The RS(int[]) constructor is NOT marked as [RefFieldEscapes] hence it cannot capture
-        // any arguments by ref. It is implicitly safe-to-escape to calling method by all of our
-        // existing rules
+        // Okay: The RS(int[]) constructor is NOT marked as [RefFieldEscapes] hence it cannot 
+        // capture any arguments by ref. It is implicitly safe-to-escape to calling method by
+        // all of our existing rules
         return new RS(new int[1]);
     }
 
@@ -218,11 +219,10 @@ ref struct RS
     [RefFieldEscapes] 
     static RS CreateRS3(ref int parameter)
     {
-        RS rs = new CreateRS2(ref parameter);
-
         // Okay: This method has [RefFieldEscapes] hence the safe-to-escape of `rs` is the minimim
         // of the ref-safe-to-escape of the arguments. In this case that is `parameter` which is 
         // to the calling method
+        RS rs = new CreateRS2(ref parameter);
         return rs;
 
         int local = 42;
@@ -370,7 +370,7 @@ ref struct RS
         RS local2 = CreateRS();
         return ref local2.Prop1;
 
-        // ERROR: the *safe-to-escape* of `local4` here is the current method 
+        // Error: the *safe-to-escape* of `local4` here is the current method 
         // scope by the revised constructor rules. This falls into bullet two 
         // above and hence based on that allowed scope.
         int local3 = 42;
@@ -408,7 +408,7 @@ ref struct SmallSpan
         // of 's' hence most assignment rules would allow it.
         s._field = ref i;
 
-        // ERROR: this must be disallowed for the exact same reasons we can't 
+        // Error: this must be disallowed for the exact same reasons we can't 
         // return a Span<T> wrapping the parameter: the consumption rules
         // believe such state smuggling cannot exist
         return s;
@@ -489,16 +489,7 @@ The [span safety document](https://github.com/dotnet/csharplang/blob/master/prop
 
 While the defaults have allowed broad adoption of `ref struct` within .NET they do create a number of friction points in low level code. For example the inability to return fields of `struct` by `ref` from instance methods. These friction points often force developers to resort to using `unsafe` which de-values our `ref struct` efforts. 
 
-```c#
-struct S
-{
-    int _field;
-
-    public ref int Prop => Unsafe.AsRef(in _field);
-}
-```
-
-The lifetime decisions for these locations is not fundamental to correctness. For example parameters could default to *ref-safe-to-escape* to within the current method or `this` in a `struct` could be *ref-safe-to-escape* to the calling method in our span safety rules and it would not make `ref struct` usage unsafe. It would just make it significantly less usable.
+The lifetime defaults for these locations is not fundamental to correctness. For example parameters could default to *ref-safe-to-escape* to within the current method or `this` in a `struct` could be *ref-safe-to-escape* to the calling method in our span safety rules and it would not make `ref struct` usage unsafe. It would simply impact the usability of the resulting feature.
 
 This, and several other friction points, can be removed if the language provides developers a way to invert the defaults by applying attributes to specific locations. The language can recognize these attributes and simply adjust the lifetime calculation for locations when evaluating span safety.
 
@@ -517,7 +508,7 @@ struct S
 
 The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#struct-this-escape) for this default is reasonable but there is nothing inherently wrong with a `struct` escaping `this` by reference, it is simply the default chosen by the span safety rules. 
 
-To fix this the attribute `System.Runtime.CompilerServices.RefThisEscapesAttribute` will be used to specify that `this` is *ref-safe-to-escape* in the calling method. It can be applied to individual methods or properties in `struct`. When applied to `struct` declaration itself it is treated as if it were applied to all methods / properties in the type. 
+To fix this the attribute `System.Runtime.CompilerServices.RefThisEscapesAttribute` will be used to specify that `this` is *ref-safe-to-escape* to the calling method. It can be applied to individual methods or properties in `struct`. When applied to `struct` declaration itself it is treated as if it were applied to all methods / properties in the type. 
 
 ```c#
 // Option 1 
@@ -578,11 +569,11 @@ Detailed Notes:
     - Any `static` member or constructor on a `struct`
 
 #### RefFieldEscapes
-Methods that return `ref struct` that capture `ref` parameters must declare that they do so. Otherwise it would violate our [compat requirements](#compat-considerations).  This will be done by annotating such methods with `System.Runtime.CompilerServices.RefFieldEscapesAttribute`. 
+Methods that return `ref struct` that capture `ref` parameters as fields must declare that they do so. Otherwise it would violate our [compat requirements](#compat-considerations).  This will be done by annotating such methods with `System.Runtime.CompilerServices.RefFieldEscapesAttribute`. 
 
 This attribute can be applied to methods, constructors and operators. Applying to any other member will be an error. 
 
-The semantics of this attribute, and how it impacts span safety, are described [above](#ref-fields-escape)
+The semantics of this attribute, and how it impacts span safety rules, are described [above](#ref-fields-escape)
 
 #### DoesNotEscape
 One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method* and in the case of `ref` parameters also *ref-safe-to-escape* to the *calling method*. These are sensible defaults because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of `ref` and `ref struct` and these defaults can cause friction with other parts of the span safet rules.
@@ -641,7 +632,7 @@ class C
         span[1] = 'o';
         span[2] = 'g';
 
-        // Error: The *safe-to-escape* of `span` is the current method scope 
+        // Error: The safe-to-escape of `span` is the current method scope 
         // while `reader` is outside the current method scope hence this fails
         // by the above rule.
         if (reader.TextEquals(span)
@@ -664,7 +655,7 @@ void WriteData(ReadOnlySpan<char> data)
         Span<char> buffer = stackalloc char[256];
         Escape(data, buffer, out var length);
 
-        // Error: Cannot assign `buffer` to `data` here as the *safe-to-escape*
+        // Error: Cannot assign `buffer` to `data` here as the safe-to-escape
         // scope of `buffer` is to the current method scope while `buffer` is
         // outside the current method scope
         data = buffer.Slice(0, length);
@@ -683,16 +674,16 @@ class C
 {
     static Span<int> M1(Span<int> p1, [DoesNotEscape] Span<int> p2)
     {
-        // Okay: the *safe-to-escape* here is still outside the enclosing scope
+        // Okay: the safe-to-escape here is still outside the enclosing scope
         // of the current method.
         return p1; 
 
-        // Error: the [DoesNotEscape] attribute changes the *safe-to-escape* 
+        // Error: the [DoesNotEscape] attribute changes the safe-to-escape*
         // to be limited to the current method scope. Hence it cannot be 
         // returned
         return p2; 
 
-        // Error: `local` has the same *safe-to-escape* as `p2` hence it cannot
+        // Error: `local` has the same safe-to-escape as `p2` hence it cannot
         // be returned.
         Span<int> local = p2;
         return p2; 
@@ -717,7 +708,7 @@ ref struct S
         // of the current method and hence the same as the receiver.
         _field = p1;
 
-        // ERROR: the [DoesNotEscape] attribute changes the *safe-to-escape* 
+        // Error: the [DoesNotEscape] attribute changes the *safe-to-escape* 
         // to be limited to the current method scope. Hence it cannot be 
         // assigned to a receiver than has a *safe-to-escape* scope outside the 
         // current method.
@@ -739,7 +730,6 @@ Detailed Notes:
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
 
 ```c#
-[RefThisEscapes]
 internal struct CharBuffer
 {
     internal char Data[128];
@@ -752,7 +742,7 @@ When indexing into a `fixed` buffer of type `T` the `readonly` state of the cont
 
 Accessing a `fixed` buffer without an indexer has no natural type however it is convertible to `Span<T>` types. In the case the container is `readonly` the buffer is implicitly convertible to `ReadOnlySpan<T>`, else it can implicitly convert to `Span<T>` or `ReadOnlySpan<T>` (the `Span<T>` conversion is considered *better*). 
 
-The resulting `Span<T>` instance will have a length equal to the size declared on the `fixed` buffer. The *safe-to-escape* scope of the returned value will be equal to the *safe-to-escape* scope of the container.
+The resulting `Span<T>` instance will have a length equal to the size declared on the `fixed` buffer. The *safe-to-escape* scope of the returned value will be equal to the *safe-to-escape* scope of the container, just as it would if the backing data was accessed as a field.
 
 For each `fixed` declaration in a type where the element type is `T` the language will generate a corresponding `get` only indexer method whose return type is `ref T`. The indexer will be annotated with the `[RefThisEscapes]` attribute as the implementation will be returning fields of the declaring type. The accessibility of the member will match the accessibility on the `fixed` field.
 
@@ -771,9 +761,7 @@ This also has the added benefit that it will make `fixed` buffers easier to cons
 
 There will also be a by value `get` and `set` accessor generated for every 
 
-The backing storage for the buffer will be generated using the `[InlineArray]` attribute. This is a mechanism discussed in [isuse 12320](https://github.com/dotnet/runtime/issues/12320) which allows specifically for the case of efficiently declaring sequence of fields of the same type.
-
-This particular issue is still under active discussion and the expectation is that the implementation of this feature will follow however that discussion goes.
+The backing storage for the buffer will be generated using the `[InlineArray]` attribute. This is a mechanism discussed in [isuse 12320](https://github.com/dotnet/runtime/issues/12320) which allows specifically for the case of efficiently declaring sequence of fields of the same type. This particular issue is still under active discussion and the expectation is that the implementation of this feature will follow however that discussion goes.
 
 ## Considerations
 
