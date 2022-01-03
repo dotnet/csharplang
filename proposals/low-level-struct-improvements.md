@@ -9,7 +9,7 @@ Earlier versions of C# added a number of low level performance features to the l
 
 As these features have gained traction in the .NET ecosystem developers, both internal and external, have been providing us with information on remaining friction points in the ecosystem. Places where they still need to drop to `unsafe` code to get their work, or require the runtime to special case types like `Span<T>`. 
 
-Today `Span<T>` is accomplished by using the `internal` type `ByReferenec<T>` which the runtime effectively treats as a `ref` field. This provides the benefit of `ref` fields but with the downside that the language provides no safety verification for it, as it does for other uses of `ref`. Further only dotnet/runtime can use this type as it's `internal`, so 3rd parties can not design their own primitives based on `ref` fields. Part of the [motivation for this work](https://github.com/dotnet/runtime/issues/32060) is to remove `ByReference<T>` and use proper `ref` fields in all code bases. 
+Today `Span<T>` is accomplished by using the `internal` type `ByReference<T>` which the runtime effectively treats as a `ref` field. This provides the benefit of `ref` fields but with the downside that the language provides no safety verification for it, as it does for other uses of `ref`. Further only dotnet/runtime can use this type as it's `internal`, so 3rd parties can not design their own primitives based on `ref` fields. Part of the [motivation for this work](https://github.com/dotnet/runtime/issues/32060) is to remove `ByReference<T>` and use proper `ref` fields in all code bases. 
 
 This proposal plans to address these issues by building on top of our existing low level features. Specifically it aims to:
 
@@ -143,7 +143,7 @@ Next the rules for method invocation will change as follows when the target meth
     - The existing *safe-to-escape* calculation for method invocation
     - All of the *ref-safe-to-escape* values of `ref` and `in` arguments
 
-The design of `[RefFieldEscape]` will be discussed in detail [later in the propsal](#reffieldescapes).
+The design of `[RefFieldEscape]` will be discussed in detail [later in the proposal](#reffieldescapes).
 
 Let's examine these rules in the context of samples to better understand their impact and how they maintain the required compat considerations.
 
@@ -236,7 +236,7 @@ ref struct RS
 
 The samples here have the same patterns as the [compat considerations](#compat-considerations) above. This means it will allow the introduction of `ref` fields without breaking existing code.
 
-Constructor chaining needs to consider these new rules as well. When the original constructor calls a chained constructor via `:this(...)` the chained constructor effectively escapes from the original. That means a chained constructor call is olny legal if the *safe-to-escape* value is not smaller than the original constructor one. This will be accomplished with the following rules:
+Constructor chaining needs to consider these new rules as well. When the original constructor calls a chained constructor via `:this(...)` the chained constructor effectively escapes from the original. That means a chained constructor call is only legal if the *safe-to-escape* value is not smaller than the original constructor one. This will be accomplished with the following rules:
 
 - If the chained constructor has `[RefFieldEscapes]` 
     - If the original constructor has `[RefFieldEscapes]` then no additional checking is needed 
