@@ -81,12 +81,31 @@ All of the above `return` statements are legal by our existing rules because the
 
 Further the design must ensure that once `ref` fields exist that implementations of `CreateSpan<T>` cannot suddenly begin capture the input arguments by `ref`. For example: 
 
+<a name="new-span-challenges"></a>
+
 ```c#
 Span<T> CreateSpan<T>(ref T parameter)
 {
-    // Error: if this works it breaks the above compat requirements because the implementation
-    // is now capturing `ref` state.
-    return Span<T>(ref parameter);
+    // This will create a length one Span<T> over the value referred to by `parameter`.
+    // Effectively `span[0]` and `parameter` refer to the same location. 
+    Span<T> span = new Span<T>(ref parameter);
+
+    // Error: this must be illegal because our existing span safety rules assume the returned
+    // Span<T> cannot capture `parameter`. Existing code could be using `CreateSpan(ref someLocal)`
+    // and passing the returned Span<T> to the caller. That code is legal today and this 
+    // proposal should not introduce new errors when calling CreateSpan<T>.
+    //
+    // Another way of thinking about this sample is that it can be safely done. It is only
+    // returning references to values that live beyond this method call. But our existing
+    // rules hide that this could be happening and callers do not account for it.
+    return span;
+
+    int local = 42;
+
+    // Error: this is fundamentally unsafe because the created Span<T> is referring to 
+    // locals in the current stack from. This is a dangling reference. No rule change 
+    // is going to make this legal.
+    return new Span<int>(ref local);
 }
 ```
 
@@ -102,28 +121,7 @@ The language will allow developers to declare `ref` fields inside of a `ref stru
 
 The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. However this section of the proposal is quite involved. The reason is to make sure the reader understands both the new rules and **why** they were chosen. There are a number of subtle interactions between `ref` fields and our [compat considerations](#compat-considerations) that are easy to miss. This section is meant to call these out and explain how they fit into the chosen rules.
 
-The [new Span<T> definition](#new-span) also reveals several challenges that must be resolved for the lifetime of types that contain `ref` fields. They must both take into account the lifetime of captured values as well as the compat considerations.
-
-```c#
-Span<int> CreatingAndReturningSpan(ref int parameter)
-{
-    int local = 42;
-
-    // This must be an error because the created Span<T> is storing a reference to the 
-    // stack. It cannot be safely returned.
-    return new Span<int>(ref local);
-
-    // This must be an error because of the compat issues of the existing span safety 
-    // rules.
-    return new Span<int>(ref parameter);
-
-    // This should be legal. There is no safety issue here nor is there any compat issue
-    // as the created Span<T> only maintains references to the heap. It is always safe 
-    // to return
-    int[] array = new int[42];
-    return new Span<int>(ref array[0]);
-}
-```
+The [new Span<T> definition](#new-span) also reveals several [challenges](#new-span-challenges) that must be resolved for the lifetime of types that contain `ref` fields. They must both take into account the lifetime of captured values as well as the compat considerations.
 
 The rules we define for `ref` fields must ensure the `Span<T>` constructor properly restricts the *safe-to-escape* scope of constructed objects in the cases it captures `ref` state. At the same time it must ensure that we don't break the existing consumption rules for methods like `CreateSpan<T>`. 
 
