@@ -84,6 +84,19 @@ Further the design must ensure that once `ref` fields exist that implementations
 <a name="new-span-challenges"></a>
 
 ```c#
+Span<int> UseSpan()
+{
+    // This code is 100% legal and safe in C# today. The span safety rules and .NET runtime 
+    // ensure that CreateSpan **cannot** capture the parameter in the returned Span<T>. Hence
+    // the result is always returnable. 
+    // 
+    // The rules created for ref fields must ensure this remains legal else it becomes a 
+    // breaking change when moving to the new compiler.
+    int local = 42;
+    Span<int> span = CreateSpan(ref local);
+    return span;
+}
+
 Span<T> CreateSpan<T>(ref T parameter)
 {
     // This will create a length one Span<T> over the value referred to by `parameter`.
@@ -99,13 +112,6 @@ Span<T> CreateSpan<T>(ref T parameter)
     // returning references to values that live beyond this method call. But our existing
     // rules hide that this could be happening and callers do not account for it.
     return span;
-
-    int local = 42;
-
-    // Error: this is fundamentally unsafe because the created Span<T> is referring to 
-    // locals in the current stack from. This is a dangling reference. No rule change 
-    // is going to make this legal.
-    return new Span<int>(ref local);
 }
 ```
 
