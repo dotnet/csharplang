@@ -60,6 +60,9 @@ Span<T> CreateSpan<T>(ref T parameter)
 
 By the existing span safety rules the return of an invocation of this method always has a //*safe-to-escape* value of *calling method*. That is because in the span safety document `ref` fields do not exist and hence there is no way for the return to capture `parameter` hence there is no constraint on the return.  The implementation of the method is completely irrelevant here, which is why it's omitted from the sample, because there is simply no way for the `ref` to be captured. This means no matter how this method is called the return is *safe-to-escape* to the *calling method*.
 
+This is not a hypothetical pattern, there are APIs today in .NET which have this basic structure. Very likely in customer code as well. One such example is [AsnDecoder.ReadEnumeratedBytes](https://github.com/dotnet/runtime/blob/3580ba795d92444e99fe5a5bfa4883458a0d4ac5/src/libraries/System.Formats.Asn1/src/System/Formats/Asn1/AsnDecoder.Enumerated.cs#L48-L52). 
+
+
 ```c#
 Span<T> CompatExample(ref int p)
 {
@@ -145,7 +148,7 @@ Next the rules for method invocation will change as follows when the target meth
     - Else the *safe-to-escape* scope is to the *current method*
 - Else the *safe-to-escape* scope of the return is the minimum of 
     - The existing *safe-to-escape* calculation for method invocation
-    - All of the *ref-safe-to-escape* values of `ref` and `in` arguments
+    - All of the *ref-safe-to-escape* values of `ref`, `in` and `out` arguments
 
 The design of `[RefFieldEscape]` will be discussed in detail [later in the proposal](#reffieldescapes).
 
@@ -811,7 +814,7 @@ This would be a breaking change and it's easy to construct code samples that tri
 - Have a `Span<T>` or `ref struct` which has a `Span<T>` as
     - The return type 
     - A `ref` or `out` parameter
-- Take a `ref` or `in` parameter 
+- Take a `ref`, `in` or `out` parameter 
 
 If this is very low then it's possible that a breaking change could be acceptable here. 
 
