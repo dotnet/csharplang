@@ -41,7 +41,7 @@ Overview of meetings and agendas for 2022
 
 ## Jan 3, 2022
 
-[C# Language Design Notes for January 3rd, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2021-01-03.md)
+[C# Language Design Notes for January 3rd, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-03.md)
 
 1. Slicing assumptions in list patterns, revisited
 2. Parameterless struct constructors, revisited
