@@ -33,7 +33,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Jan 5, 2022
 
-- Required properties (Fred - full meeting) https://github.com/dotnet/csharplang/pull/5566
+- Required properties (Fred - full meeting) https://github.com/dotnet/csharplang/blob/main/proposals/required-members.md#open-questions
 
 # C# Language Design Notes for 2022
 
