@@ -265,7 +265,7 @@ for the generic instantiation to ensure that the requirements are satisfied.
 
 ### Overriding, Hiding, and Inheriting
 
-It is an error to mark a member required if the member is not at least as visible as the containing member's type. This means the following cases are not allowed:
+It is an error to mark a member required if the member is less accessible than the member's containing type. This means the following cases are not allowed:
 
 ```cs
 interface I
@@ -294,7 +294,7 @@ When overriding a `required` member, the `required` keyword must be included on 
 unrequiring a property with an override in the future, we have design space to do so.
 
 Overrides are allowed to mark a member `required` where it was not `required` in the base type. A member so-marked is added to the required members
-list of derived type.
+list of the derived type.
 
 ### Metadata Representation
 
@@ -328,23 +328,23 @@ the string `"Types with required members are not supported in this version of yo
 any older compilers from using these constructors. We don't use a `modreq` here because it is a goal to maintain binary compat: if the last `required`
 property was removed from a type, the compiler would no longer synthesize this `modreq`, which is a binary-breaking change and all consumers would
 need to be recompiled. A compiler that understands `required` members will ignore this obsolete attribute. Note that members can come from base types
-as well: even there are no new `required` members in the current type, if any base type has `required` members, this `Obsolete` attribute will be
+as well: even if there are no new `required` members in the current type, if any base type has `required` members, this `Obsolete` attribute will be
 generated. If the constructor already has an `Obsolete` attribute, no additional attribute will be generated. If a by-ref-like type also has `required`
 members, the generated `Obsolete` attribute will reference the `required` error message, under the assumption that if a compiler is new enough to
-understand `required` properties, it will also understand by-ref-like-types.
+understand `required` properties, it will also understand by-ref-like types.
 
-To build the full list of all `required` members for a given type T, including all base types, all the `RequiredMembersAttribute`s from T and its
-base type Tb (recursively until reaching `System.Object`) are collected. At every Ti, if it has a `RequiredMembersAttribute` with members R1..Rn,
+To build the full list of `required` members for a given type `T`, including all base types, all the `RequiredMembersAttribute`s from `T` and its
+base type `Tb` (recursively until reaching `System.Object`) are collected. At every `Ti`, if it has a `RequiredMembersAttribute` with members `R1`..`Rn`,
 the following algorithm is performed:
 
-1. Perform standard member lookup on Ti for name Ri with 0 arguments.
-2. If this lookup was ambiguous or did not produce a single field or property result, an error occurs and the required member list of T cannot be
+1. Perform standard member lookup on `Ti` for name `Ri` with 0 arguments.
+2. If this lookup was ambiguous or did not produce a single field or property result, an error occurs and the required member list of `T` cannot be
 determined. No further steps are taken, and calling any constructor on `T` not marked with a `NoRequiredMembersAttribute` issues an error.
 3. Otherwise, the result of the member lookup is added to `T`'s list of required members.
 
 ## Open Questions
 
-### Requiring less-public members
+### Accessibility requirements and `init`
 
 In versions of this proposal with the `init` clause, we talked about being able to have the following scenario:
 
@@ -381,13 +381,23 @@ previously.
 The current spec says that the `required` keyword needs to be copied over and that overrides can make a member _more_ required, but not less. Is that what we want to do?
 Allowing removal of requirements needs more contract modification abilities than we are currently proposing.
 
+### Alternative metadata representation
+
+We could also take a different approach to metadata representation, taking a page from extension methods. We could put a `RequiredMemberAttribute` on the type to indicate
+that the type contains required members, and then put a `RequiredMemberAttribute` on each member that is required. This would simplify the lookup sequence (no need to do
+member lookup, just look for members with the attribute).
+
 ### Metadata Representation
 
 The [Metadata Representation](#metadata-representation) needs to be approved. We additionally need to decide whether these attributes should be included in the BCL.
 
 1. For `RequiredMembersAttribute`, this attribute is more akin to the general embedded attributes we use for nullable/nint/tuple member names, and will not be manually
-applied by the user.
+applied by the user in C#. It's possible that other languages might want to manually apply this attribute, however.
 2. `NoRequiredMembersAttribute`, on the other hand, is directly used by consumers, and thus should likely be in the BCL.
+
+If we go with the alternative representation in the previous section, that might change the calculus on `RequiredMemberAttribute`: instead of being similar to the general
+embedded attributes for `nint`/nullable/tuple member names, it's closer to `System.Runtime.CompilerServices.ExtensionAttribute`, which has been in the framework since
+extension methods shipped.
 
 ### Warning vs Error
 
@@ -410,6 +420,27 @@ class C
 
 Should issue some kind of diagnostic that `O` is marked required, but never required in a contract? Developers might find marking properties as required to be useful
 as a safety net.
+
+### Nested member initializers
+
+What will the enforcement mechanisms for nested member initializers be? Will they be disallowed entirely?
+
+```cs
+class Range
+{
+    public required Location Start { get; init; }
+    public required Location End { get; init; }
+}
+
+class Point
+{
+    public required int Column { get; init; }
+    public required int Line { get; init; }
+}
+
+_ = new Range { Start = { Column = 0, Line = 0 }, End = { Column = 1, Line = 0 } } // Would this be allowed if Point is a struct type?
+_ = new Range { Start = new Location { Column = 0, Line = 0 }, End = new Location { Column = 1, Line = 0 } } // Or would this form be necessary instead?
+```
 
 ## Discussed Questions
 
