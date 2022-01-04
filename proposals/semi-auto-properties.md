@@ -52,6 +52,13 @@ The following changes are to be made to [classes.md](https://github.com/dotnet/c
 
 ...
 
+```diff
+- If the auto-property has no set accessor, the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto-property can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the readonly backing field of the property.
++ If the auto-property has semicolon-only get accessor (without a set accessor or with an init accessor), the backing field is considered `readonly` ([Readonly fields](classes.md#readonly-fields)). Just like a `readonly` field, a getter-only auto property (without a set accessor or an init accessor) can also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the backing field of the property.
+```
+
+...
+
 ````diff
 +The following example:
 +```csharp

@@ -105,11 +105,12 @@ record struct R3();                // primary .ctor: public R3() { }
 record struct R4() { int F = 42; } // primary .ctor: public R4() { F = 42; }
 ```
 
-An explicit parameterless constructor in a `record struct` must call the primary constructor.
+An explicit parameterless constructor in a `record struct` must have a `this` initializer that calls the primary constructor or an explicitly declared constructor.
 ```csharp
 record struct R5(int F)
 {
-    public R5() { } // error: must call 'this(int F)'
+    public R5() { }                  // error: must have 'this' initializer that calls explicit .ctor
+    public R5(object o) : this() { } // ok
     public int F =  F;
 }
 ```
