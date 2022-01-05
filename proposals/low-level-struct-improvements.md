@@ -583,7 +583,7 @@ This attribute can be applied to methods, constructors and operators. Applying t
 The semantics of this attribute, and how it impacts span safety rules, are described [above](#ref-fields-escape)
 
 #### DoesNotEscape
-One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method* and in the case of `ref` parameters also *ref-safe-to-escape* to the *calling method*. These are sensible defaults because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of `ref` and `ref struct` and these defaults can cause friction with other parts of the span safet rules.
+One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible defaults because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  and `ref struct` and this default can cause friction with other parts of the span safety rules.
 
 The main friction point occurs because of the following constraint around method invocations:
 
@@ -613,7 +613,7 @@ ref struct RS
 }
 ```
 
-Essentially this rule exists because the language must assume that all inputs to a method escape to their maximum allowed scope. In the above case the language must assume that parameters escape into fields of the receiver.
+Essentially this rule exists because the language must assume that all inputs to a method escape to their maximum allowed scope. When there are `ref` or `out` parameters, including the receivers, it's possible for the inputs to escape as fields of those `ref` values (as happens in `RS.Set` above).
 
 In practice though there are many such methods which pass `ref struct` as parameters that never intend to capture them in output. It is just a value that is used within the current method. For example:
 
@@ -674,7 +674,7 @@ void WriteData(ReadOnlySpan<char> data)
 
 This pattern is fairly common across .NET code and it works just fine when a `ref struct` is not involved. Once users adopt `ref struct` though it forces them to change their patterns here and often they just resort to `unsafe` to work around the limitations here.
 
-To remove this friction the language will provide the attribute `System.Runtime.CompilerServices.DoesNotEscapeAttribute`. This can be applied to parameters or instance methods of a `ref struct`. When applied to parameters the *safe-to-escape* and *ref-safe-to-escape* scope will be to the *current method*. When applied to instance members of a `ref struct` the same limitations will apply to the `this` parameter
+To remove this friction the language will provide the attribute `System.Runtime.CompilerServices.DoesNotEscapeAttribute`. This can be applied to non-ref parameters of methods and when done it changes the *safe-to-escape* scope to the current method. 
 
 ```c#
 class C
@@ -698,9 +698,11 @@ class C
 }
 ```
 
+This attribute cannot be used on `ref` or `out` parameters. Those always implicitly escape to the calling method (that is how `ref` works). Instead `in` is likely a more appropriate designation for those scenarios.
+
 To account for this change the "Parameters" section of the span safety document will be updated to include the following bullet:
 
-- If the parameter is marked with `[DoesNotEscape]`it is *safe-to-escape* and *ref-safe-to-escape* are to the *current method*
+- If the parameter is marked with `[DoesNotEscape]`it is *safe-to-escape* is to the *current method*
 
 It's important to note that this will naturally block the ability for such parameters to escape by being stored as fields. Receivers that are passed by `ref`, or `this` on `ref struct`, have a *safe-to-escape* scope outside the current method. Hence assignment from a `[DoesNotEscape]` parameter to a field on such a value fails by existing field assignment rules: the scope of the receiver is greater than the value being assigned.
 
@@ -724,7 +726,7 @@ ref struct S
 }
 ```
 
-Given that parameters are restricted in this way we will also update the "Method Invocation" section to relax its rules. In all cases where it is considering the *ref-safe-to-escape* or *safe-to-escape* lifetimes of arguments the spec will change to ignore those arguments which line up to parameters which are marked as `[DoesNotEscape]`. Because these arguments cannot escape their lifetime does not need to be considered when considering the lifetime of returned values.
+Given that parameters are restricted in this way we will also update the "Method Invocation" section to relax its rules. In all cases where it is considering the *safe-to-escape* lifetimes of arguments the spec will change to ignore those arguments which line up to parameters which are marked as `[DoesNotEscape]`. Because these arguments cannot escape their lifetime does not need to be considered when considering the lifetime of returned values.
 
 For example the last line of calculating *safe-to-escape* of returns will change to 
 
@@ -732,6 +734,7 @@ For example the last line of calculating *safe-to-escape* of returns will change
 
 Detailed Notes:
 - The `[DoesNotEscape]` and `[RefThisEscapes]` cannot be combined on the same method 
+- The `[DoesNotEsacpe]` attribute cannot be used on parameters that are `ref`, `out` or `in`.
 
 ### Safe fixed size buffers
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
@@ -765,8 +768,6 @@ If the provided index is outside the declared bounds of the `fixed` array then a
 There will also be a named accessor generated for each `fixed` buffer that provides by value `get` and `set` operations. Having this means that `fixed` buffers will more closely resemble existing array semantics by having a `ref` accessor as well as byval `get` and `set` operations. This means compilers will have the same flexibility when emitting code consuming `fixed` buffers as they do when consuming arrays. This should be operations like `await` over `fixed` buffers easier to emit. 
 
 This also has the added benefit that it will make `fixed` buffers easier to consume from other languages. Named indexers is a feature that has existed since the 1.0 release of .NET. Even languages which cannot directly emit a named indexer can generally consume them (C# is actually a good example of this).
-
-There will also be a by value `get` and `set` accessor generated for every 
 
 The backing storage for the buffer will be generated using the `[InlineArray]` attribute. This is a mechanism discussed in [issue 12320](https://github.com/dotnet/runtime/issues/12320) which allows specifically for the case of efficiently declaring sequence of fields of the same type. This particular issue is still under active discussion and the expectation is that the implementation of this feature will follow however that discussion goes.
 
