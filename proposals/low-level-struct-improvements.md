@@ -118,7 +118,7 @@ Span<T> CreateSpan<T>(ref T parameter)
 }
 ```
 
-It will be possible for such methods to exist. Specifically methods which take `ref` parameters, capture them in `ref` fields and return them. But they require a declarative opt-in to let the compiler, and developer, know that it is happening and to adjust the span spafety rules accordingly.
+It will be possible for such methods to exist. Specifically methods which take `ref` parameters, capture them in `ref` fields and return them. But they require a declarative opt-in to let the compiler, and developer, know that it is happening and to adjust the span safety rules accordingly.
 
 It is important to understand these compat considerations before diving too far into the proposal here as they are central to parts of the design.
 
