@@ -583,7 +583,7 @@ This attribute can be applied to methods, constructors and operators. Applying t
 The semantics of this attribute, and how it impacts span safety rules, are described [above](#ref-fields-escape)
 
 #### DoesNotEscape
-One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible defaults because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  and `ref struct` and this default can cause friction with other parts of the span safety rules.
+One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
 
 The main friction point occurs because of the following constraint around method invocations:
 
@@ -693,7 +693,7 @@ class C
         // Error: `local` has the same safe-to-escape as `p2` hence it cannot
         // be returned.
         Span<int> local = p2;
-        return p2; 
+        return local; 
     }
 }
 ```
@@ -702,7 +702,7 @@ This attribute cannot be used on `ref` or `out` parameters. Those always implici
 
 To account for this change the "Parameters" section of the span safety document will be updated to include the following bullet:
 
-- If the parameter is marked with `[DoesNotEscape]`it is *safe-to-escape* is to the *current method*
+- If the parameter is marked with `[DoesNotEscape]` it is *safe-to-escape* to the *current method*
 
 It's important to note that this will naturally block the ability for such parameters to escape by being stored as fields. Receivers that are passed by `ref`, or `this` on `ref struct`, have a *safe-to-escape* scope outside the current method. Hence assignment from a `[DoesNotEscape]` parameter to a field on such a value fails by existing field assignment rules: the scope of the receiver is greater than the value being assigned.
 
@@ -734,7 +734,7 @@ For example the last line of calculating *safe-to-escape* of returns will change
 
 Detailed Notes:
 - The `[DoesNotEscape]` and `[RefThisEscapes]` cannot be combined on the same method 
-- The `[DoesNotEsacpe]` attribute cannot be used on parameters that are `ref`, `out` or `in`.
+- The `[DoesNotEscape]` attribute cannot be used on parameters that are `ref`, `out` or `in`.
 
 ### Safe fixed size buffers
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
