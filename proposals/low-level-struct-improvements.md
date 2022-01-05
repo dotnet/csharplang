@@ -201,7 +201,7 @@ ref struct RS
     static RS CreateRS2(ref int parameter)
     {
         // Okay: Both CreateRS2 and RS(ref int) are annotated as [RefFieldEscapes] hence the 
-        // safe-to-escape scope of the return is is the min of the ref-safe-to-escape scope of 
+        // safe-to-escape scope of the return is the min of the ref-safe-to-escape scope of 
         // the ref / in arguments. In that case this is simply `parameter` which has a
         // ref-safe-to-escape scope of the calling method
         RS rs = new RS(ref parameter);
