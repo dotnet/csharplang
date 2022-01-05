@@ -501,7 +501,7 @@ The lifetime defaults for these locations is not fundamental to correctness. For
 This, and several other friction points, can be removed if the language provides developers a way to invert the defaults by applying attributes to specific locations. The language can recognize these attributes and simply adjust the lifetime calculation for locations when evaluating span safety.
 
 #### RefThisEscapes
-One of the most notable friction points in the inability to return fields by `ref` in instance members of a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly. This reduces the usefulness of `ref` returns in `struct` where it is often the most desired. 
+One of the most notable friction points is the inability to return fields by `ref` in instance members of a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly. This reduces the usefulness of `ref` returns in `struct` where it is often the most desired. 
 
 ```c#
 struct S
@@ -717,7 +717,7 @@ ref struct S
 
         // Error: the [DoesNotEscape] attribute changes the *safe-to-escape* 
         // to be limited to the current method scope. Hence it cannot be 
-        // assigned to a receiver than has a *safe-to-escape* scope outside the 
+        // assigned to a receiver that has a *safe-to-escape* scope outside the 
         // current method.
         _field = p2;
     }
@@ -768,7 +768,7 @@ This also has the added benefit that it will make `fixed` buffers easier to cons
 
 There will also be a by value `get` and `set` accessor generated for every 
 
-The backing storage for the buffer will be generated using the `[InlineArray]` attribute. This is a mechanism discussed in [isuse 12320](https://github.com/dotnet/runtime/issues/12320) which allows specifically for the case of efficiently declaring sequence of fields of the same type. This particular issue is still under active discussion and the expectation is that the implementation of this feature will follow however that discussion goes.
+The backing storage for the buffer will be generated using the `[InlineArray]` attribute. This is a mechanism discussed in [issue 12320](https://github.com/dotnet/runtime/issues/12320) which allows specifically for the case of efficiently declaring sequence of fields of the same type. This particular issue is still under active discussion and the expectation is that the implementation of this feature will follow however that discussion goes.
 
 ## Considerations
 
