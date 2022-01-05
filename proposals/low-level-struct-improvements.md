@@ -663,7 +663,7 @@ void WriteData(ReadOnlySpan<char> data)
         Escape(data, buffer, out var length);
 
         // Error: Cannot assign `buffer` to `data` here as the safe-to-escape
-        // scope of `buffer` is to the current method scope while `buffer` is
+        // scope of `buffer` is to the current method scope while `data` is
         // outside the current method scope
         data = buffer.Slice(0, length);
     }
