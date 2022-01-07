@@ -32,8 +32,8 @@ __Example:__
 ///
 public class Point 
 {
-    /// <summary>method <c>draw</c> renders the point.</summary>
-    void draw() {...}
+    /// <summary>method <c>Draw</c> renders the point.</summary>
+    void Draw() {...}
 }
 ```
 
