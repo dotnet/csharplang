@@ -30,6 +30,10 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Jan 12, 2022
 
 - Definite assignment in semi-autoproperties (Fred) - https://github.com/dotnet/csharplang/issues/5563
+- Operator enhancements (Jared, Tanner):
+    - Checked operators - https://github.com/dotnet/csharplang/issues/4665
+    - Relaxing shift operator requirements - https://github.com/dotnet/csharplang/issues/4666
+    - Unsigned right shift operator - https://github.com/dotnet/csharplang/issues/4682
 
 # C# Language Design Notes for 2022
 
