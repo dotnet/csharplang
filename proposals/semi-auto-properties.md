@@ -111,7 +111,7 @@ The following changes are to be made to [classes.md](https://github.com/dotnet/c
 +```
 ````
 
-Open LDM questions:
+## Open LDM questions:
 
 1. If a type does have an existing accessible `field` symbol in scope (like a field called `field`) should there be any way for an auto-prop to still use `field` internally to both create and refer to an auto-prop field.  Under the current rules there is no way to do that.  This is certainly unfortunate for those users, however this is ideally not a significant enough issue to warrant extra dispensation.  The user, after all, can always still write out their properties like they do today, they just lose out from the convenience here in that small case.
 
