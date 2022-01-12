@@ -111,9 +111,17 @@ The following changes are to be made to [classes.md](https://github.com/dotnet/c
 +```
 ````
 
-Open LDM questions:
+## Open LDM questions:
 
 1. If a type does have an existing accessible `field` symbol in scope (like a field called `field`) should there be any way for an auto-prop to still use `field` internally to both create and refer to an auto-prop field.  Under the current rules there is no way to do that.  This is certainly unfortunate for those users, however this is ideally not a significant enough issue to warrant extra dispensation.  The user, after all, can always still write out their properties like they do today, they just lose out from the convenience here in that small case.
+
+2. Should initializers use the backing field or the property setter? If the latter, what about `public int P { get => field; } = 5;`?
+    * Calling a setter for an initializer is not an option because initializers are processed before calling base constructor and it is illegal to call any instance method before the base constructor is called.
+    * If we say that initializer assigns directly to the backing field. If there is a setter, then we are getting into a situation when initializer does one thing and an assignment to the property within constructor does a different thing (calls the setter). A behavior like that can be a trap for a user. Today, there is no semantical difference between an initializer and an assignment in constructor when both are allowed. This invariant will be broken. However, people are changing between the forms often.
+
+3. Definite assignment related questions:
+    - https://github.com/dotnet/csharplang/issues/5563
+    - https://github.com/dotnet/csharplang/pull/5573#issuecomment-1002110830
 
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
