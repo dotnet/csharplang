@@ -394,7 +394,7 @@ The rules for `ref` assignment also need to be adjusted to account for `ref` fie
 - `init` accessors:  The value limited to values that are known to refer to the heap as accessors can't have `ref` parameters
 - object initializers: The value can have any *ref-safe-to-escape* value as this will feed into the calculation of the *safe-to-escape* of the constructed object by existing rules.
 
-A `ref` field can only be `ref` assigned outside a constructor when the value is known to have a lifetime greater than the reciever. Specifically: 
+A `ref` field can only be `ref` assigned outside a constructor when the value is known to have a lifetime greater than or equal to the receiver. Specifically: 
 - A value that is known to refer to the heap is always allowed 
 - A value which is *safe-to-escape* to the *calling method* can be assigned to a `ref` field where the receiver is *safe-to-escape* within the *current method*
 - A value which is *safe-to-escape* to the *calling method* **cannot** be assigned to a `ref` field where the receiver is *safe-to-escape* to the *calling method*. In that situation it cannot be asserted that the field outlives the receiver.
