@@ -394,7 +394,10 @@ The rules for `ref` assignment also need to be adjusted to account for `ref` fie
 - `init` accessors:  The value limited to values that are known to refer to the heap as accessors can't have `ref` parameters
 - object initializers: The value can have any *ref-safe-to-escape* value as this will feed into the calculation of the *safe-to-escape* of the constructed object by existing rules.
 
-A `ref` field can only be `ref` assigned outside a constructor when the value is known to refer to the heap. That is allowed because it is both safe at the assignment location (meets the field assignment rules for ensuring the value being assigned has a lifetime at least as large as the receiver) as well as requires no updates to the existing method invocation rules. 
+A `ref` field can only be `ref` assigned outside a constructor when the value is known to have a lifetime greater than the reciever. Specifically: 
+- A value that is known to refer to the heap is always allowed 
+- A value which is *safe-to-escape* to the *calling method* can be assigned to a `ref` field where the receiver is *safe-to-escape* within the *current method*
+- A value which is *safe-to-escape* to the *calling method* **cannot** be assigned to a `ref` field where the receiver is *safe-to-escape* to the *calling method*. In that situation it cannot be asserted that the field outlives the receiver.
 
 This design does not allow for general `ref` field `ref `assignment outside object construction due to existing limitations on lifetimes. Specifically it poses challenges for scenarios like the following:
 
@@ -810,7 +813,7 @@ ref struct S<T> {
 
 // Ref assembly 
 ref struct S<T> {
-    object _o; // force unmanaged 
+    object _o; // force managed 
     T _f; // mantain generic expansion protections
 }
 ```
@@ -819,7 +822,7 @@ ref struct S<T> {
 It may seem attractive to think of the ability to assign to a `ref` field as just another scope concept instead of an orthogonal concept. Essentially *assignable to field* as an escape scope between *heap* and *calling method*. This falls apart though when looking at practical examples. Consider for example the following: 
 
 ```c#
-void M(ref int parameter)
+void M()
 {
     int local = 0;
     Span<T> span = new(ref local);
