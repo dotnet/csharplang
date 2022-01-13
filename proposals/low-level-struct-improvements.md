@@ -7,7 +7,7 @@ This proposal is an aggregation of several different proposals for `struct` perf
 ## Motivation
 Earlier versions of C# added a number of low level performance features to the language: `ref` returns, `ref struct`, function pointers, etc. ... These enabled .NET developers to create write highly performant code while continuing to leverage the C# language rules for type and memory safety.  It also allowed the creation of fundamental performance types in the .NET libraries like `Span<T>`.
 
-As these features have gained traction in the .NET ecosystem developers, both internal and external, have been providing us with information on remaining friction points in the ecosystem. Places where they still need to drop to `unsafe` code to get their work, or require the runtime to special case types like `Span<T>`. 
+As these features have gained traction in the .NET ecosystem developers, both internal and external, have been providing us with information on remaining friction points in the ecosystem. Places where they still need to drop to `unsafe` code to get their work done, or require the runtime to special case types like `Span<T>`. 
 
 Today `Span<T>` is accomplished by using the `internal` type `ByReference<T>` which the runtime effectively treats as a `ref` field. This provides the benefit of `ref` fields but with the downside that the language provides no safety verification for it, as it does for other uses of `ref`. Further only dotnet/runtime can use this type as it's `internal`, so 3rd parties can not design their own primitives based on `ref` fields. Part of the [motivation for this work](https://github.com/dotnet/runtime/issues/32060) is to remove `ByReference<T>` and use proper `ref` fields in all code bases. 
 
@@ -506,7 +506,7 @@ One of the most notable friction points is the inability to return fields by `re
 ```c#
 struct S
 {
-     _field;
+     int _field;
 
     // Error: this, and hence _field, can't return by ref
     public ref int Prop => ref _field;
@@ -530,7 +530,7 @@ struct S
 
 // Option 2 
 // The ref-safe-to-escape for this is now the calling method on all members
-[ThisRefEcapes]
+[RefThisEscapes]
 struct S
 {
     int _field;
@@ -816,7 +816,7 @@ ref struct S<T> {
 ```
 
 ### Why isn't assignability to ref field a scope?
-It may seem attractive to think of the ability to assign to a `ref` field as just another scope concept instead of an orthogonal concept. Essentially *assignable to field* as an escape scope between *heap* and *calling method*. This falls a part though when looking at practical examples. Consider for example the following: 
+It may seem attractive to think of the ability to assign to a `ref` field as just another scope concept instead of an orthogonal concept. Essentially *assignable to field* as an escape scope between *heap* and *calling method*. This falls apart though when looking at practical examples. Consider for example the following: 
 
 ```c#
 void M(ref int parameter)
@@ -833,9 +833,9 @@ The only practical way to represent whether a location can assign to a `ref` fie
 ## Open Issues
 
 ### Take the breaking change
-Consider for a minute a design where the compat problem was approached from the other direction. Effectively make it such that every method was implicitly `[RefFieldsEscape]` and then have an attribute that restores the span safety rules in place today. Say `[RefFieldDoesNotEsacpe]`. 
+Consider for a minute a design where the compat problem was approached from the other direction. Effectively make it such that every method was implicitly `[RefFieldsEscape]` and then have an attribute that restores the span safety rules in place today. Say `[RefFieldDoesNotEscape]`. 
 
-This would be a breaking change and it's easy to construct code samples that trigger an error when upgrading to a new version of C# (as demonstrated [here](#new-span-challenges)). It's hard to determine though how prevelant these types of patterns are. Essentially methods which have both the following attributes:
+This would be a breaking change and it's easy to construct code samples that trigger an error when upgrading to a new version of C# (as demonstrated [here](#new-span-challenges)). It's hard to determine though how prevalent these types of patterns are. Essentially methods which have both the following attributes:
 
 - Have a `Span<T>` or `ref struct` which has a `Span<T>` as
     - The return type 
@@ -858,7 +858,7 @@ Span<int> CreateSpan(ref int i)
 Span<int> Method()
 {
     int local = 42;
-    var span = new Span<int>(ref local);
+    var span = CreateSpan(ref local);
     return span;
 }
 ```
