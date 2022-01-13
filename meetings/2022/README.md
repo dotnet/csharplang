@@ -27,17 +27,18 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Jan 19, 2022
 
-## Jan 12, 2022
-
-- Definite assignment in semi-autoproperties (Fred) - https://github.com/dotnet/csharplang/blob/main/proposals/semi-auto-properties.md#open-ldm-questions
-- Operator enhancements (Jared, Tanner):
-    - Checked operators - https://github.com/dotnet/csharplang/issues/4665
-    - Relaxing shift operator requirements - https://github.com/dotnet/csharplang/issues/4666
-    - Unsigned right shift operator - https://github.com/dotnet/csharplang/issues/4682
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Jan 12, 2022
+
+[C# Language Design Notes for January 12th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-12.md)
+
+1. Open questions for `field`
+    1. Initializers for semi-auto properties
+    2. Definite assignment for struct types
+2. Generic Math Operator Enhancements
 
 ## Jan 5, 2022
 
