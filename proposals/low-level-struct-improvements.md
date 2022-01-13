@@ -790,6 +790,31 @@ Several ideas for having implicit opt-in to `ref` capture were explored and disc
 
 These implicit opt-in strategies all have significant holes while an explicit opt-in is fully generalizable and makes the span safety rule different explicit in the code.
 
+### Reference Assemblies
+A reference assembly for a compilation using features described in this proposal must maintain the elements that convey span safety information. That means all lifetime annotation attributes and `[RefFieldEscapes]` must be preserved in their original position. Any attempt to replace or omit them can lead to invalid reference assemblies.
+
+Representing `ref` fields is more nuanaced. Ideally a `ref` field would appear in a reference assembly as would any other field. However a `ref` field represents a change to the metadata format and that can cause issues with tool chains that are not updated to understand this metadata change. A concrete example is C++/CLI which will likely error if it consumes a `ref` field. Hence it's advantageous if `ref` fields can be omitted from reference assemblies in our core libraries. 
+
+A `ref` field by itself has no impact on span safety rules. As a conecrete example consider that flipping the existing `Span<T>` defintion to use a `ref` field has no impact on consumption. Hence the `ref` itself can be omitted safely. However a `ref` field does have other impacts to consumption that must be preserved: 
+
+- A `ref struct` which has a `ref` field is never considered `unmanaged` 
+- The type of the `ref` field impacts infinite generic expansion rules. Hence if the type of a `ref` field contains a type parameter that must be preserved 
+
+Given those rules here is a valid reference assembly transformation for a `ref struct`: 
+
+```c#
+// Impl assembly 
+ref struct S<T> {
+    ref T _field;
+}
+
+// Ref assembly 
+ref struct S<T> {
+    object _o; // force unmanaged 
+    T _f; // mantain generic expansion protections
+}
+```
+
 ### Why isn't assignability to ref field a scope?
 It may seem attractive to think of the ability to assign to a `ref` field as just another scope concept instead of an orthogonal concept. Essentially *assignable to field* as an escape scope between *heap* and *calling method*. This falls a part though when looking at practical examples. Consider for example the following: 
 
