@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
+Are we going to support default interface implementations for abstract statics in C# 11?
 
 ## Schedule when convenient
 
