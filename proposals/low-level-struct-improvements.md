@@ -818,21 +818,6 @@ ref struct S<T> {
 }
 ```
 
-### Why isn't assignability to ref field a scope?
-It may seem attractive to think of the ability to assign to a `ref` field as just another scope concept instead of an orthogonal concept. Essentially *assignable to field* as an escape scope between *heap* and *calling method*. This falls apart though when looking at practical examples. Consider for example the following: 
-
-```c#
-void M()
-{
-    int local = 0;
-    Span<T> span = new(ref local);
-}
-```
-
-The design explicitly wants to ensure this is legal. Yet the *ref-safe-to-escape* scope of `local` is *current method* and it can't be anything greater. At the same time it must be assignable to a `ref` field. Further we need to ensure that `span` is itself assignable to a `ref` field of a different type and it also has *current method* as the *ref-safe-to-escape* scope.
-
-The only practical way to represent whether a location can assign to a `ref` field is as a separate concept from escape scopes.
-
 ## Open Issues
 
 ### Take the breaking change
@@ -953,6 +938,7 @@ The following issues are all related to this proposal:
 - https://github.com/dotnet/csharplang/issues/2208
 - https://github.com/dotnet/runtime/issues/32060
 - https://github.com/dotnet/runtime/issues/61135
+- https://github.com/dotnet/csharplang/discussions/78
 
 ### Proposals
 The following proposals are related to this proposal:
