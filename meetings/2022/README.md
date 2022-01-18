@@ -26,8 +26,6 @@ Are we going to support default interface implementations for abstract statics i
 
 ## Jan 24, 2022
 
-## Jan 19, 2022
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
