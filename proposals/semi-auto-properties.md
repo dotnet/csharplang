@@ -126,3 +126,4 @@ The following changes are to be made to [classes.md](https://github.com/dotnet/c
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-14.md#field-keyword
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-12.md#open-questions-for-field
