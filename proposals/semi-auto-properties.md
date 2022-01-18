@@ -17,6 +17,15 @@ The following changes are to be made to [classes.md](https://github.com/dotnet/c
 ### Automatically implemented properties
 ```
 
+...
+
+```diff
+- A *property_initializer* may only be given for an automatically implemented property ([Automatically implemented properties](classes.md#automatically-implemented-properties)), and causes the initialization of the underlying field of such properties with the value given by the *expression*.
++ A *property_initializer* may only be given for a property that has a backing field that will be emitted and the property either does not have a setter, or its setter is auto-implemented. The *property_initializer* causes the initialization of the underlying field of such properties with the value given by the *expression*.
+```
+
+...
+
 ```diff
 - An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern
 - property with semicolon-only accessor bodies. Auto-properties must have a get accessor and can optionally
