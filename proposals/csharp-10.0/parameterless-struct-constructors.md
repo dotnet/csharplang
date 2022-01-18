@@ -33,15 +33,17 @@ Instance field declarations for a struct may include initializers.
 As with [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-field-initialization):
 > A variable initializer for an instance field cannot reference the instance being created. 
 
+An error is reported if a struct has field initializers and no declared instance constructors since the field initializers will not be run.
+```csharp
+struct S { int F = 42; } // error: 'struct' with field initializers must include an explicitly declared constructor
+```
+
 ### Constructors
 A struct may declare a parameterless instance constructor.
 
 A parameterless instance constructor is valid for all struct kinds including `struct`, `readonly struct`, `ref struct`, and `record struct`.
 
-If the struct declaration does not contain any explicit instance constructors, and the struct has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
-The parameterless constructor may be synthesized even if all initializer values are zeros.
-
-Otherwise, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)) ...
+If no parameterless instance constructor is declared, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)) ...
 > implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
 
 ### Modifiers
@@ -64,18 +66,17 @@ Execution of struct instance field initializers matches execution of [class fiel
 ### Definite assignment
 Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)).
 
-Definite assignment of struct instance fields is required within synthesized and explicit parameterless constructors.
 ```csharp
-struct S0 // ok: no synthesized constructor
+struct S0 // ok
 {
     int x;
     object y;
 }
 
-struct S1
+struct S1 // error: 'struct' with field initializers must include an explicitly declared constructor
 {
     int x = 1;
-    object y;  // error: field 'y' must be assigned
+    object y;
 }
 
 struct S2
@@ -84,19 +85,27 @@ struct S2
     object y;
     public S2() { } // error: field 'y' must be assigned
 }
+
+struct S3 // ok
+{
+    int x = 1;
+    object y;
+    public S3() { y = 2; }
+}
 ```
 
 ### No `base()` initializer
 A `base()` initializer is disallowed in struct constructors.
 
-The compiler will not emit a call to the base `System.ValueType` constructor from any struct instance constructors including explicit and synthesized parameterless constructors.
+The compiler will not emit a call to the base `System.ValueType` constructor from struct instance constructors.
 
 ### `record struct`
-If a `record struct` does not contain a primary constructor nor any instance constructors, and the `record struct` has field initializers, the compiler will synthesize a `public` parameterless instance constructor.
+An error is reported if a `record struct` has field initializers and does not contain a primary constructor nor any instance constructors since the field initializers will not be run.
 ```csharp
-record struct R0;                      // no parameterless .ctor
-record struct R1 { int F = 42; }       // synthesized .ctor: public R1() { F = 42; }
-record struct R2(int F) { int F = F; } // no parameterless .ctor
+record struct R0;                  // ok
+record struct R1 { int F = 42; }   // error: 'struct' with field initializers must include an explicitly declared constructor
+record struct R2() { int F = 42; } // ok
+record struct R3(int F);           // ok
 ```
 
 A `record struct` with an empty parameter list will have a parameterless primary constructor.
@@ -232,7 +241,7 @@ _ = new S2(); // ok: ignores constructor
 ```
 
 ### Metadata
-Explicit and synthesized parameterless struct instance constructors will be emitted to metadata.
+Explicit parameterless struct instance constructors will be emitted to metadata.
 
 Public parameterless struct instance constructors will be imported from metadata; non-public struct instance constructors will be ignored.
 _No change from C#9._
