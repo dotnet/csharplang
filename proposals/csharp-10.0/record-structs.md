@@ -213,14 +213,14 @@ constructor and a constructor with the same signature already present in the str
 If the type declaration does not include a parameter list, no primary constructor is generated.
 
 ```csharp
-record struct S1
+record struct R1
 {
-    public S1() { } // ok
+    public R1() { } // ok
 }
 
-record struct S2()
+record struct R2()
 {
-    public S2() { } // error: 'S2' defines constructor with same parameter types
+    public R2() { } // error: 'R2' already defines constructor with same parameter types
 }
 ```
 
