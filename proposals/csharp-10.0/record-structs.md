@@ -27,7 +27,7 @@ See [parameterless struct constructors](./parameterless-struct-constructors.md) 
 Record structs cannot use `ref` modifier.
 
 At most one partial type declaration of a partial record struct may provide a `parameter_list`.
-The `parameter_list` may not be empty.
+The `parameter_list` may be empty.
 
 Record struct parameters cannot use `ref`, `out` or `this` modifiers (but `in` and `params` are allowed).
 
@@ -210,6 +210,19 @@ additional members with the same conditions as the members above.
 A record struct has a public constructor whose signature corresponds to the value parameters of the
 type declaration. This is called the primary constructor for the type. It is an error to have a primary
 constructor and a constructor with the same signature already present in the struct.
+If the type declaration does not include a parameter list, no primary constructor is generated.
+
+```csharp
+record struct S1
+{
+    public S1() { } // ok
+}
+
+record struct S2()
+{
+    public S2() { } // error: 'S2' defines constructor with same parameter types
+}
+```
 
 Instance field declarations for a record struct are permitted to include variable initializers.
 If there is no primary constructor, the instance initializers execute as part of the parameterless constructor.
