@@ -24,7 +24,12 @@ Are we going to support default interface implementations for abstract statics i
 
 ## Jan 26, 2022
 
+- Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
+
 ## Jan 24, 2022
+
+- Attributes for required members (Fred)
+- Are we going to support default interface implementations for abstract statics in C# 11? (Aleksey)
 
 # C# Language Design Notes for 2022
 
