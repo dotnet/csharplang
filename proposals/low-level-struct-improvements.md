@@ -483,6 +483,10 @@ struct S1
 }
 ```
 
+The `ref` fields feature requires runtime support and changes to the ECMA spec to allow the construct. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here 
+
+https://github.com/dotnet/runtime/issues/64165
+
 Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
 - A `ref` field cannot be declared `static`
