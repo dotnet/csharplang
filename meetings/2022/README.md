@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
-Are we going to support default interface implementations for abstract statics in C# 11?
 
 ## Schedule when convenient
 
@@ -24,6 +23,7 @@ Are we going to support default interface implementations for abstract statics i
 
 ## Jan 26, 2022
 
+- Opend design questions for UTF8 String Literals (AlekseyTs)
 - Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
 
 ## Jan 24, 2022
