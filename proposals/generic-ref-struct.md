@@ -2,6 +2,10 @@ Unconstraining our generics
 =====
 
 ## Summary
+This proposal is an aggregation of several different proposals for making `ref struct` more generally usable in our type system. The goal being to unify code paths today that have to specialize on `ref struct` and other types when 
+
+`struct` performance improvements: `ref` fields and the ability to override lifetime defaults. The goal being a design which takes into account the various proposals to create a single overarching feature set for low level `struct` improvements.
+
 
 ## Motivation
 
@@ -20,6 +24,13 @@ Why have an attribute when we could just special case it like arrays
 
 ### Why not attribute per type parameter
 Can't really encode type parameters in attributes
+
+### Constraints vs. anti constraints
+The syntax `where T : ref struct` appears in the space C# refers to as constraints. That is the syntax is meant to constraint or limit the set of types that are legal for the generic type parameter.
+
+This feature though expands the set of types available. The set of types applicable to `T where T : ref struct` is larger than simply `T`. This means the feature is an anti-constraint yet it occupies a constraint location. 
+
+It is reasonable to consider a new syntax here that cleanly differentiates our anti-constraints from actual constraints. At the time of this writing though there are only two proposed anti-constraints, one is lacking supporting evidence, and no obvious better syntax for them. Hence the proposal is written using the familiair `where T :` style of syntax. If an intuitive syntax for anti-constraints is proposed it is likely to get consideration in the proposal.
 
 ### Generalize the delegate support
 The use of any type in `delegate` may cause readers to desire a more general feature that could be applied to any generic parameter. Essentially could we design a syntax for type parameters that could be any type (pointer, `ref`, etc ...) and allow it on any generic parameter? That would leave `delegate` instances as effectively having an implicit version of this syntax.
