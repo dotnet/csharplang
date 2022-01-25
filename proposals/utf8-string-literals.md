@@ -30,7 +30,7 @@ To fix this we will allow for UTF8 literals in the language and encode them into
 The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow for implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. 
 
 ```c# 
-byte[] array = "hello";             // new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20 }
+byte[] array = "hello";             // new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f }
 Span<byte> span = "dog";            // new byte[] { 0x64, 0x6f, 0x67 }
 ReadOnlySpan<byte> span = "cat";    // new byte[] { 0x63, 0x61, 0x74 }
 ```
@@ -84,7 +84,7 @@ ReadOnlySpan<byte> span = "hello";
 
 // Equivalent to
 
-ReadOnlySpan<byte> span = new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20 };
+ReadOnlySpan<byte> span = new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f };
 ```
 
 That means all optimizations that apply to the `new byte[] { ... }` form will apply to utf8 literals as well. This means the call site will be allocation free as C# will optimize this be stored in the `.data` section of the PE file.
