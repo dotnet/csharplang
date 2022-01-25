@@ -25,7 +25,25 @@ Arrays today conditionally implement interfaces based on the element type of the
 In discussion with the runtime team there was agreement that the analogy is good. However under the hood the runtime was going to need some way to track the methods in question as invalid when the element type of `Span<T>` was a `ref struct`: an internal list, attribute, etc ... Given that some level of book keeping was needed and attributes were cheap it made more sense to expose this as a general feature. This way third parties can push `where T : ref struct` through types similar to `Span<T>` where they have APIs they can't walk away from.
 
 ### Why not attribute per type parameter
-Can't really encode type parameters in attributes
+Rather than applying `[IgnoreForRefStruct]` at the member level, it could be applied more granularly at a type parameter level. Consider for example: 
+
+```c#
+struct S<T, U> 
+{
+    where T : ref struct
+    where U : ref struct 
+
+    [IgnoreForRefStruct(nameof(T))]
+    void M(T[] array)
+    {
+
+    }
+}
+```
+
+In this example the method `M` is only invalid when `T` is a `ref struct`. The type of `U` is immaterial to the legality of the method as it's not used in a manner incompatible with `ref struct`. In this case it would be desirable to have a more granular opt out. 
+
+At this time though there are no practical examples of this pattern. Adding this granularity will add cost to the runtime, as well as to the language as it's hard to reference type parameters in attributes. Going for simplicity at the moment but can reconsider in future versions if evidence for the scenario appears.
 
 ### Constraints vs. anti constraints
 The syntax `where T : ref struct` appears in the space C# refers to as constraints. That is the syntax is meant to constraint or limit the set of types that are legal for the generic type parameter.
