@@ -7,13 +7,72 @@ This proposal is an aggregation of several different proposals for making `ref s
 ## Motivation
 This feature will allow developers to remove `ref struct` specific code by instead letting them implement interfaces that are used in generic contexts to generalize algorithms. For example an explicit goal is to allow `ref struct` to implement `ISpanFormattable`. The `ISpanFormattable` interface and `ref struct` are used in low level perf sensitive areas but our current language limitations prevent them from being used together.
 
+This will also allow for combinations like `Span<Span<T>>`. This is a long desire of the runtime team who often want to represent collections of `Span<T>` but are unable to do so due to our current limitations.
+
+It also will enable the creation of generic collections of `ref struct`. For instance having a `List<T>` style [data structure](#ref-list) with a hard capacity limit will be possible with the features in this proposal.
+
 ## Detailed Design 
 
 ### ref struct generic arguments
+The compiler will allow type parameters to be (un)constrained such that they can accept `ref struct` as arguments using the `where T : ref struct` syntax. 
 
-This means type parameters with the `ref struct` constraint have all of the restrictions 
+```c#
+void Swap<T>(ref T left, ref T right)
+    where T : ref struct
+{
+    T temp = left;
+    left = right;
+    right = temp;
+}
+
+Span<byte> span1 = new byte[4];
+Span<byte> span2 = default;
+
+// Can use ref struct type arguments 
+Swap<Span<byte>>(ref span1, ref span2);
+
+// Can also use normal type arguments
+Swap<byte>(ref span1[0], ref span1[1]);
+```
+
+At the call site this relaxes the set of legal type arguments to inclued `ref struct` *in addition* to the types already allowed. Even though this appears in the constraint position it serves more of an anti-constraint because it expands the set of possible types. 
+
+As an expansion though it means that `T where T : ref struct` is not compatible with type parameters lacking the same annotation:
+
+```c#
+void M1<U>() { }
+void M2<T>()
+    where T : ref struct
+{
+    M1<T>(); // Error: type parameter T is not compatible with U because it does not 
+             // allow `ref sturct`
+}
+```
+
+At the implementation all type parameters having the `where T : ref struct` annotation are treated as if the type is a `ref struct`. Most importantly it has all of the limitations that would be expected from a `ref struct`. For example: 
+
+- Instances of `T` cannot be boxed
+- Instances of `T` can only appear as fields inside a `ref struct`
+- Instances of `T` are considered `ref struct` for the purposes of the [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). 
+- `T` cannot be used as the element of an array
+- Members on `object` such as `ToString` cannot be invoked as that implicitly boxes
+- etc ...
+
+Positionally the `ref struct` annotation must come after the type kind, such as `struct`, but before the interface list or `new()` constraint (interfaces are covered [later in the proposal](#interfaces)). The combination with type kinds has the following effects:
+
+- `where T : struct, ref struct`: describes a type parameter that can be a `struct` or `ref struct` but not other types like `class` or `interface`.
+- `where T : unmanaged, ref struct`: similar to `struct, ref struct` except that the type also meets the `unmanaged` constraint. This is believed to have limited use though as `ref struct` containing any type of `ref` data will not meet the `unmanaged` contraint and hence are likely better defined as simply `struct`.
+- `where T : notnull, ref struct`: this is the same as the `notnull` constraint but also allows for `ref struct` types to satisfy it.
+- `where T : class, ref struct`: is an error as the `ref struct` portion is meaningless when combined with `class`. 
+- `where T : default, ref struct`: is an error as the declarations are contradictory.
+- `where T : ref struct, BaseType` where `BaseType` denotes a reference type. This is an error because the `ref sruct` portion is meaningless in this context.
+
+The `where T : ref struct` annotation will be encoded by attributing the type parameter with the attribute `System.Runtime.CompilerServices.SupportsByRefLike`. This will not result in a `modreq` on the containing member nor will `[Obsolete]` tricks be added to the containing type. The intent is for this to be a binary compatible change. The explicit intent is for us to allow types in libraries to relax their type parameters to accept `ref struct` without breaking consumers.
+
+### Supporting Span<T>
 
 ### ref struct interfaces
+<a name="interfaces"></a>
 
 **TODO** look up the definition of the constrained prefix for low level rules on where this is legal
 
@@ -22,6 +81,8 @@ This means type parameters with the `ref struct` constraint have all of the rest
 ## Considerations
 
 ### Treat it like array
+**TODO** Use the name `SupportsOnlyNonByRefLike`
+
 Rather than `[IgnoreForRefStruct]` attribute why not just special case `Span<T>` and other types as the language special cases arrays today. 
 
 Arrays today conditionally implement interfaces based on the element type of the array. For example a `T[]` implements `IEnumerable<T>` when `T` is a non-pointer type. That means `int*[]` does not but `int[]` does. The issues around generics and arrays is very good analogy for `where T : ref struct` and `Span<T>`. Effectively there is a set of APIs that need to be illegal based on the element type of `Span<T>` hence why not apply the same rules as array.
@@ -136,6 +197,59 @@ It is not believed that the `interface` scenario is worth the extra syntax here.
 ## Open Issues
 
 ## Future Considerations
+
+## Examples 
+
+### RefList<T>
+<a name="ref-list"></a>
+This is an eample a `List<T>` style data structure with a hard capacity that can store `ref struct` in addition to normal types:
+
+```c#
+sealed class RefList<T> where T : ref struct
+{
+    private Span<T> _storage;
+    private int _length;
+
+    public ref T this[int index]
+    {
+        get
+        {
+            if (index >= _length)
+                throw new ArgumentException(null, nameof(index));
+
+            return ref _storage[index];
+        }
+    }
+
+    public int Length => _length;
+
+    public RefList<T>(Span<T> storage, int? length = default)
+    {
+        Reset(storage, length);
+    }
+
+    [SupportsOnlyNonByRefLike]
+    public RefList<T>(T[] array)
+    {
+        Reset(array.AsSpan());
+    }
+
+    public void Add(T value)
+    {
+        if (_length + 1 >= _storage.Length)
+            throw new InvalidOperationException();
+
+        _span[_length] = value;
+        _length++;
+    }
+
+    public void Reset(Span<T> storage, int? length = default)
+    {
+        _storage = storage;
+        _length = length ?? storage.Length;
+    }
+}
+```
 
 ### Issues
 
