@@ -4,14 +4,18 @@ Unconstraining our generics
 ## Summary
 This proposal is an aggregation of several different proposals for making `ref struct` more generally usable in our type system. The goal being to unify code paths today that have to specialize on `ref struct` and other types do to the inability of `ref struct` to participate in generics and implement interfaces. This proposal will allow us to generalize on `ref struct` as naturally as other types. 
 
-
 ## Motivation
+This feature will allow developers to remove `ref struct` specific code by instead letting them implement interfaces that are used in generic contexts to generalize algorithms. For example an explicit goal is to allow `ref struct` to implement `ISpanFormattable`. The `ISpanFormattable` interface and `ref struct` are used in low level perf sensitive areas but our current language limitations prevent them from being used together.
 
 ## Detailed Design 
 
 ### ref struct generic arguments
 
+This means type parameters with the `ref struct` constraint have all of the restrictions 
+
 ### ref struct interfaces
+
+**TODO** look up the definition of the constrained prefix for low level rules on where this is legal
 
 ### delegates
 
@@ -44,6 +48,8 @@ struct S<T, U>
 In this example the method `M` is only invalid when `T` is a `ref struct`. The type of `U` is immaterial to the legality of the method as it's not used in a manner incompatible with `ref struct`. In this case it would be desirable to have a more granular opt out. 
 
 At this time though there are no practical examples of this pattern. Adding this granularity will add cost to the runtime, as well as to the language as it's hard to reference type parameters in attributes. Going for simplicity at the moment but can reconsider in future versions if evidence for the scenario appears.
+
+**TODO** is IgnoreForRefStruct the right name (no)
 
 ### Constraints vs. anti constraints
 The syntax `where T : ref struct` appears in the space C# refers to as constraints. That is the syntax is meant to constraint or limit the set of types that are legal for the generic type parameter.
