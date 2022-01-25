@@ -145,15 +145,16 @@ The second example is hard to make work because it requires conversions in both 
 
 ### Overload resolution breaks
 
-The following API would become ambiguous:
+The following API would change meaning if we did not have a suffix:
 
 ```c#
 M("");
-static void M1(char[] charArray) => ...;
+static void M1(ReadOnlySpan<char> charSpan) => ...;
 static void M1(byte[] charArray) => ...;
 ```
 
-What should we do to address this?
+Today this calls the `ReadOnlySpan` overload, because there is an implicit user-defined conversion from `string`. If we introduced a conversion-from-expression for all string
+literals, then overload resolution would instead prefer the `byte[]` overload.
 
 ## Examples today
 Examples of where runtime has manually encoded the UTF8 bytes today
