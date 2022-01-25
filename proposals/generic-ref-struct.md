@@ -18,7 +18,11 @@ This proposal is an aggregation of several different proposals for making `ref s
 ## Considerations
 
 ### Treat it like array
-Why have an attribute when we could just special case it like arrays
+Rather than `[IgnoreForRefStruct]` attribute why not just special case `Span<T>` and other types as the language special cases arrays today. 
+
+Arrays today conditionally implement interfaces based on the element type of the array. For example a `T[]` implements `IEnumerable<T>` when `T` is a non-pointer type. That means `int*[]` does not but `int[]` does. The issues around generics and arrays is very good analogy for `where T : ref struct` and `Span<T>`. Effectively there is a set of APIs that need to be illegal based on the element type of `Span<T>` hence why not apply the same rules as array.
+
+In discussion with the runtime team there was agreement that the analogy is good. However under the hood the runtime was going to need some way to track the methods in question as invalid when the element type of `Span<T>` was a `ref struct`: an internal list, attribute, etc ... Given that some level of book keeping was needed and attributes were cheap it made more sense to expose this as a general feature. This way third parties can push `where T : ref struct` through types similar to `Span<T>` where they have APIs they can't walk away from.
 
 ### Why not attribute per type parameter
 Can't really encode type parameters in attributes
