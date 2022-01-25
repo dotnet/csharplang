@@ -83,14 +83,14 @@ The `where T : ref struct` annotation will be encoded by attributing the type pa
 ### Treat it like array
 **TODO** Use the name `SupportsOnlyNonByRefLike`
 
-Rather than `[IgnoreForRefStruct]` attribute why not just special case `Span<T>` and other types as the language special cases arrays today. 
+Rather than `[SupportsOnlyNonByRefLike]` attribute why not just special case `Span<T>` and other types as the language special cases arrays today. 
 
 Arrays today conditionally implement interfaces based on the element type of the array. For example a `T[]` implements `IEnumerable<T>` when `T` is a non-pointer type. That means `int*[]` does not but `int[]` does. The issues around generics and arrays is very good analogy for `where T : ref struct` and `Span<T>`. Effectively there is a set of APIs that need to be illegal based on the element type of `Span<T>` hence why not apply the same rules as array.
 
 In discussion with the runtime team there was agreement that the analogy is good. However under the hood the runtime was going to need some way to track the methods in question as invalid when the element type of `Span<T>` was a `ref struct`: an internal list, attribute, etc ... Given that some level of book keeping was needed and attributes were cheap it made more sense to expose this as a general feature. This way third parties can push `where T : ref struct` through types similar to `Span<T>` where they have APIs they can't walk away from.
 
 ### Why not attribute per type parameter
-Rather than applying `[IgnoreForRefStruct]` at the member level, it could be applied more granularly at a type parameter level. Consider for example: 
+Rather than applying `[SupportsOnlyNonByRefLike]` at the member level, it could be applied more granularly at a type parameter level. Consider for example: 
 
 ```c#
 struct S<T, U> 
@@ -98,7 +98,7 @@ struct S<T, U>
     where T : ref struct
     where U : ref struct 
 
-    [IgnoreForRefStruct(nameof(T))]
+    [SupportsOnlyNonByRefLike(nameof(T))]
     void M(T[] array)
     {
 
@@ -109,8 +109,6 @@ struct S<T, U>
 In this example the method `M` is only invalid when `T` is a `ref struct`. The type of `U` is immaterial to the legality of the method as it's not used in a manner incompatible with `ref struct`. In this case it would be desirable to have a more granular opt out. 
 
 At this time though there are no practical examples of this pattern. Adding this granularity will add cost to the runtime, as well as to the language as it's hard to reference type parameters in attributes. Going for simplicity at the moment but can reconsider in future versions if evidence for the scenario appears.
-
-**TODO** is IgnoreForRefStruct the right name (no)
 
 ### Constraints vs. anti constraints
 The syntax `where T : ref struct` appears in the space C# refers to as constraints. That is the syntax is meant to constraint or limit the set of types that are legal for the generic type parameter.
