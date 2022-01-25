@@ -2,9 +2,7 @@ Unconstraining our generics
 =====
 
 ## Summary
-This proposal is an aggregation of several different proposals for making `ref struct` more generally usable in our type system. The goal being to unify code paths today that have to specialize on `ref struct` and other types when 
-
-`struct` performance improvements: `ref` fields and the ability to override lifetime defaults. The goal being a design which takes into account the various proposals to create a single overarching feature set for low level `struct` improvements.
+This proposal is an aggregation of several different proposals for making `ref struct` more generally usable in our type system. The goal being to unify code paths today that have to specialize on `ref struct` and other types do to the inability of `ref struct` to participate in generics and implement interfaces. This proposal will allow us to generalize on `ref struct` as naturally as other types. 
 
 
 ## Motivation
