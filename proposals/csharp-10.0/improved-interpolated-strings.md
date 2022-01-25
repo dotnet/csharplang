@@ -14,7 +14,7 @@ in exactly the correct order.
     * This ordering is why the runtime is hesitant to introduce generic versions of the method, as it would lead to combinatoric explosion of generic instantiations
     of a very common method.
 2. It has to allocate an array for the arguments in most cases.
-3. There is no opportunity to avoid instanciating the instance if it's not needed. Logging frameworks, for example, will recommend avoiding string interpolation
+3. There is no opportunity to avoid instantiating the instance if it's not needed. Logging frameworks, for example, will recommend avoiding string interpolation
 because it will cause a string to be realized that may not be needed, depending on the current log-level of the application.
 4. It can never use `Span` or other ref struct types today, because ref structs are not allowed as generic type parameters, meaning that if a user wants to avoid
 copying to intermediate locations they have to manually format strings.
