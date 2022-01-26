@@ -147,6 +147,38 @@ Whether this conversion is supported and, if so, how it is performed is not spec
 
 Allow implicit conversions from a `string` constant with `null` value to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. The result of the conversion is `default` value of the target type.
 
+### Where does _string_constant_to_UTF8_byte_representation_conversion_ belong?
+
+Is _string_constant_to_UTF8_byte_representation_conversion_ a bullet point in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-conversions section on its own, or is it part of https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-constant-expression-conversions, or does it belong to some other existing implicit conversions group?
+
+*Proposal:* 
+
+It is a new bullet point in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-conversions, similar to "Implicit interpolated string conversions" or "Method group conversions". It doesn't feel like it belongs to "Implicit constant expression conversions" because, even though the source is a constant expression, the result is never a constant expression. Also, "Implicit constant expression conversions" are considered to be "Standard implicit conversions" (https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#standard-implicit-conversions), which is likely to lead to non-trivial behavior changes involving user-defined conversions.
+
+### Is _string_constant_to_UTF8_byte_representation_conversion_ a standard conversion
+
+In addition to "pure" Standard Conversions (the standard conversions are those pre-defined conversions that can occur as part of a user-defined conversion), compiler also treats some predefined conversions as "somewhat" standard. For example, an implicit interpolated string conversion can occur as part of a user-defined conversion if there is an explicit cast to the target type in code. As if it is a Standard Explicit Conversion, even though it is an implicit conversion not explicitly included into the set of standard implicit or explicit conversions. For example:
+
+``` C#
+class C
+{
+    static void Main()
+    {
+        C1 x = $"hello"; // error CS0266: Cannot implicitly convert type 'string' to 'C1'. An explicit conversion exists (are you missing a cast?)
+        var y = (C1)$"dog"; // works
+    }
+}
+
+class C1
+{
+    public static implicit operator C1(System.FormattableString x) => new C1();
+}
+```
+
+*Proposal:* 
+
+The new conversion is not a standard conversion. This will avoid non-trivial behavior changes involving user-defined conversions.
+
 ### The natural type of a string literal with `u8` suffix
 
 The "Detailed design" section says: "The natural type though will be `ReadOnlySpan<byte>`." At the same time: "When the `u8` suffix is used the literal can still be converted to any of the allowed types: `byte[]`, `Span<byte>` or `ReadOnlySpan<byte>`." 
