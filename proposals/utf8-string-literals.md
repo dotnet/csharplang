@@ -177,7 +177,22 @@ class C1
 
 *Proposal:* 
 
-The new conversion is not a standard conversion. This will avoid non-trivial behavior changes involving user-defined conversions.
+The new conversion is not a standard conversion. This will avoid non-trivial behavior changes involving user-defined conversions. For example, we won't need to worry about user-defined cinversions under implicit tuple literal conversions, etc.
+
+### Linq Expression Tree conversion
+
+Should _string_constant_to_UTF8_byte_representation_conversion_ be allowed in context of a Linq Expression Tree conversion?
+We can disallow it for now, or we could simply include the "lowered" form into the tree. For example:
+``` C#
+Expression<Func<byte[]>> x = () => "hello";           // () => new [] {104, 101, 108, 108, 111}
+Expression<FuncSpanOfByte> y = () => "dog";           // () => new Span`1(new [] {100, 111, 103}) 
+Expression<FuncReadOnlySpanOfByte> z = () => "cat";   // () => new ReadOnlySpan`1(new [] {99, 97, 116})
+```
+
+What about string literals with `u8` suffix? We could surface those as byte array creations:
+``` C#
+Expression<Func<byte[]>> x = () => "hello"u8;           // () => new [] {104, 101, 108, 108, 111}
+```
 
 ### The natural type of a string literal with `u8` suffix
 
