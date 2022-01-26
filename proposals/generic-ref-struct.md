@@ -51,14 +51,30 @@ void M2<T>()
 
 At the implementation all type parameters having the `where T : ref struct` annotation are treated as if the type is a `ref struct`. Most importantly it has all of the limitations that would be expected from a `ref struct`. For example: 
 
-- Instances of `T` cannot be boxed
+- Instances of `T` cannot be boxed or appear on the heap
 - Instances of `T` can only appear as fields inside a `ref struct`
-- Instances of `T` are considered `ref struct` for the purposes of the [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). 
+- Instances of `T` are considered `ref struct` for the purposes of the [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md) 
 - `T` cannot be used as the element of an array
 - Members on `object` such as `ToString` cannot be invoked as that implicitly boxes
 - etc ...
 
-Positionally the `ref struct` annotation must come after the type kind, such as `struct`, but before the interface list or `new()` constraint (interfaces are covered [later in the proposal](#interfaces)). The combination with type kinds has the following effects:
+This also means that `T : where ref struct` cannot be used where `ref struct` would be used in type positions: 
+
+```c#
+class C<T> where T : ref struct 
+{
+    // Error: field cannot be a `ref struct` inside a class
+    T field; 
+
+    // Error: array elements cannot be of type `ref struct`
+    void M(T[] array)
+    {
+
+    }
+}
+```
+
+Positionally in syntax the `ref struct` annotation must come after the type kind, such as `struct`, but before the interface list or `new()` constraint (interfaces are covered [later in the proposal](#interfaces)). The combination with type kinds has the following effects:
 
 - `where T : struct, ref struct`: describes a type parameter that can be a `struct` or `ref struct` but not other types like `class` or `interface`.
 - `where T : unmanaged, ref struct`: similar to `struct, ref struct` except that the type also meets the `unmanaged` constraint. This is believed to have limited use though as `ref struct` containing any type of `ref` data will not meet the `unmanaged` contraint and hence are likely better defined as simply `struct`.
@@ -70,6 +86,56 @@ Positionally the `ref struct` annotation must come after the type kind, such as 
 The `where T : ref struct` annotation will be encoded by attributing the type parameter with the attribute `System.Runtime.CompilerServices.SupportsByRefLike`. This will not result in a `modreq` on the containing member nor will `[Obsolete]` tricks be added to the containing type. The intent is for this to be a binary compatible change. The explicit intent is for us to allow types in libraries to relax their type parameters to accept `ref struct` without breaking consumers.
 
 ### Supporting Span<T>
+A key motivation of this proposal is to allow for instantiations like `Span<Span<T>>`. Effectively moving the `Span<T>` type to have the `where T : ref struct` annotation. This is a problem because a number of the APIs on `Span<T>` violate the rules of `where T : ref struct` as `T[]` is a common type in the APIs. 
+
+```c# 
+// Existing Span<T> definition
+public readonly ref struct Span<T>
+{
+    public Span(T[]? array) { ... }
+
+    public Span(T[]? array, int index, int length) { ... }
+
+    public static implicit operator Span<T>(T[]? array) { ... }
+}
+```
+
+If the `Span<T>` type was being designed from scratch in the presence of `where T : ref struct` it's possible different choices would've been made here. Possibly leveraging `static` factories and pushing implicit conversions into the compiler. Unfortunately this is not being designed from scratch and in order to meet the desire to have `Span<Span<T>>` these existing APIs need to be rationalized.
+
+The compiler will introduce the type `System.Runtime.CompilerServices.SupportsOnlyNonByRefLikeAttribute` that can be applied to methods and operators. When applied to a member it has the effect of removing `where T : ref struct` from the constraints on all type parameters on the *immediate* containing type. All other constraints remain in place.
+
+This allows us to rationalize our `Span<T>` definition as well as allowing third party customers rationalize their existing APIs. 
+
+```c#
+// Existing Span<T> definition
+public readonly ref struct Span<T>
+{
+    [SupportsOnlyNonByRefLikeAttributes]
+    public Span(T[]? array) { ... }
+
+    [SupportsOnlyNonByRefLikeAttributes]
+    public Span(T[]? array, int index, int length) { ... }
+
+    [SupportsOnlyNonByRefLikeAttributes]
+    public static implicit operator Span<T>(T[]? array) { ... }
+}
+```
+
+This does not impact the binding rules for invocations of such members. These symbols will continue to be fully bindable. In the case they are bound when any of the type parameters on the containing type are potentially a `ref struct` then use of a member annotated with `[SupportsOnlyNonByRefLike]` will be considered an error.
+
+```c#
+void M<T, U>()
+    where T : ref struct
+{
+    // Error: cannot access member as `T` is potentially a `ref struct`
+    new Span<T>(null);
+
+    // Okay
+    new Span<U>(null);
+}
+```
+
+The runtime will recognize this attribute and ensure that any use of these members at runtime with a type that is a `ref struct` will result in a runtime exception.
 
 ### ref struct interfaces
 <a name="interfaces"></a>
