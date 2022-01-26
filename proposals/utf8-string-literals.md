@@ -131,6 +131,44 @@ It seems unlikely that we would regret the target type conversion between string
 It seems more likely that we'd regret the `u8` suffix pointing to `ReadOnlySpan<byte>` instead of `Utf8String`. It would be similar to how we regret that `stackalloc int[]` has a natural type of `int*` instead of `Span<int>`. This is not a deal breaker though, just an inconvenience.
 
 ## Unresolved questions
+
+### The natural type of a string literal with `u8` suffix
+
+The "Detailed design" section says: "The natural type though will be `ReadOnlySpan<byte>`." At the same time: "When the `u8` suffix is used the literal can still be converted to any of the allowed types: `byte[]`, `Span<byte>` or `ReadOnlySpan<byte>`." 
+
+There are several disadvantages with this approach:
+- `ReadOnlySpan<byte>` is not available on desktop framework;
+- There are no existing conversions from `ReadOnlySpan<byte>` to `byte[]` or `Span<byte>`. In order to support them we will likely need to treat the literals as target typed. Both the language rules and implementation will become more complicated.  
+
+*Proposal:* 
+
+The natural type will be `byte[]`. It is readily available on all frameworks. BTW, at runtime we will always be starting with creating a byte array, even with the original proposal. We also don't need any special conversion rules to support conversions to `Span<byte>` and `ReadOnlySpan<byte>`. There are already implicit user-defined conversions from `byte[]` to `Span<byte>` and `ReadOnlySpan<byte>`. There is even implicit user-defined conversion to `ReadOnlyMemory<byte>` (see the "Depth of the conversion" question below). There is a disadvantage, language doesn't allow chaining user-defined conversions. So, the following code will not compile:
+```C#
+using System;
+class C
+{
+    static void Main()
+    {
+        var y = (C2)"dog"u8; // error CS0030: Cannot convert type 'byte[]' to 'C2'
+        var z = (C3)"cat"u8; // error CS0030: Cannot convert type 'byte[]' to 'C3'
+    }
+}
+
+class C2
+{
+    public static implicit operator C2(Span<byte> x) => new C2();
+}
+
+class C3
+{
+    public static explicit operator C3(ReadOnlySpan<byte> x) => new C3();
+}
+```
+However, as with any user-defined conversion, an explicit cast can be used to make one user-defined conversion a part of another user-defined conversion.
+
+It feels like all motivating scenarios are going to be addressed with `byte[]` as the natural type, but the language rules and implementation will be significantly simpler.
+
+
 ### Depth of the conversion
 Will it also work anywhere that a byte[] could work? Consider: 
 
