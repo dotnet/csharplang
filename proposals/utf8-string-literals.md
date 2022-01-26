@@ -27,7 +27,10 @@ This trade off is a pain point that comes up frequently for our partners in the 
 To fix this we will allow for UTF8 literals in the language and encode them into the UTF8 `byte[]` at compile time.
 
 ## Detailed design
-The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow for implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. 
+
+### Conversions between `string` constants and `byte` sequences
+
+The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow _string_constant_to_UTF8_byte_representation_conversion_ - implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. 
 
 ```c# 
 byte[] array = "hello";             // new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f }
@@ -59,7 +62,11 @@ ReadOnlySpan<byte> span = first + second;
 
 The two parts here are invalid on their own as they are incomplete portions of a surrogate pair. Individually there is no correct translation to UTF8 but together they form a complete surrogate pair that can be successfully translated to UTF8.
 
-Once implemented string literals will have the same problem that other literals have in the language: what type they represent depends on how they are used. C# provides a literal suffix to disambiguate the meaning for other literals. For example developers can write `3.14f` to force the value to be a `float` or `1l` to force the value to be a `long`. Similarly the language will provide the `u8` suffix on string literals to force the type to be UTF8.
+Once implemented string literals will have the same problem that other literals have in the language: what type they represent depends on how they are used. C# provides a literal suffix to disambiguate the meaning for other literals. For example developers can write `3.14f` to force the value to be a `float` or `1l` to force the value to be a `long`.
+
+### `u8` suffix on string literals
+
+Similarly the language will provide the `u8` suffix on string literals to force the type to be UTF8.
 
 When the `u8` suffix is used the literal can still be converted to any of the allowed types: `byte[]`, `Span<byte>` or `ReadOnlySpan<byte>`. The natural type though will be `ReadOnlySpan<byte>`.
 
@@ -131,6 +138,99 @@ It seems unlikely that we would regret the target type conversion between string
 It seems more likely that we'd regret the `u8` suffix pointing to `ReadOnlySpan<byte>` instead of `Utf8String`. It would be similar to how we regret that `stackalloc int[]` has a natural type of `int*` instead of `Span<int>`. This is not a deal breaker though, just an inconvenience.
 
 ## Unresolved questions
+
+### Conversions between a `string` constant with `null` value and `byte` sequences
+
+Whether this conversion is supported and, if so, how it is performed is not specified.
+
+*Proposal:* 
+
+Allow implicit conversions from a `string` constant with `null` value to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. The result of the conversion is `default` value of the target type.
+
+### Where does _string_constant_to_UTF8_byte_representation_conversion_ belong?
+
+Is _string_constant_to_UTF8_byte_representation_conversion_ a bullet point in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-conversions section on its own, or is it part of https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-constant-expression-conversions, or does it belong to some other existing implicit conversions group?
+
+*Proposal:* 
+
+It is a new bullet point in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-conversions, similar to "Implicit interpolated string conversions" or "Method group conversions". It doesn't feel like it belongs to "Implicit constant expression conversions" because, even though the source is a constant expression, the result is never a constant expression. Also, "Implicit constant expression conversions" are considered to be "Standard implicit conversions" (https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#standard-implicit-conversions), which is likely to lead to non-trivial behavior changes involving user-defined conversions.
+
+### Is _string_constant_to_UTF8_byte_representation_conversion_ a standard conversion
+
+In addition to "pure" Standard Conversions (the standard conversions are those pre-defined conversions that can occur as part of a user-defined conversion), compiler also treats some predefined conversions as "somewhat" standard. For example, an implicit interpolated string conversion can occur as part of a user-defined conversion if there is an explicit cast to the target type in code. As if it is a Standard Explicit Conversion, even though it is an implicit conversion not explicitly included into the set of standard implicit or explicit conversions. For example:
+
+``` C#
+class C
+{
+    static void Main()
+    {
+        C1 x = $"hello"; // error CS0266: Cannot implicitly convert type 'string' to 'C1'. An explicit conversion exists (are you missing a cast?)
+        var y = (C1)$"dog"; // works
+    }
+}
+
+class C1
+{
+    public static implicit operator C1(System.FormattableString x) => new C1();
+}
+```
+
+*Proposal:* 
+
+The new conversion is not a standard conversion. This will avoid non-trivial behavior changes involving user-defined conversions. For example, we won't need to worry about user-defined cinversions under implicit tuple literal conversions, etc.
+
+### Linq Expression Tree conversion
+
+Should _string_constant_to_UTF8_byte_representation_conversion_ be allowed in context of a Linq Expression Tree conversion?
+We can disallow it for now, or we could simply include the "lowered" form into the tree. For example:
+``` C#
+Expression<Func<byte[]>> x = () => "hello";           // () => new [] {104, 101, 108, 108, 111}
+Expression<FuncSpanOfByte> y = () => "dog";           // () => new Span`1(new [] {100, 111, 103}) 
+Expression<FuncReadOnlySpanOfByte> z = () => "cat";   // () => new ReadOnlySpan`1(new [] {99, 97, 116})
+```
+
+What about string literals with `u8` suffix? We could surface those as byte array creations:
+``` C#
+Expression<Func<byte[]>> x = () => "hello"u8;           // () => new [] {104, 101, 108, 108, 111}
+```
+
+### The natural type of a string literal with `u8` suffix
+
+The "Detailed design" section says: "The natural type though will be `ReadOnlySpan<byte>`." At the same time: "When the `u8` suffix is used the literal can still be converted to any of the allowed types: `byte[]`, `Span<byte>` or `ReadOnlySpan<byte>`." 
+
+There are several disadvantages with this approach:
+- `ReadOnlySpan<byte>` is not available on desktop framework;
+- There are no existing conversions from `ReadOnlySpan<byte>` to `byte[]` or `Span<byte>`. In order to support them we will likely need to treat the literals as target typed. Both the language rules and implementation will become more complicated.  
+
+*Proposal:* 
+
+The natural type will be `byte[]`. It is readily available on all frameworks. BTW, at runtime we will always be starting with creating a byte array, even with the original proposal. We also don't need any special conversion rules to support conversions to `Span<byte>` and `ReadOnlySpan<byte>`. There are already implicit user-defined conversions from `byte[]` to `Span<byte>` and `ReadOnlySpan<byte>`. There is even implicit user-defined conversion to `ReadOnlyMemory<byte>` (see the "Depth of the conversion" question below). There is a disadvantage, language doesn't allow chaining user-defined conversions. So, the following code will not compile:
+```C#
+using System;
+class C
+{
+    static void Main()
+    {
+        var y = (C2)"dog"u8; // error CS0030: Cannot convert type 'byte[]' to 'C2'
+        var z = (C3)"cat"u8; // error CS0030: Cannot convert type 'byte[]' to 'C3'
+    }
+}
+
+class C2
+{
+    public static implicit operator C2(Span<byte> x) => new C2();
+}
+
+class C3
+{
+    public static explicit operator C3(ReadOnlySpan<byte> x) => new C3();
+}
+```
+However, as with any user-defined conversion, an explicit cast can be used to make one user-defined conversion a part of another user-defined conversion.
+
+It feels like all motivating scenarios are going to be addressed with `byte[]` as the natural type, but the language rules and implementation will be significantly simpler.
+
+
 ### Depth of the conversion
 Will it also work anywhere that a byte[] could work? Consider: 
 
@@ -143,17 +243,86 @@ The first example likely should work because of the natural type that comes from
 
 The second example is hard to make work because it requires conversions in both directions. That is unless we add `ReadOnlyMemory<byte>` as one of the allowed conversion types. 
 
+*Proposal:* 
+
+Don't do anything special.
+
 ### Overload resolution breaks
 
 The following API would become ambiguous:
 
 ```c#
 M("");
-static void M1(char[] charArray) => ...;
-static void M1(byte[] charArray) => ...;
+static void M1(ReadOnlySpan<char> charArray) => ...;
+static void M1(byte[] byteArray) => ...;
 ```
 
 What should we do to address this?
+
+*Proposal:* 
+
+Similar to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#overload-resolution, [Better function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#better-function-member) is updated to prefer members where none of the conversions involved require converting `string` constants to UTF8 `byte` sequences.
+
+> #### Better function member
+> ...
+> Given an argument list `A` with a set of argument expressions `{E1, E2, ..., En}` and two applicable function members `Mp` and `Mq` with parameter types `{P1, P2, ..., Pn}` and `{Q1, Q2, ..., Qn}`, `Mp` is defined to be a ***better function member*** than `Mq` if
+>
+> 1. **for each argument, the implicit conversion from `Ex` to `Px` is not a _string_constant_to_UTF8_byte_representation_conversion_, and for at least one argument, the implicit conversion from `Ex` to `Qx` is a _string_constant_to_UTF8_byte_representation_conversion_, or**
+> 2. for each argument, the implicit conversion from `Ex` to `Px` is not a _function_type_conversion_, and
+>    *  `Mp` is a non-generic method or `Mp` is a generic method with type parameters `{X1, X2, ..., Xp}` and for each type parameter `Xi` the type argument is inferred from an expression or from a type other than a _function_type_, and
+>    *  for at least one argument, the implicit conversion from `Ex` to `Qx` is a _function_type_conversion_, or `Mq` is a generic method with type parameters `{Y1, Y2, ..., Yq}` and for at least one type parameter `Yi` the type argument is inferred from a _function_type_, or
+> 3. for each argument, the implicit conversion from `Ex` to `Qx` is not better than the implicit conversion from `Ex` to `Px`, and for at least one argument, the conversion from `Ex` to `Px` is better than the conversion from `Ex` to `Qx`.
+
+Note that the addition of this rule is not going to cover scenarios with instance methods becoming applicable and "shadowing" extension methods. For example:
+``` C#
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        var p = new Program();
+        Console.WriteLine(p.M(""));
+    }
+
+    public string M(byte[] b) => "byte[]";
+}
+
+static class E
+{
+    public static string M(this object o, string s) => "string";
+}
+```
+Behavior of this code will silently change from printing "string" to printing "byte[]".
+
+Are we Ok with this behavior change? Should it be documented as a breaking change?
+
+Note that there is no proposal to make _string_constant_to_UTF8_byte_representation_conversion_ unavailable when C#10 language version is targeted. In that case, the example above becomes an error rather than returns to C#10 behavior. This follows a general principle that target language version doesn't affect semantics of the language.
+
+Are we Ok with this behavior? Should it be documented as a breaking change?
+
+The new rule also is not going to prevent breaks involving tuple litearal conversions. For example,
+``` C#
+class C
+{
+    static void Main()
+    {
+        System.Console.Write(Test(("s", 1)));
+    }
+
+    static string Test((object, int) a) => "object";
+    static string Test((byte[], int) a) => "array";
+}
+```
+is going to silently print "array" instead of "object". 
+
+Are we Ok with this behavior? Should it be documented as a breaking change? Perhaps we could complicate the new rule to dig into the tuple literal conversions.
+
+### Should `u8` suffix be case-insensitive?
+
+*Proposal:* 
+
+Support `U8` suffix as well for consistency with numeric suffixes.
 
 ## Examples today
 Examples of where runtime has manually encoded the UTF8 bytes today
