@@ -254,6 +254,12 @@ Note that there is no proposal to make _string_constant_to_UTF8_byte_representat
 
 Are we Ok with this behavior? Should it be documented as a breaking change?
 
+### Should `u8` suffix be case-insensitive?
+
+*Proposal:* 
+
+Support `U8` suffix as well for consistency with numeric suffixes.
+
 ## Examples today
 Examples of where runtime has manually encoded the UTF8 bytes today
 
