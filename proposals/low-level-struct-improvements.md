@@ -951,6 +951,7 @@ The following issues are all related to this proposal:
 - https://github.com/dotnet/csharplang/issues/992
 - https://github.com/dotnet/csharplang/issues/1314
 - https://github.com/dotnet/csharplang/issues/2208
+- https://github.com/dotnet/csharplang/issues/4260
 - https://github.com/dotnet/runtime/issues/32060
 - https://github.com/dotnet/runtime/issues/61135
 

@@ -37,7 +37,7 @@ Swap<byte>(ref span1[0], ref span1[1]);
 
 At the call site this relaxes the set of legal type arguments to inclued `ref struct` *in addition* to the types already allowed. Even though this appears in the constraint position it serves more of an anti-constraint because it expands the set of possible types. 
 
-As an expansion though it means that `T where T : ref struct` is not compatible with type parameters lacking the same annotation:
+As an expansion though it means that `where T : ref struct` is not compatible with type parameters lacking the same annotation:
 
 ```c#
 void M1<U>() { }
@@ -49,7 +49,7 @@ void M2<T>()
 }
 ```
 
-At the implementation all type parameters having the `where T : ref struct` annotation are treated as if the type is a `ref struct`. Most importantly it has all of the limitations that would be expected from a `ref struct`. For example: 
+At the implementation all type parameters having the `where T : ref struct` annotation are treated as if the type is a `ref struct`. This means the type parameter has all of the limitations that would be expected a `ref struct` type. For example:
 
 - Instances of `T` cannot be boxed or appear on the heap
 - Instances of `T` can only appear as fields inside a `ref struct`
@@ -144,7 +144,7 @@ Note: the [alternative](#special-case) here is simply special casing `Span<T>` a
 
 The language will allow `ref struct` to implement interfaces. The rules for implementation will be the same as for normal `struct`. This includes allowing the implementations to be implicit or explicit.
 
-**TODO: Need better example than animals but feeling lazy***
+**TODO: Need better example than animals but feeling lazy**
 
 ```c#
 interface IAnimal
@@ -191,9 +191,25 @@ void Write<T>(T value)
 ### delegates
 The features described thus far allow developers the flexibility to opt existing generic types into `where T : ref struct` where legal. This though requires developers modify existing types and deal with any incompatibilities that may occur. Essentially it is not automatic, it requires work. 
 
-There is one class of types for which no human inpsection is needed: delegates. Delegates represent types that are signature only, there is no implicit implementation. That means the compiler itself can infer whether a type parameter could be validly `where T : ref struct` or not. It simply has to examine the signature and determine if the type parameter is used in any type where the corresponding parameter is not `where T : ref struct`. 
+There is one class of types for which no human inpsection is needed: delegates. Delegates represent types that are signature only, there is no implementation to consider. That means the compiler itself can infer whether a type parameter could be validly `where T : ref struct` or not. It can do so by examining the places where type parameters are used and validating if the constraints are compatible with `where T : ref struct`. For example: 
 
-To expediate the adoption of this feature and make it easier to flow through th ecosystem the compiler will automatically mark type parameters on `delegate` instances as `where T : ref struct` when it detects it is legal. That means all existing `Action` and `Func` definition will be immediately eligable to take and return `Span<T>` instances.
+```c#
+// T is never used inside another generic hence implicitly supports ref struct
+delegate T Delegate1<T>(); 
+delegate void Delegate2<T>(T p);
+delegate void Deleaget3<T>(ref T p);
+
+// T is used in a generic param that does not support ref struct hence it does not 
+// support it
+delegate void Delegate4<T>(List<T> list);
+```
+
+The compiler will automatically mark type parameters on such `delegate` declarations as having the `where T : ref struct` annotation. This will eexpediate the adoption of this feature and not force a lot of extra annotations by developers. Consider that this will automatically make all known `Action` and `Func` delegates available for `ref struct` usage.
+
+## Open Issues
+
+- Special case `Span<T>` like array vs. using an attribute and making it end user consumable
+- Use constraint syntax vs. a newly defined allow style syntax
 
 ## Considerations
 
@@ -335,11 +351,16 @@ This also means that the use of `where T : any` on interfaces is not consequence
 It is not believed that the `interface` scenario is worth the extra syntax here. If more evidence arrives that demonstrates it to be worth it we should consider this in a future version of the language.
 
 ### Take delegates further
-**TODO: explain how delegates could use ref T as a type argument**
+The [low level hackathon](https://github.com/dotnet/runtime/tree/feature/lowlevelhackathon) demonstrated that at the `delegate` level, where there are only signatures, generic instantiation can go beyond even `ref struct`. It is possible to support generic arguments with all types not supported today, like pointers, as well as items like `ref T` which are more type modifiers than types in the language.
 
-## Open Issues
+```c# 
+int i = 0;
+Action<ref int> a = (ref int j) => j++;
+a(ref i);
+Console.WriteLine(i); // 1
+```
 
-## Future Considerations
+It is unlikely that this support will be added to the language in C# 11 or runtime in .NET 7. But support is a realistic possibility in future releases. It is another reason to consider leaving delegates us implicitly opt in. That would mean if the support is extended in the runtime in the future then delegates could continue to automatically get better at the same time.
 
 ## Examples 
 
@@ -399,3 +420,5 @@ sealed class RefList<T> where T : ref struct
 ### Related Work
 
 - https://github.com/dotnet/runtime/issues/13627
+- https://github.com/dotnet/csharplang/issues/1148
+-
