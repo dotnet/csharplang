@@ -137,6 +137,8 @@ void M<T, U>()
 
 The runtime will recognize this attribute and ensure that any use of these members at runtime with a type that is a `ref struct` will result in a runtime exception.
 
+Note: the [alternative](#special-case) here is simply special casing `Span<T>` as array is special cased today.
+
 ### ref struct interfaces
 <a name="interfaces"></a>
 
@@ -147,7 +149,7 @@ The runtime will recognize this attribute and ensure that any use of these membe
 ## Considerations
 
 ### Treat it like array
-**TODO** Use the name `SupportsOnlyNonByRefLike`
+<a name="special-case"></a>
 
 Rather than `[SupportsOnlyNonByRefLike]` attribute why not just special case `Span<T>` and other types as the language special cases arrays today. 
 
@@ -181,7 +183,32 @@ The syntax `where T : ref struct` appears in the space C# refers to as constrain
 
 This feature though expands the set of types available. The set of types applicable to `T where T : ref struct` is larger than simply `T`. This means the feature is an anti-constraint yet it occupies a constraint location. 
 
-It is reasonable to consider a new syntax here that cleanly differentiates our anti-constraints from actual constraints. At the time of this writing though there are only two proposed anti-constraints, one is lacking supporting evidence, and no obvious better syntax for them. Hence the proposal is written using the familiair `where T :` style of syntax. If an intuitive syntax for anti-constraints is proposed it is likely to get consideration in the proposal.
+It is reasonable to consider a new syntax here that cleanly differentiates our anti-constraints from actual constraints. At the time of this writing though there are only two proposed anti-constraints and one is lacking supporting evidence. This makes it questionable if it meets the bar for a new syntax or not.
+
+If a new syntax is desired to separate anti-constraints from constraints then `allow` is one to consider: 
+
+```c#
+readonly ref struct Span<T> 
+    allow T : ref struct
+{
+
+}
+```
+
+This makes the support for `[SupportsOnlyNonByRefLike]` cleaner as the implementation is to simply ignore the set of `allow` items. It may even lead to a better name such as `[RemoveAllows]`. 
+
+The only downside is that it means type parameter declarations get more complex because there are now both `where` and `allow` lists on them.
+
+```c#
+void Write<T>(T value)
+    where T : ISpanFormattable
+    allow T : ref struct
+{
+
+}
+```
+
+At the same time it's possible this will read clearer to developers. It also opens the door for future allows such as pointers. 
 
 ### Generalize the delegate support
 The use of any type in `delegate` may cause readers to desire a more general feature that could be applied to any generic parameter. Essentially could we design a syntax for type parameters that could be any type (pointer, `ref`, etc ...) and allow it on any generic parameter? That would leave `delegate` instances as effectively having an implicit version of this syntax.
