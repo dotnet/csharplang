@@ -189,6 +189,11 @@ void Write<T>(T value)
 ```
 
 ### delegates
+The features described thus far allow developers the flexibility to opt existing generic types into `where T : ref struct` where legal. This though requires developers modify existing types and deal with any incompatibilities that may occur. Essentially it is not automatic, it requires work. 
+
+There is one class of types for which no human inpsection is needed: delegates. Delegates represent types that are signature only, there is no implicit implementation. That means the compiler itself can infer whether a type parameter could be validly `where T : ref struct` or not. It simply has to examine the signature and determine if the type parameter is used in any type where the corresponding parameter is not `where T : ref struct`. 
+
+To expediate the adoption of this feature and make it easier to flow through th ecosystem the compiler will automatically mark type parameters on `delegate` instances as `where T : ref struct` when it detects it is legal. That means all existing `Action` and `Func` definition will be immediately eligable to take and return `Span<T>` instances.
 
 ## Considerations
 
@@ -328,6 +333,9 @@ Effectively the only item that can be taken with `T where T : any` is to instant
 This also means that the use of `where T : any` on interfaces is not consequence free. Implicitly adding this to an interface will break any default implementated method on that interface. Hence unlike `delegate` it cannot be retroactively added to our existing types. It is possible as an opt-in for `interface` but doing so effectively removes the ability for an `interface` to participate in DIM. 
 
 It is not believed that the `interface` scenario is worth the extra syntax here. If more evidence arrives that demonstrates it to be worth it we should consider this in a future version of the language.
+
+### Take delegates further
+**TODO: explain how delegates could use ref T as a type argument**
 
 ## Open Issues
 
