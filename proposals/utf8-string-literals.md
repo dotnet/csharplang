@@ -27,6 +27,9 @@ This trade off is a pain point that comes up frequently for our partners in the 
 To fix this we will allow for UTF8 literals in the language and encode them into the UTF8 `byte[]` at compile time.
 
 ## Detailed design
+
+### Conversions between `string` constants and `byte` sequences
+
 The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow for implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. 
 
 ```c# 
@@ -59,7 +62,11 @@ ReadOnlySpan<byte> span = first + second;
 
 The two parts here are invalid on their own as they are incomplete portions of a surrogate pair. Individually there is no correct translation to UTF8 but together they form a complete surrogate pair that can be successfully translated to UTF8.
 
-Once implemented string literals will have the same problem that other literals have in the language: what type they represent depends on how they are used. C# provides a literal suffix to disambiguate the meaning for other literals. For example developers can write `3.14f` to force the value to be a `float` or `1l` to force the value to be a `long`. Similarly the language will provide the `u8` suffix on string literals to force the type to be UTF8.
+Once implemented string literals will have the same problem that other literals have in the language: what type they represent depends on how they are used. C# provides a literal suffix to disambiguate the meaning for other literals. For example developers can write `3.14f` to force the value to be a `float` or `1l` to force the value to be a `long`.
+
+### `u8` suffix on string literals
+
+Similarly the language will provide the `u8` suffix on string literals to force the type to be UTF8.
 
 When the `u8` suffix is used the literal can still be converted to any of the allowed types: `byte[]`, `Span<byte>` or `ReadOnlySpan<byte>`. The natural type though will be `ReadOnlySpan<byte>`.
 
@@ -131,6 +138,14 @@ It seems unlikely that we would regret the target type conversion between string
 It seems more likely that we'd regret the `u8` suffix pointing to `ReadOnlySpan<byte>` instead of `Utf8String`. It would be similar to how we regret that `stackalloc int[]` has a natural type of `int*` instead of `Span<int>`. This is not a deal breaker though, just an inconvenience.
 
 ## Unresolved questions
+
+### Conversions between a `string` constant with `null` value and `byte` sequences
+
+Whether this conversion is supported and, if so, how it is performed is not specified.
+
+*Proposal:* 
+
+Allow implicit conversions from a `string` constant with `null` value to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. The result of the conversion is `default` value of the target type.
 
 ### The natural type of a string literal with `u8` suffix
 
