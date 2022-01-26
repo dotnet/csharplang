@@ -301,6 +301,23 @@ Note that there is no proposal to make _string_constant_to_UTF8_byte_representat
 
 Are we Ok with this behavior? Should it be documented as a breaking change?
 
+The new rule also is not going to prevent breaks involving tuple litearal conversions. For example,
+``` C#
+class C
+{
+    static void Main()
+    {
+        System.Console.Write(Test(("s", 1)));
+    }
+
+    static string Test((object, int) a) => "object";
+    static string Test((byte[], int) a) => "array";
+}
+```
+is going to silently print "array" instead of "object". 
+
+Are we Ok with this behavior? Should it be documented as a breaking change? Perhaps we could complicate the new rule to dig into the tuple literal conversions.
+
 ### Should `u8` suffix be case-insensitive?
 
 *Proposal:* 
