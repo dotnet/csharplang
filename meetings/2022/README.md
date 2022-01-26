@@ -21,10 +21,11 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Jan 31, 2022
 
+- Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
+
 ## Jan 26, 2022
 
 - Open design questions for UTF8 String Literals (AlekseyTs) : https://github.com/dotnet/csharplang/blob/main/proposals/utf8-string-literals.md#unresolved-questions
-- Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
 
 # C# Language Design Notes for 2022
 
