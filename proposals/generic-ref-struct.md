@@ -142,7 +142,51 @@ Note: the [alternative](#special-case) here is simply special casing `Span<T>` a
 ### ref struct interfaces
 <a name="interfaces"></a>
 
-**TODO** look up the definition of the constrained prefix for low level rules on where this is legal
+The language will allow `ref struct` to implement interfaces. The rules for implementation will be the same as for normal `struct`. This includes allowing the implementations to be implicit or explicit.
+
+**TODO: Need better example than animals but feeling lazy***
+
+```c#
+interface IAnimal
+{
+    void Speak(); 
+}
+
+ref struct Lab : IAnimal
+{
+    public void Speak() => Console.WriteLine("FEED ME");
+}
+```
+
+The one exception is when `ref struct` intersects with default implementation methods. When interfaces containing default implemented methods are used on `struct` types there is an implicit boxing operation for the invocation. That means effectively a DIM call when the implementing type was a `ref struct` would violate our rules on them appearing in the heap. As such this will be disallowed by both the language and runtime. 
+
+- A `ref struct` that implements an `interface` must provide implementations for all methods, even those with a default implementation
+- A DIM invocation on a `ref struct` will result in a runtime exception
+
+The ability to implement interfaces does not change the rules around conversions though. A `ref struct` cannot be boxed, conversion from a `struct` to an `interface` has an implicit box associated with it hence conversion from `ref struct` to its implemented interfaces remains an error: 
+
+```c#
+ref struct S : IUtil { ... }
+
+S local = ...;
+IUtil util = local; // Error: a ref struct cannot be boxed 
+```
+
+The interfaces implemented by a `ref struct` can be used to satisfy constraints on a generic type parameter. Invocation of the interface methods on the type parameters is allowed because such invocations use the `.constrained` prefix for execution which eliminates boxing when the underlying type is a `struct`. 
+
+```c# 
+void Write<T>(T value)
+    where T : ref struct, ISpanFormattable
+{
+    var buffer = stackalloc char[100];
+
+    // Constrained interface call which does not box
+    if (value.TryFormat(buffer, out var written, default, null))
+    {
+        this.Write(buffer);
+    }
+}
+```
 
 ### delegates
 
