@@ -30,7 +30,7 @@ To fix this we will allow for UTF8 literals in the language and encode them into
 
 ### Conversions between `string` constants and `byte` sequences
 
-The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow for implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. 
+The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow _string_constant_to_UTF8_byte_representation_conversion_ - implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. 
 
 ```c# 
 byte[] array = "hello";             // new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f }
@@ -196,17 +196,63 @@ The first example likely should work because of the natural type that comes from
 
 The second example is hard to make work because it requires conversions in both directions. That is unless we add `ReadOnlyMemory<byte>` as one of the allowed conversion types. 
 
+*Proposal:* 
+
+Don't do anything special.
+
 ### Overload resolution breaks
 
 The following API would become ambiguous:
 
 ```c#
 M("");
-static void M1(char[] charArray) => ...;
-static void M1(byte[] charArray) => ...;
+static void M1(ReadOnlySpan<char> charArray) => ...;
+static void M1(byte[] byteArray) => ...;
 ```
 
 What should we do to address this?
+
+*Proposal:* 
+
+Similar to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#overload-resolution, [Better function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#better-function-member) is updated to prefer members where none of the conversions involved require converting `string` constants to UTF8 `byte` sequences.
+
+> #### Better function member
+> ...
+> Given an argument list `A` with a set of argument expressions `{E1, E2, ..., En}` and two applicable function members `Mp` and `Mq` with parameter types `{P1, P2, ..., Pn}` and `{Q1, Q2, ..., Qn}`, `Mp` is defined to be a ***better function member*** than `Mq` if
+>
+> 1. **for each argument, the implicit conversion from `Ex` to `Px` is not a _string_constant_to_UTF8_byte_representation_conversion_, and for at least one argument, the implicit conversion from `Ex` to `Qx` is a _string_constant_to_UTF8_byte_representation_conversion_, or**
+> 2. for each argument, the implicit conversion from `Ex` to `Px` is not a _function_type_conversion_, and
+>    *  `Mp` is a non-generic method or `Mp` is a generic method with type parameters `{X1, X2, ..., Xp}` and for each type parameter `Xi` the type argument is inferred from an expression or from a type other than a _function_type_, and
+>    *  for at least one argument, the implicit conversion from `Ex` to `Qx` is a _function_type_conversion_, or `Mq` is a generic method with type parameters `{Y1, Y2, ..., Yq}` and for at least one type parameter `Yi` the type argument is inferred from a _function_type_, or
+> 3. for each argument, the implicit conversion from `Ex` to `Qx` is not better than the implicit conversion from `Ex` to `Px`, and for at least one argument, the conversion from `Ex` to `Px` is better than the conversion from `Ex` to `Qx`.
+
+Note that the addition of this rule is not going to cover scenarios with instance methods becoming applicable and "shadowing" extension methods. For example:
+``` C#
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        var p = new Program();
+        Console.WriteLine(p.M(""));
+    }
+
+    public string M(byte[] b) => "byte[]";
+}
+
+static class E
+{
+    public static string M(this object o, string s) => "string";
+}
+```
+Behavior of this code will silently change from printing "string" to printing "byte[]".
+
+Are we Ok with this behavior change? Should it be documented as a breaking change?
+
+Note that there is no proposal to make _string_constant_to_UTF8_byte_representation_conversion_ unavailable when C#10 language version is targeted. In that case, the example above becomes an error rather than returns to C#10 behavior. This follows a general principle that target language version doesn't affect semantics of the language.
+
+Are we Ok with this behavior? Should it be documented as a breaking change?
 
 ## Examples today
 Examples of where runtime has manually encoded the UTF8 bytes today
