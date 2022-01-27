@@ -296,7 +296,7 @@ unrequiring a property with an override in the future, we have design space to d
 Overrides are allowed to mark a member `required` where it was not `required` in the base type. A member so-marked is added to the required members
 list of the derived type.
 
-Types are allowed to override required virtual properties. This means that if the base virtual property has storage, and the dervied type tries to
+Types are allowed to override required virtual properties. This means that if the base virtual property has storage, and the derived type tries to
 access the base implementation of that property, they could observe uninitialized storage. This is a general C# anti-pattern, and we don't think that
 this proposal should attempt to address it.
 
@@ -341,14 +341,14 @@ understand `required` properties, it will also understand by-ref-like types.
 usable in downlevel compilers without resorting to a modreq (ie, a binary breaking change). This will need to be designed and applied to the constructor
 in addition to Obsolete.
 
-To build the full list of `required` members for a given type `T`, including all base types, all the `RequiredMemberAttribute`s from `T` and its
-base type `Tb` (recursively until reaching `System.Object`) are collected. At every `Ti`, if it has a `RequiredMemberAttribute` with members `R1`..`Rn`,
-the following algorithm is performed:
+To build the full list of `required` members `R` for a given type `T`, including all base types, the following algorithm is run:
 
-1. Perform standard member lookup on `Ti` for name `Ri` with 0 arguments.
-2. If this lookup was ambiguous or did not produce a single field or property result, an error occurs and the required member list of `T` cannot be
-determined. No further steps are taken, and calling any constructor on `T` not marked with a `SetsRequiredMembersAttribute` issues an error.
-3. Otherwise, the result of the member lookup is added to `T`'s list of required members.
+1. For every `Tb`, starting with `T` and working through the base type chain until `object` is reached.
+2. If `Tb` is marked with `RequiredMemberAttribute`, then all members of `Tb` marked with `RequiredMemberAttribute` are gathered into `Rb`
+    1. For every `Ri` in `Rb`, if `Ri` is overridden by any member of `R`, it is skipped.
+    2. Otherwise, if any `Ri` is hidden by a member of `R`, then the lookup of required members fails and no further steps are taken. Calling any
+    constructor of `T` not attributed with `SetsRequiredMembers` issues an error.
+    3. Otherwise, `Ri` is added to `R`.
 
 ## Open Questions
 
