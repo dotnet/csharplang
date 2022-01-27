@@ -137,7 +137,13 @@ public struct Int128
 }
 ```
 
-### Expression trees? 
+### Linq Expression Trees 
+
+`Checked operators` will be supported in Linq Expression Trees. A UnaryExpression/BinaryExpression node will be created with corresponding `MethodInfo`.
+
+### Dynamic
+
+It should be possible to adjust runtime binder to support `checked operators` in `dynamic` invocations.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
