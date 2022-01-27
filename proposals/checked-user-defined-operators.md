@@ -15,7 +15,35 @@ There is no way for a user to declare a type and support both checked and unchec
 ## Detailed design
 [design]: #detailed-design
 
-<!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement, and include examples of how the feature is used. Please include syntax and desired semantics for the change, including linking to the relevant parts of the existing C# spec to describe the changes necessary to implement this feature. An initial proposal does not need to cover all cases, but it should have enough detail to enable a language team member to bring this proposal to design if they so choose. -->
+Grammar at https://github.com/dotnet/csharplang/blob/main/spec/classes.md#operators will be adjusted to allow
+`checked` keyword after the `operator` keyword right before the operator token:
+```antlr
+overloadable_unary_operator
+    : '+' | 'checked'? '-' | '!' | '~' | '++' | '--' | 'true' | 'false'
+    ;
+
+overloadable_binary_operator
+    : 'checked'? '+'   | 'checked'? '-'   | 'checked'? '*'   | 'checked'? '/'   | '%'   | '&'   | '|'   | '^'   | '<<'
+    | right_shift | '=='  | '!='  | '>'   | '<'   | '>='  | '<='
+    ;
+```
+
+For example:
+``` C#
+public static T operator checked -(T x) {...}
+public static T operator checked +(T lhs, T rhs) {...}
+public static T operator checked -(T lhs, T rhs) {...}
+public static T operator checked *(T lhs, T rhs) {...}
+public static T operator checked /(T lhs, T rhs) {...}
+```
+
+For brevity below, an operator with the `checked` keyword is referred to as a `checked operator` and an operator without it is referred to as a `regular operator`.
+
+Section "I.10.3.1 Unary operators" of ECMA-335 will be adjusted to include *op_CheckedUnaryNegation* as the name for a method implementing checked unary `-`.
+
+Section "I.10.3.2 Binary operators" of ECMA-335 will be adjusted to include *op_CheckedAddition*, *op_CheckedSubtraction*,
+*op_CheckedMultiply*, *op_CheckedDivision* as the names for methods implementing checked `+`, `-`, `*`, and `/` binary operators.
+
 
 Expression trees? 
 
@@ -27,7 +55,49 @@ Expression trees?
 ## Alternatives
 [alternatives]: #alternatives
 
-<!-- What other designs have been considered? What is the impact of not doing this? -->
+### Placement of the `checked` keyword
+
+Alternatively the `checked` keyword could be moved to the place right before the `operator` keyword:  
+``` C#
+public static T checked operator -(T x) {...}
+public static T checked operator +(T lhs, T rhs) {...}
+public static T checked operator -(T lhs, T rhs) {...}
+public static T checked operator *(T lhs, T rhs) {...}
+public static T checked operator /(T lhs, T rhs) {...}
+```
+
+Or it could be moved into the set of operator modifiers:
+```antlr
+operator_modifier
+    : 'public'
+    | 'static'
+    | 'extern'
+    | 'checked'
+    | operator_modifier_unsafe
+    ;
+```
+
+``` C#
+public static checked T operator -(T x) {...}
+public static checked T operator +(T lhs, T rhs) {...}
+public static checked T operator -(T lhs, T rhs) {...}
+public static checked T operator *(T lhs, T rhs) {...}
+public static checked T operator /(T lhs, T rhs) {...}
+```
+    
+### `unchecked` keyword
+
+There were suggestions to support `unchecked` keyword at the same position as the `checked` keyword
+with the following possible meanings:
+- Simply to explicitly reflect the ragular nature of the operator, or
+- Perhaps to designate a distinct flavor of an operator that is supposed to be used in an `unchecked` context.
+
+### Operator names in ECMA-335
+
+Alternatively the operator names could be *op_UnaryNegationChecked*, *op_AdditionChecked*, *op_SubtractionChecked*,
+*op_MultiplyChecked*, *op_DivisionChecked*, with *Checked* at the end. However, it looks like there is already a pattern
+established to end the names with the operator word. For example, there is a *op_UnsignedRightShift* operator rather than
+*op_RightShiftUnsigned* operator.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
