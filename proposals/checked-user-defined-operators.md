@@ -137,6 +137,10 @@ public struct Int128
 }
 ```
 
+### Implementing operators
+
+A `checked operator` does not implement a `regular operator` and vice versa.
+
 ### Linq Expression Trees 
 
 `Checked operators` will be supported in Linq Expression Trees. A UnaryExpression/BinaryExpression node will be created with corresponding `MethodInfo`.
@@ -148,10 +152,12 @@ It should be possible to adjust runtime binder to support `checked operators` in
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-<!-- Why should we *not* do this? -->
+This adds additional complexity to the language and allows users to introduce more kinds of breaking changes to their types.
 
 ## Alternatives
 [alternatives]: #alternatives
+
+The generic math interfaces that the libraries plans to expose could expose named methods (such as `AddChecked`). The primary drawback is that this is less readable/maintainable and doesn't get the benefit of the language precedence rules around operators.
 
 ### Placement of the `checked` keyword
 
@@ -188,7 +194,7 @@ public static checked T operator /(T lhs, T rhs) {...}
 There were suggestions to support `unchecked` keyword at the same position as the `checked` keyword
 with the following possible meanings:
 - Simply to explicitly reflect the ragular nature of the operator, or
-- Perhaps to designate a distinct flavor of an operator that is supposed to be used in an `unchecked` context.
+- Perhaps to designate a distinct flavor of an operator that is supposed to be used in an `unchecked` context. The language could support `op_Addition`, `op_CheckedAddition`, and `op_UncheckedAddition` to help limit the number of breaking changes. This adds another layer of complexity that is likely not necessary in most code.
 
 ### Operator names in ECMA-335
 
@@ -286,6 +292,9 @@ The compiler could treat the default context of a `checked operator` as checked.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
+
+Should the language allow `checked` and `unchecked` modifiers on methods (e.g. `static checked void M()`)?
+This would allow removing nesting levels for methods that require it.
 
 ### Should we support `checked conversion operators`?
 
