@@ -49,6 +49,10 @@ A user-defined `regular operator` is expected to not throw an exception when the
 
 All existing user-defined operators out there fall into the category of `regular operators`. It is understood that many of them are likely to not follow the semantics specified above, but for the purpose of semanic analysis, compiler will assume that they are.
 
+### Checked vs. unchecked context within a `checked operator`
+
+Checked/unchecked context within the body of a `checked operator` is not affected by the presence of the `checked` keyword. In other words, the context is the same as immediately at the beginning of the operator declaration. The developer would need to explicitly switch the context if part of their algorithm cannot rely on default context.
+
 ### Names in metadata
 
 Section "I.10.3.1 Unary operators" of ECMA-335 will be adjusted to include *op_CheckedUnaryNegation* as the name for a method implementing checked unary `-`.
@@ -66,7 +70,7 @@ will be replaced with the following two bullet points:
 *  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the current checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
 *  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the opposite checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
 
-The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the cecked/unchecked context has on unary operator overload resolution.
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the checked/unchecked context has on unary operator overload resolution.
 
 ### Binary operator overload resolution
 
@@ -78,7 +82,52 @@ will be replaced with the following two bullet points:
 *  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` **matching the current checked/unchecked context** is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
 *  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` **matching the opposite checked/unchecked context** is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
 
-The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the cecked/unchecked context has on binary operator overload resolution.
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the checked/unchecked context has on binary operator overload resolution.
+
+``` C#
+public class MyClass
+{
+    public static void Add(Int128 lhs, Int128 rhs)
+    {
+        // Resolves to `op_CheckedAddition`
+        Int128 r1 = checked(lhs + rhs);
+
+        // Resolves to `op_Addition`
+        Int128 r2 = unchecked(lhs + rhs);
+
+        // Resolve to `op_Subtraction`
+        Int128 r3 = checked(lhs - rhs);
+
+        // Resolve to `op_Subtraction`
+        Int128 r4 = unchecked(lhs - rhs);
+
+        // Resolves to `op_CheckedMultiply`
+        Int128 r5 = checked(lhs * rhs);
+
+        // Resolves to `op_CheckedMultiply`
+        Int128 r5 = unchecked(lhs * rhs);
+    }
+
+    public static void Divide(Int128 lhs, byte rhs)
+    {
+        // Resolves to `op_CheckedDivision`
+        Int128 r4 = checked(lhs / rhs);
+    }
+}
+
+public struct Int128
+{
+    public static Int128 operator checked +(Int128 lhs, Int128 rhs);
+    public static Int128 operator +(Int128 lhs, Int128 rhs);
+
+    public static Int128 operator -(Int128 lhs, Int128 rhs);
+
+    public static Int128 operator checked *(Int128 lhs, Int128 rhs);
+
+    public static Int128 operator checked /(Int128 lhs, int rhs);
+    public static Int128 operator /(Int128 lhs, byte rhs);
+}
+```
 
 ### Expression trees? 
 
@@ -136,15 +185,90 @@ established to end the names with the operator word. For example, there is a *op
 
 ### Require definition of corresponding `regular operator`
 
-The compiler could require that if a `checked operator` is defined, a corresponding `regular operator` is also defined. However, it feels like it should be fine to define only a checked flavor.
+The compiler could require that if a `checked operator` is defined, a corresponding `regular operator` is also defined.
+For example:
+``` C#
+public struct Int128
+{
+    // This is fine, both a checked and regular operator are defined
+    public static Int128 operator checked +(Int128 lhs, Int128 rhs);
+    public static Int128 operator +(Int128 lhs, Int128 rhs);
+
+    // This is fine, only a regular operator is defined
+    public static Int128 operator -(Int128 lhs, Int128 rhs);
+
+    // This should error, a regular operator must also be defined
+    public static Int128 operator checked *(Int128 lhs, Int128 rhs);
+}
+```
+
+However, it feels like it should be fine to define only a checked flavor.
 
 ### `Checked operators` are inapplicable in an `unchecked` context
 
 The compiler, when performing member lookup to find candidate user-defined operators within an `unchecked` context, could ignore `checked operators`. If metadata is encountered that only defines a `checked operator`, then a compilation error will occur.
+``` C#
+public class MyClass
+{
+    public static void Add(Int128 lhs, Int128 rhs)
+    {
+        // Resolves to `op_CheckedMultiply`
+        Int128 r5 = checked(lhs * rhs);
+
+        // Error: Operator '*' cannot be applied to operands of type 'Int128' and 'Int128'
+        Int128 r5 = unchecked(lhs * rhs);
+    }
+}
+
+public struct Int128
+{
+    public static Int128 operator checked *(Int128 lhs, Int128 rhs);
+}
+```
 
 ### More complicated operator lookup and overload resolution rules in a `checked` context
 
 The compiler, when performing member lookup to find candidate user-defined operators within a `checked` context will also consider applicable operators ending with `Checked`. That is, if the compiler was attempting to find applicable function members for the binary addition operator, it would look for both `op_Addition` and `op_AdditionChecked`. If the only applicable function member is a `checked operator`, it will be used. If both a `regular operator` and `checked operator` exist and are equally applicable the `checked operator` will be preferred. If both a `regular operator` and a `checked operator` exist but the `regular operator` is an exact match while the `checked operator` is not, the compiler will prefer the `regular operator`.
+``` C#
+public class MyClass
+{
+    public static void Add(Int128 lhs, Int128 rhs)
+    {
+        // Resolves to `op_CheckedAddition`
+        Int128 r1 = checked(lhs + rhs);
+
+        // Resolves to `op_Addition`
+        Int128 r2 = unchecked(lhs + rhs);
+
+        // Resolve to `op_Subtraction`
+        Int128 r3 = checked(lhs - rhs);
+
+        // Resolve to `op_Subtraction`
+        Int128 r4 = unchecked(lhs - rhs);
+    }
+
+    public static void Multiply(Int128 lhs, byte rhs)
+    {
+        // Resolves to `op_Multiply` even though `op_CheckedMultiply` is also applicable
+        Int128 r4 = checked(lhs * rhs);
+    }
+}
+
+public struct Int128
+{
+    public static Int128 operator checked +(Int128 lhs, Int128 rhs);
+    public static Int128 operator +(Int128 lhs, Int128 rhs);
+
+    public static Int128 operator -(Int128 lhs, Int128 rhs);
+
+    public static Int128 operator checked *(Int128 lhs, int rhs);
+    public static Int128 operator *(Int128 lhs, byte rhs);
+}
+```
+
+### Checked vs. unchecked context within a `checked operator`
+
+The compiler could treat the default context of a `checked operator` as checked. The developer would need to explicitly use `unchecked` if part of their algorithm should not participate in the `checked context`. However, this might not work well in the future if we start allowing `checked`/`unchecked` tokens as modifiers on operators to set the context within the body. The modifier and the keyword could contradict each other. Also, we wouldn't be able to do the same (treat default context as unchecked) for a `regular operator` because that would be a breaking change.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
