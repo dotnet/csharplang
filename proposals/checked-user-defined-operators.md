@@ -60,6 +60,10 @@ Section "I.10.3.1 Unary operators" of ECMA-335 will be adjusted to include *op_C
 Section "I.10.3.2 Binary operators" of ECMA-335 will be adjusted to include *op_CheckedAddition*, *op_CheckedSubtraction*,
 *op_CheckedMultiply*, *op_CheckedDivision* as the names for methods implementing checked `+`, `-`, `*`, and `/` binary operators.
 
+### Unary operators
+
+Unary `checked operators` follow the rules from https://github.com/dotnet/csharplang/blob/main/spec/classes.md#unary-operators.
+
 ### Unary operator overload resolution
 
 Assuming that `regular operator` matches `unchecked` evaluation context and `checked operator` matches `checked` evaluation context, 
@@ -71,6 +75,10 @@ will be replaced with the following two bullet points:
 *  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the opposite checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
 
 The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the checked/unchecked context has on unary operator overload resolution.
+
+### Binary operators
+
+Binary `checked operators` follow the rules from https://github.com/dotnet/csharplang/blob/main/spec/classes.md#binary-operators.
 
 ### Binary operator overload resolution
 
