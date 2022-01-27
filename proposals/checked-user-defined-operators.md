@@ -43,11 +43,11 @@ For brevity below, an operator with the `checked` keyword is referred to as a `c
 
 ### Semantics
 
-A user-defined `checked operator` is expected to throw an exception when the result of an operation is too large to represent in the destination type. What does it mean to be too large actully depends on the nature of the destination type and is not prescribed by the language. Typically the exception thrown is a `System.OverflowException`, but the language doesn't have any specific requirements regarding this.
+A user-defined `checked operator` is expected to throw an exception when the result of an operation is too large to represent in the destination type. What does it mean to be too large actually depends on the nature of the destination type and is not prescribed by the language. Typically the exception thrown is a `System.OverflowException`, but the language doesn't have any specific requirements regarding this.
 
-A user-defined `regular operator` is expected to not throw an exception when the result of an operation is too large to represent in the destination type. Instead, it is expected to return an instance representing a truncated result. What does it mean to be too large and to be truncated actully depends on the nature of the destination type and is not prescribed by the language. 
+A user-defined `regular operator` is expected to not throw an exception when the result of an operation is too large to represent in the destination type. Instead, it is expected to return an instance representing a truncated result. What does it mean to be too large and to be truncated actually depends on the nature of the destination type and is not prescribed by the language. 
 
-All existing user-defined operators out there fall into the category of `regular operators`. It is understood that many of them are likely to not follow the semantics specified above, but for the purpose of semanic analysis, compiler will assume that they are.
+All existing user-defined operators out there fall into the category of `regular operators`. It is understood that many of them are likely to not follow the semantics specified above, but for the purpose of semantic analysis, compiler will assume that they are.
 
 ### Checked vs. unchecked context within a `checked operator`
 
@@ -193,7 +193,7 @@ public static checked T operator /(T lhs, T rhs) {...}
 
 There were suggestions to support `unchecked` keyword at the same position as the `checked` keyword
 with the following possible meanings:
-- Simply to explicitly reflect the ragular nature of the operator, or
+- Simply to explicitly reflect the regular nature of the operator, or
 - Perhaps to designate a distinct flavor of an operator that is supposed to be used in an `unchecked` context. The language could support `op_Addition`, `op_CheckedAddition`, and `op_UncheckedAddition` to help limit the number of breaking changes. This adds another layer of complexity that is likely not necessary in most code.
 
 ### Operator names in ECMA-335
