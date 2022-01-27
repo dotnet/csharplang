@@ -287,10 +287,7 @@ The compiler could treat the default context of a `checked operator` as checked.
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-<!-- What parts of the design are still undecided? -->
-
-Conversion operators?
-Dynamic?
+### Should we support `checked conversion operators`?
 
 ## Design meetings
 
