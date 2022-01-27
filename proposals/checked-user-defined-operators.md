@@ -15,6 +15,8 @@ There is no way for a user to declare a type and support both checked and unchec
 ## Detailed design
 [design]: #detailed-design
 
+### Syntax
+
 Grammar at https://github.com/dotnet/csharplang/blob/main/spec/classes.md#operators will be adjusted to allow
 `checked` keyword after the `operator` keyword right before the operator token:
 ```antlr
@@ -39,13 +41,46 @@ public static T operator checked /(T lhs, T rhs) {...}
 
 For brevity below, an operator with the `checked` keyword is referred to as a `checked operator` and an operator without it is referred to as a `regular operator`.
 
+### Semantics
+
+A user-defined `checked operator` is expected to throw an exception when the result of an operation is too large to represent in the destination type. What does it mean to be too large actully depends on the nature of the destination type and is not prescribed by the language. Typically the exception thrown is a `System.OverflowException`, but the language doesn't have any specific requirements regarding this.
+
+A user-defined `regular operator` is expected to not throw an exception when the result of an operation is too large to represent in the destination type. Instead, it is expected to return an instance representing a truncated result. What does it mean to be too large and to be truncated actully depends on the nature of the destination type and is not prescribed by the language. 
+
+All existing user-defined operators out there fall into the category of `regular operators`. It is understood that many of them are likely to not follow the semantics specified above, but for the purpose of semanic analysis, compiler will assume that they are.
+
+### Names in metadata
+
 Section "I.10.3.1 Unary operators" of ECMA-335 will be adjusted to include *op_CheckedUnaryNegation* as the name for a method implementing checked unary `-`.
 
 Section "I.10.3.2 Binary operators" of ECMA-335 will be adjusted to include *op_CheckedAddition*, *op_CheckedSubtraction*,
 *op_CheckedMultiply*, *op_CheckedDivision* as the names for methods implementing checked `+`, `-`, `*`, and `/` binary operators.
 
+### Unary operator overload resolution
 
-Expression trees? 
+Assuming that `regular operator` matches `unchecked` evaluation context and `checked operator` matches `checked` evaluation context, 
+the first bullet in https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#unary-operator-overload-resolution:
+>*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
+
+will be replaced with the following two bullet points:
+*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the current checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
+*  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the opposite checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
+
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the cecked/unchecked context has on unary operator overload resolution.
+
+### Binary operator overload resolution
+
+Assuming that `regular operator` matches `unchecked` evaluation context and `checked operator` matches `checked` evaluation context, 
+the first bullet in https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#binary-operator-overload-resolution:
+>*  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
+
+will be replaced with the following two bullet points:
+*  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` **matching the current checked/unchecked context** is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
+*  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` **matching the opposite checked/unchecked context** is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
+
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the cecked/unchecked context has on binary operator overload resolution.
+
+### Expression trees? 
 
 ## Drawbacks
 [drawbacks]: #drawbacks
@@ -98,6 +133,18 @@ Alternatively the operator names could be *op_UnaryNegationChecked*, *op_Additio
 *op_MultiplyChecked*, *op_DivisionChecked*, with *Checked* at the end. However, it looks like there is already a pattern
 established to end the names with the operator word. For example, there is a *op_UnsignedRightShift* operator rather than
 *op_RightShiftUnsigned* operator.
+
+### Require definition of corresponding `regular operator`
+
+The compiler could require that if a `checked operator` is defined, a corresponding `regular operator` is also defined. However, it feels like it should be fine to define only a checked flavor.
+
+### `Checked operators` are inapplicable in an `unchecked` context
+
+The compiler, when performing member lookup to find candidate user-defined operators within an `unchecked` context, could ignore `checked operators`. If metadata is encountered that only defines a `checked operator`, then a compilation error will occur.
+
+### More complicated operator lookup and overload resolution rules in a `checked` context
+
+The compiler, when performing member lookup to find candidate user-defined operators within a `checked` context will also consider applicable operators ending with `Checked`. That is, if the compiler was attempting to find applicable function members for the binary addition operator, it would look for both `op_Addition` and `op_AdditionChecked`. If the only applicable function member is a `checked operator`, it will be used. If both a `regular operator` and `checked operator` exist and are equally applicable the `checked operator` will be preferred. If both a `regular operator` and a `checked operator` exist but the `regular operator` is an exact match while the `checked operator` is not, the compiler will prefer the `regular operator`.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
