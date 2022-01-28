@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
+- Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md (AlekseyTs)
 
 ## Schedule when convenient
 
