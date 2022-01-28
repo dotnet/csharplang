@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
-- Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md (AlekseyTs)
-
 ## Schedule when convenient
 
 
@@ -14,14 +12,25 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
+## Mar 2, 2022
+
+## Feb 28, 2022
+
+## Feb 23, 2022
+
+## Feb 16, 2022
+
+## Feb 14, 2022
+
+## Feb 9, 2022
+
 ## Feb 7, 2022
 
 - Design review
 
 ## Feb 2, 2022
 
-## Jan 31, 2022
-
+- Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md (AlekseyTs)
 - Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
 
 # C# Language Design Notes for 2022
