@@ -4,6 +4,7 @@
 [summary]: #summary
 
 C# should support defining `checked` variants of the following user-defined operators so that users can opt into or out of overflow behavior as appropriate:
+*  The `++` and `--` unary operators (https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#postfix-increment-and-decrement-operators and https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#prefix-increment-and-decrement-operators).
 *  The `-` unary operator (https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#unary-minus-operator).
 *  The `+`, `-`, `*`, and `/` binary operators (https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#arithmetic-operators).
 
@@ -21,7 +22,7 @@ Grammar at https://github.com/dotnet/csharplang/blob/main/spec/classes.md#operat
 `checked` keyword after the `operator` keyword right before the operator token:
 ```antlr
 overloadable_unary_operator
-    : '+' | 'checked'? '-' | '!' | '~' | '++' | '--' | 'true' | 'false'
+    : '+' | 'checked'? '-' | '!' | '~' | 'checked'? '++' | 'checked'? '--' | 'true' | 'false'
     ;
 
 overloadable_binary_operator
@@ -32,6 +33,8 @@ overloadable_binary_operator
 
 For example:
 ``` C#
+public static T operator checked ++(T x) {...}
+public static T operator checked --(T x) {...}
 public static T operator checked -(T x) {...}
 public static T operator checked +(T lhs, T rhs) {...}
 public static T operator checked -(T lhs, T rhs) {...}
@@ -55,7 +58,7 @@ Checked/unchecked context within the body of a `checked operator` is not affecte
 
 ### Names in metadata
 
-Section "I.10.3.1 Unary operators" of ECMA-335 will be adjusted to include *op_CheckedUnaryNegation* as the name for a method implementing checked unary `-`.
+Section "I.10.3.1 Unary operators" of ECMA-335 will be adjusted to include *op_CheckedIncrement*, *op_CheckedDecrement*, *op_CheckedUnaryNegation* as the names for methods implementing checked `++`, `--` and `-` unary operators.
 
 Section "I.10.3.2 Binary operators" of ECMA-335 will be adjusted to include *op_CheckedAddition*, *op_CheckedSubtraction*,
 *op_CheckedMultiply*, *op_CheckedDivision* as the names for methods implementing checked `+`, `-`, `*`, and `/` binary operators.
@@ -163,6 +166,8 @@ The generic math interfaces that the libraries plans to expose could expose name
 
 Alternatively the `checked` keyword could be moved to the place right before the `operator` keyword:  
 ``` C#
+public static T checked operator ++(T x) {...}
+public static T checked operator --(T x) {...}
 public static T checked operator -(T x) {...}
 public static T checked operator +(T lhs, T rhs) {...}
 public static T checked operator -(T lhs, T rhs) {...}
@@ -182,6 +187,8 @@ operator_modifier
 ```
 
 ``` C#
+public static checked T operator ++(T x) {...}
+public static checked T operator --(T x) {...}
 public static checked T operator -(T x) {...}
 public static checked T operator +(T lhs, T rhs) {...}
 public static checked T operator -(T lhs, T rhs) {...}
