@@ -130,10 +130,10 @@ For clarity the examples use `spanof('...')` and `lineof('...')` pseudo-syntax t
 Consider the following code with unmapped zero-based line numbers listed on the right:
 
 ```
-#line 1 10 1 15 "a"   // 3
-  A();B(              // 4
-);C();                // 5
-    D();              // 6
+#line (1,10)-(1,15) "a" // 3
+  A();B(                // 4
+);C();                  // 5
+    D();                // 6
  ```
 
 d = 3
