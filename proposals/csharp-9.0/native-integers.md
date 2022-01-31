@@ -279,9 +279,9 @@ static object GetItem(object[] array, nint index)
 }
 ```
 
-`nint` and `nuint` can be used as an `enum` base type.
+`nint` and `nuint` cannot be used as an `enum` base type from C#.
 ```C#
-enum E : nint // ok
+enum E : nint // error: byte, sbyte, short, ushort, int, uint, long, or ulong expected
 {
 }
 ```
