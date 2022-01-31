@@ -146,8 +146,6 @@ for the signature of a `>>` operator.
 
 Section "I.10.3.2 Binary operators" of ECMA-335 already reserved the name for an unsigned right shift operator - op_UnsignedRightShift.
 
-### Dynamic?
-
 ### Linq Expression Trees
 
 The `>>>` operator will be supported in Linq Expressioin Trees.
@@ -160,6 +158,14 @@ For example:
 ``` C#
 Expression<System.Func<int, int, int>> z = (x, y) => x >>> y; // (x, y) => Convert((Convert(x, UInt32) >> y), Int32)
 ```
+
+### Dynamic Binding 
+
+It looks like dynamic binding uses values of System.Linq.Expressions.ExpressionType enum to communicate
+binary operator kind to the runtime binder. Since we don't have a member specifically representing
+an unsigned right shift operator, dynamic binding for `>>>` operator will not be supported and the
+https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#static-and-dynamic-binding section 
+will be adjusted to reflect that.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
