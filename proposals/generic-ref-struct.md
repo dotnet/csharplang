@@ -83,7 +83,7 @@ Positionally in syntax the `ref struct` annotation must come after the type kind
 - `where T : default, ref struct`: is an error as the declarations are contradictory.
 - `where T : ref struct, BaseType` where `BaseType` denotes a reference type. This is an error because the `ref struct` portion is meaningless in this context.
 
-The `where T : ref struct` annotation will be encoded by attributing the type parameter with the attribute `System.Runtime.CompilerServices.SupportsByRefLike`. This will not result in a `modreq` on the containing member nor will `[Obsolete]` tricks be added to the containing type. The intent is for this to be a binary compatible change. The explicit intent is for us to allow types in libraries to relax their type parameters to accept `ref struct` without breaking consumers.
+The `where T : ref struct` annotation will be encoded by attributing the type parameter with the attribute `System.Runtime.CompilerServices.SupportsByRefLikeAttribute`. This will not result in a `modreq` on the containing member nor will `[Obsolete]` tricks be added to the containing type. The intent is for this to be a binary compatible change. The explicit intent is for us to allow types in libraries to relax their type parameters to accept `ref struct` without breaking consumers.
 
 ### Supporting Span<T>
 A key motivation of this proposal is to allow for instantiations like `Span<Span<T>>`, effectively moving the `Span<T>` type to have the `where T : ref struct` annotation. This is a problem because a number of the APIs on `Span<T>` violate the rules of `where T : ref struct` as `T[]` is a common type in the APIs. 
