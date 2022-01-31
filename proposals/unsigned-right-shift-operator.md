@@ -21,7 +21,44 @@ yet an algorithm might rely on ability to perform an unsigned right shift operat
 ### Shift operators
 
 The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#shift-operators section will be adjusted
-to include `>>>` operator - the unsigned right shift operator.
+to include `>>>` operator - the unsigned right shift operator:
+
+The `<<`, `>>` and `>>>` operators are used to perform bit shifting operations.
+
+```antlr
+shift_expression
+    : additive_expression
+    | shift_expression '<<' additive_expression
+    | shift_expression right_shift additive_expression
+    | shift_expression unsigned_right_shift additive_expression
+    ;
+```
+
+For an operation of the form `x << count` or `x >> count` or `x >>> count`, binary operator overload resolution ([Binary operator overload resolution](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#binary-operator-overload-resolution)) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
+
+The predefined unsigned right shift operators are listed below.
+
+*  Shift right:
+
+   ```csharp
+   int operator >>>(int x, int count);
+   uint operator >>>(uint x, int count);
+   long operator >>>(long x, int count);
+   ulong operator >>>(ulong x, int count);
+   ```
+
+   The `>>>` operator shifts `x` right by a number of bits computed as described below.
+
+   The low-order bits of `x` are discarded, the remaining bits are shifted right, and the high-order empty bit positions are set to zero.
+
+For the predefined operators, the number of bits to shift is computed as follows:
+
+*  When the type of `x` is `int` or `uint`, the shift count is given by the low-order five bits of `count`. In other words, the shift count is computed from `count & 0x1F`.
+*  When the type of `x` is `long` or `ulong`, the shift count is given by the low-order six bits of `count`. In other words, the shift count is computed from `count & 0x3F`.
+
+If the resulting shift count is zero, the shift operators simply return the value of `x`.
+
+Shift operations never cause overflows and produce the same results in `checked` and `unchecked` contexts.
 
 ### Operator overloading
 
@@ -38,6 +75,8 @@ The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#operator-
 ### Grammar ambiguities
 
 The `>>>` operator is subject to the same grammar ambiguities described at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#grammar-ambiguities as a regular `>>` operator.
+
+### Metadata name
 
 ### Dynamic?
 
