@@ -18,6 +18,23 @@ yet an algorithm might rely on ability to perform an unsigned right shift operat
 ## Detailed design
 [design]: #detailed-design
 
+### Operators and punctuators
+
+The https://github.com/dotnet/csharplang/blob/main/spec/lexical-structure.md#operators-and-punctuators section will be adjusted
+to include `>>>` operator - the unsigned right shift operator:
+
+```antlr
+unsigned_right_shift
+    : '>>>'
+    ;
+
+unsigned_right_shift_assignment
+    : '>>>='
+    ;
+```
+
+No characters of any kind (not even whitespace) are allowed between the tokens in *unsigned_right_shift* and *unsigned_right_shift_assignment* productions. These productions are treated specially in order to enable the correct  handling of *type_parameter_list*s.
+
 ### Shift operators
 
 The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#shift-operators section will be adjusted
@@ -59,6 +76,34 @@ For the predefined operators, the number of bits to shift is computed as follows
 If the resulting shift count is zero, the shift operators simply return the value of `x`.
 
 Shift operations never cause overflows and produce the same results in `checked` and `unchecked` contexts.
+
+### Assignment operators
+
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#assignment-operators section will be adjusted to include
+*unsigned_right_shift_assignment* as follows:
+
+```antlr
+assignment_operator
+    : '='
+    | '+='
+    | '-='
+    | '*='
+    | '/='
+    | '%='
+    | '&='
+    | '|='
+    | '^='
+    | '<<='
+    | right_shift_assignment
+    | unsigned_right_shift_assignment
+    ;
+```
+
+### Integral types
+
+The https://github.com/dotnet/csharplang/blob/main/spec/types.md#integral-types section will be adjusted to include information about `>>>` operator. The relevant bullet point is the following:
+
+*  For the binary `<<`, `>>` and `>>>` operators, the left operand is converted to type `T`, where `T` is the first of `int`, `uint`, `long`, and `ulong` that can fully represent all possible values of the operand. The operation is then performed using the precision of type `T`, and the type of the result is `T`.
 
 ### Constant expressions
 
