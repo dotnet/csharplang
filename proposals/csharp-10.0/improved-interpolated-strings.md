@@ -459,13 +459,13 @@ In particular, we do not flow information from the constructor back through to t
 types to inform generic type inference for type parameters in the containing method. An example of where this can have an impact is:
 
 ```cs
-string s = """";
+string s = "";
 C c = new C();
-c.M(s, $"""", c.ToString(), s.ToString()); // No warnings on c.ToString() or s.ToString(), as the `MaybeNull` does not flow back.
+c.M(s, $"", c.ToString(), s.ToString()); // No warnings on c.ToString() or s.ToString(), as the `MaybeNull` does not flow back.
 
 public class C
 {
-    public void M(string s1, [InterpolatedStringHandlerArgument("""", ""s1"")] CustomHandler c1, string s2, string s3) { }
+    public void M(string s1, [InterpolatedStringHandlerArgument("", "s1")] CustomHandler c1, string s2, string s3) { }
 }
 
 [InterpolatedStringHandler]
@@ -479,9 +479,9 @@ public partial struct CustomHandler
 
 ```cs
 string? s = null;
-M(s, $""""); // Infers `string` for `T` because of the `T?` parameter, not `string?`, as flow analysis does not consider the unannotated `T` parameter of the constructor
+M(s, $""); // Infers `string` for `T` because of the `T?` parameter, not `string?`, as flow analysis does not consider the unannotated `T` parameter of the constructor
 
-void M<T>(T? t, [InterpolatedStringHandlerArgument(""s1"")] CustomHandler<T> c) { }
+void M<T>(T? t, [InterpolatedStringHandlerArgument("s1")] CustomHandler<T> c) { }
 
 [InterpolatedStringHandler]
 public partial struct CustomHandler<T>
