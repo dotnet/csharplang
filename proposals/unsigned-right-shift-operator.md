@@ -60,6 +60,11 @@ If the resulting shift count is zero, the shift operators simply return the valu
 
 Shift operations never cause overflows and produce the same results in `checked` and `unchecked` contexts.
 
+### Constant expressions
+
+Operator `>>>` will be added to the set of constructs permitted in constant expressions at
+https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#constant-expressions.
+
 ### Operator overloading
 
 Operator `>>>` will be added to the set of overloadable binary operators at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#operator-overloading.
@@ -76,7 +81,25 @@ The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#operator-
 
 The `>>>` operator is subject to the same grammar ambiguities described at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#grammar-ambiguities as a regular `>>` operator.
 
+### Operators
+
+The https://github.com/dotnet/csharplang/blob/main/spec/classes.md#operators will be adjusted to include `>>>` operator.
+
+```antlr
+overloadable_binary_operator
+    : '+'   | '-'   | '*'   | '/'   | '%'   | '&'   | '|'   | '^'   | '<<'
+    | right_shift | unsigned_right_shift | '=='  | '!='  | '>'   | '<'   | '>='  | '<='
+    ;
+```
+
+### Binary operators
+
+The signature of a `>>>` operator is subject to the same rules as those at https://github.com/dotnet/csharplang/blob/main/spec/classes.md#binary-operators
+for the signature of a `>>` operator.
+
 ### Metadata name
+
+Section "I.10.3.2 Binary operators" of ECMA-335 already reserved the name for an unsigned right shift operator - op_UnsignedRightShift.
 
 ### Dynamic?
 
