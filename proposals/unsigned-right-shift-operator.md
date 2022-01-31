@@ -148,7 +148,18 @@ Section "I.10.3.2 Binary operators" of ECMA-335 already reserved the name for an
 
 ### Dynamic?
 
-### Expression Tree?
+### Linq Expression Trees
+
+The `>>>` operator will be supported in Linq Expressioin Trees.
+- For a user-defined operator, a BinaryExpression node pointing to the operator method will be created.
+- For predefined operators
+  -  when the first operand is an ansigned type, a BinaryExpression node will be created.
+  -  when the first operand is a signed type, a conversion for the first operand to an unsigned type will be added, a BinaryExpression node will be created and conversion for the result back to the signed type will be added.
+
+For example:
+``` C#
+Expression<System.Func<int, int, int>> z = (x, y) => x >>> y; // (x, y) => Convert((Convert(x, UInt32) >> y), Int32)
+```
 
 ## Drawbacks
 [drawbacks]: #drawbacks
@@ -158,7 +169,9 @@ Section "I.10.3.2 Binary operators" of ECMA-335 already reserved the name for an
 ## Alternatives
 [alternatives]: #alternatives
 
-<!-- What other designs have been considered? What is the impact of not doing this? -->
+### Linq Expression Trees
+
+There is an option to not support `>>>` operator in Linq Expressioin Trees because semantics of predefined `>>>` operators on signed types cannot be accuartely represented without adding convesions to an unsigned type and back.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
