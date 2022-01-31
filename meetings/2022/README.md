@@ -28,11 +28,12 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Feb 9, 2022
 
+- Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
+
 ## Feb 7, 2022
 
 - Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md (AlekseyTs)
 - Open questions in `field` (Fred): https://github.com/dotnet/csharplang/issues/5703
-- Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
 
 # C# Language Design Notes for 2022
 
