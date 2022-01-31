@@ -177,7 +177,7 @@ will be adjusted to reflect that.
 
 ### Linq Expression Trees
 
-There is an option to not support `>>>` operator in Linq Expressioin Trees because semantics of predefined `>>>` operators on signed types cannot be accuartely represented without adding convesions to an unsigned type and back.
+There is an option to not support `>>>` operator in Linq Expressioin Trees because semantics of predefined `>>>` operators on signed types cannot be accurately represented without adding conversions to an unsigned type and back.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
