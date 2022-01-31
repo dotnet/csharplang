@@ -18,7 +18,30 @@ yet an algorithm might rely on ability to perform an unsigned right shift operat
 ## Detailed design
 [design]: #detailed-design
 
-<!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement, and include examples of how the feature is used. Please include syntax and desired semantics for the change, including linking to the relevant parts of the existing C# spec to describe the changes necessary to implement this feature. An initial proposal does not need to cover all cases, but it should have enough detail to enable a language team member to bring this proposal to design if they so choose. -->
+### Shift operators
+
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#shift-operators section will be adjusted
+to include `>>>` operator - the unsigned right shift operator.
+
+### Operator overloading
+
+Operator `>>>` will be added to the set of overloadable binary operators at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#operator-overloading.
+
+### Lifted operators
+
+Operator `>>>` will be added to the set of binary operators permitting a lifted form at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#lifted-operators.
+
+### Operator precedence and associativity
+
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#operator-precedence-and-associativity section will be adjusted to add `>>>` operator to the "Shift" category and `>>>=` operator to the "Assignment and lambda expression" category.
+
+### Grammar ambiguities
+
+The `>>>` operator is subject to the same grammar ambiguities described at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#grammar-ambiguities as a regular `>>` operator.
+
+### Dynamic?
+
+### Expression Tree?
 
 ## Drawbacks
 [drawbacks]: #drawbacks
