@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Schedule ASAP
 
 - Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/unsigned-right-shift-operator.md (AlekseyTs)
+- Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/relaxing_shift_operator_requirements.md (AlekseyTs)
 
 ## Schedule when convenient
 
