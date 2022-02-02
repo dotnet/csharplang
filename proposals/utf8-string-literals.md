@@ -79,6 +79,7 @@ Once implemented string literals will have the same problem that other literals 
 ### `u8` suffix on string literals
 
 Similarly the language will provide the `u8` suffix on string literals to force the type to be UTF8.
+The suffix is case-insensitive, `U8` suffix will be supported and will have the same meaning as `u8` suffix.
 
 When the `u8` suffix is used, the value of the literal is a byte array containing a UTF-8 byte representation of the string.
 
@@ -363,11 +364,15 @@ Are we Ok with this behavior? Should it be documented as a breaking change? Perh
 
 The prototype will not adjust any rules here, so we can hopefully see what breaks in practice - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#breaking-changes.
 
-### Should `u8` suffix be case-insensitive?
+### (Resolved) Should `u8` suffix be case-insensitive?
 
 *Proposal:* 
 
 Support `U8` suffix as well for consistency with numeric suffixes.
+
+*Resolution:*
+
+Approved - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#suffix-case-sensitivity.
 
 ## Examples today
 Examples of where runtime has manually encoded the UTF8 bytes today
