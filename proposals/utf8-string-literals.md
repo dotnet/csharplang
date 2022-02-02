@@ -264,9 +264,11 @@ It feels like all motivating scenarios are going to be addressed with `byte[]` a
 
 *Resolution:*
 
-The proposal is approved. However the fact is not captured at https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md at the moment.
+The proposal is approved - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#natural-type-of-u8-literals.
+We will likely want to have a deeper debate about whether `u8` string literals should have a type of a mutable array, but we don't
+think that debate is necessary for now.
 
-### Depth of the conversion
+### (Resolved) Depth of the conversion
 Will it also work anywhere that a byte[] could work? Consider: 
 
 ```c# 
@@ -281,6 +283,10 @@ The second example is hard to make work because it requires conversions in both 
 *Proposal:* 
 
 Don't do anything special.
+
+*Resolution:*
+
+No new conversion targets added for now https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#conversion-depth.
 
 ### Overload resolution breaks
 
