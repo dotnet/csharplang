@@ -288,7 +288,7 @@ Don't do anything special.
 
 No new conversion targets added for now https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#conversion-depth.
 
-### Overload resolution breaks
+### (Resolved) Overload resolution breaks
 
 The following API would become ambiguous:
 
@@ -358,6 +358,10 @@ class C
 is going to silently print "array" instead of "object". 
 
 Are we Ok with this behavior? Should it be documented as a breaking change? Perhaps we could complicate the new rule to dig into the tuple literal conversions.
+
+*Resolution:*
+
+The prototype will not adjust any rules here, so we can hopefully see what breaks in practice - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#breaking-changes.
 
 ### Should `u8` suffix be case-insensitive?
 
