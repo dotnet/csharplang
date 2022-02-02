@@ -65,6 +65,8 @@ ReadOnlySpan<byte> span = first + second;
 
 The two parts here are invalid on their own as they are incomplete portions of a surrogate pair. Individually there is no correct translation to UTF8 but together they form a complete surrogate pair that can be successfully translated to UTF8.
 
+The _string_constant_to_UTF8_byte_representation_conversion_ is not allowed in Linq Expression Trees.
+
 Once implemented string literals will have the same problem that other literals have in the language: what type they represent depends on how they are used. C# provides a literal suffix to disambiguate the meaning for other literals. For example developers can write `3.14f` to force the value to be a `float` or `1l` to force the value to be a `long`.
 
 ### `u8` suffix on string literals
@@ -194,7 +196,7 @@ The new conversion is not a standard conversion. This will avoid non-trivial beh
 
 Not a standard conversion, for now - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#implicit-standard-conversion.
 
-### Linq Expression Tree conversion
+### (Resolved) Linq Expression Tree conversion
 
 Should _string_constant_to_UTF8_byte_representation_conversion_ be allowed in context of a Linq Expression Tree conversion?
 We can disallow it for now, or we could simply include the "lowered" form into the tree. For example:
@@ -208,6 +210,10 @@ What about string literals with `u8` suffix? We could surface those as byte arra
 ``` C#
 Expression<Func<byte[]>> x = () => "hello"u8;           // () => new [] {104, 101, 108, 108, 111}
 ```
+
+*Resolution:*
+
+Disallow in Linq Expression Trees - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#expression-tree-representation.
 
 ### The natural type of a string literal with `u8` suffix
 
