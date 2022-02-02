@@ -110,120 +110,17 @@ public class C
 
 `required` is only valid in `class`, `struct`, and `record` types. It is not valid in `interface` types.
 
-### `init` Clauses
+### `SetsRequiredMembersAttribute`
 
-A constructor can remove a required member from its contract by adding an `init` clause that specifies the name of the member to remove. For example:
+All constructors in a type with required members, or whose base type specifies required members, must have those members set by a consumer when that constructor is called. In order to
+exempt constructors from this requirement, a constructor can be attributed with `SetRequiredMembersAttribute`, which removes these requirements. The constructor body is not validated
+to ensure that it definitely sets the required members of the type.
 
-```cs
-public class C
-{
-    public required int Prop1 { get; init; }
-    public required int Prop2 { get; init; }
+NB: An earlier version of this proposal had a larger metalanguage around initialization, allowing adding and removing individual required members from a constructor, as well as validation
+that the constructor was setting all required members. This was deemed too complex for the initial release, and removed. We can look at adding more complex contracts and modifications as
+a later feature.
 
-    // Advertises that just Prop1 is required.
-    public C() : init(Prop2)
-    {
-        Prop2 = 2;
-        Console.WriteLine($"Prop2 is {Prop2}")
-    }
-}
-```
-
-An init clause can also provide the initialization value for the property inline. These assignments are run before the body of the constructor is executed, after the base call
-if one exists:
-
-```cs
-public class C
-{
-    public required int Prop1 { get; init; }
-    public required int Prop2 { get; init; }
-
-    // Sets Prop2 to 2 before the constructor body is run
-    public C() : init(Prop2 = 2)
-    {
-        Console.WriteLine($"Prop2 is {Prop1}")
-    }
-}
-```
-
-An init clause can remove all requirements by using the `init required` shorthand:
-
-```cs
-public class C
-{
-    public required int Prop1 { get; init; }
-    public required int Prop2 { get; init; }
-
-    // Advertises that there are no requirements
-    public C() : init required
-    {
-        Prop1 = 1;
-        Prop2 = 2;
-    }
-}
-```
-
-_required\_member\_lists_ chain across a type hierarchy. A constructor's _contract_ not only includes the required members from the current type, but also the required members
-from the base type and any interfaces that it implements. If derived constructor calls a base constructor that removes some of those members from the list, the derived constructor
-also removes those members from the list.
-
-```cs
-public class Base
-{
-    public required int Prop1 { get; init; }
-    public required int Prop2 { get; init; }
-
-    public Base() : init(Prop1 = 1) {}
-}
-
-public class Derived
-{
-    public required int Prop3 { get; set; }
-    public required int Prop4 { get; set; }
-
-    // Only advertises that Prop2 and Prop3 are required, because `base()` removed Prop1 from the list, and the init clause removes Prop4
-    public Derived : base() init(Prop4 = 4) { }
-}
-```
-
-### Initialization Requirement
-
-Members specified in an init clause must be definitely assigned at the end of the constructor body. If they are not, an error is produced. To support more complicated
-initialization logic, this error can be suppressed using the `!` operator:
-
-```cs
-public class C
-{
-    public required int Prop { get; set; }
-
-    // Error: Prop is not definitely assigned at the end of the constructor body
-    public C(int param) : init(Prop)
-    {
-        Initialize(param);
-    }
-
-    // No error: Prop! suppresses it
-    public C() : init(Prop!)
-        => Initialize(1);
-
-    public void Initialize(int param) => Prop = param;
-}
-```
-
-The `!` operator can also be applied to `init required`, to suppress the checking for all required properties on a type.
-
-```cs
-public class C
-{
-    public required int Prop1 { get; init; }
-    public required int Prop2 { get; init; }
-
-    // No errors: init required! suppresses
-    public C() : init required! {}
-}
-```
-
-#### Grammar
+### Grammar
 
 The grammar for a `constructor_initializer` is modified as follows:
 
