@@ -67,27 +67,38 @@ The two parts here are invalid on their own as they are incomplete portions of a
 
 The _string_constant_to_UTF8_byte_representation_conversion_ is not allowed in Linq Expression Trees.
 
+While the inputs to these conversions are constants and the data is fully encoded at compile time, the conversion is **not** considered constant by the language. That is because arrays are not constant today. If the definition of `const` is expanded in the future to consider arrays then these conversions should also be considered. Practically though this means a result of these conversions cannot be used as the default value of an optional parameter. 
+
+```c#
+// Error: The argument is not constant
+void Write(ReadOnlySpan<byte> message = "missing") { ... } 
+```
+
 Once implemented string literals will have the same problem that other literals have in the language: what type they represent depends on how they are used. C# provides a literal suffix to disambiguate the meaning for other literals. For example developers can write `3.14f` to force the value to be a `float` or `1l` to force the value to be a `long`.
 
 ### `u8` suffix on string literals
 
 Similarly the language will provide the `u8` suffix on string literals to force the type to be UTF8.
 
-When the `u8` suffix is used the literal can still be converted to any of the allowed types: `byte[]`, `Span<byte>` or `ReadOnlySpan<byte>`. The natural type though will be `ReadOnlySpan<byte>`.
+When the `u8` suffix is used, the value of the literal is a byte array containing a UTF-8 byte representation of the string.
 
 ```c#
-string s1 = "hello"u8;      // Error
-var s2 = "hello"u8;         // Okay and type is ReadOnlySpan<byte>
-Span<byte> s3 = "hello"u8;  // Okay
-byte[] s4 = "hello"u8;      // Okay
+string s1 = "hello"u8;             // Error
+var s2 = "hello"u8;                // Okay and type is byte[]
+Span<byte> s3 = "hello"u8;         // Okay due to an implicit user-defined conversion from byte[] declared on Span<byte>.
+ReadOnlySpan<byte> s3 = "hello"u8; // Okay due to an implicit user-defined conversion from byte[] declared on ReadOnlySpan<byte>.
 ```
 
-While the inputs to these conversions are constants and the data is fully encoded at compile time, the conversion is **not** considered constant by the language. That is because arrays are not constant today. If the definition of `const` is expanded in the future to consider arrays then this conversion should also be considered. Practically though this means a UTF8 literal cannot be used as the default value of an optional parameter. 
+A `u8` literal doesn't have a constant value. That is because arrays are not constant today. If the definition of `const` is expanded
+in the future to consider arrays, then this value should also be considered a constant. Practically though this means a `u8`
+literal cannot be used as the default value of an optional parameter.
 
 ```c#
 // Error: The argument is not constant
-void Write(ReadOnlySpan<byte> message = "missing") { ... } 
+void Write(byte[] message = "missing"u8) { ... } 
 ```
+
+### Lowering
 
 The language will lower the UTF8 encoded strings exactly as if the developer had typed the resulting `byte[]` literal in code. For example:
 
@@ -215,7 +226,7 @@ Expression<Func<byte[]>> x = () => "hello"u8;           // () => new [] {104, 10
 
 Disallow in Linq Expression Trees - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#expression-tree-representation.
 
-### The natural type of a string literal with `u8` suffix
+### (Resolved) The natural type of a string literal with `u8` suffix
 
 The "Detailed design" section says: "The natural type though will be `ReadOnlySpan<byte>`." At the same time: "When the `u8` suffix is used the literal can still be converted to any of the allowed types: `byte[]`, `Span<byte>` or `ReadOnlySpan<byte>`." 
 
@@ -251,6 +262,9 @@ However, as with any user-defined conversion, an explicit cast can be used to ma
 
 It feels like all motivating scenarios are going to be addressed with `byte[]` as the natural type, but the language rules and implementation will be significantly simpler.
 
+*Resolution:*
+
+The proposal is approved. However the fact is not captured at https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md at the moment.
 
 ### Depth of the conversion
 Will it also work anywhere that a byte[] could work? Consider: 
