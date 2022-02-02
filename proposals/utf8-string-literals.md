@@ -30,7 +30,8 @@ To fix this we will allow for UTF8 literals in the language and encode them into
 
 ### Conversions between `string` constants and `byte` sequences
 
-The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow _string_constant_to_UTF8_byte_representation_conversion_ - implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. 
+The language will allow conversions between `string` constants and `byte` sequences where the text is converted into the equivalent UTF8 byte representation. Specifically the compiler will allow _string_constant_to_UTF8_byte_representation_conversion_ - implicit conversions from `string` constants to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`.
+A new bullet point will be added to https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-conversions section. This conversion is not a standard conversion (https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#standard-conversions).
 
 ```c# 
 byte[] array = "hello";             // new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f }
@@ -153,7 +154,7 @@ Allow implicit conversions from a `string` constant with `null` value to `byte[]
 
 The proposal is approved - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#conversions-from-null-literals.
 
-### Where does _string_constant_to_UTF8_byte_representation_conversion_ belong?
+### (Resolved) Where does _string_constant_to_UTF8_byte_representation_conversion_ belong?
 
 Is _string_constant_to_UTF8_byte_representation_conversion_ a bullet point in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-conversions section on its own, or is it part of https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-constant-expression-conversions, or does it belong to some other existing implicit conversions group?
 
@@ -161,7 +162,11 @@ Is _string_constant_to_UTF8_byte_representation_conversion_ a bullet point in ht
 
 It is a new bullet point in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#implicit-conversions, similar to "Implicit interpolated string conversions" or "Method group conversions". It doesn't feel like it belongs to "Implicit constant expression conversions" because, even though the source is a constant expression, the result is never a constant expression. Also, "Implicit constant expression conversions" are considered to be "Standard implicit conversions" (https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#standard-implicit-conversions), which is likely to lead to non-trivial behavior changes involving user-defined conversions.
 
-### Is _string_constant_to_UTF8_byte_representation_conversion_ a standard conversion
+*Resolution:*
+
+We will introduce a new conversion kind for string constant to UTF-8 bytes - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#conversion-kinds
+
+### (Resolved) Is _string_constant_to_UTF8_byte_representation_conversion_ a standard conversion
 
 In addition to "pure" Standard Conversions (the standard conversions are those pre-defined conversions that can occur as part of a user-defined conversion), compiler also treats some predefined conversions as "somewhat" standard. For example, an implicit interpolated string conversion can occur as part of a user-defined conversion if there is an explicit cast to the target type in code. As if it is a Standard Explicit Conversion, even though it is an implicit conversion not explicitly included into the set of standard implicit or explicit conversions. For example:
 
@@ -184,6 +189,10 @@ class C1
 *Proposal:* 
 
 The new conversion is not a standard conversion. This will avoid non-trivial behavior changes involving user-defined conversions. For example, we won't need to worry about user-defined cinversions under implicit tuple literal conversions, etc.
+
+*Resolution:*
+
+Not a standard conversion, for now - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#implicit-standard-conversion.
 
 ### Linq Expression Tree conversion
 
