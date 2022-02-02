@@ -46,6 +46,8 @@ byte[] bytes = text; // Error: the input string is not valid UTF16
 ```
 
 The predominant usage of this feature is expected to be with literals but it will work with any `string` constant value.
+A conversion from a `string` constant with `null` value will be supprted as well. The result of the conversion will be `default`
+value of the target type.
 
 ```c#
 const string data = "dog"
@@ -139,13 +141,17 @@ It seems more likely that we'd regret the `u8` suffix pointing to `ReadOnlySpan<
 
 ## Unresolved questions
 
-### Conversions between a `string` constant with `null` value and `byte` sequences
+### (Resoved) Conversions between a `string` constant with `null` value and `byte` sequences
 
 Whether this conversion is supported and, if so, how it is performed is not specified.
 
 *Proposal:* 
 
 Allow implicit conversions from a `string` constant with `null` value to `byte[]`, `Span<byte>`, and `ReadOnlySpan<byte>`. The result of the conversion is `default` value of the target type.
+
+*Resolution:*
+
+The proposal is approved - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md#conversions-from-null-literals.
 
 ### Where does _string_constant_to_UTF8_byte_representation_conversion_ belong?
 
@@ -342,4 +348,4 @@ Examples where we leave perf on the table
 
 ## Design meetings
 
-<!-- Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to. -->
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md
