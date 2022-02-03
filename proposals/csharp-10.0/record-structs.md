@@ -238,7 +238,7 @@ would shadow members. Static members would also be useable.
 
 A warning is produced if a parameter of the primary constructor is not read.
 
-The definite assigment rules for struct instance constructors apply to the primary constructor of record structs. For instance, the following
+The definite assignment rules for struct instance constructors apply to the primary constructor of record structs. For instance, the following
 is an error:
 
 ```csharp
