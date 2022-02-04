@@ -25,9 +25,9 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Feb 16, 2022
 
-## Feb 14, 2022
-
 - Open questions in `field` (Fred): https://github.com/dotnet/csharplang/issues/5703
+
+## Feb 14, 2022
 
 ## Feb 9, 2022
 
