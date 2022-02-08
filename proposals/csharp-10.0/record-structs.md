@@ -38,8 +38,7 @@ Members are synthesized unless a member with a "matching" signature is declared 
 an accessible concrete non-virtual member with a "matching" signature is inherited.
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
-See https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#signatures-and-overloading
-
+See Signatures and overloading [§7.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#76-signatures-and-overloading).
 It is an error for a member of a record struct to be named "Clone".
 
 It is an error for an instance field of a record struct to have an unsafe type.

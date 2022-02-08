@@ -34,15 +34,13 @@ The scope of a *global_using_directive* specifically does not include *using_dir
 
 The effect of adding a *global_using_directive* to a program can be thought of as the effect of adding a similar *using_directive* that resolves to the same target namespace or type to every compilation unit of the program. However, the target of a *global_using_directive* is resolved in context of the compilation unit that contains it. 
 
-## Scopes 
-https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#scopes
+## [§7.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#77-scopes)  Scopes
 
 These are the relevant bullet points with proposed additions (which are **in bold**):
 *  The scope of name defined by an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body. An *extern_alias_directive* does not contribute any new members to the underlying declaration space. In other words, an *extern_alias_directive* is not transitive, but, rather, affects only the compilation unit or namespace body in which it occurs.
 *  **The scope of a name defined or imported by a *global_using_directive* extends over the *global_attributes* and *namespace_member_declaration*s of all the *compilation_unit*s in the program.**
 
-## Namespace and type names
-https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#namespace-and-type-names
+## [§7.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#78-namespace-and-type-names)  Namespace and type names
 
 Changes are made to the algorithm determining the meaning of a *namespace_or_type_name* as follows.
 
