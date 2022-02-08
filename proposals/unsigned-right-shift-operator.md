@@ -20,7 +20,7 @@ yet an algorithm might rely on ability to perform an unsigned right shift operat
 
 ### Operators and punctuators
 
-The https://github.com/dotnet/csharplang/blob/main/spec/lexical-structure.md#operators-and-punctuators section will be adjusted
+Section [§6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#646-operators-and-punctuators) will be adjusted
 to include `>>>` operator - the unsigned right shift operator:
 
 ```antlr
