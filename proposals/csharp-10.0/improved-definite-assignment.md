@@ -101,7 +101,7 @@ We introduce a new section **?. (null-conditional operator) expressions**. See t
 
 As in the definite assignment rules linked above, we refer to a given initially unassigned variable as *v*.
 
-We introduce the concept of "directly contains". An expression *E* is said to "directly contain" a subexpression *E<sub>1</sub>* if it is not subject to a [user-defined conversion](../../spec/conversions.md#user-defined-conversions) whose parameter is not of a non-nullable value type, and one of the following conditions holds:
+We introduce the concept of "directly contains". An expression *E* is said to "directly contain" a subexpression *E<sub>1</sub>* if it is not subject to a user-defined conversion [§10.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#105-user-defined-conversions) whose parameter is not of a non-nullable value type, and one of the following conditions holds:
 - *E* is *E<sub>1</sub>*. For example, `a?.b()` directly contains the expression `a?.b()`.
 - If *E* is a parenthesized expression `(E2)`, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
 - If *E* is a null-forgiving operator expression `E2!`, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.

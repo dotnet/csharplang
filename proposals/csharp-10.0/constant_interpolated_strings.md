@@ -93,7 +93,7 @@ Constant expressions occur in the contexts listed below. In these contexts, a co
 *  Dimension lengths in an array creation expression ([Array creation expressions](../../spec/expressions.md#array-creation-expressions)) that includes an initializer.
 *  Attributes ([Attributes](../../spec/attributes.md)).
 
-An implicit constant expression conversion ([Implicit constant expression conversions](../../spec/conversions.md#implicit-constant-expression-conversions)) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
+An implicit constant expression conversion ([§10.2.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#10211-implicit-constant-expression-conversions)) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
 
 ## Drawbacks
 [drawbacks]: #drawbacks

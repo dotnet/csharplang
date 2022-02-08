@@ -34,7 +34,7 @@ to
 
 The current C# language specification says
 
-> A *cast_expression* of the form `(T)E`, where `T` is a *type* and `E` is a *unary_expression*, performs an explicit conversion ([Explicit conversions](../../spec/conversions.md#explicit-conversions)) of the value of `E` to type `T`.
+> A *cast_expression* of the form `(T)E`, where `T` is a *type* and `E` is a *unary_expression*, performs an explicit conversion ([§10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#103-explicit-conversions)) of the value of `E` to type `T`.
 
 In the presence of the *conditional expression conversion* there may be more than one possible conversion from `E` to `T`. With the addition of *conditional expression conversion*, we prefer any other conversion to a *conditional expression conversion*, and use the *conditional expression conversion* only as a last resort.
 

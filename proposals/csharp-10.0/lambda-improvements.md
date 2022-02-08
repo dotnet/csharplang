@@ -154,7 +154,7 @@ From a _function_type_ `F` there are implicit _function_type_ conversions:
 - To `System.MulticastDelegate` or base classes or interfaces of `System.MulticastDelegate`
 - To `System.Linq.Expressions.Expression` or `System.Linq.Expressions.LambdaExpression`
 
-Anonymous function expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see [anonymous function conversions](../../spec/conversions.md#anonymous-function-conversions) and [method group conversions](../../spec/conversions.md#method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
+Anonymous function expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see anonymous function conversions [§10.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#107-anonymous-function-conversions) and method group conversions [§10.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#108-method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
 
 There are no conversions to a _function_type_ from a type other than a _function_type_.
 There are no explicit conversions for _function_types_ since _function_types_ cannot be referenced in source.
@@ -168,10 +168,10 @@ Expression e = () => "";                // Expression<Func<string>>
 object o = "".Clone;                    // Func<object>
 ```
 
-_Function_type_ conversions are not implicit or explicit [standard conversions](../../spec/conversions.md#standard-conversions) and are not considered when determining whether a user-defined conversion operator is applicable to an anonymous function or method group.
-From [evaluation of user defined conversions](../../spec/conversions.md#evaluation-of-user-defined-conversions):
+_Function_type_ conversions are not implicit or explicit standard conversions [§10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#104-standard-conversions) and are not considered when determining whether a user-defined conversion operator is applicable to an anonymous function or method group.
+From evaluation of user defined conversions [§10.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1053-evaluation-of-user-defined-conversions):
 
-> For a conversion operator to be applicable, it must be possible to perform a standard conversion ([Standard conversions](../../spec/conversions.md#standard-conversions)) from the source type to the operand type of the operator, and it must be possible to perform a standard conversion from the result type of the operator to the target type.
+> For a conversion operator to be applicable, it must be possible to perform a standard conversion ([§10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#104-standard-conversions)) from the source type to the operand type of the operator, and it must be possible to perform a standard conversion from the result type of the operator to the target type.
 
 ```csharp
 class C
