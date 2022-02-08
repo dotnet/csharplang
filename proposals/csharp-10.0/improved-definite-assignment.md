@@ -1,7 +1,7 @@
 # Improved Definite Assignment Analysis
 
 ## Summary
-[Definite assignment analysis](../../spec/variables.md#definite-assignment) as specified has a few gaps which have caused users inconvenience. In particular, scenarios involving comparison to boolean constants, conditional-access, and null coalescing.
+Definite assignment [§9.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94-definite-assignment) as specified has a few gaps which have caused users inconvenience. In particular, scenarios involving comparison to boolean constants, conditional-access, and null coalescing.
 
 ## Related discussions and issues
 csharplang discussion of this proposal: https://github.com/dotnet/csharplang/discussions/4240
@@ -97,7 +97,7 @@ if (c != null ? c.M(out object obj4) : false)
 ## Specification
 
 ### ?. (null-conditional operator) expressions
-We introduce a new section **?. (null-conditional operator) expressions**. See the [null-conditional operator](../../spec/expressions.md#null-conditional-operator) specification and [definite assignment rules](../../spec/variables.md#precise-rules-for-determining-definite-assignment) for context.
+We introduce a new section **?. (null-conditional operator) expressions**. See the [null-conditional operator](../../spec/expressions.md#null-conditional-operator) specification and Precise rules for determining definite assignment [§9.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#944-precise-rules-for-determining-definite-assignment) for context.
 
 As in the definite assignment rules linked above, we refer to a given initially unassigned variable as *v*.
 
@@ -162,7 +162,7 @@ We assume that if an expression has a constant value bool `false`, for example, 
 It's also worth noting that we never expect to be in a conditional state *before* visiting a constant expression. That's why we do not account for scenarios such as "*expr* is a constant expression with value *true*, and the state of *v* before *expr* is "definitely assigned when true".
 
 ### ?? (null-coalescing expressions) augment
-We augment the section [?? (null coalescing) expressions](../../spec/variables.md#-null-coalescing-expressions) as follows:
+We augment section [§9.4.4.29](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94429--expressions) as follows:
 
 For an expression *expr* of the form `expr_first ?? expr_second`:
 - ...
@@ -180,7 +180,7 @@ The more general formulation also allows us to handle some more unusual scenario
 - `if (x?.M(out y) ?? z?.M(out y) ?? false) y.ToString();`
 
 ### ?: (conditional) expressions
-We augment the section [**?: (conditional) expressions**](../../spec/variables.md#-conditional-expressions) as follows:
+We augment section [§9.4.4.30](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94430--expressions) as follows:
 
 For an expression *expr* of the form `expr_cond ? expr_true : expr_false`:
 - ...
@@ -210,7 +210,7 @@ This is an admittedly niche scenario, that compiles without error in the native 
 ### ==/!= (relational equality operator) expressions
 We introduce a new section **==/!= (relational equality operator) expressions**.
 
-The [general rules for expressions with embedded expressions](../../spec/variables.md#general-rules-for-expressions-with-embedded-expressions) apply, except for the scenarios described below.
+The general rules for expressions with embedded expressions [§9.4.4.23](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94423-general-rules-for-expressions-with-embedded-expressions) apply, except for the scenarios described below.
 
 For an expression *expr* of the form `expr_first == expr_second`, where `==` is a [predefined comparison operator](../../spec/expressions.md#relational-and-type-testing-operators) or a [lifted operator](../../spec/expressions.md#lifted-operators), the definite assignment state of *v* after *expr* is determined by:
   - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is a constant expression with value *null*, and the state of *v* after the non-conditional counterpart *E<sub>0</sub>* is "definitely assigned", then the state of *v* after *expr* is "definitely assigned when false".
