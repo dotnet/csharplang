@@ -207,7 +207,7 @@ static void F2(PrivateConstructor s2 = new()) { } // ok: initobj
 ```
 
 ### Type parameter constraints: `new()` and `struct`
-The `new()` and `struct` type parameter constraints require the parameterless constructor to be `public` if defined (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/main/spec/types.md#satisfying-constraints)).
+The `new()` and `struct` type parameter constraints require the parameterless constructor to be `public` if defined (see Satisfying constraints - [§8.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#845-satisfying-constraints)).
 
 The compiler assumes all structs satisfy `new()` and `struct` constraints.
 _No change from C#9._

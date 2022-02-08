@@ -101,7 +101,7 @@ assignment_operator
 
 ### Integral types
 
-The https://github.com/dotnet/csharplang/blob/main/spec/types.md#integral-types section will be adjusted to include information about `>>>` operator. The relevant bullet point is the following:
+The Integral types [§8.3.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#836-integral-types) section will be adjusted to include information about `>>>` operator. The relevant bullet point is the following:
 
 *  For the binary `<<`, `>>` and `>>>` operators, the left operand is converted to type `T`, where `T` is the first of `int`, `uint`, `long`, and `ulong` that can fully represent all possible values of the operand. The operation is then performed using the precision of type `T`, and the type of the result is `T`.
 
