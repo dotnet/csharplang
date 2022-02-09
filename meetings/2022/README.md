@@ -3,7 +3,7 @@
 All schedule items must have a public issue or checked in proposal that can be linked from the notes.
 
 ## Schedule ASAP
-
+- Definite Assignment in Struct Constructors (Rikki): https://github.com/dotnet/csharplang/issues/5737
 
 ## Schedule when convenient
 
