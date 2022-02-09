@@ -31,8 +31,8 @@ the member.
 ## Detailed Design
 
 Here is the proposed content for Vaiance Safety section of the language specification
-(https://github.com/dotnet/csharplang/blob/master/spec/interfaces.md#variance-safety).
-The change is the addition of "*These restrictions do not apply to ocurrances of types
+[§17.2.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#17232-variance-safety).
+The change is the addition of "*These restrictions do not apply to occurrences of types
 within declarations of static members.*" sentence at the beginning of the section. 
 
 ### Variance safety

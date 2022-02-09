@@ -178,8 +178,7 @@ At runtime, the actual member implementation used is the one that exists on the 
 C c = M<C>(); // The static members of C get called
 ```
 
-## Variance safety
-https://github.com/dotnet/csharplang/blob/main/spec/interfaces.md#variance-safety
+## Variance safety [§17.2.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#17232-variance-safety)
 
 Variance safety rules should apply to signatures of static abstract members. The addition proposed in
 https://github.com/dotnet/csharplang/blob/main/proposals/variance-safety-for-static-interface-members.md#variance-safety
