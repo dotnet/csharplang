@@ -29,16 +29,18 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Feb 14, 2022
 
-## Feb 9, 2022
-
-- Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md (AlekseyTs)
-- Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/unsigned-right-shift-operator.md (AlekseyTs)
-- Detailed review of https://github.com/dotnet/csharplang/blob/main/proposals/relaxing_shift_operator_requirements.md (AlekseyTs)
-- Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Feb 9, 2022
+
+[C# Language Design Meeting for February 9th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md)
+
+1. Continue discussion of checked user-defined operators
+2. Review proposal for unsigned right shift operator
+3. Review proposal for relaxing shift operator requirements
+4. Triage champion features
 
 ## Feb 7, 2022
 
