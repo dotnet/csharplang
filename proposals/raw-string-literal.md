@@ -487,7 +487,7 @@ The above is similar to the definition of `raw_string_literal` but with some imp
 4. If the contents on the same line is blank, then the literal can continue with a `new_line` and number of subsequent content lines and `new_line`s.
     - A content line is any text except a `new_line`.
     - A content line can contain multiple `raw_interpolation` occurrences at any position.  The `raw_interpolation` must start with an equal number of open braces (`{`) as the number of dollar signs at the start of the literal.
-    - The `raw_interpolation` will following the normal rules specified at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#interpolated-strings.  Any `raw_interpolation` must end with the same number of close braces (`}`) as dollar signs and open braces.
+    - The `raw_interpolation` will following the normal rules specified at [§11.7.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1173-interpolated-string-expressions).  Any `raw_interpolation` must end with the same number of close braces (`}`) as dollar signs and open braces.
     - Any `interpolation` can itself contain new-lines within in the same manner as an `interpolation` in a normal `verbatim_string_literal` (`@""`).
     - It then ends with a `new_line` some number (possibly zero) of `whitespace` and the same number of quotes that the literal started with.
 

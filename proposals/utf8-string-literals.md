@@ -303,7 +303,7 @@ What should we do to address this?
 
 *Proposal:* 
 
-Similar to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#overload-resolution, [Better function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#better-function-member) is updated to prefer members where none of the conversions involved require converting `string` constants to UTF8 `byte` sequences.
+Similar to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#overload-resolution, Better function member ([§11.6.4.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11643-better-function-member)) is updated to prefer members where none of the conversions involved require converting `string` constants to UTF8 `byte` sequences.
 
 > #### Better function member
 > ...

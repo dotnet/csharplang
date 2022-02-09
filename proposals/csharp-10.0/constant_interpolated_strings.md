@@ -31,7 +31,7 @@ This proposal represents the next logical step for constant string generation, w
 ## Detailed design
 [design]: #detailed-design
 
-The following represent the updated specifications for constant expressions under this new proposal. Current specifications from which this was directly based on can be found [here](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#constant-expressions).
+The following represent the updated specifications for constant expressions under this new proposal. Current specifications from which this was directly based on can be found in [§11.20](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1120-constant-expressions).
 
 ### Constant Expressions
 
@@ -81,7 +81,7 @@ Whenever an expression fulfills the requirements listed above, the expression is
 
 The compile-time evaluation of constant expressions uses the same rules as run-time evaluation of non-constant expressions, except that where run-time evaluation would have thrown an exception, compile-time evaluation causes a compile-time error to occur.
 
-Unless a constant expression is explicitly placed in an `unchecked` context, overflows that occur in integral-type arithmetic operations and conversions during the compile-time evaluation of the expression always cause compile-time errors ([Constant expressions](../../spec/expressions.md#constant-expressions)).
+Unless a constant expression is explicitly placed in an `unchecked` context, overflows that occur in integral-type arithmetic operations and conversions during the compile-time evaluation of the expression always cause compile-time errors ([§11.20](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1120-constant-expressions)).
 
 Constant expressions occur in the contexts listed below. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
 
@@ -90,7 +90,7 @@ Constant expressions occur in the contexts listed below. In these contexts, a co
 *  Default arguments of formal parameter lists ([Method parameters](../../spec/classes.md#method-parameters))
 *  `case` labels of a `switch` statement ([The switch statement](../../spec/statements.md#the-switch-statement)).
 *  `goto case` statements ([The goto statement](../../spec/statements.md#the-goto-statement)).
-*  Dimension lengths in an array creation expression ([Array creation expressions](../../spec/expressions.md#array-creation-expressions)) that includes an initializer.
+*  Dimension lengths in an array creation expression ([§11.7.15.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#117155-array-creation-expressions)) that includes an initializer.
 *  Attributes ([Attributes](../../spec/attributes.md)).
 
 An implicit constant expression conversion ([§10.2.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#10211-implicit-constant-expression-conversions)) permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.

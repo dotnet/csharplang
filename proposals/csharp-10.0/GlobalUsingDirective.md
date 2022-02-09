@@ -63,8 +63,7 @@ This is the relevant bullet point with proposed additions (which are **in bold**
             * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_alias_directive*s of the namespace declaration **and the namespaces and type declarations imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program** contain more than one accessible type having name `I` and `K` type parameters, then the *namespace_or_type_name* is ambiguous and an error occurs.
     * Otherwise, the *namespace_or_type_name* is undefined and a compile-time error occurs.
 
-## Simple names
-https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#simple-names
+## Simple names [§11.7.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1174-simple-names)
 
 Changes are made to the *simple_name* evaluation rules as follows.
 
@@ -81,8 +80,7 @@ This is the relevant bullet point with proposed additions (which are **in bold**
       * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_static_directive*s of the namespace declaration **and the namespaces and type declarations imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program** contain exactly one accessible type or non-extension static member having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.
       * Otherwise, if the namespaces and types imported by the *using_namespace_directive*s of the namespace declaration **and the namespaces and type declarations imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program** contain more than one accessible type or non-extension-method static member having name `I` and `K` type parameters, then the *simple_name* is ambiguous and an error occurs.
 
-## Extension method invocations
-https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#extension-method-invocations
+## Extension method invocations [§11.7.8.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11783-extension-method-invocations)
 
 Changes are made to the algorithm to find the best *type_name* `C` as follows.
 This is the relevant bullet point with proposed additions (which are **in bold**):

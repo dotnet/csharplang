@@ -161,11 +161,11 @@ done to help ensure that there are predictable and useful errors and that runtim
 
 #### Applicable function member adjustments
 
-We adjust the wording of the [applicable function member algorithm](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#applicable-function-member)
+We adjust the wording of the applicable function member algorithm ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member))
 as follows (a new sub-bullet is added to each section, in bold):
 
 A function member is said to be an ***applicable function member*** with respect to an argument list `A` when all of the following are true:
-*  Each argument in `A` corresponds to a parameter in the function member declaration as described in [Corresponding parameters](../../spec/expressions.md#corresponding-parameters), and any parameter to which no argument corresponds is an optional parameter.
+*  Each argument in `A` corresponds to a parameter in the function member declaration as described in Corresponding parameters ([§11.6.2.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11622-corresponding-parameters)), and any parameter to which no argument corresponds is an optional parameter.
 *  For each argument in `A`, the parameter passing mode of the argument (i.e., value, `ref`, or `out`) is identical to the parameter passing mode of the corresponding parameter, and
    *  for a value parameter or a parameter array, an implicit conversion ([§10.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#102-implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
    *  **for a `ref` parameter whose type is a struct type, an implicit _interpolated\_string\_handler\_conversion_ exists from the argument to the type of the corresponding parameter, or**
@@ -185,14 +185,14 @@ algorithm to resolve this if we so choose, but this scenario unlikely to occur a
 
 #### Better conversion from expression adjustments
 
-We change the [better conversion from expression](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#better-conversion-from-expression) section to the
+We change the better conversion from expression ([§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression)) section to the
 following:
 
 Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if:
 1. `E` is a non-constant _interpolated\_string\_expression_, `C1` is an _implicit\_string\_handler\_conversion_, `T1` is an _applicable\_interpolated\_string\_handler\_type_, and `C2` is not an _implicit\_string\_handler\_conversion_, or
 2. `E` does not exactly match `T2` and at least one of the following holds:
-    * `E` exactly matches `T1` ([Exactly matching Expression](../../spec/expressions.md#exactly-matching-expression))
-    * `T1` is a better conversion target than `T2` ([Better conversion target](../../spec/expressions.md#better-conversion-target))
+    * `E` exactly matches `T1` ([§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression))
+    * `T1` is a better conversion target than `T2` ([§11.6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11646-better-conversion-target))
 
 This does mean that there are some potentially non-obvious overload resolution rules, depending on whether the interpolated string in question is a constant-expression or not. For example:
 
@@ -240,7 +240,7 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-We make a slight change to the rules for the meaning of an [_interpolated\_string\_expression_](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#interpolated-strings):
+We make a slight change to the rules for the meaning of an _interpolated\_string\_expression_ ([§11.7.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1173-interpolated-string-expressions)):
 
 **If the type of an interpolated string is `string` and the type `System.Runtime.CompilerServices.DefaultInterpolatedStringHandler` exists, and the current context supports using that type, the string**
 **is lowered using the handler pattern. The final `string` value is then obtained by calling `ToStringAndClear()` on the handler type.**
@@ -266,7 +266,7 @@ _Answer_: No.
 
 ### Handler pattern codegen
 
-In this section, method invocation resolution refers to the steps listed [here](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#method-invocations).
+In this section, method invocation resolution refers to the steps listed in [§11.7.8.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11782-method-invocations).
 
 #### Constructor resolution
 
