@@ -21,7 +21,7 @@ definite assignment for `this` in constructor, destructors, ...).
 Record structs will also follow the same rules as structs for parameterless instance constructors and field initializers,
 but this document assumes that we will lift those restrictions for structs generally.
 
-See https://github.com/dotnet/csharplang/blob/master/spec/structs.md
+See [§15.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1549-constructors)
 See [parameterless struct constructors](./parameterless-struct-constructors.md) spec.
 
 Record structs cannot use `ref` modifier.
