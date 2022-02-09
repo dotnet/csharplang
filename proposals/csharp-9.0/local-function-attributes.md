@@ -2,11 +2,11 @@
 
 ## Attributes
 
-Local function declarations are now permitted to have [attributes](../../spec/attributes.md). Parameters and type parameters on local functions are also allowed to have attributes.
+Local function declarations are now permitted to have attributes ([§21](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#21-attributes)). Parameters and type parameters on local functions are also allowed to have attributes.
 
 Attributes with a specified meaning when applied to a method, its parameters, or its type parameters will have the same meaning when applied to a local function, its parameters, or its type parameters, respectively.
 
-A local function can be made conditional in the same sense as a [conditional method](../../spec/attributes.md#the-conditional-attribute) by decorating it with a `[ConditionalAttribute]`. A conditional local function must also be `static`. All restrictions on conditional methods also apply to conditional local functions, including that the return type must be `void`.
+A local function can be made conditional in the same sense as a conditional method ([§21.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#2153-the-conditional-attribute)) by decorating it with a `[ConditionalAttribute]`. A conditional local function must also be `static`. All restrictions on conditional methods also apply to conditional local functions, including that the return type must be `void`.
 
 ## Extern
 
