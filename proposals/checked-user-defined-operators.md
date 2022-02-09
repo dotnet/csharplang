@@ -92,6 +92,20 @@ Unary `checked operators` follow the rules from https://github.com/dotnet/csharp
 
 Binary `checked operators` follow the rules from https://github.com/dotnet/csharplang/blob/main/spec/classes.md#binary-operators.
 
+### Unary operator overload resolution
+
+The first bullet in https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#unary-operator-overload-resolution section will be adjusted as follows (additions are in bold).
+*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` is determined using the rules of [Candidate user-defined operators](checked-user-defined-operators.md#candidate-user-defined-operators). **If the set contains at least one operator in checked form, all operators in regular form are removed from the set.**
+
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the checked/unchecked context has on unary operator overload resolution.
+
+### Binary operator overload resolution
+
+The first bullet in https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#binary-operator-overload-resolution section will be adjusted as follows (additions are in bold).
+*  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](checked-user-defined-operators.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once. **If the set contains at least one operator in checked form, all operators in regular form are removed from the set.**
+
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the checked/unchecked context has on binary operator overload resolution.
+
 ### Candidate user-defined operators
 
 The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators section will be adjusted as follows (additions are in bold).
@@ -99,9 +113,7 @@ The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate
 Given a type `T` and an operation `operator op(A)`, where `op` is an overloadable operator and `A` is an argument list, the set of candidate user-defined operators provided by `T` for `operator op(A)` is determined as follows:
 
 *  Determine the type `T0`. If `T` is a nullable type, `T0` is its underlying type, otherwise `T0` is equal to `T`.
-*  For all `operator op` declarations **in their checked and regular forms in `checked` evaluation context and only in their regular form in `unchecked` evaluation context** in `T0` and all lifted forms of such operators, if at least one operator is applicable ([Applicable function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#applicable-function-member)) with respect to the argument list `A`, then the set of candidate operators consists of **:**
-    *  **If at least one applicable operator declaration is in checked form, all such checked applicable operators in `T0`.**
-    *  **Otherwise,** all such applicable operators in `T0`.
+*  For all `operator op` declarations **in their checked and regular forms in `checked` evaluation context and only in their regular form in `unchecked` evaluation context** in `T0` and all lifted forms of such operators, if at least one operator is applicable ([Applicable function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#applicable-function-member)) with respect to the argument list `A`, then the set of candidate operators consists of all such applicable operators in `T0`.
 *  Otherwise, if `T0` is `object`, the set of candidate operators is empty.
 *  Otherwise, the set of candidate operators provided by `T0` is the set of candidate operators provided by the direct base class of `T0`, or the effective base class of `T0` if `T0` is a type parameter.
 
@@ -163,7 +175,7 @@ class C
     {
         object o;
         
-        // error CS0034: Operator '+' is ambiguous on operands of type 'C2' and 'C3'
+        // C1.op_CheckedAddition
         o = checked(x + y);
         
         // C2.op_Addition
@@ -194,7 +206,7 @@ class C
     {
         object o;
         
-        // error CS0034: Operator '+' is ambiguous on operands of type 'C2' and 'C3'
+        // C2.op_CheckedAddition
         o = checked(x + y);
         
         // C1.op_Addition
