@@ -311,14 +311,13 @@ Conversion `checked operators` follow the rules from https://github.com/dotnet/c
 
 ### Processing of user-defined explicit conversions 
 
-Assuming that `regular operator` matches `unchecked` evaluation context and `checked operator` matches `checked` evaluation context,
-the third bullet in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#processing-of-user-defined-explicit-conversions:
+The third bullet in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#processing-of-user-defined-explicit-conversions:
 >*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
 will be replaced with the following bullet points:
-*  Find the set of applicable user-defined and lifted explicit conversion operators **matching the current checked/unchecked context**, `U0`. This set consists of the user-defined and lifted explicit conversion operators declared by the classes or structs in `D` that **match the current checked/unchecked context** and convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`.
-*  Find the set of applicable user-defined and lifted explicit conversion operators **matching the opposite checked/unchecked context**, `U1`. If `U0` is not empty, `U1` is empty. Otherwise, this set consists of the user-defined and lifted explicit conversion operators declared by the classes or structs in `D` that **match the opposite checked/unchecked context** and convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`.
-*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of operators from `U0`, `U1`, and the user-defined and lifted implicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+*  Find the set of applicable user-defined and lifted explicit conversion operators, `U0`. This set consists of the user-defined and lifted explicit conversion operators declared by the classes or structs in `D` **in their checked and regular forms in `checked` evaluation context and only in their regular form in `unchecked` evaluation context** and convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`.
+*  If `U0` contains at least one operator in checked form, all operators in regular form are removed from the set.
+*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of operators from `U0`, and the user-defined and lifted implicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
 The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the checked/unchecked context has on processing of user-defined explicit conversions.
 
