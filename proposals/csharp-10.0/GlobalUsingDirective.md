@@ -88,8 +88,7 @@ This is the relevant bullet point with proposed additions (which are **in bold**
    * If the given namespace or compilation unit directly contains non-generic type declarations `Ci` with eligible extension methods `Mj`, then the set of those extension methods is the candidate set.
    * If types `Ci` imported by *using_static_declarations* and directly declared in namespaces imported by *using_namespace_directive*s in the given namespace or compilation unit **and, if containing compilation unit is reached, imported by *global_using_static_declarations* and directly declared in namespaces imported by *global_using_namespace_directive*s in the program** directly contain eligible extension methods `Mj`, then the set of those extension methods is the candidate set.
 
-## Compilation units
-https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#compilation-units
+## Compilation units [§13.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#132-compilation-units)
 
 A *compilation_unit* defines the overall structure of a source file. A compilation unit consists of **zero or more *global_using_directive*s followed by** zero or more *using_directive*s followed by zero or more *global_attributes* followed by zero or more *namespace_member_declaration*s.
 
@@ -103,13 +102,11 @@ A C# program consists of one or more compilation units, each contained in a sepa
 
 The *global_using_directive*s of a compilation unit affect the *global_attributes* and *namespace_member_declaration*s of all compilation units in the program.
 
-## Extern aliases
-https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#extern-aliases
+## Extern aliases [§13.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#134-extern-alias-directives)
 
 The scope of an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body.
 
-## Using alias directives
-https://github.com/dotnet/csharplang/blob/main/spec/namespaces.md#using-alias-directives
+## Using alias directives [§13.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#1352-using-alias-directives)
 
 The order in which *using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *using_alias_directive* is not affected by the *using_alias_directive* itself or by other *using_directive*s in the immediately containing compilation unit or namespace body, **and, if the *using_alias_directive* is immediately contained in a compilation unit, is not affected by the *global_using_directive*s in the program**. In other words, the *namespace_or_type_name* of a *using_alias_directive* is resolved as if the immediately containing compilation unit or namespace body had no *using_directive*s **and, if the *using_alias_directive* is immediately contained in a compilation unit, the program had no *global_using_directive*s**. A *using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit or namespace body.
 
@@ -129,7 +126,7 @@ The *identifier* of a *global_using_alias_directive* must be unique within the d
 
 Just like regular members, names introduced by *global_using_alias_directive*s are hidden by similarly named members in nested scopes.
 
-The order in which *global_using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *global_using_alias_directive* is not affected by the *global_using_alias_directive* itself or by other *global_using_directive*s or *using_directive*s in the program. In other words, the *namespace_or_type_name* of a *global_using_alias_directive* is resolved as if the immediately containing compilation unit had no *using_directive*s and the entire containig program had no *global_using_directive*s. A *global_using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit.
+The order in which *global_using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *global_using_alias_directive* is not affected by the *global_using_alias_directive* itself or by other *global_using_directive*s or *using_directive*s in the program. In other words, the *namespace_or_type_name* of a *global_using_alias_directive* is resolved as if the immediately containing compilation unit had no *using_directive*s and the entire containimg program had no *global_using_directive*s. A *global_using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit.
 
 A *global_using_alias_directive* can create an alias for any namespace or type.
 
@@ -177,13 +174,12 @@ A *global_using_static_directive* only imports members and types declared direct
 
 Ambiguities between multiple *global_using_namespace_directive*s and *global_using_static_directives* are discussed in the section for *global_using_namespace_directive*s (above).
 
-## Namespace alias qualifiers
-https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#namespace-alias-qualifiers
+## Qualified alias member [§13.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/namespaces.md#138-qualified-alias-member)
 
 Changes are made to the algorithm determining the meaning of a *qualified_alias_member* as follows.
 
 This is the relevant bullet point with proposed additions (which are **in bold**):
-*  Otherwise, starting with the namespace declaration ([Namespace declarations](../../spec/namespaces.md#namespace-declarations)) immediately containing the *qualified_alias_member* (if any), continuing with each enclosing namespace declaration (if any), and ending with the compilation unit containing the *qualified_alias_member*, the following steps are evaluated until an entity is located:
+*  Otherwise, starting with the namespace declaration ([§13.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/namespaces.md#133-namespace-declarations)) immediately containing the *qualified_alias_member* (if any), continuing with each enclosing namespace declaration (if any), and ending with the compilation unit containing the *qualified_alias_member*, the following steps are evaluated until an entity is located:
 
    * If the namespace declaration or compilation unit contains a *using_alias_directive* that associates `N` with a type, **or, when a compilation unit is reached, the program contains a *global_using_alias_directive* that associates `N` with a type,** then the *qualified_alias_member* is undefined and a compile-time error occurs.
    * Otherwise, if the namespace declaration or compilation unit contains an *extern_alias_directive* or *using_alias_directive* that associates `N` with a namespace, ***or, when a compilation unit is reached, the program contains a *global_using_alias_directive* that associates `N` with a namespace,** then:
