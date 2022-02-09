@@ -355,6 +355,39 @@ public struct Int128
 }
 ```
 
+### Yet another way to build the set of candidate user-defined operators 
+
+#### Unary operator overload resolution
+
+Assuming that `regular operator` matches `unchecked` evaluation context, `checked operator` matches `checked` evaluation context
+and an operator that doesn't have `checked` form (for example, `+`) matches either context, the first bullet in https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#unary-operator-overload-resolution:
+>*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
+
+will be replaced with the following two bullet points:
+*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the current checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
+*  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the opposite checked/unchecked context** is determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators).
+
+#### Binary operator overload resolution
+
+Assuming that `regular operator` matches `unchecked` evaluation context, `checked operator` matches `checked` evaluation context
+and an operator that doesn't have a `checked` form (for example, `%`) matches either context, the first bullet in https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#binary-operator-overload-resolution:
+>*  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
+
+will be replaced with the following two bullet points:
+*  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` **matching the current checked/unchecked context** is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
+*  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` **matching the opposite checked/unchecked context** is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
+
+#### Processing of user-defined explicit conversions 
+
+Assuming that `regular operator` matches `unchecked` evaluation context and `checked operator` matches `checked` evaluation context,
+the third bullet in https://github.com/dotnet/csharplang/blob/main/spec/conversions.md#processing-of-user-defined-explicit-conversions:
+>*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+
+will be replaced with the following bullet points:
+*  Find the set of applicable user-defined and lifted explicit conversion operators **matching the current checked/unchecked context**, `U0`. This set consists of the user-defined and lifted explicit conversion operators declared by the classes or structs in `D` that **match the current checked/unchecked context** and convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`.
+*  Find the set of applicable user-defined and lifted explicit conversion operators **matching the opposite checked/unchecked context**, `U1`. If `U0` is not empty, `U1` is empty. Otherwise, this set consists of the user-defined and lifted explicit conversion operators declared by the classes or structs in `D` that **match the opposite checked/unchecked context** and convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`.
+*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of operators from `U0`, `U1`, and the user-defined and lifted implicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+
 ### Checked vs. unchecked context within a `checked operator`
 
 The compiler could treat the default context of a `checked operator` as checked. The developer would need to explicitly use `unchecked` if part of their algorithm should not participate in the `checked context`. However, this might not work well in the future if we start allowing `checked`/`unchecked` tokens as modifiers on operators to set the context within the body. The modifier and the keyword could contradict each other. Also, we wouldn't be able to do the same (treat default context as unchecked) for a `regular operator` because that would be a breaking change.
