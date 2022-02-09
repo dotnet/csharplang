@@ -128,7 +128,7 @@ The `>>>` operator is subject to the same grammar ambiguities described at [§6.
 
 ### Operators
 
-The https://github.com/dotnet/csharplang/blob/main/spec/classes.md#operators will be adjusted to include `>>>` operator.
+The [§14.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1410-operators) section will be adjusted to include `>>>` operator.
 
 ```antlr
 overloadable_binary_operator
@@ -139,7 +139,7 @@ overloadable_binary_operator
 
 ### Binary operators
 
-The signature of a `>>>` operator is subject to the same rules as those at https://github.com/dotnet/csharplang/blob/main/spec/classes.md#binary-operators
+The signature of a `>>>` operator is subject to the same rules as those at [§14.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14103-binary-operators)
 for the signature of a `>>` operator.
 
 ### Metadata name

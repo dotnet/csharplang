@@ -85,9 +85,9 @@ Unless a constant expression is explicitly placed in an `unchecked` context, ove
 
 Constant expressions occur in the contexts listed below. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
 
-*  Constant declarations ([Constants](../../spec/classes.md#constants)).
+*  Constant declarations ([§14.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#144-constants)).
 *  Enumeration member declarations ([Enum members](../../spec/enums.md#enum-members)).
-*  Default arguments of formal parameter lists ([Method parameters](../../spec/classes.md#method-parameters))
+*  Default arguments of formal parameter lists ([§14.6.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1462-method-parameters))
 *  `case` labels of a `switch` statement ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1283-the-switch-statement)).
 *  `goto case` statements ([§12.10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#12104-the-goto-statement)).
 *  Dimension lengths in an array creation expression ([§11.7.15.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#117155-array-creation-expressions)) that includes an initializer.

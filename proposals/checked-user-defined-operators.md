@@ -19,7 +19,7 @@ There is no way for a user to declare a type and support both checked and unchec
 
 ### Syntax
 
-Grammar at https://github.com/dotnet/csharplang/blob/main/spec/classes.md#operators will be adjusted to allow
+Grammar at operators ([§14.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1410-operators)) will be adjusted to allow
 `checked` keyword after the `operator` keyword right before the operator token:
 ```antlr
 overloadable_unary_operator
@@ -86,7 +86,7 @@ implementing checked explicit conversion operator.
 
 ### Unary operators
 
-Unary `checked operators` follow the rules from https://github.com/dotnet/csharplang/blob/main/spec/classes.md#unary-operators.
+Unary `checked operators` follow the rules from [§14.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14102-unary-operators).
 
 ### Unary operator overload resolution
 
@@ -102,7 +102,7 @@ The Checked and unchecked operators [§11.7.18](https://github.com/dotnet/csharp
 
 ### Binary operators
 
-Binary `checked operators` follow the rules from https://github.com/dotnet/csharplang/blob/main/spec/classes.md#binary-operators.
+Binary `checked operators` follow the rules from [§14.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14103-binary-operators).
 
 ### Unary operator overload resolution
 
@@ -319,7 +319,7 @@ class C2 : C1
 
 ### Conversion operators
 
-Conversion `checked operators` follow the rules from https://github.com/dotnet/csharplang/blob/main/spec/classes.md#conversion-operators.
+Conversion `checked operators` follow the rules from [§14.10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14104-conversion-operators).
 
 ### Processing of user-defined explicit conversions 
 

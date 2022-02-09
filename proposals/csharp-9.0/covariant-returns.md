@@ -35,7 +35,7 @@ This is a specification for [covariant return types](https://github.com/dotnet/c
 
 ### Class Method Override
 
-The [existing constraint on class override](../../spec/classes.md#override-methods) methods
+The existing constraint on class override ([§14.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1465-override-methods)) methods
 
 > - The override method and the overridden base method have the same return type.
 
@@ -52,7 +52,7 @@ This constraint permits an override method in a `private` class to have a `priva
 
 ### Class Property and Indexer Override
 
-The [existing constraint on class override](../../spec/classes.md#virtual-sealed-override-and-abstract-property-accessors) properties
+The existing constraint on class override ([§14.7.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1476-virtual-sealed-override-and-abstract-accessors)) properties
 
 > An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion ~~between the type of the overriding and the inherited property~~. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors.
 

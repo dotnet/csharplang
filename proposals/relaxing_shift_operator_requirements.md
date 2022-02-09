@@ -33,7 +33,7 @@ While the restriction that the second operand must be `int` is removed.
 
 ### Binary operators
 
-https://github.com/dotnet/csharplang/blob/main/spec/classes.md#binary-operators should be reworded as follows:
+[§14.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14103-binary-operators) should be reworded as follows:
 ```diff
 -*  A binary `<<` or `>>` operator must take two parameters, the first of which must have type `T` or `T?` and the second of which must have type `int` or `int?`, and can return any type.
 +*  A binary `<<` or `>>` operator must take two parameters, the first of which must have type `T` or `T?`, and can return any type.

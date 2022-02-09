@@ -30,7 +30,7 @@ record struct Person()
 ### Instance field initializers
 Instance field declarations for a struct may include initializers.
 
-As with [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-field-initialization):
+As with class field initializers [§14.5.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14563-instance-field-initialization):
 > A variable initializer for an instance field cannot reference the instance being created. 
 
 An error is reported if a struct has field initializers and no declared instance constructors since the field initializers will not be run.
@@ -60,7 +60,7 @@ Constructors can be declared `extern` or `unsafe`.
 Constructors cannot be `partial`.
 
 ### Executing field initializers
-Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-variable-initializers) with **one qualifier**:
+Execution of struct instance field initializers matches execution of class field initializers ([§14.11.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14113-instance-variable-initializers)) with **one qualifier**:
 > When an instance constructor has no constructor initializer, **or when the constructor initializer `this()` represents the default parameterless constructor**, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor ... . The variable initializers are executed in the textual order in which they appear in the ... declaration.
 
 ### Definite assignment

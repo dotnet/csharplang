@@ -10,7 +10,7 @@ A local function can be made conditional in the same sense as a [conditional met
 
 ## Extern
 
-The `extern` modifier is now permitted on local functions. This makes the local function external in the same sense as an [external method](../../spec/classes.md#external-methods).
+The `extern` modifier is now permitted on local functions. This makes the local function external in the same sense as an external method ([§14.6.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1468-external-methods)).
 
 Similarly to an external method, the *local-function-body* of an external local function must be a semicolon. A semicolon *local-function-body* is only permitted on an external local function. 
 

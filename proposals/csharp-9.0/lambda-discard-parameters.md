@@ -13,7 +13,7 @@ Unused parameters do not need to be named. The intent of discards is clear, i.e.
 
 ## Detailed design
 
-[Method parameters](https://github.com/dotnet/csharplang/blob/master/spec/classes.md#method-parameters)
+Method parameters - [§14.6.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1462-method-parameters)
 In the parameter list of a lambda or anonymous method with more than one parameter named `_`, such parameters are discard parameters.
 Note: if a single parameter is named `_` then it is a regular parameter for backwards compatibility reasons.
 
