@@ -217,6 +217,82 @@ class C3 : C1
 }
 ```
 
+#### Example #4:
+``` C#
+class C
+{
+    static void Add(C2 x, byte y)
+    {
+        object o;
+        
+        // C2.op_Addition
+        o = checked(x + y);
+        
+        // C2.op_Addition
+        o = unchecked(x + y);
+    }
+
+    static void Add2(C2 x, int y)
+    {
+        object o;
+        
+        // C2.op_Addition
+        o = checked(x + y);
+        
+        // C2.op_Addition
+        o = unchecked(x + y);
+    }
+}
+
+class C1
+{
+    public static C1 operator checked + (C1 x, byte y) => new C1();
+}
+
+class C2 : C1
+{
+    public static C2 operator + (C2 x, int y) => new C2();
+}
+```
+
+#### Example #5:
+``` C#
+class C
+{
+    static void Add(C2 x, byte y)
+    {
+        object o;
+        
+        // C2.op_CheckedAddition
+        o = checked(x + y);
+        
+        // C1.op_Addition
+        o = unchecked(x + y);
+    }
+
+    static void Add2(C2 x, int y)
+    {
+        object o;
+        
+        // C1.op_Addition
+        o = checked(x + y);
+        
+        // C1.op_Addition
+        o = unchecked(x + y);
+    }
+}
+
+class C1
+{
+    public static C1 operator + (C1 x, int y) => new C1();
+}
+
+class C2 : C1
+{
+    public static C2 operator checked + (C2 x, byte y) => new C2();
+}
+```
+
 ### Conversion operators
 
 Conversion `checked operators` follow the rules from https://github.com/dotnet/csharplang/blob/main/spec/classes.md#conversion-operators.
@@ -538,6 +614,82 @@ class C2 : C1
 
 class C3 : C1
 {
+}
+```
+
+##### Example #4:
+``` C#
+class C
+{
+    static void Add(C2 x, byte y)
+    {
+        object o;
+        
+        // C1.op_CheckedAddition
+        o = checked(x + y);
+        
+        // C2.op_Addition
+        o = unchecked(x + y);
+    }
+
+    static void Add2(C2 x, int y)
+    {
+        object o;
+        
+        // C2.op_Addition
+        o = checked(x + y);
+        
+        // C2.op_Addition
+        o = unchecked(x + y);
+    }
+}
+
+class C1
+{
+    public static C1 operator checked + (C1 x, byte y) => new C1();
+}
+
+class C2 : C1
+{
+    public static C2 operator + (C2 x, int y) => new C2();
+}
+```
+
+##### Example #5:
+``` C#
+class C
+{
+    static void Add(C2 x, byte y)
+    {
+        object o;
+        
+        // C2.op_CheckedAddition
+        o = checked(x + y);
+        
+        // C1.op_Addition
+        o = unchecked(x + y);
+    }
+
+    static void Add2(C2 x, int y)
+    {
+        object o;
+        
+        // C1.op_Addition
+        o = checked(x + y);
+        
+        // C1.op_Addition
+        o = unchecked(x + y);
+    }
+}
+
+class C1
+{
+    public static C1 operator + (C1 x, int y) => new C1();
+}
+
+class C2 : C1
+{
+    public static C2 operator checked + (C2 x, byte y) => new C2();
 }
 ```
 
