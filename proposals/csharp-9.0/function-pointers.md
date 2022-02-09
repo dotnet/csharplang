@@ -164,7 +164,7 @@ delegate*<delegate* managed<string, int>, delegate*<string, int>>;
 ### Function pointer conversions
 
 In an unsafe context, the set of available implicit conversions (Implicit conversions) is extended to include the following implicit pointer conversions:
-- [_Existing conversions_](https://github.com/dotnet/csharplang/blob/master/spec/unsafe-code.md#pointer-conversions)
+- _Existing conversions_ - ([§22.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#225-pointer-conversions))
 - From _funcptr\_type_ `F0` to another _funcptr\_type_ `F1`, provided all of the following are true:
     - `F0` and `F1` have the same number of parameters, and each parameter `D0n` in `F0` has the same `ref`, `out`, or `in` modifiers as the corresponding parameter `D1n` in `F1`.
     - For each value parameter (a parameter with no `ref`, `out`, or `in` modifier), an identity conversion, implicit reference conversion, or implicit pointer conversion exists from the parameter type in `F0` to the corresponding parameter type in `F1`.
@@ -244,19 +244,19 @@ The section in unsafe code on operators is modified as such:
 
 > In an unsafe context, several constructs are available for operating on all _pointer\_type_s that are not _funcptr\_type_s:
 >
-> *  The `*` operator may be used to perform pointer indirection ([Pointer indirection](../../spec/unsafe-code.md#pointer-indirection)).
-> *  The `->` operator may be used to access a member of a struct through a pointer ([Pointer member access](../../spec/unsafe-code.md#pointer-member-access)).
-> *  The `[]` operator may be used to index a pointer ([Pointer element access](../../spec/unsafe-code.md#pointer-element-access)).
-> *  The `&` operator may be used to obtain the address of a variable ([The address-of operator](../../spec/unsafe-code.md#the-address-of-operator)).
-> *  The `++` and `--` operators may be used to increment and decrement pointers ([Pointer increment and decrement](../../spec/unsafe-code.md#pointer-increment-and-decrement)).
-> *  The `+` and `-` operators may be used to perform pointer arithmetic ([Pointer arithmetic](../../spec/unsafe-code.md#pointer-arithmetic)).
-> *  The `==`, `!=`, `<`, `>`, `<=`, and `=>` operators may be used to compare pointers ([Pointer comparison](../../spec/unsafe-code.md#pointer-comparison)).
-> *  The `stackalloc` operator may be used to allocate memory from the call stack ([Fixed size buffers](../../spec/unsafe-code.md#fixed-size-buffers)).
-> *  The `fixed` statement may be used to temporarily fix a variable so its address can be obtained ([The fixed statement](../../spec/unsafe-code.md#the-fixed-statement)).
+> *  The `*` operator may be used to perform pointer indirection ([§22.6.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#2262-pointer-indirection)).
+> *  The `->` operator may be used to access a member of a struct through a pointer ([§22.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#2263-pointer-member-access)).
+> *  The `[]` operator may be used to index a pointer ([§22.6.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#2264-pointer-element-access)).
+> *  The `&` operator may be used to obtain the address of a variable ([§22.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#2265-the-address-of-operator)).
+> *  The `++` and `--` operators may be used to increment and decrement pointers ([§22.6.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#2266-pointer-increment-and-decrement)).
+> *  The `+` and `-` operators may be used to perform pointer arithmetic ([§22.6.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#2267-pointer-arithmetic)).
+> *  The `==`, `!=`, `<`, `>`, `<=`, and `=>` operators may be used to compare pointers ([§22.6.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#2268-pointer-comparison)).
+> *  The `stackalloc` operator may be used to allocate memory from the call stack ([§22.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#228-fixed-size-buffers)).
+> *  The `fixed` statement may be used to temporarily fix a variable so its address can be obtained ([§22.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#227-the-fixed-statement)).
 > 
 > In an unsafe context, several constructs are available for operating on all _funcptr\_type_s:
 > *  The `&` operator may be used to obtain the address of static methods ([Allow address-of to target methods](#allow-address-of-to-target-methods))
-> *  The `==`, `!=`, `<`, `>`, `<=`, and `=>` operators may be used to compare pointers ([Pointer comparison](../../spec/unsafe-code.md#pointer-comparison)).
+> *  The `==`, `!=`, `<`, `>`, `<=`, and `=>` operators may be used to compare pointers ([§22.6.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#2268-pointer-comparison)).
 
 Additionally, we modify all the sections in `Pointers in expressions` to forbid function pointer types, except `Pointer comparison` and `The sizeof operator`.
 
