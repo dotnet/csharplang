@@ -88,8 +88,8 @@ Constant expressions occur in the contexts listed below. In these contexts, a co
 *  Constant declarations ([Constants](../../spec/classes.md#constants)).
 *  Enumeration member declarations ([Enum members](../../spec/enums.md#enum-members)).
 *  Default arguments of formal parameter lists ([Method parameters](../../spec/classes.md#method-parameters))
-*  `case` labels of a `switch` statement ([The switch statement](../../spec/statements.md#the-switch-statement)).
-*  `goto case` statements ([The goto statement](../../spec/statements.md#the-goto-statement)).
+*  `case` labels of a `switch` statement ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1283-the-switch-statement)).
+*  `goto case` statements ([§12.10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#12104-the-goto-statement)).
 *  Dimension lengths in an array creation expression ([§11.7.15.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#117155-array-creation-expressions)) that includes an initializer.
 *  Attributes ([Attributes](../../spec/attributes.md)).
 
