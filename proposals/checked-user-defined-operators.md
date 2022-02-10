@@ -88,28 +88,16 @@ implementing checked explicit conversion operator.
 
 Unary `checked operators` follow the rules from [§14.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14102-unary-operators).
 
-### Unary operator overload resolution
-
-Assuming that `regular operator` matches `unchecked` evaluation context, `checked operator` matches `checked` evaluation context
-and an operator that doesn't have `checked` form matches either context, the first bullet in [§11.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1144-unary-operator-overload-resolution):
->*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` is determined using the rules of Candidate user-defined operators [§11.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1146-candidate-user-defined-operators).
-
-will be replaced with the following two bullet points:
-*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the current checked/unchecked context** is determined using the rules of Candidate user-defined operators [§11.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1146-candidate-user-defined-operators).
-*  If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation. Otherwise, the set of candidate user-defined operators provided by `X` for the operation `operator op(x)` **matching the opposite checked/unchecked context** is determined using the rules of Candidate user-defined operators [§11.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1146-candidate-user-defined-operators).
-
-The Checked and unchecked operators [§11.7.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11718-the-checked-and-unchecked-operators) section will be adjusted to reflect the effect that the checked/unchecked context has on unary operator overload resolution.
-
 ### Binary operators
 
 Binary `checked operators` follow the rules from [§14.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14103-binary-operators).
 
 ### Unary operator overload resolution
 
-The first bullet in https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#unary-operator-overload-resolution section will be adjusted as follows (additions are in bold).
+The first bullet in section [§11.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1144-unary-operator-overload-resolution) will be adjusted as follows (additions are in bold).
 *  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` is determined using the rules of [Candidate user-defined operators](checked-user-defined-operators.md#candidate-user-defined-operators). **If the set contains at least one operator in checked form, all operators in regular form are removed from the set.**
 
-The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the checked/unchecked context has on unary operator overload resolution.
+The section [§11.7.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11718-the-checked-and-unchecked-operators) will be adjusted to reflect the effect that the checked/unchecked context has on unary operator overload resolution.
 
 ### Binary operator overload resolution
 
