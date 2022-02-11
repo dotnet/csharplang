@@ -22,6 +22,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Feb 23, 2022
 
+- Roles and extensions (Julien, David, Mads): https://github.com/dotnet/csharplang/issues/5497
+
 ## Feb 16, 2022
 
 - Open questions in `field` (Fred): https://github.com/dotnet/csharplang/issues/5703
