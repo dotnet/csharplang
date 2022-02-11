@@ -3,8 +3,6 @@
 All schedule items must have a public issue or checked in proposal that can be linked from the notes.
 
 ## Schedule ASAP
-- Definite Assignment in Struct Constructors (Rikki): https://github.com/dotnet/csharplang/issues/5737
-- Review operator overload resolution rules in https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md.
 
 ## Schedule when convenient
 
@@ -27,8 +25,12 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Feb 16, 2022
 
 - Open questions in `field` (Fred): https://github.com/dotnet/csharplang/issues/5703
+- Triage championed features (Mads): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone
 
 ## Feb 14, 2022
+
+- Definite Assignment in Struct Constructors (Rikki): https://github.com/dotnet/csharplang/issues/5737
+- Review operator overload resolution rules (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md.
 
 # C# Language Design Notes for 2022
 
