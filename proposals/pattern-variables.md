@@ -8,33 +8,43 @@ Allow variable declarations under `or` patterns and across `case` labels in a `s
 
 This feature would reduce code duplication where we could use the same piece of code if either of patterns is satisfied. For instance:
 ```cs
-if (e is (int x, 0) or (0, int x))
-    Use(x);
+if (e is Foo foo or Wrapper { P: Foo foo })
+    return foo;
   
-switch (e)
+Expr Simplify(Expr e)
 {
-    case (int x, 0):
-    case (0, int x):
-        Use(x);
-        break;
+  switch (e) {
+    case Mult(Const(1), var x):
+    case Mult(var x, Const(1)): 
+        return Simplify(x);
+    case Add(Const(0), var x):
+    case Add(var x, Const(0)):
+        return Simplify(x);
+    // ..
+  }
 }
 ```
 Instead of:
 
 ```cs
-if (e is (int x1, 0))
-    Use(x1);
-else if (e is (0, int x2))
-    Use(x2);
+if (e is Foo foo1) 
+    return foo1;
+if (e is Wrapper { P: Foo foo2 }) 
+    return foo2;
   
-switch (e)
+Expr Simplify(Expr e)
 {
-    case (int x, 0):
-        Use(x);
-        break;
-    case (0, int x):
-        Use(x);
-        break;
+  switch (e) {
+    case Mult(Const(1), var x):
+        return Simplify(x);
+    case Mult(var x, Const(1)): 
+        return Simplify(x);
+    case Add(Const(0), var x):
+        return Simplify(x);
+    case Add(var x, Const(0)):
+        return Simplify(x);
+    // ..
+  }
 }
 ```
 
