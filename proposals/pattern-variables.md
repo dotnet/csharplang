@@ -16,7 +16,6 @@ Expr Simplify(Expr e)
   switch (e) {
     case Mult(Const(1), var x):
     case Mult(var x, Const(1)): 
-        return Simplify(x);
     case Add(Const(0), var x):
     case Add(var x, Const(0)):
         return Simplify(x);
