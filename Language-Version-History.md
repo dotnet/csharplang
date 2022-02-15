@@ -3,7 +3,8 @@ Features Added in C# Language Versions
 
 # C# 10.0 - .NET 6 and Visual Studio 2022 version 17.0
 
-- [Record structs](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/record-structs.md) and `with` expressions on structs (`record struct Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
+- [Record structs](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/record-structs.md) (`record struct Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
+- [With expression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#allow-with-expression-on-structs) on structs and anonymous types.
 - [Global using directives](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/GlobalUsingDirective.md): `global using` directives avoid repeating the same `using` directives across many files in your program.
 - [Improved definite assignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-definite-assignment.md): definite assignment and nullability analysis better handle common patterns such as `dictionary?.TryGetValue(key, out value) == true`.
 - [Constant interpolated strings](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/constant_interpolated_strings.md): interpolated strings composed of constants are themselves constants.
