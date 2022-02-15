@@ -23,6 +23,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Feb 23, 2022
 
 - Roles and extensions (Julien, David, Mads): https://github.com/dotnet/csharplang/issues/5497
+- Pattern match `Span<char>` on a constant string (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-match-span-of-char-on-string.md
 
 ## Feb 16, 2022
 
