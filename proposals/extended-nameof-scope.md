@@ -33,7 +33,7 @@ A *simple_name* is either of the form `I` or of the form `I<A1,...,Ak>`, where `
 
 - If `K` is zero and the *simple_name* appears within a block and if the block's (or an enclosing block's) local variable declaration space (Declarations) contains a local variable, parameter or constant with name `I`, then the *simple_name* refers to that local variable, parameter or constant and is classified as a variable or value.
 - If `K` is zero and the *simple_name* appears within the body of a generic method declaration and if that declaration includes a type parameter with name `I`, then the *simple_name* refers to that type parameter.
-- **If `K` is zero and the *simple_name* appears within a `nameof` expression on an attribute on the method declaration and if that declaration includes a parameter or type parameter with name `I`, then the *simple_name* refers to that parameter or type parameter.**
+- **If `K` is zero and the *simple_name* appears within a `nameof` expression in an attribute on the method declaration and if that declaration includes a parameter or type parameter with name `I`, then the *simple_name* refers to that parameter or type parameter.**
 - Otherwise, for each instance type `T` (The instance type), starting with the instance type of the immediately enclosing type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):  
 \[...]
 - Otherwise, for each namespace `N`, starting with the namespace in which the *simple_name* occurs, continuing with each enclosing namespace (if any), and ending with the global namespace, the following steps are evaluated until an entity is located:  
@@ -41,6 +41,9 @@ A *simple_name* is either of the form `I` or of the form `I<A1,...,Ak>`, where `
 - Otherwise, the simple_name is undefined and a compile-time error occurs.
 
 [Scopes](https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#scopes)
+
+- The scope of a type parameter declared by a type_parameter_list on a method_declaration is \[...] **and `nameof` expressions in an attribute on the method declaration.**
+- The scope of a parameter declared in a method_declaration (Methods) is the *method_body* of that method_declaration **and `nameof` expressions in an attribute on the method declaration.**
 
 ## Related spec sections
 - [Declarations](https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#declarations)
