@@ -126,7 +126,7 @@ The *identifier* of a *global_using_alias_directive* must be unique within the d
 
 Just like regular members, names introduced by *global_using_alias_directive*s are hidden by similarly named members in nested scopes.
 
-The order in which *global_using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *global_using_alias_directive* is not affected by the *global_using_alias_directive* itself or by other *global_using_directive*s or *using_directive*s in the program. In other words, the *namespace_or_type_name* of a *global_using_alias_directive* is resolved as if the immediately containing compilation unit had no *using_directive*s and the entire containimg program had no *global_using_directive*s. A *global_using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit.
+The order in which *global_using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *global_using_alias_directive* is not affected by the *global_using_alias_directive* itself or by other *global_using_directive*s or *using_directive*s in the program. In other words, the *namespace_or_type_name* of a *global_using_alias_directive* is resolved as if the immediately containing compilation unit had no *using_directive*s and the entire containing program had no *global_using_directive*s. A *global_using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit.
 
 A *global_using_alias_directive* can create an alias for any namespace or type.
 
