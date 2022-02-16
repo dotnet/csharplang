@@ -195,7 +195,7 @@ be issued by the compiler:
 ``` csharp
 void WarnCase<T>(
     string? name!!, // Warning: combining explicit null checking with a nullable type
-    T value1 // Okay
+    T value1!! // Okay
 )
 ```
 
