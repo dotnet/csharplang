@@ -156,7 +156,7 @@ It seems more likely that we'd regret the `u8` suffix pointing to `ReadOnlySpan<
 
 ## Unresolved questions
 
-### (Resoved) Conversions between a `string` constant with `null` value and `byte` sequences
+### (Resolved) Conversions between a `string` constant with `null` value and `byte` sequences
 
 Whether this conversion is supported and, if so, how it is performed is not specified.
 
