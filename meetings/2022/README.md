@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
+- Continue review operator overload resolution rules in https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md.
+
 ## Schedule when convenient
 
 
