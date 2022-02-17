@@ -8,8 +8,8 @@ Allow variable declarations under `or` patterns and across `case` labels in a `s
 
 This feature would reduce code duplication where we could use the same piece of code if either of patterns is satisfied. For instance:
 ```cs
-if (e is Foo foo or Wrapper { P: Foo foo })
-    return foo;
+if (e is C c or Wrapper { Prop: C c })
+    return c;
   
 Expr Simplify(Expr e)
 {
@@ -26,10 +26,10 @@ Expr Simplify(Expr e)
 Instead of:
 
 ```cs
-if (e is Foo foo1) 
-    return foo1;
-if (e is Wrapper { P: Foo foo2 }) 
-    return foo2;
+if (e is C c1) 
+    return c1;
+if (e is Wrapper { Prop: C c2 }) 
+    return c2;
   
 Expr Simplify(Expr e)
 {
