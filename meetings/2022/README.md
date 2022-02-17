@@ -24,6 +24,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Feb 28, 2022
 
+(Only one hour)
+
 ## Feb 23, 2022
 
 - Pattern match `Span<char>` on a constant string (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-match-span-of-char-on-string.md
