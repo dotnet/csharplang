@@ -53,7 +53,8 @@ shift_expression
 
 For an operation of the form `x << count` or `x >> count` or `x >>> count`, binary operator overload resolution ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1145-binary-operator-overload-resolution)) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
 
-The predefined unsigned right shift operators are listed below.
+The predefined unsigned shift operators will support the same set of signatures
+that predefined signed shift operators support today in the current implementation.
 
 *  Shift right:
 
@@ -62,6 +63,8 @@ The predefined unsigned right shift operators are listed below.
    uint operator >>>(uint x, int count);
    long operator >>>(long x, int count);
    ulong operator >>>(ulong x, int count);
+   nint operator >>>(nint x, int count);
+   nuint operator >>>(nuint x, int count);
    ```
 
    The `>>>` operator shifts `x` right by a number of bits computed as described below.
@@ -148,16 +151,7 @@ Section "I.10.3.2 Binary operators" of ECMA-335 already reserved the name for an
 
 ### Linq Expression Trees
 
-The `>>>` operator will be supported in Linq Expressioin Trees.
-- For a user-defined operator, a BinaryExpression node pointing to the operator method will be created.
-- For predefined operators
-  -  when the first operand is an ansigned type, a BinaryExpression node will be created.
-  -  when the first operand is a signed type, a conversion for the first operand to an unsigned type will be added, a BinaryExpression node will be created and conversion for the result back to the signed type will be added.
-
-For example:
-``` C#
-Expression<System.Func<int, int, int>> z = (x, y) => x >>> y; // (x, y) => Convert((Convert(x, UInt32) >> y), Int32)
-```
+The `>>>` operator will not be supported in Linq Expression Trees because semantics of predefined `>>>` operators on signed types cannot be accurately represented without adding conversions to an unsigned type and back. See https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md#unsigned-right-shift-operator for more information.
 
 ### Dynamic Binding 
 
@@ -177,7 +171,21 @@ will be adjusted to reflect that.
 
 ### Linq Expression Trees
 
-There is an option to not support `>>>` operator in Linq Expression Trees because semantics of predefined `>>>` operators on signed types cannot be accurately represented without adding conversions to an unsigned type and back.
+The `>>>` operator will be supported in Linq Expressioin Trees.
+- For a user-defined operator, a BinaryExpression node pointing to the operator method will be created.
+- For predefined operators
+  -  when the first operand is an ansigned type, a BinaryExpression node will be created.
+  -  when the first operand is a signed type, a conversion for the first operand to an unsigned type will be added, a BinaryExpression node will be created and conversion for the result back to the signed type will be added.
+
+For example:
+``` C#
+Expression<System.Func<int, int, int>> z = (x, y) => x >>> y; // (x, y) => Convert((Convert(x, UInt32) >> y), Int32)
+```
+
+`Resolution:`
+
+Rejected, see https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md#unsigned-right-shift-operator for more information.
+
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
@@ -186,4 +194,4 @@ There is an option to not support `>>>` operator in Linq Expression Trees becaus
 
 ## Design meetings
 
-<!-- Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to. -->
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md
