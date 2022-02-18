@@ -72,4 +72,4 @@ Is there concern around preserving the "intent" around why the second operand wa
 
 ## Design meetings
 
-<!-- Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to. -->
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md
