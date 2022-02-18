@@ -308,6 +308,11 @@ class C2 : C1
 ### Conversion operators
 
 Conversion `checked operators` follow the rules from [§14.10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14104-conversion-operators).
+However, the following paragraph 
+>The signature of a conversion operator consists of the source type and the target type. (This is the only form of member for which the return type participates in the signature.) The implicit or explicit classification of a conversion operator is not part of the operator's signature. Thus, a class or struct cannot declare both an implicit and an explicit conversion operator with the same source and target types.
+
+will be adjusted to allow a type to declare checked and regular forms of explicit conversions with the same source and target types.
+A type will not be allowed to declare both an implicit and a checked explicit conversion operator with the same source and target types.
 
 ### Processing of user-defined explicit conversions 
 
