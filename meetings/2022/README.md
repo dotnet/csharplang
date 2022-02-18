@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
-- Continue review operator overload resolution rules in https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md.
 
 ## Schedule when convenient
 
@@ -29,7 +28,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Feb 23, 2022
 
 - Pattern match `Span<char>` on a constant string (Chuck): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-match-span-of-char-on-string.md
-- Settle overload resolution for checked operators (Aleksey): https://github.com/dotnet/csharplang/issues/4665
+- Settle overload resolution for checked operators (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/checked-user-defined-operators.md
 
 # C# Language Design Notes for 2022
 
