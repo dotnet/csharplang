@@ -34,22 +34,20 @@ The scope of a *global_using_directive* specifically does not include *using_dir
 
 The effect of adding a *global_using_directive* to a program can be thought of as the effect of adding a similar *using_directive* that resolves to the same target namespace or type to every compilation unit of the program. However, the target of a *global_using_directive* is resolved in context of the compilation unit that contains it. 
 
-## Scopes 
-https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#scopes
+## [§7.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#77-scopes)  Scopes
 
 These are the relevant bullet points with proposed additions (which are **in bold**):
 *  The scope of name defined by an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body. An *extern_alias_directive* does not contribute any new members to the underlying declaration space. In other words, an *extern_alias_directive* is not transitive, but, rather, affects only the compilation unit or namespace body in which it occurs.
 *  **The scope of a name defined or imported by a *global_using_directive* extends over the *global_attributes* and *namespace_member_declaration*s of all the *compilation_unit*s in the program.**
 
-## Namespace and type names
-https://github.com/dotnet/csharplang/blob/master/spec/basic-concepts.md#namespace-and-type-names
+## [§7.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#78-namespace-and-type-names)  Namespace and type names
 
 Changes are made to the algorithm determining the meaning of a *namespace_or_type_name* as follows.
 
 This is the relevant bullet point with proposed additions (which are **in bold**):
 *   If the *namespace_or_type_name* is of the form `I` or of the form `I<A1, ..., Ak>`:
-    * If `K` is zero and the *namespace_or_type_name* appears within a generic method declaration ([Methods](../../spec/classes.md#methods)) and if that declaration includes a type parameter ([Type parameters](../../spec/classes.md#type-parameters)) with name `I`, then the *namespace_or_type_name* refers to that type parameter.
-    * Otherwise, if the *namespace_or_type_name* appears within a type declaration, then for each instance type `T` ([The instance type](../../spec/classes.md#the-instance-type)), starting with the instance type of that type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):
+    * If `K` is zero and the *namespace_or_type_name* appears within a generic method declaration ([§14.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#146-methods)) and if that declaration includes a type parameter ([§14.2.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1423-type-parameters)) with name `I`, then the *namespace_or_type_name* refers to that type parameter.
+    * Otherwise, if the *namespace_or_type_name* appears within a type declaration, then for each instance type `T` ([§14.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1432-the-instance-type)), starting with the instance type of that type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):
         * If `K` is zero and the declaration of `T` includes a type parameter with name `I`, then the *namespace_or_type_name* refers to that type parameter.
         * Otherwise, if the *namespace_or_type_name* appears within the body of the type declaration, and `T` or any of its base types contain a nested accessible type having name `I` and `K` type parameters, then the *namespace_or_type_name* refers to that type constructed with the given type arguments. If there is more than one such type, the type declared within the more derived type is selected. Note that non-type members (constants, fields, methods, properties, indexers, operators, instance constructors, destructors, and static constructors) and type members with a different number of type parameters are ignored when determining the meaning of the *namespace_or_type_name*.
     * If the previous steps were unsuccessful then, for each namespace `N`, starting with the namespace in which the *namespace_or_type_name* occurs, continuing with each enclosing namespace (if any), and ending with the global namespace, the following steps are evaluated until an entity is located:
@@ -65,8 +63,7 @@ This is the relevant bullet point with proposed additions (which are **in bold**
             * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_alias_directive*s of the namespace declaration **and the namespaces and type declarations imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program** contain more than one accessible type having name `I` and `K` type parameters, then the *namespace_or_type_name* is ambiguous and an error occurs.
     * Otherwise, the *namespace_or_type_name* is undefined and a compile-time error occurs.
 
-## Simple names
-https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#simple-names
+## Simple names [§11.7.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1174-simple-names)
 
 Changes are made to the *simple_name* evaluation rules as follows.
 
@@ -83,8 +80,7 @@ This is the relevant bullet point with proposed additions (which are **in bold**
       * Otherwise, if the namespaces and type declarations imported by the *using_namespace_directive*s and *using_static_directive*s of the namespace declaration **and the namespaces and type declarations imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program** contain exactly one accessible type or non-extension static member having name `I` and `K` type parameters, then the *simple_name* refers to that type or member constructed with the given type arguments.
       * Otherwise, if the namespaces and types imported by the *using_namespace_directive*s of the namespace declaration **and the namespaces and type declarations imported by the *global_using_namespace_directive*s and *global_using_static_directive*s of any namespace declaration for `N` in the program** contain more than one accessible type or non-extension-method static member having name `I` and `K` type parameters, then the *simple_name* is ambiguous and an error occurs.
 
-## Extension method invocations
-https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#extension-method-invocations
+## Extension method invocations [§11.7.8.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11783-extension-method-invocations)
 
 Changes are made to the algorithm to find the best *type_name* `C` as follows.
 This is the relevant bullet point with proposed additions (which are **in bold**):
@@ -92,8 +88,7 @@ This is the relevant bullet point with proposed additions (which are **in bold**
    * If the given namespace or compilation unit directly contains non-generic type declarations `Ci` with eligible extension methods `Mj`, then the set of those extension methods is the candidate set.
    * If types `Ci` imported by *using_static_declarations* and directly declared in namespaces imported by *using_namespace_directive*s in the given namespace or compilation unit **and, if containing compilation unit is reached, imported by *global_using_static_declarations* and directly declared in namespaces imported by *global_using_namespace_directive*s in the program** directly contain eligible extension methods `Mj`, then the set of those extension methods is the candidate set.
 
-## Compilation units
-https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#compilation-units
+## Compilation units [§13.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#132-compilation-units)
 
 A *compilation_unit* defines the overall structure of a source file. A compilation unit consists of **zero or more *global_using_directive*s followed by** zero or more *using_directive*s followed by zero or more *global_attributes* followed by zero or more *namespace_member_declaration*s.
 
@@ -107,13 +102,11 @@ A C# program consists of one or more compilation units, each contained in a sepa
 
 The *global_using_directive*s of a compilation unit affect the *global_attributes* and *namespace_member_declaration*s of all compilation units in the program.
 
-## Extern aliases
-https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#extern-aliases
+## Extern aliases [§13.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#134-extern-alias-directives)
 
 The scope of an *extern_alias_directive* extends over the ***global_using_directive*s,** *using_directive*s, *global_attributes* and *namespace_member_declaration*s of its immediately containing compilation unit or namespace body.
 
-## Using alias directives
-https://github.com/dotnet/csharplang/blob/main/spec/namespaces.md#using-alias-directives
+## Using alias directives [§13.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#1352-using-alias-directives)
 
 The order in which *using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *using_alias_directive* is not affected by the *using_alias_directive* itself or by other *using_directive*s in the immediately containing compilation unit or namespace body, **and, if the *using_alias_directive* is immediately contained in a compilation unit, is not affected by the *global_using_directive*s in the program**. In other words, the *namespace_or_type_name* of a *using_alias_directive* is resolved as if the immediately containing compilation unit or namespace body had no *using_directive*s **and, if the *using_alias_directive* is immediately contained in a compilation unit, the program had no *global_using_directive*s**. A *using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit or namespace body.
 
@@ -133,7 +126,7 @@ The *identifier* of a *global_using_alias_directive* must be unique within the d
 
 Just like regular members, names introduced by *global_using_alias_directive*s are hidden by similarly named members in nested scopes.
 
-The order in which *global_using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *global_using_alias_directive* is not affected by the *global_using_alias_directive* itself or by other *global_using_directive*s or *using_directive*s in the program. In other words, the *namespace_or_type_name* of a *global_using_alias_directive* is resolved as if the immediately containing compilation unit had no *using_directive*s and the entire containig program had no *global_using_directive*s. A *global_using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit.
+The order in which *global_using_alias_directive*s are written has no significance, and resolution of the *namespace_or_type_name* referenced by a *global_using_alias_directive* is not affected by the *global_using_alias_directive* itself or by other *global_using_directive*s or *using_directive*s in the program. In other words, the *namespace_or_type_name* of a *global_using_alias_directive* is resolved as if the immediately containing compilation unit had no *using_directive*s and the entire containing program had no *global_using_directive*s. A *global_using_alias_directive* may however be affected by *extern_alias_directive*s in the immediately containing compilation unit.
 
 A *global_using_alias_directive* can create an alias for any namespace or type.
 
@@ -181,13 +174,12 @@ A *global_using_static_directive* only imports members and types declared direct
 
 Ambiguities between multiple *global_using_namespace_directive*s and *global_using_static_directives* are discussed in the section for *global_using_namespace_directive*s (above).
 
-## Namespace alias qualifiers
-https://github.com/dotnet/csharplang/blob/master/spec/namespaces.md#namespace-alias-qualifiers
+## Qualified alias member [§13.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/namespaces.md#138-qualified-alias-member)
 
 Changes are made to the algorithm determining the meaning of a *qualified_alias_member* as follows.
 
 This is the relevant bullet point with proposed additions (which are **in bold**):
-*  Otherwise, starting with the namespace declaration ([Namespace declarations](../../spec/namespaces.md#namespace-declarations)) immediately containing the *qualified_alias_member* (if any), continuing with each enclosing namespace declaration (if any), and ending with the compilation unit containing the *qualified_alias_member*, the following steps are evaluated until an entity is located:
+*  Otherwise, starting with the namespace declaration ([§13.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/namespaces.md#133-namespace-declarations)) immediately containing the *qualified_alias_member* (if any), continuing with each enclosing namespace declaration (if any), and ending with the compilation unit containing the *qualified_alias_member*, the following steps are evaluated until an entity is located:
 
    * If the namespace declaration or compilation unit contains a *using_alias_directive* that associates `N` with a type, **or, when a compilation unit is reached, the program contains a *global_using_alias_directive* that associates `N` with a type,** then the *qualified_alias_member* is undefined and a compile-time error occurs.
    * Otherwise, if the namespace declaration or compilation unit contains an *extern_alias_directive* or *using_alias_directive* that associates `N` with a namespace, ***or, when a compilation unit is reached, the program contains a *global_using_alias_directive* that associates `N` with a namespace,** then:

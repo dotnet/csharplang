@@ -19,7 +19,7 @@ The type rules are as follows:
 
 A *throw expression* throws the value produced by evaluating the *null_coalescing_expression*, which must denote a value of the class type `System.Exception`, of a class type that derives from `System.Exception` or of a type parameter type that has `System.Exception` (or a subclass thereof) as its effective base class. If evaluation of the expression produces `null`, a `System.NullReferenceException` is thrown instead.
 
-The behavior at runtime of the evaluation of a *throw expression* is the same [as specified for a *throw statement*](../../spec/statements.md#the-throw-statement).
+The behavior at runtime of the evaluation of a *throw expression* is the same as specified for a *throw statement* ([§12.10.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#12106-the-throw-statement)).
 
 The flow-analysis rules are as follows:
 

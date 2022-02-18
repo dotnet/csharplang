@@ -13,11 +13,10 @@ Currently attribute authors can take a `System.Type` as a parameter and have use
 ## Detailed design
 [design]: #detailed-design
 
-The following section is amended: https://github.com/dotnet/csharplang/blob/main/spec/classes.md#base-classes
-
+The following section is amended: [§14.2.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14242-base-classes)
 > The direct base class of a class type must not be any of the following types: System.Array, System.Delegate, System.MulticastDelegate, System.Enum, or System.ValueType. ~~Furthermore, a generic class declaration cannot use System.Attribute as a direct or indirect base class.~~
 
-One important note is that the following section of the spec is *unaffected* when referencing the point of usage of an attribute, i.e. within an attribute list: https://github.com/dotnet/csharplang/blob/main/spec/types.md#type-parameters
+One important note is that the following section of the spec is *unaffected* when referencing the point of usage of an attribute, i.e. within an attribute list: Type parameters - [§8.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#85-type-parameters).
 
 > A type parameter cannot be used anywhere within an attribute.
 

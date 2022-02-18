@@ -30,7 +30,7 @@ record struct Person()
 ### Instance field initializers
 Instance field declarations for a struct may include initializers.
 
-As with [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-field-initialization):
+As with class field initializers [§14.5.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14563-instance-field-initialization):
 > A variable initializer for an instance field cannot reference the instance being created. 
 
 An error is reported if a struct has field initializers and no declared instance constructors since the field initializers will not be run.
@@ -43,7 +43,7 @@ A struct may declare a parameterless instance constructor.
 
 A parameterless instance constructor is valid for all struct kinds including `struct`, `readonly struct`, `ref struct`, and `record struct`.
 
-If no parameterless instance constructor is declared, the struct (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)) ...
+If no parameterless instance constructor is declared, the struct (see [§15.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1549-constructors)) ...
 > implicitly has a parameterless instance constructor which always returns the value that results from setting all value type fields to their default value and all reference type fields to null.
 
 ### Modifiers
@@ -60,11 +60,11 @@ Constructors can be declared `extern` or `unsafe`.
 Constructors cannot be `partial`.
 
 ### Executing field initializers
-Execution of struct instance field initializers matches execution of [class field initializers](https://github.com/dotnet/csharplang/blob/main/spec/classes.md#instance-variable-initializers) with **one qualifier**:
+Execution of struct instance field initializers matches execution of class field initializers ([§14.11.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14113-instance-variable-initializers)) with **one qualifier**:
 > When an instance constructor has no constructor initializer, **or when the constructor initializer `this()` represents the default parameterless constructor**, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor ... . The variable initializers are executed in the textual order in which they appear in the ... declaration.
 
 ### Definite assignment
-Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [struct constructors](https://github.com/dotnet/csharplang/blob/main/spec/structs.md#constructors)).
+Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [§15.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1549-constructors)).
 
 ```csharp
 struct S0 // ok
@@ -207,7 +207,7 @@ static void F2(PrivateConstructor s2 = new()) { } // ok: initobj
 ```
 
 ### Type parameter constraints: `new()` and `struct`
-The `new()` and `struct` type parameter constraints require the parameterless constructor to be `public` if defined (see [satisfying constraints](https://github.com/dotnet/csharplang/blob/main/spec/types.md#satisfying-constraints)).
+The `new()` and `struct` type parameter constraints require the parameterless constructor to be `public` if defined (see Satisfying constraints - [§8.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#845-satisfying-constraints)).
 
 The compiler assumes all structs satisfy `new()` and `struct` constraints.
 _No change from C#9._

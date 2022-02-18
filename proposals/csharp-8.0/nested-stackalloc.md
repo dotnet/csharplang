@@ -2,7 +2,7 @@
 
 ### Stack allocation
 
-We modify the section [*Stack allocation*](https://github.com/dotnet/csharplang/blob/master/spec/unsafe-code.md#stack-allocation) of the C# language specification to relax the places when a `stackalloc` expression may appear. We delete
+We modify the section *Stack allocation* ([§22.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#229-stack-allocation)) of the C# language specification to relax the places when a `stackalloc` expression may appear. We delete
 
 ``` antlr
 local_variable_initializer_unsafe

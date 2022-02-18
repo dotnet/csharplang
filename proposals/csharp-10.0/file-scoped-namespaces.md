@@ -46,7 +46,7 @@ The primary goal of the feature therefore is to meet the needs of the majority o
 
 ## Detailed design
 
-This proposal takes the form of a diff to the existing https://github.com/dotnet/csharplang/blob/main/spec/namespaces.md#compilation-units section of the specification.
+This proposal takes the form of a diff to the existing compilation units ([§13.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#132-compilation-units)) section of the specification.
 
 ### Diff
 

@@ -17,8 +17,8 @@ We change
 > 
 > Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if `E` does not exactly match `T2` and at least one of the following holds:
 > 
-> * `E` exactly matches `T1` ([Exactly matching Expression](../../spec/expressions.md#exactly-matching-expression))
-> * `T1` is a better conversion target than `T2` ([Better conversion target](../../spec/expressions.md#better-conversion-target))
+> * `E` exactly matches `T1` ([§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression))
+> * `T1` is a better conversion target than `T2` ([§11.6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11646-better-conversion-target))
 
 to
 
@@ -26,15 +26,15 @@ to
 > 
 > Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if `E` does not exactly match `T2` and at least one of the following holds:
 > 
-> * `E` exactly matches `T1` ([Exactly matching Expression](../../spec/expressions.md#exactly-matching-expression))
+> * `E` exactly matches `T1` ([§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression))
 > * **`C1` is not a *conditional expression conversion* and `C2` is a *conditional expression conversion***.
-> * `T1` is a better conversion target than `T2` ([Better conversion target](../../spec/expressions.md#better-conversion-target)) **and either `C1` and `C2` are both *conditional expression conversions* or neither is a *conditional expression conversion***.
+> * `T1` is a better conversion target than `T2` ([§11.6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11646-better-conversion-target)) **and either `C1` and `C2` are both *conditional expression conversions* or neither is a *conditional expression conversion***.
 
 ## Cast Expression
 
 The current C# language specification says
 
-> A *cast_expression* of the form `(T)E`, where `T` is a *type* and `E` is a *unary_expression*, performs an explicit conversion ([Explicit conversions](../../spec/conversions.md#explicit-conversions)) of the value of `E` to type `T`.
+> A *cast_expression* of the form `(T)E`, where `T` is a *type* and `E` is a *unary_expression*, performs an explicit conversion ([§10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#103-explicit-conversions)) of the value of `E` to type `T`.
 
 In the presence of the *conditional expression conversion* there may be more than one possible conversion from `E` to `T`. With the addition of *conditional expression conversion*, we prefer any other conversion to a *conditional expression conversion*, and use the *conditional expression conversion* only as a last resort.
 

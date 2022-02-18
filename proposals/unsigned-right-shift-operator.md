@@ -20,7 +20,7 @@ yet an algorithm might rely on ability to perform an unsigned right shift operat
 
 ### Operators and punctuators
 
-The https://github.com/dotnet/csharplang/blob/main/spec/lexical-structure.md#operators-and-punctuators section will be adjusted
+Section [§6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#646-operators-and-punctuators) will be adjusted
 to include `>>>` operator - the unsigned right shift operator:
 
 ```antlr
@@ -37,7 +37,7 @@ No characters of any kind (not even whitespace) are allowed between the tokens i
 
 ### Shift operators
 
-The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#shift-operators section will be adjusted
+Section [§11.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1110-shift-operators) will be adjusted
 to include `>>>` operator - the unsigned right shift operator:
 
 The `<<`, `>>` and `>>>` operators are used to perform bit shifting operations.
@@ -51,7 +51,7 @@ shift_expression
     ;
 ```
 
-For an operation of the form `x << count` or `x >> count` or `x >>> count`, binary operator overload resolution ([Binary operator overload resolution](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#binary-operator-overload-resolution)) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
+For an operation of the form `x << count` or `x >> count` or `x >>> count`, binary operator overload resolution ([§11.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1145-binary-operator-overload-resolution)) is applied to select a specific operator implementation. The operands are converted to the parameter types of the selected operator, and the type of the result is the return type of the operator.
 
 The predefined unsigned right shift operators are listed below.
 
@@ -79,7 +79,7 @@ Shift operations never cause overflows and produce the same results in `checked`
 
 ### Assignment operators
 
-The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#assignment-operators section will be adjusted to include
+Section [§11.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1118-assignment-operators) will be adjusted to include
 *unsigned_right_shift_assignment* as follows:
 
 ```antlr
@@ -101,34 +101,34 @@ assignment_operator
 
 ### Integral types
 
-The https://github.com/dotnet/csharplang/blob/main/spec/types.md#integral-types section will be adjusted to include information about `>>>` operator. The relevant bullet point is the following:
+The Integral types [§8.3.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#836-integral-types) section will be adjusted to include information about `>>>` operator. The relevant bullet point is the following:
 
 *  For the binary `<<`, `>>` and `>>>` operators, the left operand is converted to type `T`, where `T` is the first of `int`, `uint`, `long`, and `ulong` that can fully represent all possible values of the operand. The operation is then performed using the precision of type `T`, and the type of the result is `T`.
 
 ### Constant expressions
 
 Operator `>>>` will be added to the set of constructs permitted in constant expressions at
-https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#constant-expressions.
+[§11.20](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1120-constant-expressions).
 
 ### Operator overloading
 
-Operator `>>>` will be added to the set of overloadable binary operators at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#operator-overloading.
+Operator `>>>` will be added to the set of overloadable binary operators at [§11.4.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1143-operator-overloading).
 
 ### Lifted operators
 
-Operator `>>>` will be added to the set of binary operators permitting a lifted form at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#lifted-operators.
+Operator `>>>` will be added to the set of binary operators permitting a lifted form at [§11.4.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1148-lifted-operators).
 
 ### Operator precedence and associativity
 
-The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#operator-precedence-and-associativity section will be adjusted to add `>>>` operator to the "Shift" category and `>>>=` operator to the "Assignment and lambda expression" category.
+Section [§11.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1142-operator-precedence-and-associativity) will be adjusted to add `>>>` operator to the "Shift" category and `>>>=` operator to the "Assignment and lambda expression" category.
 
 ### Grammar ambiguities
 
-The `>>>` operator is subject to the same grammar ambiguities described at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#grammar-ambiguities as a regular `>>` operator.
+The `>>>` operator is subject to the same grammar ambiguities described at [§6.2.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#625-grammar-ambiguities) as a regular `>>` operator.
 
 ### Operators
 
-The https://github.com/dotnet/csharplang/blob/main/spec/classes.md#operators will be adjusted to include `>>>` operator.
+The [§14.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1410-operators) section will be adjusted to include `>>>` operator.
 
 ```antlr
 overloadable_binary_operator
@@ -139,7 +139,7 @@ overloadable_binary_operator
 
 ### Binary operators
 
-The signature of a `>>>` operator is subject to the same rules as those at https://github.com/dotnet/csharplang/blob/main/spec/classes.md#binary-operators
+The signature of a `>>>` operator is subject to the same rules as those at [§14.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14103-binary-operators)
 for the signature of a `>>` operator.
 
 ### Metadata name
@@ -164,7 +164,7 @@ Expression<System.Func<int, int, int>> z = (x, y) => x >>> y; // (x, y) => Conve
 It looks like dynamic binding uses values of System.Linq.Expressions.ExpressionType enum to communicate
 binary operator kind to the runtime binder. Since we don't have a member specifically representing
 an unsigned right shift operator, dynamic binding for `>>>` operator will not be supported and the
-https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#static-and-dynamic-binding section 
+static and dynamic binding ([§11.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#113-static-and-dynamic-binding)) section 
 will be adjusted to reflect that.
 
 ## Drawbacks

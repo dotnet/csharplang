@@ -133,7 +133,7 @@ d = ref @var (ref var v) => ref v; // ok
 ```
 
 ## Natural (function) type
-An [_anonymous function_ expression](../../spec/expressions.md#anonymous-function-expressions) (a _lambda expression_ or an _anonymous method_) has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [inferred return type](../../spec/expressions.md#inferred-return-type)).
+An _anonymous function_ expression ([§11.16](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1116-anonymous-function-expressions)) (a _lambda expression_ or an _anonymous method_) has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [§11.6.3.13](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116313-inferred-return-type)).
 
 A _method group_ has a natural type if all candidate methods in the method group have a common signature. (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
 
@@ -143,7 +143,7 @@ Anonymous function expressions or method groups with the same signature have the
 
 _Function_types_ are used in a few specific contexts only:
 - implicit and explicit conversions
-- [method type inference](../../spec/expressions.md#type-inference) and [best common type](../../spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions)
+- method type inference ([§11.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1163-type-inference)) and best common type ([§11.6.3.15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions))
 - `var` initializers
 
 A _function_type_ exists at compile time only: _function_types_ do not appear in source or metadata.
@@ -154,7 +154,7 @@ From a _function_type_ `F` there are implicit _function_type_ conversions:
 - To `System.MulticastDelegate` or base classes or interfaces of `System.MulticastDelegate`
 - To `System.Linq.Expressions.Expression` or `System.Linq.Expressions.LambdaExpression`
 
-Anonymous function expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see [anonymous function conversions](../../spec/conversions.md#anonymous-function-conversions) and [method group conversions](../../spec/conversions.md#method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
+Anonymous function expressions and method groups already have _conversions from expression_ to delegate types and expression tree types (see anonymous function conversions [§10.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#107-anonymous-function-conversions) and method group conversions [§10.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#108-method-group-conversions)). Those conversions are sufficient for converting to strongly-typed delegate types and expression tree types. The _function_type_ conversions above add _conversions from type_ to the base types only: `System.MulticastDelegate`, `System.Linq.Expressions.Expression`, etc.
 
 There are no conversions to a _function_type_ from a type other than a _function_type_.
 There are no explicit conversions for _function_types_ since _function_types_ cannot be referenced in source.
@@ -168,10 +168,10 @@ Expression e = () => "";                // Expression<Func<string>>
 object o = "".Clone;                    // Func<object>
 ```
 
-_Function_type_ conversions are not implicit or explicit [standard conversions](../../spec/conversions.md#standard-conversions) and are not considered when determining whether a user-defined conversion operator is applicable to an anonymous function or method group.
-From [evaluation of user defined conversions](../../spec/conversions.md#evaluation-of-user-defined-conversions):
+_Function_type_ conversions are not implicit or explicit standard conversions [§10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#104-standard-conversions) and are not considered when determining whether a user-defined conversion operator is applicable to an anonymous function or method group.
+From evaluation of user defined conversions [§10.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1053-evaluation-of-user-defined-conversions):
 
-> For a conversion operator to be applicable, it must be possible to perform a standard conversion ([Standard conversions](../../spec/conversions.md#standard-conversions)) from the source type to the operand type of the operator, and it must be possible to perform a standard conversion from the result type of the operator to the target type.
+> For a conversion operator to be applicable, it must be possible to perform a standard conversion ([§10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#104-standard-conversions)) from the source type to the operand type of the operator, and it must be possible to perform a standard conversion from the result type of the operator to the target type.
 
 ```csharp
 class C
@@ -193,10 +193,10 @@ obj = (object)r.NextDouble; // ok
 ```
 
 ### Type inference
-The existing rules for type inference are mostly unchanged (see [type inference](../../spec/expressions.md#type-inference)). There are however a **couple of changes** below to specific phases of type inference.
+The existing rules for type inference are mostly unchanged (see [§11.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1163-type-inference)). There are however a **couple of changes** below to specific phases of type inference.
 
 #### First phase
-The [first phase](../../spec/expressions.md#the-first-phase) allows an anonymous function to bind to `Ti` even if `Ti` is not a delegate or expression tree type (perhaps a type parameter constrained to `System.Delegate` for instance).
+The first phase ([§11.6.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11632-the-first-phase)) allows an anonymous function to bind to `Ti` even if `Ti` is not a delegate or expression tree type (perhaps a type parameter constrained to `System.Delegate` for instance).
 
 > For each of the method arguments `Ei`:
 > 
@@ -209,10 +209,10 @@ The [first phase](../../spec/expressions.md#the-first-phase) allows an anonymous
 > 
 > **An *explicit return type inference* is made *from* an expression `E` *to* a type `T` in the following way:**
 > 
-> *  **If `E` is an anonymous function with explicit return type `Ur` and `T` is a delegate type or expression tree type with return type `Vr` then an *exact inference* ([Exact inferences](../../spec/expressions.md#exact-inferences)) is made *from* `Ur` *to* `Vr`.**
+> *  **If `E` is an anonymous function with explicit return type `Ur` and `T` is a delegate type or expression tree type with return type `Vr` then an *exact inference* ([§11.6.3.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11639-exact-inferences)) is made *from* `Ur` *to* `Vr`.**
 
 #### Fixing
-[Fixing](../../spec/expressions.md#fixing) ensures other conversions are preferred over _function_type_ conversions. (Lambda expressions and method group expressions only contribute to lower bounds so handling of _function_types_ is needed for lower bounds only.)
+Fixing ([§11.6.3.12](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116312-fixing)) ensures other conversions are preferred over _function_type_ conversions. (Lambda expressions and method group expressions only contribute to lower bounds so handling of _function_types_ is needed for lower bounds only.)
 
 > An *unfixed* type variable `Xi` with a set of bounds is *fixed* as follows:
 > 
@@ -222,7 +222,7 @@ The [first phase](../../spec/expressions.md#the-first-phase) allows an anonymous
 > *  Otherwise, type inference fails.
 
 ### Best common type
-[Best common type](../../spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions) is defined in terms of type inference so the type inference changes above apply to best common type as well.
+Best common type ([§11.6.3.15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions)) is defined in terms of type inference so the type inference changes above apply to best common type as well.
 ```csharp
 var fs = new[] { (string s) => s.Length; (string s) => int.Parse(s) } // Func<string, int>[]
 ```
@@ -265,7 +265,7 @@ If two anonymous functions or method groups in the same compilation require synt
 
 ### Overload resolution
 
-[Better function member](../../spec/expressions.md#better-function-member) is updated to prefer members where none of the conversions and none of the type arguments involved inferred types from lambda expressions or method groups.
+Better function member ([§11.6.4.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11643-better-function-member)) is updated to prefer members where none of the conversions and none of the type arguments involved inferred types from lambda expressions or method groups.
 
 > #### Better function member
 > ...
@@ -276,7 +276,7 @@ If two anonymous functions or method groups in the same compilation require synt
 >    *  **for at least one argument, the implicit conversion from `Ex` to `Qx` is a _function_type_conversion_, or `Mq` is a generic method with type parameters `{Y1, Y2, ..., Yq}` and for at least one type parameter `Yi` the type argument is inferred from a _function_type_, or**
 > 2. for each argument, the implicit conversion from `Ex` to `Qx` is not better than the implicit conversion from `Ex` to `Px`, and for at least one argument, the conversion from `Ex` to `Px` is better than the conversion from `Ex` to `Qx`.
 
-[Better conversion from expression](../../spec/expressions.md#better-conversion-from-expression) is updated to prefer conversions that did not involve inferred types from lambda expressions or method groups.
+Better conversion from expression ([§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression)) is updated to prefer conversions that did not involve inferred types from lambda expressions or method groups.
 
 > #### Better conversion from expression
 > 
@@ -284,8 +284,8 @@ If two anonymous functions or method groups in the same compilation require synt
 > 1. **`C1` is not a _function_type_conversion_ and `C2` is a _function_type_conversion_, or**
 > 2. `E` is a non-constant _interpolated\_string\_expression_, `C1` is an _implicit\_string\_handler\_conversion_, `T1` is an _applicable\_interpolated\_string\_handler\_type_, and `C2` is not an _implicit\_string\_handler\_conversion_, or
 > 3. `E` does not exactly match `T2` and at least one of the following holds:
->     * `E` exactly matches `T1` ([Exactly matching Expression](../../spec/expressions.md#exactly-matching-expression))
->     * `T1` is a better conversion target than `T2` ([Better conversion target](../../spec/expressions.md#better-conversion-target))
+>     * `E` exactly matches `T1` ([§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression))
+>     * `T1` is a better conversion target than `T2` ([§11.6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11646-better-conversion-target))
 
 ## Syntax
 

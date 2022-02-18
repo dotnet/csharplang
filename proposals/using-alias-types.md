@@ -1,7 +1,7 @@
 # Allow using alias directive to reference any kind of Type
 
 ## Summary
-Relax the [using_alias_directive](https://github.com/dotnet/csharplang/blob/main/spec/namespaces.md#using-alias-directives) to allow it to point at any sort of type, not just named types.  This would support types not allowed today, like: tuple types, pointer types, array types, etc.  For example, this would now be allowed:
+Relax the using_alias_directive ([§13.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#1352-using-alias-directives)) to allow it to point at any sort of type, not just named types.  This would support types not allowed today, like: tuple types, pointer types, array types, etc.  For example, this would now be allowed:
 
 ```c#
 using Point = (int x, int y);
@@ -20,7 +20,7 @@ using_alias_directive
     ;
 ```
 
-Interestingly, most of the spec language in [using_alias_directive](https://github.com/dotnet/csharplang/blob/main/spec/namespaces.md#using-alias-directives) does not need to change.  Most language in it already refers to 'namespace or type', for example:
+Interestingly, most of the spec language in [§13.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#1352-using-alias-directives) does not need to change.  Most language in it already refers to 'namespace or type', for example:
 
 > A using_alias_directive introduces an identifier that serves as an alias for a namespace or type within the immediately enclosing compilation unit or namespace body.
 

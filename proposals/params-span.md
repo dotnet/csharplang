@@ -28,9 +28,9 @@ public static class Console
 ### Extending `params`
 `params` parameters will be supported with types `Span<T>`, `ReadOnlySpan<T>`, and `IEnumerable<T>`.
 
-A call in [_expanded form_](../spec/expressions.md#applicable-function-member) to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
+A call in _expanded form_ ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member)) to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
 
-A call in [_expanded form_](../spec/expressions.md#applicable-function-member) to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack _if the `params` array is within limits (if any) set by the compiler_.
+A call in _expanded form_ ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member)) to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack _if the `params` array is within limits (if any) set by the compiler_.
 Otherwise the array will be allocated on the heap.
 
 ```csharp
@@ -47,9 +47,9 @@ Two overloads cannot differ by `params` modifier alone.
 `params` parameters will be marked in metadata with a `System.ParamArrayAttribute` regardless of type.
 
 ### Overload resolution
-Overload resolution will continue to prefer overloads that are applicable in [_normal form_](../spec/expressions.md#applicable-function-member) rather than [_expanded form_](../spec/expressions.md#applicable-function-member).
+Overload resolution will continue to prefer overloads that are applicable in _normal form_ ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member)) rather than _expanded form_ ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member)).
 
-For overloads that are applicable in _expanded form_, [better function member](../spec/expressions.md#better-function-member) will be updated to prefer `params` types in a specific order:
+For overloads that are applicable in _expanded form_, better function member ([§11.6.4.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11643-better-function-member)) will be updated to prefer `params` types in a specific order:
 
 > When performing this evaluation, if `Mp` or `Mq` is applicable in its expanded form, then `Px` or `Qx` refers to a parameter in the expanded form of the parameter list.
 > 

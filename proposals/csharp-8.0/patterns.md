@@ -290,7 +290,7 @@ The *switch_expression* is not permitted as an *expression_statement*.
 
 > We are looking at relaxing this in a future revision.
 
-The type of the *switch_expression* is the [*best common type*](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#finding-the-best-common-type-of-a-set-of-expressions) of the expressions appearing to the right of the `=>` tokens of the *switch_expression_arm*s if such a type exists and the expression in every arm of the switch expression can be implicitly converted to that type.  In addition, we add a new *switch expression conversion*, which is a predefined implicit conversion from a switch expression to every type `T` for which there exists an implicit conversion from each arm's expression to `T`.
+The type of the *switch_expression* is the *best common type* ([§11.6.3.15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions)) of the expressions appearing to the right of the `=>` tokens of the *switch_expression_arm*s if such a type exists and the expression in every arm of the switch expression can be implicitly converted to that type.  In addition, we add a new *switch expression conversion*, which is a predefined implicit conversion from a switch expression to every type `T` for which there exists an implicit conversion from each arm's expression to `T`.
 
 It is an error if some *switch_expression_arm*'s pattern cannot affect the result because some previous pattern and guard will always match.
 

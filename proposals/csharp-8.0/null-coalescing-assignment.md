@@ -34,7 +34,7 @@ assignment_operator
     ;
 ```
 
-Which follows the [existing semantic rules for compound assignment operators](../../spec/expressions.md#compound-assignment), except that we elide the assignment if the left-hand side is non-null. The rules for this feature are as follows.
+Which follows the existing semantic rules for compound assignment operators ([§11.18.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11183-compound-assignment)), except that we elide the assignment if the left-hand side is non-null. The rules for this feature are as follows.
 
 Given `a ??= b`, where `A` is the type of `a`, `B` is the type of `b`, and `A0` is the underlying type of `A` if `A` is a nullable value type:
 

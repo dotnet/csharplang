@@ -21,7 +21,7 @@ as the type is not well known and so the conversion to `int` may not be possible
 
 ### Shift operators
 
-https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#shift-operators should be reworded as follows:
+[§11.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1110-shift-operators) should be reworded as follows:
 ```diff
 - When declaring an overloaded shift operator, the type of the first operand must always be the class or struct containing the operator declaration,
 and the type of the second operand must always be int.
@@ -33,7 +33,7 @@ While the restriction that the second operand must be `int` is removed.
 
 ### Binary operators
 
-https://github.com/dotnet/csharplang/blob/main/spec/classes.md#binary-operators should be reworded as follows:
+[§14.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14103-binary-operators) should be reworded as follows:
 ```diff
 -*  A binary `<<` or `>>` operator must take two parameters, the first of which must have type `T` or `T?` and the second of which must have type `int` or `int?`, and can return any type.
 +*  A binary `<<` or `>>` operator must take two parameters, the first of which must have type `T` or `T?`, and can return any type.
@@ -44,10 +44,10 @@ While the restriction that the second operand must be `int` or `int?` is removed
 
 ### Binary operator overload resolution
 
-The first bullet point at https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#binary-operator-overload-resolution
+The first bullet point at [§11.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1145-binary-operator-overload-resolution)
 should be reworded as follows:
 
-*  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` is determined. The set consists of the union of the candidate operators provided by `X` and **, unless the operator is a shift operator,** the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
+*  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` is determined. The set consists of the union of the candidate operators provided by `X` and **, unless the operator is a shift operator,** the candidate operators provided by `Y`, each determined using the rules of Candidate user-defined operators [§11.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1146-candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once.
 
 That is, for shift operators, candidate operators are only those provided by type `X`.
 
