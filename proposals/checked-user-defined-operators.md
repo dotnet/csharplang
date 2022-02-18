@@ -341,7 +341,7 @@ public static UnaryExpression ConvertChecked (Expression expression, Type type, 
 
 Note, that C# doesn't support assignments in expression trees, therefore checked increment/decrement will not be supported as well.
 
-There is no factory method for checked divide. There is an open question regarding this - checked-user-defined-operators.md#checked-division-in-linq-expression-trees.
+There is no factory method for checked divide. There is an open question regarding this - [Checked division in Linq Expression Trees](checked-user-defined-operators.md#checked-division-in-linq-expression-trees).
 
 ### Dynamic
 
