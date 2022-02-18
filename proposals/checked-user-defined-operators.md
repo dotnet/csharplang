@@ -328,6 +328,20 @@ A `checked operator` does not implement a `regular operator` and vice versa.
 ### Linq Expression Trees 
 
 `Checked operators` will be supported in Linq Expression Trees. A UnaryExpression/BinaryExpression node will be created with corresponding `MethodInfo`.
+The following factory methods will be used:
+``` C#
+public static UnaryExpression NegateChecked (Expression expression, MethodInfo? method);
+
+public static BinaryExpression AddChecked (Expression left, Expression right, MethodInfo? method);
+public static BinaryExpression SubtractChecked (Expression left, Expression right, MethodInfo? method);
+public static BinaryExpression MultiplyChecked (Expression left, Expression right, MethodInfo? method);
+
+public static UnaryExpression ConvertChecked (Expression expression, Type type, MethodInfo? method);
+```
+
+Note, that C# doesn't support assignments in expression trees, therefore checked increment/decrement will not be supported as well.
+
+There is no factory method for checked divide. There is an open question regarding this 
 
 ### Dynamic
 
@@ -725,15 +739,35 @@ The compiler could treat the default context of a `checked operator` as checked.
 Should the language allow `checked` and `unchecked` modifiers on methods (e.g. `static checked void M()`)?
 This would allow removing nesting levels for methods that require it.
 
-### Should we support implicit checked conversion operators?
+### Checked division in Linq Expression Trees
+
+There is no factory method to create a checked division node and there is no ```ExpressionType.DivideChecked``` member.
+We could still use the following factory method to create regular divide node with ```MethodInfo``` pointing to the `op_CheckedDivision` method.
+Consumers will have to check the name to infer the context.
+``` C#
+public static BinaryExpression Divide (Expression left, Expression right, MethodInfo? method);
+```
+
+Note, even though [§11.7.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11718-the-checked-and-unchecked-operators) section
+lists `/` operator as one of the operators affected by checked/unchecked evaluation context, IL doesn't have a special op code to perform checked division.
+Compiler always uses the factory method reardless of the context today.
+
+*Proposal:*
+Checked user-defined devision will not be supported in Linq Expression Trees.
+
+### (Resolved) Should we support implicit checked conversion operators?
 
 In general, implicit conversion operators are not supposed to throw.
 
 *Proposal:*
 No.
 
+*Resolution:*
+Approved - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-07.md#checked-implicit-conversions
+
 ## Design meetings
 
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-07.md
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md
 
 
