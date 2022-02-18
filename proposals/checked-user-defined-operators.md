@@ -345,7 +345,8 @@ There is no factory method for checked divide. There is an open question regardi
 
 ### Dynamic
 
-It should be possible to adjust runtime binder to support `checked operators` in `dynamic` invocations.
+We will investigate the cost of adding support for checked operators in dynamic invocation in CoreCLR and pursue an implementation if the cost is not too high.
+This is a quote from https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
@@ -769,5 +770,6 @@ Approved - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022
 
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-07.md
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-14.md
 
 
