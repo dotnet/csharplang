@@ -1,4 +1,4 @@
-﻿# Exceptions
+# Exceptions - C# specification
 
 Exceptions in C# provide a structured, uniform, and type-safe way of handling both system level and application level error conditions. The exception mechanism in C# is quite similar to that of C++, with a few important differences:
 
