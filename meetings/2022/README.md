@@ -36,7 +36,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Feb 28, 2022
 
 (Only one hour)
-- Ref fields (Jared)
+- Ref fields and lifetime syntax (Jared): https://github.com/dotnet/csharplang/blob/main/proposals/low-level-struct-improvements.md#keywords-vs-attributes
 
 ## Feb 23, 2022
 
