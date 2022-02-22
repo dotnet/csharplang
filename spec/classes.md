@@ -16,7 +16,7 @@ The list below provides links to each heading in this section. The links specify
       - <a id="interface-implementations"></a>[Interface implementations](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14243-interface-implementations)
     - <a id="type-parameter-constraints"></a>[Type parameter constraints](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1425-type-parameter-constraints)
     - <a id="class-body"></a>[Class body](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1426-class-body)
-  - <a id="partial-types"></a>[Partial types](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1427-partial-declarations)
+  - <a id="partial-types"></a>[Partial types](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1427-partial-declarations) - Note that the following headings (except partial methods) don't exist in the standard. The text is all contained in this section.
     - <a id="attributes"></a>Attributes
     - <a id="modifiers"></a>Modifiers
     - <a id="type-parameters-and-constraints"></a>Type parameters and constraints
