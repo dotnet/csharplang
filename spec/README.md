@@ -1,27 +1,46 @@
-C# Language Specification
-===========================
+This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotnet/csharpstandard) repository.
 
-__Version 6__
+The full table of contents is in the [standard folder](https://github.com/dotnet/csharpstandard/tree/draft-v6/standard).
 
-This is an unofficial draft, posted here for convenience. When we submit a C# 6.0 spec proposal to ECMA, it will be shared here.
+* [Lexical structure](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md)
+  - [§6.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#61-programs)  Programs
+  - [§6.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#62-grammars)  Grammars
+    - [§6.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#621-general)  General
+    - [§6.2.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#622-grammar-notation)  Grammar notation
+    - [§6.2.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#623-lexical-grammar)  Lexical grammar
+    - [§6.2.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#624-syntactic-grammar)  Syntactic grammar
+    - [§6.2.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#625-grammar-ambiguities)  Grammar ambiguities
+  - [§6.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#63-lexical-analysis)  Lexical analysis
+    - [§6.3.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#631-general)  General
+    - [§6.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#632-line-terminators)  Line terminators
+    - [§6.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#633-comments)  Comments
+    - [§6.3.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#634-white-space)  White space
+  - [§6.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#64-tokens)  Tokens
+    - [§6.4.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#641-general)  General
+    - [§6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#642-unicode-character-escape-sequences)  Unicode character escape sequences
+    - [§6.4.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#643-identifiers)  Identifiers
+    - [§6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#644-keywords)  Keywords
+    - [§6.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#645-literals)  Literals
+      - [§6.4.5.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#6451-general)  General
+      - [§6.4.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#6452-boolean-literals)  Boolean literals
+      - [§6.4.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#6453-integer-literals)  Integer literals
+      - [§6.4.5.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#6454-real-literals)  Real literals
+      - [§6.4.5.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#6455-character-literals)  Character literals
+      - [§6.4.5.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#6456-string-literals)  String literals
+      - [§6.4.5.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#6457-the-null-literal)  The null literal
+    - [§6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#646-operators-and-punctuators)  Operators and punctuators
+  - [§6.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#65-pre-processing-directives)  Pre-processing directives
+    - [§6.5.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#651-general)  General
+    - [§6.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#652-conditional-compilation-symbols)  Conditional compilation symbols
+    - [§6.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#653-pre-processing-expressions)  Pre-processing expressions
+    - [§6.5.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#654-definition-directives)  Definition directives
+    - [§6.5.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#655-conditional-compilation-directives)  Conditional compilation directives
+    - [§6.5.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#656-diagnostic-directives)  Diagnostic directives
+    - [§6.5.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#657-region-directives)  Region directives
+    - [§6.5.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#658-line-directives)  Line directives
+    - [§6.5.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#659-pragma-directives)  Pragma directives
 
-<!--
-(This document is also available for download: [csharp.pdf](CSharp%20Language%20Specification.pdf?raw=true) and [csharp.docx](CSharp%20Language%20Specification.docx?raw=true))
--->
 
-* [Introduction](introduction.md)
-    * [Hello world](introduction.md#hello-world)
-    * [Program structure](introduction.md#program-structure)
-    * [Types and variables](introduction.md#types-and-variables)
-    * [Expressions](introduction.md#expressions)
-    * [Statements](introduction.md#statements)
-    * [Classes and objects](introduction.md#classes-and-objects)
-* [Lexical structure](lexical-structure.md)
-    * [Programs](lexical-structure.md#programs)
-    * [Grammars](lexical-structure.md#grammars)
-    * [Lexical analysis](lexical-structure.md#lexical-analysis)
-    * [Tokens](lexical-structure.md#tokens)
-    * [Pre-processing directives](lexical-structure.md#pre-processing-directives)
 * [Basic concepts](basic-concepts.md)
     * [Application Startup](basic-concepts.md#application-startup)
     * [Application termination](basic-concepts.md#application-termination)
@@ -168,7 +187,3 @@ This is an unofficial draft, posted here for convenience. When we submit a C# 6.
     * [Recommended tags](documentation-comments.md#recommended-tags)
     * [Processing the documentation file](documentation-comments.md#processing-the-documentation-file)
     * [An example](documentation-comments.md#an-example)
-
-<!--
-* Grammar: [csharp.html](http://ljw1004.github.io/csharpspec/csharp.html). Or download in ANTLR format: [csharp.g4](csharp.g4?raw=true). 
--->
