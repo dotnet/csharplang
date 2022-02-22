@@ -42,7 +42,59 @@ None
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-None
+1. Should matching against `(string)null` be allowed?
+
+    If so, should `(string)null` subsume `""` since `MemoryExtensions.AsSpan(null) == MemoryExtensions.AsSpan("")`?
+    ```csharp
+    static bool IsEmpty(ReadOnlySpan<char> span)
+    {
+        return span switch
+        {
+            null => true, // ok?
+            "" => true,   // error: unreachable?
+            _ => false,
+        };
+    }
+    ```
+
+    _Recommendation: Constant pattern `(string)null` should be reported as an error._
+
+2. Should the constant pattern match include a runtime type test of the expression value for `Span<char>` or `ReadOnlySpan<char>`?
+    ```csharp
+    static bool Is123<T>(Span<T> s)
+    {
+        return s is "123"; // test for Span<char>?
+    }
+
+    static bool IsABC<T>(Span<T> s)
+    {
+        return s is Span<char> and "ABC"; // ok?
+    }
+
+    static bool IsEmptyString<T>(T t) where T : ref struct
+    {
+        return t is ""; // test for ReadOnlySpan<char>, Span<char>, string?
+    }
+    ```
+
+    _Recommendation: No implicit runtime type test for constant pattern. (`IsABC<T>()` example is allowed because the type test is explicit.)_
+
+3. Should subsumption consider strings, list patterns, and `Length` property?
+    ```csharp
+    static int ToNum(ReadOnlySpan<char> s)
+    {
+        return s switch
+        {
+            { Length: 0 } => 0,
+            "" => 1,        // error: unreachable?
+            ['A',..] => 2,
+            "ABC" => 3,     // error: unreachable?
+            _ => 4,
+        };
+    }
+    ```
+
+    _Recommendation: Same subsumption behavior as used when the expression value is `string`. (Does that mean no subsumption between constant strings, list patterns, and `Length`, other than treating `[..]` as matching any?)_
 
 ## Design meetings
 
