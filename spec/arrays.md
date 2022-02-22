@@ -11,4 +11,4 @@ The list below provides links to each heading in this section. The links specify
   - <a id="array-element-access"></a>[Array element access](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#164-array-element-access)
   - <a id="array-members"></a>[Array members](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#165-array-members)
   - <a id="array-covariance"></a>[Array covariance](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#166-array-covariance)
-  - <a id="array-initializers"></a>[Array initializers](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#167-array-initializers
+  - <a id="array-initializers"></a>[Array initializers](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#167-array-initializers)

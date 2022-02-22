@@ -37,7 +37,7 @@ The list below provides links to each heading in this section. The links specify
       - <a id="fully-qualified-name"></a>[Fully qualified name](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14392-fully-qualified-name)
       - <a id="declared-accessibility"></a>[Declared accessibility](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14393-declared-accessibility)
       - <a id="hiding"></a>[Hiding](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14394-hiding)
-      - <a id="this-access"></a>[this access]](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14395-this-access)
+      - <a id="this-access"></a>[this access](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14395-this-access)
       - <a id="access-to-private-and-protected-members-of-the-containing-type"></a>[Access to private and protected members of the containing type](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14396-access-to-private-and-protected-members-of-the-containing-type)
       - <a id="nested-types-in-generic-classes"></a>[Nested types in generic classes](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14397-nested-types-in-generic-classes)
     - <a id="reserved-member-names"></a>[Reserved member names](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14310-reserved-member-names)

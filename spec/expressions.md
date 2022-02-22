@@ -3,7 +3,7 @@
 This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotnet/csharpstandard) repository.
 The list below provides links to each heading in this section. The links specify the C# 6 branch, which is version when the specifications merged.
 
-- <a id="expressions"></a>[Expressions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md
+- <a id="expressions"></a>[Expressions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md)
   - <a id="expression-classifications"></a>[Expression classifications](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#112-expression-classifications)
     - <a id="values-of-expressions"></a>[Values of expressions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1122-values-of-expressions) 
   - <a id="static-and-dynamic-binding"></a>[Static and Dynamic Binding](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#113-static-and-dynamic-binding)
@@ -153,4 +153,4 @@ The list below provides links to each heading in this section. The links specify
     - <a id="event-assignment"></a>[Event assignment](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11184-event-assignment)
   - <a id="expression"></a>[Expression](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1119-expression)
   - <a id="constant-expressions"></a>[Constant expressions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1120-constant-expressions)
-  - <a id="boolean-expressions"></a>[Boolean expressions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1121-boolean-expressions
+  - <a id="boolean-expressions"></a>[Boolean expressions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1121-boolean-expressions)

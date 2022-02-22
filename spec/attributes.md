@@ -23,7 +23,7 @@ The list below provides links to each heading in this section. The links specify
       - <a id="the-callerfilepath-attribute"></a>[The CallerFilePath attribute](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#21553-the-callerfilepath-attribute)
       - <a id="the-callermembername-attribute"></a>[The CallerMemberName attribute](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#21554-the-callermembername-attribute)
   - <a id="attributes-for-interoperation"></a>[Attributes for Interoperation](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#216-attributes-for-interoperation)
-    - <a id="interoperation-with-com-and-win32-components"></a>[Interoperation with COM and Win32 components]
-    - <a id="interoperation-with-other-net-languages"></a>**Interoperation with other .NET languages**: This section has been removed.
-      - <a id="the-indexername-attribute"></a>**The IndexerName attribute**: This section has been removed.
+    - <a id="interoperation-with-com-and-win32-components"></a>**Interoperation with COM and Win32 components**: This heading has been removed.
+    - <a id="interoperation-with-other-net-languages"></a>**Interoperation with other .NET languages**: This heading has been removed.
+      - <a id="the-indexername-attribute"></a>**The IndexerName attribute**: This heading has been removed.
 
