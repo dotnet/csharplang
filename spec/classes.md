@@ -56,7 +56,7 @@ The list below provides links to each heading in this section. The links specify
     - <a id="variable-initializers"></a>[Variable initializers](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1456-variable-initializers)
       - <a id="static-field-initialization"></a>[Static field initialization](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14562-static-field-initialization)
       - <a id="instance-field-initialization"></a>[Instance field initialization](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14563-instance-field-initialization)
-  - <a id="methods"></a>[Methods]
+  - <a id="methods"></a>[Methods](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#146-methods)
     - <a id="method-parameters"></a>[Method parameters](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1462-method-parameters)
       - <a id="value-parameters"></a>[Value parameters](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14622-value-parameters)
       - <a id="reference-parameters"></a>[Reference parameters](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14623-reference-parameters)
