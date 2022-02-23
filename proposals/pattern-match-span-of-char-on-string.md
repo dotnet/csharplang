@@ -45,11 +45,11 @@ We alter the [spec](../csharp-7.0/pattern-matching.md#constant-pattern) for cons
 `System.MemoryExtensions` is matched by name and can be defined outside corlib.
 
 The signature of `System.MemoryExtensions.SequenceEqual` overloads must match:
-- `public static bool SequenceEqual<T>(System.Span<T>, System.ReadOnlySpan<T>)` and
-- `public static bool SequenceEqual<T>(System.ReadOnlySpan<T>, System.ReadOnlySpan<T>)` respectively.
+- `public static bool SequenceEqual<T>(System.Span<T>, System.ReadOnlySpan<T>)`
+- `public static bool SequenceEqual<T>(System.ReadOnlySpan<T>, System.ReadOnlySpan<T>)`
 
 The signature of `System.MemoryExtensions.AsSpan` must match:
-- `public static System.ReadOnlySpan<char> AsSpan(string)`.
+- `public static System.ReadOnlySpan<char> AsSpan(string)`
 
 Methods with optional parameters are excluded from consideration.
 
