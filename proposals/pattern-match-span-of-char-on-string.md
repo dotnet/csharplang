@@ -39,7 +39,19 @@ We alter the [spec](../csharp-7.0/pattern-matching.md#constant-pattern) for cons
 > 
 > Otherwise the pattern is considered matching if `object.Equals(e, c)` returns `true`. In this case it is a compile-time error if the static type of *e* is not *pattern compatible* with the type of the constant.
 
-`System.Span<T>` and `System.ReadOnlySpan<T>` are matched by name, must be `ref struct`s, and can be defined outside corlib. `System.MemoryExtensions` is matched by name and can be defined outside corlib. The signature of `System.MemoryExtensions.SequenceEqual` must match `public static bool SequenceEqual<T>(System.Span<T>, System.ReadOnlySpan<T>)` and `public static bool SequenceEqual<T>(System.ReadOnlySpan<T>, System.ReadOnlySpan<T>)` respectively, and the signature of `System.MemoryExtensions.AsSpan` must match `public static System.ReadOnlySpan<char> AsSpan(string)`. Methods with optional parameters are excluded from consideration.
+### Well-known members
+`System.Span<T>` and `System.ReadOnlySpan<T>` are matched by name, must be `ref struct`s, and can be defined outside corlib.
+
+`System.MemoryExtensions` is matched by name and can be defined outside corlib.
+
+The signature of `System.MemoryExtensions.SequenceEqual` overloads must match:
+- `public static bool SequenceEqual<T>(System.Span<T>, System.ReadOnlySpan<T>)` and
+- `public static bool SequenceEqual<T>(System.ReadOnlySpan<T>, System.ReadOnlySpan<T>)` respectively.
+
+The signature of `System.MemoryExtensions.AsSpan` must match:
+- `public static System.ReadOnlySpan<char> AsSpan(string)`.
+
+Methods with optional parameters are excluded from consideration.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
