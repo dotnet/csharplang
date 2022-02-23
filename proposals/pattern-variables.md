@@ -2,7 +2,7 @@
 
 ## Summary  
 
-Allow variable declarations under `or` patterns and across `case` labels in a `switch` section.
+Allow variable declarations under `or` and `not` patterns and across `case` labels in a `switch` section.
 
 ## Motivation
 
@@ -49,34 +49,90 @@ Expr Simplify(Expr e)
 
 ## Detailed design
 
-Variables *must* be redeclared under all disjuncitve patterns because assignment of such variables depend on the order of evaluation which is undefined in the context of pattern-matching.
+### Scope
 
-- In a *disjunctive_pattern*, pattern variables declared on one side must be redeclared on the other side.
-- In a *switch_section*, pattern variables declared under each case label must be redeclared under every other case label.
+The single-declaration requirement of certain pattern variables is relaxed as follows:
 
-In any other case, variable declaration follows the usual scoping rules and is disallowed.
+- Pattern variables may be redeclared in each label of a *switch_section*:
 
-These names can reference either of variables based on the result of the pattern-matching at runtime. Under the hood, it's the same local being assigned in each pattern.
+	```cs
+	case (var x, 0):
+	case (0, var x):
+	```
+	
+- Pattern variables may be redeclared in either side of a *disjunctive_pattern*:
 
-Redeclaring pattern variables is only permitted for variables of the same type.
+  ```cs
+  e is (0, var x) or (var x, 0)
+  ```
+  
+- Pattern variables may be redeclared within the entire pattern if declared under a *negated_pattern*:
 
-## Unresolved questions
+  ```cs
+  e is not (0, var x) and not (var x, 0)
+  ```
+  But not if contained within a *disjunctive_pattern*:
+  
+  ```cs
+  e is not (0, var x) or not (var x, 0) // error
+  ```
 
-- How identical these types should be?
-- Could we support variable declarations under `not` patterns?
-    ```cs
-    if (e is not (int x, 0) and not (0, int x))
-    ```
-- Could we relax the scoping rules beyond pattern boundaries?
-    ```cs
-    if (e is (int x, 0) || a is (0, int x))
-    ```
-- Could we relax the redeclaration requirement in a switch section? 
-    ```cs
-    case (int x, 0) a when Use(x, a): // ok
-    case (0, int x) b when Use(x, b): // ok
-        Use(x); // ok
-        Use(a); // error; not definitely assigned
-        Use(b); // error; not definitely assigned
-        break;
-    ```
+Note that this does not alter the scope of pattern variables itself, rather these names can possibly reference either of variables within the existing scope based on the result of the pattern-matching at runtime.
+
+Pattern variables with multiple declarations must be of the same type, excluding nullability for reference types:
+```cs
+case C { Property: int x } or D { Property: long x }: x.ToString(); // error
+case C { NonNullable: var x } or D { Nullable: var x }: x.ToString(); // warning
+case C { NonNullable: var x } or D { NonNullable: var x }: x.ToString(); // ok
+```
+
+Redeclaring pattern variables in any other case follows the usual scoping rules and is disallowed.
+
+### Definite assignment
+
+For an *is_pattern_expression* of the form `e is pattern`, the definite assignment state of *v* after *is_pattern_expression* is determined by:
+
+- The state of *v* after *is_pattern_expression* is definitely assigned, if *pattern* is irrefutable; permitting use after:
+    
+  ```cs
+  _ = x is var x;
+  _ = 1 is int x;
+  _ = (1, 2) is var (x, y) and var z;
+  ```
+
+- Otherwise, the state of *v* after *is_pattern_expression* is the same as the state of *v* after *pattern*.
+
+For a *switch_section* of the form `case pattern_1 when condition_1: ... case pattern_N when condition_N:`, the definite assignment state of *v* is determined by:
+
+- The state of *v* before *condition_i* is definitely assigned, if the state of *v* after *pattern_i* is "definitely assigned when true".
+- The state of *v* before *switch_section_body* is definitely assigned, if the state of *v* after each *pattern_i* is "definitely assigned when true".
+- Otherwise, the state of *v* is not definitely assigned.
+
+#### General definite assignment rules for pattern variables
+
+The following rule applies to any *primary_pattern* that declares a variable, namely *list_pattern*, *declaration_pattern*, *recursive_pattern*, and *var_pattern*, as well as any nested subpatterns.
+
+- The state of *v* is "definitely assigned when true" after *primary_pattern*; permitting use after:
+
+  ```cs
+  if (o is int x)
+  if (o is (int x, int y))
+  ```
+
+#### Definite assignment rules for pattern variables declared under logical patterns
+
+For a *disjunctive_pattern* *p* of the form `left or right`, the definite assignment state of *v* after *p* is determined by:
+- If the state of *v* after both *left* and *right* is "definitely assigned when true", then the state of *v* after *p* is "definitely assigned when true".
+- If the state of *v* after both *left*  and *right* is "definitely assigned when false", then the state of *v* after *p* is "definitely assigned when false".
+- Otherwise, the state of *v* after *p* is not definitely assigned.
+
+For a *conjunctive_pattern* *p*  of the form `left and right`, the definite assignment state of *v* after *p* is determined by:
+- If the state of *v* after either *left* or *right* is "definitely assigned when true", then the state of *v* after *p* is "definitely assigned when true".
+- If the state of *v* after both *left*  and *right* is "definitely assigned when false", then the state of *v* after *p* is "definitely assigned when false".
+- Otherwise, the state of *v* after *p* is not definitely assigned.
+
+For a *negated_pattern* *p* of the form `not pattern`, the definite assignment state of *v* after *p* is determined by:
+- If the state of *v* after *pattern* is "definitely assigned when true", then the state of *v* after *p* is "definitely assigned when false".
+- If the state of *v* after *pattern* is "definitely assigned when false", then the state of *v* after *p* is "definitely assigned when true".
+
+These rules cover the existing top-level `is not` pattern variables. However, instead of an error, the variables could be left unassigned.
