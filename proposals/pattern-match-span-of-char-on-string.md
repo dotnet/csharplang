@@ -14,6 +14,18 @@ A common operation on strings is to use a switch to test if it is a particular v
 
 In order to encourage adoption of `ReadOnlySpan<char>` we allow pattern matching a `ReadOnlySpan<char>`, on a constant `string`, thus also allowing it to be used in a switch.
 
+```csharp
+static bool Is123(ReadOnlySpan<char> s)
+{
+    return s is "123";
+}
+
+static bool IsABC(Span<char> s)
+{
+    return s switch { "ABC" => true, _ => false };
+}
+```
+
 ## Detailed design
 [design]: #detailed-design
 
@@ -27,7 +39,19 @@ We alter the [spec](../csharp-7.0/pattern-matching.md#constant-pattern) for cons
 > 
 > Otherwise the pattern is considered matching if `object.Equals(e, c)` returns `true`. In this case it is a compile-time error if the static type of *e* is not *pattern compatible* with the type of the constant.
 
-`System.Span<T>` and `System.ReadOnlySpan<T>` are matched by name, must be `ref struct`s, and can be defined outside corlib. `System.MemoryExtensions` is matched by name and can be defined outside corlib. The signature of `System.MemoryExtensions.SequenceEqual` must match `public static bool SequenceEqual<T>(System.Span<T>, System.ReadOnlySpan<T>)` and `public static bool SequenceEqual<T>(System.ReadOnlySpan<T>, System.ReadOnlySpan<T>)` respectively, and the signature of `System.MemoryExtensions.AsSpan` must match `public static System.ReadOnlySpan<char> AsSpan(string)`. Methods with optional parameters are excluded from consideration.
+### Well-known members
+`System.Span<T>` and `System.ReadOnlySpan<T>` are matched by name, must be `ref struct`s, and can be defined outside corlib.
+
+`System.MemoryExtensions` is matched by name and can be defined outside corlib.
+
+The signature of `System.MemoryExtensions.SequenceEqual` overloads must match:
+- `public static bool SequenceEqual<T>(System.Span<T>, System.ReadOnlySpan<T>)`
+- `public static bool SequenceEqual<T>(System.ReadOnlySpan<T>, System.ReadOnlySpan<T>)`
+
+The signature of `System.MemoryExtensions.AsSpan` must match:
+- `public static System.ReadOnlySpan<char> AsSpan(string)`
+
+Methods with optional parameters are excluded from consideration.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
@@ -42,7 +66,13 @@ None
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-1. Should matching against `(string)null` be allowed?
+1. Should matching be defined independently from `MemoryExtensions.SequenceEqual()` etc.?
+
+    > ... the pattern is considered matching if `e.Length == c.Length` and `e[i] == c[i]` for all characters in `e`.
+
+    _Recommendation: Define in terms of `MemoryExtensions.SequenceEqual()` for performance. If `MemoryExtensions` is missing, report compile error._
+
+2. Should matching against `(string)null` be allowed?
 
     If so, should `(string)null` subsume `""` since `MemoryExtensions.AsSpan(null) == MemoryExtensions.AsSpan("")`?
     ```csharp
@@ -50,8 +80,8 @@ None
     {
         return span switch
         {
-            null => true, // ok?
-            "" => true,   // error: unreachable?
+            (string)null => true, // ok?
+            "" => true,           // error: unreachable?
             _ => false,
         };
     }
@@ -59,7 +89,7 @@ None
 
     _Recommendation: Constant pattern `(string)null` should be reported as an error._
 
-2. Should the constant pattern match include a runtime type test of the expression value for `Span<char>` or `ReadOnlySpan<char>`?
+3. Should the constant pattern match include a runtime type test of the expression value for `Span<char>` or `ReadOnlySpan<char>`?
     ```csharp
     static bool Is123<T>(Span<T> s)
     {
@@ -79,7 +109,7 @@ None
 
     _Recommendation: No implicit runtime type test for constant pattern. (`IsABC<T>()` example is allowed because the type test is explicit.)_
 
-3. Should subsumption consider strings, list patterns, and `Length` property?
+4. Should subsumption consider constant string patterns, list patterns, and `Length` property pattern?
     ```csharp
     static int ToNum(ReadOnlySpan<char> s)
     {
