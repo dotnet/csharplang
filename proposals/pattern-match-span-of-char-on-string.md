@@ -70,7 +70,7 @@ None
 
     > ... the pattern is considered matching if `e.Length == c.Length` and `e[i] == c[i]` for all characters in `e`.
 
-    _Recommendation: Define in terms of `e.Length` and `e[i]`. For C#11, the implementation may rely on `MemoryExtensions` however._
+    _Recommendation: Define in terms of `MemoryExtensions.SequenceEqual()` for performance. If `MemoryExtensions` is missing, report compile error._
 
 2. Should matching against `(string)null` be allowed?
 
@@ -109,7 +109,7 @@ None
 
     _Recommendation: No implicit runtime type test for constant pattern. (`IsABC<T>()` example is allowed because the type test is explicit.)_
 
-4. Should subsumption consider strings, list patterns, and `Length` property?
+4. Should subsumption consider constant string patterns, list patterns, and `Length` property pattern?
     ```csharp
     static int ToNum(ReadOnlySpan<char> s)
     {
