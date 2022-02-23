@@ -80,8 +80,8 @@ None
     {
         return span switch
         {
-            null => true, // ok?
-            "" => true,   // error: unreachable?
+            (string)null => true, // ok?
+            "" => true,           // error: unreachable?
             _ => false,
         };
     }
