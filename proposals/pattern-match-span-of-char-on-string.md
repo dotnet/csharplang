@@ -66,7 +66,13 @@ None
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-1. Should matching against `(string)null` be allowed?
+1. Should matching be defined independently from `MemoryExtensions.SequenceEqual()` etc.?
+
+    > ... the pattern is considered matching if `e.Length == c.Length` and `e[i] == c[i]` for all characters in `e`.
+
+    _Recommendation: Define in terms of `e.Length` and `e[i]`. For C#11, the implementation may rely on `MemoryExtensions` however._
+
+2. Should matching against `(string)null` be allowed?
 
     If so, should `(string)null` subsume `""` since `MemoryExtensions.AsSpan(null) == MemoryExtensions.AsSpan("")`?
     ```csharp
@@ -83,7 +89,7 @@ None
 
     _Recommendation: Constant pattern `(string)null` should be reported as an error._
 
-2. Should the constant pattern match include a runtime type test of the expression value for `Span<char>` or `ReadOnlySpan<char>`?
+3. Should the constant pattern match include a runtime type test of the expression value for `Span<char>` or `ReadOnlySpan<char>`?
     ```csharp
     static bool Is123<T>(Span<T> s)
     {
@@ -103,7 +109,7 @@ None
 
     _Recommendation: No implicit runtime type test for constant pattern. (`IsABC<T>()` example is allowed because the type test is explicit.)_
 
-3. Should subsumption consider strings, list patterns, and `Length` property?
+4. Should subsumption consider strings, list patterns, and `Length` property?
     ```csharp
     static int ToNum(ReadOnlySpan<char> s)
     {
