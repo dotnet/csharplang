@@ -3,6 +3,8 @@
 This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotnet/csharpstandard) repository.
 The list below provides links to each heading in this section. The links specify the C# 6 branch, which is version when the specifications merged.
 
+> To view the text of the Microsoft spec before merging with the ECMA text, checkout the [ms-spec-text](https://github.com/dotnet/csharplang/releases/tag/ms-spec-text) tag in this repository.
+
 - <a id="expressions"></a>[Expressions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md)
   - <a id="expression-classifications"></a>[Expression classifications](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#112-expression-classifications)
     - <a id="values-of-expressions"></a>[Values of expressions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1122-values-of-expressions) 

@@ -3,6 +3,8 @@
 This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotnet/csharpstandard) repository.
 The list below provides links to each heading in this section. The links specify the C# 6 branch, which is version when the specifications merged.
 
+> To view the text of the Microsoft spec before merging with the ECMA text, checkout the [ms-spec-text](https://github.com/dotnet/csharplang/releases/tag/ms-spec-text) tag in this repository.
+
 - <a id="conversions"></a>[Conversions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.mc)
   - <a id="implicit-conversions"></a>[Implicit conversions](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.mc#102-implicit-conversions)
     - <a id="identity-conversion"></a>[Identity conversion](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.mc#1022-identity-conversion)

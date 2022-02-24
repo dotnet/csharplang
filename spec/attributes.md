@@ -3,6 +3,8 @@
 This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotnet/csharpstandard) repository.
 The list below provides links to each heading in this section. The links specify the C# 6 branch, which is version when the specifications merged.
 
+> To view the text of the Microsoft spec before merging with the ECMA text, checkout the [ms-spec-text](https://github.com/dotnet/csharplang/releases/tag/ms-spec-text) tag in this repository.
+
 - <a id="attributes"></a>[Attributes](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#21-attributes)
   - <a id="attribute-classes"></a>[ Attribute classes](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#212-attribute-classes)
     - <a id="attribute-usage"></a>[Attribute usage](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#2122-attribute-usage)

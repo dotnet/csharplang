@@ -3,6 +3,8 @@
 This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotnet/csharpstandard) repository.
 The list below provides links to each heading in this section. The links specify the C# 6 branch, which is version when the specifications merged.
 
+> To view the text of the Microsoft spec before merging with the ECMA text, checkout the [ms-spec-text](https://github.com/dotnet/csharplang/releases/tag/ms-spec-text) tag in this repository.
+
 - <a id="statements"></a>[Statements](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#12-statements)
   - <a id="end-points-and-reachability"></a>[End points and reachability](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#122-end-points-and-reachability)
   - <a id="blocks"></a>[Blocks](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#123-blocks)

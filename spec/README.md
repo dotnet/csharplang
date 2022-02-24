@@ -2,6 +2,8 @@ This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotne
 
 The full table of contents is in the [standard folder](https://github.com/dotnet/csharpstandard/tree/draft-v6/standard).
 
+> To view the text of the Microsoft spec before merging with the ECMA text, checkout the [ms-spec-text](https://github.com/dotnet/csharplang/releases/tag/ms-spec-text) tag in this repository.
+
 * [Lexical structure](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md)
   - [§6.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#61-programs)  Programs
   - [§6.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#62-grammars)  Grammars

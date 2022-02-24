@@ -3,6 +3,8 @@
 This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotnet/csharpstandard) repository.
 The list below provides links to each heading in this section. The links specify the C# 6 branch, which is version when the specifications merged.
 
+> To view the text of the Microsoft spec before merging with the ECMA text, checkout the [ms-spec-text](https://github.com/dotnet/csharplang/releases/tag/ms-spec-text) tag in this repository.
+
 - <a id="documentation-comments"></a>[Documentation comments](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentations-comments.md#annex-d-documentation-comments)
   - <a id="introduction"></a>[Introduction](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentations-comments.md#d2-introduction)
   - <a id="recommended-tags"></a>[Recommended tags](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentations-comments.md#d3-recommended-tags)
