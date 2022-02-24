@@ -443,7 +443,8 @@ __Example:__
 ```csharp
 /// <summary>This method changes the point's location to
 ///    the given coordinates.</summary>
-/// <see cref="Translate"/>
+/// <remarks>Use <see cref="Translate"/> to set the point's
+///    location relative to its current location.</remarks>
 public void Move(int xor, int yor) {
     X = xor;
     Y = yor;
@@ -452,7 +453,8 @@ public void Move(int xor, int yor) {
 /// <summary>This method changes the point's location by
 ///    the given x- and y-offsets.
 /// </summary>
-/// <see cref="Move"/>
+/// <remarks>Use <see cref="Move"/> to set the point's
+///    location relative to the origin.</remarks>
 public void Translate(int xor, int yor) {
     X += xor;
     Y += yor;
@@ -904,7 +906,8 @@ public class Point
     ///    the given coordinates.</summary>
     /// <param><c>xor</c> is the new x-coordinate.</param>
     /// <param><c>yor</c> is the new y-coordinate.</param>
-    /// <see cref="Translate"/>
+    /// <remarks>Use <see cref="Translate"/> to set the point's
+    ///    location relative to its current location.</remarks>
     public void Move(int xor, int yor) {
         X = xor;
         Y = yor;
@@ -922,7 +925,8 @@ public class Point
     /// </summary>
     /// <param><c>xor</c> is the relative x-offset.</param>
     /// <param><c>yor</c> is the relative y-offset.</param>
-    /// <see cref="Move"/>
+    /// <remarks>Use <see cref="Move"/> to set the point's
+    ///    location relative to the origin.</remarks>
     public void Translate(int xor, int yor) {
         X += xor;
         Y += yor;
@@ -1047,7 +1051,10 @@ Here is the output produced by one documentation generator when given the source
             the given coordinates.</summary>
             <param><c>xor</c> is the new x-coordinate.</param>
             <param><c>yor</c> is the new y-coordinate.</param>
-            <see cref="M:Graphics.Point.Translate(System.Int32,System.Int32)"/>
+            <remarks>Use <see
+      cref="M:Graphics.Point.Translate(System.Int32,System.Int32)"/> to set the
+      point's
+               location relative to its current location.</remarks>
         </member>
 
         <member
@@ -1064,7 +1071,10 @@ Here is the output produced by one documentation generator when given the source
             </summary>
             <param><c>xor</c> is the relative x-offset.</param>
             <param><c>yor</c> is the relative y-offset.</param>
-            <see cref="M:Graphics.Point.Move(System.Int32,System.Int32)"/>
+            <remarks>Use <see
+      cref="M:Graphics.Point.Move(System.Int32,System.Int32)"/> to set the
+      point's
+               location relative to the origin.</remarks>
         </member>
 
         <member name="M:Graphics.Point.Equals(System.Object)">
