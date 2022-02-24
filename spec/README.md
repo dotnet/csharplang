@@ -1,174 +1,174 @@
-C# Language Specification
-===========================
+This content has moved to the [`dotnet/csharpstandard`](https://github.com/dotnet/csharpstandard) repository.
 
-__Version 6__
+The full table of contents is in the [standard folder](https://github.com/dotnet/csharpstandard/tree/draft-v6/standard).
 
-This is an unofficial draft, posted here for convenience. When we submit a C# 6.0 spec proposal to ECMA, it will be shared here.
+> To view the text of the Microsoft spec before merging with the ECMA text, checkout the [ms-spec-text](https://github.com/dotnet/csharplang/releases/tag/ms-spec-text) tag in this repository.
 
-<!--
-(This document is also available for download: [csharp.pdf](CSharp%20Language%20Specification.pdf?raw=true) and [csharp.docx](CSharp%20Language%20Specification.docx?raw=true))
--->
-
-* [Introduction](introduction.md)
-    * [Hello world](introduction.md#hello-world)
-    * [Program structure](introduction.md#program-structure)
-    * [Types and variables](introduction.md#types-and-variables)
-    * [Expressions](introduction.md#expressions)
-    * [Statements](introduction.md#statements)
-    * [Classes and objects](introduction.md#classes-and-objects)
-* [Lexical structure](lexical-structure.md)
-    * [Programs](lexical-structure.md#programs)
-    * [Grammars](lexical-structure.md#grammars)
-    * [Lexical analysis](lexical-structure.md#lexical-analysis)
-    * [Tokens](lexical-structure.md#tokens)
-    * [Pre-processing directives](lexical-structure.md#pre-processing-directives)
-* [Basic concepts](basic-concepts.md)
-    * [Application Startup](basic-concepts.md#application-startup)
-    * [Application termination](basic-concepts.md#application-termination)
-    * [Declarations](basic-concepts.md#declarations)
-    * [Members](basic-concepts.md#members)
-    * [Member access](basic-concepts.md#member-access)
-    * [Signatures and overloading](basic-concepts.md#signatures-and-overloading)
-    * [Scopes](basic-concepts.md#scopes)
-    * [Namespace and type names](basic-concepts.md#namespace-and-type-names)
-    * [Automatic memory management](basic-concepts.md#automatic-memory-management)
-    * [Execution order](basic-concepts.md#execution-order)
-* [Types](types.md)
-    * [Value types](types.md#value-types)
-    * [Reference types](types.md#reference-types)
-    * [Boxing and unboxing](types.md#boxing-and-unboxing)
-    * [Constructed types](types.md#constructed-types)
-    * [Type parameters](types.md#type-parameters)
-    * [Expression tree types](types.md#expression-tree-types)
-    * [The dynamic type](types.md#the-dynamic-type)
-* [Variables](variables.md)
-    * [Variable categories](variables.md#variable-categories)
-    * [Default values](variables.md#default-values)
-    * [Definite assignment](variables.md#definite-assignment)
-    * [Variable references](variables.md#variable-references)
-    * [Atomicity of variable references](variables.md#atomicity-of-variable-references)
-* [Conversions](conversions.md)
-    * [Implicit conversions](conversions.md#implicit-conversions)
-    * [Explicit conversions](conversions.md#explicit-conversions)
-    * [Standard conversions](conversions.md#standard-conversions)
-    * [User-defined conversions](conversions.md#user-defined-conversions)
-    * [Anonymous function conversions](conversions.md#anonymous-function-conversions)
-    * [Method group conversions](conversions.md#method-group-conversions)
-* [Expressions](expressions.md)
-    * [Expression classifications](expressions.md#expression-classification)
-    * [Static and Dynamic Binding](expressions.md#static-and-dynamic-binding)
-    * [Operators](expressions.md#operators)
-    * [Member lookup](expressions.md#member-lookup)
-    * [Function members](expressions.md#function-members)
-    * [Primary expressions](expressions.md#primary-expressions)
-    * [Unary operators](expressions.md#unary-operators)
-    * [Arithmetic operators](expressions.md#arithmetic-operators)
-    * [Shift operators](expressions.md#shift-operators)
-    * [Relational and type-testing operators](expressions.md#relational-and-type-testing-operators)
-    * [Logical operators](expressions.md#logical-operators)
-    * [Conditional logical operators](expressions.md#conditional-logical-operators)
-    * [The null coalescing operator](expressions.md#the-null-coalescing-operator)
-    * [Conditional operator](expressions.md#conditional-operator)
-    * [Anonymous function expressions](expressions.md#anonymous-function-expressions)
-    * [Query expressions](expressions.md#query-expressions)
-    * [Assignment operators](expressions.md#assignment-operators)
-    * [Expression](expressions.md#expression)
-    * [Constant expressions](expressions.md#constant-expressions)
-    * [Boolean expressions](expressions.md#boolean-expressions)
-* [Statements](statements.md)
-    * [End points and reachability](statements.md#end-points-and-reachability)
-    * [Blocks](statements.md#blocks)
-    * [The empty statement](statements.md#the-empty-statement)
-    * [Labeled statements](statements.md#labeled-statements)
-    * [Declaration statements](statements.md#declaration-statements)
-    * [Expression statements](statements.md#expression-statements)
-    * [Selection statements](statements.md#selection-statements)
-    * [Iteration statements](statements.md#iteration-statements)
-    * [Jump statements](statements.md#jump-statements)
-    * [The try statement](statements.md#the-try-statement)
-    * [The checked and unchecked statements](statements.md#the-checked-and-unchecked-statements)
-    * [The lock statement](statements.md#the-lock-statement)
-    * [The using statement](statements.md#the-using-statement)
-    * [The yield statement](statements.md#the-yield-statement)
-* [Namespaces](namespaces.md)
-    * [Compilation units](namespaces.md#compilation-units)
-    * [Namespace declarations](namespaces.md#namespace-declarations)
-    * [Extern aliases](namespaces.md#extern-aliases)
-    * [Using directives](namespaces.md#using-directives)
-    * [Namespace members](namespaces.md#namespace-members)
-    * [Type declarations](namespaces.md#type-declarations)
-    * [Namespace alias qualifiers](namespaces.md#namespace-alias-qualifiers)
-* [Classes](classes.md)
-    * [Class declarations](classes.md#class-declarations)
-    * [Partial types](classes.md#partial-types)
-    * [Class members](classes.md#class-members)
-    * [Constants](classes.md#constants)
-    * [Fields](classes.md#fields)
-    * [Methods](classes.md#methods)
-    * [Properties](classes.md#properties)
-    * [Events](classes.md#events)
-    * [Indexers](classes.md#indexers)
-    * [Operators](classes.md#operators)
-    * [Instance constructors](classes.md#instance-constructors)
-    * [Static constructors](classes.md#static-constructors)
-    * [Destructors](classes.md#destructors)
-    * [Iterators](classes.md#iterators)
-    * [Async functions](classes.md#async-functions)
-* [Structs](structs.md)
-    * [Struct declarations](structs.md#struct-declarations)
-    * [Struct members](structs.md#struct-members)
-    * [Class and struct differences](structs.md#class-and-struct-differences)
-    * [Struct examples](structs.md#struct-examples)
-* [Arrays](arrays.md)
-    * [Array types](arrays.md#array-types)
-    * [Array creation](arrays.md#array-creation)
-    * [Array element access](arrays.md#array-element-access)
-    * [Array members](arrays.md#array-members)
-    * [Array covariance](arrays.md#array-covariance)
-    * [Array initializers](arrays.md#array-initializers)
-* [Interfaces](interfaces.md)
-    * [Interface declarations](interfaces.md#interface-declarations)
-    * [Interface members](interfaces.md#interface-members)
-    * [Fully qualified interface member names](interfaces.md#fully-qualified-interface-member-names)
-    * [Interface implementations](interfaces.md#interface-implementations)
-* [Enums](enums.md)
-    * [Enum declarations](enums.md#enum-declarations)
-    * [Enum modifiers](enums.md#enum-modifiers)
-    * [Enum members](enums.md#enum-members)
-    * [The System.Enum type](enums.md#the-systemenum-type)
-    * [Enum values and operations](enums.md#enum-values-and-operations)
-* [Delegates](delegates.md)
-    * [Delegate declarations](delegates.md#delegate-declarations)
-    * [Delegate compatibility](delegates.md#delegate-compatibility)
-    * [Delegate instantiation](delegates.md#delegate-instantiation)
-    * [Delegate invocation](delegates.md#delegate-invocation)
-* [Exceptions](exceptions.md)
-    * [Causes of exceptions](exceptions.md#causes-of-exceptions)
-    * [The System.Exception class](exceptions.md#the-systemexception-class)
-    * [How exceptions are handled](exceptions.md#how-exceptions-are-handled)
-    * [Common Exception Classes](exceptions.md#common-exception-classes)
-* [Attributes](attributes.md)
-    * [Attribute classes](attributes.md#attribute-classes)
-    * [Attribute specification](attributes.md#attribute-specification)
-    * [Attribute instances](attributes.md#attribute-instances)
-    * [Reserved attributes](attributes.md#reserved-attributes)
-    * [Attributes for Interoperation](attributes.md#attributes-for-interoperation)
-* [Unsafe code](unsafe-code.md)
-    * [Unsafe contexts](unsafe-code.md#unsafe-contexts)
-    * [Pointer types](unsafe-code.md#pointer-types)
-    * [Fixed and moveable variables](unsafe-code.md#fixed-and-moveable-variables)
-    * [Pointer conversions](unsafe-code.md#pointer-conversions)
-    * [Pointers in expressions](unsafe-code.md#pointers-in-expressions)
-    * [The fixed statement](unsafe-code.md#the-fixed-statement)
-    * [Fixed size buffers](unsafe-code.md#fixed-size-buffers)
-    * [Stack allocation](unsafe-code.md#stack-allocation)
-    * [Dynamic memory allocation](unsafe-code.md#dynamic-memory-allocation)
-* [Documentation comments](documentation-comments.md)
-    * [Introduction](documentation-comments.md#introduction)
-    * [Recommended tags](documentation-comments.md#recommended-tags)
-    * [Processing the documentation file](documentation-comments.md#processing-the-documentation-file)
-    * [An example](documentation-comments.md#an-example)
-
-<!--
-* Grammar: [csharp.html](http://ljw1004.github.io/csharpspec/csharp.html). Or download in ANTLR format: [csharp.g4](csharp.g4?raw=true). 
--->
+* [Lexical structure](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md)
+  - [§6.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#61-programs)  Programs
+  - [§6.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#62-grammars)  Grammars
+  - [§6.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#63-lexical-analysis)  Lexical analysis
+  - [§6.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#64-tokens)  Tokens
+  - [§6.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/lexical-structure.md#65-pre-processing-directives)  Pre-processing directives
+- [§7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#7-basic-concepts)  Basic concepts
+  - [§7.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#71-application-startup)  Application startup
+  - [§7.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#72-application-termination)  Application termination
+  - [§7.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#73-declarations)  Declarations
+  - [§7.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#74-members)  Members
+  - [§7.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#75-member-access)  Member access
+  - [§7.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#76-signatures-and-overloading)  Signatures and overloading
+  - [§7.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#77-scopes)  Scopes
+  - [§7.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#78-namespace-and-type-names)  Namespace and type names
+  - [§7.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#79-automatic-memory-management)  Automatic memory management
+  - [§7.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#710-execution-order)  Execution order
+- [§8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#8-types)  Types
+  - [§8.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#81-general)  General
+  - [§8.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#82-reference-types)  Reference types
+  - [§8.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#83-value-types)  Value types
+  - [§8.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#84-constructed-types)  Constructed types
+  - [§8.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#85-type-parameters)  Type parameters
+  - [§8.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#86-expression-tree-types)  Expression tree types
+  - [§8.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#87-the-dynamic-type)  The dynamic type
+  - [§8.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/types.md#88-unmanaged-types)  Unmanaged types
+- [§9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#9-variables)  Variables
+  - [§9.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#91-general)  General
+  - [§9.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#92-variable-categories)  Variable categories
+  - [§9.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#93-default-values)  Default values
+  - [§9.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94-definite-assignment)  Definite assignment
+  - [§9.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#95-variable-references)  Variable references
+  - [§9.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#96-atomicity-of-variable-references)  Atomicity of variable references
+- [§10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#10-conversions)  Conversions
+  - [§10.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#101-general)  General
+  - [§10.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#102-implicit-conversions)  Implicit conversions
+  - [§10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#103-explicit-conversions)  Explicit conversions
+  - [§10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#104-standard-conversions)  Standard conversions
+  - [§10.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#105-user-defined-conversions)  User-defined conversions
+  - [§10.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#106-conversions-involving-nullable-types)  Conversions involving nullable types
+  - [§10.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#107-anonymous-function-conversions)  Anonymous function conversions
+  - [§10.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#108-method-group-conversions)  Method group conversions
+- [§11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11-expressions)  Expressions
+  - [§11.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#111-general)  General
+  - [§11.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#112-expression-classifications)  Expression classifications
+  - [§11.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#113-static-and-dynamic-binding)  Static and Dynamic Binding
+  - [§11.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#114-operators)  Operators
+  - [§11.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#115-member-lookup)  Member lookup
+  - [§11.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116-function-members)  Function members
+  - [§11.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#117-primary-expressions)  Primary expressions
+  - [§11.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#118-unary-operators)  Unary operators
+  - [§11.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#119-arithmetic-operators)  Arithmetic operators
+  - [§11.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1110-shift-operators)  Shift operators
+  - [§11.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1111-relational-and-type-testing-operators)  Relational and type-testing operators
+  - [§11.12](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1112-logical-operators)  Logical operators
+  - [§11.13](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1113-conditional-logical-operators)  Conditional logical operators
+  - [§11.14](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1114-the-null-coalescing-operator)  The null coalescing operator
+  - [§11.15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1115-conditional-operator)  Conditional operator
+  - [§11.16](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1116-anonymous-function-expressions)  Anonymous function expressions
+  - [§11.17](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1117-query-expressions)  Query expressions
+  - [§11.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1118-assignment-operators)  Assignment operators
+  - [§11.19](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1119-expression)  Expression
+  - [§11.20](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1120-constant-expressions)  Constant expressions
+  - [§11.21](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1121-boolean-expressions)  Boolean expressions
+- [§12](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#12-statements)  Statements
+  - [§12.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#121-general)  General
+  - [§12.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#122-end-points-and-reachability)  End points and reachability
+  - [§12.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#123-blocks)  Blocks
+  - [§12.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#124-the-empty-statement)  The empty statement
+  - [§12.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#125-labeled-statements)  Labeled statements
+  - [§12.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#126-declaration-statements)  Declaration statements
+  - [§12.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#127-expression-statements)  Expression statements
+  - [§12.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#128-selection-statements)  Selection statements
+  - [§12.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#129-iteration-statements)  Iteration statements
+  - [§12.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1210-jump-statements)  Jump statements
+  - [§12.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1211-the-try-statement)  The try statement
+  - [§12.12](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1212-the-checked-and-unchecked-statements)  The checked and unchecked statements
+  - [§12.13](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1213-the-lock-statement)  The lock statement
+  - [§12.14](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1214-the-using-statement)  The using statement
+  - [§12.15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1215-the-yield-statement)  The yield statement
+- [§13](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#13-namespaces)  Namespaces
+  - [§13.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#131-general)  General
+  - [§13.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#132-compilation-units)  Compilation units
+  - [§13.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#133-namespace-declarations)  Namespace declarations
+  - [§13.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#134-extern-alias-directives)  Extern alias directives
+  - [§13.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#135-using-directives)  Using directives
+  - [§13.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#136-namespace-member-declarations)  Namespace member declarations
+  - [§13.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#137-type-declarations)  Type declarations
+  - [§13.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#138-qualified-alias-member)  Qualified alias member
+- [§14](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14-classes)  Classes
+  - [§14.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#141-general)  General
+  - [§14.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#142-class-declarations)  Class declarations
+  - [§14.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#143-class-members)  Class members
+  - [§14.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#144-constants)  Constants
+  - [§14.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#145-fields)  Fields
+  - [§14.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#146-methods)  Methods
+  - [§14.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#147-properties)  Properties
+  - [§14.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#148-events)  Events
+  - [§14.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#149-indexers)  Indexers
+  - [§14.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1410-operators)  Operators
+  - [§14.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1411-instance-constructors)  Instance constructors
+  - [§14.12](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1412-static-constructors)  Static constructors
+  - [§14.13](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1413-finalizers)  Finalizers
+  - [§14.14](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1414-iterators)  Iterators
+  - [§14.15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1415-async-functions)  Async Functions
+- [§15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#15-structs)  Structs
+  - [§15.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#151-general)  General
+  - [§15.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#152-struct-declarations)  Struct declarations
+  - [§15.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#153-struct-members)  Struct members
+  - [§15.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#154-class-and-struct-differences)  Class and struct differences
+- [§16](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#16-arrays)  Arrays
+  - [§16.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#161-general)  General
+  - [§16.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#162-array-types)  Array types
+  - [§16.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#163-array-creation)  Array creation
+  - [§16.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#164-array-element-access)  Array element access
+  - [§16.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#165-array-members)  Array members
+  - [§16.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#166-array-covariance)  Array covariance
+  - [§16.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/arrays.md#167-array-initializers)  Array initializers
+- [§17](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#17-interfaces)  Interfaces
+  - [§17.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#171-general)  General
+  - [§17.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#172-interface-declarations)  Interface declarations
+  - [§17.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#173-interface-body)  Interface body
+  - [§17.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#174-interface-members)  Interface members
+  - [§17.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#175-qualified-interface-member-names)  Qualified interface member names
+  - [§17.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#176-interface-implementations)  Interface implementations
+- [§18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#18-enums)  Enums
+  - [§18.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#181-general)  General
+  - [§18.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#182-enum-declarations)  Enum declarations
+  - [§18.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#183-enum-modifiers)  Enum modifiers
+  - [§18.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#184-enum-members)  Enum members
+  - [§18.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#185-the-systemenum-type)  The System.Enum type
+  - [§18.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#186-enum-values-and-operations)  Enum values and operations
+- [§19](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#19-delegates)  Delegates
+  - [§19.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#191-general)  General
+  - [§19.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#192-delegate-declarations)  Delegate declarations
+  - [§19.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#193-delegate-members)  Delegate members
+  - [§19.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#194-delegate-compatibility)  Delegate compatibility
+  - [§19.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#195-delegate-instantiation)  Delegate instantiation
+  - [§19.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#196-delegate-invocation)  Delegate invocation
+- [§20](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/exceptions.md#20-exceptions)  Exceptions
+  - [§20.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/exceptions.md#201-general)  General
+  - [§20.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/exceptions.md#202-causes-of-exceptions)  Causes of exceptions
+  - [§20.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/exceptions.md#203-the-systemexception-class)  The System.Exception class
+  - [§20.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/exceptions.md#204-how-exceptions-are-handled)  How exceptions are handled
+  - [§20.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/exceptions.md#205-common-exception-classes)  Common exception classes
+- [§21](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#21-attributes)  Attributes
+  - [§21.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#211-general)  General
+  - [§21.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#212-attribute-classes)  Attribute classes
+  - [§21.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#213-attribute-specification)  Attribute specification
+  - [§21.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#214-attribute-instances)  Attribute instances
+  - [§21.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#215-reserved-attributes)  Reserved attributes
+  - [§21.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/attributes.md#216-attributes-for-interoperation)  Attributes for interoperation
+- [§22](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#22-unsafe-code)  Unsafe code
+  - [§22.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#221-general)  General
+  - [§22.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#222-unsafe-contexts)  Unsafe contexts
+  - [§22.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#223-pointer-types)  Pointer types
+  - [§22.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#224-fixed-and-moveable-variables)  Fixed and moveable variables
+  - [§22.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#225-pointer-conversions)  Pointer conversions
+  - [§22.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#226-pointers-in-expressions)  Pointers in expressions
+  - [§22.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#227-the-fixed-statement)  The fixed statement
+  - [§22.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#228-fixed-size-buffers)  Fixed-size buffers
+  - [§22.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#229-stack-allocation)  Stack allocation
+- [§D](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentation-comments.md#annex-d-documentation-comments)  Documentation comments
+  - [§D.1](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentation-comments.md#d1-general)  General
+  - [§D.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentation-comments.md#d2-introduction)  Introduction
+  - [§D.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentation-comments.md#d3-recommended-tags)  Recommended tags
+  - [§D.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentation-comments.md#d4-processing-the-documentation-file)  Processing the documentation file
+  - [§D.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/documentation-comments.md#d5-an-example)  An example
