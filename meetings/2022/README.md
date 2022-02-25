@@ -32,6 +32,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Mar 2, 2022
 
 - Roles and extensions (Julien, David, Mads): https://github.com/dotnet/csharplang/issues/5497
+- Open questions with `field` (Fred, Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/semi-auto-properties.md
 
 ## Feb 28, 2022
 
