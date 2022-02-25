@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule when convenient
 
+- Feedback on `!!` (*After design review and MVP Summit*): https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
 
 ## Recurring topics
 
