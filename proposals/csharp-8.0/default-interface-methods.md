@@ -109,11 +109,11 @@ interface IA
 }
 interface IB : IA
 {
-    override void IA.M() { WriteLine("IB.M"); } // explicitly named
+    void IA.M() { WriteLine("IB.M"); } // explicitly named
 }
 interface IC : IA
 {
-    override void M() { WriteLine("IC.M"); } // implicitly named
+    void M() { WriteLine("IC.M"); } // implicitly named
 }
 ```
 
