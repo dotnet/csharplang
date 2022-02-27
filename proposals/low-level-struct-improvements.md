@@ -818,16 +818,14 @@ ref struct S<T> {
 ## Open Issues
 
 ### Keywords vs. attributes
-This design calls for using attributes to annotate the new lifetime rules. This also could've been done just as easily with contextual keywords. For instance `[DoesNotEscape]` could map to `scoped`
+This design calls for using attributes to annotate the new lifetime rules. This also could've been done just as easily with contextual keywords. For instance `[DoesNotEscape]` could map to `scoped`. However keywords, even the contextual ones, generally must meet a very high bar for inclusion. They take up valuable langauge real estate and are more prominent parts of the langauge. This feature, while valuable, is going to serve a minority of C# developers.
 
-Keywords, even the contextual ones, generally must meet a very high bar for inclusion. They take up valuable langauge real estate and are more prominent parts of the langauge.
+On the surface that would seem to favor not using keywords but there are two important points to consider: 
 
-This feature, while valuable, is going to serve a minority of C# developers. On the surface that would seem to favor not using keywords but there are two important points to consider: 
-
-1. The annotations will effect program semantics. This is a line C# is reluctant to cross and it's unlikley this is the feature that should justify it. 
+1. The annotations will effect program semantics. Having attributes impact program semantics is a line C# is reluctant to cross and it's unclear if this is the feature that should justify the language taking that step.
 1. The developers most likely to use this feature intesect strongly with the set of developers that use function pointers. That feature, while also used by a minority of developers, did warrant a new syntax and that decision is still seen as sound. 
 
-As such syntax should be considered here. 
+Taken together this means syntax should be considered.
 
 A rough sketch of the syntax would be: 
 
@@ -851,19 +849,18 @@ escapes struct S
 
 ### Take the breaking change
 <a name="breaking"></a>
-This design is predicated on the idea that the language must remain fully compatible with the existing span safety rules. This results in a sub-optimal design for the new features to support existing APIs that are very small in number and in several cases simply designed incorrectly. Effectively this design puts more burden on correct APIs to support legacy flaws in older ones.
+This design is predicated on the idea that the language must remain fully compatible with the existing span safety rules. This results in a sub-optimal design for the new features to support existing APIs that are likely small in number and in several cases simply designed incorrectly. Effectively this design puts more burden on correct APIs to support legacy flaws in older ones.
 
 Consider for a minute where the design was approached from the other direction: APIs with `ref` fields have the ideal state and burden is placed on developers with incorrect APIs to fix them up when compiling for C# 11. This compat break would take primarily two forms:
 
-* A `ref` parameter on method returning a `ref struct` would be considered `[RefFieldsEscaped]`.
+* A `ref` parameter on method returning a `ref struct` would be considered `[RefFieldsEscape]`.
 * A `out` parameter would be considered `ref-safe-to-escape` within the current method.
 
 This change would impact methods that have the following properties:
 
-- Have a `Span<T>` or `ref struct` which has a `Span<T>` as
-    - The return type 
-    - A `ref` or `out` parameter
-- Take a `ref`, `in` or `out` parameter 
+- Have a `Span<T>` or `ref struct`
+    - Where the `ref struct` is a return type, `ref` or `out` parameter
+    - Has an additional `in` or `ref` parameter
 
 To understand the impact it's helpful to break APIs into categories:
 
@@ -902,6 +899,18 @@ Span<int> Method()
 ```
 
 Imagine if the order here is `Widget.Library.dll` moved to C# 11 first. That implicitly moved `CreateSpan` to `[RefFieldEscapes]` behavior silently. The code was legal before hence the move to the new rules will silently succeed. A new version is shipped to NuGet.org. Now the App.exe author upgrades to the new version and suddenly they cannot compile. The compiler operating by the new rules says `span` is only *safe-to-escape* to the current method and flags the `return` as an error. The author of App.exe is stuck because the fix is for `CreateSpan` to be marked as `[RefFieldDoesNotEscape]`. The only recourse is `unsafe` APIs.
+
+This would also have an impact on APIs that have `out` parameters and attempt to return them as `ref`. For example:
+
+```c#
+ref T StrangeIdentity<T>(out T value)
+{
+    value = ...;
+    return ref value;
+}
+```
+
+This is an unlikely combination and the language could benefit strongly by considering `out` parameters as not returnable by `ref`. 
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
