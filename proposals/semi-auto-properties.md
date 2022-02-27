@@ -125,8 +125,61 @@ The following changes are to be made to [§14.7.4](https://github.com/dotnet/csh
 1. If a type does have an existing accessible `field` symbol in scope (like a field called `field`) should there be any way for an auto-prop to still use `field` internally to both create and refer to an auto-prop field.  Under the current rules there is no way to do that.  This is certainly unfortunate for those users, however this is ideally not a significant enough issue to warrant extra dispensation.  The user, after all, can always still write out their properties like they do today, they just lose out from the convenience here in that small case.
 
 2. Should initializers use the backing field or the property setter? If the latter, what about `public int P { get => field; } = 5;`?
+
     * Calling a setter for an initializer is not an option because initializers are processed before calling base constructor and it is illegal to call any instance method before the base constructor is called.
-    * If we say that initializer assigns directly to the backing field. If there is a setter, then we are getting into a situation when initializer does one thing and an assignment to the property within constructor does a different thing (calls the setter). A behavior like that can be a trap for a user. Today, there is no semantical difference between an initializer and an assignment in constructor when both are allowed. This invariant will be broken. However, people are changing between the forms often.
+
+    * If the initializer assigns directly to the backing field when there is a setter, then the initializer does one thing and an assignment to the property within constructors does a different thing (calls the setter). Today there is already a semantic difference between an initializer and an assignment in constructors in such cases. This difference can be observed with virtual auto properties:
+
+      ```cs
+      using System;
+
+       // Nothing is printed; the property initializer is not
+       // equivalent to `this.IsActive = true`.
+      _ = new Derived();
+
+      class Base
+      {
+          public virtual bool IsActive { get; set; } = true;
+      }
+
+      class Derived : Base
+      {
+          public override bool IsActive
+          {
+              get => base.IsActive;
+              set
+              {
+                  base.IsActive = value;
+                  Console.WriteLine("This will not be called");
+              }
+          }
+      }
+      ```
+
+    * There is a practical benefit when initializers skip calling the setter. It allows users of the language to choose whether to invoke the setter or not (constructor assignment or property initializer). If property initializers call the setter, this choice is taken away. Allowing language users to make this choice means that the `field` feature would be able to be used in more scenarios.
+
+      One example of this is view models. The `field` keyword will  find a lot of its use with view models because of the neat solution it brings for the `INotifyPropertyChanged` pattern. View model property setters are likely to be databound to UI and likely to cause change tracking or trigger other behaviors. Consider the following example which needs to initialize the default value of `Foo` without setting `HasPendingChanges` to `true`. If initializers call the setter, using the `field` keyword would not be an option or would require setting `HasPendingChanges` back to false in the constructor(s) which feels like a workaround: unnecessary work is being done which also leaves behind a "mess" which needs to be manually reversed, if the property initializer calls the setter.
+
+      ```cs
+      using System.Runtime.CompilerServices;
+
+      class SomeViewModel
+      {
+          public bool HasPendingChanges { get; private set; }
+
+          public int Foo { get; set => Set(ref field, value); } = 1;
+
+          private bool Set<T>(ref T location, T value)
+          {
+              if (RuntimeHelpers.Equals(location, value)) return false;
+              location = value;
+              HasPendingChanges = true;
+              return true;
+          }
+      }
+      ```
+
+    * A preexisting expectation may exist as a result of refactoring to and from auto properties. Some language users turn field initializers into property initializers and vice versa rather than moving the initialization far away from the field declaration into the constructor(s). This forms a mental model that is consistent with how the language already behaves with virtual auto properties. (See the virtual auto property example above.)
 
 3. Definite assignment related questions:
     - https://github.com/dotnet/csharplang/issues/5563
