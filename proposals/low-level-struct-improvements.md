@@ -876,11 +876,13 @@ This holds together but does require us to extend the syntax for locals a bit.  
 Example of where this would be beneficial: https://github.com/dotnet/runtime/pull/34149
 
 ### To use modreqs or not
-A decision needs to be made if methods marked with new life time attributes should or should not contain a `modreq`. The target of the `modreq` would simply be the attribute in question. Or there would be a single attribute, `System.Runtime.CompilerServices.LifetimeAnnotations`, for which a `modreq` is added if any of the lifetime attributes are used. 
+A decision needs to be made if methods marked with new lifetime attributes should or should not translate to `modreq` in emit. There would be effectively a 1:1 mapping between annotations and `modreq` if this approach was taken.
 
-The rationale for adding a `modreq` is the attributes change the semantics of span safety. Only languages which understand these semantics should be calling the methods in question. 
+The rationale for adding a `modreq` is the attributes change the semantics of span safety. Only languages which understand these semantics should be calling the methods in question. Further when applied to OHI scenarios, the lifetimes become a contract that all derived methods must implement. Having the annotations exist without `modreq` can lead to situations where `virtual` method chains with conflicting lifetime annotations are loaded (can happen if only one part of `virtual` chain is compiled and other is not). 
 
-The worry is whether or not this is overkill. No `modreq` were used in the initial span safety work and instead the framework relied on languages understanding and implementing the new rules. In cases like `[RefThisEscapes]` on a `struct` declaration would result in every single member having a `modreq`. It's questionable if that is worth the trade off
+The initial span safety work did not use `modreq` but instead relied on languages and the framework to understand. At the same time though all of the elements that contribute to the span safety rules are a strong part of the method signature: `ref`, `in`, `ref struct`, etc ... Hence any change to the existing rules of a method already results in a binary change to the signature. To give the new lifetime annotations the same impact they will need `modreq` enforcement.
+
+The concern is whether or not this is overkill. It does have the negative impact that making signatures more flexible, by say adding `[DoesNotEscape]` to a paramater, will result in a binary compat change. That trade off means that over time frameworks like BCL likely won't be able to relax such signatures. It could be mitigated to a degree by taking some approach the language does with `in` parameters and only apply `modreq` in virtual positions. 
 
 ### Allow multi-dimensional fixed buffers
 Should the design for `fixed` buffers be extended to include multi-dimensional style arrays? Essentially allowing for declarations like the following:
