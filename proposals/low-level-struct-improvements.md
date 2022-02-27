@@ -780,13 +780,6 @@ The backing storage for the buffer will be generated using the `[InlineArray]` a
 
 ## Considerations
 
-### Keywords vs. attributes
-This design calls for using attributes to annotate the new lifetime rules. This also could've been done just as easily with contextual keywords. For instance: `scoped` and `escapes` could have been used instead of `DoesNotEscape` and `RefThisEscapes`.
-
-Keywords, even the contextual ones, have a much heavier weight in the language than attributes. The use cases these features solve, while very valuable, impact a small number of developers. Consider that only a fraction of high end developers are defining `ref struct` instances and then consider that only a fraction of those developers will be using these new lifetime features.  That doesn't seem to justify adding a new contextual keyword to the language.
-
-This does mean that program correctness will be defined in terms of attributes though. That is a bit of a gray area for the language side of things but an established pattern for the runtime. 
-
 ### Why do we need [RefFieldEscapes]?
 The biggest challenge posed by the [compat considerations](#compat-considerations) is that methods cannot capture and return `ref` parameters as `ref` fields. This is a hard assumption in the rules and there are many API patterns today that take advantage of this. In order to have methods that capture `ref` parameters as `ref` fields there must be some form of explicit opt-in that is visible to calling methods.
 
@@ -823,6 +816,14 @@ ref struct S<T> {
 ```
 
 ## Open Issues
+
+### Keywords vs. attributes
+This design calls for using attributes to annotate the new lifetime rules. This also could've been done just as easily with contextual keywords. For instance: `scoped` and `escapes` could have been used instead of `DoesNotEscape` and `RefThisEscapes`.
+
+Keywords, even the contextual ones, have a much heavier weight in the language than attributes. The use cases these features solve, while very valuable, impact a small number of developers. Consider that only a fraction of high end developers are defining `ref struct` instances and then consider that only a fraction of those developers will be using these new lifetime features.  That doesn't seem to justify adding a new contextual keyword to the language.
+
+This does mean that program correctness will be defined in terms of attributes though. That is a bit of a gray area for the language side of things but an established pattern for the runtime. 
+
 
 ### Take the breaking change
 Consider for a minute a design where the compat problem was approached from the other direction. Effectively make it such that every method was implicitly `[RefFieldsEscape]` and then have an attribute that restores the span safety rules in place today. Say `[RefFieldDoesNotEscape]`. 
