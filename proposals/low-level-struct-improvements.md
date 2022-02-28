@@ -780,13 +780,6 @@ The backing storage for the buffer will be generated using the `[InlineArray]` a
 
 ## Considerations
 
-### Keywords vs. attributes
-This design calls for using attributes to annotate the new lifetime rules. This also could've been done just as easily with contextual keywords. For instance: `scoped` and `escapes` could have been used instead of `DoesNotEscape` and `RefThisEscapes`.
-
-Keywords, even the contextual ones, have a much heavier weight in the language than attributes. The use cases these features solve, while very valuable, impact a small number of developers. Consider that only a fraction of high end developers are defining `ref struct` instances and then consider that only a fraction of those developers will be using these new lifetime features.  That doesn't seem to justify adding a new contextual keyword to the language.
-
-This does mean that program correctness will be defined in terms of attributes though. That is a bit of a gray area for the language side of things but an established pattern for the runtime. 
-
 ### Why do we need [RefFieldEscapes]?
 The biggest challenge posed by the [compat considerations](#compat-considerations) is that methods cannot capture and return `ref` parameters as `ref` fields. This is a hard assumption in the rules and there are many API patterns today that take advantage of this. In order to have methods that capture `ref` parameters as `ref` fields there must be some form of explicit opt-in that is visible to calling methods.
 
@@ -824,19 +817,69 @@ ref struct S<T> {
 
 ## Open Issues
 
+### Keywords vs. attributes
+This design calls for using attributes to annotate the new lifetime rules. This also could've been done just as easily with contextual keywords. For instance `[DoesNotEscape]` could map to `scoped`. However keywords, even the contextual ones, generally must meet a very high bar for inclusion. They take up valuable language real estate and are more prominent parts of the language. This feature, while valuable, is going to serve a minority of C# developers.
+
+On the surface that would seem to favor not using keywords but there are two important points to consider: 
+
+1. The annotations will effect program semantics. Having attributes impact program semantics is a line C# is reluctant to cross and it's unclear if this is the feature that should justify the language taking that step.
+1. The developers most likely to use this feature intersect strongly with the set of developers that use function pointers. That feature, while also used by a minority of developers, did warrant a new syntax and that decision is still seen as sound. 
+
+Taken together this means syntax should be considered.
+
+A rough sketch of the syntax would be: 
+
+- `[DoesNotEscape]` maps to `scoped` 
+- `[RefThisEscapes]` maps to `escapes`
+- `[RefFieldsEscapes]` maps to `escapes` but attached to the `ref` of the method.
+- `[RefFieldsDoNotEscape]` (assuming the [breaking change](#breaking)) maps to `scoped` on the `ref`
+
+Examples:
+
+```c#
+Span<T> CreateSpan<T>(escapes ref T value) => new Span<T>(value)
+
+escapes struct S 
+{
+    int field;
+
+    ref int Prop => ref field;
+}
+```
+
 ### Take the breaking change
-Consider for a minute a design where the compat problem was approached from the other direction. Effectively make it such that every method was implicitly `[RefFieldsEscape]` and then have an attribute that restores the span safety rules in place today. Say `[RefFieldDoesNotEscape]`. 
+<a name="breaking"></a>
+This design is predicated on the idea that the language must remain fully compatible with the existing span safety rules. This results in a sub-optimal design for the new features to support existing APIs that are likely small in number and in several cases simply designed incorrectly. Effectively this design puts more burden on correct APIs to support legacy flaws in older ones.
 
-This would be a breaking change and it's easy to construct code samples that trigger an error when upgrading to a new version of C# (as demonstrated [here](#new-span-challenges)). It's hard to determine though how prevalent these types of patterns are. Essentially methods which have both the following attributes:
+Consider for a minute where the design was approached from the other direction: APIs with `ref` fields have the ideal state and burden is placed on developers with incorrect APIs to fix them up when compiling for C# 11. This compat break would take primarily two forms:
 
-- Have a `Span<T>` or `ref struct` which has a `Span<T>` as
-    - The return type 
-    - A `ref` or `out` parameter
-- Take a `ref`, `in` or `out` parameter 
+* A `ref` parameter on method returning a `ref struct` would be considered `[RefFieldsEscape]`.
+* A `out` parameter would be considered `ref-safe-to-escape` within the current method.
 
-If this is very low then it's possible that a breaking change could be acceptable here. 
+This change would impact methods that have the following properties:
 
-The challenge though is the breaking change and the fix for the breaking change are possible in different libraries. Consider the following:
+- Have a `Span<T>` or `ref struct`
+    - Where the `ref struct` is a return type, `ref` or `out` parameter
+    - Has an additional `in` or `ref` parameter
+
+To understand the impact it's helpful to break APIs into categories:
+
+1. Want consumers to account for `ref` being captured as a `ref` field. Prime example is the `Span(ref T value)` constructors 
+2. Do not want consumers to account for `ref` being captured as a `ref` field. These though break into two catogries
+    1. Unsafe APIs. These are APIS inside the `Unsafe` and `MemoryMarshal` types, of which `MemoryMarshal.CreateSpan` is the most prominent. These APIs do capture the `ref` unsafely but they are also known to be unsafe APIs. 
+    2. Safe APIs. These are APIs which take `ref` parameters for efficiency but it is not actually captured anywhere. Examples are small but one is `AsnDecoder.ReadEnumeratedBytes`
+
+This change primarily benefits (1) above. These are expected to make up the majority of APIs that take a `ref` and return a `ref struct` going forward. The changes negatively impact (2.1) and (2.2) as it breaks the existing calling semantics because the lifetime rules change. 
+
+The APIs in category (2.1) though are largely authored by Microsoft or by developers who stand the most to benefit from `ref` fields (the Tanner's of the world). It is reasonable to assume this class of developers would be ammenable to a compatability tax on upgrade to C# 11 in the form of a few annotations to retain the existing semantics if `ref` fields were provided in return.
+
+The APIs in category (2.2) are the biggest issue. It is unknown how many such APIs exist and it's unclear if these would be more / less frequent in 3rd party code. The expectation is there is a very small number of them, particularly if we take the compat break on `out`. Searches so far have revealed a very small number of these existing in `public` surface area. This is a hard pattern to search for though as it requires semantic analysis. Before taking this change a tool based approach would be needed to verify the assumptions around this impacting a small number of known cases.
+
+For both cases in category (2) though the language and runtime APIs would need to provide mechanisms for developers to restore APIs to the original lifetime semantics. As well as getting code out of lifetime jams that caused if APIs don't upgrade correctly. That should be straight forward to accomplish as well as providing guides for how to map old cases to new ones. 
+
+Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `[RefFieldsDoNotEscape]` / `scoped`. 
+
+The challenge to keep in mind with respect to compat is thi breaking change and the impact of the breaking change can appear in different libraries. Consider the following:
 
 ```c#
 // Widget.Library.dll
@@ -855,7 +898,19 @@ Span<int> Method()
 }
 ```
 
-Imagine if the order here is `Widget.Library.dll` moved to C# 11 first. That implicitly moved `CreateSpan` to `[RefFieldEscapes]` behavior silently. The code was legal before hence the move to the new rules will silently succeed. A new version is shipped to NuGet.org. Now the App.exe author upgrades to the new version and suddenly they cannot compile. The compiler operating by the new rules says `span` is only *safe-to-escape* to the current method and flags the `return` as an error. The author of App.exe is stuck because the fix is for `CreateSpan` to be marked as `[RefFieldDoesNotEscape]`. The only recourse is `unsafe` code.
+Imagine if the order here is `Widget.Library.dll` moved to C# 11 first. That implicitly moved `CreateSpan` to `[RefFieldEscapes]` behavior silently. The code was legal before hence the move to the new rules will silently succeed. A new version is shipped to NuGet.org. Now the App.exe author upgrades to the new version and suddenly they cannot compile. The compiler operating by the new rules says `span` is only *safe-to-escape* to the current method and flags the `return` as an error. The author of App.exe is stuck because the fix is for `CreateSpan` to be marked as `[RefFieldDoesNotEscape]`. The only recourse is `unsafe` APIs.
+
+This would also have an impact on APIs that have `out` parameters and attempt to return them as `ref`. For example:
+
+```c#
+ref T StrangeIdentity<T>(out T value)
+{
+    value = ...;
+    return ref value;
+}
+```
+
+This is an unlikely combination and the language could benefit strongly by considering `out` parameters as not returnable by `ref`. 
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
@@ -876,11 +931,13 @@ This holds together but does require us to extend the syntax for locals a bit.  
 Example of where this would be beneficial: https://github.com/dotnet/runtime/pull/34149
 
 ### To use modreqs or not
-A decision needs to be made if methods marked with new life time attributes should or should not contain a `modreq`. The target of the `modreq` would simply be the attribute in question. Or there would be a single attribute, `System.Runtime.CompilerServices.LifetimeAnnotations`, for which a `modreq` is added if any of the lifetime attributes are used. 
+A decision needs to be made if methods marked with new lifetime attributes should or should not translate to `modreq` in emit. There would be effectively a 1:1 mapping between annotations and `modreq` if this approach was taken.
 
-The rationale for adding a `modreq` is the attributes change the semantics of span safety. Only languages which understand these semantics should be calling the methods in question. 
+The rationale for adding a `modreq` is the attributes change the semantics of span safety. Only languages which understand these semantics should be calling the methods in question. Further when applied to OHI scenarios, the lifetimes become a contract that all derived methods must implement. Having the annotations exist without `modreq` can lead to situations where `virtual` method chains with conflicting lifetime annotations are loaded (can happen if only one part of `virtual` chain is compiled and other is not). 
 
-The worry is whether or not this is overkill. No `modreq` were used in the initial span safety work and instead the framework relied on languages understanding and implementing the new rules. In cases like `[RefThisEscapes]` on a `struct` declaration would result in every single member having a `modreq`. It's questionable if that is worth the trade off
+The initial span safety work did not use `modreq` but instead relied on languages and the framework to understand. At the same time though all of the elements that contribute to the span safety rules are a strong part of the method signature: `ref`, `in`, `ref struct`, etc ... Hence any change to the existing rules of a method already results in a binary change to the signature. To give the new lifetime annotations the same impact they will need `modreq` enforcement.
+
+The concern is whether or not this is overkill. It does have the negative impact that making signatures more flexible, by say adding `[DoesNotEscape]` to a paramater, will result in a binary compat change. That trade off means that over time frameworks like BCL likely won't be able to relax such signatures. It could be mitigated to a degree by taking some approach the language does with `in` parameters and only apply `modreq` in virtual positions. 
 
 ### Allow multi-dimensional fixed buffers
 Should the design for `fixed` buffers be extended to include multi-dimensional style arrays? Essentially allowing for declarations like the following:
