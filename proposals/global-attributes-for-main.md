@@ -1,4 +1,4 @@
-# Attribute target for Main
+# Attribute target for Simple programs
 
 ## Summary
 
@@ -22,7 +22,7 @@ their main method `partial`.
 
 A new global attribute target `main` will be recognized alongside `assembly` and
 `module`, that allows an attribute to specify it should be attached to the
-entrypoint of the program.
+entrypoint of a simple / top level program.
 
 For example:
 
@@ -33,21 +33,23 @@ For example:
 Can be placed in any syntax tree of the compilation, and the `[STAThread]`
 attribute will be attached the entrypoint of the program.
 
-Both top level statements and regular entrypoints are supported by the attribute
-target. In the case of multiple entrypoints the attribute will only apply to the
-first chosen location.
+Only simple program entrypoints are supported. In the case of multiple
+entrypoints the attribute will only apply to the first chosen location.
 
-### Assemblies with no Entry Point
+### Assemblies with no top level statements
 
-It is an error to use the `main` target location for an attribute in an assembly
-with no entry point (e.g. a class library).
+It is an error to use the `[main:` target in a program that has no top level
+statements. This includes assemblies with no entry point (e.g. a class library)
+or a program with a regular entrypoint (e.g. `static void Main()`).
 
 ### Attribute locations
 
 There is no new
 [`AttributeTargets`](https://docs.microsoft.com/en-us/dotnet/api/system.attributetargets?view=net-6.0)
 enum value defined as part of this proposal, and it is an error to prefix an
-attribute with `[main:` that has any target other than `All` or `Method`.
+attribute with `[main:` that has a target where the `AttributeTargets.Method`
+flag is not set (e.g.
+`(target & AttributeTargets.Method) != AttributeTargets.Method`)
 
 The
 [`AllowMultiple`](https://docs.microsoft.com/en-us/dotnet/api/system.attributeusageattribute.allowmultiple?view=net-6.0)
@@ -99,9 +101,10 @@ simple programs.
 If we decide *not* to support source generation scenarios, then we could limit
 the syntactic location to be required to be in the top level syntax tree itself.
 
-A further alternative would be to loosen the restrictions on source generators
-and allow them to apply attributes to *any* method, regardless of its partial
-status. This would need some level of language design not considered here.
+An alternative solution would be to have the simple program entry point assigned
+a well-know speakable identifier, and make it `partial` by default. This would
+allow a generator to create the matching partial definition that includes the
+attribute.
 
 ### Naming
 
