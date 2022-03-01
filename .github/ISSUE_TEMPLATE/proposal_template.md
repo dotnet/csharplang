@@ -14,6 +14,7 @@ New language feature proposals should fully fill out this template. This should 
 * [ ] Prototype: Not Started
 * [ ] Implementation: Not Started
 * [ ] Specification: Not Started
+* [ ] Feature docs: Not Started
 
 ## Summary
 [summary]: #summary
