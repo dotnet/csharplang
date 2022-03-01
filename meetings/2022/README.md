@@ -8,7 +8,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Schedule when convenient
 
 - Feedback on `!!` (*After design review and MVP Summit*): https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
-
+- Ambiguity of `..` in collection literals.  Reconsider syntax for list patterns.
+- 
 ## Recurring topics
 
 - *Triage championed features and milestones*
