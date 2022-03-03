@@ -90,11 +90,41 @@ Unary `checked operators` follow the rules from [§14.10.2](https://github.com/d
 
 Also, a `checked operator` declaration requires a pair-wise declaration of a `regular operator` (the return type should match as well). A compile-time error occurs otherwise. 
 
+``` C#
+public struct Int128
+{
+    // This is fine, both a checked and regular operator are defined
+    public static Int128 operator checked -(Int128 lhs);
+    public static Int128 operator -(Int128 lhs);
+
+    // This is fine, only a regular operator is defined
+    public static Int128 operator --(Int128 lhs);
+
+    // This should error, a regular operator must also be defined
+    public static Int128 operator checked ++(Int128 lhs);
+}
+```
+
 ### Binary operators
 
 Binary `checked operators` follow the rules from [§14.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14103-binary-operators).
 
 Also, a `checked operator` declaration requires a pair-wise declaration of a `regular operator` (the return type should match as well). A compile-time error occurs otherwise. 
+
+``` C#
+public struct Int128
+{
+    // This is fine, both a checked and regular operator are defined
+    public static Int128 operator checked +(Int128 lhs, Int128 rhs);
+    public static Int128 operator +(Int128 lhs, Int128 rhs);
+
+    // This is fine, only a regular operator is defined
+    public static Int128 operator -(Int128 lhs, Int128 rhs);
+
+    // This should error, a regular operator must also be defined
+    public static Int128 operator checked *(Int128 lhs, Int128 rhs);
+}
+```
 
 ### Unary operator overload resolution
 
@@ -441,27 +471,6 @@ Alternatively the operator names could be *op_UnaryNegationChecked*, *op_Additio
 *op_MultiplyChecked*, *op_DivisionChecked*, with *Checked* at the end. However, it looks like there is already a pattern
 established to end the names with the operator word. For example, there is a *op_UnsignedRightShift* operator rather than
 *op_RightShiftUnsigned* operator.
-
-### Require definition of corresponding `regular operator`
-
-The compiler could require that if a `checked operator` is defined, a corresponding `regular operator` is also defined.
-For example:
-``` C#
-public struct Int128
-{
-    // This is fine, both a checked and regular operator are defined
-    public static Int128 operator checked +(Int128 lhs, Int128 rhs);
-    public static Int128 operator +(Int128 lhs, Int128 rhs);
-
-    // This is fine, only a regular operator is defined
-    public static Int128 operator -(Int128 lhs, Int128 rhs);
-
-    // This should error, a regular operator must also be defined
-    public static Int128 operator checked *(Int128 lhs, Int128 rhs);
-}
-```
-
-However, it feels like it should be fine to define only a checked flavor.
 
 ### `Checked operators` are inapplicable in an `unchecked` context
 
@@ -956,6 +965,17 @@ class C2 : C1
     public static C2 operator checked + (C2 x, byte y) => new C2();
 }
 ```
+#### Processing of user-defined explicit conversions 
+
+The third bullet in [§10.5.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1055-user-defined-explicit-conversions):
+>*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+
+will be replaced with the following bullet points:
+*  Find the set of applicable user-defined and lifted explicit conversion operators, `U0`. This set consists of the user-defined and lifted explicit conversion operators declared by the classes or structs in `D` **in their checked and regular forms in `checked` evaluation context and only in their regular form in `unchecked` evaluation context** and convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`.
+*  If `U0` contains at least one operator in checked form, all operators in regular form are removed from the set.
+*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of operators from `U0`, and the user-defined and lifted implicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+
+The Checked and unchecked operators [§11.7.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11718-the-checked-and-unchecked-operators) section will be adjusted to reflect the effect that the checked/unchecked context has on processing of user-defined explicit conversions.
 
 ### Checked vs. unchecked context within a `checked operator`
 
