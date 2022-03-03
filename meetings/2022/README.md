@@ -9,7 +9,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Feedback on `!!` (*After design review and MVP Summit*): https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
 - Ambiguity of `..` in collection literals.  Reconsider syntax for list patterns.
-- 
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -26,6 +26,9 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Mar 14, 2022
 
 ## Mar 9, 2022
+
+- 
+- `[main:...]` attributes (Chris): https://github.com/dotnet/csharplang/pull/5817
 
 ## Mar 7, 2022
 
