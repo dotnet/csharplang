@@ -776,5 +776,6 @@ Approved - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-07.md
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-14.md
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-23.md
 
 
