@@ -84,7 +84,7 @@ For a *disjunctive_pattern* *p* of the form `left or right`, the definite assign
 - The state of *v* after *p* is "definitely assigned when true" if the state of *v* after both *left* and *right* is "definitely assigned when true".
 - The state of *v* after *p* is "definitely assigned when false" if the state of *v* after either *left* or *right* is "definitely assigned when false".
 
-For a *conjunctive_pattern* *p*  of the form `left and right`, the definite assignment state of *v* is determined by:
+For a *conjunctive_pattern* *p* of the form `left and right`, the definite assignment state of *v* is determined by:
 - The state of *v* before *right* is definitely assigned if and only if the state of *v* after *left* is "definitely assigned when true".
 - The state of *v* after *p* is "definitely assigned when true" if the state of *v* after either *left* or *right* is "definitely assigned when true".
 - The state of *v* after *p* is "definitely assigned when false" if the state of *v* after both *left* and *right* is "definitely assigned when false".
