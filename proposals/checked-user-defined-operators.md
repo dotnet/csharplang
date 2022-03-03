@@ -88,9 +88,13 @@ implementing checked explicit conversion operator.
 
 Unary `checked operators` follow the rules from [§14.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14102-unary-operators).
 
+Also, a `checked operator` declaration requires a pair-wise declaration of a `regular operator` (the return type should match as well). A compile-time error occurs otherwise. 
+
 ### Binary operators
 
 Binary `checked operators` follow the rules from [§14.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14103-binary-operators).
+
+Also, a `checked operator` declaration requires a pair-wise declaration of a `regular operator` (the return type should match as well). A compile-time error occurs otherwise. 
 
 ### Unary operator overload resolution
 
@@ -308,7 +312,10 @@ class C2 : C1
 ### Conversion operators
 
 Conversion `checked operators` follow the rules from [§14.10.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14104-conversion-operators).
-However, the following paragraph 
+
+However, a `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise. 
+
+The following paragraph 
 >The signature of a conversion operator consists of the source type and the target type. (This is the only form of member for which the return type participates in the signature.) The implicit or explicit classification of a conversion operator is not part of the operator's signature. Thus, a class or struct cannot declare both an implicit and an explicit conversion operator with the same source and target types.
 
 will be adjusted to allow a type to declare checked and regular forms of explicit conversions with the same source and target types.
@@ -776,5 +783,6 @@ Approved - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-07.md
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-14.md
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-23.md
 
 
