@@ -126,34 +126,23 @@ public struct Int128
 }
 ```
 
-### Unary operator overload resolution
-
-The first bullet in section [§11.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1144-unary-operator-overload-resolution) will be adjusted as follows (additions are in bold).
-*  The set of candidate user-defined operators provided by `X` for the operation `operator op(x)` is determined using the rules of [Candidate user-defined operators](checked-user-defined-operators.md#candidate-user-defined-operators). **If the set contains at least one operator in checked form, all operators in regular form are removed from the set.**
-
-The section [§11.7.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11718-the-checked-and-unchecked-operators) will be adjusted to reflect the effect that the checked/unchecked context has on unary operator overload resolution.
-
-### Binary operator overload resolution
-
-The first bullet in section [§11.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1145-binary-operator-overload-resolution) will be adjusted as follows (additions are in bold).
-*  The set of candidate user-defined operators provided by `X` and `Y` for the operation `operator op(x,y)` is determined. The set consists of the union of the candidate operators provided by `X` and the candidate operators provided by `Y`, each determined using the rules of [Candidate user-defined operators](checked-user-defined-operators.md#candidate-user-defined-operators). If `X` and `Y` are the same type, or if `X` and `Y` are derived from a common base type, then shared candidate operators only occur in the combined set once. **If the set contains at least one operator in checked form, all operators in regular form are removed from the set.**
-
-The Checked and unchecked operators [§11.7.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11718-the-checked-and-unchecked-operators) section will be adjusted to reflect the effect that the checked/unchecked context has on binary operator overload resolution.
-
 ### Candidate user-defined operators
 
-The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators section will be adjusted as follows (additions are in bold).
+The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#candidate-user-defined-operators section will be adjusted as follows (additions/changes are in bold).
 
 Given a type `T` and an operation `operator op(A)`, where `op` is an overloadable operator and `A` is an argument list, the set of candidate user-defined operators provided by `T` for `operator op(A)` is determined as follows:
 
 *  Determine the type `T0`. If `T` is a nullable type, `T0` is its underlying type, otherwise `T0` is equal to `T`.
-*  For all `operator op` declarations **in their checked and regular forms in `checked` evaluation context and only in their regular form in `unchecked` evaluation context** in `T0` and all lifted forms of such operators, if at least one operator is applicable ([Applicable function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#applicable-function-member)) with respect to the argument list `A`, then the set of candidate operators consists of all such applicable operators in `T0`.
+*  **Find the set of user-defined operators, `U`. This set consists of:**
+    *  **In `unchecked` evaluation context, all regular `operator op` declarations in `T0`.**
+    *  **In `checked` evaluation context, all checked and regular `operator op` declarations in `T0` except regular declarations that have pair-wise matching `checked operator` declaration.**
+*  For all `operator op` declarations in **`U`** and all lifted forms of such operators, if at least one operator is applicable ([Applicable function member](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#applicable-function-member)) with respect to the argument list `A`, then the set of candidate operators consists of all such applicable operators in `T0`.
 *  Otherwise, if `T0` is `object`, the set of candidate operators is empty.
 *  Otherwise, the set of candidate operators provided by `T0` is the set of candidate operators provided by the direct base class of `T0`, or the effective base class of `T0` if `T0` is a type parameter.
 
-Similar filtering will be applied while determining the set of candidate operators in interfaces https://github.com/dotnet/csharplang/blob/main/meetings/2017/LDM-2017-06-27.md#shadowing-within-interfaces.
+Similar rules will be applied while determining the set of candidate operators in interfaces https://github.com/dotnet/csharplang/blob/main/meetings/2017/LDM-2017-06-27.md#shadowing-within-interfaces.
 
-The https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#the-checked-and-unchecked-operators section will be adjusted to reflect the effect that the checked/unchecked context has on unary and binary operator overload resolution.
+The section [§11.7.18](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11718-the-checked-and-unchecked-operators) will be adjusted to reflect the effect that the checked/unchecked context has on unary and binary operator overload resolution.
 
 #### Example #1:
 ``` C#
@@ -182,7 +171,7 @@ public class MyClass
 
     public static void Divide(Int128 lhs, byte rhs)
     {
-        // Resolves to `op_CheckedDivision`
+        // Resolves to `op_Division` - it is a better match than `op_CheckedDivision`
         Int128 r4 = checked(lhs / rhs);
     }
 }
@@ -194,9 +183,12 @@ public struct Int128
 
     public static Int128 operator -(Int128 lhs, Int128 rhs);
 
+    // Cannot be declared in C#, but could be declared by some other language
     public static Int128 operator checked *(Int128 lhs, Int128 rhs);
 
+    // Cannot be declared in C#, but could be declared by some other language
     public static Int128 operator checked /(Int128 lhs, int rhs);
+
     public static Int128 operator /(Int128 lhs, byte rhs);
 }
 ```
@@ -209,7 +201,7 @@ class C
     {
         object o;
         
-        // C1.op_CheckedAddition
+        // error CS0034: Operator '+' is ambiguous on operands of type 'C2' and 'C3'
         o = checked(x + y);
         
         // C2.op_Addition
@@ -219,6 +211,7 @@ class C
 
 class C1
 {
+    // Cannot be declared in C#, but could be declared by some other language
     public static C1 operator checked + (C1 x, C3 y) => new C3();
 }
 
@@ -240,7 +233,7 @@ class C
     {
         object o;
         
-        // C2.op_CheckedAddition
+        // error CS0034: Operator '+' is ambiguous on operands of type 'C2' and 'C3'
         o = checked(x + y);
         
         // C1.op_Addition
@@ -255,87 +248,12 @@ class C1
 
 class C2 : C1
 {
+    // Cannot be declared in C#, but could be declared by some other language
     public static C2 operator checked + (C2 x, C1 y) => new C2();
 }
 
 class C3 : C1
 {
-}
-```
-
-#### Example #4:
-``` C#
-class C
-{
-    static void Add(C2 x, byte y)
-    {
-        object o;
-        
-        // C2.op_Addition
-        o = checked(x + y);
-        
-        // C2.op_Addition
-        o = unchecked(x + y);
-    }
-
-    static void Add2(C2 x, int y)
-    {
-        object o;
-        
-        // C2.op_Addition
-        o = checked(x + y);
-        
-        // C2.op_Addition
-        o = unchecked(x + y);
-    }
-}
-
-class C1
-{
-    public static C1 operator checked + (C1 x, byte y) => new C1();
-}
-
-class C2 : C1
-{
-    public static C2 operator + (C2 x, int y) => new C2();
-}
-```
-
-#### Example #5:
-``` C#
-class C
-{
-    static void Add(C2 x, byte y)
-    {
-        object o;
-        
-        // C2.op_CheckedAddition
-        o = checked(x + y);
-        
-        // C1.op_Addition
-        o = unchecked(x + y);
-    }
-
-    static void Add2(C2 x, int y)
-    {
-        object o;
-        
-        // C1.op_Addition
-        o = checked(x + y);
-        
-        // C1.op_Addition
-        o = unchecked(x + y);
-    }
-}
-
-class C1
-{
-    public static C1 operator + (C1 x, int y) => new C1();
-}
-
-class C2 : C1
-{
-    public static C2 operator checked + (C2 x, byte y) => new C2();
 }
 ```
 
