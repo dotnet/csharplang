@@ -93,3 +93,11 @@ For a *negated_pattern* *p* of the form `not pattern`, the definite assignment s
 - If the state of *v* after *pattern* is "definitely assigned when false", then the state of *v* after *p* is "definitely assigned when true".
 
 These rules cover the existing top-level `is not` pattern variables. However, in any other scenario the variables could be left unassigned.
+
+## Unresolved questions
+- Should the redeclaration rules work in nested scopes?
+	```cs
+	if (e is C c) return;
+	if (e is C c) return; // allowed
+	{ if (e is C c) return; } // allowed?
+	```
