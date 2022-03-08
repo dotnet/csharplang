@@ -1,2 +1,0 @@
-* change the ref field assignment rules to account for changes
-* note that Rikki's proposal is going to need adjustment with this change.

@@ -789,12 +789,12 @@ escapes struct S
 <a name="breaking"></a>
 This section explores what the design would be if limited compat breaks were allowed. The advantage of the breaks is a simplification of the lifetime rules and allowing for more "correct by construction" API designs. This section will use syntax vs. attributes as that is preferred by those who also favor limited compat breaks.
 
-In brief the two proposed compat changes are:
+In brief, the two proposed compat changes are:
 
 * A `ref` parameter on method returning a `ref struct` would be capturable as a `ref` field
-* A `out` parameter would be considered `ref-safe-to-escape` within the current method.
+* A `out` parameter would be considered `ref-safe-to-escape` within the *current method*.
 
-In this design a `ref` field in a constructor can be effectively ref reassigned to any value that is *ref-safe-to-escape* to the *calling method*. Specifically the rules for `ref` reassignment will be adjusted to account for `ref` fields as follows:
+In this design a `ref` field in a constructor can be effectively ref reassigned to any value that is *ref-safe-to-escape* to the *calling method*. Specifically the rules for ref reassignment will be adjusted to account for `ref` fields as follows:
 
 > For a ref reassignment in the form ...
 > 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
@@ -811,7 +811,7 @@ Span(ref T value)
 }
 ```
 
-The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or a value and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the current method. For example: 
+The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or a value and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the *current method*. For example: 
 
 | Parameter | ref-safe-to-escape | safe-to-escape |
 |---|---|---|
@@ -823,7 +823,7 @@ The keyword `scoped` will be used to restrict the lifetime of a value. It can be
 
 The declaration `scoped ref scoped Span<int>` is allowed but is redundant with `ref scoped Span<int>`. The *ref-safe-to-escape* of a value can never exceed the *safe-to-escape* hence once the *safe-to-escape* is restricted via `ref scoped` the *ref-safe-to-escape* is implicitly restricted.
 
-This also means that the `this` parameter of a `struct` can now be completely expressed as `scoped ref T`. Previously it had to be special cased as a `ref T` that had different *ref-safe-to-escape* rules than other `ref`. 
+This also means that the `this` parameter of a `struct` can now be completely expressed as `scoped ref T`. Previously it had to be special cased as a `ref T` that had different *ref-safe-to-escape* rules than other `ref`. Now it can be expressed as a general concept vs. being a special cased item.
 
 These annotations can be applied to locals as well as parameters and have the same impact to lifetimes. They cannot be applied to any other location including fields, array elements, etc ... Further while `scoped` can be applied to any `ref` or `in` it can only be applied to values which are `ref struct`. Having `scoped int` adds no value to the rules and will be prevented to avoid confusion.
 
@@ -843,8 +843,8 @@ This small compat change reduces the overall compat impact of this change. The a
 
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
 
-> If `p` is `scoped ref` or `scoped in` then `a` does not contribute *ref-safe-to-escape* to the arguments
-> If `p` is `scoped` then `a` does not contribute *safe-to-escape* to the arguments. Note that `ref scoped` is included here as the value is `scoped`
+> If `p` is `scoped ref` or `scoped in` then `a` does not contribute *ref-safe-to-escape* when considering arguments
+> If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. Note that `ref scoped` is included here as the value is `scoped`
 
 The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime (the `scoped` prevents it).
 
@@ -879,13 +879,31 @@ Span<int> CreateAndCapture(ref int value)
     // of the ref argument. That is the calling method for value hence this is not allowed.
     return new Span<int>(value)
 }
+
+Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
+{
+    // Okay: the safe-to-escape of `span` is *calling method* hence this is legal.
+    return span;
+
+    // Okay: the parameter here is `scoped ref` hence `refLocal` does not contribute /
+    // ref-safe-to-escape, it only contributes safe-to-escape. That is *calling method* 
+    // hence this is legal.
+    Span<int> local = default;
+    ref Span<int> refLocal = ref local;
+    return ComplexScopedRefExample(ref refLocal);
+
+    // Error: similar analysis as above but the safe-to-escape scope of `stackLocal` is 
+    // *current method* hence this is illegal
+    Span<int> stackLocal = stackalloc int[42];
+    return ComplexScopedRefExample(ref stackLocal);
+}
 ```
 
 These compat changes would impact methods that have the following properties:
 
 - Have a `Span<T>` or `ref struct`
     - Where the `ref struct` is a return type, `ref` or `out` parameter
-    - Has an additional `in` or `ref` parameter
+    - Has an additional `in` or `ref` parameter excluding the receiver
 
 To understand the impact it's helpful to break APIs into categories:
 
@@ -904,7 +922,7 @@ For both cases in category (2) though the fix is rather straight forward. The `r
 
 Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `scoped ref` instead. 
 
-The challenge to keep in mind with respect to compat is thi breaking change and the impact of the breaking change can appear in different libraries. Consider the following:
+The challenge to keep in mind with respect to compat is this breaking change and the impact of the breaking change can appear in different libraries. Consider the following:
 
 ```c#
 // Widget.Library.dll
@@ -936,6 +954,8 @@ ref T StrangeIdentity<T>(out T value)
 ```
 
 This is an unlikely combination and the language could benefit strongly by considering `out` parameters as not returnable by `ref`. 
+
+Consideration was given in this section to also taking a breaking change for *ref-safe-to-escape* defaults for `this` on a `struct`. Specifically considering changing it to be `ref T` vs. `scoped ref T`. That has the advantage that there is no need for the `escapes` keyword anymore as every has maximum return as the default hence only `scoped` is needed to restrict the behavior. The impact of this change is far more significant. It impacts all `struct` instances that have a `ref` returning method which is likely too big off a surface area to take a casual break to.
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
