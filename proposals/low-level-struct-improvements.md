@@ -195,7 +195,7 @@ ref struct RS
         // Error: This is the same analysis as above but in this case `p2` is not 
         // [RefFieldsEscape] hence the return of the constructor is safe-to-escape to
         // the current method (rule 3 above)
-        return new RS(ref p1);
+        return new RS(ref p2);
 
         // Error: This is the same analysis as above and once again by rule 3 is 
         // only safe-to-escape to the current method
@@ -825,7 +825,7 @@ The declaration `scoped ref scoped Span<int>` is allowed but is redundant with `
 
 This also means that the `this` parameter of a `struct` can now be completely expressed as `scoped ref T`. Previously it had to be special cased as a `ref T` that had different *ref-safe-to-escape* rules than other `ref`. Now it can be expressed as a general concept vs. being a special cased item.
 
-These annotations can be applied to locals as well as parameters and have the same impact to lifetimes. They cannot be applied to any other location including fields, array elements, etc ... Further while `scoped` can be applied to any `ref` or `in` it can only be applied to values which are `ref struct`. Having `scoped int` adds no value to the rules and will be prevented to avoid confusion.
+These annotations can be applied to locals as well as parameters and have the same impact to lifetimes. They cannot be applied to any other location including fields, array elements, etc ... Further while `scoped` can be applied to any `ref` or `in` it can only be applied to by-values which are `ref struct`. Having `scoped int` adds no value to the rules and will be prevented to avoid confusion.
 
 The first compat change will be that `out` parameters will be considered as `scoped out` going forward. That means they cannot be returned by `ref` anymore.
 
@@ -918,7 +918,7 @@ The APIs in category (2.1) though are largely authored by Microsoft or by develo
 
 The APIs in category (2.2) are the biggest issue. It is unknown how many such APIs exist and it's unclear if these would be more / less frequent in 3rd party code. The expectation is there is a very small number of them, particularly if we take the compat break on `out`. Searches so far have revealed a very small number of these existing in `public` surface area. This is a hard pattern to search for though as it requires semantic analysis. Before taking this change a tool based approach would be needed to verify the assumptions around this impacting a small number of known cases.
 
-For both cases in category (2) though the fix is rather straight forward. The `ref` parameters that do not want to be considered capturable need to simply add `scoped` to the `ref`. In (2.1) this will likely also force the developer to use `Unsafe` or `MemoryMarshal` but that is expected for unsafe style APIs.
+For both cases in category (2) though the fix is straight forward. The `ref` parameters that do not want to be considered capturable must add `scoped` to the `ref`. In (2.1) this will likely also force the developer to use `Unsafe` or `MemoryMarshal` but that is expected for unsafe style APIs.
 
 Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `scoped ref` instead. 
 
@@ -955,7 +955,7 @@ ref T StrangeIdentity<T>(out T value)
 
 This is an unlikely combination and the language could benefit strongly by considering `out` parameters as not returnable by `ref`. 
 
-Consideration was given in this section to also taking a breaking change for *ref-safe-to-escape* defaults for `this` on a `struct`. Specifically considering changing it to be `ref T` vs. `scoped ref T`. That has the advantage that there is no need for the `escapes` keyword anymore as every has maximum return as the default hence only `scoped` is needed to restrict the behavior. The impact of this change is far more significant. It impacts all `struct` instances that have a `ref` returning method which is likely too big off a surface area to take a casual break to.
+Consideration was given in this section to also taking a breaking change for *ref-safe-to-escape* defaults for `this` on a `struct`. Specifically considering changing it to be `ref T` vs. `scoped ref T`. That has the advantage that there is no need for the `escapes` keyword anymore as every has maximum return as the default hence only `scoped` is needed to restrict the behavior. The impact of this change is far more significant. It impacts all `struct` instances that have a `ref` returning method which is likely too big of a surface area to take a casual break to.
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
