@@ -204,7 +204,7 @@ The requirements for the enumeration pattern are:
 - The enumerator must expose a `MoveNextAsync` method that may be called with no arguments and that returns something which may be `await`ed and whose `GetResult()` returns a `bool`.
 - The enumerator must also expose `Current` property whose getter returns a `T` representing the kind of data being enumerated.
 
-For disposal, we first try to bind using pattern-based disposal, otherwise we check for the async disposal interface (`System.IDisposable`), otherwise disposal is skipped.
+For disposal, we first try to bind using pattern-based disposal, otherwise we check for the async disposal interface (`System.IAsyncDisposable`), otherwise disposal is skipped.
 
 To fulfill the disposal pattern, the enumerator must expose a `DisposeAsync` method that may be invoked with no arguments and that returns something that can be `await`ed and whose `GetResult()` returns `void`.
 
