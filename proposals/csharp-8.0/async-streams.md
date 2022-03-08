@@ -197,13 +197,18 @@ Still to consider:
 
 ### Pattern-based Compilation
 
-The compiler will bind to the pattern-based APIs if they exist, preferring those over using the interface (the pattern may be satisfied with instance methods or extension methods).  The requirements for the pattern are:
+For enumeration, we first try to bind using pattern-based enumeration (see [`foreach` statement](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1295-the-foreach-statement) and details below), otherwise we check for the async enumerable interface (`System.Collections.GenericIAsyncEnumerable<T>`).
+
+The requirements for the enumeration pattern are:
 - The enumerable must expose a `GetAsyncEnumerator` method that may be called with no arguments and that returns an enumerator that meets the relevant pattern.
 - The enumerator must expose a `MoveNextAsync` method that may be called with no arguments and that returns something which may be `await`ed and whose `GetResult()` returns a `bool`.
 - The enumerator must also expose `Current` property whose getter returns a `T` representing the kind of data being enumerated.
-- The enumerator may optionally expose a `DisposeAsync` method that may be invoked with no arguments and that returns something that can be `await`ed and whose `GetResult()` returns `void`.
 
-This code:
+For disposal, we first try to bind using pattern-based disposal, otherwise we check for the async disposal interface (`System.IDisposable`), otherwise disposal is skipped.
+
+To fulfill the disposal pattern, the enumerator must expose a `DisposeAsync` method that may be invoked with no arguments and that returns something that can be `await`ed and whose `GetResult()` returns `void`.
+
+Using pattern-based enumeration and disposal, this code:
 
 ```csharp
 var enumerable = ...;
@@ -232,7 +237,7 @@ finally
 }
 ```
 
-If the iterated type doesn't expose the right pattern, the interfaces will be used.
+If the iterated type doesn't expose the right patterns, the interfaces will be used.
 
 ### ConfigureAwait
 
