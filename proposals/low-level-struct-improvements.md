@@ -787,14 +787,101 @@ escapes struct S
 
 ### Take the breaking change
 <a name="breaking"></a>
-This design is predicated on the idea that the language must remain fully compatible with the existing span safety rules. This results in a sub-optimal design for the new features to support existing APIs that are likely small in number and in several cases simply designed incorrectly. Effectively this design puts more burden on correct APIs to support legacy flaws in older ones.
+This section explores what the design would be if limited compat breaks were allowed. The advantage of the breaks is a simplification of the lifetime rules and allowing for more "correct by construction" API designs. This section will use syntax vs. attributes as that is preferred by those who also favor limited compat breaks.
 
-Consider for a minute where the design was approached from the other direction: APIs with `ref` fields have the ideal state and burden is placed on developers with incorrect APIs to fix them up when compiling for C# 11. This compat break would take primarily two forms:
+In brief the two proposed compat changes are:
 
-* A `ref` parameter on method returning a `ref struct` would be considered `[RefFieldsEscape]`.
+* A `ref` parameter on method returning a `ref struct` would be capturable as a `ref` field
 * A `out` parameter would be considered `ref-safe-to-escape` within the current method.
 
-This change would impact methods that have the following properties:
+In this design a `ref` field in a constructor can be effectively ref reassigned to any value that is *ref-safe-to-escape* to the *calling method*. Specifically the rules for `ref` reassignment will be adjusted to account for `ref` fields as follows:
+
+> For a ref reassignment in the form ...
+> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
+> 2. `e1 = ref e2`: the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
+
+That means the desired `Span<T>` constructor works without any extra annotation:
+
+```c#
+Span(ref T value)
+{
+    // `this` is safe-to-escape and `value` is ref-safe-to-escape to calling method hence 
+    // legal by rule 1 above
+    _field = ref value;
+}
+```
+
+The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or a value and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the current method. For example: 
+
+| Parameter | ref-safe-to-escape | safe-to-escape |
+|---|---|---|
+| `Span<int> s` | *current method* | *calling method* | 
+| `scoped Span<int> s` | *current method* | *current method* | 
+| `ref Span<int> s` | *calling method* | *calling method* | 
+| `scoped ref Span<int> s` | *current method* | *calling method* | 
+| `ref scoped Span<int> s` | *current method* | *current method* | 
+
+The declaration `scoped ref scoped Span<int>` is allowed but is redundant with `ref scoped Span<int>`. The *ref-safe-to-escape* of a value can never exceed the *safe-to-escape* hence once the *safe-to-escape* is restricted via `ref scoped` the *ref-safe-to-escape* is implicitly restricted.
+
+This also means that the `this` parameter of a `struct` can now be completely expressed as `scoped ref T`. Previously it had to be special cased as a `ref T` that had different *ref-safe-to-escape* rules than other `ref`. 
+
+These annotations can be applied to locals as well as parameters and have the same impact to lifetimes. They cannot be applied to any other location including fields, array elements, etc ... Further while `scoped` can be applied to any `ref` or `in` it can only be applied to values which are `ref struct`. Having `scoped int` adds no value to the rules and will be prevented to avoid confusion.
+
+The first compat change will be that `out` parameters will be considered as `scoped out` going forward. That means they cannot be returned by `ref` anymore.
+
+```c#
+ref int Sneaky(out int i) 
+{
+    i = 42;
+
+    // Error: ref-safe-to-escape of out is now the current method
+    return ref i;
+}
+```
+
+This small compat change reduces the overall compat impact of this change. The ability to return `out` by reference is effectively compiler trivia. However it negatively impacts analysis because the rules must consider the case that it is returned by `ref`. Hence `out` arguments, even though 99% of the time are not returned by ref must be considered as such and that conflates lifetime issues.
+
+The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
+
+> If `p` is `scoped ref` or `scoped in` then `a` does not contribute *ref-safe-to-escape* to the arguments
+> If `p` is `scoped` then `a` does not contribute *safe-to-escape* to the arguments. Note that `ref scoped` is included here as the value is `scoped`
+
+The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime (the `scoped` prevents it).
+
+The method invocation for lvalue returns can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`, nor do `out` parameters need to be considered in the argument list. 
+
+> An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
+> 1. The *calling method*
+> 2. The *ref-safe-to-escape* of all `ref` arguments
+> 3. The *ref-safe-to-escape* of all `in` parameters when the argument is an lvalue otherwise *current method*
+> 4. The *safe-to-escape* of all argument expressions
+
+The method invocation for rvalue returns needs to change as follows to account for `ref` field returns.
+
+> An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
+> 1. The *calling method*
+> 2. The *safe-to-escape* of all argument expressions
+> 3. When the return is a `ref struct` then *ref-safe-to-escape* of all `ref` and `in` arguments
+
+This rule now lets us define the two variants of desired methods:
+
+```c#
+Span<int> CreateWithoutCapture(scoped ref int value)
+{
+    // Error: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
+    // of the ref argument. That is the current method for value hence this is not allowed.
+    return new Span<int>(ref value);
+}
+
+Span<int> CreateAndCapture(ref int value)
+{
+    // Okay: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
+    // of the ref argument. That is the calling method for value hence this is not allowed.
+    return new Span<int>(value)
+}
+```
+
+These compat changes would impact methods that have the following properties:
 
 - Have a `Span<T>` or `ref struct`
     - Where the `ref struct` is a return type, `ref` or `out` parameter
@@ -804,7 +891,7 @@ To understand the impact it's helpful to break APIs into categories:
 
 1. Want consumers to account for `ref` being captured as a `ref` field. Prime example is the `Span(ref T value)` constructors 
 2. Do not want consumers to account for `ref` being captured as a `ref` field. These though break into two catogries
-    1. Unsafe APIs. These are APIS inside the `Unsafe` and `MemoryMarshal` types, of which `MemoryMarshal.CreateSpan` is the most prominent. These APIs do capture the `ref` unsafely but they are also known to be unsafe APIs. 
+    1. Unsafe APIs. These are APIS inside the `Unsafe` and `MemoryMarshal` types, of which `MemoryMarshal.CreateSpan` is the most prominent. These APIs do capture the `ref` unsafely but they are also known to be unsafe APIs.
     2. Safe APIs. These are APIs which take `ref` parameters for efficiency but it is not actually captured anywhere. Examples are small but one is `AsnDecoder.ReadEnumeratedBytes`
 
 This change primarily benefits (1) above. These are expected to make up the majority of APIs that take a `ref` and return a `ref struct` going forward. The changes negatively impact (2.1) and (2.2) as it breaks the existing calling semantics because the lifetime rules change. 
@@ -813,9 +900,9 @@ The APIs in category (2.1) though are largely authored by Microsoft or by develo
 
 The APIs in category (2.2) are the biggest issue. It is unknown how many such APIs exist and it's unclear if these would be more / less frequent in 3rd party code. The expectation is there is a very small number of them, particularly if we take the compat break on `out`. Searches so far have revealed a very small number of these existing in `public` surface area. This is a hard pattern to search for though as it requires semantic analysis. Before taking this change a tool based approach would be needed to verify the assumptions around this impacting a small number of known cases.
 
-For both cases in category (2) though the language and runtime APIs would need to provide mechanisms for developers to restore APIs to the original lifetime semantics. As well as getting code out of lifetime jams that caused if APIs don't upgrade correctly. That should be straight forward to accomplish as well as providing guides for how to map old cases to new ones. 
+For both cases in category (2) though the fix is rather straight forward. The `ref` parameters that do not want to be considered capturable need to simply add `scoped` to the `ref`. In (2.1) this will likely also force the developer to use `Unsafe` or `MemoryMarshal` but that is expected for unsafe style APIs.
 
-Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `[RefFieldsDoNotEscape]` / `scoped`. 
+Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `scoped ref` instead. 
 
 The challenge to keep in mind with respect to compat is thi breaking change and the impact of the breaking change can appear in different libraries. Consider the following:
 
