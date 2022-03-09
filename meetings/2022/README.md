@@ -24,6 +24,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mar 14, 2022
 
+- File private accessibility (Steve, Jared): https://github.com/dotnet/csharplang/issues/5529
+
 ## Mar 9, 2022
 
 - Ambiguity of `..` in collection literals.  Reconsider syntax for list patterns.
