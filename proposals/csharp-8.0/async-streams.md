@@ -191,7 +191,7 @@ No syntax would be provided that would support using either the async or the syn
 
 The compile-time processing of an `await foreach` statement first determines the ***collection type***, ***enumerator type*** and ***iteration type*** of the expression (very similar to https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1295-the-foreach-statement). This determination proceeds as follows:
 
-- If the type `X` of *expression* is `dynamic` or an array type, then an error is produced an no further steps are taken.
+- If the type `X` of *expression* is `dynamic` or an array type, then an error is produced and no further steps are taken.
 - Otherwise, determine whether the type `X` has an appropriate `GetAsyncEnumerator` method:
   - Perform member lookup on the type `X` with identifier `GetAsyncEnumerator` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for an enumerable interface as described below.
   - Perform overload resolution using the resulting method group and an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, check for an enumerable interface as described below.
