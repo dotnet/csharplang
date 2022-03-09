@@ -840,7 +840,7 @@ ref int Sneaky(out int i)
 }
 ```
 
-This small compat change reduces the overall compat impact of this change. The ability to return `out` by reference is effectively compiler trivia. However it negatively impacts analysis because the rules must consider the case that it is returned by `ref`. Hence `out` arguments, even though 99% of the time are not returned by ref must be considered as such and that conflates lifetime issues.
+This change to `out` reduces the overall compat impact of this change. The ability to return `out` by reference is effectively compiler trivia. However it negatively impacts analysis because the rules must consider the case that it is returned by `ref`. Hence `out` arguments, even though 99% of the time are not returned by ref must be considered as such and that conflates lifetime issues.
 
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
 
