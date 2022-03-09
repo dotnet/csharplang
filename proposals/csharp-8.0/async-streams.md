@@ -189,7 +189,7 @@ No syntax would be provided that would support using either the async or the syn
 
 ### Semantics
 
-The compile-time processing of an async `foreach` statement first determines the ***collection type***, ***enumerator type*** and ***iteration type*** of the expression (very similar to https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1295-the-foreach-statement). This determination proceeds as follows:
+The compile-time processing of an `await foreach` statement first determines the ***collection type***, ***enumerator type*** and ***iteration type*** of the expression (very similar to https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1295-the-foreach-statement). This determination proceeds as follows:
 
 - If the type `X` of *expression* is `dynamic` or an array type, then an error is produced an no further steps are taken.
 - Otherwise, determine whether the type `X` has an appropriate `GetAsyncEnumerator` method:
@@ -254,7 +254,7 @@ The body of the `finally` block is constructed according to the following steps:
     }
     ```
     except that if `E` is a value type, or a type parameter instantiated to a value type, then the conversion of `e` to `System.IAsyncDisposable` shall not cause boxing to occur.
-- Otherwise, if `E` is a sealed type, the `finally` clause is expanded to an empty block:
+- Otherwise, the `finally` clause is expanded to an empty block:
   ```csharp
   finally {
   }
