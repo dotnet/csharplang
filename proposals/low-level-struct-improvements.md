@@ -136,18 +136,23 @@ The rules we define for `ref` fields must ensure the `Span<T>` constructor prope
 
 <a name="ref-fields-escape"></a>
 
-To accomplish this the span safety rules for method invocation will be changed. The method invocation rules presently state:
+To accomplish this two new annotations will be introduced to help control how arguments influence lifetime of method calls: `[RefFieldsEscape]` and `[DoesNotEscape]`. The annotation `[RefFieldsEscape]` when applied to a `ref` parameter signifies that it can be captured as a `ref` field in a returned `ref struct`.
+
+The `[DoesNotEscape]` annotation is not necessary for `ref` fields but more for reducing friction when dealing with specific classes of methods. It will be discussed in detail [later on](#does-not-escape) but needs to be introduced now as it impacts method invocation rules.
+
+To recognize these annotations the span safety rules for method invocation need to be updated. The first change is recognizing the impact the annotations have on arguments. For a given argument `a` that is passed to `ref` parameter `p`: 
+
+> 1. If `p` is `[RefFieldsEscape] ref` or `[RefFieldsEscape] in` and `a` is 
+>     1. A `[RefFieldEscapes]` parameter it contrbutes *safe-to-escape* to *calling method*
+>     2. A known heap location it contrbutes *safe-to-escape* to *calling method*
+>     3. It contributes *safe-to-escape* to *current method*
+> 2. If `p` is `[DoesNotEscape]` then `a` does not contribute *safe-to-escape* when considering arguments.
+
+This change allows us to keep our existng rules for rvalue method invocation:
 
 > An rvalue resulting from a method invocation e1.M(e2, ...) is *safe-to-escape* from the smallest of the following scopes:
-> 1. The entire enclosing method
-> 2. The *safe-to-escape* of all argument expressions (including the receiver)
-
-The change will be in how the *safe-to-escape* scope is calculated for arguments of method invocation when the return type is a ref-like type. The updated rule will read as follows:
-
-> When the rvalue is a ref-like type then *safe-to-escape* scope of arguments will be changed when they line up with a parameter marked as `[RefFieldEscapes]`
-> 1. When the argument is itself a parameter marked `[RefFieldEscapes]` it will be *calling method*
-> 2. When the argument is a known heap location it will be *calling method*
-> 3. Else it will be *current method*
+> * The entire enclosing method
+> * The *safe-to-escape* of all argument expressions (including the receiver)
 
 The rules for `ref` field assignment will be discussed in detail [later on](#ref-field-reassignment) the doc. For now readers only need to know constructors can initialize `ref` fields with parameters marked as `[RefFieldEscape]` or known heap locations.
 
@@ -184,28 +189,23 @@ ref struct RS
     static RS CreateRS([RefFieldEscapes] ref int p1, ref int p2)
     {
         // Okay: The RS argument `p1' lines up with a [RefFieldsEscape] argument
-        // but it is also a [RefFieldsEscape] parameter hence the return of the constructor 
-        // is safe-to-escape to the calling method (rule 1 above)
+        // but it is also a [RefFieldsEscape] parameter hence it contributes a safe-to-escape of 
+        // calling method (rule 1.1 above)
         return new RS(ref p1);
 
         // Okay: This is a known heap value hence it is safe-to-escape to the calling
-        // method (rule 2 above)
+        // method (rule 1.2 above)
         return new RS(new int[1]);
 
         // Error: This is the same analysis as above but in this case `p2` is not 
-        // [RefFieldsEscape] hence the return of the constructor is safe-to-escape to
-        // the current method (rule 3 above)
+        // [RefFieldsEscape] hence it contributes safe-to-escape of current method
+        // (rule 1.3 above)
         return new RS(ref p2);
 
-        // Error: This is the same analysis as above and once again by rule 3 is 
+        // Error: This is the same analysis as above and once again by rule 1.3 is 
         // only safe-to-escape to the current method
         int local = 42;
         return new RS(ref local);
-
-        // Okay: The RS(int[]) constructor has no arguments marked as `[RefFieldsEscape]` 
-        // hence arguments have their original safe-to-escape scope and this is 
-        // safe-to-escape to the calling method
-        return new RS(new int[1]);
     }
 }
 ```
@@ -528,6 +528,7 @@ This attribute can be applied to methods, constructors and operators. Applying t
 The semantics of this attribute, and how it impacts span safety rules, are described [above](#ref-fields-escape)
 
 #### DoesNotEscape
+<a name="does-not-escape">
 One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
 
 The main friction point occurs because of the following constraint around method invocations:
@@ -843,8 +844,8 @@ This small compat change reduces the overall compat impact of this change. The a
 
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
 
-> If `p` is `scoped ref` or `scoped in` then `a` does not contribute *ref-safe-to-escape* when considering arguments
-> If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. Note that `ref scoped` is included here as the value is `scoped`
+> 1. If `p` is `scoped ref` or `scoped in` then `a` does not contribute *ref-safe-to-escape* when considering arguments
+> 2. If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. Note that `ref scoped` is included here as the value is `scoped`
 
 The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime (the `scoped` prevents it).
 
