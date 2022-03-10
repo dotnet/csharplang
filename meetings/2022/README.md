@@ -26,18 +26,21 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - File private accessibility (Steve, Jared): https://github.com/dotnet/csharplang/issues/5529
 
-## Mar 9, 2022
-
-- Ambiguity of `..` in collection literals.  Reconsider syntax for list patterns.
-- `[main:...]` attributes (Chris): https://github.com/dotnet/csharplang/pull/5817
-
-## Mar 7, 2022
-
-- Design review
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Mar 9, 2022
+
+[C# Language Design Meeting for March 9th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-09.md)
+
+1. Ambiguity of `..` in collection expressions
+2. `main` attributes
+3. `nameof(param)`
+
+## Mar 7, 2022
+
+- Design review. No published notes.
 
 ## Mar 2, 2022
 
