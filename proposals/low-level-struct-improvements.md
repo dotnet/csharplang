@@ -143,18 +143,18 @@ The `[DoesNotEscape]` annotation is not necessary for `ref` fields but more for 
 To recognize these annotations the span safety rules for method invocation need to be updated. The first change is recognizing the impact the annotations have on arguments. For a given argument `a` that is passed to `ref` parameter `p`: 
 
 > 1. If `p` is `[RefFieldsEscape] ref` or `[RefFieldsEscape] in` and `a` is 
->     1. A `[RefFieldEscapes]` parameter it contrbutes *safe-to-escape* to *calling method*
+>     1. A `[RefFieldEscapes]` parameter it contributes *safe-to-escape* to *calling method*
 >     2. A known heap location it contributes *safe-to-escape* to *calling method*
 >     3. It contributes *safe-to-escape* to *current method*
 > 2. If `p` is `[DoesNotEscape]` then `a` does not contribute *safe-to-escape* when considering arguments.
 
-This change allows us to keep our existng rules for rvalue method invocation:
+This change allows us to keep our existing rules for rvalue method invocation:
 
 > An rvalue resulting from a method invocation e1.M(e2, ...) is *safe-to-escape* from the smallest of the following scopes:
 > * The entire enclosing method
 > * The *safe-to-escape* of all argument expressions (including the receiver)
 
-The rules for `ref` field assignment will be discussed in detail [later on](#ref-field-reassignment) the doc. For now readers only need to know constructors can initialize `ref` fields with parameters marked as `[RefFieldEscape]` or known heap locations.
+The rules for `ref` field assignment will be discussed in detail [later on](#ref-field-reassignment) the doc. For now readers only need to know constructors can initialize `ref` fields with parameters marked as `[RefFieldEscapes]` or known heap locations.
 
 Let's examine these rules in the context of samples to better understand their impact and how they maintain the required compat considerations.
 
