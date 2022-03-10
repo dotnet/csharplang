@@ -136,13 +136,13 @@ The rules we define for `ref` fields must ensure the `Span<T>` constructor prope
 
 <a name="ref-fields-escape"></a>
 
-To accomplish this two new annotations will be introduced to help control how arguments influence lifetime of method calls: `[RefFieldsEscape]` and `[DoesNotEscape]`. The annotation `[RefFieldsEscape]` when applied to a `ref` parameter signifies that it can be captured as a `ref` field in a returned `ref struct`.
+To accomplish this two new annotations will be introduced to help control how arguments influence lifetime of method calls: `[RefFieldEscapes]` and `[DoesNotEscape]`. The annotation `[RefFieldEscapes]` when applied to a `ref` parameter signifies that it can be captured as a `ref` field in a returned `ref struct`.
 
 The `[DoesNotEscape]` annotation is not necessary for `ref` fields but more for reducing friction when dealing with specific classes of methods. It will be discussed in detail [later on](#does-not-escape) but needs to be introduced now as it impacts method invocation rules.
 
 To recognize these annotations the span safety rules for method invocation need to be updated. The first change is recognizing the impact the annotations have on arguments. For a given argument `a` that is passed to `ref` parameter `p`: 
 
-> 1. If `p` is `[RefFieldsEscape] ref` or `[RefFieldsEscape] in` and `a` is 
+> 1. If `p` is `[RefFieldEscapes] ref` or `[RefFieldEscapes] in` and `a` is 
 >     1. A `[RefFieldEscapes]` parameter it contributes *safe-to-escape* to *calling method*
 >     2. A known heap location it contributes *safe-to-escape* to *calling method*
 >     3. It contributes *safe-to-escape* to *current method*
@@ -188,8 +188,8 @@ ref struct RS
 
     static RS CreateRS([RefFieldEscapes] ref int p1, ref int p2)
     {
-        // Okay: The RS argument `p1' lines up with a [RefFieldsEscape] argument
-        // but it is also a [RefFieldsEscape] parameter hence it contributes a safe-to-escape of 
+        // Okay: The RS argument `p1' lines up with a [RefFieldEscapes] argument
+        // but it is also a [RefFieldEscapes] parameter hence it contributes a safe-to-escape of 
         // calling method (rule 1.1 above)
         return new RS(ref p1);
 
@@ -198,7 +198,7 @@ ref struct RS
         return new RS(new int[1]);
 
         // Error: This is the same analysis as above but in this case `p2` is not 
-        // [RefFieldsEscape] hence it contributes safe-to-escape of current method
+        // [RefFieldEscapes] hence it contributes safe-to-escape of current method
         // (rule 1.3 above)
         return new RS(ref p2);
 
@@ -334,7 +334,7 @@ ref struct RS
 The rules for `ref` reassignment will be adjusted to account for `ref` fields as follows:
 
 > For a ref reassignment in the form ...
-> 1. `x.e1 = ref e2`: the `e2` must be a `[RefFieldsEscape]` parameter or refer to a known heap location else it is an error
+> 1. `x.e1 = ref e2`: the `e2` must be a `[RefFieldEscapes]` parameter or refer to a known heap location else it is an error
 > 2. `e1 = ref e2`: the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
 
 Examples of these rules in practice:
@@ -725,7 +725,7 @@ The biggest challenge posed by the [compat considerations](#compat-consideration
 Several ideas for having implicit opt-in to `ref` capture were explored and discarded: 
 
 - Special casing constructors. It is possible to have constructors of `ref struct` that **directly** define `ref` fields be implicitly opt-in to `[RefFieldEscapes]` semantics. However this does not generalize to factory methods and hence is not a general solution that we can use.
-- Special casing methods that return `ref struct` that define a `ref`. There are no such methods today because `ref` fields do not exist hence we could say that methods which return `ref struct` that defined a `ref` field have opted-in to `[ReFFieldsEscape]` semantics. This works but it essentially prevents any existing `ref struct` from adding `ref` fields. Doing so would cause span safety rules to be interpreted differently in all methods that returned the type. 
+- Special casing methods that return `ref struct` that define a `ref`. There are no such methods today because `ref` fields do not exist hence we could say that methods which return `ref struct` that defined a `ref` field have opted-in to `[RefFieldEscape]` semantics. This works but it essentially prevents any existing `ref struct` from adding `ref` fields. Doing so would cause span safety rules to be interpreted differently in all methods that returned the type. 
 
 These implicit opt-in strategies all have significant holes while an explicit opt-in is fully generalizable and makes the span safety rule different explicit in the code.
 
@@ -770,8 +770,8 @@ A rough sketch of the syntax would be:
 
 - `[DoesNotEscape]` maps to `scoped` 
 - `[RefThisEscapes]` maps to `escapes`
-- `[RefFieldsEscapes]` maps to `escapes` but attached to the `ref` of the method.
-- `[RefFieldsDoNotEscape]` (assuming the [breaking change](#breaking)) maps to `scoped` on the `ref`
+- `[RefFieldEscapes]` maps to `escapes` but attached to the `ref` of the method.
+- `[RefFieldDoesNotEscape]` (assuming the [breaking change](#breaking)) maps to `scoped` on the `ref`
 
 Examples:
 
