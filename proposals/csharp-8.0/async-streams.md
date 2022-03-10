@@ -230,7 +230,7 @@ is then expanded to:
 
 The body of the `finally` block is constructed according to the following steps:
 - If the type `E` has an appropriate `DisposeAsync` method:
-  - Perform member lookup on the type `E` with identifier `DisposeAsync` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for the disposal  interface as described below.
+  - Perform member lookup on the type `E` with identifier `DisposeAsync` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for the disposal interface as described below.
   - Perform overload resolution using the resulting method group and an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, check for the disposal interface as described below.
   - If the return type of the `DisposeAsync` method is not awaitable, an error is produced and no further steps are taken.
   - The `finally` clause is expanded to the semantic equivalent of:
