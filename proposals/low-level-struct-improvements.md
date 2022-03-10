@@ -144,7 +144,7 @@ To recognize these annotations the span safety rules for method invocation need 
 
 > 1. If `p` is `[RefFieldsEscape] ref` or `[RefFieldsEscape] in` and `a` is 
 >     1. A `[RefFieldEscapes]` parameter it contrbutes *safe-to-escape* to *calling method*
->     2. A known heap location it contrbutes *safe-to-escape* to *calling method*
+>     2. A known heap location it contributes *safe-to-escape* to *calling method*
 >     3. It contributes *safe-to-escape* to *current method*
 > 2. If `p` is `[DoesNotEscape]` then `a` does not contribute *safe-to-escape* when considering arguments.
 
@@ -878,7 +878,7 @@ Span<int> CreateAndCapture(ref int value)
 {
     // Okay: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
     // of the ref argument. That is the calling method for value hence this is not allowed.
-    return new Span<int>(value)
+    return new Span<int>(ref value)
 }
 
 Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
@@ -956,7 +956,7 @@ ref T StrangeIdentity<T>(out T value)
 
 This is an unlikely combination and the language could benefit strongly by considering `out` parameters as not returnable by `ref`. 
 
-Consideration was given in this section to also taking a breaking change for *ref-safe-to-escape* defaults for `this` on a `struct`. Specifically considering changing it to be `ref T` vs. `scoped ref T`. That has the advantage that there is no need for the `escapes` keyword anymore as every has maximum return as the default hence only `scoped` is needed to restrict the behavior. The impact of this change is far more significant. It impacts all `struct` instances that have a `ref` returning method which is likely too big of a surface area to take a casual break to.
+Consideration was given in this section to also taking a breaking change for *ref-safe-to-escape* defaults for `this` on a `struct`. Specifically considering changing it to be `ref T` vs. `scoped ref T`. That has the advantage that there is no need for the `escapes` keyword anymore as every value already has maximum return as the default hence only `scoped` is needed to restrict the behavior. The impact of this change is far more significant. It impacts all `struct` instances that have a `ref` returning method which is likely too big of a surface area to take a casual break to.
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
