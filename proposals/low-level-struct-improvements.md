@@ -134,23 +134,27 @@ The [new Span<T> definition](#new-span) also reveals several [challenges](#new-s
 
 The rules we define for `ref` fields must ensure the `Span<T>` constructor properly restricts the *safe-to-escape* scope of constructed objects in the cases it captures `ref` state. At the same time it must ensure that we don't break the existing consumption rules for methods like `CreateSpan<T>`. 
 
-<a name="ref-fields-escape"></a>
+<a name="ref-field-escapes"></a>
 
-To accomplish this the span safety rules will be changed as follows. First for the constructor of a `ref struct` that directly contains a `ref field`: 
-- If the constructor is annotated with `[RefFieldEscapes]` then `ref` fields can be initialized with any value that has *ref-safe-to-escape* to the *calling method*
-- Else `ref` fields can only be initialized with known heap values.
+To accomplish this two new annotations will be introduced to help control how arguments influence lifetime of method calls: `[RefFieldEscapes]` and `[DoesNotEscape]`. The annotation `[RefFieldEscapes]` when applied to a `ref` parameter signifies that it can be captured as a `ref` field in a returned `ref struct`.
 
-These rules ensure that the caller can understand when constructors will or will not capture parameters by `ref`. 
+The `[DoesNotEscape]` annotation is not necessary for `ref` fields but more for reducing friction when dealing with specific classes of methods. It will be discussed in detail [later on](#does-not-escape) but needs to be introduced now as it impacts method invocation rules.
 
-Next the rules for method invocation will change as follows when the target method is annotated with `[RefFieldEscapes]`:
-- If the current method is not annotated with `[RefFieldEscapes]` then
-    - If all arguments have a *ref-safe-to-escape* scope of *heap* then the *safe-to-escape* scope of the return is to the *calling method*
-    - Else the *safe-to-escape* scope is to the *current method*
-- Else the *safe-to-escape* scope of the return is the minimum of 
-    - The existing *safe-to-escape* calculation for method invocation
-    - All of the *ref-safe-to-escape* values of `ref`, `in` and `out` arguments
+To recognize these annotations the span safety rules for method invocation need to be updated. The first change is recognizing the impact the annotations have on arguments. For a given argument `a` that is passed to `ref` parameter `p`: 
 
-The design of `[RefFieldEscape]` will be discussed in detail [later in the proposal](#reffieldescapes).
+> 1. If `p` is `[RefFieldEscapes] ref` or `[RefFieldEscapes] in` and `a` is 
+>     1. A `[RefFieldEscapes]` parameter it contributes *safe-to-escape* to *calling method*
+>     2. A known heap location it contributes *safe-to-escape* to *calling method*
+>     3. It contributes *safe-to-escape* to *current method*
+> 2. If `p` is `[DoesNotEscape]` then `a` does not contribute *safe-to-escape* when considering arguments.
+
+This change allows us to keep our existing rules for rvalue method invocation:
+
+> An rvalue resulting from a method invocation e1.M(e2, ...) is *safe-to-escape* from the smallest of the following scopes:
+> * The entire enclosing method
+> * The *safe-to-escape* of all argument expressions (including the receiver)
+
+The rules for `ref` field assignment will be discussed in detail [later on](#ref-field-reassignment) the doc. For now readers only need to know constructors can initialize `ref` fields with parameters marked as `[RefFieldEscapes]` or known heap locations.
 
 Let's examine these rules in the context of samples to better understand their impact and how they maintain the required compat considerations.
 
@@ -161,117 +165,54 @@ ref struct RS
 
     public RS(int[] array, int index)
     {
-        // Okay: even though there is no [RefFieldEscapes] annotation the fields are initialized
-        // with known heap values
+        // Okay: as fields are initialized with known heap values. Caller does not need a visible
+        // change as it does not provide values that participate in this capture.
         _field = ref array[index];
     }
 
-    [RefFieldEscapes]
-    public RS(ref int i)
+    public RS([RefFieldEscapes] ref int value)
     {
-        // Okay: the constructor is annotated with [RefFieldEscapes] which allows for fields to be
-        // initialized with any value that is ref-safe-to-escape to calling method. That is the 
-        // case for `i` hence this is legal
-        _field = ref i;
+        // Okay: the parameter `value` is annotated with [RefFieldEscapes] which allows for 
+        // it to be assigned to a ref field. This also makes the capture visible to the 
+        // caller
+        _field = ref value;
     }
 
     public RS(ref (int, int) tuple)
     {
         // Error: even though the ref-safe-to-escape of `tuple.Item1` is to the calling method, the 
-        // constructor is not annotated with [RefFieldEscapes] hence only known heap values are 
-        // allowed
+        // parameter is not annotated with [RefFieldEscapes] hence it cannot be ref reassigned to a 
+        // ref field
         _field = ref tuple.Item1;
     }
 
-    static RS CreateRS(ref int parameter)
+    static RS CreateRS([RefFieldEscapes] ref int p1, ref int p2)
     {
-        // Error: The RS(ref int) ctor is annotated as [RefFieldEscapes] however CreateRS is 
-        // not annotated as [RefFieldEscapes] hence the safe-to-escape scope of `rs` is the
-        // current method
-        RS rs = new RS(ref parameter);
-        return rs;
+        // Okay: The RS argument `p1' lines up with a [RefFieldEscapes] argument
+        // but it is also a [RefFieldEscapes] parameter hence it contributes a safe-to-escape of 
+        // calling method (rule 1.1 above)
+        return new RS(ref p1);
 
-        // Okay: The RS(int[]) constructor is NOT marked as [RefFieldEscapes] hence it 
-        // cannot capture any arguments by ref. It is implicitly safe-to-escape to calling 
-        // method by all of our existing rules
+        // Okay: This is a known heap value hence it is safe-to-escape to the calling
+        // method (rule 1.2 above)
         return new RS(new int[1]);
-    }
 
-    [RefFieldEscapes]
-    static RS CreateRS2(ref int parameter)
-    {
-        // Okay: Both CreateRS2 and RS(ref int) are annotated as [RefFieldEscapes] hence the 
-        // safe-to-escape scope of the return is the min of the ref-safe-to-escape scope of 
-        // the ref / in arguments. In that case this is simply `parameter` which has a
-        // ref-safe-to-escape scope of the calling method
-        RS rs = new RS(ref parameter);
-        return rs;
+        // Error: This is the same analysis as above but in this case `p2` is not 
+        // [RefFieldEscapes] hence it contributes safe-to-escape of current method
+        // (rule 1.3 above)
+        return new RS(ref p2);
 
+        // Error: This is the same analysis as above and once again by rule 1.3 is 
+        // only safe-to-escape to the current method
         int local = 42;
-
-        // Error: This is the same analysis as above but in this case the ref-safe-to-escape 
-        // scope of `local`is the current method hence the safe-to-escape scope of the 
-        // constructor return is also the same.
         return new RS(ref local);
-
-        // Okay: The RS(int[]) constructor is NOT marked as [RefFieldEscapes] hence it cannot 
-        // capture any arguments by ref. It is implicitly safe-to-escape to calling method by
-        // all of our existing rules
-        return new RS(new int[1]);
-    }
-
-    // This method demonstrates that calling CreateRS2 has the same restrictions as RS(ref int) 
-    // constructor. This demonstrates that factory methods are as flexible as constructors 
-    // concerning `ref` field initialization
-    [RefFieldEscapes] 
-    static RS CreateRS3(ref int parameter)
-    {
-        // Okay: This method has [RefFieldEscapes] hence the safe-to-escape of `rs` is the minimim
-        // of the ref-safe-to-escape of the arguments. In this case that is `parameter` which is 
-        // to the calling method
-        RS rs = new CreateRS2(ref parameter);
-        return rs;
-
-        int local = 42;
-
-        // Error: In this case the ref-safe-to-escape of `local` is to the current method hence 
-        // it is also the safe-to-escape of the method invocation.
-        return new CreateRS2(ref local);
     }
 }
 ```
 
 The samples here have the same patterns as the [compat considerations](#compat-considerations) above. This means it will allow the introduction of `ref` fields without breaking existing code.
 
-Constructor chaining needs to consider these new rules as well. When the original constructor calls a chained constructor via `:this(...)` the chained constructor effectively escapes from the original. That means a chained constructor call is only legal if the *safe-to-escape* value is not smaller than the original constructor one. This will be accomplished with the following rules:
-
-- If the chained constructor has `[RefFieldEscapes]` 
-    - If the original constructor has `[RefFieldEscapes]` then no additional checking is needed 
-    - Else the chained constructor can only accept known heap values for all `ref` and `in` arguments.
-- Else no additional checking is needed
-
-```c#
-ref struct RSChain
-{
-    ref int _field;
-
-    [RefFieldEscapes]
-    public RSChain(ref int value)
-    {
-        _field = ref value;
-    }
-
-    public RSChain(ref int value, string message)
-        // Error: cannot chain to RSChain(ref int) because the lifetime may be smaller than 
-        // the original 
-        :this(ref int value) 
-    {
-
-    }
-}
-```
-
-This proposal also requires that the span safety rules for field lifetimes be expanded as the rules today simply don't explicitly account for `ref` fields. It's important to note that our expansion of the rules here is not defining new behavior but rather accounting for behavior that has long existed. The safety rules around using `ref struct` fully acknowledge and account for the possibility that `ref struct` will contain `ref` state and that `ref` state will be exposed to consumers. The most prominent example of this is the indexer on `Span<T>`:
+This proposal also requires that the span safety rules for field lifetimes be expanded as the rules today simply don't explicitly account for `ref` fields. It's important to note that our expansion of the rules here is not defining new behavior but rather accounting for behavior that has long existed. The safety rules around using `ref struct` fully acknowledge and account for the possibility that `ref struct` will contain `ref` fields and that `ref` fields will be exposed to consumers. The most prominent example of this is the indexer on `Span<T>`:
 
 ``` cs
 readonly ref struct Span<T>
@@ -388,18 +329,15 @@ ref struct RS
 }
 ```
 
-The rules for `ref` assignment also need to be adjusted to account for `ref` fields.  This design only allows for `ref` assignment of a `ref` field during object construction or when the value is known to refer to the heap. Object construction includes in the constructor of the declaring type, inside `init` accessors and inside object initializer expressions. Further the `ref` being assigned to the `ref` field in this case must have *ref-safe-to-escape* greater than the receiver of the field: 
+<a name="ref-field-reassignment"></a>
 
-- Constructors: The value must be *ref-safe-to-escape* outside the constructor
-- `init` accessors:  The value limited to values that are known to refer to the heap as accessors can't have `ref` parameters
-- object initializers: The value can have any *ref-safe-to-escape* value as this will feed into the calculation of the *safe-to-escape* of the constructed object by existing rules.
+The rules for `ref` reassignment will be adjusted to account for `ref` fields as follows:
 
-A `ref` field can only be `ref` assigned outside a constructor when the value is known to have a lifetime greater than or equal to the receiver. Specifically: 
-- A value that is known to refer to the heap is always allowed 
-- A value which is *safe-to-escape* to the *calling method* can be assigned to a `ref` field where the receiver is *safe-to-escape* within the *current method*
-- A value which is *safe-to-escape* to the *calling method* **cannot** be assigned to a `ref` field where the receiver is *safe-to-escape* to the *calling method*. In that situation it cannot be asserted that the field outlives the receiver.
+> For a ref reassignment in the form ...
+> 1. `x.e1 = ref e2`: the `e2` must be a `[RefFieldEscapes]` parameter or refer to a known heap location else it is an error
+> 2. `e1 = ref e2`: the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
 
-This design does not allow for general `ref` field `ref `assignment outside object construction due to existing limitations on lifetimes. Specifically it poses challenges for scenarios like the following:
+Examples of these rules in practice:
 
 ```c#
 ref struct SmallSpan
@@ -587,9 +525,10 @@ Methods that return `ref struct` that capture `ref` parameters as fields must de
 
 This attribute can be applied to methods, constructors and operators. Applying to any other member will be an error. 
 
-The semantics of this attribute, and how it impacts span safety rules, are described [above](#ref-fields-escape)
+The semantics of this attribute, and how it impacts span safety rules, are described [above](#ref-field-escapes)
 
 #### DoesNotEscape
+<a name="does-not-escape">
 One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
 
 The main friction point occurs because of the following constraint around method invocations:
@@ -786,7 +725,7 @@ The biggest challenge posed by the [compat considerations](#compat-consideration
 Several ideas for having implicit opt-in to `ref` capture were explored and discarded: 
 
 - Special casing constructors. It is possible to have constructors of `ref struct` that **directly** define `ref` fields be implicitly opt-in to `[RefFieldEscapes]` semantics. However this does not generalize to factory methods and hence is not a general solution that we can use.
-- Special casing methods that return `ref struct` that define a `ref`. There are no such methods today because `ref` fields do not exist hence we could say that methods which return `ref struct` that defined a `ref` field have opted-in to `[ReFFieldsEscape]` semantics. This works but it essentially prevents any existing `ref struct` from adding `ref` fields. Doing so would cause span safety rules to be interpreted differently in all methods that returned the type. 
+- Special casing methods that return `ref struct` that define a `ref`. There are no such methods today because `ref` fields do not exist hence we could say that methods which return `ref struct` that defined a `ref` field have opted-in to `[RefFieldEscape]` semantics. This works but it essentially prevents any existing `ref struct` from adding `ref` fields. Doing so would cause span safety rules to be interpreted differently in all methods that returned the type. 
 
 These implicit opt-in strategies all have significant holes while an explicit opt-in is fully generalizable and makes the span safety rule different explicit in the code.
 
@@ -831,8 +770,8 @@ A rough sketch of the syntax would be:
 
 - `[DoesNotEscape]` maps to `scoped` 
 - `[RefThisEscapes]` maps to `escapes`
-- `[RefFieldsEscapes]` maps to `escapes` but attached to the `ref` of the method.
-- `[RefFieldsDoNotEscape]` (assuming the [breaking change](#breaking)) maps to `scoped` on the `ref`
+- `[RefFieldEscapes]` maps to `escapes` but attached to the `ref` of the method.
+- `[RefFieldDoesNotEscape]` (assuming the [breaking change](#breaking)) maps to `scoped` on the `ref`
 
 Examples:
 
@@ -849,24 +788,131 @@ escapes struct S
 
 ### Take the breaking change
 <a name="breaking"></a>
-This design is predicated on the idea that the language must remain fully compatible with the existing span safety rules. This results in a sub-optimal design for the new features to support existing APIs that are likely small in number and in several cases simply designed incorrectly. Effectively this design puts more burden on correct APIs to support legacy flaws in older ones.
+This section explores what the design would be if limited compat breaks were allowed. The advantage of the breaks is a simplification of the lifetime rules and allowing for more "correct by construction" API designs. This section will use syntax vs. attributes as that is preferred by those who also favor limited compat breaks.
 
-Consider for a minute where the design was approached from the other direction: APIs with `ref` fields have the ideal state and burden is placed on developers with incorrect APIs to fix them up when compiling for C# 11. This compat break would take primarily two forms:
+In brief, the two proposed compat changes are:
 
-* A `ref` parameter on method returning a `ref struct` would be considered `[RefFieldsEscape]`.
-* A `out` parameter would be considered `ref-safe-to-escape` within the current method.
+* A `ref` parameter on method returning a `ref struct` would be capturable as a `ref` field
+* A `out` parameter would be considered `ref-safe-to-escape` within the *current method*.
 
-This change would impact methods that have the following properties:
+In this design a `ref` field in a constructor can be effectively ref reassigned to any value that is *ref-safe-to-escape* to the *calling method*. Specifically the rules for ref reassignment will be adjusted to account for `ref` fields as follows:
+
+> For a ref reassignment in the form ...
+> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
+> 2. `e1 = ref e2`: the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
+
+That means the desired `Span<T>` constructor works without any extra annotation:
+
+```c#
+Span(ref T value)
+{
+    // `this` is safe-to-escape and `value` is ref-safe-to-escape to calling method hence 
+    // legal by rule 1 above
+    _field = ref value;
+}
+```
+
+The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or a value and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the *current method*. For example: 
+
+| Parameter | ref-safe-to-escape | safe-to-escape |
+|---|---|---|
+| `Span<int> s` | *current method* | *calling method* | 
+| `scoped Span<int> s` | *current method* | *current method* | 
+| `ref Span<int> s` | *calling method* | *calling method* | 
+| `scoped ref Span<int> s` | *current method* | *calling method* | 
+| `ref scoped Span<int> s` | *current method* | *current method* | 
+
+The declaration `scoped ref scoped Span<int>` is allowed but is redundant with `ref scoped Span<int>`. The *ref-safe-to-escape* of a value can never exceed the *safe-to-escape* hence once the *safe-to-escape* is restricted via `ref scoped` the *ref-safe-to-escape* is implicitly restricted.
+
+This also means that the `this` parameter of a `struct` can now be completely expressed as `scoped ref T`. Previously it had to be special cased as a `ref T` that had different *ref-safe-to-escape* rules than other `ref`. Now it can be expressed as a general concept vs. being a special cased item.
+
+These annotations can be applied to locals as well as parameters and have the same impact to lifetimes. They cannot be applied to any other location including fields, array elements, etc ... Further while `scoped` can be applied to any `ref` or `in` it can only be applied to by-values which are `ref struct`. Having `scoped int` adds no value to the rules and will be prevented to avoid confusion.
+
+The first compat change will be that `out` parameters will be considered as `scoped out` going forward. That means they cannot be returned by `ref` anymore.
+
+```c#
+ref int Sneaky(out int i) 
+{
+    i = 42;
+
+    // Error: ref-safe-to-escape of out is now the current method
+    return ref i;
+}
+```
+
+This change to `out` reduces the overall compat impact of this change. The ability to return `out` by reference is effectively compiler trivia. However it negatively impacts analysis because the rules must consider the case that it is returned by `ref`. Hence `out` arguments, even though 99% of the time are not returned by ref must be considered as such and that conflates lifetime issues.
+
+The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
+
+> 1. If `p` is `scoped ref` or `scoped in` then `a` does not contribute *ref-safe-to-escape* when considering arguments
+> 2. If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. Note that `ref scoped` is included here as the value is `scoped`
+
+The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime (the `scoped` prevents it).
+
+The method invocation for lvalue returns can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`, nor do `out` parameters need to be considered in the argument list. 
+
+> An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
+> 1. The *calling method*
+> 2. The *ref-safe-to-escape* of all `ref` arguments
+> 3. The *ref-safe-to-escape* of all `in` parameters when the argument is an lvalue otherwise *current method*
+> 4. The *safe-to-escape* of all argument expressions
+
+The method invocation for rvalue returns needs to change as follows to account for `ref` field returns.
+
+> An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
+> 1. The *calling method*
+> 2. The *safe-to-escape* of all argument expressions
+> 3. When the return is a `ref struct` then *ref-safe-to-escape* of all `ref` and `in` arguments
+
+This rule now lets us define the two variants of desired methods:
+
+```c#
+Span<int> CreateWithoutCapture(scoped ref int value)
+{
+    // Error: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
+    // of the ref argument. That is the current method for value hence this is not allowed.
+    return new Span<int>(ref value);
+}
+
+Span<int> CreateAndCapture(ref int value)
+{
+    // Okay: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
+    // of the ref argument. That is the calling method for value hence this is not allowed.
+    return new Span<int>(ref value)
+}
+
+Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
+{
+    // Okay: the safe-to-escape of `span` is *calling method* hence this is legal.
+    return span;
+
+    // Okay: the local `refLocal` has a ref-safe-to-escape of *current method* and a 
+    // safe-to-escape of *calling method*. In the call below it is passed to a 
+    // parameter that is `scoped ref` which means it does not contribute 
+    // ref-safe-to-escape. It only contributes its safe-to-escape hence the returned
+    // rvalue ends up as safe-to-escape of *calling method*
+    Span<int> local = default;
+    ref Span<int> refLocal = ref local;
+    return ComplexScopedRefExample(ref refLocal);
+
+    // Error: similar analysis as above but the safe-to-escape scope of `stackLocal` is 
+    // *current method* hence this is illegal
+    Span<int> stackLocal = stackalloc int[42];
+    return ComplexScopedRefExample(ref stackLocal);
+}
+```
+
+These compat changes would impact methods that have the following properties:
 
 - Have a `Span<T>` or `ref struct`
     - Where the `ref struct` is a return type, `ref` or `out` parameter
-    - Has an additional `in` or `ref` parameter
+    - Has an additional `in` or `ref` parameter excluding the receiver
 
 To understand the impact it's helpful to break APIs into categories:
 
 1. Want consumers to account for `ref` being captured as a `ref` field. Prime example is the `Span(ref T value)` constructors 
 2. Do not want consumers to account for `ref` being captured as a `ref` field. These though break into two catogries
-    1. Unsafe APIs. These are APIS inside the `Unsafe` and `MemoryMarshal` types, of which `MemoryMarshal.CreateSpan` is the most prominent. These APIs do capture the `ref` unsafely but they are also known to be unsafe APIs. 
+    1. Unsafe APIs. These are APIS inside the `Unsafe` and `MemoryMarshal` types, of which `MemoryMarshal.CreateSpan` is the most prominent. These APIs do capture the `ref` unsafely but they are also known to be unsafe APIs.
     2. Safe APIs. These are APIs which take `ref` parameters for efficiency but it is not actually captured anywhere. Examples are small but one is `AsnDecoder.ReadEnumeratedBytes`
 
 This change primarily benefits (1) above. These are expected to make up the majority of APIs that take a `ref` and return a `ref struct` going forward. The changes negatively impact (2.1) and (2.2) as it breaks the existing calling semantics because the lifetime rules change. 
@@ -875,11 +921,11 @@ The APIs in category (2.1) though are largely authored by Microsoft or by develo
 
 The APIs in category (2.2) are the biggest issue. It is unknown how many such APIs exist and it's unclear if these would be more / less frequent in 3rd party code. The expectation is there is a very small number of them, particularly if we take the compat break on `out`. Searches so far have revealed a very small number of these existing in `public` surface area. This is a hard pattern to search for though as it requires semantic analysis. Before taking this change a tool based approach would be needed to verify the assumptions around this impacting a small number of known cases.
 
-For both cases in category (2) though the language and runtime APIs would need to provide mechanisms for developers to restore APIs to the original lifetime semantics. As well as getting code out of lifetime jams that caused if APIs don't upgrade correctly. That should be straight forward to accomplish as well as providing guides for how to map old cases to new ones. 
+For both cases in category (2) though the fix is straight forward. The `ref` parameters that do not want to be considered capturable must add `scoped` to the `ref`. In (2.1) this will likely also force the developer to use `Unsafe` or `MemoryMarshal` but that is expected for unsafe style APIs.
 
-Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `[RefFieldsDoNotEscape]` / `scoped`. 
+Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `scoped ref` instead. 
 
-The challenge to keep in mind with respect to compat is thi breaking change and the impact of the breaking change can appear in different libraries. Consider the following:
+The challenge to keep in mind with respect to compat is this breaking change and the impact of the breaking change can appear in different libraries. Consider the following:
 
 ```c#
 // Widget.Library.dll
@@ -911,6 +957,8 @@ ref T StrangeIdentity<T>(out T value)
 ```
 
 This is an unlikely combination and the language could benefit strongly by considering `out` parameters as not returnable by `ref`. 
+
+Consideration was given in this section to also taking a breaking change for *ref-safe-to-escape* defaults for `this` on a `struct`. Specifically considering changing it to be `ref T` vs. `scoped ref T`. That has the advantage that there is no need for the `escapes` keyword anymore as every value already has maximum return as the default hence only `scoped` is needed to restrict the behavior. The impact of this change is far more significant. It impacts all `struct` instances that have a `ref` returning method which is likely too big of a surface area to take a casual break to.
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
