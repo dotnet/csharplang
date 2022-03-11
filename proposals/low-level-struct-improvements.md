@@ -134,7 +134,7 @@ The [new Span<T> definition](#new-span) also reveals several [challenges](#new-s
 
 The rules we define for `ref` fields must ensure the `Span<T>` constructor properly restricts the *safe-to-escape* scope of constructed objects in the cases it captures `ref` state. At the same time it must ensure that we don't break the existing consumption rules for methods like `CreateSpan<T>`. 
 
-<a name="ref-fields-escape"></a>
+<a name="ref-field-escapes"></a>
 
 To accomplish this two new annotations will be introduced to help control how arguments influence lifetime of method calls: `[RefFieldEscapes]` and `[DoesNotEscape]`. The annotation `[RefFieldEscapes]` when applied to a `ref` parameter signifies that it can be captured as a `ref` field in a returned `ref struct`.
 
@@ -525,7 +525,7 @@ Methods that return `ref struct` that capture `ref` parameters as fields must de
 
 This attribute can be applied to methods, constructors and operators. Applying to any other member will be an error. 
 
-The semantics of this attribute, and how it impacts span safety rules, are described [above](#ref-fields-escape)
+The semantics of this attribute, and how it impacts span safety rules, are described [above](#ref-field-escapes)
 
 #### DoesNotEscape
 <a name="does-not-escape">
