@@ -886,9 +886,11 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
     // Okay: the safe-to-escape of `span` is *calling method* hence this is legal.
     return span;
 
-    // Okay: the parameter here is `scoped ref` hence `refLocal` does not contribute /
-    // ref-safe-to-escape, it only contributes safe-to-escape. That is *calling method* 
-    // hence this is legal.
+    // Okay: the local `refLocal` has a ref-safe-to-escape of *current method* and a 
+    // safe-to-escape of *calling method*. In the call below it is passed to a 
+    // parameter that is `scoped ref` which means it does not contribute 
+    // ref-safe-to-escape. It only contributes its safe-to-escape hence the returned
+    // rvalue ends up as safe-to-escape of *calling method*
     Span<int> local = default;
     ref Span<int> refLocal = ref local;
     return ComplexScopedRefExample(ref refLocal);
