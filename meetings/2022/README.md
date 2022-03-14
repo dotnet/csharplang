@@ -22,13 +22,15 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mar 21, 2022
 
-## Mar 14, 2022
-
-- File private accessibility (Steve, Jared): https://github.com/dotnet/csharplang/issues/5529
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Mar 14, 2022
+
+[C# Language Design Meeting for March 14th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-14.md)
+
+1. file private visibility
 
 ## Mar 9, 2022
 
