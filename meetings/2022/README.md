@@ -23,6 +23,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Mar 21, 2022
 
 - File private accessibility, continued (Steve, Jared): https://github.com/dotnet/csharplang/issues/5529
+- `static` local functions and lambdas with `field` (Fred): https://github.com/dotnet/csharplang/issues/5923
 
 # C# Language Design Notes for 2022
 
