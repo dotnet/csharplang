@@ -222,7 +222,7 @@ class B : A
 The _binary numeric promotions_ informative text (see [§11.4.7.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11473-binary-numeric-promotions)) in C# spec) is updated as follows:
 
 > -   …
-> -   Otherwise, if either operand is of type `ulong`, the other operand is converted to type `ulong`, or a binding-time error occurs if the other operand is of `type sbyte`, `short`, `int`, **`nint`**, or `long`.
+> -   Otherwise, if either operand is of type `ulong`, the other operand is converted to type `ulong`, or a binding-time error occurs if the other operand is of type `sbyte`, `short`, `int`, **`nint`**, or `long`.
 > -   **Otherwise, if either operand is of type `nuint`, the other operand is converted to type `nuint`, or a binding-time error occurs if the other operand is of type `sbyte`, `short`, `int`, `nint`, or `long`.**
 > -   Otherwise, if either operand is of type `long`, the other operand is converted to type `long`.
 > -   Otherwise, if either operand is of type `uint` and the other operand is of type `sbyte`, `short`, **`nint`,** or `int`, both operands are converted to type `long`.
@@ -307,7 +307,7 @@ Fields may be marked `volatile` for types `nint` and `nuint`.
 
 `typeof(nint)` is `typeof(IntPtr)`; `typeof(nuint)` is `typeof(UIntPtr)`.
 
-`sizeof(nint)` and `sizeof(nuint)` are supported but require compiling in an unsafe context (as does `sizeof(IntPtr)` and `sizeof(UIntPtr)`).
+`sizeof(nint)` and `sizeof(nuint)` are supported but require compiling in an unsafe context (as required for `sizeof(IntPtr)` and `sizeof(UIntPtr)`).
 The values are not compile-time constants.
 `sizeof(nint)` is implemented as `sizeof(IntPtr)` rather than `IntPtr.Size`; `sizeof(nuint)` is implemented as `sizeof(UIntPtr)` rather than `UIntPtr.Size`.
 
