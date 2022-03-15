@@ -223,7 +223,7 @@ The _binary numeric promotions_ informative text (see [§11.4.7.3](https://githu
 
 > -   …
 > -   Otherwise, if either operand is of type `ulong`, the other operand is converted to type `ulong`, or a binding-time error occurs if the other operand is of `type sbyte`, `short`, `int`, **`nint`**, or `long`.
-> -   **Otherwise, if either operand is of type `nuint`, the other operand is converted to type `nuint`, or a binding-time error occurs if the other operand is of `type sbyte`, `short`, `int`, `nint`, or `long`.**
+> -   **Otherwise, if either operand is of type `nuint`, the other operand is converted to type `nuint`, or a binding-time error occurs if the other operand is of type `sbyte`, `short`, `int`, `nint`, or `long`.**
 > -   Otherwise, if either operand is of type `long`, the other operand is converted to type `long`.
 > -   Otherwise, if either operand is of type `uint` and the other operand is of type `sbyte`, `short`, **`nint`,** or `int`, both operands are converted to type `long`.
 > -   Otherwise, if either operand is of type `uint`, the other operand is converted to type `uint`.
