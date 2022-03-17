@@ -218,6 +218,18 @@ class B : A
 }
 ```
 
+### Pointer arithmetic
+There are no predefined operators in C# for pointer addition or subtraction with native integer offsets.
+Instead, `nint` and `nuint` values are promoted to `long` and `ulong` and pointer arithmetic uses predefined operators for those types.
+```C#
+static int* AddLeftS(nint x, int* y) => x + y;   // T* operator +(long left, T* right)
+static int* AddLeftU(nuint x, int* y) => x + y;  // T* operator +(ulong left, T* right)
+static int* AddRightS(int* x, nint y) => x + y;  // T* operator +(T* left, long right)
+static int* AddRightU(int* x, nuint y) => x + y; // T* operator +(T* left, ulong right)
+static int* SubRightS(int* x, nint y) => x - y;  // T* operator -(T* left, long right)
+static int* SubRightU(int* x, nuint y) => x - y; // T* operator -(T* left, ulong right)
+```
+
 ### Binary numeric promotions
 The _binary numeric promotions_ informative text (see [§11.4.7.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11473-binary-numeric-promotions)) in C# spec) is updated as follows:
 
