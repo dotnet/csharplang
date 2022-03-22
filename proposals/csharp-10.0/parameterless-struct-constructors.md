@@ -63,6 +63,24 @@ Constructors cannot be `partial`.
 Execution of struct instance field initializers matches execution of class field initializers ([§14.11.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14113-instance-variable-initializers)) with **one qualifier**:
 > When an instance constructor has no constructor initializer, **or when the constructor initializer `this()` represents the default parameterless constructor**, ... that constructor implicitly performs the initializations specified by the _variable_initializers_ of the instance fields ... . This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor ... . The variable initializers are executed in the textual order in which they appear in the ... declaration.
 
+We also add the following language to [§15.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1549-constructors):
+
+> If the struct includes field initializers, then any constructors within the struct which have a `this()` constructor initializer referring to the default parameterless constructor are treated as though they do not have any constructor initializer.
+
+This means we get an error in a scenario like the following:
+
+```cs
+public struct S
+{
+    int x = 1;
+    int y;
+
+    public S(int y) : this() // error: Field 'S.y' must be fully assigned before control is returned to the caller
+    {
+    }
+}
+```
+
 ### Definite assignment
 Instance fields (other than `fixed` fields) must be definitely assigned in struct instance constructors that do not have a `this()` initializer (see [§15.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1549-constructors)).
 
