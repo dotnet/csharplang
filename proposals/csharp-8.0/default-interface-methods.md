@@ -29,7 +29,7 @@ The syntax for an interface is extended to permit
 - member declarations using the explicit interface implementation syntax; and
 - Explicit access modifiers (the default access is `public`).
 
-Members with bodies permit the interface to provide a "default" implementation for the method in classes and structs that do not provide an overriding implementation.
+Members with bodies permit the interface to provide a "default" implementation for the method in classes and structs that do not provide their own implementation.
 
 Interfaces may not contain instance state. While static fields are now permitted, instance fields are not permitted in interfaces. Instance auto-properties are not supported in interfaces, as they would implicitly declare a hidden field.
 
@@ -98,9 +98,9 @@ Interfaces may not declare instance constructors, destructors, or fields.
 
 > ***Closed Issue:*** We do not currently permit `partial` on an interface or its members. That would require a separate proposal. ***Decision***: Yes. <https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#permit-partial-in-interface>
 
-### Overrides in interfaces
+### Explicit implementation in interfaces
 
-Override declarations (i.e. those containing the `override` modifier) allow the programmer to provide a most specific implementation of a virtual member in an interface where the compiler or runtime would not otherwise find one. It also allows turning an abstract member from a super-interface into a default member in a derived interface. An override declaration is permitted to *explicitly* override a particular base interface method by qualifying the declaration with the interface name (no access modifier is permitted in this case). Implicit overrides are not permitted.
+Explicit implementations allow the programmer to provide a most specific implementation of a virtual member in an interface where the compiler or runtime would not otherwise find one. An implementation declaration is permitted to *explicitly* implement a particular base interface method by qualifying the declaration with the interface name (no access modifier is permitted in this case). Implicit implementations are not permitted.
 
 ```csharp
 interface IA
@@ -109,23 +109,21 @@ interface IA
 }
 interface IB : IA
 {
-    override void IA.M() { WriteLine("IB.M"); } // explicitly named
+    void IA.M() { WriteLine("IB.M"); } // Explicit implementation
 }
 interface IC : IA
 {
-    override void M() { WriteLine("IC.M"); } // implicitly named
+    void M() { WriteLine("IB.M"); } // Creates a new M, unrelated to `IA.M`. Warning
 }
 ```
 
-Override declarations in interfaces may not be declared `sealed`.
+Explicit implementations in interfaces may not be declared `sealed`.
 
-Public `virtual` function members in an interface may be overridden in a derived interface explicitly (by qualifying the name in the override declaration with the interface type that originally declared the method, and omitting an access modifier).
-
-`virtual` function members in an interface may only be overridden explicitly (not implicitly) in derived interfaces, and members that are not `public` may only be implemented in a class or struct explicitly (not implicitly). In either case, the overridden or implemented member must be *accessible* where it is overridden.
+Public `virtual` function members in an interface may only be implemented in a derived interface explicitly (by qualifying the name in the declaration with the interface type that originally declared the method, and omitting an access modifier). The member must be *accessible* where it is implemented.
 
 ### Reabstraction
 
-A virtual (concrete) method declared in an interface may be overridden to be abstract in a derived interface
+A virtual (concrete) method declared in an interface may be reabstracted in a derived interface
 
 ```csharp
 interface IA
@@ -139,17 +137,17 @@ interface IB : IA
 class C : IB { } // error: class 'C' does not implement 'IA.M'.
 ```
 
-The `abstract` modifier is not required in the declaration of `IB.M` (that is the default in interfaces), but it is probably good practice to be explicit in an override declaration.
+The `abstract` modifier is required in the declaration of `IB.M`, to indicate that `IA.M` is being reabstracted.
 
 This is useful in derived interfaces where the default implementation of a method is inappropriate and a more appropriate implementation should be provided by implementing classes.
 
 > ***Open Issue:*** Should reabstraction be permitted?
 
-### The most specific override rule
+### The most specific implementation rule
 
-We require that every interface and class have a *most specific override* for every virtual member among the overrides appearing in the type or its direct and indirect interfaces. The *most specific override* is a unique override that is more specific than every other override. If there is no override, the member itself is considered the most specific override.
+We require that every interface and class have a *most specific implementation* for every virtual member among the implementations appearing in the type or its direct and indirect interfaces. The *most specific implementation* is a unique implementation that is more specific than every other implementation. If there is no implementation, the member itself is considered the most specific implementation.
 
-One override `M1` is considered *more specific* than another override `M2` if `M1` is declared on type `T1`, `M2` is declared on type `T2`, and either
+One implementation `M1` is considered *more specific* than another implementation `M2` if `M1` is declared on type `T1`, `M2` is declared on type `T2`, and either
 
 1. `T1` contains `T2` among its direct or indirect interfaces, or
 2. `T2` is an interface type but `T1` is not an interface type.
@@ -169,8 +167,8 @@ interface IC : IA
 {
     void IA.M() { WriteLine("IC.M"); }
 }
-interface ID : IB, IC { } // error: no most specific override for 'IA.M'
-abstract class C : IB, IC { } // error: no most specific override for 'IA.M'
+interface ID : IB, IC { } // error: no most specific implementation for 'IA.M'
+abstract class C : IB, IC { } // error: no most specific implementation for 'IA.M'
 abstract class D : IA, IB, IC // ok
 {
     public abstract void M();
@@ -178,9 +176,9 @@ abstract class D : IA, IB, IC // ok
 
 ```
 
-The most specific override rule ensures that a conflict (i.e. an ambiguity arising from diamond inheritance) is resolved explicitly by the programmer at the point where the conflict arises.
+The most specific implementation rule ensures that a conflict (i.e. an ambiguity arising from diamond inheritance) is resolved explicitly by the programmer at the point where the conflict arises.
 
-Because we support explicit abstract overrides in interfaces, we could do so in classes as well
+Because we support explicit reabstractions in interfaces, we could do so in classes as well
 
 ```csharp
 abstract class E : IA, IB, IC // ok
@@ -189,9 +187,9 @@ abstract class E : IA, IB, IC // ok
 }
 ```
 
-> ***Open issue***: should we support explicit interface abstract overrides in classes?
+> ***Open issue***: should we support explicit interface abstract implementations in classes?
 
-In addition, it is an error if in a class declaration the most specific override of some interface method is an abstract override that was declared in an interface. This is an existing rule restated using the new terminology.
+In addition, it is an error if in a class declaration the most specific implementation of some interface method is an abstract implementation that was declared in an interface. This is an existing rule restated using the new terminology.
 
 ```csharp
 interface IF
@@ -201,7 +199,7 @@ interface IF
 abstract class F : IF { } // error: 'F' does not implement 'IF.M'
 ```
 
-It is possible for a virtual property declared in an interface to have a most specific override for its `get` accessor in one interface and a most specific override for its `set` accessor in a different interface. This is considered a violation of the *most specific override* rule.
+It is possible for a virtual property declared in an interface to have a most specific implementation for its `get` accessor in one interface and a most specific implementation for its `set` accessor in a different interface. This is considered a violation of the *most specific implementation* rule.
 
 ### `static` and `private` methods
 
