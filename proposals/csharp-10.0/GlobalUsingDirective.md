@@ -174,12 +174,12 @@ A *global_using_static_directive* only imports members and types declared direct
 
 Ambiguities between multiple *global_using_namespace_directive*s and *global_using_static_directives* are discussed in the section for *global_using_namespace_directive*s (above).
 
-## Qualified alias member [§13.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/namespaces.md#138-qualified-alias-member)
+## Qualified alias member [§13.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#138-qualified-alias-member)
 
 Changes are made to the algorithm determining the meaning of a *qualified_alias_member* as follows.
 
 This is the relevant bullet point with proposed additions (which are **in bold**):
-*  Otherwise, starting with the namespace declaration ([§13.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/namespaces.md#133-namespace-declarations)) immediately containing the *qualified_alias_member* (if any), continuing with each enclosing namespace declaration (if any), and ending with the compilation unit containing the *qualified_alias_member*, the following steps are evaluated until an entity is located:
+*  Otherwise, starting with the namespace declaration ([§13.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#133-namespace-declarations)) immediately containing the *qualified_alias_member* (if any), continuing with each enclosing namespace declaration (if any), and ending with the compilation unit containing the *qualified_alias_member*, the following steps are evaluated until an entity is located:
 
    * If the namespace declaration or compilation unit contains a *using_alias_directive* that associates `N` with a type, **or, when a compilation unit is reached, the program contains a *global_using_alias_directive* that associates `N` with a type,** then the *qualified_alias_member* is undefined and a compile-time error occurs.
    * Otherwise, if the namespace declaration or compilation unit contains an *extern_alias_directive* or *using_alias_directive* that associates `N` with a namespace, ***or, when a compilation unit is reached, the program contains a *global_using_alias_directive* that associates `N` with a namespace,** then:
