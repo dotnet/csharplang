@@ -1,4 +1,4 @@
-﻿# Function Pointers
+# Function Pointers
 
 ## Summary
 
@@ -274,7 +274,7 @@ In unsafe code, the following changes are made to the type inference algorithms:
 
 #### Input types
 
-[§11.6.3.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/expressions.md#11634-input-types)
+[§11.6.3.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11634-input-types)
 
 The following is added:
 
@@ -282,7 +282,7 @@ The following is added:
 
 #### Output types
 
-[§11.6.3.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/expressions.md#11635-output-types)
+[§11.6.3.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11635-output-types)
 
 The following is added:
 
@@ -290,7 +290,7 @@ The following is added:
 
 #### Output type inferences
 
-[§11.6.3.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/expressions.md#11637-output-type-inferences)
+[§11.6.3.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11637-output-type-inferences)
 
 The following bullet is added between bullets 2 and 3:
 
@@ -299,7 +299,7 @@ of `E` with the types `T1..Tk` yields a single method with return type `U`, then
 
 #### Better conversion from expression
 
-[§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/expressions.md#11644-better-conversion-from-expression)
+[§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression)
 
 The following sub-bullet is added as a case to bullet 2:
 
@@ -308,7 +308,7 @@ is identical to `U`, and the refness of `Vi` is identical to `Ui`.
 
 #### Lower-bound inferences
 
-[§11.6.3.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/expressions.md#116310-lower-bound-inferences)
+[§11.6.3.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116310-lower-bound-inferences)
 
 The following case is added to bullet 3:
 
@@ -332,7 +332,7 @@ Then, added after the 3rd bullet of inference from `Ui` to `Vi`:
 
 #### Upper-bound inferences
 
-[§11.6.3.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/expressions.md#116311-upper-bound-inferences)
+[§11.6.3.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116311-upper-bound-inferences)
 
 The following case is added to bullet 2:
 
