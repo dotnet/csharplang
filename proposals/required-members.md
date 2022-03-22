@@ -120,40 +120,16 @@ NB: An earlier version of this proposal had a larger metalanguage around initial
 that the constructor was setting all required members. This was deemed too complex for the initial release, and removed. We can look at adding more complex contracts and modifications as
 a later feature.
 
-### Grammar
+### Enforcement
 
-The grammar for a `constructor_initializer` is modified as follows:
+For every constructor `Ci` in type `T` with required members `R`, consumers calling `Ci` must do one of:
 
-```antlr
-constructor_initializer
-    : ':' constructor_chain
-    | ':' init_clause
-    | ':' constructor_chain init_clause
-    ;
+* Set all members of `R` in an _object\_initializer_ on the _object\_creation\_expression_,
+* Or set all members of `R` via the _named\_argument\_list_ section of an _attribute\_target_.
 
-constructor_chain
-    : 'base' '(' argument_list? ')'
-    | 'this' '(' argument_list? ')'
-    ;
+unless `Ci` is attributed with `SetsRequiredMembers`.
 
-init_clause
-    : 'init' '(' init_argument_list ')'
-    | 'init' 'required' '!'?
-    ;
-
-init_argument_list
-    : init_argument (',' init_argument)*
-    ;
-
-init_argument
-    : identifier init_argument_initializer?
-    | identifier '!'
-    ;
-
-init_argument_initializer
-    : '=' expression
-    ;
-```
+If the current context does not permit an _object\_initializer_ or is not an _attribute\_target_, and `Ci` is not attributed with `SetsRequiredMembers`, then it is an error to call `Ci`.
 
 ### `new()` constraint
 
@@ -202,18 +178,22 @@ this proposal should attempt to address it.
 The following 2 attributes are known to the C# compiler and required for this feature to function:
 
 ```cs
-namespace System.Runtime.CompilerServices;
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-public sealed class RequiredMemberAttribute : Attribute
+namespace System.Runtime.CompilerServices
 {
-    public RequiredMemberAttribute() {}
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    public sealed class RequiredMemberAttribute : Attribute
+    {
+        public RequiredMemberAttribute() {}
+    }
 }
 
-[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
-public sealed class SetsRequiredMembersAttribute : Attribute
+namespace System.Diagnostics.CodeAnalysis
 {
-    public SetsRequiredMembersAttribute() {}
+    [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
+    public sealed class SetsRequiredMembersAttribute : Attribute
+    {
+        public SetsRequiredMembersAttribute() {}
+    }
 }
 ```
 
