@@ -29,7 +29,7 @@ The syntax for an interface is extended to permit
 - member declarations using the explicit interface implementation syntax; and
 - Explicit access modifiers (the default access is `public`).
 
-Members with bodies permit the interface to provide a "default" implementation for the method in classes and structs that do not provide an overriding implementation.
+Members with bodies permit the interface to provide a "default" implementation for the method in classes and structs that do not provide their own implementation.
 
 Interfaces may not contain instance state. While static fields are now permitted, instance fields are not permitted in interfaces. Instance auto-properties are not supported in interfaces, as they would implicitly declare a hidden field.
 
@@ -119,9 +119,7 @@ interface IC : IA
 
 Explicit implementations in interfaces may not be declared `sealed`.
 
-Public `virtual` function members in an interface may be implemented in a derived interface explicitly (by qualifying the name in the override declaration with the interface type that originally declared the method, and omitting an access modifier).
-
-`virtual` function members in an interface may only be implemented explicitly (not implicitly) in derived interfaces, and members that are not `public` may only be implemented in a class or struct explicitly (not implicitly). In either case, the overridden or implemented member must be *accessible* where it is overridden.
+Public `virtual` function members in an interface may only be implemented in a derived interface explicitly (by qualifying the name in the declaration with the interface type that originally declared the method, and omitting an access modifier). The member must be *accessible* where it is implemented.
 
 ### Reabstraction
 
@@ -191,7 +189,7 @@ abstract class E : IA, IB, IC // ok
 
 > ***Open issue***: should we support explicit interface abstract implementations in classes?
 
-In addition, it is an error if in a class declaration the most specific override of some interface method is an abstract implementation that was declared in an interface. This is an existing rule restated using the new terminology.
+In addition, it is an error if in a class declaration the most specific implementation of some interface method is an abstract implementation that was declared in an interface. This is an existing rule restated using the new terminology.
 
 ```csharp
 interface IF
