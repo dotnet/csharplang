@@ -67,7 +67,7 @@ We also add the following language to [§15.4.9](https://github.com/dotnet/cshar
 
 > If the struct includes field initializers, then any constructors within the struct which have a `this()` constructor initializer referring to the default parameterless constructor are treated as though they do not have any constructor initializer.
 
-This means we get an error in a scenario like the following:
+This means an error is reported for the following:
 
 ```cs
 public struct S
