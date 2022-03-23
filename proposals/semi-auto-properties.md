@@ -189,3 +189,5 @@ The following changes are to be made to [§14.7.4](https://github.com/dotnet/csh
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-14.md#field-keyword
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-12.md#open-questions-for-field
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#open-questions-in-field
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#open-questions-in-field
