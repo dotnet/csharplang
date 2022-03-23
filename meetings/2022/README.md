@@ -21,6 +21,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Mar 23, 2022
 
 - Required members questions (Fred): https://github.com/dotnet/csharplang/issues/5945
+- Redeclaration in patterns (Julien): https://github.com/dotnet/csharplang/blob/bb8b0d8b12862ec0e4c04848fe47cff985eaa7a7/proposals/pattern-variables.md
 
 ## Mar 21, 2022
 
