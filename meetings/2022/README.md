@@ -20,6 +20,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mar 23, 2022
 
+- Required members questions (Fred): https://github.com/dotnet/csharplang/issues/5945
+
 ## Mar 21, 2022
 
 - File private accessibility, continued (Steve, Jared): https://github.com/dotnet/csharplang/issues/5529
