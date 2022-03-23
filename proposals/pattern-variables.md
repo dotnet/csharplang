@@ -2,72 +2,102 @@
 
 ## Summary  
 
-Allow variable declarations under `or` patterns and across `case` labels in a `switch` section.
+- Allow variable declarations under `or` and `not` patterns and across `case` labels in a `switch` section.
+	```cs
+	if (e is C c or Wrapper { Prop: C c })
+	    return c;
 
-## Motivation
+	Expr Simplify(Expr e)
+	{
+	  switch (e) {
+	    case Mult(Const(1), var x):
+	    case Mult(var x, Const(1)): 
+	    case Add(Const(0), var x):
+	    case Add(var x, Const(0)):
+		return Simplify(x);
+	    // ..
+	  }
+	}
+	```
+	Instead of:
 
-This feature would reduce code duplication where we could use the same piece of code if either of patterns is satisfied. For instance:
-```cs
-if (e is (int x, 0) or (0, int x))
-    Use(x);
-  
-switch (e)
-{
-    case (int x, 0):
-    case (0, int x):
-        Use(x);
-        break;
-}
-```
-Instead of:
+	```cs
+	if (e is C c1) 
+	    return c1;
+	if (e is Wrapper { Prop: C c2 }) 
+	    return c2;
 
-```cs
-if (e is (int x1, 0))
-    Use(x1);
-else if (e is (0, int x2))
-    Use(x2);
-  
-switch (e)
-{
-    case (int x, 0):
-        Use(x);
-        break;
-    case (0, int x):
-        Use(x);
-        break;
-}
-```
+	Expr Simplify(Expr e)
+	{
+	  switch (e) {
+	    case Mult(Const(1), var x):
+		return Simplify(x);
+	    case Mult(var x, Const(1)): 
+		return Simplify(x);
+	    case Add(Const(0), var x):
+		return Simplify(x);
+	    case Add(var x, Const(0)):
+		return Simplify(x);
+	    // ..
+	  }
+	}
+	```
 
+- Also relax single-declaration rules across the entire declaring scope as long as each variable is assigned once.
+	```cs
+	if (e is C c || e is Wrapper { Prop: C c }) ;
+	if (e is C c) ; else if (e is Wrapper { Prop: C c }) ;	
+	if (b ? e is C c : e is Warpper { Prop: C c }) ;
+	```
+	
 ## Detailed design
 
-Variables *must* be redeclared under all disjuncitve patterns because assignment of such variables depend on the order of evaluation which is undefined in the context of pattern-matching.
+### Variable redeclaration
 
-- In a *disjunctive_pattern*, pattern variables declared on one side must be redeclared on the other side.
-- In a *switch_section*, pattern variables declared under each case label must be redeclared under every other case label.
+- Pattern variables are allowed to be redeclared in the same scope if not already definitely assigned. These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
+- Pattern variables with multiple declarations must be of the same type, excluding tuple names and nullability for reference types.
 
-In any other case, variable declaration follows the usual scoping rules and is disallowed.
+### Definite assignment
 
-These names can reference either of variables based on the result of the pattern-matching at runtime. Under the hood, it's the same local being assigned in each pattern.
+For an *is_pattern_expression* of the form `e is pattern`, the definite assignment state of *v* after *is_pattern_expression* is determined by:
 
-Redeclaring pattern variables is only permitted for variables of the same type.
+- The state of *v* after *is_pattern_expression* is definitely assigned, if *pattern* is irrefutable.
+- Otherwise, the state of *v* after *is_pattern_expression* is the same as the state of *v* after *pattern*.
+
+For a *switch_section* of the form `case pattern_1 when condition_1: ... case pattern_N when condition_N:`, the definite assignment state of *v* is determined by:
+
+- The state of *v* before *condition_i* is definitely assigned, if the state of *v* after *pattern_i* is "definitely assigned when true".
+- The state of *v* before *switch_section_body* is definitely assigned, if the state of *v* after each *pattern_i* is "definitely assigned when true".
+- Otherwise, the state of *v* is not definitely assigned.
+
+#### General definite assignment rules for pattern variables
+
+The following rule applies to any *primary_pattern* *p* that declares a variable, namely *list_pattern*, *declaration_pattern*, *recursive_pattern*, and *var_pattern*, as well as any nested subpatterns.
+
+- The state of *v* after *p* is "definitely assigned when true".
+
+#### Definite assignment rules for pattern variables declared under logical patterns
+
+For a *disjunctive_pattern* *p* of the form `left or right`, the definite assignment state of *v* is determined by:
+- The state of *v* before *right* is definitely assigned if and only if the state of *v* after *left* is "definitely assigned when false".
+- The state of *v* after *p* is "definitely assigned when true" if the state of *v* after both *left* and *right* is "definitely assigned when true".
+- The state of *v* after *p* is "definitely assigned when false" if the state of *v* after either *left* or *right* is "definitely assigned when false".
+
+For a *conjunctive_pattern* *p* of the form `left and right`, the definite assignment state of *v* is determined by:
+- The state of *v* before *right* is definitely assigned if and only if the state of *v* after *left* is "definitely assigned when true".
+- The state of *v* after *p* is "definitely assigned when true" if the state of *v* after either *left* or *right* is "definitely assigned when true".
+- The state of *v* after *p* is "definitely assigned when false" if the state of *v* after both *left* and *right* is "definitely assigned when false".
+
+For a *negated_pattern* *p* of the form `not pattern`, the definite assignment state of *v* after *p* is determined by:
+- If the state of *v* after *pattern* is "definitely assigned when true", then the state of *v* after *p* is "definitely assigned when false".
+- If the state of *v* after *pattern* is "definitely assigned when false", then the state of *v* after *p* is "definitely assigned when true".
+
+These rules cover the existing top-level `is not` pattern variables. However, in any other scenario the variables could be left unassigned.
 
 ## Unresolved questions
-
-- How identical these types should be?
-- Could we support variable declarations under `not` patterns?
-    ```cs
-    if (e is not (int x, 0) and not (0, int x))
-    ```
-- Could we relax the scoping rules beyond pattern boundaries?
-    ```cs
-    if (e is (int x, 0) || a is (0, int x))
-    ```
-- Could we relax the redeclaration requirement in a switch section? 
-    ```cs
-    case (int x, 0) a when Use(x, a): // ok
-    case (0, int x) b when Use(x, b): // ok
-        Use(x); // ok
-        Use(a); // error; not definitely assigned
-        Use(b); // error; not definitely assigned
-        break;
-    ```
+- Should the redeclaration rules work in nested scopes?
+	```cs
+	if (e is C c) return;
+	if (e is C c) return; // allowed
+	{ if (e is C c) return; } // allowed?
+	```
