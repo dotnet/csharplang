@@ -110,11 +110,23 @@ public class C
 
 `required` is only valid in `class`, `struct`, and `record` types. It is not valid in `interface` types.
 
+`required` is not allowed to be applied to `ref` returning properties or, when they are added, `ref` fields.
+
+The compiler will issue a warning when `Obsolete` is applied to a required member of a type and:
+
+1. The type is not marked `Obsolete`, or
+2. Any constructor not attributed with `SetsRequiredMembersAttribute` is not marked `Obsolete`.
+
 ### `SetsRequiredMembersAttribute`
 
 All constructors in a type with required members, or whose base type specifies required members, must have those members set by a consumer when that constructor is called. In order to
 exempt constructors from this requirement, a constructor can be attributed with `SetRequiredMembersAttribute`, which removes these requirements. The constructor body is not validated
 to ensure that it definitely sets the required members of the type.
+
+`SetsRequiredMembersAttribute` removes _all_ requirements from a constructor, and those requirements are not checked for validity in any way. NB: this is the escape hatch if inheriting
+from a type with an invalid required members list is necessary: mark the constructor of that type with `SetsRequiredMembersAttribute`, and no errors will be reported.
+
+For record types, we will emit `SetsRequiredMembersAttribute` on the synthesized copy constructor of a record if the record type or any of its base types have required members.
 
 NB: An earlier version of this proposal had a larger metalanguage around initialization, allowing adding and removing individual required members from a constructor, as well as validation
 that the constructor was setting all required members. This was deemed too complex for the initial release, and removed. We can look at adding more complex contracts and modifications as
@@ -136,9 +148,11 @@ If the current context does not permit an _object\_initializer_ or is not an _at
 A type with a parameterless constructor that advertises a _contract_ is not allowed to be substituted for a type parameter constrained to `new()`, as there is no way
 for the generic instantiation to ensure that the requirements are satisfied.
 
-### Overriding, Hiding, and Inheriting
+### Accessibility
 
-It is an error to mark a member required if the member is less accessible than the member's containing type. This means the following cases are not allowed:
+It is an error to mark a member required if the member is less accessible than the member's containing type. If the member is a field, it cannot be marked `readonly`. If the member is a
+property, it must have a setter or initer that is at least as accessible as the least accessible constructor of the member's containing type not marked with `SetsRequiredMembersAttribute`.
+This means the following cases are not allowed:
 
 ```cs
 interface I
@@ -147,17 +161,23 @@ interface I
 }
 public class Base
 {
-    public virtual int Prop2 { get; }
+    public virtual int Prop2 { get; set; }
 
     protected required int _field; // Error: _field is not at least as visible as Base. Open question below about the protected constructor scenario
+
+    public required readonly int _field2; // Error: required fields cannot be readonly
     protected Base() { }
 }
 public class Derived : Base, I
 {
     required int I.Prop1 { get; } // Error: explicit interface implementions cannot be required as they cannot be set in an object initializer
 
-    public required override int Prop2 { get; } // Error: this property is hidden by Derived.Prop2 and cannot be set in an object initializer
+    public required override int Prop2 { get; set; } // Error: this property is hidden by Derived.Prop2 and cannot be set in an object initializer
     public new int Prop2 { get; }
+
+    public required int Prop3 { get; } // Error: Required member must have a setter or initer
+
+    public required int Prop4 { get; internal set; } // Error: Required member setter must be at least as visible as the constructor of Derived
 }
 ```
 
@@ -170,7 +190,7 @@ Overrides are allowed to mark a member `required` where it was not `required` in
 list of the derived type.
 
 Types are allowed to override required virtual properties. This means that if the base virtual property has storage, and the derived type tries to
-access the base implementation of that property, they could observe uninitialized storage. This is a general C# anti-pattern, and we don't think that
+access the base implementation of that property, they could observe uninitialized storage. NB: This is a general C# anti-pattern, and we don't think that
 this proposal should attempt to address it.
 
 ### Metadata Representation
