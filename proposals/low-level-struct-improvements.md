@@ -98,7 +98,7 @@ Span<int> BadUseExamples(int parameter)
 
 The impact of this compatibility break is expected to be very small. The impacted API shape made little sense in the abscene of `ref` fields hence it is unlikely customers created many of these. Experiments running tools to spot this API shape over existing repositories back up that assertion. The only repository with any significant counts of this shape is [dotnet/runtime](https://github.com/dotnet/runtime) and that is because that repo can create `ref` fields via the `ByReference<T>` intrinsic type.
 
-Even so the design must account for such APIs existing and give developers the tools to restore the existing lifetime rules when upgrading to C# 10. Specifically it must provide mechanisms that allow developers to annotate `ref` parameters as unable to escape by `ref` or `ref` field. That allows customers to define APIs in C# 11 that have the same C# 10 callsite rules for all known patterns.
+Even so the design must account for such APIs existing because express a valid pattern. Hence the design must give developers the tools to restore the existing lifetime rules when upgrading to C# 10. Specifically it must provide mechanisms that allow developers to annotate `ref` parameters as unable to escape by `ref` or `ref` field. That allows customers to define APIs in C# 11 that have the same C# 10 callsite rules for all known patterns.
 
 ## Detailed Design 
 The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.
@@ -106,7 +106,231 @@ The rules for `ref struct` safety are defined in the [span safety document](http
 ### Provide ref fields
 The language will allow developers to declare `ref` fields inside of a `ref struct`. This can be useful for example when encapsulating large mutable `struct` instances or defining high performance types like `Span<T>` in libraries besides the runtime.
 
-The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. However this section of the proposal is quite involved. The reason is to make sure the reader understands both the new rules and **why** they were chosen. There are a number of subtle interactions between `ref` fields and our [compat considerations](#compat-considerations) that are easy to miss. This section is meant to call these out and explain how they fit into the chosen rules.
+The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are `ref` re-assigned. 
+
+First though the *ref-safe-to-escape* rules for fields need to be updated to account for `ref` fields being user definable. They will be adjusted as follows:
+
+> An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
+> 1. If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
+> 2. Else if `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
+> 3. Else if `e` is of a reference type, it is *ref-safe-to-escape* from the enclosing method.
+> 4. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
+
+This is does not represent rule change though, the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to now declare their own `ref` fields and ensure they do so by the existing rules applied to `Span<T>`. 
+
+This means though that `ref` fields can be returned as `ref` from a `ref struct` but normal fields cannot.
+
+```c#
+ref struct RS
+{
+    ref int _refField;
+    int _field;
+
+    // Okay: this falls into bullet one above. 
+    public ref int Prop1 => ref _refField;
+
+    // Error: This is bullet four above and the *ref-safe-to-escape* of `this`
+    // in a `struct` is the current method scope.
+    public ref int Prop2 => ref _field;
+}
+```
+
+This may seem like an error at first glance but this is a deliberate design point. Again though, this is not a new rule being created by this proposal. It is instead acknowledging the existing rules `Span<T>` behaved by now that developers can declare their own `ref` state.
+
+Next the rules for `ref` re-assignment need to be adjusted. The primary scenario for `ref` re-assignment is `ref struct` constructors storing `ref` parameters into `ref` fields. The support will be more general but this is the core scenario. To support this the rules for ref re-assignment will be adjusted to account for `ref` fields as follows 
+
+> For a ref reassignment in the form ...
+> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
+> 2. `e1 = ref e2`: where `e1` is a local or parameter, the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
+
+That means the desired `Span<T>` constructor works without any extra annotation:
+
+```c#
+readonly ref struct Span<T>
+{
+    readonly ref T _field;
+    int _length;
+
+    public Span(ref T value)
+    {
+        // Falls into the `x.e1 = ref e2` case, where `x` is the implicit `this`. The 
+        // safe-to-escape of `this` and ref-safe-to-escape of `value` is *calling method* hence 
+        // this is legal.
+        _field = ref value;
+        _length = 1;
+    }
+}
+```
+
+To support the `ref` re-assignment rules above the rules must account for `ref` parameters now being captured as `ref`. This means the rules will account for `ref` parameters escaping both directly as a `ref` return and as a `ref` field in a `ref struct`. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape by `ref`. That is because lifetime rules for parameters are based soley on their declaration. Every `ref` parameter has the same *ref-safe-to-escape* value irrespective of how it is used inside the method. In order to support APIs where `ref` parameters can be escaping or non-escaping the language will introduce limited lifetime annotations.
+
+The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or the associated value and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the *current method*. For example: 
+
+| Parameter or Local | ref-safe-to-escape | safe-to-escape |
+|---|---|---|
+| `Span<int> s` | *current method* | *calling method* | 
+| `scoped Span<int> s` | *current method* | *current method* | 
+| `ref Span<int> s` | *calling method* | *calling method* | 
+| `scoped ref Span<int> s` | *current method* | *calling method* | 
+| `ref scoped Span<int> s` | *current method* | *current method* | 
+
+The declaration `scoped ref scoped Span<int>` is allowed but is redundant with `ref scoped Span<int>`. The *ref-safe-to-escape* of a value can never exceed the *safe-to-escape* hence once the *safe-to-escape* is restricted via `ref scoped` the *ref-safe-to-escape* is implicitly restricted as well.
+
+This allows for APIs in C# 11 to be annotated such that they have the same rules as C# 10:
+
+```c#
+Span<int> CreateSpan(scoped ref int parameters)
+{
+    // Just as with C# 10, the implementation of this method isn't relevant to callers.
+}
+
+Span<int> BadUseExamples(int parameter)
+{
+    // Okay in C# 10 and okay in C# 11 due to scoped ref
+    return CreateSpan(ref parameter);
+
+    // Okay in C# 10 and okay in C# 11 due to scoped ref
+    int local = 42;
+    return CreateSpan(ref local);
+
+    // Okay in C# 10 and okay in C# 11 due to scoped ref
+    Span<int> span = stackalloc int[42];
+    return CreateSpan(ref span[0]);
+}
+```
+
+The `scoped` annotation also means that the `this` parameter of a `struct` can now be completely expressed as `scoped ref T`. Previously it had to be special cased in the rules as `ref` parameter that had different *ref-safe-to-escape* rules than other `ref` parameters (see all the references to including or excluding the receiver). Now it can be expressed as a general concept throughout the rules.
+
+In addition to parameters the `scoped` annotation can be applied to locals or `struct` instance methods. These annotations have the same impact to lifetimes when applied to locals. For locals these annotations concretely define the lifetimes and override the lifetime that would be inferred via the initializer. 
+
+When applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
+
+```c#
+Span<int> ScopedLocalExamples()
+{
+    // Error: `span` has a safe-to-escape of *current method*. That is true even though the 
+    // initializeer has a safe-to-escape of *calling method*. The annotation overrides the 
+    // initializer
+    scoped Span<int> span = default;
+    return span;
+
+    // Okay: the initializer has safe-to-escape of *calling method* hence so does `span2` 
+    // and the return is legal.
+    Span<int> span2 = default;
+    return span2;
+
+    // The declarations of `span3` and `span4` are functionally identical because the 
+    // initializer has a safe-to-escape of *current method* meaning the `scoped` annotation
+    // is effectively implied on `span3`
+    Span<int> span3 = stackalloc int[42];
+    scoped Span<int> span4 = stackalloc int[42];
+}
+```
+
+The use on locals will be particularly helpful to code patterns which conditionally assign values with different *safe-to-escape* scope to locals. It means code no longer needs to rely on initializaion tricks like `= stackalloc byte[0]` to define a local *safe-to-escape* but now can simply use `scoped`. 
+
+```c#
+// Old way 
+// Span<byte> span = stackalloc byte[0];
+// New way 
+scoped Span<byte> span;
+int len = ...;
+if (len < MaxStackLen)
+{
+    span = stackalloc byte[len];
+}
+else
+{
+    span = new byte[len];
+}
+```
+
+This pattern comes up frequently in low level code. When the `ref struct` involved is `Span<T>` the above trick can be used. It is not applicable to other `ref struct` types though and can result in low level code needing to resort to `unsafe` to work around the inability to properly specify the lifetime. 
+
+The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` can be applied to any `ref` or `in` it can only be applied to values which are `ref struct`. Having declarations like `scoped int` adds no value to the rules and will be prevented to avoid developer confusion.
+
+
+The section is long so wanted to close with a brief summary of the proposed breaking changes:
+* A `ref` parameter on method returning a `ref struct` would be capturable as a `ref` field
+* A `out` parameter would be considered `ref-safe-to-escape` within the *current method*.
+
+
+These annotations also provide relief to existing scenarios. *go on about the scoped locals*
+
+** exmaples of ref fields and ref capture rules working together **
+
+Below are some examples of how these rules play out in real code:
+
+```c#
+ref struct RS
+{
+    ref int _refField;
+    int _field;
+
+    // Okay: this falls into bullet one above. 
+    public ref int Prop1 => ref _refField;
+
+    // Error: This is bullet four above and the *ref-safe-to-escape* of `this`
+    // in a `struct` is the current method scope.
+    public ref int Prop2 => ref _field;
+
+    public RS(int[] array)
+    {
+        _refField = ref array[0];
+    }
+
+    public RS(ref int i)
+    {
+        _refField = ref i;
+    }
+
+    public RS CreateRS() => ...;
+
+    public ref int M1(RS rs)
+    {
+        ref int local1 = ref rs.Prop1;
+
+        // Okay: this falls into bullet two above and the *safe-to-escape* of
+        // `rs` is outside the current method scope. Hence the *ref-safe-to-escape*
+        // of `local1` is outside the current method scope.
+        return ref local;
+
+        // Okay: this falls into bullet two above and the *safe-to-escape* of
+        // `rs` is outside the current method scope. Hence the *ref-safe-to-escape*
+        // of `local1` is outside the current method scope.
+        //
+        // In fact in this scenario you can guarantee that the value returned
+        // from Prop1 must exist on the heap. 
+        RS local2 = CreateRS();
+        return ref local2.Prop1;
+
+        // Error: the *safe-to-escape* of `local4` here is the current method 
+        // scope by the revised constructor rules. This falls into bullet two 
+        // above and hence based on that allowed scope.
+        int local3 = 42;
+        var local4 = new RS(ref local3);
+        return ref local4.Prop1;
+    }
+}
+```
+
+**OLD STUFF**
+
+The creation of `ref` fields mean the rules need to account for two types of `ref` escape: 
+
+1. Directly as a `ref` return
+2. As a `ref` field inside a `ref struct` returned by value
+
+The design could allow for `ref` parameters to have this level of granularity. Being annotated as 
+
+Allowing a `ref` parameter to specify it 
+
+Supporting this level of granularity 
+This level of granularity though significantly complicates 
+
+
+
+However this section of the proposal is quite involved. The reason is to make sure the reader understands both the new rules and **why** they were chosen. There are a number of subtle interactions between `ref` fields and our [compat considerations](#compat-considerations) that are easy to miss. This section is meant to call these out and explain how they fit into the chosen rules.
 
 The [new Span<T> definition](#new-span) also reveals several [challenges](#new-span-challenges) that must be resolved for the lifetime of types that contain `ref` fields. They must both take into account the lifetime of captured values as well as the compat considerations.
 
@@ -413,6 +637,11 @@ Detailed Notes:
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
 - The span safety rules for constructors, fields and assignment must be updated as outlined in this document.
 - The span safety rules need to include the definition of `ref` values that "refer to the heap". 
+
+### Return fields by ref
+<a name="return-field-by-ref">
+
+unscoped section
 
 ### Provide lifetime annotations
 The [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md) assigns escape scopes to locations based on their declaration: parameters are *ref-safe-to-escape* to calling method, `this` in a `struct` is *ref-safe-to-escape* within the current method, etc ... These defaults were chosen to make `Span<T>` and `ref` returns work with the predominant coding patterns in .NET.

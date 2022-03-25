@@ -1,3 +1,9 @@
 move to unscoped instead of escapes
 write doc in terms of the break
 tone down the compat issue
+clean up references to new-span (is that anchor still needed?)
+clean up references to new-span-challenges (is that anchor still needed?)
+clean up references to ref-field-reassignment (is that anchor still needed?)
+compat consideration section include
+  - discussion on allowing ref to have granularity of ref return
+consideration for relative lifetimes 
