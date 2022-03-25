@@ -7,17 +7,35 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule when convenient
 
-- Redeclaration in patterns (Julien): https://github.com/dotnet/csharplang/blob/bb8b0d8b12862ec0e4c04848fe47cff985eaa7a7/proposals/pattern-variables.md
-- Feedback on `!!` (*After design review and MVP Summit*): https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
 
 ## Recurring topics
 
 - *Triage championed features and milestones*
 - *Design review*
 
+
+## Apr 27, 2022
+
+## Apr 25, 2022
+
+## Apr 18, 2022
+
+## Apr 13, 2022
+
+## Apr 11, 2022
+
+## Apr 6, 2022
+
+- Feedback on `!!`: https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
+
 ## Mar 30, 2022
 
+[TBD]
+
 ## Mar 28, 2022
+
+- Redeclaration in patterns (Julien): https://github.com/dotnet/csharplang/blob/bb8b0d8b12862ec0e4c04848fe47cff985eaa7a7/proposals/pattern-variables.md
+- Disallow interfaces with static virtual member as type arguments? (Mads): https://github.com/dotnet/csharplang/issues/5955
 
 # C# Language Design Notes for 2022
 
