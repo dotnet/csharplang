@@ -20,9 +20,7 @@ This proposal plans to address these issues by building on top of our existing l
 - Allow the declaration of safe `fixed` buffers for managed and unmanaged types in `struct`
 
 ## Compat Considerations
-The biggest challenge in the proposals presented here is they must be compatible with our existing [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). That is the language can't introduce new lifetime safety errors for existing code patterns and that presents a challenge with several of the proposed features. It's important to understand these challenges as they significantly impact the design of the features.
-
-To understand the challenges here let's first consider how `Span<T>` will look once `ref` fields are supported.
+To understand the compat challenges in tihs design let's first consider how `Span<T>` will look once `ref` fields are supported.
 
 <a name="new-span"></a>
 
@@ -36,7 +34,6 @@ readonly ref struct Span<T>
     // of changing Span<T> to have ref fields. It is a convenient, and
     // safe, way to create a length one span over a stack value that today 
     // requires unsafe code.
-    [RefFieldEscapes]
     public Span(ref T value)
     {
         _field = ref value;
@@ -45,82 +42,63 @@ readonly ref struct Span<T>
 }
 ```
 
-The first challenge is the span safety rules make a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that `Span<T>` has no such constructor. By extension this also introduced a hard assumption that `ref` fields do not exist. This resulted in a significant simplification of the rules but it allows for a number of patterns that make introducing `ref` fields significantly more difficult. 
-
-Consider the following method signature:
+The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having having `ref` fields they do not allow for APIs, other than `stackalloc`, to create them. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` cannot exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
 
 ```c#
-Span<T> CreateSpan<T>(ref T parameter)
+Span<int> CreateSpan<int>()
 {
-    // The implementation of this method is irrelevant when considering the lifetime of the 
-    // returned Span<T>. The rules disallow capture of `parameter` hence the return of 
-    // CreateSpan<T> is always safe-to-escape to the calling method
-}
-```
-
-By the existing span safety rules the return of an invocation of this method always has a //*safe-to-escape* value of *calling method*. That is because in the span safety document `ref` fields do not exist and hence there is no way for the return to capture `parameter` hence there is no constraint on the return.  The implementation of the method is completely irrelevant here, which is why it's omitted from the sample, because there is simply no way for the `ref` to be captured. This means no matter how this method is called the return is *safe-to-escape* to the *calling method*.
-
-This is not a hypothetical pattern, there are APIs today in .NET which have this basic structure. Very likely in customer code as well. One such example is [AsnDecoder.ReadEnumeratedBytes](https://github.com/dotnet/runtime/blob/3580ba795d92444e99fe5a5bfa4883458a0d4ac5/src/libraries/System.Formats.Asn1/src/System/Formats/Asn1/AsnDecoder.Enumerated.cs#L48-L52). 
-
-
-```c#
-Span<T> CompatExample(ref int p)
-{
-    // Okay
+    // This is legal according to the 7.2 span rules because they do not account
+    // for a constructor in the form Span(ref T value) existing. 
     int local = 42;
-    return CreateSpan<int>(ref local);
-
-    // Okay
-    Span<T> span = stackalloc int[1];
-    return CreateSpan<int>(ref span[0]);
-
-    // Okay
-    int[] array = new int[42];
-    return CreatSpan(ref array[0]);
+    return new Span<int>(ref local);
 }
 ```
 
-All of the above `return` statements are legal by our existing rules because the return of `CreateSpan` is always *safe-to-escape* to the *calling method*. The challenge in this proposal, which comes up many times, is they **must** remain legal in the version of the language which implements these features and / or when `Span<T>` moves to using `ref` fields. The above patterns can legally exist today and cannot become errors when moving to a new language version. 
+<a name="ways-to-escape"></a>
 
-Further the design must ensure that once `ref` fields exist that implementations of `CreateSpan<T>` cannot suddenly begin capture the input arguments by `ref`. For example: 
+Effectively there are three ways for a `ref` parameter to escape from a method invocation: 
+
+1. By value
+2. By `ref` 
+3. By `ref` field
+
+The existing rules only account for (1) and (2). They do not account for (3) hence gaps like returning locals as `ref` fields are not accounted for. This design must change the rules to account for (3). This will have a small impact to compatibility for existing APIs. Specifically it will impact APIs that have the following properties.
+
+- Have a `Span<T>` or `ref struct` in the signature
+    - Where the `ref struct` is a return type, `ref` or `out` parameter
+    - Has an additional `in` or `ref` parameter excluding the receiver
+
+In C# 10 callers of such APIs never had to consider that `ref` state input to the API could be captured as a `ref` field. That allowed for several patterns to exist, safely in C# 10, that will be unsafe in C# 11 due to the ability for `ref` state to escape as a `ref` field. For example:
 
 <a name="new-span-challenges"></a>
 
 ```c#
-Span<int> UseSpan()
+Span<int> CreateSpan(ref int parameter)
 {
-    // This code is 100% legal and safe in C# today. The span safety rules and .NET runtime 
-    // ensure that CreateSpan **cannot** capture the parameter in the returned Span<T>. Hence
-    // the result is always returnable. 
-    // 
-    // The rules created for ref fields must ensure this remains legal else it becomes a 
-    // breaking change when moving to the new compiler.
-    int local = 42;
-    Span<int> span = CreateSpan(ref local);
-    return span;
+    // The implementation of this method is irrelevant when considering the lifetime of the 
+    // returned Span<T>. The span safety rules only look at the method signature, not the 
+    // implementation. In C# 10 ref fields didn't exist hence there was no way for `parameter`
+    // to escape by ref in this method
 }
 
-Span<T> CreateSpan<T>(ref T parameter)
+Span<int> BadUseExamples(int parameter)
 {
-    // This will create a length one Span<T> over the value referred to by `parameter`.
-    // Effectively `span[0]` and `parameter` refer to the same location. 
-    Span<T> span = new Span<T>(ref parameter);
+    // Okay in C# 10 but must be illegal in C# 11
+    return CreateSpan(ref parameter);
 
-    // Error: this must be illegal because our existing span safety rules assume the returned
-    // Span<T> cannot capture `parameter`. Existing code could be using `CreateSpan(ref someLocal)`
-    // and passing the returned Span<T> to the caller. That code is legal today and this 
-    // proposal should not introduce new errors when calling CreateSpan<T>.
-    //
-    // Another way of thinking about this sample is that it can be safely done. It is only
-    // returning references to values that live beyond this method call. But our existing
-    // rules hide that this could be happening and callers do not account for it.
-    return span;
+    // Okay in C# 10 but must be illegal in C# 11
+    int local = 42;
+    return CreateSpan(ref local);
+
+    // Okay in C# 10 but must be illegal in C# 11
+    Span<int> span = stackalloc int[42];
+    return CreateSpan(ref span[0]);
 }
 ```
 
-It will be possible for such methods to exist. Specifically methods which take `ref` parameters, capture them in `ref` fields and return them. But they require a declarative opt-in to let the compiler, and developer, know that it is happening and to adjust the span safety rules accordingly.
+The impact of this compatibility break is expected to be very small. The impacted API shape made little sense in the abscene of `ref` fields hence it is unlikely customers created many of these. Experiments running tools to spot this API shape over existing repositories back up that assertion. The only repository with any significant counts of this shape is [dotnet/runtime](https://github.com/dotnet/runtime) and that is because that repo can create `ref` fields via the `ByReference<T>` intrinsic type.
 
-It is important to understand these compat considerations before diving too far into the proposal here as they are central to parts of the design.
+Even so the design must account for such APIs existing and give developers the tools to restore the existing lifetime rules when upgrading to C# 10. Specifically it must provide mechanisms that allow developers to annotate `ref` parameters as unable to escape by `ref` or `ref` field. That allows customers to define APIs in C# 11 that have the same C# 10 callsite rules for all known patterns.
 
 ## Detailed Design 
 The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.

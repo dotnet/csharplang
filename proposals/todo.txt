@@ -1,0 +1,3 @@
+move to unscoped instead of escapes
+write doc in terms of the break
+tone down the compat issue
