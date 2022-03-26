@@ -30,12 +30,13 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mar 30, 2022
 
-[TBD]
+- Open questions with static virtual members (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/static-abstracts-in-interfaces.md
 
 ## Mar 28, 2022
 
 - Redeclaration in patterns (Julien): https://github.com/dotnet/csharplang/blob/bb8b0d8b12862ec0e4c04848fe47cff985eaa7a7/proposals/pattern-variables.md
 - Disallow interfaces with static virtual member as type arguments? (Mads): https://github.com/dotnet/csharplang/issues/5955
+- Self-constraints? (Mads): https://github.com/dotnet/csharplang/issues/5413#issuecomment-1079584415
 
 # C# Language Design Notes for 2022
 
