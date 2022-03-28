@@ -20,7 +20,7 @@ This proposal plans to address these issues by building on top of our existing l
 - Allow the declaration of safe `fixed` buffers for managed and unmanaged types in `struct`
 
 ## Compat Considerations
-To understand the compat challenges in tihs design let's first consider how `Span<T>` will look once `ref` fields are supported.
+To understand the compat challenges in this design let's first consider how `Span<T>` will look once `ref` fields are supported.
 
 <a name="new-span"></a>
 
@@ -150,7 +150,7 @@ The `ref` fields feature requires runtime support and changes to the ECMA spec t
 
 The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are `ref` re-assigned. 
 
-First though the *ref-safe-to-escape* rules for fields need to be updated to account for `ref` fields being user definable. They will be adjusted as follows:
+First the rules establishing *ref-safe-to-escape* values for fields needs to be updated for `ref` fields as follows:
 
 > An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
 > 1. If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
@@ -158,9 +158,9 @@ First though the *ref-safe-to-escape* rules for fields need to be updated to acc
 > 3. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
 > 4. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
 
-This is does not represent rule change though, the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to now declare their own `ref` fields and ensure they do so by the existing rules applied to `Span<T>`. 
+This is does not represent rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to now declare their own `ref` fields and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
 
-This means though that `ref` fields can be returned as `ref` from a `ref struct` but normal fields cannot.
+This does mean though that `ref` fields can be returned as `ref` from a `ref struct` but normal fields cannot.
 
 ```c#
 ref struct RS
@@ -821,23 +821,9 @@ Taken together this means syntax should be considered.
 
 A rough sketch of the syntax would be: 
 
-- `[DoesNotEscape]` maps to `scoped` 
-- `[RefThisEscapes]` maps to `unscoped`
-- `[RefFieldEscapes]` maps to `unscoped` but attached to the `ref` of the method.
-- `[RefFieldDoesNotEscape]` (assuming the [breaking change](#breaking)) maps to `scoped` on the `ref`
-
-Examples:
-
-```c#
-Span<T> CreateSpan<T>(escapes ref T value) => new Span<T>(value)
-
-escapes struct S 
-{
-    int field;
-
-    ref int Prop => ref field;
-}
-```
+- `[RefDoesNotEscape]` maps to `scoped ref` 
+- `[DoesNotEscape]` maps to `scoped`
+- `[RefDoesEscape]` maps to `unscoped`
 
 **Decision** Use synatx
 
@@ -858,6 +844,8 @@ class FixedBufferLocals
 This holds together but does require us to extend the syntax for locals a bit.  Unclear if this is or isn't worth the extra complexity. Possible we could decide no for now and bring back later if sufficient need is demonstrated.
 
 Example of where this would be beneficial: https://github.com/dotnet/runtime/pull/34149
+
+**Decision** hold off on this for now
 
 ### To use modreqs or not
 A decision needs to be made if methods marked with new lifetime attributes should or should not translate to `modreq` in emit. There would be effectively a 1:1 mapping between annotations and `modreq` if this approach was taken.
