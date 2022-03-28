@@ -279,7 +279,7 @@ Other uses for `scoped` on locals are discussed [below](#exmaples-scoped-locals)
 
 The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` can be applied to any `ref` or `in` it can only be applied to values which are `ref struct`. Having declarations like `scoped int` adds no value to the rules and will be prevented to avoid developer confusion.
 
-<a name="out-compat-change">
+<a name="out-compat-change"></a>
 
 To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *ref-safe-to-escape* value for `out` parameters to be *current method*. Effectively `out` parameters are implicitly `scoped out` going forward. From a compat perspective this means they cannot be returned by `ref` anymore:
 
