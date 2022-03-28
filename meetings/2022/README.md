@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
+- Relax requirement that in a RAW interpolated string that you cannot have more than 2n-1 braces in a row (where N is the number of $ signs).  (cyrusn).
+
 
 ## Schedule when convenient
 
