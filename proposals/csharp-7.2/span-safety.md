@@ -294,6 +294,8 @@ We wish to ensure that no `ref` local variable, and no variable of `ref struct` 
 These explanations and samples help explain why many of the safety rules above exist
 
 ### Method Arguments Must Match
+<a name="method-arguments-must-match"></a>
+
 When invoking a method where there is an `out` or `ref` parameter that is a `ref struct` then all of the `ref struct` parameters need to have the same lifetime. This is necessary because C# must make all of its decisions around lifetime safety based on the information available in the signature of the method and the lifetime of the values at the call site. 
 
 When there are `ref` parameters that are `ref struct` then there is the potential that they could swap around their contents. Hence at the call site we must ensure all of these **potential** swaps are compatible. If the language didn't enforce that then it will allow for bad code like the following.

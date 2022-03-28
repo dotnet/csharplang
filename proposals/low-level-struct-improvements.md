@@ -42,7 +42,7 @@ readonly ref struct Span<T>
 }
 ```
 
-The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having having `ref` fields they do not allow for APIs, other than `stackalloc`, to create them. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` cannot exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
+The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
 
 ```c#
 Span<int> CreateSpan<int>()
@@ -83,14 +83,14 @@ Span<int> CreateSpan(ref int parameter)
 
 Span<int> BadUseExamples(int parameter)
 {
-    // Okay in C# 10 but must be illegal in C# 11
+    // Legal in C# 10 but would be illegal with ref fields
     return CreateSpan(ref parameter);
 
-    // Okay in C# 10 but must be illegal in C# 11
+    // Legal in C# 10 but would be illegal with ref fields
     int local = 42;
     return CreateSpan(ref local);
 
-    // Okay in C# 10 but must be illegal in C# 11
+    // Legal in C# 10 but would be illegal with ref fields
     Span<int> span = stackalloc int[42];
     return CreateSpan(ref span[0]);
 }
@@ -98,7 +98,7 @@ Span<int> BadUseExamples(int parameter)
 
 The impact of this compatibility break is expected to be very small. The impacted API shape made little sense in the abscene of `ref` fields hence it is unlikely customers created many of these. Experiments running tools to spot this API shape over existing repositories back up that assertion. The only repository with any significant counts of this shape is [dotnet/runtime](https://github.com/dotnet/runtime) and that is because that repo can create `ref` fields via the `ByReference<T>` intrinsic type.
 
-Even so the design must account for such APIs existing because express a valid pattern. Hence the design must give developers the tools to restore the existing lifetime rules when upgrading to C# 10. Specifically it must provide mechanisms that allow developers to annotate `ref` parameters as unable to escape by `ref` or `ref` field. That allows customers to define APIs in C# 11 that have the same C# 10 callsite rules for all known patterns.
+Even so the design must account for such APIs existing because it express a valid pattern, just not a common one. Hence the design must give developers the tools to restore the existing lifetime rules when upgrading to C# 10. Specifically it must provide mechanisms that allow developers to annotate `ref` parameters as unable to escape by `ref` or `ref` field. That allows customers to define APIs in C# 11 that have the same C# 10 callsite rules.
 
 ## Detailed Design 
 The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.
@@ -146,9 +146,9 @@ struct S1
 }
 ```
 
-The `ref` fields feature requires runtime support and changes to the ECMA spec to allow the construct. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here https://github.com/dotnet/runtime/issues/64165
+This feature requires runtime support and changes to the ECMA spec. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here https://github.com/dotnet/runtime/issues/64165
 
-The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are `ref` re-assigned. 
+The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref re-assigned. 
 
 First the rules establishing *ref-safe-to-escape* values for fields needs to be updated for `ref` fields as follows:
 
@@ -158,7 +158,7 @@ First the rules establishing *ref-safe-to-escape* values for fields needs to be 
 > 3. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
 > 4. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
 
-This is does not represent rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to now declare their own `ref` fields and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
+This is does not represent rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to access `ref` fields directly and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
 
 This does mean though that `ref` fields can be returned as `ref` from a `ref struct` but normal fields cannot.
 
@@ -171,7 +171,7 @@ ref struct RS
     // Okay: this falls into bullet one above. 
     public ref int Prop1 => ref _refField;
 
-    // Error: This is bullet four above and the *ref-safe-to-escape* of `this`
+    // Error: This is bullet four above and the ref-safe-to-escape of `this`
     // in a `struct` is the current method scope.
     public ref int Prop2 => ref _field;
 }
@@ -179,7 +179,7 @@ ref struct RS
 
 This may seem like an error at first glance but this is a deliberate design point. Again though, this is not a new rule being created by this proposal, it is instead acknowledging the existing rules `Span<T>` behaved by now that developers can declare their own `ref` state.
 
-Next the rules for `ref` re-assignment need to be adjusted for the presence of `ref` fields. The primary scenario for `ref` re-assignment is `ref struct` constructors storing `ref` parameters into `ref` fields. The support will be more general but this is the core scenario. To support this the rules for ref re-assignment will be adjusted to account for `ref` fields as follows:
+Next the rules for ref re-assignment need to be adjusted for the presence of `ref` fields. The primary scenario for ref re-assignment is `ref struct` constructors storing `ref` parameters into `ref` fields. The support will be more general but this is the core scenario. To support this the rules for ref re-assignment will be adjusted to account for `ref` fields as follows:
 
 <a name="rules-ref-re-assignment"></a>
 
@@ -206,13 +206,11 @@ readonly ref struct Span<T>
 }
 ```
 
-To support `ref` re-assignment the span safety rules need to account for `ref` parameters being returned as a `ref` field. This is in addition to them being already directly returnable by `ref`. The rules could account for both types of returns independently but that significantly complicates the span safety rules for very little gain. Instead the rules will allow for any value that is *ref-safe-to-escape* to the *calling method* to be returnable directly by `ref` or as a `ref` field. 
-
-As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based soley on their declaration not on their usage. All `ref` and `in` parameters are *ref-safe-to-escape* to the *calling method* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the langauge will introduce limited lifetime annotations.
+The change to ref re-assignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based soley on their declaration not on their usage. All `ref` and `in` parameters are *ref-safe-to-escape* to the *calling method* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the langauge will introduce limited lifetime annotations.
 
 <a name="rules-scoped"></a>
 
-The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or the associated value and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the *current method*. For example: 
+The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or a value that is a `ref struct` and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the *current method*. For example: 
 
 | Parameter or Local | ref-safe-to-escape | safe-to-escape |
 |---|---|---|
@@ -234,24 +232,22 @@ Span<int> CreateSpan(scoped ref int parameters)
 
 Span<int> BadUseExamples(int parameter)
 {
-    // Okay in C# 10 and okay in C# 11 due to scoped ref
+    // Legal in C# 10 and legal in C# 11 due to scoped ref
     return CreateSpan(ref parameter);
 
-    // Okay in C# 10 and okay in C# 11 due to scoped ref
+    // Legal in C# 10 and legal in C# 11 due to scoped ref
     int local = 42;
     return CreateSpan(ref local);
 
-    // Okay in C# 10 and okay in C# 11 due to scoped ref
+    // Legal in C# 10 and legal in C# 11 due to scoped ref
     Span<int> span = stackalloc int[42];
     return CreateSpan(ref span[0]);
 }
 ```
 
-The `scoped` annotation also means that the `this` parameter of a `struct` can now be completely expressed as `scoped ref T`. Previously it had to be special cased in the rules as `ref` parameter that had different *ref-safe-to-escape* rules than other `ref` parameters (see all the references to including or excluding the receiver). Now it can be expressed as a general concept throughout the rules.
+The `scoped` annotation also means that the `this` parameter of a `struct` can now be defined as `scoped ref T`. Previously it had to be special cased in the rules as `ref` parameter that had different *ref-safe-to-escape* rules than other `ref` parameters (see all the references to including or excluding the receiver in the span safety rules). Now it can be expressed as a general concept throughout the rules which further simplifies them.
 
 In addition to parameters the `scoped` annotation can be applied to locals or `struct` instance methods. These annotations have the same impact to lifetimes when applied to locals. For locals these annotations concretely define the lifetimes and override the lifetime that would be inferred via the initializer. 
-
-When applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
 
 ```c#
 Span<int> ScopedLocalExamples()
@@ -277,11 +273,13 @@ Span<int> ScopedLocalExamples()
 
 Other uses for `scoped` on locals are discussed [below](#exmaples-scoped-locals).
 
-The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` can be applied to any `ref` or `in` it can only be applied to values which are `ref struct`. Having declarations like `scoped int` adds no value to the rules and will be prevented to avoid developer confusion.
+When `scoped` is applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
+
+The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` can be applied to any `ref`, `in` or `out` it can only be applied to values which are `ref struct`. Having declarations like `scoped int` adds no value to the rules and will be prevented to avoid developer confusion.
 
 <a name="out-compat-change"></a>
 
-To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *ref-safe-to-escape* value for `out` parameters to be *current method*. Effectively `out` parameters are implicitly `scoped out` going forward. From a compat perspective this means they cannot be returned by `ref` anymore:
+To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *ref-safe-to-escape* value for `out` parameters to be *current method*. Effectively `out` parameters are implicitly `scoped out` going forward. From a compat perspective this means they cannot be returned by `ref`:
 
 ```c#
 ref int Sneaky(out int i) 
@@ -308,7 +306,7 @@ Span<int> Use()
     // If we keep current `out` ref-safe-to-escape this is an error. The langauge must consider
     // the `read` parameter as returnable as a `ref` field
     //
-    // If we change `out` ref-safe-to-escape this is an okay. The langauge does not consider the 
+    // If we change `out` ref-safe-to-escape this is legal. The langauge does not consider the 
     // `read` parameter to be returnable hence this is safe
     int read;
     return Read(buffer, out read);
@@ -322,7 +320,7 @@ The span safety rules will be written in terms of `scoped ref` and `ref`. For sp
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
 
 > 1. If `p` is `scoped ref` then `a` does not contribute *ref-safe-to-escape* when considering arguments. Note that `ref scoped` is included here as it implies `scoped ref scoped`.
-> 2. If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. Note that `ref scoped` is included here as the value is `scoped`
+> 2. If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. 
 
 The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime as the `scoped` annotation prevents it.
 
@@ -347,14 +345,14 @@ This rule now lets us define the two variants of desired methods:
 Span<int> CreateWithoutCapture(scoped ref int value)
 {
     // Error: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
-    // of the ref argument. That is the current method for value hence this is not allowed.
+    // of the ref argument. That is the *current method* for value hence this is not allowed.
     return new Span<int>(ref value);
 }
 
 Span<int> CreateAndCapture(ref int value)
 {
     // Okay: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
-    // of the ref argument. That is the calling method for value hence this is not allowed.
+    // of the ref argument. That is the *calling method* for value hence this is not allowed.
     return new Span<int>(ref value)
 }
 
@@ -385,9 +383,9 @@ The presence of `scoped` allows us to also refine the method arguments must matc
 
 > For a method invocation if there is a `ref` or `scoped ref` argument of a `ref struct` type with *safe-to-escape* E1 then no argument may contribute a narrower *safe-to-escape* than E1.
 
-Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match)
+Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
 
-The section is long so wanted to close with a brief summary of the proposed breaking changes:
+The section on `ref` field and `scoped` is long so wanted to close with a brief summary of the proposed breaking changes:
 
 * A value that has *ref-safe-to-escape* to the *calling method* is returnable by `ref` or `ref` field.
 * A `out` parameter would be considered `ref-safe-to-escape` within the *current method*.
@@ -475,7 +473,7 @@ ref int SneakyOut(unscoped out int i)
 }
 ```
 
-For the purposes of span safety rules, such an `unscoped out` is considered simply a `ref`. 
+For the purposes of span safety rules, such an `unscoped out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes.
 
 Detailed Notes:
 - An instance method or property annotated with `unscoped` has *ref-safe-to-escape* of `this` set to the *calling method*. It means `this` is effectively a `ref` parameter to the method.
@@ -486,13 +484,13 @@ Detailed Notes:
     - Any member that is not declared on a `struct`
     - Any `static` member or constructor on a `struct`
 
-### LifetimeAttribute
+### LifetimeAnnotationAttribute
 The `scoped` and `unscoped` annotations will be emitted into metadata via the type `System.Runtime.CompilerServices.LifetimeAttribute` attribute. This attribute will be matched by name meaning it does not need to appear in any specific assembly.
 
 The type will have the following definition:
 
 ```c#
-[AttributeUsage(All)]
+[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter)]
 public sealed class LifetimeAnnotationAttribute : Attribute
 {
     public bool IsRefScoped { get; set; }
@@ -543,9 +541,10 @@ This also has the added benefit that it will make `fixed` buffers easier to cons
 The backing storage for the buffer will be generated using the `[InlineArray]` attribute. This is a mechanism discussed in [issue 12320](https://github.com/dotnet/runtime/issues/12320) which allows specifically for the case of efficiently declaring sequence of fields of the same type. This particular issue is still under active discussion and the expectation is that the implementation of this feature will follow however that discussion goes.
 
 ## Considerations
+There are considerations other parts of the development stack should consider when evaluating this feature.
 
 ### Reference Assemblies
-A reference assembly for a compilation using features described in this proposal must maintain the elements that convey span safety information. That means all lifetime annotation attributes and `[RefFieldEscapes]` must be preserved in their original position. Any attempt to replace or omit them can lead to invalid reference assemblies.
+A reference assembly for a compilation using features described in this proposal must maintain the elements that convey span safety information. That means all lifetime annotation attributes must be preserved in their original position. Any attempt to replace or omit them can lead to invalid reference assemblies.
 
 Representing `ref` fields is more nuanced. Ideally a `ref` field would appear in a reference assembly as would any other field. However a `ref` field represents a change to the metadata format and that can cause issues with tool chains that are not updated to understand this metadata change. A concrete example is C++/CLI which will likely error if it consumes a `ref` field. Hence it's advantageous if `ref` fields can be omitted from reference assemblies in our core libraries. 
 
@@ -670,11 +669,7 @@ This pattern comes up frequently in low level code. When the `ref struct` involv
 #### scoped parameter values
 One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
 
-The main friction point occurs because of the following constraint around method invocations:
-
-> For a method invocation if there is a `ref` or `scoped ref` argument of a `ref struct` type, with *safe-to-escape* E1, then no argument may contribute a narrower *safe-to-escape* than E1.
-
-This rule most commonly comes into play with instance methods on `ref struct` where at least one parameter is also a `ref struct`. This is a common pattern in low level code where `ref struct` types commonly leverage `Span<T>` parameters in their methods. For example it will occur on any writer style `ref struct` that uses `Span<T>` to pass around buffers.
+The main friction point occurs because of the [method arguments must match](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#method-arguments-must-match) rule. This rule most commonly comes into play with instance methods on `ref struct` where at least one parameter is also a `ref struct`. This is a common pattern in low level code where `ref struct` types commonly leverage `Span<T>` parameters in their methods. For example it will occur on any writer style `ref struct` that uses `Span<T>` to pass around buffers.
 
 This rule exists to prevent scenarios like the following:
 
@@ -737,7 +732,7 @@ class C
 
 In order to work around this low level code will resort to `unsafe` tricks to lie to the compiler about the lifetime of their `ref struct`. This significantly reduces the value proposition of `ref struct` as they are meant to be a means to avoid `unsafe` while continuing to write high performance code.
 
-This is where `scoped` is an effective tool on `ref struct` parameters because it removes them from consideration as being returned from the method. A `ref struct` parameter which is consumed, but never returned, can be labeled as `scoped` to make call sites more flexible. 
+This is where `scoped` is an effective tool on `ref struct` parameters because it removes them from consideration as being returned from the method according to the updated [method arguments must match rule](#rules-method-arguments-must-match). A `ref struct` parameter which is consumed, but never returned, can be labeled as `scoped` to make call sites more flexible. 
 
 ```c#
 ref struct JsonReader
@@ -856,7 +851,7 @@ The initial span safety work did not use `modreq` but instead relied on language
 
 The concern is whether or not this is overkill. It does have the negative impact that making signatures more flexible, by say adding `[DoesNotEscape]` to a paramater, will result in a binary compat change. That trade off means that over time frameworks like BCL likely won't be able to relax such signatures. It could be mitigated to a degree by taking some approach the language does with `in` parameters and only apply `modreq` in virtual positions. 
 
-**Decision** Do not use `modreq` in metadata
+**Decision** Do not use `modreq` in metadata. The difference between `out` and `ref` is not `modreq` but they now have different span safety lifetimes. There is no real benefit to only half enforcing the rules with `modreq` here.
 
 ### Allow multi-dimensional fixed buffers
 Should the design for `fixed` buffers be extended to include multi-dimensional style arrays? Essentially allowing for declarations like the following:
@@ -935,8 +930,7 @@ struct FrugalList<T>
 
     public ref T this[int index]
     {
-        [RefThisEscapes]
-        get
+        unscoped get
         {
             switch (index)
             {
