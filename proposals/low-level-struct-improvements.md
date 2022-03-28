@@ -880,11 +880,28 @@ struct Dimensions
 }
 ```
 
-## Decisions
+**Decision** Do not allow for now
 
-- Take the compat break around `ref` parameters being returnable as `ref` fields
-- Use syntax for lifetime annotations intsead of attributes 
-- Do not use `modreq` for the metadata
+## Future Considerations
+
+### Advanced lifetime annotations
+The lifetime annotations in this proosal are limited in that they allow developers to change the default escape / don't escape behavior of values. This does add powerful flexibility to our model but it does not radically change the set of relationships that can be expressed. At the core the C# model is still effectively binary: can a value be returned or not?
+
+That allows limited lifetime relationships to be understood. For example a value that can't be returned from a method has a smaller lifetime than one that can be returned from a method. There is no way to describe the lifetime relationship between values that can be returned from a method though. Specifically there is no way to say that one value has a larger lifetime than the other once it's established both can be returned from a method. The next step in our lifetime evolution would be allowing such relationships to be described. 
+
+Other methods such as Rust allow this type of relationship to be expressed and hence can implement handle more complex `scoped` style operations. Our language could similarly benifit if such a feature were included. At the moment there is no movitating pressure to do this but if there is in the future our `scoped` model could be expanded to inclued it in a fairly straight forward fashion. 
+
+Every `scoped` could be assigned a named lifetime by adding a generic style argument to the syntax. For example `scoped<'a>` is a value that has lifetime `'a`. Constraints like `where` could then be used to describe the relationships between these lifetimes.
+
+```c#
+void M(scoped<'a> ref MyStruct s, scoped<'b> Span<int> span)
+  where 'b >= 'a
+{
+    s.Span = span;
+}
+```
+
+This method defines two lifetimes `'a` and `'b` and there relationship, specifically that `'b` is greater than `'a`. This allows for the callsite to have more granular rules for how values can be safely passed into methods vs. the more coarse grained rules present today.
 
 ## Related Information
 
