@@ -42,7 +42,7 @@ readonly ref struct Span<T>
 }
 ```
 
-The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
+The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
 
 ```c#
 Span<int> CreateSpan<int>()
@@ -64,7 +64,7 @@ Effectively there are three ways for a `ref` parameter to escape from a method i
 
 The existing rules only account for (1) and (2). They do not account for (3) hence gaps like returning locals as `ref` fields are not accounted for. This design must change the rules to account for (3). This will have a small impact to compatibility for existing APIs. Specifically it will impact APIs that have the following properties.
 
-- Have a `Span<T>` or `ref struct` in the signature
+- Have a `ref struct` in the signature
     - Where the `ref struct` is a return type, `ref` or `out` parameter
     - Has an additional `in` or `ref` parameter excluding the receiver
 
@@ -164,7 +164,7 @@ First the rules establishing *ref-safe-to-escape* values for fields needs to be 
 > 3. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
 > 4. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
 
-This is does not represent rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to access `ref` fields directly and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
+This does not represent rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to access `ref` fields directly and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
 
 This does mean though that `ref` fields can be returned as `ref` from a `ref struct` but normal fields cannot.
 
