@@ -146,6 +146,12 @@ struct S1
 }
 ```
 
+A `ref` field can be combined with `readonly` modifiers in the following ways:
+
+- `readonly ref`: this is a field that cannot be ref re-assigned outside a constructor or `init` methods. It can be value assigned though outside those contexts
+- `ref readonly`: this is a field that can be ref re-assigned but cannot be value assigned at any point. This how an `in` parameter could be ref re-assigned to a `ref` field.
+- `readonly ref readonly`: a combination of `ref readonly` and `readonly ref. 
+
 This feature requires runtime support and changes to the ECMA spec. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here https://github.com/dotnet/runtime/issues/64165
 
 The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref re-assigned. 
@@ -916,6 +922,22 @@ This particular snippet requires unsafe because it runs into issues with passing
 This snippet wants to mutate a parameter by escaping elements of the data. The escaped data can be stack allocated for efficiency. Even though the parameter is not escaped the compiler assigns it a *safe-to-escape* scope of outside the enclosing method because it is a parameter. This means in order to use stack allocation the implementation must use `unsafe` in order to assign back to the parameter after escaping the data.
 
 ### Fun Samples
+
+#### ReadOnlySpan<T>
+
+```c#
+public readonly ref struct ReadOnlySpan<T>
+{
+    readonly ref readonly T _value;
+    readonly int _length;
+
+    public ReadOnlySpan<T>(in T value)
+    {
+        _value = ref value;
+        _length = 1;
+    }
+}
+```
 
 #### Frugal list
 
