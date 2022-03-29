@@ -199,7 +199,7 @@ That means the desired `Span<T>` constructor works without any extra annotation:
 readonly ref struct Span<T>
 {
     readonly ref T _field;
-    int _length;
+    readonly int _length;
 
     public Span(ref T value)
     {
@@ -731,7 +731,7 @@ class C
         if (reader.TextEquals(span)
         {
             ...
-        })
+        }
     }
 }
 ```
@@ -767,7 +767,7 @@ class C
         if (reader.TextEquals(span)
         {
             ...
-        })
+        }
     }
 }
 ```
