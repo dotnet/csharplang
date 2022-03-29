@@ -871,6 +871,26 @@ struct Dimensions
 
 **Decision** Do not allow for now
 
+### Violating scoped
+The runtime repository has several non-public APIs that capture `ref` paramters as `ref` fields. These are unsafe because the lifetime of the resulting value is not tracked. For example the `Span<T>(ref T value, int length)` constructor.
+
+The majority of these APIs will likely choose to have proper lifetime tracking on the return which will be achieved simply by updating to C# 11. A few though will want to keep their current semantics of not tracking the return value because their entire intent is to be unsafe. The most notable examples are `MemoryMarshal.CreateSpan` and `MemoryMarshal.CreateReadOnlySpan`. This will be achieved by marking the parameters as `scoped`.
+
+That means the runtime needs an established pattern for unsafely removing `scoped` from a parameter. This can be done today via a combination of existing methods:
+
+```c#
+Span<T> CreateSpan<T>(scoped ref T value, int length)
+{
+    ref T local = Unsafe.AsRef<T>(Unsafe.AsPointer(ref value));
+    return new Span<T>(local, length);
+}
+```
+
+This will work but is likely going to result in unnecessary code generation. One other consideration is that either:
+
+1. `Unsafe.AsRef<T>(in T value)` could expand its existing purpose by changing to `scoped in T value`. This would allow it to both remove `in` and `scoped` from parameters. It then becomes the universal "remove ref safety" method
+2. Introduce a new method whose entire purpose is to remove `scoped`: `ref T Unsafe.AsUnscoped<T>(scoped in T value)`. This removes `in` as well because if it did not then callers still need a combination of method calls to "remove ref safety" at which point the existing solution is likely sufficient.
+
 ## Future Considerations
 
 ### Advanced lifetime annotations
