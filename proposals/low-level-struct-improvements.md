@@ -728,7 +728,7 @@ class C
         // Error: The safe-to-escape of `span` is the current method scope 
         // while `reader` is outside the current method scope hence this fails
         // by the above rule.
-        if (reader.TextEquals(span)
+        if (reader.TextEquals(span))
         {
             ...
         }
@@ -764,7 +764,7 @@ class C
 
         // Okay: the compiler never considers `span` as capturable here hence it doesn't
         // contribute to the method arguments must match rule
-        if (reader.TextEquals(span)
+        if (reader.TextEquals(span))
         {
             ...
         }
