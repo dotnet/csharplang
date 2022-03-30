@@ -33,7 +33,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Mar 30, 2022
 
 - Specify behavior of default `this()` struct constructor initializer with field initializers (Chuck, Rikki): https://github.com/dotnet/roslyn/issues/58790
-- File-scoped declarations (Rikki): https://github.com/RikkiGibson/csharplang/blob/file-accessibility/proposals/file-accessibility.md
+- File-scoped declarations (Rikki): https://github.com/dotnet/csharplang/issues/5969
 - Open questions with static virtual members (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/static-abstracts-in-interfaces.md
 
 # C# Language Design Notes for 2022
