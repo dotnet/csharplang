@@ -164,7 +164,7 @@ At first glance, this feels like a "hole" in the feature, but it's **actually th
 
 Currently, the JIT does not eliminate dead stores through refs, which means that these implicit initializations do have a real cost. But that might be fixable. https://github.com/dotnet/runtime/issues/13727
 
-It's worth noting that initializing individual fields instead of the entire instance is really just an optimization. The compiler should probably be free to implement whatever heuristic it wants, as long as it meets the invariant that fields which are not definitely assigned at all return points or before any non-field member access of 'this' are implicitly initialized.
+It's worth noting that initializing individual fields instead of the entire instance is really just an optimization. The compiler should probably be free to implement whatever heuristic it wants, as long as it meets the invariant that fields which are not definitely assigned at all return points or before any non-field member access of `this` are implicitly initialized.
 
 For example, if a struct has 100 fields, and just one of them is explicitly initialized, it might make more sense to do an `initobj` on the entire thing, than to implicitly emit `initobj` for the 99 other fields. However, an implementation which implicitly emits `initobj` for the 99 other fields would still be valid.
 
