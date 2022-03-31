@@ -62,7 +62,7 @@ Constructors cannot be `partial`.
 ### Executing field initializers
 _Instance variable initializers_ ([§14.11.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#14113-instance-variable-initializers)) is **modified** as follows:
 
-> When an **class declaration** instance constructor has no constructor initializer, or it has a constructor initializer of the form `base(...)`, that constructor implicitly performs the initializations specified by the *variable_initializer*s of the instance fields declared in its class. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class constructor.
+> When **a class declaration** instance constructor has no constructor initializer, or it has a constructor initializer of the form `base(...)`, that constructor implicitly performs the initializations specified by the *variable_initializer*s of the instance fields declared in its class. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor and before the implicit invocation of the direct base class constructor.
 > 
 > **When a struct declaration instance constructor has no constructor initializer, that constructor implicitly performs the initializations specified by the *variable_initializer*s of the instance fields declared in its struct. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor.**
 > 
