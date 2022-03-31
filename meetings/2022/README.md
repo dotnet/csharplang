@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
+- Open questions with static virtual members (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/static-abstracts-in-interfaces.md
 - Relax requirement that in a RAW interpolated string that you cannot have more than 2n-1 braces in a row (where N is the number of $ signs).  (cyrusn).  https://github.com/dotnet/csharplang/issues/5960
 
 
@@ -30,15 +31,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Feedback on `!!`: https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
 
-## Mar 30, 2022
-
-- Specify behavior of default `this()` struct constructor initializer with field initializers (Chuck, Rikki): https://github.com/dotnet/roslyn/issues/58790
-- File-scoped declarations (Rikki): https://github.com/dotnet/csharplang/issues/5969
-- Open questions with static virtual members (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/static-abstracts-in-interfaces.md
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Mar 30, 2022
+
+[C# Language Design Meeting for March 30th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-30.md)
+
+1. Definite assignment in struct constructors calling `: this()`
+2. `file private` accessibility
 
 ## Mar 28, 2022
 
