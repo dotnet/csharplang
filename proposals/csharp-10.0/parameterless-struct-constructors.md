@@ -66,7 +66,7 @@ _Instance variable initializers_ ([§14.11.3](https://github.com/dotnet/csharpst
 > 
 > **When a struct declaration instance constructor has no constructor initializer, that constructor implicitly performs the initializations specified by the *variable_initializer*s of the instance fields declared in its struct. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor.**
 > 
-> **When a struct declaration instance constructor has a `this()` constructor initializer and the struct declaration _does not_ include a parameterless constructor, that constructor implicitly performs the initializations specified by the *variable_initializer*s of the instance fields declared in its struct _after_ all value type fields are set to their default value and all reference type fields are set to `null`. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor.**
+> **When a struct declaration instance constructor has a `this()` constructor initializer that represents the _default parameterless constructor_, the declared constructor implicitly performs the initializations specified by the *variable_initializer*s of the instance fields declared in its struct _after_ all value type fields are set to their default value and all reference type fields are set to `null`. This corresponds to a sequence of assignments that are executed immediately upon entry to the constructor.**
 > 
 > The variable initializers are executed in the textual order in which they appear in the class declaration.
 
