@@ -2,6 +2,12 @@
 
 https://github.com/dotnet/csharplang/issues/5737
 
+## Summary
+
+This feature makes it so that in struct constructors, we identify fields which were not explicitly assigned by the user before returning or before use, and initialize them implicitly to `default` instead of giving definite assignment errors.
+
+## Motivation
+
 This proposal is raised as a possible mitigation for usability issues found in dotnet/csharplang#5552 and dotnet/csharplang#5635, as well as addressing #5563 (all fields must be definitely assigned, but `field` is not accessible within the constructor).
 
 ---
