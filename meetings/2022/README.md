@@ -4,9 +4,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
-- Open questions with static virtual members (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/static-abstracts-in-interfaces.md
-- Relax requirement that in a RAW interpolated string that you cannot have more than 2n-1 braces in a row (where N is the number of $ signs).  (cyrusn).  https://github.com/dotnet/csharplang/issues/5960
-
 
 ## Schedule when convenient
 
@@ -27,8 +24,11 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Apr 11, 2022
 
+- Relax requirement that in a RAW interpolated string that you cannot have more than 2n-1 braces in a row (where N is the number of $ signs).  (cyrusn).  https://github.com/dotnet/csharplang/issues/5960
+
 ## Apr 6, 2022
 
+- Open questions with static virtual members (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/static-abstracts-in-interfaces.md
 - Feedback on `!!`: https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
 
 # C# Language Design Notes for 2022
