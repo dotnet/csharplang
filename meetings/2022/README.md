@@ -25,6 +25,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Apr 11, 2022
 
 - Relax requirement that in a RAW interpolated string that you cannot have more than 2n-1 braces in a row (where N is the number of $ signs).  (cyrusn).  https://github.com/dotnet/csharplang/issues/5960
+- File-scoped declarations revisited
 
 ## Apr 6, 2022
 
