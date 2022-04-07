@@ -27,6 +27,14 @@ A method declaration creates a separate declaration space for parameters, type p
 Within the block of a method, formal parameters can be referenced by their identifiers in simple_name expressions (Simple names).
 **Within a `nameof` expression in attributes placed on the method or its parameters, formal parameters can be referenced by their identifiers in *simple_name* expressions.**
 
+[Anonymous function signatures](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11162-anonymous-function-signatures)
+
+The scope of the parameters of the anonymous function is the anonymous_function_body (§7.7) **and `nameof` expressions in attributes placed on the anonymous function or its parameters**.
+
+[Delegate declarations](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#192-delegate-declarations)
+
+**The scope of the parameters of the delegate is `nameof` expressions in attributes placed on the declaration, its type parameters or its parameters**.
+
 [Simple names](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#simple-names)
 
 A *simple_name* is either of the form `I` or of the form `I<A1,...,Ak>`, where `I` is a single identifier and `<A1,...,Ak>` is an optional *type_argument_list*. When no *type_argument_list* is specified, consider `K` to be zero. The *simple_name* is evaluated and classified as follows:
