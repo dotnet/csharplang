@@ -22,10 +22,13 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Apr 13, 2022
 
+- Feedback on `!!` continued: https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
+- File-scoped declarations revisited (Mads, Rikki, Jared, Stephen): 
+
 ## Apr 11, 2022
 
-- Relax requirement that in a RAW interpolated string that you cannot have more than 2n-1 braces in a row (where N is the number of $ signs).  (cyrusn).  https://github.com/dotnet/csharplang/issues/5960
-- File-scoped declarations revisited
+- Break with utf8 literals (Aleksey): https://github.com/dotnet/roslyn/issues/60612
+- Relax raw interpolated string limitations on number of braces (cyrusn): https://github.com/dotnet/csharplang/issues/5960
 
 ## Apr 6, 2022
 
