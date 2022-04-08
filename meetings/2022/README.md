@@ -29,7 +29,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Break with utf8 literals (Aleksey): https://github.com/dotnet/roslyn/issues/60612
 - Relax raw interpolated string limitations on number of braces (cyrusn): https://github.com/dotnet/csharplang/issues/5960
-- Self type mitigation (Mads): [TBD]
+- Self type mitigation (Mads): https://github.com/dotnet/csharplang/issues/6000
 
 # C# Language Design Notes for 2022
 
