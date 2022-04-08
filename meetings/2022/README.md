@@ -20,6 +20,9 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Apr 18, 2022
 
+- Issues with Utf8 literals (Stephen, Tanner, Aleksey): https://github.com/dotnet/roslyn/issues?q=is:issue+is:open+sort:updated-desc+label:%22New+Feature+-+Utf8StringLiterals%22
+- [TBD]
+
 ## Apr 13, 2022
 
 - Feedback on `!!` continued: https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
