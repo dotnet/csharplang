@@ -53,7 +53,7 @@
 
 ### Variable redeclaration
 
-- Pattern variables are allowed to be redeclared in the same expression if not already definitely assigned. These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
+- Pattern variables are allowed to be redeclared in the same expression or switch section if not already definitely assigned. These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
 - Pattern variables with multiple declarations must be of the same type, excluding tuple names and nullability for reference types.
 
 ### Definite assignment
