@@ -43,10 +43,9 @@
 	}
 	```
 
-- Also relax single-declaration rules across the entire declaring scope as long as each variable is assigned once.
+- Also relax single-declaration rules within expression boundaries as long as each variable is assigned once.
 	```cs
 	if (e is C c || e is Wrapper { Prop: C c }) ;
-	if (e is C c) ; else if (e is Wrapper { Prop: C c }) ;	
 	if (b ? e is C c : e is Warpper { Prop: C c }) ;
 	```
 	
@@ -54,7 +53,7 @@
 
 ### Variable redeclaration
 
-- Pattern variables are allowed to be redeclared in the same scope if not already definitely assigned. These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
+- Pattern variables are allowed to be redeclared in the same expression if not already definitely assigned. These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
 - Pattern variables with multiple declarations must be of the same type, excluding tuple names and nullability for reference types.
 
 ### Definite assignment
@@ -95,9 +94,6 @@ For a *negated_pattern* *p* of the form `not pattern`, the definite assignment s
 These rules cover the existing top-level `is not` pattern variables. However, in any other scenario the variables could be left unassigned.
 
 ## Unresolved questions
-- Should the redeclaration rules work in nested scopes?
-	```cs
-	if (e is C c) return;
-	if (e is C c) return; // allowed
-	{ if (e is C c) return; } // allowed?
-	```
+- What, if anything, should be done for pattern variables across `if`/`else`?
+  Would it be possible to permit different types for each variable?
+  And if so, would it be a part of this proposal or a separate feature?
