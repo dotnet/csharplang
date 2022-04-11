@@ -179,6 +179,8 @@ The set of changes to our span safety rules necessary to allow `ref` fields is s
 
 First the rules establishing *ref-safe-to-escape* values for fields needs to be updated for `ref` fields as follows:
 
+<a name="rules-field-lifetimes"></a>
+
 > An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
 > 1. If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
 > 2. Else if `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
@@ -1045,3 +1047,52 @@ ref struct StackLinkedListNode<T>
     }
 }
 ```
+
+### Important Cases
+There are several important cases that need to be handled correctly by the rules. These are those cases and explanation of how the rules prevent them from happening.
+
+#### Preventing tricky ref assiginment from readonly mutation
+When a `ref` is taken to a `readonly` field in a constructor or `init` member the type is `ref` not `ref readonly`. This is a long standing behavior that allows for code like the following:
+
+```c#
+struct S
+{
+    readonly int i; 
+
+    public S(string s)
+    {
+        M(ref i);
+    }
+
+    static void M(ref int i) { }
+}
+```
+
+That does pose a potential problem though if such a `ref` were able to be stored into a `ref` field on the same type. It would allow for direct mutation of a `readonly struct` from an instance member:
+
+```c#
+readonly ref struct S
+{ 
+    readonly int i; 
+    readonly ref r; 
+    S()
+    {
+        i = 0;
+        r = ref i;
+    }
+
+    public void Oops()
+    {
+        r++;
+    }
+```
+
+The proposal prevents this though because it violates the span safety rules. Consider the following:
+
+- The *ref-safe-to-escape* of `this` is *current method* and *safe-to-escape* is *calling method*. These are both standard for `this` in a `struct` member.
+- The *ref-safe-to-escape* of `i` is *current method*. This falls out from the [field lifetimes rules](#rules-field-lifetimes). Specifically rule 4.
+
+At that point the line `r = ref i` is illegal by [ref re-assignment rules](#rules-ref-re-assignment). 
+
+These rules were not intended to prevent this behavior but do so as a side effect. It's important to keep this in mind for any future rule update to evaluate the impact to scenarios like this.
+
