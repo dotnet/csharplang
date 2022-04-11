@@ -152,6 +152,27 @@ A `ref` field can be combined with `readonly` modifiers in the following ways:
 - `ref readonly`: this is a field that can be ref re-assigned but cannot be value assigned at any point. This how an `in` parameter could be ref re-assigned to a `ref` field.
 - `readonly ref readonly`: a combination of `ref readonly` and `readonly ref`. 
 
+```
+ref struct ReadOnlyExample
+{
+    ref readonly int Field1;
+    readonly ref int Field2;
+    readonly ref readonly int Field3;
+
+    void Uses(int[] array)
+    {
+        Field1 = ref array[0];  // Okay
+        Field1 = array[0];      // Error: can't assign ref readonly value (value is readonly)
+        Field2 = ref array[0];  // Error: can't repoint readonly ref
+        Field2 = array[0];      // Okay
+        Field3 = ref array[0];  // Error: can't assign ref readonly value (value is readonly)
+        Field3 = array[0];      // Error: can't repoint readonly ref/ Error
+    }
+}
+```
+
+A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today.
+
 This feature requires runtime support and changes to the ECMA spec. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here https://github.com/dotnet/runtime/issues/64165
 
 The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref re-assigned. 
