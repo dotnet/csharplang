@@ -432,7 +432,7 @@ One of the most notable friction points is the inability to return fields by `re
 ```c#
 struct S
 {
-     int _field;
+    int _field;
 
     // Error: this, and hence _field, can't return by ref
     public ref int Prop => ref _field;
