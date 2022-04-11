@@ -28,14 +28,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Feedback on `!!` continued: https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
 - File-scoped declarations revisited (Mads, Rikki, Jared, Stephen): 
 
-## Apr 11, 2022
-
-- Relax raw interpolated string limitations on number of braces (cyrusn): https://github.com/dotnet/csharplang/issues/5960
-- Self type mitigation (Mads): https://github.com/dotnet/csharplang/issues/6000
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Apr 11, 2022
+
+[C# Language Design Meeting for April 11th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-11.md)
+
+1. Relax restrictions on braces on raw interpolated strings
+2. Self-type stopgap attribute
 
 ## Apr 6, 2022
 
