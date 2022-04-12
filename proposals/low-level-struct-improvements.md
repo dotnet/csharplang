@@ -165,8 +165,8 @@ ref struct ReadOnlyExample
         Field1 = array[0];      // Error: can't assign ref readonly value (value is readonly)
         Field2 = ref array[0];  // Error: can't repoint readonly ref
         Field2 = array[0];      // Okay
-        Field3 = ref array[0];  // Error: can't assign ref readonly value (value is readonly)
-        Field3 = array[0];      // Error: can't repoint readonly ref/ Error
+        Field3 = ref array[0];  // Error: can't repoint readonly ref
+        Field3 = array[0];      // Error: can't assign ref readonly value (value is readonly)
     }
 }
 ```
@@ -1051,7 +1051,7 @@ ref struct StackLinkedListNode<T>
 ### Important Cases
 There are several important cases that need to be handled correctly by the rules. These are those cases and explanation of how the rules prevent them from happening.
 
-#### Preventing tricky ref assiginment from readonly mutation
+#### Preventing tricky ref assignment from readonly mutation
 When a `ref` is taken to a `readonly` field in a constructor or `init` member the type is `ref` not `ref readonly`. This is a long standing behavior that allows for code like the following:
 
 ```c#
@@ -1075,7 +1075,7 @@ readonly ref struct S
 { 
     readonly int i; 
     readonly ref r; 
-    S()
+    public S()
     {
         i = 0;
         r = ref i;
@@ -1095,4 +1095,3 @@ The proposal prevents this though because it violates the span safety rules. Con
 At that point the line `r = ref i` is illegal by [ref re-assignment rules](#rules-ref-re-assignment). 
 
 These rules were not intended to prevent this behavior but do so as a side effect. It's important to keep this in mind for any future rule update to evaluate the impact to scenarios like this.
-
