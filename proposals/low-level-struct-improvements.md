@@ -152,11 +152,34 @@ A `ref` field can be combined with `readonly` modifiers in the following ways:
 - `ref readonly`: this is a field that can be ref re-assigned but cannot be value assigned at any point. This how an `in` parameter could be ref re-assigned to a `ref` field.
 - `readonly ref readonly`: a combination of `ref readonly` and `readonly ref`. 
 
+```
+ref struct ReadOnlyExample
+{
+    ref readonly int Field1;
+    readonly ref int Field2;
+    readonly ref readonly int Field3;
+
+    void Uses(int[] array)
+    {
+        Field1 = ref array[0];  // Okay
+        Field1 = array[0];      // Error: can't assign ref readonly value (value is readonly)
+        Field2 = ref array[0];  // Error: can't repoint readonly ref
+        Field2 = array[0];      // Okay
+        Field3 = ref array[0];  // Error: can't repoint readonly ref
+        Field3 = array[0];      // Error: can't assign ref readonly value (value is readonly)
+    }
+}
+```
+
+A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today.
+
 This feature requires runtime support and changes to the ECMA spec. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here https://github.com/dotnet/runtime/issues/64165
 
 The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref re-assigned. 
 
 First the rules establishing *ref-safe-to-escape* values for fields needs to be updated for `ref` fields as follows:
+
+<a name="rules-field-lifetimes"></a>
 
 > An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
 > 1. If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
@@ -409,7 +432,7 @@ One of the most notable friction points is the inability to return fields by `re
 ```c#
 struct S
 {
-     int _field;
+    int _field;
 
     // Error: this, and hence _field, can't return by ref
     public ref int Prop => ref _field;
@@ -1024,3 +1047,51 @@ ref struct StackLinkedListNode<T>
     }
 }
 ```
+
+### Important Cases
+There are several important cases that need to be handled correctly by the rules. These are those cases and explanation of how the rules prevent them from happening.
+
+#### Preventing tricky ref assignment from readonly mutation
+When a `ref` is taken to a `readonly` field in a constructor or `init` member the type is `ref` not `ref readonly`. This is a long standing behavior that allows for code like the following:
+
+```c#
+struct S
+{
+    readonly int i; 
+
+    public S(string s)
+    {
+        M(ref i);
+    }
+
+    static void M(ref int i) { }
+}
+```
+
+That does pose a potential problem though if such a `ref` were able to be stored into a `ref` field on the same type. It would allow for direct mutation of a `readonly struct` from an instance member:
+
+```c#
+readonly ref struct S
+{ 
+    readonly int i; 
+    readonly ref r; 
+    public S()
+    {
+        i = 0;
+        r = ref i;
+    }
+
+    public void Oops()
+    {
+        r++;
+    }
+```
+
+The proposal prevents this though because it violates the span safety rules. Consider the following:
+
+- The *ref-safe-to-escape* of `this` is *current method* and *safe-to-escape* is *calling method*. These are both standard for `this` in a `struct` member.
+- The *ref-safe-to-escape* of `i` is *current method*. This falls out from the [field lifetimes rules](#rules-field-lifetimes). Specifically rule 4.
+
+At that point the line `r = ref i` is illegal by [ref re-assignment rules](#rules-ref-re-assignment). 
+
+These rules were not intended to prevent this behavior but do so as a side effect. It's important to keep this in mind for any future rule update to evaluate the impact to scenarios like this.
