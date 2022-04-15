@@ -504,6 +504,8 @@ ref int SneakyOut(unscoped out int i)
 
 For the purposes of span safety rules, such an `unscoped out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes.
 
+The `unscoped` annotation will be disallowed on `init` members and constructors. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `unscoped` would permit such `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
+
 Detailed Notes:
 - An instance method or property annotated with `unscoped` has *ref-safe-to-escape* of `this` set to the *calling method*. It means `this` is effectively a `ref` parameter to the method.
 - A `struct` annotated with `unscoped` has the same effect of annotating every instance method and property with `unscoped`
@@ -511,7 +513,7 @@ Detailed Notes:
 - It is an error to use `unscoped` on 
     - Any type other than a `struct` (although it is legal for all variations like `readonly struct`)
     - Any member that is not declared on a `struct`
-    - Any `static` member or constructor on a `struct`
+    - Any `static` member, `init` member or constructor on a `struct`
 
 ### LifetimeAnnotationAttribute
 The `scoped` and `unscoped` annotations will be emitted into metadata via the type `System.Runtime.CompilerServices.LifetimeAttribute` attribute. This attribute will be matched by name meaning it does not need to appear in any specific assembly.
@@ -1074,7 +1076,7 @@ That does pose a potential problem though if such a `ref` were able to be stored
 readonly ref struct S
 { 
     readonly int i; 
-    readonly ref r; 
+    readonly ref int r; 
     public S()
     {
         i = 0;
