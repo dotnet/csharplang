@@ -126,6 +126,8 @@ to ensure that it definitely sets the required members of the type.
 `SetsRequiredMembersAttribute` removes _all_ requirements from a constructor, and those requirements are not checked for validity in any way. NB: this is the escape hatch if inheriting
 from a type with an invalid required members list is necessary: mark the constructor of that type with `SetsRequiredMembersAttribute`, and no errors will be reported.
 
+If a constructor `C` chains to a `base` or `this` constructor that is attributed with `SetsRequiredMembersAttribute`, `C` must also be attributed with `SetsRequiredMembersAttribute`.
+
 For record types, we will emit `SetsRequiredMembersAttribute` on the synthesized copy constructor of a record if the record type or any of its base types have required members.
 
 NB: An earlier version of this proposal had a larger metalanguage around initialization, allowing adding and removing individual required members from a constructor, as well as validation
@@ -192,6 +194,13 @@ list of the derived type.
 Types are allowed to override required virtual properties. This means that if the base virtual property has storage, and the derived type tries to
 access the base implementation of that property, they could observe uninitialized storage. NB: This is a general C# anti-pattern, and we don't think that
 this proposal should attempt to address it.
+
+### Effect on nullable analysis
+
+Members that are marked `required` are not required to be initialized to a non-nullable state at the end of a constructor. These members are additionally considered by nullable analysis to
+be maybe-null at the beginning of any constructor in a type, unless chaining to a `this` or `base` constructor that is attributed with `SetsRequiredMembersAttribute`.
+
+NB: `SetsRequiredMembersAttribute` does not bring back nullable warnings at the end of a constructor for members, as it is an escape hatch intended to inform the compiler to stop enforcing things.
 
 ### Metadata Representation
 
