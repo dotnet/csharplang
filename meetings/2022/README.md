@@ -25,14 +25,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Issues with Utf8 literals (Stephen, Tanner, Aleksey): https://github.com/dotnet/roslyn/issues?q=is:issue+is:open+sort:updated-desc+label:%22New+Feature+-+Utf8StringLiterals%22
 - Syntax for lifetime annotations of ref and ref struct parameters (Jared): https://github.com/dotnet/csharplang/blob/main/proposals/low-level-struct-improvements.md#open-issues
 
-## Apr 13, 2022
-
-- Feedback on `!!` continued: https://github.com/dotnet/csharplang/blob/main/proposals/param-nullchecking.md
-- File-scoped declarations revisited (Mads, Rikki, Jared, Stephen): 
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Apr 13, 2022
+
+[C# Language Design Meeting for April 13th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-13.md)
+
+- Parameter null checking
+- File-scoped types
 
 ## Apr 11, 2022
 
