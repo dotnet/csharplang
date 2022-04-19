@@ -1,8 +1,17 @@
+# Numeric IntPtr
 
-TODO minus operator
 TODO pointer arithmetic
 TODO dynamic
 TODO Possible breaking changes: IntPtr + int, IntPtr - int, (int)IntPtr, (IntPtr)long (and then of course various possible edge cases where user-defined vs language-defined operators subtly differ in behavior)
+
+## Summary
+[summary]: #summary
+
+This is a revision on the initial native integers feature ([spec](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/native-integers.md)), where the `nint`/`nuint` types were distinct from the underlying types `System.IntPtr`/`System.UIntPtr`.
+In short, we now treat `nint`/`nuint` as simple types aliasing `System.IntPtr`/`System.UIntPtr`, like we do for `int` in relation to `System.Int32`.
+
+## Design
+[design]: #design
 
 ### 8.3.5 Simple types
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#835-simple-types
