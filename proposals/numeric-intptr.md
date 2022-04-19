@@ -4,8 +4,6 @@ TODO pointer arithmetic
 TODO dynamic
 TODO Possible breaking changes: IntPtr + int, IntPtr - int, (int)IntPtr, (IntPtr)long (and then of course various possible edge cases where user-defined vs language-defined operators subtly differ in behavior)
 
-
-
 ### 8.3.5 Simple types
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#835-simple-types
 
@@ -43,7 +41,6 @@ In other words, an __unmanaged_type__ is one of the following:
 
 ### 10.2.3 Implicit numeric conversions
 
-
 The implicit numeric conversions are:
 ...
 
@@ -54,7 +51,6 @@ An implicit constant expression conversion permits the following conversions:
 - A *constant_expression* of type `int` can be converted to type `sbyte`, `byte`, `short`, `ushort`, `uint`, **`nint`, `nuint`**, or `ulong`, provided the value of the *constant_expression* is within the range of the destination type.
 ...
 
-
 ### 10.3.3 Explicit enumeration conversions
 
 TODO
@@ -63,7 +59,6 @@ The explicit enumeration conversions are:
 - From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal` to any *enum_type*.
 - From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
 - From any *enum_type* to any other *enum_type*.
-
 
 Unary operators: https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#118-unary-operators
 ### 11.8.2 Unary plus operator
@@ -88,7 +83,6 @@ nuint operator +(nuint x);
 
 Unary operator overload resolution is applied to select a specific operator implementation. Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint*, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, and any enum type.
 
-
 ### 11.8.3 Unary minus operator
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1183-unary-minus-operator
 
@@ -111,7 +105,6 @@ Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte
 
 In addition, a *default_value_expression* is a constant expression if the type is one of the following value types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool,` or any enumeration type.
 
-
 ### 11.8.5 Bitwise complement operator
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1185-bitwise-complement-operator
 
@@ -132,7 +125,6 @@ Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte
 ### 11.9.2 Multiplication operator
 
 The predefined multiplication operators are listed below. The operators all compute the product of `x` and `y`.
-
 
 - Integer multiplication:
 
@@ -167,7 +159,6 @@ The predefined remainder operators are listed below. The operators all compute t
   ```
 
 ### 11.9.5 Addition operator
-
 
 - Integer addition:
 
@@ -213,11 +204,6 @@ The predefined shift operators are listed below.
 
   When `x` is of type `uint`, **`nuint`** or `ulong`, the low-order bits of `x` are discarded, the remaining bits are shifted right, and the high-order empty bit positions are set to zero.
 
-For the predefined operators, the number of bits to shift is computed as follows:
-
-- When the type of `x` is `int`, **`nint`** or `uint`, the shift count is given by the low-order five bits of `count`. In other words, the shift count is computed from `count & 0x1F`.
-- When the type of `x` is `long`, **`nuint`** or `ulong`, the shift count is given by the low-order six bits of `count`. In other words, the shift count is computed from `count & 0x3F`.
-
 - Unsigned shift right:
 
   ```csharp
@@ -227,7 +213,6 @@ For the predefined operators, the number of bits to shift is computed as follows
   ```
 
 ## 11.11 Relational and type-testing operators
-
 
 ### 11.11.2 Integer comparison operators
 
@@ -258,7 +243,6 @@ bool operator >=(nuint x, nuint y);
 
 ### 11.12.2 Integer logical operators
 
-
 The predefined integer logical operators are:
 
 ```csharp
@@ -278,6 +262,5 @@ nuint operator ^(nuint x, nuint y);
 A constant expression may be either a value type or a reference type. If a constant expression is a value type, it must be one of the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool,` or any enumeration type.
 
 \[...]
-
 
 An implicit constant expression conversion permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `nint`, `uint`, `nuint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
