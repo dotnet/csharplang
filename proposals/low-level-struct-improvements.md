@@ -426,9 +426,10 @@ Detailed Notes:
 - A `ref` field cannot be declared `static`, `volatile` or `const`
 - The reference assembly generation process must preserve the presence of a `ref` field inside a `ref struct` 
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
-- The span safety rules
-    - Will be updated as outlined in this document.
-    - Will take effect whenever it's determined the core library supports `ref` fields
+- The span safety rules document will be updated as outlined in this document.
+- The new span safety rules will be in effect when either 
+    - The core library contains the feature flag indicating support for `ref` fields
+    - The `langversion` value is 11 or higher
 
 ### Provide unscoped
 One of the most notable friction points is the inability to return fields by `ref` in instance members of a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly. This reduces the usefulness of `ref` returns in `struct` where it is often the most desired. 
