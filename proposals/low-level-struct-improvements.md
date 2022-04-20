@@ -421,10 +421,12 @@ The section on `ref` field and `scoped` is long so wanted to close with a brief 
 
 Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
-- A `ref` field cannot be declared `static`
+- A `ref` field cannot be declared `static`, `volatile` or `const`
 - The reference assembly generation process must preserve the presence of a `ref` field inside a `ref struct` 
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
-- The span safety rules for method invocation, fields and assignment must be updated as outlined in this document.
+- The span safety rules
+    - Will be updated as outlined in this document.
+    - Will take effect whenever it's determined the core library supports `ref` fields
 
 ### Provide unscoped
 One of the most notable friction points is the inability to return fields by `ref` in instance members of a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly. This reduces the usefulness of `ref` returns in `struct` where it is often the most desired. 
@@ -915,6 +917,17 @@ This will work but is likely going to result in unnecessary code generation. One
 
 1. `Unsafe.AsRef<T>(in T value)` could expand its existing purpose by changing to `scoped in T value`. This would allow it to both remove `in` and `scoped` from parameters. It then becomes the universal "remove ref safety" method
 2. Introduce a new method whose entire purpose is to remove `scoped`: `ref T Unsafe.AsUnscoped<T>(scoped in T value)`. This removes `in` as well because if it did not then callers still need a combination of method calls to "remove ref safety" at which point the existing solution is likely sufficient.
+
+### What will make C# 11.0
+The fetaures outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
+
+1. `ref` fields and `scoped`
+2. `unscoped` 
+3. fixed sized buffers
+
+What gets implemented in which release is merely a scoping exercise. 
+
+**Decision** Only `ref` fields and `scoped` will make C# 11.0. LDM is happy to revisit `unscoped` if a more natural keyword can be settled on or data suggests it's possible to make `this` `unscoped` by default in all cases.
 
 ## Future Considerations
 
