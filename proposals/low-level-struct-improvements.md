@@ -921,7 +921,7 @@ This will work but is likely going to result in unnecessary code generation. One
 2. Introduce a new method whose entire purpose is to remove `scoped`: `ref T Unsafe.AsUnscoped<T>(scoped in T value)`. This removes `in` as well because if it did not then callers still need a combination of method calls to "remove ref safety" at which point the existing solution is likely sufficient.
 
 ### What will make C# 11.0
-The fetaures outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
+The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
 
 1. `ref` fields and `scoped`
 2. `unscoped` 
