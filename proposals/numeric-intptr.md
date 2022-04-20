@@ -195,8 +195,8 @@ The predefined shift operators are listed below.
 
   ```csharp
   ...
-  nint operator <<(nint x, nint count);
-  nuint operator <<(nuint x, nint count);
+  nint operator <<(nint x, int count);
+  nuint operator <<(nuint x, int count);
   ```
 
 - Shift right:
