@@ -173,6 +173,8 @@ ref struct ReadOnlyExample
 
 A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today.
 
+A `readonly ref` will be emitted to metadata using the `initonly` flag, same as any other field. A `ref readonly` field will be attributed with `System.Runtime.CompilerServices.IsReadOnlyAttribute`. A `readonly ref readonly` will be emitted with both items.
+
 This feature requires runtime support and changes to the ECMA spec. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here https://github.com/dotnet/runtime/issues/64165
 
 The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref re-assigned. 
@@ -421,10 +423,13 @@ The section on `ref` field and `scoped` is long so wanted to close with a brief 
 
 Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
-- A `ref` field cannot be declared `static`
+- A `ref` field cannot be declared `static`, `volatile` or `const`
 - The reference assembly generation process must preserve the presence of a `ref` field inside a `ref struct` 
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
-- The span safety rules for method invocation, fields and assignment must be updated as outlined in this document.
+- The span safety rules document will be updated as outlined in this document.
+- The new span safety rules will be in effect when either 
+    - The core library contains the feature flag indicating support for `ref` fields
+    - The `langversion` value is 11 or higher
 
 ### Provide unscoped
 One of the most notable friction points is the inability to return fields by `ref` in instance members of a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly. This reduces the usefulness of `ref` returns in `struct` where it is often the most desired. 
@@ -915,6 +920,17 @@ This will work but is likely going to result in unnecessary code generation. One
 
 1. `Unsafe.AsRef<T>(in T value)` could expand its existing purpose by changing to `scoped in T value`. This would allow it to both remove `in` and `scoped` from parameters. It then becomes the universal "remove ref safety" method
 2. Introduce a new method whose entire purpose is to remove `scoped`: `ref T Unsafe.AsUnscoped<T>(scoped in T value)`. This removes `in` as well because if it did not then callers still need a combination of method calls to "remove ref safety" at which point the existing solution is likely sufficient.
+
+### What will make C# 11.0
+The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
+
+1. `ref` fields and `scoped`
+2. `unscoped` 
+3. fixed sized buffers
+
+What gets implemented in which release is merely a scoping exercise. 
+
+**Decision** Only `ref` fields and `scoped` will make C# 11.0. LDM is happy to revisit `unscoped` if a more natural keyword can be settled on or data suggests it's possible to make `this` `unscoped` by default in all cases.
 
 ## Future Considerations
 
