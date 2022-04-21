@@ -6,7 +6,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 
 ## Schedule when convenient
-
+- Null-conditional assignment (Rikki): https://github.com/dotnet/csharplang/issues/6045
 
 ## Recurring topics
 
