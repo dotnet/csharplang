@@ -32,21 +32,24 @@ All schedule items must have a public issue or checked in proposal that can be l
 - ref readonly method parameters (Jared): https://github.com/dotnet/csharplang/issues/6010
 - Accessibility and implicit interface implementations (Aleksey): https://github.com/dotnet/roslyn/issues/60885
 
-## Apr 18, 2022
-
-- Issues with Utf8 literals (Stephen, Tanner, Aleksey): https://github.com/dotnet/roslyn/issues?q=is:issue+is:open+sort:updated-desc+label:%22New+Feature+-+Utf8StringLiterals%22
-- Syntax for lifetime annotations of ref and ref struct parameters (Jared): https://github.com/dotnet/csharplang/blob/main/proposals/low-level-struct-improvements.md#open-issues
 
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
 
+## Apr 18, 2022
+
+[C# Language Design Meeting for April 18th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-18.md)
+
+1. Issues with Utf8 string literals
+2. Ref and ref struct scoping modifiers
+
 ## Apr 13, 2022
 
 [C# Language Design Meeting for April 13th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-13.md)
 
-- Parameter null checking
-- File-scoped types
+1. Parameter null checking
+2. File-scoped types
 
 ## Apr 11, 2022
 
