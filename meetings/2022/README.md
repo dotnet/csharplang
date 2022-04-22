@@ -7,18 +7,30 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule when convenient
 
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
 - *Design review*
 
+## May 23, 2022
+
+## May 11, 2022
+
+## May 9, 2022
+
+## May 4, 2022
+
+## May 2, 2022
 
 ## Apr 27, 2022
+
+- Default parameters in lambdas (Safia): https://github.com/dotnet/csharplang/issues/6051
+- Null-conditional assignment (Rikki): https://github.com/dotnet/csharplang/issues/6045
 
 ## Apr 25, 2022
 
 - ref readonly method parameters (Jared): https://github.com/dotnet/csharplang/issues/6010
+- Accessibility and implicit interface implementations (Aleksey): https://github.com/dotnet/roslyn/issues/60885
 
 ## Apr 18, 2022
 
