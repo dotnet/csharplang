@@ -24,7 +24,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Apr 27, 2022
 
-- Default parameters in lambdas (Safia): [TBD]
+- Default parameters in lambdas (Safia): https://github.com/dotnet/csharplang/issues/6051
 - Null-conditional assignment (Rikki): https://github.com/dotnet/csharplang/issues/6045
 
 ## Apr 25, 2022
