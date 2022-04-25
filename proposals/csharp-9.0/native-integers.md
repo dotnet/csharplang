@@ -43,6 +43,10 @@ There is an identity conversion between compound types that differ by native int
 The tables below cover the conversions between special types.
 (The IL for each conversion includes the variants for `unchecked` and `checked` contexts if different.)
 
+General notes:
+- Most docs explain `conv.u` as conversion to __native unsigned integer__ and `conv.i` as conversion to __native integer__. But a more appropriate description is that `conv.u` is zero-extending and `conv.i` is sign-extending (if the most significant bit is `1`, then the conversion fills with `1`s).
+- Some non-obvious choices are guided by pre-existing semantics. For example, `sbyte`->`nint` uses `conv.i` and `byte`->`nint` uses `conv.u`, the same way that `sbyte`->`long` uses `conv.i8` and `byte`->`long` uses `conv.u8`.
+
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
 | `object` | `nint` | Unboxing | `unbox` |
