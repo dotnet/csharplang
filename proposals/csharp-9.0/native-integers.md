@@ -56,8 +56,7 @@ General notes:
   - `conv.u*` for `any to unsigned *` (where * is the target width)
 - Taking a few examples:
   - `sbyte->nint` and `sbyte->nuint` use `conv.i` while `byte->nint` and `byte->nuint` use `conv.u` because they are all **widening**.
-  - `nint->byte` and `nuint->byte` use `conv.u1` while `nint->sbyte` and `nuint->sbyte` use `conv.i1` as a _pre-existing semantic_. These are both **narrowing** and so there isn't a specific need to pick `signed` (`i1`) or `unsigned` (`u1`), its just a semantic of what's already done.
-  - The overflow cases do have semantics that are important and that's `conv.ovf.*` where the input is treated as `signed` and the output is `*` and `conv.ovf.*.un` where the input is treated as `unsigned` and the output is `*`.
+  - `nint->byte` and `nuint->byte` use `conv.u1` while `nint->sbyte` and `nuint->sbyte` use `conv.i1` as a _pre-existing semantic_. For `byte`, `sbyte`, `short`, and `ushort` the "stack type" is `int32`. So `conv.i1` is effectively "downcast to a signed byte and then sign-extend up to int32" while `conv.u1` is effectively "downcast to an unsigned byte and then zero-extend up to int32"
   - `checked(void*->nint)` uses `conv.ovf.i.un` the same way that `checked(void*->long)` uses `conv.ovf.i8.un`.
 
 | Operand | Target | Conversion | IL |
