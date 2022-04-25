@@ -45,12 +45,25 @@ The tables below cover the conversions between special types.
 
 General notes:
 - Most docs explain `conv.u` as conversion to __native unsigned integer__ and `conv.i` as conversion to __native integer__. But a more appropriate description is that `conv.u` is zero-extending and `conv.i` is sign-extending (if the most significant bit is `1`, then the conversion fills with `1`s).
-- Some non-obvious choices are guided by pre-existing semantics. For example, `sbyte->nint` uses `conv.i` and `byte->nint` uses `conv.u`, the same way that `sbyte->long` uses `conv.i8` and `byte->long` uses `conv.u8`. Also, `checked(void*->nint)` uses `conv.ovf.i.un` the same way that `checked(void*->long)` uses `conv.ovf.i8.un`.
+- `checked` contexts for both **widening** and **narrowing** are:
+  - `conv.ovf.*` for `signed to *`
+  - `conv.ovf.*.un` for `unsigned to *`
+- `unchecked` contexts for **widening** are:
+  - `conv.i*` for `signed to *` (where * is the target width)
+  - `conv.u*` for `unsigned to *` (where * is the target width)
+- `unchecked` contexts for **narrowing** are:
+  - `conv.i*` for `any to signed *` (where * is the target width)
+  - `conv.u*` for `any to unsigned *` (where * is the target width)
+- Taking a few examples:
+  - `sbyte->nint` and `sbyte->nuint` use `conv.i` while `byte->nint` and `byte->nuint` use `conv.u` because they are all **widening**.
+  - `nint->byte` and `nuint->byte` use `conv.u1` while `nint->sbyte` and `nuint->sbyte` use `conv.i1` as a _pre-existing semantic_. These are both **narrowing** and so there isn't a specific need to pick `signed` (`i1`) or `unsigned` (`u1`), its just a semantic of what's already done.
+  - The overflow cases do have semantics that are important and that's `conv.ovf.*` where the input is treated as `signed` and the output is `*` and `conv.ovf.*.un` where the input is treated as `unsigned` and the output is `*`.
+  - `checked(void*->nint)` uses `conv.ovf.i.un` the same way that `checked(void*->long)` uses `conv.ovf.i8.un`.
 
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
 | `object` | `nint` | Unboxing | `unbox` |
-| `void*` | `nint` | PointerToVoid | `conv.i`/`conv.ovf.i.un` |
+| `void*` | `nint` | PointerToVoid | nop / `conv.ovf.i.un` |
 | `sbyte` | `nint` | ImplicitNumeric | `conv.i` |
 | `byte` | `nint` | ImplicitNumeric | `conv.u` |
 | `short` | `nint` | ImplicitNumeric | `conv.i` |
@@ -67,7 +80,7 @@ General notes:
 | `UIntPtr` | `nint` | None | |
 | | | | |
 | `object` | `nuint` | Unboxing | `unbox` |
-| `void*` | `nuint` | PointerToVoid | `conv.u` |
+| `void*` | `nuint` | PointerToVoid | nop |
 | `sbyte` | `nuint` | ExplicitNumeric | `conv.i` / `conv.ovf.u` |
 | `byte` | `nuint` | ImplicitNumeric | `conv.u` |
 | `short` | `nuint` | ExplicitNumeric | `conv.i` / `conv.ovf.u` |
@@ -88,7 +101,7 @@ General notes:
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
 | `nint` | `object` | Boxing | `box` |
-| `nint` | `void*` | PointerToVoid | `conv.i`/`conv.ovf.u` |
+| `nint` | `void*` | PointerToVoid | nop / `conv.ovf.u` |
 | `nint` | `nuint` | ExplicitNumeric | `conv.u` / `conv.ovf.u` |
 | `nint` | `sbyte` | ExplicitNumeric | `conv.i1` / `conv.ovf.i1` |
 | `nint` | `byte` | ExplicitNumeric | `conv.u1` / `conv.ovf.u1` |
@@ -96,7 +109,7 @@ General notes:
 | `nint` | `ushort` | ExplicitNumeric | `conv.u2` / `conv.ovf.u2` |
 | `nint` | `int` | ExplicitNumeric | `conv.i4` / `conv.ovf.i4` |
 | `nint` | `uint` | ExplicitNumeric | `conv.u4` / `conv.ovf.u4` |
-| `nint` | `long` | ImplicitNumeric | `conv.i8` / `conv.ovf.i8` |
+| `nint` | `long` | ImplicitNumeric | `conv.i8` |
 | `nint` | `ulong` | ExplicitNumeric | `conv.i8` / `conv.ovf.u8` |
 | `nint` | `char` | ExplicitNumeric | `conv.u2` / `conv.ovf.u2` |
 | `nint` | `float` | ImplicitNumeric | `conv.r4` |
@@ -107,7 +120,7 @@ General notes:
 | `nint` |Enumeration|ExplicitEnumeration||
 | | | | |
 | `nuint` | `object` | Boxing | `box` |
-| `nuint` | `void*` | PointerToVoid | `conv.u` |
+| `nuint` | `void*` | PointerToVoid | nop |
 | `nuint` | `nint` | ExplicitNumeric | `conv.i` / `conv.ovf.i.un` |
 | `nuint` | `sbyte` | ExplicitNumeric | `conv.i1` / `conv.ovf.i1.un` |
 | `nuint` | `byte` | ExplicitNumeric | `conv.u1` / `conv.ovf.u1.un` |
@@ -116,7 +129,7 @@ General notes:
 | `nuint` | `int` | ExplicitNumeric | `conv.i4` / `conv.ovf.i4.un` |
 | `nuint` | `uint` | ExplicitNumeric | `conv.u4` / `conv.ovf.u4.un` |
 | `nuint` | `long` | ExplicitNumeric | `conv.u8` / `conv.ovf.i8.un` |
-| `nuint` | `ulong` | ImplicitNumeric | `conv.u8` / `conv.u8` |
+| `nuint` | `ulong` | ImplicitNumeric | `conv.u8` |
 | `nuint` | `char` | ExplicitNumeric | `conv.u2` / `conv.ovf.u2.un` |
 | `nuint` | `float` | ImplicitNumeric | `conv.r.un conv.r4` |
 | `nuint` | `double` | ImplicitNumeric | `conv.r.un conv.r8` |
