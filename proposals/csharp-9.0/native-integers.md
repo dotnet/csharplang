@@ -97,7 +97,7 @@ The tables below cover the conversions between special types.
 | `nint` | `char` | ExplicitNumeric | `conv.u2` / `conv.ovf.u2` |
 | `nint` | `float` | ImplicitNumeric | `conv.r4` |
 | `nint` | `double` | ImplicitNumeric | `conv.r8` |
-| `nint` | `decimal` | ImplicitNumeric | `decimal decimal.op_Implicit(long)` |
+| `nint` | `decimal` | ImplicitNumeric | `conv.i8 decimal decimal.op_Implicit(long)` |
 | `nint` | `IntPtr` | Identity | |
 | `nint` | `UIntPtr` | None | |
 | `nint` |Enumeration|ExplicitEnumeration||
@@ -116,7 +116,7 @@ The tables below cover the conversions between special types.
 | `nuint` | `char` | ExplicitNumeric | `conv.u2` / `conv.ovf.u2.un` |
 | `nuint` | `float` | ImplicitNumeric | `conv.r4` |
 | `nuint` | `double` | ImplicitNumeric | `conv.r8` |
-| `nuint` | `decimal` | ImplicitNumeric | `decimal decimal.op_Implicit(ulong)` |
+| `nuint` | `decimal` | ImplicitNumeric | `conv.u8 decimal decimal.op_Implicit(ulong)` |
 | `nuint` | `IntPtr` | None | |
 | `nuint` | `UIntPtr` | Identity | |
 | `nuint` |Enumeration|ExplicitEnumeration||
