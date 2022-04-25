@@ -118,8 +118,8 @@ General notes:
 | `nuint` | `long` | ExplicitNumeric | `conv.u8` / `conv.ovf.i8.un` |
 | `nuint` | `ulong` | ImplicitNumeric | `conv.u8` / `conv.u8` |
 | `nuint` | `char` | ExplicitNumeric | `conv.u2` / `conv.ovf.u2.un` |
-| `nuint` | `float` | ImplicitNumeric | `conv.r4` |
-| `nuint` | `double` | ImplicitNumeric | `conv.r8` |
+| `nuint` | `float` | ImplicitNumeric | `conv.r.un conv.r4` |
+| `nuint` | `double` | ImplicitNumeric | `conv.r.un conv.r8` |
 | `nuint` | `decimal` | ImplicitNumeric | `conv.u8 decimal decimal.op_Implicit(ulong)` |
 | `nuint` | `IntPtr` | None | |
 | `nuint` | `UIntPtr` | Identity | |
