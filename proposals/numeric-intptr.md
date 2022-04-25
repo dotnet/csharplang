@@ -3,6 +3,8 @@
 TODO pointer arithmetic
 TODO dynamic
 TODO Possible breaking changes: IntPtr + int, IntPtr - int, (int)IntPtr, (IntPtr)long (and then of course various possible edge cases where user-defined vs language-defined operators subtly differ in behavior)
+TODO Call out behavior with operators defined on IntPtr/UIntPtr
+TODO Conversion to/from enumeration
 
 ## Summary
 [summary]: #summary
