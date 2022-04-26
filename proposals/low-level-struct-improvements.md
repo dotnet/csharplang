@@ -93,7 +93,7 @@ A `ref` field can be combined with `readonly` modifiers in the following ways:
 - `ref readonly`: this is a field that can be ref re-assigned but cannot be value assigned at any point. This how an `in` parameter could be ref re-assigned to a `ref` field.
 - `readonly ref readonly`: a combination of `ref readonly` and `readonly ref`. 
 
-```
+```c#
 ref struct ReadOnlyExample
 {
     ref readonly int Field1;
@@ -371,6 +371,22 @@ Detailed Notes:
 - The new span safety rules will be in effect when either 
     - The core library contains the feature flag indicating support for `ref` fields
     - The `langversion` value is 11 or higher
+
+### Sunset restricted types
+The compiler has a concept of a set of "restricted types" which is largely undocumented. These types were given a special status because in C# 1.0 there was no general purpose way to express their behavior. Most notably the fact that the types can contain references to the execution stack. Instead the compiler had special knowledge of them and restricted their usage in ways that would always be safe: disallowed returns, cannot use as array elements, cannot use in generics, etc ...
+
+Once `ref` fields are available these types can be correctly defined in C# using a combination of `ref struct` and `ref` fields. Therefore when the compiler detects that a runtime supports `ref` fields it will no longer have a notion of restricted types. It will instead use the types as they are defined in the code. 
+
+To support this our span safety rules will be updated as follows:
+
+- `__makeref` will be treated as a method with the signature `TypedReference __makeref<T>(ref T value)`
+- `__refvalue` will be treated as a method with the signature `ref T __refvalue<T>(TypedReference tr)`. The expression `__refvalue(tr, int)` will effectively use the second argument as the type parameter.
+- `__arglist` as a parameter will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
+- `__arglist(...)` as an expression will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
+
+Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. That combined with the above rules will ensure references to the stack do escape beyond their lifetime.
+
+Note: strictly speaking this is a compiler implementation detail vs. part of the language. But given the relationship with `ref` fields it is being included in the language proposal for simplicity.
 
 ### Provide unscoped
 One of the most notable friction points is the inability to return fields by `ref` in instance members of a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly. This reduces the usefulness of `ref` returns in `struct` where it is often the most desired. 
@@ -925,12 +941,13 @@ This will work but is likely going to result in unnecessary code generation. One
 The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
 
 1. `ref` fields and `scoped`
-2. `unscoped` 
-3. fixed sized buffers
+2. Sunset restricted types
+3. `unscoped` 
+4. fixed sized buffers
 
 What gets implemented in which release is merely a scoping exercise. 
 
-**Decision** Only `ref` fields and `scoped` will make C# 11.0. LDM is happy to revisit `unscoped` if a more natural keyword can be settled on or data suggests it's possible to make `this` `unscoped` by default in all cases.
+**Decision** Only `ref` fields, `scoped` and sunsetting restricted types will make C# 11.0. LDM is happy to revisit `unscoped` if a more natural keyword can be settled on or data suggests it's possible to make `this` `unscoped` by default in all cases.
 
 ## Future Considerations
 
