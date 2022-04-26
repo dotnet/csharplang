@@ -43,8 +43,8 @@ There is an identity conversion between compound types that differ by native int
 The tables below cover the conversions between special types.
 (The IL for each conversion includes the variants for `unchecked` and `checked` contexts if different.)
 
-General notes:
-- Most docs explain `conv.u` as conversion to __native unsigned integer__ and `conv.i` as conversion to __native integer__. But a more appropriate description is that `conv.u` is zero-extending and `conv.i` is sign-extending (if the most significant bit is `1`, then the conversion fills with `1`s).
+General notes on the table below:
+- `conv.u` is a zero-extending conversion to native integer and `conv.i` is sign-extending conversion to native integer.
 - `checked` contexts for both **widening** and **narrowing** are:
   - `conv.ovf.*` for `signed to *`
   - `conv.ovf.*.un` for `unsigned to *`
@@ -54,10 +54,11 @@ General notes:
 - `unchecked` contexts for **narrowing** are:
   - `conv.i*` for `any to signed *` (where * is the target width)
   - `conv.u*` for `any to unsigned *` (where * is the target width)
-- Taking a few examples:
-  - `sbyte->nint` and `sbyte->nuint` use `conv.i` while `byte->nint` and `byte->nuint` use `conv.u` because they are all **widening**.
-  - `nint->byte` and `nuint->byte` use `conv.u1` while `nint->sbyte` and `nuint->sbyte` use `conv.i1`. For `byte`, `sbyte`, `short`, and `ushort` the "stack type" is `int32`. So `conv.i1` is effectively "downcast to a signed byte and then sign-extend up to int32" while `conv.u1` is effectively "downcast to an unsigned byte and then zero-extend up to int32"
-  - `checked(void*->nint)` uses `conv.ovf.i.un` the same way that `checked(void*->long)` uses `conv.ovf.i8.un`.
+
+Taking a few examples:
+- `sbyte to nint` and `sbyte to nuint` use `conv.i` while `byte to nint` and `byte to nuint` use `conv.u` because they are all **widening**.
+- `nint to byte` and `nuint to byte` use `conv.u1` while `nint to sbyte` and `nuint to sbyte` use `conv.i1`. For `byte`, `sbyte`, `short`, and `ushort` the "stack type" is `int32`. So `conv.i1` is effectively "downcast to a signed byte and then sign-extend up to int32" while `conv.u1` is effectively "downcast to an unsigned byte and then zero-extend up to int32".
+- `checked void* to nint` uses `conv.ovf.i.un` the same way that `checked void* to long` uses `conv.ovf.i8.un`.
 
 | Operand | Target | Conversion | IL |
 |:---:|:---:|:---:|:---:|
