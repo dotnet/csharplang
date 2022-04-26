@@ -384,7 +384,7 @@ To support this our span safety rules will be updated as follows:
 - `__arglist` as a parameter will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
 - `__arglist(...)` as an expression will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
 
-Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. That combined with the above rules will ensure references to the stack do escape beyond their lifetime.
+Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. That combined with the above rules will ensure references to the stack do not escape beyond their lifetime.
 
 Note: strictly speaking this is a compiler implementation detail vs. part of the language. But given the relationship with `ref` fields it is being included in the language proposal for simplicity.
 
