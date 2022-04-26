@@ -37,13 +37,13 @@ https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#835-sim
   `decimal` |   `System.Decimal`
 
 ### 8.3.6 Integral types
-Integral types: https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#836-integral-types
+
 C# supports **eleven** integral types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, and `char`. The integral types have the following sizes and ranges of values:
 ...
 - **The int type represents signed 32-bit integers with values from -2147483648 to 2147483647, inclusive.** TODO2 for nint and nuint
 
 ## 8.8 Unmanaged types
-Unmanaged types: https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#88-unmanaged-types
+
 In other words, an __unmanaged_type__ is one of the following:
 - `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, or `bool`.
 - Any *enum_type*.
@@ -53,14 +53,49 @@ In other words, an __unmanaged_type__ is one of the following:
 ### 10.2.3 Implicit numeric conversions
 
 The implicit numeric conversions are:
-...
+TODO2
+
+- From `sbyte` to `short`, `int`, `long`, `float`, `double`, or `decimal`.
+- From `byte` to `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
+- From `short` to `int`, `long`, `float`, `double`, or `decimal`.
+- From `ushort` to `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
+- From `int` to `long`, `float`, `double`, or `decimal`.
+- From `uint` to `long`, `ulong`, `float`, `double`, or `decimal`.
+- From `long` to `float`, `double`, or `decimal`.
+- From `ulong` to `float`, `double`, or `decimal`.
+- From `char` to `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
+- From `float` to `double`.
+
+Conversions from `int`, `uint`, `long` or `ulong` to `float` and from `long` or `ulong` to `double` may cause a loss of precision, but will never cause a loss of magnitude. The other implicit numeric conversions never lose any information.
+
+\[...]
 
 ### 10.2.11 Implicit constant expression conversions
 
 An implicit constant expression conversion permits the following conversions:
 
 - A *constant_expression* of type `int` can be converted to type `sbyte`, `byte`, `short`, `ushort`, `uint`, **`nint`, `nuint`**, or `ulong`, provided the value of the *constant_expression* is within the range of the destination type.
-...
+\[...]
+
+### 10.3.2 Explicit numeric conversions
+
+The explicit numeric conversions are the conversions from a *numeric_type* to another *numeric_type* for which an implicit numeric conversion does not already exist:
+
+TODO2
+- From `sbyte` to `byte`, `ushort`, `uint`, `ulong`, or `char`.
+- From `byte` to `sbyte` or `char`.
+- From `short` to `sbyte`, `byte`, `ushort`, `uint`, `ulong`, or `char`.
+- From `ushort` to `sbyte`, `byte`, `short`, or `char`.
+- From `int` to `sbyte`, `byte`, `short`, `ushort`, `uint`, `ulong`, or `char`.
+- From `uint` to `sbyte`, `byte`, `short`, `ushort`, `int`, or `char`.
+- From `long` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `ulong`, or `char`.
+- From `ulong` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, or `char`.
+- From `char` to `sbyte`, `byte`, or `short`.
+- From `float` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, or `decimal`.
+- From `double` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, or `decimal`.
+- From `decimal` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, or `double`.
+
+\[...]
 
 ### 10.3.3 Explicit enumeration conversions
 
@@ -71,9 +106,8 @@ The explicit enumeration conversions are:
 - From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
 - From any *enum_type* to any other *enum_type*.
 
-Unary operators: https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#118-unary-operators
 ### 11.8.2 Unary plus operator
-https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1182-unary-plus-operator
+
 The predefined unary plus operators are:
 
 ```csharp
@@ -95,7 +129,6 @@ nuint operator +(nuint x);
 Unary operator overload resolution is applied to select a specific operator implementation. Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint*, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, and any enum type.
 
 ### 11.8.3 Unary minus operator
-https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1183-unary-minus-operator
 
 The predefined unary minus operators are:
 
@@ -117,7 +150,6 @@ Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte
 In addition, a *default_value_expression* is a constant expression if the type is one of the following value types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool,` or any enumeration type.
 
 ### 11.8.5 Bitwise complement operator
-https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1185-bitwise-complement-operator
 
 The predefined bitwise complement operators are:
 
