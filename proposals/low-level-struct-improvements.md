@@ -373,14 +373,14 @@ Detailed Notes:
     - The `langversion` value is 11 or higher
 
 ### Sunset restricted types
-The compiler has a concept of a set of "restricted types" which is largely undocumented. These types were given a special status because in C# 1.0 there was no general purpose way to express their behavior. Most notably the fact that the types can contain references to the execution stack. Instead the compiler had special knowledge of them and restricted their usage in ways that would always be safe: disallowed returns, cannot use as array elements, cannot use in generics, etc ...
+The compiler has a concept of a set of "restricted types" which is largely undocumented. These types were given a special status because in C# 1.0 there was no general purpose way to express their behavior. Most notably the fact that the types can contain references to the execution stack. Instead the compiler had special knowledge of them and restricted their use to ways that would always be safe: disallowed returns, cannot use as array elements, cannot use in generics, etc ...
 
 Once `ref` fields are available these types can be correctly defined in C# using a combination of `ref struct` and `ref` fields. Therefore when the compiler detects that a runtime supports `ref` fields it will no longer have a notion of restricted types. It will instead use the types as they are defined in the code. 
 
 To support this our span safety rules will be updated as follows:
 
-- `__makeref` will be treated as a method with the signature `TypedReference __makeref<T>(ref T value)`
-- `__refvalue` will be treated as a method with the signature `ref T __refvalue<T>(TypedReference tr)`. The expression `__refvalue(tr, int)` will effectively use the second argument as the type parameter.
+- `__makeref` will be treated as a method with the signature `static TypedReference __makeref<T>(ref T value)`
+- `__refvalue` will be treated as a method with the signature `static ref T __refvalue<T>(TypedReference tr)`. The expression `__refvalue(tr, int)` will effectively use the second argument as the type parameter.
 - `__arglist` as a parameter will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
 - `__arglist(...)` as an expression will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
 
