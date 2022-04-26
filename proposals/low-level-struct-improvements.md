@@ -19,8 +19,10 @@ This proposal plans to address these issues by building on top of our existing l
 - Allow runtime to remove `unsafe` uses caused by limitations of lifetime defaults
 - Allow the declaration of safe `fixed` buffers for managed and unmanaged types in `struct`
 
-## Compat Considerations
-To understand the compat challenges in this design let's first consider how `Span<T>` will look once `ref` fields are supported.
+## Detailed Design 
+The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.
+
+Once this design is complete our `Span<T>` definition will be as follows:
 
 <a name="new-span"></a>
 
@@ -28,7 +30,7 @@ To understand the compat challenges in this design let's first consider how `Spa
 readonly ref struct Span<T>
 {
     readonly ref T _field;
-    int _length;
+    readonly int _length;
 
     // This constructor does not exist today but will be added as a part 
     // of changing Span<T> to have ref fields. It is a convenient, and
@@ -41,67 +43,6 @@ readonly ref struct Span<T>
     }
 }
 ```
-
-The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
-
-```c#
-Span<int> CreateSpan<int>()
-{
-    // This is legal according to the 7.2 span rules because they do not account
-    // for a constructor in the form Span(ref T value) existing. 
-    int local = 42;
-    return new Span<int>(ref local);
-}
-```
-
-<a name="ways-to-escape"></a>
-
-Effectively there are three ways for a `ref` parameter to escape from a method invocation: 
-
-1. By value
-2. By `ref` 
-3. By `ref` field
-
-The existing rules only account for (1) and (2). They do not account for (3) hence gaps like returning locals as `ref` fields are not accounted for. This design must change the rules to account for (3). This will have a small impact to compatibility for existing APIs. Specifically it will impact APIs that have the following properties.
-
-- Have a `ref struct` in the signature
-    - Where the `ref struct` is a return type, `ref` or `out` parameter
-    - Has an additional `in` or `ref` parameter excluding the receiver
-
-In C# 10 callers of such APIs never had to consider that `ref` state input to the API could be captured as a `ref` field. That allowed for several patterns to exist, safely in C# 10, that will be unsafe in C# 11 due to the ability for `ref` state to escape as a `ref` field. For example:
-
-<a name="new-span-challenges"></a>
-
-```c#
-Span<int> CreateSpan(ref int parameter)
-{
-    // The implementation of this method is irrelevant when considering the lifetime of the 
-    // returned Span<T>. The span safety rules only look at the method signature, not the 
-    // implementation. In C# 10 ref fields didn't exist hence there was no way for `parameter`
-    // to escape by ref in this method
-}
-
-Span<int> BadUseExamples(int parameter)
-{
-    // Legal in C# 10 but would be illegal with ref fields
-    return CreateSpan(ref parameter);
-
-    // Legal in C# 10 but would be illegal with ref fields
-    int local = 42;
-    return CreateSpan(ref local);
-
-    // Legal in C# 10 but would be illegal with ref fields
-    Span<int> span = stackalloc int[42];
-    return CreateSpan(ref span[0]);
-}
-```
-
-The impact of this compatibility break is expected to be very small. The impacted API shape made little sense in the absence of `ref` fields hence it is unlikely customers created many of these. Experiments running tools to spot this API shape over existing repositories back up that assertion. The only repository with any significant counts of this shape is [dotnet/runtime](https://github.com/dotnet/runtime) and that is because that repo can create `ref` fields via the `ByReference<T>` intrinsic type.
-
-Even so the design must account for such APIs existing because it expresses a valid pattern, just not a common one. Hence the design must give developers the tools to restore the existing lifetime rules when upgrading to C# 10. Specifically it must provide mechanisms that allow developers to annotate `ref` parameters as unable to escape by `ref` or `ref` field. That allows customers to define APIs in C# 11 that have the same C# 10 callsite rules.
-
-## Detailed Design 
-The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.
 
 ### Provide ref fields and scoped
 The language will allow developers to declare `ref` fields inside of a `ref struct`. This can be useful for example when encapsulating large mutable `struct` instances or defining high performance types like `Span<T>` in libraries besides the runtime.
@@ -152,7 +93,7 @@ A `ref` field can be combined with `readonly` modifiers in the following ways:
 - `ref readonly`: this is a field that can be ref re-assigned but cannot be value assigned at any point. This how an `in` parameter could be ref re-assigned to a `ref` field.
 - `readonly ref readonly`: a combination of `ref readonly` and `readonly ref`. 
 
-```
+```c#
 ref struct ReadOnlyExample
 {
     ref readonly int Field1;
@@ -431,6 +372,22 @@ Detailed Notes:
     - The core library contains the feature flag indicating support for `ref` fields
     - The `langversion` value is 11 or higher
 
+### Sunset restricted types
+The compiler has a concept of a set of "restricted types" which is largely undocumented. These types were given a special status because in C# 1.0 there was no general purpose way to express their behavior. Most notably the fact that the types can contain references to the execution stack. Instead the compiler had special knowledge of them and restricted their use to ways that would always be safe: disallowed returns, cannot use as array elements, cannot use in generics, etc ...
+
+Once `ref` fields are available these types can be correctly defined in C# using a combination of `ref struct` and `ref` fields. Therefore when the compiler detects that a runtime supports `ref` fields it will no longer have a notion of restricted types. It will instead use the types as they are defined in the code. 
+
+To support this our span safety rules will be updated as follows:
+
+- `__makeref` will be treated as a method with the signature `static TypedReference __makeref<T>(ref T value)`
+- `__refvalue` will be treated as a method with the signature `static ref T __refvalue<T>(TypedReference tr)`. The expression `__refvalue(tr, int)` will effectively use the second argument as the type parameter.
+- `__arglist` as a parameter will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
+- `__arglist(...)` as an expression will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
+
+Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. That combined with the above rules will ensure references to the stack do not escape beyond their lifetime.
+
+Note: strictly speaking this is a compiler implementation detail vs. part of the language. But given the relationship with `ref` fields it is being included in the language proposal for simplicity.
+
 ### Provide unscoped
 One of the most notable friction points is the inability to return fields by `ref` in instance members of a `struct`. This means developers can't create `ref` returning methods / properties and have to resort to exposing fields directly. This reduces the usefulness of `ref` returns in `struct` where it is often the most desired. 
 
@@ -578,6 +535,65 @@ The backing storage for the buffer will be generated using the `[InlineArray]` a
 
 ## Considerations
 There are considerations other parts of the development stack should consider when evaluating this feature.
+
+### Compat Considerations
+The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
+
+```c#
+Span<int> CreateSpan<int>()
+{
+    // This is legal according to the 7.2 span rules because they do not account
+    // for a constructor in the form Span(ref T value) existing. 
+    int local = 42;
+    return new Span<int>(ref local);
+}
+```
+
+<a name="ways-to-escape"></a>
+
+Effectively there are three ways for a `ref` parameter to escape from a method invocation: 
+
+1. By value
+2. By `ref` 
+3. By `ref` field
+
+The existing rules only account for (1) and (2). They do not account for (3) hence gaps like returning locals as `ref` fields are not accounted for. This design must change the rules to account for (3). This will have a small impact to compatibility for existing APIs. Specifically it will impact APIs that have the following properties.
+
+- Have a `ref struct` in the signature
+    - Where the `ref struct` is a return type, `ref` or `out` parameter
+    - Has an additional `in` or `ref` parameter excluding the receiver
+
+In C# 10 callers of such APIs never had to consider that `ref` state input to the API could be captured as a `ref` field. That allowed for several patterns to exist, safely in C# 10, that will be unsafe in C# 11 due to the ability for `ref` state to escape as a `ref` field. For example:
+
+<a name="new-span-challenges"></a>
+
+```c#
+Span<int> CreateSpan(ref int parameter)
+{
+    // The implementation of this method is irrelevant when considering the lifetime of the 
+    // returned Span<T>. The span safety rules only look at the method signature, not the 
+    // implementation. In C# 10 ref fields didn't exist hence there was no way for `parameter`
+    // to escape by ref in this method
+}
+
+Span<int> BadUseExamples(int parameter)
+{
+    // Legal in C# 10 but would be illegal with ref fields
+    return CreateSpan(ref parameter);
+
+    // Legal in C# 10 but would be illegal with ref fields
+    int local = 42;
+    return CreateSpan(ref local);
+
+    // Legal in C# 10 but would be illegal with ref fields
+    Span<int> span = stackalloc int[42];
+    return CreateSpan(ref span[0]);
+}
+```
+
+The impact of this compatibility break is expected to be very small. The impacted API shape made little sense in the absence of `ref` fields hence it is unlikely customers created many of these. Experiments running tools to spot this API shape over existing repositories back up that assertion. The only repository with any significant counts of this shape is [dotnet/runtime](https://github.com/dotnet/runtime) and that is because that repo can create `ref` fields via the `ByReference<T>` intrinsic type.
+
+Even so the design must account for such APIs existing because it expresses a valid pattern, just not a common one. Hence the design must give developers the tools to restore the existing lifetime rules when upgrading to C# 10. Specifically it must provide mechanisms that allow developers to annotate `ref` parameters as unable to escape by `ref` or `ref` field. That allows customers to define APIs in C# 11 that have the same C# 10 callsite rules.
 
 ### Reference Assemblies
 A reference assembly for a compilation using features described in this proposal must maintain the elements that convey span safety information. That means all lifetime annotation attributes must be preserved in their original position. Any attempt to replace or omit them can lead to invalid reference assemblies.
@@ -925,12 +941,13 @@ This will work but is likely going to result in unnecessary code generation. One
 The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
 
 1. `ref` fields and `scoped`
-2. `unscoped` 
-3. fixed sized buffers
+2. Sunset restricted types
+3. `unscoped` 
+4. fixed sized buffers
 
 What gets implemented in which release is merely a scoping exercise. 
 
-**Decision** Only `ref` fields and `scoped` will make C# 11.0. LDM is happy to revisit `unscoped` if a more natural keyword can be settled on or data suggests it's possible to make `this` `unscoped` by default in all cases.
+**Decision** Only `ref` fields, `scoped` and sunsetting restricted types will make C# 11.0. LDM is happy to revisit `unscoped` if a more natural keyword can be settled on or data suggests it's possible to make `this` `unscoped` by default in all cases.
 
 ## Future Considerations
 
