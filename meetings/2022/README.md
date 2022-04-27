@@ -24,14 +24,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## May 2, 2022
 
-## Apr 27, 2022
-
-- Default parameters in lambdas (Safia): https://github.com/dotnet/csharplang/issues/6051
-- Null-conditional assignment (Rikki): https://github.com/dotnet/csharplang/issues/6045
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Apr 27, 2022
+
+[C# Language Design Meeting for April 27th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-27.md)
+
+- Default parameter values in lambdas
+- Null-conditional assignment
 
 ## Apr 25, 2022
 
