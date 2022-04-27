@@ -18,6 +18,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## May 9, 2022
 
+- Numeric IntPtr (Julien): https://github.com/dotnet/csharplang/issues/6065
+
 ## May 4, 2022
 
 ## May 2, 2022
