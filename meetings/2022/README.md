@@ -7,6 +7,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule when convenient
 
+* Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
