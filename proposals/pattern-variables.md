@@ -2,7 +2,7 @@
 
 ## Summary  
 
-- Allow variable declarations under `or` and `not` patterns and across `case` labels in a `switch` section.
+- Allow variable declarations under `or` and `not` patterns and across `case` labels in a `switch` section to share code.
 	```cs
 	if (e is C c or Wrapper { Prop: C c })
 	    return c;
@@ -43,10 +43,9 @@
 	}
 	```
 
-- Also relax single-declaration rules across the entire declaring scope as long as each variable is assigned once.
+- Also relax single-declaration rules within expression boundaries as long as each variable is assigned once.
 	```cs
 	if (e is C c || e is Wrapper { Prop: C c }) ;
-	if (e is C c) ; else if (e is Wrapper { Prop: C c }) ;	
 	if (b ? e is C c : e is Warpper { Prop: C c }) ;
 	```
 	
@@ -54,7 +53,13 @@
 
 ### Variable redeclaration
 
-- Pattern variables are allowed to be redeclared in the same scope if not already definitely assigned. These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
+- Pattern variables are allowed to be redeclared in the following locations if not already definitely assigned:
+	- Within case labels for the same switch section (includes `when` clauses)
+	- Within a single expression (includes `is` expressions)
+	- Within a single pattern (includes `switch` expression arms)
+	- Across top-level condition expressions within a single `if` statement (includes `else if`)
+
+  These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
 - Pattern variables with multiple declarations must be of the same type, excluding tuple names and nullability for reference types.
 
 ### Definite assignment
@@ -67,7 +72,7 @@ For an *is_pattern_expression* of the form `e is pattern`, the definite assignme
 For a *switch_section* of the form `case pattern_1 when condition_1: ... case pattern_N when condition_N:`, the definite assignment state of *v* is determined by:
 
 - The state of *v* before *condition_i* is definitely assigned, if the state of *v* after *pattern_i* is "definitely assigned when true".
-- The state of *v* before *switch_section_body* is definitely assigned, if the state of *v* after each *pattern_i* is "definitely assigned when true".
+- The state of *v* before *switch_section_body* is definitely assigned, if the state of *v* after each *switch_section_label* is "definitely assigned when true".
 - Otherwise, the state of *v* is not definitely assigned.
 
 #### General definite assignment rules for pattern variables
@@ -95,9 +100,5 @@ For a *negated_pattern* *p* of the form `not pattern`, the definite assignment s
 These rules cover the existing top-level `is not` pattern variables. However, in any other scenario the variables could be left unassigned.
 
 ## Unresolved questions
-- Should the redeclaration rules work in nested scopes?
-	```cs
-	if (e is C c) return;
-	if (e is C c) return; // allowed
-	{ if (e is C c) return; } // allowed?
-	```
+- Would it be possible to permit different types for each variable especially within `if`/`else` chains?
+  And if so, would it be a part of this proposal or a separate feature?
