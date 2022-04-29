@@ -25,7 +25,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## May 2, 2022
 
 - Should `[SetsRequiredMembers]` constructors warn when nonnullable required members are not assigned? (Fred): https://github.com/dotnet/csharplang/issues/3630
-- Questions about field access in auto-properties: #6076, #6077, #6080
+- Questions about field access in auto-properties: https://github.com/dotnet/csharplang/issues/6076, https://github.com/dotnet/csharplang/issues/6077, https://github.com/dotnet/csharplang/issues/6080
 
 # C# Language Design Notes for 2022
 
