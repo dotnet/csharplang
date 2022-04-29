@@ -22,11 +22,10 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Numeric IntPtr (Julien): https://github.com/dotnet/csharplang/issues/6065
 
-## May 4, 2022
-
 ## May 2, 2022
 
 - Should `[SetsRequiredMembers]` constructors warn when nonnullable required members are not assigned? (Fred): https://github.com/dotnet/csharplang/issues/3630
+- Questions about field access in auto-properties: #6076, #6077, #6080
 
 # C# Language Design Notes for 2022
 
