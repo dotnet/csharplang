@@ -26,6 +26,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## May 2, 2022
 
+- Should `[SetsRequiredMembers]` constructors warn when nonnullable required members are not assigned? (Fred): https://github.com/dotnet/csharplang/issues/3630
+
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
