@@ -22,14 +22,18 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Numeric IntPtr (Julien): https://github.com/dotnet/csharplang/issues/6065
 
-## May 2, 2022
-
-- Should `[SetsRequiredMembers]` constructors warn when nonnullable required members are not assigned? (Fred): https://github.com/dotnet/csharplang/issues/6081
-- Questions about field access in auto-properties: https://github.com/dotnet/csharplang/issues/6076, https://github.com/dotnet/csharplang/issues/6077, https://github.com/dotnet/csharplang/issues/6080
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## May 2, 2022
+
+[C# Language Design Meeting for May 2nd, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md)
+
+- Effect of `SetsRequiredMembers` on nullable analysis
+- `field` questions
+    - Partial overrides of virtual properties
+    - Definite assignment of manually implemented setters
 
 ## Apr 27, 2022
 
