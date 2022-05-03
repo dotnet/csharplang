@@ -192,3 +192,4 @@ The following changes are to be made to [§14.7.4](https://github.com/dotnet/csh
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#open-questions-in-field
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#open-questions-in-field
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-21.md#open-question-in-semi-auto-properties
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#field-questions
