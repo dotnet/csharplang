@@ -21,6 +21,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## May 9, 2022
 
 - Numeric IntPtr (Julien): https://github.com/dotnet/csharplang/issues/6065
+- Ref readonly parameters revisited: https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-25.md#ref-readonly-method-parameters
 
 # C# Language Design Notes for 2022
 
