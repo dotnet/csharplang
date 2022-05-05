@@ -1,0 +1,59 @@
+# Mutable anonymous types
+
+* [x] Proposed
+* [ ] Prototype: [Complete](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
+* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/BRANCH_NAME)
+* [ ] Specification: [Not Started](pr/1)
+
+## Summary
+[summary]: #summary
+Anonymous types created in c# should be given the ability to be mutable
+
+Presently when an anonymous type is created the fields are marked as readonly.  This is helpful in certain scenarios because the ultimate type is immutable and can be tracked much easier.  However it removes the ability to use anonymous types as a full-fidelity complex structure for passing around data in a program.  
+The common alternative, Dictionary<string,object> works fine in certain scenarios but suffers in areas where data binding is required.  The lack of this basic feature forces developers to create a class for every single complex data structure that needs to be passed around - even if all that structure will ever be is data.
+
+## Motivation
+[motivation]: #motivation
+
+Presently when an anonymous type is created the fields are marked as readonly.  This is helpful in certain scenarious because the ultimate type is immutable and can be tracked much easier.  However it removes the ability to use anonymous types as a full-fidelity complex structure for passing around data in a program.  
+The common alternative, Dictionary<string,object> works fine in certain scenarios but suffers in areas where data binding is required.  The lack of this basic feature forces developers to create a class for every single complex data structure that needs to be passed around - even if all that structure will ever be is data.
+
+## Detailed design
+[design]: #detailed-design
+Add the keywork **mutable** after the **new** keyword to create a mutable anonymous type. 
+For any anonymous type var `v = new {A=10;}` it can be made mutable by changing the code to `v = new mutable {A=10;}`
+
+
+## Drawbacks
+[drawbacks]: #drawbacks
+
+With the state of an anonymous type changing, the hash for that type will presumably change.  There would have to be some kind of modification to the way anonymous types are tracked to enable this feature.
+
+## Alternatives
+[alternatives]: #alternatives
+
+The pattern below is typically used to achieve this kind of functionality but is so verbose and cludgy that most just give up and create a class.
+`           
+var data2 = new Dictionary<string, object>
+{
+    ["Username"] = "My Username",
+    ["FullName"] = "John Smith",
+    ["Age"] = 22,
+    ["Salary"] = 11.5,
+    ["IsEmployee"] = true,
+    ["DOB"] = DateTimeOffset.UtcNow,
+};
+data["FullName"] = "john smith";
+            `
+The other issue with using dictionaries is that the structure does not participate in binding
+
+One can also simply create a class for each data object, but this begins to get extremely tedious and difficult to manage considering how trivial the purpose of that class truly is - essentially a data container.
+
+
+## Unresolved questions
+[unresolved]: #unresolved-questions
+
+
+
+## Design meetings
+
