@@ -120,7 +120,7 @@ This feature requires runtime support and changes to the ECMA spec. As such thes
 
 The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref re-assigned. 
 
-First the rules establishing *ref-safe-to-escape* values for fields needs to be updated for `ref` fields as follows:
+First the rules establishing *ref-safe-to-escape* values for fields need to be updated for `ref` fields as follows:
 
 <a name="rules-field-lifetimes"></a>
 
@@ -178,7 +178,7 @@ readonly ref struct Span<T>
 }
 ```
 
-The change to ref re-assignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based soley on their declaration not on their usage. All `ref` and `in` parameters are *ref-safe-to-escape* to the *calling method* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
+The change to ref re-assignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based solely on their declaration not on their usage. All `ref` and `in` parameters are *ref-safe-to-escape* to the *calling method* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
 
 <a name="rules-scoped"></a>
 
@@ -225,7 +225,7 @@ In addition to parameters the `scoped` annotation can be applied to locals or `s
 Span<int> ScopedLocalExamples()
 {
     // Error: `span` has a safe-to-escape of *current method*. That is true even though the 
-    // initializeer has a safe-to-escape of *calling method*. The annotation overrides the 
+    // initializer has a safe-to-escape of *calling method*. The annotation overrides the 
     // initializer
     scoped Span<int> span = default;
     return span;
@@ -263,7 +263,7 @@ ref int Sneaky(out int i)
 }
 ```
 
-This change to `out` reduces the overall compat impact of this change. The ability to return `out` by reference is not practically useful, it's essentially a compiler trivia question. However it negatively impacts call site analysis because the rules must consider the case that it is returned by `ref` or `ref` field. Hence `out` arguments, even though 99% of the time are not returned by `ref` must be considered as such and that conflates lifetime issues. This would reduce the flexbility of APIs that return `ref struct` values and have `out` parameters. This is a common pattern in reader style APIs. 
+This change to `out` reduces the overall compat impact of this change. The ability to return `out` by reference is not practically useful, it's essentially a compiler trivia question. However it negatively impacts call site analysis because the rules must consider the case that it is returned by `ref` or `ref` field. Hence `out` arguments, even though 99% of the time are not returned by `ref` must be considered as such and that conflates lifetime issues. This would reduce the flexibility of APIs that return `ref struct` values and have `out` parameters. This is a common pattern in reader style APIs. 
 
 ```c#
 Span<byte> Read(Span<byte> buffer, out int read)
@@ -275,17 +275,17 @@ Span<int> Use()
 {
     var buffer = new byte[256];
 
-    // If we keep current `out` ref-safe-to-escape this is an error. The langauge must consider
+    // If we keep current `out` ref-safe-to-escape this is an error. The language must consider
     // the `read` parameter as returnable as a `ref` field
     //
-    // If we change `out` ref-safe-to-escape this is legal. The langauge does not consider the 
+    // If we change `out` ref-safe-to-escape this is legal. The language does not consider the 
     // `read` parameter to be returnable hence this is safe
     int read;
     return Read(buffer, out read);
 }
 ```
 
-The span safety rules will be written in terms of `scoped ref` and `ref`. For span saftey purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
+The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
 
 <a name="rules-method-invocation"></a>
 
@@ -624,7 +624,7 @@ ref struct S<T>
 
 ### Example demonstrating rules 
 
-#### Ref re-assignmet and call sites
+#### Ref re-assignment and call sites
 
 Demonstrating how [ref re-assignment](#rules-ref-re-assignment) and [method invocation](#rules-method-invocation) work together.
 
@@ -698,7 +698,7 @@ ref struct RS
 #### scoped locals
 <a name="examples-scoped-locals"></a>
 
-The use of `scoped` on locals will be particularly helpful to code patterns which conditionally assign values with different *safe-to-escape* scope to locals. It means code no longer needs to rely on initializaion tricks like `= stackalloc byte[0]` to define a local *safe-to-escape* but now can simply use `scoped`. 
+The use of `scoped` on locals will be particularly helpful to code patterns which conditionally assign values with different *safe-to-escape* scope to locals. It means code no longer needs to rely on initialization tricks like `= stackalloc byte[0]` to define a local *safe-to-escape* but now can simply use `scoped`. 
 
 ```c#
 // Old way 
@@ -844,7 +844,7 @@ To understand the impact it's helpful to break APIs into categories:
 
 This change primarily benefits (1) above. These are expected to make up the majority of APIs that take a `ref` and return a `ref struct` going forward. The changes negatively impact (2.1) and (2.2) as it breaks the existing calling semantics because the lifetime rules change. 
 
-The APIs in category (2.1) though are largely authored by Microsoft or by developers who stand the most to benefit from `ref` fields (the Tanner's of the world). It is reasonable to assume this class of developers would be ammenable to a compatability tax on upgrade to C# 11 in the form of a few annotations to retain the existing semantics if `ref` fields were provided in return.
+The APIs in category (2.1) though are largely authored by Microsoft or by developers who stand the most to benefit from `ref` fields (the Tanner's of the world). It is reasonable to assume this class of developers would be amenable to a compatibility tax on upgrade to C# 11 in the form of a few annotations to retain the existing semantics if `ref` fields were provided in return.
 
 The APIs in category (2.2) are the biggest issue. It is unknown how many such APIs exist and it's unclear if these would be more / less frequent in 3rd party code. The expectation is there is a very small number of them, particularly if we take the compat break on `out`. Searches so far have revealed a very small number of these existing in `public` surface area. This is a hard pattern to search for though as it requires semantic analysis. Before taking this change a tool based approach would be needed to verify the assumptions around this impacting a small number of known cases.
 
@@ -901,7 +901,7 @@ The rationale for adding a `modreq` is the attributes change the semantics of sp
 
 The initial span safety work did not use `modreq` but instead relied on languages and the framework to understand. At the same time though all of the elements that contribute to the span safety rules are a strong part of the method signature: `ref`, `in`, `ref struct`, etc ... Hence any change to the existing rules of a method already results in a binary change to the signature. To give the new lifetime annotations the same impact they will need `modreq` enforcement.
 
-The concern is whether or not this is overkill. It does have the negative impact that making signatures more flexible, by say adding `[DoesNotEscape]` to a paramater, will result in a binary compat change. That trade off means that over time frameworks like BCL likely won't be able to relax such signatures. It could be mitigated to a degree by taking some approach the language does with `in` parameters and only apply `modreq` in virtual positions. 
+The concern is whether or not this is overkill. It does have the negative impact that making signatures more flexible, by say adding `[DoesNotEscape]` to a parameter, will result in a binary compat change. That trade off means that over time frameworks like BCL likely won't be able to relax such signatures. It could be mitigated to a degree by taking some approach the language does with `in` parameters and only apply `modreq` in virtual positions. 
 
 **Decision** Do not use `modreq` in metadata. The difference between `out` and `ref` is not `modreq` but they now have different span safety lifetimes. There is no real benefit to only half enforcing the rules with `modreq` here.
 
@@ -918,7 +918,7 @@ struct Dimensions
 **Decision** Do not allow for now
 
 ### Violating scoped
-The runtime repository has several non-public APIs that capture `ref` paramters as `ref` fields. These are unsafe because the lifetime of the resulting value is not tracked. For example the `Span<T>(ref T value, int length)` constructor.
+The runtime repository has several non-public APIs that capture `ref` parameters as `ref` fields. These are unsafe because the lifetime of the resulting value is not tracked. For example the `Span<T>(ref T value, int length)` constructor.
 
 The majority of these APIs will likely choose to have proper lifetime tracking on the return which will be achieved simply by updating to C# 11. A few though will want to keep their current semantics of not tracking the return value because their entire intent is to be unsafe. The most notable examples are `MemoryMarshal.CreateSpan` and `MemoryMarshal.CreateReadOnlySpan`. This will be achieved by marking the parameters as `scoped`.
 
@@ -952,11 +952,11 @@ What gets implemented in which release is merely a scoping exercise.
 ## Future Considerations
 
 ### Advanced lifetime annotations
-The lifetime annotations in this proosal are limited in that they allow developers to change the default escape / don't escape behavior of values. This does add powerful flexibility to our model but it does not radically change the set of relationships that can be expressed. At the core the C# model is still effectively binary: can a value be returned or not?
+The lifetime annotations in this proposal are limited in that they allow developers to change the default escape / don't escape behavior of values. This does add powerful flexibility to our model but it does not radically change the set of relationships that can be expressed. At the core the C# model is still effectively binary: can a value be returned or not?
 
 That allows limited lifetime relationships to be understood. For example a value that can't be returned from a method has a smaller lifetime than one that can be returned from a method. There is no way to describe the lifetime relationship between values that can be returned from a method though. Specifically there is no way to say that one value has a larger lifetime than the other once it's established both can be returned from a method. The next step in our lifetime evolution would be allowing such relationships to be described. 
 
-Other methods such as Rust allow this type of relationship to be expressed and hence can implement handle more complex `scoped` style operations. Our language could similarly benifit if such a feature were included. At the moment there is no movitating pressure to do this but if there is in the future our `scoped` model could be expanded to inclued it in a fairly straight forward fashion. 
+Other methods such as Rust allow this type of relationship to be expressed and hence can implement handle more complex `scoped` style operations. Our language could similarly benefit if such a feature were included. At the moment there is no motivating pressure to do this but if there is in the future our `scoped` model could be expanded to included it in a fairly straight forward fashion. 
 
 Every `scoped` could be assigned a named lifetime by adding a generic style argument to the syntax. For example `scoped<'a>` is a value that has lifetime `'a`. Constraints like `where` could then be used to describe the relationships between these lifetimes.
 
