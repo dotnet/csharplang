@@ -1,11 +1,5 @@
 # Numeric IntPtr
 
-TODO pointer arithmetic
-TODO dynamic
-TODO Possible breaking changes: IntPtr + int, IntPtr - int, (int)IntPtr, (IntPtr)long (and then of course various possible edge cases where user-defined vs language-defined operators subtly differ in behavior)
-TODO Call out behavior with operators defined on IntPtr/UIntPtr
-TODO Conversion to/from enumeration
-
 ## Summary
 [summary]: #summary
 
@@ -53,20 +47,19 @@ In other words, an __unmanaged_type__ is one of the following:
 ### 10.2.3 Implicit numeric conversions
 
 The implicit numeric conversions are:
-TODO2
 
-- From `sbyte` to `short`, `int`, `long`, `float`, `double`, or `decimal`.
-- From `byte` to `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
-- From `short` to `int`, `long`, `float`, `double`, or `decimal`.
-- From `ushort` to `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
-- From `int` to `long`, `float`, `double`, or `decimal`.
-- From `uint` to `long`, `ulong`, `float`, `double`, or `decimal`.
+- From `sbyte` to `short`, `int`, **`nint`**, `long`, `float`, `double`, or `decimal`.
+- From `byte` to `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `float`, `double`, or `decimal`.
+- From `short` to `int`, **`nint`**, `long`, `float`, `double`, or `decimal`.
+- From `ushort` to `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `float`, `double`, or `decimal`.
+- From `int` to **`nint`**, `long`, `float`, `double`, or `decimal`.
+- From `uint` to **`nuint`**, `long`, `ulong`, `float`, `double`, or `decimal`.
+- **From `nint` to `long`, `float`, `double`, or `decimal`.**
+- **From `nuint` to `ulong`, `float`, `double`, or `decimal`.**
 - From `long` to `float`, `double`, or `decimal`.
 - From `ulong` to `float`, `double`, or `decimal`.
-- From `char` to `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, or `decimal`.
+- From `char` to `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `float`, `double`, or `decimal`.
 - From `float` to `double`.
-
-Conversions from `int`, `uint`, `long` or `ulong` to `float` and from `long` or `ulong` to `double` may cause a loss of precision, but will never cause a loss of magnitude. The other implicit numeric conversions never lose any information.
 
 \[...]
 
@@ -81,29 +74,29 @@ An implicit constant expression conversion permits the following conversions:
 
 The explicit numeric conversions are the conversions from a *numeric_type* to another *numeric_type* for which an implicit numeric conversion does not already exist:
 
-TODO2
-- From `sbyte` to `byte`, `ushort`, `uint`, `ulong`, or `char`.
+- From `sbyte` to `byte`, `ushort`, `uint`, **`nuint`**, `ulong`, or `char`.
 - From `byte` to `sbyte` or `char`.
-- From `short` to `sbyte`, `byte`, `ushort`, `uint`, `ulong`, or `char`.
+- From `short` to `sbyte`, `byte`, `ushort`, `uint`, **`nuint`**, `ulong`, or `char`.
 - From `ushort` to `sbyte`, `byte`, `short`, or `char`.
-- From `int` to `sbyte`, `byte`, `short`, `ushort`, `uint`, `ulong`, or `char`.
-- From `uint` to `sbyte`, `byte`, `short`, `ushort`, `int`, or `char`.
-- From `long` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `ulong`, or `char`.
-- From `ulong` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, or `char`.
+- From `int` to `sbyte`, `byte`, `short`, `ushort`, `uint`, **`nuint`**, `ulong`, or `char`.
+- From `uint` to `sbyte`, `byte`, `short`, `ushort`, `int`, **`nint`**, or `char`.
+- From `long` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `ulong`, or `char`.
+- **From `nint` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `nuint`, `ulong`, or `char`.**
+- **From `nuint` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `nint`, `long`, or `char`.**
+- From `ulong` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, or `char`.
 - From `char` to `sbyte`, `byte`, or `short`.
-- From `float` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, or `decimal`.
-- From `double` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, or `decimal`.
-- From `decimal` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, or `double`.
+- From `float` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, or `decimal`.
+- From `double` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, or `decimal`.
+- From `decimal` to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, or `double`.
 
 \[...]
 
 ### 10.3.3 Explicit enumeration conversions
 
-TODO
 The explicit enumeration conversions are:
 
-- From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal` to any *enum_type*.
-- From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
+- From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, or `decimal` to any *enum_type*.
+- From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
 - From any *enum_type* to any other *enum_type*.
 
 ### 11.8.2 Unary plus operator
@@ -138,8 +131,6 @@ The predefined unary minus operators are:
   ...
   nint operator –(nint x);
   ```  
-
-  The result is computed by ... TODO2
 
 ### 11.7.14 Postfix increment and decrement operators
 
@@ -306,4 +297,10 @@ A constant expression may be either a value type or a reference type. If a const
 
 \[...]
 
-An implicit constant expression conversion permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `nint`, `uint`, `nuint`, or `ulong`, provided the value of the constant expression is within the range of the destination type.
+An implicit constant expression conversion permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, **`nint`, `nuint`,** or `ulong`, provided the value of the constant expression is within the range of the destination type.
+
+TODO pointer arithmetic
+TODO dynamic
+TODO Possible breaking changes: IntPtr + int, IntPtr - int, (int)IntPtr, (IntPtr)long (and then of course various possible edge cases where user-defined vs language-defined operators subtly differ in behavior)
+TODO Call out behavior with operators defined on IntPtr/UIntPtr
+
