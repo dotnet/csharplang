@@ -120,7 +120,7 @@ nuint operator +(nuint x);
 
 ### 11.7.14 Postfix increment and decrement operators
 
-Unary operator overload resolution is applied to select a specific operator implementation. Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, and any enum type.
+Unary operator overload resolution is applied to select a specific operator implementation. Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint, `nuint`,** `long`, `ulong`, `char`, `float`, `double`, `decimal`, and any enum type.
 
 ### 11.8.3 Unary minus operator
 
