@@ -10,7 +10,8 @@ In short, we now treat `nint`/`nuint` as simple types aliasing `System.IntPtr`/`
 [design]: #design
 
 ### 8.3.5 Simple types
-https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#835-simple-types
+
+C# provides a set of predefined `struct` types called the simple types. The simple types are identified through keywords, but these keywords are simply aliases for predefined `struct` types in the `System` namespace, as described in the table below.
 
 **Keyword** | **Aliased type**
 ----------- | ------------------
@@ -30,11 +31,11 @@ https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#835-sim
   `bool`    |   `System.Boolean`
   `decimal` |   `System.Decimal`
 
+\[...]
+
 ### 8.3.6 Integral types
 
-C# supports **eleven** integral types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, and `char`. The integral types have the following sizes and ranges of values:
-...
-- **The int type represents signed 32-bit integers with values from -2147483648 to 2147483647, inclusive.** TODO2 for nint and nuint
+C# supports **eleven** integral types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, and `char`. \[...]
 
 ## 8.8 Unmanaged types
 
