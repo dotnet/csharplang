@@ -24,14 +24,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Implicit implementation of inaccesssible interface members revisited (Aleksey, Mads): https://github.com/dotnet/roslyn/issues/60885
 - Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
 
-## May 9, 2022
-
-- Numeric IntPtr (Julien): https://github.com/dotnet/csharplang/issues/6065
-- Ref readonly parameters revisited: https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-25.md#ref-readonly-method-parameters
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## May 9, 2022
+
+[C# Language Design Meeting for May 2nd, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-09.md)
+
+1. Numeric IntPtr
+2. Ref readonly parameters
 
 ## May 2, 2022
 
