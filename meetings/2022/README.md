@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule when convenient
 
+- Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
 
 ## Recurring topics
 
@@ -21,8 +22,9 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## May 11, 2022
 
-- Implicit implementation of inaccesssible interface members revisited (Aleksey, Mads): https://github.com/dotnet/roslyn/issues/60885
-- Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
+- Implicit implementation of inaccessible interface members revisited (Aleksey, Mads): https://github.com/dotnet/roslyn/issues/60885
+- `ref readonly` parameters - the callsite syntax: https://github.com/dotnet/csharplang/issues/6010
+- Pattern matching with Utf8 strings: https://github.com/dotnet/csharplang/discussions/6036
 
 # C# Language Design Notes for 2022
 
