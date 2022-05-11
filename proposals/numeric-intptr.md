@@ -100,17 +100,15 @@ The explicit enumeration conversions are:
 - From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
 - From any *enum_type* to any other *enum_type*.
 
-### 11.8.2 Unary plus operator
-
-The predefined unary plus operators are:
-
-```csharp
-...
-nint operator +(nint x);
-nuint operator +(nuint x);
-```
-
 # 11 Expressions
+
+#### 11.6.4.6 Better conversion target
+
+Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** than `T₂` if one of the following holds:
+
+- An implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
+- `T₁` is `Task<S₁>`, `T₂` is `Task<S₂>`, and `S₁` is a better conversion target than `S₂`
+- `T₁` is `S₁` or `S₁?` where `S₁` is a signed integral type, and `T₂` is `S₂` or `S₂?` where `S₂` is an unsigned integral type. Specifically: \[...]
 
 ### 11.7.10 Element access
 
@@ -121,6 +119,16 @@ nuint operator +(nuint x);
 ### 11.7.14 Postfix increment and decrement operators
 
 Unary operator overload resolution is applied to select a specific operator implementation. Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`,** `long`, `ulong`, `char`, `float`, `double`, `decimal`, and any enum type.
+
+### 11.8.2 Unary plus operator
+
+The predefined unary plus operators are:
+
+```csharp
+...
+nint operator +(nint x);
+nuint operator +(nuint x);
+```
 
 ### 11.8.3 Unary minus operator
 
