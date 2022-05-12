@@ -239,17 +239,17 @@ Span<int> BadUseExamples(int parameter)
 // Introduce a new lifetime for the parameter, but don't constrain it to the
 // local scope.
 Span<'a, int> CreateSpan<'a, 'b>(ref<'b> int parameter)
-Span<'a, int> BadUseExamples<'a>(int parameter)
+Span<'global, int> BadUseExamples(int parameter)
 {
-    return CreateSpan<'global, '_>(ref parameter);
+    return CreateSpan(ref parameter);
 
     // Legal in C# 10 and legal in C# 11 due to scoped ref
     int local = 42;
-    return CreateSpan<'global, '_>(ref local);
+    return CreateSpan(ref local);
 
     // Legal in C# 10 and legal in C# 11 due to scoped ref
     Span<int> span = stackalloc int[42];
-    return CreateSpan<'global, '_>(ref span[0]);
+    return CreateSpan(ref span[0]);
 }
 ```
 
