@@ -15,7 +15,7 @@ The basic rule can be defined quite simply: a ref variable's lifetime must never
 than the value it points to. For ref locals, this is trivial. A ref local is always initialized
 to a value expression or another ref expression. For a value expression, its lifetime can be
 assigned the lifetime of the value expression. For a ref expression, the lifetime is the same
-as the ref expression, which is safe by definition.
+as the ref expression.
 
 Ref parameters and returns are more complicated because they do not have an initializing value
 expression. In fact, different call sites may have completely different and incomparable lifetime
@@ -87,5 +87,208 @@ S<'a, 'b, T> M<'a, 'b, T>(ref<'a> T p1, ref<'b> int p2)
 }
 ```
 
-
 ## Syntax simplifactions
+
+### Implicit lifetimes
+
+While the above construction is very flexible and can represent almost any lifetime construction existing
+or being considered for C#, it's worthwhile to consider other syntaxes and how they could map to the above.
+The main advantage of this is that we can reduce the safety verification to a question of whether the
+proposed translation type checks according to the above rules. If it does, and the above rules are safe, then
+the alternate syntax is sound.
+
+First, let's consider existing C#, which doesn't have any lifetime annotations. We can work out the implicit
+annotations by examining the existing C# safety rules.
+
+For the simplest cases, only one ref parameter or return type, there is only one possible translation:
+
+```C#
+// Case 1
+ref int M1() { ... }
+// Case 2
+void M2(ref int x) { ...}
+// Case 3
+Span<int> M3() { ... }
+// Case 4
+void M4<'a>(Span<'a, int> s) { ... }
+
+// Map to
+// Case 1
+ref<'global> int M1() { ... }
+// Case 2
+void M2<'a>(ref<'a> int x) { ... }
+// Case 3
+// Span<T> is actually Span<'a, T>
+Span<'global, int> M3() { ... }
+// Case 4
+void M4<'a>(Span<'a, int> s) { ...}
+```
+
+This is sound and presents no problems. 
+
+Cases with multiple parameters or return types are more complicated, as there are multiple possible choices.
+We can discover which one C# chose by what is legal and what is an error.
+
+```C#
+// Case 1
+ref int M1(ref int x)
+{
+    return ref x; // legal
+}
+// Case 2
+ref int M2(ref int x, ref int y)
+{
+    x = ref y; // legal
+    if (...)
+    {
+        return ref x; // legal
+    }
+    else
+    {
+        return ref y; // legal
+    }
+}
+// Case 3
+public ref int Outer()
+{
+    long y = 0;
+    return ref M3(ref new[] { 0}[0], ref y); // error
+}
+public ref int M3(ref int x, ref long y)
+{
+    return ref x;
+}
+// Case 4
+Span<int> M4(ref int x, Span<int> y)
+{
+    return y;
+}
+Span<int> Outer()
+{
+    int x = 0;
+    return M4(ref x, new int[] { 0 }); // legal
+}
+
+// Map to
+
+// Case 1
+// The parameter is assignable to the return value (is returnable) so
+// the lifetime of the parameter must be compatible with the return. The
+// simplest choice is for their lifetimes to match.
+ref<'a> int M1<'a>(ref<'a> int x) { ... }
+// Case 2
+// The parameters are assignable to each other, and the return type, so once
+// again, they should match.
+ref<'a> int M2<'a>(ref<'a> int x, ref<'a> int y) { ... }
+// Case 3
+// Looks like the above cases, but note the error. Despite the mismatched types,
+// it is illegal to return the result of a call with the only matching parameter
+// type having a global lifetime. This implies that types don't affect lifetime
+// and that, once again, the lifetime of the return is the narrowest of all the
+// input lifetimes, i.e. the lifetime generic variable is the same.
+ref<'a> int M3<'a>(ref<'a> int x, ref<'a> long y) { ... }
+// Case 4
+// This is tricker than it seems. The ref variable and the Span variables don't
+// directly interact, but because we can return the result of `M3` in `Outer`, we
+// know that the variables must not share a lifetime, as the lifetime of `x` is
+// narrower than the return value of `Outer`.
+Span<'a, int> M4<'a, 'b>(ref<'b> int x, Span<'a, int> y) { ... }
+```
+
+The above is sound, and follows a mostly simple rule: all ref parameters and return
+values share a single lifetime. The exception is ref parameters and ref structs. In
+this case, ref structs have a different lifetime from the ref parameters. 
+
+## Proposed expansion
+
+There are a few additional syntaxes proposed for the addition of ref fields.
+
+```C#
+Span<int> CreateSpan(scoped ref int parameter)
+
+// Maps to
+
+// There is no direct mapping. This is more restrictive than the above proposal
+// because there is no syntax for limiting a ref parameter lifetime to a local
+// scope. We could introduce one, though (e.g., 'local scope)
+Span<'a, int> CreateSpan<'a>(ref<'local> int parameter) { ...}
+```
+
+This is one case the lifetime syntax above can't describe without a new `'local`
+lifetime annotation. However, we can satisfy the goals of the proposal without
+matching the behavior exactly:
+
+```C#
+Span<int> CreateSpan(scoped ref int parameter)
+Span<int> BadUseExamples(int parameter)
+{
+    // Legal in C# 10 and legal in C# 11 due to scoped ref
+    return CreateSpan(ref parameter);
+
+    // Legal in C# 10 and legal in C# 11 due to scoped ref
+    int local = 42;
+    return CreateSpan(ref local);
+
+    // Legal in C# 10 and legal in C# 11 due to scoped ref
+    Span<int> span = stackalloc int[42];
+    return CreateSpan(ref span[0]);
+}
+
+// Maps to
+
+// Introduce a new lifetime for the parameter, but don't constrain it to the
+// local scope.
+Span<'a, int> CreateSpan<'a, 'b>(ref<'b> int parameter)
+Span<'a, int> BadUseExamples<'a>(int parameter)
+{
+    return CreateSpan<'global, '_>(ref parameter);
+
+    // Legal in C# 10 and legal in C# 11 due to scoped ref
+    int local = 42;
+    return CreateSpan<'global, '_>(ref local);
+
+    // Legal in C# 10 and legal in C# 11 due to scoped ref
+    Span<int> span = stackalloc int[42];
+    return CreateSpan<'global, '_>(ref span[0]);
+}
+```
+
+In the above translation, it's enough to make the lifetime parameters not convertible
+to prevent inadvertant escape. There is no reason to limit the given ref parameter
+to local-only scope, and it doesn't properly make sense, given that the input value
+must come from outside the method and therefore the lifetime must be longer than the
+current method.
+
+Next is `unscoped`. This is an annotation for structs (not just ref structs), and support in this
+translation implies that we must allow generic lifetimes on regular structs as well, which is a
+small addition.
+
+```C#
+struct S
+{
+    int field; 
+
+    // Error: `field` has the ref-safe-to-escape of `this` which is *current method* because 
+    // it is a `scoped ref`
+    ref int Prop1 => ref field;
+
+    // Okay: `field` has the ref-safe-to-escape of `this` which is *calling method* because 
+    // it is a `ref`
+    unscoped ref int Prop1 => ref field;
+}
+
+// Maps to
+
+struct S<'a> // 'a is the implicit lifetime of `this`
+{
+    int field;
+
+    // Property returns implicitly define a new lifetime, like methods
+    ref<'b> int Prop1<'b> => ref field; // error, `this.field` has lifetime `<'a>`
+
+    // `unscoped` simply maps to the implicit `this` lifetime
+    ref<'a> int Prop1 => field; // OK, matching lifetimes
+}
+```
+
+The above is sound, and should match the intended semantics in the proposed design.
