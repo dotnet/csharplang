@@ -4,7 +4,7 @@
 ## Defining safety rules
 
 With the addition of ref fields into the language the safety rules need to be expanded to
-encompass them. Fundamentally, the ref safety rules are have only one purpose: to ensure
+encompass them. Fundamentally, the ref safety rules have only one purpose: to ensure
 that a ref to a location is not referencable after the location's lifetime ends.
 
 All value locations (i.e., things to which you can take a `ref`) have an existing lifetime
