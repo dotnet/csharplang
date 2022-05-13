@@ -238,7 +238,7 @@ Span<int> BadUseExamples(int parameter)
 
 // Introduce a new lifetime for the parameter, but don't constrain it to the
 // local scope.
-Span<'a, int> CreateSpan<'a, 'b>(ref<'b> int parameter)
+Span<'global, int> CreateSpan<'a>(ref<'a> int parameter)
 Span<'global, int> BadUseExamples(int parameter)
 {
     return CreateSpan(ref parameter);
@@ -253,11 +253,11 @@ Span<'global, int> BadUseExamples(int parameter)
 }
 ```
 
-In the above translation, it's enough to make the lifetime parameters not convertible
-to prevent inadvertant escape. There is no reason to limit the given ref parameter
-to local-only scope, and it doesn't properly make sense, given that the input value
-must come from outside the method and therefore the lifetime must be longer than the
-current method.
+In the above translation, it's enough to make the lifetime parameters of the ref
+and the Span not convertible to prevent inadvertant escape. There is no reason to 
+limit the given ref parameter to local-only scope, and it doesn't properly make sense,
+given that the input value must come from outside the method and therefore the lifetime
+must be longer than the current method.
 
 Next is `unscoped`. This is an annotation for structs (not just ref structs), and support in this
 translation implies that we must allow generic lifetimes on regular structs as well, which is a
