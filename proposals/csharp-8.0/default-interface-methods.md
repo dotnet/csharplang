@@ -585,7 +585,7 @@ class Derived : Base, IB // allowed?
 {
     static void Main()
     {
-        Ia a = new Derived();
+        IA a = new Derived();
         a.M();           // what does it do?
     }
 }
