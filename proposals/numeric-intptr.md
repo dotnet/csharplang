@@ -255,6 +255,11 @@ The predefined shift operators are listed below.
   nuint operator >>>(nuint x, nint count);
   ```
 
+For the predefined operators, the number of bits to shift is computed as follows:
+\[...]
+- When the type of `x` is `nint` or `nuint`, the shift count is given by the low-order five bits of `count` on a 32 bits platform, or the lower-order six bits of `count` on a 64 bits platform.  
+The shift count is computed from `count & (sizeof(nint) * 8 - 1)`, which is `count & 0x1F` on a 32 bits platform and `count & 0x3F` on a 64 bits platform.
+
 ## 11.11 Relational and type-testing operators
 
 ### 11.11.2 Integer comparison operators
