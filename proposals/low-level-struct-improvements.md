@@ -243,7 +243,7 @@ Span<int> ScopedLocalExamples()
 }
 ```
 
-Other uses for `scoped` on locals are discussed [below](#exmaples-scoped-locals).
+Other uses for `scoped` on locals are discussed [below](#examples-scoped-locals).
 
 When `scoped` is applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
 
@@ -292,7 +292,7 @@ The span safety rules will be written in terms of `scoped ref` and `ref`. For sp
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
 
 > 1. If `p` is `scoped ref` then `a` does not contribute *ref-safe-to-escape* when considering arguments. Note that `ref scoped` is included here as it implies `scoped ref scoped`.
-> 2. If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. 
+> 2. If `p` is `scoped` or `ref scoped` then `a` does not contribute *safe-to-escape* when considering arguments. 
 
 The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime as the `scoped` annotation prevents it.
 
@@ -353,7 +353,7 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 
 The presence of `scoped` allows us to also refine the method arguments must match rule. It can now be reduced to 
 
-> For a method invocation if there is a `ref` or `scoped ref` argument of a `ref struct` type with *safe-to-escape* E1 then no argument may contribute a narrower *safe-to-escape* than E1.
+> For a method invocation if there is an argument for a `ref` or `scoped ref` parameter of a `ref struct` type where the argument has *safe-to-escape* E1 then no argument may contribute a narrower *safe-to-escape* than E1.
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
 
@@ -719,6 +719,8 @@ else
 This pattern comes up frequently in low level code. When the `ref struct` involved is `Span<T>` the above trick can be used. It is not applicable to other `ref struct` types though and can result in low level code needing to resort to `unsafe` to work around the inability to properly specify the lifetime. 
 
 #### scoped parameter values
+<a name="examples-method-arguments-must-match"></a>
+
 One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
 
 The main friction point occurs because of the [method arguments must match](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#method-arguments-must-match) rule. This rule most commonly comes into play with instance methods on `ref struct` where at least one parameter is also a `ref struct`. This is a common pattern in low level code where `ref struct` types commonly leverage `Span<T>` parameters in their methods. For example it will occur on any writer style `ref struct` that uses `Span<T>` to pass around buffers.
