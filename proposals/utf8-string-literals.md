@@ -2,7 +2,7 @@ Utf8 Strings Literals
 ===
 
 ## Summary
-This proposal adds the ability to write UTF8 string literals in C# and have them automatically encoded into their `byte[]` representation.
+This proposal adds the ability to write UTF8 string literals in C# and have them automatically encoded into their UTF-8 `byte` representation.
 
 ## Motivation
 UTF8 is the language of the web and its use is necessary in significant portions of the .NET stack. While much of data comes in the form of `byte[]` off the network stack there is still significant uses of constants in the code. For example networking stack has to commonly write constants like `"HTTP/1.0\r\n"`, `" AUTH"` or . `"Content-Length: "`. 
@@ -33,22 +33,34 @@ To fix this we will allow for UTF8 literals in the language and encode them into
 Language will provide the `u8` suffix on string literals to force the type to be UTF8.
 The suffix is case-insensitive, `U8` suffix will be supported and will have the same meaning as `u8` suffix.
 
-When the `u8` suffix is used, the value of the literal is a byte array containing a UTF-8 byte representation of the string.
+When the `u8` suffix is used, the value of the literal is a ```ReadOnlySpan<byte>``` containing a UTF-8 byte representation of the string.
+A null terminator is placed beyond the last byte in memory (and outside the length of the ```ReadOnlySpan<byte>```) in order to handle some
+interop scenarios where the call expects null terminated strings.
 
 ```c#
 string s1 = "hello"u8;             // Error
-var s2 = "hello"u8;                // Okay and type is byte[]
-Span<byte> s3 = "hello"u8;         // Okay due to an implicit user-defined conversion from byte[] declared on Span<byte>.
-ReadOnlySpan<byte> s3 = "hello"u8; // Okay due to an implicit user-defined conversion from byte[] declared on ReadOnlySpan<byte>.
+var s2 = "hello"u8;                // Okay and type is ReadOnlySpan<byte>
+ReadOnlySpan<byte> s3 = "hello"u8; // Okay.
+byte[] s4 = "hello"u8;             // Error - Cannot implicitly convert type 'System.ReadOnlySpan<byte>' to 'byte[]'.
+byte[] s5 = "hello"u8.ToAray();    // Okay.
+Span<byte> s6 = "hello"u8;         // Error - Cannot implicitly convert type 'System.ReadOnlySpan<byte>' to 'System.Span<byte>'.
 ```
 
-A `u8` literal doesn't have a constant value. That is because arrays are not constant today. If the definition of `const` is expanded
-in the future to consider arrays, then this value should also be considered a constant. Practically though this means a `u8`
+Since the literals would be allocated as global constants, the lifetime of the resulting `ReadOnlySpan<byte>` would not prevent it from being returned or passed around to elsewhere. However, certain contexts, most notably within async functions, do not allow locals of ref struct types, so there would be a usage penalty in those situations, with a `ToArray()` call or similar being required.
+
+A `u8` literal doesn't have a constant value. That is because ```ReadOnlySpan<byte>``` cannot be type of a constant today. If the definition of `const` is expanded
+in the future to consider ```ReadOnlySpan<byte>```, then this value should also be considered a constant. Practically though this means a `u8`
 literal cannot be used as the default value of an optional parameter.
 
 ```c#
 // Error: The argument is not constant
-void Write(byte[] message = "missing"u8) { ... } 
+void Write(```ReadOnlySpan<byte>``` message = "missing"u8) { ... } 
+```
+
+When the input text for the literal is a malformed UTF16 string, then the language will emit an error:
+
+```c#
+var bytes = "hello \uD801\uD802"u8; // Error: the input string is not valid UTF16
 ```
 
 ### Lowering
@@ -56,11 +68,12 @@ void Write(byte[] message = "missing"u8) { ... }
 The language will lower the UTF8 encoded strings exactly as if the developer had typed the resulting `byte[]` literal in code. For example:
 
 ```c#
-ReadOnlySpan<byte> span = "hello";
+ReadOnlySpan<byte> span = "hello"u8;
 
 // Equivalent to
 
-ReadOnlySpan<byte> span = new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f };
+ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00 }).
+                               Slice(0,5); // The `Slice` call will be optimized away by the compiler.
 ```
 
 That means all optimizations that apply to the `new byte[] { ... }` form will apply to utf8 literals as well. This means the call site will be allocation free as C# will optimize this be stored in the `.data` section of the PE file.
