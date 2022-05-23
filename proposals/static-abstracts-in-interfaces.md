@@ -279,9 +279,9 @@ See https://github.com/dotnet/csharplang/issues/5783 and https://github.com/dotn
 
 ## Relaxing restriction for interfaces as type arguments
 
-Should we limit restriction added by static-abstracts-in-interfaces.md#interfaces-as-type-arguments section to apply only to interfaces that do not have most specific implementation for a static abstract/virtual member? In other words, if all static abstract/virtual members have most specific implementation, the interface can be used as a type argument. It appears that this is the behavior that we prefer the runtime to have.
+Should we limit restriction added by [Interfaces as type arguments](static-abstracts-in-interfaces.md#interfaces-as-type-arguments) section to apply only to interfaces that do not have most specific implementation for a static abstract/virtual member? In other words, if all static abstract/virtual members have most specific implementation, the interface can be used as a type argument. It appears that this is the behavior that we prefer the runtime to have.
 
-If we would like to make this relaxation, should we also make similar relaxation for the restriction added by static-abstracts-in-interfaces.md#interface-constraints-with-static-abstract-members section?
+If we would like to make this relaxation, should we also make similar relaxation for the restriction added by [Interface constraints with static abstract members](static-abstracts-in-interfaces.md#interface-constraints-with-static-abstract-members) section?
 
 ## Misc
 Called out above, but here's a list:
