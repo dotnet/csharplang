@@ -161,7 +161,7 @@ The rules for when a static member declaration in a class or struct is considere
 
 Today, when an interface `I` is used as a generic constraint, any type `T` with an implicit reference or boxing conversion to `I` is considered to satisfy that constraint.
 
-When `I` has static abstract members this needs to be further restricted so that `T` cannot itself be an interface.
+When `I` has static abstract/virtual members this needs to be further restricted so that `T` cannot itself be an interface.
 
 For instance:
 
@@ -171,6 +171,22 @@ void M<T>() where T : I<T> { ... }
 M<C>();  // Allowed: C is not an interface
 M<I<C>>(); // Disallowed: I is an interface
 ```
+
+## Interfaces as type arguments
+
+We discussed the issue raised by https://github.com/dotnet/csharplang/issues/5955 and decided to add a restriction around usage of an interface as a type argument (https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md#type-hole-in-static-abstracts). Here is the restriction as it was proposed by https://github.com/dotnet/csharplang/issues/5955 and approved by the LDM.
+
+> An interface containing or inheriting static virtual members cannot be used as a type argument
+
+For the purpose of this restriction, static abstract members are treated the same as static virtual members. So, an interface containing or inheriting static abstract/virtual members cannot be used as a type argument.
+
+The meeting notes https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md#type-hole-in-static-abstracts also say the following:
+
+> when we add support
+for static _virtual_ members, we should work with the runtime team to make sure that, if all static virtual members of an
+interface have a body, it should be usable as a type argument. This would avoid the breaking change from adding a static virtual
+DIM to an interface, which despite not requiring consumers to update implementing code, would potentially break usage as a type
+argument.
 
 ## Accessing static abstract interface members
 
@@ -261,6 +277,12 @@ An alternative approach would be to have "structural constraints" directly and e
 
 See https://github.com/dotnet/csharplang/issues/5783 and https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#static-abstract-interfaces-and-static-classes for more information.
 
+## Relaxing restriction for interfaces as type arguments
+
+Should we limit restriction added by #interfaces-as-type-arguments section to apply only to interfaces that do not have most specific implementation for a static abstract/virtual member? In other words, if all static abstract/virtual members have most specific implementation, the interface can be used as a type argument. It appears that this is the behavior that we prefer the runtime to have.
+
+If we would like to make this relaxation, should we also make similar relaxation for the restriction added by #interface-constraints-with-static-abstract-members section?
+
 ## Misc
 Called out above, but here's a list:
 
@@ -281,3 +303,4 @@ Not called out above:
 - https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-29.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md
