@@ -253,14 +253,15 @@ An alternative approach would be to have "structural constraints" directly and e
     - This would have to be written out every time. Having a named constraint seems better.
     - This is a whole new kind of constraint, whereas the proposed feature utilizes the existing concept of interface constraints.
     - It would only work for operators, not (easily) other kinds of static members.
-    
-## Virtual static members in classes
-
-Another *additional* feature would be to allow static members to be abstract and virtual in classes as well. This runs into similar complicating factors as the default implementations, and again seems like it can be saved for later, if and when the need and the design insights occur.
 
 # Unresolved questions
 [unresolved]: #unresolved-questions
 
+## Static abstract interfaces and static classes
+
+See https://github.com/dotnet/csharplang/issues/5783 and https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#static-abstract-interfaces-and-static-classes for more information.
+
+## Misc
 Called out above, but here's a list:
 
 - Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as static abstract members as well? Note, the current implementation is adjusted to allow them only in abstract form. If we don't want this behavior after all, there is work to disallow it.
@@ -279,3 +280,4 @@ Not called out above:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-05.md
 - https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-29.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md
