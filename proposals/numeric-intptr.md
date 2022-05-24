@@ -313,8 +313,32 @@ A constant expression may be either a value type or a reference type. If a const
 
 An implicit constant expression conversion permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, **`nint`, `nuint`,** or `ulong`, provided the value of the constant expression is within the range of the destination type.
 
-TODO pointer arithmetic
-TODO dynamic
-TODO Possible breaking changes: IntPtr + int, IntPtr - int, (int)IntPtr, (IntPtr)long (and then of course various possible edge cases where user-defined vs language-defined operators subtly differ in behavior)
-TODO Call out behavior with operators defined on IntPtr/UIntPtr
+## 22.5 Pointer conversions
+
+### 22.5.1 General
+
+\[...]
+
+Additionally, in an unsafe context, the set of available explicit conversions is extended to include the following explicit pointer conversions:
+
+- From any *pointer_type* to any other *pointer_type*.
+- From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong` to any *pointer_type*.
+- From any *pointer_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong`.
+
+## Various considerations
+
+### Breaking changes
+
+One of the main impacts of this design is that `System.IntPtr` and `System.IntPtr` gain some built-in operators (conversions, unary and binary).  
+Those include `checked` operators, which means that some operators on those types will now throw when overflowing. For example:
+- `IntPtr + int`
+- `IntPtr - int`
+- `IntPtr -> int`
+- `long -> IntPtr`
+- `void* -> IntPtr`
+
+### Metadata encoding
+
+This design means that `nint` and `nuint` can simply be emitted as `System.IntPtr` and `System.UIntPtr`, without the use of `System.Runtime.CompilerServices.NativeIntegerAttribute`.   
+Similarly, when loading metadata `NativeIntegerAttribute` can be ignored.
 
