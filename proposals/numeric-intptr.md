@@ -329,7 +329,7 @@ Additionally, in an unsafe context, the set of available explicit conversions is
 
 ### Breaking changes
 
-One of the main impacts of this design is that `System.IntPtr` and `System.IntPtr` gain some built-in operators (conversions, unary and binary).  
+One of the main impacts of this design is that `System.IntPtr` and `System.UIntPtr` gain some built-in operators (conversions, unary and binary).  
 Those include `checked` operators, which means that some operators on those types will now throw when overflowing. For example:
 - `IntPtr + int`
 - `IntPtr - int`
