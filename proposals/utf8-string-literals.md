@@ -30,7 +30,7 @@ To fix this we will allow for UTF8 literals in the language and encode them into
 
 ### `u8` suffix on string literals
 
-Language will provide the `u8` suffix on string literals to force the type to be UTF8.
+The language will provide the `u8` suffix on string literals to force the type to be UTF8.
 The suffix is case-insensitive, `U8` suffix will be supported and will have the same meaning as `u8` suffix.
 
 When the `u8` suffix is used, the value of the literal is a ```ReadOnlySpan<byte>``` containing a UTF-8 byte representation of the string.
