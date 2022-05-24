@@ -54,7 +54,7 @@ literal cannot be used as the default value of an optional parameter.
 
 ```c#
 // Error: The argument is not constant
-void Write(```ReadOnlySpan<byte>``` message = "missing"u8) { ... } 
+void Write(ReadOnlySpan<byte> message = "missing"u8) { ... } 
 ```
 
 When the input text for the literal is a malformed UTF16 string, then the language will emit an error:
