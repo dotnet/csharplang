@@ -82,7 +82,7 @@ interface I<T> where T : I<T>
     static virtual void M() {}
     static virtual T P { get; set; }
     static virtual event Action E;
-    static virtual T operator +(T l, T r) { throw NotImplementedException(); }
+    static virtual T operator +(T l, T r) { throw new NotImplementedException(); }
 }
 ```
 
@@ -285,7 +285,7 @@ One complication here is that default implementations would want to call other s
 
 We discussed a simpler version which maintains the limitations of the current proposal that static virtual members can *only* be invoked on type parameters. Since interfaces with static virtual members will often have an explicit type parameter representing a "self" type, this wouldn't be a big loss: other static virtual members could just be called on that self type. This version is a lot simpler, and seems quite doable.
 
-At https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.md#default-implementations-of-abstract-statics we decided to support Default Implementations of sttaic members following/expanding the rules esteblished in https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/default-interface-methods.md accordingly.  
+At https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.md#default-implementations-of-abstract-statics we decided to support Default Implementations of static members following/expanding the rules established in https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/default-interface-methods.md accordingly.  
 
 # Drawbacks
 [drawbacks]: #drawbacks
