@@ -13,9 +13,13 @@ record_declaration
     ;
 
 record_base
-    : ':' class_type argument_list?
+    : ':' class_type record_base_arguments?
     | ':' interface_type_list
-    | ':' class_type argument_list? ',' interface_type_list
+    | ':' class_type record_base_arguments? ',' interface_type_list
+    ;
+
+record_base_arguments
+    : '(' argument_list? ')'
     ;
 
 record_parameters
