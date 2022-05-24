@@ -112,7 +112,7 @@ public class C
 
 * `fixed`
 * `ref readonly`
-* `ref` - when added for ref fields
+* `ref`
 * `const`
 * `static`
 
@@ -262,7 +262,7 @@ To build the full list of `required` members `R` for a given type `T`, including
     1. For every `Ri` in `Rb`, if `Ri` is overridden by any member of `R`, it is skipped.
     2. Otherwise, if any `Ri` is hidden by a member of `R`, then the lookup of required members fails and no further steps are taken. Calling any
     constructor of `T` not attributed with `SetsRequiredMembers` issues an error.
-    1. Otherwise, `Ri` is added to `R`.
+    3. Otherwise, `Ri` is added to `R`.
 
 ## Open Questions
 
