@@ -19,23 +19,27 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Jun 6, 2022
 
-## May 23, 2022
-
-- Open issues for ref fields (Chuck): https://github.com/dotnet/csharplang/issues/6149
-
-## May 11, 2022
-
-- Implicit implementation of inaccessible interface members revisited (Aleksey, Mads): https://github.com/dotnet/roslyn/issues/60885
-- `ref readonly` parameters - the callsite syntax: https://github.com/dotnet/csharplang/issues/6010
-- Pattern matching with Utf8 strings: https://github.com/dotnet/csharplang/discussions/6036
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
 
+## May 23, 2022
+
+[C# Language Design Meeting for May 23rd, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-23.md)
+
+1. Open issues for `ref` fields
+
+## May 11, 2022
+
+[C# Language Design Meeting for May 11th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-11.md)
+
+1. Inconsistency around accessibility checks for interface implementations
+2. `ref readonly` method parameters
+3. Pattern matching with UTF-8 String Literals
+
 ## May 9, 2022
 
-[C# Language Design Meeting for May 2nd, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-09.md)
+[C# Language Design Meeting for May 9th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-09.md)
 
 1. Numeric IntPtr
 2. Ref readonly parameters
