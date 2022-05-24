@@ -9,13 +9,30 @@ The syntax for a record is as follows:
 ```antlr
 record_declaration
     : attributes? class_modifier* 'partial'? 'record' identifier type_parameter_list?
-      parameter_list? record_base? type_parameter_constraints_clause* record_body
+      record_parameters? record_base? type_parameter_constraints_clause* record_body
     ;
 
 record_base
     : ':' class_type argument_list?
     | ':' interface_type_list
     | ':' class_type argument_list? ',' interface_type_list
+    ;
+
+record_parameters
+    : '(' record_parameter_list? ')'
+    ;
+
+record_parameter_list
+    : record_parameter
+    | record_parameter ',' record_parameter_list
+    ;
+
+record_parameter
+    : attributes? type identifier record_property_name? default_argument?
+    ;
+
+record_property_name
+    : ':' identifier
     ;
 
 record_body
