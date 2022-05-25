@@ -39,7 +39,7 @@ C# supports **eleven** integral types: `sbyte`, `byte`, `short`, `ushort`, `int`
 
 ## 8.8 Unmanaged types
 
-In other words, an __unmanaged_type__ is one of the following:
+In other words, an **unmanaged_type** is one of the following:
 - `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, or `bool`.
 - Any *enum_type*.
 - Any user-defined *struct_type* that is not a constructed type and contains fields of *unmanaged_type*s only.
@@ -115,6 +115,12 @@ Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** th
 \[...] The number of expressions in the *argument_list* shall be the same as the rank of the *array_type*, and each expression shall be of type `int`, `uint`, **`nint`, `nuint`**, `long`, or `ulong,` or shall be implicitly convertible to one or more of these types.
 
 #### 11.7.10.2 Array access
+
+\[...] The number of expressions in the *argument_list* shall be the same as the rank of the *array_type*, and each expression shall be of type `int`, `uint`, **`nint`, `nuint`**, `long`, or `ulong,` or shall be implicitly convertible to one or more of these types.
+
+\[...] The run-time processing of an array access of the form `P[A]`, where `P` is a *primary_no_array_creation_expression* of an *array_type* and `A` is an *argument_list*, consists of the following steps:
+\[...]
+- The index expressions of the *argument_list* are evaluated in order, from left to right. Following evaluation of each index expression, an implicit conversion to one of the following types is performed: `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`. The first type in this list for which an implicit conversion exists is chosen. \[...]
 
 ### 11.7.14 Postfix increment and decrement operators
 
@@ -257,8 +263,8 @@ The predefined shift operators are listed below.
 
 For the predefined operators, the number of bits to shift is computed as follows:
 \[...]
-- When the type of `x` is `nint` or `nuint`, the shift count is given by the low-order five bits of `count` on a 32 bits platform, or the lower-order six bits of `count` on a 64 bits platform.  
-The shift count is computed from `count & (sizeof(nint) * 8 - 1)`, which is `count & 0x1F` on a 32 bits platform and `count & 0x3F` on a 64 bits platform.
+- When the type of `x` is `nint` or `nuint`, the shift count is given by the low-order five bits of `count` on a 32 bit platform, or the lower-order six bits of `count` on a 64 bit platform.  
+
 
 ## 11.11 Relational and type-testing operators
 
