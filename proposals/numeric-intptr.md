@@ -321,7 +321,7 @@ An implicit constant expression conversion permits a constant expression of type
 
 ## 16.4 Array element access
 
-Array elements are accessed using *element_access* expressions ([§11.7.10.2](expressions.md#117102-array-access)) of the form `A[I₁, I₂, ..., Iₓ]`, where `A` is an expression of an array type and each `Iₑ` is an expression of type `int`, `uint`, **`nint`, `nuint`,** `long`, `ulong`, or can be implicitly converted to one or more of these types. The result of an array element access is a variable, namely the array element selected by the indices.
+Array elements are accessed using *element_access* expressions of the form `A[I₁, I₂, ..., Iₓ]`, where `A` is an expression of an array type and each `Iₑ` is an expression of type `int`, `uint`, **`nint`, `nuint`,** `long`, `ulong`, or can be implicitly converted to one or more of these types. The result of an array element access is a variable, namely the array element selected by the indices.
 
 ## 22.5 Pointer conversions
 
@@ -342,7 +342,7 @@ In a pointer element access of the form `P[E]`, `P` shall be an expression of a 
 
 ### 22.6.7 Pointer arithmetic
 
-In an unsafe context, the `+` operator ([§11.9.5](expressions.md#1195-addition-operator)) and `–` operator ([§11.9.6](expressions.md#1196-subtraction-operator)) can be applied to values of all pointer types except `void*`. Thus, for every pointer type `T*`, the following operators are implicitly defined:
+In an unsafe context, the `+` operator and `–` operator can be applied to values of all pointer types except `void*`. Thus, for every pointer type `T*`, the following operators are implicitly defined:
 
 ```csharp
 [...]
