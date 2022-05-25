@@ -39,7 +39,7 @@ C# supports **eleven** integral types: `sbyte`, `byte`, `short`, `ushort`, `int`
 
 ## 8.8 Unmanaged types
 
-In other words, an **unmanaged_type** is one of the following:
+In other words, an *unmanaged_type* is one of the following:
 - `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, or `bool`.
 - Any *enum_type*.
 - Any user-defined *struct_type* that is not a constructed type and contains fields of *unmanaged_type*s only.
