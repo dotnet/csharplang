@@ -346,8 +346,12 @@ In an unsafe context, the `+` operator and `–` operator can be applied to valu
 
 ```csharp
 [...]
+T* operator +(T* x, nint y);
+T* operator +(T* x, nuint y);
 T* operator +(nint x, T* y);
 T* operator +(nuint x, T* y);
+T* operator -(T* x, nint y);
+T* operator -(T* x, nuint y);
 ```
 
 Given an expression `P` of a pointer type `T*` and an expression `N` of type `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong`, the expressions `P + N` and `N + P` compute the pointer value of type `T*` that results from adding `N * sizeof(T)` to the address given by `P`. Likewise, the expression `P – N` computes the pointer value of type `T*` that results from subtracting `N * sizeof(T)` from the address given by `P`.
