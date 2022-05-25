@@ -319,6 +319,10 @@ A constant expression may be either a value type or a reference type. If a const
 
 An implicit constant expression conversion permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, **`nint`, `nuint`,** or `ulong`, provided the value of the constant expression is within the range of the destination type.
 
+## 16.4 Array element access
+
+Array elements are accessed using *element_access* expressions ([§11.7.10.2](expressions.md#117102-array-access)) of the form `A[I₁, I₂, ..., Iₓ]`, where `A` is an expression of an array type and each `Iₑ` is an expression of type `int`, `uint`, **`nint`, `nuint`,** `long`, `ulong`, or can be implicitly converted to one or more of these types. The result of an array element access is a variable, namely the array element selected by the indices.
+
 ## 22.5 Pointer conversions
 
 ### 22.5.1 General
@@ -330,6 +334,23 @@ Additionally, in an unsafe context, the set of available explicit conversions is
 - From any *pointer_type* to any other *pointer_type*.
 - From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong` to any *pointer_type*.
 - From any *pointer_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong`.
+
+### 22.6.4 Pointer element access
+
+\[...]
+In a pointer element access of the form `P[E]`, `P` shall be an expression of a pointer type other than `void*`, and `E` shall be an expression that can be implicitly converted to `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong`.
+
+### 22.6.7 Pointer arithmetic
+
+In an unsafe context, the `+` operator ([§11.9.5](expressions.md#1195-addition-operator)) and `–` operator ([§11.9.6](expressions.md#1196-subtraction-operator)) can be applied to values of all pointer types except `void*`. Thus, for every pointer type `T*`, the following operators are implicitly defined:
+
+```csharp
+[...]
+T* operator +(nint x, T* y);
+T* operator +(nuint x, T* y);
+```
+
+Given an expression `P` of a pointer type `T*` and an expression `N` of type `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong`, the expressions `P + N` and `N + P` compute the pointer value of type `T*` that results from adding `N * sizeof(T)` to the address given by `P`. Likewise, the expression `P – N` computes the pointer value of type `T*` that results from subtracting `N * sizeof(T)` from the address given by `P`.
 
 ## Various considerations
 
