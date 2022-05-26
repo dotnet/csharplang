@@ -56,7 +56,7 @@ Static interface members today are implicitly non-virtual, and do not allow `abs
 
 ### Proposal
 
-#### Abstract virtual members
+#### Abstract static members
 Static interface members other than fields are allowed to also have the `abstract` modifier. Abstract static members are not allowed to have a body (or in the case of properties, the accessors are not allowed to have a body). 
 
 ``` c#
@@ -73,7 +73,18 @@ interface I<T> where T : I<T>
 }
 ```
 
-***Open question:** Non-virtual operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as virtual members?*
+#### Virtual static members
+Static interface members other than fields are allowed to also have the `virtual` modifier. Virtual static members are required to have a body. 
+
+``` c#
+interface I<T> where T : I<T>
+{
+    static virtual void M() {}
+    static virtual T P { get; set; }
+    static virtual event Action E;
+    static virtual T operator +(T l, T r) { throw new NotImplementedException(); }
+}
+```
 
 #### Explicitly non-virtual static members
 For symmetry with non-virtual instance members, static members should be allowed an optional `sealed` modifier, even though they are non-virtual by default:
@@ -94,6 +105,7 @@ interface I0
     static sealed I0 operator +(I0 l, I0 r) => l;
 }
 ```
+
 
 ## Implementation of interface members
 
@@ -125,17 +137,21 @@ class C : I<C>
 }
 ```
 
-***Open question:** Should the qualifying `I<C>.` go before the `operator` keyword or the operator symbol (e.g. `+`) itself?* I've chosen the former here, as it also works for the conversion operators.
-
 # Semantics
 
 ## Operator restrictions
 
 Today all unary and binary operator declarations have some requirement involving at least one of their operands to be of type `T` or `T?`, where `T` is the instance type of the enclosing type.
 
-These requirements need to be relaxed so that a restricted operand is allowed to be of a type parameter that is constrained to `T`.
+These requirements need to be relaxed so that a restricted operand is allowed to be of a type parameter that counts as "the instance type of the enclosing type".
 
-***Open question:** Should we relax this further so that the restricted operand can be of any type that derives from, or has one of some set of implicit conversions to `T`?*
+In order for a type parameter `T` to count as " the instance type of the enclosing type", it must meet the following requirements:
+- `T` is a direct type parameter on the interface in which the operator declaration occurs, and
+- `T` is *directly* constrained by what the spec calls the "instance type" - i.e. the surrounding interface with its own type parameters used as type arguments.
+
+## Equality operators and conversions
+
+Abstract declarations of `==` and `!=` operators, as well as abstract declarations of implicit and explicit conversion operators will be allowed in interfaces.
 
 ## Implementing static abstract members
 
@@ -147,7 +163,7 @@ The rules for when a static member declaration in a class or struct is considere
 
 Today, when an interface `I` is used as a generic constraint, any type `T` with an implicit reference or boxing conversion to `I` is considered to satisfy that constraint.
 
-When `I` has static abstract members this needs to be further restricted so that `T` cannot itself be an interface.
+When `I` has static abstract/virtual members this needs to be further restricted so that `T` cannot itself be an interface.
 
 For instance:
 
@@ -157,6 +173,22 @@ void M<T>() where T : I<T> { ... }
 M<C>();  // Allowed: C is not an interface
 M<I<C>>(); // Disallowed: I is an interface
 ```
+
+## Interfaces as type arguments
+
+We discussed the issue raised by https://github.com/dotnet/csharplang/issues/5955 and decided to add a restriction around usage of an interface as a type argument (https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md#type-hole-in-static-abstracts). Here is the restriction as it was proposed by https://github.com/dotnet/csharplang/issues/5955 and approved by the LDM.
+
+> An interface containing or inheriting static virtual members cannot be used as a type argument
+
+For the purpose of this restriction, static abstract members are treated the same as static virtual members. So, an interface containing or inheriting static abstract/virtual members cannot be used as a type argument.
+
+The meeting notes https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md#type-hole-in-static-abstracts also say the following:
+
+> when we add support
+for static _virtual_ members, we should work with the runtime team to make sure that, if all static virtual members of an
+interface have a body, it should be usable as a type argument. This would avoid the breaking change from adding a static virtual
+DIM to an interface, which despite not requiring consumers to update implementing code, would potentially break usage as a type
+argument.
 
 ## Accessing static abstract interface members
 
@@ -178,6 +210,9 @@ At runtime, the actual member implementation used is the one that exists on the 
 C c = M<C>(); // The static members of C get called
 ```
 
+Since query expressions are spec'ed as a syntactic rewrite, C# actually lets you use a *type* as the query source, as long as it has static members for the query operators you use! In other words, if the *syntax* fits, we allow it!
+We think this behavior was not intentional or important in the original LINQ, and we don't want to do the work to support it on type parameters. If there are scenarios out there we will hear about them, and can choose to embrace this later.
+
 ## Variance safety [§17.2.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#17232-variance-safety)
 
 Variance safety rules should apply to signatures of static abstract members. The addition proposed in
@@ -194,26 +229,63 @@ to
 
 The following bullet points
 
-*  Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), and `T0` (if `T0` is a class or struct).
-*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing `S` to a type encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+- Determine the types `S`, `S₀` and `T₀`.
+  - If `E` has a type, let `S` be that type.
+  - If `S` or `T` are nullable value types, let `Sᵢ` and `Tᵢ` be their underlying types, otherwise let `Sᵢ` and `Tᵢ` be `S` and `T`, respectively.
+  - If `Sᵢ` or `Tᵢ` are type parameters, let `S₀` and `T₀` be their effective base classes, otherwise let `S₀` and `T₀` be `Sₓ` and `Tᵢ`, respectively.
+- Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), and `T0` (if `T0` is a class or struct).
+- Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing `S` to a type encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
-are adjusted as follows (additions/removals are in bold):
+are adjusted as follows:
 
-*  Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), and `T0` (if `T0` is a class or struct). **If `S0` is a type parameter with *effective base class* System.Object, System.ValueType, System.Array or System.Enum, interfaces from its *effective interface set* and their base interfaces are added to the set. If `T0` is a type parameter with *effective base class*  System.Object, System.ValueType, System.Array or System.Enum, interfaces from its *effective interface set* and their base interfaces are added to the set.**
-*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit conversion operators declared by the **~~classes or structs~~types** in `D` that convert from a type encompassing `S` to a type encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+- Determine the types `S`, `S₀` and `T₀`.
+  - If `E` has a type, let `S` be that type.
+  - If `S` or `T` are nullable value types, let `Sᵢ` and `Tᵢ` be their underlying types, otherwise let `Sᵢ` and `Tᵢ` be `S` and `T`, respectively.
+  - If `Sᵢ` or `Tᵢ` are type parameters, let `S₀` and `T₀` be their effective base classes, otherwise let `S₀` and `T₀` be `Sₓ` and `Tᵢ`, respectively.
+- Find the set of applicable user-defined and lifted conversion operators, `U`. 
+  - Find the set of types, `D1`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), and `T0` (if `T0` is a class or struct).
+  - Find the set of applicable user-defined and lifted conversion operators, `U1`. This set consists of the user-defined and lifted implicit conversion operators declared by the classes or structs in `D1` that convert from a type encompassing `S` to a type encompassed by `T`.
+  - If `U1` is not empty, then `U` is `U1`. Otherwise,
+    - Find the set of types, `D2`, from which user-defined conversion operators will be considered. This set consists of `Sᵢ` *effective interface set* and their base interfaces (if `Sᵢ` is a type parameter), and `Tᵢ` *effective interface set* (if `Tᵢ` is a type parameter).
+    - Find the set of applicable user-defined and lifted conversion operators, `U2`. This set consists of the user-defined and lifted implicit conversion operators declared by the interfaces in `D2` that convert from a type encompassing `S` to a type encompassed by `T`.
+    - If `U2` is not empty, then `U` is `U2`
+- If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
-## [§10.5.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/onversions.md#1055-user-defined-explicit-conversions)  User-defined explicit conversions
+## [§10.5.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1055-user-defined-explicit-conversions)  User-defined explicit conversions
 
 The following bullet points
 
-*  Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), `T0` (if `T0` is a class or struct), and the base classes of `T0` (if `T0` is a class).
-*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+- Determine the types `S`, `S₀` and `T₀`.
+  - If `E` has a type, let `S` be that type.
+  - If `S` or `T` are nullable value types, let `Sᵢ` and `Tᵢ` be their underlying types, otherwise let `Sᵢ` and `Tᵢ` be `S` and `T`, respectively.
+  - If `Sᵢ` or `Tᵢ` are type parameters, let `S₀` and `T₀` be their effective base classes, otherwise let `S₀` and `T₀` be `Sᵢ` and `Tᵢ`, respectively.
+- Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), `T0` (if `T0` is a class or struct), and the base classes of `T0` (if `T0` is a class).
+- Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the classes or structs in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
-are adjusted as follows (additions/removals are in bold):
+are adjusted as follows:
 
-*  Find the set of types, `D`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), `T0` (if `T0` is a class or struct), and the base classes of `T0` (if `T0` is a class). **If `S0` is a type parameter with *effective base class* System.Object, System.ValueType, System.Array or System.Enum, interfaces from its *effective interface set* and their base interfaces are added to the set. If `T0` is a type parameter with *effective base class*  System.Object, System.ValueType, System.Array or System.Enum, interfaces from its *effective interface set* and their base interfaces are added to the set.**
-*  Find the set of applicable user-defined and lifted conversion operators, `U`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the **~~classes or structs~~types** in `D` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`. If `U` is empty, the conversion is undefined and a compile-time error occurs.
+- Determine the types `S`, `S₀` and `T₀`.
+  - If `E` has a type, let `S` be that type.
+  - If `S` or `T` are nullable value types, let `Sᵢ` and `Tᵢ` be their underlying types, otherwise let `Sᵢ` and `Tᵢ` be `S` and `T`, respectively.
+  - If `Sᵢ` or `Tᵢ` are type parameters, let `S₀` and `T₀` be their effective base classes, otherwise let `S₀` and `T₀` be `Sᵢ` and `Tᵢ`, respectively.
+- Find the set of applicable user-defined and lifted conversion operators, `U`.
+  - Find the set of types, `D1`, from which user-defined conversion operators will be considered. This set consists of `S0` (if `S0` is a class or struct), the base classes of `S0` (if `S0` is a class), `T0` (if `T0` is a class or struct), and the base classes of `T0` (if `T0` is a class).
+  - Find the set of applicable user-defined and lifted conversion operators, `U1`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the classes or structs in `D1` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`.
+  - If `U1` is not empty, then `U` is `U1`. Otherwise,
+    - Find the set of types, `D2`, from which user-defined conversion operators will be considered. This set consists of `Sᵢ` *effective interface set* and their base interfaces (if `Sᵢ` is a type parameter), and `Tᵢ` *effective interface set* and their base interfaces (if `Tᵢ` is a type parameter).
+    - Find the set of applicable user-defined and lifted conversion operators, `U2`. This set consists of the user-defined and lifted implicit or explicit conversion operators declared by the interfaces in `D2` that convert from a type encompassing or encompassed by `S` to a type encompassing or encompassed by `T`.
+    - If `U2` is not empty, then `U` is `U2`
+- If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
+## Default implementations
+
+An *additional* feature to this proposal is to allow static virtual members in interfaces to have default implementations, just as instance virtual/abstract members do. 
+
+One complication here is that default implementations would want to call other static virtual members "virtually". Allowing static virtual members to be called directly on the interface would require flowing a hidden type parameter representing the "self" type that the current static method really got invoked on. This seems complicated, expensive and potentially confusing.
+
+We discussed a simpler version which maintains the limitations of the current proposal that static virtual members can *only* be invoked on type parameters. Since interfaces with static virtual members will often have an explicit type parameter representing a "self" type, this wouldn't be a big loss: other static virtual members could just be called on that self type. This version is a lot simpler, and seems quite doable.
+
+At https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.md#default-implementations-of-abstract-statics we decided to support Default Implementations of static members following/expanding the rules established in https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/default-interface-methods.md accordingly.  
 
 # Drawbacks
 [drawbacks]: #drawbacks
@@ -230,38 +302,30 @@ An alternative approach would be to have "structural constraints" directly and e
     - This would have to be written out every time. Having a named constraint seems better.
     - This is a whole new kind of constraint, whereas the proposed feature utilizes the existing concept of interface constraints.
     - It would only work for operators, not (easily) other kinds of static members.
-    
-## Default implementations
-
-An *additional* feature to this proposal is to allow static virtual members in interfaces to have default implementations, just as instance virtual members do. 
-
-One complication here is that default implementations would want to call other static virtual members "virtually". Allowing static virtual members to be called directly on the interface would require flowing a hidden type parameter representing the "self" type that the current static method really got invoked on. This seems complicated, expensive and potentially confusing.
-
-We discussed a simpler version which maintains the limitations of the current proposal that static virtual members can *only* be invoked on type parameters. Since interfaces with static virtual members will often have an explicit type parameter representing a "self" type, this wouldn't be a big loss: other static virtual members could just be called on that self type. This version is a lot simpler, and seems quite doable.
-
-However, it seems rare in practice that a default implementation would be beneficial, at least in our main driving scenario of numeric abstraction. Default implementations are *explicitly* implemented on implementing classes and structs, so they wouldn't result in a public member. Why would you want e.g. an operator implementation that only surfaces in a generic context, but is hidden on the concrete type? The main reason would be if we want to evolve some of the interfaces in a later release to e.g. expose more operators. In that case, we can add the language feature at that time.
-
-## Virtual static members in classes
-
-Another *additional* feature would be to allow static members to be abstract and virtual in classes as well. This runs into similar complicating factors as the default implementations, and again seems like it can be saved for later, if and when the need and the design insights occur.
 
 # Unresolved questions
 [unresolved]: #unresolved-questions
 
-Called out above, but here's a list:
+## Static abstract interfaces and static classes
 
-- Operators `==` and `!=` as well as the implicit and explicit conversion operators are disallowed in interfaces today. Should they be disallowed as static abstract members as well? Note, the current implementation is adjusted to allow them only in abstract form. If we don't want this behavior after all, there is work to disallow it.
-- Should the qualifying `I.` in an explicit operator implementation go before the `operator` keyword or the operator symbol (e.g. `+`) itself?
-- Should we relax the operator restrictions further so that the restricted operand can be of any type that derives from, or has one of some set of implicit conversions to the enclosing type?
-- The "Operator restrictions" section must provide more precise rules for: "These requirements need to be relaxed so that a restricted operand is allowed to be of a type parameter that is constrained to `T`." What type parameters are allowed, what exactly does it mean to be constraint to `T`, etc. The current implementation allows only type parameters that belong to the immediate contatining type and only those that have containing type as one of the directly specified type constraints (https://github.com/dotnet/roslyn/issues/53801). 
+See https://github.com/dotnet/csharplang/issues/5783 and https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#static-abstract-interfaces-and-static-classes for more information.
 
-Not called out above:
+## Relaxing restriction for interfaces as type arguments
 
-- Confirm whether we would like to support use of static abstract methods declared in interfaces as operators in query expressions (https://github.com/dotnet/roslyn/issues/53796).
-- Confirm the rules outlined in "Processing of user-defined implicit conversions" and "Processing of user-defined explicit conversions" sections above. Some feedback on the current rules https://github.com/dotnet/roslyn/issues/56753.
+Should we limit restriction added by [Interfaces as type arguments](static-abstracts-in-interfaces.md#interfaces-as-type-arguments) section to apply only to interfaces that do not have most specific implementation for a static abstract/virtual member? In other words, if all static abstract/virtual members have most specific implementation, the interface can be used as a type argument. It appears that this is the behavior that we prefer the runtime to have.
+
+If we would like to make this relaxation, should we also make similar relaxation for the restriction added by [Interface constraints with static abstract members](static-abstracts-in-interfaces.md#interface-constraints-with-static-abstract-members) section?
+
+## Virtual equality operators and conversions
+
+Should we also allow declaration of virtual equality and conversion operators within interfaces? See [Equality operators and conversions](static-abstracts-in-interfaces.md#equality-operators-and-conversions) for more information. Note that https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-06.md#equality-operators-and-conversions might look like we already made this decision. However, when the discussion took place, virtual static members were not supported, and the open design question was specifically raised around the fact that "the current implementation is adjusted to allow them only in abstract form" and whether we want to keep it. So, it feels like we need to make an explicit call around adjusting the implementation to also allow virtual form of the operators.
 
 # Design meetings
 
-- https://github.com/dotnet/csharplang/tree/main/meetings/2021#apr-5-2021
 - https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-08.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-05.md
 - https://github.com/dotnet/csharplang/blob/master/meetings/2020/LDM-2020-06-29.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-06.md
