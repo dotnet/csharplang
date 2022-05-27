@@ -259,7 +259,7 @@ For an expression *expr* of the form `E is T`, where *T* is any type or pattern
 #### Remarks
 
 This section is meant to address similar scenarios as in the `==`/`!=` section above.
-This specification does not address recursive patterns, e.g. `(a?.b(out x), c?.d(out y)) is (object, object)`. Such support may come later if time permits.
+This specification does not address recursive patterns, e.g. `(a?.b(out x), c?.d(out y)) is (object, object)`. Such support may come later if time permits. See [internal issue](https://vstfdevdiv.corp.microsoft.com/DevDiv2/DevDiv/_workitems/edit/529603).
 
 ## Additional scenarios
 
