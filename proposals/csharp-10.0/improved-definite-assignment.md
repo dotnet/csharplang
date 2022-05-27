@@ -205,7 +205,7 @@ if (b ? x != null && Set(out y) : x != null && Set(out y))
 bool Set(out int x) { x = 0; return true; }
 ```
 
-This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification at the time.
+This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification at the time. See [internal issue](https://vstfdevdiv.corp.microsoft.com/DevDiv2/DevDiv/_workitems/edit/529603).
 
 ### ==/!= (relational equality operator) expressions
 We introduce a new section **==/!= (relational equality operator) expressions**.
@@ -259,7 +259,7 @@ For an expression *expr* of the form `E is T`, where *T* is any type or pattern
 #### Remarks
 
 This section is meant to address similar scenarios as in the `==`/`!=` section above.
-This specification does not address recursive patterns, e.g. `(a?.b(out x), c?.d(out y)) is (object, object)`. Such support may come later if time permits. See [internal issue](https://vstfdevdiv.corp.microsoft.com/DevDiv2/DevDiv/_workitems/edit/529603).
+This specification does not address recursive patterns, e.g. `(a?.b(out x), c?.d(out y)) is (object, object)`. Such support may come later if time permits.
 
 ## Additional scenarios
 
