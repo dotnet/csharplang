@@ -277,13 +277,13 @@ class Range
     public required Location End { get; init; }
 }
 
-class Point
+class Location
 {
     public required int Column { get; init; }
     public required int Line { get; init; }
 }
 
-_ = new Range { Start = { Column = 0, Line = 0 }, End = { Column = 1, Line = 0 } } // Would this be allowed if Point is a struct type?
+_ = new Range { Start = { Column = 0, Line = 0 }, End = { Column = 1, Line = 0 } } // Would this be allowed if Location is a struct type?
 _ = new Range { Start = new Location { Column = 0, Line = 0 }, End = new Location { Column = 1, Line = 0 } } // Or would this form be necessary instead?
 ```
 
