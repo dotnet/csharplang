@@ -19,6 +19,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Jun 6, 2022
 
+- Open issues for `ref` fields (continued) (Chuck): https://github.com/dotnet/csharplang/issues/6149
+
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
