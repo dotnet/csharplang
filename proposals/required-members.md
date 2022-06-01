@@ -158,7 +158,7 @@ for the generic instantiation to ensure that the requirements are satisfied.
 
 ### Accessibility
 
-It is an error to mark a member required if the member is less accessible than the member's containing type. The member must also be settable by consumers, meaning that:
+It is an error to mark a member required if the member cannot be set in any context where the containing type is visible. The member must also be settable by consumers, meaning that:
 * If the member is a field, it cannot be `readonly`.
 * If the member is a property, it must have a setter or initer at least as accessible as the member's containing type.
 
@@ -177,6 +177,11 @@ public class Base
 
     public required readonly int _field2; // Error: required fields cannot be readonly
     protected Base() { }
+
+    protected class Inner
+    {
+        protected required int PropInner { get; set; } // Error: PropInner cannot be set inside Base or Derived
+    }
 }
 public class Derived : Base, I
 {
