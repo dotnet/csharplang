@@ -70,8 +70,8 @@ line_indicator
 Proposed:
 ```
 line_indicator
-    : '(' decimal_digit+ ',' decimal_digit+ ')' '-' '(' decimal_digit+ ',' decimal_digit+ ')' decimal_digit+ whitespace file_name
-    | '(' decimal_digit+ ',' decimal_digit+ ')' '-' '(' decimal_digit+ ',' decimal_digit+ ')' file_name
+    : '(' decimal_digit+ ',' decimal_digit+ ')' '-' '(' decimal_digit+ ',' decimal_digit+ ')' whitespace decimal_digit+ whitespace file_name
+    | '(' decimal_digit+ ',' decimal_digit+ ')' '-' '(' decimal_digit+ ',' decimal_digit+ ')' whitespace file_name
     | decimal_digit+ whitespace file_name
     | decimal_digit+
     | 'default'
