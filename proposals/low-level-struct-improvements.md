@@ -125,10 +125,9 @@ First the rules establishing *ref-safe-to-escape* values for fields need to be u
 <a name="rules-field-lifetimes"></a>
 
 > An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
-> 1. If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
-> 2. Else if `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
-> 3. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
-> 4. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
+> 1. If `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
+> 2. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
+> 3. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
 
 This does not represent a rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to access `ref` fields directly and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
 
