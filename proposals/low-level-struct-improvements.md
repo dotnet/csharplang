@@ -156,7 +156,7 @@ Next the rules for ref re-assignment need to be adjusted for the presence of `re
 
 > For a ref reassignment in the form ...
 > 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
-> 2. `e1 = ref e2`: where `e1` is a `ref` local or parameter then `e2` must have a *ref-safe-to-escape* at least as big as the *ref-safe-to-escape* of `e1`.
+> 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *ref-safe-to-escape* at least as wide as the *ref-safe-to-escape* of `e1`.
 
 That means the desired `Span<T>` constructor works without any extra annotation:
 
