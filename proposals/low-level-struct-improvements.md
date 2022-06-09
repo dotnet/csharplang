@@ -301,7 +301,7 @@ The method invocation for lvalue returns can now be simplified. The receiver no 
 
 > An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 > 1. The *calling method*
-> 2. The *ref-safe-to-escape* contributed byall `ref` arguments
+> 2. The *ref-safe-to-escape* contributed by all `ref` arguments
 > 3. The *safe-to-escape* contributed by all argument expressions
 
 The method invocation for rvalue returns needs to change as follows to account for `ref` field returns.
@@ -351,7 +351,7 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 
 <a name="rules-method-arguments-must-match"></a>
 
-The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as fields in a `ref struct` argument to the method. Previously the rule only had to consider other `ref struct` being stored as fields. The impact of this is discussed in [the compat considerations](#compat-considerations). 
+The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). 
 
 The presence of `scoped` allows us to refine the rule to reduce the friction the rule creates. The `scoped` modifier lets us remove arguments from consideration as they cannot be returned from the method.
 
