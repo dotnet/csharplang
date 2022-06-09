@@ -301,15 +301,15 @@ The method invocation for lvalue returns can now be simplified. The receiver no 
 
 > An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 > 1. The *calling method*
-> 2. The *ref-safe-to-escape* of all `ref` arguments
-> 3. The *safe-to-escape* of all argument expressions
+> 2. The *ref-safe-to-escape* contributed byall `ref` arguments
+> 3. The *safe-to-escape* contributed by all argument expressions
 
 The method invocation for rvalue returns needs to change as follows to account for `ref` field returns.
 
 > An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 > 1. The *calling method*
-> 2. The *safe-to-escape* of all argument expressions
-> 3. When the return is a `ref struct` then *ref-safe-to-escape* of all `ref` arguments
+> 2. The *safe-to-escape* conrtibuted by all argument expressions
+> 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
 
 This rule now lets us define the two variants of desired methods:
 
