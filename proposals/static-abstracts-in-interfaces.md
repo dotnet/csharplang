@@ -151,7 +151,9 @@ In order for a type parameter `T` to count as " the instance type of the enclosi
 
 ## Equality operators and conversions
 
-Abstract declarations of `==` and `!=` operators, as well as abstract declarations of implicit and explicit conversion operators will be allowed in interfaces.
+Abstract/virtual declarations of `==` and `!=` operators, as well as abstract/virtual declarations of implicit and explicit conversion operators will be allowed in interfaces. Derived interfaces will be allowed to implement them too.
+
+For `==` and `!=` operators, at least one parameter type must be a type parameter that counts as "the instance type of the enclosing type". As defined in the previous section. 
 
 ## Implementing static abstract members
 
@@ -284,10 +286,6 @@ An alternative approach would be to have "structural constraints" directly and e
 ## Static abstract interfaces and static classes
 
 See https://github.com/dotnet/csharplang/issues/5783 and https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#static-abstract-interfaces-and-static-classes for more information.
-
-## Virtual equality operators and conversions
-
-Should we also allow declaration of virtual equality and conversion operators within interfaces? See [Equality operators and conversions](static-abstracts-in-interfaces.md#equality-operators-and-conversions) for more information. Note that https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-06.md#equality-operators-and-conversions might look like we already made this decision. However, when the discussion took place, virtual static members were not supported, and the open design question was specifically raised around the fact that "the current implementation is adjusted to allow them only in abstract form" and whether we want to keep it. So, it feels like we need to make an explicit call around adjusting the implementation to also allow virtual form of the operators.
 
 # Design meetings
 
