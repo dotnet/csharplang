@@ -112,7 +112,7 @@ ref struct ReadOnlyExample
 }
 ```
 
-A `readonly` on a `ref struct` will instance will force `ref` fields to be `readonly ref readonly`. This also means a `readonly ref struct` must mark `ref` fields as `readonly ref readonly`. This maintains the invariant that a `ref struct` which is `readonly` cannot store ref-like state.
+A `readonly` on a `ref struct` instance will cause all `ref` fields to be considered `readonly ref readonly`. By extension this means that `readonly` on a `ref struct` declaration will force all `ref` fields to be declared as `ref readonly ref`. These rules maintains the invariant that a `ref struct` which is `readonly` cannot be used to store additional ref-like values.
 
 ```c#
 ref struct S
@@ -122,10 +122,13 @@ ref struct S
     void Uses(in S s1, ref S s2)
     {
         int local = default;
+        // s1 is readonly by virtue of `in` 
         s1.Field = 42;          // Error: can't assign ref readonly value
-        s1.Field = ref loal;    // Error: can't repoint readonly ref
+        s1.Field = ref local;   // Error: can't repoint readonly ref
+
+        // s2 is same type in a position that allows mutations
         s2.Field = 42;          // Okay
-        s2.Field = ref loal;    // Okay
+        s2.Field = ref local;   // Okay
     }
 }
 ```
@@ -381,10 +384,14 @@ The updated rule is:
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
 
-The `scoped` modifier on parameters also impacts our OHI and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
+The `scoped` modifier on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
 - Add `scoped` to a `ref` or `in` parameter
 - Add `scoped` to a `ref struct` parameter 
-Any other difference with respect to `scoped` will be considered an error.
+Any other difference with respect to `scoped` will be considered an error. 
+
+The `scoped` modifier also has the following effects on method signatures:
+- The `scoped` modifier though does not affect hiding.
+- Overloads cannot differ only on `scoped`
 
 The section on `ref` field and `scoped` is long so wanted to close with a brief summary of the proposed breaking changes:
 
