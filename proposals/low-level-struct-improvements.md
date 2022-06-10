@@ -377,8 +377,8 @@ The presence of `scoped` allows us to refine the rule to reduce the friction the
 The updated rule is:
 
 > For a method invocation if there is an argument for a `ref`, `scoped ref` or `out` parameter of a `ref struct` type where the argument has *safe-to-escape* E1 then 
-> 1. No `ref struct` argument may contribute a narrower *safe-to-escape* than E1.
-> 2. No `ref` or `in` argument may contribute a narrower *ref-safe-to-escape* than E1.
+> 1. No other `ref struct` argument may contribute a narrower *safe-to-escape* than E1.
+> 2. No other `ref` or `in` argument may contribute a narrower *ref-safe-to-escape* than E1.
 >
 > This rule does not apply to `ref struct` arguments for `in` parameters
 
