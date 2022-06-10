@@ -112,7 +112,23 @@ ref struct ReadOnlyExample
 }
 ```
 
-A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today.
+A `readonly` on a `ref struct` will instance will force `ref` fields to be `readonly ref readonly`. This also means a `readonly ref struct` must mark `ref` fields as `readonly ref readonly`. This maintains the invariant that a `ref struct` which is `readonly` cannot store ref-like state.
+
+```c#
+ref struct S
+{
+    ref int Field;
+
+    void Uses(in S s1, ref S s2)
+    {
+        int local = default;
+        s1.Field = 42;          // Error: can't assign ref readonly value
+        s1.Field = ref loal;    // Error: can't repoint readonly ref
+        s2.Field = 42;          // Okay
+        s2.Field = ref loal;    // Okay
+    }
+}
+```
 
 A `readonly ref` will be emitted to metadata using the `initonly` flag, same as any other field. A `ref readonly` field will be attributed with `System.Runtime.CompilerServices.IsReadOnlyAttribute`. A `readonly ref readonly` will be emitted with both items.
 
@@ -932,6 +948,37 @@ struct Dimensions
 ```
 
 **Decision** Do not allow for now
+
+### How readonly impacts ref fields
+When a `ref struct` instance that has a `ref` field is in a `readonly` location there are two different ways the field could be represented: `readonly ref` and `readonly ref readonly`. Both of these interpretations are valid but they have significantly different impacts to existing span safety rules. 
+
+In the original span safety rules a `ref struct` in a `readonly` location cannot be used to store ref-like state. This is a deliberate intent of the span safety rules and one that customers take specific advantage of. For example:
+
+```c#
+readonly ref struct Reader
+{
+    readonly ref readonly Span<char> field;
+    public void Read(Span<char> span);
+}
+```
+
+Customers understand, and rely on, the fact that this API does not qualify for the method arguments must match rule. That is because a `readonly ref struct` cannot store ref-like state. If this decision was reversed though this invariant would no longer hold because it would allow for the following: 
+
+```c#
+readonly ref struct Reader
+{
+    // Consider the case the language allowed this approach
+    readonly ref Span<char> field;
+    public void Read(Span<char> span)
+    {
+        field = span;
+    }
+}
+```
+
+To support this in a safe way it would mean that `in` parameters must qualify for method arguments must match rule. That would be a potentially significant breaking change to existing code.
+
+**Decision** The language will treat `ref` fields as `readonly ref readonly` when the instance is in a `readonly` location.
 
 ### Violating scoped
 The runtime repository has several non-public APIs that capture `ref` parameters as `ref` fields. These are unsafe because the lifetime of the resulting value is not tracked. For example the `Span<T>(ref T value, int length)` constructor.
