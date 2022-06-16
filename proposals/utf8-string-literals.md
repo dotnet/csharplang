@@ -94,7 +94,7 @@ ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(new byte[] { 0x68, 0x65, 0x6c, 
 
 That means all optimizations that apply to the `new byte[] { ... }` form will apply to utf8 literals as well. This means the call site will be allocation free as C# will optimize this be stored in the `.data` section of the PE file.
 
-Multiple consequitive applications of UTF8 byte representation concatenation operators are collapsed into a single creation of `ReadOnlySpan<byte>` with byte array containing the final byte sequence.
+Multiple consecutive applications of UTF8 byte representation concatenation operators are collapsed into a single creation of `ReadOnlySpan<byte>` with byte array containing the final byte sequence.
 
 ```c#
 ReadOnlySpan<byte> span = "h"u8 + "el"u8 + "lo"u8;
