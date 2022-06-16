@@ -151,7 +151,9 @@ In order for a type parameter `T` to count as " the instance type of the enclosi
 
 ## Equality operators and conversions
 
-Abstract declarations of `==` and `!=` operators, as well as abstract declarations of implicit and explicit conversion operators will be allowed in interfaces.
+Abstract/virtual declarations of `==` and `!=` operators, as well as abstract/virtual declarations of implicit and explicit conversion operators will be allowed in interfaces. Derived interfaces will be allowed to implement them too.
+
+For `==` and `!=` operators, at least one parameter type must be a type parameter that counts as "the instance type of the enclosing type", as defined in the previous section. 
 
 ## Implementing static abstract members
 
@@ -159,36 +161,11 @@ The rules for when a static member declaration in a class or struct is considere
 
 ***TBD:** There may be additional or different rules necessary here that we haven't yet thought of.*
 
-## Interface constraints with static abstract members
-
-Today, when an interface `I` is used as a generic constraint, any type `T` with an implicit reference or boxing conversion to `I` is considered to satisfy that constraint.
-
-When `I` has static abstract/virtual members this needs to be further restricted so that `T` cannot itself be an interface.
-
-For instance:
-
-``` c#
-// I and C as above
-void M<T>() where T : I<T> { ... }
-M<C>();  // Allowed: C is not an interface
-M<I<C>>(); // Disallowed: I is an interface
-```
-
 ## Interfaces as type arguments
 
 We discussed the issue raised by https://github.com/dotnet/csharplang/issues/5955 and decided to add a restriction around usage of an interface as a type argument (https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md#type-hole-in-static-abstracts). Here is the restriction as it was proposed by https://github.com/dotnet/csharplang/issues/5955 and approved by the LDM.
 
-> An interface containing or inheriting static virtual members cannot be used as a type argument
-
-For the purpose of this restriction, static abstract members are treated the same as static virtual members. So, an interface containing or inheriting static abstract/virtual members cannot be used as a type argument.
-
-The meeting notes https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md#type-hole-in-static-abstracts also say the following:
-
-> when we add support
-for static _virtual_ members, we should work with the runtime team to make sure that, if all static virtual members of an
-interface have a body, it should be usable as a type argument. This would avoid the breaking change from adding a static virtual
-DIM to an interface, which despite not requiring consumers to update implementing code, would potentially break usage as a type
-argument.
+An interface containing or inheriting a static abstract/virtual member that does not have most specific implementation in the interface cannot be used as a type argument. If all static abstract/virtual members have most specific implementation, the interface can be used as a type argument.
 
 ## Accessing static abstract interface members
 
@@ -310,16 +287,6 @@ An alternative approach would be to have "structural constraints" directly and e
 
 See https://github.com/dotnet/csharplang/issues/5783 and https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#static-abstract-interfaces-and-static-classes for more information.
 
-## Relaxing restriction for interfaces as type arguments
-
-Should we limit restriction added by [Interfaces as type arguments](static-abstracts-in-interfaces.md#interfaces-as-type-arguments) section to apply only to interfaces that do not have most specific implementation for a static abstract/virtual member? In other words, if all static abstract/virtual members have most specific implementation, the interface can be used as a type argument. It appears that this is the behavior that we prefer the runtime to have.
-
-If we would like to make this relaxation, should we also make similar relaxation for the restriction added by [Interface constraints with static abstract members](static-abstracts-in-interfaces.md#interface-constraints-with-static-abstract-members) section?
-
-## Virtual equality operators and conversions
-
-Should we also allow declaration of virtual equality and conversion operators within interfaces? See [Equality operators and conversions](static-abstracts-in-interfaces.md#equality-operators-and-conversions) for more information. Note that https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-06.md#equality-operators-and-conversions might look like we already made this decision. However, when the discussion took place, virtual static members were not supported, and the open design question was specifically raised around the fact that "the current implementation is adjusted to allow them only in abstract form" and whether we want to keep it. So, it feels like we need to make an explicit call around adjusting the implementation to also allow virtual form of the operators.
-
 # Design meetings
 
 - https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-08.md
@@ -329,3 +296,4 @@ Should we also allow declaration of virtual equality and conversion operators wi
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-06.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-06-06.md
