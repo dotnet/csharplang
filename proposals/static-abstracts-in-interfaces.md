@@ -153,7 +153,7 @@ In order for a type parameter `T` to count as " the instance type of the enclosi
 
 Abstract/virtual declarations of `==` and `!=` operators, as well as abstract/virtual declarations of implicit and explicit conversion operators will be allowed in interfaces. Derived interfaces will be allowed to implement them too.
 
-For `==` and `!=` operators, at least one parameter type must be a type parameter that counts as "the instance type of the enclosing type". As defined in the previous section. 
+For `==` and `!=` operators, at least one parameter type must be a type parameter that counts as "the instance type of the enclosing type", as defined in the previous section. 
 
 ## Implementing static abstract members
 
