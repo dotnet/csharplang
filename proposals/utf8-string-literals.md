@@ -63,6 +63,22 @@ When the input text for the literal is a malformed UTF16 string, then the langua
 var bytes = "hello \uD801\uD802"u8; // Error: the input string is not valid UTF16
 ```
 
+### Addition operator
+
+A new bullet point will be added to [§11.9.5 Addition operator](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1195-addition-operator) as follows.
+
+- UTF8 byte representation concatenation:
+
+  ```csharp
+  ReadOnlySpan<byte> operator +(ReadOnlySpan<byte> x, ReadOnlySpan<byte> y);
+  ```
+
+  This binary `+` operator performs byte sequences concatenation and is applicable if and only if both operands are semantically UTF8 byte representations.
+  An operand is semantically a UTF8 byte representation when it is eiher a value of a `u8` literal, or a value produced by the UTF8 byte representation concatenation operator. 
+
+  The result of the UTF8 byte representation concatenation is a ```ReadOnlySpan<byte>``` that consists of the bytes of the left operand followed by the bytes of the right operand. A null terminator is placed beyond the last byte in memory (and outside the length of the ```ReadOnlySpan<byte>```) in order to handle some
+interop scenarios where the call expects null terminated strings.
+
 ### Lowering
 
 The language will lower the UTF8 encoded strings exactly as if the developer had typed the resulting `byte[]` literal in code. For example:
@@ -77,6 +93,17 @@ ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(new byte[] { 0x68, 0x65, 0x6c, 
 ```
 
 That means all optimizations that apply to the `new byte[] { ... }` form will apply to utf8 literals as well. This means the call site will be allocation free as C# will optimize this be stored in the `.data` section of the PE file.
+
+Multiple consequitive applications of UTF8 byte representation concatenation operators are collapsed into a single creation of `ReadOnlySpan<byte>` with byte array containing the final byte sequence.
+
+```c#
+ReadOnlySpan<byte> span = "h"u8 + "el"u8 + "lo"u8;
+
+// Equivalent to
+
+ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(new byte[] { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00 }).
+                               Slice(0,5); // The `Slice` call will be optimized away by the compiler.
+```
 
 ## Drawbacks
 ### Relying on core APIs
@@ -407,3 +434,4 @@ Examples where we leave perf on the table
 
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-26.md
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-18.md
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-06-06.md
