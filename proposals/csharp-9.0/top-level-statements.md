@@ -78,8 +78,8 @@ partial class Program
 
 The type is named "Program", so can be referenced by name from source code. It is 
 a partial type, so a type named "Program" in source code must also be declared as partial.  
-But the method name "Main" is used only for illustrations purposes, the actual name used by
-compiler is implementation dependent and the method cannot be referenced by name from
+But the method name "Main" is used only for illustration purposes, the actual name used by
+the compiler is implementation dependent and the method cannot be referenced by name from
 source code.
 
 The method is designated as the entry point of the program. Explicitly declared methods that by convention 
