@@ -8,7 +8,7 @@ Allow a sequence of *statements* to occur right before the *namespace_member_dec
 The semantics are that if such a sequence of *statements* is present, the following type declaration, modulo the actual method name, would be emitted:
 
 ``` c#
-internal partial class Program
+partial class Program
 {
     static async Task Main(string[] args)
     {
@@ -67,7 +67,7 @@ they were combined in the block body of a `Main` method of a `Program` class in 
 as follows:
 
 ``` c#
-internal partial class Program
+partial class Program
 {
     static async Task Main(string[] args)
     {
@@ -103,7 +103,7 @@ statements as follows:
 The example above would yield the following `$Main` method declaration:
 
 ``` c#
-internal partial class Program
+partial class Program
 {
     static void $Main(string[] args)
     {
@@ -130,7 +130,7 @@ System.Console.WriteLine("Hi!");
 
 would  yield:
 ``` c#
-internal partial class Program
+partial class Program
 {
     static async Task $Main(string[] args)
     {
@@ -149,7 +149,7 @@ return 0;
 
 would  yield:
 ``` c#
-internal partial class Program
+partial class Program
 {
     static async Task<int> $Main(string[] args)
     {
@@ -168,7 +168,7 @@ return 2;
 
 would  yield:
 ``` c#
-internal partial class Program
+partial class Program
 {
     static int $Main(string[] args)
     {
