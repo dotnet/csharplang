@@ -5,10 +5,10 @@
 
 Allow a sequence of *statements* to occur right before the *namespace_member_declaration*s of a *compilation_unit* (i.e. source file).
 
-The semantics are that if such a sequence of *statements* is present, the following type declaration, modulo the actual type name and the method name, would be emitted:
+The semantics are that if such a sequence of *statements* is present, the following type declaration, modulo the actual method name, would be emitted:
 
 ``` c#
-static class Program
+internal partial class Program
 {
     static async Task Main(string[] args)
     {
@@ -76,11 +76,10 @@ internal partial class Program
 }
 ```
 
-The type for the synthesized entry point is named "Program", so can be referenced by name
-from source code. It is a partial type, so a type named "Program" in source code must also
-be declared as partial.  
-But the name "Main" is used only for illustrations purposes, the actual name used by
-compiler are implementation dependent and the method cannot be referenced by name from
+The type is named "Program", so can be referenced by name from source code. It is 
+a partial type, so a type named "Program" in source code must also be declared as partial.  
+But the method name "Main" is used only for illustrations purposes, the actual name used by
+compiler is implementation dependent and the method cannot be referenced by name from
 source code.
 
 The method is designated as the entry point of the program. Explicitly declared methods that by convention 
