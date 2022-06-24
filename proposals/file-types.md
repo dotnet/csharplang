@@ -86,6 +86,49 @@ class Program
 }
 ```
 
+Note that we don't update the [scopes](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#77-scopes) section of the spec. This is because, as the spec states:
+
+> The ***scope*** of a name is the region of program text within which it is possible to refer to the entity declared by the name without qualification of the name.
+
+In effect, scope only impacts the lookup of non-qualified names. This isn't quite the right concept for us to leverage because we need to also impact the lookup of qualified names:
+
+```cs
+// File1.cs
+namespace NS1
+{
+    file class C
+    {
+        public static void M() { }
+    }
+}
+
+namespace NS2
+{
+    class Program
+    {
+        public static void M()
+        {
+            C.M(); // error: C is not in scope
+            NS1.C.M(); // ok: C can be accessed through NS1.
+        }
+    }
+}
+```
+
+```cs
+// File2.cs
+namespace NS1
+{
+    class Program
+    {
+        C.M(); // error
+        NS1.C.M(); // error
+    }
+}
+```
+
+Therefore, we don't specify the feature in terms of which scope the type is contained in, but rather as additional "filtering rules" in member lookup.
+
 ### Attributes
 A type which is both an attribute type and a file type is said to be a *file attribute*. Much like an ordinary *file types*, a *file attribute* can only be used in the file where it is declared.
 
