@@ -33,7 +33,6 @@ Our primary motivation is from source generators. Source generators work by addi
 1. Those files should be able to contain implementation details which are hidden from the rest of the compilation, yet are usable throughout the file they are declared in.
 2. We want to reduce the need for generators to "search" for type names which won't collide with declarations in user code or code from other generators.
 
-
 ## Detailed design
 [design]: #detailed-design
 
