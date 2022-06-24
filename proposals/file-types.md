@@ -130,20 +130,15 @@ namespace NS1
 Therefore, we don't specify the feature in terms of which scope the type is contained in, but rather as additional "filtering rules" in member lookup.
 
 ### Attributes
-A type which is both an attribute type and a file type is said to be a *file attribute*. Much like an ordinary *file types*, a *file attribute* can only be used in the file where it is declared.
+In the initial iteration of the feature, a file type is not allowed to be used as an attribute. Such attributes are of limited utility for users who are unaware of the internal name generation strategy used in the implementation.
 
 ```cs
-// File1.cs
-file class Attr : System.Attribute { }
+file class FC : System.Attribute { }
 
-[Attr] // ok
-class Program { }
-```
-
-```cs
-// File2.cs
-[Attr] // error
-class Other { }
+[FC] // error
+class C
+{
+}
 ```
 
 ### Usage in signatures
