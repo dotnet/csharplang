@@ -151,6 +151,8 @@ class C
 ### Usage in signatures
 There is a general need to prevent `file` types from appearing in member parameters, returns, and type parameter constraints where the `file` type might not be in scope at the point of usage of the member.
 
+Note that non-file types are permitted to implement file interfaces, similar to how types can implement less-accessible interfaces. Depending on the types present in the interface members, it could result in a violation of the rules in the following section.
+
 #### Only allow signature usage in members of `file` types
 Perhaps the simplest way to ensure this is to enforce that `file` types can only appear in signatures or as base types of other `file` types:
 
