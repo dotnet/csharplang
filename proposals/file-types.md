@@ -36,7 +36,14 @@ Our primary motivation is from source generators. Source generators work by addi
 ## Detailed design
 [design]: #detailed-design
 
-- We add the `file` modifier to the [class](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1422-class-modifiers), [struct](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1522-struct-modifiers), [interface](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#1722-interface-modifiers), and [enum](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#183-enum-modifiers) modifier sets in the grammar.
+- We add the `file` modifier to the following modifier sets:
+  - [class](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1422-class-modifiers)
+  - [struct](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1522-struct-modifiers)
+  - [interface](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#1722-interface-modifiers)
+  - [enum](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#183-enum-modifiers)
+  - [delegate](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#192-delegate-declarations)
+  - record
+  - record struct.
 - The `file` modifier can only be used on a top-level type.
 
 ### Accessibility
@@ -142,7 +149,7 @@ class C
 ```
 
 ### Usage in signatures
-There is a general need to prevent `file` types from appearing in member signatures where the `file` type might not be in scope at the point of usage of the member.
+There is a general need to prevent `file` types from appearing in member parameters, returns, and type parameter constraints where the `file` type might not be in scope at the point of usage of the member.
 
 #### Only allow signature usage in members of `file` types
 Perhaps the simplest way to ensure this is to enforce that `file` types can only appear in signatures or as base types of other `file` types:
