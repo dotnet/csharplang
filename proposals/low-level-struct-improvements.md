@@ -125,10 +125,9 @@ First the rules establishing *ref-safe-to-escape* values for fields need to be u
 <a name="rules-field-lifetimes"></a>
 
 > An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
-> 1. If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
-> 2. Else if `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
-> 3. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
-> 4. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
+> 1. If `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
+> 2. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
+> 3. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
 
 This does not represent a rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to access `ref` fields directly and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
 
@@ -157,7 +156,7 @@ Next the rules for ref re-assignment need to be adjusted for the presence of `re
 
 > For a ref reassignment in the form ...
 > 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
-> 2. `e1 = ref e2`: where `e1` is a local or parameter, the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
+> 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *ref-safe-to-escape* at least as wide a scope as the *ref-safe-to-escape* of `e1`.
 
 That means the desired `Span<T>` constructor works without any extra annotation:
 
@@ -299,7 +298,9 @@ Further treating the input to an `out` parameter as returnable is extremely conf
 
 This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
 
-The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `readonly ref` and `out` is equivalent to `ref scoped`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `readonly ref` and `ref scoped` respectively.
+The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
+
+When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
 
 <a name="rules-method-invocation"></a>
 
@@ -314,16 +315,15 @@ The method invocation for lvalue returns can now be simplified. The receiver no 
 
 > An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 > 1. The *calling method*
-> 2. The *ref-safe-to-escape* of all `ref` arguments
-> 3. The *ref-safe-to-escape* of all `in` parameters when the argument is an lvalue otherwise *current method*
-> 4. The *safe-to-escape* of all argument expressions
+> 2. The *ref-safe-to-escape* contributed by all `ref` arguments
+> 3. The *safe-to-escape* contributed by all argument expressions
 
 The method invocation for rvalue returns needs to change as follows to account for `ref` field returns.
 
 > An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 > 1. The *calling method*
-> 2. The *safe-to-escape* of all argument expressions
-> 3. When the return is a `ref struct` then *ref-safe-to-escape* of all `ref` arguments
+> 2. The *safe-to-escape* contributed by all argument expressions
+> 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
 
 This rule now lets us define the two variants of desired methods:
 
@@ -365,11 +365,24 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 
 <a name="rules-method-arguments-must-match"></a>
 
-The presence of `scoped` allows us to also refine the method arguments must match rule. It can now be reduced to 
+The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). 
 
-> For a method invocation if there is an argument for a `ref` or `scoped ref` parameter of a `ref struct` type where the argument has *safe-to-escape* E1 then no argument may contribute a narrower *safe-to-escape* than E1.
+The presence of `scoped` allows us to refine the rule to reduce the friction the rule creates. The `scoped` modifier lets us remove arguments from consideration as they cannot be returned from the method.
+
+> For a method invocation if there is an argument for a `ref`, `scoped ref` or `out` parameter of a `ref struct` type where the argument has *safe-to-escape* E1 then 
+> 1. No other `ref struct` argument may contribute a narrower *safe-to-escape* than E1.
+> 2. No other `ref` or `in` argument may contribute a narrower *ref-safe-to-escape* than E1.
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
+
+The `scoped` modifier on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
+- Add `scoped` to a `ref` or `in` parameter
+- Add `scoped` to a `ref struct` parameter 
+Any other difference with respect to `scoped` will be considered an error. 
+
+The `scoped` modifier also has the following effects on method signatures:
+- The `scoped` modifier though does not affect hiding.
+- Overloads cannot differ only on `scoped`
 
 The section on `ref` field and `scoped` is long so wanted to close with a brief summary of the proposed breaking changes:
 
@@ -552,6 +565,8 @@ The backing storage for the buffer will be generated using the `[InlineArray]` a
 There are considerations other parts of the development stack should consider when evaluating this feature.
 
 ### Compat Considerations
+<a name="compat-considerations">
+
 The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
 
 ```c#
@@ -568,9 +583,9 @@ Span<int> CreateSpan<int>()
 
 Effectively there are three ways for a `ref` parameter to escape from a method invocation: 
 
-1. By value
-2. By `ref` 
-3. By `ref` field
+1. By value return
+2. By `ref` return
+3. By `ref` field in `ref struct` that is returned or passed as `ref` / `out` parameter
 
 The existing rules only account for (1) and (2). They do not account for (3) hence gaps like returning locals as `ref` fields are not accounted for. This design must change the rules to account for (3). This will have a small impact to compatibility for existing APIs. Specifically it will impact APIs that have the following properties.
 
@@ -1304,6 +1319,33 @@ readonly ref struct SpanOfOne
 ```
 
 This means we must choose the shallow interpretation of `readonly`.
+
+#### Preventing tricky ref reassignment 
+An interesting case to keep in mind is how `ref scoped` works with [method arguments must match rule](#rules-method-arguments-must-match). Consider the following code which is legal by [ref re-assignment rules](#rules-ref-re-assignment). 
+
+```c#
+ref struct S
+{ 
+    ref readonly int Field;
+}
+
+void SetValue(ref scoped S s, in int f)
+{
+    s.Field = ref f;
+}
+```
+
+Even though `s` is `ref scoped` which means it cannot be returned, it is still assignable which means it is a vehicle for other ref-like values to escape. It behaves exactly as `out` does. The rules though do correctly account for this. Consider as an example:
+
+```c#
+void Example(ref S s)
+{
+    int local = 42;
+    SetValue(ref s, in local);
+}
+```
+
+This call falls into the method arguments must match category as it has a `scoped ref` parameter (a `ref scoped` is equivalent to `scoped ref scoped`). The argument `local` corresponds to an `in` parameter and it's *ref-safe-to-escape* is *current method* which is narrower than the *safe-to-escape* of `s` which is *calling method*. As such this invocation is illegal.
 
 #### Method arguments must match
 The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule. For the sake of better understanding the reasons for the rule we will simplify ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. 
