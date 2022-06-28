@@ -17,6 +17,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Jun 29, 2022
 
+- Spec for Utf8 concatenation operator (Aleksey): https://github.com/dotnet/csharplang/pull/6221
+- Keywordness of `field` (Fred)
 
 # C# Language Design Notes for 2022
 
