@@ -1242,3 +1242,85 @@ readonly ref struct SpanOfOne
 ```
 
 This means we must choose the shallow interpretation of `readonly`.
+
+#### Method arguments must match
+The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule.
+
+Methods can pretty liberally return state passed to them as parameters. Essentially any reachable state which is `unscoped` can be returned (including returning by `ref`). This can be returned directly through a `return` statement or indirectly by assigning into a `ref` value. 
+
+Direct returns don't pose much problems for ref safety. The compiler simply needs to look at all the returnable inputs to a method and then it effectively restricts the return value to be the minimum *safe-to-escape* of the input. That return value then goes through normal processing.
+
+Indirect returns pose a significant problem because all `ref` are both an input and output to the method. The compiler has to look at every single `ref` which is assignable in the called method, evaluate it's *safe-to-escape*, and then verify no returnable input to the method has a smaller *safe-to-escape* than that `ref`. If any such case exists then the method call must be illegal because it could violate `ref` safety. 
+
+Method arguments must match is the process by which the compiler asserts this safety check.
+
+A different way to evaluate this which is often easier for developers to consider is to do the following exercise: 
+
+1. Look at the method definition identify all places where state can be indirectly returned:
+    a. Mutable `ref` parameters pointing to `ref struct`
+    b. Mutable `ref` parameters with ref assignable `ref` fields
+    c. Assignable `ref` params or `ref` fields pointing to `ref struct` (consider recursively)
+2. Look at the call site
+    a. Identify the escape scopes that line up with the locations identified above
+    b. Identify the escape scopes of all inputs to the method that are returnable (don't line up with `scoped` parameters)
+
+If any value in 2.b is smaller than 2.a then the method call must be illegal. For the sake of this exercise we can simplify *ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. Let's look at a few examples to illustrate the rules:
+
+```c#
+ref struct R { }
+
+class Program
+{
+    static void F0(ref R a, scoped ref R b) => throw null;
+
+    static void F1(ref R x, ref scoped R y)
+    {
+        F0(ref x, ref y);
+    }
+}
+```
+
+Looking at the call to `F0` lets go through (1) and (2). The parameters with potential for indirect return are `a` and `b` as both can be directly assigned. The arguments which line up to those parameters are:
+
+- `a` which maps to `x` that has *escape-scope* of *calling method*
+- `b` which maps to `y` that has with *escape-scope* of *current method*
+
+The set of returnable input to the method are
+
+- `x` with *escape-scope* of *calling method*
+- `ref x` with *escape-scope* of *calling method*
+- `y` with *escape-scope* of *current method*
+- `ref y` with *escape-scope* of *current method*
+
+Given that there is at least one input with a smaller *escape scope* (`y` and `ref y` argument) than one of the outputs (`x` argument) the method call is illegal. 
+
+A different variation is the following:
+
+```c#
+ref struct R { }
+
+class Program
+{
+    static void F0(ref R a, ref int b) => throw null;
+
+    static void F1(ref R x)
+    {
+        int y = 42;
+        F0(ref x, ref y);
+    }
+}
+```
+
+Again the parameters with potential for indirect return are `a` and `b` as both can be directly assigned. But `b` can be excluded because it does not point to a `ref struct` hence cannot be used to store `ref` state. Thus we have:
+
+- `a` which maps to `x` that has *escape-scope* of *calling method*
+
+The set of returnable input to the method are:
+
+- `x` with *escape-scope* of *calling method*
+- `ref x` with *escape-scope* of *calling method*
+- `ref y` with *escape-scope* of *current method*
+
+Given that there is at least one input with a smaller *escape scope* (`ref y` argument) than one of the outputs (`x` argument) the method call is illegal. 
+
+
