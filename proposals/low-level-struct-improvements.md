@@ -874,7 +874,7 @@ A rough sketch of the syntax would be:
 - `[DoesNotEscape]` maps to `scoped`
 - `[RefDoesEscape]` maps to `unscoped`
 
-**Decision** Use synatx
+**Decision** Use syntax
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
@@ -884,7 +884,7 @@ class FixedBufferLocals
 {
     void Example()
     {
-        Span<int> span = stakalloc int[42];
+        Span<int> span = stackalloc int[42];
         int buffer[42];
     }
 }
@@ -939,7 +939,62 @@ This will work but is likely going to result in unnecessary code generation. One
 1. `Unsafe.AsRef<T>(in T value)` could expand its existing purpose by changing to `scoped in T value`. This would allow it to both remove `in` and `scoped` from parameters. It then becomes the universal "remove ref safety" method
 2. Introduce a new method whose entire purpose is to remove `scoped`: `ref T Unsafe.AsUnscoped<T>(scoped in T value)`. This removes `in` as well because if it did not then callers still need a combination of method calls to "remove ref safety" at which point the existing solution is likely sufficient.
 
-### What will make C# 11.0
+### Unscoped this by default?
+The design only has two locations which are `scoped` by default: 
+
+- `this` is `scoped ref` 
+- `out` is `ref scoped`
+
+The decision on `out` is to significantly reduce the compat burden of `ref` fields and at the same time is a more natural default. It lets developers actually think of `out` as data flowing outward only where as if it's `scoped ref` or even `ref` then the rules must consider data flowing in both directions. This leads to significant developer confusion where as the `ref scoped` interpretation means that `out` means `out`. 
+
+The decision on `this` this though is undesirable because it means a `struct` cannot return a field by `ref`. This is an important scenario to high perf developers and the `unscoped` keyword was added effectively for this one scenario.
+
+Keywords have a high bar and adding it for a single scenario is suspect. As such thought was given to whether we could avoid this keyword at all by making `this` simply `ref` by default and not `scoped ref`. All members that need `this` to be `scoped ref` could do so by marking the method `scoped` (as a method can be marked `readonly` to create a `readonly ref` today).
+
+On a normal `struct` this is mostly a positive change as it only introduces compat issues when a member has a `ref` return. There are **very** few of these methods and a tool could spot these and convert them to `scoped` members quickly. 
+
+On a `ref struct` this change introduces significantly bigger compat issues. Consider the following:
+
+```c#
+ref struct Sneaky
+{
+    int Field;
+    ref int RefField;
+
+    public void SelfAssign()
+    {
+        // This pattern of ref re-assign to fields on this inside instance methods is now
+        // completely legal.
+        RefField = ref Field;
+    }
+
+    static Sneaky UseExample()
+    {
+        Sneaky local = default;
+
+        // Error: this is illegal, and must be illegal, by our existing rules as the 
+        // ref-safe-to-escape of local is now an input into method arguments must match. 
+        local.SelfAssign();
+
+        // This would be dangerous as local now has a dangerous `ref` but the above 
+        // prevents us from getting here.
+        return local;
+    }
+}
+```
+
+Essentially it would mean all instance method invocations on *mutable* `ref struct` locals would be illegal unless the local was further marked as `scoped`. The rules have to consider the case where fields were ref re-assigned to other fields in `this`. A `readonly ref struct` doesn't have this problem because the `readonly` nature prevents ref re-assignment. Still this would be a significant back compat breaking change as it would impact virtually every existing mutable `ref struct`. 
+
+Some thought was given to the idea of having `this` have different defaults based on the type of `struct` or member. For example:
+
+ - `this` as `ref`: `struct`, `readonly ref struct` or `readonly member`
+ - `this` as `scoped ref`: `ref struct`
+
+ This minimizes compat breaks and maximizes flexibility but at the cost of complicating the story for customers. It also doesn't fully solve the problem because future features, like safe `fixed` buffers, require that a mutable `ref struct` have `ref` returns for fields which don't work by this design alone as it would fall into the `scoped ref` category. 
+
+**Decision** Keep `this` as `scoped ref`
+
+### What will make C# 11.0?
 The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
 
 1. `ref` fields and `scoped`
