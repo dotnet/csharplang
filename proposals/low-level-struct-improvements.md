@@ -379,6 +379,7 @@ The section on `ref` field and `scoped` is long so wanted to close with a brief 
 Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
 - A `ref` field cannot be declared `static`, `volatile` or `const`
+- A `ref` field cannot have a type that is `ref struct`
 - The reference assembly generation process must preserve the presence of a `ref` field inside a `ref struct` 
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
 - The span safety rules document will be updated as outlined in this document.
@@ -389,7 +390,7 @@ Detailed Notes:
 ### Sunset restricted types
 The compiler has a concept of a set of "restricted types" which is largely undocumented. These types were given a special status because in C# 1.0 there was no general purpose way to express their behavior. Most notably the fact that the types can contain references to the execution stack. Instead the compiler had special knowledge of them and restricted their use to ways that would always be safe: disallowed returns, cannot use as array elements, cannot use in generics, etc ...
 
-Once `ref` fields are available these types can be correctly defined in C# using a combination of `ref struct` and `ref` fields. Therefore when the compiler detects that a runtime supports `ref` fields it will no longer have a notion of restricted types. It will instead use the types as they are defined in the code. 
+Once `ref` fields are available and extended to support `ref struct` these types can be correctly defined in C# using a combination of `ref struct` and `ref` fields. Therefore when the compiler detects that a runtime supports `ref` fields it will no longer have a notion of restricted types. It will instead use the types as they are defined in the code. 
 
 To support this our span safety rules will be updated as follows:
 
@@ -398,7 +399,7 @@ To support this our span safety rules will be updated as follows:
 - `__arglist` as a parameter will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
 - `__arglist(...)` as an expression will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
 
-Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. That combined with the above rules will ensure references to the stack do not escape beyond their lifetime.
+Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. Further `TypedReference` must be viewed as having a `ref` field to a `ref struct` for any possible type (it can store any value). That combined with the above rules will ensure references to the stack do not escape beyond their lifetime.
 
 Note: strictly speaking this is a compiler implementation detail vs. part of the language. But given the relationship with `ref` fields it is being included in the language proposal for simplicity.
 
@@ -1008,17 +1009,78 @@ Some thought was given to the idea of having `this` have different defaults base
 
 **Decision** Keep `this` as `scoped ref`
 
+### ref fields to ref struct
+This feature opens up a new set of ref safety rules because it allows for a `ref` field to refer to a `ref struct`. This generic nature of `ByReference<T>` meant that up until now the runtime could not have such a construct. As a result all of our rules are written under the assumption this is not possible. The `ref` field feature is largely not about making new rules but codifying the existing rules in our system. Allowing `ref` fields to `ref struct` requires us to codify new rules because there are several new scenarios to consider.
+
+The first is that a `readonly ref` is now capable of storing `ref` state. For example:
+
+```c#
+readonly ref Container
+{
+    readonly ref Span<int> Span;
+
+    void Store(Span<int> span)
+    {
+        Span = span;
+    }
+}
+```
+
+This means when thinking about method arguments must match rules we must consider `readonly ref T` is potential method output sources when `T` potentially has a `ref` field to a `ref struct`.
+
+The second issue is language must consider a new type of escape scope: *ref-field-safe-to-escape*. All `ref struct` which transitively contain a `ref` field have another escape scope representing the value(s) in the `ref` field(s). In the case of multiple `ref` fields they can be collectively tracked as a single value. The default value for this for parameters is *calling method*. 
+
+```c#
+ref struct Nested
+{
+    ref Span<int> Span;
+}
+
+Span<int> M(ref Nested nested) => nested.Span;
+```
+
+This value is not related to the escape scope of the container; that is as it the container scope gets smaller it has no impact on the *ref-field-safe-to-escape* of the `ref` field values. 
+
+```c#
+ref struct Nested
+{
+    ref Span<int> Span;
+}
+
+void M(ref Nested nested)
+{
+    scoped ref Nested refLocal = nested;
+
+    // the ref-field-safe-to-escape of local is still *calling method* which means the following
+    // is illegal
+    refLocal.Span = stackalloc int[42];
+
+    scoped Nested valLocal = nested;
+
+    // the ref-field-safe-to-escape of local is still *calling method* which means the following
+    // is still illegal
+    valLocal.Span = stackalloc int[42];
+}
+```
+
+This *ref-field-safe-to-escape-scope* has essentially always existed. Up until now `ref` fields could only point to normal `struct` hence it was trivially collapsed to *calling method*.  To support `ref` fields to `ref struct` our existing rules need to be updated to take into account this new escape scope.
+
+These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes is in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
+
+**Decision** Delay allowing `ref` field to `ref struct` until .NET 8 where we have scenarios that will help drive the rules around these scenarios.
+
 ### What will make C# 11.0?
 The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
 
 1. `ref` fields and `scoped`
-2. Sunset restricted types
-3. `unscoped` 
-4. fixed sized buffers
+2. `ref` fields to `ref struct`
+3. Sunset restricted types
+4. `unscoped` 
+5. fixed sized buffers
 
 What gets implemented in which release is merely a scoping exercise. 
 
-**Decision** Only `ref` fields, `scoped` and sunsetting restricted types will make C# 11.0. LDM is happy to revisit `unscoped` if a more natural keyword can be settled on or data suggests it's possible to make `this` `unscoped` by default in all cases.
+**Decision** Only (1) will make C# 11.0. The expectation is (2) and (3) are enabled very early in C# 12.0 to enable dogfooding by runtime throughout the .NET 8 cycle
 
 ## Future Considerations
 
