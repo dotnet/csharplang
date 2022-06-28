@@ -1244,13 +1244,13 @@ readonly ref struct SpanOfOne
 This means we must choose the shallow interpretation of `readonly`.
 
 #### Method arguments must match
-The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule.
+The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule. For the sake of better understanding the reasons for the rule we will simplify ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. 
 
 Methods can pretty liberally return state passed to them as parameters. Essentially any reachable state which is `unscoped` can be returned (including returning by `ref`). This can be returned directly through a `return` statement or indirectly by assigning into a `ref` value. 
 
-Direct returns don't pose much problems for ref safety. The compiler simply needs to look at all the returnable inputs to a method and then it effectively restricts the return value to be the minimum *safe-to-escape* of the input. That return value then goes through normal processing.
+Direct returns don't pose much problems for ref safety. The compiler simply needs to look at all the returnable inputs to a method and then it effectively restricts the return value to be the minimum *escape-scope* of the input. That return value then goes through normal processing.
 
-Indirect returns pose a significant problem because all `ref` are both an input and output to the method. The compiler has to look at every single `ref` which is assignable in the called method, evaluate it's *safe-to-escape*, and then verify no returnable input to the method has a smaller *safe-to-escape* than that `ref`. If any such case exists then the method call must be illegal because it could violate `ref` safety. 
+Indirect returns pose a significant problem because all `ref` are both an input and output to the method. These outputs already have a known *escape-scope*. The compiler can't infer new ones, it has to consider them at their current level. That means the compiler has to look at every single `ref` which is assignable in the called method, evaluate it's *escape-scope*, and then verify no returnable input to the method has a smaller *escape-scope* than that `ref`. If any such case exists then the method call must be illegal because it could violate `ref` safety. 
 
 Method arguments must match is the process by which the compiler asserts this safety check.
 
@@ -1264,7 +1264,7 @@ A different way to evaluate this which is often easier for developers to conside
     a. Identify the escape scopes that line up with the locations identified above
     b. Identify the escape scopes of all inputs to the method that are returnable (don't line up with `scoped` parameters)
 
-If any value in 2.b is smaller than 2.a then the method call must be illegal. For the sake of this exercise we can simplify *ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. Let's look at a few examples to illustrate the rules:
+If any value in 2.b is smaller than 2.a then the method call must be illegal. Let's look at a few examples to illustrate the rules:
 
 ```c#
 ref struct R { }
@@ -1322,5 +1322,8 @@ The set of returnable input to the method are:
 - `ref y` with *escape-scope* of *current method*
 
 Given that there is at least one input with a smaller *escape scope* (`ref y` argument) than one of the outputs (`x` argument) the method call is illegal. 
+
+This is the logic that the method arguments must match rule is trying to encompass. It goes further as it considers both `scoped` as a way to remove inputs from consideration and `readonly` as a way to remove `ref` as an output (can't assign into a `readonly ref` so it can't be a source of output). These special cases do add complexity to the rules but it's done so for the benefit of the developer. The compiler seeks to remove all inputs and outputs it knows can't contribute to the result to give developers maximum flexibility when calling a member. Much like overload resolution it's worth the effort to make our rules more complex when it creates more flexibility for consumers.
+
 
 
