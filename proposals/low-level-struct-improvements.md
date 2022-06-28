@@ -112,7 +112,7 @@ ref struct ReadOnlyExample
 }
 ```
 
-A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today.
+A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today ([more details](#reason-readonly-shallow))
 
 A `readonly ref` will be emitted to metadata using the `initonly` flag, same as any other field. A `ref readonly` field will be attributed with `System.Runtime.CompilerServices.IsReadOnlyAttribute`. A `readonly ref readonly` will be emitted with both items.
 
@@ -1132,3 +1132,44 @@ The proposal prevents this though because it violates the span safety rules. Con
 At that point the line `r = ref i` is illegal by [ref re-assignment rules](#rules-ref-re-assignment). 
 
 These rules were not intended to prevent this behavior but do so as a side effect. It's important to keep this in mind for any future rule update to evaluate the impact to scenarios like this.
+
+#### readonly cannot be deep through ref fields
+<a name="reason-readonly-shallow"></a>
+
+Consider the below code sample:
+
+```c#
+ref struct S
+{
+    ref int Field;
+
+    readonly void Method()
+    {
+        // Legal or illegal?
+        Field = 42;
+    }
+}
+```
+
+When designing the rules for `ref` fields on `readonly` instances in a vacuum the rules can be validly designed such that the above is legal or illegal. Essentially `readonly` can validly be deep through a `ref` field or it can apply only to the `ref`. Applying only to the `ref` prevents ref re-assignment but allowing normal assignment which changes the referred to value.
+
+This design does not exist in a vacuum though, it is designing rules for types that already effectively have `ref` fields. The most prominent of which, `Span<T>`, already has a strong dependency on `readonly` not being deep here. It's primary scenario is the ability to assign to the `ref` field through a `readonly` instance. 
+
+```c#
+readonly ref struct SpanOfOne
+{
+    readonly ref int Field;
+
+    public ref int this[int index]
+    {
+        get
+        {
+            if (index != 1)
+                throw new Exception();
+            return ref Field;
+        }
+    }
+}
+```
+
+This means we must choose the shallow interpretation of `readonly`.
