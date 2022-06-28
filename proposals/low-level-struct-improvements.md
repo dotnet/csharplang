@@ -247,11 +247,11 @@ Other uses for `scoped` on locals are discussed [below](#examples-scoped-locals)
 
 When `scoped` is applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
 
-The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` can be applied to any `ref`, `in` or `out` it can only be applied to values which are `ref struct`. Having declarations like `scoped int` adds no value to the rules and will be prevented to avoid developer confusion.
+The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a diagnostic on such cases to avoid developer confusion.
 
 <a name="out-compat-change"></a>
 
-To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *ref-safe-to-escape* value for `out` parameters to be *current method*. Effectively `out` parameters are implicitly `scoped out` going forward. From a compat perspective this means they cannot be returned by `ref`:
+To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *safe-to-escape* value for `out` parameters to be *current method*. Effectively `out` parameters are implicitly `ref scoped` going forward. From a compat perspective this means they cannot be returned by `ref`:
 
 ```c#
 ref int Sneaky(out int i) 
@@ -260,6 +260,16 @@ ref int Sneaky(out int i)
 
     // Error: ref-safe-to-escape of out is now the current method
     return ref i;
+}
+```
+
+Languages that support `ref struct` must ensure the original value passed into an `out` parameter for a `ref struct` is not directly returned or indirectly through another `ref` just as they would for a `ref scoped` parameter. Doing so would allow for type safety holes to exist. C# achieves this via it's definite assignment rules. That both achieves our ref safety as well as allowing for existing code which assigns and then returns `out` parameters values.
+
+```c#
+ref Span<int> StrangeButLegal(out Span<int> span)
+{
+    span = default;
+    return span;
 }
 ```
 
@@ -285,7 +295,11 @@ Span<int> Use()
 }
 ```
 
-The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
+Further treating the input to an `out` parameter as returnable is extremely confusing to developers. It essentially subverts the intent of `out` to force developers to think about the original value that the language intends to be assigned by the caller. That is why going forward languages implementing `ref` safety will be required to ensure that `out` parameters are never returned. 
+
+This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
+
+The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `readonly ref` and `out` is equivalent to `ref scoped`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `readonly ref` and `ref scoped` respectively.
 
 <a name="rules-method-invocation"></a>
 
@@ -360,7 +374,7 @@ Impact of this change is discussed more deeply [below](#examples-method-argument
 The section on `ref` field and `scoped` is long so wanted to close with a brief summary of the proposed breaking changes:
 
 * A value that has *ref-safe-to-escape* to the *calling method* is returnable by `ref` or `ref` field.
-* A `out` parameter would be considered `ref-safe-to-escape` within the *current method*.
+* A `out` parameter would be considered `safe-to-escape` within the *current method*.
 
 Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
