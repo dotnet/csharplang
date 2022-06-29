@@ -522,7 +522,7 @@ For each `fixed` declaration in a type where the element type is `T` the languag
 For example, the signature of the indexer for `CharBuffer.Data` will be the following:
 
 ```c#
-unscoped internal ref char <>DataIndexer(int index) => ...;
+unscoped internal ref char DataIndexer(int index) => ...;
 ```
 
 If the provided index is outside the declared bounds of the `fixed` array then an `IndexOutOfRangeException` will be thrown. In the case a constant value is provided then it will be replaced with a direct reference to the appropriate element. Unless the constant is outside the declared bounds in which case a compile time error would occur.
@@ -840,7 +840,7 @@ These compat changes though will impact methods that have the following properti
 To understand the impact it's helpful to break APIs into categories:
 
 1. Want consumers to account for `ref` being captured as a `ref` field. Prime example is the `Span(ref T value)` constructors 
-2. Do not want consumers to account for `ref` being captured as a `ref` field. These though break into two catogries
+2. Do not want consumers to account for `ref` being captured as a `ref` field. These though break into two categories
     1. Unsafe APIs. These are APIS inside the `Unsafe` and `MemoryMarshal` types, of which `MemoryMarshal.CreateSpan` is the most prominent. These APIs do capture the `ref` unsafely but they are also known to be unsafe APIs.
     2. Safe APIs. These are APIs which take `ref` parameters for efficiency but it is not actually captured anywhere. Examples are small but one is `AsnDecoder.ReadEnumeratedBytes`
 
