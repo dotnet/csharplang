@@ -24,7 +24,7 @@ Overview of meetings and agendas for 2022
 
 [C# Language Design Meeting for June 29th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-06-29.md)
 
-- UTF-8 literal concatentation operator
+- UTF-8 literal concatenation operator
 
 ## Jun 6, 2022
 
