@@ -1296,9 +1296,9 @@ ref struct S
 }
 ```
 
-When designing the rules for `ref` fields on `readonly` instances in a vacuum the rules can be validly designed such that the above is legal or illegal. Essentially `readonly` can validly be deep through a `ref` field or it can apply only to the `ref`. Applying only to the `ref` prevents ref re-assignment but allowing normal assignment which changes the referred to value.
+When designing the rules for `ref` fields on `readonly` instances in a vacuum the rules can be validly designed such that the above is legal or illegal. Essentially `readonly` can validly be deep through a `ref` field or it can apply only to the `ref`. Applying only to the `ref` prevents ref re-assignment but allows normal assignment which changes the referred to value.
 
-This design does not exist in a vacuum though, it is designing rules for types that already effectively have `ref` fields. The most prominent of which, `Span<T>`, already has a strong dependency on `readonly` not being deep here. It's primary scenario is the ability to assign to the `ref` field through a `readonly` instance. 
+This design does not exist in a vacuum though, it is designing rules for types that already effectively have `ref` fields. The most prominent of which, `Span<T>`, already has a strong dependency on `readonly` not being deep here. Its primary scenario is the ability to assign to the `ref` field through a `readonly` instance. 
 
 ```c#
 readonly ref struct SpanOfOne
