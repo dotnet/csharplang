@@ -514,11 +514,12 @@ The type will have the following definition:
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter)]
 public sealed class LifetimeAnnotationAttribute : Attribute
 {
-    public bool IsScoped { get; set; }
+    private int _value;
+    public bool IsScoped => _value == 1;
 
-    public LifetimeAnnotationAttribute(bool isScoped)
+    public LifetimeAnnotationAttribute(int value)
     {
-        IsScoped = isScoped;
+        _value = value;
     }
 }
 ```
@@ -1012,10 +1013,26 @@ ref struct Sneaky
 
 Essentially it would mean all instance method invocations on *mutable* `ref struct` locals would be illegal unless the local was further marked as `scoped`. The rules have to consider the case where fields were ref re-assigned to other fields in `this`. A `readonly ref struct` doesn't have this problem because the `readonly` nature prevents ref re-assignment. Still this would be a significant back compat breaking change as it would impact virtually every existing mutable `ref struct`. 
 
+A `readonly ref struct` though is still problematic once we expand to having `ref` fields to `ref struct`. It allows for the same basic problem by just moving the capture into the value of the `ref` field: 
+
+```c#
+readonly ref struct ReadOnlySneaky
+{
+    readonly int Field;
+    readonly ref ReadOnlySpan<int> Span;
+
+    public void SelfAssign()
+    {
+        // Instance method captures a ref to itself
+        Span = new ReadOnlySpan<int>(ref Field, 1);
+    }
+}
+```
+
 Some thought was given to the idea of having `this` have different defaults based on the type of `struct` or member. For example:
 
  - `this` as `ref`: `struct`, `readonly ref struct` or `readonly member`
- - `this` as `scoped ref`: `ref struct`
+ - `this` as `scoped ref`: `ref struct` or `readonly ref struct` with `ref` field to `ref struct`
 
  This minimizes compat breaks and maximizes flexibility but at the cost of complicating the story for customers. It also doesn't fully solve the problem because future features, like safe `fixed` buffers, require that a mutable `ref struct` have `ref` returns for fields which don't work by this design alone as it would fall into the `scoped ref` category. 
 
