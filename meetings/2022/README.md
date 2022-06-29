@@ -16,13 +16,15 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
-## Jun 29, 2022
-
-- Spec for Utf8 concatenation operator (Aleksey): https://github.com/dotnet/csharplang/pull/6221
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Jun 29, 2022
+
+[C# Language Design Meeting for June 29th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-06-29.md)
+
+- UTF-8 literal concatentation operator
 
 ## Jun 6, 2022
 
