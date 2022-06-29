@@ -245,7 +245,7 @@ Other uses for `scoped` on locals are discussed [below](#examples-scoped-locals)
 
 When `scoped` is applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
 
-The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a diagnostic on such cases to avoid developer confusion.
+The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a warning on such cases to avoid developer confusion.
 
 <a name="out-compat-change"></a>
 
@@ -261,7 +261,7 @@ ref int Sneaky(out int i)
 }
 ```
 
-Languages that support `ref struct` must ensure the original value passed into an `out` parameter for a `ref struct` is not read. That in turn means it cannot be directly or indirectly returned.Doing so would allow for type safety holes to exist. C# achieves this via it's definite assignment rules. That both achieves our ref safety as well as allowing for existing code which assigns and then returns `out` parameters values.
+Languages that support `ref struct` must ensure the original value passed into an `out` parameter for a `ref struct` is not read. That in turn means it cannot be directly or indirectly returned. Doing so would allow for type safety holes to exist. C# achieves this via it's definite assignment rules. That both achieves our ref safety as well as allowing for existing code which assigns and then returns `out` parameters values.
 
 ```c#
 Span<int> StrangeButLegal(out Span<int> span)
@@ -293,7 +293,7 @@ Span<int> Use()
 }
 ```
 
-Further treating the input to an `out` parameter as returnable is extremely confusing to developers. It essentially subverts the intent of `out` to force developers to think about the original value that the language intends to be assigned by the caller. That is why going forward languages implementing `ref` safety will be required to ensure that `out` parameters are never returned. 
+Further treating the input to an `out` parameter as returnable is extremely confusing to developers. It essentially subverts the intent of `out` by forcing developers to consider the value passed by the caller which is never used. That is why going forward languages implementing `ref` safety will be required to ensure that the value passed to `out` parameters is never read.
 
 This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
 
@@ -380,7 +380,7 @@ The `scoped` modifier on parameters also impacts our object overriding, interfac
 Any other difference with respect to `scoped` will be considered an error. 
 
 The `scoped` modifier also has the following effects on method signatures:
-- The `scoped` modifier though does not affect hiding.
+- The `scoped` modifier does not affect hiding.
 - Overloads cannot differ only on `scoped`
 
 The section on `ref` field and `scoped` is long so wanted to close with a brief summary of the proposed breaking changes:
@@ -514,13 +514,11 @@ The type will have the following definition:
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter)]
 public sealed class LifetimeAnnotationAttribute : Attribute
 {
-    public bool IsRefScoped { get; set; }
-    public bool IsValueScoped { get; set; }
+    public bool IsScoped { get; set; }
 
-    public LifetimeAnnotationAttribute(bool isRefScoped, bool isValueScoped)
+    public LifetimeAnnotationAttribute(bool isScoped)
     {
-        IsRefScoped = isRefScoped;
-        IsValueScoped = isValueScoped;
+        IsScoped = isScoped;
     }
 }
 ```
@@ -976,7 +974,7 @@ The design only has two locations which are `scoped` by default:
 
 The decision on `out` is to significantly reduce the compat burden of `ref` fields and at the same time is a more natural default. It lets developers actually think of `out` as data flowing outward only where as if it's `ref` then the rules must consider data flowing in both directions. This leads to significant developer confusion.
 
-The decision on `this` this though is undesirable because it means a `struct` cannot return a field by `ref`. This is an important scenario to high perf developers and the `unscoped` keyword was added effectively for this one scenario.
+The decision on `this` is undesirable because it means a `struct` cannot return a field by `ref`. This is an important scenario to high perf developers and the `unscoped` keyword was added essentially for this one scenario.
 
 Keywords have a high bar and adding it for a single scenario is suspect. As such thought was given to whether we could avoid this keyword at all by making `this` simply `ref` by default and not `scoped ref`. All members that need `this` to be `scoped ref` could do so by marking the method `scoped` (as a method can be marked `readonly` to create a `readonly ref` today).
 
@@ -1029,7 +1027,7 @@ This feature opens up a new set of ref safety rules because it allows for a `ref
 The first is that a `readonly ref` is now capable of storing `ref` state. For example:
 
 ```c#
-readonly ref Container
+readonly ref struct Container
 {
     readonly ref Span<int> Span;
 
@@ -1040,7 +1038,7 @@ readonly ref Container
 }
 ```
 
-This means when thinking about method arguments must match rules we must consider `readonly ref T` is potential method output sources when `T` potentially has a `ref` field to a `ref struct`.
+This means when thinking about method arguments must match rules we must consider `readonly ref T` is potential method output when `T` potentially has a `ref` field to a `ref struct`.
 
 The second issue is language must consider a new type of escape scope: *ref-field-safe-to-escape*. All `ref struct` which transitively contain a `ref` field have another escape scope representing the value(s) in the `ref` field(s). In the case of multiple `ref` fields they can be collectively tracked as a single value. The default value for this for parameters is *calling method*. 
 
@@ -1053,7 +1051,7 @@ ref struct Nested
 Span<int> M(ref Nested nested) => nested.Span;
 ```
 
-This value is not related to the escape scope of the container; that is as it the container scope gets smaller it has no impact on the *ref-field-safe-to-escape* of the `ref` field values. 
+This value is not related to the escape scope of the container; that is as it the container scope gets smaller it has no impact on the *ref-field-safe-to-escape* of the `ref` field values. Further the *ref-field-safe-to-escape* can never be smaller than the *safe-to-escape* of the container.
 
 ```c#
 ref struct Nested
@@ -1063,7 +1061,7 @@ ref struct Nested
 
 void M(ref Nested nested)
 {
-    scoped ref Nested refLocal = nested;
+    scoped ref Nested refLocal = ref nested;
 
     // the ref-field-safe-to-escape of local is still *calling method* which means the following
     // is illegal
@@ -1081,7 +1079,7 @@ This *ref-field-safe-to-escape-scope* has essentially always existed. Up until n
 
 Third the rules for ref re-assignment need to be updated to ensure that we don't violate *ref-field-safe-to-escape* for the values. Essentially for `x.e1 = ref e2` where the type of `e1` is a `ref struct` the *ref-field-safe-to-escape` must be equal. 
 
-These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes is in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
+These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes us in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
 
 **Decision** Delay allowing `ref` field to `ref struct` until .NET 8 where we have scenarios that will help drive the rules around these scenarios.
 
