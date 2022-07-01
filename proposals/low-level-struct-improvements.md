@@ -394,7 +394,7 @@ Detailed Notes:
 - A `ref` field cannot have a type that is `ref struct`
 - The reference assembly generation process must preserve the presence of a `ref` field inside a `ref struct` 
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
-- A `scoped` modifier must appear before `in`, `out`, or `ref`
+- For by-ref values the `scoped` modifier must appear before `in`, `out`, or `ref`
 - The span safety rules document will be updated as outlined in this document
 - The new span safety rules will be in effect when either 
     - The core library contains the feature flag indicating support for `ref` fields
@@ -523,6 +523,8 @@ public sealed class LifetimeAnnotationAttribute : Attribute
     }
 }
 ```
+
+The attribute uses `int` instead of `bool` to allow for future lifetime expansions in this space.
 
 The compiler will emit this attribute on the element targeted by the `scoped` or `unscoped` syntax. This is true for types, methods and parameters. This will only be emitted when the syntax causes the value to differ from its default state. For example `scoped out` will cause no attribute to be emitted.
 
