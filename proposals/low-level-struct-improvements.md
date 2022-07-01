@@ -112,7 +112,7 @@ ref struct ReadOnlyExample
 }
 ```
 
-A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today.
+A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today ([more details](#reason-readonly-shallow))
 
 A `readonly ref` will be emitted to metadata using the `initonly` flag, same as any other field. A `ref readonly` field will be attributed with `System.Runtime.CompilerServices.IsReadOnlyAttribute`. A `readonly ref readonly` will be emitted with both items.
 
@@ -125,10 +125,9 @@ First the rules establishing *ref-safe-to-escape* values for fields need to be u
 <a name="rules-field-lifetimes"></a>
 
 > An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
-> 1. If `F` is a `ref` field and `e` is `this`, it is *ref-safe-to-escape* from the enclosing method.
-> 2. Else if `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
-> 3. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
-> 4. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
+> 1. If `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
+> 2. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
+> 3. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
 
 This does not represent a rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to access `ref` fields directly and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
 
@@ -157,7 +156,7 @@ Next the rules for ref re-assignment need to be adjusted for the presence of `re
 
 > For a ref reassignment in the form ...
 > 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
-> 2. `e1 = ref e2`: where `e1` is a local or parameter, the *ref-safe-to-escape* of `e2` must be at least as wide a scope as the *ref-safe-to-escape* of `e1`.
+> 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *safe-to-escape* equal to *safe-to-escape* for `e1` and `e2` must have *ref-safe-to-escape* at least as large as *ref-safe-to-escape* of the *ref-safe-to-escape* of `e1`
 
 That means the desired `Span<T>` constructor works without any extra annotation:
 
@@ -190,9 +189,8 @@ The keyword `scoped` will be used to restrict the lifetime of a value. It can be
 | `scoped Span<int> s` | *current method* | *current method* | 
 | `ref Span<int> s` | *calling method* | *calling method* | 
 | `scoped ref Span<int> s` | *current method* | *calling method* | 
-| `ref scoped Span<int> s` | *current method* | *current method* | 
 
-The declaration `scoped ref scoped Span<int>` is allowed but is redundant with `ref scoped Span<int>`. The *ref-safe-to-escape* of a value can never exceed the *safe-to-escape* hence once the *safe-to-escape* is restricted via `ref scoped` the *ref-safe-to-escape* is implicitly restricted as well.
+In this relationship the *ref-safe-to-escape* of a value can never exceed the *safe-to-escape*.  
 
 This allows for APIs in C# 11 to be annotated such that they have the same rules as C# 10:
 
@@ -247,7 +245,7 @@ Other uses for `scoped` on locals are discussed [below](#examples-scoped-locals)
 
 When `scoped` is applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
 
-The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` can be applied to any `ref`, `in` or `out` it can only be applied to values which are `ref struct`. Having declarations like `scoped int` adds no value to the rules and will be prevented to avoid developer confusion.
+The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a warning on such cases to avoid developer confusion.
 
 <a name="out-compat-change"></a>
 
@@ -260,6 +258,16 @@ ref int Sneaky(out int i)
 
     // Error: ref-safe-to-escape of out is now the current method
     return ref i;
+}
+```
+
+Languages that support `ref struct` must ensure the original value passed into an `out` parameter for a `ref struct` is not read. That in turn means it cannot be directly or indirectly returned. Doing so would allow for type safety holes to exist. C# achieves this via it's definite assignment rules. That both achieves our ref safety as well as allowing for existing code which assigns and then returns `out` parameters values.
+
+```c#
+Span<int> StrangeButLegal(out Span<int> span)
+{
+    span = default;
+    return span;
 }
 ```
 
@@ -285,14 +293,20 @@ Span<int> Use()
 }
 ```
 
+Further treating the input to an `out` parameter as returnable is extremely confusing to developers. It essentially subverts the intent of `out` by forcing developers to consider the value passed by the caller which is never used. That is why going forward languages implementing `ref` safety will be required to ensure that the value passed to `out` parameters is never read.
+
+This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
+
 The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
+
+When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
 
 <a name="rules-method-invocation"></a>
 
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
 
-> 1. If `p` is `scoped ref` then `a` does not contribute *ref-safe-to-escape* when considering arguments. Note that `ref scoped` is included here as it implies `scoped ref scoped`.
-> 2. If `p` is `scoped` or `ref scoped` then `a` does not contribute *safe-to-escape* when considering arguments. 
+> 1. If `p` is `scoped ref` then `a` does not contribute *ref-safe-to-escape* when considering arguments.
+> 2. If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. 
 
 The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime as the `scoped` annotation prevents it.
 
@@ -300,16 +314,15 @@ The method invocation for lvalue returns can now be simplified. The receiver no 
 
 > An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 > 1. The *calling method*
-> 2. The *ref-safe-to-escape* of all `ref` arguments
-> 3. The *ref-safe-to-escape* of all `in` parameters when the argument is an lvalue otherwise *current method*
-> 4. The *safe-to-escape* of all argument expressions
+> 2. The *ref-safe-to-escape* contributed by all `ref` arguments
+> 3. The *safe-to-escape* contributed by all argument expressions
 
 The method invocation for rvalue returns needs to change as follows to account for `ref` field returns.
 
 > An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 > 1. The *calling method*
-> 2. The *safe-to-escape* of all argument expressions
-> 3. When the return is a `ref struct` then *ref-safe-to-escape* of all `ref` arguments
+> 2. The *safe-to-escape* contributed by all argument expressions
+> 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
 
 This rule now lets us define the two variants of desired methods:
 
@@ -351,23 +364,38 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 
 <a name="rules-method-arguments-must-match"></a>
 
-The presence of `scoped` allows us to also refine the method arguments must match rule. It can now be reduced to 
+The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). 
 
-> For a method invocation if there is an argument for a `ref` or `scoped ref` parameter of a `ref struct` type where the argument has *safe-to-escape* E1 then no argument may contribute a narrower *safe-to-escape* than E1.
+The presence of `scoped` allows us to refine the rule to reduce the friction the rule creates. The `scoped` modifier lets us remove arguments from consideration as they cannot be returned from the method.
+
+> For a method invocation if there is an argument for a `ref`, `scoped ref` or `out` parameter of a `ref struct` type where the argument has *safe-to-escape* E1 then 
+> 1. No other `ref struct` argument may contribute a narrower *safe-to-escape* than E1.
+> 2. No other `ref` or `in` argument may contribute a narrower *ref-safe-to-escape* than E1.
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
+
+The `scoped` modifier on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
+- Add `scoped` to a `ref` or `in` parameter
+- Add `scoped` to a `ref struct` parameter 
+Any other difference with respect to `scoped` will be considered an error. 
+
+The `scoped` modifier also has the following effects on method signatures:
+- The `scoped` modifier does not affect hiding.
+- Overloads cannot differ only on `scoped`
 
 The section on `ref` field and `scoped` is long so wanted to close with a brief summary of the proposed breaking changes:
 
 * A value that has *ref-safe-to-escape* to the *calling method* is returnable by `ref` or `ref` field.
-* A `out` parameter would be considered `ref-safe-to-escape` within the *current method*.
+* A `out` parameter would be considered `safe-to-escape` within the *current method*.
 
 Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
 - A `ref` field cannot be declared `static`, `volatile` or `const`
+- A `ref` field cannot have a type that is `ref struct`
 - The reference assembly generation process must preserve the presence of a `ref` field inside a `ref struct` 
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
-- The span safety rules document will be updated as outlined in this document.
+- For by-ref values the `scoped` modifier must appear before `in`, `out`, or `ref`
+- The span safety rules document will be updated as outlined in this document
 - The new span safety rules will be in effect when either 
     - The core library contains the feature flag indicating support for `ref` fields
     - The `langversion` value is 11 or higher
@@ -375,7 +403,7 @@ Detailed Notes:
 ### Sunset restricted types
 The compiler has a concept of a set of "restricted types" which is largely undocumented. These types were given a special status because in C# 1.0 there was no general purpose way to express their behavior. Most notably the fact that the types can contain references to the execution stack. Instead the compiler had special knowledge of them and restricted their use to ways that would always be safe: disallowed returns, cannot use as array elements, cannot use in generics, etc ...
 
-Once `ref` fields are available these types can be correctly defined in C# using a combination of `ref struct` and `ref` fields. Therefore when the compiler detects that a runtime supports `ref` fields it will no longer have a notion of restricted types. It will instead use the types as they are defined in the code. 
+Once `ref` fields are available and extended to support `ref struct` these types can be correctly defined in C# using a combination of `ref struct` and `ref` fields. Therefore when the compiler detects that a runtime supports `ref` fields it will no longer have a notion of restricted types. It will instead use the types as they are defined in the code. 
 
 To support this our span safety rules will be updated as follows:
 
@@ -384,7 +412,7 @@ To support this our span safety rules will be updated as follows:
 - `__arglist` as a parameter will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
 - `__arglist(...)` as an expression will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
 
-Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. That combined with the above rules will ensure references to the stack do not escape beyond their lifetime.
+Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. Further `TypedReference` must be viewed as having a `ref` field to a `ref struct` for any possible type (it can store any value). That combined with the above rules will ensure references to the stack do not escape beyond their lifetime.
 
 Note: strictly speaking this is a compiler implementation detail vs. part of the language. But given the relationship with `ref` fields it is being included in the language proposal for simplicity.
 
@@ -486,16 +514,17 @@ The type will have the following definition:
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter)]
 public sealed class LifetimeAnnotationAttribute : Attribute
 {
-    public bool IsRefScoped { get; set; }
-    public bool IsValueScoped { get; set; }
+    private int _value;
+    public bool IsScoped => _value == 1;
 
-    public LifetimeAnnotationAttribute(bool isRefScoped, bool isValueScoped)
+    public LifetimeAnnotationAttribute(int value)
     {
-        IsRefScoped = isRefScoped;
-        IsValueScoped = isValueScoped;
+        _value = value;
     }
 }
 ```
+
+The attribute uses `int` instead of `bool` to allow for future lifetime expansions in this space.
 
 The compiler will emit this attribute on the element targeted by the `scoped` or `unscoped` syntax. This is true for types, methods and parameters. This will only be emitted when the syntax causes the value to differ from its default state. For example `scoped out` will cause no attribute to be emitted.
 
@@ -537,6 +566,8 @@ The backing storage for the buffer will be generated using the `[InlineArray]` a
 There are considerations other parts of the development stack should consider when evaluating this feature.
 
 ### Compat Considerations
+<a name="compat-considerations">
+
 The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
 
 ```c#
@@ -553,9 +584,9 @@ Span<int> CreateSpan<int>()
 
 Effectively there are three ways for a `ref` parameter to escape from a method invocation: 
 
-1. By value
-2. By `ref` 
-3. By `ref` field
+1. By value return
+2. By `ref` return
+3. By `ref` field in `ref struct` that is returned or passed as `ref` / `out` parameter
 
 The existing rules only account for (1) and (2). They do not account for (3) hence gaps like returning locals as `ref` fields are not accounted for. This design must change the rules to account for (3). This will have a small impact to compatibility for existing APIs. Specifically it will impact APIs that have the following properties.
 
@@ -854,7 +885,6 @@ For both cases in category (2) though the fix is straight forward. The `ref` par
 
 Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `scoped ref` instead. 
 
-
 **Decision** This design can be achieved but the resulting feature is more difficult to use to the point the decision was made to take the compat break.
 **Decision** The compiler will provide a warning when a method meets the criteria but does not capture the `ref` parameter as a `ref` field. This should suitably warn customers on upgrade about the potential issues they are creating
 
@@ -874,7 +904,7 @@ A rough sketch of the syntax would be:
 - `[DoesNotEscape]` maps to `scoped`
 - `[RefDoesEscape]` maps to `unscoped`
 
-**Decision** Use synatx
+**Decision** Use syntax
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
@@ -884,7 +914,7 @@ class FixedBufferLocals
 {
     void Example()
     {
-        Span<int> span = stakalloc int[42];
+        Span<int> span = stackalloc int[42];
         int buffer[42];
     }
 }
@@ -939,17 +969,151 @@ This will work but is likely going to result in unnecessary code generation. One
 1. `Unsafe.AsRef<T>(in T value)` could expand its existing purpose by changing to `scoped in T value`. This would allow it to both remove `in` and `scoped` from parameters. It then becomes the universal "remove ref safety" method
 2. Introduce a new method whose entire purpose is to remove `scoped`: `ref T Unsafe.AsUnscoped<T>(scoped in T value)`. This removes `in` as well because if it did not then callers still need a combination of method calls to "remove ref safety" at which point the existing solution is likely sufficient.
 
-### What will make C# 11.0
+### Unscoped this by default?
+The design only has two locations which are `scoped` by default: 
+
+- `this` is `scoped ref` 
+- `out` is `scoped ref`
+
+The decision on `out` is to significantly reduce the compat burden of `ref` fields and at the same time is a more natural default. It lets developers actually think of `out` as data flowing outward only where as if it's `ref` then the rules must consider data flowing in both directions. This leads to significant developer confusion.
+
+The decision on `this` is undesirable because it means a `struct` cannot return a field by `ref`. This is an important scenario to high perf developers and the `unscoped` keyword was added essentially for this one scenario.
+
+Keywords have a high bar and adding it for a single scenario is suspect. As such thought was given to whether we could avoid this keyword at all by making `this` simply `ref` by default and not `scoped ref`. All members that need `this` to be `scoped ref` could do so by marking the method `scoped` (as a method can be marked `readonly` to create a `readonly ref` today).
+
+On a normal `struct` this is mostly a positive change as it only introduces compat issues when a member has a `ref` return. There are **very** few of these methods and a tool could spot these and convert them to `scoped` members quickly. 
+
+On a `ref struct` this change introduces significantly bigger compat issues. Consider the following:
+
+```c#
+ref struct Sneaky
+{
+    int Field;
+    ref int RefField;
+
+    public void SelfAssign()
+    {
+        // This pattern of ref re-assign to fields on this inside instance methods is now
+        // completely legal.
+        RefField = ref Field;
+    }
+
+    static Sneaky UseExample()
+    {
+        Sneaky local = default;
+
+        // Error: this is illegal, and must be illegal, by our existing rules as the 
+        // ref-safe-to-escape of local is now an input into method arguments must match. 
+        local.SelfAssign();
+
+        // This would be dangerous as local now has a dangerous `ref` but the above 
+        // prevents us from getting here.
+        return local;
+    }
+}
+```
+
+Essentially it would mean all instance method invocations on *mutable* `ref struct` locals would be illegal unless the local was further marked as `scoped`. The rules have to consider the case where fields were ref re-assigned to other fields in `this`. A `readonly ref struct` doesn't have this problem because the `readonly` nature prevents ref re-assignment. Still this would be a significant back compat breaking change as it would impact virtually every existing mutable `ref struct`. 
+
+A `readonly ref struct` though is still problematic once we expand to having `ref` fields to `ref struct`. It allows for the same basic problem by just moving the capture into the value of the `ref` field: 
+
+```c#
+readonly ref struct ReadOnlySneaky
+{
+    readonly int Field;
+    readonly ref ReadOnlySpan<int> Span;
+
+    public void SelfAssign()
+    {
+        // Instance method captures a ref to itself
+        Span = new ReadOnlySpan<int>(ref Field, 1);
+    }
+}
+```
+
+Some thought was given to the idea of having `this` have different defaults based on the type of `struct` or member. For example:
+
+ - `this` as `ref`: `struct`, `readonly ref struct` or `readonly member`
+ - `this` as `scoped ref`: `ref struct` or `readonly ref struct` with `ref` field to `ref struct`
+
+ This minimizes compat breaks and maximizes flexibility but at the cost of complicating the story for customers. It also doesn't fully solve the problem because future features, like safe `fixed` buffers, require that a mutable `ref struct` have `ref` returns for fields which don't work by this design alone as it would fall into the `scoped ref` category. 
+
+**Decision** Keep `this` as `scoped ref`
+
+### ref fields to ref struct
+This feature opens up a new set of ref safety rules because it allows for a `ref` field to refer to a `ref struct`. This generic nature of `ByReference<T>` meant that up until now the runtime could not have such a construct. As a result all of our rules are written under the assumption this is not possible. The `ref` field feature is largely not about making new rules but codifying the existing rules in our system. Allowing `ref` fields to `ref struct` requires us to codify new rules because there are several new scenarios to consider.
+
+The first is that a `readonly ref` is now capable of storing `ref` state. For example:
+
+```c#
+readonly ref struct Container
+{
+    readonly ref Span<int> Span;
+
+    void Store(Span<int> span)
+    {
+        Span = span;
+    }
+}
+```
+
+This means when thinking about method arguments must match rules we must consider `readonly ref T` is potential method output when `T` potentially has a `ref` field to a `ref struct`.
+
+The second issue is language must consider a new type of escape scope: *ref-field-safe-to-escape*. All `ref struct` which transitively contain a `ref` field have another escape scope representing the value(s) in the `ref` field(s). In the case of multiple `ref` fields they can be collectively tracked as a single value. The default value for this for parameters is *calling method*. 
+
+```c#
+ref struct Nested
+{
+    ref Span<int> Span;
+}
+
+Span<int> M(ref Nested nested) => nested.Span;
+```
+
+This value is not related to the escape scope of the container; that is as it the container scope gets smaller it has no impact on the *ref-field-safe-to-escape* of the `ref` field values. Further the *ref-field-safe-to-escape* can never be smaller than the *safe-to-escape* of the container.
+
+```c#
+ref struct Nested
+{
+    ref Span<int> Span;
+}
+
+void M(ref Nested nested)
+{
+    scoped ref Nested refLocal = ref nested;
+
+    // the ref-field-safe-to-escape of local is still *calling method* which means the following
+    // is illegal
+    refLocal.Span = stackalloc int[42];
+
+    scoped Nested valLocal = nested;
+
+    // the ref-field-safe-to-escape of local is still *calling method* which means the following
+    // is still illegal
+    valLocal.Span = stackalloc int[42];
+}
+```
+
+This *ref-field-safe-to-escape-scope* has essentially always existed. Up until now `ref` fields could only point to normal `struct` hence it was trivially collapsed to *calling method*.  To support `ref` fields to `ref struct` our existing rules need to be updated to take into account this new escape scope.
+
+Third the rules for ref re-assignment need to be updated to ensure that we don't violate *ref-field-safe-to-escape* for the values. Essentially for `x.e1 = ref e2` where the type of `e1` is a `ref struct` the *ref-field-safe-to-escape` must be equal. 
+
+These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes us in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
+
+**Decision** Delay allowing `ref` field to `ref struct` until .NET 8 where we have scenarios that will help drive the rules around these scenarios.
+
+### What will make C# 11.0?
 The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
 
 1. `ref` fields and `scoped`
-2. Sunset restricted types
-3. `unscoped` 
-4. fixed sized buffers
+2. `ref` fields to `ref struct`
+3. Sunset restricted types
+4. `unscoped` 
+5. fixed sized buffers
 
 What gets implemented in which release is merely a scoping exercise. 
 
-**Decision** Only `ref` fields, `scoped` and sunsetting restricted types will make C# 11.0. LDM is happy to revisit `unscoped` if a more natural keyword can be settled on or data suggests it's possible to make `this` `unscoped` by default in all cases.
+**Decision** Only (1) will make C# 11.0. The expectation is (2) and (3) are enabled very early in C# 12.0 to enable dogfooding by runtime throughout the .NET 8 cycle
 
 ## Future Considerations
 
@@ -1132,3 +1296,128 @@ The proposal prevents this though because it violates the span safety rules. Con
 At that point the line `r = ref i` is illegal by [ref re-assignment rules](#rules-ref-re-assignment). 
 
 These rules were not intended to prevent this behavior but do so as a side effect. It's important to keep this in mind for any future rule update to evaluate the impact to scenarios like this.
+
+#### readonly cannot be deep through ref fields
+<a name="reason-readonly-shallow"></a>
+
+Consider the below code sample:
+
+```c#
+ref struct S
+{
+    ref int Field;
+
+    readonly void Method()
+    {
+        // Legal or illegal?
+        Field = 42;
+    }
+}
+```
+
+When designing the rules for `ref` fields on `readonly` instances in a vacuum the rules can be validly designed such that the above is legal or illegal. Essentially `readonly` can validly be deep through a `ref` field or it can apply only to the `ref`. Applying only to the `ref` prevents ref re-assignment but allows normal assignment which changes the referred to value.
+
+This design does not exist in a vacuum though, it is designing rules for types that already effectively have `ref` fields. The most prominent of which, `Span<T>`, already has a strong dependency on `readonly` not being deep here. Its primary scenario is the ability to assign to the `ref` field through a `readonly` instance. 
+
+```c#
+readonly ref struct SpanOfOne
+{
+    readonly ref int Field;
+
+    public ref int this[int index]
+    {
+        get
+        {
+            if (index != 1)
+                throw new Exception();
+            return ref Field;
+        }
+    }
+}
+```
+
+This means we must choose the shallow interpretation of `readonly`.
+
+#### Method arguments must match
+The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule. For the sake of better understanding the reasons for the rule we will simplify ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. 
+
+Methods can pretty liberally return state passed to them as parameters. Essentially any reachable state which is `unscoped` can be returned (including returning by `ref`). This can be returned directly through a `return` statement or indirectly by assigning into a `ref` value. 
+
+Direct returns don't pose much problems for ref safety. The compiler simply needs to look at all the returnable inputs to a method and then it effectively restricts the return value to be the minimum *escape-scope* of the input. That return value then goes through normal processing.
+
+Indirect returns pose a significant problem because all `ref` are both an input and output to the method. These outputs already have a known *escape-scope*. The compiler can't infer new ones, it has to consider them at their current level. That means the compiler has to look at every single `ref` which is assignable in the called method, evaluate it's *escape-scope*, and then verify no returnable input to the method has a smaller *escape-scope* than that `ref`. If any such case exists then the method call must be illegal because it could violate `ref` safety. 
+
+Method arguments must match is the process by which the compiler asserts this safety check.
+
+A different way to evaluate this which is often easier for developers to consider is to do the following exercise: 
+
+1. Look at the method definition identify all places where state can be indirectly returned:
+    a. Mutable `ref` parameters pointing to `ref struct`
+    b. Mutable `ref` parameters with ref assignable `ref` fields
+    c. Assignable `ref` params or `ref` fields pointing to `ref struct` (consider recursively)
+2. Look at the call site
+    a. Identify the escape scopes that line up with the locations identified above
+    b. Identify the escape scopes of all inputs to the method that are returnable (don't line up with `scoped` parameters)
+
+If any value in 2.b is smaller than 2.a then the method call must be illegal. Let's look at a few examples to illustrate the rules:
+
+```c#
+ref struct R { }
+
+class Program
+{
+    static void F0(ref R a, scoped ref R b) => throw null;
+
+    static void F1(ref R x, scoped R y)
+    {
+        F0(ref x, ref y);
+    }
+}
+```
+
+Looking at the call to `F0` lets go through (1) and (2). The parameters with potential for indirect return are `a` and `b` as both can be directly assigned. The arguments which line up to those parameters are:
+
+- `a` which maps to `x` that has *escape-scope* of *calling method*
+- `b` which maps to `y` that has with *escape-scope* of *current method*
+
+The set of returnable input to the method are
+
+- `x` with *escape-scope* of *calling method*
+- `ref x` with *escape-scope* of *calling method*
+- `y` with *escape-scope* of *current method*
+
+The value `ref y` is not returnable since it maps to a `scoped ref` hence it is not considered an input. But given that there is at least one input with a smaller *escape scope* (`y` argument) than one of the outputs (`x` argument) the method call is illegal. 
+
+A different variation is the following:
+
+```c#
+ref struct R { }
+
+class Program
+{
+    static void F0(ref R a, ref int b) => throw null;
+
+    static void F1(ref R x)
+    {
+        int y = 42;
+        F0(ref x, ref y);
+    }
+}
+```
+
+Again the parameters with potential for indirect return are `a` and `b` as both can be directly assigned. But `b` can be excluded because it does not point to a `ref struct` hence cannot be used to store `ref` state. Thus we have:
+
+- `a` which maps to `x` that has *escape-scope* of *calling method*
+
+The set of returnable input to the method are:
+
+- `x` with *escape-scope* of *calling method*
+- `ref x` with *escape-scope* of *calling method*
+- `ref y` with *escape-scope* of *current method*
+
+Given that there is at least one input with a smaller *escape scope* (`ref y` argument) than one of the outputs (`x` argument) the method call is illegal. 
+
+This is the logic that the method arguments must match rule is trying to encompass. It goes further as it considers both `scoped` as a way to remove inputs from consideration and `readonly` as a way to remove `ref` as an output (can't assign into a `readonly ref` so it can't be a source of output). These special cases do add complexity to the rules but it's done so for the benefit of the developer. The compiler seeks to remove all inputs and outputs it knows can't contribute to the result to give developers maximum flexibility when calling a member. Much like overload resolution it's worth the effort to make our rules more complex when it creates more flexibility for consumers.
+
+
+
