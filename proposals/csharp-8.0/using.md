@@ -82,7 +82,7 @@ The language grammar for `using` declarations will be the following:
 
 ```antlr
 local-using-declaration:
-  using type using-declarators
+  'using' type using-declarators
 
 using-declarators:
   using-declarator
