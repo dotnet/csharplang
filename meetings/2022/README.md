@@ -16,6 +16,49 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
+## Wed Aug 31, 2022
+
+## Mon Aug 29, 2022
+
+*Summer of C#*: More minimal (Safia, Fowler, Jared)
+
+## Wed Aug 24, 2022
+
+## Mon Aug 22, 2022
+
+*Summer of C#*: Compiler optimizations and LINQ perf (Jared, Rikki, Maoni)
+
+## Wed Aug 17, 2022
+
+## Mon Aug 15, 2022
+
+*Summer of C#*: Collection initializers and collection ergonomics (Cyrus, Rikki, Mads)
+
+## Wed Aug 10, 2022
+
+## Wed Aug 3, 2022
+
+## Mon Aug 1, 2022
+
+*Summer of C#*: Interactive and notebooks (Bill, Safia, Maoni)
+
+## Wed Jul 27, 2022
+
+## Wed Jul 20, 2022
+
+## Mon Jul 18, 2022
+
+*Summer of C#*: Union types (Fred, Chuck, Damian)
+
+## Wed Jul 13, 2022
+
+## Mon Jul 11, 2022
+
+*Summer of C#*: Existential types, associated types and self-types (Mads, Andy, Jared)
+
+## Wed Jul 6, 2022
+
+
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
