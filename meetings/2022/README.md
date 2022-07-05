@@ -56,8 +56,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 *Summer of C#*: Existential types, associated types and self-types (Mads, Andy, Jared)
 
-## Wed Jul 6, 2022
-
 
 # C# Language Design Notes for 2022
 
