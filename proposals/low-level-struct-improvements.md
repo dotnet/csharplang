@@ -653,204 +653,6 @@ ref struct S<T>
 }
 ```
 
-### Example demonstrating rules 
-
-#### Ref re-assignment and call sites
-
-Demonstrating how [ref re-assignment](#rules-ref-re-assignment) and [method invocation](#rules-method-invocation) work together.
-
-```c#
-ref struct RS
-{
-    ref int _refField;
-
-    public ref int Prop => ref _refField;
-
-    public RS(int[] array)
-    {
-        _refField = ref array[0];
-    }
-
-    public RS(ref int i)
-    {
-        _refField = ref i;
-    }
-
-    public RS CreateRS() => ...;
-
-    public ref int M1(RS rs)
-    {
-        // The arguments contribute here:
-        //   - `rs` contributes no ref-safe-to-escape as the corresponding parameter, 
-        //      which is `this`, is `scoped ref`
-        //   - `rs` contribute safe-to-escape of *calling method*
-        // 
-        // This is an lvalue invocation and the arguments contribute only safe-to-escape 
-        // values of *calling method*. That means `local` is safe-to-escape to *calling method*
-        ref int local1 = ref rs.Prop;
-
-        // Okay: this is legal because `local` has safe-to-escape of *calling method*
-        return ref local1;
-
-        // The arguments contribute here:
-        //   - `this` contributes no ref-safe-to-escape as the corresponding parameter
-        //     is `scoped ref`
-        //   - `this` contributes safe-to-escape of *calling method*
-        //
-        // This is an rvalue invocation and following those rules the safe-to-escape of 
-        // `local2` will be *calling method*
-        RS local2 = CreateRS();
-
-        // Okay: this follows the same analysis as `ref rs.Prop` above
-        return ref local2.Prop;
-
-        // The arguments contribute here:
-        //   - `local3` contributes ref-safe-to-escape of *current method*
-        //   - `local3` contributes safe-to-escape of *calling method*
-        // 
-        // This is an rvalue invocation which returns a `ref struct` and following those 
-        // rules the safe-to-escape of `local4` will be *current method*
-        int local3 = 42;
-        var local4 = new RS(ref local3);
-
-        // Error: 
-        // The arguments contribute here:
-        //   - `local4` contributes no ref-safe-to-escape as the corresponding parameter
-        //     is `scoped ref`
-        //   - `local4` contributes safe-to-escape of *current method*
-        // 
-        // This is an lvalue invocation and following those rules the ref-safe-to-escape 
-        // of the return is *current method*
-        return ref local4.Prop1;
-    }
-}
-```
-
-#### scoped locals
-<a name="examples-scoped-locals"></a>
-
-The use of `scoped` on locals will be particularly helpful to code patterns which conditionally assign values with different *safe-to-escape* scope to locals. It means code no longer needs to rely on initialization tricks like `= stackalloc byte[0]` to define a local *safe-to-escape* but now can simply use `scoped`. 
-
-```c#
-// Old way 
-// Span<byte> span = stackalloc byte[0];
-// New way 
-scoped Span<byte> span;
-int len = ...;
-if (len < MaxStackLen)
-{
-    span = stackalloc byte[len];
-}
-else
-{
-    span = new byte[len];
-}
-```
-
-This pattern comes up frequently in low level code. When the `ref struct` involved is `Span<T>` the above trick can be used. It is not applicable to other `ref struct` types though and can result in low level code needing to resort to `unsafe` to work around the inability to properly specify the lifetime. 
-
-#### scoped parameter values
-<a name="examples-method-arguments-must-match"></a>
-
-One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
-
-The main friction point occurs because of the [method arguments must match](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#method-arguments-must-match) rule. This rule most commonly comes into play with instance methods on `ref struct` where at least one parameter is also a `ref struct`. This is a common pattern in low level code where `ref struct` types commonly leverage `Span<T>` parameters in their methods. For example it will occur on any writer style `ref struct` that uses `Span<T>` to pass around buffers.
-
-This rule exists to prevent scenarios like the following:
-
-```c#
-ref struct RS
-{
-    Span<int> _field;
-    void Set(Span<int> p)
-    {
-        _field = p;
-    }
-
-    static void DangerousCode(ref RS p)
-    {
-        Span<int> span = stackalloc int[] { 42 };
-
-        // Error: if allowed this would let the method return a reference to 
-        // the stack
-        p.Set(span);
-    }
-}
-```
-
-Essentially this rule exists because the language must assume that all inputs to a method escape to their maximum allowed scope. When there are `ref` or `out` parameters, including the receivers, it's possible for the inputs to escape as fields of those `ref` values (as happens in `RS.Set` above).
-
-In practice though there are many such methods which pass `ref struct` as parameters that never intend to capture them in output. It is just a value that is used within the current method. For example:
-
-```c#
-ref struct JsonReader
-{
-    Span<char> _buffer;
-    int _position;
-
-    internal bool TextEquals(ReadOnySpan<char> text)
-    {
-        var current = _buffer.Slice(_position, text.Length);
-        return current == text;
-    }
-}
-
-class C
-{
-    static void M(ref JsonReader reader)
-    {
-        Span<char> span = stackalloc char[4];
-        span[0] = 'd';
-        span[1] = 'o';
-        span[2] = 'g';
-
-        // Error: The safe-to-escape of `span` is the current method scope 
-        // while `reader` is outside the current method scope hence this fails
-        // by the above rule.
-        if (reader.TextEquals(span))
-        {
-            ...
-        }
-    }
-}
-```
-
-In order to work around this low level code will resort to `unsafe` tricks to lie to the compiler about the lifetime of their `ref struct`. This significantly reduces the value proposition of `ref struct` as they are meant to be a means to avoid `unsafe` while continuing to write high performance code.
-
-This is where `scoped` is an effective tool on `ref struct` parameters because it removes them from consideration as being returned from the method according to the updated [method arguments must match rule](#rules-method-arguments-must-match). A `ref struct` parameter which is consumed, but never returned, can be labeled as `scoped` to make call sites more flexible. 
-
-```c#
-ref struct JsonReader
-{
-    Span<char> _buffer;
-    int _position;
-
-    internal bool TextEquals(scoped ReadOnySpan<char> text)
-    {
-        var current = _buffer.Slice(_position, text.Length);
-        return current == text;
-    }
-}
-
-class C
-{
-    static void M(ref JsonReader reader)
-    {
-        Span<char> span = stackalloc char[4];
-        span[0] = 'd';
-        span[1] = 'o';
-        span[2] = 'g';
-
-        // Okay: the compiler never considers `span` as capturable here hence it doesn't
-        // contribute to the method arguments must match rule
-        if (reader.TextEquals(span))
-        {
-            ...
-        }
-    }
-}
-```
-
 ## Open Issues
 
 ### Change the design to avoid compat breaks
@@ -1249,8 +1051,205 @@ ref struct StackLinkedListNode<T>
 }
 ```
 
-### Important Cases
-There are several important cases that need to be handled correctly by the rules. These are those cases and explanation of how the rules prevent them from happening.
+### Exmaples 
+Below are a set of examples demonstrating how and why the rules work the way they do. Included are several examples showing dangerous behaviors and how the rules prevent them from happening. It's important to keep these in mind when making adjustments to the proposal.
+
+#### Ref re-assignment and call sites
+
+Demonstrating how [ref re-assignment](#rules-ref-re-assignment) and [method invocation](#rules-method-invocation) work together.
+
+```c#
+ref struct RS
+{
+    ref int _refField;
+
+    public ref int Prop => ref _refField;
+
+    public RS(int[] array)
+    {
+        _refField = ref array[0];
+    }
+
+    public RS(ref int i)
+    {
+        _refField = ref i;
+    }
+
+    public RS CreateRS() => ...;
+
+    public ref int M1(RS rs)
+    {
+        // The arguments contribute here:
+        //   - `rs` contributes no ref-safe-to-escape as the corresponding parameter, 
+        //      which is `this`, is `scoped ref`
+        //   - `rs` contribute safe-to-escape of *calling method*
+        // 
+        // This is an lvalue invocation and the arguments contribute only safe-to-escape 
+        // values of *calling method*. That means `local` is safe-to-escape to *calling method*
+        ref int local1 = ref rs.Prop;
+
+        // Okay: this is legal because `local` has safe-to-escape of *calling method*
+        return ref local1;
+
+        // The arguments contribute here:
+        //   - `this` contributes no ref-safe-to-escape as the corresponding parameter
+        //     is `scoped ref`
+        //   - `this` contributes safe-to-escape of *calling method*
+        //
+        // This is an rvalue invocation and following those rules the safe-to-escape of 
+        // `local2` will be *calling method*
+        RS local2 = CreateRS();
+
+        // Okay: this follows the same analysis as `ref rs.Prop` above
+        return ref local2.Prop;
+
+        // The arguments contribute here:
+        //   - `local3` contributes ref-safe-to-escape of *current method*
+        //   - `local3` contributes safe-to-escape of *calling method*
+        // 
+        // This is an rvalue invocation which returns a `ref struct` and following those 
+        // rules the safe-to-escape of `local4` will be *current method*
+        int local3 = 42;
+        var local4 = new RS(ref local3);
+
+        // Error: 
+        // The arguments contribute here:
+        //   - `local4` contributes no ref-safe-to-escape as the corresponding parameter
+        //     is `scoped ref`
+        //   - `local4` contributes safe-to-escape of *current method*
+        // 
+        // This is an lvalue invocation and following those rules the ref-safe-to-escape 
+        // of the return is *current method*
+        return ref local4.Prop1;
+    }
+}
+```
+
+#### scoped locals
+<a name="examples-scoped-locals"></a>
+
+The use of `scoped` on locals will be particularly helpful to code patterns which conditionally assign values with different *safe-to-escape* scope to locals. It means code no longer needs to rely on initialization tricks like `= stackalloc byte[0]` to define a local *safe-to-escape* but now can simply use `scoped`. 
+
+```c#
+// Old way 
+// Span<byte> span = stackalloc byte[0];
+// New way 
+scoped Span<byte> span;
+int len = ...;
+if (len < MaxStackLen)
+{
+    span = stackalloc byte[len];
+}
+else
+{
+    span = new byte[len];
+}
+```
+
+This pattern comes up frequently in low level code. When the `ref struct` involved is `Span<T>` the above trick can be used. It is not applicable to other `ref struct` types though and can result in low level code needing to resort to `unsafe` to work around the inability to properly specify the lifetime. 
+
+#### scoped parameter values
+<a name="examples-method-arguments-must-match"></a>
+
+One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
+
+The main friction point occurs because of the [method arguments must match](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#method-arguments-must-match) rule. This rule most commonly comes into play with instance methods on `ref struct` where at least one parameter is also a `ref struct`. This is a common pattern in low level code where `ref struct` types commonly leverage `Span<T>` parameters in their methods. For example it will occur on any writer style `ref struct` that uses `Span<T>` to pass around buffers.
+
+This rule exists to prevent scenarios like the following:
+
+```c#
+ref struct RS
+{
+    Span<int> _field;
+    void Set(Span<int> p)
+    {
+        _field = p;
+    }
+
+    static void DangerousCode(ref RS p)
+    {
+        Span<int> span = stackalloc int[] { 42 };
+
+        // Error: if allowed this would let the method return a reference to 
+        // the stack
+        p.Set(span);
+    }
+}
+```
+
+Essentially this rule exists because the language must assume that all inputs to a method escape to their maximum allowed scope. When there are `ref` or `out` parameters, including the receivers, it's possible for the inputs to escape as fields of those `ref` values (as happens in `RS.Set` above).
+
+In practice though there are many such methods which pass `ref struct` as parameters that never intend to capture them in output. It is just a value that is used within the current method. For example:
+
+```c#
+ref struct JsonReader
+{
+    Span<char> _buffer;
+    int _position;
+
+    internal bool TextEquals(ReadOnySpan<char> text)
+    {
+        var current = _buffer.Slice(_position, text.Length);
+        return current == text;
+    }
+}
+
+class C
+{
+    static void M(ref JsonReader reader)
+    {
+        Span<char> span = stackalloc char[4];
+        span[0] = 'd';
+        span[1] = 'o';
+        span[2] = 'g';
+
+        // Error: The safe-to-escape of `span` is the current method scope 
+        // while `reader` is outside the current method scope hence this fails
+        // by the above rule.
+        if (reader.TextEquals(span))
+        {
+            ...
+        }
+    }
+}
+```
+
+In order to work around this low level code will resort to `unsafe` tricks to lie to the compiler about the lifetime of their `ref struct`. This significantly reduces the value proposition of `ref struct` as they are meant to be a means to avoid `unsafe` while continuing to write high performance code.
+
+This is where `scoped` is an effective tool on `ref struct` parameters because it removes them from consideration as being returned from the method according to the updated [method arguments must match rule](#rules-method-arguments-must-match). A `ref struct` parameter which is consumed, but never returned, can be labeled as `scoped` to make call sites more flexible. 
+
+```c#
+ref struct JsonReader
+{
+    Span<char> _buffer;
+    int _position;
+
+    internal bool TextEquals(scoped ReadOnySpan<char> text)
+    {
+        var current = _buffer.Slice(_position, text.Length);
+        return current == text;
+    }
+}
+
+class C
+{
+    static void M(ref JsonReader reader)
+    {
+        Span<char> span = stackalloc char[4];
+        span[0] = 'd';
+        span[1] = 'o';
+        span[2] = 'g';
+
+        // Okay: the compiler never considers `span` as capturable here hence it doesn't
+        // contribute to the method arguments must match rule
+        if (reader.TextEquals(span))
+        {
+            ...
+        }
+    }
+}
+```
+
 
 #### Preventing tricky ref assignment from readonly mutation
 When a `ref` is taken to a `readonly` field in a constructor or `init` member the type is `ref` not `ref readonly`. This is a long standing behavior that allows for code like the following:
