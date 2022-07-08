@@ -137,14 +137,22 @@ namespace NS1
 Therefore, we don't specify the feature in terms of which scope the type is contained in, but rather as additional "filtering rules" in member lookup.
 
 ### Attributes
-In the initial iteration of the feature, a file type is not allowed to be used as an attribute. Such attributes are of limited utility for users who are unaware of the internal name generation strategy used in the implementation.
+File classes are permitted to be attribute types, and can be used as attributes within both file types and non-file types, just as if the attribute type were a non-file type. The metadata name of the file-local attribute type still goes through the same name generation strategy as other file-local types. This means detecting the presence of a file-type by a hard-coded string name is likely to be impractical, because it requires depending on the internal name generation strategy of the compiler, which may change over time. However, detecting via `typeof(MyFileLocalAttribute)` works.
 
 ```cs
-file class FC : System.Attribute { }
+using System;
+using System.Linq;
 
-[FC] // error
-class C
+file class MyFileLocalAttribute : Attribute { }
+
+[MyFileLocalAttribute]
+public class C
 {
+    public static void Main()
+    {
+        var attribute = typeof(C).CustomAttributes.Where(attr => attr.AttributeType == typeof(MyFileLocalAttribute)).First();
+        Console.Write(attribute); // outputs the generated name of the file-local attribute type
+    }
 }
 ```
 
