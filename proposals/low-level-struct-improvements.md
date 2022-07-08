@@ -245,7 +245,7 @@ Other uses for `scoped` on locals are discussed [below](#examples-scoped-locals)
 
 When `scoped` is applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
 
-The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a warning on such cases to avoid developer confusion.
+The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a diagnostic for such cases to avoid developer confusion.
 
 <a name="out-compat-change"></a>
 
@@ -649,7 +649,7 @@ ref struct S<T>
 ref struct S<T>
 {
     object _o; // force managed 
-    T _f; // mantain generic expansion protections
+    T _f; // maintain generic expansion protections
 }
 ```
 
@@ -1051,7 +1051,7 @@ ref struct StackLinkedListNode<T>
 }
 ```
 
-### Exmaples 
+### Examples 
 Below are a set of examples demonstrating how and why the rules work the way they do. Included are several examples showing dangerous behaviors and how the rules prevent them from happening. It's important to keep these in mind when making adjustments to the proposal.
 
 #### Ref re-assignment and call sites
