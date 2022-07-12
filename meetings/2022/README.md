@@ -52,6 +52,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Jul 13, 2022
 
+- Default parameter values for lambdas (Adam)
+
 ## Mon Jul 11, 2022
 
 *Summer of C#*: Existential types, associated types and self-types (Mads, Andy, Jared)
