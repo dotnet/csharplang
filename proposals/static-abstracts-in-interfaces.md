@@ -264,6 +264,25 @@ We discussed a simpler version which maintains the limitations of the current pr
 
 At https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.md#default-implementations-of-abstract-statics we decided to support Default Implementations of static members following/expanding the rules established in https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/default-interface-methods.md accordingly.  
 
+## Pattern matching
+
+Given the following code, a user might reasonably expect it to print True (as it would if the constant pattern was written inline):
+
+```cs
+M(1.0);
+
+static void M<T>(T t) where T : INumberBase<T>
+{
+    Console.WriteLine(t is 1);
+}
+```
+
+However, because the input type of the pattern is not `double`, the constant `1` pattern will first type check the incoming `T` against `int`. This is unintuitive, so we will block it until a future C# version adds better handling for numeric matching against types derived from `INumberBase<T>`. To do so, we will say that, we will explicitly recognize `INumberBase<T>` as the type that all "numbers" will derive from, and block the pattern if we're trying to match a numeric constant pattern against a number type that we can't represent the pattern in (ie, a type parameter constrained to `INumberBase<T>`, or a user-defined number type that inherits from `INumberBase<T>`).
+
+Formally, we add an exception to the definition of *pattern-compatible* for constant patterns:
+
+> A constant pattern tests the value of an expression against a constant value. The constant may be any constant expression, such as a literal, the name of a declared `const` variable, or an enumeration constant. When the input value is not an open type, the constant expression is implicitly converted to the type of the matched expression; if the type of the input value is not *pattern-compatible* with the type of the constant expression, the pattern-matching operation is an error. **If the constant expression being matched against is a numeric value, the input value is a type that inherits from `System.Numerics.INumberBase<T>`, and there is no constant conversion from the constant expression to the type of the input value, the pattern-matching operation is an error.**
+
 # Drawbacks
 [drawbacks]: #drawbacks
 
