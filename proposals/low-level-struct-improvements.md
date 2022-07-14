@@ -154,6 +154,8 @@ Next the rules for ref re-assignment need to be adjusted for the presence of `re
 
 <a name="rules-ref-re-assignment"></a>
 
+The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
+
 > For a ref reassignment in the form ...
 > 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
 > 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *safe-to-escape* equal to *safe-to-escape* for `e1` and `e2` must have *ref-safe-to-escape* at least as large as *ref-safe-to-escape* of the *ref-safe-to-escape* of `e1`
@@ -585,12 +587,6 @@ member_initializer
 The left operand of the assignment must be an expression that binds to a ref field.  
 The right operand must be an expression that yields an lvalue designating a value of the same type as the left operand.  
 
-The general [rules of reassignment](#rules-ref-re-assignment) updated above apply:
-> For a ref reassignment in the form ...
-> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
-> 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *safe-to-escape* equal to *safe-to-escape* for `e1`, and `e2` must have *ref-safe-to-escape* at least as large as *ref-safe-to-escape* of the *ref-safe-to-escape* of `e1`
-TODO2
-
 We add a similar rule to [ref local reassignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/ref-local-reassignment.md):  
 If the left operand is a writeable ref (i.e. it designates anything other than a `ref readonly` field), then the right operand must be a writeable lvalue.
 
@@ -603,8 +599,7 @@ Namely the rules of [method invocation](#rules-method-invocation) updated above:
 > 2. The *safe-to-escape* contributed by all argument expressions
 > 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
 
-We make a corresponding update to the analysis of initializer expressions to account for `ref` initializers:  
-In addition *safe-to-escape* is no wider than the smallest of the *ref-safe-to-escape* of all `ref` arguments/operands of the object initializer expressions and the *safe-to-escape* of arguments/operands of the object initializer expressions, recursively, if initializers are present.
+For a `new` expression with initializers, the initializer expressions count as arguments (they contribute their *safe-to-escape*) and the `ref` initializer expressions count as `ref` arguments (they contribute their *ref-safe-to-escape*), recursively.
 
 ## Considerations
 There are considerations other parts of the development stack should consider when evaluating this feature.
