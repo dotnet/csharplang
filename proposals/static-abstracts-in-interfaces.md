@@ -283,6 +283,11 @@ Formally, we add an exception to the definition of *pattern-compatible* for cons
 
 > A constant pattern tests the value of an expression against a constant value. The constant may be any constant expression, such as a literal, the name of a declared `const` variable, or an enumeration constant. When the input value is not an open type, the constant expression is implicitly converted to the type of the matched expression; if the type of the input value is not *pattern-compatible* with the type of the constant expression, the pattern-matching operation is an error. **If the constant expression being matched against is a numeric value, the input value is a type that inherits from `System.Numerics.INumberBase<T>`, and there is no constant conversion from the constant expression to the type of the input value, the pattern-matching operation is an error.**
 
+We also add a similar exception for relational patterns:
+
+> When the input is a type for which a suitable built-in binary relational operator is defined that is applicable with the input as its left operand and the given constant as its right operand, the evaluation of that operator is taken as the meaning of the relational pattern. Otherwise we convert the input to the type of the expression using an explicit nullable or unboxing conversion. It is a compile-time error if no such conversion exists. **It is a compile-time error if the input type is a type parameter constrained to or a type inheriting from `System.Numerics.INumberBase<T>` and the input type has no suitable built-in binary relational operator defined.** The pattern is considered not to match if the conversion fails. If the conversion succeeds then the result of the pattern-matching operation is the result of evaluating the expression e OP v where e is the converted input, OP is the relational operator, and v is the constant expression.
+
+
 # Drawbacks
 [drawbacks]: #drawbacks
 
