@@ -154,6 +154,8 @@ Next the rules for ref re-assignment need to be adjusted for the presence of `re
 
 <a name="rules-ref-re-assignment"></a>
 
+The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
+
 > For a ref reassignment in the form ...
 > 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
 > 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *safe-to-escape* equal to *safe-to-escape* for `e1` and `e2` must have *ref-safe-to-escape* at least as large as *ref-safe-to-escape* of the *ref-safe-to-escape* of `e1`
@@ -561,6 +563,43 @@ There will also be a named accessor generated for each `fixed` buffer that provi
 This also has the added benefit that it will make `fixed` buffers easier to consume from other languages. Named indexers is a feature that has existed since the 1.0 release of .NET. Even languages which cannot directly emit a named indexer can generally consume them (C# is actually a good example of this).
 
 The backing storage for the buffer will be generated using the `[InlineArray]` attribute. This is a mechanism discussed in [issue 12320](https://github.com/dotnet/runtime/issues/12320) which allows specifically for the case of efficiently declaring sequence of fields of the same type. This particular issue is still under active discussion and the expectation is that the implementation of this feature will follow however that discussion goes.
+
+### Initializers with `ref` values in `new` and `with` expressions
+
+In section [11.7.15.3 Object initializers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117153-object-initializers), we update the grammar to:
+
+```antlr
+initializer_value
+    : 'ref' expression // added
+    : expression
+    | object_or_collection_initializer
+    ;
+```
+
+In the section for [`with` expression](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#with-expression), we update the grammar to:
+```antlr
+member_initializer
+    : identifier '=' 'ref' expression // added
+    : identifier '=' expression
+    ;
+```
+
+The left operand of the assignment must be an expression that binds to a ref field.  
+The right operand must be an expression that yields an lvalue designating a value of the same type as the left operand.  
+
+We add a similar rule to [ref local reassignment](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.3/ref-local-reassignment.md):  
+If the left operand is a writeable ref (i.e. it designates anything other than a `ref readonly` field), then the right operand must be a writeable lvalue.
+
+The escape rules for [constructor invocations](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#constructor-invocations) remain:
+> A `new` expression that invokes a constructor obeys the same rules as a method invocation that is considered to return the type being constructed.
+
+Namely the rules of [method invocation](#rules-method-invocation) updated above:
+> An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
+> 1. The *calling method*
+> 2. The *safe-to-escape* contributed by all argument expressions
+> 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
+
+For a `new` expression with initializers, the initializer expressions count as arguments (they contribute their *safe-to-escape*) and the `ref` initializer expressions count as `ref` arguments (they contribute their *ref-safe-to-escape*), recursively.
 
 ## Considerations
 There are considerations other parts of the development stack should consider when evaluating this feature.
