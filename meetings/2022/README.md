@@ -50,10 +50,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 *Summer of C#*: Union types (Fred, Chuck, Damian)
 
-## Wed Jul 13, 2022
-
-- Default parameter values for lambdas (Adam)
-
 ## Mon Jul 11, 2022
 
 *Summer of C#*: Existential types, associated types and self-types (Mads, Andy, Jared)
@@ -62,6 +58,12 @@ All schedule items must have a public issue or checked in proposal that can be l
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Wed Jul 13, 2022
+
+[C# Language Design Meeting for July 13th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-07-13.md)
+
+1. Lambda default parameters
 
 ## Jun 29, 2022
 
