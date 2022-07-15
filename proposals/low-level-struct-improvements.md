@@ -309,7 +309,7 @@ Overall there are three `ref` location which are implicitly declared as `scoped`
 
 The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
 
-When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
+When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is a lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
 
 <a name="rules-method-invocation"></a>
 
@@ -320,16 +320,16 @@ The span safety rules for method invocation will be updated in several ways. The
 
 The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime as the `scoped` annotation prevents it.
 
-The method invocation rules can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`. The rvalue rules need to change to account for `ref` field returns:
+The method invocation rules can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`. The value rules need to change to account for `ref` field returns:
 
-> An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
+> An value resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 > 1. The *calling method*
 > 2. The *safe-to-escape* contributed by all argument expressions
 > 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
 
-The lvalue rules can be simplified to:
+The `ref` calling  rules can be simplified to:
 
-> An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
+> An value resulting from a method invocation `ref e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 > 1. The *safe-to-escape* of the rvalue
 > 2. The *ref-safe-to-escape* contributed by all `ref` arguments
 
@@ -338,14 +338,14 @@ This rule now lets us define the two variants of desired methods:
 ```c#
 Span<int> CreateWithoutCapture(scoped ref int value)
 {
-    // Error: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
+    // Error: value Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
     // of the ref argument. That is the *current method* for value hence this is not allowed.
     return new Span<int>(ref value);
 }
 
 Span<int> CreateAndCapture(ref int value)
 {
-    // Okay: RValue Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
+    // Okay: value Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
     // of the ref argument. That is the *calling method* for value hence this is not allowed.
     return new Span<int>(ref value)
 }
@@ -375,8 +375,8 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 
 The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). The new rule is ... 
 
-> For any method invocation
-> 1. Calculate the *safe-to-escape* of the method return (for this rule assume it has a `ref struct` return)
+> For any method invocation `e.M(a1, a2, ... aN)`
+> 1. Calculate the *safe-to-escape* of the method return (for this rule assume it has a `ref struct` return type)
 > 2. All `ref` our `out` arguments must be assignable by a value with that *safe-to-escape*
 
 The presence of `scoped` allows developers to reduce the friction this rule creates by marking parameters which are not returned as `scoped`. This removes their arguments from (1) above and provides greater flexibility to callers.
