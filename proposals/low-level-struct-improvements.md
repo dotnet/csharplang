@@ -124,7 +124,7 @@ First the rules establishing *ref-safe-to-escape* values for fields need to be u
 
 <a name="rules-field-lifetimes"></a>
 
-> An lvalue designating a reference to a field, e.F, is *ref-safe-to-escape* (by reference) as follows:
+> An expression in the form `ref e.F` *ref-safe-to-escape* as follows:
 > 1. If `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
 > 2. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
 > 3. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
@@ -219,7 +219,11 @@ Span<int> BadUseExamples(int parameter)
 
 The `scoped` annotation also means that the `this` parameter of a `struct` can now be defined as `scoped ref T`. Previously it had to be special cased in the rules as `ref` parameter that had different *ref-safe-to-escape* rules than other `ref` parameters (see all the references to including or excluding the receiver in the span safety rules). Now it can be expressed as a general concept throughout the rules which further simplifies them.
 
-In addition to parameters the `scoped` annotation can be applied to locals or `struct` instance methods. These annotations have the same impact to lifetimes when applied to locals. For locals these annotations concretely define the lifetimes and override the lifetime that would be inferred via the initializer. 
+The `scoped` annotation can also be applied to the following locations:
+
+- locals: This annotation sets the lifetime as *safe-to-escape*, or *ref-safe-to-escape* in case of a `ref` local, to of *current method* irrespective of the initializer lifetime. 
+- `struct` instance methods: This annotation sets the type of `this` to `scoped ref T`. This is the default value but it is useful in the case the overall `struct` type is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
+
 
 ```c#
 Span<int> ScopedLocalExamples()
@@ -244,8 +248,6 @@ Span<int> ScopedLocalExamples()
 ```
 
 Other uses for `scoped` on locals are discussed [below](#examples-scoped-locals).
-
-When `scoped` is applied to an instance method the `this` parameter will have the type `scoped ref T`. By default this is redundant as `scoped ref T` is the default type of `this`. It is useful in the case the `struct` is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
 
 The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a diagnostic for such cases to avoid developer confusion.
 
@@ -299,6 +301,12 @@ Further treating the input to an `out` parameter as returnable is extremely conf
 
 This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
 
+<a name="implicitly-scoped"></a>
+Overall there are three `ref` location which are implicitly declared as `scoped`:
+- `this` on a `struct` instance method
+- `out` parameters 
+- `ref` parameters which refer to a `ref struct`
+
 The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
 
 When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
@@ -312,19 +320,18 @@ The span safety rules for method invocation will be updated in several ways. The
 
 The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime as the `scoped` annotation prevents it.
 
-The method invocation for lvalue returns can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`, nor do `out` parameters need to be considered in the argument list. 
-
-> An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
-> 1. The *calling method*
-> 2. The *ref-safe-to-escape* contributed by all `ref` arguments
-> 3. The *safe-to-escape* contributed by all argument expressions
-
-The method invocation for rvalue returns needs to change as follows to account for `ref` field returns.
+The method invocation rules can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`. The rvalue rules need to change to account for `ref` field returns:
 
 > An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 > 1. The *calling method*
 > 2. The *safe-to-escape* contributed by all argument expressions
 > 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
+
+The lvalue rules can be simplified to:
+
+> An lvalue resulting from a ref-returning method invocation `e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
+> 1. The *safe-to-escape* of the rvalue
+> 2. The *ref-safe-to-escape* contributed by all `ref` arguments
 
 This rule now lets us define the two variants of desired methods:
 
@@ -366,13 +373,13 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 
 <a name="rules-method-arguments-must-match"></a>
 
-The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). 
+The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). The new rule is ... 
 
-The presence of `scoped` allows us to refine the rule to reduce the friction the rule creates. The `scoped` modifier lets us remove arguments from consideration as they cannot be returned from the method.
+> For any method invocation
+> 1. Calculate the *safe-to-escape* of the method return (for this rule assume it has a `ref struct` return)
+> 2. All `ref` our `out` arguments must be assignable by a value with that *safe-to-escape*
 
-> For a method invocation if there is an argument for a `ref`, `scoped ref` or `out` parameter of a `ref struct` type where the argument has *safe-to-escape* E1 then 
-> 1. No other `ref struct` argument may contribute a narrower *safe-to-escape* than E1.
-> 2. No other `ref` or `in` argument may contribute a narrower *ref-safe-to-escape* than E1.
+The presence of `scoped` allows developers to reduce the friction this rule creates by marking parameters which are not returned as `scoped`. This removes their arguments from (1) above and provides greater flexibility to callers.
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
 
@@ -1279,7 +1286,6 @@ class C
 }
 ```
 
-
 #### Preventing tricky ref assignment from readonly mutation
 When a `ref` is taken to a `readonly` field in a constructor or `init` member the type is `ref` not `ref readonly`. This is a long standing behavior that allows for code like the following:
 
@@ -1324,6 +1330,43 @@ The proposal prevents this though because it violates the span safety rules. Con
 At that point the line `r = ref i` is illegal by [ref re-assignment rules](#rules-ref-re-assignment). 
 
 These rules were not intended to prevent this behavior but do so as a side effect. It's important to keep this in mind for any future rule update to evaluate the impact to scenarios like this.
+
+#### Silly cyclic assignment
+One aspect this design struggled with is how freely a `ref` can be returned from a method. Allowing all `ref` to be returned as freely as normal values is likely what most developers intuitively expect. However it allows for pathological scenarios that the compiler must consider when calculating ref safety. Consider the following: 
+
+```c#
+ref struct S
+{
+    int field;
+    ref int refField;
+
+    static void SelfAssign(ref S s)
+    {
+        s.refField = ref s.field;
+    }
+}
+```
+
+This is not a code pattern that we expect any developers to use. Yet when a `ref` can be returned with the same lifetime as a value it is legal under the rules. The compiler must consider all legal cases when evaluating a method call and this leads to such APIs being effectively unusable. 
+
+```c#
+void M(ref S s)
+{
+    ...
+}
+
+S Usage()
+{
+    // safe-to-escape to calling method
+    S local = default; 
+
+    // Error: compiler is forced to assume the worst and concludes a self assignment
+    // is possible here and must issue an error.
+    M(ref local);
+}
+```
+
+To make these APIs usable the compiler has to create separation between how freely `ref` and their values can be returned by default. This is the rational for having `ref` to `ref struct` and `out` be [implicitly scoped](#implicitly-scoped). It is the balance that allows APIs like this to be usable.
 
 #### readonly cannot be deep through ref fields
 <a name="reason-readonly-shallow"></a>
