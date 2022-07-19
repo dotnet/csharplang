@@ -322,3 +322,15 @@ var a = (int i = 13) => 1;
 var b = ([DefaultParameterValue(13)] int i) => 1;
 b = a; // Allowed
 ```
+
+**Open question:** First, note that this is outside the scope of the current proposal but it might be worth discussing in the future.
+Do we want to support defaults with implicitly typed lambda parameters? I.e., 
+
+```csharp
+delegate void M1(int i = 3);
+M1 m = (x = 3) => x + x; // Ok
+
+delegate void M2(long i = 2);
+M2 m = (x = 3.0) => ...; //Error: cannot convert implicitly from long to double
+```
+This inference leads to some tricky conversion issues which would require more discussion.
