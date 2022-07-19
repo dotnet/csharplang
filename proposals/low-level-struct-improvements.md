@@ -309,7 +309,7 @@ Overall there are three `ref` location which are implicitly declared as `scoped`
 
 The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
 
-When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is a lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
+When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
 
 <a name="rules-method-invocation"></a>
 
@@ -322,15 +322,15 @@ The language "does not contribute" means the arguments are simply not considered
 
 The method invocation rules can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`. The value rules need to change to account for `ref` field returns:
 
-> An value resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
+> A value resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 > 1. The *calling method*
 > 2. The *safe-to-escape* contributed by all argument expressions
 > 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
 
 The `ref` calling  rules can be simplified to:
 
-> An value resulting from a method invocation `ref e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
-> 1. The *safe-to-escape* of the rvalue
+> A value resulting from a method invocation `ref e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
+> 1. The *safe-to-escape* of the rvalue of `e1.M(e2, ...)`
 > 2. The *ref-safe-to-escape* contributed by all `ref` arguments
 
 This rule now lets us define the two variants of desired methods:
@@ -377,7 +377,7 @@ The presence of `ref` fields means the rules around method arguments must match 
 
 > For any method invocation `e.M(a1, a2, ... aN)`
 > 1. Calculate the *safe-to-escape* of the method return (for this rule assume it has a `ref struct` return type)
-> 2. All `ref` our `out` arguments must be assignable by a value with that *safe-to-escape*
+> 2. All `ref` or `out` arguments must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
 
 The presence of `scoped` allows developers to reduce the friction this rule creates by marking parameters which are not returned as `scoped`. This removes their arguments from (1) above and provides greater flexibility to callers.
 
