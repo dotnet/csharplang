@@ -198,15 +198,15 @@ var e = E;
 var f = F;
 // internal delegate int c'(int arg0 = 0);
 var g = G;
-// internal delegate int c'(int arg0 = 0);
+// internal delegate int b'(int arg0 = 13);
 
 a = b; // Not allowed
 a = c; // Allowed
 a = d; // Allowed
-c = e // Allowed
-e = f // Not Allowed
-b = f // Allowed
-e = g // Not Allowed
+c = e; // Allowed
+e = f; // Not Allowed
+b = f; // Allowed
+e = g; // Allowed
 
 d = (int c = 10) => 2; // Error: default parameter is different between new lambda
                        // and synthesized delegate b'. We won't do implicit conversion
@@ -248,11 +248,11 @@ var d = (int x = 10) => x;
 
 d = M; // Allowed with warning. The existing method group rules apply here, and the signature of M
        // is allowed to be converted to internal delegate int b'(int arg0 = 10); However, because this behavior could be confusing, it is worth alerting the user.
-d();   // will use default value from original lambda
+d();   // This call will use default value x = 10 from original lambda
 ```
 The above code has an implicit conversion from a method group to a delegate. 
 However, the anonymous delegate type that the method group is converted to has a default parameter which differs from the underlying method. 
-Because of this, we will emit a warning.
+Note that the default value for the underlying delegate type will be used here, which may seem counter-intuitive to users. Because of this, we will emit a warning.
 
 #### Other Conversion Cases
 
@@ -334,3 +334,7 @@ delegate void M2(long i = 2);
 M2 m = (x = 3.0) => ...; //Error: cannot convert implicitly from long to double
 ```
 This inference leads to some tricky conversion issues which would require more discussion.
+
+There are also parsing performance considerations here. For instance, today the term
+`(x = ` could never be the start of a lambda expression. If this syntax was allowed for lambda defaults, then the parser
+would need a larger lookahead (scanning all the way until a `=>` token) in order to determine whether a term is a lambda or not. 
