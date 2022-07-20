@@ -222,8 +222,6 @@ The `scoped` annotation also means that the `this` parameter of a `struct` can n
 The `scoped` annotation can also be applied to the following locations:
 
 - locals: This annotation sets the lifetime as *safe-to-escape*, or *ref-safe-to-escape* in case of a `ref` local, to of *current method* irrespective of the initializer lifetime. 
-- `struct` instance methods: This annotation sets the type of `this` to `scoped ref T`. This is the default value but it is useful in the case the overall `struct` type is declared as `unscoped` (detailed [below](#return-fields-by-ref)).
-
 
 ```c#
 Span<int> ScopedLocalExamples()
@@ -327,7 +325,7 @@ The method invocation rules can now be simplified. The receiver no longer needs 
 > 2. The *safe-to-escape* contributed by all argument expressions
 > 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
 
-The `ref` calling  rules can be simplified to:
+The `ref` calling rules can be simplified to:
 
 > A value resulting from a method invocation `ref e1.M(e2, ...)` is *ref-safe-to-escape* the smallest of the following scopes:
 > 1. The *safe-to-escape* of the rvalue of `e1.M(e2, ...)`
@@ -385,7 +383,8 @@ Impact of this change is discussed more deeply [below](#examples-method-argument
 
 The `scoped` modifier on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
 - Add `scoped` to a `ref` or `in` parameter
-- Add `scoped` to a `ref struct` parameter 
+- Add `scoped` to a `ref struct` parameter
+
 Any other difference with respect to `scoped` will be considered an error. 
 
 The `scoped` modifier also has the following effects on method signatures:
@@ -442,7 +441,7 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 <a name="rules-unscoped"></a>
 
-To fix this the  language will provide the opposite of the `scoped` lifetime annotation in the syntax `unscoped`.  The keyword `unscoped` will be used to expand the lifetime of a value. It can be applied to any `ref` which is implicitly `unscoped` and has the impact of changing its *ref-safe-to-escape* to *calling method*.
+To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`.  The attribute can be used to expand the lifetime of a value. It can be applied to any `ref` which is implicitly `scoped` and has the impact of changing its *ref-safe-to-escape* to *calling method*.
 
 ```c#
 struct S
@@ -455,62 +454,43 @@ struct S
 
     // Okay: `field` has the ref-safe-to-escape of `this` which is *calling method* because 
     // it is a `ref`
-    unscoped ref int Prop1 => ref field;
-}
-```
-
-The annotation can also be placed directly on the `struct` declaration and has the impact of changing `this` to simply `ref T` on all instance methods.
-
-```c#
-unscoped struct S
-{
-    int field;
-
-    // Okay
-    ref int Prop => ref field;
-}
-```
-
-This will naturally, by the existing rules in the span safety spec, allow for returning transitive fields in addition to direct fields.
-
-```c#
-unscoped struct Child
-{
-    int _value;
-    public ref int Value => ref _value;
-}
-
-unscoped struct Container
-{
-    Child _child;
-
-    // In this case the ref-safe-to-escape of `_child` is to the calling method because that is 
-    // the value of `this` and fields derive it from their receiver. From there method invocation 
-    // rules take over 
-    public ref int Value => ref _child.Value;
+    [UnscopedRef] ref int Prop1 => ref field;
 }
 ```
 
 The annotation can also be placed on `out` parameters to restore them to C# 10 behavior.
 
 ```c#
-ref int SneakyOut(unscoped out int i)
+ref int SneakyOut([UnscopedRef] out int i)
 {
     i = 42;
     return ref i;
 }
 ```
 
-For the purposes of span safety rules, such an `unscoped out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes.
+For the purposes of span safety rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes.
 
-The `unscoped` annotation will be disallowed on `init` members and constructors. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `unscoped` would permit such `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
+The `[UnscopedRef]` annotation will be disallowed on `init` members and constructors. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `[UnscopedRef]` would permit such a `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
+
+The attribute type will have the following definition:
+
+```c#
+namespace System.Diagnostics.CodeAnalysis
+{
+    [AttributeUsage(
+        AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter,
+        AllowMultiple = false,
+        Inherited = false)]
+    public sealed class UnscopedRefAttribute : Attribute
+    {
+    }
+}
+```
 
 Detailed Notes:
-- An instance method or property annotated with `unscoped` has *ref-safe-to-escape* of `this` set to the *calling method*. It means `this` is effectively a `ref` parameter to the method.
-- A `struct` annotated with `unscoped` has the same effect of annotating every instance method and property with `unscoped`
-- A member annotated with `unscoped` cannot implement an interface.
-- It is an error to use `unscoped` on 
-    - Any type other than a `struct` (although it is legal for all variations like `readonly struct`)
+- An instance method or property annotated with `[UnscopedRef]` has *ref-safe-to-escape* of `this` set to the *calling method*. It means `this` is effectively a `ref` parameter to the method.
+- A member annotated with `[UnscopedRef]` cannot implement an interface.
+- It is an error to use `[UnscopedRef]` on 
     - Any member that is not declared on a `struct`
     - Any `static` member, `init` member or constructor on a `struct`
 
@@ -549,12 +529,12 @@ Accessing a `fixed` buffer without an indexer has no natural type however it is 
 
 The resulting `Span<T>` instance will have a length equal to the size declared on the `fixed` buffer. The *safe-to-escape* scope of the returned value will be equal to the *safe-to-escape* scope of the container, just as it would if the backing data was accessed as a field.
 
-For each `fixed` declaration in a type where the element type is `T` the language will generate a corresponding `get` only indexer method whose return type is `ref T`. The indexer will be annotated with the `unscoped` annotation as the implementation will be returning fields of the declaring type. The accessibility of the member will match the accessibility on the `fixed` field.
+For each `fixed` declaration in a type where the element type is `T` the language will generate a corresponding `get` only indexer method whose return type is `ref T`. The indexer will be annotated with the `[UnscopedRef]` attribute as the implementation will be returning fields of the declaring type. The accessibility of the member will match the accessibility on the `fixed` field.
 
 For example, the signature of the indexer for `CharBuffer.Data` will be the following:
 
 ```c#
-unscoped internal ref char DataIndexer(int index) => ...;
+[UnscopedRef] internal ref char DataIndexer(int index) => ...;
 ```
 
 If the provided index is outside the declared bounds of the `fixed` array then an `IndexOutOfRangeException` will be thrown. In the case a constant value is provided then it will be replaced with a direct reference to the appropriate element. Unless the constant is outside the declared bounds in which case a compile time error would occur.
@@ -809,7 +789,7 @@ The design only has two locations which are `scoped` by default:
 
 The decision on `out` is to significantly reduce the compat burden of `ref` fields and at the same time is a more natural default. It lets developers actually think of `out` as data flowing outward only where as if it's `ref` then the rules must consider data flowing in both directions. This leads to significant developer confusion.
 
-The decision on `this` is undesirable because it means a `struct` cannot return a field by `ref`. This is an important scenario to high perf developers and the `unscoped` keyword was added essentially for this one scenario.
+The decision on `this` is undesirable because it means a `struct` cannot return a field by `ref`. This is an important scenario to high perf developers and the `[UnscopedRef]` attribute was added essentially for this one scenario.
 
 Keywords have a high bar and adding it for a single scenario is suspect. As such thought was given to whether we could avoid this keyword at all by making `this` simply `ref` by default and not `scoped ref`. All members that need `this` to be `scoped ref` could do so by marking the method `scoped` (as a method can be marked `readonly` to create a `readonly ref` today).
 
@@ -940,7 +920,7 @@ The features outlined in this document don't need to be implemented in a single 
 1. `ref` fields and `scoped`
 2. `ref` fields to `ref struct`
 3. Sunset restricted types
-4. `unscoped` 
+4. `[UnscopedRef]` 
 5. fixed sized buffers
 
 What gets implemented in which release is merely a scoping exercise. 
@@ -1028,7 +1008,7 @@ struct FrugalList<T>
 
     public ref T this[int index]
     {
-        unscoped get
+        [UnscopedRef] get
         {
             switch (index)
             {
@@ -1406,7 +1386,7 @@ This means we must choose the shallow interpretation of `readonly`.
 #### Method arguments must match
 The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule. For the sake of better understanding the reasons for the rule we will simplify ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. 
 
-Methods can pretty liberally return state passed to them as parameters. Essentially any reachable state which is `unscoped` can be returned (including returning by `ref`). This can be returned directly through a `return` statement or indirectly by assigning into a `ref` value. 
+Methods can pretty liberally return state passed to them as parameters. Essentially any reachable state which is unscoped can be returned (including returning by `ref`). This can be returned directly through a `return` statement or indirectly by assigning into a `ref` value. 
 
 Direct returns don't pose much problems for ref safety. The compiler simply needs to look at all the returnable inputs to a method and then it effectively restricts the return value to be the minimum *escape-scope* of the input. That return value then goes through normal processing.
 
