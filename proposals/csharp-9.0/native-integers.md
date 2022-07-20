@@ -102,7 +102,7 @@ Taking a few examples:
 |:---:|:---:|:---:|:---:|
 | `nint` | `object` | Boxing | `box` |
 | `nint` | `void*` | PointerToVoid | nop / `conv.ovf.u` |
-| `nint` | `nuint` | ExplicitNumeric | `conv.u` / `conv.ovf.u` |
+| `nint` | `nuint` | ExplicitNumeric | `conv.u` (can be omitted) / `conv.ovf.u` |
 | `nint` | `sbyte` | ExplicitNumeric | `conv.i1` / `conv.ovf.i1` |
 | `nint` | `byte` | ExplicitNumeric | `conv.u1` / `conv.ovf.u1` |
 | `nint` | `short` | ExplicitNumeric | `conv.i2` / `conv.ovf.i2` |
@@ -121,7 +121,7 @@ Taking a few examples:
 | | | | |
 | `nuint` | `object` | Boxing | `box` |
 | `nuint` | `void*` | PointerToVoid | nop |
-| `nuint` | `nint` | ExplicitNumeric | `conv.i` / `conv.ovf.i.un` |
+| `nuint` | `nint` | ExplicitNumeric | `conv.i`(can be omitted) / `conv.ovf.i.un` |
 | `nuint` | `sbyte` | ExplicitNumeric | `conv.i1` / `conv.ovf.i1.un` |
 | `nuint` | `byte` | ExplicitNumeric | `conv.u1` / `conv.ovf.u1.un` |
 | `nuint` | `short` | ExplicitNumeric | `conv.i2` / `conv.ovf.i2.un` |
