@@ -44,7 +44,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Jul 27, 2022
 
-## Wed Jul 20, 2022
+- `scoped` modifier on other local variable declarations (Julien): https://github.com/dotnet/roslyn/issues/62039
 
 ## Mon Jul 18, 2022
 
