@@ -529,7 +529,7 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-The compiler will emit this attribute on the `scoped` parameter. For example `scoped out` will cause no attribute to be emitted.
+The compiler will emit this attribute on the parameter with `scoped` syntax. This will only be emitted when the syntax causes the value to differ from its default state. For example `scoped out` will cause no attribute to be emitted.
 
 ### Safe fixed size buffers
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
