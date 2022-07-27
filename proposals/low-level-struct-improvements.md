@@ -523,7 +523,7 @@ The type will have the following definition:
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-    public sealed class ScopedRefAttribute : Attribute
+    internal sealed class ScopedRefAttribute : Attribute
     {
     }
 }
