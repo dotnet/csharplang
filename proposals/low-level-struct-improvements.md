@@ -529,9 +529,7 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-The attribute uses `int` instead of `bool` to allow for future lifetime expansions in this space.
-
-The compiler will emit this attribute on the element targeted by the `scoped` syntax. This is true for types, methods and parameters. This will only be emitted when the syntax causes the value to differ from its default state. For example `scoped out` will cause no attribute to be emitted.
+The compiler will emit this attribute on parameters targeted by the `scoped` syntax. This will only be emitted when the syntax causes the value to differ from its default state. For example `scoped out` will cause no attribute to be emitted.
 
 ### Safe fixed size buffers
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
