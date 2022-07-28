@@ -381,7 +381,7 @@ The presence of `scoped` allows developers to reduce the friction this rule crea
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
 
-The `scoped` modifier on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
+The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped)) on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
 - Add `scoped` to a `ref` or `in` parameter
 - Add `scoped` to a `ref struct` parameter
 
@@ -491,8 +491,9 @@ Detailed Notes:
 - An instance method or property annotated with `[UnscopedRef]` has *ref-safe-to-escape* of `this` set to the *calling method*. It means `this` is effectively a `ref` parameter to the method.
 - A member annotated with `[UnscopedRef]` cannot implement an interface.
 - It is an error to use `[UnscopedRef]` on 
-    - Any member that is not declared on a `struct`
-    - Any `static` member, `init` member or constructor on a `struct`
+    - A member that is not declared on a `struct`
+    - A `static` member, `init` member or constructor on a `struct`
+    - A parameter marked `scoped`
 
 ### ScopedRefAttribute
 The `scoped` annotations will be emitted into metadata via the type `System.Runtime.CompilerServices.ScopedRefAttribute` attribute. This attribute will be matched by name meaning it does not need to appear in any specific assembly.
