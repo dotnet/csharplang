@@ -384,6 +384,8 @@ Impact of this change is discussed more deeply [below](#examples-method-argument
 The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped)) on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
 - Add `scoped` to a `ref` or `in` parameter
 - Add `scoped` to a `ref struct` parameter
+- Remove `[UnscopedRef]` from an `out` parameter
+- Remove `[UnscopedRef]` from a `ref` parameter of a `ref struct` type
 
 Any other difference with respect to `scoped` will be considered an error. 
 
@@ -441,7 +443,9 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 <a name="rules-unscoped"></a>
 
-To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`.  The attribute can be used to expand the lifetime of a value. It can be applied to any `ref` which is implicitly `scoped` and has the impact of changing its *ref-safe-to-escape* to *calling method*.
+To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`.
+The attribute can be used to expand the lifetime of a value. It can be applied to any `ref` which is [implicitly `scoped`](#implicitly-scoped) and has the impact of changing its *ref-safe-to-escape* to *calling method*.
+An error is reported if `[UnscopedRef]` is applied to a parameter passed by value or to a `ref` that is not considered scoped.
 
 ```c#
 struct S
