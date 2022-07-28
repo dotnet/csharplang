@@ -445,7 +445,6 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`.
 The attribute can be used to expand the lifetime of a value. It can be applied to any `ref` which is [implicitly `scoped`](#implicitly-scoped) and has the impact of changing its *ref-safe-to-escape* to *calling method*.
-An error is reported if `[UnscopedRef]` is applied to a parameter passed by value or to a `ref` that is not considered scoped.
 
 ```c#
 struct S
@@ -498,6 +497,8 @@ Detailed Notes:
     - A member that is not declared on a `struct`
     - A `static` member, `init` member or constructor on a `struct`
     - A parameter marked `scoped`
+    - A parameter passed by value
+    - A parameter passed by reference that is not implicitly scoped
 
 ### ScopedRefAttribute
 The `scoped` annotations will be emitted into metadata via the type `System.Runtime.CompilerServices.ScopedRefAttribute` attribute. This attribute will be matched by name meaning it does not need to appear in any specific assembly.
