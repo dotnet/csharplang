@@ -112,7 +112,7 @@ ref struct ReadOnlyExample
 }
 ```
 
-A `readonly ref struct` will require that `ref` fields are marked as `readonly ref`. There is no requirement that they are marked as `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today ([more details](#reason-readonly-shallow))
+A `readonly ref struct` will require that `ref` fields are declared `readonly ref`. There is no requirement that they are declared `readonly ref readonly`. This does allow a `readonly struct` to have indirect mutations via such a field but that is no different than a `readonly` field that pointed to a reference type today ([more details](#reason-readonly-shallow))
 
 A `readonly ref` will be emitted to metadata using the `initonly` flag, same as any other field. A `ref readonly` field will be attributed with `System.Runtime.CompilerServices.IsReadOnlyAttribute`. A `readonly ref readonly` will be emitted with both items.
 
@@ -387,11 +387,11 @@ The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped
 - Remove `[UnscopedRef]` from an `out` parameter
 - Remove `[UnscopedRef]` from a `ref` parameter of a `ref struct` type
 
-Any other difference with respect to `scoped` will be considered an error. 
+Any other difference with respect to `scoped` or `[UnscopedRef]` will be considered an error. 
 
-The `scoped` modifier also has the following effects on method signatures:
-- The `scoped` modifier does not affect hiding.
-- Overloads cannot differ only on `scoped`
+The `scoped` modifier and `[UnscopedRef]` attribute also have the following effects on method signatures:
+- The `scoped` modifier and `[UnscopedRef]` attribute do not affect hiding
+- Overloads cannot differ only on `scoped` or `[UnscopedRef]`
 
 The section on `ref` field and `scoped` is long so wanted to close with a brief summary of the proposed breaking changes:
 
@@ -545,7 +545,7 @@ For example, the signature of the indexer for `CharBuffer.Data` will be the foll
 
 If the provided index is outside the declared bounds of the `fixed` array then an `IndexOutOfRangeException` will be thrown. In the case a constant value is provided then it will be replaced with a direct reference to the appropriate element. Unless the constant is outside the declared bounds in which case a compile time error would occur.
 
-There will also be a named accessor generated for each `fixed` buffer that provides by value `get` and `set` operations. Having this means that `fixed` buffers will more closely resemble existing array semantics by having a `ref` accessor as well as byval `get` and `set` operations. This means compilers will have the same flexibility when emitting code consuming `fixed` buffers as they do when consuming arrays. This should be operations like `await` over `fixed` buffers easier to emit. 
+There will also be a named accessor generated for each `fixed` buffer that provides by value `get` and `set` operations. Having this means that `fixed` buffers will more closely resemble existing array semantics by having a `ref` accessor as well as byval `get` and `set` operations. This means compilers will have the same flexibility when emitting code consuming `fixed` buffers as they do when consuming arrays. This should make operations like `await` over `fixed` buffers easier to emit. 
 
 This also has the added benefit that it will make `fixed` buffers easier to consume from other languages. Named indexers is a feature that has existed since the 1.0 release of .NET. Even languages which cannot directly emit a named indexer can generally consume them (C# is actually a good example of this).
 
@@ -714,6 +714,7 @@ For both cases in category (2) though the fix is straight forward. The `ref` par
 Ideally the language could reduce the impact of silent breaking changes by issuing a warning when an API silently falls into the troublesome behavior. That would be a method that both takes a `ref`, returns `ref struct` but does not actually capture the `ref` in the `ref struct`. The compiler could issue a diagnostic in that case informing developers such `ref` should be annotated as `scoped ref` instead. 
 
 **Decision** This design can be achieved but the resulting feature is more difficult to use to the point the decision was made to take the compat break.
+
 **Decision** The compiler will provide a warning when a method meets the criteria but does not capture the `ref` parameter as a `ref` field. This should suitably warn customers on upgrade about the potential issues they are creating
 
 ### Keywords vs. attributes
@@ -732,7 +733,7 @@ A rough sketch of the syntax would be:
 - `[DoesNotEscape]` maps to `scoped`
 - `[RefDoesEscape]` maps to `unscoped`
 
-**Decision** Use syntax
+**Decision** Use syntax for `scoped` and `scoped ref`; use attribute for `unscoped`.
 
 ### Allow fixed buffer locals
 This design allows for safe `fixed` buffers that can support any type. One possible extension here is allowing such `fixed` buffers to be declared as local variables. This would allow a number of existing `stackalloc` operations to be replaced with a `fixed` buffer. It would also expand the set of scenarios we could have stack style allocations as `stackalloc` is limited to unmanaged element types while `fixed` buffers are not. 
@@ -888,7 +889,7 @@ ref struct Nested
 Span<int> M(ref Nested nested) => nested.Span;
 ```
 
-This value is not related to the escape scope of the container; that is as it the container scope gets smaller it has no impact on the *ref-field-safe-to-escape* of the `ref` field values. Further the *ref-field-safe-to-escape* can never be smaller than the *safe-to-escape* of the container.
+This value is not related to the escape scope of the container; that is as the container scope gets smaller it has no impact on the *ref-field-safe-to-escape* of the `ref` field values. Further the *ref-field-safe-to-escape* can never be smaller than the *safe-to-escape* of the container.
 
 ```c#
 ref struct Nested
@@ -914,7 +915,7 @@ void M(ref Nested nested)
 
 This *ref-field-safe-to-escape-scope* has essentially always existed. Up until now `ref` fields could only point to normal `struct` hence it was trivially collapsed to *calling method*.  To support `ref` fields to `ref struct` our existing rules need to be updated to take into account this new escape scope.
 
-Third the rules for ref re-assignment need to be updated to ensure that we don't violate *ref-field-safe-to-escape* for the values. Essentially for `x.e1 = ref e2` where the type of `e1` is a `ref struct` the *ref-field-safe-to-escape` must be equal. 
+Third the rules for ref re-assignment need to be updated to ensure that we don't violate *ref-field-safe-to-escape* for the values. Essentially for `x.e1 = ref e2` where the type of `e1` is a `ref struct` the *ref-field-safe-to-escape* must be equal. 
 
 These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes us in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
 
@@ -924,14 +925,14 @@ These problems are very solvable. The compiler team has sketched out a few versi
 The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
 
 1. `ref` fields and `scoped`
-2. `ref` fields to `ref struct`
-3. Sunset restricted types
-4. `[UnscopedRef]` 
+2. `[UnscopedRef]`
+3. `ref` fields to `ref struct`
+4. Sunset restricted types
 5. fixed sized buffers
 
 What gets implemented in which release is merely a scoping exercise. 
 
-**Decision** Only (1) will make C# 11.0. The expectation is (2) and (3) are enabled very early in C# 12.0 to enable dogfooding by runtime throughout the .NET 8 cycle
+**Decision** Only (1) and (2) will make C# 11.0. The expectation is (3) and (4) are enabled very early in C# 12.0 to enable dogfooding by runtime throughout the .NET 8 cycle
 
 ## Future Considerations
 
