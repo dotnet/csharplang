@@ -28,15 +28,13 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 *Summer of C#*: Compiler optimizations and LINQ perf (Jared, Rikki, Maoni)
 
-## Wed Aug 17, 2022
-
 ## Mon Aug 15, 2022
 
 *Summer of C#*: Collection initializers and collection ergonomics (Cyrus, Rikki, Mads)
 
-## Wed Aug 10, 2022
-
 ## Wed Aug 3, 2022
+
+- Open issues with `scoped` (Chuck)
 
 ## Mon Aug 1, 2022
 
