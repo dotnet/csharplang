@@ -34,7 +34,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Aug 3, 2022
 
-- Open issues with `scoped` (Chuck)
+- Open issues with `scoped` (Chuck): https://github.com/dotnet/csharplang/issues/6337
 
 ## Mon Aug 1, 2022
 
