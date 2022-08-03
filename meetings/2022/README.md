@@ -32,17 +32,9 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 *Summer of C#*: Collection initializers and collection ergonomics (Cyrus, Rikki, Mads)
 
-## Wed Aug 3, 2022
-
-- Open issues with `scoped` (Chuck): https://github.com/dotnet/csharplang/issues/6337
-
 ## Mon Aug 1, 2022
 
 *Summer of C#*: Interactive and notebooks (Bill, Safia, Maoni)
-
-## Wed Jul 27, 2022
-
-- `scoped` modifier on other local variable declarations (Julien): https://github.com/dotnet/roslyn/issues/62039
 
 ## Mon Jul 18, 2022
 
@@ -56,6 +48,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Wed Aug 3, 2022
+
+1. `ref` fields specification updates
+
+## Wed Jul 27, 2022
+
+[C# Language Design Meeting for July 27th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-27-13.md)
+
+1. `scoped` for local declarations
 
 ## Wed Jul 13, 2022
 
