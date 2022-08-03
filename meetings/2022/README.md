@@ -51,11 +51,13 @@ Overview of meetings and agendas for 2022
 
 ## Wed Aug 3, 2022
 
+[C# Language Design Meeting for August 3rd, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-08-03.md)
+
 1. `ref` fields specification updates
 
 ## Wed Jul 27, 2022
 
-[C# Language Design Meeting for July 27th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-27-13.md)
+[C# Language Design Meeting for July 27th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-07-27.md)
 
 1. `scoped` for local declarations
 
