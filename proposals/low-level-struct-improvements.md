@@ -411,15 +411,10 @@ Detailed Notes:
     - The `langversion` value is 11 or higher
 
 ### Syntax
-[12.6.2 Local variable declarations](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1262-local-variable-declarations): added `local_variable_scope_modifier`.
+[12.6.2 Local variable declarations](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1262-local-variable-declarations): added `'scoped'?`.
 ```antlr
 local_variable_declaration
-    : local_variable_scope_modifier? local_variable_type local_variable_declarators
-    ;
-
-local_variable_scope_modifier
-    : local_variable_mode_modifier
-    | 'scoped' local_variable_mode_modifier?
+    : 'scoped'? local_variable_mode_modifier? local_variable_type local_variable_declarators
     ;
 
 local_variable_mode_modifier
@@ -427,17 +422,17 @@ local_variable_mode_modifier
     ;
 ```
 
-[12.9.4 The `for` statement](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1294-the-for-statement): added `local_variable_scope_modifier` _indirectly_ from `local_variable_declaration`.
+[12.9.4 The `for` statement](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1294-the-for-statement): added `'scoped'?` _indirectly_ from `local_variable_declaration`.
 
-[12.9.5 The `foreach` statement](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1295-the-foreach-statement): added `local_variable_scope_modifier`.
+[12.9.5 The `foreach` statement](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1295-the-foreach-statement): added `'scoped'?`.
 ```antlr
 foreach_statement
-    : 'foreach' '(' local_variable_scope_modifier? local_variable_type identifier 'in' expression ')'
+    : 'foreach' '(' 'scoped'? local_variable_type identifier 'in' expression ')'
       embedded_statement
     ;
 ```
 
-[11.6.2 Argument lists](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1162-argument-lists): added `scoped` for `out` declaration variable.
+[11.6.2 Argument lists](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1162-argument-lists): added `'scoped'?` for `out` declaration variable.
 ```antlr
 argument_value
     : expression
@@ -447,20 +442,16 @@ argument_value
     ;
 ```
 
-[14.6.2 Method parameters](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1462-method-parameters): added `parameter_scope_modifier`.
+[14.6.2 Method parameters](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1462-method-parameters): added `'scoped'?` to `parameter_modifier`.
 ```antlr
 fixed_parameter
     : attributes? parameter_modifier? type identifier default_argument?
     ;
 
 parameter_modifier
-    : parameter_scope_modifier
-    | 'this' parameter_scope_modifier?
-    ;
-
-parameter_scope_modifier
-    : parameter_mode_modifier
+    | 'this' 'scoped'? parameter_mode_modifier?
     | 'scoped' parameter_mode_modifier?
+    | parameter_mode_modifier
     ;
 
 parameter_mode_modifier
@@ -470,17 +461,12 @@ parameter_mode_modifier
     ;
 ```
 
-[19.2 Delegate declarations](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/delegates.md#192-delegate-declarations): added `parameter_scope_modifier` _indirectly_ from `fixed_parameter`.
+[19.2 Delegate declarations](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/delegates.md#192-delegate-declarations): added `'scoped'?` _indirectly_ from `fixed_parameter`.
 
-[11.16 Anonymous function expressions](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1116-anonymous-function-expressions): added `anonymous_function_parameter_scope_modifier`.
+[11.16 Anonymous function expressions](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1116-anonymous-function-expressions): added `'scoped'?`.
 ```antlr
 explicit_anonymous_function_parameter
-    : anonymous_function_parameter_scope_modifier? type identifier
-    ;
-
-anonymous_function_parameter_scope_modifier
-    : anonymous_function_parameter_modifier
-    | 'scoped' anonymous_function_parameter_modifier?
+    : 'scoped'? anonymous_function_parameter_modifier? type identifier
     ;
 
 anonymous_function_parameter_modifier
