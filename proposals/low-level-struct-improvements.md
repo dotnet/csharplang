@@ -442,6 +442,17 @@ argument_value
     ;
 ```
 
+[--.-.- Deconstruction expressions](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md): added `'scoped'?`.
+```antlr
+tuple_deconstruction_expression
+    : '(' destination (',' destination)+ ')'
+    ;
+
+destination
+    : ('scoped'? local_variable_type)? identifier
+    ;
+```
+
 [14.6.2 Method parameters](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1462-method-parameters): added `'scoped'?` to `parameter_modifier`.
 ```antlr
 fixed_parameter
