@@ -34,7 +34,7 @@ TwoSpans<T>[] arr = null;
 
 Designating a struct as ref-like will allow the struct to have ref-like instance fields and will also make all the requirements of ref-like types applicable to the struct. 
 
-## Metadata representation or ref-like structs
+## Metadata representation of ref-like structs
 
 Ref-like structs will be marked with **System.Runtime.CompilerServices.IsRefLikeAttribute** attribute.
 
