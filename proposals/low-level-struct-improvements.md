@@ -375,7 +375,7 @@ The presence of `ref` fields means the rules around method arguments must match 
 
 > For any method invocation `e.M(a1, a2, ... aN)`
 > 1. Calculate the *safe-to-escape* of the method return (for this rule assume it has a `ref struct` return type)
-> 2. All `ref` or `out` arguments must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
+> 2. All `ref` or `out` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
 
 The presence of `scoped` allows developers to reduce the friction this rule creates by marking parameters which are not returned as `scoped`. This removes their arguments from (1) above and provides greater flexibility to callers.
 
