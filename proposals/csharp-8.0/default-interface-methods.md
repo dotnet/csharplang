@@ -113,7 +113,7 @@ interface IB : IA
 }
 interface IC : IA
 {
-    void M() { WriteLine("IB.M"); } // Creates a new M, unrelated to `IA.M`. Warning
+    void M() { WriteLine("IC.M"); } // Creates a new M, unrelated to `IA.M`. Warning
 }
 ```
 
