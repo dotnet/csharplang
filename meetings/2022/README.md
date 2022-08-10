@@ -32,6 +32,10 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 *Summer of C#*: Collection initializers and collection ergonomics (Cyrus, Rikki, Mads)
 
+## Wed Aug 10, 2022
+
+- Should required on a property force it to be nullable in the constructor always (Fred) - https://github.com/dotnet/csharplang/issues/6359
+
 ## Mon Aug 1, 2022
 
 *Summer of C#*: Interactive and notebooks (Bill, Safia, Maoni)
