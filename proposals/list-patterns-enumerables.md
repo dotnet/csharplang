@@ -39,7 +39,7 @@ When multiple *list_patterns* are applied to one input value, the collection wil
 It is possible that the collection will not be completely enumerated. For example, if one of the subpatterns in the list doesn't match or when there are no ending patterns in a *list_pattern* (e.g. `[ 1, 2, .. ]`).
 
 If an enumerator is produced when a *list_pattern* is applied to an enumerable type and that enumerator is disposable it will be disposed when a top-level pattern containing the *list_pattern* successfully matches, or when none of the patterns match (in the case of a `switch` statement or expression). It is possible for an enumerator to be disposed more than once and the enumerator must ignore all calls to `Dispose` after the first one.
-```
+```cs
 // any enumerator used to evaluate this switch statement is disposed at the indicated locations
 _ = collection switch
 {
