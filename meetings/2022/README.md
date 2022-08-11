@@ -16,6 +16,12 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
+## Wed Sep 28, 2022
+
+## Mon Sep 26, 2022
+
+## Wed Sep 21, 2022
+
 ## Wed Aug 31, 2022
 
 ## Mon Aug 29, 2022
@@ -27,10 +33,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Mon Aug 22, 2022
 
 *Summer of C#*: Compiler optimizations and LINQ perf (Jared, Rikki, Maoni)
-
-## Mon Aug 15, 2022
-
-*Summer of C#*: Collection initializers and collection ergonomics (Cyrus, Rikki, Mads)
 
 ## Wed Aug 10, 2022
 
