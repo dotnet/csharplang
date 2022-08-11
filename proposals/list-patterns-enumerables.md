@@ -5,6 +5,7 @@
 Lets you to match an enumerable with a sequence of patterns e.g. `enumerable is [ 1, 2, 3 ]` will match a sequence of the length three with 1, 2, 3 as its elements.
 
 ## Detailed design
+
 The pattern syntax is unchanged:
 
 ```antlr
