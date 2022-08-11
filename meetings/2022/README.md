@@ -34,10 +34,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 *Summer of C#*: Compiler optimizations and LINQ perf (Jared, Rikki, Maoni)
 
-## Wed Aug 10, 2022
-
-- Should required on a property force it to be nullable in the constructor always (Fred) - https://github.com/dotnet/csharplang/issues/6359
-
 ## Mon Aug 1, 2022
 
 *Summer of C#*: Interactive and notebooks (Bill, Safia, Maoni)
@@ -54,6 +50,12 @@ All schedule items must have a public issue or checked in proposal that can be l
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Wed Aug 10, 2022
+
+[C# Language Design Meeting for August 10th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-08-10.md)
+
+1. `required` property default nullability
 
 ## Wed Aug 3, 2022
 
