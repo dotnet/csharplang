@@ -210,10 +210,42 @@ this proposal should attempt to address it.
 
 ### Effect on nullable analysis
 
-Members that are marked `required` are not required to be initialized to a non-nullable state at the end of a constructor. These members are additionally considered by nullable analysis to
-be maybe-null at the beginning of any constructor in a type, unless chaining to a `this` or `base` constructor that is attributed with `SetsRequiredMembersAttribute`.
+Members that are marked `required` are not required to be initialized to a non-nullable state at the end of a constructor. All `required` members from this type and any base types are considered
+by nullable analysis to be maybe-null at the beginning of any constructor in that type, unless chaining to a `this` or `base` constructor that is attributed with `SetsRequiredMembersAttribute`.
 
-NB: `SetsRequiredMembersAttribute` does not bring back nullable warnings at the end of a constructor for members, as it is an escape hatch intended to inform the compiler to stop enforcing things.
+Constructors attributed with `SetsRequiredMembersAttribute` will warn about all required fields and properties (including from base types) that do not have a null state matching their declared
+null state.
+
+```cs
+#nullable enable
+public class Base
+{
+    public required string Prop1 { get; set; }
+}
+public class Derived : Base
+{
+    public required string Prop2 { get; set; }
+
+    [SetsRequiredMembers]
+    public Derived() : base()
+    {
+    } // Warning: Prop1 and Prop2 are possibly null.
+
+    [SetsRequiredMembers]
+    public Derived(int unused) : base()
+    {
+        Prop1.ToString(); // Warning: possibly null dereference
+        Prop2.ToString(); // Warning: possibly null dereference
+    }
+
+    [SetsRequiredMembers]
+    public Derived(int unused, int unused2) : this()
+    {
+        Prop1.ToString(); // Ok
+        Prop2.ToString(); // Ok
+    }
+}
+```
 
 ### Metadata Representation
 
