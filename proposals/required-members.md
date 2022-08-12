@@ -210,17 +210,21 @@ this proposal should attempt to address it.
 
 ### Effect on nullable analysis
 
-Members that are marked `required` are not required to be initialized to a non-nullable state at the end of a constructor. All `required` members from this type and any base types are considered
-by nullable analysis to be maybe-null at the beginning of any constructor in that type, unless chaining to a `this` or `base` constructor that is attributed with `SetsRequiredMembersAttribute`.
+Members that are marked `required` are not required to be initialized to a valid nullable state at the end of a constructor. All `required` members from this type and any base types are considered
+by nullable analysis to be default at the beginning of any constructor in that type, unless chaining to a `this` or `base` constructor that is attributed with `SetsRequiredMembersAttribute`.
 
-Constructors attributed with `SetsRequiredMembersAttribute` will warn about all required fields and properties (including from base types) that do not have a null state matching their declared
-null state.
+Nullable analysis will warn about all `required` members from the current and base types that do not have a valid nullable state at the end of a constructor attributed with `SetsRequiredMembersAttribute`.
 
 ```cs
 #nullable enable
 public class Base
 {
     public required string Prop1 { get; set; }
+
+    public Base() {}
+
+    [SetsRequiredMembers]
+    public Base(int unused) { Prop1 = ""; }
 }
 public class Derived : Base
 {
@@ -243,6 +247,13 @@ public class Derived : Base
     {
         Prop1.ToString(); // Ok
         Prop2.ToString(); // Ok
+    }
+
+    [SetsRequiredMembers]
+    public Derived(int unused1, int unused2, int unused3) : base(unused1)
+    {
+        Prop1.ToString(); // Ok
+        Prop2.ToString(); // Warning: possibly null dereference
     }
 }
 ```
