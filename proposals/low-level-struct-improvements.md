@@ -501,8 +501,7 @@ Detailed Notes:
     - A parameter passed by reference that is not implicitly scoped
 
 ### ScopedRefAttribute
-The `scoped` annotations will be emitted into metadata via the type `System.Runtime.CompilerServices.ScopedRefAttribute` attribute.
-The attribute will be matched by namespace-qualified name so the definition does not need to appear in any specific assembly.
+The `scoped` annotations will be emitted into metadata via the type `System.Runtime.CompilerServices.ScopedRefAttribute` attribute. The attribute will be matched by namespace-qualified name so the definition does not need to appear in any specific assembly.
 
 The `ScopedRefAttribute` type is for compiler use only - it is not permitted in source. The type declaration is synthesized by the compiler if not already included in the compilation.
 
@@ -523,8 +522,7 @@ The compiler will emit this attribute on the parameter with `scoped` syntax. Thi
 ### RefSafetyRulesAttribute
 When compiling with a corelib that contains the feature flag for `ref` fields _or_ when compiling with language version 11 or higher, the compiler will emit a `[module: RefSafetyRules(11)]` attribute.
 
-The argument to the attribute indicates the language version of the _safety rules_ and will be `11` regardless of the actual language version passed to the compiler.
-The argument indicates that the C#11 safety rules were used when compiling the module.
+The argument to the attribute indicates the language version of the _safety rules_ used when compiling the module, and will be `11` regardless of the actual language version passed to the compiler.
 
 The attribute will be matched by namespace-qualified name so the definition does not need to appear in any specific assembly.
 
