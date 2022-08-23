@@ -103,7 +103,7 @@ This proposal adds additional complexity to the compiler in exchange for broader
 ## Alternatives
 [alternatives]: #alternatives
 
-The current `+` operator for string concatnation can combine strings in a similar manner to the current proposal.
+The current `+` operator for string concatenation can combine strings in a similar manner to the current proposal.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
