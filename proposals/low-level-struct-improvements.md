@@ -520,11 +520,11 @@ namespace System.Runtime.CompilerServices
 The compiler will emit this attribute on the parameter with `scoped` syntax. This will only be emitted when the syntax causes the value to differ from its default state. For example `scoped out` will cause no attribute to be emitted.
 
 ### RefSafetyRulesAttribute
-When compiling with a corelib that contains the feature flag for `ref` fields _or_ when compiling with language version 11 or higher, the compiler will emit a `[module: RefSafetyRules(11)]` attribute.
+To improve interoperability between modules compiled with different ref safety rules, the compiler will emit a `[module: RefSafetyRules(11)]` attribute when compiling a module with `-langversion:11` or higher or with a corlib containing the feature flag for `ref` fields.
 
-The argument to the attribute indicates the language version of the _safety rules_ used when compiling the module, and will be `11` regardless of the actual language version passed to the compiler.
+The argument to the attribute indicates the language version of the _ref safety rules_ used when the module was compiled. The version is currently fixed at `11` regardless of the actual language version passed to the compiler.
 
-The attribute will be matched by namespace-qualified name so the definition does not need to appear in any specific assembly.
+The `RefSafetyRulesAttribute` will be matched by namespace-qualified name so the definition does not need to appear in any specific assembly.
 
 The `RefSafetyRulesAttribute` type is for compiler use only - it is not permitted in source. The type declaration is synthesized by the compiler if not already included in the compilation.
 
@@ -540,20 +540,12 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-The intent of `RefSafetyRulesAttribute` is to improve interoperating with existing assemblies.
-Specifically, the compiler will use the module-level `RefSafetyRulesAttribute` to determine the scope of unannotated parameters within that module.
+When the C#11 compiler _analyzes a method call_:
+- If the module containing the method declaration includes `[module: RefSafetyRules(version)]`, regardless of `version`, the method call is analyzed with C#11 rules.
+- If the module containing the method declaration is from source, and compiled with `-langversion:11` or with a corlib containing the feature flag for `ref` fields, the method call is analyzed with C#11 rules.
+- Otherwise, the method call is analyzed with C#7.2 rules.
 
-If the containing module includes a module-level `RefSafetyRulesAttribute` with `Version = 11`:
-- unannotated `out` parameters are implicitly `scoped out`,
-- unannotated `ref` parameters to `ref struct` types are implicitly `scoped ref`.
-
-If the containing module _does not_ include a module-level `RefSafetyRulesAttribute`, _or_ the containing module includes a module-level `RefSafetyRulesAttribute` with `Version != 11`:
-- unannotated `out` parameters are unscoped,
-- unannotated `ref` parameters to `ref struct` types are unscoped.
-
-The presence or absence of a `RefSafetyRulesAttribute` affects the unannotated parameters listed above only.
-There are no other changes to defaults or the updated safety rules used by the compiler.
-In particular, an unannotated `this` parameter for a `struct` instance method is implicitly `scoped ref` regardless of `RefSafetyRulesAttribute`.
+A pre-C#11 compiler will ignore any `RefSafetyRulesAttribute` and analyze method calls with C#7.2 rules only.
 
 ### Safe fixed size buffers
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
