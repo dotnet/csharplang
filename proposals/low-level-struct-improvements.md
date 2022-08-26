@@ -524,6 +524,14 @@ To improve interoperability between modules compiled with different ref safety r
 
 The argument to the attribute indicates the language version of the _ref safety rules_ used when the module was compiled. The version is currently fixed at `11` regardless of the actual language version passed to the compiler.
 
+When the C#11 compiler _analyzes a method call_:
+- If the module containing the method declaration includes `[module: RefSafetyRules(version)]`, regardless of `version`, the method call is analyzed with C#11 rules.
+- If the module containing the method declaration is from source, and compiled with `-langversion:11` or with a corlib containing the feature flag for `ref` fields, the method call is analyzed with C#11 rules.
+- _If the module containing the method declaration references `System.Runtime { ver: 7.0 }`, the method call is analyzed with C#11 rules. This rule is a temporary mitigation for modules compiled with earlier previews of C#11 and .NET 7 and may be removed later._
+- Otherwise, the method call is analyzed with C#7.2 rules.
+
+A pre-C#11 compiler will ignore any `RefSafetyRulesAttribute` and analyze method calls with C#7.2 rules only.
+
 The `RefSafetyRulesAttribute` will be matched by namespace-qualified name so the definition does not need to appear in any specific assembly.
 
 The `RefSafetyRulesAttribute` type is for compiler use only - it is not permitted in source. The type declaration is synthesized by the compiler if not already included in the compilation.
@@ -539,13 +547,6 @@ namespace System.Runtime.CompilerServices
     }
 }
 ```
-
-When the C#11 compiler _analyzes a method call_:
-- If the module containing the method declaration includes `[module: RefSafetyRules(version)]`, regardless of `version`, the method call is analyzed with C#11 rules.
-- If the module containing the method declaration is from source, and compiled with `-langversion:11` or with a corlib containing the feature flag for `ref` fields, the method call is analyzed with C#11 rules.
-- Otherwise, the method call is analyzed with C#7.2 rules.
-
-A pre-C#11 compiler will ignore any `RefSafetyRulesAttribute` and analyze method calls with C#7.2 rules only.
 
 ### Safe fixed size buffers
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
