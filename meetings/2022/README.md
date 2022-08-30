@@ -23,25 +23,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Aug 31, 2022
 
-## Mon Aug 29, 2022
-
-*Summer of C#*: More minimal (Safia, Fowler, Jared)
-
-## Mon Aug 22, 2022
-
-*Summer of C#*: Compiler optimizations and LINQ perf (Jared, Rikki, Maoni)
-
-## Mon Aug 1, 2022
-
-*Summer of C#*: Interactive and notebooks (Bill, Safia, Maoni)
-
-## Mon Jul 18, 2022
-
-*Summer of C#*: Union types (Fred, Chuck, Damian)
-
-## Mon Jul 11, 2022
-
-*Summer of C#*: Existential types, associated types and self-types (Mads, Andy, Fred)
+- Identify low-hanging fruits for implementation among possible future features (Mads, Jared): https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22
 
 # C# Language Design Notes for 2022
 
