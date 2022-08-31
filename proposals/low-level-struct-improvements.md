@@ -529,7 +529,12 @@ To reduce the chance of breaking changes when recompiling with C#11, we will upd
 
 To enable this, the compiler will emit a new `[module: RefSafetyRules(11)]` attribute when the module is compiled with `-langversion:11` or higher or compiled with a corlib containing the feature flag for `ref` fields.
 
-The argument to the attribute indicates the language version of the _ref safety rules_ used when the module was compiled. The version is currently fixed at `11` regardless of the actual language version passed to the compiler.
+The argument to the attribute indicates the language version of the _ref safety rules_ used when the module was compiled.
+The verion is currently fixed at `11` regardless of the actual language version passed to the compiler.
+
+The expectation is that future versions of the compiler will update the ref safety rules and emit attributes with distinct versions.
+
+If the compiler loads a module that includes a `[module: RefSafetyRules(version)]` _with a `version` other than `11`_, the compiler will report a warning for the unrecognized version if there are any calls to methods declared in that module.
 
 When the C#11 compiler _analyzes a method call_:
 - If the module containing the method declaration includes `[module: RefSafetyRules(version)]`, regardless of `version`, the method call is analyzed with C#11 rules.
