@@ -185,7 +185,7 @@ class Program {
         ConsoleEx.Write(ValueFormattableString.Create((Variant)42));
         ConsoleEx.Write(ValueFormattableString.Create(
             "hello {0}", 
-            new Variant(DateTime.UtcNow));
+            new Variant(DateTime.UtcNow)));
     }
 }
 ```
