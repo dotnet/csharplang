@@ -320,7 +320,7 @@ are available then it will give us this type of flexibility.
 
 ### Why not varargs? 
 The existing 
-[varargs](https://docs.microsoft.com/en-us/cpp/windows/variable-argument-lists-dot-dot-dot-cpp-cli?view=vs-2017)
+[varargs](https://docs.microsoft.com/cpp/windows/variable-argument-lists-dot-dot-dot-cpp-cli?view=vs-2017)
 feature was considered here as a possible solution. This feature though is meant primarily for C++/CLI scenarios and
 has known holes for other scenarios. Additionally there is significant cost in porting this to Unix. Hence it wasn't
 seen as a viable solution.
@@ -331,4 +331,3 @@ This spec is related to the following issues:
 - https://github.com/dotnet/csharplang/issues/1757
 - https://github.com/dotnet/csharplang/issues/179
 - https://github.com/dotnet/corefxlab/pull/2595
-
