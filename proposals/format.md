@@ -53,7 +53,7 @@ One such potential implementation is the following. Consider all `params` invoca
 could allocate an array which has a size equal to the largest `params` invocation and use that for all of the 
 invocations by creating appropriately sized `Span<T>` instances over the array. For example:
 
-``` csharp
+```csharp
 static class OneAllocation {
     static void Use(params Span<string> spans) {
         ...
@@ -69,7 +69,7 @@ static class OneAllocation {
 
 The compiler could choose to emit the body of `Go` as follows:
 
-``` csharp
+```csharp
     static void Go() {
         var args = new string[3];
         args[0] = "jaredpar";
@@ -93,7 +93,7 @@ This optimization cannot always be applied though. Even though the callee cannot
 still be captured in the caller when there is a `ref` or a `out / ref` parameter that is itself a `ref struct`
 type. 
 
-``` csharp
+```csharp
 static class SneakyCapture {
     static ref int M(params Span<T> span) => ref span[0];
 
@@ -165,7 +165,7 @@ be implemented by translating the interpolated string into the call `ValueFormat
 for `FormattableString.Create` today. The language will support all `params` options described in this document when
 looking for the most suitable `ValueFormattableString.Create` method. 
 
-``` csharp
+```csharp
 readonly struct ValueFormattableString {
     public static ValueFormattableString Create(Variant v) { ... } 
     public static ValueFormattableString Create(string s) { ... } 
@@ -225,7 +225,7 @@ The CoreFX team also has a non-allocating set of storage types for up to three `
 them: `CreateSpan` and `KeepAlive`. This means for a `params Span<Variant>` of up to three arguments the call site 
 can be entirely allocation free.
 
-``` csharp
+```csharp
 static class ZeroAllocation {
     static void Use(params Span<Variant> spans) {
         ...
@@ -239,7 +239,7 @@ static class ZeroAllocation {
 
 The `Go` method can be lowered to the following:
 
-``` csharp
+```csharp
 static class ZeroAllocation {
     static void Go() {
         Variant2 _v;
@@ -269,7 +269,7 @@ This limitation is not some fundamental restriction though but instead more an a
 to add new op codes / intrinsics which provide universal stack allocation. These could then be used to allocate the
 backing storage for most `params Span<T>` calls.
 
-``` csharp
+```csharp
 static class BetterAllocation {
     static void Use(params Span<string> spans) {
         ...
@@ -283,7 +283,7 @@ static class BetterAllocation {
 
 The `Go` method can be lowered to the following:
 
-``` csharp
+```csharp
 static class ZeroAllocation {
     static void Go() {
         Span<T> span = RuntimeIntrinsic.StackAlloc<string>(length: 2);
