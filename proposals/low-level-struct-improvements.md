@@ -539,7 +539,7 @@ If the compiler loads a module that includes a `[module: RefSafetyRules(version)
 When the C#11 compiler _analyzes a method call_:
 - If the module containing the method declaration includes `[module: RefSafetyRules(version)]`, regardless of `version`, the method call is analyzed with C#11 rules.
 - If the module containing the method declaration is from source, and compiled with `-langversion:11` or with a corlib containing the feature flag for `ref` fields, the method call is analyzed with C#11 rules.
-- _If the module containing the method declaration references `System.Runtime { ver: 7.0 }`, the method call is analyzed with C#11 rules. This rule is a temporary mitigation for modules compiled with earlier previews of C#11 / .NET 7 and may be removed later._
+- _If the module containing the method declaration references `System.Runtime { ver: 7.0 }`, the method call is analyzed with C#11 rules. This rule is a temporary mitigation for modules compiled with earlier previews of C#11 / .NET 7 and will be removed later._
 - Otherwise, the method call is analyzed with C#7.2 rules.
 
 A pre-C#11 compiler will ignore any `RefSafetyRulesAttribute` and analyze method calls with C#7.2 rules only.
