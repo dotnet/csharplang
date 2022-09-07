@@ -501,7 +501,9 @@ Detailed Notes:
     - A parameter passed by reference that is not implicitly scoped
 
 ### ScopedRefAttribute
-The `scoped` annotations will be emitted into metadata via the type `System.Runtime.CompilerServices.ScopedRefAttribute` attribute. This attribute will be matched by name meaning it does not need to appear in any specific assembly.
+The `scoped` annotations will be emitted into metadata via the type `System.Runtime.CompilerServices.ScopedRefAttribute` attribute. The attribute will be matched by namespace-qualified name so the definition does not need to appear in any specific assembly.
+
+The `ScopedRefAttribute` type is for compiler use only - it is not permitted in source. The type declaration is synthesized by the compiler if not already included in the compilation.
 
 The type will have the following definition:
 
@@ -516,6 +518,47 @@ namespace System.Runtime.CompilerServices
 ```
 
 The compiler will emit this attribute on the parameter with `scoped` syntax. This will only be emitted when the syntax causes the value to differ from its default state. For example `scoped out` will cause no attribute to be emitted.
+
+### RefSafetyRulesAttribute
+There are several differences in the _ref safety rules_ between C#7.2 and C#11. Any of these differences could result in breaking changes when recompiling with C#11 against references compiled with C#10 or earlier.
+1. unscoped `ref`/`in`/`out` parameters may escape a method invocation as a `ref` field of a `ref struct` in C#11, not in C#7.2
+1. `out` parameters are implicitly scoped in C#11, and unscoped in C#7.2
+1. `ref`/`in` parameters to `ref struct` types are implicitly scoped in C#11, and unscoped in C#7.2
+
+To reduce the chance of breaking changes when recompiling with C#11, we will update the C#11 compiler to use the ref safety rules _for method invocation_ that _match the rules that were used to analyze the method declaration_. Essentially, when analyzing a call to a method compiled with an older compiler, the C#11 compiler will use C#7.2 ref safety rules. 
+
+To enable this, the compiler will emit a new `[module: RefSafetyRules(11)]` attribute when the module is compiled with `-langversion:11` or higher or compiled with a corlib containing the feature flag for `ref` fields.
+
+The argument to the attribute indicates the language version of the _ref safety rules_ used when the module was compiled.
+The verion is currently fixed at `11` regardless of the actual language version passed to the compiler.
+
+The expectation is that future versions of the compiler will update the ref safety rules and emit attributes with distinct versions.
+
+If the compiler loads a module that includes a `[module: RefSafetyRules(version)]` _with a `version` other than `11`_, the compiler will report a warning for the unrecognized version if there are any calls to methods declared in that module.
+
+When the C#11 compiler _analyzes a method call_:
+- If the module containing the method declaration includes `[module: RefSafetyRules(version)]`, regardless of `version`, the method call is analyzed with C#11 rules.
+- If the module containing the method declaration is from source, and compiled with `-langversion:11` or with a corlib containing the feature flag for `ref` fields, the method call is analyzed with C#11 rules.
+- _If the module containing the method declaration references `System.Runtime { ver: 7.0 }`, the method call is analyzed with C#11 rules. This rule is a temporary mitigation for modules compiled with earlier previews of C#11 / .NET 7 and will be removed later._
+- Otherwise, the method call is analyzed with C#7.2 rules.
+
+A pre-C#11 compiler will ignore any `RefSafetyRulesAttribute` and analyze method calls with C#7.2 rules only.
+
+The `RefSafetyRulesAttribute` will be matched by namespace-qualified name so the definition does not need to appear in any specific assembly.
+
+The `RefSafetyRulesAttribute` type is for compiler use only - it is not permitted in source. The type declaration is synthesized by the compiler if not already included in the compilation.
+
+```csharp
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Module, AllowMultiple = false, Inherited = false)]
+    internal sealed class RefSafetyRulesAttribute : Attribute
+    {
+        public RefSafetyRulesAttribute(int version) { Version = version; }
+        public readonly int Version;
+    }
+}
+```
 
 ### Safe fixed size buffers
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
