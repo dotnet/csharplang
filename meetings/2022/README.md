@@ -30,17 +30,17 @@ Overview of meetings and agendas for 2022
 [C# Language Design Meeting for August 31st, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-08-31.md)
 
 1. Short term work triage
-  1. Partial properties
-  2. Using aliases for any type
-  3. Null-conditional assignment
-  4. `await?`
-  5. `params IEnumerable`
-  6. Discriminated Unions
-  7. Roles
-  8. `pragma warning enable`
-  9. Ignored directives support
-  10. Primary constructors
-  11. Switch expression as a statement
+    1. Partial properties
+    2. Using aliases for any type
+    3. Null-conditional assignment
+    4. `await?`
+    5. `params IEnumerable`
+    6. Discriminated Unions
+    7. Roles
+    8. `pragma warning enable`
+    9. Ignored directives support
+    10. Primary constructors
+    11. Switch expression as a statement
 
 ## Wed Aug 24, 2022
 
