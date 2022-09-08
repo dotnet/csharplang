@@ -438,7 +438,7 @@ argument_value
     : expression
     | 'in' variable_reference
     | 'ref' variable_reference
-    | 'scoped'? 'out' local_variable_type? identifier
+    | 'out' ('scoped'? local_variable_type)? identifier
     ;
 ```
 
