@@ -410,6 +410,77 @@ Detailed Notes:
     - The core library contains the feature flag indicating support for `ref` fields
     - The `langversion` value is 11 or higher
 
+### Syntax
+[12.6.2 Local variable declarations](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1262-local-variable-declarations): added `'scoped'?`.
+```antlr
+local_variable_declaration
+    : 'scoped'? local_variable_mode_modifier? local_variable_type local_variable_declarators
+    ;
+
+local_variable_mode_modifier
+    : 'ref' 'readonly'?
+    ;
+```
+
+[12.9.4 The `for` statement](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1294-the-for-statement): added `'scoped'?` _indirectly_ from `local_variable_declaration`.
+
+[12.9.5 The `foreach` statement](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1295-the-foreach-statement): added `'scoped'?`.
+```antlr
+foreach_statement
+    : 'foreach' '(' 'scoped'? local_variable_type identifier 'in' expression ')'
+      embedded_statement
+    ;
+```
+
+[11.6.2 Argument lists](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1162-argument-lists): added `'scoped'?` for `out` declaration variable.
+```antlr
+argument_value
+    : expression
+    | 'in' variable_reference
+    | 'ref' variable_reference
+    | 'scoped'? 'out' local_variable_type? identifier
+    ;
+```
+
+[--.-.- Deconstruction expressions](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md):
+```antlr
+[TBD]
+```
+
+[14.6.2 Method parameters](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1462-method-parameters): added `'scoped'?` to `parameter_modifier`.
+```antlr
+fixed_parameter
+    : attributes? parameter_modifier? type identifier default_argument?
+    ;
+
+parameter_modifier
+    | 'this' 'scoped'? parameter_mode_modifier?
+    | 'scoped' parameter_mode_modifier?
+    | parameter_mode_modifier
+    ;
+
+parameter_mode_modifier
+    : 'in'
+    | 'ref'
+    | 'out'
+    ;
+```
+
+[19.2 Delegate declarations](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/delegates.md#192-delegate-declarations): added `'scoped'?` _indirectly_ from `fixed_parameter`.
+
+[11.16 Anonymous function expressions](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1116-anonymous-function-expressions): added `'scoped'?`.
+```antlr
+explicit_anonymous_function_parameter
+    : 'scoped'? anonymous_function_parameter_modifier? type identifier
+    ;
+
+anonymous_function_parameter_modifier
+    : 'in'
+    | 'ref'
+    | 'out'
+    ;
+```
+
 ### Sunset restricted types
 The compiler has a concept of a set of "restricted types" which is largely undocumented. These types were given a special status because in C# 1.0 there was no general purpose way to express their behavior. Most notably the fact that the types can contain references to the execution stack. Instead the compiler had special knowledge of them and restricted their use to ways that would always be safe: disallowed returns, cannot use as array elements, cannot use in generics, etc ...
 
@@ -601,7 +672,7 @@ In section [11.7.15.3 Object initializers](https://github.com/dotnet/csharpstand
 ```antlr
 initializer_value
     : 'ref' expression // added
-    : expression
+    | expression
     | object_or_collection_initializer
     ;
 ```
@@ -610,7 +681,7 @@ In the section for [`with` expression](https://github.com/dotnet/csharplang/blob
 ```antlr
 member_initializer
     : identifier '=' 'ref' expression // added
-    : identifier '=' expression
+    | identifier '=' expression
     ;
 ```
 
