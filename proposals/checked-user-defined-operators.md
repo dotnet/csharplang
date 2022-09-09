@@ -166,7 +166,7 @@ public class MyClass
         Int128 r5 = checked(lhs * rhs);
 
         // Error: Operator '*' cannot be applied to operands of type 'Int128' and 'Int128'
-        Int128 r5 = unchecked(lhs * rhs);
+        Int128 r6 = unchecked(lhs * rhs);
     }
 
     public static void Divide(Int128 lhs, byte rhs)
