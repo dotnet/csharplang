@@ -387,7 +387,15 @@ The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped
 - Remove `[UnscopedRef]` from an `out` parameter
 - Remove `[UnscopedRef]` from a `ref` parameter of a `ref struct` type
 
-Any other difference with respect to `scoped` or `[UnscopedRef]` will be considered an error. 
+Any other difference with respect to `scoped` or `[UnscopedRef]` is considered a mismatch.
+
+The compiler will report a diagnostic for _unsafe scoped mismatches_ across overrides, interface implementations, and delegate conversions when:
+- The method returns a `ref struct` or returns a `ref`, or the method has a `ref` or `out` parameter of `ref struct` type, or the method is a non-`readonly` instance method of a ref struct type, and
+- The method has at least one additional `ref`, `in`, or `out` parameter, or a parameter of `ref struct` type.
+
+The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safety rules; otherwise, the diagnostic is a _warning_.
+
+The scoped mismatch warning may be reported on a module compiled with C#7.2 ref safety rules where `scoped` is not available. In some such cases, it may be necessary to suppress the warning if the other mismatched signature cannot be modified.
 
 The `scoped` modifier and `[UnscopedRef]` attribute also have the following effects on method signatures:
 - The `scoped` modifier and `[UnscopedRef]` attribute do not affect hiding
