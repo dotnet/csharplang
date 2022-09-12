@@ -552,6 +552,10 @@ ref int SneakyOut([UnscopedRef] out int i)
 
 For the purposes of span safety rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. In the case `[UnscopedRef]` applies to a `ref` of `ref struct` the *ref-safe-to-escape* will be *return only*. This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
 
+In the case `[UnscopedRef]` applies to a `ref` of `ref struct` the *ref-safe-to-escape* will be *return only*. This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
+
+The lifetime of a `ref` annotated with `[UnscopedRef]` is that of a normal `ref`. For example applying it to a `this` of a `struct` means `this` acts as an unannotated `ref` of the same type. The exception is when `[Unscoped]
+
 The `[UnscopedRef]` annotation will be disallowed on `init` members and constructors. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `[UnscopedRef]` would permit such a `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
 
 The attribute type will have the following definition:
