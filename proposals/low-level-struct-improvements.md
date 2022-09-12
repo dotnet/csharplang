@@ -390,8 +390,10 @@ The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped
 Any other difference with respect to `scoped` or `[UnscopedRef]` is considered a mismatch.
 
 The compiler will report a diagnostic for _unsafe scoped mismatches_ across overrides, interface implementations, and delegate conversions when:
-- The method returns a `ref struct` or returns a `ref`, or the method has a `ref` or `out` parameter of `ref struct` type, or the method is a non-`readonly` instance method of a ref struct type, and
+- The method returns a `ref struct` or returns a `ref` or `ref readonly`, or the method has a `ref` or `out` parameter of `ref struct` type, and
 - The method has at least one additional `ref`, `in`, or `out` parameter, or a parameter of `ref struct` type.
+
+The rules above ignore `this` parameters because `ref struct` instance methods cannot be used for overrides, interface implementations, or delegate conversions.
 
 The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safety rules; otherwise, the diagnostic is a _warning_.
 
