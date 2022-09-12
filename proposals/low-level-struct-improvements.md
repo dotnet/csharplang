@@ -309,6 +309,13 @@ The span safety rules will be written in terms of `scoped ref` and `ref`. For sp
 
 When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
 
+<a name="return-only"></a>
+The design also requires that the introduction of a new escape scope: *return only*. This is similar to *calling method* in that it can be returned but it can **only** be returned through a `return` statement. 
+
+The details of *return only* is that it's a scope which is greater than *current method* but smaller than *calling method*. An expression provided to a `return` statement must be at least *return only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-to-escape* of *return only* will fail because it's smaller than the `ref` parameters *safe-to-escape* which is *calling method*. The need for this new escape scope will be discussed [below](#rules-unscoped). 
+
+Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-to-escape*, and if applicable a *ref-safe-to-escape*, of at least *return only*. That includes `return` statements, expression bodied members and lambda expressions.
+
 <a name="rules-method-invocation"></a>
 
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
@@ -374,7 +381,9 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). The new rule is ... 
 
 > For any method invocation `e.M(a1, a2, ... aN)`
-> 1. Calculate the *safe-to-escape* of the method return (for this rule assume it has a `ref struct` return type)
+> 1. Calculate the *safe-to-escape* of the method return.
+>     - Ignore the *ref-safe-to-escape* of arguments to `in / ref / out` parameters of `ref struct` types. The corresponding parameters *ref-safe-to-escape* are at most *return only* and hence cannot be returned via `ref` or `out` parameters.
+>     - Assume the method has a `ref struct` return type.
 > 2. All `ref` or `out` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
 
 The presence of `scoped` allows developers to reduce the friction this rule creates by marking parameters which are not returned as `scoped`. This removes their arguments from (1) above and provides greater flexibility to callers.
@@ -514,8 +523,7 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 <a name="rules-unscoped"></a>
 
-To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`.
-The attribute can be used to expand the lifetime of a value. It can be applied to any `ref` which is [implicitly `scoped`](#implicitly-scoped) and has the impact of changing its *ref-safe-to-escape* to *calling method*.
+To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. The attribute can be used to expand the lifetime of a value. It can be applied to any `ref` which is [implicitly `scoped`](#implicitly-scoped) and has the impact of changing its *ref-safe-to-escape* to *calling method*.
 
 ```c#
 struct S
@@ -542,7 +550,7 @@ ref int SneakyOut([UnscopedRef] out int i)
 }
 ```
 
-For the purposes of span safety rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes.
+For the purposes of span safety rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. In the case `[UnscopedRef]` applies to a `ref` of `ref struct` the *ref-safe-to-escape* will be *return only*. This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
 
 The `[UnscopedRef]` annotation will be disallowed on `init` members and constructors. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `[UnscopedRef]` would permit such a `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
 
@@ -1427,6 +1435,7 @@ At that point the line `r = ref i` is illegal by [ref re-assignment rules](#rule
 These rules were not intended to prevent this behavior but do so as a side effect. It's important to keep this in mind for any future rule update to evaluate the impact to scenarios like this.
 
 #### Silly cyclic assignment
+<a name="cyclic-assignment"></a>
 One aspect this design struggled with is how freely a `ref` can be returned from a method. Allowing all `ref` to be returned as freely as normal values is likely what most developers intuitively expect. However it allows for pathological scenarios that the compiler must consider when calculating ref safety. Consider the following: 
 
 ```c#
@@ -1461,7 +1470,42 @@ S Usage()
 }
 ```
 
-To make these APIs usable the compiler has to create separation between how freely `ref` and their values can be returned by default. This is the rational for having `ref` to `ref struct` and `out` be [implicitly scoped](#implicitly-scoped). It is the balance that allows APIs like this to be usable.
+To make these APIs usable the compiler has to create separation between how freely `ref` and their values can be returned by default. This is the rational for having `ref` to `ref struct` and `out` be [implicitly scoped](#implicitly-scoped).
+
+It is also why `[UnscopedRef]` only promotes the *ref-safe-to-escape* of such values to *return only* and not *calling method*. Consider that using *calling method* forces a viral use of `[UnscopedRef]` for a `ref struct`:
+
+```c#
+ref struct S
+{
+    byte Field;
+
+    [UnscopedRef]
+    public Span<byte> Data => new Span<byte>(ref Field, 1);
+}
+
+void M(ref S s)
+{
+    // Error: passing a scoped ref to [UnscopedRef] ref 
+    Span<byte> span = s.Data;
+}
+```
+
+This is correctly illegal in that case because the compiler has to consider the pathological case that `S.Data` could cyclic assign via `this`. That forces methods all methods that call `S.Data` to further mark their `ref` parameters as `[UnscopedRef]`. This is viral until the method which creates the value as a local. This is why *return only* exists as an escape scope. It does complicate the spec / implementation but it serves to make the feature significantly more usable.
+
+In terms of advanced annotations the `[UnscopedRef]` design creates the following:
+
+```
+ref struct S { }
+
+// C# code
+S Create1(ref S p)
+S Create2([UnscopedRef] ref S p)
+
+// Annotation equivalent
+scoped<'b> S Create1(scoped<'a> ref scoped<'b> S)
+scoped<'a> S Create2(scoped<'a> ref scoped<'b> S)
+  where 'b >= 'a
+```
 
 #### readonly cannot be deep through ref fields
 <a name="reason-readonly-shallow"></a>
