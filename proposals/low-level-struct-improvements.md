@@ -381,6 +381,8 @@ The presence of `scoped` allows developers to reduce the friction this rule crea
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
 
+<a name="scoped-mismatch"></a>
+
 The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped)) on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
 - Add `scoped` to a `ref` or `in` parameter
 - Add `scoped` to a `ref struct` parameter
