@@ -704,7 +704,7 @@ For a `new` expression with initializers, the initializer expressions count as a
 
 ## Changes in unsafe context
 
-Pointer types are extended to allow managed types as referent type, but only in local declarations and casts.
+Pointer types are extended to allow managed types as referent type, but only in casts.
 Such pointer types are written as a managed type followed by a `*` token. They produce a warning.
 The address-of operator is relaxed to accept a variable with a managed type as its operand.
 
