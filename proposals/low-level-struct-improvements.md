@@ -381,13 +381,25 @@ The presence of `scoped` allows developers to reduce the friction this rule crea
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
 
+<a name="scoped-mismatch"></a>
+
 The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped)) on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
 - Add `scoped` to a `ref` or `in` parameter
 - Add `scoped` to a `ref struct` parameter
 - Remove `[UnscopedRef]` from an `out` parameter
 - Remove `[UnscopedRef]` from a `ref` parameter of a `ref struct` type
 
-Any other difference with respect to `scoped` or `[UnscopedRef]` will be considered an error. 
+Any other difference with respect to `scoped` or `[UnscopedRef]` is considered a mismatch.
+
+The compiler will report a diagnostic for _unsafe scoped mismatches_ across overrides, interface implementations, and delegate conversions when:
+- The method returns a `ref struct` or returns a `ref` or `ref readonly`, or the method has a `ref` or `out` parameter of `ref struct` type, and
+- The method has at least one additional `ref`, `in`, or `out` parameter, or a parameter of `ref struct` type.
+
+The rules above ignore `this` parameters because `ref struct` instance methods cannot be used for overrides, interface implementations, or delegate conversions.
+
+The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safety rules; otherwise, the diagnostic is a _warning_.
+
+The scoped mismatch warning may be reported on a module compiled with C#7.2 ref safety rules where `scoped` is not available. In some such cases, it may be necessary to suppress the warning if the other mismatched signature cannot be modified.
 
 The `scoped` modifier and `[UnscopedRef]` attribute also have the following effects on method signatures:
 - The `scoped` modifier and `[UnscopedRef]` attribute do not affect hiding
