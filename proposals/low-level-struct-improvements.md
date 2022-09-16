@@ -714,6 +714,12 @@ Namely the rules of [method invocation](#rules-method-invocation) updated above:
 
 For a `new` expression with initializers, the initializer expressions count as arguments (they contribute their *safe-to-escape*) and the `ref` initializer expressions count as `ref` arguments (they contribute their *ref-safe-to-escape*), recursively.
 
+## Changes in unsafe context
+
+Pointer types are extended to allow managed types as referent type, but only in casts.
+Such pointer types are written as a managed type followed by a `*` token. They produce a warning.
+The address-of operator is relaxed to accept a variable with a managed type as its operand.
+
 ## Considerations
 There are considerations other parts of the development stack should consider when evaluating this feature.
 
