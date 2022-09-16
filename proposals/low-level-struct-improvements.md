@@ -300,10 +300,9 @@ Further treating the input to an `out` parameter as returnable is extremely conf
 This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
 
 <a name="implicitly-scoped"></a>
-Overall there are three `ref` location which are implicitly declared as `scoped`:
+Overall there are two `ref` location which are implicitly declared as `scoped`:
 - `this` on a `struct` instance method
 - `out` parameters 
-- `ref` parameters which refer to a `ref struct`
 
 The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
 
@@ -312,7 +311,9 @@ When discussing the *ref-safe-to-escape* of arguments that correspond to `in` pa
 <a name="return-only"></a>
 The design also requires that the introduction of a new escape scope: *return only*. This is similar to *calling method* in that it can be returned but it can **only** be returned through a `return` statement. 
 
-The details of *return only* is that it's a scope which is greater than *current method* but smaller than *calling method*. An expression provided to a `return` statement must be at least *return only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-to-escape* of *return only* will fail because it's smaller than the `ref` parameters *safe-to-escape* which is *calling method*. The need for this new escape scope will be discussed [below](#rules-unscoped). 
+The details of *return only* is that it's a scope which is greater than *current method* but smaller than *calling method*. An expression provided to a `return` statement must be at least *return only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-to-escape* of *return only* will fail because it's smaller than the `ref` parameter's *safe-to-escape* which is *calling method*. The need for this new escape scope will be discussed [below](#rules-unscoped). 
+
+A `ref` or `in` parameter for a `ref struct` will have a *ref-safe-to-escape* of *return only*.  This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
 
 Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-to-escape*, and if applicable a *ref-safe-to-escape*, of at least *return only*. That includes `return` statements, expression bodied members and lambda expressions.
 
@@ -523,7 +524,9 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 <a name="rules-unscoped"></a>
 
-To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. The attribute can be used to expand the lifetime of a value. It can be applied to any `ref` which is [implicitly `scoped`](#implicitly-scoped) and has the impact of changing its *ref-safe-to-escape* to *calling method*.
+To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` which is [implicitly `scoped`](#implicitly-scoped). The *ref-safe-to-escape* of a `ref` annotated with `[UnscopedRef]` is that of a normal `ref` of the same type. For example if the target type the `ref` modifies is a `ref struct` then the *ref-safe-to-escape* is *return only*, otherwise it is *calling method*.
+
+When applying `[UnscopedRef]` to an instance method of a `struct` it has the impact of modifying the implicit `this` parameter. This means `this` acts as an unannotated `ref` of the same type. 
 
 ```c#
 struct S
@@ -550,13 +553,9 @@ ref int SneakyOut([UnscopedRef] out int i)
 }
 ```
 
-For the purposes of span safety rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. In the case `[UnscopedRef]` applies to a `ref` of `ref struct` the *ref-safe-to-escape* will be *return only*. This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
+For the purposes of span safety rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. 
 
-In the case `[UnscopedRef]` applies to a `ref` of `ref struct` the *ref-safe-to-escape* will be *return only*. This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
-
-The lifetime of a `ref` annotated with `[UnscopedRef]` is that of a normal `ref`. For example applying it to a `this` of a `struct` means `this` acts as an unannotated `ref` of the same type. The exception is when `[Unscoped]
-
-The `[UnscopedRef]` annotation will be disallowed on `init` members and constructors. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `[UnscopedRef]` would permit such a `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
+The `[UnscopedRef]` annotation will be disallowed on `init` members and constructors inside `struct`. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `[UnscopedRef]` would permit such a `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
 
 The attribute type will have the following definition:
 
@@ -1632,6 +1631,3 @@ The set of returnable input to the method are:
 Given that there is at least one input with a smaller *escape scope* (`ref y` argument) than one of the outputs (`x` argument) the method call is illegal. 
 
 This is the logic that the method arguments must match rule is trying to encompass. It goes further as it considers both `scoped` as a way to remove inputs from consideration and `readonly` as a way to remove `ref` as an output (can't assign into a `readonly ref` so it can't be a source of output). These special cases do add complexity to the rules but it's done so for the benefit of the developer. The compiler seeks to remove all inputs and outputs it knows can't contribute to the result to give developers maximum flexibility when calling a member. Much like overload resolution it's worth the effort to make our rules more complex when it creates more flexibility for consumers.
-
-
-
