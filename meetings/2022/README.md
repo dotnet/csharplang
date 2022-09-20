@@ -21,6 +21,10 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Sep 21, 2022
 
+- Triage [new championed features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone) (Mads)
+- Triage [working set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22) and determine working groups (Mads) 
+- Change ref safety errors to warnings inside unsafe (Jared): https://github.com/dotnet/csharplang/issues/6476
+
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
