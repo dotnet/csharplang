@@ -157,7 +157,7 @@ Next the rules for ref reassignment need to be adjusted for the presence of `ref
 The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
 
 > For a ref reassignment in the form ...
-> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* at least *return only* then `e2` must have at least *ref-safe-to-escape* at least as large as `x`
+> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* at least *return only* then `e2` must have *ref-safe-to-escape* at least as large as `x`
 > 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *safe-to-escape* equal to *safe-to-escape* for `e1` and `e2` must have *ref-safe-to-escape* at least as large as *ref-safe-to-escape* of the *ref-safe-to-escape* of `e1`
 
 That means the desired `Span<T>` constructor works without any extra annotation:
@@ -390,6 +390,14 @@ The presence of `ref` fields means the rules around method arguments must match 
 >     - Ignore the *ref-safe-to-escape* of arguments whose corresponding parameters have a *ref-safe-to-escape* of *return-only* or smaller.
 >     - Assume the method has a `ref struct` return type.
 > 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
+
+> For any method invocation `e.M(a1, a2, ... aN)`
+> 1. Calculate the minimum of the following:
+>     - *calling method*
+>     - The *safe-to-escape* of all arguments
+>     - The *ref-safe-to-escape* of all ref arguments whose corresponding parameters have a *ref-safe-to-escape* of *calling method* or smaller.
+> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
+
 
 > Further for any method invocation `e.M(a1, a2, ... aN)`
 > 1. Calculate the *safe-to-escape* of the method return.
@@ -1503,7 +1511,7 @@ S Usage()
 }
 ```
 
-To make these APIs usable the compiler ensures that `ref` have a smaller lifetime than their associated parameters. This is the rational This is the rational for having *ref-safe-to-escape* for `ref` to `ref struct` be *return only* and `out` be *containing method*. That prevents cyclic assignment because of the difference in lifetimes.
+To make these APIs usable the compiler ensures that the `ref` lifetime for a `ref` parameter is smaller than lifetime of any references in the associated parameter value. This is the rationale for having *ref-safe-to-escape* for `ref` to `ref struct` be *return only* and `out` be *containing method*. That prevents cyclic assignment because of the difference in lifetimes.
 
 It is also why `[UnscopedRef]` only promotes the *ref-safe-to-escape* of any `ref` to `ref struct` values to *return only* and not *calling method*. Consider that using *calling method* allows for cyclic assignment and would force a viral use of `[UnscopedRef]` for a `ref struct`:
 
@@ -1536,10 +1544,10 @@ ref struct RS
 
 void M1(out RS p)
 {
-    // Error: method arguments must match rules do the following
-    // Step 1 calculate would calculate the smallest escape as *containing method*
+    // Error: from method arguments must match:
+    // Step 1 would calculate the narrowest escape as *containing method*
     // Step 2 would fail the assignment check because p safe-to-escape is *return only*
-    M1(out p);
+    M2(out p);
 }
 
 void M2([UnscopedRef] out RS p)
@@ -1606,7 +1614,7 @@ readonly ref struct SpanOfOne
 This means we must choose the shallow interpretation of `readonly`.
 
 #### Modeling constructors 
-One subtle tricky design point is how are constructors bodies modeled for ref safety? Essentially how is the following constructor analyzed? 
+One subtle design question is: How are constructors bodies modeled for ref safety? Essentially how is the following constructor analyzed? 
 
 ```c#
 ref struct S
@@ -1623,7 +1631,7 @@ ref struct S
 There are roughly two approaches:
 
 1. Model as a `static` method where `this` is a local where it's *safe-to-escape* is *calling method*
-2. Model as a `static` method where `this` is a `ref` or `out` parameter. 
+2. Model as a `static` method where `this` is an `out` parameter. 
 
 Further a constructor must meet the following invariants:
 
