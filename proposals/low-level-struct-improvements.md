@@ -89,8 +89,8 @@ ref struct S1
 
 A `ref` field can be combined with `readonly` modifiers in the following ways:
 
-- `readonly ref`: this is a field that cannot be ref re-assigned outside a constructor or `init` methods. It can be value assigned though outside those contexts
-- `ref readonly`: this is a field that can be ref re-assigned but cannot be value assigned at any point. This how an `in` parameter could be ref re-assigned to a `ref` field.
+- `readonly ref`: this is a field that cannot be ref reassigned outside a constructor or `init` methods. It can be value assigned though outside those contexts
+- `ref readonly`: this is a field that can be ref reassigned but cannot be value assigned at any point. This how an `in` parameter could be ref reassigned to a `ref` field.
 - `readonly ref readonly`: a combination of `ref readonly` and `readonly ref`. 
 
 ```c#
@@ -118,7 +118,7 @@ A `readonly ref` will be emitted to metadata using the `initonly` flag, same as 
 
 This feature requires runtime support and changes to the ECMA spec. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here https://github.com/dotnet/runtime/issues/64165
 
-The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref re-assigned. 
+The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref reassigned. 
 
 First the rules establishing *ref-safe-to-escape* values for fields need to be updated for `ref` fields as follows:
 
@@ -150,9 +150,9 @@ ref struct RS
 
 This may seem like an error at first glance but this is a deliberate design point. Again though, this is not a new rule being created by this proposal, it is instead acknowledging the existing rules `Span<T>` behaved by now that developers can declare their own `ref` state.
 
-Next the rules for ref re-assignment need to be adjusted for the presence of `ref` fields. The primary scenario for ref re-assignment is `ref struct` constructors storing `ref` parameters into `ref` fields. The support will be more general but this is the core scenario. To support this the rules for ref re-assignment will be adjusted to account for `ref` fields as follows:
+Next the rules for ref reassignment need to be adjusted for the presence of `ref` fields. The primary scenario for ref reassignment is `ref struct` constructors storing `ref` parameters into `ref` fields. The support will be more general but this is the core scenario. To support this the rules for ref reassignment will be adjusted to account for `ref` fields as follows:
 
-<a name="rules-ref-re-assignment"></a>
+<a name="rules-ref-reassignment"></a>
 
 The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
 
@@ -179,7 +179,7 @@ readonly ref struct Span<T>
 }
 ```
 
-The change to ref re-assignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based solely on their declaration not on their usage. All `ref` and `in` parameters are *ref-safe-to-escape* to the *calling method* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
+The change to ref reassignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based solely on their declaration not on their usage. All `ref` and `in` parameters are *ref-safe-to-escape* to the *calling method* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
 
 <a name="rules-scoped"></a>
 
@@ -955,7 +955,7 @@ ref struct Sneaky
 
     public void SelfAssign()
     {
-        // This pattern of ref re-assign to fields on this inside instance methods is now
+        // This pattern of ref reassign to fields on this inside instance methods is now
         // completely legal.
         RefField = ref Field;
     }
@@ -975,7 +975,7 @@ ref struct Sneaky
 }
 ```
 
-Essentially it would mean all instance method invocations on *mutable* `ref struct` locals would be illegal unless the local was further marked as `scoped`. The rules have to consider the case where fields were ref re-assigned to other fields in `this`. A `readonly ref struct` doesn't have this problem because the `readonly` nature prevents ref re-assignment. Still this would be a significant back compat breaking change as it would impact virtually every existing mutable `ref struct`. 
+Essentially it would mean all instance method invocations on *mutable* `ref struct` locals would be illegal unless the local was further marked as `scoped`. The rules have to consider the case where fields were ref reassigned to other fields in `this`. A `readonly ref struct` doesn't have this problem because the `readonly` nature prevents ref reassignment. Still this would be a significant back compat breaking change as it would impact virtually every existing mutable `ref struct`. 
 
 A `readonly ref struct` though is still problematic once we expand to having `ref` fields to `ref struct`. It allows for the same basic problem by just moving the capture into the value of the `ref` field: 
 
@@ -1058,7 +1058,7 @@ void M(ref Nested nested)
 
 This *ref-field-safe-to-escape-scope* has essentially always existed. Up until now `ref` fields could only point to normal `struct` hence it was trivially collapsed to *calling method*.  To support `ref` fields to `ref struct` our existing rules need to be updated to take into account this new escape scope.
 
-Third the rules for ref re-assignment need to be updated to ensure that we don't violate *ref-field-safe-to-escape* for the values. Essentially for `x.e1 = ref e2` where the type of `e1` is a `ref struct` the *ref-field-safe-to-escape* must be equal. 
+Third the rules for ref reassignment need to be updated to ensure that we don't violate *ref-field-safe-to-escape* for the values. Essentially for `x.e1 = ref e2` where the type of `e1` is a `ref struct` the *ref-field-safe-to-escape* must be equal. 
 
 These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes us in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
 
@@ -1214,9 +1214,9 @@ ref struct StackLinkedListNode<T>
 ### Examples 
 Below are a set of examples demonstrating how and why the rules work the way they do. Included are several examples showing dangerous behaviors and how the rules prevent them from happening. It's important to keep these in mind when making adjustments to the proposal.
 
-#### Ref re-assignment and call sites
+#### Ref reassignment and call sites
 
-Demonstrating how [ref re-assignment](#rules-ref-re-assignment) and [method invocation](#rules-method-invocation) work together.
+Demonstrating how [ref reassignment](#rules-ref-reassignment) and [method invocation](#rules-method-invocation) work together.
 
 ```c#
 ref struct RS
@@ -1451,7 +1451,7 @@ The proposal prevents this though because it violates the span safety rules. Con
 - The *ref-safe-to-escape* of `this` is *current method* and *safe-to-escape* is *calling method*. These are both standard for `this` in a `struct` member.
 - The *ref-safe-to-escape* of `i` is *current method*. This falls out from the [field lifetimes rules](#rules-field-lifetimes). Specifically rule 4.
 
-At that point the line `r = ref i` is illegal by [ref re-assignment rules](#rules-ref-re-assignment). 
+At that point the line `r = ref i` is illegal by [ref reassignment rules](#rules-ref-reassignment). 
 
 These rules were not intended to prevent this behavior but do so as a side effect. It's important to keep this in mind for any future rule update to evaluate the impact to scenarios like this.
 
@@ -1546,7 +1546,7 @@ ref struct S
 }
 ```
 
-When designing the rules for `ref` fields on `readonly` instances in a vacuum the rules can be validly designed such that the above is legal or illegal. Essentially `readonly` can validly be deep through a `ref` field or it can apply only to the `ref`. Applying only to the `ref` prevents ref re-assignment but allows normal assignment which changes the referred to value.
+When designing the rules for `ref` fields on `readonly` instances in a vacuum the rules can be validly designed such that the above is legal or illegal. Essentially `readonly` can validly be deep through a `ref` field or it can apply only to the `ref`. Applying only to the `ref` prevents ref reassignment but allows normal assignment which changes the referred to value.
 
 This design does not exist in a vacuum though, it is designing rules for types that already effectively have `ref` fields. The most prominent of which, `Span<T>`, already has a strong dependency on `readonly` not being deep here. Its primary scenario is the ability to assign to the `ref` field through a `readonly` instance. 
 
