@@ -157,7 +157,7 @@ Next the rules for ref reassignment need to be adjusted for the presence of `ref
 The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
 
 > For a ref reassignment in the form ...
-> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* to *calling method* then `e2` must be *ref-safe-to-escape* to the *calling method*
+> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* at least *return only* then `e2` must have at least the same *ref-safe-to-escape* as `x`.
 > 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *safe-to-escape* equal to *safe-to-escape* for `e1` and `e2` must have *ref-safe-to-escape* at least as large as *ref-safe-to-escape* of the *ref-safe-to-escape* of `e1`
 
 That means the desired `Span<T>` constructor works without any extra annotation:
@@ -171,8 +171,8 @@ readonly ref struct Span<T>
     public Span(ref T value)
     {
         // Falls into the `x.e1 = ref e2` case, where `x` is the implicit `this`. The 
-        // safe-to-escape of `this` and ref-safe-to-escape of `value` is *calling method* hence 
-        // this is legal.
+        // safe-to-escape of `this` is *return only* and ref-safe-to-escape of `value` is 
+        // *calling method* hence this is legal.
         _field = ref value;
         _length = 1;
     }
@@ -313,9 +313,13 @@ The design also requires that the introduction of a new escape scope: *return on
 
 The details of *return only* is that it's a scope which is greater than *current method* but smaller than *calling method*. An expression provided to a `return` statement must be at least *return only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-to-escape* of *return only* will fail because it's smaller than the `ref` parameter's *safe-to-escape* which is *calling method*. The need for this new escape scope will be discussed [below](#rules-unscoped). 
 
-A `ref` or `in` parameter for a `ref struct` will have a *ref-safe-to-escape* of *return only*.  This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
+There are two locations which default to *return only*:
+- A `ref` or `in` parameter for a `ref struct` will have a *ref-safe-to-escape* of *return only*.  This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
+- A `out` parameter for a `ref struct` will have *safe-to-escape* of *return only*. This allows for return and `out` to be equally expressive. This does not have the silly cyclic assignment problem because `out` is implicitly `scoped` so the *ref-safe-to-escape* is still smaller than the *safe-to-escape*.
 
 Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-to-escape*, and if applicable a *ref-safe-to-escape*, of at least *return only*. That includes `return` statements, expression bodied members and lambda expressions.
+
+Likewise any assignment to an `out` must have a *safe-to-escape* of at least *return only*. This is not a special case though, this just follows from the existing assignment rules.
 
 <a name="rules-method-invocation"></a>
 
@@ -386,6 +390,13 @@ The presence of `ref` fields means the rules around method arguments must match 
 >     - Ignore the *ref-safe-to-escape* of arguments to `in / ref / out` parameters of `ref struct` types. The corresponding parameters *ref-safe-to-escape* are at most *return only* and hence cannot be returned via `ref` or `out` parameters.
 >     - Assume the method has a `ref struct` return type.
 > 2. All `ref` or `out` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
+
+> Further for any method invocation `e.M(a1, a2, ... aN)` where the target method has at least one `[UnscopedRef] out` parameter
+> 1. Calculate the *safe-to-escape* of the method return.
+>     - Include the *ref-safe-to-escape* of arguments to `[UnscopedRef] out` parameters
+>     - Ignore the *ref-safe-to-escape* of arguments to all other `in / ref / out` parameters
+>     - Assume the method has a `ref struct` return type.
+> 2. All `out` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*.
 
 The presence of `scoped` allows developers to reduce the friction this rule creates by marking parameters which are not returned as `scoped`. This removes their arguments from (1) above and provides greater flexibility to callers.
 
@@ -1211,7 +1222,7 @@ ref struct StackLinkedListNode<T>
 }
 ```
 
-### Examples 
+### Examples and Notes 
 Below are a set of examples demonstrating how and why the rules work the way they do. Included are several examples showing dangerous behaviors and how the rules prevent them from happening. It's important to keep these in mind when making adjustments to the proposal.
 
 #### Ref reassignment and call sites
@@ -1239,16 +1250,17 @@ ref struct RS
 
     public ref int M1(RS rs)
     {
-        // The arguments contribute here:
+        // The call site arguments for Prop contribute here:
         //   - `rs` contributes no ref-safe-to-escape as the corresponding parameter, 
         //      which is `this`, is `scoped ref`
         //   - `rs` contribute safe-to-escape of *calling method*
         // 
         // This is an lvalue invocation and the arguments contribute only safe-to-escape 
-        // values of *calling method*. That means `local` is safe-to-escape to *calling method*
+        // values of *calling method*. That means `local1` is ref-safe-to-escape to 
+        // *calling method*
         ref int local1 = ref rs.Prop;
 
-        // Okay: this is legal because `local` has safe-to-escape of *calling method*
+        // Okay: this is legal because `local` has ref-safe-to-escape of *calling method*
         return ref local1;
 
         // The arguments contribute here:
@@ -1411,6 +1423,7 @@ class C
 ```
 
 #### Preventing tricky ref assignment from readonly mutation
+<a name="tricky-ref-assignment"></a>
 When a `ref` is taken to a `readonly` field in a constructor or `init` member the type is `ref` not `ref readonly`. This is a long standing behavior that allows for code like the following:
 
 ```c#
@@ -1568,6 +1581,42 @@ readonly ref struct SpanOfOne
 ```
 
 This means we must choose the shallow interpretation of `readonly`.
+
+#### Modeling constructors 
+One subtle tricky design point is how are constructors bodies modeled for ref safety? Essentially how is the following constructor analyzed? 
+
+```c#
+ref struct S
+{
+    int field;
+
+    public S(ref int f)
+    {
+        field = ref f;
+    }
+}
+```
+
+There are roughly two approaches:
+
+1. Model as a `static` method where `this` is a local where it's *safe-to-escape* is *calling method*
+2. Model as a `static` method where `this` is a `ref` or `out` parameter. 
+
+Further a constructor must meet the following invariants:
+
+1. Ensure that `ref` parameters can be captured as `ref` fields. 
+2. Ensure that `ref` to fields of `this` cannot be escaped through `ref` parameters. That would violate [tricky ref assignment](#tricky-ref-assignment). 
+
+The intent is to pick the form that satisfies our invariants without introduction of any special rules for constructors. Given that the best model for constructors is viewing `this` as an `out` parameter. The *return-only* nature of the `out` allows us to satisfy all the invariants above without any special casing: 
+
+```c#
+public static void ctor(out S @this, ref int f)
+{
+    // The ref-safe-to-escape of `ref f` is *return-only* which is also the 
+    // safe-to-escape of `this.field` hence this assignment is allowed
+    @this.field = ref f;
+}
+```
 
 #### Method arguments must match
 The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule. For the sake of better understanding the reasons for the rule we will simplify ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. 
