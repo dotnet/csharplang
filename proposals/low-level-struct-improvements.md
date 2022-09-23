@@ -157,7 +157,7 @@ Next the rules for ref reassignment need to be adjusted for the presence of `ref
 The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
 
 > For a ref reassignment in the form ...
-> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* at least *return only* then `e2` must have at least the same *ref-safe-to-escape* as `x`.
+> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* at least *return only* then `e2` must have at least *ref-safe-to-escape* at least as large as `x`
 > 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *safe-to-escape* equal to *safe-to-escape* for `e1` and `e2` must have *ref-safe-to-escape* at least as large as *ref-safe-to-escape* of the *ref-safe-to-escape* of `e1`
 
 That means the desired `Span<T>` constructor works without any extra annotation:
