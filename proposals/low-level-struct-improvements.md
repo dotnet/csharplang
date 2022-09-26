@@ -386,23 +386,17 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). The new rule is ... 
 
 > For any method invocation `e.M(a1, a2, ... aN)`
-> 1. Calculate the *safe-to-escape* of the method return.
->     - Ignore the *ref-safe-to-escape* of arguments whose corresponding parameters have a *ref-safe-to-escape* of *return-only* or smaller.
->     - Assume the method has a `ref struct` return type.
-> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
-
-> For any method invocation `e.M(a1, a2, ... aN)`
-> 1. Calculate the minimum of the following:
+> 1. Calculate the narrowest *safe-to-escape* from:
 >     - *calling method*
 >     - The *safe-to-escape* of all arguments
->     - The *ref-safe-to-escape* of all ref arguments whose corresponding parameters have a *ref-safe-to-escape* of *calling method* or smaller.
-> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This applies even when the `ref` argument matches a `scoped ref` parameter.
+>     - The *ref-safe-to-escape* of all ref arguments whose corresponding parameters have a *ref-safe-to-escape* of *calling method*
+> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This is a case where `ref` does **not** generalize to include `in` and `out`
 
-
-> Further for any method invocation `e.M(a1, a2, ... aN)`
-> 1. Calculate the *safe-to-escape* of the method return.
->     - Ignore the *ref-safe-to-escape* of arguments whose corresponding parameters are `scoped`
->     - Assume the method has a `ref struct` return type.
+> For any method invocation `e.M(a1, a2, ... aN)`
+> 1. Calculate the narrowest *safe-to-escape* from:
+>     - *calling method*
+>     - The *safe-to-escape* of all arguments
+>     - The *ref-safe-to-escape* of all ref arguments whose corresponding parameters are not `scoped` 
 > 2. All `out` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*.
 
 The presence of `scoped` allows developers to reduce the friction this rule creates by marking parameters which are not returned as `scoped`. This removes their arguments from (1) in both cases above and provides greater flexibility to callers.
@@ -1630,7 +1624,7 @@ ref struct S
 
 There are roughly two approaches:
 
-1. Model as a `static` method where `this` is a local where it's *safe-to-escape* is *calling method*
+1. Model as a `static` method where `this` is a local where its *safe-to-escape* is *calling method*
 2. Model as a `static` method where `this` is an `out` parameter. 
 
 Further a constructor must meet the following invariants:
