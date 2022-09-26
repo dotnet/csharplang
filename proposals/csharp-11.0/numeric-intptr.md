@@ -4,7 +4,7 @@
 [summary]: #summary
 
 This is a revision on the initial native integers feature ([spec](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/native-integers.md)), where the `nint`/`nuint` types were distinct from the underlying types `System.IntPtr`/`System.UIntPtr`.
-In short, we now treat `nint`/`nuint` as simple types aliasing `System.IntPtr`/`System.UIntPtr`, like we do for `int` in relation to `System.Int32`.
+In short, we now treat `nint`/`nuint` as simple types aliasing `System.IntPtr`/`System.UIntPtr`, like we do for `int` in relation to `System.Int32`. The `System.Runtime.CompilerServices.RuntimeFeature.NumericIntPtr` runtime feature flag triggers this new behavior.
 
 ## Design
 [design]: #design
