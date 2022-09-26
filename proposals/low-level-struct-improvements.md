@@ -727,9 +727,14 @@ For a `new` expression with initializers, the initializer expressions count as a
 
 ## Changes in unsafe context
 
-Pointer types are extended to allow managed types as referent type, but only in casts.
+Pointer types (section 22.3) are extended to allow managed types as referent type.
 Such pointer types are written as a managed type followed by a `*` token. They produce a warning.
-The address-of operator is relaxed to accept a variable with a managed type as its operand.
+
+The address-of operator (section 22.6.5) is relaxed to accept a variable with a managed type as its operand.
+
+The `fixed` statement (section 22.7) is relaxed to accept _fixed_pointer_initializer_ that is the address of a variable of managed type `T` or that is an expression of an _array_type_ with elements of a managed type `T`.
+
+The stack allocation initializer (section 22.9) is similarly relaxed.
 
 ## Considerations
 There are considerations other parts of the development stack should consider when evaluating this feature.
