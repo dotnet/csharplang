@@ -39,14 +39,21 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Triage [working set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22) and determine working groups (Mads) 
 
-## Wed Sep 21, 2022
-
-- Triage [new championed features](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22+no%3Amilestone) (Mads)
-- Change ref safety errors to warnings inside unsafe (Jared): https://github.com/dotnet/csharplang/issues/6476
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Wed Sep 21, 2022
+
+[C# Language Design Meeting for September 21st, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-21.md)
+
+- [Unchampioned issue triage](#unchampioned-issue-triage)
+    - [Track subtype exhaustiveness for classes with only private constructors](#track-subtype-exhaustiveness-for-classes-with-only-private-constructors)
+    - [ReadOnlySpan initialization from static data](#readonlyspan-initialization-from-static-data)
+    - [Embedded Language Indicators for raw string literals](#embedded-language-indicators-for-raw-string-literals)
+    - [Implicit Parameters](#implicit-parameters)
+- [Unsafer Unsafeness](#unsafer-unsafeness)
+    - [Conclusion](#conclusion)
 
 ## Wed Aug 31, 2022
 
