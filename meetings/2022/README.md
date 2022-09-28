@@ -29,15 +29,24 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mon Oct 10, 2022
 
+- Triage [working set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22) and determine working groups (Mads) 
+
 ## Wed Oct 5, 2022
 
-## Wed Sep 28, 2022
-
-- Triage [working set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22) and determine working groups (Mads) 
 
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Wed Sep 28, 2022
+
+[C# Language Design Meeting for September 28th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-28.md)
+
+- Working set triage
+    - Discriminated Unions
+    - Collection literals
+    - Nullability improvements
+    - Ungrouped
 
 ## Mon Sep 26, 2022
 
