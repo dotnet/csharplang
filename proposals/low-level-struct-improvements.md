@@ -313,9 +313,10 @@ The design also requires that the introduction of a new escape scope: *return on
 
 The details of *return only* is that it's a scope which is greater than *current method* but smaller than *calling method*. An expression provided to a `return` statement must be at least *return only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-to-escape* of *return only* will fail because it's smaller than the `ref` parameter's *safe-to-escape* which is *calling method*. The need for this new escape scope will be discussed [below](#rules-unscoped). 
 
-There are two locations which default to *return only*:
-- A `ref` or `in` parameter for a `ref struct` will have a *ref-safe-to-escape* of *return only*.  This is necessary to prevent [silly cyclic assignment](#cyclic-assignment) issues.
+There are three locations which default to *return only*:
+- A `ref` or `in` parameter. This is done in part for `ref struct` to prevent [silly cyclic assignment](#cyclic-assignment) issues. It is done uniformly though to simplify the model as well as minimize compat changes.
 - A `out` parameter for a `ref struct` will have *safe-to-escape* of *return only*. This allows for return and `out` to be equally expressive. This does not have the silly cyclic assignment problem because `out` is implicitly `scoped` so the *ref-safe-to-escape* is still smaller than the *safe-to-escape*.
+- A `this` parameter for a `struct` constructor. This falls out due them being modeled as `out` parameters. 
 
 Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-to-escape*, and if applicable a *ref-safe-to-escape*, of at least *return only*. That includes `return` statements, expression bodied members and lambda expressions.
 
@@ -334,8 +335,9 @@ The method invocation rules can now be simplified. The receiver no longer needs 
 
 > A value resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
 > 1. The *calling method*
-> 2. The *safe-to-escape* contributed by all argument expressions
-> 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
+> 2. When the return is a `ref struct`:
+>    1. The *safe-to-escape* contributed by all argument expressions
+>    2. The *ref-safe-to-escape* contributed by all `ref` arguments
 
 The `ref` calling rules can be simplified to:
 
@@ -548,7 +550,9 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 <a name="rules-unscoped"></a>
 
-To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` which is [implicitly `scoped`](#implicitly-scoped). The *ref-safe-to-escape* of a `ref` annotated with `[UnscopedRef]` is that of a normal `ref` of the same type. For example if the target type the `ref` modifies is a `ref struct` then the *ref-safe-to-escape* is *return only*, otherwise it is *calling method*.
+To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` and it will change the *ref-safe-to-escape* to be one level wider than its default. For example:
+- if applied to a `struct` instance method it will become *return only* where previously it was *containing method*.
+- if applied to a `ref` parameter it will become *containing method* where previously it was *return only*
 
 When applying `[UnscopedRef]` to an instance method of a `struct` it has the impact of modifying the implicit `this` parameter. This means `this` acts as an unannotated `ref` of the same type. 
 
