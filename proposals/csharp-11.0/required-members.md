@@ -415,7 +415,7 @@ public class Derived : Base
 However, we have removed the `init` clause from the proposal at this point, so we need to decide whether to allow this scenario in a limited fashion. The options we
 have are:
 
-1. Disallow the scenario. This is the most conservative approach, and the rules in the [OHI](#overriding-hiding-and-inheriting) are currently written with this assumption
+1. Disallow the scenario. This is the most conservative approach, and the rules in the [Accessibility](#accessibility) are currently written with this assumption
 in mind. The rule is that any member that is required must be at least as visible as its containing type.
 2. Require that all constructors are either:
     1. No more visible than the least-visible required member.
