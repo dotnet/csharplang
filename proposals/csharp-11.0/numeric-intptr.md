@@ -100,8 +100,6 @@ The explicit enumeration conversions are:
 - From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
 - From any *enum_type* to any other *enum_type*.
 
-# 11 Expressions
-
 #### 11.6.4.6 Better conversion target
 
 Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** than `T₂` if one of the following holds:

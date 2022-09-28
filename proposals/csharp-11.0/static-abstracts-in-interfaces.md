@@ -5,11 +5,11 @@
 * [ ] Implementation: Not Started
 * [ ] Specification: Not Started
 
-# Summary
+## Summary
 
 An interface is allowed to specify abstract static members that implementing classes and structs are then required to provide an explicit or implicit implementation of. The members can be accessed off of type parameters that are constrained by the interface.
 
-# Motivation
+## Motivation
 [motivation]: #motivation
 
 There is currently no way to abstract over static members and write generalized code that applies across types that define those static members. This is particularly problematic for member kinds that *only* exist in a static form, notably operators.
@@ -43,20 +43,20 @@ public static T AddAll<T>(T[] ts) where T : IAddable<T>
 int sixtyThree = AddAll(new [] { 1, 2, 4, 8, 16, 32 });
 ```
 
-# Syntax
+## Syntax
 
-## Interface members
+### Interface members
 
 The feature would allow static interface members to be declared virtual. 
 
-### Today's rules
+#### Today's rules
 Today, instance members in interfaces are implicitly abstract (or virtual if they have a default implementation), but can optionally have an `abstract` (or `virtual`) modifier. Non-virtual instance members must be explicitly marked as `sealed`. 
 
 Static interface members today are implicitly non-virtual, and do not allow `abstract`, `virtual` or `sealed` modifiers.
 
-### Proposal
+#### Proposal
 
-#### Abstract static members
+##### Abstract static members
 Static interface members other than fields are allowed to also have the `abstract` modifier. Abstract static members are not allowed to have a body (or in the case of properties, the accessors are not allowed to have a body). 
 
 ``` c#
@@ -73,7 +73,7 @@ interface I<T> where T : I<T>
 }
 ```
 
-#### Virtual static members
+##### Virtual static members
 Static interface members other than fields are allowed to also have the `virtual` modifier. Virtual static members are required to have a body. 
 
 ``` c#
@@ -86,7 +86,7 @@ interface I<T> where T : I<T>
 }
 ```
 
-#### Explicitly non-virtual static members
+##### Explicitly non-virtual static members
 For symmetry with non-virtual instance members, static members should be allowed an optional `sealed` modifier, even though they are non-virtual by default:
 
 ``` c#
@@ -106,16 +106,15 @@ interface I0
 }
 ```
 
+### Implementation of interface members
 
-## Implementation of interface members
-
-### Today's rules
+#### Today's rules
 
 Classes and structs can implement abstract instance members of interfaces either implicitly or explicitly. An implicitly implemented interface member is a normal (virtual or non-virtual) member declaration of the class or struct that just "happens" to also implement the interface member. The member can even be inherited from a base class and thus not even be present in the class declaration.
 
 An explicitly implemented interface member uses a qualified name to identify the interface member in question. The implementation is not directly accessible as a member on the class or struct, but only through the interface.
 
-### Proposal
+#### Proposal
 
 No new syntax is needed in classes and structs to facilitate implicit implementation of static abstract interface members. Existing static member declarations serve that purpose.
 
@@ -137,9 +136,9 @@ class C : I<C>
 }
 ```
 
-# Semantics
+## Semantics
 
-## Operator restrictions
+### Operator restrictions
 
 Today all unary and binary operator declarations have some requirement involving at least one of their operands to be of type `T` or `T?`, where `T` is the instance type of the enclosing type.
 
@@ -149,25 +148,25 @@ In order for a type parameter `T` to count as " the instance type of the enclosi
 - `T` is a direct type parameter on the interface in which the operator declaration occurs, and
 - `T` is *directly* constrained by what the spec calls the "instance type" - i.e. the surrounding interface with its own type parameters used as type arguments.
 
-## Equality operators and conversions
+### Equality operators and conversions
 
 Abstract/virtual declarations of `==` and `!=` operators, as well as abstract/virtual declarations of implicit and explicit conversion operators will be allowed in interfaces. Derived interfaces will be allowed to implement them too.
 
 For `==` and `!=` operators, at least one parameter type must be a type parameter that counts as "the instance type of the enclosing type", as defined in the previous section. 
 
-## Implementing static abstract members
+### Implementing static abstract members
 
 The rules for when a static member declaration in a class or struct is considered to implement a static abstract interface member, and for what requirements apply when it does, are the same as for instance members.
 
 ***TBD:** There may be additional or different rules necessary here that we haven't yet thought of.*
 
-## Interfaces as type arguments
+### Interfaces as type arguments
 
 We discussed the issue raised by https://github.com/dotnet/csharplang/issues/5955 and decided to add a restriction around usage of an interface as a type argument (https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-28.md#type-hole-in-static-abstracts). Here is the restriction as it was proposed by https://github.com/dotnet/csharplang/issues/5955 and approved by the LDM.
 
 An interface containing or inheriting a static abstract/virtual member that does not have most specific implementation in the interface cannot be used as a type argument. If all static abstract/virtual members have most specific implementation, the interface can be used as a type argument.
 
-## Accessing static abstract interface members
+### Accessing static abstract interface members
 
 A static abstract interface member `M` may be accessed on a type parameter `T` using the expression `T.M` when `T` is constrained by an interface `I` and `M` is an accessible static abstract member of `I`.
 
@@ -190,7 +189,7 @@ C c = M<C>(); // The static members of C get called
 Since query expressions are spec'ed as a syntactic rewrite, C# actually lets you use a *type* as the query source, as long as it has static members for the query operators you use! In other words, if the *syntax* fits, we allow it!
 We think this behavior was not intentional or important in the original LINQ, and we don't want to do the work to support it on type parameters. If there are scenarios out there we will hear about them, and can choose to embrace this later.
 
-## Variance safety [§17.2.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#17232-variance-safety)
+### Variance safety [§17.2.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#17232-variance-safety)
 
 Variance safety rules should apply to signatures of static abstract members. The addition proposed in
 https://github.com/dotnet/csharplang/blob/main/proposals/variance-safety-for-static-interface-members.md#variance-safety
@@ -202,7 +201,7 @@ to
 
 *These restrictions do not apply to occurrences of types within declarations of **non-virtual, non-abstract** static members.*
 
-## [§10.5.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1054-user-defined-implicit-conversions) User defined implicit conversions
+### [§10.5.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1054-user-defined-implicit-conversions) User defined implicit conversions
 
 The following bullet points
 
@@ -228,7 +227,7 @@ are adjusted as follows:
     - If `U2` is not empty, then `U` is `U2`
 - If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
-## [§10.5.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1055-user-defined-explicit-conversions)  User-defined explicit conversions
+### [§10.5.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#1055-user-defined-explicit-conversions)  User-defined explicit conversions
 
 The following bullet points
 
@@ -254,7 +253,7 @@ are adjusted as follows:
     - If `U2` is not empty, then `U` is `U2`
 - If `U` is empty, the conversion is undefined and a compile-time error occurs.
 
-## Default implementations
+### Default implementations
 
 An *additional* feature to this proposal is to allow static virtual members in interfaces to have default implementations, just as instance virtual/abstract members do. 
 
@@ -264,7 +263,7 @@ We discussed a simpler version which maintains the limitations of the current pr
 
 At https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-01-24.md#default-implementations-of-abstract-statics we decided to support Default Implementations of static members following/expanding the rules established in https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/default-interface-methods.md accordingly.  
 
-## Pattern matching
+### Pattern matching
 
 Given the following code, a user might reasonably expect it to print True (as it would if the constant pattern was written inline):
 
@@ -288,30 +287,30 @@ We also add a similar exception for relational patterns:
 > When the input is a type for which a suitable built-in binary relational operator is defined that is applicable with the input as its left operand and the given constant as its right operand, the evaluation of that operator is taken as the meaning of the relational pattern. Otherwise we convert the input to the type of the expression using an explicit nullable or unboxing conversion. It is a compile-time error if no such conversion exists. **It is a compile-time error if the input type is a type parameter constrained to or a type inheriting from `System.Numerics.INumberBase<T>` and the input type has no suitable built-in binary relational operator defined.** The pattern is considered not to match if the conversion fails. If the conversion succeeds then the result of the pattern-matching operation is the result of evaluating the expression e OP v where e is the converted input, OP is the relational operator, and v is the constant expression.
 
 
-# Drawbacks
+## Drawbacks
 [drawbacks]: #drawbacks
 
 - "static abstract" is a new concept and will meaningfully add to the conceptual load of C#.
 - It's not a cheap feature to build. We should make sure it's worth it.
 
-# Alternatives
+## Alternatives
 [alternatives]: #alternatives
 
-## Structural constraints
+### Structural constraints
 
 An alternative approach would be to have "structural constraints" directly and explicitly requiring the presence of specific operators on a type parameter. The drawbacks of that are:
     - This would have to be written out every time. Having a named constraint seems better.
     - This is a whole new kind of constraint, whereas the proposed feature utilizes the existing concept of interface constraints.
     - It would only work for operators, not (easily) other kinds of static members.
 
-# Unresolved questions
+## Unresolved questions
 [unresolved]: #unresolved-questions
 
-## Static abstract interfaces and static classes
+### Static abstract interfaces and static classes
 
 See https://github.com/dotnet/csharplang/issues/5783 and https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#static-abstract-interfaces-and-static-classes for more information.
 
-# Design meetings
+## Design meetings
 
 - https://github.com/dotnet/csharplang/blob/master/meetings/2021/LDM-2021-02-08.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-05.md

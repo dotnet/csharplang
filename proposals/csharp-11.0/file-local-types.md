@@ -63,7 +63,7 @@ The implementation guarantees that file-local types in different files with the 
 ### Lookup
 We amend the [member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) section as follows (new text in **bold**):
 
-> - Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process ([§11.6.3](expressions.md#1163-type-inference)) might be able to infer the type arguments.
+> - Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process ([§11.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1163-type-inference)) might be able to infer the type arguments.
 > - **Next, let *F* be the compilation unit which contains the expression where member lookup is occurring. All members which are file-local types and are not declared in *F* are removed from the set.**
 > - **Next, if the set of accessible members contains file-local types, all non-file-local types are removed from the set.**
 
