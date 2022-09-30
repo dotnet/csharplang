@@ -33,6 +33,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Oct 5, 2022
 
+- Final review of ref lifetime rules (Jared): [Spec](https://github.com/dotnet/csharplang/blob/main/proposals/low-level-struct-improvements.md)
 
 # C# Language Design Notes for 2022
 
