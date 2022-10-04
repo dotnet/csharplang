@@ -316,7 +316,7 @@ The details of *return only* is that it's a scope which is greater than *current
 There are three locations which default to *return only*:
 - A `ref` or `in` parameter. This is done in part for `ref struct` to prevent [silly cyclic assignment](#cyclic-assignment) issues. It is done uniformly though to simplify the model as well as minimize compat changes.
 - A `out` parameter for a `ref struct` will have *safe-to-escape* of *return only*. This allows for return and `out` to be equally expressive. This does not have the silly cyclic assignment problem because `out` is implicitly `scoped` so the *ref-safe-to-escape* is still smaller than the *safe-to-escape*.
-- A `this` parameter for a `struct` constructor. This falls out due them being modeled as `out` parameters. 
+- A `this` parameter for a `struct` constructor. This falls out due to being modeled as `out` parameters. 
 
 Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-to-escape*, and if applicable a *ref-safe-to-escape*, of at least *return only*. That includes `return` statements, expression bodied members and lambda expressions.
 
@@ -552,7 +552,7 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` and it will change the *ref-safe-to-escape* to be one level wider than its default. For example:
 - if applied to a `struct` instance method it will become *return only* where previously it was *containing method*.
-- if applied to a `ref` parameter it will become *containing method* where previously it was *return only*
+- if applied to a `ref` parameter it will become *calling method* where previously it was *return only*
 
 When applying `[UnscopedRef]` to an instance method of a `struct` it has the impact of modifying the implicit `this` parameter. This means `this` acts as an unannotated `ref` of the same type. 
 
