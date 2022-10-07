@@ -196,6 +196,18 @@ class C : I
 }
 ```
 
+### `global using static`
+It is a compile-time error to use a file-local type in a `global using static` directive, i.e.
+
+```cs
+global using static C; // error
+
+file class C
+{
+    public static void M() { }
+}
+```
+
 ### Implementation/overrides
 file-local type declarations can implement interfaces, override virtual methods, etc. just like regular type declarations.
 
