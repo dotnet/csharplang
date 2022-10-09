@@ -7,8 +7,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule when convenient
 
-- Keywordness of `field` (Fred)
-- Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
 
 ## Recurring topics
 
@@ -26,6 +24,10 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Mon Oct 17, 2022
 
 ## Wed Oct 12, 2022
+
+- Keywordness of `field` (Fred)
+- Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
+- Support `params` with default lambda parameters? (Fred)
 
 ## Mon Oct 10, 2022
 
