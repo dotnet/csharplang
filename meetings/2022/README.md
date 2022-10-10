@@ -30,10 +30,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 - Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
 - Support `params` with default lambda parameters? (Fred)
 
-## Mon Oct 10, 2022
-
-- Triage [working set](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Working+Set%22) and determine working groups (Mads) 
-
 ## Wed Oct 5, 2022
 
 - Final review of ref lifetime rules (Jared): [Spec](https://github.com/dotnet/csharplang/blob/main/proposals/low-level-struct-improvements.md)
@@ -41,6 +37,18 @@ All schedule items must have a public issue or checked in proposal that can be l
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Mon Oct 10, 2022
+
+[C# Language Design Meeting for October 10th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-10.md)
+
+- [Working set triage](#working-set-triage)
+    - [Static classes implementing interfaces](#static-classes-implementing-interfaces)
+    - [Null-conditional assignment](#null-conditional-assignment)
+    - [Lambda default parameters](#lambda-default-parameters)
+- [Working groups](#working-groups)
+- [`params` support for lambda default parameters](#params-support-for-lambda-default-parameters)
+    - [Conclusion](#conclusion)
 
 ## Wed Sep 28, 2022
 
