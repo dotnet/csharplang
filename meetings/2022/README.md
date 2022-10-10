@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
+- List-patterns on enumerables. Still okay with feature? Would requiring slices to be last element be acceptable or desirable? (Julien): [doc](https://github.com/dotnet/csharplang/pull/6365)
 
 ## Schedule when convenient
 
