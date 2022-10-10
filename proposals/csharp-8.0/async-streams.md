@@ -296,7 +296,7 @@ namespace System.Threading.Tasks
             public ConfiguredAsyncEnumerator<T> GetAsyncEnumerator() =>
                 new ConfiguredAsyncEnumerator<T>(_enumerable.GetAsyncEnumerator(), _continueOnCapturedContext);
 
-            public struct Enumerator
+            public struct ConfiguredAsyncEnumerator<T>
             {
                 private readonly IAsyncEnumerator<T> _enumerator;
                 private readonly bool _continueOnCapturedContext;
