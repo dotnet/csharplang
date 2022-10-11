@@ -248,12 +248,20 @@ public class C(bool b, int i, string s) : B(b)
         get => s;
         set => s = value ?? throw new NullArgumentException(nameof(X));
     }
-    public C(string s2) : base(true) 
+    public C(string s2) : base(true) // cannot use `string s` because it would shadow
     { 
         s = s2; // must initialize s because it is captured by S
     }
+    protected C(C original) : base(original) // copy constructor
+    {
+        this.s = original.s; // assignment to b and i not required because not captured
+    }
 }
 ```
+
+### Double storage warning
+
+If a primary constructor parameter is passed to the base and *also* captured, there's a high risk that it is inadvertently stored twice in the object. It might make sense to issue a warning about this, if we can settle on good conditions for the warning, as well as recommended ways to shut it up if the code was intentional.
 
 ### Primary constructor bodies
 
