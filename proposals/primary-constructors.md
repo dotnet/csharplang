@@ -182,6 +182,12 @@ With this proposal, records no longer need to separately specify a primary const
 ## Alternatives
 [alternatives]: #alternatives
 
+### No capture
+
+A much simpler version of the feature would prohibit primary constructor parameters from occurring in member bodies. Referencing them would be an error. Fields would have to be explicitly declared if storage is desired beyond the initialization code.
+
+This could still be evolved to the full proposal at a later time, and would avoid a number of decisions and complexities, at the cost of removing less boilerplate initially.
+
 ### Explicit generated fields
 
 An alternative approach is for primary constructor parameters to always and visibly generate a field of the same name. Instead of closing over the parameters in the same manner as local and anonymous functions, there would explicitly be a generated member declaration, similar to the public properties generated for primary construcor parameters in records. Just like for records, if a suitable member already exists, one would not be generated.
