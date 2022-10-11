@@ -194,7 +194,7 @@ Another problem often raised with this approach is that many developers have dif
 
 Finally, visibly generating member declarations is really the name of the game for records, but much more surprising and "out of character" for non-record classes and structs. All in all, those are the reasons why the main proposal opts for implicit capture, with sensible behavior (consistent with records) for explicit member declarations when they are desired.
 
-## Remove instance members from initializer scope
+### Remove instance members from initializer scope
 
 The lookup rules above are intended to allow for the current behavior of primary constructor parameters in records when a corresponding member is manually declared, and to explain the behavior of the generated member when it is not. This requires lookup to differ between "initialization scope" (this/base initializers, member initializers) and "body scope" (member bodies), which the above proposal achieves by changing *when* primary constructor parameters are looked for, depending on where the reference occurs.
 
