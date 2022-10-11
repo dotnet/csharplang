@@ -186,7 +186,15 @@ With this proposal, records no longer need to separately specify a primary const
 
 A much simpler version of the feature would prohibit primary constructor parameters from occurring in member bodies. Referencing them would be an error. Fields would have to be explicitly declared if storage is desired beyond the initialization code.
 
-This could still be evolved to the full proposal at a later time, and would avoid a number of decisions and complexities, at the cost of removing less boilerplate initially.
+``` c#
+public class C(string s)
+{
+    public S1 => s; // Nope!
+    public S2 { get; } = s; // Still allowed
+}
+```
+
+This could still be evolved to the full proposal at a later time, and would avoid a number of decisions and complexities, at the cost of removing less boilerplate initially, and probably also seeming unintuitive. 
 
 ### Explicit generated fields
 
