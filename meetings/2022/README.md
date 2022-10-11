@@ -42,13 +42,13 @@ Overview of meetings and agendas for 2022
 
 [C# Language Design Meeting for October 10th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-10.md)
 
-- [Working set triage](#working-set-triage)
-    - [Static classes implementing interfaces](#static-classes-implementing-interfaces)
-    - [Null-conditional assignment](#null-conditional-assignment)
-    - [Lambda default parameters](#lambda-default-parameters)
-- [Working groups](#working-groups)
-- [`params` support for lambda default parameters](#params-support-for-lambda-default-parameters)
-    - [Conclusion](#conclusion)
+- Working set triage
+    - Static classes implementing interfaces
+    - Null-conditional assignment
+    - Lambda default parameters
+- Working groups
+- `params` support for lambda default parameters
+    - Conclusion
 
 ## Wed Sep 28, 2022
 
