@@ -24,6 +24,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mon Oct 17, 2022
 
+- Primary constructors (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
+
 ## Wed Oct 12, 2022
 
 - Keywordness of `field` (Fred)
