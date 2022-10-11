@@ -8,140 +8,250 @@
 ## Summary
 [summary]: #summary
 
-Classes can have a parameter list, and when they do, their base class specification can have an argument list.
-Primary constructor parameters are in scope throughout the class declaration, and if they are captured by a function member or anonymous function, they are stored as private fields in the class.
+Classes and structs can have a parameter list, and their base class specification can have an argument list.
+Primary constructor parameters are in scope throughout the class or struct declaration, and if they are captured by a function member or anonymous function, they are appropriately stored (e.g. as unspeakable private fields of the declared class or struct).
+
+The proposal "retcons" the primary constructors already available on records in terms of this more general feature with some additional members synthesized.
 
 ## Motivation
 [motivation]: #motivation
 
-It is common to have a lot of boilerplate in program initialization code. In the general case, a given piece of data `x` is mentioned many times:
+The ability of a class or struct in C# to have more than one constructor provides for generality, but at the expense of some tedium in the declaration syntax, because the constructor input and the class state need to be cleanly separated.
 
-- As a private field `_x`
-- As a parameter `x` to a constructor
-- In an assignment `_x = x;` of the field from the parameter in the constructor
-- As a property `X`
-- In the property setter `x = value;`
-- In the property getter `return x;`
+Primary constructors put the parameters of one constructor in scope for the whole class or struct to be used for initialization or directly as object state. The trade-off is that any other constructors must call through the primary constructor.
 
 ``` c#
-class C
+public class C(bool b, int i, string s) : B(b) // b passed to base constructor
 {
-    private string _x;
-    
-    public C(string x)
+    public int I { get; set; } = i; // i used for initialization
+    public string S // s used directly in function members
     {
-        _x = x;
+        get => s;
+        set => s = value ?? throw new NullArgumentException(nameof(X));
     }
-    public string X
-    {
-        get => _x;
-        set { if (value == null) throw new NullArgumentException(nameof(X)); _x = value; }
-    }
+    public C(string s) : this(0, s) { } // must call this(...)
 }
 ```
-
-For properties that don't require validation or computation, the tedium can be reduced using auto-properties, thus cutting out the need to declare an explicit backing field for the property. But if your property requires any sort of logic beyond what an auto-property provides, the above is the best you an do.
-
-Primary constructors instead reduce the overhead by putting constructor arguments directly in scope throughout the class, again obviating the need to explicitly declare a backing field. Thus, the above example would become:
-
-``` c#
-class C(string x)
-{
-    public string X
-    {
-        get => x;
-        set { if (value == null) throw new NullArgumentException(nameof(X)); x = value; }
-    }
-}
-```
-
-In this example, the primary constructor reduces the number of named entities for `x` from three to two, obviating the `_x` backing field. It removes two out of three member declarations (keeping only the property declaration itself), and reduces the total number of mentions of `x`/`_x`/`X` from eight to five.
-
 
 ## Detailed design
 [design]: #detailed-design
 
-Classes can have a parameter list:
+This describes the generalized design across records and non-records, and then details how the existing primary constructors for records are specified by adding a set of synthesized members in the presence of a primary constructor.
+
+### Syntax
+Class and struct declarations are augmented to allow a parameter list on the type name, an argument list on the base class, and a body consisting of just a `;`:
+
+``` antlr
+class_declaration
+  : attributes? class_modifier* 'partial'? class_designator identifier type_parameter_list?
+  parameter_list? class_base? type_parameter_constraints_clause* class_body ';'?
+  ;
+  
+class_designator
+  : 'record' 'class'?
+  | 'class'
+  
+class_base
+  : ':' class_type argument_list?
+  | ':' interface_type_list
+  | ':' class_type  argument_list? ',' interface_type_list
+  ;  
+  
+class_body
+  : '{' class_member_declaration* '}' ';'?
+  | ';'
+  ;
+  
+struct_declaration
+  : attributes? struct_modifier* 'partial'? 'record'? 'struct' identifier type_parameter_list?
+    parameter_list? struct_interfaces? type_parameter_constraints_clause* struct_body ';'?
+  ;
+
+struct_body
+  : '{' struct_member_declaration* '}' ';'?
+  | ';'
+  ;
+```
+
+***Note:*** These productions replace `record_declaration` in [Records](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#records) and `record_struct_declaration` in [Record structs](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#record-structs), which both become obsolete. 
+
+It is an error for a `class_base` to have an `argument_list` if the enclosing `class_declaration` does not contain a `parameter_list`. At most one partial type declaration of a partial class or struct may provide a `parameter_list`. The parameters in the `parameter_list` must all be value parameters.
+
+It is an error for a `class_body` or `struct_body` to consist of just a `;` unless the corresponding `class_declaration` or `struct_declaration` has a `record` keyword and a `parameter_list`.
+
+A class or struct with a `parameter_list` has an implicit public constructor whose signature corresponds to the value parameters of the type declaration. This is called the ***primary constructor*** for the type, and causes the implicitly declared parameterless constructor, if present, to be suppressed. It is an error to have a primary constructor and a constructor with the same signature already present in the type declaration.
+
+### Lookup
+
+The [lookup of simple names](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1174-simple-names) is augmented to handle primary constructor parameters. The changes are highlighted in **bold** in the following excerpt:
+
+> - Otherwise, for each instance type `T` ([§14.3.2](classes.md#1432-the-instance-type)), starting with the instance type of the immediately enclosing type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):
+>   - If `e` is zero and the declaration of `T` includes a type parameter with name `I`, then the *simple_name* refers to that type parameter.
+>   - **Otherwise, if the declaration of `T` includes a primary constructor parameter `I` and the reference occurs within the `argument_list` of `T`'s `class_base` or within an initializer of a field, property or event, the result is the primary constructor parameter `I`**
+>   - Otherwise, if a member lookup ([§11.5](expressions.md#115-member-lookup)) of `I` in `T` with `e` type arguments produces a match:
+>     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method ([§11.7.8.2](expressions.md#11782-method-invocations)).
+>     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor ([§11.2.1](expressions.md#1121-general)), the result is the same as a member access ([§11.7.6](expressions.md#1176-member-access)) of the form `this.I`. This can only happen when `e` is zero.
+>     - Otherwise, the result is the same as a member access ([§11.7.6](expressions.md#1176-member-access)) of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
+>   - **Otherwise, if the declaration of `T` includes a primary constructor parameter `I`, the result is the primary constructor parameter `I`. It is an error if the reference does not occur within the body of an instance method or an instance accessor.**
+
+The first addition corresponds to the change incurred by [primary constructors on records](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#primary-constructor), and ensures that primary constructor parameters are found before any corresponding fields within initializers and base class arguments.
+
+The second addition allows primary constructor parameters to be found elsewhere within the class body, but only if not shadowed by members. It produces an error if the reference is not from within the body of an instance member or accessor. Note that instance constructors are excluded from this list.
+
+Thus, in the following declaration:
 
 ``` c#
-public class C(int i, string s)
+class C(int i)
 {
-    ...
+    protected int i = i; // references parameter
+    public int I => i; // references field
 }
 ```
 
-The parameter list causes a constructor to be implicitly declared for the class, with the same accessibility as the class itself.
+The initializer for the field `i` references the parameter `i` (as per the first addition), whereas the body of the property `I` references the field `i` (since member lookup comes before the second addition).
+
+## Semantics
+
+A primary constructor leads to the generation of an instance constructor on the enclosing type with the given parameters. If the `class_base` has an argument list, the generated instance constructor will have a `base` initializer with the same argument list.
+
+All instance member initializers in the class body will become assignments in the generated constructor. This means that, unlike other classes, initializers will run *after* the base constructor has been invoked, not before.
+
+If a primary constructor parameter is referenced from within an instance member, it is captured into the state of the enclosing type, so that it remains accessible after the termination of the constructor. A likely implementation strategy is via a private field using a mangled name. The private field is initialized by the generated constructor before , and all references to the parameter are replaced with references to the field.
+
+If a primary constructor parameter is only referenced from within instance member initializers, those can directly reference the parameter of the generated constructor, as they are executed as part of it.
+
+For instance this declaration:
 
 ``` c#
-new C(5, "Hello");
-```
-
-Primary constructor parameters are in scope throughout the class body. If they are captured by a function member or anonymous function, they become stored as private fields in the class. If they are only used during initialization they will not be stored in the object.
-
-``` c#
-public class C(int i, string s)
+public class C(bool b, int i, string s) : B(b) // b passed to base constructor
 {
-	int[] a = new int[i]; // i not captured
-    public int S => s;    // s captured
+    public int I { get; set; } = i; // i used for initialization
+    public string S // s used directly in function members
+    {
+        get => s;
+        set => s = value ?? throw new NullArgumentException(nameof(X));
+    }
+    public C(string s) : this(true, 0, s) { } // must call this(...)
 }
 ```
 
-If a class with a primary constructor has a base class specification, that one can have an argument list. This serves as the argument list to a `base(...)` initializer of the implicitly declared constructor. If no argument list is provided, an empty one is assumed.
-
-``` c#
-public class C(int i, string s) : B(s)
-{
-    ...
-}
-```
-The class can have explicitly defined constructors as well, but those all have to use a `this(...)` initializer. This ensures that the primary constructor is always called when a new instance is constructed.
-
-All initializers in the class body will become assignments in the generated constructor. This means that, unlike other classes, initializers will run *after* the base constructor has been invoked, not before. In addition, the generated class will contain assignments to initialize any private fields that were generated to store primary constructor parameters that were captured by members. Those members are rewritten to use the private field instead of the parameter in a manner similar to closures for lambda expressions. The generated primary fields are initialized first, and then the initializer-generated assignments are executed in the order of appearance in the class.
-
-For the above example, the effect of the class declaration is as if rewritten like this:
+Generates code similar to the following:
 
 ``` c#
 public class C : B
 {
-    public C(int i, string s) : base(s)
+    public int I { get; set; }
+    public string S
     {
-        __s = s;        // store parameter s for captured use
-        a = new int[i]; // initialize a
+        get => __s;
+        set => __s = value ?? throw new NullArgumentException(nameof(X));
     }
-    int __s; // generated field for capture of s
+    public C(string s) : this(0, s) { ... } // must call this(...)
     
-    int[] a;
-    public int S => __s; // s replaced with captured __s
+    // generated members
+    private string __s; // for capture of s
+    public C(bool b, int i, string s) : base(b)
+    {
+        __s = s; // capture s
+        I = i; // run I's initializer
+    }
 }
 ```
 
-The capture has similar restrictions to the capture of local variables by lambda expressions. For instance, `ref` and `out` parameters are allowed in primary constructors, but cannot be captured my member bodies.
+It is an error for a non-primary constructor declaration to have the same parameter list as the primary constructor. All non-primary constructor declarations must use a `this` initializer, so that the primary constructor is ultimately called.
 
+## Primary constructors on records
+
+With this proposal, records no longer need to separately specify a primary constructor mechanism. Instead, record (class and struct) declarations that have primary constructors would follow the general rules, with these simple additions:
+
+- For each primary constructor parameter, if a member with the same name already exists it must be an instance property or field, and it must be assignable to. If not, a public init-only auto-property of the same name is synthesized with a property initializer assigning from the parameter.
+- A deconstructor is synthesized with out parameters to match the primary constructor parameters.
+- If an explicit constructor declaration is a "copy constructor" - a constructor that takes a single parameter of the enclosing type - it is not required to call a `this` initializer, and will not execute the member initializers present in the record declaration.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-In rough order of significance.
-
-* The proposal uses syntax that has also been proposed for positional records. If we desire both features, some accommodation is required. E.g. a `data` modifier on records has been proposed.
 * The allocation size of constructed objects is less obvious, as the compiler determines whether to allocate a field for a primary constructor parameter based on the full text of the class. This risk is similar to the implicit capture of variables by lambda expressions.
 * A common temptation (or accidental pattern) might be to capture the "same" parameter at multiple levels of inheritance as it is passed up the constructor chain instead of explicitly allotting it a protected field at the base class, leading to duplicated allocations for the same data in objects. This is very similar to today's risk of overriding auto-properties with auto-properties. 
-* As proposed above, there is no place for additional logic that might usually expressed in constructor bodies. The "Primary constructor bodies" extension below addresses that.
-* As proposed, execution order semantics are subtly different than with ordinary constructors. This could probably be remedied, but at the cost of some of the extension proposals (notably "Primary constructor bodies").
-* The proposal only works when a single constructor can be designated primary.
-* There is no way to have separate accessibility of the class and the primary constructor. For instance, in situations where public constructors all delegate to one private "build-it-all" constructor that would be needed. If necessary, syntax could be proposed for that later.
+* As proposed here, there is no place for additional logic that might usually be expressed in constructor bodies. The "primary constructor bodies" extension below addresses that.
+* As proposed, execution order semantics are subtly different from within ordinary constructors, delaying member initializers to after the base calls. This could probably be remedied, but at the cost of some of the extension proposals (notably "primary constructor bodies").
+* The proposal only works for scenarios where a single constructor can be designated primary.
+* There is no way to express separate accessibility of the class and the primary constructor. An example is when public constructors all delegate to one private "build-it-all" constructor. If necessary, syntax could be proposed for that later.
 
 
 ## Alternatives
 [alternatives]: #alternatives
 
-Full-on positional records may be an alternative, or may coexist with primary constructors, depending on the specifics. They would allow for *more* abbreviation in a *smaller* number of scenarios. So both are potentially useful, but having both may be overkill, unless they can be somewhat neatly integrated with each other.
+### Explicit generated fields
 
+An alternative approach is for primary constructor parameters to always and visibly generate a field of the same name. Instead of closing over the parameters in the same manner as local and anonymous functions, there would explicitly be a generated member declaration, similar to the public properties generated for primary construcor parameters in records. Just like for records, if a suitable member already exists, one would not be generated.
+
+If the generated field is private it could still be elided when it is not used as a field in member bodies. In classes, however, a private field would often not be the right choice, because of the state duplication it could cause in derived classes. An option here would be to instead generating a protected field in classes, encouraging reuse of storage across inheritance layers. However, then we would not be able to elide the declaration, and would incur allocation cost for every primary constructor parameter.
+
+This would align non-record primary constructors more closely with record ones, in that members are always (at least conceptually) generated, albeit different kinds of members with different accessibilities. But it would also lead to surprising differences from how parameters and locals are captured elsewhere in C#. If we were ever to allow local classes, for example, they would capture enclosing parameters and locals implicitly. Visibly generating shadowing fields for them would not seem to be a reasonable behavior.
+
+All in all, visibly generating member declarations is really the name of the game for records, but much less so for non-records. Plus for classes there's a high risk that the generated member won't have the right accessibility. Those are the reasons why the main proposal opts for implicit capture, with sensible behavior (consistent with records) for explicit member declarations when they are desired.
+
+## Remove instance members from initializer scope
+
+The lookup rules above are intended to allow for the current behavior of primary constructor parameters in records when a corresponding member is manually declared, and to explain the behavior of the generated member when it is not. This requires lookup to differ between "initialization scope" (this/base initializers, member initializers) and "body scope" (member bodies), which the above proposal achieves by changing *when* primary constructor parameters are looked for, depending on where the reference occurs.
+
+An observation is that referencing an instance member with a simple name in initializer scope always leads to an error. Instead of merely shadowing instance members in those places, could we simply take them out of scope? That way, there wouldn't be this weird conditional ordering of scopes.
+
+This alternative is probably possible, but it would have some consequences that are somewhat far-reaching and potentially undesirable. First of all, if we remove instance members from initializer scope then a simple name that *does* correspond to an instance member and *not* to a primary constructor parameter could accidentally bind to something outside of the type declaration! This seems like it would rarely be intentional, and an error would be better.
+
+Furthermore, *static* members are fine to reference in initialization scope. So we would have to distinguish between static and instance members in lookup, something we don't do today. (We do distinguish in overload resolution but that is not in play here). So that would have to also be changed, leading to yet more situations where e.g. in static contexts something would bind "further out" rather than error because it found an instance member.
+
+All in all this "simplification" would lead to quite a downstream complication that no-one asked for.
 
 ## Possible extensions
 [extensions]: #possible-extensions
 
 These are variations or additions to the core proposal that may be considered in conjunction with it, or at a later stage if deemed useful.
+
+### Primary constructor parameter access within constructors
+
+The rules above make it an error to reference a primary constructor parameter within another constructor. This could be allowed within the *body* of other constructors, though, since the primary constructor runs first. However it would need to remain disallowed within the argument list of the `this` initializer.
+
+``` c#
+public class C(bool b, int i, string s) : B(b)
+{
+    public C(string s) : this(b, s) // b still disallowed
+    { 
+        i++; // could be allowed
+    }
+}
+```
+
+Such access would still incur capture, as that would be the only way the constructor body could get at the variable after the primary constructor has already run. 
+
+The prohibition on primary constructor parameters in the this-initializer's arguments could be weakened to allow them, but make them not definitely assigned, but that does not seem useful.
+
+### Allow constructors without a `this` initializer
+
+Constructors without a `this` initializer (i.e. with an implicit or explicit `base` initializer) could be allowed. Such a constructor would *not* run instance field, property and event initializers, as those would be considered to be part of the primary constructor only.
+
+In the presence of such base-calling constructors, there are a couple of options for how primary constructor parameter capture is handled. The simplest is to completely disallow capture in this situation. Primary constructor parameters would be for initialization only when such constructors exist.
+
+Alternatively, if combined with the previously described option to allow access to primary constructor parameters within constructors, the parameters could enter the constructor body as not definitely assigned, and ones that are captured would need to be definitely assigned by the end of the constructor body. They would essentially be implicit out parameters. That way, captured primary constructor parameters would always have a sensible (i.e. explicitly assigned) value by the time they are consumed by other function members.
+
+An attraction of this extension (in either form) is that it fully generalizes the current exemption for "copy constructors" in records, without leading to situations where uninitialized primary constructor parameters are observed. Essentially, constructors that initialize the object in alternative ways are fine. The capture-related restrictions would not be a breaking change for existing manually defined copy constructors in records, because records never capture their primary constructor parameters (they generate fields instead).
+
+``` c#
+public class C(bool b, int i, string s) : B(b)
+{
+    public int I { get; set; } = i; // i used for initialization
+    public string S // s used directly in function members
+    {
+        get => s;
+        set => s = value ?? throw new NullArgumentException(nameof(X));
+    }
+    public C(string s2) : base(true) 
+    { 
+        s = s2; // must initialize s because it is captured by S
+    }
+}
+```
 
 ### Primary constructor bodies
 
@@ -160,36 +270,5 @@ public class C(int i, string s) : B(s)
 }
 ```
 
-### Initializer fields and initializer functions
-
-In a class with a primary constructor we could consider field and method declarations without accessibility modifiers to be more like local variables and local functions:
-
-* Just like primary constructor parameters the "initializer fields" would only be captured into an actual private field if they were used in function members.
-* The "initializer functions" would only be considered to capture primary constructor parameters and initializer fields if they were themselves used in other function members. If not captured, they could be generated in a more optimal fashion, like local functions.
-* Just like primary constructor parameters they would not be available via member access, but only as a simple name.
-
-This could be used for temporary variables and helper functions that are only relevant to initialization:
-
-``` c#
-public class C(string s)
-{
-    int size = s.Length;             // not captured
-    int[] Create() => new int[size]; // not captured
-	int[] a = Create();
-    ...
-}
-```
-
-This may be too subtle, especially since the absence of accessibility modifiers elsewhere simply means `private`. 
-
-### Initializer statements
-
-A radical combination of the above to extensions would be to simply allow statements directly in the class body. Such statements are exactly as the interspersed constructor bodies proposed above, except they don't need to be enclosed in `{ }`. For this to be sufficiently useful, "local" variables and helper functions would need to also be expressible at the top level of the class, in the manner explored in the extension "Initializer fields and initializer functions" above.
-
-
-### Member access
-
-The core proposal treats primary constructor parameters as parameters that can only be referred as simple names. An alternative is to allow them to be referenced as if they were private fields, i.e. with a member access, *even* if they are sometimes not generated as fields. This would allow them to be referenced as `this.x` when shadowed by local variables, and accessed from a different instance as `other.x`.
-
-If applied to the "initializer fields and initializer functions" extension this would also reduce the degree to which those were different from ordinary private members. The only difference would then be that the compiler is free to elide them from the object if only used during initialization.
+A lot of this scenario might be adequately be covered if we were to introduce "final initializers" which run after the constructors *and* any object/collection initializers have completed. However, argument validation is one thing that would ideally happen as early as possible.
 
