@@ -32,3 +32,6 @@ However, *the notes are not minutes*! They *never* state who said what in the me
 
 This approach is intended to reinforce that the LDMs are a safe space, and a collaborative, creative effort. It is not a negotiation between representatives of different interests. It is not a voting body, and it is not a venue for posturing. Everybody cooperates towards the same end: creating the best language for today's and tomorrow's C# developers.
 
+## Working groups
+
+Working groups who choose to do so will keep meeting notes in a subfolder of the [working-groups](working-groups/) folder belonging to that group. These notes will be anonymized, like LDM notes, but are likely to be much rougher than dedicated LDM notes. We will not create dedicated discussions when posting these working group notes. Users that want to comment on them can either comment on the issue for the group or create a discussion, as they choose. Working groups will each have a leader, and that leader will be responsible for coordinating with the broader LDM on when things need to be brought back to the full group.
