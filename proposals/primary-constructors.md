@@ -190,7 +190,9 @@ If the generated field is private it could still be elided when it is not used a
 
 This would align non-record primary constructors more closely with record ones, in that members are always (at least conceptually) generated, albeit different kinds of members with different accessibilities. But it would also lead to surprising differences from how parameters and locals are captured elsewhere in C#. If we were ever to allow local classes, for example, they would capture enclosing parameters and locals implicitly. Visibly generating shadowing fields for them would not seem to be a reasonable behavior.
 
-All in all, visibly generating member declarations is really the name of the game for records, but much less so for non-records. Plus for classes there's a high risk that the generated member won't have the right accessibility. Those are the reasons why the main proposal opts for implicit capture, with sensible behavior (consistent with records) for explicit member declarations when they are desired.
+Another problem often raised with this approach is that many developers have different naming conventions for parameters and fields. Which should be used for the primary constructor parameter? Either choice would lead to inconsistency with the rest of the code.
+
+Finally, visibly generating member declarations is really the name of the game for records, but much more surprising and "out of character" for non-record classes and structs. All in all, those are the reasons why the main proposal opts for implicit capture, with sensible behavior (consistent with records) for explicit member declarations when they are desired.
 
 ## Remove instance members from initializer scope
 
@@ -272,3 +274,23 @@ public class C(int i, string s) : B(s)
 
 A lot of this scenario might be adequately be covered if we were to introduce "final initializers" which run after the constructors *and* any object/collection initializers have completed. However, argument validation is one thing that would ideally happen as early as possible.
 
+## Combined parameter and member declarations
+
+A possible and often mentioned addition could be to allow primary constructor parameters to be annotated so that they would *also* declare a member on the type. Most commonly it is proposed to allow an access specifier on the parameters to trigger the member generation:
+
+``` c#
+public class C(bool b, protected int i, string s) : B(b) // i is a field as well as a parameter
+{
+    void M()
+    {
+        ... i ... // refers to the field i
+        ... s ... // closes over the parameter s
+    }
+}
+```
+
+There are some problems: 
+  - What if a property is desired, not a field? Having `{ get; set; }` syntax inline in a parameter list does not seem appetizing.
+  - What if different naming conventions are used for parameters and fields? Then this feature would be useless.
+  
+This is a potential future addition that can be adopted or not
