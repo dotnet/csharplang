@@ -156,9 +156,9 @@ Next the rules for ref reassignment need to be adjusted for the presence of `ref
 
 The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
 
-> For a ref reassignment in the form ...
-> 1. `x.e1 = ref e2`: where `x` is *safe-to-escape* at least *return only* then `e2` must have *ref-safe-to-escape* at least as large as `x`
-> 2. `e1 = ref e2`: where `e1` is a `ref` local or `ref` parameter then `e2` must have a *safe-to-escape* equal to *safe-to-escape* for `e1` and `e2` must have *ref-safe-to-escape* at least as large as *ref-safe-to-escape* of the *ref-safe-to-escape* of `e1`
+> For a ref reassignment in the form `e1 = ref e2` both of the following must be true:
+> 1. e2 must have ref-safe-to-escape at least as large as the ref-safe-to-escape of e1
+> 2. e1 must have the same safe-to-escape as e2
 
 That means the desired `Span<T>` constructor works without any extra annotation:
 
@@ -321,6 +321,8 @@ There are three locations which default to *return only*:
 Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-to-escape*, and if applicable a *ref-safe-to-escape*, of at least *return only*. That includes `return` statements, expression bodied members and lambda expressions.
 
 Likewise any assignment to an `out` must have a *safe-to-escape* of at least *return only*. This is not a special case though, this just follows from the existing assignment rules.
+
+Note: An expression whose type is not a `ref struct` type always has a *safe-to-return* of *calling method*. 
 
 <a name="rules-method-invocation"></a>
 
@@ -1096,7 +1098,7 @@ The features outlined in this document don't need to be implemented in a single 
 
 What gets implemented in which release is merely a scoping exercise. 
 
-**Decision** Only (1) and (2) will make C# 11.0. The expectation is (3) and (4) are enabled very early in C# 12.0 to enable dogfooding by runtime throughout the .NET 8 cycle
+**Decision** Only (1) and (2) made C# 11.0. The rest will be considered in future versions of C#.
 
 ## Future Considerations
 
