@@ -1,15 +1,19 @@
-# Default Parameters for Lambdas and Method Groups
+# Default and Variable Parameters for Lambdas and Method Groups
 
 ## Summary
 
 [summary]: #summary
 
-To build on top of the lambda improvements introduced in C#10 (see [relevant background](#relevant-background)), we propose adding support for default parameter values in lambdas. This would enable users to implement the following lambdas:
+To build on top of the lambda improvements introduced in C# 10 (see [relevant background](#relevant-background)), we propose adding support for default parameter values and [`params` arrays](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/params) in lambdas. This would enable users to implement the following lambdas:
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1;
 addWithDefault(); // 3
 addWithDefault(5); // 6
+
+var count = (params int[] xs) => xs.Length;
+count(); // 0
+count(1, 2, 3); // 3
 ```
 
 Similarly, we will allow the same kind of behavior for method groups:
@@ -18,8 +22,15 @@ var addWithDefault = addWithDefaultMethod;
 addWithDefault(); // 3
 addWithDefault(5) // 6
 
+var counter = countMethod;
+counter(); // 0
+counter(1, 2); // 2
+
 int addWithDefaultMethod(int addTo = 2) {
   return addTo + 1;
+}
+int countMethod(params int[] xs) {
+  return xs.Length;
 }
 ```
 
@@ -55,6 +66,7 @@ app.MapPost("/todos/{id}", (TodoService todoService, int id, string task = "foo"
 ```
 
 The proposed syntax also has the benefit of reducing confusing differences between lambdas and local functions, making it easier to reason about constructs and "grow up" lambdas to functions without compromising features, particularly in other scenarios where lambdas are used in APIs where method groups can also be provided as references.
+This is also the main motivation for supporting the `params` array which is not covered by the aforementioned use-case scenario.
 
 For example: 
 ```csharp
@@ -69,41 +81,54 @@ app.MapPost("/todos/{id}", todoHandler);
 ```
 
 ## Current Behavior
-Currently, when a user implements a lambda with a default value, the compiler raises an error stating that default values are not allowed. 
+Currently, when a user implements a lambda with a default or `params` parameter, the compiler raises an error stating that it's not allowed. 
 
 ```csharp
-var addWithDefault = (int addTo = 2) => addTo + 1; // Error: default values not allowed in this context
+var addWithDefault = (int addTo = 2) => addTo + 1; // error CS1065: Default values are not valid in this context.
+var counter = (params int[] xs) => xs.Length; // error CS1670: params is not valid in this context
 ```
 
-When a user attempts to use a method group where the underlying method has a default parameter, the
-default param isn't propagated, so the call to the method doesn't typecheck due to a mismatch in the number of expected parameters.
+When a user attempts to use a method group where the underlying method has a default or `params` parameter, this information isn't propagated, so the call to the method doesn't typecheck due to a mismatch in the number of expected arguments.
 ```cs
-void M(int i = 1) {}
+void M1(int i = 1) { }
+var m1 = M1; // Infers Action<int>
+m1(); // error CS7036: There is no argument given that corresponds to the required parameter 'obj' of 'Action<int>'
 
-var m = M; // Infers Action<int>
-m(); // Error: no value provided for arg0
+void M2(params int[] xs) { }
+var m2 = M2; // Infers Action<int[]>
+m2(); // error CS7036: There is no argument given that corresponds to the required parameter 'obj' of 'Action<int[]>'
 ```
 
-## New Behavior 
+## New Behavior
 
-Following this proposal, default values can be applied to lambda parameters with the following behavior:
+Following this proposal, default values and `params` can be applied to lambda parameters with the following behavior:
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1;
 addWithDefault(); // 3
 addWithDefault(5); // 6
+
+var count = (params int[] xs) => xs.Length;
+count(); // 0
+count(1, 2, 3); // 3
 ```
 
-Default values can be applied to method group parameters by specifically defining a method group that
-has a default parameter:
+Default values and `params` can be applied to method group parameters by specifically defining such method group:
 
 ```cs
-void addWithDefault(int addTo = 2) {
+int addWithDefault(int addTo = 2) {
   return addTo + 1;
 }
 
 var add1 = addWithDefault; 
-add1(); // ok, default parameter will be used.
+add1(); // ok, default parameter will be used
+
+int count(params int[] xs) {
+  return xs.Length;
+}
+
+var count1 = count;
+count1(1, 2, 3); // ok, `params` will be used
 ```
 
 ## Breaking Change
@@ -120,6 +145,16 @@ DoAction(writeInt, 3); // Ok, writeInt is an Action<int>
 void DoAction(Action<int> a, int p) {
   a(p);
 }
+
+int Count(params int[] xs) {
+  return xs.Length;
+}
+var counter = Count; // Inferred as Func<int[], int>
+DoFunction(counter, 3); // Ok, counter is a Func<int[], int>
+
+int DoFunction(Func<int[], int> f, int p) {
+  return f(new[] { p });
+}
 ```
 Following this change, code of this nature would cease to compile.
 
@@ -134,9 +169,19 @@ DoAction(writeInt, 3); // Error, cannot convert from anonymous delegate type to 
 void DoAction(Action<int> a, int p) {
   a(p);
 }
+
+int Count(params int[] xs) {
+  return xs.Length;
+}
+var counter = Count; // Inferred as anonymous delegate type
+DoFunction(counter, 3); // Error, cannot convert from anonymous delegate type to Func
+
+int DoFunction(Func<int[], int> f, int p) {
+  return f(new[] { p });
+}
 ```
 The impact of this breaking change needs to be considered. Fortunately, the use of `var` to infer the type of a method group has
-only been supported since C# 10, so only code which has been written since then which explicity relies on this behavior would break.
+only been supported since C# 10, so only code which has been written since then which explicitly relies on this behavior would break.
 
 ## Detailed design
 
@@ -145,31 +190,44 @@ only been supported since C# 10, so only code which has been written since then 
 ### Grammar and Parser Changes
 This enhancement requires the following changes to the grammar for lambda expressions.
 ```diff
-explicit_anonymous_function_parameter
+ explicit_anonymous_function_parameter_list
++    : explicit_anonymous_function_parameters
++    | explicit_anonymous_function_parameters ',' parameter_array
++    | parameter_array
++    ;
++
++explicit_anonymous_function_parameters
+     : explicit_anonymous_function_parameter
+       (',' explicit_anonymous_function_parameter)*
+     ;
+
+ explicit_anonymous_function_parameter
 -    : anonymous_function_parameter_modifier? type identifier
 +    : anonymous_function_parameter_modifier? type identifier default_argument?
-    ;
+     ;
 ```
 No changes to the grammar are necessary for method groups since this proposal would only change their semantics.
 
 ### Binder Changes
 
 #### Synthesizing New Delegate Types
-As with the behavior for delegates with `ref` or `out` parameters, a new natural type is generated for each lambda or method group defined with any default parameter values.
+As with the behavior for delegates with `ref` or `out` parameters, a new natural type is generated for each lambda or method group defined with any default or `params` parameters.
 Note that in the below examples, the notation `a'`, `b'`, etc. is used to represent these anonymous delegate types.
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1;
-// internal delegate int b'(int arg0 = 2);
+// internal delegate int a'(int arg0 = 2);
 var printString = (string toPrint = "defaultString") => Console.WriteLine(toPrint);
-// internal delegate void c'(string arg0 = "defaultString");
+// internal delegate void b'(string arg0 = "defaultString");
+var count = (params int[] xs) => xs.Length;
+// internal delegate int c'(params int[] arg0);
 string pathJoin(string s1, string s2, string sep = "/") { return $"{s1}{sep}{s2}"; }
 var joinFunc = pathJoin;
 // internal delegate string d'(string arg0, string arg1, string arg3 = " ");
 ```
 
 #### Conversion and Unification Behavior 
-The delegates described previously will be unified when the same parameter (based on position) has the same default value, regardless of parameter name.
+Anonymous delegates with default parameters will be unified when the same parameter (based on position) has the same default value, regardless of parameter name.
 
 ```csharp
 int E(int j = 13) {
@@ -212,7 +270,7 @@ d = (int c = 10) => 2; // Error: default parameter is different between new lamb
                        // and synthesized delegate b'. We won't do implicit conversion
 ```
 
-Similarly, there is of course compatibility with named delegates that have default parameters as well: 
+Similarly, there is of course compatibility with named delegates that already support default and `params` parameters.
 ```csharp
 int D(int a = 1) {
   return a;
@@ -234,7 +292,7 @@ Del del3 = d; // Not allowed. Cannot convert internal delegate type to Del.
               // to be Action<int> since Action<int> also cannot be converted to a named delegate type.
 ```
 
-Since lambdas and method groups with default parameter values are typed as anonymous delegates, the
+Since lambdas and method groups with default and `params` parameters are typed as anonymous delegates, the
 method group conversion rules as described in [§10.8](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/conversions#108-method-group-conversions)
 apply. We can first consider the following example: 
 
@@ -253,6 +311,29 @@ d();   // This call will use default value x = 10 from original lambda
 The above code has an implicit conversion from a method group to a delegate. 
 However, the anonymous delegate type that the method group is converted to has a default parameter which differs from the underlying method. 
 Note that the default value for the underlying delegate type will be used here, which may seem counter-intuitive to users. Because of this, we will emit a warning.
+
+This is not as confusing in case of `params`, so there will be no warning.
+
+```csharp
+int M1(int[] xs) {
+  return xs.Length;
+}
+int M2(params int[] xs) {
+  return xs.Length;
+}
+
+var d1 = (int[] xs) => xs.Length;
+// internal delegate int a'(int[] arg0);
+var d2 = (params int[] xs) => xs.Length;
+// internal delegate int b'(params int[] arg0);
+
+d1 = M1;
+d2 = M1;
+d1 = M2;
+d2 = M2;
+d1(1, 2, 3); // Error, d1's argument is not `params`.
+d2(1, 2, 3); // Ok, d2's argument is `params`.
+```
 
 #### Other Conversion Cases
 
@@ -292,10 +373,10 @@ D1 d = Fun; // Allowed WITHOUT warning, since Fun and its default parameter are 
 ### IL/Runtime Behavior
 
 The default parameter values will be emitted to metadata. The IL for this feature will be very similar in nature to the IL emitted for lambdas with `ref` and `out` parameters. A class which
-inherits from `System.Delegate` or similar will be generated, and the `Invoke` method will include `.param` directives to set default parameters -- 
-just as would be the case for a standard named delegate with default parameters.
+inherits from `System.Delegate` or similar will be generated, and the `Invoke` method will include `.param` directives to set default parameters or `System.ParamArrayAttribute` &ndash; 
+just as would be the case for a standard named delegate with default or `params` parameters.
 
-These delegate types are able to inspected at runtime, as normal.
+These delegate types are able to be inspected at runtime, as normal.
 In code, users can introspect the `DefaultValue` in the `ParameterInfo` associated with the lambda or method group by using the associated `MethodInfo`.
 
 ```csharp
@@ -337,4 +418,8 @@ This inference leads to some tricky conversion issues which would require more d
 
 There are also parsing performance considerations here. For instance, today the term
 `(x = ` could never be the start of a lambda expression. If this syntax was allowed for lambda defaults, then the parser
-would need a larger lookahead (scanning all the way until a `=>` token) in order to determine whether a term is a lambda or not. 
+would need a larger lookahead (scanning all the way until a `=>` token) in order to determine whether a term is a lambda or not.
+
+## Design meetings
+
+- [LDM 2022-10-10](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-10.md#params-support-for-lambda-default-parameters): decision to add support for `params` in the same way as default parameters.
