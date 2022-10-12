@@ -158,7 +158,7 @@ The left operand of the `= ref` operator must be an expression that binds to a r
 
 > For a ref reassignment in the form `e1 = ref e2` both of the following must be true:
 > 1. `e2` must have *ref-safe-to-escape* at least as large as the *ref-safe-to-escape* of `e1`
-> 2. `e1` must have the same *safe-to-escape* as `e2` [Note](#example-ref-reassignment-safety)
+> 2. `e1` must have the same *safe-to-escape* as `e2` [Note](#examples-ref-reassignment-safety)
 
 That means the desired `Span<T>` constructor works without any extra annotation:
 
