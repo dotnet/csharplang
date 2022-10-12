@@ -158,7 +158,7 @@ The left operand of the `= ref` operator must be an expression that binds to a r
 
 > For a ref reassignment in the form `e1 = ref e2` both of the following must be true:
 > 1. `e2` must have *ref-safe-to-escape* at least as large as the *ref-safe-to-escape* of `e1`
-> 2. `e1` must have the same *safe-to-escape* as `e2`
+> 2. `e1` must have the same *safe-to-escape* as `e2` [Note](#example-ref-reassignment-safety)
 
 That means the desired `Span<T>` constructor works without any extra annotation:
 
@@ -1308,6 +1308,38 @@ ref struct RS
     }
 }
 ```
+
+#### Ref reassignment and unsafe escapes
+<a name="examples-ref-reassignment-safety"></a>
+
+The reason for the following line in the [ref reassignment rules](#rules-ref-reassignment) may not be obvious at first glance:
+
+> `e1` must have the same *safe-to-escape* as `e2`
+
+This is because the lifetime of the values pointed to by `ref` locations are invariant. The indirection prevents us from allowing any kind of variance here, even to narrower lifetimes. If narrowing is allowed then it opens up the following unsafe code:
+
+```csharp
+ref struct RS { }
+void Example(ref Span<int> p)
+{
+    Span<int> local = stackalloc int[42];
+    ref Span<int> refLocal = ref local;
+
+    // The rule above prevent this because the safe-to-escape of the two values is 
+    // different.
+    refLocal = ref p;
+
+    // If it were allowed this would be legal as the safe-to-escape of refLocal
+    // is *containing method* and that is satisfied by stackalloc. At the same time
+    // it would be assigning through p and escaping the stackalloc to the calling
+    // method
+    refLocal = stackalloc int[13];
+}
+```
+
+For a `ref` to non `ref struct` this rule is trivially satisfied as the values all have the same *safe-to-escape* scope. This rule really only comes into play when the value is a `ref struct`. 
+
+This behavior of `ref` will also be important in a future where we allow `ref` fields to `ref struct`. 
 
 #### scoped locals
 <a name="examples-scoped-locals"></a>
