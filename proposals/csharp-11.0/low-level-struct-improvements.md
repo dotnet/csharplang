@@ -1335,6 +1335,8 @@ void Example(ref Span<int> p)
     // is *containing method* and that is satisfied by stackalloc. At the same time
     // it would be assigning through p and escaping the stackalloc to the calling
     // method
+    // 
+    // This is equivalent of saying p = stackalloc int[13]!!! 
     refLocal = stackalloc int[13];
 }
 ```
