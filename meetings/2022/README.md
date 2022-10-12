@@ -4,7 +4,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Schedule ASAP
 
-- List-patterns on enumerables. Still okay with feature? Would requiring slices to be last element be acceptable or desirable? (Julien): [doc](https://github.com/dotnet/csharplang/pull/6365)
+
 
 ## Schedule when convenient
 
@@ -26,14 +26,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Oct 19, 2022
 
+- List-patterns on enumerables. Still okay with feature? Would requiring slices to be last element be acceptable or desirable? (Julien): [doc](https://github.com/dotnet/csharplang/pull/6365)
+
 ## Mon Oct 17, 2022
 
 - Primary constructors (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
+- Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
 
 ## Wed Oct 12, 2022
 
 - Keywordness of `field` (Fred): https://github.com/dotnet/csharplang/issues/6530
-- Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
 
 ## Wed Oct 5, 2022
 
