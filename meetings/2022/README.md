@@ -28,9 +28,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Oct 12, 2022
 
-- Keywordness of `field` (Fred)
+- Keywordness of `field` (Fred): https://github.com/dotnet/csharplang/issues/6530
 - Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
-- Support `params` with default lambda parameters? (Fred)
 
 ## Wed Oct 5, 2022
 
