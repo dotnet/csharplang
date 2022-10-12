@@ -1325,8 +1325,10 @@ void Example(ref Span<int> p)
     Span<int> local = stackalloc int[42];
     ref Span<int> refLocal = ref local;
 
-    // The rule above prevent this because the safe-to-escape of the two values is 
-    // different.
+    // The safe-to-escape of refLocal is narrower than p. For a non-ref reassignment 
+    // this would be allowed as its safe to assign wider lifetimes to narrower ones.
+    // In the case of ref reassignment though this rule prevents it as the 
+    // safe-to-escape values are different.
     refLocal = ref p;
 
     // If it were allowed this would be legal as the safe-to-escape of refLocal
