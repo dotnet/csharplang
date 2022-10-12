@@ -16,9 +16,13 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mon Oct 31, 2022
 
+- "Summer of C#" session on Collection initializers and ergonomics (Cyrus, Safia, Rikki) - *no notes*
+
 ## Wed Oct 26, 2022
 
 ## Mon Oct 24, 2022
+
+- LDM PGI for MVPs (Mads) - *no notes*
 
 ## Wed Oct 19, 2022
 
