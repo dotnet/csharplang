@@ -18,18 +18,18 @@ counter(1, 2, 3); // 3
 
 Similarly, we will allow the same kind of behavior for method groups:
 ```csharp
-var addWithDefault = addWithDefaultMethod;
+var addWithDefault = AddWithDefaultMethod;
 addWithDefault(); // 3
 addWithDefault(5) // 6
 
-var counter = countMethod;
+var counter = CountMethod;
 counter(); // 0
 counter(1, 2); // 2
 
-int addWithDefaultMethod(int addTo = 2) {
+int AddWithDefaultMethod(int addTo = 2) {
   return addTo + 1;
 }
-int countMethod(params int[] xs) {
+int CountMethod(params int[] xs) {
   return xs.Length;
 }
 ```
@@ -72,12 +72,12 @@ For example:
 ```csharp
 var app = WebApplication.Create(args);
 
-Result todoHandler(TodoService todoService, int id, string task = "foo") {
+Result TodoHandler(TodoService todoService, int id, string task = "foo") {
   var todo = todoService.Create(id, task);
   return Results.Created(todo);
 }
 
-app.MapPost("/todos/{id}", todoHandler);
+app.MapPost("/todos/{id}", TodoHandler);
 ```
 
 ## Current Behavior
@@ -116,18 +116,18 @@ counter(1, 2, 3); // 3
 Default values and `params` can be applied to method group parameters by specifically defining such method group:
 
 ```cs
-int addWithDefault(int addTo = 2) {
+int AddWithDefault(int addTo = 2) {
   return addTo + 1;
 }
 
-var add1 = addWithDefault; 
+var add1 = AddWithDefault; 
 add1(); // ok, default parameter will be used
 
-int counter(params int[] xs) {
+int Counter(params int[] xs) {
   return xs.Length;
 }
 
-var counter1 = counter;
+var counter1 = Counter;
 counter1(1, 2, 3); // ok, `params` will be used
 ```
 
@@ -220,7 +220,7 @@ var printString = (string toPrint = "defaultString") => Console.WriteLine(toPrin
 // internal delegate void b'(string arg = "defaultString");
 var counter = (params int[] xs) => xs.Length;
 // internal delegate int c'(params int[] arg);
-string pathJoin(string s1, string s2, string sep = "/") { return $"{s1}{sep}{s2}"; }
+string PathJoin(string s1, string s2, string sep = "/") { return $"{s1}{sep}{s2}"; }
 var joinFunc = pathJoin;
 // internal delegate string d'(string arg1, string arg2, string arg3 = " ");
 ```
@@ -427,13 +427,13 @@ In code, users can introspect the `DefaultValue` in the `ParameterInfo` associat
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1;
-void addWithDefaultMethod(int addTo = 2) {
+void AddWithDefaultMethod(int addTo = 2) {
   return addTo + 1;
 }
 
 addWithDefault.Method.GetParameters()[0].DefaultValue; // 2
 
-var add1 = addWithDefaultMethod;
+var add1 = AddWithDefaultMethod;
 add1.Method.GetParameters()[0].DefaultValue; // 2
 ```
 
