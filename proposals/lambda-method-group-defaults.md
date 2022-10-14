@@ -212,6 +212,19 @@ Same rules as for method parameters ([§14.6.2](https://github.com/dotnet/csharp
 
 No changes to the grammar are necessary for method groups since this proposal would only change their semantics.
 
+### Updates of prior proposals
+
+The following addition (in bold) is required to the [function types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) specification in a prior proposal:
+
+> The natural type of an anonymous function expression or method group is a *function_type*. A *function_type* represents a method signature: the parameter types, **default values, ref kinds, `params` modifiers**, and return type and ref kind. Anonymous function expressions or method groups with the same signature have the same *function_type*.
+
+The following addition (in bold) is required to the [delegate types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#delegate-types) specification in a prior proposal:
+
+> The delegate type for the anonymous function or method group with parameter types `P1, ..., Pn` and return type `R` is:
+>
+> - if any parameter or return value is not by value, **or any parameter is optional or `params`**, or there are more than 16 parameters, or any of the parameter types or return are not valid type arguments (say, `(int* p) => { }`), then the delegate is a synthesized `internal` anonymous delegate type with signature that matches the anonymous function or method group, and with parameter names `arg1, ..., argn` or `arg` if a single parameter;
+> [...]
+
 ### Binder changes
 
 #### Synthesizing new delegate types
