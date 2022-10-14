@@ -36,6 +36,10 @@ Unless one is specified, all types are considered to have an implicit, empty fin
 
 At the end of the execution of an object creation expression ([11.7.15.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117152-object-creation-expressions)) or a `with` expression, the resulting object's final initializer is executed as a function member invocation [11.6.6](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1166-function-member-invocation) on the resulting object, which means that it will be a virtual call based on the runtime type of that object.
 
+### Nullability
+
+When it comes to nullability analysis, the body of the final initializer would be assumed to benefit from benefit from member initializers and required member annotations when it comes to *reading* non-nullable reference fields, and would in turn contribute to preventing nullability warnings by *writing* to non-nullable reference fields.
+
 ### Implementation strategies
 
 Final initializers should likely be implemented as a public virtual method with an unspeakable name (same across all final initializers), no parameters and a `void` return type.
