@@ -1,4 +1,4 @@
-# Optional and Parameter Array Parameters for Lambdas and Method Groups
+# Optional and parameter array parameters for lambdas and method groups
 
 ## Summary
 
@@ -34,7 +34,7 @@ int CountMethod(params int[] xs) {
 }
 ```
 
-## Relevant Background
+## Relevant background
 [Lambda Improvements in C# 10](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md)
 
 [Method group conversion specification §10.8](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions)
@@ -80,7 +80,7 @@ Result TodoHandler(TodoService todoService, int id, string task = "foo") {
 app.MapPost("/todos/{id}", TodoHandler);
 ```
 
-## Current Behavior
+## Current behavior
 Currently, when a user implements a lambda with an optional or `params` parameter, the compiler raises an error.
 
 ```csharp
@@ -99,7 +99,7 @@ var m2 = M2; // Infers Action<int[]>
 m2(); // error CS7036: There is no argument given that corresponds to the required parameter 'obj' of 'Action<int[]>'
 ```
 
-## New Behavior
+## New behavior
 
 Following this proposal, default values and `params` can be applied to lambda parameters with the following behavior:
 
@@ -131,7 +131,7 @@ var counter1 = Counter;
 counter1(1, 2, 3); // ok, `params` will be used
 ```
 
-## Breaking Change
+## Breaking change
 
 Currently, the inferred type of a method group is `Action` or `Func` so the following code compiles:
 ```csharp
@@ -187,7 +187,7 @@ only been supported since C# 10, so only code which has been written since then 
 
 [design]: #detailed-design
 
-### Grammar and Parser Changes
+### Grammar and parser changes
 This enhancement requires the following changes to the grammar for lambda expressions.
 ```diff
  explicit_anonymous_function_parameter_list
@@ -212,9 +212,9 @@ Same rules as for method parameters ([§14.6.2](https://github.com/dotnet/csharp
 
 No changes to the grammar are necessary for method groups since this proposal would only change their semantics.
 
-### Binder Changes
+### Binder changes
 
-#### Synthesizing New Delegate Types
+#### Synthesizing new delegate types
 As with the behavior for delegates with `ref` or `out` parameters, a new natural type is generated for each lambda or method group defined with any optional or `params` parameters.
 Note that in the below examples, the notation `a'`, `b'`, etc. is used to represent these anonymous delegate types.
 
@@ -230,7 +230,7 @@ var joinFunc = pathJoin;
 // internal delegate string d'(string arg1, string arg2, string arg3 = " ");
 ```
 
-#### Conversion and Unification Behavior 
+#### Conversion and unification behavior 
 Anonymous delegates with optional parameters will be unified when the same parameter (based on position) has the same default value, regardless of parameter name.
 
 ```csharp
@@ -386,9 +386,9 @@ d1(1, 2, 3); // Error, d1's argument is not `params`.
 d2(1, 2, 3); // Ok, d2's argument is `params`.
 ```
 
-#### Other Conversion Cases
+#### Other conversion cases
 
-**Lambda Without Default, Target With Default**:
+**Lambda without default, target with default**:
 
 This case is already handled by the compiler, and we do not want to have the behavior here change.
 ```csharp
@@ -396,7 +396,7 @@ delegate void D1(int i = 42);
 D1 d = i => { }; // Allowed. This is an implicit conversion which is already allowed in the compiler.
 ```
 
-**Lambda/Method Group With Default, Target Without Default**:
+**Lambda/method group with default, target without default**:
 
 In this case, we will allow an implicit conversion from a lambda with a default to a delegate without. 
 However, because the default value(s) in the lambda will go unused (since the lambda cannot be called any other way) 
@@ -421,7 +421,7 @@ D1 d = Fun; // Allowed WITHOUT warning, since Fun and its default parameter valu
             // without using the delegate.
 ```
 
-### IL/Runtime Behavior
+### IL/runtime behavior
 
 The default parameter values will be emitted to metadata. The IL for this feature will be very similar in nature to the IL emitted for lambdas with `ref` and `out` parameters. A class which
 inherits from `System.Delegate` or similar will be generated, and the `Invoke` method will include `.param` directives to set default parameter values or `System.ParamArrayAttribute` &ndash; 
@@ -442,7 +442,7 @@ var add1 = AddWithDefaultMethod;
 add1.Method.GetParameters()[0].DefaultValue; // 2
 ```
 
-## Open Questions
+## Open questions
 
 **Open question:** how does this interact with the existing `DefaultParameterValue` attribute?
 
