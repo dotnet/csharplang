@@ -5,7 +5,7 @@ Features Added in C# Language Versions
 
 - [Raw string literals](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/raw-string-literal.md): introduces a string literal where the content never needs escaping (`var json = """{ "summary": "text" }""";` or `var json = $$"""{ "summary": "text", "length": {{length}} }""";`).
 - [UTF-8 string literals](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/utf8-string-literals.md): UTF-8 string literals with the `u8` suffix (`ReadOnlySpan<byte> s = "hello"u8;`)
-- [pattern match `Span<char>` on a constant string](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/pattern-match-span-of-char-on-string.md): an input value of type `Span<char>` or `ReadonlySpan<char>` can be matched with a constant string pattern (`span is "123"`).
+- [Pattern match `Span<char>` on a constant string](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/pattern-match-span-of-char-on-string.md): an input value of type `Span<char>` or `ReadonlySpan<char>` can be matched with a constant string pattern (`span is "123"`).
 - [Newlines in interpolations](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/new-line-in-interpolation.md): allows newline characters in single-line interpolated strings.
 - [List patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md): allows matching indexable types (`list is [1, 2, ..]`).
 - [File-local types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/file-local-types.md): introduces the `file` type modifier (`file class C { ... }`).
