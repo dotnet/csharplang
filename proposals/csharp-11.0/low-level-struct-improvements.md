@@ -427,6 +427,9 @@ The diagnostic is reported as an _error_ if the mismatched signatures are both u
 
 The scoped mismatch warning may be reported on a module compiled with C#7.2 ref safety rules where `scoped` is not available. In some such cases, it may be necessary to suppress the warning if the other mismatched signature cannot be modified.
 
+The `scoped` modifier also affects the anonymous function conversion (§11.17.1):
+In an implicitly typed parameter list, the types, **ref kinds and scopes** of the parameters are inferred from the context in which the anonymous function occurs—specifically, when the anonymous function is converted to a compatible delegate type or expression tree type, that type provides the parameter types, **ref kinds and scopes**.
+
 The `scoped` modifier and `[UnscopedRef]` attribute also have the following effects on method signatures:
 - The `scoped` modifier and `[UnscopedRef]` attribute do not affect hiding
 - Overloads cannot differ only on `scoped` or `[UnscopedRef]`
