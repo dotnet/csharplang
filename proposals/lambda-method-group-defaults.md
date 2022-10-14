@@ -191,8 +191,7 @@ only been supported since C# 10, so only code which has been written since then 
 This enhancement requires the following changes to the grammar for lambda expressions.
 ```diff
  explicit_anonymous_function_parameter_list
-+    : explicit_anonymous_function_parameters
-+    | explicit_anonymous_function_parameters ',' parameter_array
++    : explicit_anonymous_function_parameters (',' parameter_array)?
 +    | parameter_array
 +    ;
 +
