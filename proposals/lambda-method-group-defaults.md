@@ -1,4 +1,4 @@
-# Default and Variable Parameters for Lambdas and Method Groups
+# Optional and Parameter Array Parameters for Lambdas and Method Groups
 
 ## Summary
 
