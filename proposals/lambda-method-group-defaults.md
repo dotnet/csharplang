@@ -269,6 +269,36 @@ d = (int c = 10) => 2; // Error: default parameter is different between new lamb
                        // and synthesized delegate b'. We won't do implicit conversion
 ```
 
+Anonymous delegates with an array as the last parameter will be unified when the last parameter has the same `params` annotation, regardless of its name.
+
+```csharp
+int C(int[] xs) {
+  return xs.Length;
+}
+
+int D(params int[] xs) {
+  return xs.Length;
+}
+
+var a = (int[] xs) => xs.Length;
+// internal delegate int a'(int[] xs);
+var b = (params int[] xs) => xs.Length;
+// internal delegate int b'(params int[] xs);
+
+var c = C;
+// internal delegate int a'(int[] xs);
+var d = D;
+// internal delegate int b'(params int[] xs);
+
+a = b; // Not allowed
+a = c; // Allowed
+b = c; // Not allowed
+b = d; // Allowed
+
+c = (params int[] xs) => xs.Length; // Error: different delegate types; no implicit conversion
+d = (int[] xs) => xs.Length; // Error: different delegate types; no implicit conversion
+```
+
 Similarly, there is of course compatibility with named delegates that already support default and `params` parameters.
 ```csharp
 int D(int a = 1) {
@@ -289,6 +319,23 @@ var d = D;
 Del del3 = d; // Not allowed. Cannot convert internal delegate type to Del.
               // Note that there is no change here from previous behavior, when d would be inferred
               // to be Action<int> since Action<int> also cannot be converted to a named delegate type.
+
+int E(params int[] xs) {
+  return xs.Length;
+}
+
+delegate int DelParams(params int[] xs);
+
+DelParams del4 = (int[] xs) => xs.Length; // Error: `params` annotation does not match, so no conversion can be performed
+
+DelParams del5 = (params int[] xs) => xs.Length; // Allowed
+
+DelParams del6 = E; // Allowed as before per the method group conversion rules
+
+var e = E;
+// e is inferred as internal delegate int b'(params int[] arg);
+
+DelParams del7 = e; // Not allowed. Cannot convert internal delegate type to DelParams.
 ```
 
 Since lambdas and method groups with default and `params` parameters are typed as anonymous delegates, the
