@@ -30,7 +30,7 @@ public class Person
     public required string LastName { get; init; }
 
     private readonly string fullName;
-    public override string ToString() => fullName;
+
     init
     {
         // Fix up provided state
@@ -47,6 +47,8 @@ public class Person
             ? $"{FirstName} {LastName}"
             : $"{FirstName} {MiddleName} {LastName}";
     }
+
+    public override string ToString() => fullName;
 }
 ```
 
