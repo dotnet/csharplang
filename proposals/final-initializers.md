@@ -39,10 +39,8 @@ public class Person
         LastName = LastName.Trim();
 
         // Validate state
-        if (FirstName is "") throw new ArgumentException(
-            "Empty names not allowed", nameof(FirstName));
-        if (LastName is "") throw new ArgumentException(
-            "Empty names not allowed", nameof(LastName));
+        if (FirstName is "") throw new ArgumentException("Empty names not allowed", nameof(FirstName));
+        if (LastName is "") throw new ArgumentException("Empty names not allowed", nameof(LastName));
 
         // Compute additional state
         fullName = (MiddleName is null)
