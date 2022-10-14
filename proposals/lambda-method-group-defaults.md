@@ -376,7 +376,7 @@ The default parameter values will be emitted to metadata. The IL for this featur
 inherits from `System.Delegate` or similar will be generated, and the `Invoke` method will include `.param` directives to set default parameters or `System.ParamArrayAttribute` &ndash; 
 just as would be the case for a standard named delegate with default or `params` parameters.
 
-These delegate types are able to be inspected at runtime, as normal.
+These delegate types can be inspected at runtime, as normal.
 In code, users can introspect the `DefaultValue` in the `ParameterInfo` associated with the lambda or method group by using the associated `MethodInfo`.
 
 ```csharp
