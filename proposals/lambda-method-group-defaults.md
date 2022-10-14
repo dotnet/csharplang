@@ -11,9 +11,9 @@ var addWithDefault = (int addTo = 2) => addTo + 1;
 addWithDefault(); // 3
 addWithDefault(5); // 6
 
-var count = (params int[] xs) => xs.Length;
-count(); // 0
-count(1, 2, 3); // 3
+var counter = (params int[] xs) => xs.Length;
+counter(); // 0
+counter(1, 2, 3); // 3
 ```
 
 Similarly, we will allow the same kind of behavior for method groups:
@@ -108,9 +108,9 @@ var addWithDefault = (int addTo = 2) => addTo + 1;
 addWithDefault(); // 3
 addWithDefault(5); // 6
 
-var count = (params int[] xs) => xs.Length;
-count(); // 0
-count(1, 2, 3); // 3
+var counter = (params int[] xs) => xs.Length;
+counter(); // 0
+counter(1, 2, 3); // 3
 ```
 
 Default values and `params` can be applied to method group parameters by specifically defining such method group:
@@ -123,12 +123,12 @@ int addWithDefault(int addTo = 2) {
 var add1 = addWithDefault; 
 add1(); // ok, default parameter will be used
 
-int count(params int[] xs) {
+int counter(params int[] xs) {
   return xs.Length;
 }
 
-var count1 = count;
-count1(1, 2, 3); // ok, `params` will be used
+var counter1 = counter;
+counter1(1, 2, 3); // ok, `params` will be used
 ```
 
 ## Breaking Change
@@ -219,7 +219,7 @@ var addWithDefault = (int addTo = 2) => addTo + 1;
 // internal delegate int a'(int arg = 2);
 var printString = (string toPrint = "defaultString") => Console.WriteLine(toPrint);
 // internal delegate void b'(string arg = "defaultString");
-var count = (params int[] xs) => xs.Length;
+var counter = (params int[] xs) => xs.Length;
 // internal delegate int c'(params int[] arg);
 string pathJoin(string s1, string s2, string sep = "/") { return $"{s1}{sep}{s2}"; }
 var joinFunc = pathJoin;
