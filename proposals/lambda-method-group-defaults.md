@@ -81,7 +81,7 @@ app.MapPost("/todos/{id}", todoHandler);
 ```
 
 ## Current Behavior
-Currently, when a user implements a lambda with a default or `params` parameter, the compiler raises an error stating that it's not allowed. 
+Currently, when a user implements a lambda with a default or `params` parameter, the compiler raises an error.
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1; // error CS1065: Default values are not valid in this context.
