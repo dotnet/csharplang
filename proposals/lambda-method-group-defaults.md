@@ -216,14 +216,14 @@ Note that in the below examples, the notation `a'`, `b'`, etc. is used to repres
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1;
-// internal delegate int a'(int arg0 = 2);
+// internal delegate int a'(int arg = 2);
 var printString = (string toPrint = "defaultString") => Console.WriteLine(toPrint);
-// internal delegate void b'(string arg0 = "defaultString");
+// internal delegate void b'(string arg = "defaultString");
 var count = (params int[] xs) => xs.Length;
-// internal delegate int c'(params int[] arg0);
+// internal delegate int c'(params int[] arg);
 string pathJoin(string s1, string s2, string sep = "/") { return $"{s1}{sep}{s2}"; }
 var joinFunc = pathJoin;
-// internal delegate string d'(string arg0, string arg1, string arg3 = " ");
+// internal delegate string d'(string arg1, string arg2, string arg3 = " ");
 ```
 
 #### Conversion and Unification Behavior 
@@ -243,20 +243,20 @@ int G(int x = 13) {
 }
 
 var a = (int i = 13) => 1;
-// internal delegate int b'(int arg0 = 13);
+// internal delegate int b'(int arg = 13);
 var b = (int i = 0) => 2;
-// internal delegate int c'(int arg0 = 0);
+// internal delegate int c'(int arg = 0);
 var c = (int i = 13) => 3;
-// internal delegate int b'(int arg0 = 13);
+// internal delegate int b'(int arg = 13);
 var d = (int c = 13) => 1;
-// internal delegate int b'(int arg0 = 13);
+// internal delegate int b'(int arg = 13);
 
 var e = E;
-// internal delegate int b'(int arg0 = 13);
+// internal delegate int b'(int arg = 13);
 var f = F;
-// internal delegate int c'(int arg0 = 0);
+// internal delegate int c'(int arg = 0);
 var g = G;
-// internal delegate int b'(int arg0 = 13);
+// internal delegate int b'(int arg = 13);
 
 a = b; // Not allowed
 a = c; // Allowed
@@ -285,7 +285,7 @@ Del del1 = (int x = 1) => x; // Allowed, because default parameter value in lamb
 Del del2 = D; // This behavior does not change and compiles as before as per the method group conversion rules 
 
 var d = D;
-// d is inferred as internal delegate int a'(int arg0 = 1);
+// d is inferred as internal delegate int a'(int arg = 1);
 
 Del del3 = d; // Not allowed. Cannot convert internal delegate type to Del.
               // Note that there is no change here from previous behavior, when d would be inferred
@@ -302,10 +302,10 @@ int M(int x = 20) {
 }
 
 var d = (int x = 10) => x;
-// internal delegate int b'(int arg0 = 10);
+// internal delegate int b'(int arg = 10);
 
 d = M; // Allowed with warning. The existing method group rules apply here, and the signature of M
-       // is allowed to be converted to internal delegate int b'(int arg0 = 10); However, because this behavior could be confusing, it is worth alerting the user.
+       // is allowed to be converted to internal delegate int b'(int arg = 10); However, because this behavior could be confusing, it is worth alerting the user.
 d();   // This call will use default value x = 10 from original lambda
 ```
 The above code has an implicit conversion from a method group to a delegate. 
@@ -323,9 +323,9 @@ int M2(params int[] xs) {
 }
 
 var d1 = (int[] xs) => xs.Length;
-// internal delegate int a'(int[] arg0);
+// internal delegate int a'(int[] arg);
 var d2 = (params int[] xs) => xs.Length;
-// internal delegate int b'(params int[] arg0);
+// internal delegate int b'(params int[] arg);
 
 d1 = M1;
 d2 = M1;
