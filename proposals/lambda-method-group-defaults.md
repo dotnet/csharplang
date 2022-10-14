@@ -4,7 +4,7 @@
 
 [summary]: #summary
 
-To build on top of the lambda improvements introduced in C# 10 (see [relevant background](#relevant-background)), we propose adding support for default parameter values and [`params` arrays](https://docs.microsoft.com/dotnet/csharp/language-reference/keywords/params) in lambdas. This would enable users to implement the following lambdas:
+To build on top of the lambda improvements introduced in C# 10 (see [relevant background](#relevant-background)), we propose adding support for default parameter values and `params` arrays in lambdas. This would enable users to implement the following lambdas:
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1;
