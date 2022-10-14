@@ -287,7 +287,7 @@ d = (int c = 10) => 2; // Error: default parameter value is different between ne
                        // and synthesized delegate b'. We won't do implicit conversion
 ```
 
-Anonymous delegates with an array as the last parameter will be unified when the last parameter has the same `params` annotation, regardless of its name.
+Anonymous delegates with an array as the last parameter will be unified when the last parameter has the same `params` modifier, regardless of its name.
 
 ```csharp
 int C(int[] xs) {
@@ -344,7 +344,7 @@ int E(params int[] xs) {
 
 delegate int DelParams(params int[] xs);
 
-DelParams del4 = (int[] xs) => xs.Length; // Error: `params` annotation does not match, so no conversion can be performed
+DelParams del4 = (int[] xs) => xs.Length; // Error: `params` modifier does not match, so no conversion can be performed
 
 DelParams del5 = (params int[] xs) => xs.Length; // Allowed
 
