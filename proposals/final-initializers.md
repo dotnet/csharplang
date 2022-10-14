@@ -52,7 +52,7 @@ public class Person
 
 ### Syntax
 
-This production is added to the `class_member_declaration` production etc.
+This production is added to `class_member_declaration`, etc.:
 
 ``` antlr
 final_initializer_declaration
