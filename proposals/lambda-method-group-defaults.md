@@ -205,6 +205,11 @@ This enhancement requires the following changes to the grammar for lambda expres
 +    : anonymous_function_parameter_modifier? type identifier default_argument?
      ;
 ```
+
+Same rules as for method parameters ([§14.6.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1462-method-parameters)) apply for lambda parameters:
+- A parameter with a `ref`, `out` or `this` modifier cannot have a *default_argument*.
+- A *parameter_array* may occur after an optional parameter, but cannot have a default value – the omission of arguments for a *parameter_array* would instead result in the creation of an empty array.
+
 No changes to the grammar are necessary for method groups since this proposal would only change their semantics.
 
 ### Binder Changes
