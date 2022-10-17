@@ -1,6 +1,25 @@
 Features Added in C# Language Versions
 ====================
 
+# C# 11.0 - .NET 7 and Visual Studio 2022 version 17.4
+
+- [Raw string literals](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/raw-string-literal.md): introduces a string literal where the content never needs escaping (`var json = """{ "summary": "text" }""";` or `var json = $$"""{ "summary": "text", "length": {{length}} }""";`).
+- [UTF-8 string literals](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/utf8-string-literals.md): UTF-8 string literals with the `u8` suffix (`ReadOnlySpan<byte> s = "hello"u8;`)
+- [Pattern match `Span<char>` on a constant string](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/pattern-match-span-of-char-on-string.md): an input value of type `Span<char>` or `ReadonlySpan<char>` can be matched with a constant string pattern (`span is "123"`).
+- [Newlines in interpolations](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/new-line-in-interpolation.md): allows newline characters in single-line interpolated strings.
+- [List patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md): allows matching indexable types (`list is [1, 2, ..]`).
+- [File-local types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/file-local-types.md): introduces the `file` type modifier (`file class C { ... }`).
+- [Ref fields](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/low-level-struct-improvements.md): allows `ref` field declarations in a `ref struct` (`ref struct S { ref int field; ... }`), introduces `scoped` modifier and `[UnscopedRef]` attribute.
+- [Required members](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/required-members.md): introduces the `required` field and property modifier and `[SetsRequiredMembers]` attribute.
+- [Static abstract members in interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/static-abstracts-in-interfaces.md): allows an interface to specify abstract static members.
+- [Unsigned right-shift operator](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/unsigned-right-shift-operator.md): introduces the `>>>` operator and `>>>=`.
+- [`checked` user-defined operators](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md): numeric and conversion operators support defining `checked` variants (`public static Int128 operator checked +(Int128 lhs, Int128 rhs) { ... }`).
+- [Relaxing shift operator requirements](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/relaxing_shift_operator_requirements.md): the right-hand-side operand of a shift operator is no longer restricted to only be `int`
+- [Numeric IntPtr](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/numeric-intptr.md): `nint`/`nuint` become simple types aliasing `System.IntPtr`/`System.UIntPtr`.
+- [Auto-default structs](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/auto-default-structs.md): struct constructors automatically default fields that are not explicitly assigned.
+- [Generic attributes](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/generic-attributes.md): allows attributes to be generic (`[MyAttribute<int>]`).
+- [Extended `nameof` scope in attributes](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/extended-nameof-scope.md): allows `nameof(parameter)` inside an attribute on a method or parameter (`[MyAttribute(nameof(parameter))] void M(int parameter) { }`).
+
 # C# 10.0 - .NET 6 and Visual Studio 2022 version 17.0
 
 - [Record structs](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-10.0/record-structs.md) (`record struct Point(int X, int Y);`, `var newPoint = point with { X = 100 };`).
