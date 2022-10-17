@@ -287,7 +287,7 @@ d = (int c = 10) => 2; // Error: default parameter value is different between ne
                        // and synthesized delegate b'. We won't do implicit conversion
 ```
 
-Anonymous delegates with an array as the last parameter will be unified when the last parameter has the same `params` modifier, regardless of its name.
+Anonymous delegates with an array as the last parameter will be unified when the last parameter has the same `params` modifier and array type, regardless of parameter name.
 
 ```csharp
 int C(int[] xs) {
