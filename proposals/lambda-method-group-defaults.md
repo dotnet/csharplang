@@ -228,7 +228,7 @@ The following addition (in bold) is required to the [delegate types](https://git
 ### Binder changes
 
 #### Synthesizing new delegate types
-As with the behavior for delegates with `ref` or `out` parameters, a new natural type is generated for each lambda or method group defined with any optional or `params` parameters.
+As with the behavior for delegates with `ref` or `out` parameters, delegate types are synthesized for lambdas or method groups defined with optional or `params` parameters.
 Note that in the below examples, the notation `a'`, `b'`, etc. is used to represent these anonymous delegate types.
 
 ```csharp
