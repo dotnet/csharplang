@@ -66,7 +66,7 @@
 	- Across top-level condition expressions within a single `if` statement (includes `else if`)
 
   These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
-- Pattern variables with multiple declarations must be of the same type, excluding nullability for reference types.
+- Pattern variables with multiple declarations must be of the same type, excluding top-level nullability for reference types. Differences in nested nullability are subject to standard nullability conversion warnings.
 
         if (e is C c || e is Wrapper { Prop: var c }) { /* c may be null */ }
 
