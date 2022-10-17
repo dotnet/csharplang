@@ -296,6 +296,8 @@ public class C(int i, string s) : B(s)
 
 A lot of this scenario might be adequately be covered if we were to introduce "final initializers" which run after the constructors *and* any object/collection initializers have completed. However, argument validation is one thing that would ideally happen as early as possible.
 
+Primary constructor bodies could also provide a place for allowing an access modifier for the primary constructor, allowing it to deviate from the accessibility of the enclosing type.
+
 ### Combined parameter and member declarations
 
 A possible and often mentioned addition could be to allow primary constructor parameters to be annotated so that they would *also* declare a member on the type. Most commonly it is proposed to allow an access specifier on the parameters to trigger the member generation:
