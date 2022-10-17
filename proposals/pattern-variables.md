@@ -60,7 +60,7 @@
 	- Across top-level condition expressions within a single `if` statement (includes `else if`)
 
   These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
-- Pattern variables with multiple declarations must be of the same type, excluding tuple names and nullability for reference types.
+- Pattern variables with multiple declarations must be of the same type, including tuple names and nullability for reference types.
 
 ### Definite assignment
 
