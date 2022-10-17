@@ -46,7 +46,13 @@
 - Also relax single-declaration rules within expression boundaries as long as each variable is assigned once.
 	```cs
 	if (e is C c || e is Wrapper { Prop: C c }) ;
-	if (b ? e is C c : e is Warpper { Prop: C c }) ;
+	if (b ? e is C c : e is Wrapper { Prop: C c }) ;
+	```
+	
+- Also relax single-declaration rules within conditions of an `if/else`:
+	```cs
+	if (e is C c) { }
+        else if (e is Wrapper { Prop: C c }) { }
 	```
 	
 ## Detailed design
@@ -60,7 +66,9 @@
 	- Across top-level condition expressions within a single `if` statement (includes `else if`)
 
   These names can possibly reference either of variables based on the result of the pattern-matching at runtime.
-- Pattern variables with multiple declarations must be of the same type, including tuple names and nullability for reference types.
+- Pattern variables with multiple declarations must be of the same type, excluding top-level nullability for reference types. Differences in nested nullability are subject to standard nullability conversion warnings.
+
+        if (e is C c || e is Wrapper { Prop: var c }) { /* c may be null */ }
 
 ### Definite assignment
 
@@ -101,4 +109,4 @@ These rules cover the existing top-level `is not` pattern variables. However, in
 
 ## Unresolved questions
 - Would it be possible to permit different types for each variable especially within `if`/`else` chains?
-  And if so, would it be a part of this proposal or a separate feature?
+  And if so, would it be a part of this proposal or a separate feature? (discussed in LDM 2022/10/17)
