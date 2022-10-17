@@ -354,6 +354,17 @@ var e = E;
 // e is inferred as internal delegate int b'(params int[] arg);
 
 DelParams del7 = e; // Not allowed. Cannot convert internal delegate type to DelParams.
+
+delegate int DelArray(int[] xs);
+
+DelArray del8 = (params int[] xs) => xs.Length; // Error: conversion from `params` to non-`params`
+
+del8 = E; // Allowed: both have `params`
+
+var del9 = (params int[] xs) => xs.Length;
+// del9 is inferred as internal delegate int b'(params int[] arg);
+
+del8 = del9; // Not allowed. Cannot convert internal delegate type to DelArray.
 ```
 
 Since lambdas and method groups with optional and `params` parameters are typed as anonymous delegates, the
