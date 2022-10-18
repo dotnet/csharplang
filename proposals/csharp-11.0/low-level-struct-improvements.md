@@ -152,6 +152,7 @@ This may seem like an error at first glance but this is a deliberate design poin
 
 Next the rules for ref reassignment need to be adjusted for the presence of `ref` fields. The primary scenario for ref reassignment is `ref struct` constructors storing `ref` parameters into `ref` fields. The support will be more general but this is the core scenario. To support this the rules for ref reassignment will be adjusted to account for `ref` fields as follows:
 
+#### Ref reassignment rules
 <a name="rules-ref-reassignment"></a>
 
 The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
@@ -181,6 +182,7 @@ readonly ref struct Span<T>
 
 The change to ref reassignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based solely on their declaration not on their usage. All `ref` and `in` parameters are *ref-safe-to-escape* to the *calling method* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
 
+#### `scoped` modifier
 <a name="rules-scoped"></a>
 
 The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or a value that is a `ref struct` and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the *current method*. For example: 
@@ -249,6 +251,7 @@ Other uses for `scoped` on locals are discussed [below](#examples-scoped-locals)
 
 The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a diagnostic for such cases to avoid developer confusion.
 
+#### Change to scope of `out` parameters
 <a name="out-compat-change"></a>
 
 To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *ref-safe-to-escape* value for `out` parameters to be *current method*. Effectively `out` parameters are implicitly `scoped out` going forward. From a compat perspective this means they cannot be returned by `ref`:
@@ -299,6 +302,7 @@ Further treating the input to an `out` parameter as returnable is extremely conf
 
 This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
 
+#### Implicitly `scoped` parameters
 <a name="implicitly-scoped"></a>
 Overall there are two `ref` location which are implicitly declared as `scoped`:
 - `this` on a `struct` instance method
@@ -308,6 +312,7 @@ The span safety rules will be written in terms of `scoped ref` and `ref`. For sp
 
 When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
 
+#### Return-only escape scope
 <a name="return-only"></a>
 The design also requires that the introduction of a new escape scope: *return only*. This is similar to *calling method* in that it can be returned but it can **only** be returned through a `return` statement. 
 
@@ -324,6 +329,7 @@ Likewise any assignment to an `out` must have a *safe-to-escape* of at least *re
 
 Note: An expression whose type is not a `ref struct` type always has a *safe-to-return* of *calling method*. 
 
+#### Rules for method invocation
 <a name="rules-method-invocation"></a>
 
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
@@ -407,6 +413,7 @@ The presence of `scoped` allows developers to reduce the friction this rule crea
 
 Impact of this change is discussed more deeply [below](#examples-method-arguments-must-match). Overall this will allow developers to make call sites more flexible by annotating non-escaping ref-like values with `scoped`.
 
+#### Parameter scope variance
 <a name="scoped-mismatch"></a>
 
 The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped)) on parameters also impacts our object overriding, interface implementation and `delegate` conversion rules. The signature for an override, interface implementation or `delegate` conversion can: 
