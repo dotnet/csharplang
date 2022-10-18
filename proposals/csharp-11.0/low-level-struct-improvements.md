@@ -251,7 +251,7 @@ Other uses for `scoped` on locals are discussed [below](#examples-scoped-locals)
 
 The `scoped` annotation cannot be applied to any other location including returns, fields, array elements, etc ... Further while `scoped` has impact when applied to any `ref`, `in` or `out` it only has impact when applied to values which are `ref struct`. Having declarations like `scoped int` has no impact because a non `ref struct` is always safe to return. The compiler will create a diagnostic for such cases to avoid developer confusion.
 
-#### Change the scope of `out` parameters
+#### Change the behavior of `out` parameters
 <a name="out-compat-change"></a>
 
 To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *ref-safe-to-escape* value for `out` parameters to be *current method*. Effectively `out` parameters are implicitly `scoped out` going forward. From a compat perspective this means they cannot be returned by `ref`:
@@ -266,17 +266,7 @@ ref int Sneaky(out int i)
 }
 ```
 
-Languages that support `ref struct` must ensure the original value passed into an `out` parameter for a `ref struct` is not read. That in turn means it cannot be directly or indirectly returned. Doing so would allow for type safety holes to exist. C# achieves this via it's definite assignment rules. That both achieves our ref safety as well as allowing for existing code which assigns and then returns `out` parameters values.
-
-```c#
-Span<int> StrangeButLegal(out Span<int> span)
-{
-    span = default;
-    return span;
-}
-```
-
-This change to `out` reduces the overall compat impact of this change. The ability to return `out` by reference is not practically useful, it's essentially a compiler trivia question. However it negatively impacts call site analysis because the rules must consider the case that it is returned by `ref` or `ref` field. Hence `out` arguments, even though 99% of the time are not returned by `ref` must be considered as such and that conflates lifetime issues. This would reduce the flexibility of APIs that return `ref struct` values and have `out` parameters. This is a common pattern in reader style APIs. 
+This will increase the flexibility of APIs that return `ref struct` values and have `out` parameters because it does not have to consider the parameter being captured by reference anymore. This is important because it's a common pattern in reader style APIs:
 
 ```c#
 Span<byte> Read(Span<byte> buffer, out int read)
@@ -298,9 +288,19 @@ Span<int> Use()
 }
 ```
 
-Further treating the input to an `out` parameter as returnable is extremely confusing to developers. It essentially subverts the intent of `out` by forcing developers to consider the value passed by the caller which is never used. That is why going forward languages implementing `ref` safety will be required to ensure that the value passed to `out` parameters is never read.
+The language will also no longer consider arguments passed to an `out` parameter to be returnable. Treating the input to an `out` parameter as returnable was extremely confusing to developers. It essentially subverts the intent of `out` by forcing developers to consider the value passed by the caller which is never used except in languages that don't respect `out`. Going forward languages that support `ref struct` must ensure the original value passed to an `out` parameter is never read. 
 
-This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
+C# achieves this via it's definite assignment rules. That both achieves our ref safety rules as well as allowing for existing code which assigns and then returns `out` parameters values.
+
+```c#
+Span<int> StrangeButLegal(out Span<int> span)
+{
+    span = default;
+    return span;
+}
+```
+
+Together these changes mean the argument to an `out` parameter does not contribute *safe-to-escape* or *ref-safe-to-escape* values to method invocations. This significantly reduces the overall compat impact of `ref` fields as well as simplifies how developers think about `out`. An argument to an `out` parameter does not contribute to the return, it is simply an output. 
 
 #### Implicitly `scoped` parameters
 <a name="implicitly-scoped"></a>
@@ -332,10 +332,11 @@ Note: An expression whose type is not a `ref struct` type always has a *safe-to-
 #### Rules for method invocation
 <a name="rules-method-invocation"></a>
 
-The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `a` that is passed to parameter `p`:
+The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `expr` that is passed to parameter `p`:
 
-> 1. If `p` is `scoped ref` then `a` does not contribute *ref-safe-to-escape* when considering arguments.
-> 2. If `p` is `scoped` then `a` does not contribute *safe-to-escape* when considering arguments. 
+> 1. If `p` is `scoped ref` then `expr` does not contribute *ref-safe-to-escape* when considering arguments.
+> 2. If `p` is `scoped` then `expr` does not contribute *safe-to-escape* when considering arguments. 
+> 3. If `p` is `out` then `expr` does not contribute *ref-safe-to-escape* or *safe-to-escape* [more details](#out-compat-change)
 
 The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime as the `scoped` annotation prevents it.
 
