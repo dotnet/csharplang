@@ -1700,6 +1700,45 @@ public static void ctor(out S @this, ref int f)
 }
 ```
 
+#### Infer *safe-to-escape* of declaration expressions
+We adjust the span-safety proposal to automatically infer a *safe-to-escape* of a declaration expression like the following.
+    
+```cs
+ref struct RS
+{
+    public RS(ref int x) { } // assumed to be able to capture 'x'
+
+    static void M0(RS input, out RS output) => output = input;
+
+    static void M1()
+    {
+        var i = 0;
+        var rs1 = new RS(ref i); // safe-to-escape of 'rs1' is CurrentMethod
+        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CurrentMethod
+    }
+
+    static void M2(RS rs1)
+    {
+        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CallingMethod
+    }
+
+    static void M3(RS rs1)
+    {
+        M0(rs1, out scoped var rs2); // 'scoped' modifier forces safe-to-escape of 'rs2' to the current local scope (CurrentMethod or narrower).
+    }
+}
+
+```
+
+The *safe-to-escape* of a declaration variable from an `out` argument or deconstruction (`(var x, var y) = M()`) is the *narrowest* of the following:
+* calling method
+* if out variable is marked `scoped`, then the current local scope (i.e. current method or narrower).
+* if out variable's type is ref struct, consider all arguments to the containing invocation, including the receiver:
+  * STE of any argument where its corresponding parameter is not `out` and has STE of ReturnOnly or wider
+  * RSTE of any argument where its corresponding parameter has RSTE of ReturnOnly or wider
+    
+Note that the local scope which results from the `scoped` modifier is the narrowest which could possibly be used for the variable--to be any narrower would mean the expression refers to variables which are only declared in a narrower scope than the expression.
+
 #### Method arguments must match
 The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule. For the sake of better understanding the reasons for the rule we will simplify ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. 
 
