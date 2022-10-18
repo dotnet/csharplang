@@ -303,43 +303,15 @@ Further treating the input to an `out` parameter as returnable is extremely conf
 This means going forward `out` will match developers intuition when it comes to ref safety: `out` means `out`.
 
 #### Infer *safe-to-escape* of declaration expressions
-We adjust the span-safety proposal to automatically infer a *safe-to-escape* of a declaration expression like the following.
-    
-```cs
-ref struct RS
-{
-    public RS(ref int x) { } // assumed to be able to capture 'x'
-
-    static void M0(RS input, out RS output) => output = input;
-
-    static void M1()
-    {
-        var i = 0;
-        var rs1 = new RS(ref i); // safe-to-escape of 'rs1' is CurrentMethod
-        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CurrentMethod
-    }
-
-    static void M2(RS rs1)
-    {
-        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CallingMethod
-    }
-
-    static void M3(RS rs1)
-    {
-        M0(rs1, out scoped var rs2); // 'scoped' modifier forces safe-to-escape of 'rs2' to the current local scope (CurrentMethod or narrower).
-    }
-}
-
-```
-
-The *safe-to-escape* of a declaration variable from an `out` argument or deconstruction (`(var x, var y) = M()`) is the *narrowest* of the following:
+<a id="infer-safe-to-escape-of-declaration-expressions"></a>
+The *safe-to-escape* of a declaration variable from an `out` argument (`M(x, out var y)`) or deconstruction (`(var x, var y) = M()`) is the *narrowest* of the following:
 * calling method
 * if out variable is marked `scoped`, then the current local scope (i.e. current method or narrower).
 * if out variable's type is ref struct, consider all arguments to the containing invocation, including the receiver:
   * STE of any argument where its corresponding parameter is not `out` and has STE of ReturnOnly or wider
   * RSTE of any argument where its corresponding parameter has RSTE of ReturnOnly or wider
     
-Note that the local scope which results from the `scoped` modifier is the narrowest which could possibly be used for the variable--to be any narrower would mean the expression refers to variables which are only declared in a narrower scope than the expression.
+See also [Examples of inferred *safe-to-escape* of declaration expressions](#examples-of-inferred-safe-to-escape-of-declaration-expressions).
 
 #### Implicitly `scoped` parameters
 <a name="implicitly-scoped"></a>
@@ -1819,3 +1791,37 @@ The set of returnable input to the method are:
 Given that there is at least one input with a smaller *escape scope* (`ref y` argument) than one of the outputs (`x` argument) the method call is illegal. 
 
 This is the logic that the method arguments must match rule is trying to encompass. It goes further as it considers both `scoped` as a way to remove inputs from consideration and `readonly` as a way to remove `ref` as an output (can't assign into a `readonly ref` so it can't be a source of output). These special cases do add complexity to the rules but it's done so for the benefit of the developer. The compiler seeks to remove all inputs and outputs it knows can't contribute to the result to give developers maximum flexibility when calling a member. Much like overload resolution it's worth the effort to make our rules more complex when it creates more flexibility for consumers.
+
+#### Examples of inferred *safe-to-escape* of declaration expressions
+<a id="examples-of-inferred-safe-to-escape-of-declaration-expressions"></a>
+
+Related to [Infer *safe-to-escape* of declaration expressions](#infer-safe-to-escape-of-declaration-expressions).
+    
+```cs
+ref struct RS
+{
+    public RS(ref int x) { } // assumed to be able to capture 'x'
+
+    static void M0(RS input, out RS output) => output = input;
+
+    static void M1()
+    {
+        var i = 0;
+        var rs1 = new RS(ref i); // safe-to-escape of 'rs1' is CurrentMethod
+        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CurrentMethod
+    }
+
+    static void M2(RS rs1)
+    {
+        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CallingMethod
+    }
+
+    static void M3(RS rs1)
+    {
+        M0(rs1, out scoped var rs2); // 'scoped' modifier forces safe-to-escape of 'rs2' to the current local scope (CurrentMethod or narrower).
+    }
+}
+
+```
+
+Note that the local scope which results from the `scoped` modifier is the narrowest which could possibly be used for the variable--to be any narrower would mean the expression refers to variables which are only declared in a narrower scope than the expression.
