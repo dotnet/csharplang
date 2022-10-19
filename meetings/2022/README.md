@@ -28,14 +28,14 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - List-patterns on enumerables. Still okay with feature? Would requiring slices to be last element be acceptable or desirable? (Julien): [doc](https://github.com/dotnet/csharplang/pull/6365)
 
-## Mon Oct 17, 2022
-
-- Primary constructors (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
-- Variable declarations under disjunctive patterns (Fred/Julien): https://github.com/dotnet/csharplang/blob/main/proposals/pattern-variables.md
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Mon Oct 17, 2022
+
+- Primary Constructors
+- Permit variable declarations under disjunctive patterns
 
 ## Wed Oct 12, 2022
 
