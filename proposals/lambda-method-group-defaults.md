@@ -190,21 +190,25 @@ only been supported since C# 10, so only code which has been written since then 
 ### Grammar and parser changes
 This enhancement requires the following changes to the grammar for lambda expressions.
 ```diff
- explicit_anonymous_function_parameter_list
-+    : explicit_anonymous_function_parameters (',' parameter_array)?
-+    | parameter_array
-+    ;
-+
-+explicit_anonymous_function_parameters
-     : explicit_anonymous_function_parameter
-       (',' explicit_anonymous_function_parameter)*
-     ;
+ lambda_expression
+   : modifier* identifier '=>' (block | expression)
+-  | attribute_list* modifier* type? lambda_parameters '=>' (block | expression)
++  | attribute_list* modifier* type? lambda_parameter_list '=>' (block | expression)
+   ;
 
- explicit_anonymous_function_parameter
--    : anonymous_function_parameter_modifier? type identifier
-+    : anonymous_function_parameter_modifier? type identifier default_argument?
-     ;
++lambda_parameter_list
++  : lambda_parameters (',' parameter_array)?
++  | parameter_array
++  ;
+
+ lambda_parameter
+   : identifier
+-  | attribute_list* modifier* type? identifier
++  | attribute_list* modifier* type? identifier default_argument?
+   ;
 ```
+
+Note that this allows default parameter values and `params` arrays only for lambdas, not for anonymous methods declared with `delegate { }` syntax.
 
 Same rules as for method parameters ([§14.6.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1462-method-parameters)) apply for lambda parameters:
 - A parameter with a `ref`, `out` or `this` modifier cannot have a *default_argument*.
