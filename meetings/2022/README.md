@@ -24,13 +24,17 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - LDM PGI for MVPs (Mads) - *no notes*
 
-## Wed Oct 19, 2022
-
-- List-patterns on enumerables. Still okay with feature? Would requiring slices to be last element be acceptable or desirable? (Julien): [doc](https://github.com/dotnet/csharplang/pull/6365)
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Wed Oct 19, 2022
+
+[C# Language Design Meeting for October 19th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-19.md)
+
+- Open questions in list patterns on `IEnumerable`
+    - Allowing patterns after slices
+    - Allowing slicing to capture
 
 ## Mon Oct 17, 2022
 
