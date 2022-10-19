@@ -34,6 +34,8 @@ Overview of meetings and agendas for 2022
 
 ## Mon Oct 17, 2022
 
+[C# Language Design Meeting for October 17th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md)
+
 - Primary Constructors
 - Permit variable declarations under disjunctive patterns
 
