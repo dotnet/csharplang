@@ -302,6 +302,17 @@ Span<int> StrangeButLegal(out Span<int> span)
 
 Together these changes mean the argument to an `out` parameter does not contribute *safe-to-escape* or *ref-safe-to-escape* values to method invocations. This significantly reduces the overall compat impact of `ref` fields as well as simplifies how developers think about `out`. An argument to an `out` parameter does not contribute to the return, it is simply an output. 
 
+#### Infer *safe-to-escape* of declaration expressions
+<a id="infer-safe-to-escape-of-declaration-expressions"></a>
+The *safe-to-escape* of a declaration variable from an `out` argument (`M(x, out var y)`) or deconstruction (`(var x, var y) = M()`) is the *narrowest* of the following:
+* calling method
+* if out variable is marked `scoped`, then the current local scope (i.e. current method or narrower).
+* if out variable's type is ref struct, consider all arguments to the containing invocation, including the receiver:
+  * STE of any argument where its corresponding parameter is not `out` and has STE of ReturnOnly or wider
+  * RSTE of any argument where its corresponding parameter has RSTE of ReturnOnly or wider
+    
+See also [Examples of inferred *safe-to-escape* of declaration expressions](#examples-of-inferred-safe-to-escape-of-declaration-expressions).
+
 #### Implicitly `scoped` parameters
 <a name="implicitly-scoped"></a>
 Overall there are two `ref` location which are implicitly declared as `scoped`:
@@ -1781,3 +1792,37 @@ The set of returnable input to the method are:
 Given that there is at least one input with a smaller *escape scope* (`ref y` argument) than one of the outputs (`x` argument) the method call is illegal. 
 
 This is the logic that the method arguments must match rule is trying to encompass. It goes further as it considers both `scoped` as a way to remove inputs from consideration and `readonly` as a way to remove `ref` as an output (can't assign into a `readonly ref` so it can't be a source of output). These special cases do add complexity to the rules but it's done so for the benefit of the developer. The compiler seeks to remove all inputs and outputs it knows can't contribute to the result to give developers maximum flexibility when calling a member. Much like overload resolution it's worth the effort to make our rules more complex when it creates more flexibility for consumers.
+
+#### Examples of inferred *safe-to-escape* of declaration expressions
+<a id="examples-of-inferred-safe-to-escape-of-declaration-expressions"></a>
+
+Related to [Infer *safe-to-escape* of declaration expressions](#infer-safe-to-escape-of-declaration-expressions).
+    
+```cs
+ref struct RS
+{
+    public RS(ref int x) { } // assumed to be able to capture 'x'
+
+    static void M0(RS input, out RS output) => output = input;
+
+    static void M1()
+    {
+        var i = 0;
+        var rs1 = new RS(ref i); // safe-to-escape of 'rs1' is CurrentMethod
+        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CurrentMethod
+    }
+
+    static void M2(RS rs1)
+    {
+        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CallingMethod
+    }
+
+    static void M3(RS rs1)
+    {
+        M0(rs1, out scoped var rs2); // 'scoped' modifier forces safe-to-escape of 'rs2' to the current local scope (CurrentMethod or narrower).
+    }
+}
+
+```
+
+Note that the local scope which results from the `scoped` modifier is the narrowest which could possibly be used for the variable--to be any narrower would mean the expression refers to variables which are only declared in a narrower scope than the expression.
