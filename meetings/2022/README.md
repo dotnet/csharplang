@@ -14,11 +14,22 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
+
+## Mon Nov 30, 2022
+
+## Mon Nov 28, 2022
+
+## Mon Nov 14, 2022
+
+## Mon Nov 7, 2022
+
 ## Mon Oct 31, 2022
 
 - "Summer of C#" session on Collection initializers and ergonomics (Cyrus, Safia, Rikki) - *no notes*
 
 ## Wed Oct 26, 2022
+
+- Null-conditional assignment (Rikki): https://github.com/dotnet/csharplang/issues/6045
 
 ## Mon Oct 24, 2022
 
