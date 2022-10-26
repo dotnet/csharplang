@@ -1174,7 +1174,7 @@ This snippet wants to mutate a parameter by escaping elements of the data. The e
 
 ### Fun Samples
 
-#### ReadOnlySpan<T>
+#### ReadOnlySpan\<T>
 
 ```c#
 public readonly ref struct ReadOnlySpan<T>
@@ -1182,7 +1182,7 @@ public readonly ref struct ReadOnlySpan<T>
     readonly ref readonly T _value;
     readonly int _length;
 
-    public ReadOnlySpan<T>(in T value)
+    public ReadOnlySpan(in T value)
     {
         _value = ref value;
         _length = 1;
