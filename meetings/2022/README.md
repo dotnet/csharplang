@@ -15,13 +15,15 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Design review*
 
 
-## Mon Nov 30, 2022
+## Wed Nov 30, 2022
 
 ## Mon Nov 28, 2022
 
 ## Mon Nov 14, 2022
 
 ## Mon Nov 7, 2022
+
+## Wed Nov 2, 2022
 
 ## Mon Oct 31, 2022
 
