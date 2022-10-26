@@ -23,6 +23,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mon Nov 7, 2022
 
+- Team meeting - *no notes*
+
 ## Wed Nov 2, 2022
 
 ## Mon Oct 31, 2022
