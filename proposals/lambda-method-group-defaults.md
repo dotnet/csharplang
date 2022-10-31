@@ -216,6 +216,12 @@ Same rules as for method parameters ([§14.6.2](https://github.com/dotnet/csharp
 
 No changes to the grammar are necessary for method groups since this proposal would only change their semantics.
 
+The following bullet point needs to be added to anonymous function conversions ([§10.7](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#107-anonymous-function-conversions)):
+
+> Specifically, an anonymous function `F` is compatible with a delegate type `D` provided:
+>
+> - If `F` is a *lambda_expression*, each parameter in `D` has the same default parameter value and `params` modifier as the corresponding parameter in `F`.
+
 ### Updates of prior proposals
 
 The following addition (in bold) is required to the [function types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) specification in a prior proposal:
