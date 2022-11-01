@@ -29,6 +29,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Nov 2, 2022
 
+- Partial properties (Rikki): https://github.com/dotnet/csharplang/issues/6420
+
 ## Mon Oct 31, 2022
 
 - "Summer of C#" session on Collection initializers and ergonomics (Cyrus, Safia, Rikki) - *no notes*
