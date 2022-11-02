@@ -161,7 +161,7 @@ void M1(C? c)
 int? M2(C? c)
 {
     return c?.M() = 42; // equivalent to:
-    return c == null ? (int?)null : c.M() = 42;
+    return c is null ? (int?)null : c.M() = 42;
 }
 ```
 
@@ -177,11 +177,11 @@ M(a is null
 ```cs
 return a?.b = c?.d = e?.f; // equivalent to:
 return a?.b = (c?.d = e?.f); // equivalent to:
-return a == null
+return a is null
     ? null
-    : (a.b = c == null
+    : (a.b = c is null
         ? null
-        : (c.d = e == null
+        : (c.d = e is null
             ? null
             : e.f));
 }
@@ -198,11 +198,11 @@ if (a is not null)
 }
 
 return a?.b ??= c; // equivalent to:
-return a == null
+return a is null
     ? null
-    : a.b != null
-        ? a.b
-        : a.b = c;
+    : a.b is null
+        ? a.b = c
+        : a.b;
 ```
 
 ## Drawbacks
