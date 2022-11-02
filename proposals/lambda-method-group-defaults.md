@@ -221,7 +221,7 @@ The following addition (in bold) is required to anonymous function conversions (
 > Specifically, an anonymous function `F` is compatible with a delegate type `D` provided:
 >
 > - [...]
-> - If `F` has an explicitly typed parameter list, each parameter in `D` has the same type and modifiers as the corresponding parameter in `F` **(`params` modifiers and default values are not considered)**.
+> - If `F` has an explicitly typed parameter list, each parameter in `D` has the same type and modifiers as the corresponding parameter in `F` **ignoring `params` modifiers and default values**.
 
 ### Updates of prior proposals
 
