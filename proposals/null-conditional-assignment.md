@@ -116,8 +116,8 @@ When the *null conditional assignment* appears in an expression-statement, its s
 - `P?[A] = B` is equivalent to `if (P is not null) P[A] = B`, except that `P` is only evaluated once.
 
 Otherwise, its semantics are as follows:
-- `P?.A = B` with result type `T` is equivalent to `(P is null) ? (T?)null : (P.A = B)`, except that `P` is only evaluated once.
-- `P?[A] = B` with result type `T` is equivalent to `(P is null) ? (T?)null : (P[A] = B)`, except that `P` is only evaluated once.
+- `P?.A = B` is equivalent to `(P is null) ? (T?)null : (P.A = B)`, where `T` is the result type of `P.A = B`, except that `P` is only evaluated once.
+- `P?[A] = B` is equivalent to `(P is null) ? (T?)null : (P[A] = B)`, where `T` is the result type of `P[A] = B`, except that `P` is only evaluated once.
 
 ### Implementation
 The grammar in the standard currently doesn't correspond strongly to the syntax design used in the implementation. We expect that to remain the case after this feature is implemented. The syntax design in the [implementation](https://github.com/dotnet/roslyn/blob/09408ab8a29e03caddfb11f29328c05169ac7cde/src/Compilers/CSharp/Portable/Syntax/Syntax.xml#L583-L607) isn't expected to actually change--only the way it is used will change. For example:
@@ -151,11 +151,17 @@ class C
     ref int M() => /*...*/;
 }
 
-void M(C? c)
+void M1(C? c)
 {
     c?.M() = 42; // equivalent to:
     if (c is not null)
         c.M() = 42;
+}
+
+int? M2(C? c)
+{
+    return c?.M() = 42; // equivalent to:
+    return c is null ? (int?)null : c.M() = 42;
 }
 ```
 
@@ -165,12 +171,20 @@ M(a is null
     ? null
     : (a.b is null
         ? null
-        : (a.b.c = d));
+        : (a.b.c = d)));
 ```
 
 ```cs
-a?.b = c?.d = e?.f; // equivalent to:
-a?.b = (c?.d = e?.f);
+return a?.b = c?.d = e?.f; // equivalent to:
+return a?.b = (c?.d = e?.f); // equivalent to:
+return a is null
+    ? null
+    : (a.b = c is null
+        ? null
+        : (c.d = e is null
+            ? null
+            : e.f));
+}
 ```
 
 ```cs
@@ -182,6 +196,13 @@ if (a is not null)
         a.b = c;
     }
 }
+
+return a?.b ??= c; // equivalent to:
+return a is null
+    ? null
+    : a.b is null
+        ? a.b = c
+        : a.b;
 ```
 
 ## Drawbacks
