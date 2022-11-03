@@ -22,6 +22,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Mon Nov 14, 2022
 
 - Construction improvements (Mads and Kathleen)
+- `params ReadOnlySpan<T>` (Params improvements WG)
 
 ## Mon Nov 7, 2022
 
