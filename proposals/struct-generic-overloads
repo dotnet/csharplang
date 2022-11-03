@@ -1,0 +1,109 @@
+# FEATURE_NAME
+
+* [x] Proposed
+* [ ] Prototype: [Complete](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
+* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/BRANCH_NAME)
+* [ ] Specification: [Not Started](pr/1)
+
+## Summary
+[summary]: #summary
+
+Allow for explicit generic defenitions of generic arguments on structs.
+
+## Motivation
+[motivation]: #motivation
+
+In some cases it is useful to create a very flexible struct using several generic arguments, but it also makes sense to assume that some people
+wont care about every argument. If you wish to do this now, you would have to copy paste the entire struct and replace every instance of
+the generic argument with some 'default' type that makes sence to use in your context. This simple syntax should allow for this
+to be written without any code duplication.
+
+## Detailed design
+[design]: #detailed-design
+
+Lets say you have a simple yet flexible struct for handling if a function or method executed correctly.
+```csharp
+struct Result<TValue, TError>
+{
+    private TValue _value;
+    private TError _error;
+    
+    public bool IsOk(out TValue value)
+    {
+        value = _value;
+        return _value != null;
+    }
+    
+    public bool IsError(out TError error)
+    {
+        error = _error;
+        return _value == null;
+    }
+}
+```
+
+Now what happens if some other developer wants to use your struct but doesn't want to explicitly type the error type every time they use the struct.
+At the time the only way is for them to create a new struct which is almost an exact copy of your struct, expect the TError is removed and the _error field has
+an explicit type instead. Same with the IsError function.
+
+My proposal is to allow a syntax as follows:
+```csharp
+struct Result<TValue> = Result<TValue, Exception>;
+```
+
+Behind the scenes this would lower into code where it essentially is both structs written out fully. That would look something like this:
+```csharp
+struct Result<TValue, TError>
+{
+    private TValue _value;
+    private TError _error;
+    
+    public bool IsOk(out TValue value)
+    {
+        value = _value;
+        return _value != null;
+    }
+    
+    public bool IsError(out TError error)
+    {
+        error = _error;
+        return _value == null;
+    }
+}
+
+[CompilerGenerated]
+struct Result<TValue>
+{
+    private TValue _value;
+    private Exception _error;
+    
+    public bool IsOk(out TValue value)
+    {
+        value = _value;
+        return _value != null;
+    }
+    
+    public bool IsError(out Exception error)
+    {
+        error = _error;
+        return _value == null;
+    }
+}
+```
+
+## Downsides
+[downsides]: #downsides
+This type of syntax hides a great deal of code behind the scenes, but since it should be exactly the same code with very minor changes
+it shouldn't be too bad to wrap your head around, but it is an important aspect of this feature.
+
+It could also prove difficult to understand what going on behind the scenes if you don't have access to the struct being 'copied' and can't read its contents.
+
+## Alternatives
+[alternatives]: #alternatives
+
+An alternate syntax could look like this:
+```csharp
+struct Result<TValue> : Result<TValue, Exception>;
+```
+Where the equals is replaced by a colon. I feel this resembles the idea of inheritance a bit too much as this feature would not be the same as inheritance.
+The two struccts are completely seperate conceptually, it just happens that one of them are generated based on the other.
