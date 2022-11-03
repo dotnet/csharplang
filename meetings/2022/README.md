@@ -28,18 +28,16 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - Team meeting - *no notes*
 
-## Wed Nov 2, 2022
-
-- Partial properties (Rikki): https://github.com/dotnet/csharplang/issues/6420
-
-## Mon Oct 31, 2022
-
-- "Summer of C#" session on Collection initializers and ergonomics (Cyrus, Safia, Rikki) - *no notes*
-
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
+
+## Wed Nov 2, 2022
+
+[C# Language Design Meeting for November 2nd, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-11-02.md)
+
+- Partial Properties
+- Default parameter values in lambdas
 
 ## Wed Oct 26, 2022
 
