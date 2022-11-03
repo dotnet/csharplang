@@ -216,6 +216,13 @@ Same rules as for method parameters ([§14.6.2](https://github.com/dotnet/csharp
 
 No changes to the grammar are necessary for method groups since this proposal would only change their semantics.
 
+The following addition (in bold) is required to anonymous function conversions ([§10.7](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#107-anonymous-function-conversions)):
+
+> Specifically, an anonymous function `F` is compatible with a delegate type `D` provided:
+>
+> - [...]
+> - If `F` has an explicitly typed parameter list, each parameter in `D` has the same type and modifiers as the corresponding parameter in `F` **ignoring `params` modifiers and default values**.
+
 ### Updates of prior proposals
 
 The following addition (in bold) is required to the [function types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) specification in a prior proposal:
@@ -322,131 +329,30 @@ d = (int[] xs) => xs.Length; // Error: different delegate types; no implicit con
 ```
 
 Similarly, there is of course compatibility with named delegates that already support optional and `params` parameters.
-```csharp
-int D(int a = 1) {
-  return a;
-}
-
-delegate int Del(int a = 1);
-
-Del del = (int x = 100) => x; // Error: Default parameter value does not match, so no conversion can be performed
-                              
-Del del1 = (int x = 1) => x; // Allowed, because default parameter value in lambda matches default parameter value in delegate
-
-Del del2 = D; // This behavior does not change and compiles as before as per the method group conversion rules 
-
-var d = D;
-// d is inferred as internal delegate int a'(int arg = 1);
-
-Del del3 = d; // Not allowed. Cannot convert internal delegate type to Del.
-              // Note that there is no change here from previous behavior, when d would be inferred
-              // to be Action<int> since Action<int> also cannot be converted to a named delegate type.
-
-int E(params int[] xs) {
-  return xs.Length;
-}
-
-delegate int DelParams(params int[] xs);
-
-DelParams del4 = (int[] xs) => xs.Length; // Error: `params` modifier does not match, so no conversion can be performed
-
-DelParams del5 = (params int[] xs) => xs.Length; // Allowed
-
-DelParams del6 = E; // Allowed as before per the method group conversion rules
-
-var e = E;
-// e is inferred as internal delegate int b'(params int[] arg);
-
-DelParams del7 = e; // Not allowed. Cannot convert internal delegate type to DelParams.
-
-delegate int DelArray(int[] xs);
-
-DelArray del8 = (params int[] xs) => xs.Length; // Error: conversion from `params` to non-`params`
-
-del8 = E; // Allowed: both have `params`
-
-var del9 = (params int[] xs) => xs.Length;
-// del9 is inferred as internal delegate int b'(params int[] arg);
-
-del8 = del9; // Not allowed. Cannot convert internal delegate type to DelArray.
-```
-
-Since lambdas and method groups with optional and `params` parameters are typed as anonymous delegates, the
-method group conversion rules as described in [§10.8](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/conversions#108-method-group-conversions)
-apply. We can first consider the following example: 
+When default values or `params` modifiers differ in a conversion, the source one will be unused if it's in a lambda expression, since the lambda cannot be called in any other way.
+That might seem counter-intuitive to users, hence a warning will be emitted when the source default value or `params` modifier is present and different from the target one.
+If the source is a method group, it can be called on its own, hence no warning will be emitted.
 
 ```csharp
-int M(int x = 20) {
-  return x;
-}
+delegate int DelegateNoDefault(int x);
+delegate int DelegateWithDefault(int x = 1);
+int MethodNoDefault(int x) => x;
+int MethodWithDefault(int x = 2) => x;
+DelegateNoDefault d1 = MethodWithDefault; // no warning: source is a method group
+DelegateWithDefault d2 = MethodWithDefault; // no warning: source is a method group
+DelegateWithDefault d3 = MethodNoDefault; // no warning: source is a method group
+DelegateNoDefault d4 = (int x = 1) => x; // warning: source present, target missing
+DelegateWithDefault d5 = (int x = 2) => x; // warning: source present, target different
+DelegateWithDefault d6 = (int x) => x; // no warning: source missing, target present
 
-var d = (int x = 10) => x;
-// internal delegate int b'(int arg = 10);
-
-d = M; // Allowed with warning. The existing method group rules apply here, and the signature of M
-       // is allowed to be converted to internal delegate int b'(int arg = 10); However, because this behavior could be confusing, it is worth alerting the user.
-d();   // This call will use default value x = 10 from original lambda
-```
-The above code has an implicit conversion from a method group to a delegate. 
-However, the anonymous delegate type that the method group is converted to has a default parameter value which differs from the underlying method. 
-Note that the default value for the underlying delegate type will be used here, which may seem counter-intuitive to users. Because of this, we will emit a warning.
-
-This is not as confusing in case of `params`, so there will be no warning.
-
-```csharp
-int M1(int[] xs) {
-  return xs.Length;
-}
-int M2(params int[] xs) {
-  return xs.Length;
-}
-
-var d1 = (int[] xs) => xs.Length;
-// internal delegate int a'(int[] arg);
-var d2 = (params int[] xs) => xs.Length;
-// internal delegate int b'(params int[] arg);
-
-d1 = M1;
-d2 = M1;
-d1 = M2;
-d2 = M2;
-d1(1, 2, 3); // Error, d1's argument is not `params`.
-d2(1, 2, 3); // Ok, d2's argument is `params`.
-```
-
-#### Other conversion cases
-
-**Lambda without default, target with default**:
-
-This case is already handled by the compiler, and we do not want to have the behavior here change.
-```csharp
-delegate void D1(int i = 42);
-D1 d = i => { }; // Allowed. This is an implicit conversion which is already allowed in the compiler.
-```
-
-**Lambda/method group with default, target without default**:
-
-In this case, we will allow an implicit conversion from a lambda with a default to a delegate without. 
-However, because the default value(s) in the lambda will go unused (since the lambda cannot be called any other way) 
-we will emit a warning as there is a good chance the user has missed something. 
-
-In the case of method groups, we will continue to allow the implicit conversion to delegate with no warning, even if 
-there are no defaults in the target delegate type in order to keep our existing behavior. For more information on method group conversions,
-see [§10.8](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions).
-
-Note that the core distinction here is that with a method group, the underlying method can still
-be called by name in the standard way whereas if a lambda is assigned to a delegate, it can only
-be called through the delegate. 
-
-```csharp
-void Fun(int i = 4) { ... }
-
-delegate void D1(int i);
-D1 d = (int i = 1) => 42; // Allowed WITH warning, since the lambda is now only callable through the delegate
-                          // and the default value has effectively been thrown away.
-
-D1 d = Fun; // Allowed WITHOUT warning, since Fun and its default parameter value are still accessible
-            // without using the delegate.
+delegate int DelegateNoParams(int[] xs);
+delegate int DelegateWithParams(params int[] xs);
+int MethodNoParams(int[] xs) => xs.Length;
+int MethodWithParams(params int[] xs) => xs.Length;
+DelegateNoParams d7 = MethodWithParams; // no warning: source is a method group
+DelegateWithParams d8 = MethodNoParams; // no warning: source is a method group
+DelegateNoParams d9 = (params int[] xs) => xs.Length; // warning: source present, target missing
+DelegateWithParams d10 = (int[] xs) => xs.Length; // no warning: source missing, target present
 ```
 
 ### IL/runtime behavior
