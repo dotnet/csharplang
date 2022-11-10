@@ -156,7 +156,7 @@ int DoFunction(Func<int[], int> f, int p) {
   return f(new[] { p });
 }
 ```
-Following this change, code of this nature would cease to compile.
+Following this change, code of this nature would cease to compile with `-langversion:12` or higher.
 
 ```csharp
 void WriteInt(int i = 0) {
