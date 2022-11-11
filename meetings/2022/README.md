@@ -14,6 +14,17 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
+## Mon Dec 19, 2022
+
+## Wed Dec 14, 2022
+
+## Mon Dec 12, 2022
+
+- *Design review - no notes*
+
+## Wed Dec 7, 2022
+
+## Mon Dec 5, 2022
 
 ## Wed Nov 30, 2022
 
