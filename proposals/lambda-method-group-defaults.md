@@ -156,7 +156,7 @@ int DoFunction(Func<int[], int> f, int p) {
   return f(new[] { p });
 }
 ```
-Following this change, code of this nature would cease to compile.
+Following this change, code of this nature would cease to compile in .NET SDK 7.0.200 or later.
 
 ```csharp
 void WriteInt(int i = 0) {
