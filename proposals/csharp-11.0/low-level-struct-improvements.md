@@ -180,7 +180,7 @@ readonly ref struct Span<T>
 }
 ```
 
-The change to ref reassignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based solely on their declaration not on their usage. All `ref` and `in` parameters are *ref-safe-to-escape* to the *calling method* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
+The change to ref reassignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based solely on their declaration not on their usage. All `ref` and `in` parameters have *ref-safe-to-escape* of *return only* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
 
 #### `scoped` modifier
 <a name="rules-scoped"></a>
@@ -622,7 +622,7 @@ namespace System.Diagnostics.CodeAnalysis
 ```
 
 Detailed Notes:
-- An instance method or property annotated with `[UnscopedRef]` has *ref-safe-to-escape* of `this` set to the *calling method*. It means `this` is effectively a `ref` parameter to the method.
+- An instance method or property annotated with `[UnscopedRef]` has *ref-safe-to-escape* of `this` set to the *calling method*.
 - A member annotated with `[UnscopedRef]` cannot implement an interface.
 - It is an error to use `[UnscopedRef]` on 
     - A member that is not declared on a `struct`
@@ -1698,12 +1698,12 @@ Further a constructor must meet the following invariants:
 1. Ensure that `ref` parameters can be captured as `ref` fields. 
 2. Ensure that `ref` to fields of `this` cannot be escaped through `ref` parameters. That would violate [tricky ref assignment](#tricky-ref-assignment). 
 
-The intent is to pick the form that satisfies our invariants without introduction of any special rules for constructors. Given that the best model for constructors is viewing `this` as an `out` parameter. The *return-only* nature of the `out` allows us to satisfy all the invariants above without any special casing: 
+The intent is to pick the form that satisfies our invariants without introduction of any special rules for constructors. Given that the best model for constructors is viewing `this` as an `out` parameter. The *return only* nature of the `out` allows us to satisfy all the invariants above without any special casing: 
 
 ```c#
 public static void ctor(out S @this, ref int f)
 {
-    // The ref-safe-to-escape of `ref f` is *return-only* which is also the 
+    // The ref-safe-to-escape of `ref f` is *return only* which is also the 
     // safe-to-escape of `this.field` hence this assignment is allowed
     @this.field = ref f;
 }
