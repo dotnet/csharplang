@@ -28,7 +28,7 @@ class Person
 class Student : Person
 {
     public int ID { get; }
-    public Person(int id, string firstName, string lastName, string? middleName = null)
+    public Student(int id, string firstName, string lastName, string? middleName = null)
         : base(firstName, lastName, middleName)
     {
         ID = id;
