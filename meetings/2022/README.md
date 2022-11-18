@@ -18,6 +18,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Dec 14, 2022
 
+- Construction improvements (Mads and Kathleen)
+
 ## Mon Dec 12, 2022
 
 - *Design review - no notes*
@@ -29,10 +31,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Wed Nov 30, 2022
 
 - `params ReadOnlySpan<T>` (Params improvements WG)
-
-## Mon Nov 28, 2022
-
-- Construction improvements (Mads and Kathleen)
 
 ## Mon Nov 14, 2022
 
