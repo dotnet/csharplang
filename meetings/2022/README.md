@@ -32,14 +32,6 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 - `params ReadOnlySpan<T>` (Params improvements WG)
 
-## Mon Nov 14, 2022
-
-- Team meeting (cont'd) - *no notes*
-
-## Mon Nov 7, 2022
-
-- Team meeting - *no notes*
-
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
