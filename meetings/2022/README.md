@@ -30,6 +30,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Nov 30, 2022
 
+- Required members and `MemberNotNull`: https://github.com/dotnet/csharplang/issues/6754 (333fred)
 - `params ReadOnlySpan<T>` https://github.com/dotnet/csharplang/pull/6747 (Params improvements WG)
 
 # C# Language Design Notes for 2022
