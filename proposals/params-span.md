@@ -1,18 +1,19 @@
-# `params Span<T>`
+# `params ReadOnlySpan<T>`
 
 ## Summary
-Avoid heap allocation for implicit allocation of arrays in specific scenarios with `params` arguments.
+Avoid heap allocation of implicitly allocated `params` arrays.
 
 ## Motivation
 `params` array parameters provide a convenient way to call a method that takes an arbitrary length list of arguments.
 However, using an array type for the parameter means the compiler must implicitly allocate an array on the heap at each call site.
 
-If we extend `params` types to include the `ref struct` types `Span<T>` and `ReadOnlySpan<T>`, where values of those types cannot escape the call stack, the array at the call site may be created on the stack instead.
+If we extend `params` support to `ReadOnlySpan<T>`, where the implicitly created span cannot escape the calling method, the underlying array at the call site may be created on the stack instead.
 
-And if we're extending `params` to other types, we  could also allow `params IEnumerable<T>` to avoid allocating and copying collections at call sites that have an `IEnumerable<T>` rather than `T[]`.
+If overload resolution prefers `params ReadOnlySpan<T>` over `params T[]`, then adding a `params ReadOnlySpan<T>` overload to an existing API would reduce allocations when recompiling callers.
 
-The benefits of `params ReadOnlySpan<T>` and `params Span<T>` are primarily for new APIs. Existing commonly used APIs such as `Console.WriteLine()` and `StringBuilder.AppendFormat()` already have overloads that avoid array allocations for common cases and those overloads would need to be retained for backward compatibility.
+The benefit of `params ReadOnlySpan<T>` is primarily for APIs that don't already include optimized overloads. Commonly used APIs such as `Console.WriteLine()` and `StringBuilder.AppendFormat()` that already have non-`params` overloads for callers with few arguments would benefit less.
 ```csharp
+// Existing API with params and non-params overloads
 public static class Console
 {
     public static void WriteLine(string value);
@@ -21,125 +22,186 @@ public static class Console
     public static void WriteLine(string format, object arg0, object arg1, object arg2);
     public static void WriteLine(string format, params object[] arg);
 }
+
+// New API with single overload
+abstract class Logger
+{
+    public abstract void Log(string format, params ReadOnlySpan<object> args);
+}
 ```
 
 ## Detailed design
 
 ### Extending `params`
-`params` parameters will be supported with types `Span<T>`, `ReadOnlySpan<T>`, and `IEnumerable<T>`.
+A `params` parameter type may be `System.ReadOnlySpan<T>` for a valid type argument `T`.
 
-A call in _expanded form_ ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member)) to a method with a `params T[]` or `params IEnumerable<T>` parameter will result in an array `T[]` allocated on the heap.
-
-A call in _expanded form_ ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member)) to a method with a `params ReadOnlySpan<T>` or `params Span<T>` parameter will result in an array `T[]` created on the stack _if the `params` array is within limits (if any) set by the compiler_.
-Otherwise the array will be allocated on the heap.
+A call in [_expanded form_](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member) to a method with a `params ReadOnlySpan<T>` parameter will result in a `ReadOnlySpan<T>` instance implicitly created by the compiler.
 
 ```csharp
-Console.WriteLine(fmt, x, y, z); // WriteLine(string format, params ReadOnlySpan<object?> arg)
+log.Log("({0}, {1}, {2})", x, y, z);
+
+// Potentially emitted as:
+log.Log("({0}, {1}, {2})",
+    new System.ReadOnlySpan<object>(new object[] { x, y, z }));
 ```
 
-The compiler will report an error when compiling the method declaring the `params` parameter if the `ReadOnlySpan<T>` or `Span<T>` parameter value is returned from the method or assigned to an `out` parameter.
-That ensures call-sites can create the underlying array on the stack and reuse the array across call-sites without concern for aliases.
-
-A `params` parameter must be last parameter in the method signature.
+A `params` parameter must be the last parameter in the method signature and cannot include a `ref`, `out`, or `in` modifier.
 
 Two overloads cannot differ by `params` modifier alone.
 
-`params` parameters will be marked in metadata with a `System.ParamArrayAttribute` regardless of type.
+`params` parameters are marked in metadata with a `System.ParamArrayAttribute`.
+
+A `params ReadOnlySpan<T>` is implicitly `scoped` unless explicitly annotated with `[UnscopedRef]`.
+Within the `params` method, the compiler will use escape analysis to report diagnostics if the `scoped` span is captured or returned.
 
 ### Overload resolution
-Overload resolution will continue to prefer overloads that are applicable in _normal form_ ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member)) rather than _expanded form_ ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member)).
+Overload resolution prefers overloads that are applicable in [_normal form_](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member) over [_expanded form_](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member).
 
-For overloads that are applicable in _expanded form_, better function member ([§11.6.4.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11643-better-function-member)) will be updated to prefer `params` types in a specific order:
+[_Better function member_](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11643-better-function-member) will prefer `params ReadOnlySpan<T>` over `params T[]` for overloads applicable in [_expanded form_](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member):
 
-> When performing this evaluation, if `Mp` or `Mq` is applicable in its expanded form, then `Px` or `Qx` refers to a parameter in the expanded form of the parameter list.
-> 
 > In case the parameter type sequences `{P1, P2, ..., Pn}` and `{Q1, Q2, ..., Qn}` are equivalent (i.e. each `Pi` has an identity conversion to the corresponding `Qi`), the following tie-breaking rules are applied, in order, to determine the better function member.
 > 
 > *  If `Mp` is a non-generic method and `Mq` is a generic method, then `Mp` is better than `Mq`.
 > *  ...
 > *  **Otherwise, if both methods have `params` parameters and are applicable only in their expanded forms, and the `params` types are distinct types with equivalent element type (there is an identity conversion between element types), the more specific `params` type is the first of:**
 >    *  **`ReadOnlySpan<T>`**
->    *  **`Span<T>`**
 >    *  **`T[]`**
->    *  **`IEnumerable<T>`**
 > *  Otherwise if one member is a non-lifted operator and  the other is a lifted operator, the non-lifted one is better.
 > *  Otherwise, neither function member is better.
 
-### Array creation expressions
-Array creation expressions that are target-typed to `ReadOnlySpan<T>` or `Span<T>` will be created on the stack _if the length of the array is a constant value within limits (if any) set by the compiler_.
-Otherwise the array will be allocated on the heap.
+### Array allocation and reuse
+The compiler will include the following optimizations for implicitly allocated `params` arrays. Additional optimizations may be added in future for cases where the compiler can determine there are _no reachable aliases_ to the array.
 
+The compiler _will allocate the array on the stack_ for a `params ReadOnlySpan<T>` argument when
+- the parameter is implicitly or explicitly `scoped`,
+- the argument is implicitly allocated, and
+- the runtime supports [_stack allocated arrays of managed types_](#runtime-stack-allocation).
+
+The compiler _will reuse the array_ allocated on the stack for implicit arguments to `params ReadOnlySpan<T>` and `params ReadOnlySpan<U>` when there is an identity conversion between element types `T` and `U`.
+
+The parameter must be `scoped` to ensure the implicitly allocated array is not returned or aliased which might prevent allocating on the stack or reusing the array.
+
+The array is allocated on the stack regardless of argument length or array element size.
+The array is allocated to the length of the longest `params` argument across all applicable uses for matching `T`.
+
+The span for a particular `params` argument will be a slice of the array matching the argument length at that call site.
+
+At runtime, the stack space for the array is reserved for the lifetime of the method, regardless of where in the method the array is used.
+
+Reuse is within the same method and thread of execution only and may be across distinct call sites _or_ repeated calls from the same call site.
+
+Before exiting a C# scope, the compiler ensures the array contains no references from the scope.
+
+To _opt out_ of compiler optimizations at a call site, the calling code should allocate the span explicitly.
+
+The code emitted for an implicitly allocated `params` span should be identical to the code emitted when using a [_collection literal_](https://github.com/dotnet/csharplang/issues/5354) for the `params` argument.
 ```csharp
-Span<int> s = new[] { i, j, k };   // int[] on the stack
-WriteLine(fmt, new[] { x, y, z }); // object[] on the stack for WriteLine(string fmt, ReadOnlySpan<object> args);
+log.Log("({0}, {1}, {2})", x, y, z);
+log.Log("({0}, {1}, {2})", [x, y, z]); // identical code gen
 ```
 
-### Array re-use
-The compiler _may_ reuse an implicitly allocated array across multiple uses within a single thread executing a method:
-- At the same call-site (within a loop) or
-- At distinct call-sites if the lifetime of the spans do not overlap, and the array length is sufficient, and
-  - the element types are managed types that are considered identical by the runtime, or
-  - the element types are unmanaged types of the same size.
+### Runtime stack allocation
+There is a runtime request to support [_fixed size array_](https://github.com/dotnet/runtime/issues/61135) fields of managed types.
+With _fixed size arrays_, we can define `struct` types with inline arrays and use locals for stack allocated arrays.
 
-An implicitly allocated array may be reused regardless of whether the array was created on the stack or the heap.
-
-### Lowering implicit allocation
-For the `params` and array creation cases above that are target typed to `Span<T>` or `ReadOnlySpan<T>`, the compiler will lower the creation of spans using an efficient approach, specifically avoiding heap allocations when possible.
-The exact details are still to be determined and may differ based on the target framework and runtime.
-
-The guarantee the compiler gives is the span will be the expected size and will contain the expected items at any point in user code.
-
-## Open issues
-### Is `params Span<T>` necessary?
-Is there a reason to support `params` parameters of type `Span<T>` in addition to `ReadOnlySpan<T>`? Is allowing mutation within the `params` method useful?
-
-### Is `params IEnumerable<T>` necessary?
-If the compiler allows `params ReadOnlySpan<T>`, then new APIs that require `params` could use `params ReadOnlySpan<T>` instead of `params T[]` because `T[]` is implicitly convertible to `ReadOnlySpan<T>`. And existing APIs could add a `params ReadOnlySpan<T>` overload where the existing `params T[]` simply delegates to the new overload.
-
-There is no conversion from `IEnumerable<T>` to `ReadOnlySpan<T>` however, so allowing `params IEnumerable<T>` is essentially asking APIs to provide two overloads for `params` methods: `params ReadOnlySpan<T>` and `params IEnumerable<T>`. 
-
-Are scenarios for `params IEnumerable<T>` sufficiently compelling to justify that?
-
-### Array limits
-The compiler may use heuristics to determine when to fallback to heap allocation for the underlying data for spans.
-If heuristics are necessary, experimentation should establish the limits we agree on.
-
-### Lowering approach
-We need to determine the particular approach used to lower `params` and array creation expressions to avoid heap allocation.
-
-For instance, one potential approach to represent a `Span<T>` of constant length `N` is to synthesize a `struct` with `N` fields of type `T`
-where the layout and alignment of the fields matches the alignment of elements in `T[]`, and create the `Span<T>` from a `ref` to the first field of the `struct`.
-
-With that approach, `Console.WriteLine(fmt, x, y, z);` would be emitted as:
+For example, consider a `FixedSizeArray3<T>` type defined below which includes an inline three element array:
 ```csharp
-[StructLayout(LayoutKind.Sequential)]
-internal struct __ValueArray3<T> { public T Item1, Item2, Item3; };
-
-var values = new __ValueArray3<object>() { Item1 = x, Item2 = y, Item3 = z };
-var span = MemoryMarshal.CreateSpan(ref values.Item1, 3);
-Console.WriteLine(fmt, (ReadOnlySpan<object>)span); // WriteLine(string format, params ReadOnlySpan<object?> arg)
-```
-
-Alternative approaches may require runtime support.
-
-### Explicit `stackalloc`
-Should we allow explicit stack allocation of arrays of managed types with `stackalloc` as well?
-```csharp
-public static ImmutableArray<TResult> Select<TSource, TResult>(this ImmutableArray<TSource> source, Func<TSource, TResult> map)
+struct FixedSizeArray3<T>
 {
-    int n = source.Length;
-    Span<TResult> result = n <= 16 ? stackalloc TResult[n] : new TResult[n];
-    for (int i = 0; i < n; i++)
-        result[i] = map(source[i]);
-    return ImmutableArray.Create(result); // requires ImmutableArray.Create<T>([DoesNotEscape] ReadOnlySpan<T> items)
+    public T[3] Array; // pseudo-code for inline fixed size array
 }
 ```
 
-This would require runtime support for stack allocation of arrays of non-constant length and any type, and GC tracking of the elements.
+With that type, a call to `log.Log("({0}, {1}, {2})", x, y, z)` could be emitted as:
+```csharp
+var _tmp = new FixedSizeArray3<object>();
+_tmp.Array[0] = x;
+_tmp.Array[1] = y;
+_tmp.Array[2] = z;
 
-Direct runtime support for stack allocation of arrays of managed types might be useful for lowering implicit allocation as well.
+// Logger.Log(string format, params ReadOnlySpan<object> args);
+log.Log("({0}, {1}, {2})",
+    new ReadOnlySpan<object>(_tmp.Array));
+```
 
-The GC does not currently track the lifetime of a `stackalloc` array so if the contents of the array have a shorter lifetime than the method, the compiler will need to zero the contents of the array so the lifetime of elements matches expectations.
+Ideally the base class library will provide types such as `FixedSizeArray1<T>`, `FixedSizeArray2<T>`, etc. for a limited number of array lengths.
+And if the compilation requires spans for other array lengths, the compiler will generate and emit the additional types.
+
+### Example
+Consider the following extension method for logging the contents of a dictionary:
+```csharp
+static void LogDictionary<K, V>(this Logger log, Dictionary<K, V> dictionary)
+{
+    log.Log("Dictionary");
+
+    foreach (var (k, v) in dictionary)
+        log.Log("{0}, {1}", k, v);
+
+    log.Log("Count = {0}", dictionary.Count);
+}
+```
+
+The method could be lowered to:
+```csharp
+static void LogDictionary<K, V>(this Logger log, Dictionary<K, V> dictionary)
+{
+    FixedSizeArray2<object> _tmp = new FixedSizeArray2<object>();
+
+    log.Log("Dictionary",
+        new ReadOnlySpan<object>(Array.Empty<object>()); // no reuse
+
+    foreach (var (k, v) in dictionary)
+    {
+        _tmp.Array[0] = k;
+        _tmp.Array[1] = v;
+        log.Log("{0}, {1}",
+            new ReadOnlySpan(_tmp.Array)); // reuse
+        Array.Clear(_tmp.Array);           // clear
+    }
+
+    _tmp.Array[0] = dictionary.Count;
+    log.Log("Count = {0}",
+        new ReadOnlySpan(_tmp.Array, 0, 1)); // reuse slice
+}
+```
+
+## Open issues
+### Support `params scoped T[]`?
+Allow a `params T[]` to be marked as `scoped` and allocate argument arrays on the stack at call sites? That would avoid heap allocation at each call site, but allocations could only be reused at call sites with matching argument type _and length_.
+
+### Support `params Span<T>`?
+Support `params Span<T>` to allow the `params` method to modify the span contents, even though the effects are only observable at call sites that explicitly allocate the argument array?
+
+### Support `params IEnumerable<T>`, etc.?
+If we're extending `params` to support `ReadOnlySpan<T>`, should we also support `params` parameters of other collection types, including interfaces and concrete types?
+
+The reason to support `params ReadOnlySpan<T>` is to improve performance of existing callers by allowing stack allocation of `params` arrays.
+The reason to extend `params` to other collection types is not performance but to support implicit collections at call sites while _also_ supporting APIs or call sites that use collections other than arrays.
+
+For APIs, supporting `params` and other collection types is already possible through overloads:
+```csharp
+abstract class Logger
+{
+    public abstract void Log(string format, IEnumerable<object> args);
+
+    public void Log(string format, params object[] args)
+    {
+        Log(format, (IEnumerable<object>)args);
+    }
+}
+```
+
+And for callers where the API takes an explicit collection type rather than `params`, [_collection literals_](https://github.com/dotnet/csharplang/issues/5354) provide a simple syntax that reduces the need for `params`.
+```csharp
+log.Log("({0}, {1}, {2})", [x, y, z]);
+
+abstract class Logger
+{
+    public abstract void Log(string format, IEnumerable<object> args);
+}
+```
+
+That said, this proposal doesn't prevent extending `params` to other types in the future.
 
 ### Opting out
 Should we allow opt-ing out of _implicit allocation_ on the call stack?
