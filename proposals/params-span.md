@@ -35,7 +35,7 @@ abstract class Logger
 ### Extending `params`
 A `params` parameter type may be `System.ReadOnlySpan<T>` for a valid type argument `T`.
 
-A call in [_expanded form_](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member) to a method with a `params ReadOnlySpan<T>` parameter will result in a `ReadOnlySpan<T>` instance implicit created by the compiler.
+A call in [_expanded form_](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member) to a method with a `params ReadOnlySpan<T>` parameter will result in a `ReadOnlySpan<T>` instance implicitly created by the compiler.
 
 ```csharp
 log.Log("({0}, {1}, {2})", x, y, z);
@@ -94,7 +94,7 @@ Before exiting a C# scope, the compiler ensures the array contains no references
 
 To _opt out_ of compiler optimizations at a call site, the calling code should allocate the span explicitly.
 
-The code emitted for an implicitly allocated `params` span should be identical to the code emitted when using a [_collection literal_](https://github.com/dotnet/csharplang/issues/5354)) for the `params` argument.
+The code emitted for an implicitly allocated `params` span should be identical to the code emitted when using a [_collection literal_](https://github.com/dotnet/csharplang/issues/5354) for the `params` argument.
 ```csharp
 log.Log("({0}, {1}, {2})", x, y, z);
 log.Log("({0}, {1}, {2})", [x, y, z]); // identical code gen
