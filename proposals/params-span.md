@@ -79,6 +79,8 @@ The compiler _will allocate the array on the stack_ for a `params ReadOnlySpan<T
 
 The compiler _will reuse the array_ allocated on the stack for implicit arguments to `params ReadOnlySpan<T>` and `params ReadOnlySpan<U>` when there is an identity conversion between element types `T` and `U`.
 
+The parameter must be `scoped` to ensure there are no aliases to the array that would prevent reusing the array across call sites.
+
 The array is allocated on the stack regardless of argument length or array element size.
 The array is allocated to the length of the longest `params` argument across all applicable uses for matching `T`.
 
@@ -171,7 +173,11 @@ Allow a `params T[]` to be marked as `scoped` and allocate argument arrays on th
 Support `params Span<T>` to allow the `params` method to modify the span contents, even though the effects are only observable at call sites that explicitly allocate the argument array?
 
 ### Support `params IEnumerable<T>`, etc.?
-If we're extending `params` to support `ReadOnlySpan<T>`, should we also support `params` parameters of other collection types, including interfaces and concrete types? The reason to support `params ReadOnlySpan<T>` is to improve the performance of existing callers. And other collection types are already well supported by having non-`params` overloads for the other types in addition to a `params T[]` overload. That said, this proposal doesn't prevent extending `params` to other types in the future.
+If we're extending `params` to support `ReadOnlySpan<T>`, should we also support `params` parameters of other collection types, including interfaces and concrete types?
+
+The reason to support `params ReadOnlySpan<T>` is to improve the performance of existing callers. And other collection types are already well supported by having non-`params` overloads for the other types in addition to a `params T[]` overload. And [_collection literals_](https://github.com/dotnet/csharplang/issues/5354) may provide a simple syntax for target-typed collections that reduces the need for `params` in general.
+
+That said, this proposal doesn't prevent extending `params` to other types in the future.
 
 ### Opting out
 Should we allow opt-ing out of _implicit allocation_ on the call stack?
