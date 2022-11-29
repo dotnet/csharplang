@@ -79,7 +79,7 @@ The compiler _will allocate the array on the stack_ for a `params ReadOnlySpan<T
 
 The compiler _will reuse the array_ allocated on the stack for implicit arguments to `params ReadOnlySpan<T>` and `params ReadOnlySpan<U>` when there is an identity conversion between element types `T` and `U`.
 
-The parameter must be `scoped` to ensure there are no aliases to the array that would prevent reusing the array across call sites.
+The parameter must be `scoped` to ensure the implicitly allocated array is not returned or aliased which might prevent allocating on the stack or reusing the array.
 
 The array is allocated on the stack regardless of argument length or array element size.
 The array is allocated to the length of the longest `params` argument across all applicable uses for matching `T`.
@@ -175,7 +175,31 @@ Support `params Span<T>` to allow the `params` method to modify the span content
 ### Support `params IEnumerable<T>`, etc.?
 If we're extending `params` to support `ReadOnlySpan<T>`, should we also support `params` parameters of other collection types, including interfaces and concrete types?
 
-The reason to support `params ReadOnlySpan<T>` is to improve the performance of existing callers. And other collection types are already well supported by having non-`params` overloads for the other types in addition to a `params T[]` overload. And [_collection literals_](https://github.com/dotnet/csharplang/issues/5354) may provide a simple syntax for target-typed collections that reduces the need for `params` in general.
+The reason to support `params ReadOnlySpan<T>` is to improve performance of existing callers by allowing stack allocation of `params` arrays.
+The reason to extend `params` to other collection types is not performance but to support implicit collections at call sites while _also_ supporting APIs or call sites that use collections other than arrays.
+
+For APIs, supporting `params` and other collection types is already possible through overloads:
+```csharp
+abstract class Logger
+{
+    public abstract void Log(string format, IEnumerable<object> args);
+
+    public void Log(string format, params object[] args)
+    {
+        Log(format, (IEnumerable<object>)args);
+    }
+}
+```
+
+And for callers where the API takes an explicit collection type rather than `params`, [_collection literals_](https://github.com/dotnet/csharplang/issues/5354) provide a simple syntax that reduces the need for `params`.
+```csharp
+log.Log("({0}, {1}, {2})", [x, y, z]);
+
+abstract class Logger
+{
+    public abstract void Log(string format, IEnumerable<object> args);
+}
+```
 
 That said, this proposal doesn't prevent extending `params` to other types in the future.
 
