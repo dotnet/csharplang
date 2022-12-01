@@ -28,6 +28,8 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Mon Dec 5, 2022
 
+- Review accessibility of generated `Program` for top-level statements (https://github.com/dotnet/csharplang/issues/6769)
+
 # C# Language Design Notes for 2022
 
 Overview of meetings and agendas for 2022
