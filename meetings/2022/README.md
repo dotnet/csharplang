@@ -18,17 +18,13 @@ All schedule items must have a public issue or checked in proposal that can be l
 
 ## Wed Dec 14, 2022
 
+- Review accessibility of generated `Program` for top-level statements (https://github.com/dotnet/csharplang/issues/6769)
 - Construction improvements (Mads and Kathleen)
 
 ## Mon Dec 12, 2022
 
 - *Design review - no notes*
 
-## Wed Dec 7, 2022
-
-## Mon Dec 5, 2022
-
-- Review accessibility of generated `Program` for top-level statements (https://github.com/dotnet/csharplang/issues/6769)
 
 # C# Language Design Notes for 2022
 
