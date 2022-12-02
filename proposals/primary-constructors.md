@@ -44,7 +44,7 @@ Class and struct declarations are augmented to allow a parameter list on the typ
 ``` antlr
 class_declaration
   : attributes? class_modifier* 'partial'? class_designator identifier type_parameter_list?
-  parameter_list? class_base? type_parameter_constraints_clause* class_body ';'?
+  parameter_list? class_base? type_parameter_constraints_clause* class_body
   ;
   
 class_designator
@@ -64,7 +64,7 @@ class_body
   
 struct_declaration
   : attributes? struct_modifier* 'partial'? 'record'? 'struct' identifier type_parameter_list?
-    parameter_list? struct_interfaces? type_parameter_constraints_clause* struct_body ';'?
+    parameter_list? struct_interfaces? type_parameter_constraints_clause* struct_body
   ;
 
 struct_body
