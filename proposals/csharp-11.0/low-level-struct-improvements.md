@@ -353,7 +353,7 @@ The language "does not contribute" means the arguments are simply not considered
 
 The method invocation rules can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`. The value rules need to change to account for `ref` field returns:
 
-> A value resulting from a method invocation `e1.M(e2, ...)`, where M() does not return ref to ref struct, is *safe-to-escape* from the narrowest of the following scopes:
+> A value resulting from a method invocation `e1.M(e2, ...)`, where `M()` does not return ref-to-ref-struct, is *safe-to-escape* from the narrowest of the following scopes:
 > 1. The *calling method*
 > 2. When the return is a `ref struct` the *safe-to-escape* contributed by all argument expressions
 > 3. When the return is a `ref struct` the *ref-safe-to-escape* contributed by all `ref` arguments
@@ -362,7 +362,7 @@ The method invocation rules can now be simplified. The receiver no longer needs 
 
 The `ref` calling rules can be simplified to:
 
-> A value resulting from a method invocation `ref e1.M(e2, ...)`, where M() does not return ref-to-ref-struct, is *ref-safe-to-escape* the narrowest of the following scopes:
+> A value resulting from a method invocation `ref e1.M(e2, ...)`, where `M()` does not return ref-to-ref-struct, is *ref-safe-to-escape* the narrowest of the following scopes:
 > 1. The *calling method*
 > 2. The *safe-to-escape* contributed by all argument expressions
 > 3. The *ref-safe-to-escape* contributed by all `ref` arguments
