@@ -357,9 +357,8 @@ The method invocation rules can now be simplified. The receiver no longer needs 
 > 1. The *calling method*
 > 2. When the return is a `ref struct` the *safe-to-escape* contributed by all argument expressions
 > 3. When the return is a `ref struct` the *ref-safe-to-escape* contributed by all `ref` arguments
+>
 > If M() does return ref-to-ref-struct, the *safe-to-escape* is the same as the *safe-to-escape* of all arguments which are ref-to-ref-struct. It is an error if there are multiple arguments with different *safe-to-escape*.
-
-See [STE invariance for ref to ref struct variables](#ste-invariance-for-ref-to-ref-struct-variables).
 
 The `ref` calling rules can be simplified to:
 
@@ -367,6 +366,7 @@ The `ref` calling rules can be simplified to:
 > 1. The *calling method*
 > 2. The *safe-to-escape* contributed by all argument expressions
 > 3. The *ref-safe-to-escape* contributed by all `ref` arguments
+>
 > If M() does return ref-to-ref-struct, the *ref-safe-to-escape* is the narrowest *ref-safe-to-escape* contributed by all arguments which are ref-to-ref-struct.
 
 This rule now lets us define the two variants of desired methods:
