@@ -14,12 +14,9 @@ All schedule items must have a public issue or checked in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
-## Mon Dec 19, 2022
-
 ## Wed Dec 14, 2022
 
 - Review accessibility of generated `Program` for top-level statements (https://github.com/dotnet/csharplang/issues/6769)
-- Construction improvements (Mads and Kathleen)
 
 ## Mon Dec 12, 2022
 
