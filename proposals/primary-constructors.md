@@ -114,9 +114,13 @@ The initializer for the field `i` references the parameter `i` (as per the first
 
 A primary constructor leads to the generation of an instance constructor on the enclosing type with the given parameters. If the `class_base` has an argument list, the generated instance constructor will have a `base` initializer with the same argument list.
 
-All instance member initializers in the class body will become assignments in the generated constructor. This means that, unlike other classes, initializers will run *after* the base constructor has been invoked, not before.
+Primary constructor parameters in class/struct declarations can be declared `ref`, `in` or `out`. Declaring `ref` or `out` parameters remains illegal in primary constructors of record declaration.
+
+All instance member initializers in the class body will become assignments in the generated constructor.
 
 If a primary constructor parameter is referenced from within an instance member, it is captured into the state of the enclosing type, so that it remains accessible after the termination of the constructor. A likely implementation strategy is via a private field using a mangled name. The private field is initialized by the generated constructor before , and all references to the parameter are replaced with references to the field.
+
+Capturing is not allowed for `ref`, `in` and `out` parameters. This is similar to a limitation for capturing in lambdas. 
 
 If a primary constructor parameter is only referenced from within instance member initializers, those can directly reference the parameter of the generated constructor, as they are executed as part of it.
 
@@ -164,7 +168,7 @@ It is an error for a non-primary constructor declaration to have the same parame
 
 With this proposal, records no longer need to separately specify a primary constructor mechanism. Instead, record (class and struct) declarations that have primary constructors would follow the general rules, with these simple additions:
 
-- For each primary constructor parameter, if a member with the same name already exists it must be an instance property or field, and it must be assignable to. If not, a public init-only auto-property of the same name is synthesized with a property initializer assigning from the parameter.
+- For each primary constructor parameter, if a member with the same name already exists it must be an instance property or field. If not, a public init-only auto-property of the same name is synthesized with a property initializer assigning from the parameter.
 - A deconstructor is synthesized with out parameters to match the primary constructor parameters.
 - If an explicit constructor declaration is a "copy constructor" - a constructor that takes a single parameter of the enclosing type - it is not required to call a `this` initializer, and will not execute the member initializers present in the record declaration.
 
@@ -318,3 +322,9 @@ There are some problems:
   - What if different naming conventions are used for parameters and fields? Then this feature would be useless.
   
 This is a potential future addition that can be adopted or not. The current proposal leaves the possibility open.
+
+## LDM meetings
+
+https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
+
+
