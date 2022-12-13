@@ -168,7 +168,7 @@ It is an error for a non-primary constructor declaration to have the same parame
 
 With this proposal, records no longer need to separately specify a primary constructor mechanism. Instead, record (class and struct) declarations that have primary constructors would follow the general rules, with these simple additions:
 
-- For each primary constructor parameter, if a member with the same name already exists it must be an instance property or field. If not, a public init-only auto-property of the same name is synthesized with a property initializer assigning from the parameter.
+- For each primary constructor parameter, if a member with the same name already exists, it must be an instance property or field. If not, a public init-only auto-property of the same name is synthesized with a property initializer assigning from the parameter.
 - A deconstructor is synthesized with out parameters to match the primary constructor parameters.
 - If an explicit constructor declaration is a "copy constructor" - a constructor that takes a single parameter of the enclosing type - it is not required to call a `this` initializer, and will not execute the member initializers present in the record declaration.
 
