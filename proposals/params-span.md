@@ -128,7 +128,7 @@ log.Log("({0}, {1}, {2})",
 ```
 
 Ideally the base class library will provide types such as `FixedSizeBuffer1<T>`, `FixedSizeBuffer2<T>`, etc. for a limited number of span lengths.
-And if the compilation requires spans for other span lengths, the compiler will generate and emit the additional types.
+And if the compilation requires buffers for other span lengths, the compiler will generate and emit the additional types.
 
 ### Example
 Consider the following extension method for logging the contents of a dictionary:
