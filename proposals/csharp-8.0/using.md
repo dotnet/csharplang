@@ -102,12 +102,12 @@ Restrictions around `using` declaration:
 
 ### pattern-based using
 
-The language will add the notion of a disposable pattern: that is a type which has an accessible 
+The language will add the notion of a disposable pattern for `ref struct` types: that is a `ref struct` which has an accessible 
 `Dispose` instance method. Types which fit the disposable pattern can participate in a `using` 
 statement or declaration without being required to implement `IDisposable`. 
 
 ```csharp
-class Resource
+ref struct Resource
 { 
     public void Dispose() { ... }
 }
@@ -118,16 +118,8 @@ using (var r = new Resource())
 }
 ```
 
-This will allow developers to leverage `using` in a number of new scenarios:
-
-- `ref struct`: These types can't implement interfaces today and hence can't participate in `using`
+This will allow developers to leverage `using` for `ref struct` types. These types can't implement interfaces today and hence can't participate in `using`
 statements.
-- Extension methods will allow developers to augment types in other assemblies to participate 
-in `using` statements.
-
-In the situation where a type can be implicitly converted to `IDisposable` and also fits the
-disposable pattern, then `IDisposable` will be preferred. While this takes the opposite approach
-of `foreach` (pattern preferred over interface) it is necessary for backwards compatibility.
 
 The same restrictions from a traditional `using` statement apply here as well: local variables 
 declared in the `using` are read-only, a `null` value will not cause an exception to be thrown, 
@@ -146,9 +138,8 @@ etc ... The code generation will be different only in that there will not be a c
 }
 ```
 
-In order to fit the disposable pattern the `Dispose` method must be accessible, parameterless and have 
-a `void` return type. There are no other restrictions. This explicitly means that extension methods
-can be used here.
+In order to fit the disposable pattern the `Dispose` method must be an accessible instance member, parameterless and have 
+a `void` return type. It cannot be an extension method.
 
 ## Considerations
 
