@@ -51,7 +51,8 @@ Two overloads cannot differ by `params` modifier alone.
 
 `params` parameters are marked in metadata with a `System.ParamArrayAttribute`.
 
-A `params ReadOnlySpan<T>` is implicitly `scoped`, and it is an error to declare the parameter as explicitly `scoped` or `[UnscopedRef]`.
+A `params ReadOnlySpan<T>` is implicitly `scoped`, and can be declared `scoped` explicitly.
+The parameter _cannot_ be annotated with `[UnscopedRef]`.
 Within the `params` method, the compiler will use escape analysis to report diagnostics if the span is captured or returned.
 
 ### Overload resolution
