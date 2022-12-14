@@ -17,6 +17,7 @@ All schedule items must have a public issue or checked in proposal that can be l
 ## Wed Dec 14, 2022
 
 - Review accessibility of generated `Program` for top-level statements (https://github.com/dotnet/csharplang/issues/6769)
+- Breaking change consideration for raw-string-literals: https://github.com/dotnet/roslyn/pull/65973
 
 ## Mon Dec 12, 2022
 
