@@ -182,7 +182,7 @@ public class C : B
 
 It is an error for a non-primary constructor declaration to have the same parameter list as the primary constructor. All non-primary constructor declarations must use a `this` initializer, so that the primary constructor is ultimately called.
 
-Records produce a warning if primary constructor parameter isn't red within instance initializers or base initializer. Similar warning will be reported for primary constructor parameters in classes and structures:
+Records produce a warning if primary constructor parameter isn't read within instance initializers or base initializer. Similar warnings will be reported for primary constructor parameters in classes and structures:
 - for a by-value parameter, if the parameter is not captured and is not red within instance initializers or base initializer.
 - for an `in` parameter, if the parameter is not red within instance initializers or base initializer. 
 - for a `ref` parameter, if the parameter is not red or written to within instance initializers or base initializer. 
