@@ -87,16 +87,26 @@ The [lookup of simple names](https://github.com/dotnet/csharpstandard/blob/draft
 
 > - Otherwise, for each instance type `T` ([§14.3.2](classes.md#1432-the-instance-type)), starting with the instance type of the immediately enclosing type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):
 >   - If `e` is zero and the declaration of `T` includes a type parameter with name `I`, then the *simple_name* refers to that type parameter.
->   - **Otherwise, if the declaration of `T` includes a primary constructor parameter `I` and the reference occurs within the `argument_list` of `T`'s `class_base` or within an initializer of a field, property or event, the result is the primary constructor parameter `I`**
+>   - **Otherwise, if the declaration of `T` includes a primary constructor parameter `I` and the reference occurs within the `argument_list` of `T`'s `class_base` or within an initializer of `T`'s field, property or event, the result is the primary constructor parameter `I`**
 >   - Otherwise, if a member lookup ([§11.5](expressions.md#115-member-lookup)) of `I` in `T` with `e` type arguments produces a match:
 >     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method ([§11.7.8.2](expressions.md#11782-method-invocations)).
 >     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor ([§11.2.1](expressions.md#1121-general)), the result is the same as a member access ([§11.7.6](expressions.md#1176-member-access)) of the form `this.I`. This can only happen when `e` is zero.
 >     - Otherwise, the result is the same as a member access ([§11.7.6](expressions.md#1176-member-access)) of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
->   - **Otherwise, if the declaration of `T` includes a primary constructor parameter `I`, the result is the primary constructor parameter `I`. It is an error if the reference does not occur within the body of an instance method or an instance accessor.**
+>   - **Otherwise, if the declaration of `T` includes a primary constructor parameter `I`, the result is the primary constructor parameter `I`.**
 
-The first addition corresponds to the change incurred by [primary constructors on records](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#primary-constructor), and ensures that primary constructor parameters are found before any corresponding fields within initializers and base class arguments.
+The first addition corresponds to the change incurred by [primary constructors on records](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#primary-constructor), and ensures that primary constructor parameters are found before any corresponding fields within initializers and base class arguments. It extends this rule to static initializers as well. However, since records always have an instance member with the same name as the parameter, the extension can only lead to a change in an error message. Illegal access to a parameter vs. illegal access to an instance member.  
 
-The second addition allows primary constructor parameters to be found elsewhere within the class body, but only if not shadowed by members. It produces an error if the reference is not from within the body of an instance member or accessor. Note that instance constructors are excluded from this list.
+The second addition allows primary constructor parameters to be found elsewhere within the type body, but only if not shadowed by members.
+
+It is an error to reference a primary constructor parameter if the reference does not occur within a `nameof` argument and
+at the same time does not occur within one of the following:
+- an initializer of an instance field, property or event of the declaring type (type declaring primary constractor with the parameter).
+- the `argument_list` of `class_base` of the declaring type.
+- the body of an instance method (note that instance constructors are excluded) of the declaring type.
+- the body of an instance accessor of the declaring type.
+
+In other words, primary constructor parameters are in scope throughout the declaring type body. They shadow declaring type members within
+an initializer of a field, property or event of the declaring type, or within the `argument_list` of `class_base` of the declaring type. They are shadowed by declaring type members everywhere else.
 
 Thus, in the following declaration:
 
@@ -118,11 +128,18 @@ Primary constructor parameters in class/struct declarations can be declared `ref
 
 All instance member initializers in the class body will become assignments in the generated constructor.
 
-If a primary constructor parameter is referenced from within an instance member, it is captured into the state of the enclosing type, so that it remains accessible after the termination of the constructor. A likely implementation strategy is via a private field using a mangled name. The private field is initialized by the generated constructor before , and all references to the parameter are replaced with references to the field.
+If a primary constructor parameter is referenced from within an instance member, it is captured into the state of the enclosing type, so that it remains accessible after the termination of the constructor. A likely implementation strategy is via a private field using a mangled name. 
 
 Capturing is not allowed for `ref`, `in` and `out` parameters. This is similar to a limitation for capturing in lambdas. 
 
 If a primary constructor parameter is only referenced from within instance member initializers, those can directly reference the parameter of the generated constructor, as they are executed as part of it.
+
+Primary Constructor will do the following sequence of operations:
+1.	Parameter values are stored in capture fields, if any.
+2.	Instance initializers are executed
+3.	Base constructor initializer is called
+
+Parameter references in any user code are replaced with corresponding capture field references.
 
 For instance this declaration:
 
@@ -154,15 +171,21 @@ public class C : B
     
     // generated members
     private string __s; // for capture of s
-    public C(bool b, int i, string s) : base(b)
+    public C(bool b, int i, string s)
     {
         __s = s; // capture s
         I = i; // run I's initializer
+	B(b) // run B's constructor
     }
 }
 ```
 
 It is an error for a non-primary constructor declaration to have the same parameter list as the primary constructor. All non-primary constructor declarations must use a `this` initializer, so that the primary constructor is ultimately called.
+
+Records produce a warning if primary constructor parameter isn't red within instance initializers or base initializer. Similar warning will be reported for primary constructor parameters in classes and structures:
+- for a by-value parameter, if the parameter is not captured and is not red within instance initializers or base initializer.
+- for an `in` parameter, if the parameter is not red within instance initializers or base initializer. 
+- for a `ref` parameter, if the parameter is not red or written to within instance initializers or base initializer. 
 
 ## Primary constructors on records
 
