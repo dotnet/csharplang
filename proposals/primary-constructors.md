@@ -175,7 +175,7 @@ public class C : B
     {
         __s = s; // capture s
         I = i; // run I's initializer
-	B(b) // run B's constructor
+        B(b) // run B's constructor
     }
 }
 ```
