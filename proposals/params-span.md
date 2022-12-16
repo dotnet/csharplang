@@ -91,8 +91,6 @@ The parameter must be `scoped` to ensure the implicitly allocated buffer is not 
 The buffer is allocated on the stack regardless of argument length or element size.
 The buffer is allocated to the length of the longest `params` argument across all applicable uses for matching `T`.
 
-The _runtime_ may use heuristics to decide to allocate locals on the _heap_ rather than the stack, particularly for large locals.
-
 To _opt out_ of compiler optimizations at a call site, the calling code should allocate the span explicitly (directly or indirectly using `new ReadOnlySpan<T>(new[] { ... })`).
 
 The span for a particular `params` argument will be a slice of the buffer matching the argument length at that call site.
