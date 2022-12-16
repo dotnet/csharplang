@@ -98,9 +98,9 @@ The first addition corresponds to the change incurred by [primary constructors o
 
 The second addition allows primary constructor parameters to be found elsewhere within the type body, but only if not shadowed by members.
 
-It is an error to reference a primary constructor parameter if the reference does not occur within a `nameof` argument and
-at the same time does not occur within one of the following:
-- an initializer of an instance field, property or event of the declaring type (type declaring primary constractor with the parameter).
+It is an error to reference a primary constructor parameter if the reference does not occur within one of the following:
+- a `nameof` argument
+- an initializer of an instance field, property or event of the declaring type (type declaring primary constructor with the parameter).
 - the `argument_list` of `class_base` of the declaring type.
 - the body of an instance method (note that instance constructors are excluded) of the declaring type.
 - the body of an instance accessor of the declaring type.
