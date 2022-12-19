@@ -64,7 +64,7 @@ Overload resolution prefers overloads that are applicable in [_normal form_](htt
 > 
 > *  If `Mp` is a non-generic method and `Mq` is a generic method, then `Mp` is better than `Mq`.
 > *  ...
-> *  Otherwise if one member is a non-lifted operator and  the other is a lifted operator, the non-lifted one is better.
+> *  Otherwise if one member is a non-lifted operator and the other is a lifted operator, the non-lifted one is better.
 > *  **Otherwise, if both methods have `params` parameters and are applicable only in their expanded forms, and the `params` types are distinct types with equivalent element type (there is an identity conversion between element types), the more specific `params` type is the first of:**
 >    *  **`ReadOnlySpan<T>`**
 >    *  **`T[]`**
