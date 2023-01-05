@@ -126,7 +126,7 @@ The compiler will issue a warning when `Obsolete` is applied to a required membe
 ### `SetsRequiredMembersAttribute`
 
 All constructors in a type with required members, or whose base type specifies required members, must have those members set by a consumer when that constructor is called. In order to
-exempt constructors from this requirement, a constructor can be attributed with `SetRequiredMembersAttribute`, which removes these requirements. The constructor body is not validated
+exempt constructors from this requirement, a constructor can be attributed with `SetsRequiredMembersAttribute`, which removes these requirements. The constructor body is not validated
 to ensure that it definitely sets the required members of the type.
 
 `SetsRequiredMembersAttribute` removes _all_ requirements from a constructor, and those requirements are not checked for validity in any way. NB: this is the escape hatch if inheriting
