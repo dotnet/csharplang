@@ -31,8 +31,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Jan 11, 2023
 
-
+- Compiler plan for language features (Jared)
+- Using aliases for any type (Cyrus): https://github.com/dotnet/csharplang/issues/4284
 ## Mon Jan 9, 2023
+
+- Working groups check-in (Mads)
 
 
 # C# Language Design Notes for 2023
