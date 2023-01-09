@@ -193,8 +193,8 @@ There is a special language rule for scenarios often referred to as "Color Color
 
 >In a member access of the form `E.I`, if `E` is a single identifier, and if the meaning of `E` as a *simple_name* ([§11.7.4](expressions.md#1174-simple-names)) is a constant, field, property, local variable, or parameter with the same type as the meaning of `E` as a *type_name* ([§7.8.1](basic-concepts.md#781-general)), then both possible meanings of `E` are permitted. The member lookup of `E.I` is never ambiguous, since `I` shall necessarily be a member of the type `E` in both cases. In other words, the rule simply permits access to the static members and nested types of `E` where a compile-time error would otherwise have occurred.
 
-With respect to primary constructors, the rule has effect on whether an identifier within an instance member should be treated as a type reference, or as a primary constructor parameter reference, which, in turn, captures the parameter into the the state of the enclosing type. Even though "the member lookup of `E.I` is never ambiguous", when lookup yields a member group, in some cases it is impossible to make determination whether a member access refers to a static, or to an instance member without fully resolving (binding) the member access. At the same time, the fact of capturing a primary constructor parameter, changes properties of enclosing type in a way that affects semantic analysis. For example, the type might become unmanaged and fail certain constraints because of that. 
-There are even scenarios for which binding can succeed either way, depending on whether the parameter is considered captured, or not. For example:
+With respect to primary constructors, the rule affects whether an identifier within an instance member should be treated as a type reference, or as a primary constructor parameter reference, which, in turn, captures the parameter into the the state of the enclosing type. Even though "the member lookup of `E.I` is never ambiguous", when lookup yields a member group, in some cases it is impossible to determine whether a member access refers to a static member or an instance member without fully resolving (binding) the member access. At the same time, capturing a primary constructor parameter changes properties of enclosing type in a way that affects semantic analysis. For example, the type might become unmanaged and fail certain constraints because of that. 
+There are even scenarios for which binding can succeed either way, depending on whether the parameter is considered captured or not. For example:
 ``` C#
 struct S1(Color Color)
 {
@@ -208,19 +208,19 @@ class Color
 {
     public void M1<T>(T x, int y = 0)
     {
-        System.Console.WriteLine(""instance"");
+        System.Console.WriteLine("instance");
     }
     
     public static void M1<T>(T x) where T : unmanaged
     {
-        System.Console.WriteLine(""static"");
+        System.Console.WriteLine("static");
     }
 }
 ```
 
-If we treat receiver ```Color``` as a value, we capture the parameter and 'S1' becomes managed. Then static method becomes inapplicable due to constraint and we would call instance method. However, if we treat the receiver as a type, we don't capture the parameter and 'S1' remains unmanaged, then both methods are applicable, but the static method is "better" because it doesn't have an optional parameter. Neither choice leads to an error, but each would result in distinct behavior.
+If we treat receiver ```Color``` as a value, we capture the parameter and 'S1' becomes managed. Then the static method becomes inapplicable due to the constraint and we would call instance method. However, if we treat the receiver as a type, we don't capture the parameter and 'S1' remains unmanaged, then both methods are applicable, but the static method is "better" because it doesn't have an optional parameter. Neither choice leads to an error, but each would result in distinct behavior.
 
-Given this, compiler is going to produce an ambiguity error for a member access `E.I` when all the following conditions are met:
+Given this, compiler will produce an ambiguity error for a member access `E.I` when all the following conditions are met:
 - Member lookup of `E.I` yields a member group containing instance and static members at the same time. Extension methods applicable to the receiver type are treated as instance methods for the purpose of this check.
 - If `E` is treated as a simple name, rather than a type name, it would refer to a primary constructor parameter and would capture the parameter into the state of the enclosing type. 
 
