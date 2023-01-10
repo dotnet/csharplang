@@ -383,6 +383,34 @@ There are some problems:
   
 This is a potential future addition that can be adopted or not. The current proposal leaves the possibility open.
 
+## Open questions
+
+### Capturing instance of the enclosing type in a closure
+
+When a parameter captured into the state of the enclosing type is also referenced in a lambda inside an instance initializer or a base initializer, the lambda and the state of the enclosing type should refer to the same location for the parameter.
+For example:
+``` C#
+partial class C1
+{
+    public System.Func<int> F1 = Execute1(() => p1++);
+}
+
+partial class C1 (int p1)
+{
+    public int M1() { return p1++; }
+    static System.Func<int> Execute1(System.Func<int> f)
+    {
+        _ = f();
+        return f;
+    }
+}
+```
+Since naive implementation of capturing a parameter into the state of the type simply captures the parameter in a private instance field, the lambda needs to refer to the same field. As a result, it needs to be able to access the instance of the type. This requires capturing `this` into a closure before the base constructor is invoked. That, in turn, results in safe, but an unverifiable IL. Is this acceptable? 
+
+Alternatively we could:
+- Disallow lambdas like that;
+- Or, instead, capture parameters like that in an instance of a separate class (yet another closure), and share that instance between the closure and the instance of the enclosing type. Thus eliminating the need to capture `this` in a closure.
+
 ## LDM meetings
 
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
