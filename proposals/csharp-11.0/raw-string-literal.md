@@ -248,7 +248,7 @@ var v1 = """
          """
 ```
 
-This is because the start of the raw string must have a `new_line` (which is does) but the end must have a `new_line` as well (which it does not).  The minimal legal `raw_string_literal` is:
+This is because the start of the raw string must have a `new_line` (which it does) but the end must have a `new_line` as well (which it does not).  The minimal legal `raw_string_literal` is:
 
 ```
 var v1 = """
