@@ -6,8 +6,8 @@ Overview of meetings and agendas for 2022
 
 [C# Language Design Meeting for December 14th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-12-14.md)
 
-- [Breaking change for raw string literals](#breaking-change-for-raw-string-literals)
-- [Program as internal by default](#program-as-internal-by-default)
+- Breaking change for raw string literals
+- Program as internal by default
 
 ## Wed Nov 30, 2022
 
