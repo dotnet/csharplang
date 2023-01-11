@@ -28,17 +28,21 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Jan 18, 2023
 
-
-## Wed Jan 11, 2023
-
-- Compiler plan for language features (Jared)
-- Using aliases for any type (Cyrus): https://github.com/dotnet/csharplang/issues/4284
-## Mon Jan 9, 2023
-
-- Working groups check-in (Mads)
-
-
 # C# Language Design Notes for 2023
 
 Overview of meetings and agendas for 2023
 
+## Wed Jan 11, 2023
+
+[C# Language Design Meeting for January 11th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-01-11.md)
+
+- `using` aliases for any types
+    - Pointer types in aliases
+    - Reference nullability in aliases
+    - Value nullability in aliases
+
+## Mon Jan 9, 2023
+
+[C# Language Design Meeting for January 9th, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-01-09.md)
+
+- Working group re-evaluation
