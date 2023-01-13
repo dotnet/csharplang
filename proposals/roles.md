@@ -91,9 +91,9 @@ We modify the [simple names rules](https://github.com/dotnet/csharpstandard/blob
 
 The *simple_name* with identifier `I` is evaluated and classified as follows:
 - ... the *simple_name* refers to that local variable, parameter or constant.
-- ... the *simple_name* refers to that type parameter.
+- ... the *simple_name* refers to that [generic method declaration's] type parameter.
 - Otherwise, for each instance type `T`, starting with the instance type of the immediately enclosing type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):
-  - ... the *simple_name* refers to that type parameter.
+  - ... the *simple_name* refers to that [type declaration's] type parameter.
   - Otherwise, if a member lookup of `I` in `T` with `e` type arguments produces a match:
     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method.
     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor, the result is the same as a member access of the form `this.I`. This can only happen when `e` is zero.
@@ -143,13 +143,23 @@ An extension type `X` is compatible with given type `U` if:
 - a possible type substitution on the type parameters of `X` yields underlying type `U`. We call the resulting substituted type `X` the "compatible substituted extension type"
 
 We process as follows (TODO more details needed):
-- First, gather compatible extension types for given underlying type `U`
-  - For each enclosing namespace declaration and their using-namespace directives, we gather compatible substituted extension types
-- Next, perform member lookup for `I` in each compatible substituted extension type `X`
+- Starting with the closest enclosing namespace declaration, continuing with each enclosing namespace declaration, and ending with the containing compilation unit, successive attempts are made to find a candidate set of extension members:
+  - If the given namespace or compilation unit directly contains extension types, those will be considered first.
+  - If namespaces imported by using-namespace directives in the given namespace or compilation unit directly contain extension types, those will be considered second.
+- Check which extension types are compatible with the given underlying type `U` and collect resulting compatible substituted extension types.
+- Perform member lookup for `I` in each compatible substituted extension type `X`
 - Merge the results
+- If the set is empty, proceed to the next enclosing namespace
+- If the set consists of a single member that is not a method, then this member is the result of the lookup.
+- Otherwise, if the set contains only methods, then this group of methods is the result of the lookup.
+- Otherwise, the lookup is ambiguous, and a binding-time error occurs.
+- If no candidate set is found in any enclosing namespace declaration or compilation unit, the result of the lookup is empty.
+
+The preceding rules mean that extension members available in inner namespace declarations take precedence over extension members available in outer namespace declarations,
+and that extension members declared directly in a namespace take precedence over extension members imported into that same namespace with a using namespace directive.
 
 ## B. Roles and extensions with members
 TODO: when we get to instance scenarios, the simple names rules above will find `object.ToString()` for `ToString()` in instance extension method, rather than `U.ToString()`. Can we improve on that?
 
-## B. Roles and extensions that implement interfaces
+## C. Roles and extensions that implement interfaces
 
