@@ -224,6 +224,15 @@ Given this, compiler will produce an ambiguity error for a member access `E.I` w
 - Member lookup of `E.I` yields a member group containing instance and static members at the same time. Extension methods applicable to the receiver type are treated as instance methods for the purpose of this check.
 - If `E` is treated as a simple name, rather than a type name, it would refer to a primary constructor parameter and would capture the parameter into the state of the enclosing type. 
 
+### Double storage warning
+
+If a primary constructor parameter is passed to the base and *also* captured, there's a high risk that it is inadvertently stored twice in the object. 
+
+Compiler will produce a warning for `in` or by value argument in a `class_base` `argument_list` when all the following conditions are true:
+- The argument represents an implicit or explicit identity conversion of a primary constructor parameter;
+- The argument is not part of an expanded `params` argument;
+- The primary constructor parameter is captured into the state of the enclosing type.
+
 ## Primary constructors on records
 
 With this proposal, records no longer need to separately specify a primary constructor mechanism. Instead, record (class and struct) declarations that have primary constructors would follow the general rules, with these simple additions:
@@ -336,10 +345,6 @@ public class C(bool b, int i, string s) : B(b)
     }
 }
 ```
-
-### Double storage warning
-
-If a primary constructor parameter is passed to the base and *also* captured, there's a high risk that it is inadvertently stored twice in the object. It might make sense to issue a warning about this, if we can settle on good conditions for the warning, as well as recommended ways to shut it up if the code was intentional.
 
 ### Primary constructor bodies
 
