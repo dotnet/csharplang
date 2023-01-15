@@ -50,4 +50,8 @@ A new [unsafe context](https://github.com/dotnet/csharpstandard/blob/standard-v6
 unsafe_using_alias_directive
 +    : 'using' 'unsafe' identifier '=' type ';'
     ;
+
++ the 'unsafe' modifier specified in the alias declaration causes the entire textual extent of the 'type' portion to become an unsafe context. 
 ```
+
+
