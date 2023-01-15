@@ -51,7 +51,9 @@ unsafe_using_alias_directive
 +    : 'using' 'unsafe' identifier '=' type ';'
     ;
 
-+ the 'unsafe' modifier specified in the alias declaration causes the entire textual extent of the 'type' portion to become an unsafe context. 
++ The 'unsafe' modifier specified in the alias declaration causes the entire textual extent of the 'type' portion to become an unsafe context. 
++ 'unsafe' cannot be used with a 'using static' declaration. 
++ 'unsafe' can only be used with an using_alias_directive, not a using_directive.
 ```
 
 
