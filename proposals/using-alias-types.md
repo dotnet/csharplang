@@ -38,20 +38,17 @@ The sections that do need updating are:
 + The namespace_name referenced by a using_namespace_directive is resolved in the same way as the namespace_or_type_name referenced by a using_alias_directive. Thus, using_namespace_directives in the same compilation unit or namespace body do not affect each other and can be written in any order.
 ```
 
-
-## Design meeting open questions.
-
-This section needs to be resolved in a design meeting.
-
-The intent of this specification is to allow one to write something like:
-
-```
-using MyPointer = My*;
+```diff
++ It is illegal for a using alias type to be a nullable reference type.  e.g. `using X = string?;` is not legal.
 ```
 
-The spec is currently unclear if this would be ok or not.  Technically, the `using_alias_directive` here is not in an `unsafe` context, so the `My*` could be considered an error.  However, the spirit of this specification is that should be allowed, and only the *usages* of `MyPointer` would themselves have to either be in another `using_alias_directive` or in an `unsafe` context.  Another way this could be formalized is that the `(namespace_name | type)` portion of a `using_alias_directive` would always be an `unsafe` context, but that wouldn't negate the fact that any place that alias was referenced would also need to be an `unsafe` context.
+# Supporting aliases to types containing pointers.
 
+A new [unsafe context](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#222-unsafe-contexts) is added 
 
---
-
-Similarly what should be done about `using NullablePerson = Person?; // Person is a reference type`?  My intuition is that this is fine (though should only be legal if the *using* is in a `#nullable enable` section).  The meaning of `NullablePerson` in all reference locations is `Person?` (even if that location is `#nullable disable`).  However, depending on the nullability region where it is referenced you may or may not get nullable warnings around it.
+```diff
+unsafe_using_alias_directive
+using_alias_directive
++    : 'using' 'unsafe' identifier '=' type ';'
+    ;
+```
