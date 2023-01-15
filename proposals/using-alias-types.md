@@ -48,7 +48,6 @@ A new [unsafe context](https://github.com/dotnet/csharpstandard/blob/standard-v6
 
 ```diff
 unsafe_using_alias_directive
-using_alias_directive
 +    : 'using' 'unsafe' identifier '=' type ';'
     ;
 ```
