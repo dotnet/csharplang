@@ -54,7 +54,8 @@ The permitted modifiers are `partial`, `unsafe` and the accessibility modifiers 
 Note that `static` is disallowed.  
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
 The **role_underlying_type** type may not be `dynamic`, a pointer or an extension type.  
-This declares a static class type. It inherits from type `object`. It has `internal` declared accessibility by default.  
+The **role_underlying_type** must include all the type parameters from the extension type.  
+This declares a class type. It inherits from type `object`. It has `internal` declared accessibility by default.  
 TODO: attributes?
 TODO: emitted name?
 
