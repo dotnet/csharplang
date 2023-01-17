@@ -50,6 +50,10 @@ The sections that do need updating are:
 A new [unsafe context](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#222-unsafe-contexts) is added 
 
 ```diff
+using_directive
++    : unsafe_using_alias_directive
+    ;
+
 unsafe_using_alias_directive
 +    : 'using' 'unsafe' identifier '=' type ';'
     ;
