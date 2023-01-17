@@ -47,15 +47,11 @@ The sections that do need updating are:
 
 # Supporting aliases to types containing pointers.
 
-A new [unsafe context](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#222-unsafe-contexts) is added 
+A new [unsafe context](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#222-unsafe-contexts) is added through an optional 'unsafe' modifier in the using_alias_directive production:
 
 ```diff
-using_directive
-+    : unsafe_using_alias_directive
-    ;
-
-unsafe_using_alias_directive
-+    : 'using' 'unsafe' identifier '=' type ';'
+using_alias_directive
++    : 'using' 'unsafe'? identifier '=' (namespace_name | type) ';'
     ;
 
 + The 'unsafe' modifier specified in the alias declaration causes the entire textual extent of the 'type' portion to become an unsafe context. 
