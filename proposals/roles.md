@@ -9,10 +9,10 @@ The syntax for a roles is as follows:
 
 ```antr
 type_declaration
-	: role_declaration // add
-	| extension_declaration // add
-	| ...
-	;
+    : role_declaration // add
+    | extension_declaration // add
+    | ...
+    ;
 
 role_declaration
     : modifier* 'role' identifier type_parameter_list? role_underlying_type type_parameter_constraints_clause* role_body
@@ -50,11 +50,11 @@ TODO: events?
 
 ### General
 
-The permitted modifiers are `partial`, `static`, `unsafe` and the accessibility modifiers `public` and `internal`.  
-An extension declaration must have a `static` modifier. If the declaration is partial, then at least one part must have the `static` modifier. 
-The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).
+The permitted modifiers are `partial`, `unsafe` and the accessibility modifiers `public` and `internal`.  
+Note that `static` is disallowed.  
+The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
 The **role_underlying_type** type may not be `dynamic`, a pointer or an extension type.  
-This declares a static class type. It inherits from type `object`. It has `internal` declared accessibility by default.
+This declares a static class type. It inherits from type `object`. It has `internal` declared accessibility by default.  
 TODO: attributes?
 TODO: emitted name?
 
