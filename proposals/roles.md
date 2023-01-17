@@ -54,9 +54,10 @@ TODO: events?
 The permitted modifiers on an extension type are `partial`, `unsafe` and the accessibility modifiers `public` and `internal`.  
 Note that `static` is disallowed.  
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
-The **role_underlying_type** type may not be `dynamic`, an interface, a pointer or an extension type.  
-The **role_underlying_type** must include all the type parameters from the extension type.  
-This declares a class type. It inherits from type `object`. It has `internal` declared accessibility by default.  
+The **role_underlying_type** type may not be `dynamic`, an interface, a pointer, a nullable reference, or an extension type.  
+The **role_underlying_type** type must include all the type parameters from the extension type.  
+The **role_underlying_type** may not include an **interface_type_list** (this is part of Phase C).
+This declares a class type (TODO). It inherits from type `object`. It has `internal` declared accessibility by default.  
 TODO: attributes?
 TODO: emitted name?
 
