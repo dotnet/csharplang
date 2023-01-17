@@ -39,7 +39,10 @@ The sections that do need updating are:
 ```
 
 ```diff
-+ It is illegal for a using alias type to be a nullable reference type.  e.g. `using X = string?;` is not legal.
++ It is illegal for a using alias type to be a nullable reference type.
+
+    1. `using X = string?;` is not legal.
+    2. `using X = List<string?>;` is legal.  The alias is to `List<...>` which is itself not a nullable reference type itself, even though it contains one as a type argument.
 ```
 
 # Supporting aliases to types containing pointers.
