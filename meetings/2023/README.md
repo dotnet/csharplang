@@ -28,7 +28,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Jan 18, 2023
 
-- Nullable postconditions for async methods (Rikki)
+- Nullable postconditions for async methods (Rikki): https://github.com/dotnet/csharplang/issues/6888
 - Semicolon class bodies with (and without?) primary constructors? (Aleksey): https://github.com/dotnet/csharplang/discussions/6871
 
 # C# Language Design Notes for 2023
