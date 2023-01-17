@@ -7,7 +7,7 @@ C. roles and extensions that implement interfaces
 
 The syntax for a roles is as follows:
 
-```antr
+```antlr
 type_declaration
     : role_declaration // add
     | extension_declaration // add
@@ -24,6 +24,7 @@ extension_declaration
 
 role_underlying_type
     : ':' type
+    : ':' type ',' interface_type_list
     ;
 
 role_body
@@ -48,22 +49,23 @@ In this first subset of the feature, the syntax is restricted to non-nested **ex
 and containing only **constant_declaration**, **field_declaration**, **method_declaration** and **property_declaration** members.
 TODO: events?
 
-### General
+### Extension type
 
-The permitted modifiers are `partial`, `unsafe` and the accessibility modifiers `public` and `internal`.  
+The permitted modifiers on an extension type are `partial`, `unsafe` and the accessibility modifiers `public` and `internal`.  
 Note that `static` is disallowed.  
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
-The **role_underlying_type** type may not be `dynamic`, a pointer or an extension type.  
+The **role_underlying_type** type may not be `dynamic`, an interface, a pointer or an extension type.  
 The **role_underlying_type** must include all the type parameters from the extension type.  
 This declares a class type. It inherits from type `object`. It has `internal` declared accessibility by default.  
 TODO: attributes?
 TODO: emitted name?
 
-### Members
+### Extension type members
 
 The extension type members may not use the `new` modifier.
 Accessibility modifiers including `protected` are disallowed.
-The extension type does not inherit members from its underlying type.  
+The extension type does not **inherit** members from its underlying type (which may be `sealed` or a struct), but
+the lookup rules are modified to achieve a similar effect (see below).  
 
 #### Constants
 
@@ -79,7 +81,7 @@ Otherwise, existing [rules for fields](https://github.com/dotnet/csharpstandard/
 A **method_declaration** in an **extension_declaration** shall explicitly include a `static` modifier.  
 Parameters with the `this` modifier are disallowed.
 Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
-In particular, a static method does not operate on a specific instance, and it is a compile-time error to refer to this in a static method.
+In particular, a static method does not operate on a specific instance, and it is a compile-time error to refer to `this` in a static method.
 
 #### Properties
 
