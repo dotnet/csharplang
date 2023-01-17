@@ -43,6 +43,7 @@ The sections that do need updating are:
 
     1. `using X = string?;` is not legal.
     2. `using X = List<string?>;` is legal.  The alias is to `List<...>` which is itself not a nullable reference type itself, even though it contains one as a type argument.
+    3. `using X = int?;` is legal.  This is a nullable *value* type, not a nullable *reference* type.
 ```
 
 # Supporting aliases to types containing pointers.
