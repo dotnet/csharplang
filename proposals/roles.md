@@ -45,19 +45,20 @@ role_member_declaration
 
 ## Phase A: Adding static constants, fields, methods and properties
 
-In this first subset of the feature, the syntax is restricted to non-nested **extension_declaration**
-and containing only **constant_declaration**, **field_declaration**, **method_declaration** and **property_declaration** members.
+In this first subset of the feature, the syntax is restricted to **extension_declaration**
+and containing only **constant_declaration** members and static **field_declaration**, **method_declaration** and **property_declaration** members.
 TODO: events?
 
 ### Extension type
 
+An extension type is declared by a non-nested **extension_declaration**.  
 The permitted modifiers on an extension type are `partial`, `unsafe` and the accessibility modifiers `public` and `internal`.  
 Note that `static` is disallowed.  
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
-The **role_underlying_type** type may not be `dynamic`, an interface, a pointer, a nullable reference, or an extension type.  
+The **role_underlying_type** type may not be `dynamic`, a pointer, a nullable reference, or an extension type.  
 The **role_underlying_type** type must include all the type parameters from the extension type.  
 The **role_underlying_type** may not include an **interface_type_list** (this is part of Phase C).
-This declares a class type (TODO). It inherits from type `object`. It has `internal` declared accessibility by default.  
+This declares a ref struct type. It inherits from type `System.ValueType`. It has `internal` declared accessibility by default.  
 TODO: attributes?
 TODO: emitted name?
 
@@ -67,6 +68,7 @@ The extension type members may not use the `new` modifier.
 Accessibility modifiers including `protected` are disallowed.
 The extension type does not **inherit** members from its underlying type (which may be `sealed` or a struct), but
 the lookup rules are modified to achieve a similar effect (see below).  
+TODO how do we emit the relationship to underlying type?
 
 #### Constants
 
@@ -104,7 +106,7 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
     - Otherwise, the result is the same as a member access of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
   - **Otherwise, if `T` is not an extension type and an ***extension member lookup*** of `I` for underlying type `T` with `e` type arguments produces a match:**
     ...
-  - **Otherwise, if `T` is an extension type and a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**
+  - **Otherwise, if `T` is a role (only relevant in phase B) or extension type and a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**
     ...
 - Otherwise, for each namespace `N`, starting with the namespace in which the *simple_name* occurs, continuing with each enclosing namespace (if any), and ending with the global namespace, the following steps are evaluated until an entity is located:
   ...
@@ -130,13 +132,19 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
   - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
-- **Otherwise, if `E` is classified as a type, if `E` is not a type parameter or an extension type, and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:**  
+- **If `E` is classified as a type, if `E` is not a type parameter or an extension type, and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:**  
   ...
-- **Otherwise, if `E` is classified as an extension type, and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:** 
+- **If `E` is classified as a role (only relevant in phase B) or extension type, and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:** 
   ...
 - If `E` is a property access, indexer access, variable, or value, the type of which is `T`, and a member lookup of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:
   ...
+- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is not a type parameter or a role type, and an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**
+  ...
+- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is a role or extension type, and a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**
+  ...
 - Otherwise, an attempt is made to process `E.I` as an extension method invocation. If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
+
+TODO one downside of this approach is that we stop once a method with proper name is found, even if it will be applicable. We could tweak the above rules (member access and simple names) by separating invocations. 
 
 ### Extension member lookup
 
@@ -151,7 +159,7 @@ We process as follows (TODO more details needed):
   - If the given namespace or compilation unit directly contains extension types, those will be considered first.
   - If namespaces imported by using-namespace directives in the given namespace or compilation unit directly contain extension types, those will be considered second.
 - Check which extension types are compatible with the given underlying type `U` and collect resulting compatible substituted extension types.
-- Perform member lookup for `I` in each compatible substituted extension type `X`
+- Perform member lookup for `I` in each compatible substituted extension type `X` (note this takes into account whether the member is invoked).
 - Merge the results
 - If the set is empty, proceed to the next enclosing namespace
 - If the set consists of a single member that is not a method, then this member is the result of the lookup.
@@ -163,7 +171,43 @@ The preceding rules mean that extension members available in inner namespace dec
 and that extension members declared directly in a namespace take precedence over extension members imported into that same namespace with a using namespace directive.
 
 ## B. Roles and extensions with members
-TODO: when we get to instance scenarios, the simple names rules above will find `object.ToString()` for `ToString()` in instance extension method, rather than `U.ToString()`. Can we improve on that?
+
+In this second subset of the feature, the **role_declaration** becomes allowed
+and non-static members become allowed.
+
+### Role type
+
+A role type is declared by a non-nested **role_declaration**.  
+The permitted modifiers on an extension type are `partial`, `unsafe` and the accessibility modifiers `public` and `internal`.  
+Note that `static` is disallowed.  
+The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
+The **role_underlying_type** type may not be `dynamic`, a pointer, a nullable reference, a role (TODO), or an extension type.  
+
+### Role and extension type members
+
+The restrictions on modifiers from phase A remain (`new` and `protected` disallowed).  
+Non-static members become allowed in phase B.  
+
+#### Lookup rules
+
+The simple names and member access rules from phase A section (above) take full effect, as role types now exist and  
+extension types may have non-static members.  
+TODO: the simple names rules find `object.ToString()` for `ToString()` in instance extension method, rather than `U.ToString()`. Can we improve on that?
+
+#### Fields
+
+A **field_declaration** in a **role_declaration** or **extension_declaration** shall explicitly include a `static` modifier.  
+
+#### Methods
+
+TODO
+Non-static methods are emitted as static methods with an additional parameter with the type underlying the role or extension.  
+TODO What if I have a static method `void M(UnderlyingType x)` and a non-static method `void M()`. How do avoid conflict in metadata? How do we avoid confusion in invocation?
+
+#### Instance invocations
+
+TODO
+An additional argument is passed in.
 
 ## C. Roles and extensions that implement interfaces
 
