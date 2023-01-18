@@ -15,11 +15,11 @@ type_declaration
     ;
 
 role_declaration
-    : modifier* 'role' identifier type_parameter_list? role_underlying_type type_parameter_constraints_clause* role_body
+    : modifier* 'role' identifier type_parameter_list? role_underlying_type? type_parameter_constraints_clause* role_body
     ;
 
 extension_declaration
-    : modifier* 'extension' identifier type_parameter_list? role_underlying_type type_parameter_constraints_clause* role_body
+    : modifier* 'extension' identifier type_parameter_list? role_underlying_type? type_parameter_constraints_clause* role_body
     ;
 
 role_underlying_type
@@ -57,8 +57,11 @@ Note that `static` is disallowed.
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
 The **role_underlying_type** type may not be `dynamic`, a pointer, a nullable reference, or an extension type.  
 The **role_underlying_type** type must include all the type parameters from the extension type.  
-The **role_underlying_type** may not include an **interface_type_list** (this is part of Phase C).
-This declares a ref struct type. It inherits from type `System.ValueType`. It has `internal` declared accessibility by default.  
+The **role_underlying_type** may not include an **interface_type_list** (this is part of Phase C).  
+An extension declaration must include an underlying type, unless it is partial. It is a compile-time error if no part of a partial extension type includes an underlying type, or the underlying type from differs amongst all the parts.  
+When a partial extension declaration includes an accessibility specification, that specification shall agree with all other parts that include an accessibility specification. If no part of a partial extension includes an accessibility specification, the type is given the appropriate default accessibility (`internal`).
+The underlying type of an extension type shall be at least as accessible as the extension type itself.  
+This declares a ref struct type. It inherits from type `System.ValueType`.
 TODO: attributes?
 TODO: emitted name?
 
@@ -178,10 +181,7 @@ and non-static members become allowed.
 ### Role type
 
 A role type is declared by a non-nested **role_declaration**.  
-The permitted modifiers on an extension type are `partial`, `unsafe` and the accessibility modifiers `public` and `internal`.  
-Note that `static` is disallowed.  
-The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
-The **role_underlying_type** type may not be `dynamic`, a pointer, a nullable reference, a role (TODO), or an extension type.  
+The above rules from extension types apply, namely the permitted modifiers and rules on underlying type.
 
 ### Role and extension type members
 
