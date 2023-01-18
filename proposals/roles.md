@@ -94,7 +94,13 @@ In particular, a static method does not operate on a specific instance, and it i
 A **property_declaration** in an **extension_declaration** shall explicitly include a `static` modifier.  
 Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
 
-### Simple names
+### Lookup rules
+
+If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression*, the member is said to be invoked.
+
+TODO do we need to include indexer access and operator invocation?
+
+#### Simple names
 
 We modify the [simple names rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1174-simple-names) as follows:
 
@@ -107,7 +113,7 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method.
     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor, the result is the same as a member access of the form `this.I`. This can only happen when `e` is zero.
     - Otherwise, the result is the same as a member access of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
-  - **Otherwise, if `T` is not an extension type and an ***extension member lookup*** of `I` for underlying type `T` with `e` type arguments produces a match:**
+  - **Otherwise, if `T` is not an extension type, the member is not invoked, and an ***extension member lookup*** of `I` for underlying type `T` with `e` type arguments produces a match:**
     ...
   - **Otherwise, if `T` is a role (only relevant in phase B) or extension type and a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**
     ...
@@ -115,7 +121,9 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
   ...
 - Otherwise, the simple_name is undefined and a compile-time error occurs.
 
-### Member access 
+TODO Note we're not including invocations of extension methods.
+
+#### Member access
 
 We modify the [member access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access) as follows:
 
@@ -135,27 +143,31 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
   - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
-- **If `E` is classified as a type, if `E` is not a type parameter or an extension type, and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:**  
+- **If `E` is classified as a type, if `E` is not a type parameter or an extension type, if the member is not invoked, and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:**  
   ...
 - **If `E` is classified as a role (only relevant in phase B) or extension type, and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:** 
   ...
 - If `E` is a property access, indexer access, variable, or value, the type of which is `T`, and a member lookup of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:
   ...
-- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is not a type parameter or a role type, and an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**
+- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is not a type parameter or a role type, if the member is not invoked, and an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**
   ...
 - **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is a role or extension type, and a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**
   ...
 - Otherwise, an attempt is made to process `E.I` as an extension method invocation. If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
+TODO add support for invoking extension methods
+
 TODO one downside of this approach is that we stop once a method with proper name is found, even if it will be applicable. We could tweak the above rules (member access and simple names) by separating invocations. 
 
-### Extension member lookup
-
-Given an underlying type `U` and an identifier `I`, the objective is to find an extension member `X.I`, if possible.
+#### Compatible substituted extension type
 
 An extension type `X` is compatible with given type `U` if:
 - `X` is non-generic and its underlying type is `U`
-- a possible type substitution on the type parameters of `X` yields underlying type `U`. We call the resulting substituted type `X` the "compatible substituted extension type"
+- a possible type substitution on the type parameters of `X` yields underlying type `U`. Such substitution is unique. We call the resulting substituted type `X` the "compatible substituted extension type"
+
+#### Extension member lookup
+
+Given an underlying type `U` and an identifier `I`, the objective is to find an extension member `X.I`, if possible.
 
 We process as follows (TODO more details needed):
 - Starting with the closest enclosing namespace declaration, continuing with each enclosing namespace declaration, and ending with the containing compilation unit, successive attempts are made to find a candidate set of extension members:
@@ -188,11 +200,15 @@ The above rules from extension types apply, namely the permitted modifiers and r
 The restrictions on modifiers from phase A remain (`new` and `protected` disallowed).  
 Non-static members become allowed in phase B.  
 
-#### Lookup rules
+### Lookup rules
 
 The simple names and member access rules from phase A section (above) take full effect, as role types now exist and  
 extension types may have non-static members.  
 TODO: the simple names rules find `object.ToString()` for `ToString()` in instance extension method, rather than `U.ToString()`. Can we improve on that?
+
+#### Operators
+
+TODO
 
 #### Fields
 
