@@ -3,7 +3,7 @@
 ## Summary
 [summary]: #summary
 
-Pattern matching extensions for C# enable many of the benefits of algebraic data types and pattern matching from functional languages, but in a way that smoothly integrates with the feel of the underlying language. The basic features are: [record types](https://github.com/dotnet/csharplang/proposals/records.md), which are types whose semantic meaning is described by the shape of the data; and pattern matching, which is a new expression form that enables extremely concise multilevel decomposition of these data types. Elements of this approach are inspired by related features in the programming languages [F#](http://www.msr-waypoint.net/pubs/79947/p29-syme.pdf "Extensible Pattern Matching Via a Lightweight Language") and [Scala](https://link.springer.com/content/pdf/10.1007%2F978-3-540-73589-2.pdf "Matching Objects With Patterns, page 273").
+Pattern matching extensions for C# enable many of the benefits of algebraic data types and pattern matching from functional languages, but in a way that smoothly integrates with the feel of the underlying language. Elements of this approach are inspired by related features in the programming languages [F#](https://www.microsoft.com/research/wp-content/uploads/2016/02/p29-syme.pdf "Extensible Pattern Matching Via a Lightweight Language") and [Scala](https://link.springer.com/content/pdf/10.1007%2F978-3-540-73589-2.pdf "Matching Objects With Patterns, page 273").
 
 ## Detailed design
 [design]: #detailed-design
@@ -44,7 +44,7 @@ declaration_pattern
     : type simple_designation
     ;
 constant_pattern
-    : expression
+    : constant_expression
     ;
 var_pattern
     : 'var' designation
@@ -61,7 +61,8 @@ subpattern
     | identifier ':' pattern
     ;
 property_subpattern
-    : '{' subpatterns? '}'
+    : '{' '}'
+    | '{' subpatterns ','? '}'
     ;
 property_pattern
     : type? property_subpattern simple_designation?
@@ -158,7 +159,7 @@ designations
 
 If the *designation* is a *simple_designation*, an expression *e* matches the pattern. In other words, a match to a *var pattern* always succeeds with a *simple_designation*. If the *simple_designation* is a *single_variable_designation*, the value of *e* is bounds to a newly introduced local variable. The type of the local variable is the static type of *e*.
 
-If the *designation* is a *tuple_designation*, then the pattern is equivalent to a *positional_pattern* of the form `(var ` *designation*, ... `)` where the *designation*s are those found within the *tuple_designation*.  For example, the pattern `var (x, (y, z))` is equivalent to `(var x, (var y, var z))`.
+If the *designation* is a *tuple_designation*, then the pattern is equivalent to a *positional_pattern* of the form `(var` *designation*, ... `)` where the *designation*s are those found within the *tuple_designation*.  For example, the pattern `var (x, (y, z))` is equivalent to `(var x, (var y, var z))`.
 
 It is an error if the name `var` binds to a type.
 
@@ -263,36 +264,41 @@ A *switch_expression* is added to support `switch`-like semantics for an express
 The C# language syntax is augmented with the following syntactic productions:
 
 ```antlr
-relational_expression
+multiplicative_expression
     : switch_expression
+    | multiplicative_expression '*' switch_expression
+    | multiplicative_expression '/' switch_expression
+    | multiplicative_expression '%' switch_expression
     ;
 switch_expression
-    : relational_expression 'switch' '{' '}'
-    | relational_expression 'switch' '{' switch_expression_arms ','? '}'
+    : range_expression 'switch' '{' '}'
+    | range_expression 'switch' '{' switch_expression_arms ','? '}'
     ;
 switch_expression_arms
     : switch_expression_arm
     | switch_expression_arms ',' switch_expression_arm
     ;
 switch_expression_arm
-    : pattern case_guard? '=>' null_coalescing_expression
+    : pattern case_guard? '=>' expression
     ;
 case_guard
     : 'when' null_coalescing_expression
     ;
 ```
 
-The *switch_expression* is not allowed as an *expression_statement*.
+The *switch_expression* is not permitted as an *expression_statement*.
 
 > We are looking at relaxing this in a future revision.
 
-The type of the *switch_expression* is the *best common type* of the expressions appearing to the right of the `=>` tokens of the *switch_expression_arm*s.
+The type of the *switch_expression* is the *best common type* ([§11.6.3.15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions)) of the expressions appearing to the right of the `=>` tokens of the *switch_expression_arm*s if such a type exists and the expression in every arm of the switch expression can be implicitly converted to that type.  In addition, we add a new *switch expression conversion*, which is a predefined implicit conversion from a switch expression to every type `T` for which there exists an implicit conversion from each arm's expression to `T`.
 
-It is an error if the compiler proves (using a set of techniques that has not yet been specified) that some *switch_expression_arm*'s pattern cannot affect the result because some previous pattern will always match. The compiler shall produce a warning if it proves (using those techniques) that some possible input value might not match some *switch_expression_arm* at runtime.
+It is an error if some *switch_expression_arm*'s pattern cannot affect the result because some previous pattern and guard will always match.
+
+A switch expression is said to be *exhaustive* if some arm of the switch expression handles every value of its input.  The compiler shall produce a warning if a switch expression is not *exhaustive*.
 
 At runtime, the result of the *switch_expression* is the value of the *expression* of the first *switch_expression_arm* for which the expression on the left-hand-side of the *switch_expression* matches the *switch_expression_arm*'s pattern, and for which the *case_guard* of the *switch_expression_arm*, if present, evaluates to `true`. If there is no such *switch_expression_arm*, the *switch_expression* throws an instance of the exception `System.Runtime.CompilerServices.SwitchExpressionException`.
 
-### Optional parens which switching on a tuple literal
+### Optional parens when switching on a tuple literal
 
 In order to switch on a tuple literal using the *switch_statement*, you have to write what appear to be redundant parens
 
@@ -323,5 +329,3 @@ The compilation of pattern matching can take advantage of common parts of patter
 When some of the patterns are integers or strings, the compiler can generate the same kind of code it generates for a switch-statement in earlier versions of the language.
 
 For more on these kinds of optimizations, see [[Scott and Ramsey (2000)]](https://www.cs.tufts.edu/~nr/cs257/archive/norman-ramsey/match.pdf "When Do Match-Compilation Heuristics Matter?").
-
-It would be possible to support declaring a type hierarchy closed, meaning that all subtypes of the given type are declared in the same assembly. In that case the compiler can generate an internal tag field to distinguish among the different subtypes and reduce the number of type tests required at runtime. Closed hierarchies enable the compiler to detect when a set of matches are complete. It is also possible to provide a slightly weaker form of this optimization while allowing the hierarchy to be open.

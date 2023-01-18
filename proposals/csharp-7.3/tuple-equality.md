@@ -17,7 +17,7 @@ This proposal adds a tuple case between (1) and (2): if both operands of a compa
 
 Both operands (and, in the case of tuple literals, their elements) are evaluated in order from left to right. Each pair of elements is then used as operands to bind the operator `==` (or `!=`), recursively. Any elements with compile-time type `dynamic` cause an error. The results of those element-wise comparisons are used as operands in a chain of conditional AND (or OR) operators.
 
-For instance, in the context of `(int, (int, int)) t1, t2;`, `t1 == (1, (2, 3))` would evaluate as `temp1.Item1 == temp2.Item1 && temp1.Item2.Item1 == temp2.Item2.Item1 && temp2.Item2.Item2 == temp2.Item2.Item2`.
+For instance, in the context of `(int, (int, int)) t1, t2;`, `t1 == (1, (2, 3))` would evaluate as `temp1.Item1 == temp2.Item1 && temp1.Item2.Item1 == temp2.Item2.Item1 && temp1.Item2.Item2 == temp2.Item2.Item2`.
 
 When a tuple literal is used as operand (on either side), it receives a converted tuple type formed by the element-wise conversions which are introduced when binding the operator `==` (or `!=`) element-wise. 
 
@@ -41,9 +41,9 @@ If an element-wise comparison returns some other non-bool type in a tuple equali
 - if the non-bool type converts to `bool`, we apply that conversion,
 - if there is no such conversion, but the type has an operator `false`, we'll use that and negate the result.
 
-In a tuple inequality, the same rules apply except that we'll use the operator `true` (without negation) instead of the operator `true`.
+In a tuple inequality, the same rules apply except that we'll use the operator `true` (without negation) instead of the operator `false`.
 
-Those rules are similar the rules involved for using a non-bool type in an `if` statement and some other existing contexts.
+Those rules are similar to the rules involved for using a non-bool type in an `if` statement and some other existing contexts.
 
 ## Evaluation order and special cases
 The left-hand-side value is evaluated first, then the right-hand-side value, then the element-wise comparisons from left to right (including conversions, and with early exit based on existing rules for conditional AND/OR operators).
@@ -73,5 +73,5 @@ If someone wrote their own `ValueTuple` types with  an implementation of the com
 
 ----
 
-Relates to [relational and type testing operators](../../spec/expressions.md#relational-and-type-testing-operators)
+Relates to relational and type testing operators ([§11.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1111-relational-and-type-testing-operators))
 Relates to [#190](https://github.com/dotnet/csharplang/issues/190)

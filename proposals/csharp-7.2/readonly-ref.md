@@ -1,10 +1,5 @@
 # Readonly references
 
-* [x] Proposed
-* [x] Prototype
-* [x] Implementation: Started
-* [ ] Specification: Not Started
-
 ## Summary
 [summary]: #summary
 
@@ -24,7 +19,7 @@ Here I just want to acknowledge that the idea by itself is not very new.
 ### Motivation
 
 Prior to this feature C# did not have an efficient way of expressing a desire to pass struct variables into method calls for readonly purposes with no intention of modifying. Regular by-value argument passing implies copying, which adds unnecessary costs.  That drives users to use by-ref argument passing and rely on comments/documentation to indicate that the data is not supposed to be mutated by the callee. It is not a good solution for many reasons.  
-The examples are numerous - vector/matrix math operators in graphics libraries like [XNA](https://msdn.microsoft.com/en-us/library/bb194944.aspx) are known to have ref operands purely because of performance considerations. There is code in Roslyn compiler itself that uses structs to avoid allocations and then passes them by reference to avoid copying costs.
+The examples are numerous - vector/matrix math operators in graphics libraries like [XNA](https://msdn.microsoft.com/library/bb194944.aspx) are known to have ref operands purely because of performance considerations. There is code in Roslyn compiler itself that uses structs to avoid allocations and then passes them by reference to avoid copying costs.
 
 ### Solution (`in` parameters)
 
@@ -258,7 +253,7 @@ The life time of the argument temporaries matches the closest encompassing scope
 The formal life time of temporary variables is semantically significant in scenarios involving escape analysis of variables returned by reference.
 
 ### Metadata representation of `in` parameters.
-When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a byref parameter, it means that the the parameter is an `in` parameter.
+When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a byref parameter, it means that the parameter is an `in` parameter.
 
 In addition, if the method is *abstract* or *virtual*, then the signature of such parameters (and only such parameters) must have `modreq[System.Runtime.InteropServices.InAttribute]`.
 
@@ -332,7 +327,7 @@ struct ImmutableArray<T>
     public ref readonly T ItemRef(int i)
     {
         // returning a readonly reference to an array element
-        return ref this.r1;
+        return ref this.array[i];
     }
 }
 
@@ -442,7 +437,7 @@ readonly struct Vector3
 **Motivation:** consequence of restriction on instance fields.
 
 ### Metadata representation.
-When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a value type, it means that the the type is a `readonly struct`.
+When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to a value type, it means that the type is a `readonly struct`.
 
 In particular:
 -  The identity of the `IsReadOnlyAttribute` type is unimportant. In fact it can be embedded by the compiler in the containing assembly if needed.
@@ -600,7 +595,7 @@ Allow special kind of conditional expression that evaluates to a reference to on
 
 ### Using `ref` ternary expression.
 
-The syntax for the `ref` flavor of a conditional expression is ` <condition> ? ref <consequence> : ref <alternative>;`
+The syntax for the `ref` flavor of a conditional expression is `<condition> ? ref <consequence> : ref <alternative>;`
 
 Just like with the ordinary conditional expression only `<consequence>` or `<alternative>` is evaluated depending on result of the boolean condition expression.
 

@@ -1,6 +1,6 @@
 ﻿# Nullable Reference Types Specification
 
-*** This is a work in progress - several parts are missing or incomplete. ***
+***This is a work in progress - several parts are missing or incomplete. An updated version of this document can be found in the C# 9 folder. ***
 
 ## Syntax
 
@@ -70,14 +70,8 @@ The postfix `!` operator has no runtime effect - it evaluates to the result of t
 
 ### nullable implicitly typed local variables
 
-Alongside `var` it is now permitted to write `var?`.
-
-```antlr
-local_variable_type
-    : ...
-    | 'var' '?'
-    ;
-```
+`var` infers an annotated type for reference types.
+For instance, in `var s = "";` the `var` is inferred as `string?`.
 
 ### Nullable compiler directives
 
@@ -97,7 +91,6 @@ nullable_action
     : 'disable'
     | 'enable'
     | 'restore'
-    | 'safeonly'
     ;
 ```
 
@@ -119,11 +112,11 @@ Note that the new form of `pragma_warning_body` uses `nullable_action`, not `war
 
 ## Nullable contexts
 
-Every line of source code has a *nullable annotation context* and a *nullable warning context*. These control whether nullable annotations have effect, and whether nullability warnings are given. The annotation context of a given line is either *disabled* or *enabled*. The warning context of a given line is either *disabled*, *safeonly* or *enabled*.
+Every line of source code has a *nullable annotation context* and a *nullable warning context*. These control whether nullable annotations have effect, and whether nullability warnings are given. The annotation context of a given line is either *disabled* or *enabled*. The warning context of a given line is either *disabled* or *enabled*.
 
-Both contexts can be specified at the project level (outside of C# source code), or anywhere within a source file via `#nullable` and `#pragma warning` pre-processor directives. If no project level settings are provided the default is for both contexts to be *disabled*.
+Both contexts can be specified at the project level (outside of C# source code), or anywhere within a source file via `#nullable` pre-processor directives. If no project level settings are provided the default is for both contexts to be *disabled*.
 
-The `#nullable` directive controls both the annotation and warning contexts within the source text, and take precedence over the project-level settings. The `#pragma warning ... nullable` directives control only the warning context, leaving the annotation context unchanged.
+The `#nullable` directive controls the annotation and warning contexts within the source text, and take precedence over the project-level settings.
 
 A directive sets the context(s) it controls for subsequent lines of code, until another directive overrides it, or until the end of the source file.
 
@@ -132,11 +125,12 @@ The effect of the directives is as follows:
 - `#nullable disable`: Sets the nullable annotation and warning contexts to *disabled*
 - `#nullable enable`: Sets the nullable annotation and warning contexts to *enabled*
 - `#nullable restore`: Restores the nullable annotation and warning contexts to project settings
-- `#nullable safeonly`: Sets the nullable annotation context to *enabled* and the warning context to *safeonly*
-- `#pragma warning disable nullable`: Sets the nullable warning context to *disabled*
-- `#pragma warning enable nullable`: Sets the nullable warning context to *enabled*
-- `#pragma warning restore nullable`: Restores the nullable warning context to project settings
-- `#pragma warning safeonly nullable`: Sets the nullable warning context to *safeonly*
+- `#nullable disable annotations`: Sets the nullable annotation context to *disabled*
+- `#nullable enable annotations`: Sets the nullable annotation context to *enabled*
+- `#nullable restore annotations`: Restores the nullable annotation context to project settings
+- `#nullable disable warnings`: Sets the nullable warning context to *disabled*
+- `#nullable enable warnings`: Sets the nullable warning context to *enabled*
+- `#nullable restore warnings`: Restores the nullable warning context to project settings
 
 ## Nullability of types
 
@@ -167,6 +161,13 @@ Type parameters additionally take their constraints into account:
     - *nullable* in an *enabled* annotation context
 
 For a type parameter `T`, `T?` is only allowed if `T` is known to be a value type or known to be a reference type.
+
+### Nested functions
+
+Nested functions (lambdas and local functions) are treated like methods, except in regards to their captured variables.
+The default state of a captured variable inside a lambda or local function is the intersection of the nullable state
+of the variable at all the "uses" of that nested function. A use of a function is either a call to that function, or
+where it is converted to a delegate.
 
 ### Oblivious vs nonnullable
 
@@ -357,13 +358,13 @@ In addition we need to propagate "nullness" from the input expressions to the re
 To handle these we add more phases to fixing, which is now:
 
 1. Gather all the types in all the bounds as candidates, removing `?` from all that are nullable reference types
-2. Eliminate candidates based on requirements of exact, lower and upper bounds (ignoring `null` and `default` bounds)
+2. Eliminate candidates based on requirements of exact, lower and upper bounds (keeping `null` and `default` bounds)
 3. Eliminate candidates that do not have an implicit conversion to all the other candidates
 4. If the remaining candidates do not all have identity conversions to one another, then type inference fails
 5. *Merge* the remaining candidates as described below
 6. If the resulting candidate is a reference type or a nonnullable value type and *all* of the exact bounds or *any* of the lower bounds are nullable value types, nullable reference types, `null` or `default`, then `?` is added to the resulting candidate, making it a nullable value type or reference type.
 
-*Merging* is described between two candidate types. It is transitive and commutative, so the candidates can be merged in any order with the same ultimate result.
+*Merging* is described between two candidate types. It is transitive and commutative, so the candidates can be merged in any order with the same ultimate result. It is undefined if the two candidate types are not identity convertible to each other.
 
 The *Merge* function takes two candidate types and a direction (*+* or *-*):
 
@@ -376,7 +377,7 @@ The *Merge* function takes two candidate types and a direction (*+* or *-*):
 - *Merge*(`C<S1,...,Sn>`, `C<T1,...,Tn>`, *-*) = `C<`*Merge*(`S1`, `T1`, *d1*)`,...,`*Merge*(`Sn`, `Tn`, *dn*)`>`, *where*
     - `di` = *-* if the `i`'th type parameter of `C<...>` is covariant
     - `di` = *+* if the `i`'th type parameter of `C<...>` is contra- or invariant
-- *Merge*(`(S1 s1,..., Sn sn)`, `(T1 t1,..., Tn tn)`, *d*) = `(`*Merge*(`S1`, `T1`, *d*)` n1,...,`*Merge*(`Sn`, `Tn`, *d*) `nn)`, *where*
+- *Merge*(`(S1 s1,..., Sn sn)`, `(T1 t1,..., Tn tn)`, *d*) = `(`*Merge*(`S1`, `T1`, *d*)`n1,...,`*Merge*(`Sn`, `Tn`, *d*) `nn)`, *where*
     - `ni` is absent if `si` and `ti` differ, or if both are absent
     - `ni` is `si` if `si` and `ti` are the same
 - *Merge*(`object`, `dynamic`) = *Merge*(`dynamic`, `object`) = `dynamic`

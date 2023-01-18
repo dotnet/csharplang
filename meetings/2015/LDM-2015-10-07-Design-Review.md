@@ -27,7 +27,7 @@ And, for records:
 
 1. No `record` keyword necessary
 2. `with` expressions (https://github.com/dotnet/roslyn/issues/5172)
-3. Approach for for algebraic data types
+3. Approach for algebraic data types
 
 ### Implementation status of prototype port
 

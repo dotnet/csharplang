@@ -93,7 +93,7 @@ We continued to discuss the range operator in C# and the underlying types for it
 4. Expanding the feature
 5. Is T? where T : class? allowed or meaningful?
 6. Typing judgments containing oblivious types
-7. Unconstrained T in List<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
+7. Unconstrained T in List\<T> then `FirstOrDefault()`. What attribute to annotate `FirstOrDefault`?
 
 ## August 22, 2018
 

@@ -28,7 +28,7 @@ await_expression
 
 The null-conditional `await` operator awaits its operand only if that operand is non-null. Otherwise the result of applying the operator is null.
 
-The type of the result is computed using the [rules for the null-conditional operator](https://github.com/dotnet/csharplang/blob/master/spec/expressions.md#null-conditional-operator).
+The type of the result is computed using the rules for the null-conditional operator [§11.7.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1177-null-conditional-member-access).
 
 > **NOTE:**
 > If `e` is of type `Task`, then `await? e;` would do nothing if `e` is `null`, and await `e` if it is not `null`.

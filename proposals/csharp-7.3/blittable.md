@@ -24,7 +24,7 @@ void Hash<T>(T value) where T : unmanaged
 }
 ```
 
-This constraint can only be met by types which fit into the unmanaged type definition in the C# language spec. Another way of looking at it is that a type satisfies the unmanaged constraint iff it can also be used as a pointer. 
+This constraint can only be met by types which fit into the unmanaged type definition in the C# language spec. Another way of looking at it is that a type satisfies the unmanaged constraint if it can also be used as a pointer. 
 
 ```csharp
 Hash(new Point()); // Okay 
@@ -64,7 +64,7 @@ The language will introduce a new constraint named `unmanaged`. In order to sati
 - Have the type `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool`, `IntPtr` or `UIntPtr`.
 - Be any `enum` type.
 - Be a pointer type.
-- Be a user defined struct that satsifies the `unmanaged` constraint.
+- Be a user defined struct that satisfies the `unmanaged` constraint.
 
 Compiler generated instance fields, such as those backing auto-implemented properties, must also meet these constraints. 
 

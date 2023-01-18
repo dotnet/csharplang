@@ -1,10 +1,5 @@
 # Async Main
 
-* [x] Proposed
-* [ ] Prototype
-* [ ] Implementation
-* [ ] Specification
-
 ## Summary
 [summary]: #summary
 

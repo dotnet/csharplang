@@ -1,10 +1,5 @@
 # Target-typed "default" literal
 
-* [x] Proposed
-* [x] Prototype
-* [x] Implementation
-* [ ] Specification
-
 ## Summary
 [summary]: #summary
 
@@ -29,7 +24,7 @@ This is applicable in a number of scenarios, such as:
 ## Detailed design
 [design]: #detailed-design
 
-A new expression is introduced, the *default* literal. An expression with this classification can be implicitly converted to any type, by a *default-or-null literal conversion*. 
+A new expression is introduced, the *default* literal. An expression with this classification can be implicitly converted to any type, by a *default literal conversion*. 
 
 The inference of the type for the *default* literal works the same as that for the *null* literal, except that any type is allowed (not just reference types).
 

@@ -1,9 +1,4 @@
-# Async Streams
-
-* [x] Proposed
-* [x] Prototype
-* [ ] Implementation
-* [ ] Specification
+﻿# Async Streams
 
 ## Summary
 [summary]: #summary
@@ -53,7 +48,7 @@ namespace System.Collections.Generic
 {
     public interface IAsyncEnumerable<out T>
     {
-        IAsyncEnumerator<T> GetAsyncEnumerator();
+        IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default);
     }
 
     public interface IAsyncEnumerator<out T> : IAsyncDisposable
@@ -87,6 +82,7 @@ Discarded options considered:
 - _`ITask<(bool,T)> TryMoveNextAsync();`_: Not covariant, allocations on every call, etc.
 - _`Task<bool> TryMoveNextAsync(out T result);`_: The `out` result would need to be set when the operation returns synchronously, not when it asynchronously completes the task potentially sometime long in the future, at which point there'd be no way to communicate the result.
 - _`IAsyncEnumerator<T>` not implementing `IAsyncDisposable`_: We could choose to separate these.  However, doing so complicates certain other areas of the proposal, as code must then be able to deal with the possibility that an enumerator doesn't provide disposal, which makes it difficult to write pattern-based helpers.  Further, it will be common for enumerators to have a need for disposal (e.g. any C# async iterator that has a finally block, most things enumerating data from a network connection, etc.), and if one doesn't, it is simple to implement the method purely as `public ValueTask DisposeAsync() => default(ValueTask);` with minimal additional overhead.
+- _ `IAsyncEnumerator<T> GetAsyncEnumerator()`: No cancellation token parameter.
 
 #### Viable alternative:
 
@@ -151,48 +147,23 @@ However, there are multiple problems with that approach:
 - How does a developer cancel a `foreach` loop?  If it's done by giving a `CancellationToken` to an enumerable/enumerator, then either a) we need to support `foreach`'ing over enumerators, which raises them to being first-class citizens, and now you need to start thinking about an ecosystem built up around enumerators (e.g. LINQ methods) or b) we need to embed the `CancellationToken` in the enumerable anyway by having some `WithCancellation` extension method off of `IAsyncEnumerable<T>` that would store the provided token and then pass it into  the wrapped enumerable's `GetAsyncEnumerator` when the `GetAsyncEnumerator` on the returned struct is invoked (ignoring that token).  Or, you can just use the `CancellationToken` you have in the body of the foreach.
 - If/when query comprehensions are supported, how would the `CancellationToken` supplied to `GetEnumerator` or `MoveNextAsync` be passed into each clause?  The easiest way would simply be for the clause to capture it, at which point whatever token is passed to `GetAsyncEnumerator`/`MoveNextAsync` is ignored.
 
-Due to all of this, the simplest and most consistent solution is simply to do (1): `IAsyncEnumerable<T>`/`IAsyncEnumerator<T>` are cancellation-agnostic.  If you want to cancel a `foreach` loop, you can use a `CancellationToken` in the body and in any methods you call:
+An earlier version of this document recommended (1), but we since switched to (4).
 
-```csharp
-CancellationToken ct = ...;
-await foreach (var i in GetData())
-{
-    ct.ThrowIfCancellationRequested();
-    await UseAsync(i, ct);
-    ...
-}
-```
+The two main problems with (1):
+- producers of cancellable enumerables have to implement some boilerplate, and can only leverage the compiler's support for async-iterators to implement a `IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken)` method.
+- it is likely that many producers would be tempted to just add a `CancellationToken` parameter to their async-enumerable signature instead, which will prevent consumers from passing the cancellation token they want when they are given an `IAsyncEnumerable` type.
 
-If you want to pass a `CancellationToken` into an iterator, you simply do so as an argument, just as with other `async` methods:
+There are two main consumption scenarios:
+1. `await foreach (var i in GetData(token)) ...` where the consumer calls the async-iterator method,
+2. `await foreach (var i in givenIAsyncEnumerable.WithCancellation(token)) ...` where the consumer deals with a given `IAsyncEnumerable` instance.
 
-```csharp
-static async IAsyncEnumerable<T> GetData(CancellationToken cancellationToken = default)
-{
-    using (cancellationToken.Register(...))
-    {
-        ...
-        await ...
-        ...
-    }
-}
-...
-await foreach (T i in GetData(ct))
-{
-    ...
-}
-```
+We find that a reasonable compromise to support both scenarios in a way that is convenient for both producers and consumers of async-streams is to use a specially annotated parameter in the async-iterator method. The `[EnumeratorCancellation]` attribute is used for this purpose. Placing this attribute on a parameter tells the compiler that if a token is passed to the `GetAsyncEnumerator` method, that token should be used instead of the value originally passed for the parameter.
 
-If you want to use a `CancellationToken` in a query comprehension, you just capture it:
-
-```csharp
-CancellationToken ct = ...
-IAsyncEnumerable<string> results = from url in source
-                                   select DownloadAsync(url, ct);
-```
-
-Etc.
-
-For now, we should pursue (1).
+Consider `IAsyncEnumerable<int> GetData([EnumeratorCancellation] CancellationToken token = default)`. 
+The implementer of this method can simply use the parameter in the method body. 
+The consumer can use either consumption patterns above:
+1. if you use `GetData(token)`, then the token is saved into the async-enumerable and will be used in iteration,
+2. if you use `givenIAsyncEnumerable.WithCancellation(token)`, then the token passed to `GetAsyncEnumerator` will supersede any token saved in the async-enumerable.
 
 ## foreach
 
@@ -216,52 +187,78 @@ await foreach (var i in enumerable)
 
 No syntax would be provided that would support using either the async or the sync APIs; the developer must choose based on the syntax used.
 
-Discarded options considered:
-- _`foreach (var i in await enumerable)`_: This is already valid syntax, and changing its meaning would be a breaking change.  This means to `await` the `enumerable`, get back something synchronously iterable from it, and then synchronously iterate through that.
-- _`foreach (var i await in enumerable)`, `foreach (var await i in enumerable)`, `foreach (await var i in enumerable)`_: These all suggest that we're awaiting the next item, but there are other awaits involved in foreach, in particular if the enumerable is an `IAsyncDisposable`, we will be `await`'ing its async disposal.  That await is as the scope of the foreach rather than for each individual element, and thus the `await` keyword deserves to be at the `foreach` level.  Further, having it associated with the `foreach` gives us a way to describe the `foreach` with a different term, e.g. a "await foreach".  But more importantly, there's value in considering `foreach` syntax at the same time as `using` syntax, so that they remain consistent with each other, and `using (await ...)` is already valid syntax.
-- _`foreach await (var i in enumerable)`_
+### Semantics
 
-Still to consider:
-- `foreach` today does not support iterating through an enumerator.  We expect it will be more common to have `IAsyncEnumerator<T>`s handed around, and thus it's tempting to support `await foreach` with both `IAsyncEnumerable<T>` and `IAsyncEnumerator<T>`.  But once we add such support, it introduces the question of whether `IAsyncEnumerator<T>` is a first-class citizen, and whether we need to have overloads of combinators that operate on enumerators in addition to enumerables?    Do we want to encourage methods to return enumerators rather than enumerables? We should continue to discuss this.  If we decide we don't want to support it, we might want to introduce an extension method `public static IAsyncEnumerable<T> AsEnumerable<T>(this IAsyncEnumerator<T> enumerator);` that would allow an enumerator to still be `foreach`'d.  If we decide we do want to support it, we'll need to also decide on whether the `await foreach` would be responsible for calling `DisposeAsync` on the enumerator, and the answer is likely "no, control over disposal should be handled by whoever called `GetEnumerator`."
+The compile-time processing of an `await foreach` statement first determines the ***collection type***, ***enumerator type*** and ***iteration type*** of the expression (very similar to https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1295-the-foreach-statement). This determination proceeds as follows:
 
-### Pattern-based Compilation
+- If the type `X` of *expression* is `dynamic` or an array type, then an error is produced and no further steps are taken.
+- Otherwise, determine whether the type `X` has an appropriate `GetAsyncEnumerator` method:
+  - Perform member lookup on the type `X` with identifier `GetAsyncEnumerator` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for an enumerable interface as described below.
+  - Perform overload resolution using the resulting method group and an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, check for an enumerable interface as described below.
+  - If the return type `E` of the `GetAsyncEnumerator` method is not a class, struct or interface type, an error is produced and no further steps are taken.
+  - Member lookup is performed on `E` with the identifier `Current` and no type arguments. If the member lookup produces no match, the result is an error, or the result is anything except a public instance property that permits reading, an error is produced and no further steps are taken.
+  - Member lookup is performed on `E` with the identifier `MoveNextAsync` and no type arguments. If the member lookup produces no match, the result is an error, or the result is anything except a method group, an error is produced and no further steps are taken.
+  - Overload resolution is performed on the method group with an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, or its return type is not awaitable into `bool`, an error is produced and no further steps are taken.
+  - The collection type is `X`, the enumerator type is `E`, and the iteration type is the type of the `Current` property.
+- Otherwise, check for an enumerable interface:
+  - If among all the types `Tᵢ` for which there is an implicit conversion from `X` to `IAsyncEnumerable<ᵢ>`, there is a unique type `T` such that `T` is not dynamic and for all the other `Tᵢ` there is an implicit conversion from `IAsyncEnumerable<T>` to `IAsyncEnumerable<Tᵢ>`, then the collection type is the interface `IAsyncEnumerable<T>`, the enumerator type is the interface `IAsyncEnumerator<T>`, and the iteration type is `T`.
+  - Otherwise, if there is more than one such type `T`, then an error is produced and no further steps are taken.
+- Otherwise, an error is produced and no further steps are taken.
 
-The compiler will bind to the pattern-based APIs if they exist, preferring those over using the interface (the pattern may be satisfied with instance methods or extension methods).  The requirements for the pattern are:
-- The enumerable must expose a `GetAsyncEnumerator` method that may be called with no arguments and that returns an enumerator that meets the relevant pattern.
-- The enumerator must expose a `MoveNextAsync` method that may be called with no arguments and that returns something which may be `await`ed and whose `GetResult()` returns a `bool`.
-- The enumerator must also expose `Current` property whose getter returns a `T` representing the kind of data being enumerated.
-- The enumerator may optionally expose a `DisposeAsync` method that may be invoked with no arguments and that returns something that can be `await`ed and whose `GetResult()` returns `void`.
-
-This code:
+The above steps, if successful, unambiguously produce a collection type `C`, enumerator type `E` and iteration type `T`.
 
 ```csharp
-var enumerable = ...;
-await foreach (T item in enumerable)
-{
-   ...
-}
+await foreach (V v in x) «embedded_statement»
 ```
 
-is translated to the equivalent of:
+is then expanded to:
 
 ```csharp
-var enumerable = ...;
-var enumerator = enumerable.GetAsyncEnumerator();
-try
 {
-    while (await enumerator.MoveNextAsync())
-    {
-       T item = enumerator.Current;
-       ...
+    E e = ((C)(x)).GetAsyncEnumerator();
+    try {
+        while (await e.MoveNextAsync()) {
+            V v = (V)(T)e.Current;
+            «embedded_statement»
+        }
+    }
+    finally {
+        ... // Dispose e
     }
 }
-finally
-{
-    await enumerator.DisposeAsync(); // omitted, along with the try/finally, if the enumerator doesn't expose DisposeAsync
-}
 ```
 
-If the iterated type doesn't expose the right pattern, the interfaces will be used.
+The body of the `finally` block is constructed according to the following steps:
+- If the type `E` has an appropriate `DisposeAsync` method:
+  - Perform member lookup on the type `E` with identifier `DisposeAsync` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for the disposal interface as described below.
+  - Perform overload resolution using the resulting method group and an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, check for the disposal interface as described below.
+  - If the return type of the `DisposeAsync` method is not awaitable, an error is produced and no further steps are taken.
+  - The `finally` clause is expanded to the semantic equivalent of:
+  ```csharp
+    finally {
+        await e.DisposeAsync();
+    }
+    ```
+- Otherwise, if there is an implicit conversion from `E` to the `System.IAsyncDisposable` interface, then
+  - If `E` is a non-nullable value type then the `finally` clause is expanded to the semantic equivalent of:
+  ```csharp
+    finally {
+        await ((System.IAsyncDisposable)e).DisposeAsync();
+    }
+    ```
+  - Otherwise the `finally` clause is expanded to the semantic equivalent of:
+    ```csharp
+    finally {
+        System.IAsyncDisposable d = e as System.IAsyncDisposable;
+        if (d != null) await d.DisposeAsync();
+    }
+    ```
+    except that if `E` is a value type, or a type parameter instantiated to a value type, then the conversion of `e` to `System.IAsyncDisposable` shall not cause boxing to occur.
+- Otherwise, the `finally` clause is expanded to an empty block:
+  ```csharp
+  finally {
+  }
+  ```
 
 ### ConfigureAwait
 
@@ -299,7 +296,7 @@ namespace System.Threading.Tasks
             public ConfiguredAsyncEnumerator<T> GetAsyncEnumerator() =>
                 new ConfiguredAsyncEnumerator<T>(_enumerable.GetAsyncEnumerator(), _continueOnCapturedContext);
 
-            public struct Enumerator
+            public struct ConfiguredAsyncEnumerator<T>
             {
                 private readonly IAsyncEnumerator<T> _enumerator;
                 private readonly bool _continueOnCapturedContext;
