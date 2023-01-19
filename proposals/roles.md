@@ -1,9 +1,9 @@
 ﻿# Roles
 
-This proposal is divided into three parts, all relating to extending existing types:
-A. static extensions
-B. roles and extensions with members
-C. roles and extensions that implement interfaces
+This proposal is divided into three parts, all relating to extending existing types:  
+A. static extensions  
+B. roles and extensions with members  
+C. roles and extensions that implement interfaces  
 
 The syntax for a roles is as follows:
 
@@ -45,19 +45,19 @@ role_member_declaration
 
 ## Phase A: Adding static constants, fields, methods and properties
 
-In this first subset of the feature, the syntax is restricted to **extension_declaration**
-and containing only **constant_declaration** members and static **field_declaration**, **method_declaration** and **property_declaration** members.
-TODO: events? constructors?
+In this first subset of the feature, the syntax is restricted to *extension_declaration*
+and containing only *constant_declaration* members and static *field_declaration*, *method_declaration* and *property_declaration* members.  
+TODO: events?
 
 ### Extension type
 
-An extension type is declared by a non-nested **extension_declaration**.  
+An extension type is declared by a non-nested *extension_declaration*.  
 The permitted modifiers on an extension type are `partial`, `unsafe` and the accessibility modifiers `public` and `internal`.  
 Note that `static` is disallowed.  
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
-The **role_underlying_type** type may not be `dynamic`, a pointer, a nullable reference, or an extension type.  
-The **role_underlying_type** type must include all the type parameters from the extension type.  
-The **role_underlying_type** may not include an **interface_type_list** (this is part of Phase C).  
+The *role_underlying_type* type may not be `dynamic`, a pointer, a nullable reference, a ref struct type, or an extension type.  
+The *role_underlying_type* type must include all the type parameters from the extension type.  
+The *role_underlying_type* may not include an *interface_type_list* (this is part of Phase C).  
 An extension declaration must include an underlying type, unless it is partial. It is a compile-time error if no part of a partial extension type includes an underlying type, or the underlying type from differs amongst all the parts.  
 When a partial extension declaration includes an accessibility specification, that specification shall agree with all other parts that include an accessibility specification. If no part of a partial extension includes an accessibility specification, the type is given the appropriate default accessibility (`internal`).
 The underlying type of an extension type shall be at least as accessible as the extension type itself.  
@@ -68,8 +68,8 @@ TODO how do we emit the relationship to underlying type?
 
 ### Extension type members
 
-The extension type members may not use the `new` modifier.
-Accessibility modifiers including `protected` are disallowed.
+The extension type members may not use the `new` modifier.  
+Accessibility modifiers including `protected` are disallowed.  
 The extension type does not **inherit** members from its underlying type (which may be `sealed` or a struct), but
 the lookup rules are modified to achieve a similar effect (see below).  
 
@@ -79,23 +79,22 @@ Existing [rules for constants](https://github.com/dotnet/csharpstandard/blob/dra
 
 #### Fields
 
-A **field_declaration** in an **extension_declaration** shall explicitly include a `static` modifier.  
+A *field_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
 Otherwise, existing [rules for fields](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#145-fields) apply.  
 
 #### Methods
 
-A **method_declaration** in an **extension_declaration** shall explicitly include a `static` modifier.  
+A *method_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
 Parameters with the `this` modifier are disallowed.
 Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
 In particular, a static method does not operate on a specific instance, and it is a compile-time error to refer to `this` in a static method.
 
 #### Properties
 
-A **property_declaration** in an **extension_declaration** shall explicitly include a `static` modifier.  
+A *property_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
 Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
 
 ### Lookup rules
-
 
 #### Simple names
 
@@ -118,7 +117,7 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
   ...
 - Otherwise, the simple_name is undefined and a compile-time error occurs.
 
-TODO Note we're not including invocations of extension methods.
+TODO maybe we should not do any extension type lookup here, since we didn't do any extension method lookup previously.
 
 #### Member access
 
@@ -153,18 +152,17 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
 - Otherwise, an attempt is made to process `E.I` as an extension method invocation. If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
 TODO Note: above rules prevent `underlying.M()` from binding to `LegacyExtension.M(this Role)`.
+TODO Is the "where `T` is not a type parameter" portion still relevant?
 
 #### Compatible substituted extension type
 
 An extension type `X` is compatible with given type `U` if:
-- `X` is non-generic and its underlying type is `U`
-- a possible type substitution on the type parameters of `X` yields underlying type `U`. Such substitution is unique. We call the resulting substituted type `X` the "compatible substituted extension type"
+- `X` is non-generic and its underlying type is `U`, a base type of `U` or an implemented interface of `U`
+- a possible type substitution on the type parameters of `X` yields underlying type `U` a base type of `U` or an implemented interface of `U`. Such substitution is unique. We call the resulting substituted type `X` the "compatible substituted extension type"
 
 #### Extension member lookup
 
 If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression*, the member is said to be invoked.
-
-TODO do we need to include indexer access (*element_access*) and operator invocation?
 
 Given an underlying type `U` and an identifier `I`, the objective is to find an extension member `X.I`, if possible.
 
@@ -187,6 +185,15 @@ The preceding rules mean that extension members available in inner namespace dec
 and that extension members declared directly in a namespace take precedence over extension members imported into that same namespace with a using namespace directive.  
 The difference between invocation and non-invocation handling is that for invocation scenarios, we can look past a result and continue looking at enclosing namespaces.  
 
+### Element access
+
+https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117103-indexer-access
+TODO
+
+### Operators
+
+TODO
+
 ### Method group conversions
 
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions
@@ -194,13 +201,15 @@ TODO A single method is selected corresponding to a method invocation, but with 
 
 ## B. Roles and extensions with members
 
-In this second subset of the feature, the **role_declaration** becomes allowed
+In this second subset of the feature, the *role_declaration* becomes allowed
 and non-static members become allowed.
 
 ### Role type
 
-A role type is declared by a non-nested **role_declaration**.  
+A role type is declared by a non-nested *role_declaration*.  
 The above rules from extension types apply, namely the permitted modifiers and rules on underlying type.
+
+TODO: constructors?
 
 ### Role and extension type members
 
@@ -219,7 +228,7 @@ TODO
 
 #### Fields
 
-A **field_declaration** in a **role_declaration** or **extension_declaration** shall explicitly include a `static` modifier.  
+A *field_declaration* in a *role_declaration* or *extension_declaration* shall explicitly include a `static` modifier.  
 
 #### Methods
 
@@ -230,7 +239,6 @@ TODO What if I have a static method `void M(UnderlyingType x)` and a non-static 
 #### Instance invocations
 
 TODO
-An additional argument is passed in.
 
 ## C. Roles and extensions that implement interfaces
 
