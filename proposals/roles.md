@@ -113,7 +113,7 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method.
     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor, the result is the same as a member access of the form `this.I`. This can only happen when `e` is zero.
     - Otherwise, the result is the same as a member access of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
-  - **Otherwise, if `T` is not an extension type, the member is not invoked, and an ***extension member lookup*** of `I` for underlying type `T` with `e` type arguments produces a match:**
+  - **Otherwise, if `T` is not an extension type, and an ***extension member lookup*** of `I` for underlying type `T` with `e` type arguments produces a match:**
     ...
   - **Otherwise, if `T` is a role (only relevant in phase B) or extension type and a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**
     ...
@@ -143,21 +143,20 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
   - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
-- **If `E` is classified as a type, if `E` is not a type parameter or an extension type, if the member is not invoked, and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:**  
+- **If `E` is classified as a type, if `E` is not a type parameter or an extension type, and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:**  
   ...
-- **If `E` is classified as a role (only relevant in phase B) or extension type, and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:** 
+- **If `E` is classified as a role (only relevant in phase B) or extension type, and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, then `E.I` is evaluated and classified as follows:**  
   ...
-- If `E` is a property access, indexer access, variable, or value, the type of which is `T`, and a member lookup of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:
+- If `E` is a property access, indexer access, variable, or value, the type of which is `T`, and a member lookup of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:  
   ...
-- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is not a type parameter or a role type, if the member is not invoked, and an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**
+- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is not a type parameter or a role type, and an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**  
   ...
-- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is a role or extension type, and a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**
+- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, the type of which is `T`, where `T` is a role or extension type, and a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, then `E.I` is evaluated and classified as follows:**  
   ...
 - Otherwise, an attempt is made to process `E.I` as an extension method invocation. If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
-TODO add support for invoking extension methods
-
 TODO one downside of this approach is that we stop once a method with proper name is found, even if it will be applicable. We could tweak the above rules (member access and simple names) by separating invocations. 
+TODO Note: above rules prevent `underlying.M()` from binding to `LegacyExtension.M(this Role)`.
 
 #### Compatible substituted extension type
 
@@ -175,15 +174,22 @@ We process as follows (TODO more details needed):
   - If namespaces imported by using-namespace directives in the given namespace or compilation unit directly contain extension types, those will be considered second.
 - Check which extension types are compatible with the given underlying type `U` and collect resulting compatible substituted extension types.
 - Perform member lookup for `I` in each compatible substituted extension type `X` (note this takes into account whether the member is invoked).
-- Merge the results
-- If the set is empty, proceed to the next enclosing namespace
+- Merge the results.
+- If the set is empty, proceed to the next enclosing namespace.
 - If the set consists of a single member that is not a method, then this member is the result of the lookup.
-- Otherwise, if the set contains only methods, then this group of methods is the result of the lookup.
+- Otherwise, if the set contains only methods and the member is invoked, overload resolution is applied to the candidate set.
+  - If no single best method is found, a compile-time error occurs.
+  - Otherwise, continue the search through namespaces and their imports.
 - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, the result of the lookup is empty.
 
 The preceding rules mean that extension members available in inner namespace declarations take precedence over extension members available in outer namespace declarations,
 and that extension members declared directly in a namespace take precedence over extension members imported into that same namespace with a using namespace directive.
+
+### Method group conversions
+
+https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions
+TODO A single method is selected corresponding to a method invocation, but with some tweaks related to normal form and optional parameters.
 
 ## B. Roles and extensions with members
 
