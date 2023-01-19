@@ -47,7 +47,7 @@ role_member_declaration
 
 In this first subset of the feature, the syntax is restricted to **extension_declaration**
 and containing only **constant_declaration** members and static **field_declaration**, **method_declaration** and **property_declaration** members.
-TODO: events?
+TODO: events? constructors?
 
 ### Extension type
 
@@ -61,9 +61,10 @@ The **role_underlying_type** may not include an **interface_type_list** (this is
 An extension declaration must include an underlying type, unless it is partial. It is a compile-time error if no part of a partial extension type includes an underlying type, or the underlying type from differs amongst all the parts.  
 When a partial extension declaration includes an accessibility specification, that specification shall agree with all other parts that include an accessibility specification. If no part of a partial extension includes an accessibility specification, the type is given the appropriate default accessibility (`internal`).
 The underlying type of an extension type shall be at least as accessible as the extension type itself.  
-This declares a ref struct type. It inherits from type `System.ValueType`.
-TODO: attributes?
-TODO: emitted name?
+This declares a ref struct type with that name. It inherits from type `System.ValueType`.
+
+TODO how do we emit an extension type versus a handcrafted ref struct?  
+TODO how do we emit the relationship to underlying type?  
 
 ### Extension type members
 
@@ -71,7 +72,6 @@ The extension type members may not use the `new` modifier.
 Accessibility modifiers including `protected` are disallowed.
 The extension type does not **inherit** members from its underlying type (which may be `sealed` or a struct), but
 the lookup rules are modified to achieve a similar effect (see below).  
-TODO how do we emit the relationship to underlying type?
 
 #### Constants
 
@@ -96,9 +96,6 @@ Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstand
 
 ### Lookup rules
 
-If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression*, the member is said to be invoked.
-
-TODO do we need to include indexer access and operator invocation?
 
 #### Simple names
 
@@ -113,11 +110,11 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method.
     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor, the result is the same as a member access of the form `this.I`. This can only happen when `e` is zero.
     - Otherwise, the result is the same as a member access of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
-  - **Otherwise, if `T` is not an extension type, and an ***extension member lookup*** of `I` for underlying type `T` with `e` type arguments produces a match:**
+  - **Otherwise, if `T` is not an extension type, and an ***extension member lookup*** of `I` for underlying type `T` with `e` type arguments produces a match:**  
     ...
-  - **Otherwise, if `T` is a role (only relevant in phase B) or extension type and a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**
+  - **Otherwise, if `T` is a role (only relevant in phase B) or extension type and a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**  
     ...
-- Otherwise, for each namespace `N`, starting with the namespace in which the *simple_name* occurs, continuing with each enclosing namespace (if any), and ending with the global namespace, the following steps are evaluated until an entity is located:
+- Otherwise, for each namespace `N`, starting with the namespace in which the *simple_name* occurs, continuing with each enclosing namespace (if any), and ending with the global namespace, the following steps are evaluated until an entity is located:  
   ...
 - Otherwise, the simple_name is undefined and a compile-time error occurs.
 
@@ -155,7 +152,6 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   ...
 - Otherwise, an attempt is made to process `E.I` as an extension method invocation. If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
-TODO one downside of this approach is that we stop once a method with proper name is found, even if it will be applicable. We could tweak the above rules (member access and simple names) by separating invocations. 
 TODO Note: above rules prevent `underlying.M()` from binding to `LegacyExtension.M(this Role)`.
 
 #### Compatible substituted extension type
@@ -166,15 +162,19 @@ An extension type `X` is compatible with given type `U` if:
 
 #### Extension member lookup
 
+If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression*, the member is said to be invoked.
+
+TODO do we need to include indexer access (*element_access*) and operator invocation?
+
 Given an underlying type `U` and an identifier `I`, the objective is to find an extension member `X.I`, if possible.
 
-We process as follows (TODO more details needed):
+We process as follows:
 - Starting with the closest enclosing namespace declaration, continuing with each enclosing namespace declaration, and ending with the containing compilation unit, successive attempts are made to find a candidate set of extension members:
   - If the given namespace or compilation unit directly contains extension types, those will be considered first.
   - If namespaces imported by using-namespace directives in the given namespace or compilation unit directly contain extension types, those will be considered second.
 - Check which extension types are compatible with the given underlying type `U` and collect resulting compatible substituted extension types.
 - Perform member lookup for `I` in each compatible substituted extension type `X` (note this takes into account whether the member is invoked).
-- Merge the results.
+- Merge the results (TODO need more details).
 - If the set is empty, proceed to the next enclosing namespace.
 - If the set consists of a single member that is not a method, then this member is the result of the lookup.
 - Otherwise, if the set contains only methods and the member is invoked, overload resolution is applied to the candidate set.
@@ -184,7 +184,8 @@ We process as follows (TODO more details needed):
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, the result of the lookup is empty.
 
 The preceding rules mean that extension members available in inner namespace declarations take precedence over extension members available in outer namespace declarations,
-and that extension members declared directly in a namespace take precedence over extension members imported into that same namespace with a using namespace directive.
+and that extension members declared directly in a namespace take precedence over extension members imported into that same namespace with a using namespace directive.  
+The difference between invocation and non-invocation handling is that for invocation scenarios, we can look past a result and continue looking at enclosing namespaces.  
 
 ### Method group conversions
 
