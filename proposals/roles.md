@@ -185,6 +185,8 @@ The preceding rules mean that extension members available in inner namespace dec
 and that extension members declared directly in a namespace take precedence over extension members imported into that same namespace with a using namespace directive.  
 The difference between invocation and non-invocation handling is that for invocation scenarios, we can look past a result and continue looking at enclosing namespaces.  
 
+For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
+
 ### Element access
 
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117103-indexer-access
