@@ -58,7 +58,7 @@ The standard rules for modifiers apply (valid combination of access modifiers, n
 The *role_underlying_type* type may not be `dynamic`, a pointer, a nullable reference, a ref struct type, or an extension type.  
 The *role_underlying_type* type must include all the type parameters from the extension type.  
 The *role_underlying_type* may not include an *interface_type_list* (this is part of Phase C).  
-An extension declaration must include an underlying type, unless it is partial. It is a compile-time error if no part of a partial extension type includes an underlying type, or the underlying type from differs amongst all the parts.  
+An extension declaration must include an underlying type, unless it is partial. It is a compile-time error if no part of a partial extension type includes an underlying type, or the underlying type differs amongst all the parts.  
 When a partial extension declaration includes an accessibility specification, that specification shall agree with all other parts that include an accessibility specification. If no part of a partial extension includes an accessibility specification, the type is given the appropriate default accessibility (`internal`).
 The underlying type of an extension type shall be at least as accessible as the extension type itself.  
 This declares a ref struct type with that name. It inherits from type `System.ValueType`.
@@ -109,15 +109,13 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method.
     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor, the result is the same as a member access of the form `this.I`. This can only happen when `e` is zero.
     - Otherwise, the result is the same as a member access of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
-  - **Otherwise, if `T` is not an extension type, and an ***extension member lookup*** of `I` for underlying type `T` with `e` type arguments produces a match:**  
-    ...
   - **Otherwise, if `T` is a role (only relevant in phase B) or extension type and a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**  
     ...
 - Otherwise, for each namespace `N`, starting with the namespace in which the *simple_name* occurs, continuing with each enclosing namespace (if any), and ending with the global namespace, the following steps are evaluated until an entity is located:  
   ...
 - Otherwise, the simple_name is undefined and a compile-time error occurs.
 
-TODO maybe we should not do any extension type lookup here, since we didn't do any extension method lookup previously.
+TODO confirm we don't want extension type lookup here, since we didn't do any extension method lookup previously.
 
 #### Member access
 
