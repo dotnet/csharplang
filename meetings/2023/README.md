@@ -17,9 +17,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Wed Feb 1, 2023
 
 
-## Mon Jan 30, 2023
-
-
 ## Wed Jan 25, 2023
 
 
