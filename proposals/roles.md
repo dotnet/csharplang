@@ -76,7 +76,7 @@ The underlying type of an extension type shall be at least as accessible as the 
 This declares a ref struct type with that name. It inherits from type `System.ValueType`.
 
 TODO how do we emit an extension type versus a handcrafted ref struct?  
-TODO how do we emit the relationship to underlying type?  
+TODO how do we emit the relationship to underlying type? base type or special constructor?  
 
 ### Extension type members
 
@@ -108,6 +108,10 @@ and it is a compile-time error to refer to `this` in a static method.
 
 A *property_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
 Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
+
+#### Nested types
+
+TODO `UnderlyingType.NestedType` would find the `NestedType` from an extension.
 
 ### Lookup rules
 
@@ -144,6 +148,8 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
 
 TODO confirm we don't want extension type lookup here, since we didn't do 
 any extension method lookup previously.
+TODO we want to adjust the rules (either base type or member lookup or other) to find 
+`UnderlyingType.ToString` instead of `object.ToString` when inside an extension/role.
 
 #### Member access
 
@@ -243,8 +249,16 @@ The preceding rules mean that extension members available in inner namespace dec
 take precedence over extension members available in outer namespace declarations,
 and that extension members declared directly in a namespace take precedence over 
 extension members imported into that same namespace with a using namespace directive.  
+
 The difference between invocation and non-invocation handling is that for invocation scenarios, 
 we can look past a result and continue looking at enclosing namespaces.  
+
+For example, if an "inner" extension has a method `void M(int)` and an "outer" extension
+has a method `void M(string)`, an extension member lookup for `M("hello")` will look over
+the `int` extension and successfully find the `string` extension.  
+On the other hand, if an "inner" extension has an `int` property and an "outer" extension
+has a string property, an assignment of a string to that property will fail, as
+extension member lookup will find the `int` property and stop there.  
 
 For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
 
@@ -262,6 +276,7 @@ TODO
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions
 TODO A single method is selected corresponding to a method invocation, 
 but with some tweaks related to normal form and optional parameters.
+TODO There's also the scenario where a method group contains a single method (lambda improvements).
 
 ## B. Roles and extensions with members
 
@@ -274,11 +289,22 @@ A role type is declared by a non-nested *role_declaration*.
 The above rules from extension types apply, namely the permitted modifiers and rules on underlying type.
 
 TODO: constructors?
+TODO: what is the base type of a role? Do we tweak member lookup to avoid looking into `object`,
+or do we say that role doesn't have `object` in its base chain?
 
 ### Role and extension type members
 
 The restrictions on modifiers from phase A remain (`new` and `protected` disallowed).  
 Non-static members become allowed in phase B.  
+
+### Conversions
+
+TODO
+```
+role R : U { } 
+R r = default;
+object o = r; // what conversion is that? if R doesn't have `object` as base type. What about interfaces?
+```
 
 ### Lookup rules
 
@@ -303,6 +329,8 @@ TODO
 #### Instance invocations
 
 TODO
+
+
 
 ## C. Roles and extensions that implement interfaces
 
