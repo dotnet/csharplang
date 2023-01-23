@@ -105,8 +105,9 @@ Function M that maps a position (line, character) within the scope of the `#line
 
 _M_(_l_, _c_) =
 
-  _l_ = _d_ + 1		=> 	(_L.start.line_ + _l_ – _d_ – 1, _L.start.character_ + max(_c_ – _character offset_, 0))
-  _l_ > _d_ + 1		=> 	(_L.start.line_ + _l_ – _d_ – 1, _c_)
+  _l_ == _d_ + 1 => (_L.start.line_ + _l_ – _d_ – 1, _L.start.character_ + max(_c_ – _character offset_, 0))
+
+  _l_ > _d_ + 1 => (_L.start.line_ + _l_ – _d_ – 1, _c_)
 
 The syntax constructs that sequence points are associated with are determined by the compiler implementation and not covered by this specification.
 The compiler also decides for each sequence point its unmapped span. This span may partially or fully cover the associated syntax construct.
