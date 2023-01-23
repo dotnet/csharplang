@@ -75,6 +75,7 @@ the type is given the appropriate default accessibility (`internal`).
 The underlying type of an extension type shall be at least as accessible as the extension type itself.  
 This declares a ref struct type with that name. It inherits from type `System.ValueType`.
 
+TODO what kind of type is an extension or role?
 TODO how do we emit an extension type versus a handcrafted ref struct?  
 TODO how do we emit the relationship to underlying type? base type or special constructor?  
 
@@ -207,14 +208,20 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
 TODO Note: above rules prevent `underlying.M()` from binding to `LegacyExtension.M(this Role)`.
 TODO Is the "where `T` is not a type parameter" portion still relevant?
 
+#### Member lookup
+
+TODO Lookup in base types only extends through roles/extensions 
+(not System.Object/System.ValueType/System.Role)
+
 #### Compatible substituted extension type
 
 An extension type `X` is compatible with given type `U` if:
 - `X` is non-generic and its underlying type is `U`, a base type of `U` or an implemented interface of `U`
 - a possible type substitution on the type parameters of `X` yields underlying type `U`, 
-  a base type of `U` or an implemented interface of `U`. 
-  Such substitution is unique. 
-  We call the resulting substituted type `X` the "compatible substituted extension type"
+  a base type of `U` or an implemented interface of `U`.  
+  Such substitution is unique (because of the requirement that all type parameters
+  from the role/extension appear in the underlying type).  
+  We call the resulting substituted type `X` the "compatible substituted extension type".
 
 #### Extension member lookup
 
@@ -239,8 +246,9 @@ We process as follows:
   then this member is the result of the lookup.
 - Otherwise, if the set contains only methods and the member is invoked, 
   overload resolution is applied to the candidate set.
-  - If no single best method is found, a compile-time error occurs.
-  - Otherwise, continue the search through namespaces and their imports.
+  - If a single best method is found, this member is the result of the lookup.
+  - If no best method is found (ambiguity), continue the search through namespaces and their imports.
+  - Otherwise, a compile-time error occurs.
 - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
   the result of the lookup is empty.
@@ -329,8 +337,6 @@ TODO
 #### Instance invocations
 
 TODO
-
-
 
 ## C. Roles and extensions that implement interfaces
 
