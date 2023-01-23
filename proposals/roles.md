@@ -43,6 +43,12 @@ role_member_declaration
     ;
 ```
 
+TODO we may need to allow a role to be defined on top of multiple other roles. 
+`role DiamondRole : NarrowerUnderlyingType, BaseRole1, Interface1, BaseRole2, Interface2 { }`
+
+TODO there are some open questions on extension syntax 
+(who decides to turn a role into an extension?)
+
 ## Phase A: Adding static constants, fields, methods and properties
 
 In this first subset of the feature, the syntax is restricted to *extension_declaration*
@@ -52,14 +58,15 @@ TODO: events?
 
 ### Extension type
 
-An extension type is declared by a non-nested *extension_declaration*.  
-The permitted modifiers on an extension type are `partial`, `unsafe` and 
-the accessibility modifiers `public` and `internal`.  
-Note that `static` is disallowed.  
+An extension type is a role type (new kind of type) declared by an *extension_declaration*.  
+The permitted modifiers on an extension type are `partial`, `unsafe`, `file` and 
+the accessibility modifiers `public`, `internal` and `private`.  
+Note that `static` is disallowed. The extension type is static if its underlying type
+is static.  
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
 
-The *role_underlying_type* type may not be `dynamic`, a pointer, a nullable reference, 
-a ref struct type, or an extension type.  
+The *role_underlying_type* type may not be `dynamic`, a pointer, a nullable reference (no top-level nullability), 
+a ref struct type.  
 The *role_underlying_type* type must include all the type parameters from the extension type.  
 The *role_underlying_type* may not include an *interface_type_list* (this is part of Phase C).  
 
@@ -73,11 +80,17 @@ If no part of a partial extension includes an accessibility specification,
 the type is given the appropriate default accessibility (`internal`).
 
 The underlying type of an extension type shall be at least as accessible as the extension type itself.  
-This declares a ref struct type with that name. It inherits from type `System.ValueType`.
+Implementation detail: It will be implemented as a ref struct.
 
-TODO what kind of type is an extension or role?
+A role type satisfies the constraints satisfied by its underlying type. In phase C,
+some additional constraints can be satisfied (additional implemented interfaces).  
+
+TODO what is a role type? what is its base type?  
+TODO downlevel concerns (relates to disallowing `static` modifier)?  
 TODO how do we emit an extension type versus a handcrafted ref struct?  
 TODO how do we emit the relationship to underlying type? base type or special constructor?  
+TODO our emit strategy should allow using pointer types and ref structs as underlying types
+in the future.  
 
 ### Extension type members
 
@@ -247,11 +260,14 @@ We process as follows:
 - Otherwise, if the set contains only methods and the member is invoked, 
   overload resolution is applied to the candidate set.
   - If a single best method is found, this member is the result of the lookup.
-  - If no best method is found (ambiguity), continue the search through namespaces and their imports.
-  - Otherwise, a compile-time error occurs.
+  - If no best method is found, continue the search through namespaces and their imports.
+  - Otherwise (ambiguity), a compile-time error occurs.
 - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
   the result of the lookup is empty.
+
+TODO need to account for nested extension types. We'll start looking in enclosing types then enclosing namespaces.  
+TODO explain static usings and nested extension types.
 
 The preceding rules mean that extension members available in inner namespace declarations 
 take precedence over extension members available in outer namespace declarations,
