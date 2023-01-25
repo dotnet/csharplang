@@ -16,6 +16,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Mar 1, 2023
 
+- `using unsafe X = int*;` or `unsafe using X = int*;`.  Cyrus Najmabadi
 
 ## Mon Feb 27, 2023
 
