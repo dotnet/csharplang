@@ -60,7 +60,7 @@ TODO: events?
 
 An extension type is a role type (new kind of type) declared by an *extension_declaration*.  
 The permitted modifiers on an extension type are `partial`, `unsafe`, `file` and 
-the accessibility modifiers `public`, `internal` and `private`.  
+the accessibility modifiers.  
 Note that `static` is disallowed. The extension type is static if its underlying type
 is static.  
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
@@ -91,11 +91,11 @@ TODO how do we emit an extension type versus a handcrafted ref struct?
 TODO how do we emit the relationship to underlying type? base type or special constructor?  
 TODO our emit strategy should allow using pointer types and ref structs as underlying types
 in the future.  
+TODO slightly different meaning for `protected`  
 
 ### Extension type members
 
-The extension type members may not use the `new` modifier.  
-Accessibility modifiers including `protected` are disallowed.  
+The extension type members may not use the `new`, `virtual` or `override` modifiers.  
 The extension type does not **inherit** members from its underlying type 
 (which may be `sealed` or a struct), but
 the lookup rules are modified to achieve a similar effect (see below).  
@@ -162,8 +162,7 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
 
 TODO confirm we don't want extension type lookup here, since we didn't do 
 any extension method lookup previously.
-TODO we want to adjust the rules (either base type or member lookup or other) to find 
-`UnderlyingType.ToString` instead of `object.ToString` when inside an extension/role.
+
 
 #### Member access
 
@@ -225,6 +224,8 @@ TODO Is the "where `T` is not a type parameter" portion still relevant?
 
 TODO Lookup in base types only extends through roles/extensions 
 (not System.Object/System.ValueType/System.Role)
+TODO as a result we'll find `UnderlyingType.ToString` instead of 
+`object.ToString` when inside an extension/role.
 
 #### Compatible substituted extension type
 
@@ -318,7 +319,7 @@ or do we say that role doesn't have `object` in its base chain?
 
 ### Role and extension type members
 
-The restrictions on modifiers from phase A remain (`new` and `protected` disallowed).  
+The restrictions on modifiers from phase A remain (`new`).  
 Non-static members become allowed in phase B.  
 
 ### Conversions
