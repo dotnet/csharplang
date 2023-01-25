@@ -75,23 +75,14 @@ Similarly, roles don't have a base type, but have base roles.
 `role R<T> : T where T : INumber<T> { }`
 A role may be a value or reference type, and this may not be known at compile-time. 
 
-## Implementation details
+### Role type
 
-Roles will be implemented as ref structs.  
+A role type is declared by a non-nested *role_declaration*.  
+The above rules from extension types apply, namely the permitted modifiers and rules on underlying type.
 
-TODO what is a role type? what is its base type?  
-TODO downlevel concerns (relates to disallowing `static` modifier)?  
-TODO how do we emit an extension type versus a handcrafted ref struct?  
-TODO how do we emit the relationship to underlying type? base type or special constructor?  
-TODO our emit strategy should allow using pointer types and ref structs as underlying types
-in the future.  
-
-## Phase A: Adding static constants, fields, methods and properties
-
-In this first subset of the feature, the syntax is restricted to *extension_declaration*
-and containing only *constant_declaration* members and static *field_declaration*, 
-*method_declaration*, *property_declaration* and *type_declaration* members.  
-TODO: events?
+TODO: constructors?
+TODO: what is the base type of a role? Do we tweak member lookup to avoid looking into `object`,
+or do we say that role doesn't have `object` in its base chain?
 
 ### Extension type
 
@@ -122,6 +113,24 @@ A role type satisfies the constraints satisfied by its underlying type. In phase
 some additional constraints can be satisfied (additional implemented interfaces).  
 
 TODO slightly different meaning for `protected`  
+
+## Implementation details
+
+Roles will be implemented as ref structs.  
+
+TODO what is a role type? what is its base type?  
+TODO downlevel concerns (relates to disallowing `static` modifier)?  
+TODO how do we emit an extension type versus a handcrafted ref struct?  
+TODO how do we emit the relationship to underlying type? base type or special constructor?  
+TODO our emit strategy should allow using pointer types and ref structs as underlying types
+in the future.  
+
+## Phase A: Adding static constants, fields, methods and properties
+
+In this first subset of the feature, the syntax is restricted to *extension_declaration*
+and containing only *constant_declaration* members and static *field_declaration*, 
+*method_declaration*, *property_declaration* and *type_declaration* members.  
+TODO: events?
 
 ### Constraints
 
@@ -381,14 +390,8 @@ TODO There's also the scenario where a method group contains a single method (la
 In this second subset of the feature, the *role_declaration* becomes allowed
 and non-static members other than fields become allowed.
 
-### Role type
+TODO issues in async code
 
-A role type is declared by a non-nested *role_declaration*.  
-The above rules from extension types apply, namely the permitted modifiers and rules on underlying type.
-
-TODO: constructors?
-TODO: what is the base type of a role? Do we tweak member lookup to avoid looking into `object`,
-or do we say that role doesn't have `object` in its base chain?
 
 ### Role and extension type members
 
