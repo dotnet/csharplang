@@ -45,9 +45,46 @@ role_member_declaration
 
 TODO we may need to allow a role to be defined on top of multiple other roles. 
 `role DiamondRole : NarrowerUnderlyingType, BaseRole1, Interface1, BaseRole2, Interface2 { }`
+We should assume multiple inheritance for now. Will update syntax to allow multiple inherited roles.  
+In that syntax, the first type will be the underlying type.  
+`role R : I { } // First type is underlying type (not an implemented interface)`
 
 TODO there are some open questions on extension syntax 
 (who decides to turn a role into an extension?)
+
+## Overview of role types 
+
+We'll use "augments" for relationship to underlying type 
+(comparable to "inherits" for relationship to base type).  
+We'll use "inherits" for relationship to inherited roles 
+(comparable to "implements" for relationship to implemented interfaces).  
+
+```csharp
+struct U { }
+role X : U { }
+role Y : U, X, X1 { }
+```
+"Y has underlying type U"  
+"Y augments U"  
+"Y inherits X and X1"  
+"Derived role Y inherits members from inherited roles X and X1"  
+
+Similarly, roles don't have a base type, but have base roles.    
+
+`role R<T> : T where T : I1, I2 { }`
+`role R<T> : T where T : INumber<T> { }`
+A role may be a value or reference type, and this may not be known at compile-time. 
+
+## Implementation details
+
+Roles will be implemented as ref structs.  
+
+TODO what is a role type? what is its base type?  
+TODO downlevel concerns (relates to disallowing `static` modifier)?  
+TODO how do we emit an extension type versus a handcrafted ref struct?  
+TODO how do we emit the relationship to underlying type? base type or special constructor?  
+TODO our emit strategy should allow using pointer types and ref structs as underlying types
+in the future.  
 
 ## Phase A: Adding static constants, fields, methods and properties
 
@@ -80,22 +117,45 @@ If no part of a partial extension includes an accessibility specification,
 the type is given the appropriate default accessibility (`internal`).
 
 The underlying type of an extension type shall be at least as accessible as the extension type itself.  
-Implementation detail: It will be implemented as a ref struct.
 
 A role type satisfies the constraints satisfied by its underlying type. In phase C,
 some additional constraints can be satisfied (additional implemented interfaces).  
 
-TODO what is a role type? what is its base type?  
-TODO downlevel concerns (relates to disallowing `static` modifier)?  
-TODO how do we emit an extension type versus a handcrafted ref struct?  
-TODO how do we emit the relationship to underlying type? base type or special constructor?  
-TODO our emit strategy should allow using pointer types and ref structs as underlying types
-in the future.  
 TODO slightly different meaning for `protected`  
+
+### Constraints
+
+TODO `struct`, `class`
+`where T : Extension`, `where T : Role`
+Disallow roles/extensions in type constraints for now. Is there an issue with struct?
 
 ### Extension type members
 
-The extension type members may not use the `new`, `virtual` or `override` modifiers.  
+The extension type members may not use the `virtual` or `override` modifiers.  
+The `new` modifier is allowed and the compiler will warn that you should
+use `new` when shadowing.  
+Shadowing includes underlying type and inherited roles.  
+
+```
+class U { public void M() { } }
+role R : U { /*new*/ public void M() { } } // wins when dealing with an R
+```
+
+```
+class U { public void M() { } }
+extension X : U { /*new*/ public void M() { } } // ignored in some cases, but extension is a role so rule should apply anyways
+U u;
+u.M(); // U.M (ignored X.M)
+X x;
+x.M(); // X.M
+```
+
+```
+class U { }
+role R : U { public void M() { } }
+role R2 : U, R { /*new*/ public void M() { } } // wins when dealing with an R2
+```
+
 The extension type does not **inherit** members from its underlying type 
 (which may be `sealed` or a struct), but
 the lookup rules are modified to achieve a similar effect (see below).  
@@ -122,12 +182,26 @@ and it is a compile-time error to refer to `this` in a static method.
 
 A *property_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
 Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
+In particular, a static method does not operate on a specific instance, 
+and it is a compile-time error to refer to `this` in a static method.
 
 #### Nested types
 
 TODO `UnderlyingType.NestedType` would find the `NestedType` from an extension.
 
+#### Events
+
+TODO
+
 ### Lookup rules
+
+Will need to spec or disallow `base.` syntax.
+Casting seems an adequate solution to access hidden members: `((R)r2).M()`.  
+We may not need a syntax like `base(R).` which was brainstormed for some other features.
+
+We want to ensure that both of these are possible:  
+From an extension, need to access a hidden thing.  
+From an underlying type, still need to access the extension member when extension loses.  
 
 #### Simple names
 
@@ -162,7 +236,6 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
 
 TODO confirm we don't want extension type lookup here, since we didn't do 
 any extension method lookup previously.
-
 
 #### Member access
 
@@ -306,7 +379,7 @@ TODO There's also the scenario where a method group contains a single method (la
 ## B. Roles and extensions with members
 
 In this second subset of the feature, the *role_declaration* becomes allowed
-and non-static members become allowed.
+and non-static members other than fields become allowed.
 
 ### Role type
 
@@ -322,7 +395,23 @@ or do we say that role doesn't have `object` in its base chain?
 The restrictions on modifiers from phase A remain (`new`).  
 Non-static members become allowed in phase B.  
 
-### Conversions
+#### Fields
+
+A *field_declaration* in a *role_declaration* or *extension_declaration* 
+shall explicitly include a `static` modifier.  
+
+#### Methods
+
+TODO allow `this` (of type current role).  
+
+#### Properties
+
+Auto-properties must still be static (since instance fields are disallowed).  
+TODO allow `this` (of type current role).  
+
+#### Operators
+
+##### Conversions
 
 TODO
 ```
@@ -331,6 +420,20 @@ R r = default;
 object o = r; // what conversion is that? if R doesn't have `object` as base type. What about interfaces?
 ```
 
+Should allow conversion operators. Extension conversion is useful. 
+Example: from `int` to `string` (done by `StringExtension`).  
+But we should disallow user-defined conversions from/to underlying type 
+or inherited roles, because a conversion already exists.  
+Conversion to interface still disallowed.  
+
+#### Events
+
+TODO
+
+#### Indexers
+
+TODO
+
 ### Lookup rules
 
 The simple names and member access rules from phase A section (above) take full effect, 
@@ -338,20 +441,7 @@ as role types now exist and extension types may have non-static members.
 TODO: the simple names rules find `object.ToString()` for `ToString()` 
 in instance extension method, rather than `U.ToString()`. Can we improve on that?
 
-#### Operators
-
-TODO
-
-#### Fields
-
-A *field_declaration* in a *role_declaration* or *extension_declaration* 
-shall explicitly include a `static` modifier.  
-
-#### Methods
-
-TODO
-
-#### Instance invocations
+### Instance invocations
 
 TODO
 
