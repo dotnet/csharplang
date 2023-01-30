@@ -43,7 +43,7 @@ role_member_declaration
     ;
 ```
 
-TODO we may need to allow a role to be defined on top of multiple other roles. 
+TODO2 we may need to allow a role to be defined on top of multiple other roles. 
 `role DiamondRole : NarrowerUnderlyingType, BaseRole1, Interface1, BaseRole2, Interface2 { }`
 We should assume multiple inheritance for now. Will update syntax to allow multiple inherited roles.  
 In that syntax, the first type will be the underlying type.  
@@ -52,7 +52,41 @@ In that syntax, the first type will be the underlying type.
 TODO there are some open questions on extension syntax 
 (who decides to turn a role into an extension?)
 
-## Overview of role types 
+## Role type
+
+A role type (new kind of type) is declared by a *role_declaration*.  
+The permitted modifiers on an extension type are `partial`, `unsafe`, `file` and 
+the accessibility modifiers.  
+
+TODO2 allow and clarify meaning of `static.
+Note that `static` is disallowed. The extension type is static if its underlying type
+is static.  
+The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
+
+The extension type does not **inherit** members from its underlying type 
+(which may be `sealed` or a struct), but
+the lookup rules are modified to achieve a similar effect (see below).  
+
+The *role_underlying_type* type may not be `dynamic`, a pointer, a nullable reference (no top-level nullability), 
+a ref struct type.  
+The *role_underlying_type* type must include all the type parameters from the extension type.  
+The *role_underlying_type* may not include an *interface_type_list* (this is part of Phase C).  
+
+An extension declaration must include an underlying type, unless it is partial. 
+It is a compile-time error if no part of a partial extension type includes an underlying type, 
+or the underlying type differs amongst all the parts.  
+
+When a partial extension declaration includes an accessibility specification, 
+that specification shall agree with all other parts that include an accessibility specification. 
+If no part of a partial extension includes an accessibility specification, 
+the type is given the appropriate default accessibility (`internal`).
+
+The underlying type of an extension type shall be at least as accessible as the extension type itself.  
+
+A role type satisfies the constraints satisfied by its underlying type (see section on constraints). 
+In phase C, some additional constraints can be satisfied (additional implemented interfaces).  
+
+TODO2
 
 We'll use "augments" for relationship to underlying type 
 (comparable to "inherits" for relationship to base type).  
@@ -75,74 +109,175 @@ Similarly, roles don't have a base type, but have base roles.
 `role R<T> : T where T : INumber<T> { }`
 A role may be a value or reference type, and this may not be known at compile-time. 
 
-### Role type
-
-A role type is declared by a non-nested *role_declaration*.  
-The above rules from extension types apply, namely the permitted modifiers and rules on underlying type.
-
-TODO: constructors?
-TODO: what is the base type of a role? Do we tweak member lookup to avoid looking into `object`,
-or do we say that role doesn't have `object` in its base chain?
-
-### Extension type
-
-An extension type is a role type (new kind of type) declared by an *extension_declaration*.  
-The permitted modifiers on an extension type are `partial`, `unsafe`, `file` and 
-the accessibility modifiers.  
-Note that `static` is disallowed. The extension type is static if its underlying type
-is static.  
-The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
-
-The *role_underlying_type* type may not be `dynamic`, a pointer, a nullable reference (no top-level nullability), 
-a ref struct type.  
-The *role_underlying_type* type must include all the type parameters from the extension type.  
-The *role_underlying_type* may not include an *interface_type_list* (this is part of Phase C).  
-
-An extension declaration must include an underlying type, unless it is partial. 
-It is a compile-time error if no part of a partial extension type includes an underlying type, 
-or the underlying type differs amongst all the parts.  
-
-When a partial extension declaration includes an accessibility specification, 
-that specification shall agree with all other parts that include an accessibility specification. 
-If no part of a partial extension includes an accessibility specification, 
-the type is given the appropriate default accessibility (`internal`).
-
-The underlying type of an extension type shall be at least as accessible as the extension type itself.  
-
-A role type satisfies the constraints satisfied by its underlying type. In phase C,
-some additional constraints can be satisfied (additional implemented interfaces).  
 
 TODO slightly different meaning for `protected`  
+TODO: constructors?
 
-### Constraints
+### Role type members
 
-TODO `struct`, `class`
-`where T : Extension`, `where T : Role`
-Disallow roles/extensions in type constraints for now. Is there an issue with struct?
+The role type members may not use the `virtual` or `override` modifiers.  
+The `new` modifier is allowed and the compiler will warn that you should
+use `new` when shadowing.  
+Shadowing includes underlying type and inherited roles.  
 
-## Implementation details
+```
+class U { public void M() { } }
+role R : U { /*new*/ public void M() { } } // wins when dealing with an R
+```
 
-Roles will be implemented as ref structs.  
+```
+class U { public void M() { } }
+extension X : U { /*new*/ public void M() { } } // ignored in some cases, but extension is a role so rule should apply anyways
+U u;
+u.M(); // U.M (ignored X.M)
+X x;
+x.M(); // X.M
+```
 
-TODO what is a role type? what is its base type?  
-TODO downlevel concerns (relates to disallowing `static` modifier)?  
-TODO how do we emit an extension type versus a handcrafted ref struct?  
-TODO how do we emit the relationship to underlying type? base type or special constructor?  
-TODO our emit strategy should allow using pointer types and ref structs as underlying types
-in the future.  
+```
+class U { }
+role R : U { public void M() { } }
+role R2 : U, R { /*new*/ public void M() { } } // wins when dealing with an R2
+```
 
+#### Constants
 
-### Lookup rules
+Existing [rules for constants](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#144-constants) 
+apply (so duplicates or the `static` modifier are disallowed).
 
-Will need to spec or disallow `base.` syntax.
+#### Fields
+
+A *field_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
+Otherwise, existing [rules for fields](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#145-fields) apply.  
+
+#### Methods
+
+A *method_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
+Parameters with the `this` modifier are disallowed.
+Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
+In particular, a static method does not operate on a specific instance, 
+and it is a compile-time error to refer to `this` in a static method.
+
+#### Properties
+
+A *property_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
+Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
+In particular, a static method does not operate on a specific instance, 
+and it is a compile-time error to refer to `this` in a static method.
+
+#### Nested types
+
+TODO2 `UnderlyingType.NestedType` would find the `NestedType` from an extension.
+
+#### Events
+
+TODO
+
+#### Fields
+
+A *field_declaration* in a *role_declaration* or *extension_declaration* 
+shall explicitly include a `static` modifier.  
+
+#### Methods
+
+TODO allow `this` (of type current role).  
+
+#### Properties
+
+Auto-properties must still be static (since instance fields are disallowed).  
+TODO allow `this` (of type current role).  
+
+#### Operators
+
+##### Conversions
+
+TODO
+```
+role R : U { } 
+R r = default;
+object o = r; // what conversion is that? if R doesn't have `object` as base type. What about interfaces?
+```
+
+Should allow conversion operators. Extension conversion is useful. 
+Example: from `int` to `string` (done by `StringExtension`).  
+But we should disallow user-defined conversions from/to underlying type 
+or inherited roles, because a conversion already exists.  
+Conversion to interface still disallowed.  
+
+#### Indexers
+
+TODO
+
+TODO more members
+
+## Extension type
+
+An extension type is a role type declared by an *extension_declaration*.  
+The above rules from role types apply, namely the permitted modifiers and rules on underlying type.  
+TODO2
+
+## Constraints
+
+TL;DR: A role satisfies the constraints satisfied by its underlying type. Roles cannot be used as type constraints.  
+
+TODO2 `struct`, `class`
+
+By the existing [rules on type parameter constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1425-type-parameter-constraints)
+roles are disallowed in constraints (a role is neither a class or an interface type).
+
+```
+where T : Role // error
+```
+
+TODO Does this restriction on constraints cause issues with structs?
+
+We modify the [rules on satisfying constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#845-satisfying-constraints) as follows:
+
+TODO2
+Whenever a constructed type or generic method is referenced, the supplied type arguments are checked against the type parameter constraints declared on the generic type or method. For each `where` clause, the type argument `A` that corresponds to the named type parameter is checked against each constraint as follows:
+
+- If the constraint is a `class` type, an interface type, or a type parameter, let `C` represent that constraint with the supplied type arguments substituted for any type parameters that appear in the constraint. To satisfy the constraint, it shall be the case that type `A` is convertible to type `C` by one of the following:
+  - An identity conversion
+  - An implicit reference conversion
+  - A boxing conversion, provided that type `A` is a non-nullable value type.
+  - An implicit reference, boxing or type parameter conversion from a type parameter `A` to `C`.
+- If the constraint is the reference type constraint (`class`), the type `A` shall satisfy one of the following:
+  - `A` is an interface type, class type, delegate type, array type or the dynamic type.
+  > *Note*: `System.ValueType` and `System.Enum` are reference types that satisfy this constraint. *end note*
+  - `A` is a type parameter that is known to be a reference type.
+- If the constraint is the value type constraint (`struct`), the type `A` shall satisfy one of the following:
+  - `A` is a `struct` type or `enum` type, but not a nullable value type.
+  > *Note*: `System.ValueType` and `System.Enum` are reference types that do not satisfy this constraint. *end note*
+  - `A` is a type parameter having the value type constraint.
+- If the constraint is the constructor constraint `new()`, the type `A` shall not be `abstract` and shall have a public parameterless constructor. This is satisfied if one of the following is true:
+  - `A` is a value type, since all value types have a public default constructor.
+  - `A` is a type parameter having the constructor constraint.
+  - `A` is a type parameter having the value type constraint.
+  - `A` is a `class` that is not abstract and contains an explicitly declared public constructor with no parameters.
+  - `A` is not `abstract` and has a default constructor.
+
+A compile-time error occurs if one or more of a type parameter’s constraints are not satisfied by the given type arguments.
+
+## Extension methods
+
+We modify the [extension methods rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#14610-extension-methods) as follows:
+
+[...] The first parameter of an extension method may have no modifiers other than `this`, 
+and the parameter type may not be a pointer **or a role** type.
+
+## Lookup rules
+
+TODO2 Will need to spec or disallow `base.` syntax?
 Casting seems an adequate solution to access hidden members: `((R)r2).M()`.  
-We may not need a syntax like `base(R).` which was brainstormed for some other features.
 
-We want to ensure that both of these are possible:  
+TODO2 We want to ensure that both of these are possible:  
 From an extension, need to access a hidden thing.  
 From an underlying type, still need to access the extension member when extension loses.  
 
-#### Simple names
+### Simple names
+
+TL;DR: After doing an unsuccessful member lookup in a role, we'll also perform a
+member lookup in the underlying type.  
 
 We modify the [simple names rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1174-simple-names) as follows:
 
@@ -176,7 +311,11 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
 TODO confirm we don't want extension type lookup here, since we didn't do 
 any extension method lookup previously.
 
-#### Member access
+### Member access
+
+TL;DR: After doing an unsuccessful member lookup in a type, we'll perform an member lookup
+in the underlying type if we were dealing with a role, or we'll perform an extension member lookup
+if we were not dealing with a role.
 
 We modify the [member access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access) as follows:
 
@@ -229,17 +368,59 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
 - Otherwise, an attempt is made to process `E.I` as an extension method invocation. 
   If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
-TODO Note: above rules prevent `underlying.M()` from binding to `LegacyExtension.M(this Role)`.
 TODO Is the "where `T` is not a type parameter" portion still relevant?
 
-#### Member lookup
+### Member lookup
 
-TODO Lookup in base types only extends through roles/extensions 
-(not System.Object/System.ValueType/System.Role)
-TODO as a result we'll find `UnderlyingType.ToString` instead of 
-`object.ToString` when inside an extension/role.
+TL;DR: Member lookup understands that roles inherit from their base roles, but not from `object`.
 
-#### Compatible substituted extension type
+We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) as follows:
+
+A member lookup of a name `N` with `K` type arguments in a type `T` is processed as follows:
+
+- First, a set of accessible members named `N` is determined:
+  - If `T` is a type parameter, then the set is the union of the sets of accessible members named `N` in each of the types specified as a primary constraint or secondary constraint for `T`, along with the set of accessible members named `N` in `object`.
+  - Otherwise, the set consists of all accessible members named `N` in `T`, including inherited members and **for non-role types** the accessible members named `N` in `object`. If `T` is a constructed type, the set of members is obtained by substituting type arguments as described in §14.3.3. Members that include an `override` modifier are excluded from the set.
+- Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process might be able to infer the type arguments.
+- Next, if the member is invoked, all non-invocable members are removed from the set.
+- Next, members that are hidden by other members are removed from the set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied:
+  - If `M` is a constant, field, property, event, or enumeration member, then all members declared in a base type of `S` are removed from the set.
+  - If `M` is a type declaration, then all non-types declared in a base type of `S` are removed from the set, and all type declarations with the same number of type parameters as `M` declared in a base type of `S` are removed from the set.
+  - If `M` is a method, then all non-method members declared in a base type of `S` are removed from the set.
+- Next, interface members that are hidden by class members are removed from the set. This step only has an effect if `T` is a type parameter and `T` has both an effective base class other than `object` and a non-empty effective interface set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied if `S` is a class declaration other than `object`:
+  - If `M` is a constant, field, property, event, enumeration member, or type declaration, then all members declared in an interface declaration are removed from the set.
+  - If `M` is a method, then all non-method members declared in an interface declaration are removed from the set, and all methods with the same signature as `M` declared in an interface declaration are removed from the set.
+- Finally, having removed hidden members, the result of the lookup is determined:
+  - If the set consists of a single member that is not a method, then this member is the result of the lookup.
+  - Otherwise, if the set contains only methods, then this group of methods is the result of the lookup.
+  - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
+
+For purposes of member lookup, a type `T` is considered to have the following base types:
+
+- If `T` is `object` or `dynamic`, then `T` has no base type.
+- If `T` is an *enum_type*, the base types of `T` are the class types `System.Enum`, `System.ValueType`, and `object`.
+- If `T` is a *struct_type*, the base types of `T` are the class types `System.ValueType` and `object`.
+- If `T` is a *class_type*, the base types of `T` are the base classes of `T`, including the class type `object`.
+- If `T` is an *interface_type*, the base types of `T` are the base interfaces of `T` and the class type `object`.
+- If `T` is an *array_type*, the base types of `T` are the class types `System.Array` and `object`.
+- If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
+- **If `T` is an *role_type*, the base types of `T` are the base roles of `T`.**.
+
+```csharp
+role R : U
+{
+    void M()
+    {
+        var s = ToString(); // find `U.ToString()` as opposed to `object.ToString()`
+    }
+}
+```
+
+### Compatible substituted extension type
+
+TL;DR: We can determine whether an extension is compatible with a given underlying type
+and when successful this process yields an extension type we can use
+(including required substitutions).  
 
 An extension type `X` is compatible with given type `U` if:
 - `X` is non-generic and its underlying type is `U`, a base type of `U` or an implemented interface of `U`
@@ -251,18 +432,21 @@ An extension type `X` is compatible with given type `U` if:
 
 ```csharp
 #nullable enable
-role Extension<T> : Underlying<T> where T : class
-class Base<T>;
-class Underlying<T> : Base<T>;
+role Extension<T> : Underlying<T> where T : class { }
+class Base<T> { }
+class Underlying<T> : Base<T> { }
 
 Base<object> b; // Extension<object> is a compatible extension with b
 Underlying<string> u; // Extension<string> is a compatible extension with u
-Underlying<string?>u2; // Extensions<string?> is a compatible extension with u2
+Underlying<int> u2; // But no substitution of Extension<T> is compatible with u2
+Underlying<string?> u3; // Extensions<string?> is a compatible extension with u3
                        // but its usage will produce a warning
-Underlying<int> u3; // But no substitution of Extension<T> is compatible with u3
 ```
 
-#### Extension member lookup
+### Extension member lookup
+
+TL;DR: Given an underlying type, we'll search enclosing types and namespaces 
+(and their imports) for compatible extensions and for each "layer" we'll do member lookups.  
 
 If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression*, 
 the member is said to be invoked.
@@ -292,8 +476,8 @@ We process as follows:
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
   the result of the lookup is empty.
 
-TODO need to account for nested extension types. We'll start looking in enclosing types then enclosing namespaces.  
-TODO explain static usings and nested extension types.
+TODO2 need to account for nested extension types. We'll start looking in enclosing types then enclosing namespaces.  
+TODO2 explain static usings and nested extension types.
 
 The preceding rules mean that extension members available in inner namespace declarations 
 take precedence over extension members available in outer namespace declarations,
@@ -328,6 +512,18 @@ TODO A single method is selected corresponding to a method invocation,
 but with some tweaks related to normal form and optional parameters.
 TODO There's also the scenario where a method group contains a single method (lambda improvements).
 
+## Implementation details
+
+Roles will be implemented as ref structs.  
+If the role any instance member, then we'll emit a ref field (of underlying type)
+into the ref struct and a constructor.
+
+TODO how do we emit an extension type versus a handcrafted ref struct?  
+TODO how do we emit the relationship to underlying type? base type or special constructor?  
+TODO our emit strategy should allow using pointer types and ref structs as underlying types
+in the future.  
+TODO issues in async code with ref structs
+
 ## Phase A: Adding static constants, fields, methods and properties
 
 In this first subset of the feature, the syntax is restricted to *extension_declaration*
@@ -335,77 +531,10 @@ and containing only *constant_declaration* members and static *field_declaration
 *method_declaration*, *property_declaration* and *type_declaration* members.  
 TODO: events?
 
-### Extension type members
-
-The extension type members may not use the `virtual` or `override` modifiers.  
-The `new` modifier is allowed and the compiler will warn that you should
-use `new` when shadowing.  
-Shadowing includes underlying type and inherited roles.  
-
-```
-class U { public void M() { } }
-role R : U { /*new*/ public void M() { } } // wins when dealing with an R
-```
-
-```
-class U { public void M() { } }
-extension X : U { /*new*/ public void M() { } } // ignored in some cases, but extension is a role so rule should apply anyways
-U u;
-u.M(); // U.M (ignored X.M)
-X x;
-x.M(); // X.M
-```
-
-```
-class U { }
-role R : U { public void M() { } }
-role R2 : U, R { /*new*/ public void M() { } } // wins when dealing with an R2
-```
-
-The extension type does not **inherit** members from its underlying type 
-(which may be `sealed` or a struct), but
-the lookup rules are modified to achieve a similar effect (see below).  
-
-#### Constants
-
-Existing [rules for constants](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#144-constants) 
-apply (so duplicates or the `static` modifier are disallowed).
-
-#### Fields
-
-A *field_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
-Otherwise, existing [rules for fields](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#145-fields) apply.  
-
-#### Methods
-
-A *method_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
-Parameters with the `this` modifier are disallowed.
-Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
-In particular, a static method does not operate on a specific instance, 
-and it is a compile-time error to refer to `this` in a static method.
-
-#### Properties
-
-A *property_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
-Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
-In particular, a static method does not operate on a specific instance, 
-and it is a compile-time error to refer to `this` in a static method.
-
-#### Nested types
-
-TODO `UnderlyingType.NestedType` would find the `NestedType` from an extension.
-
-#### Events
-
-TODO
-
 ## B. Roles and extensions with members
 
 In this second subset of the feature, the *role_declaration* becomes allowed
-and non-static members other than fields become allowed.
-
-TODO issues in async code
-
+and non-static members other than fields or auto-properties become allowed.
 
 ### Role and extension type members
 
@@ -450,13 +579,6 @@ TODO
 #### Indexers
 
 TODO
-
-### Lookup rules
-
-The simple names and member access rules from phase A section (above) take full effect, 
-as role types now exist and extension types may have non-static members.  
-TODO: the simple names rules find `object.ToString()` for `ToString()` 
-in instance extension method, rather than `U.ToString()`. Can we improve on that?
 
 ### Instance invocations
 
