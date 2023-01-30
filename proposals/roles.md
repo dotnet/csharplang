@@ -114,6 +114,12 @@ some additional constraints can be satisfied (additional implemented interfaces)
 
 TODO slightly different meaning for `protected`  
 
+### Constraints
+
+TODO `struct`, `class`
+`where T : Extension`, `where T : Role`
+Disallow roles/extensions in type constraints for now. Is there an issue with struct?
+
 ## Implementation details
 
 Roles will be implemented as ref structs.  
@@ -125,82 +131,6 @@ TODO how do we emit the relationship to underlying type? base type or special co
 TODO our emit strategy should allow using pointer types and ref structs as underlying types
 in the future.  
 
-## Phase A: Adding static constants, fields, methods and properties
-
-In this first subset of the feature, the syntax is restricted to *extension_declaration*
-and containing only *constant_declaration* members and static *field_declaration*, 
-*method_declaration*, *property_declaration* and *type_declaration* members.  
-TODO: events?
-
-### Constraints
-
-TODO `struct`, `class`
-`where T : Extension`, `where T : Role`
-Disallow roles/extensions in type constraints for now. Is there an issue with struct?
-
-### Extension type members
-
-The extension type members may not use the `virtual` or `override` modifiers.  
-The `new` modifier is allowed and the compiler will warn that you should
-use `new` when shadowing.  
-Shadowing includes underlying type and inherited roles.  
-
-```
-class U { public void M() { } }
-role R : U { /*new*/ public void M() { } } // wins when dealing with an R
-```
-
-```
-class U { public void M() { } }
-extension X : U { /*new*/ public void M() { } } // ignored in some cases, but extension is a role so rule should apply anyways
-U u;
-u.M(); // U.M (ignored X.M)
-X x;
-x.M(); // X.M
-```
-
-```
-class U { }
-role R : U { public void M() { } }
-role R2 : U, R { /*new*/ public void M() { } } // wins when dealing with an R2
-```
-
-The extension type does not **inherit** members from its underlying type 
-(which may be `sealed` or a struct), but
-the lookup rules are modified to achieve a similar effect (see below).  
-
-#### Constants
-
-Existing [rules for constants](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#144-constants) 
-apply (so duplicates or the `static` modifier are disallowed).
-
-#### Fields
-
-A *field_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
-Otherwise, existing [rules for fields](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#145-fields) apply.  
-
-#### Methods
-
-A *method_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
-Parameters with the `this` modifier are disallowed.
-Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
-In particular, a static method does not operate on a specific instance, 
-and it is a compile-time error to refer to `this` in a static method.
-
-#### Properties
-
-A *property_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
-Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
-In particular, a static method does not operate on a specific instance, 
-and it is a compile-time error to refer to `this` in a static method.
-
-#### Nested types
-
-TODO `UnderlyingType.NestedType` would find the `NestedType` from an extension.
-
-#### Events
-
-TODO
 
 ### Lookup rules
 
@@ -319,6 +249,19 @@ An extension type `X` is compatible with given type `U` if:
   from the role/extension appear in the underlying type).  
   We call the resulting substituted type `X` the "compatible substituted extension type".
 
+```csharp
+#nullable enable
+role Extension<T> : Underlying<T> where T : class
+class Base<T>;
+class Underlying<T> : Base<T>;
+
+Base<object> b; // Extension<object> is a compatible extension with b
+Underlying<string> u; // Extension<string> is a compatible extension with u
+Underlying<string?>u2; // Extensions<string?> is a compatible extension with u2
+                       // but its usage will produce a warning
+Underlying<int> u3; // But no substitution of Extension<T> is compatible with u3
+```
+
 #### Extension member lookup
 
 If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression*, 
@@ -384,6 +327,77 @@ https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#1
 TODO A single method is selected corresponding to a method invocation, 
 but with some tweaks related to normal form and optional parameters.
 TODO There's also the scenario where a method group contains a single method (lambda improvements).
+
+## Phase A: Adding static constants, fields, methods and properties
+
+In this first subset of the feature, the syntax is restricted to *extension_declaration*
+and containing only *constant_declaration* members and static *field_declaration*, 
+*method_declaration*, *property_declaration* and *type_declaration* members.  
+TODO: events?
+
+### Extension type members
+
+The extension type members may not use the `virtual` or `override` modifiers.  
+The `new` modifier is allowed and the compiler will warn that you should
+use `new` when shadowing.  
+Shadowing includes underlying type and inherited roles.  
+
+```
+class U { public void M() { } }
+role R : U { /*new*/ public void M() { } } // wins when dealing with an R
+```
+
+```
+class U { public void M() { } }
+extension X : U { /*new*/ public void M() { } } // ignored in some cases, but extension is a role so rule should apply anyways
+U u;
+u.M(); // U.M (ignored X.M)
+X x;
+x.M(); // X.M
+```
+
+```
+class U { }
+role R : U { public void M() { } }
+role R2 : U, R { /*new*/ public void M() { } } // wins when dealing with an R2
+```
+
+The extension type does not **inherit** members from its underlying type 
+(which may be `sealed` or a struct), but
+the lookup rules are modified to achieve a similar effect (see below).  
+
+#### Constants
+
+Existing [rules for constants](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#144-constants) 
+apply (so duplicates or the `static` modifier are disallowed).
+
+#### Fields
+
+A *field_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
+Otherwise, existing [rules for fields](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#145-fields) apply.  
+
+#### Methods
+
+A *method_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
+Parameters with the `this` modifier are disallowed.
+Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
+In particular, a static method does not operate on a specific instance, 
+and it is a compile-time error to refer to `this` in a static method.
+
+#### Properties
+
+A *property_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
+Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
+In particular, a static method does not operate on a specific instance, 
+and it is a compile-time error to refer to `this` in a static method.
+
+#### Nested types
+
+TODO `UnderlyingType.NestedType` would find the `NestedType` from an extension.
+
+#### Events
+
+TODO
 
 ## B. Roles and extensions with members
 
