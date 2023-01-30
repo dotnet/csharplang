@@ -24,7 +24,12 @@ extension_declaration
 
 role_underlying_type
     : ':' type
-    : ':' type ',' interface_type_list
+    : ':' type ',' role_or_interface_type_list
+    ;
+
+role_or_interface_type_list
+    : interface_type_list
+	: role_type (',' role_or_interface_type_list)
     ;
 
 role_body
@@ -43,11 +48,10 @@ role_member_declaration
     ;
 ```
 
-TODO2 we may need to allow a role to be defined on top of multiple other roles. 
-`role DiamondRole : NarrowerUnderlyingType, BaseRole1, Interface1, BaseRole2, Interface2 { }`
-We should assume multiple inheritance for now. Will update syntax to allow multiple inherited roles.  
-In that syntax, the first type will be the underlying type.  
-`role R : I { } // First type is underlying type (not an implemented interface)`
+An example with multiple base roles:
+```
+role DiamondRole : NarrowerUnderlyingType, BaseRole1, BaseRole2, Interface1, Interface2 { }`
+```
 
 TODO there are some open questions on extension syntax 
 (who decides to turn a role into an extension?)
