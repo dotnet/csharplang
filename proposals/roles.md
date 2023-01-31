@@ -29,7 +29,7 @@ role_underlying_type
 
 role_or_interface_type_list
     : interface_type_list
-	: role_type (',' role_or_interface_type_list)
+    : role_type (',' role_or_interface_type_list)
     ;
 
 role_body
@@ -55,16 +55,16 @@ role DiamondRole : NarrowerUnderlyingType, BaseRole1, BaseRole2, Interface1, Int
 
 TODO there are some open questions on extension syntax 
 (who decides to turn a role into an extension?)
+TODO should we have a naming convention like `Role` and `Extension` suffixes? 
+(`CustomerRole` and `DataObjectExtension`)
 
 ## Role type
 
 A role type (new kind of type) is declared by a *role_declaration*.  
-The permitted modifiers on an extension type are `partial`, `unsafe`, `file` and 
+The permitted modifiers on an extension type are `partial`, `unsafe`, `static`, `file` and 
 the accessibility modifiers.  
-
-TODO2 allow and clarify meaning of `static.
-Note that `static` is disallowed. The extension type is static if its underlying type
-is static.  
+A static role shall not be instantiated, shall not be used as a type and shall
+contain only static members.  
 The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
 
 The extension type does not **inherit** members from its underlying type 
@@ -144,6 +144,8 @@ role R : U { public void M() { } }
 role R2 : U, R { /*new*/ public void M() { } } // wins when dealing with an R2
 ```
 
+A role cannot contain a member declaration with the same name as the role.
+
 #### Constants
 
 Existing [rules for constants](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#144-constants) 
@@ -212,7 +214,7 @@ Conversion to interface still disallowed.
 
 TODO
 
-TODO more members
+TODO more members (static constructors, constructors)
 
 ## Extension type
 
@@ -223,8 +225,6 @@ TODO2
 ## Constraints
 
 TL;DR: A role satisfies the constraints satisfied by its underlying type. Roles cannot be used as type constraints.  
-
-TODO2 `struct`, `class`
 
 By the existing [rules on type parameter constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1425-type-parameter-constraints)
 roles are disallowed in constraints (a role is neither a class or an interface type).
@@ -238,9 +238,15 @@ TODO Does this restriction on constraints cause issues with structs?
 We modify the [rules on satisfying constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#845-satisfying-constraints) as follows:
 
 TODO2
-Whenever a constructed type or generic method is referenced, the supplied type arguments are checked against the type parameter constraints declared on the generic type or method. For each `where` clause, the type argument `A` that corresponds to the named type parameter is checked against each constraint as follows:
+Whenever a constructed type or generic method is referenced, the supplied type arguments
+are checked against the type parameter constraints declared on the generic type or method.
+For each `where` clause, the type argument `A` that corresponds to the named type parameter
+is checked against each constraint as follows:
 
-- If the constraint is a `class` type, an interface type, or a type parameter, let `C` represent that constraint with the supplied type arguments substituted for any type parameters that appear in the constraint. To satisfy the constraint, it shall be the case that type `A` is convertible to type `C` by one of the following:
+- If the constraint is a `class` type, an interface type, or a type parameter,
+  let `C` represent that constraint with the supplied type arguments substituted 
+  for any type parameters that appear in the constraint. To satisfy the constraint, 
+  it shall be the case that type `A` is convertible to type `C` by one of the following:
   - An identity conversion
   - An implicit reference conversion
   - A boxing conversion, provided that type `A` is a non-nullable value type.
@@ -253,7 +259,9 @@ Whenever a constructed type or generic method is referenced, the supplied type a
   - `A` is a `struct` type or `enum` type, but not a nullable value type.
   > *Note*: `System.ValueType` and `System.Enum` are reference types that do not satisfy this constraint. *end note*
   - `A` is a type parameter having the value type constraint.
-- If the constraint is the constructor constraint `new()`, the type `A` shall not be `abstract` and shall have a public parameterless constructor. This is satisfied if one of the following is true:
+- If the constraint is the constructor constraint `new()`, 
+  the type `A` shall not be `abstract` and shall have a public parameterless constructor. 
+  This is satisfied if one of the following is true:
   - `A` is a value type, since all value types have a public default constructor.
   - `A` is a type parameter having the constructor constraint.
   - `A` is a type parameter having the value type constraint.
