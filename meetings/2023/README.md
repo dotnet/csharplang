@@ -32,7 +32,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Feb 1, 2023
 
-- Extensions (Julien)
+- Extensions (Julien): https://github.com/dotnet/csharplang/pull/6880
 
 # C# Language Design Notes for 2023
 
