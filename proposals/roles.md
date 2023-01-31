@@ -87,6 +87,9 @@ the type is given the appropriate default accessibility (`internal`).
 
 The underlying type of an extension type shall be at least as accessible as the extension type itself.  
 
+There is an identity conversion between a role and its underlying type,
+and between a role and its base roles.
+
 A role type satisfies the constraints satisfied by its underlying type (see section on constraints). 
 In phase C, some additional constraints can be satisfied (additional implemented interfaces).  
 
@@ -113,9 +116,7 @@ Similarly, roles don't have a base type, but have base roles.
 `role R<T> : T where T : INumber<T> { }`
 A role may be a value or reference type, and this may not be known at compile-time. 
 
-
-TODO slightly different meaning for `protected`  
-TODO: constructors?
+TODO2 slightly different meaning for `protected`  
 
 ### Role type members
 
@@ -226,24 +227,14 @@ TODO2
 
 TL;DR: A role satisfies the constraints satisfied by its underlying type. Roles cannot be used as type constraints.  
 
-By the existing [rules on type parameter constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1425-type-parameter-constraints)
-roles are disallowed in constraints (a role is neither a class or an interface type).
-
-```
-where T : Role // error
-```
-
-TODO Does this restriction on constraints cause issues with structs?
-
 We modify the [rules on satisfying constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#845-satisfying-constraints) as follows:
 
-TODO2
 Whenever a constructed type or generic method is referenced, the supplied type arguments
 are checked against the type parameter constraints declared on the generic type or method.
 For each `where` clause, the type argument `A` that corresponds to the named type parameter
 is checked against each constraint as follows:
 
-- If the constraint is a `class` type, an interface type, or a type parameter,
+- If the constraint is a class type, an interface type, or a type parameter,
   let `C` represent that constraint with the supplied type arguments substituted 
   for any type parameters that appear in the constraint. To satisfy the constraint, 
   it shall be the case that type `A` is convertible to type `C` by one of the following:
@@ -253,12 +244,12 @@ is checked against each constraint as follows:
   - An implicit reference, boxing or type parameter conversion from a type parameter `A` to `C`.
 - If the constraint is the reference type constraint (`class`), the type `A` shall satisfy one of the following:
   - `A` is an interface type, class type, delegate type, array type or the dynamic type.
-  > *Note*: `System.ValueType` and `System.Enum` are reference types that satisfy this constraint. *end note*
   - `A` is a type parameter that is known to be a reference type.
+  - **`A` is a role type with an underlying type that satisfies the reference type constraint.**
 - If the constraint is the value type constraint (`struct`), the type `A` shall satisfy one of the following:
   - `A` is a `struct` type or `enum` type, but not a nullable value type.
-  > *Note*: `System.ValueType` and `System.Enum` are reference types that do not satisfy this constraint. *end note*
   - `A` is a type parameter having the value type constraint.
+  - **`A` is a role type with an underlying type that satisfies the value type constraint.**
 - If the constraint is the constructor constraint `new()`, 
   the type `A` shall not be `abstract` and shall have a public parameterless constructor. 
   This is satisfied if one of the following is true:
@@ -269,6 +260,15 @@ is checked against each constraint as follows:
   - `A` is not `abstract` and has a default constructor.
 
 A compile-time error occurs if one or more of a type parameter’s constraints are not satisfied by the given type arguments.
+
+By the existing [rules on type parameter constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1425-type-parameter-constraints)
+roles are disallowed in constraints (a role is neither a class or an interface type).
+
+```
+where T : Role // error
+```
+
+TODO Does this restriction on constraints cause issues with structs?
 
 ## Extension methods
 
@@ -516,6 +516,8 @@ TODO
 ### Operators
 
 TODO
+User-defined conversion should be allowed, except where it conflicts with a built-in
+conversion (such as with an underlying type).  
 
 ### Method group conversions
 
