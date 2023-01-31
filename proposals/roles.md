@@ -54,7 +54,7 @@ role DiamondRole : NarrowerUnderlyingType, BaseRole1, BaseRole2, Interface1, Int
 ```
 
 TODO there are some open questions on extension syntax 
-(who decides to turn a role into an extension?)
+(who decides to turn a role into an extension?)  
 TODO should we have a naming convention like `Role` and `Extension` suffixes? 
 (`CustomerRole` and `DataObjectExtension`)
 
@@ -536,24 +536,24 @@ conversion (such as with an underlying type).
 
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions
 TODO A single method is selected corresponding to a method invocation, 
-but with some tweaks related to normal form and optional parameters.
-TODO There's also the scenario where a method group contains a single method (lambda improvements).
+but with some tweaks related to normal form and optional parameters.  
+TODO There's also the scenario where a method group contains a single method (lambda improvements).  
 
 ## Implementation details
 
-Roles will be implemented as ref structs.  
-If the role any instance member, then we'll emit a ref field (of underlying type)
+Roles are implemented as ref structs.  
+If the role any instance member, then we emit a ref field (of underlying type)
 into the ref struct and a constructor.  
 Values of role types are left as values of the underlying value type, until a role
 member is accessed. When a role member is accessed, a role instance is created
 with a reference to the underlying value and the member is accessed on that instance.
 
 ```
-Role r = default(UnderlyingType);
+Role r = default(UnderlyingType); // emitted as a local of type `UnderlyingType`
 r.RoleMember(); // emitted as `new Role(ref r).RoleMember();`
 ```
 
-Roles appearing in signatures would be emitted as the role's underlying type
+Roles appearing in signatures are emitted as the role's underlying type
 marked with a modopt of the role type.
 
 ```
@@ -573,7 +573,7 @@ and containing only *constant_declaration* members and static *field_declaration
 *method_declaration*, *property_declaration* and *type_declaration* members.  
 TODO: events?
 
-## B. Roles and extensions with members
+## Phase B. Roles and extensions with members
 
 In this second subset of the feature, the *role_declaration* becomes allowed
 and non-static members other than fields or auto-properties become allowed.
@@ -626,5 +626,5 @@ TODO
 
 TODO
 
-## C. Roles and extensions that implement interfaces
+## Phase C. Roles and extensions that implement interfaces
 
