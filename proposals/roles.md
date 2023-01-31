@@ -85,15 +85,13 @@ that specification shall agree with all other parts that include an accessibilit
 If no part of a partial extension includes an accessibility specification, 
 the type is given the appropriate default accessibility (`internal`).
 
-The underlying type of an extension type shall be at least as accessible as the extension type itself.  
-
 There is an identity conversion between a role and its underlying type,
 and between a role and its base roles.
 
 A role type satisfies the constraints satisfied by its underlying type (see section on constraints). 
 In phase C, some additional constraints can be satisfied (additional implemented interfaces).  
 
-TODO2
+### Terminology
 
 We'll use "augments" for relationship to underlying type 
 (comparable to "inherits" for relationship to base type).  
@@ -117,6 +115,21 @@ Similarly, roles don't have a base type, but have base roles.
 A role may be a value or reference type, and this may not be known at compile-time. 
 
 TODO2 slightly different meaning for `protected`  
+
+### Accessibility constraints
+
+We modify the [accessibility constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#755-accessibility-constraints) as follows:
+
+The following accessibility constraints exist:
+- [...]
+- **The underlying type of a role type shall be at least as accessible as the role type itself.**
+- **The base roles of a role type shall be at least as accessible as the role type itself.**
+
+### Signatures and overloading
+
+The existing [rules for signatures](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#76-signatures-and-overloading) apply.  
+Two signatures differing by a role vs. its underlying type, or a role vs. 
+one of its base types are considered to be the *same signature*.
 
 ### Role type members
 
@@ -281,10 +294,6 @@ and the parameter type may not be a pointer **or a role** type.
 
 TODO2 Will need to spec or disallow `base.` syntax?
 Casting seems an adequate solution to access hidden members: `((R)r2).M()`.  
-
-TODO2 We want to ensure that both of these are possible:  
-From an extension, need to access a hidden thing.  
-From an underlying type, still need to access the extension member when extension loses.  
 
 ### Simple names
 
@@ -466,9 +475,11 @@ the member is said to be invoked.
 Given an underlying type `U` and an identifier `I`, the objective is to find an extension member `X.I`, if possible.
 
 We process as follows:
-- Starting with the closest enclosing namespace declaration, continuing with each enclosing namespace declaration, 
-  and ending with the containing compilation unit, successive attempts are made to find a candidate set of extension members:
-  - If the given namespace or compilation unit directly contains extension types, those will be considered first.
+- Starting with the closest enclosing type declaration, continuing with each type declaration,
+  then continuing with each enclosing namespace declaration, and ending with
+  the containing compilation unit, successive attempts are made to find a candidate set of extension members:
+  - If the given type, namespace or compilation unit directly contains extension types,
+    those will be considered first.
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types, those will be considered second.
 - Check which extension types are compatible with the given underlying type `U` and 
@@ -488,12 +499,14 @@ We process as follows:
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
   the result of the lookup is empty.
 
-TODO2 need to account for nested extension types. We'll start looking in enclosing types then enclosing namespaces.  
-TODO2 explain static usings and nested extension types.
+TODO2 explain static usings
 
-The preceding rules mean that extension members available in inner namespace declarations 
+The preceding rules mean that:
+1. extension members available in inner type declarations take precedence over
+extension members available in outer type declarations,
+2. extension members available in inner namespace declarations 
 take precedence over extension members available in outer namespace declarations,
-and that extension members declared directly in a namespace take precedence over 
+3. and that extension members declared directly in a namespace take precedence over 
 extension members imported into that same namespace with a using namespace directive.  
 
 The difference between invocation and non-invocation handling is that for invocation scenarios, 
@@ -530,7 +543,22 @@ TODO There's also the scenario where a method group contains a single method (la
 
 Roles will be implemented as ref structs.  
 If the role any instance member, then we'll emit a ref field (of underlying type)
-into the ref struct and a constructor.
+into the ref struct and a constructor.  
+Values of role types are left as values of the underlying value type, until a role
+member is accessed. When a role member is accessed, a role instance is created
+with a reference to the underlying value and the member is accessed on that instance.
+
+```
+Role r = default(UnderlyingType);
+r.RoleMember(); // emitted as `new Role(ref r).RoleMember();`
+```
+
+Roles appearing in signatures would be emitted as the role's underlying type
+marked with a modopt of the role type.
+
+```
+void M(Role r) // emitted as `void M(modopt(Role) UnderlyingType r)`
+```
 
 TODO how do we emit an extension type versus a handcrafted ref struct?  
 TODO how do we emit the relationship to underlying type? base type or special constructor?  
