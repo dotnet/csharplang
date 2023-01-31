@@ -106,7 +106,7 @@ class Base
 
 class Derived : Base
 {
-    Derived()
+    public Derived()
     {
         // Not allowed with get only properties but allowed with init
         Value = true;
@@ -117,7 +117,7 @@ class Consumption
 {
     void Example()
     {
-        var d = new Derived() { Value = true; };
+        var d = new Derived() { Value = true };
     }
 }
 
