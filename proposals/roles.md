@@ -54,7 +54,8 @@ role DiamondRole : NarrowerUnderlyingType, BaseRole1, BaseRole2, Interface1, Int
 ```
 
 TODO there are some open questions on extension syntax 
-(who decides to turn a role into an extension?)  
+(who decides to turn a role into an extension? is the syntax understandable, with
+multiple base roles and implemented interfaces?)  
 TODO should we have a naming convention like `Role` and `Extension` suffixes? 
 (`CustomerRole` and `DataObjectExtension`)
 
@@ -72,8 +73,7 @@ The extension type does not **inherit** members from its underlying type
 the lookup rules are modified to achieve a similar effect (see below).  
 
 The *role_underlying_type* type may not be `dynamic`, a pointer, a nullable reference (no top-level nullability), 
-a ref struct type.  
-The *role_underlying_type* type must include all the type parameters from the extension type.  
+a ref struct type or a role.  
 The *role_underlying_type* may not include an *interface_type_list* (this is part of Phase C).  
 
 An extension declaration must include an underlying type, unless it is partial. 
@@ -97,6 +97,8 @@ An extension is declared by an *extension_declaration*.
 It is a role whose members can be found on the underlying type
 (or a value of the underlying type) when the extension is "in scope"
 and compatible with the underlying type (see extension member lookup section).
+
+The *role_underlying_type* type must include all the type parameters from the extension type.  
 
 The above rules from role types apply, namely the permitted modifiers and rules on underlying type.  
 
@@ -122,6 +124,11 @@ Similarly, roles don't have a base type, but have base roles.
 `role R<T> : T where T : I1, I2 { }`
 `role R<T> : T where T : INumber<T> { }`
 A role may be a value or reference type, and this may not be known at compile-time. 
+
+### Underlying type
+
+TODO2 we need rules to only allow an underlying type that is compatible with the base roles.  
+TODO2 would it be possible to treat the underlying type and the base roles as a single group (base types)?  
 
 ### Accessibility constraints
 
@@ -162,9 +169,17 @@ The existing [rules for signatures](https://github.com/dotnet/csharpstandard/blo
 Two signatures differing by a role vs. its underlying type, or a role vs. 
 one of its base types are considered to be the *same signature*.
 
+TODO2 this needs to be refined to allow overload on different underlying types.
+```
+role ObjectRole : object;
+role StringRole : string, ObjectRole;
+void M(ObjectRole r)
+void M(StringRole r) // overload is okay
+```
+
 ### Role type members
 
-The role type members may not use the `virtual` or `override` modifiers.  
+The role type members may not use the `virtual`, `abstract` or `override` modifiers.  
 The `new` modifier is allowed and the compiler will warn that you should
 use `new` when shadowing.  
 Shadowing includes underlying type and inherited roles.  
@@ -327,6 +342,7 @@ and the parameter type may not be a pointer **or a role** type.
 
 ## Lookup rules
 
+TODO2 give an overview
 TODO2 Will need to spec or disallow `base.` syntax?
 Casting seems an adequate solution to access hidden members: `((R)r2).M()`.  
 
@@ -370,8 +386,8 @@ any extension method lookup previously.
 ### Member access
 
 TL;DR: After doing an unsuccessful member lookup in a type, we'll perform an member lookup
-in the underlying type if we were dealing with a role, or we'll perform an extension member lookup
-if we were not dealing with a role.
+in the underlying type if we were dealing with a role, and if that is still unsuccessful,
+we'll perform an extension member lookup.
 
 We modify the [member access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access) as follows:
 
@@ -399,12 +415,12 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
   - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
-- **If `E` is classified as a type, if `E` is not a type parameter or an extension type, 
-  and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
-  then `E.I` is evaluated and classified as follows:**  
-  ...
 - **If `E` is classified as a role (only relevant in phase B) or extension type, 
   and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, 
+  then `E.I` is evaluated and classified as follows:**  
+  ...
+- **If `E` is classified as a type, if `E` is not a type parameter, 
+  and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
 - If `E` is a property access, indexer access, variable, or value, the type of which is `T`, 
@@ -412,13 +428,13 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   then `E.I` is evaluated and classified as follows:  
   ...
 - **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
-  the type of which is `T`, where `T` is not a type parameter or a role type, and 
-  an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, 
+  the type of which is `T`, where `T` is a role or extension type, and 
+  a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
 - **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
-  the type of which is `T`, where `T` is a role or extension type, and 
-  a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, 
+  the type of which is `T`, where `T` is not a type parameter, and 
+  an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
 - Otherwise, an attempt is made to process `E.I` as an extension method invocation. 
