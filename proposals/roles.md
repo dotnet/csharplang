@@ -5,7 +5,7 @@ A. static extensions
 B. roles and extensions with members  
 C. roles and extensions that implement interfaces  
 
-The syntax for a roles is as follows:
+The syntax for roles is as follows:
 
 ```antlr
 type_declaration
@@ -91,6 +91,15 @@ and between a role and its base roles.
 A role type satisfies the constraints satisfied by its underlying type (see section on constraints). 
 In phase C, some additional constraints can be satisfied (additional implemented interfaces).  
 
+## Extension type
+
+An extension is declared by an *extension_declaration*. 
+It is a role whose members can be found on the underlying type
+(or a value of the underlying type) when the extension is "in scope"
+and compatible with the underlying type (see extension member lookup section).
+
+The above rules from role types apply, namely the permitted modifiers and rules on underlying type.  
+
 ### Terminology
 
 We'll use "augments" for relationship to underlying type 
@@ -114,8 +123,6 @@ Similarly, roles don't have a base type, but have base roles.
 `role R<T> : T where T : INumber<T> { }`
 A role may be a value or reference type, and this may not be known at compile-time. 
 
-TODO2 slightly different meaning for `protected`  
-
 ### Accessibility constraints
 
 We modify the [accessibility constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#755-accessibility-constraints) as follows:
@@ -124,6 +131,30 @@ The following accessibility constraints exist:
 - [...]
 - **The underlying type of a role type shall be at least as accessible as the role type itself.**
 - **The base roles of a role type shall be at least as accessible as the role type itself.**
+
+### Protected access
+
+We modify the [protected access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#754-protected-access) as follows:
+
+**When a `protected` (or other accessibility with `protected`) role member is accessed, 
+the access shall take place within a role declaration that derives from 
+the role in which it is declared. 
+Furthermore, the access is required to take place *through* an instance of that 
+derived role type or a role type constructed from it.
+This restriction prevents one derived role from accessing protected members of 
+other derived roles, even when the members are inherited from the same base role.**
+
+TODO
+
+Let `B` be a base class that declares a protected instance member `M`, 
+and let `D` be a class that derives from `B`. Within the *class_body* of `D`, 
+access to `M` can take one of the following forms:
+
+- An unqualified *type_name* or *primary_expression* of the form `M`.
+- A *primary_expression* of the form `E.M`, provided the type of `E` is `T` or 
+  a class derived from `T`, where `T` is the class `D`, or a class type constructed from `D`.
+- A *primary_expression* of the form `base.M`.
+- A *primary_expression* of the form `base[`*argument_list*`]`.
 
 ### Signatures and overloading
 
@@ -187,7 +218,17 @@ and it is a compile-time error to refer to `this` in a static method.
 
 #### Nested types
 
-TODO2 `UnderlyingType.NestedType` would find the `NestedType` from an extension.
+TODO any special rules?
+
+```
+extension Extension : UnderlyingType
+{
+    class NestedType { }
+}
+class UnderlyingType { }
+
+UnderlyingType.NestedType x = null; // okay
+```
 
 #### Events
 
@@ -229,12 +270,6 @@ Conversion to interface still disallowed.
 TODO
 
 TODO more members (static constructors, constructors)
-
-## Extension type
-
-An extension type is a role type declared by an *extension_declaration*.  
-The above rules from role types apply, namely the permitted modifiers and rules on underlying type.  
-TODO2
 
 ## Constraints
 
