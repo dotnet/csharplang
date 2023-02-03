@@ -16,7 +16,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Mar 1, 2023
 
-- `using unsafe X = int*;` or `unsafe using X = int*;`.  Cyrus Najmabadi
 
 ## Mon Feb 27, 2023
 
@@ -26,12 +25,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Feb 15, 2023
 
+- Roles (Julien/Mads): https://github.com/dotnet/csharplang/pull/6880
 
 ## Mon Feb 13, 2023
 
 
 ## Wed Feb 1, 2023
 
+- `using unsafe X = int*;` or `unsafe using X = int*;`.  Cyrus Najmabadi
 - Extensions (Julien): https://github.com/dotnet/csharplang/pull/6880
 
 # C# Language Design Notes for 2023
