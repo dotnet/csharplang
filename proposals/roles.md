@@ -1,4 +1,28 @@
-﻿# Roles
+# Roles
+
+## Summary
+[summary]: #summary
+
+The purpose of "roles" is to augment or adapt existing types to new scenarios, when those types are not under your control, or where changing them would negatively impact other uses of them. The adaptation can be in the form of adding new function members as well as implementing additional interfaces.
+
+Roles are also proposed as the underlying mechanism for "Extensions", and would have great synergy with those.
+
+## Motivation
+[motivation]: #motivation
+
+Roles address two main classes of scenarios: "augmentation" scenarios (fit an existing value with a *new* member) and "adaptation" scenarios (fit an existing value to an *existing* interface). 
+
+In addition, it is proposed that an "Extensions" feature is built on top of roles to provide for additional kinds of extension members beyond today's extension methods, and for "extension interfaces".
+
+### Augmentation scenarios
+
+Augmentation scenarios allow existing values to be seen through the lens of a "stronger" type - a role that provides additional function members on the value.
+
+### Adaptation scenarios
+
+Adaptation scenarios allow existing values to be adapted to existing interfaces, where a role provides  details on how the interface members are implemented.
+
+## Design
 
 This proposal is divided into three parts, all relating to extending existing types:  
 A. static extensions  
