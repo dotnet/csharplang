@@ -71,13 +71,34 @@ struct_body
   : '{' struct_member_declaration* '}' ';'?
   | ';'
   ;
+  
+interface_declaration
+  : attributes? interface_modifier* 'partial'? 'interface'
+    identifier variant_type_parameter_list? interface_base?
+    type_parameter_constraints_clause* interface_body
+  ;  
+    
+interface_body
+  : '{' interface_member_declaration* '}' ';'?
+  | ';'
+  ;
+
+enum_declaration
+  : attributes? enum_modifier* 'enum' identifier enum_base? enum_body
+  ;
+
+enum_body
+  : '{' enum_member_declarations? '}' ';'?
+  | '{' enum_member_declarations ',' '}' ';'?
+  | ';'
+  ;
 ```
 
 ***Note:*** These productions replace `record_declaration` in [Records](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#records) and `record_struct_declaration` in [Record structs](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/record-structs.md#record-structs), which both become obsolete. 
 
-It is an error for a `class_base` to have an `argument_list` if the enclosing `class_declaration` does not contain a `parameter_list`. At most one partial type declaration of a partial class or struct may provide a `parameter_list`. The parameters in the `parameter_list` must all be value parameters.
+It is an error for a `class_base` to have an `argument_list` if the enclosing `class_declaration` does not contain a `parameter_list`. At most one partial type declaration of a partial class or struct may provide a `parameter_list`. The parameters in the `parameter_list` of a `record` declaration must all be value parameters.
 
-It is an error for a `class_body` or `struct_body` to consist of just a `;` unless the corresponding `class_declaration` or `struct_declaration` has a `record` keyword and a `parameter_list`.
+Note, according to this proposal `class_body`, `struct_body`, `interface_body` and `enum_body` are allowed to consist of just a `;`.
 
 A class or struct with a `parameter_list` has an implicit public constructor whose signature corresponds to the value parameters of the type declaration. This is called the ***primary constructor*** for the type, and causes the implicitly declared parameterless constructor, if present, to be suppressed. It is an error to have a primary constructor and a constructor with the same signature already present in the type declaration.
 
@@ -419,5 +440,5 @@ Alternatively we could:
 ## LDM meetings
 
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
-
+https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-01-18.md
 
