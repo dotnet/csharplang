@@ -321,6 +321,7 @@ is checked against each constraint as follows:
   - `A` is a type parameter having the value type constraint.
   - `A` is a `class` that is not abstract and contains an explicitly declared public constructor with no parameters.
   - `A` is not `abstract` and has a default constructor.
+  - **`A` is a role type with an underlying type that satisfies the constructor constraint.**
 
 A compile-time error occurs if one or more of a type parameter’s constraints are not satisfied by the given type arguments.
 
@@ -664,6 +665,8 @@ Example: from `int` to `string` (done by `StringExtension`).
 But we should disallow user-defined conversions from/to underlying type 
 or inherited roles, because a conversion already exists.  
 Conversion to interface still disallowed.  
+TODO2: Could we make the conversion to be explicit identity conversion instead
+of implicit?  
 
 #### Events
 
