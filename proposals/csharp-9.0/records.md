@@ -50,14 +50,14 @@ The synthesized members are as follows:
 
 If the record is derived from `object`, the record type includes a synthesized readonly property equivalent to a property declared as follows:
 ```C#
-Type EqualityContract { get; };
+Type EqualityContract { get; }
 ```
 The property is `private` if the record type is `sealed`. Otherwise, the property is `virtual` and `protected`.
 The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`.
 
 If the record type is derived from a base record type `Base`, the record type includes a synthesized readonly property equivalent to a property declared as follows:
 ```C#
-protected override Type EqualityContract { get; };
+protected override Type EqualityContract { get; }
 ```
 
 The property can be declared explicitly. It is an error if the explicit declaration does not match the expected signature or accessibility, or if the explicit declaration doesn't allow overriding it in a derived type and the record type is not `sealed`. It is an error if either synthesized, or explicitly declared property doesn't override a property with this signature in the record type `Base` (for example, if the property is missing in the `Base`, or sealed, or not virtual, etc.).
