@@ -23,7 +23,7 @@ Further support is present for collection-like types not covered under the above
 
     - Collection initializers, which require syntax like `new List<T>` (lacking inference of a possibly verbose `T`) prior to their values, and which can cause multiple reallocations of memory because they use N `.Add` invocations without supplying an initial capacity.
 
-    - Immutable collections, which require syntax like `ImmutableArray.Create(...)` to initialize the values, and which can cause intermediary allocations and data copying. More efficient construction forms (like `ImmutableArray.CreateBuilder`) are unweildy and still produce unavoidable garbage.
+    - Immutable collections, which require syntax like `ImmutableArray.Create(...)` to initialize the values, and which can cause intermediary allocations and data copying. More efficient construction forms (like `ImmutableArray.CreateBuilder`) are unwieldy and still produce unavoidable garbage.
 
 * Looking at the surrounding ecosystem, we also find examples everywhere of list creation being more convenient and pleasant to use.  TypeScript, Dart, Swift, Elm, Python, and more opt for a succinct syntax for this purpose, with widespread usage, and to great effect. Cursory investigations have revealed no substantive problems arising in those ecosystems with having these literals built in.
 
@@ -102,7 +102,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
     * For example, an implementation could translate literals like `[1, 2, 3]` directly to a `new int[] { 1, 2, 3 }` expression that itself bakes the raw data into the assembly, eliding the need for `__index` or a sequence of instructions to assign each value. Importantly, this does mean if any step of the translation might cause an exception at runtime that the program state is still left in the state indicated by the translation.
 
-    * Similarly, while a collection literal has a *natural type* of `List<T>`, it is permissable to avoid such an allocation if the result would not be observable.  For example, `foreach (var toggle in [true, false])`.  Because the elements are all that the user's code can refer to, the above could be optimized away into a direct stack allocation.
+    * Similarly, while a collection literal has a *natural type* of `List<T>`, it is permissible to avoid such an allocation if the result would not be observable.  For example, `foreach (var toggle in [true, false])`.  Because the elements are all that the user's code can refer to, the above could be optimized away into a direct stack allocation.
 
 * Collections are assumed to be well-behaved.  For example:
 
@@ -234,7 +234,7 @@ Each element of the literal is examined in the following fashion:
 
 * An element `..s_n` has its *iteration type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to `dictionary key set` and `TValue` is added to `dictionary value set`. Otherwise, the *iteration type* is added to `remainder set`.
 
-* An element `k_n: v_n` adds the `k_n` and `v_n` *expressions* to `dictionary key set` and `dictionary value set` repectively.
+* An element `k_n: v_n` adds the `k_n` and `v_n` *expressions* to `dictionary key set` and `dictionary value set` respectively.
 
 * If the `dictionary key/value set` sets are empty, then there were definitely no `k_n: v_n` elements. In that case, the *fallback case* runs below.
 
@@ -242,7 +242,7 @@ Each element of the literal is examined in the following fashion:
 
     * If the first round fails for either set, the *fallback case* runs below.
 
-    * If the first rounds succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to `remainder set`.  A second round of the *best common type* algorithm is performed on this set to determine `BCT_Final`.
+    * If the first round succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to `remainder set`.  A second round of the *best common type* algorithm is performed on this set to determine `BCT_Final`.
 
         * If the second round fails, the *fallback* case runs below.
         * Otherwise `BCT_Final` is the *natural element type* and the algorithm ends.
@@ -359,7 +359,7 @@ If they all have such a property, the literal is considered to have a *known len
 
     * A literal without any `spread_element` expressions has *known length*.
 
-    * If at least one `spread_element` can not have its count of elements determined, then the literal is considered to have an *unknown length*.
+    * If at least one `spread_element` cannot have its count of elements determined, then the literal is considered to have an *unknown length*.
 
     * Each `spread_element` can have a different type and a different `Length` or `Count` property than the other elements.
 
@@ -637,7 +637,7 @@ While collection literals can be used for many scenarios, there are a few that t
 
 * This introduces [yet another form](https://xkcd.com/927/) for collection expressions on top of the myriad ways we already have. This is extra complexity for the language.  That said, this also makes it possible to unify on one ~~ring~~ syntax to rule them all, which means existing codebases can be simplified and moved to a uniform look everywhere.
 
-* Using `[`...`]` instead of `{`...`}` moves away from the syntax we've generally used for arrays and collection initializers already.  Specifically that it uses `[`...`]` instead of `{`...`}`.  However, this was already settled on by the language team when we did list patterns.  We attempted to make `{`...`}` work with list patterns and ran into insurmountable issues.  Because of this, we moved to `[`...`]` which, while new for C#, feels natural in many programming languages and allowed us to start fresh with no ambiguity.  Using `[`...`]` as the corresponding literal form is complimentary with our latest decisions, and gives us a clean place to work without problem.
+* Using `[`...`]` instead of `{`...`}` moves away from the syntax we've generally used for arrays and collection initializers already.  Specifically that it uses `[`...`]` instead of `{`...`}`.  However, this was already settled on by the language team when we did list patterns.  We attempted to make `{`...`}` work with list patterns and ran into insurmountable issues.  Because of this, we moved to `[`...`]` which, while new for C#, feels natural in many programming languages and allowed us to start fresh with no ambiguity.  Using `[`...`]` as the corresponding literal form is complementary with our latest decisions, and gives us a clean place to work without problem.
 
 This does introduce warts into the language.  For example, the following are both legal and (fortunately) mean the exact same thing:
 
@@ -719,14 +719,14 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
     \* `T[]`, `Span<T>` and `ImmutableArray<T>` might potentially work for 'all literal forms' if we extend this spec greatly with some sort of builder mechanism that allows us to tell it about all the pieces, with a final `T[]` or `Span<T>` obtained from the builder which can also then be passed to the `Construct` method used by *known length* translation in order to support `ImmutableArray<T>` and any other collection.
 
-    Only `List<T>` gives us a `Yes` for all columns. However, getting `Yes` for everything is not necessarily what we desire.  For example, if we believe the future is one where immutable is the most desirable, the types like `T[]`, `Span<T>`, or `List<T>` may not compliment that well.  Similarly if we believe that people will want to use these without paying for allocations, then `Span<T>` and `ReadOnlySpan<T>` seem the most viable.
+    Only `List<T>` gives us a `Yes` for all columns. However, getting `Yes` for everything is not necessarily what we desire.  For example, if we believe the future is one where immutable is the most desirable, the types like `T[]`, `Span<T>`, or `List<T>` may not complement that well.  Similarly if we believe that people will want to use these without paying for allocations, then `Span<T>` and `ReadOnlySpan<T>` seem the most viable.
 
     However, the likely crux of this is the following:
 
     * Mutation is part and parcel of .NET
     * `List<T>` is already heavily the lingua franca of lists.
     * `List<T>` is a viable final form for any potential list literal (including those with spreads of *unknown length*)
-    * Spans types and ValueArray are too esoteric, and the inability to use ref structs within async-contexts is likely a deal breaker for broad acceptance.
+    * Span types and ValueArray are too esoteric, and the inability to use ref structs within async-contexts is likely a deal breaker for broad acceptance.
 
     As such, while it unfortunate that it has two allocations, `List<T>` seems be the most broadly applicable. This is likely what we would want from the *natural type*.
 
