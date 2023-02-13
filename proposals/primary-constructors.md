@@ -437,6 +437,22 @@ Alternatively we could:
 - Disallow lambdas like that;
 - Or, instead, capture parameters like that in an instance of a separate class (yet another closure), and share that instance between the closure and the instance of the enclosing type. Thus eliminating the need to capture `this` in a closure.
 
+### Assigning to `this` within a struct
+
+C# allows to assign to `this` within a struct. If the struct captures a primary constructor parameter, the assignment is going to overwrite its value, which might be not obvious to the user. Do we want to report a warning for assignments like this?  
+
+``` C#
+struct S(int x)
+{
+    int X => x;
+    
+    void M(S s)
+    {
+        this = s; // 'x' is overwritten
+    }
+}
+```
+
 ## LDM meetings
 
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
