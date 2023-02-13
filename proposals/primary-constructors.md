@@ -151,7 +151,7 @@ All instance member initializers in the class body will become assignments in th
 
 If a primary constructor parameter is referenced from within an instance member, and the reference is not inside of a `nameof` argument, it is captured into the state of the enclosing type, so that it remains accessible after the termination of the constructor. A likely implementation strategy is via a private field using a mangled name. In a readonly struct the capture fields will be readonly. Therefore, access to captured parameters of a readonly struct will have similar restrictions as access to readonly fields. Access to captured parameters within a readonly member will have similar restrictions as access to instance fields in the same context.
 
-Capturing is not allowed for `ref`, `in` and `out` parameters. This is similar to a limitation for capturing in lambdas. 
+Capturing is not allowed for parameters that have ref-like type, and capturing is not allowed for `ref`, `in` or `out` parameters. This is similar to a limitation for capturing in lambdas. 
 
 If a primary constructor parameter is only referenced from within instance member initializers, those can directly reference the parameter of the generated constructor, as they are executed as part of it.
 
