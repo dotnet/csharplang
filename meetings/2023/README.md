@@ -14,6 +14,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - *Design review*
 
 
+## Wed Mar 15, 2023
+
+
+## Mon Mar 13, 2023
+
+
+## Wed Mar 8, 2023
+
+
+## Mon Mar 6, 2023
+
+
 ## Wed Mar 1, 2023
 
 
@@ -26,9 +38,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Wed Feb 15, 2023
 
 - Roles (Julien/Mads): https://github.com/dotnet/csharplang/pull/6880
-
-## Mon Feb 13, 2023
-
 
 ## Wed Feb 1, 2023
 
