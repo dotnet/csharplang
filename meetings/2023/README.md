@@ -37,7 +37,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Feb 15, 2023
 
-- Roles (Julien/Mads): https://github.com/dotnet/csharplang/pull/6880
 
 ## Wed Feb 1, 2023
 
