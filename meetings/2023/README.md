@@ -37,6 +37,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Feb 15, 2023
 
+Open questions and signoff on Primary Constructors (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#open-questions
 
 ## Wed Feb 1, 2023
 
