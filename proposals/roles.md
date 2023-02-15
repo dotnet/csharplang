@@ -99,6 +99,8 @@ the lookup rules are modified to achieve a similar effect (see below).
 The *role_underlying_type* type may not be `dynamic`, a pointer, a nullable reference (no top-level nullability), 
 a ref struct type or a role.  
 The *role_underlying_type* may not include an *interface_type_list* (this is part of Phase C).  
+The role type must be static if its underlying type is static.  
+
 
 An extension declaration must include an underlying type, unless it is partial. 
 It is a compile-time error if no part of a partial extension type includes an underlying type, 
@@ -162,6 +164,8 @@ The following accessibility constraints exist:
 - [...]
 - **The underlying type of a role type shall be at least as accessible as the role type itself.**
 - **The base roles of a role type shall be at least as accessible as the role type itself.**
+
+Note those also apply to visibility constraints of file-local types (TODO not yet specified).
 
 ### Protected access
 
