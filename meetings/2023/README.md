@@ -37,11 +37,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Signoff on Primary Constructors (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
 
-## Wed Feb 1, 2023
-
-- `using unsafe X = int*;` or `unsafe using X = int*;`.  Cyrus Najmabadi
-- Extensions (Julien): https://github.com/dotnet/csharplang/pull/6880
-
 # C# Language Design Notes for 2023
 
 Overview of meetings and agendas for 2023
@@ -53,6 +48,13 @@ Overview of meetings and agendas for 2023
 - Open questions in primary constructors
     - Capturing parameters in lambdas
     - Assigning to `this` in a `struct`
+
+## Wed Feb 1, 2023
+
+[C# Language Design Meeting for February 1st, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-01.md)
+
+- Position of `unsafe` in aliases
+- Roles and extensions
 
 ## Wed Jan 18, 2023
 
