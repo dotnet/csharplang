@@ -36,10 +36,6 @@
 
     Please read [this](https://stackoverflow.com/help/dont-ask) before posting.
 
-- [MSDN Forum](https://social.msdn.microsoft.com/Forums/vstudio/en-US/home?forum=csharpgeneral)
-
-    Please read [this](https://social.msdn.microsoft.com/Forums/vstudio/en-US/df14dc5f-982b-4676-b767-6123c8a90495/where-is-the-correct-place-to-make-posts-regarding-aspnet-sql-or-another-topic-that-is-not-related?forum=csharpgeneral) before posting.
-
 - [Reddit](https://www.reddit.com/r/csharp/)
 
     Please read [this](https://www.reddit.com/r/csharp/comments/3xn6sm/welcome_to_rcsharp_read_this_post_before) before posting.
