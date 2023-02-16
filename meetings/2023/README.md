@@ -34,10 +34,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Feb 22, 2023
 
-
-## Wed Feb 15, 2023
-
-- Open questions and signoff on Primary Constructors (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#open-questions
+- Signoff on Primary Constructors (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
 
 ## Wed Feb 1, 2023
 
@@ -47,6 +44,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 # C# Language Design Notes for 2023
 
 Overview of meetings and agendas for 2023
+
+## Wed Feb 15, 2023
+
+- [Open questions in primary constructors](#open-questions-in-primary-constructors)
+    - [Capturing parameters in lambdas](#capturing-parameters-in-lambdas)
+    - [Assigning to `this` in a `struct`](#assigning-to-this-in-a-struct)
 
 ## Wed Jan 18, 2023
 
