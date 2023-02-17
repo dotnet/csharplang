@@ -27,15 +27,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Mar 6, 2023
 
 
-## Wed Mar 1, 2023
+## Wed Mar 1, 2023 (Shorter meeting)
 
 
 ## Mon Feb 27, 2023
 
+- Discriminated Unions (Fred)
 
 ## Wed Feb 22, 2023
 
 - Signoff on Primary Constructors (Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
+- Extensions (Julien): https://github.com/dotnet/csharplang/pull/6880
 
 # C# Language Design Notes for 2023
 
