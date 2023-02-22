@@ -11,6 +11,9 @@ TODO2 adjust scoping rules so that type parameters are in scope within the 'for'
 
 The purpose of "extensions" is to augment or adapt existing types to new scenarios, when those types are not under your control, or where changing them would negatively impact other uses of them. The adaptation can be in the form of adding new function members as well as implementing additional interfaces.
 
+`explicit extension CustomerExtension for ReadOnlySpan<byte> : PersonExtension { ... }`
+`implicit extension EnumExtension for Enum { ... }`
+
 ## Motivation
 [motivation]: #motivation
 
