@@ -1,5 +1,11 @@
 # Extension types
 
+TODO2 roles are disallowed as `this` parameter types  
+TODO2 types may not be called "extension" (reserved, break)  
+TODO2 underlying type may not be a ref or scoped type  
+TODO2 disallow primary constructor parameter list (integrate with grammar changes from primary ctor)  
+TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
+
 ## Summary
 [summary]: #summary
 
@@ -36,7 +42,7 @@ type_declaration
     ;
 
 extension_declaration
-    : extension_modifier* 'extension' identifier type_parameter_list? 'for' type extension_base_type_list? type_parameter_constraints_clause* extension_body
+    : extension_modifier* ('implicit' | 'explicit') 'extension' identifier type_parameter_list? ('for' type)? extension_base_type_list? type_parameter_constraints_clause* extension_body
     ;
 
 extension_base_type_list
@@ -64,8 +70,6 @@ extension_member_declaration
     ;
 
 extension_modifier
-    : 'implicit'
-    | 'explicit'
     | 'partial'
     | 'unsafe'
     | 'static'
@@ -86,7 +90,7 @@ TODO should we have a naming convention like `Extension` suffixes? (`DataObjectE
 ## Extension type
 
 A extension type (new kind of type) is declared by a *extension_declaration*.  
-The permitted modifiers on an extension type are `implicit`, `explicit`, `partial`, 
+The permitted modifiers on an extension type are `partial`, 
 `unsafe`, `static`, `file` and the accessibility modifiers.  
 A static extension shall not be instantiated, shall not be used as a type and shall
 contain only static members.  
@@ -103,6 +107,18 @@ The extension type must be static if its underlying type is static.
 
 It is a compile-time error if the underlying type differs amongst all the parts
 of an extension declaration.  
+
+It is a compile-time error if the `implicit` or `explicit` modifiers differ amongst
+all the parts of an extension declaration.  
+
+When a partial extension declaration includes an underlying type specification,
+that underlying type specification shall reference the same type as all other parts
+of that partial type that include an underlying type specification.
+It is a compile-time error if no part of a partial extension includes
+an underlying type specification.  
+
+TODO should the underlying type be inferred when none was specified but
+base extensions are specified?
 
 When a partial extension declaration includes an accessibility specification, 
 that specification shall agree with all other parts that include an accessibility specification. 
@@ -401,9 +417,6 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
   the following steps are evaluated until an entity is located:  
   ...
 - Otherwise, the simple_name is undefined and a compile-time error occurs.
-
-TODO confirm we don't want extension type lookup here, since we didn't do 
-any extension method lookup previously.
 
 ### Member access
 
