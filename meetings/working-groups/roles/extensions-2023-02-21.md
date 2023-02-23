@@ -10,7 +10,7 @@ But that view is not obvious. There's a historical view where extensions come fi
 and roles follow, but there's also a view where roles are fundational and extensions
 are roles plus implicit lookup rules...  
 For now, we're leaning to require `implicit`/`explicit`. We can decide to relax this 
-and pick what the default means later.  . 
+and pick what the default means later.
 
 ## When to keep using extension methods?
 
