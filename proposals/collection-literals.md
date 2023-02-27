@@ -826,7 +826,7 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
 Hopefully small questions:
         
-* Can/should the compiler emit Array.Empty for `[]`.  Should we mandate that it always does this?  Should we make it an option?  Should we disallow and say it's always a fresh instance?  I (cyrus) strongly think it should mandate Array.Empty to avoid allocations whenever possible.
+* Can/should the compiler emit Array.Empty for `[]`?  Should we mandate that it does this, to avoid allocations whenever possible?
 
 * Should it be legal to create and immediately index into a collection literal?  Note: this requires an answer to the unresolved question below of whether collection literals have a *natural type*.
 
