@@ -29,7 +29,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Mar 1, 2023 (Shorter meeting)
 
-- Discriminated Unions (Fred)
+- Discriminated Unions (Fred) - https://github.com/dotnet/csharplang/discussions/7010
 
 ## Mon Feb 27, 2023
 
