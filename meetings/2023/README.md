@@ -23,9 +23,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Mar 8, 2023
 
-
-## Mon Mar 6, 2023
-
+- Discriminated Unions cont'd (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
+- Breaking changes in C# (Mads) - https://github.com/dotnet/csharplang/discussions/7033
 
 ## Wed Mar 1, 2023 (Shorter meeting)
 
