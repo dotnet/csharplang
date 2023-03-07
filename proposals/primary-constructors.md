@@ -1,10 +1,5 @@
 # Primary constructors
 
-* [x] Proposed
-* [ ] Prototype: Not started
-* [ ] Implementation: Not started
-* [ ] Specification: Not started
-
 ## Summary
 [summary]: #summary
 
