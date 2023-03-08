@@ -48,13 +48,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Discriminated Unions (Fred) - https://github.com/dotnet/csharplang/discussions/7010
 
-## Mon Feb 27, 2023
-
-- Source generator improvements for .NET 8 (Rikki)
-
 # C# Language Design Notes for 2023
 
-Overview of meetings and agendas for 2023
+## Mon Feb 27, 2023
+
+[C# Language Design Meeting for February 27th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-27.md)
+
+- Interceptors
 
 ## Wed Feb 22, 2023
 
