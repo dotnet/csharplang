@@ -6,6 +6,10 @@ TODO2 underlying type may not be a ref or scoped type
 TODO2 disallow primary constructor parameter list (integrate with grammar changes from primary ctor)  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
 TODO2 disallow nullable annotation on base extension? Or at least need to clarify what `Extension?` means in various scenarios.
+TODO2 disallow 'required' modifier?
+TODO2 any restrictions on mixing `implicit` and `explicit` extensions in an extension hierarchy?
+TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
+TODO2 extensions are disallowed within interfaces with variant type parameters
 
 ## Summary
 [summary]: #summary
