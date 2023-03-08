@@ -210,7 +210,7 @@ Through the use of the [`init`](#init-methods) modifier, existing APIs can direc
 ## Natural type
 [natural-type]: #natural-type
 
-In the absence of a *target type*, a non-empty literal can have a *natural type*.
+In the absence of a *constructible target type*, a non-empty literal can have a *natural type*.
 
 The *natural type* is determined using the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) algorithm.
 
@@ -220,6 +220,11 @@ If the *natural type* of the collection is `List<T>` the literal is not allowed 
 
 This means there is no way for a literal to have a *natural type* of some `List<KeyValuePair<TKey, TValue>>` (though it certainly can be *target-typed* to that type).
 
+```c#
+var x = [];     // error: element type cannot be inferred for []
+var y = [1, 2]; // ok: List<int>
+object z = [3]; // ok: List<int>
+```
 
 ### Natural Element Type
 [natural-element-type]: #natural-element-type
