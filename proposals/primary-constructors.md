@@ -134,7 +134,7 @@ class C(int i)
 }
 ```
 
-The initializer for the field `i` references the parameter `i` (as per the first addition), whereas the body of the property `I` references the field `i`.
+The initializer for the field `i` references the parameter `i`, whereas the body of the property `I` references the field `i`.
 
 ## Semantics
 
