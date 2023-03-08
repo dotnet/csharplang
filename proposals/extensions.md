@@ -5,7 +5,7 @@ TODO2 types may not be called "extension" (reserved, break)
 TODO2 underlying type may not be a ref or scoped type  
 TODO2 disallow primary constructor parameter list (integrate with grammar changes from primary ctor)  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
-TODO2 disallow nullable annotation on base extension
+TODO2 disallow nullable annotation on base extension? Or at least need to clarify what `Extension?` means in various scenarios.
 
 ## Summary
 [summary]: #summary
