@@ -39,12 +39,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Mar 13, 2023
 
 
+# C# Language Design Notes for 2023
+
 ## Wed Mar 8, 2023
 
-- Discriminated Unions cont'd (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
-- Breaking changes in C# (Mads) - https://github.com/dotnet/csharplang/discussions/7033
+[C# Language Design Meeting for March 8th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-03-08.md)
 
-# C# Language Design Notes for 2023
+- Discriminated Unions
+- Limited Breaking Changes in C#
 
 ## Wed Mar 1, 2023 (Shorter meeting)
 
