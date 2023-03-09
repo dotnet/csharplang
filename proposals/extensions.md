@@ -1,20 +1,17 @@
 # Extension types
 
 TODO2 roles are disallowed as `this` parameter types  
-TODO2 types may not be called "extension" (reserved, break)  
-TODO2 underlying type may not be a ref or scoped type  
-TODO2 disallow primary constructor parameter list (integrate with grammar changes from primary ctor)  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
-TODO2 disallow nullable annotation on base extension? Or at least need to clarify what `Extension?` means in various scenarios.
-TODO2 disallow 'required' modifier?
-TODO2 any restrictions on mixing `implicit` and `explicit` extensions in an extension hierarchy?
 TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
 TODO2 extensions are disallowed within interfaces with variant type parameters
 
 ## Summary
 [summary]: #summary
 
-The purpose of "extensions" is to augment or adapt existing types to new scenarios, when those types are not under your control, or where changing them would negatively impact other uses of them. The adaptation can be in the form of adding new function members as well as implementing additional interfaces.
+The purpose of "extensions" is to augment or adapt existing types to new scenarios,
+when those types are not under your control, or where changing them would
+negatively impact other uses of them. The adaptation can be in the form of
+adding new function members as well as implementing additional interfaces.
 
 `explicit extension CustomerExtension for ReadOnlySpan<byte> : PersonExtension { ... }`
 `implicit extension EnumExtension for Enum { ... }`
@@ -22,17 +19,22 @@ The purpose of "extensions" is to augment or adapt existing types to new scenari
 ## Motivation
 [motivation]: #motivation
 
-Explicit extensions address two main classes of scenarios: "augmentation" scenarios (fit an existing value with a *new* member) and "adaptation" scenarios (fit an existing value to an *existing* interface). 
+Explicit extensions address two main classes of scenarios: "augmentation" scenarios
+(fit an existing value with a *new* member) and "adaptation" scenarios
+(fit an existing value to an *existing* interface).
 
-In addition, implicit extensions would provide for additional kinds of extension members beyond today's extension methods, and for "extension interfaces".
+In addition, implicit extensions would provide for additional kinds of extension members
+beyond today's extension methods, and for "extension interfaces".
 
 ### Augmentation scenarios
 
-Augmentation scenarios allow existing values to be seen through the lens of a "stronger" type - an extension that provides additional function members on the value.
+Augmentation scenarios allow existing values to be seen through the lens of
+a "stronger" type - an extension that provides additional function members on the value.
 
 ### Adaptation scenarios
 
-Adaptation scenarios allow existing values to be adapted to existing interfaces, where an extension provides details on how the interface members are implemented.
+Adaptation scenarios allow existing values to be adapted to existing interfaces,
+where an extension provides details on how the interface members are implemented.
 
 ## Design
 
@@ -97,27 +99,28 @@ TODO should we have a naming convention like `Extension` suffixes? (`DataObjectE
 
 ## Extension type
 
-A extension type (new kind of type) is declared by a *extension_declaration*.  
-The permitted modifiers on an extension type are `partial`, 
-`unsafe`, `static`, `file` and the accessibility modifiers.  
-A static extension shall not be instantiated, shall not be used as a type and shall
-contain only static members.  
-The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
+An extension type (new kind of type) is declared by a *extension_declaration*.  
 
 The extension type does not **inherit** members from its underlying type 
 (which may be `sealed` or a struct), but
 the lookup rules are modified to achieve a similar effect (see below).  
 
+There is an identity conversion between an extension and its underlying type,
+and between an extension and its base extensions.
+
+An extension type satisfies the constraints satisfied by its underlying type (see section on constraints). 
+In phase C, some additional constraints can be satisfied (additional implemented interfaces).  
+
+### Underlying type
+
 The *extension_underlying_type* type may not be `dynamic`, a pointer, a nullable reference (no top-level nullability), 
-a ref struct type or an extension.  
+a ref struct type, a ref type or an extension.  
 The underlying may not include an *interface_type_list* (this is part of Phase C).  
 The extension type must be static if its underlying type is static.  
+TODO2 any restrictions on mixing `implicit` and `explicit` extensions in an extension hierarchy?  
 
 It is a compile-time error if the underlying type differs amongst all the parts
 of an extension declaration.  
-
-It is a compile-time error if the `implicit` or `explicit` modifiers differ amongst
-all the parts of an extension declaration.  
 
 When a partial extension declaration includes an underlying type specification,
 that underlying type specification shall reference the same type as all other parts
@@ -125,19 +128,27 @@ of that partial type that include an underlying type specification.
 It is a compile-time error if no part of a partial extension includes
 an underlying type specification.  
 
+TODO2 we need rules to only allow an underlying type that is compatible with the base extensions.  
+
 TODO should the underlying type be inferred when none was specified but
 base extensions are specified?
+
+### Modifiers
+
+It is a compile-time error if the `implicit` or `explicit` modifiers differ amongst
+all the parts of an extension declaration.  
+
+The permitted modifiers on an extension type are `partial`, 
+`unsafe`, `static`, `file` and the accessibility modifiers.  
+A static extension shall not be instantiated, shall not be used as a type and shall
+contain only static members.  
+The standard rules for modifiers apply (valid combination of access modifiers, no duplicates).  
+Extension types may not contain instance fields (either explicitly or implicitly).
 
 When a partial extension declaration includes an accessibility specification, 
 that specification shall agree with all other parts that include an accessibility specification. 
 If no part of a partial extension includes an accessibility specification, 
 the type is given the appropriate default accessibility (`internal`).
-
-There is an identity conversion between a extension and its underlying type,
-and between a extension and its base extensions.
-
-A extension type satisfies the constraints satisfied by its underlying type (see section on constraints). 
-In phase C, some additional constraints can be satisfied (additional implemented interfaces).  
 
 ## Implicit extension type
 
@@ -149,7 +160,7 @@ The underlying type must include all the type parameters from the implicit exten
 
 ### Terminology
 
-We'll use "augments" for relationship to underlying type 
+We'll use "extends" for relationship to underlying/extended type 
 (comparable to "inherits" for relationship to base type).  
 We'll use "inherits" for relationship to inherited/base extensions 
 (comparable to "implements" for relationship to implemented interfaces).  
@@ -160,19 +171,15 @@ explicit extension X for U { }
 explicit extension Y for U : X, X1 { }
 ```
 "Y has underlying type U"  
-"Y augments U"  
+"Y extends U"  
 "Y inherits X and X1"  
 "Derived extension Y inherits members from inherited/base extensions X and X1"  
 
-Similarly, extension don't have a base type, but have base extensions.    
+Similarly, extension don't have a base type, but have base extensions.  
 
 `implicit extension R<T> for T where T : I1, I2 { }`
 `implicit extension R<T> for T where T : INumber<T> { }`
 An extension may be a value or reference type, and this may not be known at compile-time. 
-
-### Underlying type
-
-TODO2 we need rules to only allow an underlying type that is compatible with the base extensions.  
 
 ### Accessibility constraints
 
@@ -209,7 +216,16 @@ access to `M` can take one of the following forms:
 - A *primary_expression* of the form `base.M`.
 - A *primary_expression* of the form `base[`*argument_list*`]`.
 
-### Signatures and overloading
+### Extension type members
+
+The extension type members may not use the `virtual`, `abstract`, `sealed` or `override` modifiers.  
+TODO2 disallow 'required' modifier since mostly meant to initialize state?  
+The `new` modifier is allowed and the compiler will warn that you should
+use `new` when shadowing.  
+
+An extension cannot contain a member declaration with the same name as the extension.
+
+#### Signatures, overloading and hiding
 
 The existing [rules for signatures](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#76-signatures-and-overloading) apply.  
 Two signatures differing by an extension vs. its underlying type, or an extension vs. 
@@ -223,11 +239,6 @@ void M(ObjectExtension r)
 void M(StringExtension r) // overload is okay
 ```
 
-### Extension type members
-
-The extension type members may not use the `virtual`, `abstract` or `override` modifiers.  
-The `new` modifier is allowed and the compiler will warn that you should
-use `new` when shadowing.  
 Shadowing includes underlying type and inherited extensions.  
 
 ```
@@ -250,8 +261,6 @@ explicit extension R for U { public void M() { } }
 explicit extension R2 for U : R { /*new*/ public void M() { } } // wins when dealing with an R2
 ```
 
-An extension cannot contain a member declaration with the same name as the extension.
-
 #### Constants
 
 Existing [rules for constants](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#144-constants) 
@@ -268,7 +277,8 @@ A *method_declaration* in an *extension_declaration* shall explicitly include a 
 Parameters with the `this` modifier are disallowed.
 Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
 In particular, a static method does not operate on a specific instance, 
-and it is a compile-time error to refer to `this` in a static method.
+and it is a compile-time error to refer to `this` in a static method.  
+Extension methods are disallowed.
 
 #### Properties
 
@@ -386,6 +396,14 @@ We modify the [extension methods rules](https://github.com/dotnet/csharpstandard
 [...] The first parameter of an extension method may have no modifiers other than `this`, 
 and the parameter type may not be a pointer **or an extension** type.
 
+## Nullability
+
+TODO2 disallow nullable annotation on base extension? Or at least need to clarify what `Extension?` means in various scenarios.
+
+## Compat breaks
+
+TODO2 types may not be called "extension" (reserved, break)  
+
 ## Lookup rules
 
 TODO2 give an overview
@@ -471,7 +489,7 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   then `E.I` is evaluated and classified as follows:  
   ...
 - **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
-  the type of which is `T`, where `T` is a extension type, and 
+  the type of which is `T`, where `T` is an extension type, and 
   a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
