@@ -36,9 +36,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Mar 15, 2023
 
+- Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
+- Interceptors (Rikki)
 
-## Mon Mar 13, 2023
+## Mon Mar 13, 2023 (Shorter meeting)
 
+- `List<int*[]>` (Cyrus)
+- Attributes on primary constructors (Rikki) - https://github.com/dotnet/csharplang/issues/7047
 
 # C# Language Design Notes for 2023
 
