@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - `List<int*[]>` - Cyrus
+- Attributes on primary constructors (Rikki) - https://github.com/dotnet/csharplang/issues/7047
 
 ## Recurring topics
 
