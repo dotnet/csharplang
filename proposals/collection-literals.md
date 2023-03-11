@@ -72,7 +72,7 @@ primary_no_array_creation_expression
   ;
 ```
 
-Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/target-typed-default.md#motivation) but also have a [*natural type*](#natural-type) in the absence of a *target type*.
+Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/target-typed-default.md#motivation) but also have a [*natural type*](#natural-type) when the target type is not a *constructible collection type*.
 
 ### Spec clarifications
 [spec-clarifications]: #spec-clarifications
@@ -115,7 +115,8 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 ## Constructible collection types
 [constructible-collection-types]: #constructible-collection-types
 
-The following types can be constructed using a collection literal.  Actual translation of the literal to the corresponding is defined [below](#collection-literal-translation).
+The following are _constructible collection types_ that can be used to construct collection literals.
+Actual translation of the literal to the corresponding is defined [below](#collection-literal-translation).
 
 * Single dimensional arrays (e.g. `T[]`).
 * [*Span types*](#span-types)
@@ -180,7 +181,7 @@ Through the use of the [`init`](#init-methods) modifier, existing APIs can direc
 
 ## Empty collection literal
 
-* In the absence of a *target type*, the empty literal `[]` has no type.  However, similar to the [`null-literal`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md#6457-the-null-literal), this literal can be converted to any [`constructible`](#constructible-collection-types) collection type.
+* The empty literal `[]` has no type.  However, similar to the [`null-literal`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md#6457-the-null-literal), this literal can be implicitly converted to any [`constructible`](#constructible-collection-types) collection type.
 
     For example, the following is not legal as there is no *target type* and there are no other conversions involved:
 
@@ -210,7 +211,7 @@ Through the use of the [`init`](#init-methods) modifier, existing APIs can direc
 ## Natural type
 [natural-type]: #natural-type
 
-In the absence of a *target type*, a non-empty literal can have a *natural type*.
+In the absence of a *constructible collection target type*, a non-empty literal can have a *natural type*.
 
 The *natural type* is determined using the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) algorithm.
 
@@ -220,6 +221,11 @@ If the *natural type* of the collection is `List<T>` the literal is not allowed 
 
 This means there is no way for a literal to have a *natural type* of some `List<KeyValuePair<TKey, TValue>>` (though it certainly can be *target-typed* to that type).
 
+```c#
+var x = [];     // error: element type cannot be inferred for []
+var y = [1, 2]; // ok: List<int>
+object z = [3]; // ok: List<int>
+```
 
 ### Natural Element Type
 [natural-element-type]: #natural-element-type
@@ -289,7 +295,7 @@ Each element of the literal is examined in the following fashion:
     var values = x ? [1, 2, 3] : [];
     ```
 
-    The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection literal type, `[]` is treated as being target-typed to that collection type.
+    The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection type, `[]` is treated as target-typed to that collection type.
 
 * Given:
 
