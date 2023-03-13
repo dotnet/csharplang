@@ -226,7 +226,8 @@ access to `M` can take one of the following forms:
 
 ### Extension type members
 
-The extension type members may not use the `virtual`, `abstract`, `sealed`, `override` or `readonly` modifiers.  
+The extension type members may not use the `virtual`, `abstract`, `sealed`, `override` modifiers.  
+Member methods may not use the `readonly` modifier.  
 TODO2 disallow 'required' modifier since mostly meant to initialize state?  
 The `new` modifier is allowed and the compiler will warn that you should
 use `new` when shadowing.  
