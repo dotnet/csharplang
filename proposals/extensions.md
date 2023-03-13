@@ -1,9 +1,16 @@
 # Extension types
 
+TODO2 problem with lookup rules on implicit extensions (will run into ambiguous 
+    lookups in implicit extension scenarios)
 TODO2 roles are disallowed as `this` parameter types  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
 TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
 TODO2 extensions are disallowed within interfaces with variant type parameters
+TODO2 Event with an associated instance field (error)
+TODO2 No duplicate base extensions
+TODO2 We should likely allow constructors and `required` properties
+TODO2 The wrapping can be done with a static unspeakable factory method
+TODO2 Spec poison attributes (ExtensionMarker and CompilerFeature)
 
 ## Summary
 [summary]: #summary
@@ -119,14 +126,15 @@ The underlying may not include an *interface_type_list* (this is part of Phase C
 The extension type must be static if its underlying type is static.  
 TODO2 any restrictions on mixing `implicit` and `explicit` extensions in an extension hierarchy?  
 
-It is a compile-time error if the underlying type differs amongst all the parts
-of an extension declaration.  
-
 When a partial extension declaration includes an underlying type specification,
 that underlying type specification shall reference the same type as all other parts
 of that partial type that include an underlying type specification.
 It is a compile-time error if no part of a partial extension includes
 an underlying type specification.  
+
+It is a compile-time error if the underlying type differs amongst all the parts
+of an extension declaration.  
+TODO2 this should be revised.  
 
 TODO2 we need rules to only allow an underlying type that is compatible with the base extensions.  
 
@@ -218,7 +226,7 @@ access to `M` can take one of the following forms:
 
 ### Extension type members
 
-The extension type members may not use the `virtual`, `abstract`, `sealed` or `override` modifiers.  
+The extension type members may not use the `virtual`, `abstract`, `sealed`, `override` or `readonly` modifiers.  
 TODO2 disallow 'required' modifier since mostly meant to initialize state?  
 The `new` modifier is allowed and the compiler will warn that you should
 use `new` when shadowing.  
@@ -318,6 +326,10 @@ TODO allow `this` (of type current extension).
 Auto-properties must still be static (since instance fields are disallowed).  
 TODO allow `this` (of type current extension).  
 
+#### Constructors
+
+TODO
+
 #### Operators
 
 ##### Conversions
@@ -338,8 +350,6 @@ Conversion to interface still disallowed.
 #### Indexers
 
 TODO
-
-TODO more members (static constructors, constructors)
 
 ## Constraints
 
@@ -577,6 +587,9 @@ Underlying<string?> u3; // Extensions<string?> is a compatible extension with u3
 ```
 
 ### Extension member lookup
+
+TODO2 won't this design lead to ambiguities when an extension and its base extension
+are both in scope?
 
 TL;DR: Given an underlying type, we'll search enclosing types and namespaces 
 (and their imports) for compatible extensions and for each "layer" we'll do member lookups.  
