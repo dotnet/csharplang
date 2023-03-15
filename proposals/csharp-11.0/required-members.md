@@ -156,6 +156,11 @@ If the current context does not permit an _object\_initializer_ or is not an _at
 A type with a parameterless constructor that advertises a _contract_ is not allowed to be substituted for a type parameter constrained to `new()`, as there is no way
 for the generic instantiation to ensure that the requirements are satisfied.
 
+### `struct` `default`s
+
+Required members are not enforced on instances of `struct` types created with `default` or `default(StructType)`. They are enforced for `struct` instances created with `new StructType()`,
+even when `StructType` has no parameterless constructor and the default struct constructor is used.
+
 ### Accessibility
 
 It is an error to mark a member required if the member cannot be set in any context where the containing type is visible.
