@@ -26,9 +26,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Apr 10, 2023
 
 
-## Wed Apr 5, 2023
-
-
 ## Mon Apr 3, 2023
 
 - Collection literals (Chuck, Cyrus) - https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md
