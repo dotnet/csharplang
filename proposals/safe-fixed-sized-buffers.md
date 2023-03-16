@@ -53,10 +53,11 @@ The buffer element type is the *type* specified in `field_declaration`. A fixed-
 The elements of a fixed-size buffer shall be laid out sequentially in memory as though they are elements of an array.
 
 A *field_declaration* with a *fixed_size_buffer_declarator* cannot have the `volatile` modifier, and it cannot be marked with a `System.ThreadStaticAttribute`.
+A *field_declaration* with a *fixed_size_buffer_declarator* in an interface must have `static` modifier.
 
-Depending on the situation (details are specified below), an access to a fixes-size buffer member is classified as a value (never a variable) of either
-`System.ReadOnlySpan<S>` or `System.Span<S>`, where S is the element type of the fixed-size buffer. Both types provide indexers returning refernce to a
-specific element with appropriate "readonly-ness". Which prevents direct assignment to the elements when language rules don't permit that.
+Depending on the situation (details are specified below), an access to a fixed-size buffer member is classified as a value (never a variable) of either
+`System.ReadOnlySpan<S>` or `System.Span<S>`, where S is the element type of the fixed-size buffer. Both types provide indexers returning reference to a
+specific element with appropriate "readonly-ness", which prevents direct assignment to the elements when language rules don't permit that.
 
 The resulting span instance will have a length equal to the size declared on the fixed-size buffer.
 Indexing into the span with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
@@ -112,3 +113,9 @@ A member access for a readonly fixed-size buffer is evaluated and classified as 
 Fixed-size buffers are not subject to definite assignment-checking, and fixed-size buffer members are ignored for purposes of definite-assignment checking of struct type variables.
 
 When a fixed-size buffer member is static or the outermost containing struct variable of a fixed-size buffer member is a static variable, an instance variable of a class instance, or an array element, the elements of the fixed-size buffer are automatically initialized to their default values. In all other cases, the initial content of a fixed-size buffer is undefined.
+
+## Alternatives
+
+C/C++ has a different notion of fixed-size bufers. For example, there is a notion of "zero-length fixed sized buffers",
+which is often used as a way to indicate that the data is "variable length". It is not a goal of this proposal to be
+able to interop with that.
