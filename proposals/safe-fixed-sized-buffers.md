@@ -56,7 +56,7 @@ A *field_declaration* with a *fixed_size_buffer_declarator* cannot have the `vol
 A *field_declaration* with a *fixed_size_buffer_declarator* in an interface must have `static` modifier.
 
 Depending on the situation (details are specified below), an access to a fixed-size buffer member is classified as a value (never a variable) of either
-`System.ReadOnlySpan<S>` or `System.Span<S>`, where S is the element type of the fixed-size buffer. Both types provide indexers returning reference to a
+`System.ReadOnlySpan<S>` or `System.Span<S>`, where S is the element type of the fixed-size buffer. Both types provide indexers returning a reference to a
 specific element with appropriate "readonly-ness", which prevents direct assignment to the elements when language rules don't permit that.
 
 The resulting span instance will have a length equal to the size declared on the fixed-size buffer.
