@@ -46,7 +46,7 @@ fixed_size_buffer_declarator
     ;    
 ```
 
-A *fixed_size_buffer_declarator* introduces a fixed-size buffers of a given element type.
+A *fixed_size_buffer_declarator* introduces a fixed-size buffer of a given element type.
 
 The buffer element type is the *type* specified in `field_declaration`. A fixed-size buffer declarator introduces a new member and consists of an identifier that names the member, followed by a constant expression enclosed in `[` and `]` tokens. The constant expression denotes the number of elements in the member introduced by that fixed-size buffer declarator. The type of the constant expression must be implicitly convertible to type `int`, and the value must be a non-zero positive integer.
 
