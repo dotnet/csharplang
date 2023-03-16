@@ -3,17 +3,16 @@ Safe Fixed Size Buffers
 
 ## Summary
 
-Provide a general-purpose and safe mechanism for declaring fixed sized buffers within C# classes, structs and interfaces.
+Provide a general-purpose and safe mechanism for declaring fixed sized buffers within C# classes, structs, and interfaces.
 
 ## Motivation
 
 This proposal plans to address the many limitations of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
-Specifically it aims to allow the declaration of safe `fixed` buffers for managed and unmanaged types in a `struct`, `class`, or `interface`.
-And provide language safety verification for them.
+Specifically it aims to allow the declaration of safe `fixed` buffers for managed and unmanaged types in a `struct`, `class`, or `interface`, and provide language safety verification for them.
 
 ## Detailed Design 
 
-Grammar for `variable_declarator` in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
+The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
 will be extended to allow specifying the size of the buffer:
 
 ``` antlr
@@ -47,13 +46,13 @@ fixed_size_buffer_declarator
     ;    
 ```
 
-A `fixed_size_buffer_declarator` introduces a fixed-size buffers of a given element type.
+A *fixed_size_buffer_declarator* introduces a fixed-size buffers of a given element type.
 
-The buffer element type is the `type` specified in `field_declaration`. A fixed-size buffer declarator introduces a new member and consists of an identifier that names the member, followed by a constant expression enclosed in `[` and `]` tokens. The constant expression denotes the number of elements in the member introduced by that fixed-size buffer declarator. The type of the constant expression shall be implicitly convertible to type `int`, and the value shall be a non-zero positive integer.
+The buffer element type is the *type* specified in `field_declaration`. A fixed-size buffer declarator introduces a new member and consists of an identifier that names the member, followed by a constant expression enclosed in `[` and `]` tokens. The constant expression denotes the number of elements in the member introduced by that fixed-size buffer declarator. The type of the constant expression must be implicitly convertible to type `int`, and the value must be a non-zero positive integer.
 
 The elements of a fixed-size buffer shall be laid out sequentially in memory as though they are elements of an array.
 
-A `volatile` modifier cannot be used with `fixed_size_buffer_declarator`. A System.ThreadStaticAttribute cannot be applied to a field declaration like that.
+A *field_declaration* with a *fixed_size_buffer_declarator* cannot have the `volatile` modifier, and it cannot be marked with a `System.ThreadStaticAttribute`.
 
 Depending on the situation (details are specified below), an access to a fixes-size buffer member is classified as a value (never a variable) of either
 `System.ReadOnlySpan<S>` or `System.Span<S>`, where S is the element type of the fixed-size buffer. Both types provide indexers returning refernce to a
@@ -62,7 +61,7 @@ specific element with appropriate "readonly-ness". Which prevents direct assignm
 The resulting span instance will have a length equal to the size declared on the fixed-size buffer.
 Indexing into the span with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
 
-The `safe-to-escape` scope of the value will be equal to the `safe-to-escape` scope of the container, just as it would if the backing data was accessed as a field.
+The *safe-to-escape* scope of the value will be equal to the *safe-to-escape* scope of the container, just as it would if the backing data was accessed as a field.
 
 ### Fixed-size buffers in expressions
 
