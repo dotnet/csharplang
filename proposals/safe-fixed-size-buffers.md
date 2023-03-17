@@ -114,7 +114,26 @@ Fixed-size buffers are not subject to definite assignment-checking, and fixed-si
 
 When a fixed-size buffer member is static or the outermost containing struct variable of a fixed-size buffer member is a static variable, an instance variable of a class instance, or an array element, the elements of the fixed-size buffer are automatically initialized to their default values. In all other cases, the initial content of a fixed-size buffer is undefined.
 
+## Open design questions
+
+### Initializer
+
+Should we support initialization at declaration site with, perhaps, [collection literals](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)?
+
 ## Alternatives
+
+### Method or property group like approach in the language
+
+One thought is to treat these members more like method groups, in that they aren't automatically a value in and of themselves,
+but can be made into one if necessary. Here’s how that would work:
+- Safe fixed-size buffer accesses have their own classification (just like e.g. method groups and lambdas)
+- They can be indexed directly as a language operation (not via span types) to produce a variable (which is readonly
+  if the buffer is in a readonly context, just the same as fields of a struct)
+- They have implicit conversions-from-expression to ```Span<T>``` and ```ReadOnlySpan<T>```, but use of the former is an error if
+  they are in a readonly context
+- Their natural type is ```ReadOnlySpan<T>```, so that’s what they contribute if they participate in type inference (e.g., var, best-common-type or generic)
+
+### C/C++ fixed-size bufers
 
 C/C++ has a different notion of fixed-size bufers. For example, there is a notion of "zero-length fixed sized buffers",
 which is often used as a way to indicate that the data is "variable length". It is not a goal of this proposal to be
