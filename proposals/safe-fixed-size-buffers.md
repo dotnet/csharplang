@@ -59,6 +59,8 @@ Depending on the situation (details are specified below), an access to a fixed-s
 `System.ReadOnlySpan<S>` or `System.Span<S>`, where S is the element type of the fixed-size buffer. Both types provide indexers returning a reference to a
 specific element with appropriate "readonly-ness", which prevents direct assignment to the elements when language rules don't permit that.
 
+This limits the set of types that can be used as a fixed-size buffer element type to types that can be used as type arguments. For example, a pointer type cannot be used as an element type.
+
 The resulting span instance will have a length equal to the size declared on the fixed-size buffer.
 Indexing into the span with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
 
@@ -113,6 +115,97 @@ A member access for a readonly fixed-size buffer is evaluated and classified as 
 Fixed-size buffers are not subject to definite assignment-checking, and fixed-size buffer members are ignored for purposes of definite-assignment checking of struct type variables.
 
 When a fixed-size buffer member is static or the outermost containing struct variable of a fixed-size buffer member is a static variable, an instance variable of a class instance, or an array element, the elements of the fixed-size buffer are automatically initialized to their default values. In all other cases, the initial content of a fixed-size buffer is undefined.
+
+### Metadata
+
+#### Metadata emit and code generation
+
+For metadata encoding compiler will rely on recently added [```System.Runtime.CompilerServices.InlineArrayAttribute```](https://github.com/dotnet/runtime/issues/61135). 
+
+Fixed-size buffers like:
+``` C#
+public struct C
+{
+    public int buffer1[10];
+    public readonly int buffer2[10];
+}
+```
+will be emitted as  fields of a specially decorated struct type.
+
+Equivalent C# code will be:
+
+``` C#
+public partial class C
+{
+    public Buffer10<int> buffer1;
+    public readonly Buffer10<int> buffer2;
+}
+
+[System.Runtime.CompilerServices.InlineArray(10)]
+public struct Buffer10<T>
+{
+    private T _element0;
+
+    [UnscopedRef]
+    public System.Span<T> AsSpan()
+    {
+        return System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref _element0, 10);
+    }
+
+    [UnscopedRef]
+    public readonly System.ReadOnlySpan<T> AsReadOnlySpan()
+    {
+        // Note, an attempt to compile reports error CS1605: Cannot use '_element0' as a ref or out value because it is read-only
+        return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref _element0, 10);  
+    }
+}
+```
+
+The actual naming conventions for the type and its members are TBD. Framework will likely to include a set of predefined "buffer" types that cover
+limited set of buffer sizes. When predefined type doesn't exist, compiler will synthesize it in the module being built. Names of the generated types
+will be "speakable" in order to support consumption from other languages. 
+
+A code generated for an access like: 
+``` C#
+public partial class C
+{
+    void M1(int val)
+    {
+        buffer1[1] = val;
+    }
+
+    int M2()
+    {
+        return buffer2[1];
+    }
+}
+```
+
+will be equivalent to:
+``` C#
+public partial class C
+{
+    void M1(int val)
+    {
+        buffer.AsSpan()[1] = val;
+    }
+
+    int M2()
+    {
+        return buffer2.AsReadOnlySpan()[1];
+    }
+}
+```
+
+#### Metadata import
+
+When compiler imports a field declaration of type *T* and the following conditions are all met:
+- *T* is a struct type decorated with the ```InlineArray``` attribute, and
+- The first instance field declared within *T* has type *F*, and
+- There is a ```public System.Span<F> AsSpan()``` within *T*, and 
+- There is a ```public readonly System.ReadOnlySpan<T> AsReadOnlySpan()``` or ```public System.ReadOnlySpan<T> AsReadOnlySpan()``` within *T*. 
+
+the field will be treated as C# fixed-size buffer with element type *F*. Otherwise, the field will be treated as a regular field of type *T*.
 
 ## Open design questions
 
