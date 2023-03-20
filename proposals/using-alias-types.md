@@ -54,10 +54,14 @@ A new [unsafe context](https://github.com/dotnet/csharpstandard/blob/standard-v6
 using_alias_directive
 +    : 'using' 'unsafe'? identifier '=' (namespace_name | type) ';'
     ;
+    
+using_static_directive
++    : 'using' 'static' 'unsafe'? type_name ';'
+    ;
 
-+ The 'unsafe' keyword specified in the alias declaration causes the entire textual extent of the 'type' portion (not the 'namespace_name' portion) to become an unsafe context. 
-+ 'unsafe' cannot be used with a 'using static' declaration. 
-+ 'unsafe' can only be used with an using_alias_directive, not a using_directive.
++ 'unsafe' can only be used with an using_alias_directive or using_static_directive, not a using_directive.
++ The 'unsafe' keyword present in a 'using_alias_directive' causes the entire textual extent of the 'type' portion (not the 'namespace_name' portion) to become an unsafe context. 
++ The 'unsafe' keyword present in a 'using_static_directive' causes the entire textual extent of the 'type_name' portion to become an unsafe context. 
 ```
 
 
