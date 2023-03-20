@@ -56,11 +56,11 @@ using_alias_directive
     ;
     
 using_static_directive
-+    : 'using' 'unsafe'? 'static' type_name ';'
++    : 'using' 'static' 'unsafe'? type_name ';'
     ;
 
-+ The 'unsafe' keyword specified in the alias or static directive causes the entire textual extent of the 'type' or 'type_name' portion (not the 'namespace_name' portion) to become an unsafe context. 
 + 'unsafe' can only be used with an using_alias_directive or using_static_directive, not a using_directive.
++ The 'unsafe' keyword specified in the alias or static directive causes the entire textual extent of the 'type' or 'type_name' portion (not the 'namespace_name' portion) to become an unsafe context. 
 ```
 
 
