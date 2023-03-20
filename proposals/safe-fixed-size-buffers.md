@@ -76,7 +76,7 @@ When an instance fixed-size buffer member is referenced as a simple name, the ef
 
 #### Non-readonly fixed-size buffers
 
-In a member access of the form `E.I`, if `E` is of a struct type and a member lookup of `I` in that struct type identifies an instance fixed-size member,
+In a member access of the form `E.I`, if `E` is of a struct type and a member lookup of `I` in that struct type identifies a non-readonly instance fixed-size member,
 then `E.I` is evaluated and classified as follows:
 
 - If `E` is classified as a value, the result of the expression is classified as a value of type `System.ReadOnlySpan<S>`, where S is the element type of `I`.
@@ -84,15 +84,15 @@ then `E.I` is evaluated and classified as follows:
 - Otherwise, `E` is classified as a variable and the result of the expression is classified as a value of type `System.Span<S>`, where S is the element type of `I`.
   The value can be used to access members’ elements.
 
-In a member access of the form `E.I`, if `E` is of a class type and a member lookup of `I` in that class type identifies an instance fixed-size member,
+In a member access of the form `E.I`, if `E` is of a class type and a member lookup of `I` in that class type identifies a non-readonly instance fixed-size member,
 then `E.I` is evaluated and classified as a value of type `System.Span<S>`, where S is the element type of `I`.
 
-In a member access of the form `E.I`, if member lookup of `I` identifies a static fixed-size member,
+In a member access of the form `E.I`, if member lookup of `I` identifies a non-readonly static fixed-size member,
 then `E.I` is evaluated and classified as a value of type `System.Span<S>`, where S is the element type of `I`.
 
 #### Readonly fixed-size buffers
 
-When a *field_declaration* includes a `readonly` modifier, the member introduced by the fixed_size_buffer_declarator is a ***readony fixed-size buffer***.
+When a *field_declaration* includes a `readonly` modifier, the member introduced by the fixed_size_buffer_declarator is a ***readonly fixed-size buffer***.
 Direct assignments to elements of a readonly fixed-size buffer can only occur in an instance constructor, init member or static constructor in the same type.
 Specifically, direct assignments to an element of readonly fixed-size buffer are permitted only in the following contexts:
 
@@ -124,7 +124,7 @@ For metadata encoding compiler will rely on recently added [```System.Runtime.Co
 
 Fixed-size buffers like:
 ``` C#
-public struct C
+public partial class C
 {
     public int buffer1[10];
     public readonly int buffer2[10];
@@ -161,8 +161,8 @@ public struct Buffer10<T>
 }
 ```
 
-The actual naming conventions for the type and its members are TBD. Framework will likely to include a set of predefined "buffer" types that cover
-limited set of buffer sizes. When predefined type doesn't exist, compiler will synthesize it in the module being built. Names of the generated types
+The actual naming conventions for the type and its members are TBD. The framework will likely include a set of predefined "buffer" types that cover
+a limited set of buffer sizes. When a predefined type doesn't exist, compiler will synthesize it in the module being built. Names of the generated types
 will be "speakable" in order to support consumption from other languages. 
 
 A code generated for an access like: 
