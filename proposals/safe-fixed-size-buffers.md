@@ -338,6 +338,16 @@ Indexing into a fixed-size buffer with a constant expression outside of the decl
 The *safe-to-escape* scope of the value will be equal to the *safe-to-escape* scope of the *primary_no_array_creation_expression*,
 just as it would if the backing data was accessed as a field.
 
+### Conversions
+
+A new conversion from expression will be added.
+
+There is an implicit conversion from expression representing a variable of a fixed-size buffer type to ```System.Span<T>``` type.
+The result of conversion is a span returned by *AsSpan* method.
+
+There is an implicit conversion from expression representing a value of a fixed-size buffer type to ```System.ReadOnlySpan<T>``` type.
+The result of conversion is a span returned by *AsReadOnlySpan* method.
+
 ### Definite assignment checking
 
 Regular definite assignment rules are applicable to variables that have a fixed-size buffer type. 
