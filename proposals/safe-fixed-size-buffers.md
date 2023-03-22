@@ -280,8 +280,6 @@ public struct Buffer10<T>
 {
     private T _element0;
 
-    ref T this[int index] => ref AsSpan()[index];
-
     [UnscopedRef]
     public System.Span<T> AsSpan()
     {
@@ -347,8 +345,9 @@ just as it would if the backing data was accessed as a field.
 
 A new conversion from expression will be added.
 
-There is an implicit conversion from expression representing a variable of a fixed-size buffer type to ```System.Span<T>``` type.
-The result of conversion is a span returned by *AsSpan* method.
+There is an implicit conversion from expression representing a variable of a fixed-size buffer type to the following types:
+- ```System.Span<T>``` - the result of conversion is a span returned by *AsSpan* method.
+- ```System.ReadOnlySpan<T>``` - the result of conversion is a span returned by *AsReadOnlySpan* method.
 
 There is an implicit conversion from expression representing a value of a fixed-size buffer type to ```System.ReadOnlySpan<T>``` type.
 The result of conversion is a span returned by *AsReadOnlySpan* method.
