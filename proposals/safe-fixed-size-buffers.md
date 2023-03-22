@@ -327,7 +327,12 @@ If the *primary_no_array_creation_expression* of an *element_access* is a value 
 
 #### Fixed-size buffer element access
 
-For a fixed-size buffer element access, the *primary_no_array_creation_expression* of the *element_access* must be a variable or value of a fixed-size buffer type. Furthermore, the *argument_list* of a fixed-size buffer element access is not allowed to contain named arguments. The *argument_list* must contain a single expression, and the expression must be of type `int`, or must be implicitly convertible to `int`. The expression denotes a zero-based index of the element in the fixed-size buffer.
+For a fixed-size buffer element access, the *primary_no_array_creation_expression* of the *element_access* must be a variable or value of a fixed-size buffer type. Furthermore, the *argument_list* of a fixed-size buffer element access is not allowed to contain named arguments. The *argument_list* must contain a single expression, and the expression must be 
+- either of type `int`, or
+- must be implicitly convertible to `int`, or
+- must be of type ```System.Index```. 
+
+The expression denotes a zero-based index of the element in the fixed-size buffer.
 
 If *primary_no_array_creation_expression* is a variable, result of evaluating a fixed-size buffer element access is result of accessing element of a ```System.Span<T>``` returned by *AsSpan* method at the specified position. 
 
@@ -347,6 +352,24 @@ The result of conversion is a span returned by *AsSpan* method.
 
 There is an implicit conversion from expression representing a value of a fixed-size buffer type to ```System.ReadOnlySpan<T>``` type.
 The result of conversion is a span returned by *AsReadOnlySpan* method.
+
+### List patterns
+
+[List patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md) will not be supported for instances
+of fixed-size buffer types. In order to be able to take advantage of list patterns on fixed-size buffer types, a target expression must be
+explicitly converted either to ```System.Span<T>```, or to ```System.ReadOnlySpan<T>``` type first. The reason is the fact that pattern evaluation 
+liberally makes copies of the target expression, and it would be impossble to slice the copy into ```System.Span<T>```, but intent of the user might
+be to get instances of ```System.Span<T>``` from slicing. Even if the user would be fine with getting instances of ```System.ReadOnlySpan<T>```
+from slicing, it wouldn't be ref safe to return (from a pattern) one created based on a compiler generated temp. Lifetime of temps is very short
+(a statement or an expression) and they are often reused. When a target expression is copied is unspecified, and, often, depends on complexity of
+the pattern and the evaluation strategy chosen by compiler. 
+
+### MemoryMarshal.CreateReadOnlySpan
+
+We might want to specially recognize ```System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan``` method and allow
+passing a reference to a readonly location as its first argument. This should allow users to define their own fixed-size buffer
+types. For example, in order to be able to share a type across multiple assemblies and also include custom APIs into its definition.
+This might also help framework to define our shared fixed-size buffer types.
 
 ### Definite assignment checking
 
