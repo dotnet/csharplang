@@ -328,13 +328,12 @@ If the *primary_no_array_creation_expression* of an *element_access* is a value 
 For a fixed-size buffer element access, the *primary_no_array_creation_expression* of the *element_access* must be a variable or value of a fixed-size buffer type. Furthermore, the *argument_list* of a fixed-size buffer element access is not allowed to contain named arguments. The *argument_list* must contain a single expression, and the expression must be 
 - either of type `int`, or
 - must be implicitly convertible to `int`, or
-- must be of type ```System.Index```. 
+- must be of type ```System.Index```, or 
+- must be of type ```System.Range```. 
 
-The expression denotes a zero-based index of the element in the fixed-size buffer.
+If *primary_no_array_creation_expression* is a variable, result of evaluating a fixed-size buffer element access is result of indexing into a ```System.Span<T>``` returned by *AsSpan* method with the same argument. 
 
-If *primary_no_array_creation_expression* is a variable, result of evaluating a fixed-size buffer element access is result of accessing element of a ```System.Span<T>``` returned by *AsSpan* method at the specified position. 
-
-If *primary_no_array_creation_expression* is a value, result of evaluating a fixed-size buffer element access is result of accessing element of a ```System.ReadOnlySpan<T>``` returned by *AsReadOnlySpan* method at the specified position. 
+If *primary_no_array_creation_expression* is a value, result of evaluating a fixed-size buffer element access is result of indexing into a ```System.ReadOnlySpan<T>``` returned by *AsReadOnlySpan* with the same argument. 
 
 Indexing into a fixed-size buffer with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
 
