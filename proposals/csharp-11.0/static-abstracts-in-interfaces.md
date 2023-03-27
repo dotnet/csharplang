@@ -1,11 +1,7 @@
 # Static abstract members in interfaces
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
-
 ## Summary
+[summary]: #summary
 
 An interface is allowed to specify abstract static members that implementing classes and structs are then required to provide an explicit or implicit implementation of. The members can be accessed off of type parameters that are constrained by the interface.
 
