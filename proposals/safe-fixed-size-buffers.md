@@ -326,14 +326,14 @@ If the *primary_no_array_creation_expression* of an *element_access* is a value 
 #### Fixed-size buffer element access
 
 For a fixed-size buffer element access, the *primary_no_array_creation_expression* of the *element_access* must be a variable or value of a fixed-size buffer type. Furthermore, the *argument_list* of a fixed-size buffer element access is not allowed to contain named arguments. The *argument_list* must contain a single expression, and the expression must be 
-- either of type `int`, or
-- must be implicitly convertible to `int`, or
-- must be of type ```System.Index```, or 
-- must be of type ```System.Range```. 
+- of type `int`, or
+- implicitly convertible to `int`, or
+- of type ```System.Index```, or 
+- of type ```System.Range```. 
 
-If *primary_no_array_creation_expression* is a variable, result of evaluating a fixed-size buffer element access is result of indexing into a ```System.Span<T>``` returned by *AsSpan* method with the same argument. 
+If *primary_no_array_creation_expression* is a variable, the result of evaluating a fixed-size buffer element access is the result of indexing into a ```System.Span<T>``` returned by *AsSpan* method with the same argument. 
 
-If *primary_no_array_creation_expression* is a value, result of evaluating a fixed-size buffer element access is result of indexing into a ```System.ReadOnlySpan<T>``` returned by *AsReadOnlySpan* with the same argument. 
+If *primary_no_array_creation_expression* is a value, the result of evaluating a fixed-size buffer element access is the result of indexing into a ```System.ReadOnlySpan<T>``` returned by *AsReadOnlySpan* with the same argument. 
 
 Indexing into a fixed-size buffer with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
 
@@ -356,7 +356,7 @@ The result of conversion is a span returned by *AsReadOnlySpan* method.
 [List patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md) will not be supported for instances
 of fixed-size buffer types. In order to be able to take advantage of list patterns on fixed-size buffer types, a target expression must be
 explicitly converted either to ```System.Span<T>```, or to ```System.ReadOnlySpan<T>``` type first. The reason is the fact that pattern evaluation 
-liberally makes copies of the target expression, and it would be impossble to slice the copy into ```System.Span<T>```, but intent of the user might
+liberally makes copies of the target expression, and it would be impossible to slice the copy into ```System.Span<T>```, but intent of the user might
 be to get instances of ```System.Span<T>``` from slicing. Even if the user would be fine with getting instances of ```System.ReadOnlySpan<T>```
 from slicing, it wouldn't be ref safe to return (from a pattern) one created based on a compiler generated temp. Lifetime of temps is very short
 (a statement or an expression) and they are often reused. When a target expression is copied is unspecified, and, often, depends on complexity of
