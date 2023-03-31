@@ -10,7 +10,175 @@ Provide a general-purpose and safe mechanism for declaring fixed sized buffers w
 This proposal plans to address the many limitations of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
 Specifically it aims to allow the declaration of safe `fixed` buffers for managed and unmanaged types in a `struct`, `class`, or `interface`, and provide language safety verification for them.
 
+
 ## Detailed Design (Option 1)
+
+The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
+will be extended to allow specifying the size of the buffer:
+
+``` antlr
+field_declaration
+    : attributes? field_modifier* type variable_declarators ';'
+    ;
+
+field_modifier
+    : 'new'
+    | 'public'
+    | 'protected'
+    | 'internal'
+    | 'private'
+    | 'static'
+    | 'readonly'
+    | 'volatile'
+    | unsafe_modifier   // unsafe code support
+    ;
+
+variable_declarators
+    : variable_declarator (',' variable_declarator)*
+    ;
+    
+variable_declarator
+    : identifier ('=' variable_initializer)?
+    | fixed_size_buffer_declarator
+    ;
+    
+fixed_size_buffer_declarator
+    : identifier '[' constant_expression ']'
+    ;    
+```
+
+A *fixed_size_buffer_declarator* introduces a new field and consists of an identifier that names it,
+followed by a constant expression enclosed in `[` and `]` tokens. The type of the constant expression must be
+implicitly convertible to type `int`, and the value must be a non-zero positive integer.
+
+A *field_declaration* with a *fixed_size_buffer_declarator* in an interface must have `static` modifier.
+
+The field has a special struct type which represents a fixed-size buffer of a given element type.
+The element type is the *type* specified in *field_declaration*.  The constant expression
+denotes the number of elements in the buffer. The elements of a fixed-size buffer are laid out sequentially
+in memory as though they are elements of an array.
+
+The struct type will be defined using [```System.Runtime.CompilerServices.InlineArrayAttribute```](https://github.com/dotnet/runtime/issues/61135) feature.
+The framework will likely include a set of predefined "buffer" types that cover a limited set of buffer sizes. When a predefined type doesn't exist,
+compiler will synthesize it in the module being built. Names of the generated types will be "speakable" in order to support consumption from other languages. 
+The actual naming conventions for the generated type and its members are TBD. 
+
+For example, the following declaration:
+``` C#
+public partial class C
+{
+    public int buffer[10];
+}
+```
+
+is equivalent to:
+
+``` C#
+public partial class C
+{
+    public Buffer10<int> buffer;
+}
+
+[System.Runtime.CompilerServices.InlineArray(10)]
+public struct Buffer10<T>
+{
+    private T _element0;
+
+    [UnscopedRef]
+    public System.Span<T> AsSpan()
+    {
+        return System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref _element0, 10);
+    }
+
+    [UnscopedRef]
+    public readonly System.ReadOnlySpan<T> AsReadOnlySpan()
+    {
+        // Note, an attempt to compile reports error CS1605: Cannot use '_element0' as a ref or out value because it is read-only
+        return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref _element0, 10);  
+    }
+}
+```
+
+This limits the set of types that can be used as a fixed-size buffer element type to types that can be used as type arguments. For example, a pointer type cannot be used as an element type.
+
+
+### Element access
+
+The [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#11710-element-access) will be extended
+to support fixed-size buffer element access.
+
+An *element_access* consists of a *primary_no_array_creation_expression*, followed by a “`[`” token, followed by an *argument_list*, followed by a “`]`” token. The *argument_list* consists of one or more *argument*s, separated by commas.
+
+```ANTLR
+element_access
+    : primary_no_array_creation_expression '[' argument_list ']'
+    ;
+```
+
+The *argument_list* of an *element_access* is not allowed to contain `ref` or `out` arguments.
+
+An *element_access* is dynamically bound ([§11.3.3](expressions.md#1133-dynamic-binding)) if at least one of the following holds:
+
+- The *primary_no_array_creation_expression* has compile-time type `dynamic`.
+- At least one expression of the *argument_list* has compile-time type `dynamic` and the *primary_no_array_creation_expression* does not have an array type,
+  **and the *primary_no_array_creation_expression* does not have a fixed-size buffer type or there is more than one item in the argument list**.
+
+In this case, the compiler classifies the *element_access* as a value of type `dynamic`. The rules below to determine the meaning of the *element_access* are then applied at run-time, using the run-time type instead of the compile-time type of those of the *primary_no_array_creation_expression* and *argument_list* expressions which have the compile-time type `dynamic`. If the *primary_no_array_creation_expression* does not have compile-time type `dynamic`, then the element access undergoes a limited compile-time check as described in [§11.6.5](expressions.md#1165-compile-time-checking-of-dynamic-member-invocation).
+
+If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access ([§11.7.10.2](expressions.md#117102-array-access)). **If the *primary_no_array_creation_expression* of an *element_access* is a variable or value of a fixed-size buffer type and the *argument_list* consists of a single argument, the *element_access* is a fixed-size buffer element access.** Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type that has one or more indexer members, in which case the *element_access* is an indexer access ([§11.7.10.3](expressions.md#117103-indexer-access)).
+
+#### Fixed-size buffer element access
+
+For a fixed-size buffer element access, the *primary_no_array_creation_expression* of the *element_access* must be a variable or value of a fixed-size buffer type. Furthermore, the *argument_list* of a fixed-size buffer element access is not allowed to contain named arguments. The *argument_list* must contain a single expression, and the expression must be 
+- of type `int`, or
+- implicitly convertible to `int`, or
+- of type ```System.Index```, or 
+- of type ```System.Range```. 
+
+If *primary_no_array_creation_expression* is a variable, the result of evaluating a fixed-size buffer element access is the result of indexing into a ```System.Span<T>``` returned by *AsSpan* method with the same argument. 
+
+If *primary_no_array_creation_expression* is a value, the result of evaluating a fixed-size buffer element access is the result of indexing into a ```System.ReadOnlySpan<T>``` returned by *AsReadOnlySpan* with the same argument. 
+
+Indexing into a fixed-size buffer with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
+
+The *safe-to-escape* scope of the value will be equal to the *safe-to-escape* scope of the *primary_no_array_creation_expression*,
+just as it would if the backing data was accessed as a field.
+
+### Conversions
+
+A new conversion from expression will be added.
+
+There is an implicit conversion from expression representing a variable of a fixed-size buffer type to the following types:
+- ```System.Span<T>``` - the result of conversion is a span returned by *AsSpan* method.
+- ```System.ReadOnlySpan<T>``` - the result of conversion is a span returned by *AsReadOnlySpan* method.
+
+There is an implicit conversion from expression representing a value of a fixed-size buffer type to ```System.ReadOnlySpan<T>``` type.
+The result of conversion is a span returned by *AsReadOnlySpan* method.
+
+### List patterns
+
+[List patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md) will not be supported for instances
+of fixed-size buffer types. In order to be able to take advantage of list patterns on fixed-size buffer types, a target expression must be
+explicitly converted either to ```System.Span<T>```, or to ```System.ReadOnlySpan<T>``` type first. The reason is the fact that pattern evaluation 
+liberally makes copies of the target expression, and it would be impossible to slice the copy into ```System.Span<T>```, but intent of the user might
+be to get instances of ```System.Span<T>``` from slicing. Even if the user would be fine with getting instances of ```System.ReadOnlySpan<T>```
+from slicing, it wouldn't be ref safe to return (from a pattern) one created based on a compiler generated temp. Lifetime of temps is very short
+(a statement or an expression) and they are often reused. When a target expression is copied is unspecified, and, often, depends on complexity of
+the pattern and the evaluation strategy chosen by compiler. 
+
+### MemoryMarshal.CreateReadOnlySpan
+
+We might want to specially recognize ```System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan``` method and allow
+passing a reference to a readonly location as its first argument. This should allow users to define their own fixed-size buffer
+types. For example, in order to be able to share a type across multiple assemblies and also include custom APIs into its definition.
+This might also help framework to define our shared fixed-size buffer types.
+
+### Definite assignment checking
+
+Regular definite assignment rules are applicable to variables that have a fixed-size buffer type. 
+
+
+## Detailed Design (Option 2)
 
 The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
 will be extended to allow specifying the size of the buffer:
@@ -206,172 +374,6 @@ When compiler imports a field declaration of type *T* and the following conditio
 
 the field will be treated as C# fixed-size buffer with element type *F*. Otherwise, the field will be treated as a regular field of type *T*.
 
-
-## Detailed Design (Option 2)
-
-The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
-will be extended to allow specifying the size of the buffer:
-
-``` antlr
-field_declaration
-    : attributes? field_modifier* type variable_declarators ';'
-    ;
-
-field_modifier
-    : 'new'
-    | 'public'
-    | 'protected'
-    | 'internal'
-    | 'private'
-    | 'static'
-    | 'readonly'
-    | 'volatile'
-    | unsafe_modifier   // unsafe code support
-    ;
-
-variable_declarators
-    : variable_declarator (',' variable_declarator)*
-    ;
-    
-variable_declarator
-    : identifier ('=' variable_initializer)?
-    | fixed_size_buffer_declarator
-    ;
-    
-fixed_size_buffer_declarator
-    : identifier '[' constant_expression ']'
-    ;    
-```
-
-A *fixed_size_buffer_declarator* introduces a new field and consists of an identifier that names it,
-followed by a constant expression enclosed in `[` and `]` tokens. The type of the constant expression must be
-implicitly convertible to type `int`, and the value must be a non-zero positive integer.
-
-A *field_declaration* with a *fixed_size_buffer_declarator* in an interface must have `static` modifier.
-
-The field has a special struct type which represents a fixed-size buffer of a given element type.
-The element type is the *type* specified in *field_declaration*.  The constant expression
-denotes the number of elements in the buffer. The elements of a fixed-size buffer are laid out sequentially
-in memory as though they are elements of an array.
-
-The struct type will be defined using [```System.Runtime.CompilerServices.InlineArrayAttribute```](https://github.com/dotnet/runtime/issues/61135) feature.
-The framework will likely include a set of predefined "buffer" types that cover a limited set of buffer sizes. When a predefined type doesn't exist,
-compiler will synthesize it in the module being built. Names of the generated types will be "speakable" in order to support consumption from other languages. 
-The actual naming conventions for the generated type and its members are TBD. 
-
-For example, the following declaration:
-``` C#
-public partial class C
-{
-    public int buffer[10];
-}
-```
-
-is equivalent to:
-
-``` C#
-public partial class C
-{
-    public Buffer10<int> buffer;
-}
-
-[System.Runtime.CompilerServices.InlineArray(10)]
-public struct Buffer10<T>
-{
-    private T _element0;
-
-    [UnscopedRef]
-    public System.Span<T> AsSpan()
-    {
-        return System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref _element0, 10);
-    }
-
-    [UnscopedRef]
-    public readonly System.ReadOnlySpan<T> AsReadOnlySpan()
-    {
-        // Note, an attempt to compile reports error CS1605: Cannot use '_element0' as a ref or out value because it is read-only
-        return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref _element0, 10);  
-    }
-}
-```
-
-This limits the set of types that can be used as a fixed-size buffer element type to types that can be used as type arguments. For example, a pointer type cannot be used as an element type.
-
-
-### Element access
-
-The [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#11710-element-access) will be extended
-to support fixed-size buffer element access.
-
-An *element_access* consists of a *primary_no_array_creation_expression*, followed by a “`[`” token, followed by an *argument_list*, followed by a “`]`” token. The *argument_list* consists of one or more *argument*s, separated by commas.
-
-```ANTLR
-element_access
-    : primary_no_array_creation_expression '[' argument_list ']'
-    ;
-```
-
-The *argument_list* of an *element_access* is not allowed to contain `ref` or `out` arguments.
-
-An *element_access* is dynamically bound ([§11.3.3](expressions.md#1133-dynamic-binding)) if at least one of the following holds:
-
-- The *primary_no_array_creation_expression* has compile-time type `dynamic`.
-- At least one expression of the *argument_list* has compile-time type `dynamic` and the *primary_no_array_creation_expression* does not have an array type,
-  **and the *primary_no_array_creation_expression* does not have a fixed-size buffer type or there is more than one item in the argument list**.
-
-In this case, the compiler classifies the *element_access* as a value of type `dynamic`. The rules below to determine the meaning of the *element_access* are then applied at run-time, using the run-time type instead of the compile-time type of those of the *primary_no_array_creation_expression* and *argument_list* expressions which have the compile-time type `dynamic`. If the *primary_no_array_creation_expression* does not have compile-time type `dynamic`, then the element access undergoes a limited compile-time check as described in [§11.6.5](expressions.md#1165-compile-time-checking-of-dynamic-member-invocation).
-
-If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access ([§11.7.10.2](expressions.md#117102-array-access)). **If the *primary_no_array_creation_expression* of an *element_access* is a variable or value of a fixed-size buffer type and the *argument_list* consists of a single argument, the *element_access* is a fixed-size buffer element access.** Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type that has one or more indexer members, in which case the *element_access* is an indexer access ([§11.7.10.3](expressions.md#117103-indexer-access)).
-
-#### Fixed-size buffer element access
-
-For a fixed-size buffer element access, the *primary_no_array_creation_expression* of the *element_access* must be a variable or value of a fixed-size buffer type. Furthermore, the *argument_list* of a fixed-size buffer element access is not allowed to contain named arguments. The *argument_list* must contain a single expression, and the expression must be 
-- of type `int`, or
-- implicitly convertible to `int`, or
-- of type ```System.Index```, or 
-- of type ```System.Range```. 
-
-If *primary_no_array_creation_expression* is a variable, the result of evaluating a fixed-size buffer element access is the result of indexing into a ```System.Span<T>``` returned by *AsSpan* method with the same argument. 
-
-If *primary_no_array_creation_expression* is a value, the result of evaluating a fixed-size buffer element access is the result of indexing into a ```System.ReadOnlySpan<T>``` returned by *AsReadOnlySpan* with the same argument. 
-
-Indexing into a fixed-size buffer with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
-
-The *safe-to-escape* scope of the value will be equal to the *safe-to-escape* scope of the *primary_no_array_creation_expression*,
-just as it would if the backing data was accessed as a field.
-
-### Conversions
-
-A new conversion from expression will be added.
-
-There is an implicit conversion from expression representing a variable of a fixed-size buffer type to the following types:
-- ```System.Span<T>``` - the result of conversion is a span returned by *AsSpan* method.
-- ```System.ReadOnlySpan<T>``` - the result of conversion is a span returned by *AsReadOnlySpan* method.
-
-There is an implicit conversion from expression representing a value of a fixed-size buffer type to ```System.ReadOnlySpan<T>``` type.
-The result of conversion is a span returned by *AsReadOnlySpan* method.
-
-### List patterns
-
-[List patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md) will not be supported for instances
-of fixed-size buffer types. In order to be able to take advantage of list patterns on fixed-size buffer types, a target expression must be
-explicitly converted either to ```System.Span<T>```, or to ```System.ReadOnlySpan<T>``` type first. The reason is the fact that pattern evaluation 
-liberally makes copies of the target expression, and it would be impossible to slice the copy into ```System.Span<T>```, but intent of the user might
-be to get instances of ```System.Span<T>``` from slicing. Even if the user would be fine with getting instances of ```System.ReadOnlySpan<T>```
-from slicing, it wouldn't be ref safe to return (from a pattern) one created based on a compiler generated temp. Lifetime of temps is very short
-(a statement or an expression) and they are often reused. When a target expression is copied is unspecified, and, often, depends on complexity of
-the pattern and the evaluation strategy chosen by compiler. 
-
-### MemoryMarshal.CreateReadOnlySpan
-
-We might want to specially recognize ```System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan``` method and allow
-passing a reference to a readonly location as its first argument. This should allow users to define their own fixed-size buffer
-types. For example, in order to be able to share a type across multiple assemblies and also include custom APIs into its definition.
-This might also help framework to define our shared fixed-size buffer types.
-
-### Definite assignment checking
-
-Regular definite assignment rules are applicable to variables that have a fixed-size buffer type. 
 
 ## Open design questions
 
