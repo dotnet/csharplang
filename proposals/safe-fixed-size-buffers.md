@@ -10,13 +10,14 @@ Provide a general-purpose and safe mechanism for declaring fixed sized buffers w
 This proposal plans to address the many limitations of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
 Specifically it aims to allow the declaration of safe `fixed` buffers for managed and unmanaged types in a `struct`, `class`, or `interface`, and provide language safety verification for them.
 
+Note, that for the purpose of this proposal a term "fixed-size buffer" refers to a "safe fixed-size buffer" rather than to a buffer described at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
 
 ## Detailed Design (Option 1)
 
 The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
 will be extended to allow specifying the size of the buffer:
 
-``` antlr
+``` diff antlr
 field_declaration
     : attributes? field_modifier* type variable_declarators ';'
     ;
@@ -39,7 +40,7 @@ variable_declarators
     
 variable_declarator
     : identifier ('=' variable_initializer)?
-    | fixed_size_buffer_declarator
++   | fixed_size_buffer_declarator
     ;
     
 fixed_size_buffer_declarator
@@ -180,10 +181,14 @@ Regular definite assignment rules are applicable to variables that have a fixed-
 
 ## Detailed Design (Option 2)
 
+In this design, fixed-size buffer types do not get general special treatment by the language.
+There is a special syntax to declare members that represent fixed-size buffers and new rules around consuming those members.
+They are not fields from the language point of view.
+
 The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
 will be extended to allow specifying the size of the buffer:
 
-``` antlr
+``` diff antlr
 field_declaration
     : attributes? field_modifier* type variable_declarators ';'
     ;
@@ -206,7 +211,7 @@ variable_declarators
     
 variable_declarator
     : identifier ('=' variable_initializer)?
-    | fixed_size_buffer_declarator
++   | fixed_size_buffer_declarator
     ;
     
 fixed_size_buffer_declarator
@@ -247,9 +252,9 @@ In a member access of the form `E.I`, if `E` is of a struct type and a member lo
 then `E.I` is evaluated and classified as follows:
 
 - If `E` is classified as a value, the result of the expression is classified as a value of type `System.ReadOnlySpan<S>`, where S is the element type of `I`.
-  The value can be used to access members’ elements.
+  The value can be used to access member's elements.
 - Otherwise, `E` is classified as a variable and the result of the expression is classified as a value of type `System.Span<S>`, where S is the element type of `I`.
-  The value can be used to access members’ elements.
+  The value can be used to access member's elements.
 
 In a member access of the form `E.I`, if `E` is of a class type and a member lookup of `I` in that class type identifies a non-readonly instance fixed-size member,
 then `E.I` is evaluated and classified as a value of type `System.Span<S>`, where S is the element type of `I`.
@@ -273,9 +278,9 @@ This is achieved by the following.
 A member access for a readonly fixed-size buffer is evaluated and classified as follows:
 
 - If access occurs in a context where direct assignments to an element of readonly fixed-size buffer are permitted, the result of the expression is classified as a value of type `System.Span<S>`, where S is the element type of the fixed-size buffer.
-  The value can be used to access members’ elements.
+  The value can be used to access member's elements.
 - Otherwise, the expression is classified as a value of type `System.ReadOnlySpan<S>`, where S is the element type of the fixed-size buffer.
-  The value can be used to access members’ elements.
+  The value can be used to access member's elements.
 
 ### Definite assignment checking
 
