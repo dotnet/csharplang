@@ -361,10 +361,14 @@ When an instance fixed-size buffer member is referenced as a simple name, the ef
 In a member access of the form `E.I`, if `E` is of a struct type and a member lookup of `I` in that struct type identifies a non-readonly instance fixed-size member,
 then `E.I` is evaluated and classified as follows:
 
-- If `E` is classified as a value, the result of the expression is classified as a value of type `System.ReadOnlySpan<S>`, where S is the element type of `I`.
-  The value can be used to access member's elements.
-- Otherwise, `E` is classified as a variable and the result of the expression is classified as a value of type `System.Span<S>`, where S is the element type of `I`.
-  The value can be used to access member's elements.
+- If `E` is classified as a value, then `E.I` can be used only as a *primary_no_array_creation_expression* of
+  an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#11710-element-access)
+  with index of ```System.Index``` type, or of a type implicitly convertible to int. Result of the element access is
+  a fixed-size member's element at the specified position, classified as a value.   
+- Otherwise, if `E` is classified as a readonly variable and the result of the expression is classified as a value of type `System.ReadOnlySpan<S>`,
+  where S is the element type of `I`. The value can be used to access member's elements.
+- Otherwise, `E` is classified as a writable variable and the result of the expression is classified as a value of type `System.Span<S>`,
+  where S is the element type of `I`. The value can be used to access member's elements.
 
 In a member access of the form `E.I`, if `E` is of a class type and a member lookup of `I` in that class type identifies a non-readonly instance fixed-size member,
 then `E.I` is evaluated and classified as a value of type `System.Span<S>`, where S is the element type of `I`.
@@ -387,8 +391,12 @@ This is achieved by the following.
 
 A member access for a readonly fixed-size buffer is evaluated and classified as follows:
 
-- If access occurs in a context where direct assignments to an element of readonly fixed-size buffer are permitted, the result of the expression is classified as a value of type `System.Span<S>`, where S is the element type of the fixed-size buffer.
-  The value can be used to access member's elements.
+- In a member access of the form `E.I`, if `E` is of a struct type and `E` is classified as a value, then `E.I` can be used only as a
+  *primary_no_array_creation_expression* of an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#11710-element-access)
+  with index of ```System.Index``` type, or of a type implicitly convertible to int. Result of the element access is a fixed-size member's element at the specified
+  position, classified as a value.
+- If access occurs in a context where direct assignments to an element of readonly fixed-size buffer are permitted, the result of the expression
+  is classified as a value of type `System.Span<S>`, where S is the element type of the fixed-size buffer. The value can be used to access member's elements.
 - Otherwise, the expression is classified as a value of type `System.ReadOnlySpan<S>`, where S is the element type of the fixed-size buffer.
   The value can be used to access member's elements.
 
