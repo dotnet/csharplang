@@ -275,13 +275,7 @@ void M3()
 ### List patterns
 
 [List patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md) will not be supported for instances
-of fixed-size buffer types. In order to be able to take advantage of list patterns on fixed-size buffer types, a target expression must be
-explicitly converted either to ```System.Span<T>```, or to ```System.ReadOnlySpan<T>``` type first. The reason is the fact that pattern evaluation 
-liberally makes copies of the target expression, and it would be impossible to slice the copy into ```System.Span<T>```, but intent of the user might
-be to get instances of ```System.Span<T>``` from slicing. Even if the user would be fine with getting instances of ```System.ReadOnlySpan<T>```
-from slicing, it wouldn't be ref safe to return (from a pattern) one created based on a compiler generated temp. Lifetime of temps is very short
-(a statement or an expression) and they are often reused. When a target expression is copied is unspecified, and, often, depends on complexity of
-the pattern and the evaluation strategy chosen by compiler. 
+of fixed-size buffer types.
 
 ### MemoryMarshal.CreateReadOnlySpan
 
