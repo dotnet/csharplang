@@ -102,7 +102,6 @@ public struct Buffer10<T>
 
 This limits the set of types that can be used as a fixed-size buffer element type to types that can be used as type arguments. For example, a pointer type cannot be used as an element type.
 
-
 ### Element access
 
 The [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#11710-element-access) will be extended
@@ -136,14 +135,98 @@ For a fixed-size buffer element access, the *primary_no_array_creation_expressio
 - of type ```System.Index```, or 
 - of type ```System.Range```. 
 
-If *primary_no_array_creation_expression* is a variable, the result of evaluating a fixed-size buffer element access is the result of indexing into a ```System.Span<T>``` returned by *AsSpan* method with the same argument. 
+##### When the expresion type is int
 
-If *primary_no_array_creation_expression* is a value, the result of evaluating a fixed-size buffer element access is the result of indexing into a ```System.ReadOnlySpan<T>``` returned by *AsReadOnlySpan* with the same argument. 
+If *primary_no_array_creation_expression* is a writable variable, the result of evaluating a fixed-size buffer element access is a writable variable
+equaivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.item?view=net-8.0) with
+that integer value on an instance of ```System.Span<T>``` returned by ```[UnscopedRef] public System.Span<T> AsSpan()``` method on *primary_no_array_creation_expression*. 
+
+If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating a fixed-size buffer element access is a readonly variable
+equaivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
+that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```[UnscopedRef] public readonly System.ReadOnlySpan<T> AsReadOnlySpan()```
+method on *primary_no_array_creation_expression*. 
+
+If *primary_no_array_creation_expression* is a value, the result of evaluating a fixed-size buffer element access is a value
+equaivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
+that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```[UnscopedRef] public readonly System.ReadOnlySpan<T> AsReadOnlySpan()```
+method on *primary_no_array_creation_expression*. 
+
+For example:
+``` C#
+void M1(Buffer10<int> x)
+{
+    ref int a = ref x[0]; // Ok, equivalent to `ref int a = ref x.AsSpan()[0]`
+}
+
+void M2(in Buffer10<int> x)
+{
+    ref readonly int a = ref x[0]; // Ok, equivalent to `ref readonly int a = ref x.AsReadOnlySpan()[0]`
+    ref int b = ref x[0]; // An error, `x` is a readonly variable => `x[0]` is a readonly variable
+}
+
+Buffer10<int> GetBuffer() => default;
+
+void M3()
+{
+    int a = GetBuffer()[0]; // Ok, equivalent to `int a = GetBuffer().AsReadOnlySpan()[0]` 
+    ref readonly int b = ref x[0]; // An error, `x[0]` is a value
+    ref int c = ref x[0]; // An error, `x[0]` is a value
+}
+```
 
 Indexing into a fixed-size buffer with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
 
-The *safe-to-escape* scope of the value will be equal to the *safe-to-escape* scope of the *primary_no_array_creation_expression*,
-just as it would if the backing data was accessed as a field.
+##### When the expresion type is implicitly convertible to `int`
+
+The expression is converted to int and then the element access is interpreted as described in **When the expresion type is int** section.
+
+##### When the expresion type is ```System.Index```
+
+The ```System.Index``` value is transformed to an int-based index value as described at https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-index-support, assuming that the length of the collection is known at compile time and is equal to the amount of elements
+in the fixed-size buffer type of the *primary_no_array_creation_expression*. Then the element access is interpreted as described in
+**When the expresion type is int** section.
+
+##### When the expresion type is ```System.Range```
+
+If *primary_no_array_creation_expression* is a writable variable, the result of evaluating a fixed-size buffer element access is a value
+equaivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.slice?view=net-8.0)
+on an instance of ```System.Span<T>``` returned by ```[UnscopedRef] public System.Span<T> AsSpan()``` method on *primary_no_array_creation_expression*. 
+
+If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating a fixed-size buffer element access is a value
+equaivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.slice?view=net-8.0)
+on an instance of ```System.ReadOnlySpan<T>``` returned by ```[UnscopedRef] public readonly System.ReadOnlySpan<T> AsReadOnlySpan()```
+method on *primary_no_array_creation_expression*. 
+
+If *primary_no_array_creation_expression* is a value, an error is reported. 
+
+The arguments for the ```Slice``` method invocation are calcilated from the ```System.Range``` value as described at 
+https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-range-support, assuming that the length of the collection
+is known at compile time and is equal to the amount of elements in the fixed-size buffer type of the *primary_no_array_creation_expression*.
+
+Compiler can omit the ```Slice``` call if it is known at compile time that `start` is 0 and `length` is equal to the amount of elements in the
+fixed-size buffer type. Compiler can also report an error if it is known at compile time that slicing goes out of fixed-size buffer bounds.
+
+For example:
+``` C#
+void M1(Buffer10<int> x)
+{
+    System.Span<int> a = x[..]; // Ok, equivalent to `System.Span<int> a = x.AsSpan().Slice(0, 10)`
+}
+
+void M2(in Buffer10<int> x)
+{
+    System.ReadOnlySpan<int> a = x[..]; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan().Slice(0, 10)`
+    System.Span<int> b = x[..]; // An error, System.ReadOnlySpan<int> cannot be converted to System.Span<int>
+}
+
+Buffer10<int> GetBuffer() => default;
+
+void M3()
+{
+    _ = x[..]; // An error, `x` is a value
+}
+```
+
 
 ### Conversions
 
