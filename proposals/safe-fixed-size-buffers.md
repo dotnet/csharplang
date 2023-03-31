@@ -230,14 +230,47 @@ void M3()
 
 ### Conversions
 
-A new conversion from expression will be added.
+A new conversion, a fixed-size buffer conversion, from expression will be added. The fixed-size buffer conversion is
+a [standard conversion](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#104-standard-conversions).
 
-There is an implicit conversion from expression representing a variable of a fixed-size buffer type to the following types:
-- ```System.Span<T>``` - the result of conversion is a span returned by *AsSpan* method.
-- ```System.ReadOnlySpan<T>``` - the result of conversion is a span returned by *AsReadOnlySpan* method.
+There is an implicit conversion from expression representing a writable variable of a fixed-size buffer type to the following types:
+- ```System.Span<T>```
+- ```System.ReadOnlySpan<T>```
 
-There is an implicit conversion from expression representing a value of a fixed-size buffer type to ```System.ReadOnlySpan<T>``` type.
-The result of conversion is a span returned by *AsReadOnlySpan* method.
+There is an implicit conversion from expression representing a readonly variable of a fixed-size buffer type to the following types:
+- ```System.ReadOnlySpan<T>```
+
+Note, that there is no new conversion added from expression representing a value of a fixed-size buffer type.
+
+Result of a fixed-size buffer conversion to ```System.Span<T>``` is a value equaivalent to invoking
+```[UnscopedRef] public System.Span<T> AsSpan()``` method on the converted variable. 
+
+Result of a fixed-size buffer conversion to ```System.ReadOnlySpan<T>``` is a value equaivalent to invoking
+```[UnscopedRef] public readonly System.ReadOnlySpan<T> AsReadOnlySpan()``` method on the converted variable. 
+
+For example:
+``` C#
+void M1(Buffer10<int> x)
+{
+    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan()`
+    System.Span<int> b = x; // Ok, equivalent to `System.Span<int> b = x.AsSpan()`
+}
+
+void M2(in Buffer10<int> x)
+{
+    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan()`
+    System.Span<int> b = x; // An error, no conversion to System.Span<int>
+}
+
+Buffer10<int> GetBuffer() => default;
+
+void M3()
+{
+    System.ReadOnlySpan<int> a = GetBuffer(); // An error, no conversion to System.ReadOnlySpan<int>
+    System.Span<int> b = GetBuffer(); // An error, no conversion to System.Span<int>
+}
+```
+
 
 ### List patterns
 
