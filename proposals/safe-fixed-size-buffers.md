@@ -169,8 +169,8 @@ Buffer10<int> GetBuffer() => default;
 void M3()
 {
     int a = GetBuffer()[0]; // Ok, equivalent to `int a = GetBuffer().AsReadOnlySpan()[0]` 
-    ref readonly int b = ref x[0]; // An error, `x[0]` is a value
-    ref int c = ref x[0]; // An error, `x[0]` is a value
+    ref readonly int b = ref GetBuffer()[0]; // An error, `GetBuffer()[0]` is a value
+    ref int c = ref GetBuffer()[0]; // An error, `GetBuffer()[0]` is a value
 }
 ```
 
@@ -223,7 +223,7 @@ Buffer10<int> GetBuffer() => default;
 
 void M3()
 {
-    _ = x[..]; // An error, `x` is a value
+    _ = GetBuffer()[..]; // An error, `GetBuffer()` is a value
 }
 ```
 
