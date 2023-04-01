@@ -272,6 +272,39 @@ void M3()
 }
 ```
 
+Alternatively, we could say that there is an implicit conversion from expression of a fixed-size buffer type to the following types
+(regardless of vaariable/value classification):
+- ```System.Span<T>```
+- ```System.ReadOnlySpan<T>```
+
+But then, converting a readonly variable to ```System.Span<T>``` or converting a value to either type is a ref-safety error.
+
+
+For example:
+``` C#
+void M1(Buffer10<int> x)
+{
+    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan()`
+    System.Span<int> b = x; // Ok, equivalent to `System.Span<int> b = x.AsSpan()`
+}
+
+void M2(in Buffer10<int> x)
+{
+    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan()`
+    System.Span<int> b = x; // An error, readonly mismatch
+}
+
+Buffer10<int> GetBuffer() => default;
+
+void M3()
+{
+    System.ReadOnlySpan<int> a = GetBuffer(); // An error, ref-safety
+    System.Span<int> b = GetBuffer(); // An error, ref-safety
+}
+```
+
+With this approach, less context information is needed for conversion classification. This is going to significantly simplify implementation. 
+
 
 ### List patterns
 
