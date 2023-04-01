@@ -132,8 +132,8 @@ If the *primary_no_array_creation_expression* of an *element_access* is a value 
 For a fixed-size buffer element access, the *primary_no_array_creation_expression* of the *element_access* must be a variable or value of a fixed-size buffer type. Furthermore, the *argument_list* of a fixed-size buffer element access is not allowed to contain named arguments. The *argument_list* must contain a single expression, and the expression must be 
 - of type `int`, or
 - implicitly convertible to `int`, or
-- of type ```System.Index```, or 
-- of type ```System.Range```. 
+- implicitly convertible to ```System.Index```, or 
+- implicitly convertible to ```System.Range```. 
 
 ##### When the expresion type is int
 
@@ -176,17 +176,18 @@ void M3()
 
 Indexing into a fixed-size buffer with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
 
-##### When the expresion type is implicitly convertible to `int`
+##### When the expresion is implicitly convertible to `int`
 
 The expression is converted to int and then the element access is interpreted as described in **When the expresion type is int** section.
 
-##### When the expresion type is ```System.Index```
+##### When the expresion implicitly convertible to ```System.Index```
 
-The ```System.Index``` value is transformed to an int-based index value as described at https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-index-support, assuming that the length of the collection is known at compile time and is equal to the amount of elements
-in the fixed-size buffer type of the *primary_no_array_creation_expression*. Then the element access is interpreted as described in
+The expression is converted to ```System.Index```, which is then transformed to an int-based index value as described at https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-index-support, assuming that the
+length of the collection is known at compile time and is equal to the amount of elements in the fixed-size buffer type of
+the *primary_no_array_creation_expression*. Then the element access is interpreted as described in
 **When the expresion type is int** section.
 
-##### When the expresion type is ```System.Range```
+##### When the expresion implicitly convertible to ```System.Range```
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating a fixed-size buffer element access is a value
 equaivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.slice?view=net-8.0)
@@ -199,7 +200,7 @@ method on *primary_no_array_creation_expression*.
 
 If *primary_no_array_creation_expression* is a value, an error is reported. 
 
-The arguments for the ```Slice``` method invocation are calcilated from the ```System.Range``` value as described at 
+The arguments for the ```Slice``` method invocation are calcilated from the index expression converted to```System.Range``` as described at 
 https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-range-support, assuming that the length of the collection
 is known at compile time and is equal to the amount of elements in the fixed-size buffer type of the *primary_no_array_creation_expression*.
 
