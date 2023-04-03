@@ -94,8 +94,8 @@ public struct Buffer10<T>
     [UnscopedRef]
     public readonly System.ReadOnlySpan<T> AsReadOnlySpan()
     {
-        // Note, an attempt to compile reports error CS1605: Cannot use '_element0' as a ref or out value because it is read-only
-        return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref _element0, 10);  
+        return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(
+                    ref System.Runtime.CompilerServices.Unsafe.AsRef(in _element0), 10);
     }
 }
 ```
@@ -311,13 +311,6 @@ With this approach, less context information is needed for conversion classifica
 [List patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md) will not be supported for instances
 of fixed-size buffer types.
 
-### MemoryMarshal.CreateReadOnlySpan
-
-We might want to specially recognize ```System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan``` method and allow
-passing a reference to a readonly location as its first argument. This should allow users to define their own fixed-size buffer
-types. For example, in order to be able to share a type across multiple assemblies and also include custom APIs into its definition.
-This might also help framework to define our shared fixed-size buffer types.
-
 ### Definite assignment checking
 
 Regular definite assignment rules are applicable to variables that have a fixed-size buffer type. 
@@ -479,8 +472,8 @@ public struct Buffer10<T>
     [UnscopedRef]
     public readonly System.ReadOnlySpan<T> AsReadOnlySpan()
     {
-        // Note, an attempt to compile reports error CS1605: Cannot use '_element0' as a ref or out value because it is read-only
-        return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref _element0, 10);  
+        return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(
+                    ref System.Runtime.CompilerServices.Unsafe.AsRef(in _element0), 10);
     }
 }
 ```
