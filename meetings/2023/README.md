@@ -15,6 +15,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Apr 26, 2023
 
+- Collection literals: dictionaries; `Construct` methods (Chuck, Cyrus) - https://github.com/dotnet/csharplang/issues/7085
 
 ## Mon Apr 24, 2023
 
@@ -23,7 +24,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Apr 10, 2023
 
 - Fixed Size Buffers (Aleksey) - https://github.com/dotnet/csharplang/pull/7064
-- Collection literals: dictionaries; `Construct` methods (Chuck, Cyrus) - https://github.com/dotnet/csharplang/issues/7085
 
 ## Mon Apr 3, 2023
 
