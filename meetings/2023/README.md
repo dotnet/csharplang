@@ -25,17 +25,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Fixed Size Buffers (Aleksey) - https://github.com/dotnet/csharplang/pull/7064
 
-## Mon Apr 3, 2023
-
-- Collection literals (Chuck, Cyrus) - https://github.com/dotnet/csharplang/issues/7085
-- Fixed Size Buffers (Aleksey) - https://github.com/dotnet/csharplang/pull/7064
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon Apr 3, 2023
+
+[C# Language Design Meeting for April 3rd, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-03.md)
+
+- [Collection Literals](#collection-literals)
+- [Fixed-size buffers](#fixed-size-buffers)
 
 ## Mon Mar 13, 2023 (Shorter meeting)
 
