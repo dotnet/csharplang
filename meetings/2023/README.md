@@ -36,8 +36,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 [C# Language Design Meeting for April 3rd, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-03.md)
 
-- [Collection Literals](#collection-literals)
-- [Fixed-size buffers](#fixed-size-buffers)
+- Collection Literals
+- Fixed-size buffers
 
 ## Mon Mar 13, 2023 (Shorter meeting)
 
