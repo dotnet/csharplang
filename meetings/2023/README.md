@@ -22,6 +22,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Apr 17, 2023
 
+- Collection literals: dictionaries; `Construct` methods (Chuck, Cyrus) - https://github.com/dotnet/csharplang/issues/7085
 
 ## Mon Apr 10, 2023
 
