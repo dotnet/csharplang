@@ -320,12 +320,12 @@ Regular definite assignment rules are applicable to variables that have a fixed-
 If there is a guarantee that the first element in a fixed-size buffer type is aligned at the beginning of the type (no gap), then compiler can use the
 following code to get a ```Span``` value (instead of relying on presence of ```AsSpan``` helper):
 ``` C#
-new Span<element type>(Unsafe.AsPointer(ref <the fixed-size buffer writable variable>), <size of the fixed-size buffer>)
+MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TElement>(ref buffer), size)
 ```
 
 And the following code to get a ```ReadOnlySpan``` value (instead of relying on presence of ```AsReadOnlySpan``` helper):
 ``` C#
-new ReadOnlySpan<element type>(Unsafe.AsPointer(ref Unsafe.AsRef(in <the fixed-size buffer writable variable>)), <size of the fixed-size buffer>)
+MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<TBuffer, TElement>(ref Unsafe.AsRef(in buffer)), size)
 ```
 
 In order to reduce IL size at use sites compiler should be able to add two generic reusable helpers into private implementation detail type and
@@ -335,14 +335,16 @@ For example:
 ``` C#
 public static System.Span<TElement> AsSpan<TBuffer, TElement>(ref TBuffer buffer, int size) where TBuffer : struct
 {
-    return new Span<TElement>(Unsafe.AsPointer(ref buffer), size);
+    return MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TElement>(ref buffer), size);
 }
 
 public static System.ReadOnlySpan<TElement> AsReadOnlySpan<TBuffer, TElement>(in TBuffer buffer, int size) where TBuffer : struct
 {
-    return new ReadOnlySpan<TElement>(Unsafe.AsPointer(ref Unsafe.AsRef(in buffer)), size);
+    return MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<TBuffer, TElement>(ref Unsafe.AsRef(in buffer)), size);
 }
 ```
+
+Also, quite possibly compiler could omit the ```Unsafe.As``` and ```Unsafe.AsRef``` calls in IL.
 
 
 ## Detailed Design (Option 2)
