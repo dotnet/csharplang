@@ -315,6 +315,35 @@ of fixed-size buffer types.
 
 Regular definite assignment rules are applicable to variables that have a fixed-size buffer type. 
 
+### An alternative to relying on AsSpan/AsReadOnlySpan helpers
+
+If there is a guarantee that the first element in a fixed-size buffer type is aligned at the beginning of the type (no gap), then compiler can use the
+following code to get a ```Span``` value (instead of relying on presence of ```AsSpan``` helper):
+``` C#
+new Span<element type>(Unsafe.AsPointer(ref <the fixed-size buffer writable variable>), <size of the fixed-size buffer>)
+```
+
+And the following code to get a ```ReadOnlySpan``` value (instead of relying on presence of ```AsReadOnlySpan``` helper):
+``` C#
+new ReadOnlySpan<element type>(Unsafe.AsPointer(ref Unsafe.AsRef(in <the fixed-size buffer writable variable>)), <size of the fixed-size buffer>)
+```
+
+In order to reduce IL size at use sites compiler should be able to add two generic reusable helpers into private implementation detail type and
+use them across all use sites in the same program.
+
+For example:
+``` C#
+public static System.Span<TElement> AsSpan<TBuffer, TElement>(ref TBuffer buffer, int size) where TBuffer : struct
+{
+    return new Span<TElement>(Unsafe.AsPointer(ref buffer), size);
+}
+
+public static System.ReadOnlySpan<TElement> AsReadOnlySpan<TBuffer, TElement>(in TBuffer buffer, int size) where TBuffer : struct
+{
+    return new ReadOnlySpan<TElement>(Unsafe.AsPointer(ref Unsafe.AsRef(in buffer)), size);
+}
+```
+
 
 ## Detailed Design (Option 2)
 
