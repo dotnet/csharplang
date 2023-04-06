@@ -13,7 +13,21 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
+## Wed May 31, 2023
+
+## Wed May 17, 2023
+
+## Mon May 15, 2023
+
+## Mon May 8, 2023
+
+## Wed May 3, 2023
+
+## Mon May 1, 2023
+
 ## Wed Apr 26, 2023
+
+(One hour only)
 
 - Collection literals: dictionaries; `Construct` methods (Chuck, Cyrus) - https://github.com/dotnet/csharplang/issues/7085
 
@@ -22,6 +36,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - *Design review*
 
 ## Mon Apr 10, 2023
+
+(One topic only)
 
 - Fixed Size Buffers (Aleksey) - https://github.com/dotnet/csharplang/pull/7064
 
