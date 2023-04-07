@@ -46,7 +46,7 @@ The sections that do need updating are:
     3. `using X = int?;` is legal.  This is a nullable *value* type, not a nullable *reference* type.
 ```
 
-# Supporting aliases to types containing pointers.
+## Supporting aliases to types containing pointers.
 
 A new [unsafe context](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#222-unsafe-contexts) is added through an optional 'unsafe' keyword in the using_alias_directive production:
 
