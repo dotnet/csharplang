@@ -249,39 +249,6 @@ Compiler will produce a warning for `in` or by value argument in a `class_base` 
 - The argument is not part of an expanded `params` argument;
 - The primary constructor parameter is captured into the state of the enclosing type.
 
-## Attributes targeting primary constructors
-
-At https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-03-13.md we decided to embrace
-the https://github.com/dotnet/csharplang/issues/7047 proposal.
-
-The "method" attribute target is allowed on a *class_declaration*/*struct_declaration* with *parameter_list* and results in the
-corresponding primary constructor having that attribute.
-Attributes with the `method` target on a *class_declaration*/*struct_declaration* without *parameter_list* are are ignored
-with a warning.
-
-``` C#
-[method: FooAttr] // Good
-public partial record Rec(
-    [property: Foo] int X,
-    [field: NonSerialized] int Y
-);
-
-[method: BarAttr] // warning CS0657: 'method' is not a valid attribute location for this declaration. Valid attribute locations for this declaration are 'type'. All attributes in this block will be ignored.
-public partial record Rec
-{
-    public void Frobnicate()
-    {
-        ...
-    }
-}
-
-[method: Attr] // Good
-public record MyUnit1();
-
-[method: Attr] // warning CS0657: 'method' is not a valid attribute location for this declaration. Valid attribute locations for this declaration are 'type'. All attributes in this block will be ignored.
-public record MyUnit2;
-```
-
 ## Primary constructors on records
 
 With this proposal, records no longer need to separately specify a primary constructor mechanism. Instead, record (class and struct) declarations that have primary constructors would follow the general rules, with these simple additions:
@@ -439,36 +406,6 @@ This is a potential future addition that can be adopted or not. The current prop
 
 ## Open questions
 
-### Field targeting attributes for captured primary constructor parameters
-
-Should we allow field targeting attributes for captured primary constructor parameters?
-
-``` C#
-class C1([field: Test] int x) // Parameter is captured, the attribute goes to the capture field
-{
-    public int X => x;
-}
-
-class C2([field: Test] int x) // Parameter is not captured, the attribute is ignored with a warning CS0657: 'field' is not a valid attribute location for this declaration. Valid attribute locations for this declaration are 'param'. All attributes in this block will be ignored.
-{
-    public int X = x;
-}
-```
-
-Right now the attributes are ignored with the warning regardless of whether the parameter is captured.
-
-Note that for records, field targeted attributes are allowed when a property is synthesized for it. The attributes 
-go on the backing field then.
-
-``` C#
-record R1([field: Test]int X); // Ok, the attribute goes on the backing field
-
-record R2([field: Test]int X) // warning CS0657: 'field' is not a valid attribute location for this declaration. Valid attribute locations for this declaration are 'param'. All attributes in this block will be ignored.
-{
-    public int X = X;
-}
-```
-
 ### Capturing instance of the enclosing type in a closure
 
 When a parameter captured into the state of the enclosing type is also referenced in a lambda inside an instance initializer or a base initializer, the lambda and the state of the enclosing type should refer to the same location for the parameter.
@@ -495,11 +432,6 @@ Alternatively we could:
 - Disallow lambdas like that;
 - Or, instead, capture parameters like that in an instance of a separate class (yet another closure), and share that instance between the closure and the instance of the enclosing type. Thus eliminating the need to capture `this` in a closure.
 
-#### Conclusion:
-We are comfortable with capturing `this` into a closure before the base constructor is invoked
-(https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-15.md).
-The runtime team didn't find the IL pattern problematic as well.
-
 ### Assigning to `this` within a struct
 
 C# allows to assign to `this` within a struct. If the struct captures a primary constructor parameter, the assignment is going to overwrite its value, which might be not obvious to the user. Do we want to report a warning for assignments like this?  
@@ -516,15 +448,8 @@ struct S(int x)
 }
 ```
 
-#### Conclusion:
-
-Allowed, no warning (https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-15.md).
-
 ## LDM meetings
 
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
 https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-01-18.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-15.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-22.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-03-13.md
 
