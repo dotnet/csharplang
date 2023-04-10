@@ -16,9 +16,7 @@ https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
 
 ## Wed May 31, 2023
 
-## Wed May 17, 2023
-
-## Mon May 15, 2023
+## Mon May 8, 2023
 
 ## Wed May 3, 2023
 
