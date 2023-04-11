@@ -11,6 +11,10 @@ TODO2 No duplicate base extensions
 TODO2 We should likely allow constructors and `required` properties
 TODO2 The wrapping can be done with a static unspeakable factory method
 TODO2 Spec poison attributes (ExtensionMarker and CompilerFeature)
+TODO2 Open question on top-level nullability on underlying type.
+TODO2 spec similar to section §8.5.2, defining what is considered an enum:
+- must have an extension marker method
+- shall not have any instance fields
 
 ## Summary
 [summary]: #summary
@@ -667,8 +671,13 @@ TODO There's also the scenario where a method group contains a single method (la
 
 ## Implementation details
 
-Extensions are implemented as ref structs.  
-If the extension any instance member, then we emit a ref field (of underlying type)
+Extensions are implemented as ref structs with an extension marker method.  
+The extension marker method encodes the underlying type and base extensions as parameters.  
+For example: `implicit extension R for UnderlyingType : BaseExtension1, BaseExtension2` yield 
+`private static void <Extension>$(UnderlyingType, BaseExtension1, BaseExtension2, ...)`.  
+TODO2 whether the extension is implicit or explicit will be encoded in the method name.
+
+If the extension has any instance member, then we emit a ref field (of underlying type)
 into the ref struct and a constructor.  
 Values of extension types are left as values of the underlying value type, until an extension
 member is accessed. When an extension member is accessed, an extension instance is created
