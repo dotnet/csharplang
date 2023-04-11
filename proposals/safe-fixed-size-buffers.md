@@ -347,7 +347,15 @@ public static System.ReadOnlySpan<TElement> AsReadOnlySpan<TBuffer, TElement>(in
 Also, quite possibly compiler could omit the ```Unsafe.As``` and ```Unsafe.AsRef``` calls in IL.
 
 
-## Detailed Design (Option 2)
+## Open design questions
+
+### Initializer
+
+Should we support initialization at declaration site with, perhaps, [collection literals](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)?
+
+## Alternatives
+
+### Detailed Design (Option 2)
 
 In this design, fixed-size buffer types do not get general special treatment by the language.
 There is a special syntax to declare members that represent fixed-size buffers and new rules around consuming those members.
@@ -406,7 +414,7 @@ Indexing into the span with a constant expression outside of the declared fixed-
 
 The *safe-to-escape* scope of the value will be equal to the *safe-to-escape* scope of the container, just as it would if the backing data was accessed as a field.
 
-### Fixed-size buffers in expressions
+#### Fixed-size buffers in expressions
 
 Member lookup of a fixed-size buffer member proceeds exactly like member lookup of a field.
 
@@ -414,7 +422,7 @@ A fixed-size buffer can be referenced in an expression using a *simple_name* or 
 
 When an instance fixed-size buffer member is referenced as a simple name, the effect is the same as a member access of the form `this.I`, where `I` is the fixed-size buffer member. When a static fixed-size buffer member is referenced as a simple name, the effect is the same as a member access of the form `E.I`, where `I` is the fixed-size buffer member and `E` is the declaring type.
 
-#### Non-readonly fixed-size buffers
+##### Non-readonly fixed-size buffers
 
 In a member access of the form `E.I`, if `E` is of a struct type and a member lookup of `I` in that struct type identifies a non-readonly instance fixed-size member,
 then `E.I` is evaluated and classified as follows:
@@ -434,7 +442,7 @@ then `E.I` is evaluated and classified as a value of type `System.Span<S>`, wher
 In a member access of the form `E.I`, if member lookup of `I` identifies a non-readonly static fixed-size member,
 then `E.I` is evaluated and classified as a value of type `System.Span<S>`, where S is the element type of `I`.
 
-#### Readonly fixed-size buffers
+##### Readonly fixed-size buffers
 
 When a *field_declaration* includes a `readonly` modifier, the member introduced by the fixed_size_buffer_declarator is a ***readonly fixed-size buffer***.
 Direct assignments to elements of a readonly fixed-size buffer can only occur in an instance constructor, init member or static constructor in the same type.
@@ -458,15 +466,15 @@ A member access for a readonly fixed-size buffer is evaluated and classified as 
 - Otherwise, the expression is classified as a value of type `System.ReadOnlySpan<S>`, where S is the element type of the fixed-size buffer.
   The value can be used to access member's elements.
 
-### Definite assignment checking
+#### Definite assignment checking
 
 Fixed-size buffers are not subject to definite assignment-checking, and fixed-size buffer members are ignored for purposes of definite-assignment checking of struct type variables.
 
 When a fixed-size buffer member is static or the outermost containing struct variable of a fixed-size buffer member is a static variable, an instance variable of a class instance, or an array element, the elements of the fixed-size buffer are automatically initialized to their default values. In all other cases, the initial content of a fixed-size buffer is undefined.
 
-### Metadata
+#### Metadata
 
-#### Metadata emit and code generation
+##### Metadata emit and code generation
 
 For metadata encoding compiler will rely on recently added [```System.Runtime.CompilerServices.InlineArrayAttribute```](https://github.com/dotnet/runtime/issues/61135). 
 
@@ -545,7 +553,7 @@ public partial class C
 }
 ```
 
-#### Metadata import
+##### Metadata import
 
 When compiler imports a field declaration of type *T* and the following conditions are all met:
 - *T* is a struct type decorated with the ```InlineArray``` attribute, and
@@ -555,14 +563,6 @@ When compiler imports a field declaration of type *T* and the following conditio
 
 the field will be treated as C# fixed-size buffer with element type *F*. Otherwise, the field will be treated as a regular field of type *T*.
 
-
-## Open design questions
-
-### Initializer
-
-Should we support initialization at declaration site with, perhaps, [collection literals](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)?
-
-## Alternatives
 
 ### Method or property group like approach in the language
 
