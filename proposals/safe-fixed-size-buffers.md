@@ -3,12 +3,18 @@ Safe Fixed Size Buffers
 
 ## Summary
 
+Provide a general-purpose and safe mechanism for consuming struct types utilizing
+[InlineArrayAttribute](https://github.com/dotnet/runtime/issues/61135) feature.
 Provide a general-purpose and safe mechanism for declaring fixed sized buffers within C# classes, structs, and interfaces.
 
 ## Motivation
 
 This proposal plans to address the many limitations of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
-Specifically it aims to allow the declaration of safe `fixed` buffers for managed and unmanaged types in a `struct`, `class`, or `interface`, and provide language safety verification for them.
+Specifically it aims to allow:
+- accesing elements of struct types utilizing [InlineArrayAttribute](https://github.com/dotnet/runtime/issues/61135) feature;
+- the declaration of safe `fixed` buffers for managed and unmanaged types in a `struct`, `class`, or `interface`.
+
+And provide language safety verification for them.
 
 Note, that for the purpose of this proposal a term "fixed-size buffer" refers to a "safe fixed-size buffer" rather than to a buffer described at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
 
