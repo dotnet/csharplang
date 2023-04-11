@@ -18,95 +18,66 @@ And provide language safety verification for them.
 
 Note, that for the purpose of this proposal a term "fixed-size buffer" refers to a "safe fixed-size buffer" rather than to a buffer described at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
 
-## Detailed Design (Option 1)
+## Detailed Design 
 
-The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
-will be extended to allow specifying the size of the buffer:
-
-``` diff antlr
-field_declaration
-    : attributes? field_modifier* type variable_declarators ';'
-    ;
-
-field_modifier
-    : 'new'
-    | 'public'
-    | 'protected'
-    | 'internal'
-    | 'private'
-    | 'static'
-    | 'readonly'
-    | 'volatile'
-    | unsafe_modifier   // unsafe code support
-    ;
-
-variable_declarators
-    : variable_declarator (',' variable_declarator)*
-    ;
-    
-variable_declarator
-    : identifier ('=' variable_initializer)?
-+   | fixed_size_buffer_declarator
-    ;
-    
-fixed_size_buffer_declarator
-    : identifier '[' constant_expression ']'
-    ;    
-```
-
-A *fixed_size_buffer_declarator* introduces a new field and consists of an identifier that names it,
-followed by a constant expression enclosed in `[` and `]` tokens. The type of the constant expression must be
-implicitly convertible to type `int`, and the value must be a non-zero positive integer.
-
-A *field_declaration* with a *fixed_size_buffer_declarator* in an interface must have `static` modifier.
-
-The field has a special struct type which represents a fixed-size buffer of a given element type.
-The element type is the *type* specified in *field_declaration*.  The constant expression
-denotes the number of elements in the buffer. The elements of a fixed-size buffer are laid out sequentially
-in memory as though they are elements of an array.
-
-The struct type will be defined using [```System.Runtime.CompilerServices.InlineArrayAttribute```](https://github.com/dotnet/runtime/issues/61135) feature.
-The framework will likely include a set of predefined "buffer" types that cover a limited set of buffer sizes. When a predefined type doesn't exist,
-compiler will synthesize it in the module being built. Names of the generated types will be "speakable" in order to support consumption from other languages. 
-The actual naming conventions for the generated type and its members are TBD. 
-
-For example, the following declaration:
-``` C#
-public partial class C
-{
-    public int buffer[10];
-}
-```
-
-is equivalent to:
+Recently runtime added [InlineArrayAttribute](https://github.com/dotnet/runtime/issues/61135) feature.
+In short, a user can declare a structure type like the following:
 
 ``` C#
-public partial class C
-{
-    public Buffer10<int> buffer;
-}
-
 [System.Runtime.CompilerServices.InlineArray(10)]
-public struct Buffer10<T>
+public struct Buffer
 {
-    private T _element0;
-
-    [UnscopedRef]
-    public System.Span<T> AsSpan()
-    {
-        return System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref _element0, 10);
-    }
-
-    [UnscopedRef]
-    public readonly System.ReadOnlySpan<T> AsReadOnlySpan()
-    {
-        return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(
-                    ref System.Runtime.CompilerServices.Unsafe.AsRef(in _element0), 10);
-    }
+    private object _element0;
 }
 ```
 
-This limits the set of types that can be used as a fixed-size buffer element type to types that can be used as type arguments. For example, a pointer type cannot be used as an element type.
+Runtime provides a special type layout for the ```Buffer``` type:
+- The size of the type is extended to fit 10 (the number comes from the InlineArray attribute) elements of ```object```
+  type (the type comes from the type of the only instance field in the struct, ```_element0``` in this example).
+- The first element is aligned with the instance field and with the beginning of the struct
+- The elements are laid out sequentially in memory as though they are elements of an array.
+
+Runtime provides regular GC tracking for all elements in the struct.
+
+This proposal will refer to types like this as "fixed-size buffer types".
+
+Elements of a fixed-size buffer type can be accessed through pointers or through span instances returned by
+[System.Runtime.InteropServices.MemoryMarshal.CreateSpan](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.memorymarshal.createspan?view=net-7.0)/[System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.memorymarshal.createreadonlyspan?view=net-7.0) APIs. However, neither
+the pointer approach, nor the APIs provide type and bounds checking out of the box.
+
+Language will provide a type-safe/ref-safe way for accessing elements of fixed-size buffer types. The access will be span based. 
+This limits support to fixed-size buffer types with element types that can be used as a type argument.
+For example, a pointer type cannot be used as an element type. Other examples the span types.
+
+### Obtaining instances of span types for a fixed-size buffer type
+
+Since there is a guarantee that the first element in a fixed-size buffer type is aligned at the beginning of the type (no gap), compiler will use the
+following code to get a ```Span``` value:
+``` C#
+MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TElement>(ref buffer), size)
+```
+
+And the following code to get a ```ReadOnlySpan``` value:
+``` C#
+MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<TBuffer, TElement>(ref Unsafe.AsRef(in buffer)), size)
+```
+
+In order to reduce IL size at use sites compiler should be able to add two generic reusable helpers into private implementation detail type and
+use them across all use sites in the same program.
+
+``` C#
+public static System.Span<TElement> AsSpan<TBuffer, TElement>(ref TBuffer buffer, int size) where TBuffer : struct
+{
+    return MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TElement>(ref buffer), size);
+}
+
+public static System.ReadOnlySpan<TElement> AsReadOnlySpan<TBuffer, TElement>(in TBuffer buffer, int size) where TBuffer : struct
+{
+    return MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<TBuffer, TElement>(ref Unsafe.AsRef(in buffer)), size);
+}
+```
+
+Also, quite possibly compiler will be able to omit the ```Unsafe.As``` and ```Unsafe.AsRef``` calls in IL.
 
 ### Element access
 
@@ -145,28 +116,34 @@ For a fixed-size buffer element access, the *primary_no_array_creation_expressio
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating a fixed-size buffer element access is a writable variable
 equaivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.item?view=net-8.0) with
-that integer value on an instance of ```System.Span<T>``` returned by ```[UnscopedRef] public System.Span<T> AsSpan()``` method on *primary_no_array_creation_expression*. 
+that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> AsSpan``` method on *primary_no_array_creation_expression*. 
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating a fixed-size buffer element access is a readonly variable
 equaivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
-that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```[UnscopedRef] public readonly System.ReadOnlySpan<T> AsReadOnlySpan()```
+that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> AsReadOnlySpan```
 method on *primary_no_array_creation_expression*. 
 
 If *primary_no_array_creation_expression* is a value, the result of evaluating a fixed-size buffer element access is a value
 equaivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
-that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```[UnscopedRef] public readonly System.ReadOnlySpan<T> AsReadOnlySpan()```
+that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> AsReadOnlySpan```
 method on *primary_no_array_creation_expression*. 
 
 For example:
 ``` C#
+[System.Runtime.CompilerServices.InlineArray(10)]
+public struct Buffer10<T>
+{
+    private T _element0;
+}
+
 void M1(Buffer10<int> x)
 {
-    ref int a = ref x[0]; // Ok, equivalent to `ref int a = ref x.AsSpan()[0]`
+    ref int a = ref x[0]; // Ok, equivalent to `ref int a = ref AsSpan<Buffer10<int>, int>(ref x, 10)[0]`
 }
 
 void M2(in Buffer10<int> x)
 {
-    ref readonly int a = ref x[0]; // Ok, equivalent to `ref readonly int a = ref x.AsReadOnlySpan()[0]`
+    ref readonly int a = ref x[0]; // Ok, equivalent to `ref readonly int a = ref AsReadOnlySpan<Buffer10<int>, int>(in x, 10)[0]`
     ref int b = ref x[0]; // An error, `x` is a readonly variable => `x[0]` is a readonly variable
 }
 
@@ -174,7 +151,7 @@ Buffer10<int> GetBuffer() => default;
 
 void M3()
 {
-    int a = GetBuffer()[0]; // Ok, equivalent to `int a = GetBuffer().AsReadOnlySpan()[0]` 
+    int a = GetBuffer()[0]; // Ok, equivalent to `int a = AsReadOnlySpan<Buffer10<int>, int>(GetBuffer(), 10)[0]` 
     ref readonly int b = ref GetBuffer()[0]; // An error, `GetBuffer()[0]` is a value
     ref int c = ref GetBuffer()[0]; // An error, `GetBuffer()[0]` is a value
 }
@@ -197,11 +174,11 @@ the *primary_no_array_creation_expression*. Then the element access is interpret
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating a fixed-size buffer element access is a value
 equaivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.slice?view=net-8.0)
-on an instance of ```System.Span<T>``` returned by ```[UnscopedRef] public System.Span<T> AsSpan()``` method on *primary_no_array_creation_expression*. 
+on an instance of ```System.Span<T>``` returned by ```System.Span<T> AsSpan``` method on *primary_no_array_creation_expression*. 
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating a fixed-size buffer element access is a value
 equaivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.slice?view=net-8.0)
-on an instance of ```System.ReadOnlySpan<T>``` returned by ```[UnscopedRef] public readonly System.ReadOnlySpan<T> AsReadOnlySpan()```
+on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> AsReadOnlySpan```
 method on *primary_no_array_creation_expression*. 
 
 If *primary_no_array_creation_expression* is a value, an error is reported. 
@@ -217,12 +194,12 @@ For example:
 ``` C#
 void M1(Buffer10<int> x)
 {
-    System.Span<int> a = x[..]; // Ok, equivalent to `System.Span<int> a = x.AsSpan().Slice(0, 10)`
+    System.Span<int> a = x[..]; // Ok, equivalent to `System.Span<int> a = AsSpan<Buffer10<int>, int>(ref x, 10).Slice(0, 10)`
 }
 
 void M2(in Buffer10<int> x)
 {
-    System.ReadOnlySpan<int> a = x[..]; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan().Slice(0, 10)`
+    System.ReadOnlySpan<int> a = x[..]; // Ok, equivalent to `System.ReadOnlySpan<int> a = AsReadOnlySpan<Buffer10<int>, int>(in x, 10).Slice(0, 10)`
     System.Span<int> b = x[..]; // An error, System.ReadOnlySpan<int> cannot be converted to System.Span<int>
 }
 
@@ -240,63 +217,23 @@ void M3()
 A new conversion, a fixed-size buffer conversion, from expression will be added. The fixed-size buffer conversion is
 a [standard conversion](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#104-standard-conversions).
 
-There is an implicit conversion from expression representing a writable variable of a fixed-size buffer type to the following types:
+There is an implicit conversion from expression of a fixed-size buffer type to the following types:
 - ```System.Span<T>```
 - ```System.ReadOnlySpan<T>```
 
-There is an implicit conversion from expression representing a readonly variable of a fixed-size buffer type to the following types:
-- ```System.ReadOnlySpan<T>```
-
-Note, that there is no new conversion added from expression representing a value of a fixed-size buffer type.
-
-Result of a fixed-size buffer conversion to ```System.Span<T>``` is a value equaivalent to invoking
-```[UnscopedRef] public System.Span<T> AsSpan()``` method on the converted variable. 
-
-Result of a fixed-size buffer conversion to ```System.ReadOnlySpan<T>``` is a value equaivalent to invoking
-```[UnscopedRef] public readonly System.ReadOnlySpan<T> AsReadOnlySpan()``` method on the converted variable. 
+However, converting a readonly variable to ```System.Span<T>``` or converting a value to either type is an error.
 
 For example:
 ``` C#
 void M1(Buffer10<int> x)
 {
-    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan()`
-    System.Span<int> b = x; // Ok, equivalent to `System.Span<int> b = x.AsSpan()`
+    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = AsReadOnlySpan<Buffer10<int>, int>(in x, 10)`
+    System.Span<int> b = x; // Ok, equivalent to `System.Span<int> b = AsSpan<Buffer10<int>, int>(ref x, 10)`
 }
 
 void M2(in Buffer10<int> x)
 {
-    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan()`
-    System.Span<int> b = x; // An error, no conversion to System.Span<int>
-}
-
-Buffer10<int> GetBuffer() => default;
-
-void M3()
-{
-    System.ReadOnlySpan<int> a = GetBuffer(); // An error, no conversion to System.ReadOnlySpan<int>
-    System.Span<int> b = GetBuffer(); // An error, no conversion to System.Span<int>
-}
-```
-
-Alternatively, we could say that there is an implicit conversion from expression of a fixed-size buffer type to the following types
-(regardless of vaariable/value classification):
-- ```System.Span<T>```
-- ```System.ReadOnlySpan<T>```
-
-But then, converting a readonly variable to ```System.Span<T>``` or converting a value to either type is a ref-safety error.
-
-
-For example:
-``` C#
-void M1(Buffer10<int> x)
-{
-    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan()`
-    System.Span<int> b = x; // Ok, equivalent to `System.Span<int> b = x.AsSpan()`
-}
-
-void M2(in Buffer10<int> x)
-{
-    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = x.AsReadOnlySpan()`
+    System.ReadOnlySpan<int> a = x; // Ok, equivalent to `System.ReadOnlySpan<int> a = AsReadOnlySpan<Buffer10<int>, int>(in x, 10)`
     System.Span<int> b = x; // An error, readonly mismatch
 }
 
@@ -309,8 +246,6 @@ void M3()
 }
 ```
 
-With this approach, less context information is needed for conversion classification. This is going to significantly simplify implementation. 
-
 
 ### List patterns
 
@@ -321,36 +256,6 @@ of fixed-size buffer types.
 
 Regular definite assignment rules are applicable to variables that have a fixed-size buffer type. 
 
-### An alternative to relying on AsSpan/AsReadOnlySpan helpers
-
-If there is a guarantee that the first element in a fixed-size buffer type is aligned at the beginning of the type (no gap), then compiler can use the
-following code to get a ```Span``` value (instead of relying on presence of ```AsSpan``` helper):
-``` C#
-MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TElement>(ref buffer), size)
-```
-
-And the following code to get a ```ReadOnlySpan``` value (instead of relying on presence of ```AsReadOnlySpan``` helper):
-``` C#
-MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<TBuffer, TElement>(ref Unsafe.AsRef(in buffer)), size)
-```
-
-In order to reduce IL size at use sites compiler should be able to add two generic reusable helpers into private implementation detail type and
-use them across all use sites in the same program.
-
-For example:
-``` C#
-public static System.Span<TElement> AsSpan<TBuffer, TElement>(ref TBuffer buffer, int size) where TBuffer : struct
-{
-    return MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TElement>(ref buffer), size);
-}
-
-public static System.ReadOnlySpan<TElement> AsReadOnlySpan<TBuffer, TElement>(in TBuffer buffer, int size) where TBuffer : struct
-{
-    return MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<TBuffer, TElement>(ref Unsafe.AsRef(in buffer)), size);
-}
-```
-
-Also, quite possibly compiler could omit the ```Unsafe.As``` and ```Unsafe.AsRef``` calls in IL.
 
 
 ## Open design questions
