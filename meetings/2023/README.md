@@ -22,6 +22,8 @@ https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
 
 ## Mon May 1, 2023
 
+- Lock statement pattern (Steve, Kount) - https://github.com/dotnet/csharplang/issues/7104
+
 ## Wed Apr 26, 2023
 
 (One hour only)
