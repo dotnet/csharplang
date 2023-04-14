@@ -34,18 +34,18 @@ https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md
 
 - *Design review*
 
-## Mon Apr 10, 2023
-
-(One topic only)
-
-- Fixed Size Buffers (Aleksey) - https://github.com/dotnet/csharplang/pull/7064
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon Apr 10, 2023
+
+[C# Language Design Meeting for April 10th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-10.md)
+
+* Fixed Size Buffers
 
 ## Mon Apr 3, 2023
 
