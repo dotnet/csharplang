@@ -1,4 +1,4 @@
-Inline Array
+Inline Arrays
 =====
 
 ## Summary
