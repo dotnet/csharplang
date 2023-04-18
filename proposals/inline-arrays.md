@@ -11,7 +11,7 @@ Provide a general-purpose and safe mechanism for declaring inline arrays within 
 
 This proposal plans to address the many limitations of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
 Specifically it aims to allow:
-- accesing elements of struct types utilizing [InlineArrayAttribute](https://github.com/dotnet/runtime/issues/61135) feature;
+- accessing elements of struct types utilizing [InlineArrayAttribute](https://github.com/dotnet/runtime/issues/61135) feature;
 - the declaration of inline arrays for managed and unmanaged types in a `struct`, `class`, or `interface`.
 
 And provide language safety verification for them.
@@ -109,19 +109,19 @@ For an inline array element access, the *primary_no_array_creation_expression* o
 - implicitly convertible to ```System.Index```, or 
 - implicitly convertible to ```System.Range```. 
 
-##### When the expresion type is int
+##### When the expression type is int
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a writable variable
-equaivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.item?view=net-8.0) with
+equivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.item?view=net-8.0) with
 that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. 
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a readonly variable
-equaivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
+equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*. 
 
 If *primary_no_array_creation_expression* is a value, the result of evaluating an inline array element access is a value
-equaivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
+equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*. 
 
@@ -156,31 +156,31 @@ void M3()
 
 Indexing into an inline array with a constant expression outside of the declared inline array bounds is a compile time error.
 
-##### When the expresion is implicitly convertible to `int`
+##### When the expression is implicitly convertible to `int`
 
-The expression is converted to int and then the element access is interpreted as described in **When the expresion type is int** section.
+The expression is converted to int and then the element access is interpreted as described in **When the expression type is int** section.
 
-##### When the expresion implicitly convertible to ```System.Index```
+##### When the expression implicitly convertible to ```System.Index```
 
 The expression is converted to ```System.Index```, which is then transformed to an int-based index value as described at https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-index-support, assuming that the
 length of the collection is known at compile time and is equal to the amount of elements in the inline array type of
 the *primary_no_array_creation_expression*. Then the element access is interpreted as described in
-**When the expresion type is int** section.
+**When the expression type is int** section.
 
-##### When the expresion implicitly convertible to ```System.Range```
+##### When the expression implicitly convertible to ```System.Range```
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a value
-equaivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.slice?view=net-8.0)
+equivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.slice?view=net-8.0)
 on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. 
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a value
-equaivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.slice?view=net-8.0)
+equivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.slice?view=net-8.0)
 on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*. 
 
 If *primary_no_array_creation_expression* is a value, an error is reported. 
 
-The arguments for the ```Slice``` method invocation are calcilated from the index expression converted to```System.Range``` as described at 
+The arguments for the ```Slice``` method invocation are calculated from the index expression converted to```System.Range``` as described at
 https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-range-support, assuming that the length of the collection
 is known at compile time and is equal to the amount of elements in the inline array type of the *primary_no_array_creation_expression*.
 
@@ -485,8 +485,8 @@ but can be made into one if necessary. Here’s how that would work:
   they are in a readonly context
 - Their natural type is ```ReadOnlySpan<T>```, so that’s what they contribute if they participate in type inference (e.g., var, best-common-type or generic)
 
-### C/C++ fixed-size bufers
+### C/C++ fixed-size buffers
 
-C/C++ has a different notion of fixed-size bufers. For example, there is a notion of "zero-length fixed sized buffers",
+C/C++ has a different notion of fixed-size buffers. For example, there is a notion of "zero-length fixed sized buffers",
 which is often used as a way to indicate that the data is "variable length". It is not a goal of this proposal to be
 able to interop with that.
