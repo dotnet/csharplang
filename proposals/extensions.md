@@ -1,20 +1,17 @@
 # Extension types
 
-TODO2 problem with lookup rules on implicit extensions (will run into ambiguous 
+TODO3 No duplicate base extensions (to avoid ambiguities)
+TODO3 problem with lookup rules on implicit extensions (will run into ambiguous 
     lookups in implicit extension scenarios)
+
 TODO2 roles are disallowed as `this` parameter types  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
 TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
 TODO2 extensions are disallowed within interfaces with variant type parameters
 TODO2 Event with an associated instance field (error)
-TODO2 No duplicate base extensions
 TODO2 We should likely allow constructors and `required` properties
 TODO2 The wrapping can be done with a static unspeakable factory method
-TODO2 Spec poison attributes (ExtensionMarker and CompilerFeature)
 TODO2 Open question on top-level nullability on underlying type.
-TODO2 spec similar to section §8.5.2, defining what is considered an enum:
-- must have an extension marker method
-- shall not have any instance fields
 
 ## Summary
 [summary]: #summary
@@ -138,7 +135,6 @@ an underlying type specification.
 
 It is a compile-time error if the underlying type differs amongst all the parts
 of an extension declaration.  
-TODO2 this should be revised.  
 
 TODO2 we need rules to only allow an underlying type that is compatible with the base extensions.  
 
@@ -629,7 +625,7 @@ We process as follows:
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
   the result of the lookup is empty.
 
-TODO2 explain static usings
+TODO3 explain static usings
 
 The preceding rules mean that:
 1. extension members available in inner type declarations take precedence over
@@ -672,10 +668,12 @@ TODO There's also the scenario where a method group contains a single method (la
 ## Implementation details
 
 Extensions are implemented as ref structs with an extension marker method.  
-The extension marker method encodes the underlying type and base extensions as parameters.  
-For example: `implicit extension R for UnderlyingType : BaseExtension1, BaseExtension2` yield 
-`private static void <Extension>$(UnderlyingType, BaseExtension1, BaseExtension2, ...)`.  
-TODO2 whether the extension is implicit or explicit will be encoded in the method name.
+The type is marked with Obsolete and CompilerFeatureRequired attributes.  
+The extension marker method encodes the underlying type and base extensions as parameters in that order.  
+The marker method is called `<ImplicitExtension>$` for implicit extensions and 
+`<ExplicitExtension>$` for explicit extensions.  
+For example: `implicit extension R for UnderlyingType : BaseExtension1, BaseExtension2` yields
+`private static void <ImplicitExtension>$(UnderlyingType, BaseExtension1, BaseExtension2)`.  
 
 If the extension has any instance member, then we emit a ref field (of underlying type)
 into the ref struct and a constructor.  
@@ -695,10 +693,6 @@ marked with a modopt of the extension type.
 void M(Extension r) // emitted as `void M(modopt(Extension) UnderlyingType r)`
 ```
 
-TODO how do we emit an extension type versus a handcrafted ref struct?  
-TODO how do we emit the relationship to underlying type? base type or special constructor?  
-TODO our emit strategy should allow using pointer types and ref structs as underlying types
-in the future.  
 TODO issues in async code with ref structs
 
 ## Phase A: Adding static constants, fields, methods and properties
