@@ -253,7 +253,58 @@ of inline array types.
 
 Regular definite assignment rules are applicable to variables that have an inline array type. 
 
+### Inline array type syntax
 
+Grammar at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general will be adjusted as follows:
+``` diff antlr
+array_type
+    : non_array_type rank_specifier+
+    ;
+
+rank_specifier
+    : '[' ','* ']'
++   | '[' constant_expression ']' 
+    ;
+```
+
+The type of the *constant_expression* must be implicitly convertible to type `int`, and the value must be a non-zero positive integer.
+
+The relevant part of the https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#1621-general section will be adjusted as follows.
+
+The grammar productions for array types are provided in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general.
+
+An array type is written as a *non_array_type* followed by one or more *rank_specifier*s.
+
+A *non_array_type* is any *type* that is not itself an *array_type*.
+
+The rank of an array type is given by the leftmost *rank_specifier* in the *array_type*: A *rank_specifier* indicates that
+the array is an array with a rank of one plus the number of “`,`” tokens in the *rank_specifier*.
+
+The element type of an array type is the type that results from deleting the leftmost *rank_specifier*:
+
+- An array type of the form `T[ constant_expression ]` is an anonymous inline array type with
+  length denoted by *constant_expression* and a non-array element type `T`.
+- An array type of the form `T[ constant_expression ][R₁]...[Rₓ]` is an anonymous inline array type with
+  length denoted by *constant_expression* and an element type `T[R₁]...[Rₓ]`.
+- An array type of the form `T[R]` (where R is not a *constant_expression*) is a regular array type with rank `R` and a non-array element type `T`.
+- An array type of the form `T[R][R₁]...[Rₓ]` (where R is not a *constant_expression*) is a regular array type with rank `R` and an element type `T[R₁]...[Rₓ]`.
+
+In effect, the *rank_specifier*s are read from left to right *before* the final non-array element type.
+
+> *Example*: The type in `T[][,,][,]` is a single-dimensional array of three-dimensional arrays of two-dimensional arrays of `int`. *end example*
+
+At run-time, a value of a regular array type can be `null` or a reference to an instance of that array type.
+
+> *Note*: Following the rules of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#166-array-covariance,
+> the value may also be a reference to a covariant array type. *end note*
+
+An anonymous inline array type is a compiler synthesized inline array type with internal accessibility. The element type must be a 
+type that can be used as a type argument. Unlike an explicitly declared inline array type, an anonymous inline array type cannot be
+referenced by name, it can be referenced only by *array_type* syntax. In context of the same program, any two *array_type*s
+denoting inline array types of the same element type and of the same length, refer to the same anonymous inline array type. 
+
+Besides internal accessibility, compiler will prevent consumption of APIs utilizing anonymous inline array types across assembly boundaries
+by using a required custom modifier (exact type TBD) applied to an anonymous inline array type reference.
 
 ## Open design questions
 
