@@ -902,6 +902,7 @@ The C# method syntax maps to the model in the following ways:
 
 The basic rules for the lifetime are defined as:
 
+- All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `'heap` and `'local`. 
 - All variables have their lifetime defined at declaration by annotating the type. For example `'a ref 'b Span<int> span` defines a local `span` whose value lifetime is `'b` and whose ref lifetime is `'a`. 
 - All values that are not typed to `ref struct` implicitly have a lifetime of `'heap`. That is there is no need to write `'heap int` everywhere, one can simply write `'int`. 
 - The `ref` of a non-ref local has ref lifetime `'local`
@@ -917,8 +918,8 @@ Given that let's explore a simple example that demonstrates the model here:
 ```txt
 ref int M1(ref int i) => ...
 
-// Maps to 
-`ro ref int Identity('ro ref int i)
+// Maps to the following. 
+`ro ref int Identity<'ro>('ro ref int i)
 {
     // okay: has ref lifteime 'ro which is equal to 'ro
     return ref i;
@@ -937,13 +938,23 @@ ref int M1(ref int i) => ...
 Now let's explore the same example using a `ref struct`: 
 
 ```txt
-Span<int> M2(ref int i, Span<int> span1, scoped Span<int> span2) => ...
+ref struct S
+{
+    ref int Field;
+
+    'ro S<'ro>(ref int f)
+    {
+        Field = ref f;
+    }
+}
+
+S M2(ref int i, S span1, scoped S span2) => ...
 
 // Maps to 
-'ro Span<int> M2(
+'ro S<int> M2<'ro>(
     'ro ref int i,
-    'ro Span<int> span1)
-    'local Span<int> span2)
+    'ro S span1)
+    'local S span2)
 {
     // okay: has lifteime 'ro which is equal to 'ro
     return span1;
@@ -953,14 +964,14 @@ Span<int> M2(ref int i, Span<int> span1, scoped Span<int> span2) => ...
 
     // okay: the smallest lifetime input to the method is 'ro therefore it is 
     // the return
-    'ro Span<int> local = new Span<int>(ref 'i);
+    'ro S local = new S<'ro>(ref 'i);
     return local;
 
     // okay: has ref lifetime 'heap which is >= 'ro
     // okay: the smallest lifetime input to the method is 'heap therefore it is 
     // is a 'heap value and that is >= 'ro
     int[] array = new int[42];
-    return new Span<int>(ref array[0]);
+    return new S<'heap>(ref array[0]);
 
     // error: has ref lifetime 'local which has no relationship to 'a hence 
     // it's illegal
@@ -990,7 +1001,7 @@ ref struct S
     int field;
     ref int refField;
 
-    static void SelfAssign('ro ref 'cm S s)
+    static void SelfAssign<'ro, 'cm>('ro ref 'cm S s)
     {
         // error: ref s.field has ref lifetime 'ro and cannot be assigned to refField which
         // has lifetime 'cm as 'ro <= 'cm
