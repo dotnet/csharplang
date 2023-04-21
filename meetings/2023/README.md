@@ -4,7 +4,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#field-targeting-attributes-for-captured-primary-constructor-parameters
+Open design questions for Primary Constructors (Aleksey):
+- https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#field-targeting-attributes-for-captured-primary-constructor-parameters
+- https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#warn-on-shadowing-by-a-member-from-base
 
 ## Schedule when convenient
 
