@@ -1008,6 +1008,7 @@ ref struct S
         s.refField = 'ro ref s.field;
     }
 }
+```
 
 ## Open Issues
 
