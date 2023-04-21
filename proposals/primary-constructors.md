@@ -464,6 +464,10 @@ record R2([field: Test]int X) // warning CS0657: 'field' is not a valid attribut
 }
 ```
 
+### Warn on shadowing by a member from base
+
+Should we report a warning when a member from base is shadowing a primary constructor parameter inside a member (see https://github.com/dotnet/csharplang/discussions/7109#discussioncomment-5666621)?
+
 ### Capturing instance of the enclosing type in a closure
 
 When a parameter captured into the state of the enclosing type is also referenced in a lambda inside an instance initializer or a base initializer, the lambda and the state of the enclosing type should refer to the same location for the parameter.
