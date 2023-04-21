@@ -666,7 +666,7 @@ To reduce the chance of breaking changes when recompiling with C#11, we will upd
 To enable this, the compiler will emit a new `[module: RefSafetyRules(11)]` attribute when the module is compiled with `-langversion:11` or higher or compiled with a corlib containing the feature flag for `ref` fields.
 
 The argument to the attribute indicates the language version of the _ref safety rules_ used when the module was compiled.
-The verion is currently fixed at `11` regardless of the actual language version passed to the compiler.
+The version is currently fixed at `11` regardless of the actual language version passed to the compiler.
 
 The expectation is that future versions of the compiler will update the ref safety rules and emit attributes with distinct versions.
 
@@ -1431,7 +1431,7 @@ ref struct JsonReader
     Span<char> _buffer;
     int _position;
 
-    internal bool TextEquals(ReadOnySpan<char> text)
+    internal bool TextEquals(ReadOnlySpan<char> text)
     {
         var current = _buffer.Slice(_position, text.Length);
         return current == text;
@@ -1468,7 +1468,7 @@ ref struct JsonReader
     Span<char> _buffer;
     int _position;
 
-    internal bool TextEquals(scoped ReadOnySpan<char> text)
+    internal bool TextEquals(scoped ReadOnlySpan<char> text)
     {
         var current = _buffer.Slice(_position, text.Length);
         return current == text;
