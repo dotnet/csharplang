@@ -255,7 +255,7 @@ Regular definite assignment rules are applicable to variables that have an inlin
 
 ### Inline array type syntax
 
-Grammar at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general will be adjusted as follows:
+The grammar at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general will be adjusted as follows:
 ``` diff antlr
 array_type
     : non_array_type rank_specifier+
