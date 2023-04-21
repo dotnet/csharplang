@@ -4,11 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-Open design questions for Primary Constructors (Aleksey):
-- https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#field-targeting-attributes-for-captured-primary-constructor-parameters
-- https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#warn-on-shadowing-by-a-member-from-base
 
-[Inline array type syntax](https://github.com/dotnet/csharplang/pull/7130) (Aleksey)
 
 ## Schedule when convenient
 
@@ -24,9 +20,14 @@ Open design questions for Primary Constructors (Aleksey):
 
 ## Wed May 3, 2023
 
+- Open design questions for Primary Constructors (Aleksey):
+    - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#field-targeting-attributes-for-captured-primary-constructor-parameters
+    - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#warn-on-shadowing-by-a-member-from-base
+
 ## Mon May 1, 2023
 
 - Lock statement pattern (Steve, Kount) - https://github.com/dotnet/csharplang/issues/7104
+- Inline array type syntax (Aleksey) - https://github.com/dotnet/csharplang/pull/7130
 
 ## Wed Apr 26, 2023
 
