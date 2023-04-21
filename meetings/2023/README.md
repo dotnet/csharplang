@@ -8,6 +8,8 @@ Open design questions for Primary Constructors (Aleksey):
 - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#field-targeting-attributes-for-captured-primary-constructor-parameters
 - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#warn-on-shadowing-by-a-member-from-base
 
+[Inline array type syntax](https://github.com/dotnet/csharplang/pull/7130) (Aleksey)
+
 ## Schedule when convenient
 
 
