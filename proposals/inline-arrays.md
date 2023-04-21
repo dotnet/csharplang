@@ -304,13 +304,74 @@ referenced by name, it can be referenced only by *array_type* syntax. In context
 denoting inline array types of the same element type and of the same length, refer to the same anonymous inline array type. 
 
 Besides internal accessibility, compiler will prevent consumption of APIs utilizing anonymous inline array types across assembly boundaries
-by using a required custom modifier (exact type TBD) applied to an anonymous inline array type reference.
+by using a required custom modifier (exact type TBD) applied to an anonymous inline array type reference in the signature.
+
+#### Array creation expressions
+
+[Array creation expressions]{https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#117155-array-creation-expressions}
+
+```ANTLR
+array_creation_expression
+    : 'new' non_array_type '[' expression_list ']' rank_specifier*
+      array_initializer?
+    | 'new' array_type array_initializer
+    | 'new' rank_specifier array_initializer
+    ;
+```
+
+Given the current grammar, use of a *constant_expression* in place of the *expression_list* already has meaning of
+allocating a regular single-dimensional array type of the specified length. Therefore, *array_creation_expression* will continue
+to represent an allocation of a regular array.
+
+However, the new form of the *rank_specifier* could be used to incorporate an anonymous inline array type into the element type of
+the allocated array.
+
+For example, the following expressions create a regular array of length 2 with an element type of an anonymous inline array type
+with element type int and length 5:
+``` C#
+new int[2][5];
+new int[][5] {default, default};
+new [] {default(int[5]), default(int[5])};
+```
+
+#### Array initializers
+
+The [Array initializers](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#167-array-initializers) section
+will be adjusted to allow use of *array_initializer* to initialize inline array types (no changes to the grammar necessary).
+
+```ANTLR
+array_initializer
+    : '{' variable_initializer_list? '}'
+    | '{' variable_initializer_list ',' '}'
+    ;
+
+variable_initializer_list
+    : variable_initializer (',' variable_initializer)*
+    ;
+    
+variable_initializer
+    : expression
+    | array_initializer
+    ;
+```
+
+The length of the inline array must be explicitly provided by the target type.
+
+For example:
+``` C#
+int[5] a = {1, 2, 3, 4, 5}; // initializes anonymous inline array of length 5
+Buffer10<int> b = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; // initializes user-defined inline array
+var c = new int[][] {{11, 12}, {21, 22}, {31, 32}}; // An error for the nested array initializer
+var d = new int[][2] {{11, 12}, {21, 22}, {31, 32}}; // An error for the nested array initializer
+```
+
 
 ## Open design questions
 
-### Initializer
+### Collection literals
 
-Should we support initialization at declaration site with, perhaps, [collection literals](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)?
+Should we support conversion from [collection literals](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)
+to inline array types?
 
 ## Alternatives
 
