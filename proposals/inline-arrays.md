@@ -365,13 +365,25 @@ var c = new int[][] {{11, 12}, {21, 22}, {31, 32}}; // An error for the nested a
 var d = new int[][2] {{11, 12}, {21, 22}, {31, 32}}; // An error for the nested array initializer
 ```
 
+#### Collection literals
+
+An inline array type is a valid *constructible collection* target type for a [collection literal](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md).
+
+For example:
+``` C#
+int[5] a = [1, 2, 3, 4, 5]; // initializes anonymous inline array of length 5
+Buffer10<int> b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // initializes user-defined inline array
+var d = new int[][2] {[11, 12], [21, 22], [31, 32]}; // regular array with an element type of an anonymous inline array type with element type int and length 2
+```
+
+The length of the collection literal must match the length of the target inline array type. If the length of the literal
+is known at compile time and it doesn't match the target length, an error is reported. Otherwise, an exception is going
+to be thrown at runtime once the mismatch is encountered. The exact exception type is TBD. Some candidates are:
+System.NotSupportedException, System.InvalidOperationException.
+
+
 
 ## Open design questions
-
-### Collection literals
-
-Should we support conversion from [collection literals](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)
-to inline array types?
 
 ## Alternatives
 
