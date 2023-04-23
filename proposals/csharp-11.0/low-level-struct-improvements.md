@@ -919,6 +919,7 @@ Given that let's explore a simple example that demonstrates the model here:
 ref int M1(ref int i) => ...
 
 // Maps to the following. 
+
 $ro ref int Identity<$ro>($ro ref int i)
 {
     // okay: has ref lifteime $ro which is equal to $ro
@@ -937,12 +938,12 @@ $ro ref int Identity<$ro>($ro ref int i)
 
 Now let's explore the same example using a `ref struct`: 
 
-```txt
+```csharp
 ref struct S
 {
     ref int Field;
 
-    $ro S<$ro>(ref int f)
+    $ro S<$ro>($ro ref int f)
     {
         Field = ref f;
     }
@@ -951,6 +952,7 @@ ref struct S
 S M2(ref int i, S span1, scoped S span2) => ...
 
 // Maps to 
+
 $ro S<int> M2<$ro>(
     $ro ref int i,
     $ro S span1)
@@ -982,7 +984,7 @@ $ro S<int> M2<$ro>(
 
 Next let's see how this helps with the cyclic self assignment problem:
 
-```txt
+```csharp
 ref struct S
 {
     int field;
@@ -1003,9 +1005,9 @@ ref struct S
 
     static void SelfAssign<$ro, $cm>($ro ref $cm S s)
     {
-        // error: ref s.field has ref lifetime 'ro and cannot be assigned to refField which
-        // has lifetime 'cm as 'ro <= 'cm
-        s.refField = 'ro ref s.field;
+        // error: ref s.field has ref lifetime $ro and cannot be assigned to refField which
+        // has lifetime $cm as $ro <= $cm
+        s.refField = $ro ref s.field;
     }
 }
 ```
