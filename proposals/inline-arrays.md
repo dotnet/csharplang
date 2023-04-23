@@ -381,6 +381,53 @@ is known at compile time and it doesn't match the target length, an error is rep
 to be thrown at runtime once the mismatch is encountered. The exact exception type is TBD. Some candidates are:
 System.NotSupportedException, System.InvalidOperationException.
 
+An instance of an inline array type is a valid expression in a [*spread_element*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#detailed-design).
+
+### The foreach statement
+
+[The foreach statement](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1295-the-foreach-statement) will be adjusted
+to allow usage of an inline array type as a collection in a foreach statement.
+
+For example:
+``` C#
+foreach (var a in getBufferAsValue())
+{
+    WriteLine(a);
+}
+
+foreach (var b in getBufferAsWritableVariable())
+{
+    WriteLine(b);
+}
+
+foreach (var c in getBufferAsReadonlyVariable())
+{
+    WriteLine(c);
+}
+
+Buffer10<int> getBufferAsValue() => default;
+ref Buffer10<int> getBufferAsWritableVariable() => default;
+ref readonly Buffer10<int> getBufferAsReadonlyVariable() => default;
+```
+
+is equivalent to:
+``` C#
+Buffer10<int> temp = getBufferAsValue();
+foreach (var a in (System.ReadOnlySpan<int>)temp)
+{
+    WriteLine(a);
+}
+
+foreach (var b in (System.Span<int>)getBufferAsWritableVariable())
+{
+    WriteLine(b);
+}
+
+foreach (var c in (System.ReadOnlySpan<int>)getBufferAsReadonlyVariable())
+{
+    WriteLine(c);
+}
+```
 
 
 ## Open design questions
