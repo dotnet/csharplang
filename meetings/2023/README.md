@@ -33,7 +33,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 (One hour only)
 
-- Collection literals: dictionaries; `Construct` methods (Chuck, Cyrus) - https://github.com/dotnet/csharplang/issues/7085
+- Collection literals: target type, natural type, dictionaries (Chuck, Cyrus): [collection-literals.md](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)
 
 ## Mon Apr 24, 2023
 
