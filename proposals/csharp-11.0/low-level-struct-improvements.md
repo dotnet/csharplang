@@ -874,61 +874,61 @@ Lifetime models are most naturally expressed via a more explicit annotation mode
 
 Note that this is not meant to be a 100% complete documentation. Documenting every single behavior isn't a goal here. Instead it's meant to establish a general understanding and common verbiage by which the model, and potential changes to it, can be discussed.
 
-The below examples make use of named lifetimes. The syntax `'a` refers to a lifetime named `a`. It is a lifetime that has no meaning byitself but can be given a relationship to other lifetimes via the `where lifetime` syntax. There are a few predefined lifetimes for convenience and brevity below:
+The below examples make use of named lifetimes. The syntax `$a` refers to a lifetime named `a`. It is a lifetime that has no meaning byitself but can be given a relationship to other lifetimes via the `where lifetime` syntax. There are a few predefined lifetimes for convenience and brevity below:
 
-- `'heap`: this is the lifetime of any value that exists on the heap
-- `'local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*
-- `'ro`: name place holder for the *return only* safe to escape scope
-- `'cm`: name place holder for the *calling method* safe to escape scope
-- `'this`: this is the lifetime of the implicit `this` value in an instance method or field declaration.
+- `$heap`: this is the lifetime of any value that exists on the heap
+- `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*
+- `$ro`: name place holder for the *return only* safe to escape scope
+- `$cm`: name place holder for the *calling method* safe to escape scope
+- `$this`: this is the lifetime of the implicit `this` value in an instance method or field declaration.
 
 There are a few predefined relationships between lifetimes:
 
-- `lifetime 'heap >= 'a` for all lifetimes `'a`
-- `lifetime 'cm >= 'ro` 
-- `lifetime 'x >= 'local` for all predefined lifetimes. User defined lifetimes have no relationship to local unless explictly defined.
-- `lifetime 'this >= ro`
+- `lifetime $heap >= $a` for all lifetimes `$a`
+- `lifetime $cm >= $ro` 
+- `lifetime $x >= $local` for all predefined lifetimes. User defined lifetimes have no relationship to local unless explictly defined.
+- `lifetime $this >= $ro`
 
-Note: while both `'this` and `'cm` are `>= ro` there is no relationship between the two of them.
+Note: while both `$this` and `$cm` are `>= $ro` there is no relationship between the two of them.
 
 The C# method syntax maps to the model in the following ways: 
 
-- `ref` parameters have a ref lifetime of `'ro`
-- parameters of type `ref struct` have a value lifetime of `'cm`
-- ref returns have a ref lifetime of `'ro`
-- returns of type `ref struct` have a value lifetime of `'ro`
-- `scoped` on a parameter or `ref` changes the lifetime to be `'local`
-- `ref this` has lifetime `'local` by default but it becomes `'ro` when the method is annotated with `[UnscopedRef]`
+- `ref` parameters have a ref lifetime of `$ro`
+- parameters of type `ref struct` have a value lifetime of `$cm`
+- ref returns have a ref lifetime of `$ro`
+- returns of type `ref struct` have a value lifetime of `$ro`
+- `scoped` on a parameter or `ref` changes the lifetime to be `$local`
+- `ref this` has lifetime `$local` by default but it becomes `$ro` when the method is annotated with `[UnscopedRef]`
 
 The basic rules for the lifetime are defined as:
 
-- All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `'heap` and `'local`. 
-- All variables have their lifetime defined at declaration by annotating the type. For example `'a ref 'b Span<int> span` defines a local `span` whose value lifetime is `'b` and whose ref lifetime is `'a`. 
-- All values that are not typed to `ref struct` implicitly have a lifetime of `'heap`. That is there is no need to write `'heap int` everywhere, one can simply write `'int`. 
-- The `ref` of a non-ref local has ref lifetime `'local`
+- All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `$heap` and `$local`. 
+- All variables have their lifetime defined at declaration by annotating the type. For example `$a ref $b Span<int> span` defines a local `span` whose value lifetime is `$b` and whose ref lifetime is `$a`. 
+- All values that are not typed to `ref struct` implicitly have a lifetime of `$heap`. That is there is no need to write `$heap int` everywhere, one can simply write `$int`. 
+- The `ref` of a non-ref local has ref lifetime `$local`
 - An assignment is only legal when the lifetime of the RHS is greater than or equal to the LHS.
 - An return is only legal when the lifetime of the value is greater than or equal to lifetime on the return
 - Lifetimes of expressions can be made explicit by putting annotations in front of them:
-    - `'a expr` the value lifetime is explicitly `'a`
-    - `'a ref 'b expr` the value lifetime is `'b` and the ref lifetime is `'a`.
+    - `$a expr` the value lifetime is explicitly `$a`
+    - `$a ref $b expr` the value lifetime is `$b` and the ref lifetime is `$a`.
 - A method call has the value return of the smallest of all the lifetimes input: ref or value. In the case there is no total ordering of the lifetimes, for example if two lifetimes have no relationship to each other, then the result is a new named lifetime that has no relationship to any other lifetime.
 
 Given that let's explore a simple example that demonstrates the model here: 
 
-```txt
+```csharp
 ref int M1(ref int i) => ...
 
 // Maps to the following. 
-`ro ref int Identity<'ro>('ro ref int i)
+$ro ref int Identity<$ro>($ro ref int i)
 {
-    // okay: has ref lifteime 'ro which is equal to 'ro
+    // okay: has ref lifteime $ro which is equal to $ro
     return ref i;
 
-    // okay: has ref lifetime 'heap which is >= 'ro
+    // okay: has ref lifetime $heap which is >= $ro
     int[] array = new int[42];
     return ref array[0];
 
-    // error: has ref lifetime 'local which has no relationship to 'a hence 
+    // error: has ref lifetime $local which has no relationship to $a hence 
     // it's illegal
     int local = 42;
     return ref local;
@@ -942,7 +942,7 @@ ref struct S
 {
     ref int Field;
 
-    'ro S<'ro>(ref int f)
+    $ro S<$ro>(ref int f)
     {
         Field = ref f;
     }
@@ -951,29 +951,29 @@ ref struct S
 S M2(ref int i, S span1, scoped S span2) => ...
 
 // Maps to 
-'ro S<int> M2<'ro>(
-    'ro ref int i,
-    'ro S span1)
-    'local S span2)
+$ro S<int> M2<$ro>(
+    $ro ref int i,
+    $ro S span1)
+    $local S span2)
 {
-    // okay: has lifteime 'ro which is equal to 'ro
+    // okay: has lifteime $ro which is equal to $ro
     return span1;
 
-    // error: has lifetime 'local which is not >= 'ro
+    // error: has lifetime $local which is not >= $ro
     return span2;
 
-    // okay: the smallest lifetime input to the method is 'ro therefore it is 
+    // okay: the smallest lifetime input to the method is $ro therefore it is 
     // the return
-    'ro S local = new S<'ro>(ref 'i);
+    $ro S local = new S<$ro>(ref $i);
     return local;
 
-    // okay: has ref lifetime 'heap which is >= 'ro
-    // okay: the smallest lifetime input to the method is 'heap therefore it is 
-    // is a 'heap value and that is >= 'ro
+    // okay: has ref lifetime $heap which is >= $ro
+    // okay: the smallest lifetime input to the method is $heap therefore it is 
+    // is a $heap value and that is >= $ro
     int[] array = new int[42];
-    return new S<'heap>(ref array[0]);
+    return new S<$heap>(ref array[0]);
 
-    // error: has ref lifetime 'local which has no relationship to 'a hence 
+    // error: has ref lifetime $local which has no relationship to $a hence 
     // it's illegal
     int local = 42;
     return ref local;
@@ -1001,7 +1001,7 @@ ref struct S
     int field;
     ref int refField;
 
-    static void SelfAssign<'ro, 'cm>('ro ref 'cm S s)
+    static void SelfAssign<$ro, $cm>($ro ref $cm S s)
     {
         // error: ref s.field has ref lifetime 'ro and cannot be assigned to refField which
         // has lifetime 'cm as 'ro <= 'cm
