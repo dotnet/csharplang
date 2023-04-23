@@ -874,7 +874,7 @@ Lifetime models are most naturally expressed via a more explicit annotation mode
 
 Note that this is not meant to be a 100% complete documentation. Documenting every single behavior isn't a goal here. Instead it's meant to establish a general understanding and common verbiage by which the model, and potential changes to it, can be discussed.
 
-The below examples make use of named lifetimes. The syntax `$a` refers to a lifetime named `a`. It is a lifetime that has no meaning byitself but can be given a relationship to other lifetimes via the `where lifetime` syntax. There are a few predefined lifetimes for convenience and brevity below:
+The below examples make use of named lifetimes. The syntax `$a` refers to a lifetime named `a`. It is a lifetime that has no meaning by itself but can be given a relationship to other lifetimes via the `where lifetime` syntax. There are a few predefined lifetimes for convenience and brevity below:
 
 - `$heap`: this is the lifetime of any value that exists on the heap
 - `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*
