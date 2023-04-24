@@ -877,42 +877,65 @@ Note that this is not meant to be a 100% complete documentation. Documenting eve
 Usually it's not necessary to directly talk about lifetime types. The exceptions are places where lifetimes can vary based on particular "instantiation" sites. This is a kind of polymorphism and we call these varying lifetimes "generic lifetimes", represented as generic parameters. C# does not provide syntax for expressing lifetime generics, so we define an implicit "translation" from C# to an expanded lowered language that contains explicit generic parameters.
 The below examples make use of named lifetimes. The syntax `$a` refers to a lifetime named `a`. It is a lifetime that has no meaning by itself but can be given a relationship to other lifetimes via the `where lifetime` syntax. There are a few predefined lifetimes for convenience and brevity below:
 
-- `$heap`: this is the lifetime of any value that exists on the heap
-- `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*
+- `$heap`: this is the lifetime of any value that exists on the heap. It is available in all scopes and method signatures.
+- `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*. It is implicitly defined in methods and can appear in method signatures except for any output position.
 - `$ro`: name place holder for the *return only* safe to escape scope
 - `$cm`: name place holder for the *calling method* safe to escape scope
-- `$this`: this is the lifetime of the implicit `this` value in an instance method or field declaration.
 
 There are a few predefined relationships between lifetimes:
 
 - `lifetime $heap >= $a` for all lifetimes `$a`
 - `lifetime $cm >= $ro` 
 - `lifetime $x >= $local` for all predefined lifetimes. User defined lifetimes have no relationship to local unless explictly defined.
-- `lifetime $this >= $ro`
 
-Note: while both `$this` and `$cm` are `>= $ro` there is no relationship between the two of them.
+Lifetime variables when defined on types can be invariant or covariant. These are expressed using the same syntax as generic parameters:
 
-The C# method syntax maps to the model in the following ways: 
+```csharp
+// $this is covariant
+// $a is invariant
+ref struct S<out $this, out $a> 
+```
 
-- `ref` parameters have a ref lifetime of `$ro`
-- parameters of type `ref struct` have a value lifetime of `$cm`
-- ref returns have a ref lifetime of `$ro`
-- returns of type `ref struct` have a value lifetime of `$ro`
-- `scoped` on a parameter or `ref` changes the lifetime to be `$local`
-- `ref this` has lifetime `$local` by default but it becomes `$ro` when the method is annotated with `[UnscopedRef]`
+When defining a constructor in the model the name `new` will be used for the method. It is necessary to have a parameter list for the returned value as well as the constructor arguments. This is necessary to express the relationship between constructor inputs and the constructed value. Rather than having `Span<$a><$ro>` the model will use `Span<$a> new<$ro>` instead. The type of `this` in the constructor, including lifetimes, will be the defined return value.
 
 The basic rules for the lifetime are defined as:
 
 - All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `$heap` and `$local`. 
-- All variables have their lifetime defined at declaration by annotating the type. For example `$a ref $b Span<int> span` defines a local `span` whose value lifetime is `$b` and whose ref lifetime is `$a`. 
-- All values that are not typed to `ref struct` implicitly have a lifetime of `$heap`. That is there is no need to write `$heap int` everywhere, one can simply write `$int`. 
-- The `ref` of a non-ref local has ref lifetime `$local`
-- An assignment is only legal when the lifetime of the RHS is greater than or equal to the LHS.
-- An return is only legal when the lifetime of the value is greater than or equal to lifetime on the return
-- Lifetimes of expressions can be made explicit by putting annotations in front of them:
-    - `$a expr` the value lifetime is explicitly `$a`
-    - `$a ref $b expr` the value lifetime is `$b` and the ref lifetime is `$a`.
-- A method call has the value return of the smallest of all the lifetimes input: ref or value. In the case there is no total ordering of the lifetimes, for example if two lifetimes have no relationship to each other, then the result is a new named lifetime that has no relationship to any other lifetime.
+- All types `T` that are not a `ref struct` implicitly have lifetime of `T<$heap>`. This is implicit, there is no need to write `int<$heap>` in every sample.
+- For a ref field defined as `ref T<$l1, $l2, ... $ln>` all lifetimes `$l1` through `$ln` must be invariant. 
+- The `ref` of a variable has a lifetime of the 
+    - The lifetime of the ref for all ref parameters, ref locals, ref fields and ref returns
+    - `$heap` for all reference types and fields of reference types
+    - `$local` for everything else
+- An assignment or return is legal when the underlying type conversion is legal
+- A ref assignment or return is legal when the types referred to by the ref are identical. The variance of the type does not apply for this.
+- Lifetimes of expressions can be made explicit by using cast annotations:
+    - `(T<$a> expr)` the value lifetime is explicitly `$a` for `T<...>`
+    - `$a ref (T<$b>)expr` the value lifetime is `$b` for `T<...>` and the ref lifetime is `$a`.
+
+Next let's define the rules that allow us to map C# syntax to the underlying model.
+
+The lifetime parameter `$this` on type definitions is _not_ predefined but it does have a few rules associated with it when it is defined:
+- It must be the first lifetime parameter.
+- It must be covariant: `out $this`. 
+- The lifetime parameters of all non-ref fields, and the ref lifetime of ref fields, must be `$this`
+
+For brevity sake a type which has no explicit lifetime parameters treated as if there is `out $this` defined and applied to all fields of the type. A type with a `ref` field must define explicit lifetime parameters.
+
+These rules exists to support our existing invariant that `T` can be assigned to `scoped T` for all types. That maps down to `T<$a, ...>` being assignable to `T<$local, ...>` for all lifetimes known to be a subtype of `$local`. Further this supports other items like being able to assign `Span<T>` from the heap to those on the stack. This does exclude types where fields have differing lifetimes for non-ref values but that is the reality of C# today. Changing that would require a significant change of C# rules that would need to be mapped out. 
+
+The type of `this` for a type `S<out $this, ...>` inside an instance method is implicitly defined as the following:
+- For normal instance method: `$local ref S<$ro, ...>`
+- For instance method annotated with `[UnscopedRef]`: `$ro ref S<$ro, ...>`
+The lack of an explicit `this` parameter forces the implicit rules here. For complex samples and discussions likely better to use an explicit parameter.
+
+The C# method syntax maps to the model in the following ways: 
+
+- `ref` parameters have a ref lifetime of `$ro`
+- parameters of type `ref struct` have a this lifetime of `$cm`
+- ref returns have a ref lifetime of `$ro`
+- returns of type `ref struct` have a value lifetime of `$ro`
+- `scoped` on a parameter or `ref` changes the lifetime to be `$local`
 
 Given that let's explore a simple example that demonstrates the model here: 
 
@@ -944,7 +967,7 @@ ref struct S
 {
     ref int Field;
 
-    $ro S<$ro>($ro ref int f)
+    S(ref int f)
     {
         Field = ref f;
     }
@@ -954,27 +977,43 @@ S M2(ref int i, S span1, scoped S span2) => ...
 
 // Maps to 
 
-$ro S<int> M2<$ro>(
-    $ro ref int i,
-    $ro S span1)
-    $local S span2)
+ref struct S<out $this>
 {
-    // okay: has lifteime $ro which is equal to $ro
+    // Implicitly 
+    $this ref int Field;
+
+    S<$ro> new<$ro>($ro ref int f)
+    {
+        Field = ref f;
+    }
+}
+
+S<$ro> M2<$ro>(
+    $ro ref int i,
+    S<$ro> span1)
+    S<$local> span2)
+{
+    // okay: types match exactly
     return span1;
 
     // error: has lifetime $local which is not >= $ro
     return span2;
 
-    // okay: the smallest lifetime input to the method is $ro therefore it is 
-    // the return
-    $ro S local = new S<$ro>(ref $i);
+    // okay: type of default(S<$heap>) is a sub-type of Span<$ro>
+    return default(S<$heap>)
+
+    // okay: the ref lifetime of ref $i is $ro so this is just an 
+    // identity conversion
+    S<$ro> local = new S<$ro>(ref $i);
     return local;
 
-    // okay: has ref lifetime $heap which is >= $ro
-    // okay: the smallest lifetime input to the method is $heap therefore it is 
-    // is a $heap value and that is >= $ro
     int[] array = new int[42];
-    return new S<$heap>(ref array[0]);
+    // okay: S<$heap> is convertible to S<$ro>
+    return new S<$heap>($heap ref array[0]);
+
+    // okay: the parameter of the ctor is $ro ref int and the argument is $heap ref int. These 
+    // are convertible.
+    return new S<$ro>($heap ref array[0]);
 
     // error: has ref lifetime $local which has no relationship to $a hence 
     // it's illegal
@@ -999,15 +1038,15 @@ ref struct S
 
 // Maps to 
 
-ref struct S
+ref struct S<out $this>
 {
     int field;
-    ref int refField;
+    $this ref int refField;
 
-    static void SelfAssign<$ro, $cm>($ro ref $cm S s)
+    static void SelfAssign<$ro, $cm>($ro ref S<$cm> s)
     {
-        // error: ref s.field has ref lifetime $ro and cannot be assigned to refField which
-        // has lifetime $cm as $ro <= $cm
+        // error: the types work out here to $cm ref int = $ro ref int and that is 
+        // illegal as $ro is not a sub-type of $cm (the relationship is the other direction)
         s.refField = $ro ref s.field;
     }
 }
