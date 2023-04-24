@@ -870,10 +870,11 @@ ref struct S<T>
 ```
 
 ### Annotations
-Lifetime models are most naturally expressed via a more explicit annotation model. While the syntax of C# implicitly adds lifetimes to values, there is an underlying model that describes the fundamental rules here. It's often easier to discuss the implication of changes to the design in terms of these rules so they are included here for discussion sake.
+Lifetimes are most naturally expressed using types. A given program's lifetimes are safe when the lifetime types type check. While the syntax of C# implicitly adds lifetimes to values, there is an underlying type system that describes the fundamental rules here. It's often easier to discuss the implication of changes to the design in terms of these rules so they are included here for discussion sake.
 
 Note that this is not meant to be a 100% complete documentation. Documenting every single behavior isn't a goal here. Instead it's meant to establish a general understanding and common verbiage by which the model, and potential changes to it, can be discussed.
 
+Usually it's not necessary to directly talk about lifetime types. The exceptions are places where lifetimes can vary based on particular "instantiation" sites. This is a kind of polymorphism and we call these varying lifetimes "generic lifetimes", represented as generic parameters. C# does not provide syntax for expressing lifetime generics, so we define an implicit "translation" from C# to an expanded lowered language that contains explicit generic parameters.
 The below examples make use of named lifetimes. The syntax `$a` refers to a lifetime named `a`. It is a lifetime that has no meaning by itself but can be given a relationship to other lifetimes via the `where lifetime` syntax. There are a few predefined lifetimes for convenience and brevity below:
 
 - `$heap`: this is the lifetime of any value that exists on the heap
