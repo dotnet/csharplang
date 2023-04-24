@@ -896,6 +896,8 @@ Lifetime variables when defined on types can be invariant or covariant. These ar
 ref struct S<out $this, out $a> 
 ```
 
+The lifetime of a ref is expressed by providing a lifetime argument to the ref. For example a `ref` that refers to the heap is expressed as `ref<$heap>`.
+
 When defining a constructor in the model the name `new` will be used for the method. It is necessary to have a parameter list for the returned value as well as the constructor arguments. This is necessary to express the relationship between constructor inputs and the constructed value. Rather than having `Span<$a><$ro>` the model will use `Span<$a> new<$ro>` instead. The type of `this` in the constructor, including lifetimes, will be the defined return value.
 
 The basic rules for the lifetime are defined as:
@@ -903,15 +905,18 @@ The basic rules for the lifetime are defined as:
 - All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `$heap` and `$local`. 
 - All types `T` that are not a `ref struct` implicitly have lifetime of `T<$heap>`. This is implicit, there is no need to write `int<$heap>` in every sample.
 - For a ref field defined as `ref T<$l1, $l2, ... $ln>` all lifetimes `$l1` through `$ln` must be invariant. 
+- For a ref defined as `ref<$a> T<$b, ...>`, `$b` must be known to be at least as big as `$a`
 - The `ref` of a variable has a lifetime of the 
-    - The lifetime of the ref for all ref parameters, ref locals, ref fields and ref returns
+    - For a ref local, parameter, field or return of type `ref<$a> T` the lifetime is `$a`
     - `$heap` for all reference types and fields of reference types
     - `$local` for everything else
 - An assignment or return is legal when the underlying type conversion is legal
-- A ref assignment or return is legal when the types referred to by the ref are identical. The variance of the type does not apply for this.
+- A ref assignment or return where the LHS is `ref<$a> T1` and the RHS is `ref<$b> T2` is legal when both:
+    - `T1` is equal to `T2`. Variance is not considered here, the types must be equal.
+    - `$b` is a sub-type of `$a`
 - Lifetimes of expressions can be made explicit by using cast annotations:
     - `(T<$a> expr)` the value lifetime is explicitly `$a` for `T<...>`
-    - `$a ref (T<$b>)expr` the value lifetime is `$b` for `T<...>` and the ref lifetime is `$a`.
+    - `ref<$a> (T<$b>)expr` the value lifetime is `$b` for `T<...>` and the ref lifetime is `$a`.
 
 Next let's define the rules that allow us to map C# syntax to the underlying model.
 
@@ -925,8 +930,8 @@ For brevity sake a type which has no explicit lifetime parameters treated as if 
 These rules exists to support our existing invariant that `T` can be assigned to `scoped T` for all types. That maps down to `T<$a, ...>` being assignable to `T<$local, ...>` for all lifetimes known to be a subtype of `$local`. Further this supports other items like being able to assign `Span<T>` from the heap to those on the stack. This does exclude types where fields have differing lifetimes for non-ref values but that is the reality of C# today. Changing that would require a significant change of C# rules that would need to be mapped out. 
 
 The type of `this` for a type `S<out $this, ...>` inside an instance method is implicitly defined as the following:
-- For normal instance method: `$local ref S<$ro, ...>`
-- For instance method annotated with `[UnscopedRef]`: `$ro ref S<$ro, ...>`
+- For normal instance method: `ref<$local> S<$ro, ...>`
+- For instance method annotated with `[UnscopedRef]`: `ref<$ro> S<$ro, ...>`
 The lack of an explicit `this` parameter forces the implicit rules here. For complex samples and discussions likely better to use an explicit parameter.
 
 The C# method syntax maps to the model in the following ways: 
@@ -944,7 +949,7 @@ ref int M1(ref int i) => ...
 
 // Maps to the following. 
 
-$ro ref int Identity<$ro>($ro ref int i)
+ref<$ro> int Identity<$ro>(ref<$ro> int i)
 {
     // okay: has ref lifteime $ro which is equal to $ro
     return ref i;
@@ -980,16 +985,16 @@ S M2(ref int i, S span1, scoped S span2) => ...
 ref struct S<out $this>
 {
     // Implicitly 
-    $this ref int Field;
+    ref<$this> int Field;
 
-    S<$ro> new<$ro>($ro ref int f)
+    S<$ro> new<$ro>(ref<$ro> int f)
     {
         Field = ref f;
     }
 }
 
 S<$ro> M2<$ro>(
-    $ro ref int i,
+    ref<$ro> int i,
     S<$ro> span1)
     S<$local> span2)
 {
@@ -1009,11 +1014,11 @@ S<$ro> M2<$ro>(
 
     int[] array = new int[42];
     // okay: S<$heap> is convertible to S<$ro>
-    return new S<$heap>($heap ref array[0]);
+    return new S<$heap>(ref<$heap> array[0]);
 
     // okay: the parameter of the ctor is $ro ref int and the argument is $heap ref int. These 
     // are convertible.
-    return new S<$ro>($heap ref array[0]);
+    return new S<$ro>(ref<$heap> array[0]);
 
     // error: has ref lifetime $local which has no relationship to $a hence 
     // it's illegal
@@ -1041,13 +1046,13 @@ ref struct S
 ref struct S<out $this>
 {
     int field;
-    $this ref int refField;
+    ref<$this> int refField;
 
-    static void SelfAssign<$ro, $cm>($ro ref S<$cm> s)
+    static void SelfAssign<$ro, $cm>(ref<$ro> S<$cm> s)
     {
-        // error: the types work out here to $cm ref int = $ro ref int and that is 
+        // error: the types work out here to ref<$cm> int = ref<$ro> int and that is 
         // illegal as $ro is not a sub-type of $cm (the relationship is the other direction)
-        s.refField = $ro ref s.field;
+        s.refField = ref<$ro> s.field;
     }
 }
 ```
