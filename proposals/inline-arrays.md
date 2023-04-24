@@ -308,7 +308,7 @@ by using a required custom modifier (exact type TBD) applied to an anonymous inl
 
 #### Array creation expressions
 
-[Array creation expressions]{https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#117155-array-creation-expressions}
+[Array creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#117155-array-creation-expressions)
 
 ```ANTLR
 array_creation_expression
