@@ -893,7 +893,7 @@ Lifetime variables when defined on types can be invariant or covariant. These ar
 ```csharp
 // $this is covariant
 // $a is invariant
-ref struct S<out $this, out $a> 
+ref struct S<out $this, $a> 
 ```
 
 The lifetime of a ref is expressed by providing a lifetime argument to the ref. For example a `ref` that refers to the heap is expressed as `ref<$heap>`.
