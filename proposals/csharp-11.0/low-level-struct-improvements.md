@@ -911,12 +911,11 @@ The basic rules for the lifetime are defined as:
     - `$heap` for all reference types and fields of reference types
     - `$local` for everything else
 - An assignment or return is legal when the underlying type conversion is legal
-- A ref assignment or return where the LHS is `ref<$a> T1` and the RHS is `ref<$b> T2` is legal when both:
-    - `T1` is equal to `T2`. Variance is not considered here, the types must be equal.
-    - `$b` is a sub-type of `$a`
 - Lifetimes of expressions can be made explicit by using cast annotations:
     - `(T<$a> expr)` the value lifetime is explicitly `$a` for `T<...>`
     - `ref<$a> (T<$b>)expr` the value lifetime is `$b` for `T<...>` and the ref lifetime is `$a`.
+
+For the purpose of lifetime rules a `ref` is considered part of the type of the expression for purposes of conversions. It is logically represented by converting `ref<$a> T<...>` to `ref<$a, T<...>>` where `$a` is covariant and `T` is invariant. 
 
 Next let's define the rules that allow us to map C# syntax to the underlying model.
 
