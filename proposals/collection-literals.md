@@ -264,48 +264,10 @@ foreach (var b in [true, false]) // Not necessarily List<bool>.
 * Given:
 
     ```c#
-    Dictionary<string, object> d1 = ...;
-    Dictionary<object, string> d2 = ...;
-    var d3 = [..d1, ..d2];
-    ```
-
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `..d1` will have a *iteration type* of `KeyValuePair<string, object>` and `..d2` will have a *iteration type* of `KeyValuePair<object, string>`. These will contribute `{string, object}` to the determination of the `TKey` type and `{object, string}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
-
-* Given:
-
-    ```c#
-    var d = [null: null, "a": "b"];
-    ```
-
-    The *natural type* of `d` is `Dictionary<string, string>`.  This is because the `k_n: v_n` elements will construct the set `{null, "a"}` for the determination of the `TKey` type and `{null, "b"}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `string`.
-
-* Given:
-
-    ```c#
     var values = x ? [1, 2, 3] : [];
     ```
 
     The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection type, `[]` is treated as target-typed to that collection type.
-
-* Given:
-
-    ```c#
-    string s1, s2;
-    object o1, o2;
-    var d = [s1: o1, o2: s2];
-    ```
-
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `k_n: v_n` elements will construct the set `{s1, o1}` for the determination of the `TKey` type and `{o2, s2}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
-
-* Given:
-
-    ```c#
-    string s1, s2;
-    object o1, o2;
-    var d = [KeyValuePair.Create(s1, o1), KeyValuePair.Create(o2, s2)];
-    ```
-
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `e_n` elements are `KeyValuePair<string, object>` and `KeyValuePair<object, string>` respectively.  These will construct the set `{string, object}`for the determination of the `TKey` type and `{object, string}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
 
 ## Span types
 [span-types]: #span-types
