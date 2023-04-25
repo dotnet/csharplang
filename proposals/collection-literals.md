@@ -125,6 +125,14 @@ Actual translation of the literal to the corresponding type is defined [below](#
 * Types that support [*collection initializers*](#collection-initializers)
 * Interface types `I<T>` implemented by `List<T>` (e.g. `IEnumerable<T>`, `IList<T>`, `IReadOnlyList<T>`)
 
+```c#
+int[] a = [];                // array
+Span<int> b = [1, 2];        // span
+ImmutableArray<int> c = [3]; // Construct method
+List<int> c = [5, 6];        // collection initializer type
+IEnumerable<int> d = [];     // list interface
+```
+
 ## `Construct` methods
 [construct-methods]: #construct-methods
 
@@ -138,7 +146,7 @@ If found, the collection can be constructed by creating a fresh instance of its 
 
 The allowance for extension methods means that collection literal support can be added to a existing API which does not already directly support this.
 
-The `Construct` method is used for construction of the collection even if the type is *collection initializer* type.
+The `Construct` method is used for construction of the collection even if the type supports *collection initializers*.
 _This means an extension method could be added that would silently change how collection literals for an existing collection initializer type are constructed in the program._
 
 Through the use of the [`init`](#init-methods) modifier, existing APIs can directly support collection literals in a manner that allows for no-overhead production of the data the final collection will store.
@@ -220,14 +228,20 @@ If a *natural element type* `T` cannot be determined, the literal has no *natura
 
 This means there is no way for a literal to have a *natural type* of some `List<KeyValuePair<TKey, TValue>>` (though it certainly can be *target-typed* to that type).
 
-_Should `IEnumerable` contribute a natural element type of `object` or no contribution?_
-
 The choice of `List<T>` rather than `T[]` or `ImmutableArray<T>` is to allow mutation of `var` locals after initialization. `List<T>` is preferred over `Span<T>` because `Span<T>` cannot be used in `async` methods.
 
 ```c#
 var list = [1, 2, 3];
 // ...
 list.Add(4);
+```
+
+Should `IEnumerable` contribute an *iteration type* of `object` or no contribution?
+
+```c#
+IEnumerable e1 = [1, 2, 3];
+var e2 = [..e1];           // List<object> or error?
+List<string> e3 = [..e1];  // error?
 ```
 
 The compiler is free to use a representation other than the natural type if the difference is not observable.
@@ -250,20 +264,6 @@ foreach (var b in [true, false]) // Not necessarily List<bool>.
     ```
 
     The *natural type* of `x` is `List<T>` where `T` is the *best common type* of `i` and the *iteration type* of `objects`.  Respectively, that would be the *best common type* between `string` and `object`, which would be `object`.  As such, the type of `x` would be `List<object>`.
-
-* Given:
-
-    ```c#
-    IEnumerable e1 = [1, 2];
-    var e2 = [..e1];               // List<object> or error?
-    List<string> e3 = [..e1, "3"]; // error?
-    ```
-
-    Should `IEnumerable` contribute `object` to the *best common type* or no contribution?
-
-    Should `[..e1]` bind successfully to any target type collection?
-
-    Should `[..e1]` have a natural type?
 
 * Given:
 
@@ -541,11 +541,16 @@ Not having a *known length* does not prevent any result from being created. Howe
 
 [*Constructible collection types*](#constructible-collection-types) is updated to include dictionaries.
 
-> The following are _constructible collection types_ that can be used to construct collection literals.
-> 
-> * ...
-> * `Dictionary<TKey, TValue>`
-> * Interface types `I<TKey, TValue>` implemented by `Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
+The following are _constructible collection types_ that can be used to construct collection literals.
+
+* ...
+* `Dictionary<TKey, TValue>`
+* Interface types `I<TKey, TValue>` implemented by `Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
+
+```c#
+Dictionary<string, int> x = [];
+IReadOnlyDictionary<string, int> y = ["one":1, "two":2];
+```
 
 Dictionary construction uses `this[int index] { set; }` rather than `Add()` when to ensure consistent _overwrite semantics_ rather than _add semantics_.
 
