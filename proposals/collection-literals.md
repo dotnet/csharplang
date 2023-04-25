@@ -544,34 +544,34 @@ This means there is no way for a literal to have a *natural type* of some `List<
 ### Natural element type (updated)
 [natural-element-type-updated]: #natural-element-type-updated
 
-Computing the *natural element type* starts with three sets of types and expressions called `dictionary key set`, `dictionary value set`, and `remainder set`.
+Computing the *natural element type* starts with three sets of types and expressions called *dictionary key set*, *dictionary value set*, and *remainder set*.
 
-The `dictionary key/value set` sets will either both be empty or both be non-empty.
+The *dictionary key/value sets* will either both be empty or both be non-empty.
 
 Each element of the literal is examined in the following fashion:
 
-* An element `e_n` has its *type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to `dictionary key set` and `TValue` is added to `dictionary value set`.  Otherwise, the `e_n` *expression* is added to `remainder set`.
+* An element `e_n` has its *type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to *dictionary key set* and `TValue` is added to *dictionary value set*.  Otherwise, the `e_n` *expression* is added to *remainder set*.
 
-* An element `..s_n` has its *iteration type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to `dictionary key set` and `TValue` is added to `dictionary value set`. Otherwise, the *iteration type* is added to `remainder set`.
+* An element `..s_n` has its *iteration type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to *dictionary key set* and `TValue` is added to *dictionary value set*. Otherwise, the *iteration type* is added to *remainder set*.
 
-* An element `k_n: v_n` adds the `k_n` and `v_n` *expressions* to `dictionary key set` and `dictionary value set` respectively.
+* An element `k_n: v_n` adds the `k_n` and `v_n` *expressions* to *dictionary key set* and *dictionary value set* respectively.
 
-* If the `dictionary key/value set` sets are empty, then there were definitely no `k_n: v_n` elements. In that case, the *fallback case* runs below.
+* If the *dictionary key/value sets* are empty, then there were definitely no `k_n: v_n` elements. In that case, the *fallback case* runs below.
 
-* If `dictionary key/value set` sets are non-empty, then a first round of the *best common type* algorithm in performed on those sets to determine `BCT_Key` and `BCT_Value` respectively.
+* If *dictionary key/value sets* are non-empty, then a first round of the *best common type* algorithm in performed on those sets to determine `BCT_Key` and `BCT_Value` respectively.
 
     * If the first round fails for either set, the *fallback case* runs below.
 
-    * If the first round succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to `remainder set`.  A second round of the *best common type* algorithm is performed on this set to determine `BCT_Final`.
+    * If the first round succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to *remainder set*.  A second round of the *best common type* algorithm is performed on this set to determine `BCT_Final`.
 
         * If the second round fails, the *fallback* case runs below.
         * Otherwise `BCT_Final` is the *natural element type* and the algorithm ends.
 
 * The *fallback case*:
 
-        * All `e_n` *expressions* are added to `remainder set`
-        * All `..s_n` *iteration types* are added to `remainder set`
-        * The *natural element type* is the *best common type* of the `remainder set` and the algorithm ends.
+    * All `e_n` *expressions* are added to *remainder set*
+    * All `..s_n` *iteration types* are added to *remainder set*
+    * The *natural element type* is the *best common type* of the *remainder set* and the algorithm ends.
 
 ---
 
