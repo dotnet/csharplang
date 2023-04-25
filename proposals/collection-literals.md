@@ -137,7 +137,9 @@ While certain types (like arrays and spans) can always be constructed with a col
 If found, the collection can be constructed by creating a fresh instance of its type using `new T()`, producing the corresponding argument to pass to `Construct`, and then calling that method on the fresh instance.  `new T()` supports all structs, including those without a `parameterless struct constructor`.
 
 The allowance for extension methods means that collection literal support can be added to a existing API which does not already directly support this.
-_An extension method could be added that would silently change how collections are created in the program._
+
+The `Construct` method is used for construction of the collection even if the type is *collection initializer* type.
+_This means an extension method could be added that would silently change how collection literals for an existing collection initializer type are constructed in the program._
 
 Through the use of the [`init`](#init-methods) modifier, existing APIs can directly support collection literals in a manner that allows for no-overhead production of the data the final collection will store.
 
@@ -214,7 +216,9 @@ A *natural element type* `T` is first determined from the *best common type* of:
 * The *type* of each element `e_n`, and
 * The *iteration type* of each element `..s_n`.
 
-If a *natural element type* `T` cannot be determined, the literal has no *natural type*.  If `T` can be determined, the *natural type* of the collection is `List<T>`.
+If a *natural element type* `T` cannot be determined, the literal has no *natural type*.  If `T` can be determined and it is some `KeyValuePair<TKey, TValue>`, then the *natural type* of the collection is `Dictionary<TKey, TValue>` (see [*dictionaries*](#dictionaries)); otherwise, the *natural type* of the collection is `List<T>`.
+
+This means there is no way for a literal to have a *natural type* of some `List<KeyValuePair<TKey, TValue>>` (though it certainly can be *target-typed* to that type).
 
 _Should `IEnumerable` contribute a natural element type of `object` or no contribution?_
 
@@ -269,6 +273,22 @@ foreach (var b in [true, false]) // Not necessarily List<bool>.
 
     The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection type, `[]` is treated as target-typed to that collection type.
 
+## Type inference
+
+* Should this work?
+
+    ```c#
+    var a = AsArray([1, 2, 3]);
+
+    static T[] AsArray<T>(params T[] array) => array;
+    ```
+
+* And this?
+
+    ```c#
+    var b = AsArray([.. b ? [x] : [y]]);
+    ```
+
 ## Span types
 [span-types]: #span-types
 
@@ -308,10 +328,13 @@ Span<T> __result = __array;
 ```
 
 ## Collection initializers
+[collection-initializers]: #collection-initializers
 
 _Include text from [*collection initializers*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117154-collection-initializers)_.
 
-`List<T>` is constructible by virtue of supporting *collection initializers*.
+The *collection initializer type* must support binding to `Add(arg)` where `arg` is a single argument.
+
+`List<T>` is *collection initializer type* and is therefore a [*constructible collection type*](#constructible-collection-types).
 
 ## Collection literal translation
 [collection-literal-translation]: #collection-literal-translation
@@ -514,18 +537,17 @@ Not having a *known length* does not prevent any result from being created. Howe
         The counts passed to `CreateArray` are used to provide a starting size hint to prevent wasteful resizes.
 
 ## Dictionaries
+[dictionaries]: #dictionaries
 
 [*Constructible collection types*](#constructible-collection-types) is updated to include dictionaries.
 
-The following are _constructible collection types_ that can be used to construct collection literals.
+> The following are _constructible collection types_ that can be used to construct collection literals.
+> 
+> * ...
+> * `Dictionary<TKey, TValue>`
+> * Interface types `I<TKey, TValue>` implemented by `Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
 
-* ...
-* `Dictionary<TKey, TValue>`
-* Interface types `I<TKey, TValue>` implemented by `Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
-
-_Note that `Dictionary<TKey, TValue>` does not include a public `Add()` instance method with a single parameter, so the type is not constructible as a *collection initializer*._
-
-_Use `this[int index] { set; }` rather than `Add()` when constructing a dictionary for consistent set rather than add semantics._
+Dictionary construction uses `this[int index] { set; }` rather than `Add()` when to ensure consistent _overwrite semantics_ rather than _add semantics_.
 
 ```c#
 var d = [x:x1, y:y1]; // {{x, x1}, {y, y1}}
@@ -533,13 +555,13 @@ d = [..d, y:y2];      // {{x, x1}, {y, y2}}
 d = [x:x2, ..d];      // {{x, x2}, {y, y2}}
 ```
 
-The [*natural type*](#natural-type) is updated as follows.
+As stated in [*natural type*](#natural-type):
 
-If the [*natural element type*](#natural-element-type-updated) `T` can be determined and it is some `KeyValuePair<TKey, TValue>`, then the *natural type* of the collection is `Dictionary<TKey, TValue>`; otherwise, the *natural type* of the collection is `List<T>`.
+> If the [*natural element type*](#natural-element-type-updated) `T` can be determined and it is some `KeyValuePair<TKey, TValue>`, then the *natural type* of the collection is `Dictionary<TKey, TValue>`; otherwise, the *natural type* of the collection is `List<T>`.
 
 If the *natural type* of the collection is `List<T>` the literal is not allowed to contain a `dictionary_element`.
 
-This means there is no way for a literal to have a *natural type* of some `List<KeyValuePair<TKey, TValue>>` (though it certainly can be *target-typed* to that type).
+The *natural element type* algorithm is updated as follows.
 
 ### Natural element type (updated)
 [natural-element-type-updated]: #natural-element-type-updated
@@ -562,7 +584,7 @@ Each element of the literal is examined in the following fashion:
 
     * If the first round fails for either set, the *fallback case* runs below.
 
-    * If the first round succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to *remainder set*.  A second round of the *best common type* algorithm is performed on this set to determine `BCT_Final`.
+    * If the first round succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to *remainder set*.  A second round of the *best common type* algorithm is performed on *remainder set* set to determine `BCT_Final`.
 
         * If the second round fails, the *fallback* case runs below.
         * Otherwise `BCT_Final` is the *natural element type* and the algorithm ends.
