@@ -129,8 +129,8 @@ Actual translation of the literal to the corresponding type is defined [below](#
 int[] a = [];                // array
 Span<int> b = [1, 2];        // span
 ImmutableArray<int> c = [3]; // Construct method
-List<int> c = [5, 6];        // collection initializer type
-IEnumerable<int> d = [];     // list interface
+List<int> d = [5, 6];        // collection initializer type
+IEnumerable<int> e = [];     // list interface
 ```
 
 ## `Construct` methods
@@ -231,9 +231,8 @@ This means there is no way for a literal to have a *natural type* of some `List<
 The choice of `List<T>` rather than `T[]` or `ImmutableArray<T>` is to allow mutation of `var` locals after initialization. `List<T>` is preferred over `Span<T>` because `Span<T>` cannot be used in `async` methods.
 
 ```c#
-var list = [1, 2, 3];
-// ...
-list.Add(4);
+var values = [1, 2, 3];
+values.Add(4); // ok
 ```
 
 Should `IEnumerable` contribute an *iteration type* of `object` or no contribution?
@@ -247,9 +246,8 @@ List<string> e3 = [..e1];  // error?
 The compiler is free to use a representation other than the natural type if the difference is not observable.
 
 ```c#
-foreach (var b in [true, false]) // Not necessarily List<bool>.
+foreach (var b in [true, false]) // Not necessarily List<bool>
 {
-    // ...
 }
 ```
 
@@ -258,36 +256,41 @@ foreach (var b in [true, false]) // Not necessarily List<bool>.
 * For example, given:
 
     ```c#
-    string i = ...;
+    string s = ...;
     object[] objects = ...;
-    var x = [i, ..objects];
+    var x = [s, ..objects]; // List<object>
     ```
 
-    The *natural type* of `x` is `List<T>` where `T` is the *best common type* of `i` and the *iteration type* of `objects`.  Respectively, that would be the *best common type* between `string` and `object`, which would be `object`.  As such, the type of `x` would be `List<object>`.
+    The *natural type* of `x` is `List<T>` where `T` is the *best common type* of `s` and the *iteration type* of `objects`.  Respectively, that would be the *best common type* between `string` and `object`, which would be `object`.  As such, the type of `x` would be `List<object>`.
 
 * Given:
 
     ```c#
-    var values = x ? [1, 2, 3] : [];
+    var values = x ? [1, 2, 3] : []; // List<int>
     ```
 
     The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection type, `[]` is treated as target-typed to that collection type.
 
 ## Type inference
 
-* Should this work?
+Type inference should infer constructible collection types:
 
-    ```c#
-    var a = AsArray([1, 2, 3]);
+```c#
+static void F<T>(T[] arg) { }
+static void F<T>(ImmutableArray<T> arg) { }
 
-    static T[] AsArray<T>(params T[] array) => array;
-    ```
+F([1, 2, 3]); // error: ambiguous between F<T>(T[]) and F<T>(ImmutableArray<T>)
+```
 
-* And this?
+And for extension methods:
 
-    ```c#
-    var b = AsArray([.. b ? [x] : [y]]);
-    ```
+```c#
+static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
+
+var a = [1, 2, 3].AsImmutableArray(); // ok: ImmutableArray<int>
+```
+
+Supporting type inference may require an intermediate *collection type* at compile-time, similar to the [*natural function type*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) used for conversions and type inference for lambda expressions and method groups.
 
 ## Span types
 [span-types]: #span-types
@@ -555,9 +558,9 @@ IReadOnlyDictionary<string, int> y = ["one":1, "two":2];
 Dictionary construction uses `this[int index] { set; }` rather than `Add()` when to ensure consistent _overwrite semantics_ rather than _add semantics_.
 
 ```c#
-var d = [x:x1, y:y1]; // {{x, x1}, {y, y1}}
-d = [..d, y:y2];      // {{x, x1}, {y, y2}}
-d = [x:x2, ..d];      // {{x, x2}, {y, y2}}
+var x = [a:1, b:2]; // {{a, 1}, {b, 2}}
+var y = [..x, b:4]; // {{a, 1}, {b, 4}}
+var z = [a:3, ..x]; // {{a, 3}, {b, 2}}
 ```
 
 As stated in [*natural type*](#natural-type):
