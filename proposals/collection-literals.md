@@ -309,13 +309,7 @@ Span<T> __result = __array;
 
 ## Collection initializers
 
-_Quote from [*collection initializers*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117154-collection-initializers)_.
-
-_What specifically does it mean to be a type that supports collection initializers? Does the type have to be a non-abstract type, or a type parameter with `new()` or `struct` constraint? Does it need a public constructor with specific signature?_
-
-_What are the requirements for a constructor? Presumably, we need to support a parameterless constructor to allow use with a type parameter with `new()` constraint. What if there is a constructor with a `int capacity` parameter?_
-
-_Requires a collection with one or more `Add()` methods with a single parameter, or additional optional parameters, or `params` arrray parameter. No support for multi-valued initializers. Get existing collection initializer requirements._
+_Include text from [*collection initializers*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117154-collection-initializers)_.
 
 `List<T>` is constructible by virtue of supporting *collection initializers*.
 
