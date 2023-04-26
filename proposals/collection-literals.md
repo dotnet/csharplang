@@ -271,7 +271,15 @@ foreach (var b in [true, false]) // Not necessarily List<bool>
 
     The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection type, `[]` is treated as target-typed to that collection type.
 
-## Type inference
+### Conversions and type inference
+
+The *natural type* should allow conversions to other collection types, in *best common type* scenarios for instance.
+
+```c#
+int[] a = [1];
+var b = [a, [2]];         // ok: List<int[]>
+var c = new[] { [3], a }; // ok: int[][]
+```
 
 Type inference should infer constructible collection types:
 
@@ -290,7 +298,7 @@ static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
 var a = [1, 2, 3].AsImmutableArray(); // ok: ImmutableArray<int>
 ```
 
-Supporting type inference may require an intermediate *collection type* at compile-time, similar to the [*natural function type*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) used for conversions and type inference for lambda expressions and method groups.
+Supporting these cases may require using a *natural collection type* at compile-time that is not bound to a concrete collection type such as `T[]` or `List<T>`, similar to the [*natural function type*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) used for conversions and type inference for lambda expressions and method groups.
 
 ## Span types
 [span-types]: #span-types
