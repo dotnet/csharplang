@@ -243,14 +243,6 @@ var e2 = [..e1];           // List<object> or error?
 List<string> e3 = [..e1];  // error?
 ```
 
-The compiler is free to use a representation other than the natural type if the difference is not observable.
-
-```c#
-foreach (var b in [true, false]) // Not necessarily List<bool>
-{
-}
-```
-
 ---
 
 * For example, given:
@@ -276,9 +268,8 @@ foreach (var b in [true, false]) // Not necessarily List<bool>
 The *natural type* should allow conversions to other collection types, in *best common type* scenarios for instance.
 
 ```c#
-int[] a = [1];
-var b = [a, [2]];         // ok: List<int[]>
-var c = new[] { [3], a }; // ok: int[][]
+int[] a = new[] { 1 };
+var b = new[] { a, [2] }; // ok: int[][]
 ```
 
 Type inference should infer constructible collection types:
@@ -568,7 +559,7 @@ Dictionary construction uses `this[int index] { set; }` rather than `Add()` when
 ```c#
 var x = [a:1, b:2]; // {{a, 1}, {b, 2}}
 var y = [..x, b:4]; // {{a, 1}, {b, 4}}
-var z = [a:3, ..x]; // {{a, 3}, {b, 2}}
+var z = [a:3, ..x]; // {{a, 1}, {b, 2}}
 ```
 
 As stated in [*natural type*](#natural-type):
