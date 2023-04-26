@@ -96,7 +96,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
 * `List<T>`, `Dictionary<TKey, TValue>` and `KeyValuePair<TKey, TValue>` refer to the respective types in the `System.Collections.Generic` namespace.
 
-* The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [`query expression translation`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11173-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
+* The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11173-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
 
 * An implementation is not required to translate literals exactly as specified below.  Any translation is legal as long as the same result is produced and there are no observable differences (outside of timing) in the production of the result.
 
@@ -112,21 +112,26 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
     * The behavior of collection literals with collections that are not well-behaved is undefined.
 
-## Constructible collection types
+## Constructible collection types (target types)
 [constructible-collection-types]: #constructible-collection-types
 
 The following are _constructible collection types_ that can be used to construct collection literals.
-Actual translation of the literal to the corresponding is defined [below](#collection-literal-translation).
+These are the valid _target types_ for collection literals.
+Actual translation of the literal to the corresponding type is defined [below](#collection-literal-translation).
 
-* Single dimensional arrays (e.g. `T[]`).
+* Single dimensional arrays (e.g. `T[]`)
 * [*Span types*](#span-types)
-* Types with a suitable [`Construct` method](#construct-methods).
-* Instantiations of any interface type `I<T>` implemented by `List<T>`.  For example, `IEnumerable<T>`, `IList<T>`, `IReadOnlyList<T>`.
-* Instantiations of any interface type `I<TKey, TValue>` implemented by `Dictionary<TKey, TValue>`.  For example, `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`.
-* Types that support [`collection initializers`](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117154-collection-initializers).
+* Types with a suitable [`Construct` method](#construct-methods)
+* Types that support [*collection initializers*](#collection-initializers)
+* Interface types `I<T>` implemented by `List<T>` (e.g. `IEnumerable<T>`, `IList<T>`, `IReadOnlyList<T>`)
 
-`List<T>` and `Dictionary<TKey, TValue>` are both constructible by virtue of them both supporting `collection initializers`.
-
+```c#
+int[] a = [];                // array
+Span<int> b = [1, 2];        // span
+ImmutableArray<int> c = [3]; // Construct method
+List<int> d = [5, 6];        // collection initializer type
+IEnumerable<int> e = [];     // list interface
+```
 
 ## `Construct` methods
 [construct-methods]: #construct-methods
@@ -135,19 +140,21 @@ While certain types (like arrays and spans) can always be constructed with a col
 
 * the `Construct` method is found on an instance of `T` (including through [extension methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations)), and
 
-* `CollectionType` is some other type known to be a [`constructible`](constructible-collection-types) type.
+* `CollectionType` is some other type known to be a [*constructible*](constructible-collection-types) type.
 
 If found, the collection can be constructed by creating a fresh instance of its type using `new T()`, producing the corresponding argument to pass to `Construct`, and then calling that method on the fresh instance.  `new T()` supports all structs, including those without a `parameterless struct constructor`.
 
 The allowance for extension methods means that collection literal support can be added to a existing API which does not already directly support this.
 
-Through the use of the [`init`](#init-methods) modifier, existing APIs can directly support collection literals in a manner that allows for no-overhead production of the data the final collection will store.
+The `Construct` method is used for construction of the collection even if the type supports *collection initializers*.
+_This means an extension method could be added that would silently change how collection literals for an existing collection initializer type are constructed in the program._
 
+Through the use of the [`init`](#init-methods) modifier, existing APIs can directly support collection literals in a manner that allows for no-overhead production of the data the final collection will store.
 
 ### `init Construct` methods
 [init-methods]: #init-methods
 
-* Like [`init accessors`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/init.md#init-only-setters), an `init` method would be an instance method invocable at the point of object creation but become unavailable once object creation has completed. This facility thus prevents general use of such a marked method outside of known safe compiler scopes where the instance value being constructed cannot be observed until complete.
+* Like [*`init` accessors*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/init.md#init-only-setters), an `init` method would be an instance method invocable at the point of object creation but become unavailable once object creation has completed. This facility thus prevents general use of such a marked method outside of known safe compiler scopes where the instance value being constructed cannot be observed until complete.
 
 * In the context of collection literals, using the `init` modifier on the [`Construct` method](#construct-methods) would allow types to trust that the collection instances passed into them cannot be mutated outside of them, and that they are being passed ownership of the collection instance.  This would negate any need to copy data that would normally be assumed to be in an untrusted location.
 
@@ -161,7 +168,7 @@ Through the use of the [`init`](#init-methods) modifier, existing APIs can direc
 
     `ImmutableArray<T>` would then take that array directly and use it as its own backing storage.  This would be safe because the compiler (following the requirements around `init`) would ensure that no other location in the code would have access to this temporary array, and thus it would not be possible to mutate it behind the back of the `ImmutableArray<T>` instance.
 
-    The above also demonstrates that this approach can work with struct types which do not have a [`parameterless struct constructor`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/parameterless-struct-constructors.md).  In the above, the call to `new ImmutableArray<T>()` is equivalent to `default(ImmutableArray<T>)`, (producing an `ImmutableArray<T>` whose [`IsDefault`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.immutable.immutablearray-1.isdefault) property is initially true.  However, the `Construct` method can then safely update this to the final non-default state without that intermediate state being visible.
+    The above also demonstrates that this approach can work with struct types which do not have a [*parameterless struct constructor*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/parameterless-struct-constructors.md).  In the above, the call to `new ImmutableArray<T>()` is equivalent to `default(ImmutableArray<T>)`, (producing an `ImmutableArray<T>` whose [`IsDefault`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.immutable.immutablearray-1.isdefault) property is initially true.  However, the `Construct` method can then safely update this to the final non-default state without that intermediate state being visible.
 
 * This formalization is quite beneficial because the only existing mechanism to (safely) create an ImmutableArray with values without copying is both excessively verbose and produces unavoidable garbage:
 
@@ -178,10 +185,9 @@ Through the use of the [`init`](#init-methods) modifier, existing APIs can direc
     ImmutableArray<int> __result = __builder.MoveToImmutable();
     ```
 
-
 ## Empty collection literal
 
-* The empty literal `[]` has no type.  However, similar to the [`null-literal`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md#6457-the-null-literal), this literal can be implicitly converted to any [`constructible`](#constructible-collection-types) collection type.
+* The empty literal `[]` has no type.  However, similar to the [*null-literal*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md#6457-the-null-literal), this literal can be implicitly converted to any [*constructible*](#constructible-collection-types) collection type.
 
     For example, the following is not legal as there is no *target type* and there are no other conversions involved:
 
@@ -207,7 +213,6 @@ Through the use of the [`init`](#init-methods) modifier, existing APIs can direc
 
     Here, if `b` is false, it is not required that any value actually be constructed for the empty literal since it would immediately be spread into zero values in the final literal.
 
-
 ## Natural type
 [natural-type]: #natural-type
 
@@ -215,107 +220,76 @@ In the absence of a *constructible collection target type*, a non-empty literal 
 
 The *natural type* is determined using the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) algorithm.
 
-A [*natural element type*](#natural-element-type) `T` is first determined.  If that cannot be determined, the literal has no *natural type*.  If `T` can be determined and it is some `KeyValuePair<TKey, TValue>`, then the *natural type* of the collection is `Dictionary<TKey, TValue>`; otherwise, the *natural type* of the collection is `List<T>`.
+A *natural element type* `T` is first determined from the *best common type* of:
+* The *type* of each element `e_n`, and
+* The *iteration type* of each element `..s_n`.
 
-If the *natural type* of the collection is `List<T>` the literal is not allowed to contain a `dictionary_element`.
+If a *natural element type* `T` cannot be determined, the literal has no *natural type*.  If `T` can be determined and it is some `KeyValuePair<TKey, TValue>`, then the *natural type* of the collection is `Dictionary<TKey, TValue>` (see [*dictionaries*](#dictionaries)); otherwise, the *natural type* of the collection is `List<T>`.
 
 This means there is no way for a literal to have a *natural type* of some `List<KeyValuePair<TKey, TValue>>` (though it certainly can be *target-typed* to that type).
 
+The choice of `List<T>` rather than `T[]` or `ImmutableArray<T>` is to allow mutation of `var` locals after initialization. `List<T>` is preferred over `Span<T>` because `Span<T>` cannot be used in `async` methods.
+
 ```c#
-var x = [];     // error: element type cannot be inferred for []
-var y = [1, 2]; // ok: List<int>
-object z = [3]; // ok: List<int>
+var values = [1, 2, 3];
+values.Add(4); // ok
 ```
 
-### Natural Element Type
-[natural-element-type]: #natural-element-type
+Should `IEnumerable` contribute an *iteration type* of `object` or no contribution?
 
-Computing the *natural element type* starts with three sets of types and expressions called `dictionary key set`, `dictionary value set`, and `remainder set`.
-
-The `dictionary key/value set` sets will either both be empty or both be non-empty.
-
-Each element of the literal is examined in the following fashion:
-
-* An element `e_n` has its *type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to `dictionary key set` and `TValue` is added to `dictionary value set`.  Otherwise, the `e_n` *expression* is added to `remainder set`.
-
-* An element `..s_n` has its *iteration type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to `dictionary key set` and `TValue` is added to `dictionary value set`. Otherwise, the *iteration type* is added to `remainder set`.
-
-* An element `k_n: v_n` adds the `k_n` and `v_n` *expressions* to `dictionary key set` and `dictionary value set` respectively.
-
-* If the `dictionary key/value set` sets are empty, then there were definitely no `k_n: v_n` elements. In that case, the *fallback case* runs below.
-
-* If `dictionary key/value set` sets are non-empty, then a first round of the *best common type* algorithm in performed on those sets to determine `BCT_Key` and `BCT_Value` respectively.
-
-    * If the first round fails for either set, the *fallback case* runs below.
-
-    * If the first round succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to `remainder set`.  A second round of the *best common type* algorithm is performed on this set to determine `BCT_Final`.
-
-        * If the second round fails, the *fallback* case runs below.
-        * Otherwise `BCT_Final` is the *natural element type* and the algorithm ends.
-
-* The *fallback case*:
-
-        * All `e_n` *expressions* are added to `remainder set`
-        * All `..s_n` *iteration types* are added to `remainder set`
-        * The *natural element type* is the *best common type* of the `remainder set` and the algorithm ends.
+```c#
+IEnumerable e1 = [1, 2, 3];
+var e2 = [..e1];           // List<object> or error?
+List<string> e3 = [..e1];  // error?
+```
 
 ---
 
 * For example, given:
 
     ```c#
-    string i = ...;
+    string s = ...;
     object[] objects = ...;
-    var x = [i, ..objects];
+    var x = [s, ..objects]; // List<object>
     ```
 
-    The *natural type* of `x` is `List<T>` where `T` is the *best common type* of `i` and the *iteration type* of `objects`.  Respectively, that would be the *best common type* between `string` and `object`, which would be `object`.  As such, the type of `x` would be `List<object>`.
+    The *natural type* of `x` is `List<T>` where `T` is the *best common type* of `s` and the *iteration type* of `objects`.  Respectively, that would be the *best common type* between `string` and `object`, which would be `object`.  As such, the type of `x` would be `List<object>`.
 
 * Given:
 
     ```c#
-    Dictionary<string, object> d1 = ...;
-    Dictionary<object, string> d2 = ...;
-    var d3 = [..d1, ..d2];
-    ```
-
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `..d1` will have a *iteration type* of `KeyValuePair<string, object>` and `..d2` will have a *iteration type* of `KeyValuePair<object, string>`. These will contribute `{string, object}` to the determination of the `TKey` type and `{object, string}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
-
-* Given:
-
-    ```c#
-    var d = [null: null, "a": "b"];
-    ```
-
-    The *natural type* of `d` is `Dictionary<string, string>`.  This is because the `k_n: v_n` elements will construct the set `{null, "a"}` for the determination of the `TKey` type and `{null, "b"}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `string`.
-
-* Given:
-
-    ```c#
-    var values = x ? [1, 2, 3] : [];
+    var values = x ? [1, 2, 3] : []; // List<int>
     ```
 
     The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection type, `[]` is treated as target-typed to that collection type.
 
-* Given:
+### Conversions and type inference
 
-    ```c#
-    string s1, s2;
-    object o1, o2;
-    var d = [s1: o1, o2: s2];
-    ```
+The *natural type* should allow conversions to other collection types, in *best common type* scenarios for instance.
 
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `k_n: v_n` elements will construct the set `{s1, o1}` for the determination of the `TKey` type and `{o2, s2}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
+```c#
+int[] a = new[] { 1 };
+var b = new[] { a, [2] }; // ok: int[][]
+```
 
-* Given:
+Type inference should infer constructible collection types:
 
-    ```c#
-    string s1, s2;
-    object o1, o2;
-    var d = [KeyValuePair.Create(s1, o1), KeyValuePair.Create(o2, s2)];
-    ```
+```c#
+static void F<T>(T[] arg) { }
+static void F<T>(ImmutableArray<T> arg) { }
 
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `e_n` elements are `KeyValuePair<string, object>` and `KeyValuePair<object, string>` respectively.  These will construct the set `{string, object}`for the determination of the `TKey` type and `{object, string}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
+F([1, 2, 3]); // error: ambiguous between F<T>(T[]) and F<T>(ImmutableArray<T>)
+```
+
+And for extension methods:
+
+```c#
+static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
+
+var a = [1, 2, 3].AsImmutableArray(); // ok: ImmutableArray<int>
+```
+
+Supporting these cases may require using a *natural collection type* at compile-time that is not bound to a concrete collection type such as `T[]` or `List<T>`, similar to the [*natural function type*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) used for conversions and type inference for lambda expressions and method groups.
 
 ## Span types
 [span-types]: #span-types
@@ -332,7 +306,7 @@ foreach (var x in y)
 }
 ```
 
-The compiler is allowed to translate that using `stackalloc` however it wants, as long as the `Span` meaning stays the same and [`span-safety`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.  For example, it can translate the above to:
+The compiler is allowed to translate that using `stackalloc` however it wants, as long as the `Span` meaning stays the same and [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.  For example, it can translate the above to:
 
 ```c#
 Span<int> __buffer = stackalloc int[3];
@@ -354,6 +328,15 @@ If the compiler decides to allocate on the heap, the translation for `Span<T>` i
 T[] __array = [...]; // using existing rules
 Span<T> __result = __array;
 ```
+
+## Collection initializers
+[collection-initializers]: #collection-initializers
+
+_Include text from [*collection initializers*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117154-collection-initializers)_.
+
+The *collection initializer type* must support binding to `Add(arg)` where `arg` is a single argument.
+
+`List<T>` is *collection initializer type* and is therefore a [*constructible collection type*](#constructible-collection-types).
 
 ## Collection literal translation
 [collection-literal-translation]: #collection-literal-translation
@@ -554,6 +537,111 @@ Not having a *known length* does not prevent any result from being created. Howe
         This allows for minimal waste and copying, without additional overhead that library collections might incur.
 
         The counts passed to `CreateArray` are used to provide a starting size hint to prevent wasteful resizes.
+
+## Dictionaries
+[dictionaries]: #dictionaries
+
+[*Constructible collection types*](#constructible-collection-types) is updated to include dictionaries.
+
+The following are _constructible collection types_ that can be used to construct collection literals.
+
+* ...
+* `Dictionary<TKey, TValue>`
+* Interface types `I<TKey, TValue>` implemented by `Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
+
+```c#
+Dictionary<string, int> x = [];
+IReadOnlyDictionary<string, int> y = ["one":1, "two":2];
+```
+
+Dictionary construction uses `this[int index] { set; }` rather than `Add()` when to ensure consistent _overwrite semantics_ rather than _add semantics_.
+
+```c#
+var x = [a:1, b:2]; // {{a, 1}, {b, 2}}
+var y = [..x, b:4]; // {{a, 1}, {b, 4}}
+var z = [a:3, ..x]; // {{a, 1}, {b, 2}}
+```
+
+As stated in [*natural type*](#natural-type):
+
+> If the [*natural element type*](#natural-element-type-updated) `T` can be determined and it is some `KeyValuePair<TKey, TValue>`, then the *natural type* of the collection is `Dictionary<TKey, TValue>`; otherwise, the *natural type* of the collection is `List<T>`.
+
+If the *natural type* of the collection is `List<T>` the literal is not allowed to contain a `dictionary_element`.
+
+The *natural element type* algorithm is updated as follows.
+
+### Natural element type (updated)
+[natural-element-type-updated]: #natural-element-type-updated
+
+Computing the *natural element type* starts with three sets of types and expressions called *dictionary key set*, *dictionary value set*, and *remainder set*.
+
+The *dictionary key/value sets* will either both be empty or both be non-empty.
+
+Each element of the literal is examined in the following fashion:
+
+* An element `e_n` has its *type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to *dictionary key set* and `TValue` is added to *dictionary value set*.  Otherwise, the `e_n` *expression* is added to *remainder set*.
+
+* An element `..s_n` has its *iteration type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to *dictionary key set* and `TValue` is added to *dictionary value set*. Otherwise, the *iteration type* is added to *remainder set*.
+
+* An element `k_n: v_n` adds the `k_n` and `v_n` *expressions* to *dictionary key set* and *dictionary value set* respectively.
+
+* If the *dictionary key/value sets* are empty, then there were definitely no `k_n: v_n` elements. In that case, the *fallback case* runs below.
+
+* If *dictionary key/value sets* are non-empty, then a first round of the *best common type* algorithm in performed on those sets to determine `BCT_Key` and `BCT_Value` respectively.
+
+    * If the first round fails for either set, the *fallback case* runs below.
+
+    * If the first round succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to *remainder set*.  A second round of the *best common type* algorithm is performed on *remainder set* set to determine `BCT_Final`.
+
+        * If the second round fails, the *fallback* case runs below.
+        * Otherwise `BCT_Final` is the *natural element type* and the algorithm ends.
+
+* The *fallback case*:
+
+    * All `e_n` *expressions* are added to *remainder set*
+    * All `..s_n` *iteration types* are added to *remainder set*
+    * The *natural element type* is the *best common type* of the *remainder set* and the algorithm ends.
+
+---
+
+* Given:
+
+    ```c#
+    Dictionary<string, object> d1 = ...;
+    Dictionary<object, string> d2 = ...;
+    var d3 = [..d1, ..d2];
+    ```
+
+    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `..d1` will have a *iteration type* of `KeyValuePair<string, object>` and `..d2` will have a *iteration type* of `KeyValuePair<object, string>`. These will contribute `{string, object}` to the determination of the `TKey` type and `{object, string}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
+
+* Given:
+
+    ```c#
+    var d = [null: null, "a": "b"];
+    ```
+
+    The *natural type* of `d` is `Dictionary<string, string>`.  This is because the `k_n: v_n` elements will construct the set `{null, "a"}` for the determination of the `TKey` type and `{null, "b"}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `string`.
+
+* Given:
+
+    ```c#
+    string s1, s2;
+    object o1, o2;
+    var d = [s1: o1, o2: s2];
+    ```
+
+    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `k_n: v_n` elements will construct the set `{s1, o1}` for the determination of the `TKey` type and `{o2, s2}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
+
+* Given:
+
+    ```c#
+    string s1, s2;
+    object o1, o2;
+    var d = [KeyValuePair.Create(s1, o1), KeyValuePair.Create(o2, s2)];
+    ```
+
+    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `e_n` elements are `KeyValuePair<string, object>` and `KeyValuePair<object, string>` respectively.  These will construct the set `{string, object}`for the determination of the `TKey` type and `{object, string}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
+
 
 ## Unsupported scenarios
 [unsupported-scenarios]: #unsupported-scenarios
