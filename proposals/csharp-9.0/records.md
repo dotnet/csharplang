@@ -143,7 +143,7 @@ class R1 : IEquatable<R1>
         => !(left == right);
     public override int GetHashCode()
     {
-        return Combine(EqualityComparer<Type>.Default.GetHashCode(EqualityContract),
+        return HashCode.Combine(EqualityComparer<Type>.Default.GetHashCode(EqualityContract),
             EqualityComparer<T1>.Default.GetHashCode(P1));
     }
 }
@@ -165,7 +165,7 @@ class R2 : R1, IEquatable<R2>
         => !(left == right);
     public override int GetHashCode()
     {
-        return Combine(base.GetHashCode(),
+        return HashCode.Combine(base.GetHashCode(),
             EqualityComparer<T2>.Default.GetHashCode(P2));
     }
 }
@@ -187,7 +187,7 @@ class R3 : R2, IEquatable<R3>
         => !(left == right);
     public override int GetHashCode()
     {
-        return Combine(base.GetHashCode(),
+        return HashCode.Combine(base.GetHashCode(),
             EqualityComparer<T3>.Default.GetHashCode(P3));
     }
 }
@@ -396,10 +396,33 @@ For a record:
 A positional record with at least one parameter synthesizes a public void-returning instance method called Deconstruct with an out
 parameter declaration for each parameter of the primary constructor declaration. Each parameter
 of the Deconstruct method has the same type as the corresponding parameter of the primary
-constructor declaration. The body of the method assigns each parameter of the Deconstruct method
-to the value from an instance member access to a member of the same name.
+constructor declaration. The body of the method assigns to each parameter of the Deconstruct method, 
+the value of the instance property of the same name.
 The method can be declared explicitly. It is an error if the explicit declaration does not match
 the expected signature or accessibility, or is static.
+
+The following example shows a positional record `R` with its compiler synthesized `Deconstruct` method, along with its usage:
+
+```csharp
+public record R(int P1, string P2 = "xyz")
+{
+    public void Deconstruct(out int P1, out string P2)
+    {
+        P1 = this.P1;
+        P2 = this.P2;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        R r = new R(12);
+        (int p1, string p2) = r;
+        Console.WriteLine($"p1: {p1}, p2: {p2}");
+    }
+}
+```
 
 ## `with` expression
 
