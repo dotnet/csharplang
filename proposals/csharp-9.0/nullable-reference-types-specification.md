@@ -75,6 +75,8 @@ A type parameter constrained with `class?` (or `class` in a *disabled* annotatio
 
 A warning is given on a `class?` constraint in a *disabled* annotation context.
 
+The behavior of `?` annotations on type parameters that aren't constrained to be either a `struct` or `class` is covered in [Unconstrained type parameter annotations](unconstrained-type-parameter-annotations.md#annotation).
+
 ### `notnull` constraint
 
 A type parameter constrained with `notnull` may not be a nullable type (nullable value type, nullable reference type or nullable type parameter).
@@ -90,7 +92,7 @@ primary_constraint
 
 The `default` constraint can be used on a method override or explicit implementation to disambiguate `T?` meaning "nullable type parameter" from "nullable value type" (`Nullable<T>`). Lacking the `default` constraint a `T?` syntax in an override or explicit implementation will be interpreted as `Nullable<T>`
 
-See https://github.com/dotnet/csharplang/blob/master/proposals/csharp-9.0/unconstrained-type-parameter-annotations.md#default-constraint
+See [Unconstrained type parameter annotations](unconstrained-type-parameter-annotations.md#default-constraint).
 
 ### The null-forgiving operator
 
