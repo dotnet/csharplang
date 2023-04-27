@@ -875,7 +875,10 @@ Lifetimes are most naturally expressed using types. A given program's lifetimes 
 Note that this is not meant to be a 100% complete documentation. Documenting every single behavior isn't a goal here. Instead it's meant to establish a general understanding and common verbiage by which the model, and potential changes to it, can be discussed.
 
 Usually it's not necessary to directly talk about lifetime types. The exceptions are places where lifetimes can vary based on particular "instantiation" sites. This is a kind of polymorphism and we call these varying lifetimes "generic lifetimes", represented as generic parameters. C# does not provide syntax for expressing lifetime generics, so we define an implicit "translation" from C# to an expanded lowered language that contains explicit generic parameters.
-The below examples make use of named lifetimes. The syntax `$a` refers to a lifetime named `a`. It is a lifetime that has no meaning by itself but can be given a relationship to other lifetimes via the `where lifetime` syntax. There are a few predefined lifetimes for convenience and brevity below:
+
+The below examples make use of named lifetimes. The syntax `$a` refers to a lifetime named `a`. It is a lifetime that has no meaning by itself but can be given a relationship to other lifetimes via the `where $a : $b` syntax. This establishes that `$a` is convertible to `$b`. It may help to think of this as establishing that `$a` is a lifetime at least as long as `$b`.
+
+There are a few predefined lifetimes for convenience and brevity below:
 
 - `$heap`: this is the lifetime of any value that exists on the heap. It is available in all scopes and method signatures.
 - `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*. It is implicitly defined in methods and can appear in method signatures except for any output position.
@@ -884,9 +887,9 @@ The below examples make use of named lifetimes. The syntax `$a` refers to a life
 
 There are a few predefined relationships between lifetimes:
 
-- `lifetime $heap >= $a` for all lifetimes `$a`
-- `lifetime $cm >= $ro` 
-- `lifetime $x >= $local` for all predefined lifetimes. User defined lifetimes have no relationship to local unless explictly defined.
+- `where $heap : $a` for all lifetimes `$a`
+- `where $cm : $ro` 
+- `where $x : $local` for all predefined lifetimes. User defined lifetimes have no relationship to local unless explictly defined.
 
 Lifetime variables when defined on types can be invariant or covariant. These are expressed using the same syntax as generic parameters:
 
@@ -905,7 +908,7 @@ The basic rules for the lifetime are defined as:
 - All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `$heap` and `$local`. 
 - All types `T` that are not a `ref struct` implicitly have lifetime of `T<$heap>`. This is implicit, there is no need to write `int<$heap>` in every sample.
 - For a ref field defined as `ref T<$l1, $l2, ... $ln>` all lifetimes `$l1` through `$ln` must be invariant. 
-- For a ref defined as `ref<$a> T<$b, ...>`, `$b` must be known to be at least as big as `$a`
+- For a ref defined as `ref<$a> T<$b, ...>`, `$b` must wider or equal to `$a`
 - The `ref` of a variable has a lifetime of the 
     - For a ref local, parameter, field or return of type `ref<$a> T` the lifetime is `$a`
     - `$heap` for all reference types and fields of reference types
@@ -926,7 +929,7 @@ The lifetime parameter `$this` on type definitions is _not_ predefined but it do
 
 For brevity sake a type which has no explicit lifetime parameters treated as if there is `out $this` defined and applied to all fields of the type. A type with a `ref` field must define explicit lifetime parameters.
 
-These rules exists to support our existing invariant that `T` can be assigned to `scoped T` for all types. That maps down to `T<$a, ...>` being assignable to `T<$local, ...>` for all lifetimes known to be a subtype of `$local`. Further this supports other items like being able to assign `Span<T>` from the heap to those on the stack. This does exclude types where fields have differing lifetimes for non-ref values but that is the reality of C# today. Changing that would require a significant change of C# rules that would need to be mapped out. 
+These rules exists to support our existing invariant that `T` can be assigned to `scoped T` for all types. That maps down to `T<$a, ...>` being assignable to `T<$local, ...>` for all lifetimes known to wider than ype of `$local`. Further this supports other items like being able to assign `Span<T>` from the heap to those on the stack. This does exclude types where fields have differing lifetimes for non-ref values but that is the reality of C# today. Changing that would require a significant change of C# rules that would need to be mapped out. 
 
 The type of `this` for a type `S<out $this, ...>` inside an instance method is implicitly defined as the following:
 - For normal instance method: `ref<$local> S<$ro, ...>`
@@ -950,14 +953,14 @@ ref int M1(ref int i) => ...
 
 ref<$ro> int Identity<$ro>(ref<$ro> int i)
 {
-    // okay: has ref lifteime $ro which is equal to $ro
+    // okay: has ref lifetime $ro which is equal to $ro
     return ref i;
 
-    // okay: has ref lifetime $heap which is >= $ro
+    // okay: has ref lifetime $heap which convertible $ro
     int[] array = new int[42];
     return ref array[0];
 
-    // error: has ref lifetime $local which has no relationship to $a hence 
+    // error: has ref lifetime $local which has no conversion to $a hence 
     // it's illegal
     int local = 42;
     return ref local;
@@ -1000,10 +1003,11 @@ S<$ro> M2<$ro>(
     // okay: types match exactly
     return span1;
 
-    // error: has lifetime $local which is not >= $ro
+    // error: has lifetime $local which has no conversion to $ro
     return span2;
 
-    // okay: type of default(S<$heap>) is a sub-type of Span<$ro>
+    // okay: type S<$heap> has a conversion to S<$ro> because $heap has a
+    // conversion to $ro and the first lifetime parameter of S<> is covariant
     return default(S<$heap>)
 
     // okay: the ref lifetime of ref $i is $ro so this is just an 
@@ -1019,7 +1023,7 @@ S<$ro> M2<$ro>(
     // are convertible.
     return new S<$ro>(ref<$heap> array[0]);
 
-    // error: has ref lifetime $local which has no relationship to $a hence 
+    // error: has ref lifetime $local which has no conversion to $a hence 
     // it's illegal
     int local = 42;
     return ref local;
@@ -1050,7 +1054,7 @@ ref struct S<out $this>
     static void SelfAssign<$ro, $cm>(ref<$ro> S<$cm> s)
     {
         // error: the types work out here to ref<$cm> int = ref<$ro> int and that is 
-        // illegal as $ro is not a sub-type of $cm (the relationship is the other direction)
+        // illegal as $ro has no conversion to $cm (the relationship is the other direction)
         s.refField = ref<$ro> s.field;
     }
 }
