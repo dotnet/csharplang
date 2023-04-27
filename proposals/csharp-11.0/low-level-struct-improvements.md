@@ -697,6 +697,9 @@ namespace System.Runtime.CompilerServices
 ```
 
 ### Safe fixed size buffers
+
+Safe fixed size buffers was not delivered in C# 11. This feature may be implemented in a future version of C#.
+
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
 
 ```c#
@@ -1217,45 +1220,6 @@ struct FrugalList<T>
                 default: throw null;
             }
         }
-    }
-}
-```
-
-#### Stack based linked list
-
-```c#
-ref struct StackLinkedListNode<T>
-{
-    T _value;
-    ref StackLinkedListNode<T> _next;
-
-    public T Value => _value;
-
-    public bool HasNext => !Unsafe.IsNullRef(ref _next);
-
-    public ref StackLinkedListNode<T> Next 
-    {
-        get
-        {
-            if (!HasNext)
-            {
-                throw new InvalidOperationException("No next node");
-            }
-
-            return ref _next;
-        }
-    }
-
-    public StackLinkedListNode(T value)
-    {
-        this = default;
-        _value = value;
-    }
-
-    public StackLinkedListNode(T value, ref StackLinkedListNode<T> next)
-    {
-        _value = value;
-        _next = ref next;
     }
 }
 ```
