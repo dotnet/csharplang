@@ -123,7 +123,6 @@ The *extension_underlying_type* type may not be `dynamic`, a pointer,
 a ref struct type, a ref type or an extension.  
 The underlying may not include an *interface_type_list* (this is part of Phase C).  
 The extension type must be static if its underlying type is static.  
-TODO2 any restrictions on mixing `implicit` and `explicit` extensions in an extension hierarchy?  
 
 When a partial extension declaration includes an underlying type specification,
 that underlying type specification shall reference the same type as all other parts
@@ -280,7 +279,7 @@ Otherwise, existing [rules for fields](https://github.com/dotnet/csharpstandard/
 
 #### Methods
 
-A *method_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
+TODO allow `this` (of type current extension).  
 Parameters with the `this` modifier are disallowed.
 Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
 In particular, a static method does not operate on a specific instance, 
@@ -289,10 +288,12 @@ Extension methods are disallowed.
 
 #### Properties
 
-A *property_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
-Otherwise, existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
-In particular, a static method does not operate on a specific instance, 
-and it is a compile-time error to refer to `this` in a static method.
+TODO allow `this` (of type current extension).  
+Auto-properties must be static (since instance fields are disallowed).  
+
+Existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
+In particular, a static property does not operate on a specific instance, 
+and it is a compile-time error to refer to `this` in a static property.
 
 #### Nested types
 
@@ -314,16 +315,7 @@ TODO
 
 #### Fields
 
-A *field_declaration* in an *extension_declaration* shall explicitly include a `static` modifier.  
-
-#### Methods
-
-TODO allow `this` (of type current extension).  
-
-#### Properties
-
-Auto-properties must still be static (since instance fields are disallowed).  
-TODO allow `this` (of type current extension).  
+TODO
 
 #### Constructors
 
@@ -586,9 +578,6 @@ Underlying<string?> u3; // Extensions<string?> is a compatible extension with u3
 ```
 
 ### Extension member lookup
-
-TODO2 won't this design lead to ambiguities when an extension and its base extension
-are both in scope?
 
 TL;DR: Given an underlying type, we'll search enclosing types and namespaces 
 (and their imports) for compatible extensions and for each "layer" we'll do member lookups.  
