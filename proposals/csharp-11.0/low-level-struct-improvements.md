@@ -274,7 +274,7 @@ Span<byte> Read(Span<byte> buffer, out int read)
     // .. 
 }
 
-Span<int> Use()
+Span<byte> Use()
 {
     var buffer = new byte[256];
 
@@ -383,7 +383,7 @@ Span<int> CreateAndCapture(ref int value)
 {
     // Okay: value Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
     // of the ref argument. That is the *calling method* for value hence this is not allowed.
-    return new Span<int>(ref value)
+    return new Span<int>(ref value);
 }
 
 Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
@@ -697,6 +697,9 @@ namespace System.Runtime.CompilerServices
 ```
 
 ### Safe fixed size buffers
+
+Safe fixed size buffers was not delivered in C# 11. This feature may be implemented in a future version of C#.
+
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
 
 ```c#
@@ -787,7 +790,7 @@ There are considerations other parts of the development stack should consider wh
 The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
 
 ```c#
-Span<int> CreateSpan<int>()
+Span<int> CreateSpanOfInt()
 {
     // This is legal according to the 7.2 span rules because they do not account
     // for a constructor in the form Span(ref T value) existing. 
@@ -1203,57 +1206,20 @@ struct FrugalList<T>
 
     public int Count = 3;
 
+    public FrugalList(){}
+
     public ref T this[int index]
     {
         [UnscopedRef] get
         {
             switch (index)
             {
-                case 0: return ref _item1;
-                case 1: return ref _item2;
-                case 2: return ref _item3;
+                case 0: return ref _item0;
+                case 1: return ref _item1;
+                case 2: return ref _item2;
                 default: throw null;
             }
         }
-    }
-}
-```
-
-#### Stack based linked list
-
-```c#
-ref struct StackLinkedListNode<T>
-{
-    T _value;
-    ref StackLinkedListNode<T> _next;
-
-    public T Value => _value;
-
-    public bool HasNext => !Unsafe.IsNullRef(ref _next);
-
-    public ref StackLinkedListNode<T> Next 
-    {
-        get
-        {
-            if (!HasNext)
-            {
-                throw new InvalidOperationException("No next node");
-            }
-
-            return ref _next;
-        }
-    }
-
-    public StackLinkedListNode(T value)
-    {
-        this = default;
-        _value = value;
-    }
-
-    public StackLinkedListNode(T value, ref StackLinkedListNode<T> next)
-    {
-        _value = value;
-        _next = ref next;
     }
 }
 ```
@@ -1328,7 +1294,7 @@ ref struct RS
         // 
         // This is an lvalue invocation and following those rules the ref-safe-to-escape 
         // of the return is *current method*
-        return ref local4.Prop1;
+        return ref local4.Prop;
     }
 }
 ```
@@ -1343,7 +1309,6 @@ The reason for the following line in the [ref reassignment rules](#rules-ref-rea
 This is because the lifetime of the values pointed to by `ref` locations are invariant. The indirection prevents us from allowing any kind of variance here, even to narrower lifetimes. If narrowing is allowed then it opens up the following unsafe code:
 
 ```csharp
-ref struct RS { }
 void Example(ref Span<int> p)
 {
     Span<int> local = stackalloc int[42];
@@ -1565,7 +1530,7 @@ void M(ref S s)
     ...
 }
 
-S Usage()
+void Usage()
 {
     // safe-to-escape to calling method
     S local = default; 
