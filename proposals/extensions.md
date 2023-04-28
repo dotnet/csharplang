@@ -2,14 +2,10 @@
 
 TODO3 No duplicate base extensions (to avoid ambiguities)
 
-TODO2 roles are disallowed as `this` parameter types  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
 TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
 TODO2 extensions are disallowed within interfaces with variant type parameters
-TODO2 Event with an associated instance field (error)
 TODO2 We should likely allow constructors and `required` properties
-TODO2 The wrapping can be done with a static unspeakable factory method
-TODO2 Open question on top-level nullability on underlying type.
 
 ## Summary
 [summary]: #summary
@@ -225,7 +221,6 @@ access to `M` can take one of the following forms:
 
 The extension type members may not use the `virtual`, `abstract`, `sealed`, `override` modifiers.  
 Member methods may not use the `readonly` modifier.  
-TODO2 disallow 'required' modifier since mostly meant to initialize state?  
 The `new` modifier is allowed and the compiler will warn that you should
 use `new` when shadowing.  
 
@@ -312,6 +307,7 @@ UnderlyingType.NestedType x = null; // okay
 #### Events
 
 TODO
+TODO2 Event with an associated instance field (error)
 
 #### Fields
 
@@ -399,6 +395,7 @@ and the parameter type may not be a pointer **or an extension** type.
 
 ## Nullability
 
+TODO2 Open question on top-level nullability on underlying type.
 TODO2 disallow nullable annotation on base extension? Or at least need to clarify what `Extension?` means in various scenarios.
 
 ## Compat breaks
@@ -667,6 +664,8 @@ For example: `implicit extension R for UnderlyingType : BaseExtension1, BaseExte
 
 If the extension has any instance member, then we emit a ref field (of underlying type)
 into the ref struct and a constructor.  
+TODO2 The wrapping can be done with a static unspeakable factory method  
+
 Values of extension types are left as values of the underlying value type, until an extension
 member is accessed. When an extension member is accessed, an extension instance is created
 with a reference to the underlying value and the member is accessed on that instance.
