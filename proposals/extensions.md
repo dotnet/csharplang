@@ -195,8 +195,8 @@ We modify the [accessibility constraints](https://github.com/dotnet/csharpstanda
 
 The following accessibility constraints exist:
 - [...]
-- **The underlying type of an extension type shall be at least as accessible as the extension type itself.**
-- **The base extensions of an extension type shall be at least as accessible as the extension type itself.**
+- \***The underlying type of an extension type shall be at least as accessible as the extension type itself.**
+- \***The base extensions of an extension type shall be at least as accessible as the extension type itself.**
 
 Note those also apply to visibility constraints of file-local types (TODO not yet specified).
 
@@ -204,7 +204,7 @@ Note those also apply to visibility constraints of file-local types (TODO not ye
 
 We modify the [protected access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#754-protected-access) as follows:
 
-**When a `protected` (or other accessibility with `protected`) extension member is accessed, 
+\***When a `protected` (or other accessibility with `protected`) extension member is accessed, 
 the access shall take place within an extension declaration that derives from 
 the extension in which it is declared. 
 Furthermore, the access is required to take place *through* an instance of that 
@@ -374,11 +374,11 @@ is checked against each constraint as follows:
 - If the constraint is the reference type constraint (`class`), the type `A` shall satisfy one of the following:
   - `A` is an interface type, class type, delegate type, array type or the dynamic type.
   - `A` is a type parameter that is known to be a reference type.
-  - **`A` is an extension type with an underlying type that satisfies the reference type constraint.**
+  - \***`A` is an extension type with an underlying type that satisfies the reference type constraint.**
 - If the constraint is the value type constraint (`struct`), the type `A` shall satisfy one of the following:
   - `A` is a `struct` type or `enum` type, but not a nullable value type.
   - `A` is a type parameter having the value type constraint.
-  - **`A` is an extension type with an underlying type that satisfies the value type constraint.**
+  - \***`A` is an extension type with an underlying type that satisfies the value type constraint.**
 - If the constraint is the constructor constraint `new()`, 
   the type `A` shall not be `abstract` and shall have a public parameterless constructor. 
   This is satisfied if one of the following is true:
@@ -387,7 +387,7 @@ is checked against each constraint as follows:
   - `A` is a type parameter having the value type constraint.
   - `A` is a `class` that is not abstract and contains an explicitly declared public constructor with no parameters.
   - `A` is not `abstract` and has a default constructor.
-  - **`A` is an extension type with an underlying type that satisfies the constructor constraint.**
+  - \***`A` is an extension type with an underlying type that satisfies the constructor constraint.**
 
 A compile-time error occurs if one or more of a type parameter’s constraints are not satisfied by the given type arguments.
 
@@ -446,7 +446,7 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
       the result is the same as a member access of the form `this.I`. 
       This can only happen when `e` is zero.
     - Otherwise, the result is the same as a member access of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
-  - **Otherwise, if `T` is an extension (only relevant in phase B) and 
+  - \***Otherwise, if `T` is an extension (only relevant in phase B) and 
     a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**  
     ...
 - Otherwise, for each namespace `N`, starting with the namespace in which the *simple_name* occurs, 
@@ -487,11 +487,11 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
   - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
-- **If `E` is classified as an extension, 
+- \***If `E` is classified as an extension, 
   and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
-- **If `E` is classified as a type, if `E` is not a type parameter, 
+- \***If `E` is classified as a type, if `E` is not a type parameter, 
   and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
@@ -499,12 +499,12 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   and a member lookup of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:  
   ...
-- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
+- \***(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
   the type of which is `T`, where `T` is an extension type, and 
   a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
-- **(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
+- \***(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
   the type of which is `T`, where `T` is not a type parameter, and 
   an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
@@ -548,7 +548,7 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is an *interface_type*, the base types of `T` are the base interfaces of `T` and the class type `object`.
 - If `T` is an *array_type*, the base types of `T` are the class types `System.Array` and `object`.
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
-- \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T`.**.
+- \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T`.**
 
 ```csharp
 explicit extension R : U
