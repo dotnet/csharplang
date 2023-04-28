@@ -1,8 +1,6 @@
 # Extension types
 
 TODO3 No duplicate base extensions (to avoid ambiguities)
-TODO3 problem with lookup rules on implicit extensions (will run into ambiguous 
-    lookups in implicit extension scenarios)
 
 TODO2 roles are disallowed as `this` parameter types  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
