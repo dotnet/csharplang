@@ -872,6 +872,197 @@ ref struct S<T>
 }
 ```
 
+### Annotations
+Lifetimes are most naturally expressed using types. A given program's lifetimes are safe when the lifetime types type check. While the syntax of C# implicitly adds lifetimes to values, there is an underlying type system that describes the fundamental rules here. It's often easier to discuss the implication of changes to the design in terms of these rules so they are included here for discussion sake.
+
+Note that this is not meant to be a 100% complete documentation. Documenting every single behavior isn't a goal here. Instead it's meant to establish a general understanding and common verbiage by which the model, and potential changes to it, can be discussed.
+
+Usually it's not necessary to directly talk about lifetime types. The exceptions are places where lifetimes can vary based on particular "instantiation" sites. This is a kind of polymorphism and we call these varying lifetimes "generic lifetimes", represented as generic parameters. C# does not provide syntax for expressing lifetime generics, so we define an implicit "translation" from C# to an expanded lowered language that contains explicit generic parameters.
+
+The below examples make use of named lifetimes. The syntax `$a` refers to a lifetime named `a`. It is a lifetime that has no meaning by itself but can be given a relationship to other lifetimes via the `where $a : $b` syntax. This establishes that `$a` is convertible to `$b`. It may help to think of this as establishing that `$a` is a lifetime at least as long as `$b`.
+
+There are a few predefined lifetimes for convenience and brevity below:
+
+- `$heap`: this is the lifetime of any value that exists on the heap. It is available in all scopes and method signatures.
+- `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*. It is implicitly defined in methods and can appear in method signatures except for any output position.
+- `$ro`: name place holder for the *return only* safe to escape scope
+- `$cm`: name place holder for the *calling method* safe to escape scope
+
+There are a few predefined relationships between lifetimes:
+
+- `where $heap : $a` for all lifetimes `$a`
+- `where $cm : $ro` 
+- `where $x : $local` for all predefined lifetimes. User defined lifetimes have no relationship to local unless explictly defined.
+
+Lifetime variables when defined on types can be invariant or covariant. These are expressed using the same syntax as generic parameters:
+
+```csharp
+// $this is covariant
+// $a is invariant
+ref struct S<out $this, $a> 
+```
+
+The lifetime of a ref is expressed by providing a lifetime argument to the ref. For example a `ref` that refers to the heap is expressed as `ref<$heap>`.
+
+When defining a constructor in the model the name `new` will be used for the method. It is necessary to have a parameter list for the returned value as well as the constructor arguments. This is necessary to express the relationship between constructor inputs and the constructed value. Rather than having `Span<$a><$ro>` the model will use `Span<$a> new<$ro>` instead. The type of `this` in the constructor, including lifetimes, will be the defined return value.
+
+The basic rules for the lifetime are defined as:
+
+- All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `$heap` and `$local`. 
+- All types `T` that are not a `ref struct` implicitly have lifetime of `T<$heap>`. This is implicit, there is no need to write `int<$heap>` in every sample.
+- For a ref field defined as `ref T<$l1, $l2, ... $ln>` all lifetimes `$l1` through `$ln` must be invariant. 
+- For a ref defined as `ref<$a> T<$b, ...>`, `$b` must wider or equal to `$a`
+- The `ref` of a variable has a lifetime of the 
+    - For a ref local, parameter, field or return of type `ref<$a> T` the lifetime is `$a`
+    - `$heap` for all reference types and fields of reference types
+    - `$local` for everything else
+- An assignment or return is legal when the underlying type conversion is legal
+- Lifetimes of expressions can be made explicit by using cast annotations:
+    - `(T<$a> expr)` the value lifetime is explicitly `$a` for `T<...>`
+    - `ref<$a> (T<$b>)expr` the value lifetime is `$b` for `T<...>` and the ref lifetime is `$a`.
+
+For the purpose of lifetime rules a `ref` is considered part of the type of the expression for purposes of conversions. It is logically represented by converting `ref<$a> T<...>` to `ref<$a, T<...>>` where `$a` is covariant and `T` is invariant. 
+
+Next let's define the rules that allow us to map C# syntax to the underlying model.
+
+The lifetime parameter `$this` on type definitions is _not_ predefined but it does have a few rules associated with it when it is defined:
+- It must be the first lifetime parameter.
+- It must be covariant: `out $this`. 
+- The lifetime parameters of all non-ref fields, and the ref lifetime of ref fields, must be `$this`
+
+For brevity sake a type which has no explicit lifetime parameters treated as if there is `out $this` defined and applied to all fields of the type. A type with a `ref` field must define explicit lifetime parameters.
+
+These rules exists to support our existing invariant that `T` can be assigned to `scoped T` for all types. That maps down to `T<$a, ...>` being assignable to `T<$local, ...>` for all lifetimes known to wider than ype of `$local`. Further this supports other items like being able to assign `Span<T>` from the heap to those on the stack. This does exclude types where fields have differing lifetimes for non-ref values but that is the reality of C# today. Changing that would require a significant change of C# rules that would need to be mapped out. 
+
+The type of `this` for a type `S<out $this, ...>` inside an instance method is implicitly defined as the following:
+- For normal instance method: `ref<$local> S<$ro, ...>`
+- For instance method annotated with `[UnscopedRef]`: `ref<$ro> S<$ro, ...>`
+The lack of an explicit `this` parameter forces the implicit rules here. For complex samples and discussions likely better to use an explicit parameter.
+
+The C# method syntax maps to the model in the following ways: 
+
+- `ref` parameters have a ref lifetime of `$ro`
+- parameters of type `ref struct` have a this lifetime of `$cm`
+- ref returns have a ref lifetime of `$ro`
+- returns of type `ref struct` have a value lifetime of `$ro`
+- `scoped` on a parameter or `ref` changes the lifetime to be `$local`
+
+Given that let's explore a simple example that demonstrates the model here: 
+
+```csharp
+ref int M1(ref int i) => ...
+
+// Maps to the following. 
+
+ref<$ro> int Identity<$ro>(ref<$ro> int i)
+{
+    // okay: has ref lifetime $ro which is equal to $ro
+    return ref i;
+
+    // okay: has ref lifetime $heap which convertible $ro
+    int[] array = new int[42];
+    return ref array[0];
+
+    // error: has ref lifetime $local which has no conversion to $a hence 
+    // it's illegal
+    int local = 42;
+    return ref local;
+}
+```
+
+Now let's explore the same example using a `ref struct`: 
+
+```csharp
+ref struct S
+{
+    ref int Field;
+
+    S(ref int f)
+    {
+        Field = ref f;
+    }
+}
+
+S M2(ref int i, S span1, scoped S span2) => ...
+
+// Maps to 
+
+ref struct S<out $this>
+{
+    // Implicitly 
+    ref<$this> int Field;
+
+    S<$ro> new<$ro>(ref<$ro> int f)
+    {
+        Field = ref f;
+    }
+}
+
+S<$ro> M2<$ro>(
+    ref<$ro> int i,
+    S<$ro> span1)
+    S<$local> span2)
+{
+    // okay: types match exactly
+    return span1;
+
+    // error: has lifetime $local which has no conversion to $ro
+    return span2;
+
+    // okay: type S<$heap> has a conversion to S<$ro> because $heap has a
+    // conversion to $ro and the first lifetime parameter of S<> is covariant
+    return default(S<$heap>)
+
+    // okay: the ref lifetime of ref $i is $ro so this is just an 
+    // identity conversion
+    S<$ro> local = new S<$ro>(ref $i);
+    return local;
+
+    int[] array = new int[42];
+    // okay: S<$heap> is convertible to S<$ro>
+    return new S<$heap>(ref<$heap> array[0]);
+
+    // okay: the parameter of the ctor is $ro ref int and the argument is $heap ref int. These 
+    // are convertible.
+    return new S<$ro>(ref<$heap> array[0]);
+
+    // error: has ref lifetime $local which has no conversion to $a hence 
+    // it's illegal
+    int local = 42;
+    return ref local;
+}
+```
+
+Next let's see how this helps with the cyclic self assignment problem:
+
+```csharp
+ref struct S
+{
+    int field;
+    ref int refField;
+
+    static void SelfAssign(ref S s)
+    {
+        s.refField = ref s.field;
+    }
+}
+
+// Maps to 
+
+ref struct S<out $this>
+{
+    int field;
+    ref<$this> int refField;
+
+    static void SelfAssign<$ro, $cm>(ref<$ro> S<$cm> s)
+    {
+        // error: the types work out here to ref<$cm> int = ref<$ro> int and that is 
+        // illegal as $ro has no conversion to $cm (the relationship is the other direction)
+        s.refField = ref<$ro> s.field;
+    }
+}
+```
+
 ## Open Issues
 
 ### Change the design to avoid compat breaks
