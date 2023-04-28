@@ -432,6 +432,14 @@ foreach (var c in (System.ReadOnlySpan<int>)getBufferAsReadonlyVariable())
 
 ## Open design questions
 
+### Should compiler validate applications of the InlineArrayAttribute?
+
+Possible things we can check:
+- The type is a struct (probably just a warning)
+- Has only one field
+- Specified length > 0
+- The struct doesn't have an explicit layout specified
+
 ## Alternatives
 
 ### Detailed Design (Option 2)
