@@ -518,7 +518,7 @@ TODO Is the "where `T` is not a type parameter" portion still relevant?
 
 TL;DR: Member lookup understands that extensions inherit from their base extensions, but not from `object`.
 
-We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) as follows:
+We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) as follows (only change is what counts as "base type"):
 
 A member lookup of a name `N` with `K` type arguments in a type `T` is processed as follows:
 
@@ -548,7 +548,7 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is an *interface_type*, the base types of `T` are the base interfaces of `T` and the class type `object`.
 - If `T` is an *array_type*, the base types of `T` are the class types `System.Array` and `object`.
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
-- **If `T` is an *extension_type*, the base types of `T` are the base extensions of `T`.**.
+- \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T`.**.
 
 ```csharp
 explicit extension R : U
@@ -612,18 +612,21 @@ We process as follows:
   collect resulting compatible substituted extension types.
 - Perform member lookup for `I` in each compatible substituted extension type `X` 
   (note this takes into account whether the member is invoked).
-- Merge the results (TODO need more details).
-- If the set is empty, proceed to the next enclosing namespace.
-- If the set consists of a single member that is not a method, 
-  then this member is the result of the lookup.
-- Otherwise, if the set contains only methods and the member is invoked, 
-  overload resolution is applied to the candidate set.
-  - If a single best method is found, this member is the result of the lookup.
-  - If no best method is found, continue the search through namespaces and their imports.
-  - Otherwise (ambiguity), a compile-time error occurs.
-- Otherwise, the lookup is ambiguous, and a binding-time error occurs.
-- If no candidate set is found in any enclosing namespace declaration or compilation unit, 
-  the result of the lookup is empty.
+- Merge the results
+- Next, members that are hidden by other members are removed from the set.  
+  (Same rules as in member lookup, but "base type" is extended to mean "base extension")
+- Finally, having removed hidden members, the result of the lookup is determined:
+  - If the set is empty, proceed to the next enclosing namespace.
+  - If the set consists of a single member that is not a method,
+    then this member is the result of the lookup.
+  - Otherwise, if the set contains only methods and the member is invoked,
+    overload resolution is applied to the candidate set.
+    - If a single best method is found, this member is the result of the lookup.
+    - If no best method is found, continue the search through namespaces and their imports.
+    - Otherwise (ambiguity), a compile-time error occurs.
+  - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
+  - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
+    the result of the lookup is empty.
 
 TODO3 explain static usings
 
