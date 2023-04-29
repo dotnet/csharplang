@@ -24,6 +24,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
     - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#field-targeting-attributes-for-captured-primary-constructor-parameters
     - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#warn-on-shadowing-by-a-member-from-base
 
+- Collection literals natural type (Chuck, Cyrus): [collection-literals.md](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)
+
 ## Mon May 1, 2023
 
 - Lock statement pattern (Steve, Kount) - https://github.com/dotnet/csharplang/issues/7104
