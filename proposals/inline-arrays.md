@@ -253,13 +253,192 @@ of inline array types.
 
 Regular definite assignment rules are applicable to variables that have an inline array type. 
 
+### Inline array type syntax
+
+The grammar at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general will be adjusted as follows:
+``` diff antlr
+array_type
+    : non_array_type rank_specifier+
+    ;
+
+rank_specifier
+    : '[' ','* ']'
++   | '[' constant_expression ']' 
+    ;
+```
+
+The type of the *constant_expression* must be implicitly convertible to type `int`, and the value must be a non-zero positive integer.
+
+The relevant part of the https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#1621-general section will be adjusted as follows.
+
+The grammar productions for array types are provided in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general.
+
+An array type is written as a *non_array_type* followed by one or more *rank_specifier*s.
+
+A *non_array_type* is any *type* that is not itself an *array_type*.
+
+The rank of an array type is given by the leftmost *rank_specifier* in the *array_type*: A *rank_specifier* indicates that
+the array is an array with a rank of one plus the number of “`,`” tokens in the *rank_specifier*.
+
+The element type of an array type is the type that results from deleting the leftmost *rank_specifier*:
+
+- An array type of the form `T[ constant_expression ]` is an anonymous inline array type with
+  length denoted by *constant_expression* and a non-array element type `T`.
+- An array type of the form `T[ constant_expression ][R₁]...[Rₓ]` is an anonymous inline array type with
+  length denoted by *constant_expression* and an element type `T[R₁]...[Rₓ]`.
+- An array type of the form `T[R]` (where R is not a *constant_expression*) is a regular array type with rank `R` and a non-array element type `T`.
+- An array type of the form `T[R][R₁]...[Rₓ]` (where R is not a *constant_expression*) is a regular array type with rank `R` and an element type `T[R₁]...[Rₓ]`.
+
+In effect, the *rank_specifier*s are read from left to right *before* the final non-array element type.
+
+> *Example*: The type in `T[][,,][,]` is a single-dimensional array of three-dimensional arrays of two-dimensional arrays of `int`. *end example*
+
+At run-time, a value of a regular array type can be `null` or a reference to an instance of that array type.
+
+> *Note*: Following the rules of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#166-array-covariance,
+> the value may also be a reference to a covariant array type. *end note*
+
+An anonymous inline array type is a compiler synthesized inline array type with internal accessibility. The element type must be a 
+type that can be used as a type argument. Unlike an explicitly declared inline array type, an anonymous inline array type cannot be
+referenced by name, it can be referenced only by *array_type* syntax. In context of the same program, any two *array_type*s
+denoting inline array types of the same element type and of the same length, refer to the same anonymous inline array type. 
+
+Besides internal accessibility, compiler will prevent consumption of APIs utilizing anonymous inline array types across assembly boundaries
+by using a required custom modifier (exact type TBD) applied to an anonymous inline array type reference in the signature.
+
+#### Array creation expressions
+
+[Array creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#117155-array-creation-expressions)
+
+```ANTLR
+array_creation_expression
+    : 'new' non_array_type '[' expression_list ']' rank_specifier*
+      array_initializer?
+    | 'new' array_type array_initializer
+    | 'new' rank_specifier array_initializer
+    ;
+```
+
+Given the current grammar, use of a *constant_expression* in place of the *expression_list* already has meaning of
+allocating a regular single-dimensional array type of the specified length. Therefore, *array_creation_expression* will continue
+to represent an allocation of a regular array.
+
+However, the new form of the *rank_specifier* could be used to incorporate an anonymous inline array type into the element type of
+the allocated array.
+
+For example, the following expressions create a regular array of length 2 with an element type of an anonymous inline array type
+with element type int and length 5:
+``` C#
+new int[2][5];
+new int[][5] {default, default};
+new [] {default(int[5]), default(int[5])};
+```
+
+#### Array initializers
+
+The [Array initializers](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#167-array-initializers) section
+will be adjusted to allow use of *array_initializer* to initialize inline array types (no changes to the grammar necessary).
+
+```ANTLR
+array_initializer
+    : '{' variable_initializer_list? '}'
+    | '{' variable_initializer_list ',' '}'
+    ;
+
+variable_initializer_list
+    : variable_initializer (',' variable_initializer)*
+    ;
+    
+variable_initializer
+    : expression
+    | array_initializer
+    ;
+```
+
+The length of the inline array must be explicitly provided by the target type.
+
+For example:
+``` C#
+int[5] a = {1, 2, 3, 4, 5}; // initializes anonymous inline array of length 5
+Buffer10<int> b = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; // initializes user-defined inline array
+var c = new int[][] {{11, 12}, {21, 22}, {31, 32}}; // An error for the nested array initializer
+var d = new int[][2] {{11, 12}, {21, 22}, {31, 32}}; // An error for the nested array initializer
+```
+
+#### Collection literals
+
+An inline array type is a valid *constructible collection* target type for a [collection literal](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md).
+
+For example:
+``` C#
+int[5] a = [1, 2, 3, 4, 5]; // initializes anonymous inline array of length 5
+Buffer10<int> b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // initializes user-defined inline array
+var d = new int[][2] {[11, 12], [21, 22], [31, 32]}; // regular array with an element type of an anonymous inline array type with element type int and length 2
+```
+
+The length of the collection literal must match the length of the target inline array type. If the length of the literal
+is known at compile time and it doesn't match the target length, an error is reported. Otherwise, an exception is going
+to be thrown at runtime once the mismatch is encountered. The exact exception type is TBD. Some candidates are:
+System.NotSupportedException, System.InvalidOperationException.
+
+An instance of an inline array type is a valid expression in a [*spread_element*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#detailed-design).
+
+### The foreach statement
+
+[The foreach statement](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1295-the-foreach-statement) will be adjusted
+to allow usage of an inline array type as a collection in a foreach statement.
+
+For example:
+``` C#
+foreach (var a in getBufferAsValue())
+{
+    WriteLine(a);
+}
+
+foreach (var b in getBufferAsWritableVariable())
+{
+    WriteLine(b);
+}
+
+foreach (var c in getBufferAsReadonlyVariable())
+{
+    WriteLine(c);
+}
+
+Buffer10<int> getBufferAsValue() => default;
+ref Buffer10<int> getBufferAsWritableVariable() => default;
+ref readonly Buffer10<int> getBufferAsReadonlyVariable() => default;
+```
+
+is equivalent to:
+``` C#
+Buffer10<int> temp = getBufferAsValue();
+foreach (var a in (System.ReadOnlySpan<int>)temp)
+{
+    WriteLine(a);
+}
+
+foreach (var b in (System.Span<int>)getBufferAsWritableVariable())
+{
+    WriteLine(b);
+}
+
+foreach (var c in (System.ReadOnlySpan<int>)getBufferAsReadonlyVariable())
+{
+    WriteLine(c);
+}
+```
 
 
 ## Open design questions
 
-### Initializer
+### Should compiler validate applications of the InlineArrayAttribute?
 
-Should we support initialization at declaration site with, perhaps, [collection literals](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)?
+Possible things we can check:
+- The type is a struct (probably just a warning)
+- Has only one field
+- Specified length > 0
+- The struct doesn't have an explicit layout specified
 
 ## Alternatives
 
