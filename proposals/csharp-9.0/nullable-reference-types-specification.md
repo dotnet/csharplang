@@ -75,7 +75,7 @@ A type parameter constrained with `class?` (or `class` in a *disabled* annotatio
 
 A warning is given on a `class?` constraint in a *disabled* annotation context.
 
-The behavior of `?` annotations on type parameters that aren't constrained to be either a `struct` or `class` is covered in [Unconstrained type parameter annotations](unconstrained-type-parameter-annotations.md#annotation).
+The behavior of `?` annotations on type parameters that aren't constrained to be either a `struct` or `class` is covered in [Unconstrained type parameter annotations](unconstrained-type-parameter-annotations.md#-annotation).
 
 ### `notnull` constraint
 
