@@ -24,7 +24,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
     - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#field-targeting-attributes-for-captured-primary-constructor-parameters
     - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#warn-on-shadowing-by-a-member-from-base
 
-- Collection literals natural type (Chuck, Cyrus): [collection-literals.md](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)
+- Collection literals natural type (Chuck, Cyrus): [working group notes](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-28.md#natural-type)
 
 ## Mon May 1, 2023
 
