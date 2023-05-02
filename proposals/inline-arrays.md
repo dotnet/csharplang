@@ -440,6 +440,17 @@ Possible things we can check:
 - Specified length > 0
 - The struct doesn't have an explicit layout specified
 
+### Should we support initialization of Inline Array elements in an object initializer?
+
+``` C#
+static C M2() => new C() { F = {[0] = 111} };
+
+class C
+{
+    public Buffer10<int> F;
+}
+```
+
 ## Alternatives
 
 ### Detailed Design (Option 2)
