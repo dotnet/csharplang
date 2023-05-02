@@ -263,33 +263,47 @@ List<string> e3 = [..e1];  // error?
 
     The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection type, `[]` is treated as target-typed to that collection type.
 
-### Conversions and type inference
-
-The *natural type* should allow conversions to other collection types, in *best common type* scenarios for instance.
-
+## Type inference
 ```c#
-int[] a = new[] { 1 };
-var b = new[] { a, [2] }; // ok: int[][]
-```
+AsArray([1, 2, 3]);      // ok: AsArray<int>(int[])
+[4].AsImmutableArray();  // ok: AsImmutableArray<int>(ImmutableArray<int>)
 
-Type inference should infer constructible collection types:
-
-```c#
-static void F<T>(T[] arg) { }
-static void F<T>(ImmutableArray<T> arg) { }
-
-F([1, 2, 3]); // error: ambiguous between F<T>(T[]) and F<T>(ImmutableArray<T>)
-```
-
-And for extension methods:
-
-```c#
+static T[] AsArray<T>(this T[] arg) => arg;
 static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
-
-var a = [1, 2, 3].AsImmutableArray(); // ok: ImmutableArray<int>
 ```
 
-Supporting these cases may require using a *natural collection type* at compile-time that is not bound to a concrete collection type such as `T[]` or `List<T>`, similar to the [*natural function type*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) used for conversions and type inference for lambda expressions and method groups.
+The existing rules for type inference (see [§11.6.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference)) include the following **additions** for *exact inferences* §11.6.3.9, *lower-bound inferences* §11.6.3.10 and *upper-bound inferences* §11.6.3.11. The additions are the same for each section.
+
+> An *exact inference* *from* a type `U` *to* a type `V` is made as follows:
+> 
+> - If `V` is one of the *unfixed* `Xᵢ` then `U` is added to the set of exact bounds for `Xᵢ`.
+> - Otherwise, sets `V₁...Vₑ` and `U₁...Uₑ` are determined by checking if any of the following cases apply:
+>   - `V` is an array type `V₁[...]` and `U` is an array type `U₁[...]` of the same rank
+>   - **`V` is a single-dimensional array type `V₁[]` and `U` is a collection literal with element type `U₁`**
+>   - `V` is the type `V₁?` and `U` is the type `U₁`
+>   - `V` is a constructed type `C<V₁...Vₑ>` and `U` is a constructed type `C<U₁...Uₑ>`
+>   - **`V` is a constructed type `C<V₁>` that is a constructible collection with element type `V₁`, and `U` is a collection literal with element type `U₁`**
+>   If any of these cases apply then an *exact inference* is made from each `Uᵢ` to the corresponding `Vᵢ`.
+
+_How do we recognize that `C<V₁>` is a constructible collection with element type `V₁`?_
+
+### Interaction with natural type
+
+The *natural type* should not prevent conversions to other collection types in *best common type* or *type inference* scenarios.
+```c#
+var x = new[] { new int[0], [1, 2, 3] }; // ok: int[][]
+var y = First(new int[0], [1, 2, 3]);    // ok: int[]
+
+static T First<T>(T x, T y) => x;
+```
+
+To allow conversions to other collection types, type inference may need to infer exact, lower-bound, and upper-bound inferences from the **expression `U`** to a type `V` when an expression is given, and *fixing* §11.6.3.12 updates the sets of *candidate types* based on implicit conversion from the **expression** bound to the each *candidate type*.
+
+_Should nested cases infer collection types successfully?_
+```c#
+var x = new[] { [ulong.MaxValue], [1, 2, 3] };  // ok: List<ulong>[]
+var y = First([[ulong.MaxValue]], [[1, 2, 3]]); // ok: List<List<ulong>>
+```
 
 ## Span types
 [span-types]: #span-types
