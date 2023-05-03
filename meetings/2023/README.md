@@ -18,6 +18,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon May 8, 2023
 
+- Primary constructors continued (Aleksey)
+- Process: How to handle topics running over
+
 ## Wed May 3, 2023
 
 - Open design questions for Primary Constructors (Aleksey):
