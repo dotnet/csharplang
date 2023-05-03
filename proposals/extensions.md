@@ -117,7 +117,7 @@ In phase C, some additional constraints can be satisfied (additional implemented
 
 The *extension_underlying_type* type may not be `dynamic`, a pointer, 
 a ref struct type, a ref type or an extension.  
-The underlying may not include an *interface_type_list* (this is part of Phase C).  
+The underlying type may not include an *interface_type_list* (this is part of Phase C).  
 The extension type must be static if its underlying type is static.  
 
 When a partial extension declaration includes an underlying type specification,
