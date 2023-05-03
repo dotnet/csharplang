@@ -3,9 +3,9 @@
 ## Problem with lookup rules on implicit extensions
 
 The issue is that the proposed rules would allow a member from a base implicit extension
-to be found by extension member lookups in two way: 1. via import and 2. via inheritance.  
+to be found by extension member lookups in two way: via import and via inheritance.  
 This would result into having duplicates (same member appears twice in lookup) or conflicts
-(hidden member conflicts with hiding member).
+(hidden member conflicts with hiding member).  
 Below are a few examples. 
 
 ### Various examples
@@ -71,7 +71,6 @@ o.Prop; // find it twice, but it's only Base.Prop, so okay
 
 ```
 // Non invocation, shadowing
-
 implicit extension Base for object 
 {
     int Prop => 0;
@@ -89,6 +88,7 @@ derived.Prop; // would find Derived.Prop
 ### Options
 
 We considered a few different ways of handling this:
+
 First, we thought of relying on overload resolution to prefer more derived members. But this doesn't work for non-invocation scenarios.
 
 Then we considered removing/pruning base extensions from the set of candidates during extension member lookup.  
@@ -112,7 +112,7 @@ public interface I3 : I1 { }
 public interface I4 : I2, I3 { }
 ```
 
-We tracked down the relevant rule from member lookup:
+We tracked down the relevant rule from member lookup:  
 "Next, members that are hidden by other members are removed from the set."
 
 Conclusion: We'll incorporate a similar rule in extension member lookup.
