@@ -21,15 +21,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Primary constructors continued (Aleksey)
 - Process: How to handle topics running over
 
-## Wed May 3, 2023
-
-- Open design questions for Primary Constructors (Aleksey):
-    - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#field-targeting-attributes-for-captured-primary-constructor-parameters
-    - https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#warn-on-shadowing-by-a-member-from-base
-
-- Collection literals natural type (Chuck, Cyrus): [working group notes](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-28.md#natural-type)
-
-
 ## Mon Apr 24, 2023
 
 - *Design review*
@@ -40,6 +31,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Wed May 3, 2023
+
+[C# Language Design Meeting for May 3rd, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md)
+
+- Inline Arrays
+- Primary constructors
+    - Attributes on captured parameters
+    - Warning for shadowing base members
+- Collection literal natural type
 
 ## Mon May 1, 2023
 
