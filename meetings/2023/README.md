@@ -29,11 +29,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Collection literals natural type (Chuck, Cyrus): [working group notes](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-28.md#natural-type)
 
-## Wed Apr 26, 2023
-
-(One hour only)
-
-- Collection literals: target type, natural type, dictionaries (Chuck, Cyrus): [collection-literals.md](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md)
 
 ## Mon Apr 24, 2023
 
@@ -52,6 +47,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Fixed Size Buffers
 - `lock` statement improvements
+
+## Wed Apr 26, 2023
+
+[C# Language Design Meeting for April 26th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-26.md)
+
+- Collection literals
 
 ## Mon Apr 10, 2023
 
