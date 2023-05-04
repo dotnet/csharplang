@@ -29,11 +29,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Collection literals natural type (Chuck, Cyrus): [working group notes](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-28.md#natural-type)
 
-## Mon May 1, 2023
-
-- Lock statement pattern (Steve, Kount) - https://github.com/dotnet/csharplang/issues/7104
-- Inline array type syntax (Aleksey) - https://github.com/dotnet/csharplang/pull/7130
-
 ## Wed Apr 26, 2023
 
 (One hour only)
@@ -50,6 +45,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon May 1, 2023
+
+[C# Language Design Meeting for May 1st, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-01.md)
+
+- Fixed Size Buffers
+- `lock` statement improvements
 
 ## Mon Apr 10, 2023
 
