@@ -16,10 +16,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed May 31, 2023
 
+## Wed May 17, 2023
+
+## Mon May 15, 2023
+
 ## Mon May 8, 2023
 
 - Primary constructors continued (Aleksey)
-- Process: How to handle topics running over
+- Process: How to handle topics running over (Mads)
 
 ## Mon Apr 24, 2023
 
