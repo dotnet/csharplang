@@ -271,6 +271,50 @@ System.NotSupportedException, System.InvalidOperationException.
 
 An instance of an inline array type is a valid expression in a [*spread_element*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#detailed-design).
 
+### Validation of the InlineArrayAttribute applications
+
+Compiler will validate the following aspects of the InlineArrayAttribute applications:
+- The target type is a struct
+- The target type has only one field
+- Specified length > 0
+- The target struct doesn't have an explicit layout specified
+
+### Inline Array elements in an object initializer
+
+By default, element initialization will not be supported via *initializer_target* of form ```'[' argument_list ']'```
+(see https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#117153-object-initializers):  
+``` C#
+static C M2() => new C() { F = {[0] = 111} }; // error CS1913: Member '[0]' cannot be initialized. It is not a field or property.
+
+class C
+{
+    public Buffer10<int> F;
+}
+```
+
+However, if the inline array type explicitly defines suitable indexer, object initializer will use it:
+``` C#
+static C M2() => new C() { F = {[0] = 111} }; // Ok, indexer is invoked
+
+class C
+{
+    public Buffer10<int> F;
+}
+
+[System.Runtime.CompilerServices.InlineArray(10)]
+public struct Buffer10<T>
+{
+    private T _element0;
+
+    public T this[int i]
+    {
+        get => this[i];
+        set => this[i] = value;
+    }
+}
+```
+
+
 ### The foreach statement
 
 [The foreach statement](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1295-the-foreach-statement) will be adjusted
@@ -319,25 +363,6 @@ foreach (var c in (System.ReadOnlySpan<int>)getBufferAsReadonlyVariable())
 
 
 ## Open design questions
-
-### Should compiler validate applications of the InlineArrayAttribute?
-
-Possible things we can check:
-- The type is a struct (probably just a warning)
-- Has only one field
-- Specified length > 0
-- The struct doesn't have an explicit layout specified
-
-### Should we support initialization of Inline Array elements in an object initializer?
-
-``` C#
-static C M2() => new C() { F = {[0] = 111} };
-
-class C
-{
-    public Buffer10<int> F;
-}
-```
 
 ## Alternatives
 
@@ -687,3 +712,4 @@ able to interop with that.
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-03.md#fixed-size-buffers
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-10.md#fixed-size-buffers
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-01.md#fixed-size-buffers
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md#inline-arrays
