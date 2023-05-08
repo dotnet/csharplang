@@ -463,6 +463,8 @@ record R2([field: Test]int X) // warning CS0657: 'field' is not a valid attribut
     public int X = X;
 }
 ```
+#### Conclusion:
+Not allowed (https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md#attributes-on-captured-parameters).
 
 ### Warn on shadowing by a member from base
 
@@ -521,9 +523,10 @@ Allowed, no warning (https://github.com/dotnet/csharplang/blob/main/meetings/202
 
 ## LDM meetings
 
-https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-01-18.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-15.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-22.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-03-13.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-01-18.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-15.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-22.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-03-13.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md#primary-constructors
 
