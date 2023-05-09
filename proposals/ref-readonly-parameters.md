@@ -65,7 +65,7 @@ As a reminder,
 ```cs
 namespace System.Runtime.CompilerServices
 {
-    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
     public sealed class RequiresLocationAttribute : Attribute
     {
     }
