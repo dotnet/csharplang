@@ -3,16 +3,16 @@
 ## Summary
 [summary]: #summary
 
-Allow parameter declaration-site modifier `ref readonly` and change call-site rules as follows:
+Allow parameter declaration-site modifier `ref readonly` and change callsite rules as follows:
 
-| Call-site annotation | `ref` parameter | `ref readonly` parameter | `in` parameter | `out` parameter |
+| Callsite annotation | `ref` parameter | `ref readonly` parameter | `in` parameter | `out` parameter |
 |----------------------|-----------------|--------------------------|----------------|-----------------|
 | `ref`                | Allowed         | **Allowed**              | **Warning**    | Error           |
 | `in`                 | Error           | **Allowed**              | Allowed        | Error           |
 | `out`                | Error           | **Error**                | Error          | Allowed         |
 | No annotation        | Error           | **Warning**              | Allowed        | Error           |
 
-Note that there is one change to the existing rules: `in` parameter with `ref` call-site annotation produces a warning instead of an error.
+Note that there is one change to the existing rules: `in` parameter with `ref` callsite annotation produces a warning instead of an error.
 
 | Value kind | `ref` parameter | `ref readonly` parameter | `in` parameter | `out` parameter |
 |------------|-----------------|--------------------------|----------------|-----------------|
@@ -25,7 +25,7 @@ Note that there is one change to the existing rules: `in` parameter with `ref` c
 C# 7.2 [introduced `in` parameters](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/proposals/csharp-7.2/readonly-ref.md#solution-in-parameters) as a way to pass readonly references.
 `in` parameters allow both lvalues and rvalues and can be used without any annotation at the callsite.
 However, APIs which capture or return references from their parameters would like to disallow rvalues and also enforce some indication at the callsite that a reference is being captured.
-`ref readonly` parameters are ideal in such cases as they allow only lvalues and warn if used without any annotation.
+`ref readonly` parameters are ideal in such cases as they warn if used with rvalues or without any annotation at the callsite.
 
 Furthermore, there are APIs that need only read-only references but use
 - `ref` parameters since they were introduced before `in` became available and changing to `in` would be a source and binary breaking change, e.g., `QueryInterface`, or
@@ -37,7 +37,7 @@ For details on binary compatibility, see the proposed [metadata encoding](#metad
 Specifically, changing
 - `ref` → `ref readonly` would only be a binary breaking change for virtual methods,
 - `ref` → `in` would also be a binary breaking change for virtual methods, but not a source breaking change (because the rules change to only warn for `ref` arguments passed to `in` parameters),
-- `in` → `ref readonly` would not be a breaking change (but no callsite annotation would result in a warning).
+- `in` → `ref readonly` would not be a breaking change (but no callsite annotation or rvalue would result in a warning).
 
 In the opposite direction, changing
 - `ref readonly` → `ref` would be potentially a source breaking change (unless only `ref` callsite annotation was used), and a binary breaking change for virtual methods,
