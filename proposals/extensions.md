@@ -1,6 +1,8 @@
 # Extension types
 
+TODO3 disallow variance in type parameters of extensions
 TODO3 No duplicate base extensions (to avoid ambiguities)
+TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.
 
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
 TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
@@ -505,7 +507,9 @@ TODO Is the "where `T` is not a type parameter" portion still relevant?
 
 TL;DR: Member lookup understands that extensions inherit from their base extensions, but not from `object`.
 
-We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) as follows (only change is what counts as "base type"):
+We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) 
+and [base types rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1252-base-types) 
+as follows (only change is what counts as "base type"):
 
 A member lookup of a name `N` with `K` type arguments in a type `T` is processed as follows:
 
@@ -546,6 +550,11 @@ explicit extension R : U
     }
 }
 ```
+
+This change also affects the [method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations):
+
+> The set of candidate methods is reduced to contain only methods from the most derived types:
+> For each method `C.F` in the set, where `C` is the type in which the method `F` is declared, all methods declared in a base type of `C` are removed from the set.
 
 ### Compatible substituted extension type
 
