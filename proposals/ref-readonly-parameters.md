@@ -74,6 +74,11 @@ Note that unlike `in` parameters, no `[IsReadOnly]` is emitted for `ref readonly
 
 The `RequiresLocationAttribute` will be matched by namespace-qualified name and synthesized by the compiler if not already included in the compilation.
 
+#### Function pointers
+
+In function pointers, `in` parameters are emitted with `modreq(System.Runtime.InteropServices.InAttribute)`.
+`ref readonly` parameters will be emitted in the same way to ensure binary compatibility.
+
 ## Alternatives
 [alternatives]: #alternatives
 
