@@ -5,22 +5,17 @@
 
 Allow parameter declaration-site modifier `ref readonly` and change call-site rules as follows:
 
-| Call site annotation | `ref` parameter | `ref readonly` parameter | `in` parameter |
-|----------------------|-----------------|--------------------------|----------------|
-| `ref`                | Allowed         | Allowed                  | **Warning**    |
-| `in`                 | Error           | Allowed                  | Allowed        |
-| No annotation        | Error           | Warning                  | Allowed        |
+| Call-site annotation | `ref` parameter | `ref readonly` parameter | `in` parameter | `out` parameter |
+|----------------------|-----------------|--------------------------|----------------|-----------------|
+| `ref`                | Allowed         | Allowed                  | **Warning**    | Error           |
+| `in`                 | Error           | Allowed                  | Allowed        | Error           |
+| `out`                | Error           | Error                    | Error          | Allowed         |
+| No annotation        | Error           | Warning                  | Allowed        | Error           |
+
+Note that there is one change to the existing rules: `in` parameter with `ref` call-site annotation produces a warning instead of an error.
 
 - `ref` and `ref readonly` parameters require lvalues at the call site.
 - `in` allows lvalues or rvalues at the callsite.
-
-Note that there is one change (in bold) to the existing rules which are currently as follows:
-
-| Call site annotation | `ref` parameter | `in` parameter |
-|----------------------|-----------------|----------------|
-| `ref`                | Allowed         | **Error**      |
-| `in`                 | Error           | Allowed        |
-| No annotation        | Error           | Allowed        |
 
 ## Motivation
 [motivation]: #motivation
