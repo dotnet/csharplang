@@ -1,10 +1,5 @@
 # Breaking change warnings
 
-* [x] Proposed
-* [ ] Prototype: [Not started](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
-* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/BRANCH_NAME)
-* [ ] Specification: [Not Started](pr/1)
-
 ## Summary
 [summary]: #summary
 
