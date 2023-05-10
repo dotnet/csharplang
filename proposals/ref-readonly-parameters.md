@@ -103,7 +103,7 @@ This was discussed in [LDM 2022-05-11](https://github.com/dotnet/csharplang/blob
 [unresolved]: #unresolved-questions
 
 - Allow default values for `ref readonly` parameters? They are allowed for `in` parameters, but `ref readonly` parameters shouldn't be used for rvalues (that's normally a warning).
-- Disallow temps for both `in` and `ref readonly` parameters? See https://github.com/dotnet/roslyn/pull/67955#discussion_r1178138561.
+- Emit errors for rvalues passed into `in`/`ref readonly` parameters of methods that could capture them? See https://github.com/dotnet/roslyn/pull/67955#discussion_r1178138561.
 
 ## Design meetings
 
