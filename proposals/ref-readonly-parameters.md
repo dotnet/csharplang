@@ -50,6 +50,7 @@ No changes in grammar are necessary.
 Specification will be extended to allow `ref readonly` modifiers for parameters with the same rules as specified for `in` parameters in [their proposal](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/proposals/csharp-7.2/readonly-ref.md), except where explicitly changed in this proposal.
 
 ### Interchangeability with `in`
+[interchangeability]: #interchangeability-with-in
 
 Members declared in a single type cannot differ in signature solely by `ref`/`out`/`in`/`ref readonly`.
 For other purposes of signature matching (e.g., hiding or overriding), `ref readonly` can be interchanged with `in` modifier, but that results in a warning at the declaration site [[§7.6](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/basic-concepts.md#76-signatures-and-overloading)].
@@ -81,6 +82,7 @@ Note that unlike `in` parameters, no `[IsReadOnly]` is emitted for `ref readonly
 The `RequiresLocationAttribute` will be matched by namespace-qualified name and synthesized by the compiler if not already included in the compilation.
 
 #### Function pointers
+[funcptrs]: #function-pointers
 
 In function pointers, `in` parameters are emitted with `modreq(System.Runtime.InteropServices.InAttribute)`.
 `ref readonly` parameters will be emitted in the same way to ensure binary compatibility.
