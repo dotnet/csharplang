@@ -4,7 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md#the-foreach-statement (Aleksey)
+- https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md#the-foreach-statement (Aleksey)
+- Breaking change warnings (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/breaking-change-warnings.md
 
 
 ## Schedule when convenient
