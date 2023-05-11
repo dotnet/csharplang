@@ -521,6 +521,30 @@ struct S(int x)
 
 Allowed, no warning (https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-15.md).
 
+### Double storage warning for initialization plus capture
+
+We have a warning if a primary constructor parameter is passed to the base and *also* captured, because there's a high risk that it is inadvertently stored twice in the object. 
+
+It seems that there's a similar risk if a parameter is used to initialize a member, and is also captured. Here's a small example:
+
+``` c#
+public class Person(string name)
+{
+    public string Name { get; set; } = name;   // initialization
+    public override string ToString() => name; // capture
+}
+```
+
+For a given instance of `Person`, changes to `Name` would not be reflected in the output of `ToString`, which is probably unintended on the developer's part.
+
+Should we introduce a double storage warning for this situation?
+
+This is how it would work:
+
+The compiler will produce a warning for a `variable_initializer` when all the following conditions are true:
+- The variable initializer represents an implicit or explicit identity conversion of a primary constructor parameter;
+- The primary constructor parameter is captured into the state of the enclosing type.
+
 ## LDM meetings
 
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
