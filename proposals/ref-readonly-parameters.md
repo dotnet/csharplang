@@ -90,7 +90,7 @@ The `RequiresLocationAttribute` will be matched by namespace-qualified name and 
 #### Function pointers
 [funcptrs]: #function-pointers
 
-In function pointers, `in` parameters are emitted with `modreq(System.Runtime.InteropServices.InAttribute)`.
+In function pointers, `in` parameters are emitted with `modreq(System.Runtime.InteropServices.InAttribute)` (see [function pointers proposal](https://github.com/dotnet/csharplang/blob/0376b4cc500b1370da86d26be634c9acf9d60b71/proposals/csharp-9.0/function-pointers.md#metadata-representation-of-in-out-and-ref-readonly-parameters-and-return-types)).
 `ref readonly` parameters will be emitted in the same way to ensure binary compatibility.
 
 ## Alternatives
@@ -111,6 +111,7 @@ This was discussed in [LDM 2022-05-11](https://github.com/dotnet/csharplang/blob
 [unresolved]: #unresolved-questions
 
 - Allow default values for `ref readonly` parameters? They are allowed for `in` parameters, but `ref readonly` parameters shouldn't be used for rvalues (that's normally a warning).
+- Emit function pointers `ref readonly` parameters differently from `in` parameters to avoid freely casting between them? Use `modreq`,`modopt`?
 - Emit errors for rvalues passed into `in`/`ref readonly` parameters of methods that could capture them? See https://github.com/dotnet/roslyn/pull/67955#discussion_r1178138561.
 
 ## Design meetings
