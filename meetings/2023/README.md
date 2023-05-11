@@ -4,12 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md#the-foreach-statement (Aleksey)
-- Breaking change warnings (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/breaking-change-warnings.md
-
-
 ## Schedule when convenient
-
 
 ## Recurring topics
 
@@ -20,7 +15,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed May 17, 2023
 
+- `List<T>` with optimizations as natural type for collection literals (Cyrus): _link TBD_ 
+- Dual storage warnings for initialization and capture with primary constructors (Mads/Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#double-storage-warning-for-initialization-plus-capture
+
 ## Mon May 15, 2023
+
+- Breaking change warnings (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/breaking-change-warnings.md
+- https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md#the-foreach-statement (Aleksey)
 
 ## Mon May 8, 2023
 
