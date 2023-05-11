@@ -56,6 +56,12 @@ Members declared in a single type cannot differ in signature solely by `ref`/`ou
 For other purposes of signature matching (e.g., hiding or overriding), `ref readonly` can be interchanged with `in` modifier, but that results in a warning at the declaration site [[§7.6](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/basic-concepts.md#76-signatures-and-overloading)].
 For the purpose of delegate/lambda/method group conversions [[§10.7](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#107-anonymous-function-conversions), [§10.8](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#108-method-group-conversions)], `ref readonly` can be interchanged with `in` modifier, but that results in a warning.
 
+### Overload resolution
+[overload-resolution]: #overload-resolution
+
+Overload resolution will allow mixing `ref`/`ref readonly`/`in` callsite annotations and parameter modifiers as denoted by the table in [the summary of this proposal](#summary), i.e., all *allowed* and *warning* cases will be considered as possible candidates during overload resolution.
+Specifically, there's a change in existing behavior where methods with `in` parameter will match calls with the corresponding argument marked as `ref`&mdash;this change will be gated on LangVersion.
+
 ### Metadata encoding
 [metadata]: #metadata-encoding
 
