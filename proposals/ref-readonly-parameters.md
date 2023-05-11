@@ -62,6 +62,9 @@ For the purpose of delegate/lambda/method group conversions [[§10.7](https://gi
 Overload resolution will allow mixing `ref`/`ref readonly`/`in` callsite annotations and parameter modifiers as denoted by the table in [the summary of this proposal](#summary), i.e., all *allowed* and *warning* cases will be considered as possible candidates during overload resolution.
 Specifically, there's a change in existing behavior where methods with `in` parameter will match calls with the corresponding argument marked as `ref`&mdash;this change will be gated on LangVersion.
 
+Note that there is no change in overriding for `ref` and `in` modifiers, they cannot be interchanged, because the signatures aren't binary compatible.
+For consistency, the same is true for other signature matching purposes (e.g., hiding) and conversions.
+
 ### Metadata encoding
 [metadata]: #metadata-encoding
 
@@ -123,7 +126,8 @@ Similarly, special `modreq` could be used instead of an attribute to ensure `ref
 This would provide stronger guarantees, so it would be good for new APIs, but prevent adoption in existing runtime APIs which cannot introduce breaking changes.
 
 Overload resolution, overriding, and conversion could disallow interchangeability of `ref readonly` and `in` modifiers.
-Also, the overload resolution change for existing `in` parameters could be taken unconditionally (not considering LangVersion).
+
+The overload resolution change for existing `in` parameters could be taken unconditionally (not considering LangVersion), but that would be a breaking change.
 
 Default parameter values could be an error for `ref readonly` parameters.
 
