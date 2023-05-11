@@ -93,6 +93,11 @@ The `RequiresLocationAttribute` will be matched by namespace-qualified name and 
 In function pointers, `in` parameters are emitted with `modreq(System.Runtime.InteropServices.InAttribute)` (see [function pointers proposal](https://github.com/dotnet/csharplang/blob/0376b4cc500b1370da86d26be634c9acf9d60b71/proposals/csharp-9.0/function-pointers.md#metadata-representation-of-in-out-and-ref-readonly-parameters-and-return-types)).
 `ref readonly` parameters will be emitted in the same way to ensure binary compatibility.
 
+### Default parameter values
+[default-params]: #default-parameter-values
+
+Default parameter values are allowed for `ref readonly` parameters with a warning since they are equivalent to passing rvalues.
+
 ## Alternatives
 [alternatives]: #alternatives
 
@@ -104,13 +109,23 @@ Changing these APIs from `ref` to `[RequiresLocation] in` would be a source brea
 Instead of allowing the modifier `ref readonly`, the compiler could recognize when a special attribute (like `[RequiresLocation]`) is applied to a parameter.
 This was discussed in [LDM 2022-04-25](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-04-25.md#ref-readonly-method-parameters), deciding this is a language feature, not an analyzer, so it should look like one.
 
-Passing lvalues without any modifiers to a `ref readonly` parameters could be permitted without any warnings, similarly to C++'s implicit byref parameters.
+Passing lvalues without any modifiers to `ref readonly` parameters could be permitted without any warnings, similarly to C++'s implicit byref parameters.
 This was discussed in [LDM 2022-05-11](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-05-11.md#ref-readonly-method-parameters), noting that the primary motivation for `ref readonly` parameters are APIs which capture or return references from these parameters, so marker of some kind is a good thing.
+
+### Pending LDM review
+[to-review]: #pending-ldm-review
+
+Errors could be emitted instead of warnings when passing rvalues to `ref readonly` parameters or mismatching callsite annotations and parameter modifiers.
+This would provide stronger guarantees, so it would be good for new APIs, but prevent adoption in existing runtime APIs which cannot introduce breaking changes.
+
+Overload resolution, overriding, and conversion could disallow interchangeability of `ref readonly` and `in` modifiers.
+Also, the overload resolution change for existing `in` parameters could be taken unconditionally (not considering LangVersion).
+
+Default parameter values could be an error for `ref readonly` parameters.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- Allow default values for `ref readonly` parameters? They are allowed for `in` parameters, but `ref readonly` parameters shouldn't be used for rvalues (that's normally a warning).
 - Emit function pointers `ref readonly` parameters differently from `in` parameters to avoid freely casting between them? Use `modreq`,`modopt`?
 - Emit errors for rvalues passed into `in`/`ref readonly` parameters of methods that could capture them? See https://github.com/dotnet/roslyn/pull/67955#discussion_r1178138561.
 
