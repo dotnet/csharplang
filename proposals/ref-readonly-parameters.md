@@ -116,6 +116,7 @@ This was discussed in [LDM 2022-05-11](https://github.com/dotnet/csharplang/blob
 [to-review]: #pending-ldm-review
 
 Inverse ordering of modifiers (`readonly ref` instead of `ref readonly`) could be allowed.
+This would be inconsistent with how `readonly ref` returns and fields behave (inverse ordering is disallowed or means something different, respectively) and could clash with readonly parameters if implemented in the future.
 
 Errors could be emitted instead of warnings when passing rvalues to `ref readonly` parameters or mismatching callsite annotations and parameter modifiers.
 Similarly, special `modreq` could be used instead of an attribute to ensure `ref readonly` parameters are distinct from `in` parameters on the binary level.
