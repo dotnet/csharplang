@@ -70,4 +70,4 @@ It is our plan to move the C# Language Specification into Markdown, and draft it
 
 ## Implementation
 
-The reference implementation of the C# language can be found in the [Roslyn repository](https://github.com/dotnet/roslyn). This repository also tracks the [implementation status for language features](https://github.com/dotnet/roslyn/blob/master/docs/Language%20Feature%20Status.md). Until recently, that was also where language design artifacts were tracked. Please allow a little time as we move over active proposals.
+The reference implementation of the C# language can be found in the [Roslyn repository](https://github.com/dotnet/roslyn). This repository also tracks the [implementation status for language features](https://github.com/dotnet/roslyn/blob/main/docs/Language%20Feature%20Status.md). Until recently, that was also where language design artifacts were tracked. Please allow a little time as we move over active proposals.
