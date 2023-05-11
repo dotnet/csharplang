@@ -40,7 +40,7 @@ Specifically, changing
 - `in` → `ref readonly` would not be a breaking change (but no callsite annotation or rvalue would result in a warning).
 
 In the opposite direction, changing
-- `ref readonly` → `ref` would be potentially a source breaking change (unless only `ref` callsite annotation was used), and a binary breaking change for virtual methods,
+- `ref readonly` → `ref` would be potentially a source breaking change (unless only `ref` callsite annotation was used and only readonly references used as arguments), and a binary breaking change for virtual methods,
 - `ref readonly` → `in` would not be a breaking change (but `ref` callsite annotation would result in a warning).
 
 ## Detailed design
