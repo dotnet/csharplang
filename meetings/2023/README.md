@@ -15,7 +15,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed May 17, 2023
 
-- `List<T>` with optimizations as natural type for collection literals (Cyrus): _link TBD_ 
+
 - Dual storage warnings for initialization and capture with primary constructors (Mads/Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#double-storage-warning-for-initialization-plus-capture
 
 ## Mon May 15, 2023
