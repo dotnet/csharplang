@@ -17,17 +17,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md#the-foreach-statement (Aleksey)
 
-## Mon May 15, 2023
-
-- Breaking change warnings (Mads): https://github.com/dotnet/csharplang/blob/main/proposals/breaking-change-warnings.md
-- Dual storage warnings for initialization and capture with primary constructors (Mads/Aleksey): https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#double-storage-warning-for-initialization-plus-capture
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon May 15, 2023
+
+[C# Language Design Meeting for May 15th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-15.md)
+
+- Breaking Change Warnings
+- Primary Constructors
 
 ## Mon May 8, 2023
 
