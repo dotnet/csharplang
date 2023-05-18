@@ -361,7 +361,7 @@ foreach (var c in (System.ReadOnlySpan<int>)getBufferAsReadonlyVariable())
 }
 ```
 
-We will support `foreach` over inline arrays, even if it starts as restricted in `async` methods due to involvment of the `System.ReadOnlySpan` type into the translation.
+We will support `foreach` over inline arrays, even if it starts as restricted in `async` methods due to involvement of the `System.ReadOnlySpan` type into the translation.
 
 ## Open design questions
 
