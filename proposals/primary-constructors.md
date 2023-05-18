@@ -136,6 +136,16 @@ class C(int i)
 
 The initializer for the field `i` references the parameter `i`, whereas the body of the property `I` references the field `i`.
 
+#### Warn on shadowing by a member from base
+
+Compiler will produce a warning on usage of an idetifier when a base member shadows a primary constructor parameter
+if that primary constructor parameter was not passed to the base type via its constructor.
+
+A primary constructor parameter is considered to be passed to the base type via its constructor when all the following conditions
+are true for an argument in *class_base*:
+- The argument represents an implicit or explicit identity conversion of a primary constructor parameter;
+- The argument is not part of an expanded `params` argument;
+
 ## Semantics
 
 A primary constructor leads to the generation of an instance constructor on the enclosing type with the given parameters. If the `class_base` has an argument list, the generated instance constructor will have a `base` initializer with the same argument list.
@@ -240,7 +250,7 @@ Given this, compiler will produce an ambiguity error for a member access `E.I` w
 - Member lookup of `E.I` yields a member group containing instance and static members at the same time. Extension methods applicable to the receiver type are treated as instance methods for the purpose of this check.
 - If `E` is treated as a simple name, rather than a type name, it would refer to a primary constructor parameter and would capture the parameter into the state of the enclosing type. 
 
-### Double storage warning
+### Double storage warnings
 
 If a primary constructor parameter is passed to the base and *also* captured, there's a high risk that it is inadvertently stored twice in the object. 
 
@@ -248,6 +258,19 @@ Compiler will produce a warning for `in` or by value argument in a `class_base` 
 - The argument represents an implicit or explicit identity conversion of a primary constructor parameter;
 - The argument is not part of an expanded `params` argument;
 - The primary constructor parameter is captured into the state of the enclosing type.
+
+Compiler will produce a warning for a `variable_initializer` when all the following conditions are true:
+- The variable initializer represents an implicit or explicit identity conversion of a primary constructor parameter;
+- The primary constructor parameter is captured into the state of the enclosing type.
+
+For example:
+``` c#
+public class Person(string name)
+{
+    public string Name { get; set; } = name;   // initialization
+    public override string ToString() => name; // capture
+}
+```
 
 ## Attributes targeting primary constructors
 
@@ -470,6 +493,10 @@ Not allowed (https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-20
 
 Should we report a warning when a member from base is shadowing a primary constructor parameter inside a member (see https://github.com/dotnet/csharplang/discussions/7109#discussioncomment-5666621)?
 
+#### Conclusion:
+
+An alternative design is approved - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-08.md#primary-constructors
+
 ### Capturing instance of the enclosing type in a closure
 
 When a parameter captured into the state of the enclosing type is also referenced in a lambda inside an instance initializer or a base initializer, the lambda and the state of the enclosing type should refer to the same location for the parameter.
@@ -545,6 +572,10 @@ The compiler will produce a warning for a `variable_initializer` when all the fo
 - The variable initializer represents an implicit or explicit identity conversion of a primary constructor parameter;
 - The primary constructor parameter is captured into the state of the enclosing type.
 
+#### Conclusion:
+
+Approved, see https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-15.md#primary-constructors 
+
 ## LDM meetings
 
 - https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-17.md
@@ -553,4 +584,6 @@ The compiler will produce a warning for a `variable_initializer` when all the fo
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-02-22.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-03-13.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md#primary-constructors
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-08.md#primary-constructors
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-15.md#primary-constructors
 
