@@ -138,7 +138,7 @@ The initializer for the field `i` references the parameter `i`, whereas the body
 
 #### Warn on shadowing by a member from base
 
-Compiler will produce a warning on usage of an idetifier when a base member shadows a primary constructor parameter
+Compiler will produce a warning on usage of an identifier when a base member shadows a primary constructor parameter
 if that primary constructor parameter was not passed to the base type via its constructor.
 
 A primary constructor parameter is considered to be passed to the base type via its constructor when all the following conditions
