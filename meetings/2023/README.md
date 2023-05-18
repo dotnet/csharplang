@@ -13,16 +13,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed May 31, 2023
 
-## Wed May 17, 2023
-
-- https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md#the-foreach-statement (Aleksey)
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Wed May 17, 2023
+
+[C# Language Design Meeting for May 17th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-17.md)
+
+- Inline arrays
 
 ## Mon May 15, 2023
 
