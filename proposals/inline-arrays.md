@@ -361,6 +361,7 @@ foreach (var c in (System.ReadOnlySpan<int>)getBufferAsReadonlyVariable())
 }
 ```
 
+We will support `foreach` over inline arrays, even if it starts as restricted in `async` methods due to involvement of the span types into the translation.
 
 ## Open design questions
 
@@ -713,3 +714,4 @@ able to interop with that.
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-10.md#fixed-size-buffers
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-01.md#fixed-size-buffers
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md#inline-arrays
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-17.md#inline-arrays
