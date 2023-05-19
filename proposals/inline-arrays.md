@@ -350,7 +350,7 @@ foreach (var a in (System.ReadOnlySpan<int>)temp)
     WriteLine(a);
 }
 
-foreach (var b in (System.ReadOnlySpan<int>)getBufferAsWritableVariable())
+foreach (var b in (System.Span<int>)getBufferAsWritableVariable())
 {
     WriteLine(b);
 }
