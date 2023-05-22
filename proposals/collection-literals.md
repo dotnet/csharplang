@@ -227,16 +227,18 @@ var values = [1, 2, 3];
 values.Add(4); // ok
 ```
 
+The *natural element type* may be inferred from `spread_element` enumerated element type.
+
+```c#
+var c = [..[1, 2, 3]]; // List<int>
+```
+
 Should `IEnumerable` contribute an *iteration type* of `object` or no contribution?
 
 ```c#
 IEnumerable e1 = [1, 2, 3];
 var e2 = [..e1];           // List<object> or error?
 List<string> e3 = [..e1];  // error?
-```
-
-```c#
-var c = [..[1, 2, 3]]; // List<int>
 ```
 
 ---
@@ -439,7 +441,7 @@ Not having a *known length* does not prevent any result from being created. Howe
     *  If `T` is some `Span<T1>`, then the literal is translated as the same as above, except that the `__result` initialization is translated as:
 
         ```c#
-        Span<T1> __result = T1[__len];
+        Span<T1> __result = new T1[__len];
 
         // same assignments as the array translation
         ```
