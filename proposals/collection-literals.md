@@ -509,7 +509,7 @@ Not having a *known length* does not prevent any result from being created. Howe
         // further additions of the remaining elements
         ```
 
-        * In this translation, `expression_element` is only supported if the element type is some `KeyValuePair<,>` or `dynamic`, and `spread_element` is only supported if the enumerator type is some `KeyValuePair<,>` or `dynamic`.
+        * In this translation, `expression_element` is only supported if the element type is some `KeyValuePair<,>` or `dynamic`, and `spread_element` is only supported if the enumerated element type is some `KeyValuePair<,>` or `dynamic`.
 
 ### Unknown length translation
 [unknown-length-translation]: #unknown-length-translation
