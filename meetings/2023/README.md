@@ -21,6 +21,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed May 31, 2023
 
+- Collection literals (Cyrus)
+
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
