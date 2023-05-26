@@ -938,7 +938,7 @@ Hopefully small questions:
     Span<int> __s1 = b ? [c] : [d, e];
     int __e2 = f;
 
-    Span<int> __result = stackallock int[2 + __s1.Length];
+    Span<int> __result = stackalloc int[2 + __s1.Length];
     int __index = 0;
 
     __result[__index++] = a;
