@@ -126,7 +126,7 @@ Actual translation of the literal to the corresponding type is defined [below](#
 * [*Span types*](#span-types)
 * Types with a suitable [`Construct` method](#construct-methods)
 * Types that implement `System.Collections.IDictionary` - *dictionary [collection initializers](#collection-initializers)*
-* Interface types _`I<TKey, TValue>`_ implemented by `System.Collections.Generic.Dictionary<TKey, TValue>`
+* Interface types _`I<TKey, TValue>`_ implemented by `System.Collections.Generic.Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
 * Types that implement `System.Collections.IEnumerable` - [*collection initializers*](#collection-initializers)
 * Interface types _`I<T>`_ implemented by `System.Collections.Generic.List<T>` (e.g. `IEnumerable<T>`, `IList<T>`, `IReadOnlyList<T>`)
 
