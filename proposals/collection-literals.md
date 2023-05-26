@@ -446,6 +446,8 @@ Not having a *known length* does not prevent any result from being created. Howe
         // same assignments as the array translation
         ```
 
+        The translation may use `stackalloc T1[]` rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
+
     * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
 
     The above forms (for arrays and spans) are the base representations of the literal value and are used for the following translation rules.
