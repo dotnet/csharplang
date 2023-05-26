@@ -117,21 +117,18 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
 The following are _constructible collection types_ that can be used to construct collection literals.
 These are the valid _target types_ for collection literals.
+
+The list is in priority order. If a collection type belongs in multiple categories, the first is used.
+
 Actual translation of the literal to the corresponding type is defined [below](#collection-literal-translation).
 
 * Single dimensional arrays (e.g. `T[]`)
 * [*Span types*](#span-types)
 * Types with a suitable [`Construct` method](#construct-methods)
-* Types that support [*collection initializers*](#collection-initializers)
-* Interface types `I<T>` implemented by `List<T>` (e.g. `IEnumerable<T>`, `IList<T>`, `IReadOnlyList<T>`)
-
-```c#
-int[] a = [];                // array
-Span<int> b = [1, 2];        // span
-ImmutableArray<int> c = [3]; // Construct method
-List<int> d = [5, 6];        // collection initializer type
-IEnumerable<int> e = [];     // list interface
-```
+* Types that implement `System.Collections.IDictionary` - *dictionary [collection initializers](#collection-initializers)*
+* Interface types _`I<TKey, TValue>`_ implemented by `System.Collections.Generic.Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
+* Types that implement `System.Collections.IEnumerable` - [*collection initializers*](#collection-initializers)
+* Interface types _`I<T>`_ implemented by `System.Collections.Generic.List<T>` (e.g. `IEnumerable<T>`, `IList<T>`, `IReadOnlyList<T>`)
 
 ## `Construct` methods
 [construct-methods]: #construct-methods
@@ -150,6 +147,8 @@ The `Construct` method is used for construction of the collection even if the ty
 _This means an extension method could be added that would silently change how collection literals for an existing collection initializer type are constructed in the program._
 
 Through the use of the [`init`](#init-methods) modifier, existing APIs can directly support collection literals in a manner that allows for no-overhead production of the data the final collection will store.
+
+_Does this support construction of custom dictionary types?_
 
 ### `init Construct` methods
 [init-methods]: #init-methods
@@ -218,21 +217,20 @@ Through the use of the [`init`](#init-methods) modifier, existing APIs can direc
 
 In the absence of a *constructible collection target type*, a non-empty literal can have a *natural type*.
 
-The *natural type* is determined using the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) algorithm.
-
-A *natural element type* `T` is first determined from the *best common type* of:
-* The *type* of each element `e_n`, and
-* The *iteration type* of each element `..s_n`.
-
-If a *natural element type* `T` cannot be determined, the literal has no *natural type*.  If `T` can be determined and it is some `KeyValuePair<TKey, TValue>`, then the *natural type* of the collection is `Dictionary<TKey, TValue>` (see [*dictionaries*](#dictionaries)); otherwise, the *natural type* of the collection is `List<T>`.
-
-This means there is no way for a literal to have a *natural type* of some `List<KeyValuePair<TKey, TValue>>` (though it certainly can be *target-typed* to that type).
+The *natural type* is determined from the [*natural element type*](#natural-element-type).
+If the *natural element type* `T` cannot be determined, the literal has no *natural type*. If `T` can be determined, the *natural type* of the collection is `List<T>`.
 
 The choice of `List<T>` rather than `T[]` or `ImmutableArray<T>` is to allow mutation of `var` locals after initialization. `List<T>` is preferred over `Span<T>` because `Span<T>` cannot be used in `async` methods.
 
 ```c#
 var values = [1, 2, 3];
 values.Add(4); // ok
+```
+
+The *natural element type* may be inferred from `spread_element` enumerated element type.
+
+```c#
+var c = [..[1, 2, 3]]; // List<int>
 ```
 
 Should `IEnumerable` contribute an *iteration type* of `object` or no contribution?
@@ -286,6 +284,8 @@ The existing rules for type inference (see [§11.6.3](https://github.com/dotnet/
 >   If any of these cases apply then an *exact inference* is made from each `Uᵢ` to the corresponding `Vᵢ`.
 
 _How do we recognize that `C<V₁>` is a constructible collection with element type `V₁`?_
+
+_Update to include inference from dictionary types._
 
 ### Interaction with natural type
 
@@ -348,9 +348,9 @@ Span<T> __result = __array;
 
 _Include text from [*collection initializers*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117154-collection-initializers)_.
 
-The *collection initializer type* must support binding to `Add(arg)` where `arg` is a single argument.
+Non-dictionary construction uses `Add()` instance methods or extension methods.
 
-`List<T>` is *collection initializer type* and is therefore a [*constructible collection type*](#constructible-collection-types).
+Dictionary construction uses indexer instance properties rather than `Add()` methods to ensure consistent _overwrite semantics_ rather than _add semantics_.
 
 ## Collection literal translation
 [collection-literal-translation]: #collection-literal-translation
@@ -374,17 +374,7 @@ If they all have such a property, the literal is considered to have a *known len
 
 * Evaluation of the element expressions happens entirely first.  Only after all those evaluations happen are calls to `Count` (or `Length` or `TryGetNonEnumeratedCount`) and all enumerations made.
 
-* Certain translations below attempt to find a suitable `Add` method by which to add either `expression_element` or `spread_element` members to the collection.  If such an `Add` method cannot be found *and* the value being added is some `KeyValuePair<,>` `__kvp`, then the translation will instead try to emit `__result[__kvp.Key] = __kvp.Value;`.
-
-* All methods/properties utilized in a translation (for example `Add`, `this[...]`, `Length`, `Count`, etc.) do not have to be the same.  For example, `SomeCollection<X> x = [a, b];` may invoke different `SomeCollection.Add` methods for each element in the collection literal.
-
-<!--
-* When evaluating a `spread_element`, the evaluation should happen with a target-type equivalent to the type of the collection being produced.  If such a evaluation is not allowed, then the evaluation should happen using the natural type of the `spread_element`.  This difference can be demonstrated with:
-
-    ```c#
-    Span<int> span = [a, ..b ? [c, d] : [], f];
-    ```
--->
+*  All methods/properties utilized in a translation (for example `Add`, `this[...]`, `Length`, `Count`, etc.) do not have to be the same.  For example, `SomeCollection<X> x = [a, b];` may invoke different `SomeCollection.Add` methods for each element in the collection literal.
 
 ### Interface translation
 [interface-translation]: #interface-translation
@@ -420,7 +410,7 @@ Having a *known length* allows for efficient construction of a result with the p
 
 Not having a *known length* does not prevent any result from being created. However, it may result in extra CPU and memory costs producing the data, then moving to the final destination.
 
-* For a *known length* literal `[e1, k1: v1, ..s1, e2, k2: v2, ..s2, etc]`, the translation first starts with the following:
+* For a *known length* literal `[e1, k1: v1, ..s1, etc]`, the translation first starts with the following:
 
     ```c#
     int __len = count_of_expression_elements +
@@ -451,10 +441,12 @@ Not having a *known length* does not prevent any result from being created. Howe
     *  If `T` is some `Span<T1>`, then the literal is translated as the same as above, except that the `__result` initialization is translated as:
 
         ```c#
-        Span<T1> __result = stackalloc T1[__len];
+        Span<T1> __result = new T1[__len];
 
         // same assignments as the array translation
         ```
+
+        The translation may use `stackalloc T1[]` rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
 
     * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
 
@@ -478,7 +470,7 @@ Not having a *known length* does not prevent any result from being created. Howe
             T __result = new T(capacity: __len);
 
             __result.Add(__e1);
-            __result[__k1] = __v1;
+            __result.Add(new T1(__k1, __v1));
             foreach (var __t in __s1)
                 __result.Add(__t);
 
@@ -495,7 +487,7 @@ Not having a *known length* does not prevent any result from being created. Howe
             T __result = new T();
 
             __result.Add(__e1);
-            __result[__k1] = __v1;
+            __result.Add(new T1(__k1, __v1));
             foreach (var __t in __s1)
                 __result.Add(__t);
 
@@ -503,6 +495,23 @@ Not having a *known length* does not prevent any result from being created. Howe
             ```
 
             This allows creating the target type, albeit with no capacity optimization to prevent internal reallocation of storage.
+
+        * In this translation, `dictionary_element` is only supported if `T1` is known and is some `KeyValuePair<,>`.
+
+    * If `T` is a dictionary collection initializer with key `K1` and value `V1`, the literal is translated as:
+
+        ```c#
+        T __result = new T(capacity: __len);
+
+        __result[__e1.Key] = __e1.Value;
+        __result[__k1] = __v1;
+        foreach (var __t in __s1)
+            __result[__t.Key] = __t.Value;
+
+        // further additions of the remaining elements
+        ```
+
+        * In this translation, `expression_element` is only supported if the element type is some `KeyValuePair<,>` or `dynamic`, and `spread_element` is only supported if the enumerated element type is some `KeyValuePair<,>` or `dynamic`.
 
 ### Unknown length translation
 [unknown-length-translation]: #unknown-length-translation
@@ -515,11 +524,11 @@ Not having a *known length* does not prevent any result from being created. Howe
         T __result = new T();
 
         __result.Add(__e1);
-        __result[__k1] = __v1;
+        __result.Add(new T1(__k1, __v1));
         foreach (var __t in __s1)
             __result.Add(__t);
 
-            // further additions of the remaining elements
+        // further additions of the remaining elements
         ```
 
         This allows spreading of any iterable type, albeit with the least amount of optimization possible.
@@ -536,14 +545,14 @@ Not having a *known length* does not prevent any result from being created. Howe
         ```c#
         T1[] __result = <private_details>.CreateArray<T1>(
             count_of_expression_elements + count_of_dictionary_elements);
-        __result = 0;
+        int __index = 0;
 
         <private_details>.Add(ref __result, __index++, __e1);
         <private_details>.Add(ref __result, __index++, new T1(__k1, __v1));
         foreach (var __t in __s1)
             <private_details>.Add(ref __result, __index++, __t);
 
-            // further additions of the remaining elements
+        // further additions of the remaining elements
 
         <private_details>.Resize(ref __result, __index);
         ```
@@ -552,40 +561,8 @@ Not having a *known length* does not prevent any result from being created. Howe
 
         The counts passed to `CreateArray` are used to provide a starting size hint to prevent wasteful resizes.
 
-## Dictionaries
-[dictionaries]: #dictionaries
-
-[*Constructible collection types*](#constructible-collection-types) is updated to include dictionaries.
-
-The following are _constructible collection types_ that can be used to construct collection literals.
-
-* ...
-* `Dictionary<TKey, TValue>`
-* Interface types `I<TKey, TValue>` implemented by `Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
-
-```c#
-Dictionary<string, int> x = [];
-IReadOnlyDictionary<string, int> y = ["one":1, "two":2];
-```
-
-Dictionary construction uses `this[int index] { set; }` rather than `Add()` when to ensure consistent _overwrite semantics_ rather than _add semantics_.
-
-```c#
-var x = [a:1, b:2]; // {{a, 1}, {b, 2}}
-var y = [..x, b:4]; // {{a, 1}, {b, 4}}
-var z = [a:3, ..x]; // {{a, 1}, {b, 2}}
-```
-
-As stated in [*natural type*](#natural-type):
-
-> If the [*natural element type*](#natural-element-type-updated) `T` can be determined and it is some `KeyValuePair<TKey, TValue>`, then the *natural type* of the collection is `Dictionary<TKey, TValue>`; otherwise, the *natural type* of the collection is `List<T>`.
-
-If the *natural type* of the collection is `List<T>` the literal is not allowed to contain a `dictionary_element`.
-
-The *natural element type* algorithm is updated as follows.
-
-### Natural element type (updated)
-[natural-element-type-updated]: #natural-element-type-updated
+## Natural element type
+[natural-element-type]: #natural-element-type
 
 Computing the *natural element type* starts with three sets of types and expressions called *dictionary key set*, *dictionary value set*, and *remainder set*.
 
@@ -963,7 +940,7 @@ Hopefully small questions:
     Span<int> __s1 = b ? [c] : [d, e];
     int __e2 = f;
 
-    Span<int> __result = stackallock int[2 + __s1.Length];
+    Span<int> __result = stackalloc int[2 + __s1.Length];
     int __index = 0;
 
     __result[__index++] = a;
