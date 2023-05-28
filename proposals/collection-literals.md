@@ -88,7 +88,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
     - Literals with no `spread_element` in them.
     - Literals with arbitrary ordering of any element type.
 
-* In the following sections, examples of literals without a `k: v` element should assumed to not have any `dictionary_element` in them. Any usages of `..s` should be assumed to be a spread of a non-dictionary value.  Sections that refer to dictionary behavior will call that out.
+* In the following sections, examples of literals without a `k: v` element should be assumed to not have any `dictionary_element` in them. Any usages of `..s` should be assumed to be a spread of a non-dictionary value.  Sections that refer to dictionary behavior will call that out.
 
 * The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
 
@@ -98,7 +98,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
 * The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11173-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
 
-* An implementation is not required to translate literals exactly as specified below.  Any translation is legal as long as the same result is produced and there are no observable differences (outside of timing) in the production of the result.
+* An implementation is not required to translate literals exactly as specified below.  Any translation is legal if the same result is produced and there are no observable differences in the production of the result.
 
     * For example, an implementation could translate literals like `[1, 2, 3]` directly to a `new int[] { 1, 2, 3 }` expression that itself bakes the raw data into the assembly, eliding the need for `__index` or a sequence of instructions to assign each value. Importantly, this does mean if any step of the translation might cause an exception at runtime that the program state is still left in the state indicated by the translation.
 
@@ -112,23 +112,48 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
     * The behavior of collection literals with collections that are not well-behaved is undefined.
 
-## Constructible collection types (target types)
-[constructible-collection-types]: #constructible-collection-types
+## Conversions
+A collection literal expression is classified as a value.
 
-The following are _constructible collection types_ that can be used to construct collection literals.
-These are the valid _target types_ for collection literals.
+A _collection literal conversion_ permits a collection literal expression to be implicitly converted to a type.
 
-The list is in priority order. If a collection type belongs in multiple categories, the first is used.
+The following collection literal conversions exist from a collection literal:
 
-Actual translation of the literal to the corresponding type is defined [below](#collection-literal-translation).
+* To a single dimensional *array type* `T[]`, or a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`, where for each element `Ei`:
+  * If `Ei` is an *expression_element* there is an implicit conversion from `Ei` to `T`.
+  * If `Ei` is a *dictionary_element* `Ki:Vi`, then `T` is a _type_ `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * If `Ei` is a *spread_element* with enumerated element type `Si` there is an implicit conversion from `Si` to `T`.
 
-* Single dimensional arrays (e.g. `T[]`)
-* [*Span types*](#span-types)
-* Types with a suitable [`Construct` method](#construct-methods)
-* Types that implement `System.Collections.IDictionary` - *dictionary [collection initializers](#collection-initializers)*
-* Interface types _`I<TKey, TValue>`_ implemented by `System.Collections.Generic.Dictionary<TKey, TValue>` (e.g. `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`)
-* Types that implement `System.Collections.IEnumerable` - [*collection initializers*](#collection-initializers)
-* Interface types _`I<T>`_ implemented by `System.Collections.Generic.List<T>` (e.g. `IEnumerable<T>`, `IList<T>`, `IReadOnlyList<T>`)
+* To a *type* with an associated *[builder](#construct-methods)* where there is an implicit collection literal conversion from the collection literal to the *builder argument type*.
+
+* To a *type* that implements `System.Collections.IDictionary` where:
+  * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter `int capacity`.
+  * For each element `Ei` there is an applicable instance indexer for the *key_value_pair* from:
+    * If `Ei` is an *expression_element* with type `dynamic` or `System.Collections.Generic.KeyValuePair<Ki, Vi>`, the values of applicable properties `Key` and `Value` from `Ei`.
+    * If `Ei` is a *dictionary_element* `Ki:Vi`, the values `Ki` and `Vi`.
+    * If `Ei` is a *spread_element* with enumerated element `Si` with type `dynamic` or `System.Collections.Generic.KeyValuePair<Ki, Vi>`, the values of applicable properties `Key` and `Value` from `Si`.
+
+* To an *interface type* *`I<K, V>`* implemented by `System.Collections.Generic.Dictionary<K, V>` where for each element `Ei`:
+  * If `Ei` is an *expression_element* then the type of `Ei` is `dynamic`, or the type of `Ei` is a _type_ `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * If `Ei` is a *dictionary_element* `Ki:Vi` there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * If `Ei` is a *spread_element* with enumerated element type `Si` then the type of `Si` is `dynamic`, or the type of `Si` is a _type_ `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+
+* To a *type* that implements `System.Collections.IEnumerable` where for each element `Ei`:
+  * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter `int capacity`.
+  * No element `Ei` is a *dictionary_element*.
+  * For each element `Ei` there is an applicable instance or extension method `Add` for the single argument from:
+    * If `Ei` is an *expression_element*, the expression `Ei`.
+    * If `Ei` is a *spread_element*, the enumerated item.
+
+* To an *interface type* *`I<T>`* implemented by `System.Collections.Generic.List<T>` where for each element `Ei`:
+  * If `Ei` is an *expression_element* there is an implicit conversion from `Ei` to `T`.
+  * If `Ei` is a *dictionary_element* `Ki:Vi`, then `T` is a _type_ `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * If `Ei` is a *spread_element* with enumerated element type `Si` there is an implicit conversion from `Si` to `T`.
+
+Types for which there is an implicit collection literal conversion from a collection literal are the valid *target types* for that collection literal.
+
+## Construction
+_Give specific ordering for determining how to construct the constructible collection types._
 
 ## `Construct` methods
 [construct-methods]: #construct-methods
@@ -141,7 +166,7 @@ While certain types (like arrays and spans) can always be constructed with a col
 
 If found, the collection can be constructed by creating a fresh instance of its type using `new T()`, producing the corresponding argument to pass to `Construct`, and then calling that method on the fresh instance.  `new T()` supports all structs, including those without a `parameterless struct constructor`.
 
-The allowance for extension methods means that collection literal support can be added to a existing API which does not already directly support this.
+The allowance for extension methods means that collection literal support can be added to an existing API which does not already directly support this.
 
 The `Construct` method is used for construction of the collection even if the type supports *collection initializers*.
 _This means an extension method could be added that would silently change how collection literals for an existing collection initializer type are constructed in the program._
@@ -280,12 +305,27 @@ The existing rules for type inference (see [§11.6.3](https://github.com/dotnet/
 >   - **`V` is a single-dimensional array type `V₁[]` and `U` is a collection literal with element type `U₁`**
 >   - `V` is the type `V₁?` and `U` is the type `U₁`
 >   - `V` is a constructed type `C<V₁...Vₑ>` and `U` is a constructed type `C<U₁...Uₑ>`
->   - **`V` is a constructed type `C<V₁>` that is a constructible collection with element type `V₁`, and `U` is a collection literal with element type `U₁`**
+>   - **`V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`**
+>
 >   If any of these cases apply then an *exact inference* is made from each `Uᵢ` to the corresponding `Vᵢ`.
 
-_How do we recognize that `C<V₁>` is a constructible collection with element type `V₁`?_
+_How do we recognize that `C<V₁>` has element type `V₁`?_
 
 _Update to include inference from dictionary types._
+```c#
+var d = ["Alice": 42, "Bob": 43].AsDictionary(comparer);
+
+static Dictionary<TKey, TValue> AsDictionary<TKey, TValue>(
+    this List<KeyValuePair<TKey, TValue>> list,
+    IEqualityComparer<TKey> comparer = null) { ... }
+```
+
+_What are the implications of type inference of spread elements?_
+```c#
+F([..[1, 2]]); // ok: F<int>(int[])
+
+static void F<T>(T[] arg) { }
+```
 
 ### Interaction with natural type
 
@@ -297,13 +337,16 @@ var y = First(new int[0], [1, 2, 3]);    // ok: int[]
 static T First<T>(T x, T y) => x;
 ```
 
-To allow conversions to other collection types, type inference may need to infer exact, lower-bound, and upper-bound inferences from the **expression `U`** to a type `V` when an expression is given, and *fixing* §11.6.3.12 updates the sets of *candidate types* based on implicit conversion from the **expression** bound to the each *candidate type*.
+To allow conversions to other collection types, type inference may need to infer exact, lower-bound, and upper-bound inferences from the **expression `U`** (rather than the type of `U`) to a type `V` when an expression is given, and *fixing* §11.6.3.12 updates the sets of *candidate types* based on implicit conversion from the **expression** bound to the each *candidate type*.
 
 _Should nested cases infer collection types successfully?_
 ```c#
 var x = new[] { [ulong.MaxValue], [1, 2, 3] };  // ok: List<ulong>[]
 var y = First([[ulong.MaxValue]], [[1, 2, 3]]); // ok: List<List<ulong>>
 ```
+
+## Overload resolution
+_Include betterness order - perhaps the following, from best to worst: spans; arrays and constructed types; interface types._
 
 ## Span types
 [span-types]: #span-types
@@ -320,7 +363,7 @@ foreach (var x in y)
 }
 ```
 
-The compiler is allowed to translate that using `stackalloc` however it wants, as long as the `Span` meaning stays the same and [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.  For example, it can translate the above to:
+The compiler is allowed to translate that using `stackalloc` as long as the `Span` meaning stays the same and [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.  For example, it can translate the above to:
 
 ```c#
 Span<int> __buffer = stackalloc int[3];
@@ -333,8 +376,6 @@ foreach (var x in y)
     // do things with span
 }
 ```
-
-This approach ensures the stack does not grow in an unbounded fashion, though it may not be possible in all collection-literal cases.
 
 If the compiler decides to allocate on the heap, the translation for `Span<T>` is simply:
 
@@ -909,13 +950,11 @@ However, given the breadth and consistency brought by the new literal syntax, we
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-Hopefully small questions:
-        
 * Can/should the compiler emit Array.Empty for `[]`?  Should we mandate that it does this, to avoid allocations whenever possible?
 
 * Should it be legal to create and immediately index into a collection literal?  Note: this requires an answer to the unresolved question below of whether collection literals have a *natural type*.
 
-* Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow what the spec/impl does for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757).
+* Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757).
 
 * Should we expand on collection initializers to look for the very common `AddRange` method? It could be used by the underlying constructed type to perform adding of spread elements potentially more efficiently.  We might also want to look for things like `.CopyTo` as well.  There may be drawbacks here as those methods might end up causing excess allocations/dispatches versus directly enumerating in the translated code.
 
@@ -933,7 +972,7 @@ Hopefully small questions:
 
     In order to evaluate this full literal, we need to evaluate the element expressions within.  That means being able to evaluate `b ? [c] : [d, e]`.  However, absent a target type to evaluate this expression in the context of, and absent any sort of *natural type*, this would we would be unable to determine what to do with either `[c]` or `[d, e]` here.
 
-    To resolve this, we could say that when evaluating a literal's `spread_element` expression, there was an implicit target type equivalent to the target type of the literal itself.  So, in the above, that would rewritten as:
+    To resolve this, we could say that when evaluating a literal's `spread_element` expression, there was an implicit target type equivalent to the target type of the literal itself.  So, in the above, that would be rewritten as:
 
     ```c#
     int __e1 = a;
@@ -1023,7 +1062,7 @@ https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collectio
 
 * Cast/Index ambiguity.
 
-Today the following is an expression that indexed into
+Today the following is an expression that is indexed into
 
 ```c#
 var v = (Expr)[1, 2, 3];
