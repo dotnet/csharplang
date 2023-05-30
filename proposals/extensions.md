@@ -4,10 +4,12 @@ TODO3 disallow variance in type parameters of extensions
 TODO3 No duplicate base extensions (to avoid ambiguities)
 TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.
 
+TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
 TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
 TODO2 extensions are disallowed within interfaces with variant type parameters
 TODO2 We should likely allow constructors and `required` properties
+TODO attributes and attribute targets
 
 ## Summary
 [summary]: #summary
@@ -501,7 +503,99 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
 - Otherwise, an attempt is made to process `E.I` as an extension method invocation. 
   If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
+Note: the path to extension member lookup and extension method invocation from this section
+is only for empty lookup results. We can also get to extension member lookup and extension method invocation
+in scenarios where lookup yields a method group but the candidates get filtered out by applicability rules.
+That is covered elsewhere.
+
 TODO Is the "where `T` is not a type parameter" portion still relevant?
+
+### Method invocations
+
+TL;DR: Instead of falling back to extension method invocation directly, we'll fall back to "extension invocations"
+which includes both extension types and extension method invocations.
+
+We modify the [method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations) as follows:
+
+\[...]
+- If the resulting set of candidate methods is empty, then further processing along the following steps are abandoned, and instead an attempt is made to process the invocation as \***an extension invocation**. If this fails, then no applicable methods exist, and a binding-time error occurs.
+\[...]
+
+### Extension invocations
+
+In a method invocation of one of the forms
+
+```csharp
+«E» . «I» ( )
+«E» . «I» ( «args» )
+«E» . «I» < «typeargs» > ( )
+«E» . «I» < «typeargs» > ( «args» )
+```
+
+if the normal processing of the invocation finds no applicable methods,
+an attempt is made to process the construct as an extension invocation.
+This includes methods from extension types and extension methods.
+If «E» or any of the «args» has compile-time type `dynamic`, extensions will not apply.
+
+The *invocation_expression* is evaluated as follows:
+- If `E` is classified as a type and an extension member lookup of `I` in `E` with `K` type parameters
+  produces a match, then:
+  - `E.I` is evaluated (same as "member access" section).
+  - If it is a method group, the *invocation_expression* is evaluated as a method invocation.
+  - If it is a value of a delegate_type, the *invocation_expression* is evaluated as a delegate invocation.
+  - If it is neither a method group nor a value of a *delegate_type*, a binding-time error occurs.
+- If `E` is a property access, indexer access, variable, or value, the type of which is `T`, and
+  and an extension member lookup of `I` in `T` with `K` type parameters produces a match, then:
+  - `E.I` is evaluated (same as "member access" section).
+  - If it is a method group, the *invocation_expression* is evaluated as a method invocation 
+    (note this includes extension method invocations).
+  - If it is a value of a delegate_type, the *invocation_expression* is evaluated as a delegate invocation.
+  - If it is neither a method group nor a value of a *delegate_type*, a binding-time error occurs.
+- Otherwise, if `E` is a property access, indexer access, variable, or value, then an attempt
+  is made to process the invocation as an extension method invocation.
+  If this fails, then no applicable methods exist, and a binding-time error occurs.
+
+Note: there are two ways to get to extension method invocation:
+1. if the extension member lookup produced a match, but the method invocation processing resulted 
+   in no applicable candidates, so fell back to extension method invocation.
+2. if the extension member lookup produced no match.
+
+### Extension method invocations
+
+The [extension method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12893-extension-method-invocations)
+remain unchanged.
+
+### Array access
+
+https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128112-array-access
+
+TODO2 need to fall back to extension types that are compatible with the given *array_type*.
+
+### Indexer access
+
+TL;DR: If no candidate is applicable, then we attempt extension indexer access instead.
+
+We modify the [indexer access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128113-indexer-access) as follows:
+
+/[...]
+
+The binding-time processing of an indexer access of the form `P[A]`, where `P` is a *primary_no_array_creation_expression* of a class, struct, or interface type `T`, and `A` is an *argument_list*, consists of the following steps:
+
+- The set of indexers provided by `T` is constructed. \[...]
+- The set is reduced to those indexers that are applicable and not hidden by other indexers. \[...]
+- \***If the resulting set of candidate indexers is empty, then further processing 
+  along the following steps are abandoned, and instead an attempt is made 
+  to process the indexer access as an extension indexer access. If this fails, 
+  then no applicable indexers exist, and a binding-time error occurs.**
+- If the resulting set of candidate indexers is empty, then no applicable indexers exist, and a binding-time error occurs.
+- The best indexer of the set of candidate indexers is identified using the overload resolution rules. If a single best indexer cannot be identified, the indexer access is ambiguous, and a binding-time error occurs.
+- /[...]
+
+/[...]
+
+#### Extension indexer access
+
+TODO2
 
 ### Member lookup
 
