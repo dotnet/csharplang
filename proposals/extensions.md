@@ -3,6 +3,8 @@
 TODO3 disallow variance in type parameters of extensions
 TODO3 No duplicate base extensions (to avoid ambiguities)
 TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.
+TODO3 meaning of `using static SomeType;` (probably should look for extension types declared within `SomeType`)
+TODO3 meaning of `using static Extension;`
 
 TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
