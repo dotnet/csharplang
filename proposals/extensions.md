@@ -542,19 +542,17 @@ This includes methods from extension types and extension methods.
 If «E» or any of the «args» has compile-time type `dynamic`, extensions will not apply.
 
 The *invocation_expression* is evaluated as follows:
-- If `E` is classified as a type and an extension member lookup of `I` in `E` with `K` type parameters
-  produces a match, then:
-  - `E.I` is evaluated (same as "member access" section).
-  - If it is a method group, the *invocation_expression* is evaluated as a method invocation.
-  - If it is a value of a delegate_type, the *invocation_expression* is evaluated as a delegate invocation.
-  - If it is neither a method group nor a value of a *delegate_type*, a binding-time error occurs.
 - If `E` is a property access, indexer access, variable, or value, the type of which is `T`, and
   and an extension member lookup of `I` in `T` with `K` type parameters produces a match, then:
   - `E.I` is evaluated (same as "member access" section).
-  - If it is a method group, the *invocation_expression* is evaluated as a method invocation 
-    (note this includes extension method invocations).
+  - If it is a method group, the *invocation_expression* is evaluated as a method invocation
+    (ie. first attempting to find applicable candidates in the method group then using overload resolution,
+    or attempting to process `E.I` as a extension method invocation).
   - If it is a value of a delegate_type, the *invocation_expression* is evaluated as a delegate invocation.
   - If it is neither a method group nor a value of a *delegate_type*, a binding-time error occurs.
+- If `E` is classified as a type and an extension member lookup of `I` in `E` with `K` type parameters
+  produces a match, then:
+  - ...
 - Otherwise, if `E` is a property access, indexer access, variable, or value, then an attempt
   is made to process the invocation as an extension method invocation.
   If this fails, then no applicable methods exist, and a binding-time error occurs.
