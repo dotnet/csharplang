@@ -500,12 +500,16 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
-- Otherwise, an attempt is made to process `E.I` as an extension method invocation. 
+- Otherwise, an attempt is made to process `E.I` as an extension method invocation.
   If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
 Note: the path to extension member lookup and extension method invocation from this section
-is only for empty lookup results. We can also get to extension member lookup and extension method invocation
-in scenarios where lookup yields a method group but the candidates get filtered out by applicability rules.
+is only for empty results from member lookup and extension member lookup.
+We can also get to extension member lookup and extension method invocation
+in:
+1. invocation scenarios where the set of *applicable* candidate methods is empty.
+2. indexer access scenarios where the set of *applicable* candidate indexers is empty.
+
 That is covered elsewhere.
 
 TODO Is the "where `T` is not a type parameter" portion still relevant?
@@ -564,12 +568,6 @@ Note: there are two ways to get to extension method invocation:
 
 The [extension method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12893-extension-method-invocations)
 remain unchanged.
-
-### Array access
-
-https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128112-array-access
-
-TODO2 need to fall back to extension types that are compatible with the given *array_type*.
 
 ### Indexer access
 
@@ -736,11 +734,6 @@ has a string property, an assignment of a string to that property will fail, as
 extension member lookup will find the `int` property and stop there.  
 
 For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
-
-### Element access
-
-https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117103-indexer-access
-TODO
 
 ### Operators
 
