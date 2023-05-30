@@ -739,12 +739,22 @@ TODO
 User-defined conversion should be allowed, except where it conflicts with a built-in
 conversion (such as with an underlying type).  
 
+### Collection initializers
+
+TODO
+https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128164-collection-initializers
+Explain how extension types factor in when resolving `Add` calls.
+
 ### Method group conversions
 
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions
 TODO A single method is selected corresponding to a method invocation, 
 but with some tweaks related to normal form and optional parameters.  
 TODO There's also the scenario where a method group contains a single method (lambda improvements).  
+TODO There's also the scenario where method groups have a natural type even in the presence
+  of multiple extension methods, and even though the scenario remains an error for other reasons.
+  > A method group has a natural type if all candidate methods in the method group have a common signature.
+    (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
 
 ## Implementation details
 
