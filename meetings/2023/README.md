@@ -21,7 +21,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed May 31, 2023
 
-- Collection literals (Cyrus)
+- Collection literals (Cyrus) - https://github.com/captainsafia/csharplang/blob/main/meetings/working-groups/collection-literals/CL-LDM-05-31-2023.md
 
 ## Wed Mar 15, 2023
 
