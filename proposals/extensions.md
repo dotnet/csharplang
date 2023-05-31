@@ -511,14 +511,15 @@ We can also get to extension member lookup and extension method invocation
 in:
 1. invocation scenarios where the set of *applicable* candidate methods is empty.
 2. indexer access scenarios where the set of *applicable* candidate indexers is empty.
+3. TODO there may be more scenarios (operator resolution, delegate conversion, natural function types)
 
-That is covered elsewhere.
+That is covered below.
 
 TODO Is the "where `T` is not a type parameter" portion still relevant?
 
 ### Method invocations
 
-TL;DR: Instead of falling back to extension method invocation directly, we'll fall back to "extension invocations"
+TL;DR: Instead of falling back to "extension method invocation" directly, we'll fall back to "extension invocations"
 which includes both extension types and extension method invocations.
 
 We modify the [method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations) as follows:
@@ -550,11 +551,11 @@ The *invocation_expression* is evaluated as follows:
   - If it is a method group, the *invocation_expression* is evaluated as a method invocation
     (ie. first attempting to find applicable candidates in the method group then using overload resolution,
     or attempting to process `E.I` as a extension method invocation).
-  - If it is a value of a delegate_type, the *invocation_expression* is evaluated as a delegate invocation.
+  - If it is a value of a *delegate_type*, the *invocation_expression* is evaluated as a delegate invocation.
   - If it is neither a method group nor a value of a *delegate_type*, a binding-time error occurs.
 - If `E` is classified as a type and an extension member lookup of `I` in `E` with `K` type parameters
   produces a match, then:
-  - ...
+  - ... (same as above bullet)
 - Otherwise, if `E` is a property access, indexer access, variable, or value, then an attempt
   is made to process the invocation as an extension method invocation.
   If this fails, then no applicable methods exist, and a binding-time error occurs.
@@ -593,7 +594,7 @@ The binding-time processing of an indexer access of the form `P[A]`, where `P` i
 
 #### Extension indexer access
 
-TODO2
+TODO2 this will be similar to the "extension invocations" rules.
 
 ### Member lookup
 
