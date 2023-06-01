@@ -133,7 +133,7 @@ The following collection literal conversions exist from a collection literal:
     * If `Ei` is a *dictionary_element* `Ki:Vi`, the values `Ki` and `Vi`.
     * If `Ei` is a *spread_element* with enumerated element `Si` with type `dynamic` or `System.Collections.Generic.KeyValuePair<Ki, Vi>`, the values of applicable properties `Key` and `Value` from `Si`.
 
-* To an *interface type* *`I<K, V>`* implemented by `System.Collections.Generic.Dictionary<K, V>` where for each element `Ei`:
+* To an *interface type* *`I<K, V>`* where `I<TKey, TValue>` is implemented by `System.Collections.Generic.Dictionary<TKey, TValue>` where for each element `Ei`:
   * If `Ei` is an *expression_element* then the type of `Ei` is `dynamic`, or the type of `Ei` is a _type_ `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
   * If `Ei` is a *dictionary_element* `Ki:Vi` there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
   * If `Ei` is a *spread_element* with enumerated element type `Si` then the type of `Si` is `dynamic`, or the type of `Si` is a _type_ `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
@@ -145,10 +145,10 @@ The following collection literal conversions exist from a collection literal:
     * If `Ei` is an *expression_element*, the expression `Ei`.
     * If `Ei` is a *spread_element*, the enumerated item.
 
-* To an *interface type* *`I<T>`* implemented by `System.Collections.Generic.List<T>` where for each element `Ei`:
-  * If `Ei` is an *expression_element* there is an implicit conversion from `Ei` to `T`.
-  * If `Ei` is a *dictionary_element* `Ki:Vi`, then `T` is a _type_ `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * If `Ei` is a *spread_element* with enumerated element type `Si` there is an implicit conversion from `Si` to `T`.
+* To an *interface type* *`I<T0>`* where `I<T>` is implemented by `System.Collections.Generic.List<T>` where for each element `Ei`:
+  * If `Ei` is an *expression_element* there is an implicit conversion from `Ei` to `T0`.
+  * If `Ei` is a *dictionary_element* `Ki:Vi`, then `T0` is a _type_ `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * If `Ei` is a *spread_element* with enumerated element type `Si` there is an implicit conversion from `Si` to `T0`.
 
 Types for which there is an implicit collection literal conversion from a collection literal are the valid *target types* for that collection literal.
 
