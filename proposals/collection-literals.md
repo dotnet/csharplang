@@ -138,7 +138,7 @@ The following collection literal conversions exist from a collection literal:
   * If `Ei` is a *dictionary_element* `Ki:Vi` there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
   * If `Ei` is a *spread_element* with enumerated element type `Si` then the type of `Si` is `dynamic`, or the type of `Si` is a _type_ `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
 
-* To a *type* that implements `System.Collections.IEnumerable` where for each element `Ei`:
+* To a *type* that implements `System.Collections.IEnumerable` where:
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter `int capacity`.
   * No element `Ei` is a *dictionary_element*.
   * For each element `Ei` there is an applicable instance or extension method `Add` for the single argument from:
