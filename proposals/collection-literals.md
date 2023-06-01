@@ -124,7 +124,7 @@ The following collection literal conversions exist from a collection literal:
   * If `Ei` is a *dictionary_element* `Ki:Vi`, then `T` is a _type_ `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
   * If `Ei` is a *spread_element* with *iteration type* `Si` there is an implicit conversion from `Si` to `T`.
 
-* To a *type* with an associated *[builder](#construct-methods)* where there is an implicit collection literal conversion from the collection literal to the *builder argument type*.
+* To a *type* with an associated *[builder](#construct-methods)* where there is an implicit collection literal conversion from the collection literal to the *array* or *span* *builder argument type*.
 
 * To a *type* that implements `System.Collections.IDictionary` where:
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
