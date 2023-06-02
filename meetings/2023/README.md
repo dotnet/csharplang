@@ -21,9 +21,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Collection literals continued (Cyrus) - https://github.com/captainsafia/csharplang/blob/main/meetings/working-groups/collection-literals/CL-LDM-05-31-2023.md
 
-## Wed May 31, 2023
-
-- Collection literals (Cyrus) - https://github.com/captainsafia/csharplang/blob/main/meetings/working-groups/collection-literals/CL-LDM-05-31-2023.md
 
 ## Wed Mar 15, 2023
 
@@ -31,6 +28,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Wed May 31, 2023
+
+[C# Language Design Meeting for May 31st, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-31.md)
+
+- Collection literals
 
 ## Wed May 17, 2023
 
