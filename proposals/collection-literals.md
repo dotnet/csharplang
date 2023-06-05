@@ -117,36 +117,44 @@ A *collection literal conversion* allows a collection literal expression to be c
 
 The following implicit *collection literal conversions* exist from a collection literal expression:
 
-* To a single dimensional *array type* `T[]`, or a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`, where for each element `Ei`:
-  * If `Ei` is an *expression element* there is an implicit conversion from `Ei` to `T`.
-  * If `Ei` is a *dictionary element* `Ki:Vi`, then `T` is a type `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * If `Ei` is a *spread element* with *iteration type* `Si` there is an implicit conversion from `Si` to `T`.
+* To a single dimensional *array type* `T[]`, or a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`, where:
+  * For each *expression element* `Ei` there is an implicit conversion from `Ei` to `T`.
+  * For each *dictionary element* `Ki:Vi`, `T` is a type `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * For each *spread element* `Si` there is an implicit conversion from the *iteration type* of `Si` to `T`.
 
 * To a *type* with an associated *[builder](#construct-methods)* where there is an implicit collection literal conversion from the collection literal to the *span type* of the builder argument.
 
 * To a *type* that implements `System.Collections.IDictionary` where:
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
-  * For each element `Ei` there is an applicable instance indexer for the key value pair from:
-    * If `Ei` is an *expression element* with type `dynamic` or `System.Collections.Generic.KeyValuePair<Ki, Vi>`, the values of applicable properties `Key` and `Value` from `Ei`.
-    * If `Ei` is a *dictionary element* `Ki:Vi`, the values `Ki` and `Vi`.
-    * If `Ei` is a *spread element* with *iteration type* `dynamic` or `System.Collections.Generic.KeyValuePair<Ki, Vi>`, the values of applicable properties `Key` and `Value` from the *iteration variable*.
+  * For each *expression element* `Ei`:
+    * the type of `Ei` is `dynamic` and there is an applicable indexer setter that can be invoked with two `dynamic` arguments, or
+    * the type of `Ei` is a type `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
+  * For each *dictionary element* `Ki:Vi`, there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
+  * For each *spread element* `Si`:
+    * the *iteration type* of `Si` is `dynamic` and there is an applicable indexer setter that can be invoked with two `dynamic` arguments, or
+    * the *iteration type* is `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
 
-* To an *interface type* *`I<K, V>`* where `I<TKey, TValue>` is implemented by `System.Collections.Generic.Dictionary<TKey, TValue>` and where for each element `Ei`:
-  * If `Ei` is an *expression element* then the type of `Ei` is `dynamic`, or the type of `Ei` is a type `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * If `Ei` is a *dictionary element* `Ki:Vi` there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * If `Ei` is a *spread element* with *iteration type* `dynamic`, or `System.Collections.Generic.KeyValuePair<Ki, Vi>` where there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+_Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?_
+
+* To an *interface type* *`I<K, V>`* where:
+  * `System.Collections.Generic.Dictionary<TKey, TValue>` implements `I<TKey, TValue>`.
+  * For each *expression element* `Ei`, the type of `Ei` is `dynamic`, or the type of `Ei` is a type `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * For each *dictionary element* `Ki:Vi` there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * For each *spread element* `Si`, the *iteration type* of `Si` is `dynamic`, or the *iteration type* is `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
 
 * To a *type* that implements `System.Collections.IEnumerable` where:
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
-  * No element `Ei` is a *dictionary element*.
-  * For each element `Ei` there is an applicable instance or extension method `Add` for the single argument from:
-    * If `Ei` is an *expression element*, the expression `Ei`.
-    * If `Ei` is a *spread element*, the *iteration variable* of the spread element.
+  * For each *expression element* `Ei` there is an applicable instance or extension method `Add` for a single argument `Ei`.
+  * For each *spread element* `Si` there is an applicable instance or extension method `Add` for a single argument of the *iteration type* of `Si`.
+  * There are no *dictionary elements*.
 
-* To an *interface type* *`I<T0>`* where `I<T>` is implemented by `System.Collections.Generic.List<T>` and where for each element `Ei`:
-  * If `Ei` is an *expression element* there is an implicit conversion from `Ei` to `T0`.
-  * If `Ei` is a *dictionary element* `Ki:Vi`, then `T0` is a type `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * If `Ei` is a *spread element* with *iteration type* `Si` there is an implicit conversion from `Si` to `T0`.
+_Open issue: Should we allow dictionary elements if we can reliably determine the target type is a collection of `KeyValuePair<K, V>`?_
+
+* To an *interface type* *`I<T0>`* where:
+  * `System.Collections.Generic.List<T>` implements `I<T>`.
+  * For each *expression element* `Ei` there is an implicit conversion from `Ei` to `T0`.
+  * For each *dictionary element* `Ki:Vi`, `T0` is a type `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * For each *spread element* `Si` there is an implicit conversion from the *iteration type* of `Si` to `T0`.
 
 Types for which there is an implicit collection literal conversion from a collection literal are the valid *target types* for that collection literal.
 
@@ -351,7 +359,7 @@ _Which overload should we prefer in the following?_
 F([1:2]); // ambiguous?
 
 static void F<K, V>(IEnumerable<KeyValuePair<K, V>> e) { }
-static void F<K, V>(IDictionary<K, V> d) { }
+static void F<K, V>(IDictionary d) { }
 ```
 
 ## Span types
