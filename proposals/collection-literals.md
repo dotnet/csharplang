@@ -113,6 +113,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
     * The behavior of collection literals with collections that are not well-behaved is undefined.
 
 ## Conversions
+
 A *collection literal conversion* allows a collection literal expression to be converted to a type.
 
 The following implicit *collection literal conversions* exist from a collection literal expression:
