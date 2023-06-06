@@ -481,9 +481,9 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
   - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
 
-- \***If `E` is classified as an extension, 
+- \***If `E.I` is not invoked and `E` is classified as an extension, 
   and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, 
-  then `E.I` is evaluated and classified as follows:**  
+  then `E.I` is evaluated and classified as follows:**  // TODO3 this is likely insufficient
   ...
 - \***If `E.I` is not invoked and `E` is classified as a type, if `E` is not a type parameter, 
   and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
@@ -493,10 +493,10 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   and a member lookup of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:  
   ...
-- \***(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
-  the type of which is `T`, where `T` is an extension type, and 
+- \***(only relevant in phase B) If `E.I` is not invoked and `E` is a property access, 
+  indexer access, variable, or value, the type of which is `T`, where `T` is an extension type, and 
   a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, 
-  then `E.I` is evaluated and classified as follows:**  
+  then `E.I` is evaluated and classified as follows:**  // TODO3 this is likely insufficient
   ...
 - \***(only relevant in phase B) If `E.I` is not invoked and `E` is a property access, indexer access, variable, or value, 
   the type of which is `T`, where `T` is not a type parameter, and 
@@ -514,12 +514,47 @@ We can also get to extension invocation in:
 
 That is covered below.
 
-TODO Is the "where `T` is not a type parameter" portion still relevant?
+TODO3 There's a problem with lookups in extension types that need to continue up into the underlying type. Should
+  those be done in "member lookup" or in "member access"?
+  If we put it in "member lookup", then a lookup of a member in an underlying type will start looking in the underlying type,
+  then look in the extension, then again in the underlying type.
+  If we put it in "member access", then we don't get a single method group that bundles members of an extension with members of the underlying type.
+
+----
+TODO3: Problem with invocation from method from underlying type:
+
+```
+extension E for C
+{
+  void M()
+  {
+    this.MethodFromUnderlying(); // problem
+    MethodFromUnderlying(); // not covered
+    _ = this.PropertyFromUnderlying; // covered by member access
+    _ = PropertyFromUnderlying; // not covered
+  }
+}
+
+class C
+{
+  void M()
+  {
+    this.ExtensionMethod(); // covered by extension invocation
+    ExtensionMethod(); // not available
+    _ = this.ExtensionProperty; // covered by member access
+    _ = ExtensionProperty; // not covered
+  }
+}
+```
+
+Few ways to fix this gap:
+1. add an "underlying type invocation" section, call it from "member access"
+2. enhance the member lookup in "member access" to include members from underlying type
+3. enhance "member lookup" to include members from underlying type
 
 ### Method invocations
 
-TL;DR: Instead of falling back to "extension method invocation" directly, we'll fall back to "extension invocations"
-which includes both extension types and extension method invocations.
+TL;DR: Instead of falling back to "extension method invocation" directly, we'll now fall back to "extension invocations" which replaces it.
 
 We modify the [method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations) as follows:
 
@@ -591,17 +626,17 @@ The search proceeds as follows:
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types or methods, those will be considered second.
 
-  - For the `Type` case:
+  - First, try extension types:
     - Check which extension types in the current scope are compatible with the given underlying type `Type` and 
       collect resulting compatible substituted extension types.
-    - Perform member lookup for `identifier` in each compatible substituted extension type
-      (note this takes into account that the member is invoked).
-TODO3 This will cause us to look into the underlying type again. Confirm whether that's okay.
+    - Perform member lookup for `identifier` in each compatible substituted extension type.
+      (note this takes into account that the member is invoked)
+      (note this doesn't include members from the underlying type)
     - Merge the results
     - Next, members that are hidden by other members are removed from the set.  
       (Same rules as in member lookup, but "base type" is extended to mean "base extension")
     - Finally, having removed hidden members:
-      - If the set is empty, proceed to the next enclosing scope.
+      - If the set is empty, proceed to extension methods below.
       - If the set consists of a single member that is not a method, then:
         - If it is a value of a *delegate_type*, the *invocation_expression* 
           is evaluated as a delegate invocation.
@@ -611,23 +646,21 @@ TODO3 This will cause us to look into the underlying type again. Confirm whether
           is evaluated as a dynamic member invocation.
       - If the set contains only methods, we remove all the methods that are not 
         accessible or applicable (see "method invocations").
-        - If the set is empty, proceed to the next enclosing scope.
+        - If the set is empty, proceed to extension methods below.
         - Otherwise, overload resolution is applied to the candidate methods:
           - If a single best method is found, the *invocation_expression* 
             is evaluated as the invocation of this method.
           - If no single best method is found, a compile-time error occurs.
 
-  - For the `expr` case where the expression has type `Type`:
-    - We do the same search for an extension type member as above with the given underlying type `Type`
-      but proceed to searching extension methods whenever we encounter an empty set,
-      before proceeding to the next enclosing scope.
-      - \[...same as above...]
+  - Next, try extension methods (only for the `expr` case):
     - Check which extension methods in the current scope are eligible.
       - If the set is empty, proceed to the next enclosing scope.
       - Otherwise, overload resolution is applied to the candidate set. 
         - If a single best method is found, the *invocation_expression* 
           is evaluated as a static method invocation.
         - If no single best method is found, a compile-time error occurs.
+
+  - Proceed to the next enclosing scope
 - If no extension type member or extension method is found to be suitable for the invocation 
   in any enclosing scope, a compile-time error occurs.
 
