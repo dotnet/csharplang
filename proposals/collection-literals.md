@@ -128,11 +128,11 @@ The following implicit *collection literal conversions* exist from a collection 
 * To a *type* that implements `System.Collections.IDictionary` where:
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
   * For each *expression element* `Ei`:
-    * the type of `Ei` is `dynamic` and there is an applicable indexer setter that can be invoked with two `dynamic` arguments, or
+    * the type of `Ei` is `dynamic` and there is an [applicable](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation) indexer setter that can be invoked with two `dynamic` arguments, or
     * the type of `Ei` is a type `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
   * For each *dictionary element* `Ki:Vi`, there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
   * For each *spread element* `Si`:
-    * the *iteration type* of `Si` is `dynamic` and there is an applicable indexer setter that can be invoked with two `dynamic` arguments, or
+    * the *iteration type* of `Si` is `dynamic` and there is an [applicable](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation) indexer setter that can be invoked with two `dynamic` arguments, or
     * the *iteration type* is `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
 
 _Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?_
