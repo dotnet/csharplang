@@ -452,7 +452,7 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
 
 TL;DR: After doing an unsuccessful member lookup in a type, we'll perform an member lookup
 in the underlying type if we were dealing with an extension, and if that is still unsuccessful,
-we'll perform an extension member lookup.
+we'll perform an extension member lookup for non-invocations or attempt an extension invocation for invocations.
 
 We modify the [member access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access) as follows:
 
@@ -480,11 +480,12 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
   - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
+
 - \***If `E` is classified as an extension, 
   and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
-- \***If `E` is classified as a type, if `E` is not a type parameter, 
+- \***If `E.I` is not invoked and `E` is classified as a type, if `E` is not a type parameter, 
   and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
@@ -497,18 +498,16 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
-- \***(only relevant in phase B) If `E` is a property access, indexer access, variable, or value, 
+- \***(only relevant in phase B) If `E.I` is not invoked and `E` is a property access, indexer access, variable, or value, 
   the type of which is `T`, where `T` is not a type parameter, and 
   an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
-- Otherwise, an attempt is made to process `E.I` as an extension method invocation.
+- Otherwise, an attempt is made to process `E.I` as an \***extension invocation**.
   If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
-Note: the path to extension member lookup and extension method invocation from this section
-is only for empty results from member lookup and extension member lookup.
-We can also get to extension member lookup and extension method invocation
-in:
+Note: the path to extension invocation from this section is only for empty results from member lookup.
+We can also get to extension invocation in:
 1. invocation scenarios where the set of *applicable* candidate methods is empty.
 2. indexer access scenarios where the set of *applicable* candidate indexers is empty.
 3. TODO there may be more scenarios (operator resolution, delegate conversion, natural function types)
@@ -530,40 +529,125 @@ We modify the [method invocations rules](https://github.com/dotnet/csharpstandar
 
 ### Extension invocations
 
-In a method invocation of one of the forms
+We replace the [extension method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12893-extension-method-invocations)
+with the following:
+
+In an invocation of one of the forms
 
 ```csharp
-«E» . «I» ( )
-«E» . «I» ( «args» )
-«E» . «I» < «typeargs» > ( )
-«E» . «I» < «typeargs» > ( «args» )
+«Type» . «identifier» ( )  
+«Type» . «identifier» ( «args» )  
+«Type» . «identifier» < «typeargs» > ( )  
+«Type» . «identifier» < «typeargs» > ( «args» )
+«expr» . «identifier» ( )  
+«expr» . «identifier» ( «args» )  
+«expr» . «identifier» < «typeargs» > ( )  
+«expr» . «identifier» < «typeargs» > ( «args» )
 ```
 
 if the normal processing of the invocation finds no applicable methods,
-an attempt is made to process the construct as an extension invocation.
-This includes methods from extension types and extension methods.
-If «E» or any of the «args» has compile-time type `dynamic`, extensions will not apply.
+an attempt is made to process the construct as an invocation of an extension type member
+or an extension method.  
+If `expr` or any of te «args» has compile-time type `dynamic`, 
+extensions (extension type members or extension methods) will not apply.
 
-The *invocation_expression* is evaluated as follows:
-- If `E` is a property access, indexer access, variable, or value, the type of which is `T`, and
-  and an extension member lookup of `I` in `T` with `K` type parameters produces a match, then:
-  - `E.I` is evaluated (same as "member access" section).
-  - If it is a method group, the *invocation_expression* is evaluated as a method invocation
-    (ie. first attempting to find applicable candidates in the method group then using overload resolution,
-    or attempting to process `E.I` as a extension method invocation).
-  - If it is a value of a *delegate_type*, the *invocation_expression* is evaluated as a delegate invocation.
-  - If it is neither a method group nor a value of a *delegate_type*, a binding-time error occurs.
-- If `E` is classified as a type and an extension member lookup of `I` in `E` with `K` type parameters
-  produces a match, then:
-  - ... (same as above bullet)
-- Otherwise, if `E` is a property access, indexer access, variable, or value, then an attempt
-  is made to process the invocation as an extension method invocation.
-  If this fails, then no applicable methods exist, and a binding-time error occurs.
+This succeeds if we find either:
+- for the `Type` case,
+  an substituted compatible implicit extension type `X` for `Type`
+  so that the corresponding invocation can take place:
+```csharp
+X . «identifier» ( )
+X . «identifier» ( «args» )
+X . «identifier» < «typeargs» > ( )
+X . «identifier» < «typeargs» > ( «args» )
+```
+- for the `expr` case where the expression has type `Type`,
+  a substituted compatible implicit extension type `X` for `Type`
+  so that the corresponding invocation can take place:
+```csharp
+((X)expr) . «identifier» ( )
+((X)expr) . «identifier» ( «args» )
+((X)expr) . «identifier» < «typeargs» > ( )
+((X)expr) . «identifier» < «typeargs» > ( «args» )
+```
+- for the `expr` case, the best *type_name* `C`
+  so that the corresponding static extension method invocation can take place:
+```csharp
+C . «identifier» ( «expr» )
+C . «identifier» ( «expr» , «args» )
+C . «identifier» < «typeargs» > ( «expr» )
+C . «identifier» < «typeargs» > ( «expr» , «args» )
+```
 
-Note: there are two ways to get to extension method invocation:
-1. if the extension member lookup produced a match, but the method invocation processing resulted 
-   in no applicable candidates, so fell back to extension method invocation.
-2. if the extension member lookup produced no match.
+\[Extension method eligibility remains unchanged]
+
+The search proceeds as follows:
+
+- Starting with the closest enclosing type declaration, continuing with each type declaration,
+  then continuing with each enclosing namespace declaration, and ending with
+  the containing compilation unit, successive attempts are made:
+  - If the given type, namespace or compilation unit directly contains extension types or methods,
+    those will be considered first.
+  - If namespaces imported by using-namespace directives in the given namespace or 
+    compilation unit directly contain extension types or methods, those will be considered second.
+
+  - For the `Type` case:
+    - Check which extension types in the current scope are compatible with the given underlying type `Type` and 
+      collect resulting compatible substituted extension types.
+    - Perform member lookup for `identifier` in each compatible substituted extension type
+      (note this takes into account that the member is invoked).
+TODO3 This will cause us to look into the underlying type again. Confirm whether that's okay.
+    - Merge the results
+    - Next, members that are hidden by other members are removed from the set.  
+      (Same rules as in member lookup, but "base type" is extended to mean "base extension")
+    - Finally, having removed hidden members:
+      - If the set is empty, proceed to the next enclosing scope.
+      - If the set consists of a single member that is not a method, then:
+        - If it is a value of a *delegate_type*, the *invocation_expression* 
+          is evaluated as a delegate invocation.
+        - If it is a value of a *function_pointer_type*, the *invocation_expression* 
+          is evaluated as a function pointer invocation.
+        - If it is a value of a type `dynamic`, the *invocation_expression* 
+          is evaluated as a dynamic member invocation.
+      - If the set contains only methods, we remove all the methods that are not 
+        accessible or applicable (see "method invocations").
+        - If the set is empty, proceed to the next enclosing scope.
+        - Otherwise, overload resolution is applied to the candidate methods:
+          - If a single best method is found, the *invocation_expression* 
+            is evaluated as the invocation of this method.
+          - If no single best method is found, a compile-time error occurs.
+
+  - For the `expr` case where the expression has type `Type`:
+    - We do the same search for an extension type member as above with the given underlying type `Type`
+      but proceed to searching extension methods whenever we encounter an empty set,
+      before proceeding to the next enclosing scope.
+      - \[...same as above...]
+    - Check which extension methods in the current scope are eligible.
+      - If the set is empty, proceed to the next enclosing scope.
+      - Otherwise, overload resolution is applied to the candidate set. 
+        - If a single best method is found, the *invocation_expression* 
+          is evaluated as a static method invocation.
+        - If no single best method is found, a compile-time error occurs.
+- If no extension type member or extension method is found to be suitable for the invocation 
+  in any enclosing scope, a compile-time error occurs.
+
+The preceding rules mean:
+- that instance methods take precedence over extension methods, 
+- that extension type members available in a given namespace take precedence 
+  over extension methods in that namespace,
+- that extension type members available in inner namespace declarations take precedence
+  over extension type members available in outer namespace declarations,
+- that extension methods available in inner namespace declarations take precedence
+  over extension methods available in outer namespace declarations, 
+- that extension type members declared directly in a namespace take precedence
+  over extension type members imported into that same namespace with a using namespace directive,
+- and that extension methods declared directly in a namespace take precedence
+  over extension methods imported into that same namespace with a using namespace directive.
+
+TODO3 what to do about deconstruction, foreach, and other pattern-based invocations?
+  Should we find a property named `Deconstruct` with the appropriate delegate, function or dynamic type?
+
+TODO clarify behavior for extension on `object` or `dynamic` used as `dynamic.M()`?
 
 ### Extension method invocations
 
@@ -594,7 +678,7 @@ The binding-time processing of an indexer access of the form `P[A]`, where `P` i
 
 #### Extension indexer access
 
-TODO2 this will be similar to the "extension invocations" rules.
+TODO this will be similar to the "extension invocations" rules.
 
 ### Member lookup
 
@@ -603,6 +687,9 @@ TL;DR: Member lookup understands that extensions inherit from their base extensi
 We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) 
 and [base types rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1252-base-types) 
 as follows (only change is what counts as "base type"):
+
+If a member is a method or event, or if it is a constant, field or property of either a delegate type or
+a function type or the type `dynamic`, then the member is said to be invocable.
 
 A member lookup of a name `N` with `K` type arguments in a type `T` is processed as follows:
 
@@ -681,7 +768,7 @@ Underlying<string?> u3; // Extensions<string?> is a compatible extension with u3
 TL;DR: Given an underlying type, we'll search enclosing types and namespaces 
 (and their imports) for compatible extensions and for each "layer" we'll do member lookups.  
 
-If the *simple_name* or *member_access* occurs as the *primary_expression* of an *invocation_expression*, 
+If the *member_access* occurs as the *primary_expression* of an *invocation_expression*, 
 the member is said to be invoked.
 
 Given an underlying type `U` and an identifier `I`, the objective is to find an extension member `X.I`, if possible.
