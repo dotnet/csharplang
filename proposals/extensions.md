@@ -514,14 +514,8 @@ We can also get to extension invocation in:
 
 That is covered below.
 
-TODO3 There's a problem with lookups in extension types that need to continue up into the underlying type. Should
-  those be done in "member lookup" or in "member access"?
-  If we put it in "member lookup", then a lookup of a member in an underlying type will start looking in the underlying type,
-  then look in the extension, then again in the underlying type.
-  If we put it in "member access", then we don't get a single method group that bundles members of an extension with members of the underlying type.
-
 ----
-TODO3: Problem with invocation from method from underlying type:
+TODO3: Problem with invocation of method from underlying type:
 
 ```
 extension E for C
