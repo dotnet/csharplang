@@ -1,15 +1,15 @@
 # Extension types
 
-TODO3 disallow variance in type parameters of extensions
-TODO3 No duplicate base extensions (to avoid ambiguities)
-TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.
+TODO3 disallow variance in type parameters of extensions  
+TODO3 No duplicate base extensions (to avoid ambiguities)  
+TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.  
 
-TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them
+TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
-TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
-TODO2 extensions are disallowed within interfaces with variant type parameters
-TODO2 We should likely allow constructors and `required` properties
-TODO attributes and attribute targets
+TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces  
+TODO2 extensions are disallowed within interfaces with variant type parameters  
+TODO2 We should likely allow constructors and `required` properties  
+TODO attributes and attribute targets  
 
 ## Summary
 [summary]: #summary
@@ -101,7 +101,7 @@ An example with multiple base explicit extension:
 explicit extension DiamondExtension for NarrowerUnderlyingType : BaseExtension1, Interface1, BaseExtension2, Interface2 { }`
 ```
 
-TODO should we have a naming convention like `Extension` suffixes? (`DataObjectExtension`)
+TODO should we have a naming convention like `Extension` suffixes? (`DataObjectExtension`)  
 
 ## Extension type
 
@@ -136,7 +136,7 @@ of an extension declaration.
 TODO2 we need rules to only allow an underlying type that is compatible with the base extensions.  
 
 TODO should the underlying type be inferred when none was specified but
-base extensions are specified?
+  base extensions are specified?
 
 ### Modifiers
 
@@ -220,6 +220,22 @@ access to `M` can take one of the following forms:
   a class derived from `T`, where `T` is the class `D`, or a class type constructed from `D`.
 - A *primary_expression* of the form `base.M`.
 - A *primary_expression* of the form `base[`*argument_list*`]`.
+
+```csharp
+class Base
+{
+    protected void M() { }
+}
+extension E1 for Base
+{
+    // cannot use Base.M
+    protected void M2() { }
+}
+extension E2 for Base : E1
+{
+    // can use E1.M2
+}
+```
 
 ### Extension type members
 
