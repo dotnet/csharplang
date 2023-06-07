@@ -3,8 +3,6 @@
 TODO3 disallow variance in type parameters of extensions
 TODO3 No duplicate base extensions (to avoid ambiguities)
 TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.
-TODO3 meaning of `using static SomeType;` (probably should look for extension types declared within `SomeType`)
-TODO3 meaning of `using static Extension;`
 
 TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
@@ -450,9 +448,9 @@ The *simple_name* with identifier `I` is evaluated and classified as follows:
 
 ### Member access
 
-TL;DR: After doing an unsuccessful member lookup in a type, we'll perform an member lookup
-in the underlying type if we were dealing with an extension, and if that is still unsuccessful,
-we'll perform an extension member lookup for non-invocations or attempt an extension invocation for invocations.
+TL;DR: After doing an unsuccessful member lookup in a type,
+we'll perform an extension member lookup for non-invocations
+or attempt an extension invocation for invocations.
 
 We modify the [member access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access) as follows:
 
@@ -481,10 +479,6 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
   - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
 
-- \***If `E.I` is not invoked and `E` is classified as an extension, 
-  and if a member lookup of `I` in underlying type `U` with `K` type parameters produces a match, 
-  then `E.I` is evaluated and classified as follows:**  // TODO3 this is likely insufficient
-  ...
 - \***If `E.I` is not invoked and `E` is classified as a type, if `E` is not a type parameter, 
   and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
   then `E.I` is evaluated and classified as follows:**  
@@ -492,11 +486,6 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
 - If `E` is a property access, indexer access, variable, or value, the type of which is `T`, 
   and a member lookup of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:  
-  ...
-- \***(only relevant in phase B) If `E.I` is not invoked and `E` is a property access, 
-  indexer access, variable, or value, the type of which is `T`, where `T` is an extension type, and 
-  a member lookup of `I` in underlying type `U` with `K` type arguments produces a match, 
-  then `E.I` is evaluated and classified as follows:**  // TODO3 this is likely insufficient
   ...
 - \***(only relevant in phase B) If `E.I` is not invoked and `E` is a property access, indexer access, variable, or value, 
   the type of which is `T`, where `T` is not a type parameter, and 
@@ -513,38 +502,6 @@ We can also get to extension invocation in:
 3. TODO there may be more scenarios (operator resolution, delegate conversion, natural function types)
 
 That is covered below.
-
-----
-TODO3: Problem with invocation of method from underlying type:
-
-```
-extension E for C
-{
-  void M()
-  {
-    this.MethodFromUnderlying(); // problem
-    MethodFromUnderlying(); // not covered
-    _ = this.PropertyFromUnderlying; // covered by member access
-    _ = PropertyFromUnderlying; // not covered
-  }
-}
-
-class C
-{
-  void M()
-  {
-    this.ExtensionMethod(); // covered by extension invocation
-    ExtensionMethod(); // not available
-    _ = this.ExtensionProperty; // covered by member access
-    _ = ExtensionProperty; // not covered
-  }
-}
-```
-
-Few ways to fix this gap:
-1. add an "underlying type invocation" section, call it from "member access"
-2. enhance the member lookup in "member access" to include members from underlying type
-3. enhance "member lookup" to include members from underlying type
 
 ### Method invocations
 
@@ -628,7 +585,7 @@ The search proceeds as follows:
       (note this doesn't include members from the underlying type)
     - Merge the results
     - Next, members that are hidden by other members are removed from the set.  
-      (Same rules as in member lookup, but "base type" is extended to mean "base extension")
+      (note: "base types" means "base extensions and underlying type" for extension types)
     - Finally, having removed hidden members:
       - If the set is empty, proceed to extension methods below.
       - If the set consists of a single member that is not a method, then:
@@ -671,9 +628,6 @@ The preceding rules mean:
 - and that extension methods declared directly in a namespace take precedence
   over extension methods imported into that same namespace with a using namespace directive.
 
-TODO3 what to do about deconstruction, foreach, and other pattern-based invocations?
-  Should we find a property named `Deconstruct` with the appropriate delegate, function or dynamic type?
-
 TODO clarify behavior for extension on `object` or `dynamic` used as `dynamic.M()`?
 
 ### Extension method invocations
@@ -709,7 +663,7 @@ TODO this will be similar to the "extension invocations" rules.
 
 ### Member lookup
 
-TL;DR: Member lookup understands that extensions inherit from their base extensions, but not from `object`.
+TL;DR: Member lookup on an extension type includes members from base extensions and the underlying type.
 
 We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) 
 and [base types rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1252-base-types) 
@@ -720,22 +674,30 @@ a function type or the type `dynamic`, then the member is said to be invocable.
 
 A member lookup of a name `N` with `K` type arguments in a type `T` is processed as follows:
 
-- First, a set of accessible members named `N` is determined:
-  - If `T` is a type parameter, then the set is the union of the sets of accessible members named `N` in each of the types specified as a primary constraint or secondary constraint for `T`, along with the set of accessible members named `N` in `object`.
-  - Otherwise, the set consists of all accessible members named `N` in `T`, including inherited members and **for non-extension types** the accessible members named `N` in `object`. If `T` is a constructed type, the set of members is obtained by substituting type arguments as described in §14.3.3. Members that include an `override` modifier are excluded from the set.
+- First, a set of accessible members named `N` is determined:
+  - If `T` is a type parameter, then the set is the union of the sets of accessible members named `N` in each of the types specified as a primary constraint or secondary constraint for `T`, along with the set of accessible members named `N` in `object`.
+  - \**If `T` is an extension type , then the set is the union of the sets of accessible members named `N` in each of the base extensions, along with the set of accessible members named `N` in the extended type.**
+  - Otherwise, the set consists of all accessible members named `N` in `T`, including inherited members and the accessible members named `N` in `object`. If `T` is a constructed type, the set of members is obtained by substituting type arguments. Members that include an `override` modifier are excluded from the set.
 - Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process might be able to infer the type arguments.
 - Next, if the member is invoked, all non-invocable members are removed from the set.
-- Next, members that are hidden by other members are removed from the set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied:
+- Next, members that are hidden by other members are removed from the set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied:
   - If `M` is a constant, field, property, event, or enumeration member, then all members declared in a base type of `S` are removed from the set.
-  - If `M` is a type declaration, then all non-types declared in a base type of `S` are removed from the set, and all type declarations with the same number of type parameters as `M` declared in a base type of `S` are removed from the set.
+  - If `M` is a type declaration, then all non-types declared in a base type of `S` are removed from the set, and all type declarations with the same number of type parameters as `M` declared in a base type of `S` are removed from the set.
   - If `M` is a method, then all non-method members declared in a base type of `S` are removed from the set.
 - Next, interface members that are hidden by class members are removed from the set. This step only has an effect if `T` is a type parameter and `T` has both an effective base class other than `object` and a non-empty effective interface set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied if `S` is a class declaration other than `object`:
   - If `M` is a constant, field, property, event, enumeration member, or type declaration, then all members declared in an interface declaration are removed from the set.
-  - If `M` is a method, then all non-method members declared in an interface declaration are removed from the set, and all methods with the same signature as `M` declared in an interface declaration are removed from the set.
+  - If `M` is a method, then all non-method members declared in an interface declaration are removed from the set, and all methods with the same signature as `M` declared in an interface declaration are removed from the set.
 - Finally, having removed hidden members, the result of the lookup is determined:
   - If the set consists of a single member that is not a method, then this member is the result of the lookup.
   - Otherwise, if the set contains only methods, then this group of methods is the result of the lookup.
   - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
+
+### Base types
+
+TL;DR: An extension type inherits from its base extensions and its extended type.
+
+We modify the [base types rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1252-base-types) 
+as follows:
 
 For purposes of member lookup, a type `T` is considered to have the following base types:
 
@@ -746,7 +708,7 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is an *interface_type*, the base types of `T` are the base interfaces of `T` and the class type `object`.
 - If `T` is an *array_type*, the base types of `T` are the class types `System.Array` and `object`.
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
-- \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T`.**
+- \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T` and the extended type of `T`.**
 
 ```csharp
 explicit extension R : U
@@ -790,6 +752,20 @@ Underlying<string?> u3; // Extensions<string?> is a compatible extension with u3
                        // but its usage will produce a warning
 ```
 
+```csharp
+explicit extension E1 for C
+{
+    void M()
+    {
+        this.M2(); // ok, E2 is compatible with type E1 since C is a base type of E1 and E2 extends C
+    }
+}
+implicit extension E2 for C
+{
+    public void M2() { }
+}
+```
+
 ### Extension member lookup
 
 TL;DR: Given an underlying type, we'll search enclosing types and namespaces 
@@ -814,7 +790,7 @@ We process as follows:
   (note this takes into account whether the member is invoked).
 - Merge the results
 - Next, members that are hidden by other members are removed from the set.  
-  (Same rules as in member lookup, but "base type" is extended to mean "base extension")
+  (note: "base types" means "base extensions and underlying type" for extension types)
 - Finally, having removed hidden members, the result of the lookup is determined:
   - If the set is empty, proceed to the next enclosing namespace.
   - If the set consists of a single member that is not a method,
@@ -828,7 +804,9 @@ We process as follows:
   - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
     the result of the lookup is empty.
 
-TODO3 explain static usings
+TODO3 explain static usings:
+  meaning of `using static SomeType;` (probably should look for extension types declared within `SomeType`)
+  meaning of `using static Extension;`
 
 The preceding rules mean that:
 1. extension members available in inner type declarations take precedence over
@@ -872,6 +850,12 @@ TODO There's also the scenario where method groups have a natural type even in t
   of multiple extension methods, and even though the scenario remains an error for other reasons.
   > A method group has a natural type if all candidate methods in the method group have a common signature.
     (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
+
+### Pattern-based invocations and member access
+
+TODO Need to scan through all pattern-based rules for known members to consider whether to include extension type members.
+  If extension methods were already included, then we should certainly include extension type methods.
+  Otherwise, we should consider it (for example `Current` property in `foreach`).
 
 ## Implementation details
 
