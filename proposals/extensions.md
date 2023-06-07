@@ -663,34 +663,8 @@ TODO this will be similar to the "extension invocations" rules.
 
 ### Member lookup
 
-TL;DR: Member lookup on an extension type includes members from base extensions and the underlying type.
-
-We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) 
-and [base types rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1252-base-types) 
-as follows (only change is what counts as "base type"):
-
-If a member is a method or event, or if it is a constant, field or property of either a delegate type or
-a function type or the type `dynamic`, then the member is said to be invocable.
-
-A member lookup of a name `N` with `K` type arguments in a type `T` is processed as follows:
-
-- First, a set of accessible members named `N` is determined:
-  - If `T` is a type parameter, then the set is the union of the sets of accessible members named `N` in each of the types specified as a primary constraint or secondary constraint for `T`, along with the set of accessible members named `N` in `object`.
-  - \**If `T` is an extension type , then the set is the union of the sets of accessible members named `N` in each of the base extensions, along with the set of accessible members named `N` in the extended type.**
-  - Otherwise, the set consists of all accessible members named `N` in `T`, including inherited members and the accessible members named `N` in `object`. If `T` is a constructed type, the set of members is obtained by substituting type arguments. Members that include an `override` modifier are excluded from the set.
-- Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process might be able to infer the type arguments.
-- Next, if the member is invoked, all non-invocable members are removed from the set.
-- Next, members that are hidden by other members are removed from the set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied:
-  - If `M` is a constant, field, property, event, or enumeration member, then all members declared in a base type of `S` are removed from the set.
-  - If `M` is a type declaration, then all non-types declared in a base type of `S` are removed from the set, and all type declarations with the same number of type parameters as `M` declared in a base type of `S` are removed from the set.
-  - If `M` is a method, then all non-method members declared in a base type of `S` are removed from the set.
-- Next, interface members that are hidden by class members are removed from the set. This step only has an effect if `T` is a type parameter and `T` has both an effective base class other than `object` and a non-empty effective interface set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied if `S` is a class declaration other than `object`:
-  - If `M` is a constant, field, property, event, enumeration member, or type declaration, then all members declared in an interface declaration are removed from the set.
-  - If `M` is a method, then all non-method members declared in an interface declaration are removed from the set, and all methods with the same signature as `M` declared in an interface declaration are removed from the set.
-- Finally, having removed hidden members, the result of the lookup is determined:
-  - If the set consists of a single member that is not a method, then this member is the result of the lookup.
-  - Otherwise, if the set contains only methods, then this group of methods is the result of the lookup.
-  - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
+No change to the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup),
+because the changes to the "base types" section means that an extension type inherits members from its base extensions and its extended type.
 
 ### Base types
 
