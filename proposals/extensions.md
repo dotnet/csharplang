@@ -721,6 +721,8 @@ TL;DR: We can determine whether an implicit extension is compatible with a given
 and when successful this process yields an extension type we can use
 (including required substitutions).  
 
+TODO3 we prefer new extension methods over old extension methods. Confirm that is what we want.
+
 An extension type `X` is compatible with given type `U` if:
 - `X` is non-generic and its underlying type is `U`, a base type of `U` or an implemented interface of `U`
 - a possible type substitution on the type parameters of `X` yields underlying type `U`, 
