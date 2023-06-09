@@ -295,44 +295,88 @@ List<string> e3 = [..e1];  // error?
 
 ## Type inference
 ```c#
-AsArray([1, 2, 3]);      // ok: AsArray<int>(int[])
-[4].AsImmutableArray();  // ok: AsImmutableArray<int>(ImmutableArray<int>)
+AsArray([1, 2, 3]); // AsArray<int>(int[])
 
 static T[] AsArray<T>(this T[] arg) => arg;
-static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
 ```
 
-The existing rules for type inference (see [§11.6.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference)) include the following **additions** for *exact inferences* §11.6.3.9, *lower-bound inferences* §11.6.3.10 and *upper-bound inferences* §11.6.3.11. The additions are the same for each section.
+The *natural element type* of a collection literal expression is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of:
+* For each *expression element* `Ei`, the expression `Ei`
+* For each *spread element* `Si`, the *iteration type* of `Si`
 
+The existing [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are extended to include inference from the *natural element type* of collection literal expressions. The following rules are **added**.
+
+> 11.6.3.9 Exact inferences
+> 
 > An *exact inference* *from* a type `U` *to* a type `V` is made as follows:
 > 
-> - If `V` is one of the *unfixed* `Xᵢ` then `U` is added to the set of exact bounds for `Xᵢ`.
-> - Otherwise, sets `V₁...Vₑ` and `U₁...Uₑ` are determined by checking if any of the following cases apply:
->   - `V` is an array type `V₁[...]` and `U` is an array type `U₁[...]` of the same rank
->   - **`V` is a single-dimensional array type `V₁[]` and `U` is a collection literal with element type `U₁`**
->   - `V` is the type `V₁?` and `U` is the type `U₁`
->   - `V` is a constructed type `C<V₁...Vₑ>` and `U` is a constructed type `C<U₁...Uₑ>`
->   - **`V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`**
+> - ...
+> - **Otherwise, if `V` is a single-dimensional array type `V₁[]` or `V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`, then an *exact inference* is made from `U₁` to `V₁`.**
+> - Otherwise, no inferences are made.
+
+> 11.6.3.10 Lower-bound inferences
+> 
+> A *lower-bound inference from* a type `U` *to* a type `V` is made as follows:
 >
->   If any of these cases apply then an *exact inference* is made from each `Uᵢ` to the corresponding `Vᵢ`.
+> - ...
+> - **Otherwise, if `V` is a single-dimensional array type `V₁[]` or `V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`, then a *lower-bound inference* is made from `U₁` to `V₁`.**
+> - Otherwise, no inferences are made.
 
-_How do we recognize that `C<V₁>` has element type `V₁`?_
+> 11.6.3.11 Upper-bound inferences
+> 
+> An *upper-bound inference from* a type `U` *to* a type `V` is made as follows:
+> 
+> - ...
+> - **Otherwise, if `V` is a single-dimensional array type `V₁[]` or `V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`, then an *upper-bound inference* is made from `U₁` to `V₁`.**
+> - Otherwise, no inferences are made.
 
-_Update to include inference from dictionary types._
-```c#
-var d = ["Alice": 42, "Bob": 43].AsDictionary(comparer);
+> 11.6.3.12 Fixing
+> 
+> An *unfixed* type variable `Xᵢ` with a set of bounds is *fixed* as follows:
+> 
+> - The set of *candidate types* `Uₑ` starts out as the set of all types in the set of bounds for `Xᵢ` **where types inferred from collection literal element types are ignored if there are any types that were not inferred from collection literal element types**.
+> - ...
 
-static Dictionary<TKey, TValue> AsDictionary<TKey, TValue>(
-    this List<KeyValuePair<TKey, TValue>> list,
-    IEqualityComparer<TKey> comparer = null) { ... }
-```
+### Open questions
 
-_What are the implications of type inference of spread elements?_
-```c#
-F([..[1, 2]]); // ok: F<int>(int[])
+- How do we recognize that `C<V₁>` has element type `V₁`?
 
-static void F<T>(T[] arg) { }
-```
+- What changes are required for conditional operator?
+
+- Can we support inference from extension method `this`?
+
+    ```c#
+    [4].AsImmutableArray();  // AsImmutableArray<int>(ImmutableArray<int>)
+
+    static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
+    ```
+
+- What changes are required for dictionary types?
+
+    ```c#
+    var d = ["Alice": 42, "Bob": 43].AsDictionary(comparer);
+
+    static Dictionary<TKey, TValue> AsDictionary<TKey, TValue>(
+        this List<KeyValuePair<TKey, TValue>> list,
+        IEqualityComparer<TKey> comparer = null) { ... }
+    ```
+
+- Infer from spread element iterator type?
+
+    ```c#
+    IEnumerable<int> e = [1, 2, 3];
+    AsArray([..e]); // AsArray<int>(int[])
+    ```
+
+- Infer from nested collection literals?
+
+    ```c#
+    NestedArray([[1, 2, 3], []]); // NestedArray<int>(int[][])
+
+    static void NestedArray<T>(T[][] arg) { }
+    ```
+
+    This might be supported by introducing a *collection type* at compile time that represents an arbitrary collection with a specific *natural element type* and that is recognized in type inference similar to support for [*function types*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) for lambda expressions.
 
 ### Interaction with natural type
 
