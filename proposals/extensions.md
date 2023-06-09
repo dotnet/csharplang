@@ -781,6 +781,7 @@ We process as follows:
 - Perform member lookup for `I` in each compatible substituted extension type `X` 
   (note this takes into account whether the member is invoked).
 - Merge the results
+TODO3 spec how we deal with duplicate or near duplicate entries
 - Next, members that are hidden by other members are removed from the set.  
   (note: "base types" means "base extensions and underlying type" for extension types)
 - Finally, having removed hidden members, the result of the lookup is determined:
