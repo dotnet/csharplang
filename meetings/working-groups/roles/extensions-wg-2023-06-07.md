@@ -33,6 +33,7 @@ The second issue is that the proposed rules raise a question about how pattern-b
 such as the one involved in deconstruction.
 
 For instance, should the following work?
+
 ```csharp
 implicit extension E for C
 {
