@@ -115,6 +115,9 @@ This was discussed in [LDM 2022-04-25](https://github.com/dotnet/csharplang/blob
 Passing lvalues without any modifiers to `ref readonly` parameters could be permitted without any warnings, similarly to C++'s implicit byref parameters.
 This was discussed in [LDM 2022-05-11](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-05-11.md#ref-readonly-method-parameters), noting that the primary motivation for `ref readonly` parameters are APIs which capture or return references from these parameters, so marker of some kind is a good thing.
 
+Passing rvalue to a `ref readonly` could be an error, not a warning.
+That was indeed first decided in [LDM 2022-04-25](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-04-25.md#ref-readonly-method-parameters), but later e-mail discussions relaxed this because we would lose the ability to change existing APIs without breaking users.
+
 ### Pending LDM review
 [to-review]: #pending-ldm-review
 
