@@ -49,7 +49,8 @@ class C
 }
 ```
 
-Decision: given that an instance `Deconstruct` property would not participate in deconstruction,
+Decision: If the scenario allowed instance properties today, then extension properties should work, if not, then not.
+So, given that an instance `Deconstruct` property would not participate in deconstruction today,
 we don't want an extension `Deconstruct` property to participate either.
 
 Any scenario that allowed extension methods should allow methods from extension types to participate.  
