@@ -126,7 +126,7 @@ If *primary_no_array_creation_expression* is a value, the result of evaluating a
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
-of the access are equivalent to the same for an invocation of a method with the signature ```T GetItem(in InlineArrayType array)```. 
+of the access are equivalent to the same for an invocation of a method with the signature ```T GetItem(InlineArrayType array)```. 
 
 For example:
 ``` C#
