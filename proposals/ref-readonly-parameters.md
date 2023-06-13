@@ -123,7 +123,13 @@ Passing lvalues without any modifiers to `ref readonly` parameters could be perm
 This was discussed in [LDM 2022-05-11](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-05-11.md#ref-readonly-method-parameters), noting that the primary motivation for `ref readonly` parameters are APIs which capture or return references from these parameters, so marker of some kind is a good thing.
 
 Passing rvalue to a `ref readonly` could be an error, not a warning.
-That was indeed first decided in [LDM 2022-04-25](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-04-25.md#ref-readonly-method-parameters), but later e-mail discussions relaxed this because we would lose the ability to change existing APIs without breaking users.
+That was initially accepted in [LDM 2022-04-25](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-04-25.md#ref-readonly-method-parameters), but later e-mail discussions relaxed this because we would lose the ability to change existing APIs without breaking users.
+
+`in` could be the "natural" callsite modifier for `ref readonly` parameters and using `ref` could result in warnings.
+This would ensure a consistent code style and make it obvious at the callsite that the reference is readonly (unlike `ref`).
+It was initially accepted in [LDM 2022-04-25](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-04-25.md#ref-readonly-method-parameters).
+However, warnings could be a friction point for API authors to move from `ref` to `ref readonly`.
+Also, `in` has been redefined as `ref readonly` + convenience features, hence this was rejected in [LDM 2022-05-11](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/meetings/2022/LDM-2022-05-11.md#ref-readonly-method-parameters).
 
 ### Pending LDM review
 [to-review]: #pending-ldm-review
