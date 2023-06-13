@@ -1018,6 +1018,10 @@ https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-28.md#c
 https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-06.md
 https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-14.md
 https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-21.md
+https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-05.md
+https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-28.md
+https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-05-26.md
+https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-12.md
 
 ## Upcoming agenda items
 
