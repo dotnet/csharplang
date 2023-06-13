@@ -113,17 +113,20 @@ For an inline array element access, the *primary_no_array_creation_expression* o
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a writable variable
 equivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.item?view=net-8.0) with
-that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. 
+that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
+of the access are equivalent to the same for an invocation of a method with the signature ```ref T GetItem(ref InlineArrayType array)```.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a readonly variable
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
-method on *primary_no_array_creation_expression*. 
+method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
+of the access are equivalent to the same for an invocation of a method with the signature ```ref readonly T GetItem(in InlineArrayType array)```. 
 
 If *primary_no_array_creation_expression* is a value, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
-method on *primary_no_array_creation_expression*. 
+method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
+of the access are equivalent to the same for an invocation of a method with the signature ```T GetItem(in InlineArrayType array)```. 
 
 For example:
 ``` C#
@@ -171,12 +174,16 @@ the *primary_no_array_creation_expression*. Then the element access is interpret
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.slice?view=net-8.0)
-on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. 
+on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*.
+For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape* of the access are equivalent to the same
+for an invocation of a method with the signature ```System.Span<T> GetSlice(ref InlineArrayType array)```.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.slice?view=net-8.0)
 on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
-method on *primary_no_array_creation_expression*. 
+method on *primary_no_array_creation_expression*.
+For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape* of the access are equivalent to the same
+for an invocation of a method with the signature ```System.ReadOnlySpan<T> GetSlice(in InlineArrayType array)```.
 
 If *primary_no_array_creation_expression* is a value, an error is reported. 
 
@@ -242,6 +249,10 @@ void M3()
     System.Span<int> b = GetBuffer(); // An error, ref-safety
 }
 ```
+
+For the purpose of ref-safety analysis the *safe-to-escape* of the conversion is equivalent to *safe-to-escape*
+for an invocation of a method with the signature ```System.Span<T> Convert(ref InlineArrayType array)```, or
+```System.ReadOnlySpan<T> Convert(in InlineArrayType array)```.
 
 
 ### List patterns
