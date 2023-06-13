@@ -12,12 +12,17 @@ Allow parameter declaration-site modifier `ref readonly` and change callsite rul
 | `out`                | Error           | **Error**                | Error          | Allowed         |
 | No annotation        | Error           | **Warning**              | Allowed        | Error           |
 
-Note that there is one change to the existing rules: `in` parameter with `ref` callsite annotation produces a warning instead of an error.
+(Note that there is one change to the existing rules: `in` parameter with `ref` callsite annotation produces a warning instead of an error.)
+
+Change argument value rules as follows:
 
 | Value kind | `ref` parameter | `ref readonly` parameter | `in` parameter | `out` parameter |
 |------------|-----------------|--------------------------|----------------|-----------------|
 | rvalue     | Error           | **Warning**              | Allowed        | Error           |
 | lvalue     | Allowed         | **Allowed**              | Allowed        | Allowed         |
+
+Where lvalue means a variable (i.e., a value with a location; does not have to be writable/assignable)
+and rvalue means any kind of value.
 
 ## Motivation
 [motivation]: #motivation
