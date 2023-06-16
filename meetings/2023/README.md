@@ -16,6 +16,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Jun 19, 2023
 
 - Spans vs interfaces in overload resolution (Chuck/Stephen) - https://github.com/dotnet/csharplang/issues/7276
+- Collection literal type inference (Chuck/Cyrus) - https://github.com/dotnet/csharplang/pull/7284
 
 ## Mon Jun 5, 2023
 
