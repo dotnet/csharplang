@@ -493,7 +493,7 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
     - Otherwise, the result is an event access with no associated instance expression.
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
-  - Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.
+  - Otherwise, \***if `E.I` is not invoked,** `E.I` is an invalid member reference, and a compile-time error occurs.
 
 - \***If `E.I` is not invoked and `E` is classified as a type, if `E` is not a type parameter, 
   and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
@@ -789,7 +789,7 @@ TODO3 spec how we deal with duplicate or near duplicate entries
   - If the set consists of a single member that is not a method,
     then this member is the result of the lookup.
   - Otherwise, if the set contains only methods and the member is invoked,
-    overload resolution is applied to the candidate set.
+    overload resolution is applied to the candidate set. TODO3 we can never get here...
     - If a single best method is found, this member is the result of the lookup.
     - If no best method is found, continue the search through namespaces and their imports.
     - Otherwise (ambiguity), a compile-time error occurs.
