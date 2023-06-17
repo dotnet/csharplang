@@ -304,15 +304,9 @@ The *natural element type* of a collection literal expression is the [*best comm
 * For each *expression element* `Ei`, the expression `Ei`
 * For each *spread element* `Si`, the *iteration type* of `Si`
 
-The existing [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are extended to include inference from the *natural element type* of collection literal expressions. The following rules are **added**.
-
-> 11.6.3.9 Exact inferences
-> 
-> An *exact inference* *from* a type `U` *to* a type `V` is made as follows:
-> 
-> - ...
-> - **Otherwise, if `V` is a single-dimensional array type `V₁[]` or `V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`, then an *exact inference* is made from `U₁` to `V₁`.**
-> - Otherwise, no inferences are made.
+The existing [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are extended to include inference from the *natural element type* of collection literal expressions.
+Collection literal expressions only contribute to *lower bounds*, even when passed as arguments to `in` parameters.
+The following type inference rules are **added**.
 
 > 11.6.3.10 Lower-bound inferences
 > 
@@ -320,14 +314,6 @@ The existing [*type inference*](https://github.com/dotnet/csharpstandard/blob/st
 >
 > - ...
 > - **Otherwise, if `V` is a single-dimensional array type `V₁[]` or `V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`, then a *lower-bound inference* is made from `U₁` to `V₁`.**
-> - Otherwise, no inferences are made.
-
-> 11.6.3.11 Upper-bound inferences
-> 
-> An *upper-bound inference from* a type `U` *to* a type `V` is made as follows:
-> 
-> - ...
-> - **Otherwise, if `V` is a single-dimensional array type `V₁[]` or `V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`, then an *upper-bound inference* is made from `U₁` to `V₁`.**
 > - Otherwise, no inferences are made.
 
 > 11.6.3.12 Fixing
