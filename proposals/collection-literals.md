@@ -295,7 +295,7 @@ List<string> e3 = [..e1];  // error?
 
 ## Type inference
 ```c#
-AsArray([1, 2, 3]); // AsArray<int>(int[])
+var a = AsArray([1, 2, 3]); // AsArray<int>(int[])
 
 static T[] AsArray<T>(this T[] arg) => arg;
 ```
@@ -304,9 +304,8 @@ The *natural element type* of a collection literal expression is the [*best comm
 * For each *expression element* `Ei`, the expression `Ei`
 * For each *spread element* `Si`, the *iteration type* of `Si`
 
-The existing [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are extended to include inference from the *natural element type* of collection literal expressions.
-Collection literal expressions only contribute to *lower bounds*, even when passed as arguments to `in` parameters.
-The following type inference rules are **added**.
+The existing [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are **updated** to include inferences from the *natural element type* of collection literal expressions.
+Collection literal expressions only contribute to *lower bounds*, even when passed as arguments to `in` parameters so *lower-bound* are updated but *upper-bound* and *exact* inferences are not.
 
 > 11.6.3.10 Lower-bound inferences
 > 
@@ -323,19 +322,27 @@ The following type inference rules are **added**.
 > - The set of *candidate types* `Uₑ` starts out as the set of all types in the set of bounds for `Xᵢ` **where types inferred from collection literal element types are ignored if there are any types that were not inferred from collection literal element types**.
 > - ...
 
-### Open questions
+## Extension methods
+```c#
+var ia = [4].AsImmutableArray();  // AsImmutableArray<int>(ImmutableArray<int>)
+
+static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
+```
+
+The existing [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11783-extension-method-invocations) rules are **updated** to include conversions from collection literal expressions.
+
+> 11.7.8.3 Extension method invocations
+>
+> An extension method `Cᵢ.Mₑ` is *eligible* if:
+> 
+> - ...
+> - An implicit identity, reference, **collection literal**, or boxing conversion exists from *expr* to the type of the first parameter of `Mₑ`.
+
+## Open questions
 
 - How do we recognize that `C<V₁>` has element type `V₁`?
 
 - What changes are required for conditional operator?
-
-- Can we support inference from extension method `this`?
-
-    ```c#
-    [4].AsImmutableArray();  // AsImmutableArray<int>(ImmutableArray<int>)
-
-    static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
-    ```
 
 - What changes are required for dictionary types?
 
@@ -345,13 +352,6 @@ The following type inference rules are **added**.
     static Dictionary<TKey, TValue> AsDictionary<TKey, TValue>(
         this List<KeyValuePair<TKey, TValue>> list,
         IEqualityComparer<TKey> comparer = null) { ... }
-    ```
-
-- Infer from spread element iterator type?
-
-    ```c#
-    IEnumerable<int> e = [1, 2, 3];
-    AsArray([..e]); // AsArray<int>(int[])
     ```
 
 - Infer from nested collection literals?
@@ -364,7 +364,7 @@ The following type inference rules are **added**.
 
     This might be supported by introducing a *collection type* at compile time that represents an arbitrary collection with a specific *natural element type* and that is recognized in type inference similar to support for [*function types*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) for lambda expressions.
 
-### Interaction with natural type
+## Interaction with natural type
 
 The *natural type* should not prevent conversions to other collection types in *best common type* or *type inference* scenarios.
 ```c#
