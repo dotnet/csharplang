@@ -300,27 +300,20 @@ var a = AsArray([1, 2, 3]); // AsArray<int>(int[])
 static T[] AsArray<T>(T[] arg) => arg;
 ```
 
-The *natural element type* of a collection literal expression is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of:
-* For each *expression element* `Ei`, the expression `Ei`
-* For each *spread element* `Si`, the *iteration type* of `Si`
+The [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are **updated** to include inferences from collection literal expressions.
 
-The existing [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are **updated** to include inferences from the *natural element type* of collection literal expressions.
-Collection literal expressions only contribute to *lower bounds*, even when passed as arguments to `in` parameters so *lower-bound* are updated but *upper-bound* and *exact* inferences are not.
-
-> 11.6.3.10 Lower-bound inferences
+> 11.6.3.2 The first phase
 > 
-> A *lower-bound inference from* a type `U` *to* a type `V` is made as follows:
->
+> For each of the method arguments `Eᵢ`:
+> 
+> - **If `Eᵢ` is a *collection literal*, a *collection element type inference* is made *from* `Eᵢ` *to* the corresponding *parameter type* `Tᵢ`.**
 > - ...
-> - **Otherwise, if `V` is a single-dimensional array type `V₁[]` or `V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`, then a *lower-bound inference* is made from `U₁` to `V₁`.**
-> - Otherwise, no inferences are made.
-
-> 11.6.3.12 Fixing
 > 
-> An *unfixed* type variable `Xᵢ` with a set of bounds is *fixed* as follows:
-> 
-> - The set of *candidate types* `Uₑ` starts out as the set of all types in the set of bounds for `Xᵢ` **where types inferred from collection literal element types are ignored if there are any types that were not inferred from collection literal element types**.
-> - ...
+A *collection element type inference*  is made *from* a expression `E` *to* a type `T` as follows:
+- If `E` is a collection literal with elements `Eᵢ`, and `T` is a *single-dimensional array type* `Tₑ[]` or `T` is [*collection type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
+  - If `Eᵢ` is a *collection literal*, a *collection element type inference* is made *from* `Eᵢ` *to* `Tₑ`.
+  - Otherwise, if `Eᵢ` has type `Uᵢ` then a *lower-bound inference* is made *from* `Uᵢ` *to* `Tₑ`.
+  - Otherwise, no inferences are made for `Eᵢ`.
 
 ## Extension methods
 ```c#
@@ -329,7 +322,7 @@ var ia = [4].AsImmutableArray();  // AsImmutableArray<int>(ImmutableArray<int>)
 static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
 ```
 
-The existing [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11783-extension-method-invocations) rules are **updated** to include conversions from collection literal expressions.
+The [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11783-extension-method-invocations) rules are **updated** to include conversions from collection literal expressions.
 
 > 11.7.8.3 Extension method invocations
 >
