@@ -493,7 +493,7 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
     - Otherwise, the result is an event access with no associated instance expression.
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
-  - Otherwise, \***if `E.I` is not invoked,** `E.I` is an invalid member reference, and a compile-time error occurs.
+  - \***~~Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.~~**
 
 - \***If `E.I` is not invoked and `E` is classified as a type, if `E` is not a type parameter, 
   and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
