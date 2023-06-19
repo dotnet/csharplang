@@ -297,7 +297,7 @@ List<string> e3 = [..e1];  // error?
 ```c#
 var a = AsArray([1, 2, 3]); // AsArray<int>(int[])
 
-static T[] AsArray<T>(this T[] arg) => arg;
+static T[] AsArray<T>(T[] arg) => arg;
 ```
 
 The *natural element type* of a collection literal expression is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of:
@@ -342,6 +342,16 @@ The existing [*extension method invocation*](https://github.com/dotnet/csharpsta
 
 - How do we recognize that `C<V₁>` has element type `V₁`?
 
+- Infer from nested collection literals?
+
+    ```c#
+    NestedArray([[1, 2, 3], []]); // NestedArray<int>(int[][])
+
+    static void NestedArray<T>(T[][] arg) { }
+    ```
+
+    This might be supported by introducing a *collection type* at compile time that represents an arbitrary collection with a specific *natural element type* and that is recognized in type inference similar to support for [*function types*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) for lambda expressions.
+
 - What changes are required for conditional operator?
 
 - What changes are required for dictionary types?
@@ -353,16 +363,6 @@ The existing [*extension method invocation*](https://github.com/dotnet/csharpsta
         this List<KeyValuePair<TKey, TValue>> list,
         IEqualityComparer<TKey> comparer = null) { ... }
     ```
-
-- Infer from nested collection literals?
-
-    ```c#
-    NestedArray([[1, 2, 3], []]); // NestedArray<int>(int[][])
-
-    static void NestedArray<T>(T[][] arg) { }
-    ```
-
-    This might be supported by introducing a *collection type* at compile time that represents an arbitrary collection with a specific *natural element type* and that is recognized in type inference similar to support for [*function types*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) for lambda expressions.
 
 ## Interaction with natural type
 
