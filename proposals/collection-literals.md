@@ -295,9 +295,11 @@ List<string> e3 = [..e1];  // error?
 
 ## Type inference
 ```c#
-var a = AsArray([1, 2, 3]); // AsArray<int>(int[])
+var a = AsArray([1, 2, 3]);          // AsArray<int>(int[])
+var b = AsListOfArray([[4, 5], []]); // AsListOfArray<int>(List<int[]>)
 
 static T[] AsArray<T>(T[] arg) => arg;
+static List<T[]> AsListOfArray<T>(List<T[]> arg) => arg;
 ```
 
 The [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are **updated** to include inferences from collection literal expressions.
@@ -332,18 +334,6 @@ The [*extension method invocation*](https://github.com/dotnet/csharpstandard/blo
 > - An implicit identity, reference, **collection literal**, or boxing conversion exists from *expr* to the type of the first parameter of `Mₑ`.
 
 ## Open questions
-
-- How do we recognize that `C<V₁>` has element type `V₁`?
-
-- Infer from nested collection literals?
-
-    ```c#
-    NestedArray([[1, 2, 3], []]); // NestedArray<int>(int[][])
-
-    static void NestedArray<T>(T[][] arg) { }
-    ```
-
-    This might be supported by introducing a *collection type* at compile time that represents an arbitrary collection with a specific *natural element type* and that is recognized in type inference similar to support for [*function types*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) for lambda expressions.
 
 - What changes are required for conditional operator?
 
