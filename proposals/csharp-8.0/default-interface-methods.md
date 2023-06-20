@@ -1,5 +1,7 @@
 # default interface methods
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 [summary]: #summary
 

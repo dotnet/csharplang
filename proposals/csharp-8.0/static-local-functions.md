@@ -1,5 +1,7 @@
 # Static local functions
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 
 Support local functions that disallow capturing state from the enclosing scope.
