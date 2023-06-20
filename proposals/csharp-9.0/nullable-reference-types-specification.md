@@ -1,6 +1,6 @@
 ﻿# Nullable Reference Types Specification
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
 
 ***This is a work in progress - several parts are missing or incomplete.***
 

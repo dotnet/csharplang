@@ -1,6 +1,6 @@
 # Global Using Directive
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
 
 Syntax for a using directive is extended with an optional `global` keyword that can precede the `using` keyword:
 ```antlr

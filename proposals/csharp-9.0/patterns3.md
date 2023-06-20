@@ -1,6 +1,6 @@
 ﻿# Pattern-matching changes for C# 9.0
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
 
 We are considering a small handful of enhancements to pattern-matching for C# 9.0 that have natural synergy and work well to address a number of common programming problems:
 - https://github.com/dotnet/csharplang/issues/2925 Type patterns

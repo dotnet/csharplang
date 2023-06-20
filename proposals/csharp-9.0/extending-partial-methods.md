@@ -1,6 +1,6 @@
 # Extending Partial Methods
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
 
 ## Summary
 This proposal aims to remove all restrictions around the signatures of `partial`

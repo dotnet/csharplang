@@ -1,6 +1,6 @@
 # Raw string literal
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
 
 ## Summary
 Allow a new form of string literal that starts with a minimum of three `"""` characters (but no maximum), optionally followed by a `new_line`, the content of the string, and then ends with the same number of quotes that the literal started with.  For example:

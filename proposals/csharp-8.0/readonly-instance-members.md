@@ -1,6 +1,6 @@
 # Readonly Instance Members
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
 
 Championed Issue: <https://github.com/dotnet/csharplang/issues/1710>
 
