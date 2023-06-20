@@ -1,5 +1,7 @@
 ﻿# Lambda improvements
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 Proposed changes:
 1. Allow lambdas with attributes

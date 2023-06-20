@@ -1,5 +1,7 @@
 # Enhanced #line directives
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 [summary]: #summary 
 The compiler applies the mapping defined by `#line` directives to diagnostic locations and sequence points emitted to the PDB.

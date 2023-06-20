@@ -1,5 +1,7 @@
 # Record structs
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 The syntax for a record struct is as follows:
 
 ```antlr
