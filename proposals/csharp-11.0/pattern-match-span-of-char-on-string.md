@@ -1,5 +1,7 @@
 # Pattern match `Span<char>` on a constant string
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 [summary]: #summary
 

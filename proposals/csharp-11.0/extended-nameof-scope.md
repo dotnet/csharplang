@@ -1,5 +1,7 @@
 # Extended `nameof` scope
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 
 Allow `nameof(parameter)` inside an attribute on a method or parameter.
