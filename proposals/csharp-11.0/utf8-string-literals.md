@@ -1,7 +1,7 @@
 Utf8 Strings Literals
 ===
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
 
 ## Summary
 This proposal adds the ability to write UTF8 string literals in C# and have them automatically encoded into their UTF-8 `byte` representation.

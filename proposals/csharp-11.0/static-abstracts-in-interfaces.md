@@ -1,6 +1,6 @@
 # Static abstract members in interfaces
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
 
 ## Summary
 [summary]: #summary

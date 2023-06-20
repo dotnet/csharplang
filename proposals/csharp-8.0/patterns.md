@@ -1,6 +1,6 @@
 # Recursive Pattern Matching
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
 
 ## Summary
 [summary]: #summary

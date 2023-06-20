@@ -1,6 +1,6 @@
 # Init Only Setters
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
 
 ## Summary
 This proposal adds the concept of init only properties and indexers to C#. 

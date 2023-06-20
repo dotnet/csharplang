@@ -1,6 +1,6 @@
 ﻿# Permit `stackalloc` in nested contexts
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
 
 ## Stack allocation
 

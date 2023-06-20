@@ -1,6 +1,6 @@
 # Allow new-lines in all interpolations
 
-[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md)]
 
 * [x] Proposed
 * [x] Implementation: https://github.com/dotnet/roslyn/pull/56853
