@@ -1,6 +1,6 @@
 ﻿# Permit `stackalloc` in nested contexts
 
-[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 ## Stack allocation
 

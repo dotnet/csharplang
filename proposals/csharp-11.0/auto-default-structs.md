@@ -1,6 +1,6 @@
 # Auto-default structs
 
-[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 https://github.com/dotnet/csharplang/issues/5737
 

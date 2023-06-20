@@ -1,6 +1,6 @@
 ﻿# Lambda improvements
 
-[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 ## Summary
 Proposed changes:

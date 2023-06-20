@@ -1,6 +1,6 @@
 # "pattern-based using" and "using declarations"
 
-[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 ## Summary
 

@@ -1,6 +1,6 @@
 # Record structs
 
-[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 The syntax for a record struct is as follows:
 

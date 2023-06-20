@@ -1,6 +1,6 @@
 # Nullable reference types in C# #
 
-[!INCLUDE[Specletdisclaimer](../../docs-includes/speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 The goal of this feature is to:
 
