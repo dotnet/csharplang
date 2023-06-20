@@ -1,5 +1,7 @@
 # Suppress emitting of `localsinit` flag.
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 [summary]: #summary
 

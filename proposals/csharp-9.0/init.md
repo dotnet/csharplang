@@ -1,5 +1,7 @@
 # Init Only Setters
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 This proposal adds the concept of init only properties and indexers to C#. 
 These properties and indexers can be set at the point of object creation 

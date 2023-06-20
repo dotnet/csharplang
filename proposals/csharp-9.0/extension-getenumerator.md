@@ -1,5 +1,7 @@
 # Extension `GetEnumerator` support for `foreach` loops.
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 [summary]: #summary
 

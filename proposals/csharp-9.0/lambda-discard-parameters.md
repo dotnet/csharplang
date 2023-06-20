@@ -1,5 +1,7 @@
 # Lambda discard parameters
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Summary
 
 Allow discards (`_`) to be used as parameters of lambdas and anonymous methods.

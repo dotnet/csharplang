@@ -1,5 +1,7 @@
 ﻿# Nullable Reference Types Specification
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ***This is a work in progress - several parts are missing or incomplete.***
 
 This feature adds two new kinds of nullable types (nullable reference types and nullable generic types) to the existing nullable value types, and introduces a static flow analysis for purpose of null-safety.

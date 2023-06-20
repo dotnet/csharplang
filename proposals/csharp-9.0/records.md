@@ -1,6 +1,8 @@
 
 # Records
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 This proposal tracks the specification for the C# 9 records feature, as agreed to by the C#
 language design team.
 

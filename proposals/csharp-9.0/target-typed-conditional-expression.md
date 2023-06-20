@@ -1,5 +1,7 @@
 # Target-Typed Conditional Expression
 
+[!INCLUDE[Specletdisclaimer](~/docs/csharp/includes/speclet-disclaimer.md.md)]
+
 ## Conditional Expression Conversion
 
 For a conditional expression `c ? e1 : e2`, when
