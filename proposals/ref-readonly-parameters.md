@@ -103,7 +103,9 @@ Specifying the attribute in source will be an error, similarly to `ParamArrayAtt
 [funcptrs]: #function-pointers
 
 In function pointers, `in` parameters are emitted with `modreq(System.Runtime.InteropServices.InAttribute)` (see [function pointers proposal](https://github.com/dotnet/csharplang/blob/0376b4cc500b1370da86d26be634c9acf9d60b71/proposals/csharp-9.0/function-pointers.md#metadata-representation-of-in-out-and-ref-readonly-parameters-and-return-types)).
-`ref readonly` parameters will be emitted in the same way to ensure binary compatibility.
+`ref readonly` parameters will be emitted in the same but with additional `modopt(System.Runtime.CompilerServices.RequiresLocationAttribute)`.
+This ensures that older compiler versions will see `ref readonly` parameters as `in` parameters without any errors or warnings
+and new compiler versions will be able to recognize `ref readonly` parameters to emit warnings during [conversions][interchangeability] and [invocations][overload-resolution].
 
 ### Default parameter values
 [default-params]: #default-parameter-values
@@ -151,10 +153,11 @@ Default parameter values could be an error for `ref readonly` parameters.
 
 Specifying the `RequiresLocationAttribute` in source could be allowed, similarly to `In` and `Out` attributes.
 
+Function pointer `ref readonly` parameters could be emitted without `modopt` or with `modreq`.
+
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- Emit function pointers `ref readonly` parameters differently from `in` parameters to avoid freely casting between them? Use `modreq`,`modopt`?
 - Emit errors for rvalues passed into `in`/`ref readonly` parameters of methods that could capture them? See https://github.com/dotnet/roslyn/pull/67955#discussion_r1178138561.
 
 ## Design meetings
