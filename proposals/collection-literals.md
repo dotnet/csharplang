@@ -295,46 +295,59 @@ List<string> e3 = [..e1];  // error?
 
 ## Type inference
 ```c#
-AsArray([1, 2, 3]);      // ok: AsArray<int>(int[])
-[4].AsImmutableArray();  // ok: AsImmutableArray<int>(ImmutableArray<int>)
+var a = AsArray([1, 2, 3]);          // AsArray<int>(int[])
+var b = AsListOfArray([[4, 5], []]); // AsListOfArray<int>(List<int[]>)
 
-static T[] AsArray<T>(this T[] arg) => arg;
+static T[] AsArray<T>(T[] arg) => arg;
+static List<T[]> AsListOfArray<T>(List<T[]> arg) => arg;
+```
+
+The [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are **updated** to include inferences from collection literal expressions.
+
+> 11.6.3.2 The first phase
+> 
+> For each of the method arguments `Eᵢ`:
+> 
+> - **If `Eᵢ` is a *collection literal*, a *collection literal inference* is made *from* `Eᵢ` *to* the corresponding *parameter type* `Tᵢ`.**
+> - ...
+> 
+A *collection literal inference*  is made *from* an expression `E` *to* a type `T` as follows:
+- If `E` is a *collection literal* with elements `Eᵢ` and `T` is a [*collection type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
+  - If `Eᵢ` is a *collection literal*, a *collection literal inference* is made *from* `Eᵢ` *to* `Tₑ`.
+  - Otherwise, if `Eᵢ` has type `Uᵢ` then a *lower-bound inference* is made *from* `Uᵢ` *to* `Tₑ`.
+  - Otherwise, no inferences are made for `Eᵢ`.
+
+## Extension methods
+```c#
+var ia = [4].AsImmutableArray();  // AsImmutableArray<int>(ImmutableArray<int>)
+
 static ImmutableArray<T> AsImmutableArray<T>(this ImmutableArray<T> arg) => arg;
 ```
 
-The existing rules for type inference (see [§11.6.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference)) include the following **additions** for *exact inferences* §11.6.3.9, *lower-bound inferences* §11.6.3.10 and *upper-bound inferences* §11.6.3.11. The additions are the same for each section.
+The [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11783-extension-method-invocations) rules are **updated** to include conversions from collection literal expressions.
 
-> An *exact inference* *from* a type `U` *to* a type `V` is made as follows:
-> 
-> - If `V` is one of the *unfixed* `Xᵢ` then `U` is added to the set of exact bounds for `Xᵢ`.
-> - Otherwise, sets `V₁...Vₑ` and `U₁...Uₑ` are determined by checking if any of the following cases apply:
->   - `V` is an array type `V₁[...]` and `U` is an array type `U₁[...]` of the same rank
->   - **`V` is a single-dimensional array type `V₁[]` and `U` is a collection literal with element type `U₁`**
->   - `V` is the type `V₁?` and `U` is the type `U₁`
->   - `V` is a constructed type `C<V₁...Vₑ>` and `U` is a constructed type `C<U₁...Uₑ>`
->   - **`V` is a constructible collection type `C<V₁>` with element type `V₁`, and `U` is a collection literal with element type `U₁`**
+> 11.7.8.3 Extension method invocations
 >
->   If any of these cases apply then an *exact inference* is made from each `Uᵢ` to the corresponding `Vᵢ`.
+> An extension method `Cᵢ.Mₑ` is *eligible* if:
+> 
+> - ...
+> - An implicit identity, reference, **collection literal**, or boxing conversion exists from *expr* to the type of the first parameter of `Mₑ`.
 
-_How do we recognize that `C<V₁>` has element type `V₁`?_
+## Open questions
 
-_Update to include inference from dictionary types._
-```c#
-var d = ["Alice": 42, "Bob": 43].AsDictionary(comparer);
+- What changes are required for conditional operator?
 
-static Dictionary<TKey, TValue> AsDictionary<TKey, TValue>(
-    this List<KeyValuePair<TKey, TValue>> list,
-    IEqualityComparer<TKey> comparer = null) { ... }
-```
+- What changes are required for dictionary types?
 
-_What are the implications of type inference of spread elements?_
-```c#
-F([..[1, 2]]); // ok: F<int>(int[])
+    ```c#
+    var d = ["Alice": 42, "Bob": 43].AsDictionary(comparer);
 
-static void F<T>(T[] arg) { }
-```
+    static Dictionary<TKey, TValue> AsDictionary<TKey, TValue>(
+        this List<KeyValuePair<TKey, TValue>> list,
+        IEqualityComparer<TKey> comparer = null) { ... }
+    ```
 
-### Interaction with natural type
+## Interaction with natural type
 
 The *natural type* should not prevent conversions to other collection types in *best common type* or *type inference* scenarios.
 ```c#
