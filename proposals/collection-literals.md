@@ -312,7 +312,7 @@ The [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6
 > - ...
 > 
 A *collection literal inference*  is made *from* a expression `E` *to* a type `T` as follows:
-- If `E` is a collection literal with elements `Eᵢ`, and `T` is a *single-dimensional array type* `Tₑ[]` or `T` is [*collection type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
+- If `E` is a collection literal with elements `Eᵢ` and `T` is a [*collection type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
   - If `Eᵢ` is a *collection literal*, a *collection literal inference* is made *from* `Eᵢ` *to* `Tₑ`.
   - Otherwise, if `Eᵢ` has type `Uᵢ` then a *lower-bound inference* is made *from* `Uᵢ` *to* `Tₑ`.
   - Otherwise, no inferences are made for `Eᵢ`.
