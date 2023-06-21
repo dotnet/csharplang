@@ -1,5 +1,7 @@
 # Improved Definite Assignment Analysis
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 Definite assignment [§9.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94-definite-assignment) as specified has a few gaps which have caused users inconvenience. In particular, scenarios involving comparison to boolean constants, conditional-access, and null coalescing.
 

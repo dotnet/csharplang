@@ -1,5 +1,7 @@
 # Extended property patterns
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

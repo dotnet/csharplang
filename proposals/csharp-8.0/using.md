@@ -1,5 +1,7 @@
 # "pattern-based using" and "using declarations"
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 
 The language will add two new capabilities around the `using` statement in order to make resource

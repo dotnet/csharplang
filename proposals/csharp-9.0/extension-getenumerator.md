@@ -1,5 +1,7 @@
 # Extension `GetEnumerator` support for `foreach` loops.
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

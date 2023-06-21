@@ -1,5 +1,7 @@
 # Native-sized integers
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

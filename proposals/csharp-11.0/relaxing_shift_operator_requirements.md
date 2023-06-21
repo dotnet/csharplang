@@ -1,5 +1,7 @@
 # Relaxing shift operator requirements
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

@@ -1,6 +1,8 @@
 ﻿# Permit `stackalloc` in nested contexts
 
-### Stack allocation
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
+## Stack allocation
 
 We modify the section *Stack allocation* ([§22.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/unsafe-code.md#229-stack-allocation)) of the C# language specification to relax the places when a `stackalloc` expression may appear. We delete
 
@@ -35,6 +37,6 @@ The type of the *stackalloc_initializer* with *element type* `K` depends on its 
 - If the *stackalloc_initializer* appears directly as the *local_variable_initializer* of a *local_variable_declaration* statement or a *for_initializer*, then its type is `K*`.
 - Otherwise its type is `System.Span<K>`.
 
-### Stackalloc Conversion
+## Stackalloc Conversion
 
 The *stackalloc conversion* is a new built-in implicit conversion from expression. When the type of a *stackalloc_initializer* is `K*`, there is an implicit *stackalloc conversion* from the *stackalloc_initializer* to the type `System.Span<K>`.

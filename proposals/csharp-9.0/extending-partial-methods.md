@@ -1,5 +1,7 @@
 # Extending Partial Methods
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 This proposal aims to remove all restrictions around the signatures of `partial`
 methods in C#. The goal being to expand the set of scenarios in which these

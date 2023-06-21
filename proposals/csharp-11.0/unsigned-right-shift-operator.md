@@ -1,5 +1,7 @@
 # Unsigned right shift operator
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

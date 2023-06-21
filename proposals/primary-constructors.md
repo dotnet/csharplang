@@ -1,5 +1,7 @@
 # Primary constructors
 
+[!INCLUDE[Specletdisclaimer](speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

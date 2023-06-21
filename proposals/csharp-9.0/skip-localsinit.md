@@ -1,5 +1,7 @@
 # Suppress emitting of `localsinit` flag.
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

@@ -1,5 +1,7 @@
 # Global Using Directive
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 Syntax for a using directive is extended with an optional `global` keyword that can precede the `using` keyword:
 ```antlr
 compilation_unit

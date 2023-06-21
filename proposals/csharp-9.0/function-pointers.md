@@ -1,5 +1,7 @@
 # Function Pointers
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 
 This proposal provides language constructs that expose IL opcodes that cannot currently be accessed efficiently,

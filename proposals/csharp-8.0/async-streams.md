@@ -1,5 +1,7 @@
 ﻿# Async Streams
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

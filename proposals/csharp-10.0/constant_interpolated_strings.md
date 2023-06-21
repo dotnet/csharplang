@@ -1,5 +1,7 @@
 # Constant Interpolated Strings
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

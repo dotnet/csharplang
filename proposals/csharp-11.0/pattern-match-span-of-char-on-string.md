@@ -1,5 +1,7 @@
 # Pattern match `Span<char>` on a constant string
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

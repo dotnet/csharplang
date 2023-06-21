@@ -1,5 +1,7 @@
 ﻿# Unconstrained type parameter annotations
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 
 Allow nullable annotations for type parameters that are not constrained to value types or reference types: `T?`.

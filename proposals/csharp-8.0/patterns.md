@@ -1,5 +1,7 @@
 # Recursive Pattern Matching
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

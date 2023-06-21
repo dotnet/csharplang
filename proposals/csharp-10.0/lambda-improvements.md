@@ -1,5 +1,7 @@
 ﻿# Lambda improvements
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 Proposed changes:
 1. Allow lambdas with attributes

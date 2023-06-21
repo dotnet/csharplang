@@ -1,5 +1,7 @@
 # Static local functions
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 
 Support local functions that disallow capturing state from the enclosing scope.

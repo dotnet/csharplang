@@ -1,5 +1,7 @@
 # Nullable reference types in C# #
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 The goal of this feature is to:
 
 * Allow developers to express whether a variable, parameter or result of a reference type is intended to be null or not.

@@ -1,5 +1,7 @@
 # Static abstract members in interfaces
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

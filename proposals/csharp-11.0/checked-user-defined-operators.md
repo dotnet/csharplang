@@ -1,5 +1,7 @@
 # Checked user-defined operators
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 

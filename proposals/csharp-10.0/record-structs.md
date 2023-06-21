@@ -1,5 +1,7 @@
 # Record structs
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 The syntax for a record struct is as follows:
 
 ```antlr

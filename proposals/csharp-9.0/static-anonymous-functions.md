@@ -1,5 +1,7 @@
 # Static anonymous functions
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 
 Allow a 'static' modifier on lambdas and anonymous methods, which disallows capture of locals or instance state from containing scopes.
