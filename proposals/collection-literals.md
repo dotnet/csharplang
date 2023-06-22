@@ -317,6 +317,13 @@ A *collection literal inference*  is made *from* an expression `E` *to* a type `
   - Otherwise, if `Eᵢ` has type `Uᵢ` then a *lower-bound inference* is made *from* `Uᵢ` *to* `Tₑ`.
   - Otherwise, no inferences are made for `Eᵢ`.
 
+> 11.6.3.7 Output type inferences
+> 
+> An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
+> 
+> - **If `E` is a *collection literal* with elements `Eᵢ` and `T` is a [*collection type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *output type inference* is made *from* each `Eᵢ` *to* `Tₑ`.**
+> - ...
+
 ## Extension methods
 ```c#
 var ia = [4].AsImmutableArray();  // AsImmutableArray<int>(ImmutableArray<int>)
