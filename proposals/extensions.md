@@ -766,7 +766,8 @@ TL;DR: Given an underlying type, we'll search enclosing types and namespaces
 If the *member_access* occurs as the *primary_expression* of an *invocation_expression*, 
 the member is said to be invoked.
 
-Given an underlying type `U` and an identifier `I`, the objective is to find an extension member `X.I`, if possible.
+Given a *member_access* of the form `E.I` and `U` the type of `E`, the objective
+is to find an extension member `X.I` or an extension method group `X.I`, if possible.
 
 We process as follows:
 - Starting with the closest enclosing type declaration, continuing with each type declaration,
@@ -776,26 +777,31 @@ We process as follows:
     those will be considered first.
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types, those will be considered second.
-- Check which extension types are compatible with the given underlying type `U` and 
-  collect resulting compatible substituted extension types.
-- Perform member lookup for `I` in each compatible substituted extension type `X` 
-  (note this takes into account whether the member is invoked).
-- Merge the results
+- Look for members in extension types:
+  - Check which extension types are compatible with the given underlying type `U` and 
+    collect resulting compatible substituted extension types.
+  - Perform member lookup for `I` in each compatible substituted extension type `X` 
+    (note this takes into account whether the member is invoked).
+  - Merge the results
 TODO3 spec how we deal with duplicate or near duplicate entries
-- Next, members that are hidden by other members are removed from the set.  
-  (note: "base types" means "base extensions and underlying type" for extension types)
-- Finally, having removed hidden members, the result of the lookup is determined:
-  - If the set is empty, proceed to the next enclosing namespace.
-  - If the set consists of a single member that is not a method,
-    then this member is the result of the lookup.
-  - Otherwise, if the set contains only methods and the member is invoked,
-    overload resolution is applied to the candidate set. TODO3 we can never get here...
-    - If a single best method is found, this member is the result of the lookup.
-    - If no best method is found, continue the search through namespaces and their imports.
-    - Otherwise (ambiguity), a compile-time error occurs.
-  - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
-  - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
-    the result of the lookup is empty.
+  - Next, members that are hidden by other members are removed from the set.  
+    (note: "base types" means "base extensions and underlying type" for extension types)
+  - Finally, having removed hidden members, the result of the lookup is determined:
+    - If the set is empty, proceed to the next enclosing scope.
+    - If the set consists of a single member that is not a method,
+      then this member is the result of the lookup.
+    - Otherwise, if the set contains only methods and the member is invoked,
+      overload resolution is applied to the candidate set. TODO3 we can never get here...
+      - If a single best method is found, this member is the result of the lookup.
+      - If no best method is found, continue the search.
+      - Otherwise (ambiguity), a compile-time error occurs.
+    - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
+- If `E` is a value (not a type), look for extension methods:
+  - If the scope contains eligible extension methods, then this set is the result of the lookup. 
+    TODO3 this doesn't fit, as eligibility is based on applicability which requires arguments
+  - Otherwise, continue the search through namespaces and their imports.
+- If no candidate set is found in any enclosing namespace declaration or compilation unit, 
+  the result of the lookup is empty.
 
 TODO3 explain static usings:
   meaning of `using static SomeType;` (probably should look for extension types declared within `SomeType`)
