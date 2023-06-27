@@ -55,6 +55,11 @@ In the opposite direction, changing
 No changes in grammar are necessary.
 Specification will be extended to allow `ref readonly` modifiers for parameters with the same rules as specified for `in` parameters in [their proposal](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/proposals/csharp-7.2/readonly-ref.md), except where explicitly changed in this proposal.
 
+Note that even though `ref` argument modifier is allowed for `ref readonly` parameters, nothing changes w.r.t. value kind checks, i.e.,
+- `ref` can only be used with assignable values;
+- to pass readonly references, one has to use the `in` argument modifier instead;
+- to pass rvalues, one has to use no modifier (which results in a warning for `ref readonly` parameters as described in [the summary of this proposal][summary]).
+
 ### Interchangeability with `in`
 [interchangeability]: #interchangeability-with-in
 
