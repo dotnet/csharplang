@@ -38,7 +38,7 @@ Furthermore, there are APIs that need only read-only references but use
 - `ref` parameters to disallow rvalues even though they don't mutate the passed reference, e.g., `Unsafe.IsNullRef`.
 
 These APIs could migrate to `ref readonly` parameters without breaking users.
-For details on binary compatibility, see the proposed [metadata encoding](#metadata).
+For details on binary compatibility, see the proposed [metadata encoding][metadata].
 Specifically, changing
 - `ref` → `ref readonly` would only be a binary breaking change for virtual methods,
 - `ref` → `in` would also be a binary breaking change for virtual methods, but not a source breaking change (because the rules change to only warn for `ref` arguments passed to `in` parameters),
@@ -70,7 +70,7 @@ For the purpose of anonymous function [[§10.7](https://github.com/dotnet/csharp
 ### Overload resolution
 [overload-resolution]: #overload-resolution
 
-Overload resolution will allow mixing `ref`/`ref readonly`/`in` callsite annotations and parameter modifiers as denoted by the table in [the summary of this proposal](#summary), i.e., all *allowed* and *warning* cases will be considered as possible candidates during overload resolution.
+Overload resolution will allow mixing `ref`/`ref readonly`/`in` callsite annotations and parameter modifiers as denoted by the table in [the summary of this proposal][summary], i.e., all *allowed* and *warning* cases will be considered as possible candidates during overload resolution.
 Specifically, there's a change in existing behavior where methods with `in` parameter will match calls with the corresponding argument marked as `ref`&mdash;this change will be gated on LangVersion.
 
 ### Metadata encoding
