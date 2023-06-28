@@ -43,7 +43,7 @@ Specifically, changing
 - `ref` → `ref readonly` would only be a binary breaking change for virtual methods,
 - `ref` → `in` would also be a binary breaking change for virtual methods, but not a source breaking change (because the rules change to only warn for `ref` arguments passed to `in` parameters),
 - `in` → `ref readonly` would not be a breaking change (but no callsite annotation or rvalue would result in a warning),
-  - note that this would be a source breaking change for users using older compiler versions (as they interpret `ref readonly` parameters as `ref` parameters, disallowing `in` or no annotation at the callsite) and new compiler versions with `LangVersion <= 11` (for consistency, an error will be emitted that `ref readonly` parameters are not supported).
+  - note that this would be a source breaking change for users using older compiler versions (as they interpret `ref readonly` parameters as `ref` parameters, disallowing `in` or no annotation at the callsite) and new compiler versions with `LangVersion <= 11` (for consistency with older compiler versions, an error will be emitted that `ref readonly` parameters are not supported unless the corresponding arguments are passed with the `ref` modifier).
 
 In the opposite direction, changing
 - `ref readonly` → `ref` would be potentially a source breaking change (unless only `ref` callsite annotation was used and only readonly references used as arguments), and a binary breaking change for virtual methods,
@@ -99,7 +99,7 @@ namespace System.Runtime.CompilerServices
 ```
 
 Furthermore, if virtual, they will be emitted with `modreq(System.Runtime.InteropServices.InAttribute)` to ensure binary compatibility with `in` parameters.
-Note that unlike `in` parameters, no `[IsReadOnly]` is emitted for `ref readonly` parameters to avoid increasing metadata size (which also makes older compiler versions interpret them as `ref` parameters).
+Note that unlike `in` parameters, no `[IsReadOnly]` will be emitted for `ref readonly` parameters to avoid increasing metadata size and also to make older compiler versions interpret `ref readonly` parameters as `ref` parameters (and hence `ref` → `ref readonly` won't be a source breaking change even between different compiler versions).
 
 The `RequiresLocationAttribute` will be matched by namespace-qualified name and synthesized by the compiler if not already included in the compilation.
 
@@ -163,6 +163,10 @@ Function pointer `ref readonly` parameters could be emitted without `modopt` or 
 
 We could emit both `[RequiresLocation]` and `[IsReadOnly]` attributes for `ref readonly` parameters.
 Then `in` → `ref readonly` would not be a breaking change even for older compiler versions, but `ref` → `ref readonly` would become a source breaking change for older compiler versions (as they would interpret `ref readonly` as `in`, disallowing `ref` modifiers) and new compiler versions with `LangVersion <= 11` (for consistency).
+
+We could make the behavior for `LangVersion <= 11` different from the behavior for older compiler versions.
+For example, it could be an error whenever a `ref readonly` parameter is called (even when using the `ref` modifier at the callsite),
+or it could be always allowed without any errors.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
