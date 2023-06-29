@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- Interceptors (Rikki) - https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md
+
 ## Schedule when convenient
 
 ## Recurring topics
