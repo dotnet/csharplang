@@ -15,22 +15,25 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Jul 12, 2023
 
-## Mon Jun 19, 2023
-
-- Spans vs interfaces in overload resolution (Chuck/Stephen) - https://github.com/dotnet/csharplang/issues/7276
-- Collection literal type inference (Chuck/Cyrus) - https://github.com/dotnet/csharplang/pull/7284
-
-## Mon Jun 5, 2023
-
-- Collection literals continued (Cyrus) - https://github.com/captainsafia/csharplang/blob/main/meetings/working-groups/collection-literals/CL-LDM-05-31-2023.md
-
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon Jun 19, 2023
+
+[C# Language Design Meeting for June 19th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-06-19.md)
+
+- Prefer spans over interfaces in overload resolution
+- Collection literals
+
+## Mon Jun 5, 2023
+
+[C# Language Design Meeting for June 5th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-06-05.md)
+
+- Collection literals
 
 ## Wed May 31, 2023
 
