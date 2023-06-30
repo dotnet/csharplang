@@ -106,6 +106,6 @@ parameter must be spelled out?
 
 #### Emit consequences
 
-This proposal that `readonly` on parameters has no effect on the emitted code, and that it will not be possible to tell from metadata (including things that read metadata, such as reflection) that a parameter was declared as
+This proposal states that `readonly` on parameters has no effect on the emitted code, and that it will not be possible to tell from metadata (including things that read metadata, such as reflection) that a parameter was declared as
 `readonly`. Are there use cases for reflecting this information in metadata, and if so, what should the emit strategy we use to convey this information be? And, if we do emit to metadata, should that change how overriding
 carries through that information?
