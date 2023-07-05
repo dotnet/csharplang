@@ -60,9 +60,9 @@ by value, `ref readonly`, or `in`.
 For `partial` methods, we allow the implementing `partial` method declaration to add the `readonly` modifier to a parameter if the defining `partial` method did not. If the defining partial `method` included the
 `readonly` modifier included the `readonly` modifier, the implementing `partial` method must also include it.
 
-#### Abstract members and interfaces
+#### Signature-only locations
 
-`abstract` members and `interface` members are not permitted to specify `readonly` on their parameters.
+`abstract` members, `interface` members, delegate types, and function pointer types are not permitted to specify `readonly` on their parameters
 
 #### Overriding
 
@@ -92,7 +92,11 @@ this proposal takes the position that we would only want to introduce a shorthan
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-#### Lambda parameters
+### Restrict to just primary ctor parameters
+
+This general feature has historically been pushed back on due to the attractive nuisanceness of the feature. We could artificially restrict this to just primary constructor parameters to avoid introducing that in general.
+
+### Lambda parameters
 
 Today, when applying a modifier to a lambda parameter, the type must also be spelled out. For example, this is not permitted:
 
@@ -104,7 +108,7 @@ D d = (ref i) => {};
 The LDM has long thought about allowing the type here to be omitted, but has not yet done so. Should we make that change as part of this proposal? Or should we say that `readonly`, like `ref`, means that the type of the lambda
 parameter must be spelled out?
 
-#### Emit consequences
+### Emit consequences
 
 This proposal states that `readonly` on parameters has no effect on the emitted code, and that it will not be possible to tell from metadata (including things that read metadata, such as reflection) that a parameter was declared as
 `readonly`. Are there use cases for reflecting this information in metadata, and if so, what should the emit strategy we use to convey this information be? And, if we do emit to metadata, should that change how overriding
