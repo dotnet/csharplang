@@ -186,17 +186,15 @@ namespace System.Runtime.CompilerServices
 ```
 
 The attribute can be applied to `class` and `struct` types only.
-
 The attribute is not inherited although the attribute can be applied to a base `class` or an `abstract class`.
 
 An error is reported for a collection literal if there are multiple `[CollectionBuilder]` attributes on the collection type.
 
 The *create method* must be a `static` method defined on the *builder type*.
-
 The *create method* must have a single parameter of a type `System.ReadOnlySpan<T0>` passed by value, and a return value of the *collection type* to which the attribute is applied.
 
 The *builder type* cannot be generic.
-The *builder method* must be a generic *method* *iff* the collection type is a generic type, and the type parameters of the builder *method* must correspond in order to the type parameters of *collection type*.
+The *builder method* can be a generic *method* and the *arity* of the builder method must match the *arity* of the *collection type*.
 
 Overloads with distinct signatures on the builder type, and overloads on base types, are ignored.
 
@@ -206,12 +204,12 @@ If the parameter is `scoped`, the compiler *may* allocate the storage for the `R
 
 For example, a possible *create method* for `ImmutableArray<T>`:
 ```csharp
-[CollectionBuilder(typeof(ImmutableArray), "CreateRange")]
+[CollectionBuilder(typeof(ImmutableArray), "Create")]
 public struct ImmutableArray<T> { ... }
 
 public static class ImmutableArray
 {
-    public ImmutableArray<T> CreateRange<T>(scoped ReadOnlySpan<T> items) { ... }
+    public ImmutableArray<T> Create<T>(scoped ReadOnlySpan<T> items) { ... }
 }
 ```
 
@@ -219,7 +217,7 @@ With the *create method* above, `ImmutableArray<int> ia = [1, 2, 3];` could be e
 ```csharp
 Span<int> __tmp = stackalloc int[] { 1, 2, 3 };
 ImmutableArray<int> ia =
-    ImmutableArray.CreateRange((ReadOnlySpan<int>)__tmp);
+    ImmutableArray.Create((ReadOnlySpan<int>)__tmp);
 ```
 
 ## Construction
