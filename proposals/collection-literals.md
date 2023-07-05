@@ -177,7 +177,7 @@ The attribute specifies the *builder type* and *method name* of a method to be i
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(
-        AttributeTargets.Class | AttributeTargets.Struct,
+        AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface,
         Inherited = false,
         AllowMultiple = false)]
     public sealed class CollectionBuilderAttribute : System.Attribute
@@ -189,7 +189,7 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-The attribute can be applied to `class` and `struct` types only.
+The attribute can be applied to `class`, `struct`, and `interface` types.
 The attribute is not inherited although the attribute can be applied to a base `class` or an `abstract class`.
 
 An error is reported for a collection literal if there are multiple `[CollectionBuilder]` attributes on the collection type.
