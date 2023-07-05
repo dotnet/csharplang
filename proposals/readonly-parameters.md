@@ -52,13 +52,13 @@ is not.
 
 ### Semantics
 
-The for a `readonly` parameter, the compiler will issue an error when it is assigned to or taken as a mutable `lvalue`. This means that a `readonly` parameter cannot be passed by `out` or `ref`, but can be passed
+For a `readonly` parameter, the compiler will issue an error when it is assigned to or taken as a mutable `lvalue`. This means that a `readonly` parameter cannot be passed by `out` or `ref`, but can be passed
 by value, `ref readonly`, or `in`.
 
 #### `partial` methods
 
 For `partial` methods, we allow the implementing `partial` method declaration to add the `readonly` modifier to a parameter if the defining `partial` method did not. If the defining partial `method` included the
-`readonly` modifier included the `readonly` modifier, the implementing `partial` method must also include it.
+`readonly` modifier, the implementing `partial` method must also include it.
 
 #### Signature-only locations
 
