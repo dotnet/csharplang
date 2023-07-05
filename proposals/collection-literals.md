@@ -176,6 +176,10 @@ The attribute specifies the *builder type* and *method name* of a method to be i
 ```c#
 namespace System.Runtime.CompilerServices
 {
+    [AttributeUsage(
+        AttributeTargets.Class | AttributeTargets.Struct,
+        Inherited = false,
+        AllowMultiple = false)]
     public sealed class CollectionBuilderAttribute : System.Attribute
     {
         public CollectionBuilderAttribute(Type builderType, string methodName);
@@ -200,7 +204,7 @@ Overloads with distinct signatures on the builder type, and overloads on base ty
 
 An error is reported for a collection literal if the `[CollectionBuilder]` attribute on the collection type does not represent an invocable method with the expected signature defined on the *builder type*.
 
-If the parameter is `scoped`, the compiler *may* allocate the storage for the `ReadOnlySpan<T0>` on the stack rather than the heap.
+If the parameter does not escape the *create method* (that is, if the parameter is `scoped` or if the return type is not a `ref struct`), the compiler *may* allocate the storage for the `ReadOnlySpan<T0>` on the stack rather than the heap.
 
 For example, a possible *create method* for `ImmutableArray<T>`:
 ```csharp
@@ -209,7 +213,7 @@ public struct ImmutableArray<T> { ... }
 
 public static class ImmutableArray
 {
-    public ImmutableArray<T> Create<T>(scoped ReadOnlySpan<T> items) { ... }
+    public static ImmutableArray<T> Create<T>(ReadOnlySpan<T> items) { ... }
 }
 ```
 
