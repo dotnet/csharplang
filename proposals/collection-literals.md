@@ -198,7 +198,7 @@ The *create method* must be a `static` method defined on the *builder type*.
 The *create method* must have a single parameter of a type `System.ReadOnlySpan<T0>` passed by value, and a return value of the *collection type* to which the attribute is applied.
 
 The *builder type* cannot be generic.
-The *builder method* can be a generic *method* and the *arity* of the builder method must match the *arity* of the *collection type*.
+The *builder method* can be generic and the *arity* of the builder method must match the *arity* of the *collection type*.
 
 Overloads with distinct signatures on the builder type, and overloads on base types, are ignored.
 
