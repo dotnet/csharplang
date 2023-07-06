@@ -118,12 +118,17 @@ A *collection literal conversion* allows a collection literal expression to be c
 
 The following implicit *collection literal conversions* exist from a collection literal expression:
 
-* To a single dimensional *array type* `T[]`, or a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`, where:
-  * For each *expression element* `Ei` there is an implicit conversion from `Ei` to `T`.
-  * For each *dictionary element* `Ki:Vi`, `T` is a type `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * For each *spread element* `Si` there is an implicit conversion from the *iteration type* of `Si` to `T`.
+* To a single dimensional *array type* `T[]` where:
+  * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-* To a *type* with an associated *[builder](#construct-methods)* where there is an implicit collection literal conversion from the collection literal to the *span type* of the builder argument.
+* To a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>` where:
+  * For each *element* `Ei` there is an *implicit conversion* to `T`.
+
+* To a *type* with a *[create method](#create-methods)* with *parameter type* `System.ReadOnlySpan<T>` where:
+  * For each *element* `Ei` there is an *implicit conversion* to `T`.
+
+* To an *[inline array type](https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md)* with *element type* `T` where:
+  * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *type* that implements `System.Collections.IDictionary` where:
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
@@ -137,7 +142,7 @@ The following implicit *collection literal conversions* exist from a collection 
 
 _Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?_
 
-* To an *interface type* *`I<K, V>`* where:
+* To an *interface type* `I<K, V>` where:
   * `System.Collections.Generic.Dictionary<TKey, TValue>` implements `I<TKey, TValue>`.
   * For each *expression element* `Ei`, the type of `Ei` is `dynamic`, or the type of `Ei` is a type `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
   * For each *dictionary element* `Ki:Vi` there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
@@ -151,70 +156,76 @@ _Open issue: Relying on a parameter named `capacity` seems brittle. Is there an 
 
 _Open issue: Should we allow dictionary elements if we can reliably determine the target type is a collection of `KeyValuePair<K, V>`?_
 
-* To an *interface type* *`I<T0>`* where:
+* To an *interface type* `I<T0>` where:
   * `System.Collections.Generic.List<T>` implements `I<T>`.
-  * For each *expression element* `Ei` there is an implicit conversion from `Ei` to `T0`.
-  * For each *dictionary element* `Ki:Vi`, `T0` is a type `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * For each *spread element* `Si` there is an implicit conversion from the *iteration type* of `Si` to `T0`.
+  * For each *element* `Ei` there is an *implicit conversion* to `T0`.
+
+In the cases above, a collection literal *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
+  * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
+  * `Ei` is a *dictionary element* `Ki:Vi` and `T` is a type `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
+  * `Ei` is a *spread element* `Si` and there is an implicit conversion from the *iteration type* of `Si` to `T`.
 
 Types for which there is an implicit collection literal conversion from a collection literal are the valid *target types* for that collection literal.
 
+## Create methods
+[create-methods]: #create-methods
+
+A *create method* is indicated with a `[CollectionBuilder]` attribute on the *collection type*.
+The attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
+
+```c#
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(
+        AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface,
+        Inherited = false,
+        AllowMultiple = false)]
+    public sealed class CollectionBuilderAttribute : System.Attribute
+    {
+        public CollectionBuilderAttribute(Type builderType, string methodName);
+        public Type BuilderType { get; }
+        public string MethodName { get; }
+    }
+}
+```
+
+The attribute can be applied to `class`, `struct`, and `interface` types.
+The attribute is not inherited although the attribute can be applied to a base `class` or an `abstract class`.
+
+An error is reported for a collection literal if there are multiple `[CollectionBuilder]` attributes on the collection type.
+
+The *create method* must be a `static` method defined on the *builder type*.
+The *create method* must have a single parameter of a type `System.ReadOnlySpan<T0>` passed by value, and a return value of the *collection type* to which the attribute is applied.
+
+The *builder type* cannot be generic.
+The *builder method* can be generic and the *arity* of the builder method must match the *arity* of the *collection type*.
+
+Overloads with distinct signatures on the builder type, and overloads on base types, are ignored.
+
+An error is reported for a collection literal if the `[CollectionBuilder]` attribute on the collection type does not represent an invocable method with the expected signature defined on the *builder type*.
+
+If the parameter does not escape the *create method* (that is, if the parameter is `scoped` or if the return type is not a `ref struct`), the compiler *may* allocate the storage for the `ReadOnlySpan<T0>` on the stack rather than the heap.
+
+For example, a possible *create method* for `ImmutableArray<T>`:
+```csharp
+[CollectionBuilder(typeof(ImmutableArray), "Create")]
+public struct ImmutableArray<T> { ... }
+
+public static class ImmutableArray
+{
+    public static ImmutableArray<T> Create<T>(ReadOnlySpan<T> items) { ... }
+}
+```
+
+With the *create method* above, `ImmutableArray<int> ia = [1, 2, 3];` could be emitted as:
+```csharp
+Span<int> __tmp = stackalloc int[] { 1, 2, 3 };
+ImmutableArray<int> ia =
+    ImmutableArray.Create((ReadOnlySpan<int>)__tmp);
+```
+
 ## Construction
 _Give specific ordering for determining how to construct the constructible collection types._
-
-## `Construct` methods
-[construct-methods]: #construct-methods
-
-While certain types (like arrays and spans) can always be constructed with a collection literal, an arbitrary type `T` can support being be constructed from a collection literal through the use of a `void Construct(CollectionType)` method when:
-
-* the `Construct` method is found on an instance of `T` (including through [extension methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations)), and
-
-* `CollectionType` is some other type known to be a [*constructible*](constructible-collection-types) type.
-
-If found, the collection can be constructed by creating a fresh instance of its type using `new T()`, producing the corresponding argument to pass to `Construct`, and then calling that method on the fresh instance.  `new T()` supports all structs, including those without a `parameterless struct constructor`.
-
-The allowance for extension methods means that collection literal support can be added to an existing API which does not already directly support this.
-
-The `Construct` method is used for construction of the collection even if the type supports *collection initializers*.
-_This means an extension method could be added that would silently change how collection literals for an existing collection initializer type are constructed in the program._
-
-Through the use of the [`init`](#init-methods) modifier, existing APIs can directly support collection literals in a manner that allows for no-overhead production of the data the final collection will store.
-
-_Does this support construction of custom dictionary types?_
-
-### `init Construct` methods
-[init-methods]: #init-methods
-
-* Like [*`init` accessors*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/init.md#init-only-setters), an `init` method would be an instance method invocable at the point of object creation but become unavailable once object creation has completed. This facility thus prevents general use of such a marked method outside of known safe compiler scopes where the instance value being constructed cannot be observed until complete.
-
-* In the context of collection literals, using the `init` modifier on the [`Construct` method](#construct-methods) would allow types to trust that the collection instances passed into them cannot be mutated outside of them, and that they are being passed ownership of the collection instance.  This would negate any need to copy data that would normally be assumed to be in an untrusted location.
-
-* For example, if an `init void Construct(T[] values)` instance method were added to [`ImmutableArray<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.immutable.immutablearray-1), then it would be possible for the compiler to emit the following:
-
-    ```c#
-    T[] __storage = /* initialized using predefined rules */
-    ImmutableArray<T> __result = new ImmutableArray<T>();
-    __result.Construct(__storage);
-    ```
-
-    `ImmutableArray<T>` would then take that array directly and use it as its own backing storage.  This would be safe because the compiler (following the requirements around `init`) would ensure that no other location in the code would have access to this temporary array, and thus it would not be possible to mutate it behind the back of the `ImmutableArray<T>` instance.
-
-    The above also demonstrates that this approach can work with struct types which do not have a [*parameterless struct constructor*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/parameterless-struct-constructors.md).  In the above, the call to `new ImmutableArray<T>()` is equivalent to `default(ImmutableArray<T>)`, (producing an `ImmutableArray<T>` whose [`IsDefault`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.immutable.immutablearray-1.isdefault) property is initially true.  However, the `Construct` method can then safely update this to the final non-default state without that intermediate state being visible.
-
-* This formalization is quite beneficial because the only existing mechanism to (safely) create an ImmutableArray with values without copying is both excessively verbose and produces unavoidable garbage:
-
-    ```c#
-    var __builder = ImmutableArray.CreateBuilder<int>(initialCapacity: __len);
-
-    __builder.Add(e1);
-    foreach (var __t in s1)
-        __builder.Add(__t);
-
-    // Add remainder of values.
-
-    // Create final result. __builder is now garbage.
-    ImmutableArray<int> __result = __builder.MoveToImmutable();
-    ```
 
 ## Empty collection literal
 
