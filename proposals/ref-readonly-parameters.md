@@ -103,7 +103,7 @@ Note that unlike `in` parameters, no `[IsReadOnly]` will be emitted for `ref rea
 
 The `RequiresLocationAttribute` will be matched by namespace-qualified name and synthesized by the compiler if not already included in the compilation.
 
-Specifying the attribute in source will be an error, similarly to `ParamArrayAttribute`.
+Specifying the attribute in source will be an error if it's applied to a parameter, similarly to `ParamArrayAttribute`.
 
 #### Function pointers
 [funcptrs]: #function-pointers
@@ -158,6 +158,7 @@ The overload resolution change for existing `in` parameters could be taken uncon
 Default parameter values could be an error for `ref readonly` parameters.
 
 Specifying the `RequiresLocationAttribute` in source could be allowed, similarly to `In` and `Out` attributes.
+Alternatively, it could be an error when applied in other contexts than just parameters, similarly to `IsReadOnly` attribute; to preserve further design space.
 
 Function pointer `ref readonly` parameters could be emitted without `modopt` or with `modreq`.
 
