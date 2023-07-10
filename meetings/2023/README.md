@@ -4,8 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Interceptors (Rikki) - https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md
-- Collection literals (Chuck, Cyrus) - [extension method invocation](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#extension-methods), [create methods](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#create-methods)
+- Interceptors (Rikki, cont'd) - https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md
+
 
 ## Schedule when convenient
 
@@ -15,6 +15,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - *Design review*
 
 ## Wed Jul 12, 2023
+
+- Collection literals (Chuck, Cyrus) - [extension method invocation](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#extension-methods), [create methods](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#create-methods)
+- Interceptors (Rikki) - https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md
 
 ## Wed Mar 15, 2023
 
