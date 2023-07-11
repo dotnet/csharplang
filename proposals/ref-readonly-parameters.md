@@ -114,6 +114,9 @@ Older compiler versions will ignore the `modopt` and hence interpret `ref readon
 and new compiler versions aware of the `modopt` will use it to recognize `ref readonly` parameters to emit warnings during [conversions][interchangeability] and [invocations][overload-resolution].
 For consistency with older compiler versions, new compiler versions with `LangVersion <= 11` will report errors that `ref readonly` parameters are not supported unless the corresponding arguments are passed with the `ref` modifier.
 
+Note that it is a binary break to change modifiers in function pointer signatures if they are part of public APIs, hence it will be a binary break when changing `ref` or `in` to `ref readonly`.
+However, a source break will only occur for callers with `LangVersion <= 11` when changing `in` → `ref readonly` (if invoking the pointer with `in` callsite modifier), consistent with normal methods. 
+
 ### Default parameter values
 [default-params]: #default-parameter-values
 
@@ -160,14 +163,14 @@ Default parameter values could be an error for `ref readonly` parameters.
 
 Specifying the `RequiresLocationAttribute` in source could be allowed, similarly to `In` and `Out` attributes.
 
-Function pointer `ref readonly` parameters could be emitted with different `modopt`/`modreq` combinations:
+Function pointer `ref readonly` parameters could be emitted with different `modopt`/`modreq` combinations (note that "source break" in this table means for callers with `LangVersion <= 11`):
 
 | Modifiers                             | Can be recognized across compilations | Old compilers see them as | `ref` → `ref readonly` | `in` → `ref readonly` |
 |---------------------------------------|---------------------------------------|---------------------------|------------------------|-----------------------|
-| `modreq(In) modopt(RequiresLocation)` | yes                                   | `in`                      | break                  | ok                    |
-| `modreq(In)`                          | no                                    | `in`                      | break                  | ok                    |
-| `modreq(RequiresLocation)`            | yes                                   | unsupported               | break                  | break                 |
-| `modopt(RequiresLocation)`            | yes                                   | `ref`                     | ok                     | break                 |
+| `modreq(In) modopt(RequiresLocation)` | yes                                   | `in`                      | binary, source break   | binary break          |
+| `modreq(In)`                          | no                                    | `in`                      | binary, source break   | ok                    |
+| `modreq(RequiresLocation)`            | yes                                   | unsupported               | binary, source break   | binary, source break  |
+| `modopt(RequiresLocation)`            | yes                                   | `ref`                     | binary break           | binary, source break  |
 
 We could emit both `[RequiresLocation]` and `[IsReadOnly]` attributes for `ref readonly` parameters.
 Then `in` → `ref readonly` would not be a breaking change even for older compiler versions, but `ref` → `ref readonly` would become a source breaking change for older compiler versions (as they would interpret `ref readonly` as `in`, disallowing `ref` modifiers) and new compiler versions with `LangVersion <= 11` (for consistency).
