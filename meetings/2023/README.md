@@ -20,6 +20,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Jul 17, 2023
 
 - Which features are shipping in C# 12, and what do we call them? (Mads and Jared) - [Language Feature Status](https://github.com/dotnet/roslyn/blob/main/docs/Language%20Feature%20Status.md)
+- Readonly parameters (Fred and Cyrus) - https://github.com/333fred/csharplang/blob/readonly-params/proposals/readonly-parameters.md
 
 ## Wed Jul 12, 2023
 
