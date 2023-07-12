@@ -22,18 +22,21 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Which features are shipping in C# 12, and what do we call them? (Mads and Jared) - [Language Feature Status](https://github.com/dotnet/roslyn/blob/main/docs/Language%20Feature%20Status.md)
 - Readonly parameters (Fred and Cyrus) - https://github.com/333fred/csharplang/blob/readonly-params/proposals/readonly-parameters.md
 
-## Wed Jul 12, 2023
-
-- Collection literals (Chuck, Cyrus) - [extension method invocation](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#extension-methods), [create methods](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#create-methods)
-- Interceptors (Rikki) - https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md
-
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Wed Jul 12, 2023
+
+[C# Language Design Meeting for July 12th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-12.md)
+
+- Collection Literals
+    - `Create` methods
+    - Extension methods
+- Interceptors
 
 ## Mon Jun 19, 2023
 
