@@ -17,6 +17,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Jul 24, 2023
 
+- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
+
 ## Mon Jul 17, 2023
 
 - Which features are shipping in C# 12, and what do we call them? (Mads and Jared) - [Language Feature Status](https://github.com/dotnet/roslyn/blob/main/docs/Language%20Feature%20Status.md)
