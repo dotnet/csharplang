@@ -109,9 +109,13 @@ Specifying the attribute in source will be an error if it's applied to a paramet
 [funcptrs]: #function-pointers
 
 In function pointers, `in` parameters are emitted with `modreq(System.Runtime.InteropServices.InAttribute)` (see [function pointers proposal](https://github.com/dotnet/csharplang/blob/0376b4cc500b1370da86d26be634c9acf9d60b71/proposals/csharp-9.0/function-pointers.md#metadata-representation-of-in-out-and-ref-readonly-parameters-and-return-types)).
-`ref readonly` parameters will be emitted in the same but with additional `modopt(System.Runtime.CompilerServices.RequiresLocationAttribute)`.
-This ensures that older compiler versions will see `ref readonly` parameters as `in` parameters without any errors or warnings
-and new compiler versions will be able to recognize `ref readonly` parameters to emit warnings during [conversions][interchangeability] and [invocations][overload-resolution].
+`ref readonly` parameters will be emitted without that `modreq`, but instead with `modopt(System.Runtime.CompilerServices.RequiresLocationAttribute)`.
+Older compiler versions will ignore the `modopt` and hence interpret `ref readonly` parameters as `ref` parameters (consistent with older compiler behavior for normal methods with `ref readonly` parameters as described above)
+and new compiler versions aware of the `modopt` will use it to recognize `ref readonly` parameters to emit warnings during [conversions][interchangeability] and [invocations][overload-resolution].
+For consistency with older compiler versions, new compiler versions with `LangVersion <= 11` will report errors that `ref readonly` parameters are not supported unless the corresponding arguments are passed with the `ref` modifier.
+
+Note that it is a binary break to change modifiers in function pointer signatures if they are part of public APIs, hence it will be a binary break when changing `ref` or `in` to `ref readonly`.
+However, a source break will only occur for callers with `LangVersion <= 11` when changing `in` → `ref readonly` (if invoking the pointer with `in` callsite modifier), consistent with normal methods. 
 
 ### Default parameter values
 [default-params]: #default-parameter-values
@@ -160,7 +164,14 @@ Default parameter values could be an error for `ref readonly` parameters.
 Specifying the `RequiresLocationAttribute` in source could be allowed, similarly to `In` and `Out` attributes.
 Alternatively, it could be an error when applied in other contexts than just parameters, similarly to `IsReadOnly` attribute; to preserve further design space.
 
-Function pointer `ref readonly` parameters could be emitted without `modopt` or with `modreq`.
+Function pointer `ref readonly` parameters could be emitted with different `modopt`/`modreq` combinations (note that "source break" in this table means for callers with `LangVersion <= 11`):
+
+| Modifiers                             | Can be recognized across compilations | Old compilers see them as | `ref` → `ref readonly` | `in` → `ref readonly` |
+|---------------------------------------|---------------------------------------|---------------------------|------------------------|-----------------------|
+| `modreq(In) modopt(RequiresLocation)` | yes                                   | `in`                      | binary, source break   | binary break          |
+| `modreq(In)`                          | no                                    | `in`                      | binary, source break   | ok                    |
+| `modreq(RequiresLocation)`            | yes                                   | unsupported               | binary, source break   | binary, source break  |
+| `modopt(RequiresLocation)`            | yes                                   | `ref`                     | binary break           | binary, source break  |
 
 We could emit both `[RequiresLocation]` and `[IsReadOnly]` attributes for `ref readonly` parameters.
 Then `in` → `ref readonly` would not be a breaking change even for older compiler versions, but `ref` → `ref readonly` would become a source breaking change for older compiler versions (as they would interpret `ref readonly` as `in`, disallowing `ref` modifiers) and new compiler versions with `LangVersion <= 11` (for consistency).
