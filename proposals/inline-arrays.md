@@ -41,7 +41,7 @@ Runtime provides regular GC tracking for all elements in the struct.
 This proposal will refer to types like this as "inline array types".
 
 Elements of an inline array type can be accessed through pointers or through span instances returned by
-[System.Runtime.InteropServices.MemoryMarshal.CreateSpan](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.memorymarshal.createspan?view=net-7.0)/[System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.memorymarshal.createreadonlyspan?view=net-7.0) APIs. However, neither
+[System.Runtime.InteropServices.MemoryMarshal.CreateSpan](https://learn.microsoft.com/dotnet/api/system.runtime.interopservices.memorymarshal.createspan)/[System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan](https://learn.microsoft.com/dotnet/api/system.runtime.interopservices.memorymarshal.createreadonlyspan) APIs. However, neither
 the pointer approach, nor the APIs provide type and bounds checking out of the box.
 
 Language will provide a type-safe/ref-safe way for accessing elements of inline array types. The access will be span based. 
@@ -91,15 +91,15 @@ element_access
 
 The *argument_list* of an *element_access* is not allowed to contain `ref` or `out` arguments.
 
-An *element_access* is dynamically bound ([§11.3.3](expressions.md#1133-dynamic-binding)) if at least one of the following holds:
+An *element_access* is dynamically bound ([§11.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1133-dynamic-binding)) if at least one of the following holds:
 
 - The *primary_no_array_creation_expression* has compile-time type `dynamic`.
 - At least one expression of the *argument_list* has compile-time type `dynamic` and the *primary_no_array_creation_expression* does not have an array type,
   **and the *primary_no_array_creation_expression* does not have an inline array type or there is more than one item in the argument list**.
 
-In this case, the compiler classifies the *element_access* as a value of type `dynamic`. The rules below to determine the meaning of the *element_access* are then applied at run-time, using the run-time type instead of the compile-time type of those of the *primary_no_array_creation_expression* and *argument_list* expressions which have the compile-time type `dynamic`. If the *primary_no_array_creation_expression* does not have compile-time type `dynamic`, then the element access undergoes a limited compile-time check as described in [§11.6.5](expressions.md#1165-compile-time-checking-of-dynamic-member-invocation).
+In this case, the compiler classifies the *element_access* as a value of type `dynamic`. The rules below to determine the meaning of the *element_access* are then applied at run-time, using the run-time type instead of the compile-time type of those of the *primary_no_array_creation_expression* and *argument_list* expressions which have the compile-time type `dynamic`. If the *primary_no_array_creation_expression* does not have compile-time type `dynamic`, then the element access undergoes a limited compile-time check as described in [§11.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1165-compile-time-checking-of-dynamic-member-invocation).
 
-If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access ([§11.7.10.2](expressions.md#117102-array-access)). **If the *primary_no_array_creation_expression* of an *element_access* is a variable or value of an inline array type and the *argument_list* consists of a single argument, the *element_access* is an inline array element access.** Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type that has one or more indexer members, in which case the *element_access* is an indexer access ([§11.7.10.3](expressions.md#117103-indexer-access)).
+If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access ([§11.7.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117102-array-access)). **If the *primary_no_array_creation_expression* of an *element_access* is a variable or value of an inline array type and the *argument_list* consists of a single argument, the *element_access* is an inline array element access.** Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type that has one or more indexer members, in which case the *element_access* is an indexer access ([§11.7.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117103-indexer-access)).
 
 #### Inline array element access
 
@@ -112,18 +112,18 @@ For an inline array element access, the *primary_no_array_creation_expression* o
 ##### When the expression type is int
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a writable variable
-equivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.item?view=net-8.0) with
+equivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.span-1.item?view=net-8.0) with
 that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
 of the access are equivalent to the same for an invocation of a method with the signature ```static ref T GetItem(ref InlineArrayType array)```.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a readonly variable
-equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
+equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
 of the access are equivalent to the same for an invocation of a method with the signature ```static ref readonly T GetItem(in InlineArrayType array)```. 
 
 If *primary_no_array_creation_expression* is a value, the result of evaluating an inline array element access is a value
-equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
+equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.item?view=net-8.0) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
 of the access are equivalent to the same for an invocation of a method with the signature ```static T GetItem(InlineArrayType array)```. 
@@ -173,13 +173,13 @@ the *primary_no_array_creation_expression*. Then the element access is interpret
 ##### When the expression implicitly convertible to ```System.Range```
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a value
-equivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.slice?view=net-8.0)
+equivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/dotnet/api/system.span-1.slice?view=net-8.0)
 on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*.
 For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape* of the access are equivalent to the same
 for an invocation of a method with the signature ```static System.Span<T> GetSlice(ref InlineArrayType array)```.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a value
-equivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1.slice?view=net-8.0)
+equivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.slice?view=net-8.0)
 on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*.
 For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape* of the access are equivalent to the same
