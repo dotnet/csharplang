@@ -65,6 +65,7 @@ Note that even though `ref` argument modifier is allowed for `ref readonly` para
 
 Members declared in a single type cannot differ in signature solely by `ref`/`out`/`in`/`ref readonly`.
 For other purposes of signature matching (e.g., hiding or overriding), `ref readonly` can be interchanged with `in` modifier, but that results in a warning at the declaration site [[§7.6](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/basic-concepts.md#76-signatures-and-overloading)].
+This doesn't apply when matching `partial` declaration with its implementation.
 Note that there is no change in overriding for `ref`/`in` and `ref readonly`/`ref` modifier pairs, they cannot be interchanged, because the signatures aren't binary compatible.
 For consistency, the same is true for other signature matching purposes (e.g., hiding).
 
@@ -75,8 +76,25 @@ For the purpose of anonymous function [[§10.7](https://github.com/dotnet/csharp
 ### Overload resolution
 [overload-resolution]: #overload-resolution
 
-Overload resolution will allow mixing `ref`/`ref readonly`/`in` callsite annotations and parameter modifiers as denoted by the table in [the summary of this proposal][summary], i.e., all *allowed* and *warning* cases will be considered as possible candidates during overload resolution.
+Overload resolution will allow mixing `ref`/`ref readonly`/`in`/no callsite annotations and parameter modifiers as denoted by the table in [the summary of this proposal][summary], i.e., all *allowed* and *warning* cases will be considered as possible candidates during overload resolution.
 Specifically, there's a change in existing behavior where methods with `in` parameter will match calls with the corresponding argument marked as `ref`&mdash;this change will be gated on LangVersion.
+
+However, the warning for passing an argument with no callsite modifier to a `ref readonly` parameter will be suppressed if the parameter is the receiver in an extension method invocation.
+
+Note that by-value overloads will be preferred over `ref readonly` overloads in case there is no argument modifier:
+
+```cs
+var x = 1;
+C.M(x); // calls C.M(int x)
+C.M(ref x); // calls C.M(ref readonly int x)
+C.M(in x); // calls C.M(ref readonly int x)
+
+public static class C
+{
+    public static void M(int x) { }
+    public static void M(ref readonly int x) { }
+}
+```
 
 ### Metadata encoding
 [metadata]: #metadata-encoding
@@ -158,6 +176,10 @@ This would provide stronger guarantees, so it would be good for new APIs, but pr
 Overload resolution, overriding, and conversion could disallow interchangeability of `ref readonly` and `in` modifiers.
 
 The overload resolution change for existing `in` parameters could be taken unconditionally (not considering LangVersion), but that would be a breaking change.
+
+Invoking an extension method with `ref readonly` receiver could result in warning "Argument 1 should be passed with `ref` or `in` keyword" as would happen for non-extension invocations with no callsite modifiers.
+
+`ref readonly` overloads could be preferred over by-value overloads when there is no callsite modifier or there could be an ambiguity error.
 
 Default parameter values could be an error for `ref readonly` parameters.
 
