@@ -19,17 +19,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
 
-## Mon Jul 17, 2023
-
-- Which features are shipping in C# 12, and what do we call them? (Mads and Jared) - [Language Feature Status](https://github.com/dotnet/roslyn/blob/main/docs/Language%20Feature%20Status.md)
-- Readonly parameters (Fred and Cyrus) - https://github.com/333fred/csharplang/blob/readonly-params/proposals/readonly-parameters.md
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon Jul 17, 2023
+
+[C# Language Design Meeting for July 17th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md)
+
+- Compiler Check-in
+- `readonly` parameters
 
 ## Wed Jul 12, 2023
 
