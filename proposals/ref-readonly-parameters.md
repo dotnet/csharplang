@@ -69,7 +69,7 @@ This doesn't apply when matching `partial` declaration with its implementation.
 Note that there is no change in overriding for `ref`/`in` and `ref readonly`/`ref` modifier pairs, they cannot be interchanged, because the signatures aren't binary compatible.
 For consistency, the same is true for other signature matching purposes (e.g., hiding).
 
-For the purpose of anonymous function [[§10.7](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#107-anonymous-function-conversions)], method group [[§10.8](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#108-method-group-conversions)], and [function pointer](https://github.com/dotnet/csharplang/blob/4b17ebb49654d21d4e96f415339c15c9f8a9ccde/proposals/csharp-9.0/function-pointers.md#function-pointer-conversions) conversions, these modifiers are considered compatible (but the conversion results in a warning):
+For the purpose of anonymous function [[§10.7](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#107-anonymous-function-conversions)], method group [[§10.8](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#108-method-group-conversions)], and [function pointer](https://github.com/dotnet/csharplang/blob/4b17ebb49654d21d4e96f415339c15c9f8a9ccde/proposals/csharp-9.0/function-pointers.md#function-pointer-conversions) conversions, these modifiers are considered compatible (but the conversion results in a warning except for function pointer casts):
 - `ref readonly` can be interchanged with `in` or `ref` modifier,
 - `in` can be interchanged with `ref` modifier.
 
