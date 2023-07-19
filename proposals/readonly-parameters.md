@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-We allow parameters to marked with `readonly`. This disallows them from being assigned to or being passed by `ref` or `out`.
+We allow parameters to be marked with `readonly`. This disallows them from being assigned to or being passed by `ref` or `out`.
 
 ## Motivation
 [motivation]: #motivation
