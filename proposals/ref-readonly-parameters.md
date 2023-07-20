@@ -142,6 +142,7 @@ However, a source break will only occur for callers with `LangVersion <= 11` whe
 [default-params]: #default-parameter-values
 
 Default parameter values are allowed for `ref readonly` parameters with a warning since they are equivalent to passing rvalues.
+This allows API authors to change `in` parameters with default values to `ref readonly` parameters without introducing a source breaking change.
 
 ## Alternatives
 [alternatives]: #alternatives
