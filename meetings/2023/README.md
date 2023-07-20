@@ -13,11 +13,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Sept 6, 2023
 
-## Wed Jul 16 2023
+## Wed Aug 16 2023
 
-## Mon Jul 14, 2023
+## Mon Aug 14, 2023
 
-## Wed Jul 9, 2023
+## Wed Aug 9, 2023
 
 ## Mon Aug 7, 2023
 
