@@ -28,27 +28,6 @@ Once a single switch arm returns a `ref` expression, all other switch arms must 
 
 Since all ref expressions are LValues, and the switch arms are all ref expressions, the entire result of the switch expression is also an LValue. Therefore, the entire switch expression can be passed by reference, assigned to, and returned by reference. Note that for directly assigning to the switch expression's ref result, the `ref` keyword must not be used, like normal ref locals are assigned. For example:
 
-`item switch { 1 => ref X, 2 => ref Y } = value`
-
-When not in the context of assigning the ref result of the `switch` expression, not using the `ref` keyword in front of the switch expression is considered a logical error. Thus, it is advised to show a warning covering that case, like in the example:
-```csharp
-private void RefSwitchAssignLocal()
-{
-    // Warning:
-    // the switch statement returns by reference but the result is immediately dereferenced
-    int dimension = axis switch
-    {
-        Axis.X => ref X,
-        Axis.Y => ref Y,
-    };
-}
-```
-
-Ref return safety relies on the individual switch arms. If any of the switch arms that does not throw is unsafe to return, the entire switch statement is unsafe to return. Otherwise, the entire `switch` statement's expression is safe to return.
-
-## Examples
-[examples]: #examples
-
 ```csharp
 // Returning by reference
 private ref int GetDirectionField(Direction direction) => ref direction switch
@@ -88,6 +67,58 @@ private void RefSwitchAssignDirectly(int value)
     dimension = value;
 }
 ```
+
+Note that, a switch arm can only return a `ref` to a read-only reference if the switch expression is assigned to a `ref readonly` symbol. Consider the example:
+```csharp
+void M(Axis axis, ref int x, in int y)
+{
+    ref int dimension = ref axis switch
+    {
+        Axis.X => ref x,
+        Axis.Y => ref y, // Error: y is readonly and cannot be passed by reference to a non-readonly reference
+    };
+}
+```
+
+To pass `ref y`, the declaration of `dimension` must be `ref readonly int`, demoting all assigned references to readonly:
+```csharp
+void M(Axis axis, ref int x, in int y)
+{
+    ref readonly int dimension = ref axis switch
+    {
+        Axis.X => ref x,
+        Axis.Y => ref y,
+    };
+}
+```
+
+Likewise, the same error would be thrown if the above expression were to be directly assigned a value, like in the example:
+```csharp
+void M(Axis axis, ref int x, in int y)
+{
+    axis switch
+    {
+        Axis.X => ref x,
+        Axis.Y => ref y, // Error: y is readonly and cannot be assigned by reference
+    } = 412;
+}
+```
+
+When not in the context of assigning the ref result of the `switch` expression, not using the `ref` keyword in front of the switch expression is considered a logical error. Thus, it is advised to show a warning covering that case, like in the example:
+```csharp
+private void RefSwitchAssignLocal()
+{
+    // Warning:
+    // the switch statement returns by reference but the result is immediately dereferenced
+    int dimension = axis switch
+    {
+        Axis.X => ref X,
+        Axis.Y => ref Y,
+    };
+}
+```
+
+Ref return safety relies on the individual switch arms. If any of the switch arms that does not throw is unsafe to return, the entire switch statement is unsafe to return. Otherwise, the entire `switch` statement's expression is safe to return.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
