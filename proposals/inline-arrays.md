@@ -115,12 +115,14 @@ If *primary_no_array_creation_expression* is a writable variable, the result of 
 equivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.span-1.item) with
 that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
 of the access are equivalent to the same for an invocation of a method with the signature ```static ref T GetItem(ref InlineArrayType array)```.
+The resulting variable is considered movable if and only if *primary_no_array_creation_expression* is movable.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a readonly variable
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.item) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
-of the access are equivalent to the same for an invocation of a method with the signature ```static ref readonly T GetItem(in InlineArrayType array)```. 
+of the access are equivalent to the same for an invocation of a method with the signature ```static ref readonly T GetItem(in InlineArrayType array)```.
+The resulting variable is considered movable if and only if *primary_no_array_creation_expression* is movable.
 
 If *primary_no_array_creation_expression* is a value, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.item) with
