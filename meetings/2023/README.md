@@ -27,9 +27,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Jul 26, 2023
 
+- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
+  
 ## Mon Jul 24, 2023
 
-- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
+- Discuss [feedback](https://github.com/dotnet/csharplang/discussions/7109) on mutability of [primary constructor](https://github.com/dotnet/csharplang/issues/2691) parameters (Kathleen)
 - [Method group natural type](https://github.com/dotnet/csharplang/issues/7364) (Julien)
 
 ## Wed Mar 15, 2023
