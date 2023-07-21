@@ -28,7 +28,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Wed Jul 26, 2023
 
 - [Method group natural type](https://github.com/dotnet/csharplang/issues/7364) (Julien)
--   
+  
 ## Mon Jul 24, 2023
 
 - [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
