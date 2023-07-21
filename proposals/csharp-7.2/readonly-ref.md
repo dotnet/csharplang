@@ -263,6 +263,8 @@ Same requirements apply to `Invoke` methods in delegates.
 
 **Motivation**: this is to ensure that existing compilers cannot simply ignore `readonly` when creating or assigning delegates.
 
+**Warning**: this is currently not implemented. See https://github.com/dotnet/roslyn/issues/69079.
+
 ## Returning by readonly reference.
 
 ### Motivation
