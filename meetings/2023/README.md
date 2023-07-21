@@ -32,7 +32,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Jul 24, 2023
 
 - [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
-- Discuss [feedback](https://github.com/dotnet/csharplang/discussions/7109) on mutability of [primary constructor](https://github.com/dotnet/csharplang/issues/2691) parameters (kathleen)
+- Discuss [feedback](https://github.com/dotnet/csharplang/discussions/7109) on mutability of [primary constructor](https://github.com/dotnet/csharplang/issues/2691) parameters (Kathleen)
 
 ## Wed Mar 15, 2023
 
