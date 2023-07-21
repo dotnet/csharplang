@@ -55,6 +55,9 @@ In the opposite direction, changing
 No changes in grammar are necessary.
 Specification will be extended to allow `ref readonly` modifiers for parameters with the same rules as specified for `in` parameters in [their proposal](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/proposals/csharp-7.2/readonly-ref.md), except where explicitly changed in this proposal.
 
+### Value kind checks
+[value-kind-checks]: #value-kind-checks
+
 Note that even though `ref` argument modifier is allowed for `ref readonly` parameters, nothing changes w.r.t. value kind checks, i.e.,
 - `ref` can only be used with assignable values;
 - to pass readonly references, one has to use the `in` argument modifier instead;
@@ -176,6 +179,11 @@ This would be inconsistent with how `readonly ref` returns and fields behave (in
 Errors could be emitted instead of warnings when passing rvalues to `ref readonly` parameters or mismatching callsite annotations and parameter modifiers.
 Similarly, special `modreq` could be used instead of an attribute to ensure `ref readonly` parameters are distinct from `in` parameters on the binary level.
 This would provide stronger guarantees, so it would be good for new APIs, but prevent adoption in existing runtime APIs which cannot introduce breaking changes.
+
+Value kind checks could be relaxed to allow passing readonly references via `ref` into `in`/`ref readonly` parameters.
+That would be similar to how ref assignments and ref returns work today&mdash;they also allow passing references as readonly via the `ref` modifier on the source expression.
+However, the `ref` there is usually close to the place where the target is declared as `ref readonly`, so it is clear we are passing a reference as readonly, unlike invocations whose argument and parameter modifiers are usually far apart.
+Furthermore, they allow *only* the `ref` modifier unlike arguments which allow also `in`, hence `in` and `ref` would become interchangeable for arguments, or `in` would become practically obsolete if users wanted to make their code consistent (they would probably use `ref` everywhere since it's the only modifier allowed for ref assignments and ref returns).
 
 Function pointer conversions could warn on `ref readonly`/`ref`/`in` mismatch, but if we wanted to gate that on LangVersion, a significant implementation investment would be required as today type conversions do not need access to compilation.
 Furthermore, even though mismatch is currently an error, it is easy for users to add a cast to allow the mismatch if they want.
