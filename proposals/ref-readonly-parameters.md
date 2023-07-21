@@ -212,7 +212,91 @@ or it could be always allowed without any errors.
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- Emit errors for rvalues passed into `in`/`ref readonly` parameters of methods that could capture them? See https://github.com/dotnet/roslyn/pull/67955#discussion_r1178138561.
+### Breaking change for extension methods
+
+There is currently a breaking change because of the `ref`/`in` mismatch relaxation:
+
+```cs
+class C
+{
+    string M(in int i) => "C";
+    static void Main()
+    {
+        int i = 5;
+        System.Console.Write(new C().M(ref i));
+    }
+}
+static class E
+{
+    public static string M(this C c, ref int i) => "E";
+}
+```
+
+Previously, the call would bind to `E.M`, hence `"E"` was printed.
+Now `C.M` is allowed to bind (with a warning) and no extension scopes are searched since we have an applicable candidate, hence `"C"` is printed.
+We could
+- disallow the `ref`/`in` mismatch (that would only prevent migration to `in` for old APIs that used `ref` because `in` wasn't available yet),
+- go with the breaking change (it is probably rare),
+- modify the overload resolution rules to continue looking for a better match when there's `ref`/`in` mismatch (and perhaps other mismatches introduced in this proposal, although they are not a breaking change since they include the new `ref readonly` modifier).
+
+### Betterness rules
+
+The following example currently results in three ambiguity errors for the three invocations.
+We could add new betterness rules to resolve the ambiguities.
+One way would be to make the example print `221` (where `ref readonly` parameter is matched with `in` argument since it would be a warning to call it with no modifier whereas for `in` parameter that's allowed).
+
+```cs
+interface I1 { }
+interface I2 { }
+class C
+{
+    static string M1(I1 o, in int i) => "1";
+    static string M1(I2 o, ref readonly int i) => "2";
+    static void Main()
+    {
+        int i = 5;
+        System.Console.Write(M1(null, ref i));
+        System.Console.Write(M1(null, in i));
+        System.Console.Write(M1(null, i));
+    }
+}
+```
+
+Draft of these rules:
+
+| argument    | better parameter | worse parameter     |
+|-------------|------------------|---------------------|
+| `ref`/`in`  | `ref readonly`   | `in`                |
+| `ref`       | `ref`            | `ref readonly`/`in` |
+| by-value    | by-value/`in`    | `ref readonly`      |
+| `in`        | `in`             | `ref`               |
+
+Similarly, we should handle method conversions.
+The following example currently results in two ambiguity errors for the two delegate assignments.
+We would expect the exactly matching delegate to win and the example to print `12`.
+
+```cs
+class C
+{
+    void M(I1 o, ref readonly int x) => System.Console.Write("1");
+    void M(I2 o, ref int x) => System.Console.Write("2");
+    void Run()
+    {
+        D1 m1 = this.M;
+        D2 m2 = this.M;
+
+        var i = 5;
+        m1(null, in i);
+        m2(null, ref i);
+    }
+    static void Main() => new C().Run();
+}
+interface I1 { }
+interface I2 { }
+class X : I1, I2 { }
+delegate void D1(X s, ref readonly int x);
+delegate void D2(X s, ref int x);
+```
 
 ## Design meetings
 
