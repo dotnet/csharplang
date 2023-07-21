@@ -78,7 +78,7 @@ public static System.ReadOnlySpan<TElement> InlineArrayAsReadOnlySpan<TBuffer, T
 
 ### Element access
 
-The [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#11710-element-access) will be extended
+The [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12811-element-access) will be extended
 to support inline array element access.
 
 An *element_access* consists of a *primary_no_array_creation_expression*, followed by a “`[`” token, followed by an *argument_list*, followed by a “`]`” token. The *argument_list* consists of one or more *argument*s, separated by commas.
@@ -91,15 +91,15 @@ element_access
 
 The *argument_list* of an *element_access* is not allowed to contain `ref` or `out` arguments.
 
-An *element_access* is dynamically bound ([§11.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1133-dynamic-binding)) if at least one of the following holds:
+An *element_access* is dynamically bound ([§11.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1233-dynamic-binding)) if at least one of the following holds:
 
 - The *primary_no_array_creation_expression* has compile-time type `dynamic`.
 - At least one expression of the *argument_list* has compile-time type `dynamic` and the *primary_no_array_creation_expression* does not have an array type,
   **and the *primary_no_array_creation_expression* does not have an inline array type or there is more than one item in the argument list**.
 
-In this case, the compiler classifies the *element_access* as a value of type `dynamic`. The rules below to determine the meaning of the *element_access* are then applied at run-time, using the run-time type instead of the compile-time type of those of the *primary_no_array_creation_expression* and *argument_list* expressions which have the compile-time type `dynamic`. If the *primary_no_array_creation_expression* does not have compile-time type `dynamic`, then the element access undergoes a limited compile-time check as described in [§11.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1165-compile-time-checking-of-dynamic-member-invocation).
+In this case, the compiler classifies the *element_access* as a value of type `dynamic`. The rules below to determine the meaning of the *element_access* are then applied at run-time, using the run-time type instead of the compile-time type of those of the *primary_no_array_creation_expression* and *argument_list* expressions which have the compile-time type `dynamic`. If the *primary_no_array_creation_expression* does not have compile-time type `dynamic`, then the element access undergoes a limited compile-time check as described in [§11.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
 
-If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access ([§11.7.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117102-array-access)). **If the *primary_no_array_creation_expression* of an *element_access* is a variable or value of an inline array type and the *argument_list* consists of a single argument, the *element_access* is an inline array element access.** Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type that has one or more indexer members, in which case the *element_access* is an indexer access ([§11.7.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117103-indexer-access)).
+If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access ([§11.7.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128112-array-access)). **If the *primary_no_array_creation_expression* of an *element_access* is a variable or value of an inline array type and the *argument_list* consists of a single argument, the *element_access* is an inline array element access.** Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type that has one or more indexer members, in which case the *element_access* is an indexer access ([§11.7.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128113-indexer-access)).
 
 #### Inline array element access
 
@@ -295,7 +295,7 @@ Compiler will validate the following aspects of the InlineArrayAttribute applica
 ### Inline Array elements in an object initializer
 
 By default, element initialization will not be supported via *initializer_target* of form ```'[' argument_list ']'```
-(see https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#117153-object-initializers):  
+(see https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128163-object-initializers):  
 ``` C#
 static C M2() => new C() { F = {[0] = 111} }; // error CS1913: Member '[0]' cannot be initialized. It is not a field or property.
 
@@ -435,7 +435,7 @@ by using a required custom modifier (exact type TBD) applied to an anonymous inl
 
 #### Array creation expressions
 
-[Array creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#117155-array-creation-expressions)
+[Array creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128165-array-creation-expressions)
 
 ```ANTLR
 array_creation_expression
@@ -567,7 +567,7 @@ In a member access of the form `E.I`, if `E` is of a struct type and a member lo
 then `E.I` is evaluated and classified as follows:
 
 - If `E` is classified as a value, then `E.I` can be used only as a *primary_no_array_creation_expression* of
-  an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#11710-element-access)
+  an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12811-element-access)
   with index of ```System.Index``` type, or of a type implicitly convertible to int. Result of the element access is
   a fixed-size member's element at the specified position, classified as a value.   
 - Otherwise, if `E` is classified as a readonly variable and the result of the expression is classified as a value of type `System.ReadOnlySpan<S>`,
@@ -597,7 +597,7 @@ This is achieved by the following.
 A member access for a readonly fixed-size buffer is evaluated and classified as follows:
 
 - In a member access of the form `E.I`, if `E` is of a struct type and `E` is classified as a value, then `E.I` can be used only as a
-  *primary_no_array_creation_expression* of an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#11710-element-access)
+  *primary_no_array_creation_expression* of an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12811-element-access)
   with index of ```System.Index``` type, or of a type implicitly convertible to int. Result of the element access is a fixed-size member's element at the specified
   position, classified as a value.
 - If access occurs in a context where direct assignments to an element of readonly fixed-size buffer are permitted, the result of the expression
