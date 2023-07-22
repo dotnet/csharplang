@@ -378,7 +378,6 @@ static class Extensions
 var x = [1].AsImmutableArray();           // error: collection expression has no target type
 var y = [2].AsImmutableArray<int>();      // error: ...
 var z = Extensions.AsImmutableArray([3]); // ok
-
 ```
 
 ## Open questions
