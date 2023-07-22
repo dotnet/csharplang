@@ -3,14 +3,19 @@
 ## Summary  
 
 Allow lambda parameter declarations with `in`/`ref`/`out` to be declared without requiring their type names.
+
+Given this delegate:
 ```cs
-// Given this delegate
 delegate bool TryParse<T>(string text, out T result);
+```
 
-// Allow this simplified parameter declaration
+Allow this simplified parameter declaration:
+```cs
 TryParse<int> parse1 = (text, out result) => Int32.TryParse(text, out result);
+```
 
-// Currently only this is valid
+Currently only this is valid:
+```cs
 TryParse<int> parse2 = (string text, out int result) => Int32.TryParse(text, out result);
 ```
 
@@ -30,3 +35,5 @@ The change in the spec will require that, in [the grammar for lambda expressions
 ```
 
 The type of the parameters matches the type of the parameter in the target delegate type, including the by-reference modifiers.
+
+Attributes on the parameters will not be affected in any way. Similarly, `async` lambdas will also not be affected from this change.
