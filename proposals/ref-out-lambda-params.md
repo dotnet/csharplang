@@ -49,12 +49,9 @@ The change in the spec will require that, [the grammar for lambda expressions](h
       ;
 
 + implicit_parenthesized_anonymous_function_parameter
-+    : identifier
 +    : anonymous_function_parameter_modifier? identifier
      ;
 ```
-
-The new grammar rule is added so that this change specifically affects parenthesized lambda expression parameters, leaving lambda expressions with an unparenthesized parameter unsupported.
 
 The type of the parameters matches the type of the parameter in the target delegate type, including the by-reference modifiers.
 
