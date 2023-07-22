@@ -18,6 +18,22 @@ The `switch` expression is meant to provide a quicker way to return values based
 ## Detailed design
 [design]: #detailed-design
 
+### Grammar
+The [grammar](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/patterns#switch-expression) needs to be updated for the switch expression's arms to support `ref` expressions:
+
+```diff
+  switch_expression_arm
+-     : pattern case_guard? '=>' expression
++     : pattern case_guard? '=>' switch_expression_arm_value
+      ;
+
++ switch_expression_arm_value
++     : expression
++     | 'ref'? variable_reference
++     ;
+```
+
+### Semantics
 A `switch` expression may return a `ref` value. The returning expression, if not a `throw` expression, must be a `ref` expression.
 
 A `switch` expression that returns a `ref` value needs an extra `ref` in front of it when assigned/returned to a `ref` local. This design aligns with the current design in the ternary operator.
@@ -26,7 +42,7 @@ A `switch` expression that returns a `ref` value needs an extra `ref` in front o
 
 Once a single switch arm returns a `ref` expression, all other switch arms must return `ref` expressions, unless they are `throw` expressions. Not providing a `ref` expression in a switch arm causes a compiler error.
 
-Since all ref expressions are LValues, and the switch arms are all ref expressions, the entire result of the switch expression is also an LValue. Therefore, the entire switch expression can be passed by reference, assigned to, and returned by reference. Note that for directly assigning to the switch expression's ref result, the `ref` keyword must not be used, like normal ref locals are assigned. For example:
+Since all ref expressions are LValues, and the switch arms are all ref expressions or `throw` expressions, the entire result of the switch expression is also an LValue. Therefore, the entire switch expression can be passed by reference, assigned to, and returned by reference. Note that for directly assigning to the switch expression's ref result, the `ref` keyword must not be used, like normal ref locals are assigned. For example:
 
 ```csharp
 // Returning by reference
@@ -109,7 +125,7 @@ When not in the context of assigning the ref result of the `switch` expression, 
 private void RefSwitchAssignLocal()
 {
     // Warning:
-    // the switch statement returns by reference but the result is immediately dereferenced
+    // the switch expression returns by reference but the result is immediately dereferenced
     int dimension = axis switch
     {
         Axis.X => ref X,
@@ -118,7 +134,7 @@ private void RefSwitchAssignLocal()
 }
 ```
 
-Ref return safety relies on the individual switch arms. If any of the switch arms that does not throw is unsafe to return, the entire switch statement is unsafe to return. Otherwise, the entire `switch` statement's expression is safe to return.
+Ref return safety relies on the individual switch arms. If any of the switch arms that does not throw is unsafe to return, the entire switch expression is unsafe to return. Otherwise, the entire `switch` expression's result is safe to return.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
