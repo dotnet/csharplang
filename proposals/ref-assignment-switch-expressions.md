@@ -120,12 +120,11 @@ void M(Axis axis, ref int x, in int y)
 }
 ```
 
-When not in the context of assigning the ref result of the `switch` expression, not using the `ref` keyword in front of the switch expression is considered a logical error. Thus, it is advised to show a warning covering that case, like in the example:
+When not in the context of assigning the ref result of the `switch` expression, not using the `ref` keyword in front of the switch expression is considered a logical error. Thus, it is an error, like in the example:
 ```csharp
 private void RefSwitchAssignLocal()
 {
-    // Warning:
-    // the switch expression returns by reference but the result is immediately dereferenced
+    // Error: The switch expression returns a reference, which cannot be immediately discarded
     int dimension = axis switch
     {
         Axis.X => ref X,
@@ -133,6 +132,8 @@ private void RefSwitchAssignLocal()
     };
 }
 ```
+
+> Note: this does not align with the current behavior of ref ternary expressions (`a ? ref b : ref c`). This is intentional, and the handling of this case in ref ternary expressions is a separate concern.
 
 Ref return safety relies on the individual switch arms. If any of the switch arms that does not throw is unsafe to return, the entire switch expression is unsafe to return. Otherwise, the entire `switch` expression's result is safe to return.
 
