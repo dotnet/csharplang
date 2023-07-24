@@ -646,14 +646,19 @@ The preceding rules mean:
 
 TODO clarify behavior for extension on `object` or `dynamic` used as `dynamic.M()`?
 
-### Extension method invocations
-
-The [extension method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12893-extension-method-invocations)
-remain unchanged.
-
 ### Indexer access
 
 TL;DR: If no candidate is applicable, then we attempt extension indexer access instead.
+
+We modify the [element access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128111-general) as follows:
+
+/[...]
+An *element_access* is dynamically bound if \[...]
+If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access. 
+Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type 
+that has one or more indexer members, in which case the *element_access* is an indexer access.
+\***Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type 
+that has no indexer members, in which case the *element_access* is an extension indexer access.**
 
 We modify the [indexer access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128113-indexer-access) as follows:
 
@@ -675,7 +680,53 @@ The binding-time processing of an indexer access of the form `P[A]`, where `P` i
 
 #### Extension indexer access
 
-TODO this will be similar to the "extension invocations" rules.
+TODO3 Confirm what expressions can be the receiver. How about `base`?
+
+In an element access of one of the forms
+
+```csharp
+«expr» [ ]
+«expr» [ «args» ]
+```
+
+if the normal processing of the element access finds no applicable indexers, an attempt is made to process the construct as an extension indexer access. If «expr» or any of the «args» has compile-time type `dynamic`, extension methods will not apply.
+
+This succeeds if, given that «expr» has type `Type`, we find
+a substituted compatible implicit extension type `X` for `Type`
+so that the corresponding element access can take place:
+```csharp
+((X)expr) . «identifier» [ ]
+((X)expr) . «identifier» [ «args» ]
+```
+
+The search proceeds as follows:
+
+- Starting with the closest enclosing type declaration, continuing with each type declaration,
+  then continuing with each enclosing namespace declaration, and ending with
+  the containing compilation unit, successive attempts are made:
+  - If the given type, namespace or compilation unit directly contains extension types or methods,
+    those will be considered first.
+  - If namespaces imported by using-namespace directives in the given namespace or 
+    compilation unit directly contain extension types or methods, those will be considered second.
+
+  - Check which extension types in the current scope are compatible with the given underlying type `Type` and 
+    collect resulting compatible substituted extension types.
+  - The set of indexers is constructed from all indexers declared in each substituted extension type
+    that are not override declarations and are accessible in the current context.
+  - Merge the results
+  - Next, members that are hidden by other members are removed from the set.  
+    (note: "base types" means "base extensions and underlying type" for extension types)
+  - Next, members that are not applicable with respect to the given **argument_list** are removed from the set.
+  - Finally, having removed hidden and inapplicable members:
+    - If the set is empty, proceed to the next enclosing scope.
+    - Otherwise, overload resolution is applied to the candidate indexers:
+      - If a single best indexer is found, the *element_access*
+        is evaluated as the invocation of either the *get_accessor* or the *set_accessor* of the indexer.
+      - If no single best indexer is found, a compile-time error occurs.
+
+- If no extension indexer is found to be suitable for the element access
+  in any enclosing scope, a compile-time error occurs.
+
 
 ### Member lookup
 
@@ -826,6 +877,11 @@ has a string property, an assignment of a string to that property will fail, as
 extension member lookup will find the `int` property and stop there.  
 
 For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
+
+### Identical simple names and type names
+
+For context see [Identical simple names and type names](https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#identical-simple-names-and-type-names).
+TODO3
 
 ### Operators
 
