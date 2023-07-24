@@ -112,20 +112,6 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
     * The behavior of collection literals with collections that are not well-behaved is undefined.
 
-## Element type
-[element-type]: #element-type
-
-Certain uses of *collection expressions* &mdash; [*type inference*](#type-inference) and [*create methods*](#create-methods) &mdash; require a target type with a known *element type*.
-
-The *element type* of a type is defined as:
-
-* For a single dimensional *array type* `T[]`, the *element type* is `T`.
-* For a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`, the *element type* is `T`.
-* For an *[inline array type](https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md)* with *element type* `T`, the *element type* is `T`.
-* For a *type* that implements `System.Collections.IEnumerable`, the *element type* is `System.Object`.
-* For an *interface type* `I<T0>` where `System.Collections.Generic.List<T>` implements `I<T>`, the *element type* is `T0`.
-* Otherwise the type does not have an *element type*.
-
 ## Conversions
 [conversions]: #conversions
 
@@ -204,14 +190,14 @@ namespace System.Runtime.CompilerServices
 The attribute can be applied to a `class`, `struct`, `ref struct`, or `interface`.
 The attribute is not inherited although the attribute can be applied to a base `class` or an `abstract class`.
 
-The collection type must have an [*element type*](#element-type).
+The collection type must have an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
 
 For the *create method*:
 - The *builder type* must be a non-generic `class` or `struct`.
 - The method must be defined on the *builder type* directly.
 - The method must be `public` and `static`.
 - The *arity* of the method must match the *arity* of the collection type.
-- The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, where `E` is the [*element type*](#element-type) of the corresponding *collection type*.
+- The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, where `E` is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the corresponding *collection type*.
 - The method return type must be the corresponding *collection type*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invocable method with the expected signature.
@@ -347,14 +333,14 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 
 > An *input type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> - If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*element type*](#element-type) `Tₑ`, then an *input type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
+> - If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *input type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
 > - *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
 > 
 > An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 > 
-> - If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*element type*](#element-type) `Tₑ`, then an *output type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
+> - If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *output type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
 > - *[existing rules from output type inferences]* ...
 
 ## Extension methods
@@ -857,7 +843,7 @@ However, given the breadth and consistency brought by the new literal syntax, we
 ## Resolved questions
 [resolved]: #resolved-questions
 
-* Should the compiler use `stackalloc` for stack allocation when *inline arrays* are not available and the *element type* is a primitive type?
+* Should the compiler use `stackalloc` for stack allocation when *inline arrays* are not available and the *iteration type* is a primitive type?
 
     Resolution: No. Managing a `stackalloc` buffer requires additional effort over an *inline array* to ensure the buffer is not allocated repeatedly when the collection expression is within a loop. The additional complexity in the compiler and in the generated code outweighs the benefit of stack allocation on older platforms.
 
