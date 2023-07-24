@@ -197,8 +197,8 @@ For the *create method*:
 - The method must be defined on the *builder type* directly.
 - The method must be `public` and `static`.
 - The *arity* of the method must match the *arity* of the collection type.
-- The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, where `E` is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the corresponding *collection type*.
-- The method return type must be the corresponding *collection type*.
+- The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) between `E` and the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type*.
+- There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) between the method return type and the *collection type*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invocable method with the expected signature.
 
