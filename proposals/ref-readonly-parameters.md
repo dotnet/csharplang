@@ -247,6 +247,24 @@ We could
 - go with the breaking change (it is probably rare),
 - modify the overload resolution rules to continue looking for a better match when there's `ref`/`in` mismatch (and perhaps other mismatches introduced in this proposal, although they are not a breaking change since they include the new `ref readonly` modifier).
 
+Similar (but not that silent) break happens also without extension methods:
+
+```cs
+var i = 5;
+System.Console.Write(C.M(null, ref i));
+
+interface I1 { }
+interface I2 { }
+static class C
+{
+    public static string M(I1 o, ref int x) => "1";
+    public static string M(I2 o, in int x) => "2";
+}
+```
+
+Previously, this would print `"1"`, now there's an ambiguity error for the `C.M` call.
+It could be resolved by adding betterness rules described below.
+
 ### Betterness rules
 
 The following example currently results in three ambiguity errors for the three invocations.
