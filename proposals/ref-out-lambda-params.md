@@ -1,8 +1,8 @@
-# Declaration of `in`/`ref`/`out` lambda parameters without type name
+# Declaration of lambda parameters with by-reference modifiers without type name
 
 ## Summary  
 
-Allow lambda parameter declarations with `in`/`ref`/`out` to be declared without requiring their type names.
+Allow lambda parameter declarations with by-reference modifiers (`in` / `ref` / `out` / `ref readonly`) to be declared without requiring their type names.
 
 Given this delegate:
 ```cs
@@ -23,20 +23,22 @@ TryParse<int> parse2 = (string text, out int result) => Int32.TryParse(text, out
 
 ### Parameter declaration
 
-Parameter declarations in lambda expressions with parenthesized parameters now permit a single identifier after an `in`/`ref`/`out` modifier on the parameter. This does not apply to lambda expressions with a single parameter with omitted parentheses.
+Parameter declarations in lambda expressions with parenthesized parameters now permit a single identifier after a modifier on the parameter. This does not apply to lambda expressions with a single parameter with omitted parentheses.
 
 For example,
 ```csharp
-SelfReturnerIn<string> f = in x => x;
-SelfReturnerRef<string> g = ref x => x;
-SelfReturnerOut<string> h = out x => x;
+SelfReturnerIn<string> fin = in x => x;
+SelfReturnerRef<string> fref = ref x => x;
+SelfReturnerOut<string> fout = out x => x;
+SelfReturnerRefReadonly<string> frr = ref readonly x => x;
 
 delegate T SelfReturnerIn<T>(in T t);
 delegate T SelfReturnerRef<T>(ref T t);
 delegate T SelfReturnerOut<T>(out T t);
+delegate T SelfReturnerRefReadonly<T>(ref readonly T t);
 ```
 
-are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, `in` and `out` are also left unsupported and illegal.
+are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, `in`, `out` and `ref readonly` are also left unsupported and illegal.
 
 The change in the spec will require that, [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) must be adjusted as follows:
 
@@ -49,8 +51,8 @@ The change in the spec will require that, [the grammar for lambda expressions](h
       ;
 
 + implicit_parenthesized_anonymous_function_parameter
-+    : anonymous_function_parameter_modifier? identifier
-     ;
++     : anonymous_function_parameter_modifier? identifier
+      ;
 ```
 
 The type of the parameters matches the type of the parameter in the target delegate type, including the by-reference modifiers.
