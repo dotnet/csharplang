@@ -137,7 +137,10 @@ d = ref @var (ref var v) => ref v; // ok
 ## Natural (function) type
 An _anonymous function_ expression ([§11.16](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1116-anonymous-function-expressions)) (a _lambda expression_ or an _anonymous method_) has a natural type if the parameters types are explicit and the return type is either explicit or can be inferred (see [§11.6.3.13](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116313-inferred-return-type)).
 
-A _method group_ has a natural type if all candidate methods in the method group have a common signature. (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
+The natural type of a _method group_ is determined by considering each scope in turn: instance methods, then each scope of extension methods.
+If the methods in that scope have a common signature, then that signature provides the natural type.
+Otherwise, we proceed to the next scope.
+If no scope yielded a result, then the method group doesn't have a natural type.
 
 The natural type of an anonymous function expression or method group is a _function_type_.
 A _function_type_ represents a method signature: the parameter types and ref kinds, and return type and ref kind.
