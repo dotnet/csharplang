@@ -6,6 +6,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- Updated on the C# standard process (Bill)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
