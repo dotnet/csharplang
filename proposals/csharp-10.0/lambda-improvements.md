@@ -142,6 +142,9 @@ If the methods in that scope have a common signature, then that signature provid
 Otherwise, we proceed to the next scope.
 If no scope yielded a result, then the method group doesn't have a natural type.
 
+Note: when C# 10 shipped, we required all candidate methods across all scopes to have a common signature in order
+to give the method group a natural type.
+
 The natural type of an anonymous function expression or method group is a _function_type_.
 A _function_type_ represents a method signature: the parameter types and ref kinds, and return type and ref kind.
 Anonymous function expressions or method groups with the same signature have the same _function_type_.
