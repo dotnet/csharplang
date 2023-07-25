@@ -27,7 +27,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Jul 26, 2023
 
-- Discuss [primary constructor](https://github.com/dotnet/csharplang/issues/2691) parameters, including default mutability (Fred)
+- Discuss [primary constructor](https://github.com/dotnet/csharplang/issues/2691) parameters, including default mutability: https://github.com/dotnet/csharplang/discussions/7377 (Fred)
   
 ## Mon Jul 24, 2023
 
