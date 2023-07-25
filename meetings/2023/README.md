@@ -6,7 +6,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- Updated on the C# standard process (Bill)
+- Updated on the C# standard process (Bill, after Aug 10)
 
 ## Recurring topics
 
