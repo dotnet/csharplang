@@ -4,11 +4,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- More method group natural type questions (Julien, https://github.com/dotnet/roslyn/issues/69222)
 
 ## Schedule when convenient
 
 - Updated on the C# standard process (Bill, after Aug 10)
+- Futures: reflection alternatives (Andy, after Aug 15)
 
 ## Recurring topics
 
@@ -25,9 +25,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Aug 7, 2023
 
-## Wed Aug 2, 2023
-
 ## Mon Jul 31, 2023
+
+- More [primary constructor](https://github.com/dotnet/csharplang/issues/2691) parameters, including default mutability: https://github.com/dotnet/csharplang/discussions/7377 (Fred)
+- [More method group natural type questions](https://github.com/dotnet/roslyn/issues/69222) (Julien)
+
 
 ## Wed Jul 26, 2023
 
