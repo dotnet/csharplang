@@ -25,6 +25,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Aug 7, 2023
 
+- Brief collection-expression question and update (CyrusNajmabadi): Link forthcoming. 
+
 ## Mon Jul 31, 2023
 
 - More [primary constructor](https://github.com/dotnet/csharplang/issues/2691) parameters, including default mutability: https://github.com/dotnet/csharplang/discussions/7377 (Fred)
