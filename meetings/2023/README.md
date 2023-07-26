@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- More method group natural type questions (Julien, https://github.com/dotnet/roslyn/issues/69222)
+
 ## Schedule when convenient
 
 - Updated on the C# standard process (Bill, after Aug 10)
