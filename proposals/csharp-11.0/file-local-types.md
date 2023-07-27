@@ -67,12 +67,12 @@ We amend the [member lookup](https://github.com/dotnet/csharpstandard/blob/draft
 
 > - Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process ([§11.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1163-type-inference)) might be able to infer the type arguments.
 > - **Next, let *F* be the compilation unit which contains the expression where member lookup is occurring. All members which are file-local types and are not declared in *F* are removed from the set.**
-> - **Next, if the set of accessible members contains file-local types, all non-file-local types are removed from the set.**
+> - **Next, if the set of accessible members contains file-local types, all members which are not file-local types are removed from the set.**
 
 #### Remarks
 These rules disallow usage of file-local types outside the file in which they are declared.
 
-These rules also permit *shadowing* of a non-file-local type by a file-local type:
+These rules also permit a file-local type to *shadow* a namespace or a non-file-local type:
 ```cs
 // File1.cs
 class C
