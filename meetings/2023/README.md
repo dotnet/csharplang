@@ -25,7 +25,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Aug 7, 2023
 
-- Brief collection-expression question and update (CyrusNajmabadi): (https://github.com/dotnet/csharplang/issues/7396
+- Brief collection-expression question and update (CyrusNajmabadi): https://github.com/dotnet/csharplang/issues/7396
 
 ## Mon Jul 31, 2023
 
