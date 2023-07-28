@@ -7,8 +7,9 @@
 
 This proposal refines the determination of the natural type of a method group in a few ways:
 1. Consider candidate methods scope-by-scope (instance methods first, then each scope subsequent scope of extension methods)
-2. Prune generic instance methods when no type arguments are provided (`var x = M;`)
-3. Prune generic extension methods based on constraints
+2. Prune candidates that have no chance of succeeding, so they don't interfere with determining a unique signature:
+    - Prune generic instance methods when no type arguments are provided (`var x = M;`)
+    - Prune generic extension methods based on being able to reduce the extension and on constraints
 
 It also allows the natural type of a method group to contribute to method type inference
 
@@ -62,7 +63,11 @@ partial class Program
 
 ### Type inference
 
-TBD
+We modify the [explicit parameter type inference rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12638-explicit-parameter-type-inferences) to not just apply to explicitly-typed lambdas, but also to method groups:
+
+An *explicit parameter type inference* is made *from* an expression `E` *to* a type `T` in the following way:
+
+- If `E` is an explicitly typed anonymous function \***or method group with a unique signature** with parameter types `U₁...Uᵥ` and `T` is a delegate type or expression tree type with parameter types `V₁...Vᵥ` then for each `Uᵢ` an *exact inference* is made *from* `Uᵢ` *to* the corresponding `Vᵢ`.
 
 ----
 
