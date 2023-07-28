@@ -62,6 +62,7 @@ partial class Program
 2. If the scopes are exhausted, then the method group doesn't have a natural type
 
 ### Type inference
+[inference]: #inference
 
 We modify the [explicit parameter type inference rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12638-explicit-parameter-type-inferences) to not just apply to explicitly-typed lambdas, but also to method groups:
 
