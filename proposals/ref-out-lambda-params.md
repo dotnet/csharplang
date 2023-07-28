@@ -1,8 +1,8 @@
-# Declaration of lambda parameters with by-reference modifiers without type name
+# Declaration of lambda parameters with modifiers without type name
 
 ## Summary  
 
-Allow lambda parameter declarations with by-reference modifiers (`in` / `ref` / `out` / `ref readonly`) to be declared without requiring their type names.
+Allow lambda parameter declarations with modifiers (`in` / `ref` / `out` / `ref readonly` / `scoped` / `scoped ref` / `params`) to be declared without requiring their type names.
 
 Given this delegate:
 ```cs
@@ -31,16 +31,22 @@ SelfReturnerIn<string> fin = in x => x;
 SelfReturnerRef<string> fref = ref x => x;
 SelfReturnerOut<string> fout = out x => x;
 SelfReturnerRefReadonly<string> frr = ref readonly x => x;
+SelfReturnerScoped<string> frr = scoped x => x;
+SelfReturnerScopedRef<string> frr = scoped ref x => x;
+SelfReturnerParams<string> frr = params x => x;
 
 delegate T SelfReturnerIn<T>(in T t);
 delegate T SelfReturnerRef<T>(ref T t);
 delegate T SelfReturnerOut<T>(out T t);
 delegate T SelfReturnerRefReadonly<T>(ref readonly T t);
+delegate T SelfReturnerScoped<T>(scoped T t);
+delegate T SelfReturnerScopedRef<T>(scoped ref T t);
+delegate T SelfReturnerParams<T>(params T[] t);
 ```
 
-are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, `in`, `out` and `ref readonly` are also left unsupported and illegal.
+are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, `in`, `out` and `ref readonly`, `scoped`, `scoped ref`, `params` are also left unsupported and illegal.
 
-The change in the spec will require that, [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) must be adjusted as follows:
+The change in the spec will require that [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) be adjusted as follows:
 
 ```diff
   implicit_anonymous_function_parameter_list
@@ -51,13 +57,15 @@ The change in the spec will require that, [the grammar for lambda expressions](h
       ;
 
 + implicit_parenthesized_anonymous_function_parameter
-+     : anonymous_function_parameter_modifier? identifier
++     : anonymous_function_parameter_modifier? implicit_anonymous_function_parameter
       ;
 ```
 
-The type of the parameters matches the type of the parameter in the target delegate type, including the by-reference modifiers.
+The type of the parameters matches the type of the parameter in the target delegate type, including the modifiers.
 
-Attributes on the parameters will not be affected in any way. Similarly, `async` lambdas will also not be affected from this change.
+Attributes on the parameters will not be affected in any way.
+
+It will still be illegal for `async` lambdas to contain by-ref parameters, since it is illegal to have by-ref parameters in async methods.
 
 If the lambda expression is not assigned to an expression with a type, the type cannot be inferred from usage. For example, the following is illegal:
 ```csharp
