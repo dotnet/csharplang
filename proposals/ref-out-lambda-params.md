@@ -44,7 +44,7 @@ delegate T SelfReturnerScopedRef<T>(scoped ref T t);
 delegate T SelfReturnerParams<T>(params T[] t);
 ```
 
-are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, `in`, `out` and `ref readonly`, `scoped`, `scoped ref`, `params` are also left unsupported and illegal.
+are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, all other modifiers are also left unsupported and illegal.
 
 The change in the spec will require that [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) be adjusted as follows:
 
