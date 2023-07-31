@@ -46,6 +46,8 @@ delegate T SelfReturnerParams<T>(params T[] t);
 
 are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, all other modifiers are also left unsupported and illegal.
 
+Using the `scoped` modifier alone is unsupported, because `scoped` is currently parsed as a type identifier, thus resolving to an explicit lambda parameter declaration.
+
 The change in the spec will require that [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) be adjusted as follows:
 
 ```diff
