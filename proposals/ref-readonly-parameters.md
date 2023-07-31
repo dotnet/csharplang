@@ -74,7 +74,7 @@ Note that even though `ref` argument modifier is allowed for `ref readonly` para
 
 Members declared in a single type cannot differ in signature solely by `ref`/`out`/`in`/`ref readonly`.
 For other purposes of signature matching (e.g., hiding or overriding), `ref readonly` can be interchanged with `in` modifier, but that results in a warning at the declaration site [[§7.6](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/basic-concepts.md#76-signatures-and-overloading)].
-This doesn't apply when matching `partial` declaration with its implementation.
+This doesn't apply when matching `partial` declaration with its implementation and when matching interceptor signature with intercepted signature.
 Note that there is no change in overriding for `ref`/`in` and `ref readonly`/`ref` modifier pairs, they cannot be interchanged, because the signatures aren't binary compatible.
 For consistency, the same is true for other signature matching purposes (e.g., hiding).
 
