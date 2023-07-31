@@ -65,9 +65,18 @@ The type of the parameters matches the type of the parameter in the target deleg
 
 Attributes on the parameters will not be affected in any way.
 
+Discard identifiers will be supported, as long as the modifiers are properly and correctly provided for the respective parameters, matching the target delegate type. This means that a parameter simply declared as `_` will not match a parameter declared `ref int x`, since the discard parameter needs to be accompanied by the `ref` modifier to match.
+
+More specifically, a proper lambda declaration involving discarded parameter names would be:
+```csharp
+delegate void Test(ref int x, scoped ref int y, params int[] p);
+
+Test t = (ref _, scoped ref _, params _) => { };
+```
+
 It will still be illegal for `async` lambdas to contain by-ref parameters, since it is illegal to have by-ref parameters in async methods.
 
-If the lambda expression is not assigned to an expression with a type, the type cannot be inferred from usage. For example, the following is illegal:
+If the lambda expression is not assigned to an expression with an explicit type, the type cannot be inferred from usage. For example, the following is illegal:
 ```csharp
 var d = (in a, ref b, out c) =>
 {
