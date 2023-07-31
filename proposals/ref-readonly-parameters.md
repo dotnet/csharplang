@@ -236,7 +236,8 @@ Now `C.M` is allowed to bind (with a warning) and no extension scopes are search
 We could
 - disallow the `ref`/`in` mismatch (that would only prevent migration to `in` for old APIs that used `ref` because `in` wasn't available yet),
 - go with the breaking change (it is probably rare),
-- modify the overload resolution rules to continue looking for a better match when there's `ref`/`in` mismatch (and perhaps other mismatches introduced in this proposal, although they are not a breaking change since they include the new `ref readonly` modifier).
+- modify the overload resolution rules to continue looking for a better match (determined by betterness rules specified below) when there's a ref kind mismatch introduced in this proposal,
+  - or alternatively continue only for `ref` vs. `in` mismatch, not the others (`ref readonly` vs. `ref`/`in`/by-value).
 
 Similar (but not that silent) break happens also without extension methods:
 
@@ -258,7 +259,7 @@ It could be resolved by adding betterness rules described below.
 
 ### Betterness rules
 
-The following example currently results in three ambiguity errors for the three invocations.
+The following example currently results in three ambiguity errors for the three invocations of `M`.
 We could add new betterness rules to resolve the ambiguities.
 One way would be to make the example print `221` (where `ref readonly` parameter is matched with `in` argument since it would be a warning to call it with no modifier whereas for `in` parameter that's allowed).
 
@@ -267,19 +268,22 @@ interface I1 { }
 interface I2 { }
 class C
 {
-    static string M1(I1 o, in int i) => "1";
-    static string M1(I2 o, ref readonly int i) => "2";
+    static string M(I1 o, in int i) => "1";
+    static string M(I2 o, ref readonly int i) => "2";
     static void Main()
     {
         int i = 5;
-        System.Console.Write(M1(null, ref i));
-        System.Console.Write(M1(null, in i));
-        System.Console.Write(M1(null, i));
+        System.Console.Write(M(null, ref i));
+        System.Console.Write(M(null, in i));
+        System.Console.Write(M(null, i));
     }
 }
 ```
 
-Draft of these rules:
+We propose rules that will mark as worse the parameter whose argument could have been passed with a different argument modifier to make it better.
+In other words, user should be always able to turn a worse parameter into a better parameter by changing its corresponding argument modifier.
+For example, when an argument is passed by `in`, a `ref readonly` parameter is preferred over an `in` parameter because user could pass the argument by-value to choose the `in` parameter.
+This rule is just an extension of by-value/`in` preference rule that is in effect today (it's the last overload resolution rule and the whole overload is better if any of its parameter is better and none is worse than the corresponding parameter of another overload).
 
 | argument    | better parameter | worse parameter     |
 |-------------|------------------|---------------------|
@@ -290,7 +294,8 @@ Draft of these rules:
 
 Similarly, we should handle method conversions.
 The following example currently results in two ambiguity errors for the two delegate assignments.
-We would expect the exactly matching delegate to win and the example to print `12`.
+We propose rules that will prefer a method parameter whose refness modifier matches the corresponding target delegate parameter refness modifier over one that has a mismatch.
+Hence, the following example would print `12`.
 
 ```cs
 class C
