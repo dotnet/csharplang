@@ -55,6 +55,12 @@ In the opposite direction, changing
 No changes in grammar are necessary.
 Specification will be extended to allow `ref readonly` modifiers for parameters with the same rules as specified for `in` parameters in [their proposal](https://github.com/dotnet/csharplang/blob/c8c1615fcad4ca016a97b7260ad497aad53ebc78/proposals/csharp-7.2/readonly-ref.md), except where explicitly changed in this proposal.
 
+For better clarity, here we call out some rules that apply both to `in` and `ref readonly`:
+- `ref readonly` and `in` are allowed as modifiers of indexer parameters even though `ref` is not.
+- By-value overloads are preferred over `in`/`ref readonly` overloads in case there is no argument modifier.
+
+However, operators won't be allowed to contain `ref readonly` parameters (like `ref` but unlike `in`).
+
 ### Value kind checks
 [value-kind-checks]: #value-kind-checks
 
@@ -86,21 +92,6 @@ Overload resolution will allow mixing `ref`/`ref readonly`/`in`/no callsite anno
 Specifically, there's a change in existing behavior where methods with `in` parameter will match calls with the corresponding argument marked as `ref`&mdash;this change will be gated on LangVersion.
 
 However, the warning for passing an argument with no callsite modifier to a `ref readonly` parameter will be suppressed if the parameter is the receiver in an extension method invocation.
-
-Note that by-value overloads will be preferred over `ref readonly` overloads in case there is no argument modifier:
-
-```cs
-var x = 1;
-C.M(x); // calls C.M(int x)
-C.M(ref x); // calls C.M(ref readonly int x)
-C.M(in x); // calls C.M(ref readonly int x)
-
-public static class C
-{
-    public static void M(int x) { }
-    public static void M(ref readonly int x) { }
-}
-```
 
 ### Metadata encoding
 [metadata]: #metadata-encoding
