@@ -28,16 +28,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - More [method group natural type questions](https://github.com/dotnet/roslyn/issues/69222) (Julien)
 - Brief collection-expression question and update (CyrusNajmabadi): https://github.com/dotnet/csharplang/issues/7396
 
-## Mon Jul 31, 2023
-
-- Further discussion [primary constructor](https://github.com/dotnet/csharplang/issues/2691) parameters, including [default mutability](https://github.com/dotnet/csharplang/discussions/7377) (Fred)
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon Jul 31, 2023
+
+[C# Language Design Meeting for July 31st, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-31.md)
+
+- Primary constructor parameters and `readonly`
 
 ## Wed Jul 26, 2023
 
