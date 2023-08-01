@@ -31,9 +31,9 @@ SelfReturnerIn<string> fin = in x => x;
 SelfReturnerRef<string> fref = ref x => x;
 SelfReturnerOut<string> fout = out x => x;
 SelfReturnerRefReadonly<string> frr = ref readonly x => x;
-SelfReturnerScoped<string> frr = scoped x => x;
-SelfReturnerScopedRef<string> frr = scoped ref x => x;
-SelfReturnerParams<string> frr = params x => x;
+SelfReturnerScoped<string> fs = scoped x => x;
+SelfReturnerScopedRef<string> fsr = scoped ref x => x;
+SelfReturnerParams<string> fp = params x => x;
 
 delegate T SelfReturnerIn<T>(in T t);
 delegate T SelfReturnerRef<T>(ref T t);
@@ -46,7 +46,15 @@ delegate T SelfReturnerParams<T>(params T[] t);
 
 are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, all other modifiers are also left unsupported and illegal.
 
-Using the `scoped` modifier alone is unsupported, because `scoped` is currently parsed as a type identifier, thus resolving to an explicit lambda parameter declaration.
+Using the `scoped` modifier alone is unsupported, because `scoped` is currently parsed as a type identifier, thus resolving to an explicit lambda parameter declaration. For example,
+
+```csharp
+ScopedParameter<string> d = (scoped x) => { }
+
+delegate void ScopedParameter<T>(scoped T t);
+```
+
+is invalid, as `scoped` resolves to a type identifier, and not as a parameter modifier. Adjusting this behavior is a breaking change (see open question).
 
 The change in the spec will require that [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) be adjusted as follows:
 
@@ -99,3 +107,7 @@ var dd = (a, b) => Method2(a, b);
 
 int Method2(int a, int b) => a + b;
 ```
+
+# Open Questions
+
+- [ ] Do we consider making a breaking change supporting `scoped` as the parameter modifier in implicitly-typed parameters?
