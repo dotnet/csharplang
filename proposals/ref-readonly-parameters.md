@@ -91,7 +91,9 @@ As a reminder, implicit function pointer conversions are disallowed if there is 
 Overload resolution will allow mixing `ref`/`ref readonly`/`in`/no callsite annotations and parameter modifiers as denoted by the table in [the summary of this proposal][summary], i.e., all *allowed* and *warning* cases will be considered as possible candidates during overload resolution.
 Specifically, there's a change in existing behavior where methods with `in` parameter will match calls with the corresponding argument marked as `ref`&mdash;this change will be gated on LangVersion.
 
-However, the warning for passing an argument with no callsite modifier to a `ref readonly` parameter will be suppressed if the parameter is the receiver in an extension method invocation.
+However, the warning for passing an argument with no callsite modifier to a `ref readonly` parameter will be suppressed if the parameter is
+- the receiver in an extension method invocation,
+- used implicitly as part of custom collection initializer or interpolated string handler.
 
 ### Metadata encoding
 [metadata]: #metadata-encoding
@@ -183,7 +185,8 @@ Overload resolution, overriding, and conversion could disallow interchangeabilit
 
 The overload resolution change for existing `in` parameters could be taken unconditionally (not considering LangVersion), but that would be a breaking change.
 
-Invoking an extension method with `ref readonly` receiver could result in warning "Argument 1 should be passed with `ref` or `in` keyword" as would happen for non-extension invocations with no callsite modifiers.
+Invoking an extension method with `ref readonly` receiver could result in warning "Argument 1 should be passed with `ref` or `in` keyword" as would happen for non-extension invocations with no callsite modifiers (user could fix such warning by turning the extension method invocation into static method invocation).
+The same warning could be reported when using custom collection initializer or interpolated string handler with `ref readonly` parameter, although user could not work around it.
 
 `ref readonly` overloads could be preferred over by-value overloads when there is no callsite modifier or there could be an ambiguity error.
 
