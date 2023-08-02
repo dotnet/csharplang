@@ -23,6 +23,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Aug 9, 2023
 
+- [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
+
 ## Mon Aug 7, 2023
 
 - More [method group natural type questions](https://github.com/dotnet/roslyn/issues/69222) (Julien)
