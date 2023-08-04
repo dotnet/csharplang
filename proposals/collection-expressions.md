@@ -277,21 +277,26 @@ The *safe-context* of a collection expression is:
 
 * If the target type is a *ref struct type* with a [*create method*](#create-methods), the safe-context of the collection expression is the [*safe-context of an invocation*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#164126-method-and-property-invocation) of the create method where the collection expression is the span argument to the method.
 
-* Otherwise the safe-context of the collection expression is *caller-context*.
+* Otherwise the safe-context of the collection expression is the *caller-context*.
 
 A collection expression with a safe-context of *declaration-block* cannot escape the enclosing scope, and the compiler *may* store the collection on the stack rather than the heap.
 
 To allow a collection expression for a ref struct type to escape the *declaration-block*, it may be necessary to cast the expression to another type.
 
 ```csharp
+static ReadOnlySpan<int> AsSpanConstants()
+{
+    return [1, 2, 3]; // ok: span refers to assembly data section
+}
+
 static ReadOnlySpan<T> AsSpan2<T>(T x, T y)
 {
-    return [x, y]; // error: cannot return span
+    return [x, y];    // error: span may refer to stack data
 }
 
 static ReadOnlySpan<T> AsSpan3<T>(T x, T y, T z)
 {
-    return (T[])[x, y, z]; // ok: converting T[] to ReadOnlySpan<T>
+    return (T[])[x, y, z]; // ok: span refers to T[] on heap
 }
 ```
 
