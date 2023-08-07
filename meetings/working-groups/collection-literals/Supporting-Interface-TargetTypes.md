@@ -23,7 +23,7 @@
       Goo([1, 2, 3])
       ```
 
-   We can optimize in a way similar to what we do with `yield`ing iterators.  Namely, you would an `IEnumerable<T>` instance that was itself its own `IEnumerator<T>` instance (in the case where it has not been enumerated yet, and was being enumerated on the same thread that created it).  This would again be much more efficient than what you get today with any normal concrete type a user uses here (lists, arrays, etc.)   This again ties heavily into our story that by using collection expressions you can trust you're going to get the best results.
+   We can optimize in a way similar to what we do with `yield`ing iterators.  Namely, you would an `IEnumerable<T>` instance that was itself its own `IEnumerator<T>` instance (in the case where it has not been enumerated yet, and was being enumerated on the same thread that created it).  This would again be much more efficient than what you get today with any normal concrete type a user uses here (lists, arrays, etc.), and again ties heavily into our story that by using collection expressions you can trust you're going to get the best results.
 
    As before, promising too much can hurt us (and defy user expectations around performance and safety).
 
