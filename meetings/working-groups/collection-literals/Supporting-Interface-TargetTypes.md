@@ -34,7 +34,7 @@
 If we picked an existing concrete collection type to instantiate when targeting an interface type, the choices would likely be the following:
 
 1. `List<T>`.  The most flexible.  But also not very efficient, and definitely unsafe to expose through an `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` property.  
-2. `T[]`.  A strange middle ground.  Only partially flexibly.  Can mutate the values in the array themselves, but cannot do anything affecting the length of the array.  Also unsafe to expose through an`IEnumerable<T>/IReadOnlyList<T>` property.  
+2. `T[]`.  A strange middle ground.  Only partially flexibly.  Can mutate the values in the array themselves, but cannot do anything affecting the length of the array.  Also unsafe to expose through an `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` property.  
 3. `ImmutableArray<T>`.  The least flexible.  Provides safety for elements.  But now does not work well for the case of passing to `ICollection<T>/IList<T>` (which can mutate the number of elements).
 
 If we don't pick a concrete type, we have a few options at our disposal:
