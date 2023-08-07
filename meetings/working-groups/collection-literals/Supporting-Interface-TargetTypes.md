@@ -2,7 +2,9 @@
 
 1.  Interfaces are important. For apis that take collections, outside of the large set of api the BCL has that deal with contiguous data (and thus take arrays or spans), the `System.Collections.XXX` collection types are the next most commonly used set.   Of the types in that namespace, the interface collections `IEnumerable<T>/ICollection<T>/IReadOnlyCollection<T>/IList<T>/IReadOnlyList<T>` are used ~90% of the time.  And when used, 90% of those are `IEnumerable<T>` itself.  (If we include linq-extensions this number shoots even higher up.  But we've cut those out as *currently* you cannot call extensions on collection-exprs).  The large set of these methods (which extends out into the ecosystem as well), motivates supporting interfaces to have collection expressions feel complete at launch.
 
-2. There is a coherent, and explainable difference between "natural types" and interfaces.  While both relate to the idea of "a type must be picked for you", the needs and choices differ between the two.
+2. Our own best practices, which are aped in the ecosystem, are that (if contiguous data segments are not necessary) that apis be maximally permissive in what they take as arguments.  Put another way, our apis "accept the general, but return the specific".  For collections, the way that we "accept the general" is normally as `IEnumerable<T>` (which corresponds to the data above).
+
+3. There is a coherent, and explainable difference between "natural types" and interfaces.  While both relate to the idea of "a type must be picked for you", the needs and choices differ between the two.
 
    For natural types we believe the primary case where it is picked is for `var`.  In the `var` case the code exists in a mutable location where users generally have full control to manipulate as they desire.  Collections can be used to buffer, manipulate, filter, and generally act as a temporary scratch location to produce a final result.  As such, a mutable type (like `List<T>`) is the most 'natural' type here given the need for general flexibility.  `List<T>` itself is the most commonly used collection type for this purpose, and it naturally aligns semantically with the sequence of elements that a collection expression syntactically represents.  Like `Dictionary<K,V>` it presents what the ecosystem thinks of as *the* collection type when trying to manipulate values.
 
@@ -12,7 +14,7 @@
 
    Because they core scenarios differ so wildly on their expectations around mutability and around the problems that arise (for either) by aligning on what the other does, it seems reasonable to state and explain things if we go down a path where there are different types and choices between natural and target types.
 
-3. Furthermore, alignment between the two systems (target and natural typing) could actually be highly negative if we promise a concrete collection type. For example, if we promise a `List<T>` type, then that eliminates the ability to use a singleton for the *very* common and *core* use-case of passing `[]` as an argument to `IEnumerable` apis (or initializing an `IEnumerable` property).  This would force users away from this, and require them to be as verbose as today to be explicit to get the desired savings.  This deeply undercuts are core narrative that you can use collection expressions and they can be the *efficient* type you can depend on.
+4. Furthermore, alignment between the two systems (target and natural typing) could actually be highly negative if we promise a concrete collection type. For example, if we promise a `List<T>` type, then that eliminates the ability to use a singleton for the *very* common and *core* use-case of passing `[]` as an argument to `IEnumerable` apis (or initializing an `IEnumerable` property).  This would force users away from this, and require them to be as verbose as today to be explicit to get the desired savings.  This deeply undercuts are core narrative that you can use collection expressions and they can be the *efficient* type you can depend on.
 
    Conversely, by not promising a concrete type, we get more opportunities to optimize, even for *non* empty cases.  For example, with:
 
@@ -25,7 +27,7 @@
 
    As before, promising too much can hurt us (and defy user expectations around performance and safety).
 
-4. Certain concrete types (specifically `List<T>` or `T[]`) have highly undesirable downsides for an interface.  Specifically, it would make it a very dangerous footgun for any API to expose an `IEnumerable<T>/IReadOnlyList<T>` property that was instantiated with a collection expression.  A set of users would be very unhappy and perturbed to discover that they switched away from an existing read-collection type to a collection expression and now had things become unsafe.  This would tie into the feeling that collection expressions could not be trusted to make sound decisions that people could trust.
+5. Certain concrete types (specifically `List<T>` or `T[]`) have highly undesirable downsides for an interface.  Specifically, it would make it a very dangerous footgun for any API to expose an `IEnumerable<T>/IReadOnlyList<T>` property that was instantiated with a collection expression.  A set of users would be very unhappy and perturbed to discover that they switched away from an existing read-collection type to a collection expression and now had things become unsafe.  This would tie into the feeling that collection expressions could not be trusted to make sound decisions that people could trust.
 
 ## Options
 
