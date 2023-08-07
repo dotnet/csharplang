@@ -27,7 +27,7 @@
 
    As before, promising too much can hurt us (and defy user expectations around performance and safety).
 
-5. Certain concrete types (specifically `List<T>` or `T[]`) have highly undesirable downsides for an interface target.  Specifically, it would make it a very dangerous footgun for any API to expose an `IEnumerable<T>/IReadOnlyList<T>` property that was instantiated with a collection expression.  A set of users would be very unhappy and perturbed to discover that they switched away from an existing read-collection type to a collection expression and now had things become unsafe.  This would tie into the feeling that collection expressions could not be trusted to make sound decisions that people could trust.
+5. Certain concrete types (specifically `List<T>` or `T[]`) have highly undesirable downsides for an interface target.  Specifically, it would make it a very dangerous footgun for any API to expose an `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` property that was instantiated with a collection expression.  A set of users would be very unhappy and perturbed to discover that they switched away from an existing read-collection type to a collection expression and now had things become unsafe.  This would tie into the feeling that collection expressions could not be trusted to make sound decisions that people could trust.
 
 ## Options
 
