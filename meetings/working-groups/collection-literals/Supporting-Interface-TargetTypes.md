@@ -1,6 +1,6 @@
 ## Notes for supporting interfaces.
 
-1.  Interfaces are important. Outside of the large set of api the BCL has that deal with contiguous data (and thus take arrays or spans), collections are the next most important set.  Interfaces are used ~90% of the time.  And when used, 90% of those are IEnumerable<T> itself.  (These numbers are real)  If we include linq-extensions this number shoots even higher up.  But we've cut those out as *currently* you cannot call extensions on collection-exprs.  
+1.  Interfaces are important. For apis that take collections, outside of the large set of api the BCL has that deal with contiguous data (and thus take arrays or spans), the `System.Collections.XXX` collection types are the next most commonly used set.   Of the types in that namespace, the interface collections `IEnumerable<T>/ICollection<T>/IReadOnlyCollection<T>/IList<T>/IReadOnlyList<T>` are used ~90% of the time.  And when used, 90% of those are `IEnumerable<T>` itself.  If we include linq-extensions this number shoots even higher up.  But we've cut those out as *currently* you cannot call extensions on collection-exprs.  
 
 2. There is a coherent, and explainable difference between "natural types" and interfaces.  While both relate to the idea of "a type must be picked for you", the needs and choices differ between the two.
 
