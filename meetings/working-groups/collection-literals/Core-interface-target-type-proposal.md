@@ -41,7 +41,8 @@ Collection expressions aim to be a substantively 'complete' replacement for the 
 
 1. `new T[] { ... }`
 2. `new[] { ... }`
-3. `stackalloc T[] { ... }` and `stackalloc[] { ... }`
+1. `stackalloc T[] { ... }`
+1. `stackalloc[] { ... }`
 4. `new CollectionType<Etc> { ... }`
 5. `ImmutableCollectionType.Create(...)`
 6. `ImmutableCollection.CreateBuilder(); builder.Add(...); ...; builder.ToImmutable()`
