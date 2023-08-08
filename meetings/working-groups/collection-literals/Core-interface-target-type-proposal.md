@@ -40,12 +40,13 @@ Note: these interfaces are already well known to the language.  '1' is well know
 Collection expressions aim to be a substantively 'complete' replacement for the myriad of ways people create collections today.  They are intended to be used for the *vast majority* of cases where people use collections, and default (as much as possible) to choices that fit the needs of the majority of the user base.  A strong desire here is to not add "just another way to create a collection" alongside everything else, but to provide a singular *replacement* that is then suitable to move almost all code wholesale to.  It aims to replace *all* of the following forms:
 
 1. `new T[] { ... }`
-2. `new[] { ... }`
+1. `new[] { ... }`
 1. `stackalloc T[] { ... }`
 1. `stackalloc[] { ... }`
-4. `new CollectionType<Etc> { ... }`
-5. `ImmutableCollectionType.Create(...)`
-6. `ImmutableCollection.CreateBuilder(); builder.Add(...); ...; builder.ToImmutable()`
+1. `new CollectionType<Etc> { ... }`
+1. `ImmutableCollectionType.Create(...)`
+1. `ImmutableCollection.CreateBuilder(); builder.Add(...); ...; builder.ToImmutable()`
+1. And more... including things like: `ImmutableArray<T>.Empty.Add(x).AddRange(y).etc()`
 
 
 An examination of the BCL and the top 20 Nuget packages (Newtonsoft, EF, Azure, Castle, AWS, Automapper), all of which are >400m downloads, reveals very relevant data here.  Methods taking those interface collections account for roughly 28% of all methods taking some collection type (arrays, spans, other BCL collections), and `IEnumerable<T>` alone accounts for 25% of the collection-taking methods.  This is not surprising as our own practices, and general feedback is simply that methods should be extremely permissive in what they accept, and be precise in what they return.  `IEnumerable<T>` (and our other collection interfaces) act as that permissive type that we and our ecosystem have broadly adopted.
