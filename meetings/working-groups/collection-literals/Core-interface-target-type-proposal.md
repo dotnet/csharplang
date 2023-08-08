@@ -68,7 +68,7 @@ In any interesting design, there are many factors that must be assessed and cons
 
 4. Performance. A core pillar of collection expressions that we are both evangelizing it by, and which we are seeing customers resonate with, is the idea of: "Absent external information unavailable to the compiler, the compiler should almost always do as well or better than the user could.  Often much more so.  And almost certainly with clearer code for the user to write."  Because the user can write a simple `[a, b, c, d, e]` expression, without having to explicitly state what is going on, and because we can provide so much smart understanding to each situation, we can heavily optimize.  For example:
 
-    - if the above 5-element collection were converted to an `ImmutableArray<T>` our emitted could would practically always be better than users using normal construction patterns.  We can also greatly leverage extremely fast and efficient systems under hte covers (like synthesizing `Inline-Arrays` types) that would generally be extremely ugly and painful for users to do themselves.
+    - If the above 5-element collection were converted to an `ImmutableArray<T>`, our emitted code could would practically always be better than users using normal construction patterns.  We can also greatly leverage extremely fast and efficient systems under the covers (like synthesizing `Inline-Arrays` types) that would generally be extremely ugly and painful for users to do themselves.
 
     - what we emit can adopt ecosystem best practices around performance.  `[]` can emit as efficient singletons, not causing undesirable allocations.  etc. etc.
 
