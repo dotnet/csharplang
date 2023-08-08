@@ -147,7 +147,7 @@ This option *nails* the "simplicity", "universality, and "brevity" aspects we ar
 
 However, this also falls short in both the 'performance' and 'safety' domains.  Indeed, it does so so egregiously, that our own analyzers will flag this as inappropriate and push both the users who run these analyzers, and the users who just care about these facets of development, away from feeling they can trust this feature to live up to its recommendation as making the "right, smart, best choices" for them.   It will also likely lead to negative-evangelization, where voices in the community steer people away from the feature as a whole.
 
-Specifically, for "performance", `List<T>` is actually a fairly undesirable type: 
+Next, for "performance", `List<T>` is actually a fairly undesirable type: 
 
 1. It *already* comes with two allocations for itself.
 2. Getting an iterator for it (through the `IEnumerable<T>.GetEnumerator` path) will produce another allocation.
