@@ -48,7 +48,6 @@ Collection expressions aim to be a substantively 'complete' replacement for the 
 1. `ImmutableCollection.CreateBuilder(); builder.Add(...); ...; builder.ToImmutable()`
 1. And more... including things like: `ImmutableArray<T>.Empty.Add(x).AddRange(y).etc()`
 
-
 An examination of the BCL and the top 20 Nuget packages (Newtonsoft, EF, Azure, Castle, AWS, Automapper), all of which are >400m downloads, reveals very relevant data here.  Methods taking those interface collections account for roughly 28% of all methods taking some collection type (arrays, spans, other BCL collections), and `IEnumerable<T>` alone accounts for 25% of the collection-taking methods.  This is not surprising as our own practices, and general feedback is simply that methods should be extremely permissive in what they accept, and be precise in what they return.  `IEnumerable<T>` (and our other collection interfaces) act as that permissive type that we and our ecosystem have broadly adopted.
 
 Indeed, if it were not for `params T[]` (a full 50% of all collection-taking methods), `IEnumerable<T>` would be the most commonly taken collection by far for the ecosystem.
