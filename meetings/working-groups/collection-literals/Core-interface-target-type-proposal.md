@@ -172,7 +172,7 @@ First, it's important to look at the surface area of the read-only interfaces `I
 
 That's it.  Just *three* members.  Now, given the above, the rules would be as follows:
 
-1. For a target-type of `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`, the language will state that you have no guarantee on any particular type being used at all.  But you will get an instance that efficiently implements the API surface area requested.  We have choices on what to generate, and those choices can change over time.  For example, the type that is used could be:
+1. We take a page from what we do today *already* for `IEnumerable<T>` and `yield` iterators, and we say that if you have a target-type of `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`, the language will state that you have no guarantee on any particular type being used at all.  But you will get an instance that efficiently implements the API surface area requested.  For example, the type that is used could be:
 
     - An unnameable, compiler synthesized type.  This could be something like what we do with arrays today (and Inline-Arrays for collection-expressions) where a specific type is generated for each specific size (including using Inline-Array tricks where available), producing values with practically no size overhead.  Or it could potentially be a generalized unnameable type that has contiguous storage (like an array) for the elements, but wraps it safely.
 
