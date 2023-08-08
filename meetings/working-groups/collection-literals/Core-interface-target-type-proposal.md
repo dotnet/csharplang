@@ -204,7 +204,7 @@ class Order
     // Legal. An efficient 'empty' instance will be used.
     public IReadOnlyList<OrderTag> Tags { get; } = [];
 
-    // Legtal. Equivalent to: `{ get; } = new List<int>()`
+    // Legal. Equivalent to: `{ get; } = new List<int>()`
     public IList<int> ProductIds { get; } = [];
 }
 ```
