@@ -145,7 +145,7 @@ class Order
 
 This option *nails* the "simplicity", "universality, and "brevity" aspects we are trying to solve.  Explaining to users what happens in these cases is trivial: "It makes a `List<T>`.  The part-and-parcel type of .Net that you've know about and have used for nearly 20 years now".  Similarly, it can be used for *all* these apis that take in one of these interfaces.  Finally, it always allows the nice short syntactic-form that really sells people on why collection-expressions are a superior choice to use over practically every other collection-creation constructs they can use today.
 
-However, this also falls short in both the 'performance' and 'safety' domains.  Indeed, it does so so egregiously, that our own analyzers will flag this as inappropriate and push both the  users who run these analyzers (and the users who just care about these facets of development) away from feeling they can trust this feature to live up to its recommendation as making the "right, smart, best choices" for them.
+However, this also falls short in both the 'performance' and 'safety' domains.  Indeed, it does so so egregiously, that our own analyzers will flag this as inappropriate and push both the users who run these analyzers, and the users who just care about these facets of development, away from feeling they can trust this feature to live up to its recommendation as making the "right, smart, best choices" for them.   It will also likely lead to negative-evangelization, where voices in the community steer people away from the feature as a whole.
 
 Specifically, for "performance", `List<T>` is actually a fairly undesirable type: 
 
