@@ -70,7 +70,7 @@ In any interesting design, there are many factors that must be assessed and cons
 
     - If the above 5-element collection were converted to an `ImmutableArray<T>`, our emitted code could would practically always be better than users using normal construction patterns.  We can also greatly leverage extremely fast and efficient systems under the covers (like synthesizing `Inline-Arrays` types) that would generally be extremely ugly and painful for users to do themselves.
 
-    - what we emit can adopt ecosystem best practices around performance.  `[]` can emit as efficient singletons, not causing undesirable allocations.  etc. etc.
+    - What we emit can adopt ecosystem best practices around performance.  For instance, `[]` can emit as efficient singletons, not causing undesirable allocations.
 
     While many customers will not care about performance to this level, we still want customers that do to have confidence in this feature (and we definitely do not want to see the feature immediately banned).
 
