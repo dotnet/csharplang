@@ -153,7 +153,7 @@ Next, for "performance", `List<T>` is actually a fairly undesirable type:
 2. Getting an iterator for it (through the `IEnumerable<T>.GetEnumerator` path) will produce another allocation.
 3. It has excess overhead internally to support both being able to grow, and has overhead internally to ensure it is not mutated while it is being iterated.
 
-`List<T>` is a great type when you need flexibility and permissiveness.  It is not a good choice when you know precisely what you are producing, and you have no need to access the flexible behaviors it provides.
+`List<T>` is a great type when you need flexibility and permissiveness.  It is not a good choice when you know precisely what you are producing, and you have no need to access the flexible, mutation-oriented, capabilities it provides.
 
 For "safety" `List<T>` is also an unacceptable choice for many (and our own analyzers will push you away from it).  Users who expose data currently (and safely) through the readonly interfaces `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` today will find that they cannot effectively move to collection expressions.  They will have to maintain the code the highly verbose and clunky code they have today, to use types like `ImmutableArray`, or things like `new List<int> { a, b, c }>.AsReadOnly()`.  This will make collection-expressions feel half baked for these users, again undercutting the story that they make "right, smart, best choices" for the user, and forcing them to lose the brevity and consistency of being able to use collection-expressions with confidence everwhere.
 
