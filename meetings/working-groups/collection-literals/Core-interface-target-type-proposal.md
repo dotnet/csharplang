@@ -58,7 +58,7 @@ With how important these interface types are though, we do not believe pushing o
 
 ### What factors are at play?
 
-In any interesting design, there are many factors that must be assessed and considered as a holistic whole.  For collection expressions, the broad areas we want the land the feature are include, but are not limited to:
+In any interesting design, there are many factors that must be assessed and considered as a whole.  For collection expressions, these include but are not limited to:
 
 1. Simplicity. Ideally the feature works in a fashion that is both simple to explain and simple for users to understand. Using some of our modern terminology, we'd like to avoid 'decoder rings' when people use it.
 
