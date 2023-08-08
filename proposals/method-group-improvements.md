@@ -30,8 +30,9 @@ In practice, this means that we:
 4. If the arity of the resulting signature doesn't match the number of provided type arguments, then the method group doesn't have a natural type
 5. Otherwise, the resulting signature is used as the natural type
 
-
 ## Proposal
+
+The principle is to go scope-by-scope and prune candidates that we know cannot succeed as early as possible (same principle used in overload resolution).
 
 1. For each scope, we construct the set of all candidate methods:
   - for the initial scope, methods on the relevant type with arity matching the provided type arguments and satisfying constraints with the provided type arguments are in the set if they are static and the receiver is a type, or if they are non-static and the receiver is a value
