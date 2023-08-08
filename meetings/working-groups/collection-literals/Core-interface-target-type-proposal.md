@@ -219,7 +219,7 @@ While the wins now with 'safety' are definitely welcome, the largest benefits co
 
 1. Empty collection expressions can always be collapsed down to a single empty singleton (per `T` element type) across the entire program.
 
-1. We can use features like inline-arrays to generate instances that inline all their elements are literally no larger than space for the elements themselves.  A count would not even need to be stored as it could just be hard-coded as the value returned by `int Count { get; }`.  While this might generate many types in the assembly (one type per unique count), it's worth noting that this is what we *already* do for arrays *today*, and what we will be doing for the inline-array types we generate for spans/params-spans.
+1. We can use features like inline-arrays to generate instances that inline all their elements and are literally no larger than space for the elements themselves.  A count would not even need to be stored as it could just be hard-coded as the value returned by `int Count { get; }`.  While this might generate many types in the assembly (one type per unique count), it's worth noting that this is what we *already* do for arrays *today*, and what we will be doing for the inline-array types we generate for spans/params-spans.
 
 1. We can borrow a trick from `yield iterators` where the iterator returned from `IEnumerator<T> GetEnumerator()` literally *reuses* the `this` instance to be its own iterator *if* it has never been iterated yet, and the calling thread is the same one that generated the `IEnumerable<T>`.  This means that if you have:
 
