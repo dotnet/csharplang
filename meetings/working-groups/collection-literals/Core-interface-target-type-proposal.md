@@ -186,7 +186,6 @@ That's it.  Just *three* members.  With that in mind the rules for target-typing
 Effectively, this *intentionally* bifurcates the interfaces into two important categories.  The 'read only' interfaces, which support no mutation, and the 'mutable interfaces' which do.  Our feeling is that for the latter, there is no real better choice than `List<T>`.  It is the 'bread and butter' type the BCL has for this purpose that the entire ecosystem understands and feels comfortable with.  For the domain of mutable-sequences, it is extremely good and does its job well.
 
 
-
 Specifically:
 
 ```c#
