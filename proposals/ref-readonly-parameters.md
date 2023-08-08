@@ -140,6 +140,48 @@ However, a source break will only occur for callers with `LangVersion <= 11` whe
 Default parameter values are allowed for `ref readonly` parameters with a warning since they are equivalent to passing rvalues.
 This allows API authors to change `in` parameters with default values to `ref readonly` parameters without introducing a source breaking change.
 
+## Breaking changes
+[breaking-changes]: #breaking-changes
+
+The `ref`/`in` mismatch relaxation in overload resolution introduces a behavior breaking change demonstrated in the following example:
+
+```cs
+class C
+{
+    string M(in int i) => "C";
+    static void Main()
+    {
+        int i = 5;
+        System.Console.Write(new C().M(ref i));
+    }
+}
+static class E
+{
+    public static string M(this C c, ref int i) => "E";
+}
+```
+
+In C#&nbsp;11, the call binds to `E.M`, hence `"E"` is printed.
+In C#&nbsp;12, `C.M` is allowed to bind (with a warning) and no extension scopes are searched since we have an applicable candidate, hence `"C"` is printed.
+
+There is also a source breaking change due to the same reason.
+The example below prints `"1"` in C#&nbsp;11, but fails to compile with an ambiguity error in C#&nbsp;12:
+
+```cs
+var i = 5;
+System.Console.Write(C.M(null, ref i));
+
+interface I1 { }
+interface I2 { }
+static class C
+{
+    public static string M(I1 o, ref int x) => "1";
+    public static string M(I2 o, in int x) => "2";
+}
+```
+
+The examples above demonstrate the breaks for method invocations, but since they are caused by overload resolution changes, they can be similarly triggered for method conversions.
+
 ## Alternatives
 [alternatives]: #alternatives
 
@@ -211,59 +253,17 @@ We could make the behavior for `LangVersion <= 11` different from the behavior f
 For example, it could be an error whenever a `ref readonly` parameter is called (even when using the `ref` modifier at the callsite),
 or it could be always allowed without any errors.
 
-## Unresolved questions
-[unresolved]: #unresolved-questions
-
-### Breaking change for extension methods
-
-There is currently a breaking change because of the `ref`/`in` mismatch relaxation:
-
-```cs
-class C
-{
-    string M(in int i) => "C";
-    static void Main()
-    {
-        int i = 5;
-        System.Console.Write(new C().M(ref i));
-    }
-}
-static class E
-{
-    public static string M(this C c, ref int i) => "E";
-}
-```
-
-Previously, the call would bind to `E.M`, hence `"E"` was printed.
-Now `C.M` is allowed to bind (with a warning) and no extension scopes are searched since we have an applicable candidate, hence `"C"` is printed.
-We could
-- disallow the `ref`/`in` mismatch (that would only prevent migration to `in` for old APIs that used `ref` because `in` wasn't available yet),
-- go with the breaking change (it is probably rare),
-- modify the overload resolution rules to continue looking for a better match (determined by betterness rules specified below) when there's a ref kind mismatch introduced in this proposal,
+This proposal suggests accepting a [behavior breaking change][breaking-changes] because it should be rare to hit, is gated by LangVersion, and users can work around it by calling the extension method explicitly.
+Instead, we could mitigate it by
+- disallowing the `ref`/`in` mismatch (that would only prevent migration to `in` for old APIs that used `ref` because `in` wasn't available yet),
+- modifying the overload resolution rules to continue looking for a better match (determined by betterness rules specified below) when there's a ref kind mismatch introduced in this proposal,
   - or alternatively continue only for `ref` vs. `in` mismatch, not the others (`ref readonly` vs. `ref`/`in`/by-value).
 
-Similar (but not that silent) break happens also without extension methods:
-
-```cs
-var i = 5;
-System.Console.Write(C.M(null, ref i));
-
-interface I1 { }
-interface I2 { }
-static class C
-{
-    public static string M(I1 o, ref int x) => "1";
-    public static string M(I2 o, in int x) => "2";
-}
-```
-
-Previously, this would print `"1"`, now there's an ambiguity error for the `C.M` call.
-It could be resolved by adding betterness rules described below.
-
-### Betterness rules
+#### Betterness rules
 
 The following example currently results in three ambiguity errors for the three invocations of `M`.
 We could add new betterness rules to resolve the ambiguities.
+This would also resolve the [source breaking change][breaking-changes].
 One way would be to make the example print `221` (where `ref readonly` parameter is matched with `in` argument since it would be a warning to call it with no modifier whereas for `in` parameter that's allowed).
 
 ```cs
@@ -283,7 +283,7 @@ class C
 }
 ```
 
-We propose rules that will mark as worse the parameter whose argument could have been passed with a different argument modifier to make it better.
+New betterness rules could mark as worse the parameter whose argument could have been passed with a different argument modifier to make it better.
 In other words, user should be always able to turn a worse parameter into a better parameter by changing its corresponding argument modifier.
 For example, when an argument is passed by `in`, a `ref readonly` parameter is preferred over an `in` parameter because user could pass the argument by-value to choose the `in` parameter.
 This rule is just an extension of by-value/`in` preference rule that is in effect today (it's the last overload resolution rule and the whole overload is better if any of its parameter is better and none is worse than the corresponding parameter of another overload).
@@ -295,9 +295,9 @@ This rule is just an extension of by-value/`in` preference rule that is in effec
 | by-value    | by-value/`in`    | `ref readonly`      |
 | `in`        | `in`             | `ref`               |
 
-Similarly, we should handle method conversions.
+We should handle method conversions similarly.
 The following example currently results in two ambiguity errors for the two delegate assignments.
-We propose rules that will prefer a method parameter whose refness modifier matches the corresponding target delegate parameter refness modifier over one that has a mismatch.
+New betterness rules could prefer a method parameter whose refness modifier matches the corresponding target delegate parameter refness modifier over one that has a mismatch.
 Hence, the following example would print `12`.
 
 ```cs
