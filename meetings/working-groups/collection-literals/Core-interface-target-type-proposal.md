@@ -201,7 +201,7 @@ and
 ```c#
 class Order
 {
-    // Legal. an efficient 'empty' instance will be used.
+    // Legal. An efficient 'empty' instance will be used.
     public IReadOnlyList<OrderTag> Tags { get; } = [];
 
     // Legtal. Equivalent to: `{ get; } = new List<int>()`
