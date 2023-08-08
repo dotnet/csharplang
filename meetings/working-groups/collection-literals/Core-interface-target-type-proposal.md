@@ -118,7 +118,7 @@ class Order
 
 First, this immediately fails the simplicity and universality concerns. From our own experience, and the data about the ecosystem, we know that users will need to interface with, well, interfaces :).  This will be an immediate hurdle that will deeply undercut the value of this feature space, potentially even deeply tainting it for the future.
 
-Second, collection expressions would not provide any sort of actual useful syntax or brevity for users in this case.  Because an explicit type would have to be provided, users would be left with syntax with nearly the same complexity and verbosity as what they would have to write today.  Users seeing this would rightfully ask "why would i pick this new form, that is really just the same as the old form, just with some tokens tweaked?"
+Second, collection expressions would not provide any sort of actual useful syntax or brevity for users in this case.  Because an explicit type would have to be provided, users would be left with syntax with nearly the same complexity and verbosity as what they would have to write today.  Users seeing this would rightfully ask "why would I pick this new form, that is really just the same as the old form, just with some tokens tweaked?"
 
 Performance and safety though would be mostly neutral here.  Users who did not care about either would likely just use `List<T>`, and users who did would pick something appropriate for their domain.  However, this would still be a small tick in the 'negative' category as our claims about us making the "right, smart, best choices" for users would be undercut by then forcing the user to have to make those choices themselves.
 
