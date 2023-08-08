@@ -54,7 +54,7 @@ Indeed, if it were not for `params T[]` (a full 50% of all collection-taking met
 
 Ideally, we would ship with support for everything, but we've currently made judicious moves from C#12 to C#13 based on complexity, but also based on impact.  For example, `Dictionary expressions` were moved to C#13 to lighten our load, and because data indicates that APIs that consume those dictionary types are only <3% of all apis that take collections in the first place.  `Natural type` support has also been pushed out because the complexity is felt to be substantive enough to warrant more time.
 
-With how important these interface types are, we do not believe pushing out from C# 12 will allow us to ship a viable and coherent story to customers.  
+With how important these interface types are though, we do not believe pushing out from C# 12 will allow us to ship a viable and coherent story to customers.  
 
 ### What factors are at play?
 
