@@ -129,7 +129,7 @@ This is the next simplest option.  It says that for any of those five interface 
 ```c#
 void DoSomething(IEnumerable<int> values) { ... }
 
-// Legal, is equivalent to `DoSomething(new List<int> { 1, 2, 3 })`
+// Legal. Is equivalent to `DoSomething(new List<int> { 1, 2, 3 })`
 DoSomething([1, 2, 3]);
 ```
 
@@ -138,7 +138,7 @@ and
 ```c#
 class Order
 {
-    // Legal, is equivalent to: `Tags { get; } = new List<OrderTag>();
+    // Legal. Is equivalent to: `Tags { get; } = new List<OrderTag>();
     public IReadOnlyList<OrderTag> Tags { get; } = [];
 }
 ```
@@ -201,10 +201,10 @@ and
 ```c#
 class Order
 {
-    // Allowed, an efficient 'empty' instance will be used.
+    // Legal. an efficient 'empty' instance will be used.
     public IReadOnlyList<OrderTag> Tags { get; } = [];
 
-    // Allowed.  Equivalent to: `{ get; } = new List<int>()`
+    // Legtal. Equivalent to: `{ get; } = new List<int>()`
     public IList<int> ProductIds { get; } = [];
 }
 ```
