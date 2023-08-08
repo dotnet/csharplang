@@ -159,7 +159,7 @@ For "safety" `List<T>` is also an unacceptable choice for many (and our own anal
 
 ### Option 3: Be smart. :)
 
-Deep discussion around the problems with the above approach led the WG to come up with a tweak to the core idea it has, to ideally leverage nearly all its benefits, while curtailing its drawbacks.
+Deep discussion around the problems with Option 2 led the WG to come up with a tweak to the core idea it has, to ideally leverage nearly all its benefits, while curtailing its drawbacks.
 
 First, it's important to look at the surface area of the read-only interfaces `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` and see that it is *entirely*:
 
