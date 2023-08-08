@@ -171,7 +171,7 @@ First, it's important to look at the surface area of the read-only interfaces `I
 }
 ```
 
-That's it.  Just *three* members.  Now, given the above, the rules would be as follows:
+That's it.  Just *three* members.  With that in mind the rules for target-typing an interface would be as follows:
 
 1. We take a page from what we do today *already* for `IEnumerable<T>` and `yield` iterators, and we say that if you have a target-type of `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`, the language will state that you have no guarantee on any particular type being used at all.  But you will get an instance that efficiently implements the API surface area requested.  For example, the type that is used could be:
 
