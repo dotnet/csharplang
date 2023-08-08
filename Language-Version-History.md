@@ -1,6 +1,16 @@
 Features Added in C# Language Versions
 ====================
 
+# C# 12.0 - .NET 8 and Visual Studio 2022 version 17.8
+
+- [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+- [Primary Constructors](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md)
+- [Inline Arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md)
+- [Using aliases for any type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/using-alias-types.md)
+- [Ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/ref-readonly-parameters.md)
+- [Nameof accessing instance members](https://github.com/dotnet/csharplang/issues/4037)
+- [Lambda optional parameters](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/lambda-method-group-defaults.md)
+
 # C# 11.0 - .NET 7 and Visual Studio 2022 version 17.4
 
 - [Raw string literals](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/raw-string-literal.md): introduces a string literal where the content never needs escaping (`var json = """{ "summary": "text" }""";` or `var json = $$"""{ "summary": "text", "length": {{length}} }""";`).
