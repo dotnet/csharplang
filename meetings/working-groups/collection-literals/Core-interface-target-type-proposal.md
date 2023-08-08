@@ -82,7 +82,7 @@ In any interesting design, there are many factors that must be assessed and cons
 
 ## Options
 
-Note: there are truly a plethora of options available here.  However, based on feedback from LDM and the working group meetings, we tried to whittle things down to a reasonable few that we feel warrant discussion and comparison.
+Based on feedback from LDM and the working group meetings, we tried to whittle a large number of options down to a reasonable few that we feel warrant discussion and comparison.
 
 ### Option 1: Disallow target typing to these interface types.
 
