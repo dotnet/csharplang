@@ -62,7 +62,7 @@ In any interesting design, there are many factors that must be assessed and cons
 
 1. Simplicity. Ideally the feature works in a fashion that is both simple to explain and simple for users to understand. Using some of our modern terminology, we'd like to avoid 'decoder rings' when people use it.
 
-2. Universality.  This restates the background context.  Namely that we want to meet the literal 97% case at launch.  This means needing good stories for arrays, spans, BCL concrete collections *and* BCL core interfaces.
+2. Universality.  This restates the background context: we want to meet the literal 97% case at launch, not 69% which would be the case if interfaces can't be targeted.  This means needing good stories for arrays, spans, BCL concrete collections *and* BCL core interfaces.
 
 3. Brevity.  It is a strong goal of this feature that users be able to just write the simple, idiomatic, collection expression form without the need to do things like add coercive casts to commonly appease the compiler.  Specifically, for casts, once you add them (e.g. `(List<int>)[1, 2, 3]`) then the benefit of the feature as a whole is vastly diminished. Where the new form isn't substantively better than the existing form (just 2 characters saved over `new List<int> {1, 2, 3}`).  Unlike other features, the cliff here is very steep, often fundamentally negating the idea that this is a valuable feature in the first place.  Many parts of the design (especially broad adoption of target-typing) has been entirely around ensuring users can just write the simple expression form and almost never have to do things to appease the language.
 
