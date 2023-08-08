@@ -76,7 +76,7 @@ In any interesting design, there are many factors that must be assessed and cons
 
     It would also be highly unfortunate if we shipped and our own analyzers immediately flagged the usage as being a problem.
 
-    Finally, part of performance means being a good .Net citizen.  So the collections we produce should be able to pick up the optimizations the BCL has today for collection types.
+    Finally, part of performance means being a good .NET citizen.  So the collections we produce should be able to pick up the optimizations the BCL has today for collection types.
 
 5. Safety.  Specifically, keeping data safe from undesirable mutation. We broadly think of users as being in two categories.  The first category generally doesn't think about safety, and thus would suffice with any solution on our part.  If mutable data is exposed or not isn't relevant to them as they do not care about keeping their data safe.  However, the second group (which is likely smaller, but present, vocal, and influential) absolutely wants to keep their exposed data safe from mutation.  Similar to the perf concerns, we believe we need a solution for this group that fits their expectations, puts them at ease, and isn't immediately banned (or flagged by analyzers) for doing unsafe things.
 
