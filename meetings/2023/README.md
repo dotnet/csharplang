@@ -21,9 +21,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Aug 14, 2023
 
+- [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
+
 ## Wed Aug 9, 2023
 
-- [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
+-  [Change to lambda binding](https://github.com/dotnet/roslyn/issues/69093)
+-  [Collection expressions target typing to core interfaces](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/Core-interface-target-type-proposal.md)
 
 ## Mon Aug 7, 2023
 
