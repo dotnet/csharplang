@@ -49,9 +49,11 @@ Collection expressions aim to be a substantively 'complete' replacement for the 
 1. `ImmutableCollection.CreateBuilder(); builder.Add(...); ...; builder.ToImmutable()`.  (Wasteful, and doesn't work for base cases like a field initializer).
 1. And more... including things like: `ImmutableArray<T>.Empty.Add(x).AddRange(y).etc()`
 
-An examination of the BCL and the top 20 NuGet packages (Newtonsoft, EF, Azure, Castle, AWS, AutoMapper, and more), all of which are >400m downloads, reveals very relevant data here.  Methods taking those interface collections account for roughly 28% of all methods taking some collection type (arrays, spans, other BCL collections), and `IEnumerable<T>` alone accounts for 25% of the collection-taking methods.  This is not surprising as our own practices, and general design guidance we give the community, are simply that methods should be extremely permissive in what they accept, and be precise in what they return.  `IEnumerable<T>` (and our other collection interfaces) act as that permissive type that we and our ecosystem have broadly adopted.
+An examination of the BCL and the top 20 NuGet packages (Newtonsoft, EF, Azure, Castle, AWS, AutoMapper, and more), all of which are >400m downloads, reveals very relevant data here.  Methods taking those interface collections account for roughly 28% of all methods taking some collection type (arrays, spans, other BCL collections), and `IEnumerable<T>` alone accounts for 25% of the collection-taking methods.  This is not surprising as our own practices, and general design guidance we give the community, are simply that:
 
-Indeed, if it were not for `(params) T[]` (a full 50% of all collection-taking methods), `IEnumerable<T>` would be the most commonly taken collection by far for the ecosystem.
+> methods should be permissive in what they accept, and be precise in what they return.
+
+`IEnumerable<T>` (and our other collection interfaces) act as that permissive type that we and our ecosystem have broadly adopted. Indeed, if it were not for `(params) T[]` (a full 50% of all collection-taking methods), `IEnumerable<T>` would be the most commonly taken collection by far for the ecosystem.
 
 Ideally, we would ship with support for everything, but we've currently made judicious moves from C#12 to C#13 based on complexity, but also based on impact.  For example, `Dictionary expressions` were moved to C#13 to lighten our load, and because data indicates that APIs that consume those dictionary types are only <3% of all apis that take collections in the first place.  `Natural type` support has also been pushed out because the complexity is felt to be substantive enough to warrant more time.
 
@@ -121,7 +123,7 @@ class Order : ITaggable
 }
 ```
 
-First, this immediately fails the simplicity and universality concerns. From our own experience, and the data about the ecosystem, we know that users will need to interface with, well, interfaces :).  This will be an immediate hurdle that will deeply undercut the value of this feature space, potentially even deeply tainting it for the future.
+First, this immediately fails the simplicity and universality concerns. From our own experience, and the data about the ecosystem, we know that users will need to interface with, well, interfaces :).  This will be an immediate hurdle that will deeply undercut the value of this feature space, potentially even deeply tainting it for the future.  This also undercuts the core design principle we give to people of "be permissive in what you accept".  It would now be "be permissing in what you accept, but also accept a concrete type so that it can be called using collection expressions".
 
 Second, collection expressions would not provide any sort of actual useful syntax or brevity for users in this case.  Because an explicit type would have to be provided, users would be left with syntax with nearly the same complexity and verbosity as what they would have to write today.  Users seeing this would rightfully ask:
 
