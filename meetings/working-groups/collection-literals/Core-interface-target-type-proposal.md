@@ -123,7 +123,7 @@ class Order : ITaggable
 }
 ```
 
-First, this immediately fails the simplicity and universality concerns. From our own experience, and the data about the ecosystem, we know that users will need to interface with, well, interfaces :).  This will be an immediate hurdle that will deeply undercut the value of this feature space, potentially even deeply tainting it for the future.  This also undercuts the core design principle we give to people of "be permissive in what you accept".  It would now be "be permissing in what you accept, but also accept a concrete type so that it can be called using collection expressions".
+First, this immediately fails the simplicity and universality concerns. From our own experience, and the data about the ecosystem, we know that users will need to interface with, well, interfaces :).  This will be an immediate hurdle that will deeply undercut the value of this feature space, potentially even deeply tainting it for the future.  This also undercuts the core design principle we give to people of "be permissive in what you accept".  It would now be "be permissive in what you accept, but also accept a concrete type so that it can be called using collection expressions".
 
 Second, collection expressions would not provide any sort of actual useful syntax or brevity for users in this case.  Because an explicit type would have to be provided, users would be left with syntax with nearly the same complexity and verbosity as what they would have to write today.  Users seeing this would rightfully ask:
 
