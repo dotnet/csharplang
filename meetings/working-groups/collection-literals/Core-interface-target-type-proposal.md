@@ -108,7 +108,7 @@ DoSomething((List<int>)[1, 2, 3]);
 and
 
 ```c#
-class Order
+class Order : ITaggable
 {
     // Not allowed:
     public IReadOnlyList<OrderTag> Tags { get; } = [];
@@ -151,7 +151,7 @@ DoSomething([1, 2, 3]);
 and
 
 ```c#
-class Order
+class Order : ITaggable
 {
     // Legal. Is equivalent to: `Tags { get; } = new List<OrderTag>();
     public IReadOnlyList<OrderTag> Tags { get; } = [];
@@ -223,9 +223,9 @@ DoSomething([1, 2, 3]);
 and
 
 ```c#
-class Order
+class Order : ITaggable
 {
-    // Legal. An efficient 'empty' instance will be used.
+    // Legal. An efficient 'empty', read-only singleton will be used.
     public IReadOnlyList<OrderTag> Tags { get; } = [];
 
     // Legal. Equivalent to: `{ get; } = new List<int>()`, 
