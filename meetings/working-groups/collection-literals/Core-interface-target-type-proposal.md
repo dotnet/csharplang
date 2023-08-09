@@ -122,7 +122,9 @@ class Order
 
 First, this immediately fails the simplicity and universality concerns. From our own experience, and the data about the ecosystem, we know that users will need to interface with, well, interfaces :).  This will be an immediate hurdle that will deeply undercut the value of this feature space, potentially even deeply tainting it for the future.
 
-Second, collection expressions would not provide any sort of actual useful syntax or brevity for users in this case.  Because an explicit type would have to be provided, users would be left with syntax with nearly the same complexity and verbosity as what they would have to write today.  Users seeing this would rightfully ask "why would I pick this new form, that is really just the same as the old form, just with some tokens tweaked?"
+Second, collection expressions would not provide any sort of actual useful syntax or brevity for users in this case.  Because an explicit type would have to be provided, users would be left with syntax with nearly the same complexity and verbosity as what they would have to write today.  Users seeing this would rightfully ask:
+
+> why would I pick this new form, that is really just the same as the old form, just with some tokens tweaked?
 
 Performance and safety though would be mostly neutral here.  Users who did not care about either would likely just use `List<T>`, and users who did would pick something appropriate for their domain.  However, this would still be a small tick in the 'negative' category as our claims about us making the "right, smart, best choices" for users would be undercut by then forcing the user to have to make those choices themselves.
 
@@ -157,7 +159,7 @@ class Order
 
 This option *nails* the "simplicity", "universality, and "brevity" aspects we are trying to solve.  Explaining to users what happens in these cases is trivial: "It makes a `List<T>`.  The part-and-parcel type of .NET that you've known about and have used for nearly 20 years now".  Similarly, it can be used for *all* these APIs that take in one of these interfaces.  Finally, it always allows the nice short syntactic form that really sells people on why collection expressions are a superior choice to use over practically every other collection creation construct they can use today.
 
-However, this also falls short in both the 'performance' and 'safety' domains.  Indeed, it does so so egregiously, that our own analyzers will flag this as inappropriate and push both the users who run these analyzers, and the users who just care about these facets of development, away from feeling they can trust this feature to live up to its recommendation as making the "right, smart, best choices" for them.   It will also likely lead to negative-evangelization, where voices in the community steer people away from the feature as a whole.
+However, this also falls short in both the 'performance' and 'safety' domains.  Indeed, it does so so egregiously, that our own analyzers will flag this as inappropriate and push both the users who run these analyzers, and the users who just care about these facets of development, away from feeling they can trust this feature to live up to its recommendation as making the "right, smart, best choices" for them.   It will also likely lead to negative-evangelization, where voices in the community steer people away from the feature as a whole, proclaiming it as harmful.
 
 #### Option 2 - Performance
 
@@ -272,6 +274,14 @@ Finally, we come to the one area where the above proposal ticks downward: "simpl
 1. Are you using one of the mutation-supporting interfaces (`ICollection<T>/IList<T>`)?  If so, you'll get something great.  A high quality mutable type that supports that API and will work great with the rest of the ecosystem.
 2. Are you using the read-only interfaces (`IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`)?  If so, you get a *safe*, *high performance* impl that supports the API shape needed.  This is right in line with what we already do for you today when you use `IEnumerable<T>` with `yield`.  Your instance will be safe, with no concern about data changing out from you unexpectedly.  And, if you use collection-expressions you will just get performance wins *for free*.  In other words, compared to virtually any other approach you're taking today (outside of hand-writing custom types for everything, and initializing them all with exceptionally ugly code), this system will work better.  And, if you are the user that was hand-writing everything before, this system is also so much better because now you get the same perf, with exceptional clarity and brevity.
 
+We feel there is nothing particularly strange or difficult to explain here to users. C# and .Net is replete with APIs and patterns that do not let you know the specific type being constructed. For example, from C# 3 onwards, `Linq` very much put forth the idea of:
+
+> You will just get an `IEnumerable<T>`, but you won't know what the actual concrete type is. This abstraction also allows the underlying system to heavily optimize.  `Linq` itself uses this to great effect, using many different specialized implementations under the covers to provide better performance.
+
+Similarly, with several of our latest releases, we've started more heavily pushing the idea that the language has smart semantics that will do what you ask it to do, very efficiently, without overspecifying exactly how that must be done.  Patterns in general, and List-patterns (the analog to list-construction) heavily push this idea, stating explicitly that assumptions about well-behavedness will be made and that the compiler will pick the best way to do things.
+
+So we feel that collection-expressions fit well into both the historical, and modern, way that C# and .Net works.  Where you can declaratively tell us what you want (like with `Linq`), and the systems coordinate to produce great results by default.
+
 ## Conclusion
 
-The working group strongly thinks that we should go with option 3 and that we should do so in C#12.  The other options come with enormously painful caveats that heavily undercut the core messaging of this feature entirely.  And missing C#12 on this also dramatically limits the usefulness of this feature space, and will immediately cause customer confusion and frustration that such a core scenario feels unaddressed by us in the initial release.
+Based on all of this, the working group strongly thinks that we should go with option 3 and that we should do so in C#12.  The other options come with enormously painful caveats that heavily undercut the core messaging of this feature entirely.  Missing C# 12 on this also dramatically limits the usefulness of this feature space, and will immediately cause customer confusion and frustration that such a core scenario feels unaddressed by us in the initial release.
