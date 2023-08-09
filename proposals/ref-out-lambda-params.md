@@ -110,6 +110,28 @@ int Method2(int a, int b) => a + b;
 
 # Open Questions
 
-- [x] Do we consider making a breaking change supporting `scoped` as the parameter modifier in implicitly-typed parameters?
+- [x] Question: Do we consider making a breaking change supporting `scoped` as the parameter modifier in implicitly-typed parameters?
   - Answer: [Yes](https://github.com/dotnet/csharplang/pull/7369#issuecomment-1670155767)
-  
+
+- [ ] Question:
+
+By always considering `scoped` as a parameter modifier in implicitly-typed lambda parameters, do we also extend this breaking change onto explicitly-typed lambda parameters? This would change the existing snippet's meaning:
+```csharp
+public class C
+{
+    public void M(scoped sc, scoped scoped scsc)
+    {
+        MSc mSc = M;
+        MSc mSc1 = (scoped sc, scoped scoped scsc) => { };
+    }
+    
+    public delegate void MSc(scoped sc, scoped scoped scsc);
+}
+
+public ref struct @scoped { }
+```
+`sc` in `mSc1` would now mean an implicitly-typed parameter with the `scoped` modifier, causing an error about not specifying its type explicitly, given the presence of `scsc` in that lambda. As of C# 11, `scoped` in this case refers to the type of the lambda parameter. The delegate and method declarations are unaffected from this behavior adjustment.
+
+Without this breaking change, we have to special-case implicitly-typed lambda parameters over explicitly-typed ones, and adjust the parsing behavior accordingly, which sounds like too much work for supporting a pathogenic case.
+
+An even further step is to introduce this breaking change in parameters in all signatures, methods, delegates and anonymous functions. However, other than consistency and alignment with the breaking changes around `scoped`, there is no real reason.
