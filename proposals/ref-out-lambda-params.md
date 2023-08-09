@@ -31,9 +31,9 @@ SelfReturnerIn<string> fin = in x => x;
 SelfReturnerRef<string> fref = ref x => x;
 SelfReturnerOut<string> fout = out x => x;
 SelfReturnerRefReadonly<string> frr = ref readonly x => x;
-SelfReturnerScoped<string> frr = scoped x => x;
-SelfReturnerScopedRef<string> frr = scoped ref x => x;
-SelfReturnerParams<string> frr = params x => x;
+SelfReturnerScoped<string> fs = scoped x => x;
+SelfReturnerScopedRef<string> fsr = scoped ref x => x;
+SelfReturnerParams<string> fp = params x => x;
 
 delegate T SelfReturnerIn<T>(in T t);
 delegate T SelfReturnerRef<T>(ref T t);
@@ -107,3 +107,9 @@ var dd = (a, b) => Method2(a, b);
 
 int Method2(int a, int b) => a + b;
 ```
+
+# Open Questions
+
+- [x] Do we consider making a breaking change supporting `scoped` as the parameter modifier in implicitly-typed parameters?
+  - Answer: [Yes](https://github.com/dotnet/csharplang/pull/7369#issuecomment-1670155767)
+  
