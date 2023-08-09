@@ -262,6 +262,44 @@ _Give specific ordering for determining how to construct the constructible colle
 
     Here, if `b` is false, it is not required that any value actually be constructed for the empty literal since it would immediately be spread into zero values in the final literal.
 
+## Ref safety
+[ref-safety]: #ref-safety
+
+See [*safe context constraint*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#164121-general) for definitions of the *safe-context* values: *declaration-block*, *function-member*, and *caller-context*.
+
+The *safe-context* of a collection expression is:
+
+* The safe-context of an empty collection expression `[]` is the *caller-context*.
+
+* If the target type is a *span type* `System.ReadOnlySpan<T>`, and `T` is a *primitive type*, and the collection expression contains *constant values only*, the safe-context of the collection expression is the *caller-context*.
+
+* If the target type is a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`, the safe-context of the collection expression is the *declaration-block*.
+
+* If the target type is a *ref struct type* with a [*create method*](#create-methods), the safe-context of the collection expression is the [*safe-context of an invocation*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/structs.md#164126-method-and-property-invocation) of the create method where the collection expression is the span argument to the method.
+
+* Otherwise the safe-context of the collection expression is the *caller-context*.
+
+A collection expression with a safe-context of *declaration-block* cannot escape the enclosing scope, and the compiler *may* store the collection on the stack rather than the heap.
+
+To allow a collection expression for a ref struct type to escape the *declaration-block*, it may be necessary to cast the expression to another type.
+
+```csharp
+static ReadOnlySpan<int> AsSpanConstants()
+{
+    return [1, 2, 3]; // ok: span refers to assembly data section
+}
+
+static ReadOnlySpan<T> AsSpan2<T>(T x, T y)
+{
+    return [x, y];    // error: span may refer to stack data
+}
+
+static ReadOnlySpan<T> AsSpan3<T>(T x, T y, T z)
+{
+    return (T[])[x, y, z]; // ok: span refers to T[] on heap
+}
+```
+
 ## Natural type
 [natural-type]: #natural-type
 
