@@ -44,6 +44,7 @@ Collection expressions aim to be a substantively 'complete' replacement for the 
 1. `stackalloc T[] { ... }`
 1. `stackalloc[] { ... }`
 1. `new CollectionType<Dictionary<(int x, int y), string[]>> { ... }`
+1. `new() { ... }`
 1. `ImmutableCollectionType.Create(...)`
 1. `ImmutableCollection.CreateBuilder(); builder.Add(...); ...; builder.ToImmutable()`.  (Wasteful, and doesn't work for base cases like a field initializer).
 1. And more... including things like: `ImmutableArray<T>.Empty.Add(x).AddRange(y).etc()`
