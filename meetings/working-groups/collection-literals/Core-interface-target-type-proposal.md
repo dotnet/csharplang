@@ -51,7 +51,7 @@ Collection expressions aim to be a substantively 'complete' replacement for the 
 
 An examination of the BCL and the top 20 NuGet packages (Newtonsoft, EF, Azure, Castle, AWS, AutoMapper, and more), all of which are >400m downloads, reveals very relevant data here.  Methods taking those interface collections account for roughly 28% of all methods taking some collection type (arrays, spans, other BCL collections), and `IEnumerable<T>` alone accounts for 25% of the collection-taking methods.  This is not surprising as our own practices, and general design guidance we give the community, are simply that:
 
-> methods should be permissive in what they accept, and be precise in what they return.
+> Methods should be permissive in what they accept, and be precise in what they return.
 
 `IEnumerable<T>` (and our other collection interfaces) act as that permissive type that we and our ecosystem have broadly adopted. Indeed, if it were not for `(params) T[]` (a full 50% of all collection-taking methods), `IEnumerable<T>` would be the most commonly taken collection by far for the ecosystem.
 
@@ -123,11 +123,13 @@ class Order : ITaggable
 }
 ```
 
-First, this immediately fails the simplicity and universality concerns. From our own experience, and the data about the ecosystem, we know that users will need to interface with, well, interfaces :).  This will be an immediate hurdle that will deeply undercut the value of this feature space, potentially even deeply tainting it for the future.  This also undercuts the core design principle we give to people of "be permissive in what you accept".  It would now be "be permissive in what you accept, but also accept a concrete type so that it can be called using collection expressions".
+First, this immediately fails the simplicity and universality concerns. From our own experience, and the data about the ecosystem, we know that users will need to interface with, well, interfaces :).  This will be an immediate hurdle that will deeply undercut the value of this feature space, potentially even deeply tainting it for the future.  This also undercuts the core design principle we give to people of "be permissive in what you accept".  It would now be:
+
+> Be permissive in what you accept, but also accept a concrete type so that it can be called using collection expressions
 
 Second, collection expressions would not provide any sort of actual useful syntax or brevity for users in this case.  Because an explicit type would have to be provided, users would be left with syntax with nearly the same complexity and verbosity as what they would have to write today.  Users seeing this would rightfully ask:
 
-> why would I pick this new form, that is really just the same as the old form, just with some tokens tweaked?
+> Why would I pick this new form, that is really just the same as the old form, just with some tokens tweaked?
 
 Performance and safety though would be mostly neutral here.  Users who did not care about either would likely just use `List<T>`, and users who did would pick something appropriate for their domain.  However, this would still be a small tick in the 'negative' category as our claims about us making the "right, smart, best choices" for users would be undercut by then forcing the user to have to make those choices themselves.
 
@@ -160,7 +162,11 @@ class Order : ITaggable
 }
 ```
 
-This option *nails* the "simplicity", "universality, and "brevity" aspects we are trying to solve.  Explaining to users what happens in these cases is trivial: "It makes a `List<T>`.  The part-and-parcel type of .NET that you've known about and have used for nearly 20 years now".  Similarly, it can be used for *all* these APIs that take in one of these interfaces.  Finally, it always allows the nice short syntactic form that really sells people on why collection expressions are a superior choice to use over practically every other collection creation construct they can use today.
+This option *nails* the "simplicity", "universality, and "brevity" aspects we are trying to solve.  Explaining to users what happens in these cases is trivial:
+
+> It makes a `List<T>`.  The part-and-parcel type of .NET that you've known about and have used for nearly 20 years now.
+
+Similarly, it can be used for *all* these APIs that take in one of these interfaces.  Finally, it always allows the nice short syntactic form that really sells people on why collection expressions are a superior choice to use over practically every other collection creation construct they can use today.
 
 However, this also falls short in both the 'performance' and 'safety' domains.  Indeed, it does so so egregiously, that our own analyzers will flag this as inappropriate and push both the users who run these analyzers, and the users who just care about these facets of development, away from feeling they can trust this feature to live up to its recommendation as making the "right, smart, best choices" for them.   It will also likely lead to negative-evangelization, where voices in the community steer people away from the feature as a whole, proclaiming it as harmful.
 
@@ -177,7 +183,7 @@ While `List<T>` is a great type when you need flexibility and permissiveness, it
 
 #### Option 2 - Safety
 
-For "safety" `List<T>` is also an unacceptable choice for many (and our own analyzers will push you away from it).  Users who expose data currently (and safely) through the readonly interfaces `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` today will find that they cannot effectively move to collection expressions.  They will have to keep the highly verbose and clunky code they have today, to use types like `ImmutableArray`, or things like `new List<int> { a, b, c }>.AsReadOnly()`.  This will make collection-expressions feel half baked for these users, again undercutting the story that this new feature makes the  "right, smart, best choices" for the user.  It will also force them to lose the brevity and consistency of being able to use collection-expressions with confidence everywhere.
+For "safety" `List<T>` is also an unacceptable choice for many (and our own analyzers will push you away from it).  Users who expose data safely today through the readonly interfaces `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` today will find that they cannot effectively move to collection expressions.  They will have to keep the highly verbose and clunky code they have today, to use types like `ImmutableArray`, or things like `new List<int> { a, b, c }>.AsReadOnly()`.  This will make collection-expressions feel half-baked for these users, again undercutting the story that this new feature makes the  "right, smart, best choices" for the user.  It will also force them to lose the brevity and consistency of being able to use collection-expressions with confidence everywhere.
 
 Note: we could potentially choose *different* types depending in the end interface we were assigning to.  For example, `List<T>` for the mutable ones, and `ImmutableArray<T>` for the non-mutable ones.  However, this would certainly now start getting less simple, with the need for a 'decoder ring' rising.  It also likely would not play nicely with when we get to dictionaries.  While `Dictionary<K,V>` would be a natural analog to `List<T>`, with great familiarity to the ecosystem, `ImmutableDictionary<K,V>` would be a disaster in a great number of cases as the read-only dictionary analog.
 
@@ -185,7 +191,7 @@ Note: we could potentially choose *different* types depending in the end interfa
 
 Deep discussion around the problems with Option 2 led the WG and partners to come up with a variant of '2', leveraging the parts it does well at, while curtailing its drawbacks.
 
-First, it's important to look at the surface area of the read-only interfaces `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` and see that it is *entirely*:
+First, it's important to look at the surface area of the read-only interfaces `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>` and see that it is only the following *three* members:
 
 ```c#
 {
@@ -195,7 +201,7 @@ First, it's important to look at the surface area of the read-only interfaces `I
 }
 ```
 
-That's it.  Just *three* members.  With that in mind the rules for target-typing an interface would be as follows:
+Basically, exactly the same as `IEnuemrable<T>` with *just* enough to think of it as an indexable sequence. With that in mind the rules for target-typing an interface would be as follows:
 
 1. We take a page from what we do today *already* for `IEnumerable<T>` and `yield` iterators, and we say that if you have a target-type of `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`, the language will state that you have no guarantee on any particular type being used at all.  But you will get an instance that efficiently implements the API surface area requested.  For example, the type that is used could be:
 
@@ -205,7 +211,7 @@ That's it.  Just *three* members.  With that in mind the rules for target-typing
 
     - Importantly, both of the above are possible, and we could even do one, then migrate to the other over different releases.  Because all that user could could ever know about is the target-interface type, there would be no source, binary, or runtime breaking changes here.  This means that in C# 12 we could use a compiler-synthesized type.  But also then migrate over to a BCL api if the BCL would like to own a canonical API for this purpose.
 
-    - Also, we have enormous flexibility here in terms of what does happen.  For example, if the compiler synthesizes types, it could choose a handful to make extremely efficient (for example, for collections expression of less then 8 elements), and then fallback to a single type that handled the rest of the cases.  These approaches could change over time based on data (similar to how we've adapted how we emit switch statements/expressions, and hashing). 
+    - Also, we have enormous flexibility here in terms of what does happen.  For example, if the compiler synthesizes types, it could choose a handful to make extremely efficient (for example, for collections expression of less then eight elements), and then fallback to a single type that handled the rest of the cases.  These approaches could change over time based on data (similar to how we've adapted how we emit switch statements/expressions, and hashing). 
 
 2. For a target-type of `ICollection<T>/IList<T>`, we would state the same thing.  That no type was guaranteed, but you would be certain to get an good implementation that supported mutation.  In practice though, we would be *highly* likely to just default this to `List<T>` as it would satisfy these requirements, while being an excellent implementation that is already heavily optimized for the flexible cases these interfaces would need.  This would also lower the burden on the compiler side in terms of codegen and complexity.
 
@@ -238,21 +244,25 @@ class Order : ITaggable
 
 With respect to the factors we care about, here's how the above falls out:
 
-For 'brevity/universality', this still strongly satisfies our goals.  Users will be able to use the succinct collection-expression form for all these APIs with ease. However, compared to option 2, we now see *large* wins in both safety and performance. 
+For 'brevity/universality', this still strongly satisfies our goals.  Users will be able to use the succinct collection-expression form for all these APIs with ease. However, compared to option 2, we now see wins in both safety and performance. 
 
 #### Option 3 - Safety
 
-Starting with safety, we now have a good option for everyone exposing data through any of those three interfaces.  Data is safe by default (a good choice for all users).  Analyzers do not trigger, preventing our own tooling from pushing people away from using our cohesive story here.  Users who do not care about safety continue not to care, while users for whom it is very important are extremely satisfied that they can trust this feature and that it lives up to the stated goal that it will make the smart choices they can depend on, and they do not have to ban this feature, or recommend others steer away from it.  This approach also naturally extends out to when we do dictionary-literals.  There, it will also be the case that for `IReadOnlyDictionary<TKey, Value>` we will not want to expose a mutable type (like `Dictionary<TKey, TValue>`) for safety reasons.
+Starting with safety, we now have a good option for everyone exposing data through any of those three read-only interfaces.  Data is safe by default, which is good for the users that care, and non-harmful for the users that do not care.  Users who care are then satisfied that they can trust this feature and that it lives up to the stated goal that it will make the smart choices they can depend on and they do not have to ban this feature, or recommend others steer away from it.  Importantly, analyzers do not trigger, preventing our own tooling from pushing people away from using our cohesive story here.
+
+This approach also naturally extends out to when we do dictionary-literals.  There, it will also be the case that for `IReadOnlyDictionary<TKey, Value>` we will not want to expose a mutable type (like `Dictionary<TKey, TValue>`) for safety reasons.
 
 #### Option 3 - Performance
 
-While the wins now with 'safety' are definitely welcome, the largest benefits come in the "performance" category.  Specifically, not having to name a particular type for the read-only interfaces opens up many areas of optimization that would simply be unavailable when having to pick an existing generalized type. This would also live up to the promise that we will do an excellent job with perf, and that it would be *very* hard for a user to do the same, and practically impossible for them to do so with simple syntax.  Specifically, all of the following are available as things we could do to heavily optimize here when target-typing `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`.
+While the wins now with 'safety' are definitely welcome, the largest benefits come in the "performance" category.
+
+Specifically, not having to name a particular type for the read-only interfaces opens up many areas of optimization that would simply be unavailable when having to pick an existing generalized type. This would also live up to the promise that we will do an excellent job with perf, and that it would be *very* hard for a user to do the same, and practically impossible for them to do so with simple syntax.  Specifically, all of the following are available as things we could do to heavily optimize here when target-typing `IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`.
 
 1. Empty collection expressions can always be collapsed down to a single empty singleton (per `T` element type) across the entire program.
 
 1. We can use features like inline-arrays to generate instances that inline all their elements and are no larger than space for the elements themselves.  A count would not even need to be stored as it could just be hard-coded as the value returned by `int Count { get; }`.  While this might generate many types in the assembly (one type per unique count), it's worth noting that this is what we *already* do for arrays *today*, and what we will be doing for the inline-array types we generate for spans/params-spans.
 
-1. We can borrow a trick from `yield iterators` where the iterator returned from `IEnumerator<T> GetEnumerator()` *reuses* the `this` instance to be its own iterator *if* it has never been iterated yet, and the calling thread is the same one that generated the `IEnumerable<T>`.  This means that if you have:
+1. We can borrow a trick from `yield iterators` where the iterator returned from `IEnumerator<T> GetEnumerator()` *reuses* the `this` instance to be its own iterator *if* it has never been iterated yet and the calling thread is the same one that generated the `IEnumerable<T>`.  This means that if you have:
 
     ```c#
     DoSomething([1, 2, 3]);
@@ -262,7 +272,9 @@ While the wins now with 'safety' are definitely welcome, the largest benefits co
 
 1. We do not need any code anywhere that sits in service of supporting variable sizes, or supporting mutation.  This means no overheads of checks, or invalidation of iterators, etc.
 
-    Overall, by not specifying explicit types, we actually open up a wealth of optimizations that both our own compiler or the BCL can choose to do.  While synthesizing types may initially seem concerning, we do already do it for many cases today, including when we already generate `IEnumerables` with `yield`, and also for every array type of a different count generated.  The surface area here is also exceptionally small.  There are only three extremely basic operations to support.  So the burden on the compiler to generate types for this feels completely acceptable, especially for the large wins we can achieve.  
+1. Collections full of constants, with well-known patterns, could potentially be implemented without allocating contiguous storage for them.  For example `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]` could be generated as `Enumerable.Range(1, 10)`, and so on.
+
+    Overall, by not specifying explicit types, we actually open up a wealth of optimizations that both our own compiler or the BCL can choose to do.  While synthesizing types may initially seem concerning, we do already do it for many cases today, including when we already generate `IEnumerables` with `yield`, and also for every array creation that has an initializer (like `new int[] { 1, 2, 3 }`).  The surface area here is also exceptionally small.  There are only three extremely basic operations to support (`GetEnumerator(),Count,this[]`).  So the burden on the compiler to generate types for this feels completely acceptable, especially for the large wins we can achieve.  
 
     There are still benefits though with the BCL taking this over.  Specifically, if they do so, they can then implement internal interfaces they may query for.  Or they can use their knowledge of the exact internal types they use to get to the underlying data in even more efficient ways (including potentially being able to grab spans to it).  That said, if there was such an API to grab a span from an collection type, it would be good for that to be public so that the compiler could just implement that itself.
 
@@ -275,7 +287,11 @@ While the wins now with 'safety' are definitely welcome, the largest benefits co
 Finally, we come to the one area where the above proposal ticks downward: "simplicity".  It is certainly the case that "Use `List<T>` for everything" approach is much simpler to explain.  However, we believe the above to be *acceptably* complex to explain, with enough benefits to point at to convince users that this was the right choice for them.  Specifically, we believe the best way to explain it is:
 
 1. Are you using one of the mutation-supporting interfaces (`ICollection<T>/IList<T>`)?  If so, you'll get something great.  A high quality mutable type that supports that API and will work great with the rest of the ecosystem.
-2. Are you using the read-only interfaces (`IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`)?  If so, you get a *safe*, *high performance* impl that supports the API shape needed.  This is right in line with what we already do for you today when you use `IEnumerable<T>` with `yield`.  Your instance will be safe, with no concern about data changing out from you unexpectedly.  And, if you use collection-expressions you will just get performance wins *for free*.  In other words, compared to virtually any other approach you're taking today (outside of hand-writing custom types for everything, and initializing them all with exceptionally ugly code), this system will work better.  And, if you are the user that was hand-writing everything before, this system is also so much better because now you get the same perf, with exceptional clarity and brevity.
+2. Are you using the read-only interfaces (`IEnumerable<T>/IReadOnlyCollection<T>/IReadOnlyList<T>`)?  If so, you get a *safe*, *high performance* impl that supports the API shape needed.  This is right in line with what we already do for you today when you use `IEnumerable<T>` with `yield`.
+
+    Your instance will be safe, with no concern about data changing out from you unexpectedly.
+    
+    And, by switching to collection-expressions you will just get performance wins *for free*.  In other words, compared to virtually any other approach you're taking today (outside of hand-writing custom types for everything, and initializing them all with exceptionally ugly code), this system will work better.  And, if you are the user that was hand-writing everything before, this system is also so much better because now you get the same perf, with exceptional clarity and brevity.
 
 We feel there is nothing particularly strange or difficult to explain here to users. C# and .Net is replete with APIs and patterns that do not let you know the specific type being constructed. For example, from C# 3 onwards, `Linq` very much put forth the idea of:
 
