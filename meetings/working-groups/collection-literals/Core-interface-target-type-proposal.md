@@ -2,7 +2,7 @@
 
 ### The problem we are trying to solve
 
-What does it mean when the user has one of the following five types (the types implements by our core list-types like `T[]`, `List<T>`, `ImmutableArray<T>`):
+What does it mean when the user has one of the following five types (the types implemented by our core list-like-types like `T[]`, `List<T>`, `ImmutableArray<T>`):
 
 1. `IEnumerable<T>`
 2. `IReadOnlyCollection<T>`
