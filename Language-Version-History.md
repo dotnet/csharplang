@@ -1,6 +1,16 @@
 Features Added in C# Language Versions
 ====================
 
+# C# 12.0 - .NET 8 and Visual Studio 2022 version 17.8
+
+- [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md): provides a uniform and efficient way of creating collections using collection-like types (`List<int> list = [1, 2, 3];`)
+- [Primary Constructors](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md): helps reduce field and constructor boilerplate (`class Point(int x, int y);`)
+- [Inline Arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md): provides a general-purpose and safe mechanism for declaring arrays using the `[InlineArray(size)]` attribute.
+- [Using aliases for any type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/using-alias-types.md): relaxes many restrictions on `using` alias declarations, allowing built-in types, tuple types, pointer types, array types (`using Point = (int x, int y);`)
+- [Ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/ref-readonly-parameters.md): `ref readonly` parameters mandate that arguments are passed by reference instead of potentially copied, can’t be modified, and warn if a temporary variable must be created.
+- [Nameof accessing instance members](https://github.com/dotnet/csharplang/issues/4037): relaxes some restrictions on usage of instance members inside `nameof` (`nameof(field.ToString)`)
+- [Lambda optional parameters](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/lambda-method-group-defaults.md): allows lambda parameters to declare default values (`(int i = 42) => { }`)
+
 # C# 11.0 - .NET 7 and Visual Studio 2022 version 17.4
 
 - [Raw string literals](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/raw-string-literal.md): introduces a string literal where the content never needs escaping (`var json = """{ "summary": "text" }""";` or `var json = $$"""{ "summary": "text", "length": {{length}} }""";`).
