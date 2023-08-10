@@ -437,14 +437,28 @@ var y = First([[ulong.MaxValue]], [[1, 2, 3]]); // ok: List<List<ulong>>
 ```
 
 ## Overload resolution
-_Include betterness order - perhaps the following, from best to worst: spans; arrays and constructed types; interface types._
+[overload-resolution]: #overload-resolution
 
-_Which overload should we prefer in the following?_
+[*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11644-better-conversion-from-expression) is updated to prefer certain target types over for collection expressions.
+
+> Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
+> 
+> - ...
+> - `C₁` and `C₂` are collection expression conversions and one of the following holds:
+>   - `T₁` is a *span type* and `T₂` is not a *span type*
+>   - `T₁` is not an *interface type* and `T₂` is an *interface type*
+
+The additional rule groups the collection target types from best to worst:
+- span types
+- arrays, inline arrays, and concrete types
+- interfaces
+
+Changing the grouping in the future is a potential breaking change. For example, with the grouping above, overload resolution will prefer the array overload because the second parameter type is more specific in that overload. But if the grouping is changed so concrete types are preferred over array types, the call is ambiguous.
 ```c#
-F([1:2]); // ambiguous?
+_ = Concat([1, 2, 3], 4); // Concat(int[], int)
 
-static void F<K, V>(IEnumerable<KeyValuePair<K, V>> e) { }
-static void F<K, V>(IDictionary d) { }
+static int[] Concat(int[] x, int y);
+static List<int> Concat(List<int> x, int y);
 ```
 
 ## Span types
