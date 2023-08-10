@@ -271,7 +271,7 @@ The *safe-context* of a collection expression is:
 
 * The safe-context of an empty collection expression `[]` is the *caller-context*.
 
-* If the target type is a *span type* `System.ReadOnlySpan<T>`, and `T` is a *primitive type*, and the collection expression contains *constant values only*, the safe-context of the collection expression is the *caller-context*.
+* If the target type is a *span type* `System.ReadOnlySpan<T>`, and `T` is one of the *primitive types* `bool`, `sbyte`, `byte`, `short`, `ushort`, `char`, `int`, `uint`, `long`, `ulong`, `float`, or `double`, and the collection expression contains *constant values only*, the safe-context of the collection expression is the *caller-context*.
 
 * If the target type is a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`, the safe-context of the collection expression is the *declaration-block*.
 
