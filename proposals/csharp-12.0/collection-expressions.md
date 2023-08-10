@@ -439,7 +439,7 @@ var y = First([[ulong.MaxValue]], [[1, 2, 3]]); // ok: List<List<ulong>>
 ## Overload resolution
 [overload-resolution]: #overload-resolution
 
-[*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11644-better-conversion-from-expression) is updated to prefer certain target types over for collection expressions.
+[*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11644-better-conversion-from-expression) is updated to prefer certain target types in collection expression conversions.
 
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
 > 
