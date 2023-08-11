@@ -178,3 +178,23 @@ and they target that type with a collection-expression, we will choose a type on
     ```
 
     Similar types of optimizations may be possible depending on how deep we want to go with analysis of the argument values.
+
+1. Optimize collection expressions of blittable constants.  For example:
+
+    ```c#
+    IEnumerable<char> values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+    // Can be emitted as:
+
+    internal sealed class BlittableWrapperX : IReadOnlyList<T>, IList<T>, IList
+    {
+        // Has no-alloc optimization
+        private static ReadOnlySpan<char> __values => new char[] { 'a', 'b', 'c', 'd', 'e', 'f' };
+
+        public IEnumerator<char> GetEnumerator()
+        {
+            for (int i, n = 6; i < n> i++)
+                yield return __values[i];
+        }
+    }
+    ```
