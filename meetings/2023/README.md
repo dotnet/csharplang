@@ -6,23 +6,35 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- Updated on the C# standard process (Bill, after Aug 10)
+- Futures: reflection alternatives (Andy, after Aug 15)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
 - *Design review*
 
-## Mon Jul 31, 2023
+## Wed Sept 6, 2023
 
-## Wed Jul 26, 2023
+## Wed Aug 16 2023
 
-## Mon Jul 24, 2023
+- Even more collection expression details (Cyrus)
+- [Experimental] attribute (Julien)
 
-- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
+## Mon Aug 14, 2023
 
-## Mon Jul 17, 2023
+- More collection expression details (Cyrus)
+- [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
 
-- Which features are shipping in C# 12, and what do we call them? (Mads and Jared) - [Language Feature Status](https://github.com/dotnet/roslyn/blob/main/docs/Language%20Feature%20Status.md)
-- Readonly parameters (Fred and Cyrus) - https://github.com/333fred/csharplang/blob/readonly-params/proposals/readonly-parameters.md
+## Wed Aug 9, 2023
+
+-  [Change to lambda binding](https://github.com/dotnet/roslyn/issues/69093)
+-  [Collection expressions target typing to core interfaces](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/Core-interface-target-type-proposal.md)
+
+## Mon Aug 7, 2023
+
+- More [method group natural type questions](https://github.com/dotnet/roslyn/issues/69222) (Julien)
+- Brief collection-expression question and update (CyrusNajmabadi): https://github.com/dotnet/csharplang/issues/7396
 
 ## Wed Mar 15, 2023
 
@@ -30,6 +42,32 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon Jul 31, 2023
+
+[C# Language Design Meeting for July 31st, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-31.md)
+
+- Primary constructor parameters and `readonly`
+
+## Wed Jul 26, 2023
+
+[C# Language Design Meeting for July 26th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-26.md)
+
+- Primary constructor parameters and `readonly`
+
+## Mon Jul 24, 2023
+
+[C# Language Design Meeting for July 24th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-24.md)
+
+- Method group natural types with extension members
+- Interceptors
+
+## Mon Jul 17, 2023
+
+[C# Language Design Meeting for July 17th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md)
+
+- Compiler Check-in
+- `readonly` parameters
 
 ## Wed Jul 12, 2023
 
