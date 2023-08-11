@@ -1126,6 +1126,7 @@ https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collectio
 https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-12.md
 https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-26.md
 https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-03.md
+https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-10.md
 
 ## Upcoming agenda items
 
