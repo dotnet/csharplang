@@ -3,12 +3,12 @@
 ## Summary
 [summary]: #summary
 
-Collection expressions introduce a new terse syntax, `[e1, e2, e3, etc]`, to create common collection values.  Inlining other collections into these values is possible using a spread operator `..` like so: `[e1, ..c2, e2, ..c2]`.  A `[k1: v1, ..d1]` form is also supported for creating dictionaries.
+Collection expressions introduce a new terse syntax, `[e1, e2, e3, etc]`, to create common collection values.  Inlining other collections into these values is possible using a spread operator `..` like so: `[e1, ..c2, e2, ..c2]`.
 
 Several collection-like types can be created without requiring external BCL support.  These types are:
 * [Array types](https://github.com/dotnet/csharplang/blob/main/spec/types.md#array-types), such as `int[]`.
 * [`Span<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) and [`ReadOnlySpan<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1).
-* Types that support [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), such as [`List<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) and [`Dictionary<TKey, TValue>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2).
+* Types that support [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), such as [`List<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1).
 
 Further support is present for collection-like types not covered under the above through a new attribute and API pattern that can be adopted directly on the type itself.
 
@@ -35,8 +35,6 @@ An inclusive solution is needed for C#. It should meet the vast majority of cass
 
 This leads to a natural conclusion that the syntax should be like `[e1, e2, e3, e-etc]` or `[e1, ..c2, e2]`, which correspond to the pattern equivalents of `[p1, p2, p3, p-etc]` and `[p1, ..p2, p3]`.
 
-A form for dictionary-like collections is also supported where the elements of the literal are written as `k: v` like `[k1: v1, ..d1]`.  A future pattern form that has a corresponding syntax (like `x is [k1: var v1]`) would be desirable.
-
 ## Detailed design
 [design]: #detailed-design
 
@@ -55,7 +53,6 @@ primary_no_array_creation_expression
 
 + collection_literal_element
   : expression_element
-  | dictionary_element
   | spread_element
   ;
 
@@ -63,23 +60,18 @@ primary_no_array_creation_expression
   : expression
   ;
 
-+ dictionary_element
-  : expression ':' expression
-  ;
-
 + spread_element
   : '..' expression
   ;
 ```
 
-Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/target-typed-default.md#motivation) but also have a [*natural type*](#natural-type) when the target type is not a *constructible collection type*.
+Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.1/target-typed-default.md#motivation).
 
 ### Spec clarifications
 [spec-clarifications]: #spec-clarifications
 
 * For brevity, `collection_literal_expression` will be referred to as "literal" in the following sections.
 * `expression_element` instances will commonly be referred to as `e1`, `e_n`, etc.
-* `dictionary_element` instances will commonly be referred to as `k1: v1`, `k_n: v_n`, etc.
 * `spread_element` instances will commonly be referred to as `..s1`, `..s_n`, etc.
 * *span type* means either `Span<T>` or `ReadOnlySpan<T>`.
 * Literals will commonly be shown as `[e1, ..s1, e2, ..s2, etc]` to convey any number of elements in any order.  Importantly, this form will be used to represent all cases such as:
@@ -88,21 +80,17 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
     - Literals with no `spread_element` in them.
     - Literals with arbitrary ordering of any element type.
 
-* In the following sections, examples of literals without a `k: v` element should be assumed to not have any `dictionary_element` in them. Any usages of `..s` should be assumed to be a spread of a non-dictionary value.  Sections that refer to dictionary behavior will call that out.
-
 * The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
 
 * Variables starting with `__name` are used to represent the results of the evaluation of `name`, stored in a location so that it is only evaluated once.  For example `__e1` is the evaluation of `e1`.
 
-* `List<T>`, `Dictionary<TKey, TValue>` and `KeyValuePair<TKey, TValue>` refer to the respective types in the `System.Collections.Generic` namespace.
+* `List<T>`, `IEnumerable<T>`, etc. refer to the respective types in the `System.Collections.Generic` namespace.
 
 * The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11173-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
 
 * An implementation is not required to translate literals exactly as specified below.  Any translation is legal if the same result is produced and there are no observable differences in the production of the result.
 
     * For example, an implementation could translate literals like `[1, 2, 3]` directly to a `new int[] { 1, 2, 3 }` expression that itself bakes the raw data into the assembly, eliding the need for `__index` or a sequence of instructions to assign each value. Importantly, this does mean if any step of the translation might cause an exception at runtime that the program state is still left in the state indicated by the translation.
-
-    * Similarly, while a collection literal has a *natural type* of `List<T>`, it is permissible to avoid such an allocation if the result would not be observable.  For example, `foreach (var toggle in [true, false])`.  Because the elements are all that the user's code can refer to, the above could be optimized away into a direct stack allocation.
 
 * Collections are assumed to be well-behaved.  For example:
 
@@ -131,37 +119,18 @@ The following implicit *collection literal conversions* exist from a collection 
 * To an *[inline array type](https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md)* with *element type* `T` where:
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-* To a *type* that implements `System.Collections.IDictionary` where:
-  * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
-  * For each *expression element* `Ei`:
-    * the type of `Ei` is `dynamic` and there is an [applicable](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation) indexer setter that can be invoked with two `dynamic` arguments, or
-    * the type of `Ei` is a type `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
-  * For each *dictionary element* `Ki:Vi`, there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
-  * For each *spread element* `Si`:
-    * the *iteration type* of `Si` is `dynamic` and there is an [applicable](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation) indexer setter that can be invoked with two `dynamic` arguments, or
-    * the *iteration type* is `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an applicable indexer setter that can be invoked with two arguments of types `Ki` and `Vi`.
-
-  _Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?_
-
-* To an *interface type* `I<K, V>` where `System.Collections.Generic.Dictionary<TKey, TValue>` implements `I<TKey, TValue>` and where:
-  * For each *expression element* `Ei`, the type of `Ei` is `dynamic`, or the type of `Ei` is a type `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * For each *dictionary element* `Ki:Vi` there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-  * For each *spread element* `Si`, the *iteration type* of `Si` is `dynamic`, or the *iteration type* is `System.Collections.Generic.KeyValuePair<Ki, Vi>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
-
 * To a *type* that implements `System.Collections.IEnumerable` where:
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
   * For each *expression element* `Ei` there is an applicable instance or extension method `Add` for a single argument `Ei`.
   * For each *spread element* `Si` there is an applicable instance or extension method `Add` for a single argument of the *iteration type* of `Si`.
-  * There are no *dictionary elements*.
 
-  _Open issue: Should we allow dictionary elements if we can reliably determine the target type is a collection of `KeyValuePair<K, V>`?_
+  _Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?_
 
 * To an *interface type* `I<T0>` where `System.Collections.Generic.List<T>` implements `I<T>` and where:
   * For each *element* `Ei` there is an *implicit conversion* to `T0`.
 
 In the cases above, a collection literal *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
   * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
-  * `Ei` is a *dictionary element* `Ki:Vi` and `T` is a type `System.Collections.Generic.KeyValuePair<K, V>` and there is an implicit conversion from `Ki` to `K` and from `Vi` to `V`.
   * `Ei` is a *spread element* `Si` and there is an implicit conversion from the *iteration type* of `Si` to `T`.
 
 Types for which there is an implicit collection literal conversion from a collection literal are the valid *target types* for that collection literal.
@@ -244,20 +213,11 @@ _Give specific ordering for determining how to construct the constructible colle
     var v = []; // illegal
     ```
 
-    However, the following is allowed because of the use of conversions between the branches in the conditional expression:
-
-    ```c#
-    bool b = ...
-    var v = b ? [1, 2, 3] : [];
-    ```
-
-    In this case the type of the empty literal will be `List<int>` due to the [*natural type*](#natural-type) of `[1, 2, 3]`.
-
 * Spreading an empty literal is permitted to be elided.  For example:
 
     ```c#
     bool b = ...
-    var v = [x, y, .. b ? [1, 2, 3] : []];
+    List<int> l = [x, y, .. b ? [1, 2, 3] : []];
     ```
 
     Here, if `b` is false, it is not required that any value actually be constructed for the empty literal since it would immediately be spread into zero values in the final literal.
@@ -299,55 +259,6 @@ static ReadOnlySpan<T> AsSpan3<T>(T x, T y, T z)
     return (T[])[x, y, z]; // ok: span refers to T[] on heap
 }
 ```
-
-## Natural type
-[natural-type]: #natural-type
-
-In the absence of a *constructible collection target type*, a non-empty literal can have a *natural type*.
-
-The *natural type* is determined from the [*natural element type*](#natural-element-type).
-If the *natural element type* `T` cannot be determined, the literal has no *natural type*. If `T` can be determined, the *natural type* of the collection is `List<T>`.
-
-The choice of `List<T>` rather than `T[]` or `ImmutableArray<T>` is to allow mutation of `var` locals after initialization. `List<T>` is preferred over `Span<T>` because `Span<T>` cannot be used in `async` methods.
-
-```c#
-var values = [1, 2, 3];
-values.Add(4); // ok
-```
-
-The *natural element type* may be inferred from `spread_element` enumerated element type.
-
-```c#
-var c = [..[1, 2, 3]]; // List<int>
-```
-
-Should `IEnumerable` contribute an *iteration type* of `object` or no contribution?
-
-```c#
-IEnumerable e1 = [1, 2, 3];
-var e2 = [..e1];           // List<object> or error?
-List<string> e3 = [..e1];  // error?
-```
-
----
-
-* For example, given:
-
-    ```c#
-    string s = ...;
-    object[] objects = ...;
-    var x = [s, ..objects]; // List<object>
-    ```
-
-    The *natural type* of `x` is `List<T>` where `T` is the *best common type* of `s` and the *iteration type* of `objects`.  Respectively, that would be the *best common type* between `string` and `object`, which would be `object`.  As such, the type of `x` would be `List<object>`.
-
-* Given:
-
-    ```c#
-    var values = x ? [1, 2, 3] : []; // List<int>
-    ```
-
-    The *best common type* between `[1, 2, 3]` and `[]` causes `[]` to take on the type `[1, 2, 3]`, which is `List<int>` as per the existing *natural type* rules. As this is a constructible collection type, `[]` is treated as target-typed to that collection type.
 
 ## Type inference
 [type-inference]: #type-inference
@@ -402,38 +313,6 @@ static class Extensions
 var x = [1].AsImmutableArray();           // error: collection expression has no target type
 var y = [2].AsImmutableArray<int>();      // error: ...
 var z = Extensions.AsImmutableArray([3]); // ok
-```
-
-## Open questions
-
-- What changes are required for conditional operator?
-
-- What changes are required for dictionary types?
-
-    ```c#
-    var d = ["Alice": 42, "Bob": 43].AsDictionary(comparer);
-
-    static Dictionary<TKey, TValue> AsDictionary<TKey, TValue>(
-        this List<KeyValuePair<TKey, TValue>> list,
-        IEqualityComparer<TKey> comparer = null) { ... }
-    ```
-
-## Interaction with natural type
-
-The *natural type* should not prevent conversions to other collection types in *best common type* or *type inference* scenarios.
-```c#
-var x = new[] { new int[0], [1, 2, 3] }; // ok: int[][]
-var y = First(new int[0], [1, 2, 3]);    // ok: int[]
-
-static T First<T>(T x, T y) => x;
-```
-
-To allow conversions to other collection types, type inference may need to infer exact, lower-bound, and upper-bound inferences from the **expression `U`** (rather than the type of `U`) to a type `V` when an expression is given, and *fixing* §11.6.3.12 updates the sets of *candidate types* based on implicit conversion from the **expression** bound to the each *candidate type*.
-
-_Should nested cases infer collection types successfully?_
-```c#
-var x = new[] { [ulong.MaxValue], [1, 2, 3] };  // ok: List<ulong>[]
-var y = First([[ulong.MaxValue]], [[1, 2, 3]]); // ok: List<List<ulong>>
 ```
 
 ## Overload resolution
@@ -497,15 +376,6 @@ T[] __array = [...]; // using existing rules
 Span<T> __result = __array;
 ```
 
-## Collection initializers
-[collection-initializers]: #collection-initializers
-
-_Include text from [*collection initializers*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117154-collection-initializers)_.
-
-Non-dictionary construction uses `Add()` instance methods or extension methods.
-
-Dictionary construction uses indexer instance properties rather than `Add()` methods to ensure consistent _overwrite semantics_ rather than _add semantics_.
-
 ## Collection literal translation
 [collection-literal-translation]: #collection-literal-translation
 
@@ -535,13 +405,6 @@ If they all have such a property, the literal is considered to have a *known len
 
 Given a target type `T` for a literal:
 
-* If `T` is some interface `I<TKey, TValue>` where that interface is implemented by `Dictionary<TKey, TValue>`, then the literal is translated as:
-
-    ```c#
-    Dictionary<TKey, TValue> __temp = [...]; /* standard translation */
-    I<TKey, TValue> __result = __temp;
-    ```
-
 * If `T` is some interface `I<T1>` where that interface is implemented by `List<T1>`, then the literal is translated as:
 
     ```c#
@@ -549,9 +412,9 @@ Given a target type `T` for a literal:
     I<T1> __result = __temp;
     ```
 
-In other words, the translation works by using the specified rules with the concrete `List<T>` or `Dictionary<TKey, TValue>` types as the target type.  That translated value is then implicitly converted to the resultant interface type.
+In other words, the translation works by using the specified rules with the concrete `List<T>` type as the target type.  That translated value is then implicitly converted to the resultant interface type.
 
-The compiler is free to not use the specific `List<T>` or `Dictionary<TKey, TValue>` types if it chooses not to.  Specifically:
+The compiler is free to not use the specific `List<T>`.  Specifically:
 1. it may choose to use entirely different types altogether (including types not referenceable by the user).
 2. it is only required to expose a type that supports the specific members of the `I` interface.
 
@@ -564,11 +427,10 @@ Having a *known length* allows for efficient construction of a result with the p
 
 Not having a *known length* does not prevent any result from being created. However, it may result in extra CPU and memory costs producing the data, then moving to the final destination.
 
-* For a *known length* literal `[e1, k1: v1, ..s1, etc]`, the translation first starts with the following:
+* For a *known length* literal `[e1, ..s1, etc]`, the translation first starts with the following:
 
     ```c#
     int __len = count_of_expression_elements +
-                count_of_dictionary_elements +
                 __s1.Count;
                 ...
                 __s_n.Count;
@@ -583,14 +445,11 @@ Not having a *known length* does not prevent any result from being created. Howe
         int __index = 0;
 
         __result[__index++] = __e1;
-        __result[__index++] = new T1(__k1, __v1);
         foreach (T1 __t in __s1)
             __result[__index++] = __t;
 
         // further assignments of the remaining elements
         ```
-
-        In this translation, `dictionary_element` is only supported if `T1` is some `KeyValuePair<,>`.
 
     *  If `T` is some `Span<T1>`, then the literal is translated as the same as above, except that the `__result` initialization is translated as:
 
@@ -624,7 +483,6 @@ Not having a *known length* does not prevent any result from being created. Howe
             T __result = new T(capacity: __len);
 
             __result.Add(__e1);
-            __result.Add(new T1(__k1, __v1));
             foreach (var __t in __s1)
                 __result.Add(__t);
 
@@ -641,7 +499,6 @@ Not having a *known length* does not prevent any result from being created. Howe
             T __result = new T();
 
             __result.Add(__e1);
-            __result.Add(new T1(__k1, __v1));
             foreach (var __t in __s1)
                 __result.Add(__t);
 
@@ -649,23 +506,6 @@ Not having a *known length* does not prevent any result from being created. Howe
             ```
 
             This allows creating the target type, albeit with no capacity optimization to prevent internal reallocation of storage.
-
-        * In this translation, `dictionary_element` is only supported if `T1` is known and is some `KeyValuePair<,>`.
-
-    * If `T` is a dictionary collection initializer with key `K1` and value `V1`, the literal is translated as:
-
-        ```c#
-        T __result = new T(capacity: __len);
-
-        __result[__e1.Key] = __e1.Value;
-        __result[__k1] = __v1;
-        foreach (var __t in __s1)
-            __result[__t.Key] = __t.Value;
-
-        // further additions of the remaining elements
-        ```
-
-        * In this translation, `expression_element` is only supported if the element type is some `KeyValuePair<,>` or `dynamic`, and `spread_element` is only supported if the enumerated element type is some `KeyValuePair<,>` or `dynamic`.
 
 ### Unknown length translation
 [unknown-length-translation]: #unknown-length-translation
@@ -678,7 +518,6 @@ Not having a *known length* does not prevent any result from being created. Howe
         T __result = new T();
 
         __result.Add(__e1);
-        __result.Add(new T1(__k1, __v1));
         foreach (var __t in __s1)
             __result.Add(__t);
 
@@ -698,11 +537,10 @@ Not having a *known length* does not prevent any result from being created. Howe
 
         ```c#
         T1[] __result = <private_details>.CreateArray<T1>(
-            count_of_expression_elements + count_of_dictionary_elements);
+            count_of_expression_elements);
         int __index = 0;
 
         <private_details>.Add(ref __result, __index++, __e1);
-        <private_details>.Add(ref __result, __index++, new T1(__k1, __v1));
         foreach (var __t in __s1)
             <private_details>.Add(ref __result, __index++, __t);
 
@@ -715,79 +553,6 @@ Not having a *known length* does not prevent any result from being created. Howe
 
         The counts passed to `CreateArray` are used to provide a starting size hint to prevent wasteful resizes.
 
-## Natural element type
-[natural-element-type]: #natural-element-type
-
-Computing the *natural element type* starts with three sets of types and expressions called *dictionary key set*, *dictionary value set*, and *remainder set*.
-
-The *dictionary key/value sets* will either both be empty or both be non-empty.
-
-Each element of the literal is examined in the following fashion:
-
-* An element `e_n` has its *type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to *dictionary key set* and `TValue` is added to *dictionary value set*.  Otherwise, the `e_n` *expression* is added to *remainder set*.
-
-* An element `..s_n` has its *iteration type* determined.  If that type is some `KeyValuePair<TKey, TValue>`, then `TKey` is added to *dictionary key set* and `TValue` is added to *dictionary value set*. Otherwise, the *iteration type* is added to *remainder set*.
-
-* An element `k_n: v_n` adds the `k_n` and `v_n` *expressions* to *dictionary key set* and *dictionary value set* respectively.
-
-* If the *dictionary key/value sets* are empty, then there were definitely no `k_n: v_n` elements. In that case, the *fallback case* runs below.
-
-* If *dictionary key/value sets* are non-empty, then a first round of the *best common type* algorithm in performed on those sets to determine `BCT_Key` and `BCT_Value` respectively.
-
-    * If the first round fails for either set, the *fallback case* runs below.
-
-    * If the first round succeeds for both sets, there is a `KeyValuePair<BCT_Key, BCT_Value>` type produced.  This type is added to *remainder set*.  A second round of the *best common type* algorithm is performed on *remainder set* set to determine `BCT_Final`.
-
-        * If the second round fails, the *fallback* case runs below.
-        * Otherwise `BCT_Final` is the *natural element type* and the algorithm ends.
-
-* The *fallback case*:
-
-    * All `e_n` *expressions* are added to *remainder set*
-    * All `..s_n` *iteration types* are added to *remainder set*
-    * The *natural element type* is the *best common type* of the *remainder set* and the algorithm ends.
-
----
-
-* Given:
-
-    ```c#
-    Dictionary<string, object> d1 = ...;
-    Dictionary<object, string> d2 = ...;
-    var d3 = [..d1, ..d2];
-    ```
-
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `..d1` will have a *iteration type* of `KeyValuePair<string, object>` and `..d2` will have a *iteration type* of `KeyValuePair<object, string>`. These will contribute `{string, object}` to the determination of the `TKey` type and `{object, string}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
-
-* Given:
-
-    ```c#
-    var d = [null: null, "a": "b"];
-    ```
-
-    The *natural type* of `d` is `Dictionary<string, string>`.  This is because the `k_n: v_n` elements will construct the set `{null, "a"}` for the determination of the `TKey` type and `{null, "b"}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `string`.
-
-* Given:
-
-    ```c#
-    string s1, s2;
-    object o1, o2;
-    var d = [s1: o1, o2: s2];
-    ```
-
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `k_n: v_n` elements will construct the set `{s1, o1}` for the determination of the `TKey` type and `{o2, s2}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
-
-* Given:
-
-    ```c#
-    string s1, s2;
-    object o1, o2;
-    var d = [KeyValuePair.Create(s1, o1), KeyValuePair.Create(o2, s2)];
-    ```
-
-    The *natural type* of `d3` is `Dictionary<object, object>`.  This is because the `e_n` elements are `KeyValuePair<string, object>` and `KeyValuePair<object, string>` respectively.  These will construct the set `{string, object}`for the determination of the `TKey` type and `{object, string}` to the determination of the `TValue` type.  In both cases, the *best common type* of each of these sets is `object`.
-
-
 ## Unsupported scenarios
 [unsupported-scenarios]: #unsupported-scenarios
 
@@ -795,7 +560,7 @@ While collection literals can be used for many scenarios, there are a few that t
 
 * Multi-dimensional arrays (e.g. `new int[5, 10] { ... }`). There is no facility to include the dimensions, and all collection literals are either linear or map structures only.
 
-* Collections which pass special values to their constructors.  For example `new Dictionary<string, object>(CaseInsensitiveComparer.Instance)`.  There is no facility to access the constructor being used in either target or natural-typing scenarios.
+* Collections which pass special values to their constructors. There is no facility to access the constructor being used.
 
 * Nested collection initializers, e.g. `new Widget { Children = { w1, w2, w3 } }`.  This form needs to stay since it has very different semantics from `Children = [w1, w2, w3]`.  The former calls `.Add` repeatedly on `.Children` while the latter would assign a new collection over `.Children`.  We could consider having the latter form fall back to adding to an existing collection if `.Children` can't be assigned, but that seems like it could be extremely confusing.
 
@@ -814,14 +579,6 @@ While collection literals can be used for many scenarios, there are a few that t
 
         * Require users to parenthesize `(..e)` or include a start index `0..e` if they want a range.
         * Choose a different syntax (like `...`) for spread.  This would be unfortunate for the lack of consistency with slice patterns.
-
-    * `dictionary_element` can be ambiguous with a [`conditional_expression`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator).  For example:
-
-        ```c#
-        var v = [ a ? [b] : c ];
-        ```
-
-        This could be interpreted as `expression_element` where the `expression` is a `conditional_expression` (e.g. `[ (a ? [b] : c) ]`).  Or it could be interpreted as a `dictionary_element` `"k: v"` where `a?[b]` is `k`, and `c` is `v`.
 
 * There are two cases where there isn't a true ambiguity but where the syntax greatly increases parsing complexity.  While not a problem given engineering time, this does still increase cognitive overhead for users when looking at code.
 
@@ -921,65 +678,6 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
     </details>
 
-* Should a `collection_literal_expression` have a *natural type*?  In other words, should it be legal to write the following:
-
-    ```c#
-    var x = [1, 2, 3];
-    ```
-
-    Resolution: Yes, the *natural type* will be an appropriate instantiation of `List<T>`. The following text exists to record the original discussion of this topic.
-
-    <details>
-
-    It is virtually certain that users will want to do this.  However, there is much less certainty both on what users would want this mean and if there is even any sort of broad majority on some default.  There are numerous types we could pick, all of which have varying pros and cons.  Specifically, our options are *at least* any of the following:
-
-    * Array types
-    * Span types
-    * `ImmutableArray<T>`
-    * `List<T>`
-    * [`ValueArray<T, N>`](https://github.com/dotnet/roslyn/pull/57286)
-
-    Each of those options has varying benefits with respect to the following questions:
-
-    * Will the literal cause a heap allocation (and, if so, how many), or can it live on the stack?
-    * Are the values of the literal mutable after creation or are they fixed?
-    * Is the resultant value itself mutable (e.g. can it be cleared, or can new elements be added to it)?
-    * Can the value be used in all contexts (for example, async/non-async)?
-    * Can be used for *all* literal forms (for example, a `spread_element` of an *unknown length*)?
-
-    Note: for whatever type we pick as a *natural type*, the user can always target-type to the type they want with a simple cast, though that won't be pleasant.
-
-    With all of that, we have a matrix like so:
-
-    | type | heap allocs | mutable elements | mutable collection | async | all literal forms |
-    |-|-|-|-|-|-|
-    | `T[]` | 1 | Yes | No | Yes | No* |
-    | `Span<T>` | 0 | Yes | No | No | No* |
-    | `ReadOnlySpan<T>` | 0 | No | No | No | No* |
-    | `List<T>` | 2 | Yes | Yes | Yes | Yes |
-    | `ImmutableArray<T>` | 1 | No | No | Yes | No* |
-    | `ValueArray<T, N>` | ? | ? | ? | ? | ? |
-
-    \* `T[]`, `Span<T>` and `ImmutableArray<T>` might potentially work for 'all literal forms' if we extend this spec greatly with some sort of builder mechanism that allows us to tell it about all the pieces, with a final `T[]` or `Span<T>` obtained from the builder which can also then be passed to the `Construct` method used by *known length* translation in order to support `ImmutableArray<T>` and any other collection.
-
-    Only `List<T>` gives us a `Yes` for all columns. However, getting `Yes` for everything is not necessarily what we desire.  For example, if we believe the future is one where immutable is the most desirable, the types like `T[]`, `Span<T>`, or `List<T>` may not complement that well.  Similarly if we believe that people will want to use these without paying for allocations, then `Span<T>` and `ReadOnlySpan<T>` seem the most viable.
-
-    However, the likely crux of this is the following:
-
-    * Mutation is part and parcel of .NET
-    * `List<T>` is already heavily the lingua franca of lists.
-    * `List<T>` is a viable final form for any potential list literal (including those with spreads of *unknown length*)
-    * Span types and ValueArray are too esoteric, and the inability to use ref structs within async-contexts is likely a deal breaker for broad acceptance.
-
-    As such, while it unfortunate that it has two allocations, `List<T>` seems be the most broadly applicable. This is likely what we would want from the *natural type*.
-
-    I believe the only other reasonable alternative would be `ImmutableArray<T>`, but either with the caveat that that it cannot support `spread_elements` of *unknown length*, or that we will have to add a fair amount of complexity to this specification to allow for some API pattern to allow it to participate.  That said, we should strongly consider adding that complexity if we believe this will be the recommended collection type that we and the BCL will be encouraging people to use.
-
-    Finally, we could consider having different *natural types* in different contexts (like in an async context, pick a type that isn't a ref struct), but that seems rather confusing and distasteful.
-
-    </details>
-
-
 * Can a `collection_literal_expression` be target-typed to an `IEnumerable<T>` or other collection interfaces?
 
     For example:
@@ -994,75 +692,9 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
     <details>
 
-    If `collection_literal_expression` is not target-typed to an `IEnumerable<T>`, then its *natural type* of `List<T>` allows it to be assigned to a compatible `IEnumerable<T>`. This would disallow `IEnumerable<long> x = [1, 2, 3];` since `List<int>` is not assignable to `IEnumerable<long>`. This feels like it will come up. For example:
-
-    ```c#
-    void DoWork(IEnumerable<long> values) { ... }
-    // ...
-    DoWork([1, 2, 3]);
-    ```
-
-    Considering the case of the element types matching (both being `int`):
-
-    ```c#
-    void DoWork(IEnumerable<int> values) { ... }
-    // ...
-    DoWork([1, 2, 3]);
-    ```
-
     The open question here is determining what underlying type to actually create.  One option is to look at the proposal for [`params IEnumerable<T>`](https://github.com/dotnet/csharplang/issues/179).  There, we would generate an array to pass the values along, similar to what happens with `params T[]`.
 
-    A downside to using an array would be if a *natural type* is added for collection literals and that *natural type* is not `T[]`. There would be a potentially surprising difference when refactoring between `var x = [1, 2, 3];` and `IEnumerable<int> x = [1, 2, 3];`.
-
     </details>
-
-
-* How would we proceed on this in the future to get dictionary literals?
-
-    Resolution: The form `[k: v]` is supported for dictionary literals.  Dictionary literals also support spreading (e.g. `[k: v, ..d]`) The following text exists to record the original discussion of this topic.
-
-    <details>
-
-    This is a complex space as we have multiple forms for dictionaries today.  For example:
-
-    ```c#
-    var x = new Dictionary<int, string>
-    {
-        { 1, "x" },
-        { 2, "y" },
-    };
-    ```
-
-    And
-
-    ```c#
-    var x = new Dictionary<int, string>
-    {
-        [1] = "x",
-        [2] = "y",
-    }
-    ```
-
-    Immutable dictionaries in particular motivate doing something in this space, with the syntax that makes generic type inference possible looking like this:
-
-    ```cs
-    M(ImmutableDictionary.CreateRange(new[]
-    {
-        KeyValuePair.Create(1, "x"),
-        KeyValuePair.Create(2, "y"),
-    }));
-    ```
-
-    Would we want a syntax that draws parallels with object or collection initializers?  Or would we want something similar to these collection literals?  Options include (but are not limited to):
-
-    - `Dictionary<int, string> x = { { 1, "x" }, { 2, "y" } };`
-    - `Dictionary<int, string> x = { [1] = "x", [2] = "y" };`
-    - `Dictionary<int, string> x = [ { 1, "x" }, { 2, "y" } ];`
-    - `Dictionary<int, string> x = [1:"x", 2:"y"];`
-    - etc.
-
-    </details>
-
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
@@ -1135,26 +767,6 @@ https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collectio
     * Always stackalloc.  Teach people to be careful with Span.  This allows things like `Span<T> span = [1, 2, ..s]` to work, and be fine as long as `s` is small.  If this could blow the stack, users could always create an array instead, and then get a span around this.  This seems like the most in line with what people might want, but with extreme danger.
 
     * Only stackalloc when the literal has a *fixed* number of elements (i.e. no spread elements).  This then likely makes things always safe, with fixed stack usage, and the compiler (hopefully) able to reuse that fixed buffer.  However, it means things like `[1, 2, ..s]` would never be possible, even if the user knows it is completely safe at runtime.
-
-* Creating an `ImmutableDictionary<,>` is not efficient with any of the translations exposed today.  The only translation that can create them would be:
-
-    ```c#
-    KeyValuePair<,>[] __temp = ...; // initialized with all values
-    ImmutableDictionary<,> __result = new ImmutableDictionary<,>();
-    __result.Construct(__temp);
-    ```
-
-    This has the benefit of giving the dictionary all values at once.  But it has the downside of allocating a buffer to just be thrown away.  Is it more desirable to define something like an `init void Add(T value)` method so that the above could be:
-
-    ```c#
-    KeyValuePair<,>[] __temp = ...; // initialized with all values
-    ImmutableDictionary<,> __result = new ImmutableDictionary<,>();
-    __result.Add(__e1);
-    foreach (var __t in __s1)
-        __result.Add(__t);
-
-    // and so on.
-    ```
 
 * How does overload resolution work?  If an API has:
 
