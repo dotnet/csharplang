@@ -166,4 +166,15 @@ and they target that type with a collection-expression, we will choose a type on
 
     We would likely not do this for collections stored into a location (like into a field).  In that case, it seems more likely that the value might be enumerated many times.  So this would really only be beneficial for the collection-expressions passed to r-values.
 
+1. Optimize patterns found in arguments to produce collections that do not actually need storage for those values.  For example:
 
+    ```c#
+    IEnumerable<int> values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    // Can be emitted as:
+    IEnumerable<int> values = Enumerable.Range(1, 10);
+
+    // Or with a specialized compiler synthesized impl that does the same.
+    ```
+
+    Similar types of optimizations may be possible depending on how deep we want to go with analysis of the argument values.
