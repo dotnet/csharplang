@@ -26,22 +26,26 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - More collection expression details (Cyrus)
 - [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
 
-## Wed Aug 9, 2023
-
--  [Change to lambda binding](https://github.com/dotnet/roslyn/issues/69093)
--  [Collection expressions target typing to core interfaces](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/Core-interface-target-type-proposal.md)
-
-## Mon Aug 7, 2023
-
-- More [method group natural type questions](https://github.com/dotnet/roslyn/issues/69222) (Julien)
-- Brief collection-expression question and update (CyrusNajmabadi): https://github.com/dotnet/csharplang/issues/7396
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Wed Aug 9, 2023
+
+[C# Language Design Meeting for August 9th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-08-09.md)
+
+- Lambdas with explicit return types
+- Target typing of collection expressions to core interfaces
+- Loosening requirements for collection builder methods
+
+## Mon Aug 7, 2023
+
+[C# Language Design Meeting for August 7th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-08-07.md)
+
+- Improvements to method group natural types
 
 ## Mon Jul 31, 2023
 
