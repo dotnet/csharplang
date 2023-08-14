@@ -40,6 +40,8 @@ A `switch` expression that returns a `ref` value needs an extra `ref` in front o
 
 `throw` expressions can still be used normally, and pose no effect on the return type of the `switch` expression.
 
+The default case arm can be omitted, and will throw, behaving in the same manner as switch expressions that do not return a `ref` value.
+
 Once a single switch arm returns a `ref` expression, all other switch arms must return `ref` expressions, unless they are `throw` expressions. Not providing a `ref` expression in a switch arm causes a compiler error.
 
 For all `ref` expressions, the type of the expression must be exactly the same. No conversions are applicable in this context. For example:
