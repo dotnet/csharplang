@@ -42,6 +42,23 @@ A `switch` expression that returns a `ref` value needs an extra `ref` in front o
 
 Once a single switch arm returns a `ref` expression, all other switch arms must return `ref` expressions, unless they are `throw` expressions. Not providing a `ref` expression in a switch arm causes a compiler error.
 
+For all `ref` expressions, the type of the expression must be exactly the same. No conversions are applicable in this context. For example:
+
+```csharp
+private void InvalidConversion(Axis axis)
+{
+    int x = 0;
+    long y = 0;
+    ref int dimension = ref axis switch
+    {
+        Axis.X => ref x,
+        Axis.Y => ref y, // Error: The expression must be of type 'int' to match the common ref type
+    };
+}
+```
+
+In the above example, `int` could be resolved as the best common type due to ordering of the arms, but there is no restriction as to how to resolve the best common type in case of a tie for `ref` switch expressions. Either of the two types above could be considered the best common type, and the mismatching expression would bear the error.
+
 Since all ref expressions are LValues, and the switch arms are all ref expressions or `throw` expressions, the entire result of the switch expression is also an LValue. Therefore, the entire switch expression can be passed by reference, assigned to, and returned by reference. Note that for directly assigning to the switch expression's ref result, the `ref` keyword must not be used, like normal ref locals are assigned. For example:
 
 ```csharp
@@ -56,7 +73,7 @@ private ref int GetDirectionField(Direction direction) => ref direction switch
 };
 
 // Assigning to a ref local
-private void RefSwitchAssignLocal()
+private void RefSwitchAssignLocal(Axis axis)
 {
     ref int dimension = ref axis switch
     {
@@ -66,7 +83,7 @@ private void RefSwitchAssignLocal()
 }
 
 // Assigning to the ref of the switch expression
-private void RefSwitchAssignDirectly(int value)
+private void RefSwitchAssignDirectly(Axis axis, int value)
 {
     axis switch
     {
@@ -84,7 +101,27 @@ private void RefSwitchAssignDirectly(int value)
 }
 ```
 
-Note that, a switch arm can only return a `ref` to a read-only reference if the switch expression is assigned to a `ref readonly` symbol. Consider the example:
+Compound assignments with the result of a `ref`-returning `switch` expression on the LHS are permitted, for example:
+```csharp
+private void RefSwitchCompoundAssignment(Axis axis, int value)
+{
+    axis switch
+    {
+        Axis.X => ref X,
+        Axis.Y => ref Y,
+    } += value;
+
+    // Equivalent to:
+    ref int dimension = ref axis switch
+    {
+        Axis.X => ref X,
+        Axis.Y => ref Y,
+    };
+    dimension += value;
+}
+```
+
+Note that, a switch arm can only return a `ref` to a read-only reference if the switch expression is assigned to a `ref readonly` expression. Consider the example:
 ```csharp
 void M(Axis axis, ref int x, in int y)
 {
