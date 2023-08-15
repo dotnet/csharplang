@@ -116,28 +116,22 @@ The following implicit *collection expression conversions* exist from a collecti
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-* To an *[inline array type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md)* with *element type* `T` where:
+* To a *struct* or *class type* that implements `System.Collections.IEnumerable` where:
 
-  * For each *element* `Ei` there is an *implicit conversion* to `T`.
-
-* To a *type* that implements `System.Collections.IEnumerable` where:
-
-  * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
+  * The *type* contains an applicable instance constructor that can be invoked with no arguments.
   * For each *expression element* `Ei` there is an applicable instance or extension method `Add` for a single argument `Ei`.
   * For each *spread element* `Si` there is an applicable instance or extension method `Add` for a single argument of the *iteration type* of `Si`.
-
-  *Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?*
 
 * To an *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`, `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>` where:
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-In the cases above, a collection literal *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
+In the cases above, a collection expression *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
 
 * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
 * `Ei` is a *spread element* `Si` and there is an implicit conversion from the *iteration type* of `Si` to `T`.
 
-Types for which there is an implicit collection expression conversion from a collection literal are the valid *target types* for that collection literal.
+Types for which there is an implicit collection expression conversion from a collection expression are the valid *target types* for that collection expression.
 
 The following additional implicit conversions exist from a *collection expression*:
 
@@ -219,7 +213,36 @@ ImmutableArray<int> ia =
 ## Construction
 [construction]: #construction
 
-*Give specific ordering for determining how to construct the constructible collection types.*
+A collection expression has a *known length* if the compile-time type of each *spread element* in the collection expression is [*countable*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types).
+
+*Does *countable* include explicit implementations of `ICollection<T>.Count` and `ICollection.Count`? We should check for those interfaces as well.*
+
+If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *[create method](#create-methods)*, the construction of the collection instance as follows:
+
+* If the collection expression does not contain *spread elements*, and the collection type contains an applicable constructor with a single `int capacity` parameter, the compiler *may* invoke that constructor with a non-zero capacity value. Otherwise, the constructor that is applicable with no arguments is invoked.
+
+* For each element in order:
+  * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument. (Interleaving `Add` calls matches classic [*collection initializer behavior*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#117154-collection-initializers).)
+  * If the element is a *spread element* then:
+    * If the target type has an `AddRange` instance or extension method that is applicable when invoked with the spread element *expression*, the `AddRange` method *may be* invoked with expression as the argument.
+    * Otherwise the spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and the applicable `Add` instance or extension method is invoked for each item from the enumerator in order.
+
+If the target type is an *array*, a *span*, a type with a *[create method](#create-methods)*, or an *interface*, the construction of the collection instance is as follows:
+
+* The elements expressions are evaluated in order, exactly once each. Any further references to the element expressions refer to the results of this initial evaluation. All element expressions are evaluated before any references to the evaluated expressions.
+
+* If the target type is an *array*, a *span*, or a type with a *create method*, and the collection expression has a *known length*, the compiler will allocate the underlying storage directly using the 
+
+* If the target type is an *array*, a *span*, or a type with a *create method*, and the collection expression has a *known length*, the compiler will allocate the underlying storage directly with the expected length. If the collection length is not known, an intermediate buffer *may be* used to construct the collection before copying to the target collection instance.
+
+* *The compiler *may* attempt to determine the length *at runtime* for otherwise unknown length spread elements using the countable properties or using alternatives when the behavior difference is not observable &mdash; for well-known collection types in particular.*
+
+* For each element in order:
+  * If the element is an *expression element*, the evaluated expression is assigned to the collection.
+  * If the element is a *spread element* then:
+    * If the spread element *expression* type implements `IEnumerable<T>`, the interface implementation *may be* used to iterate the items, with each item added to the collection in order.
+    * Otherwise the spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and each item from the enumerator is assigned to the collection in order.
+    * *The compiler *may* use alternatives for copying items from the spread element *expression* when the behavior difference is not observable &mdash; when copying between well-known collection types in particular.*
 
 ## Empty collection literal
 
@@ -427,20 +450,6 @@ Span<T> __result = __array;
 
 ## Collection literal translation
 [collection-literal-translation]: #collection-literal-translation
-
-* The types of each `spread_element` expression are examined to see if they contain an accessible instance `int Length { get; }` or `int Count { get; }` property in the same fashion as [list patterns](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/list-patterns.md).  
-If they all have such a property, the literal is considered to have a *known length*.
-
-  * In examples below, references to `.Count` refer to this computed length, however it was obtained.
-  * A literal without any `spread_element` expressions has *known length*.
-  * If at least one `spread_element` cannot have its count of elements determined, then the literal is considered to have an *unknown length*.
-  * Each `spread_element` can have a different type and a different `Length` or `Count` property than the other elements.
-  * Having a *known length* does not affect what collections can be created.  It only affects how efficiently the construction can happen. For example, a *known length* literal is statically guaranteed to efficiently create an array or span at runtime.  Specifically, allocating the precise storage needed, and placing all values in the right location once.
-
-* A literal without a *known length* does not have a guarantee around efficient construction.  However, such a literal may still be efficient at runtime.  For example, the compiler is free to use helpers like [`TryGetNonEnumeratedCount(IEnumerable<T>, out int count)`](https://learn.microsoft.com/dotnet/api/system.linq.enumerable.trygetnonenumeratedcount) to determine *at runtime* the capacity needed for the constructed collection.  As above, in examples below, references to `.Count` refer to this computed length, however it was obtained.
-* All elements expressions are evaluated left to right (similar to [array_creation_expression](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#array-creation-expressions)).  These expressions are only evaluated once and any further references to them will refer to the result of that evaluation.
-* Evaluation of the element expressions happens entirely first.  Only after all those evaluations happen are calls to `Count` (or `Length` or `TryGetNonEnumeratedCount`) and all enumerations made.
-* All methods/properties utilized in a translation (for example `Add`, `this[...]`, `Length`, `Count`, etc.) do not have to be the same.  For example, `SomeCollection<X> x = [a, b];` may invoke different `SomeCollection.Add` methods for each element in the collection literal.
 
 ### Interface translation
 [interface-translation]: #interface-translation
