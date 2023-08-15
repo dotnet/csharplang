@@ -20,11 +20,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Even more collection expression details (Cyrus)
 - [Experimental] attribute (Julien)
+- [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
 
 ## Mon Aug 14, 2023
 
 - More collection expression [details](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-LDM-2023-08-14.md) (Chuck/Cyrus)
-- [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
 
 ## Wed Mar 15, 2023
 
