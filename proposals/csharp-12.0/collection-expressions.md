@@ -1,14 +1,17 @@
 # Collection expressions
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 
 Collection expressions introduce a new terse syntax, `[e1, e2, e3, etc]`, to create common collection values.  Inlining other collections into these values is possible using a spread operator `..` like so: `[e1, ..c2, e2, ..c2]`.
 
 Several collection-like types can be created without requiring external BCL support.  These types are:
+
 * [Array types](https://github.com/dotnet/csharplang/blob/main/spec/types.md#array-types), such as `int[]`.
-* [`Span<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) and [`ReadOnlySpan<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1).
-* Types that support [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), such as [`List<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1).
+* [`Span<T>`](https://learn.microsoft.com/dotnet/api/system.span-1) and [`ReadOnlySpan<T>`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1).
+* Types that support [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), such as [`List<T>`](https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1).
 
 Further support is present for collection-like types not covered under the above through a new attribute and API pattern that can be adopted directly on the type itself.
 
@@ -17,13 +20,10 @@ Further support is present for collection-like types not covered under the above
 
 * Collection-like values are hugely present in programming, algorithms, and especially in the C#/.NET ecosystem.  Nearly all programs will utilize these values to store data and send or receive data from other components. Currently, almost all C# programs must use many different and unfortunately verbose approaches to create instances of such values. Some approaches also have performance drawbacks. Here are some common examples:
 
-    - Arrays, which require either `new Type[]` or `new[]` before the `{ ... }` values.
-
-    - Spans, which may use `stackalloc` and other cumbersome constructs.
-
-    - Collection initializers, which require syntax like `new List<T>` (lacking inference of a possibly verbose `T`) prior to their values, and which can cause multiple reallocations of memory because they use N `.Add` invocations without supplying an initial capacity.
-
-    - Immutable collections, which require syntax like `ImmutableArray.Create(...)` to initialize the values, and which can cause intermediary allocations and data copying. More efficient construction forms (like `ImmutableArray.CreateBuilder`) are unwieldy and still produce unavoidable garbage.
+  * Arrays, which require either `new Type[]` or `new[]` before the `{ ... }` values.
+  * Spans, which may use `stackalloc` and other cumbersome constructs.
+  * Collection initializers, which require syntax like `new List<T>` (lacking inference of a possibly verbose `T`) prior to their values, and which can cause multiple reallocations of memory because they use N `.Add` invocations without supplying an initial capacity.
+  * Immutable collections, which require syntax like `ImmutableArray.Create(...)` to initialize the values, and which can cause intermediary allocations and data copying. More efficient construction forms (like `ImmutableArray.CreateBuilder`) are unwieldy and still produce unavoidable garbage.
 
 * Looking at the surrounding ecosystem, we also find examples everywhere of list creation being more convenient and pleasant to use.  TypeScript, Dart, Swift, Elm, Python, and more opt for a succinct syntax for this purpose, with widespread usage, and to great effect. Cursory investigations have revealed no substantive problems arising in those ecosystems with having these literals built in.
 
@@ -75,30 +75,24 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 * `spread_element` instances will commonly be referred to as `..s1`, `..s_n`, etc.
 * *span type* means either `Span<T>` or `ReadOnlySpan<T>`.
 * Literals will commonly be shown as `[e1, ..s1, e2, ..s2, etc]` to convey any number of elements in any order.  Importantly, this form will be used to represent all cases such as:
-    - Empty literals `[]`
-    - Literals with no `expression_element` in them.
-    - Literals with no `spread_element` in them.
-    - Literals with arbitrary ordering of any element type.
+
+  * Empty literals `[]`
+  * Literals with no `expression_element` in them.
+  * Literals with no `spread_element` in them.
+  * Literals with arbitrary ordering of any element type.
 
 * The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
-
 * Variables starting with `__name` are used to represent the results of the evaluation of `name`, stored in a location so that it is only evaluated once.  For example `__e1` is the evaluation of `e1`.
-
 * `List<T>`, `IEnumerable<T>`, etc. refer to the respective types in the `System.Collections.Generic` namespace.
-
 * The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11173-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
-
 * An implementation is not required to translate literals exactly as specified below.  Any translation is legal if the same result is produced and there are no observable differences in the production of the result.
-
-    * For example, an implementation could translate literals like `[1, 2, 3]` directly to a `new int[] { 1, 2, 3 }` expression that itself bakes the raw data into the assembly, eliding the need for `__index` or a sequence of instructions to assign each value. Importantly, this does mean if any step of the translation might cause an exception at runtime that the program state is still left in the state indicated by the translation.
+  * For example, an implementation could translate literals like `[1, 2, 3]` directly to a `new int[] { 1, 2, 3 }` expression that itself bakes the raw data into the assembly, eliding the need for `__index` or a sequence of instructions to assign each value. Importantly, this does mean if any step of the translation might cause an exception at runtime that the program state is still left in the state indicated by the translation.
 
 * Collections are assumed to be well-behaved.  For example:
 
-    * It is assumed that the value of `Count` on a collection will produce that same value as the number of elements when enumerated.
-
-    * The types used in this spec defined in the `System.Collections.Generic` namespace are presumed to be side-effect free.  As such, the compiler can optimize scenarios where such types might be used as intermediary values, but otherwise not be exposed.
-
-    * The behavior of collection literals with collections that are not well-behaved is undefined.
+  * It is assumed that the value of `Count` on a collection will produce that same value as the number of elements when enumerated.
+  * The types used in this spec defined in the `System.Collections.Generic` namespace are presumed to be side-effect free.  As such, the compiler can optimize scenarios where such types might be used as intermediary values, but otherwise not be exposed.
+  * The behavior of collection literals with collections that are not well-behaved is undefined.
 
 ## Conversions
 [conversions]: #conversions
@@ -108,30 +102,37 @@ A *collection literal conversion* allows a collection literal expression to be c
 The following implicit *collection literal conversions* exist from a collection literal expression:
 
 * To a single dimensional *array type* `T[]` where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>` where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *type* with a *[create method](#create-methods)* with *parameter type* `System.ReadOnlySpan<T>` where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To an *[inline array type](https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md)* with *element type* `T` where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *type* that implements `System.Collections.IEnumerable` where:
+
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
   * For each *expression element* `Ei` there is an applicable instance or extension method `Add` for a single argument `Ei`.
   * For each *spread element* `Si` there is an applicable instance or extension method `Add` for a single argument of the *iteration type* of `Si`.
 
-  _Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?_
+  *Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?*
 
 * To an *interface type* `I<T0>` where `System.Collections.Generic.List<T>` implements `I<T>` and where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T0`.
 
 In the cases above, a collection literal *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
-  * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
-  * `Ei` is a *spread element* `Si` and there is an implicit conversion from the *iteration type* of `Si` to `T`.
+
+* `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
+* `Ei` is a *spread element* `Si` and there is an implicit conversion from the *iteration type* of `Si` to `T`.
 
 Types for which there is an implicit collection literal conversion from a collection literal are the valid *target types* for that collection literal.
 
@@ -162,12 +163,13 @@ The attribute is not inherited although the attribute can be applied to a base `
 The collection type must have an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
 
 For the *create method*:
-- The *builder type* must be a non-generic `class` or `struct`.
-- The method must be defined on the *builder type* directly.
-- The method must be `public` and `static`.
-- The *arity* of the method must match the *arity* of the collection type.
-- The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) between `E` and the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type*.
-- There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) between the method return type and the *collection type*.
+
+* The *builder type* must be a non-generic `class` or `struct`.
+* The method must be defined on the *builder type* directly.
+* The method must be `public` and `static`.
+* The *arity* of the method must match the *arity* of the collection type.
+* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) between `E` and the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type*.
+* There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) between the method return type and the *collection type*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invocable method with the expected signature.
 
@@ -178,6 +180,7 @@ For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub
 The span parameter for the *create method* can be explicitly marked `scoped` or `[UnscopedRef]`. If the parameter is implicitly or explicitly `scoped`, the compiler *may* allocate the storage for the span on the stack rather than the heap.
 
 For example, a possible *create method* for `ImmutableArray<T>`:
+
 ```csharp
 [CollectionBuilder(typeof(ImmutableArray), "Create")]
 public struct ImmutableArray<T> { ... }
@@ -189,6 +192,7 @@ public static class ImmutableArray
 ```
 
 With the *create method* above, `ImmutableArray<int> ia = [1, 2, 3];` could be emitted as:
+
 ```csharp
 [InlineArray(3)] struct __InlineArray3<T> { private T _element0; }
 
@@ -201,7 +205,8 @@ ImmutableArray<int> ia =
 ```
 
 ## Construction
-_Give specific ordering for determining how to construct the constructible collection types._
+
+*Give specific ordering for determining how to construct the constructible collection types.*
 
 ## Empty collection literal
 
@@ -276,31 +281,33 @@ The [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6
 The existing rules for the [*first phase*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11632-the-first-phase) are extracted to a new *input type inference* section, and a  rule is added to *input type inference* and *output type inference* for collection literal expressions.
 
 > 11.6.3.2 The first phase
-> 
+>
 > For each of the method arguments `Eᵢ`:
-> - An *input type inference* is made *from* `Eᵢ` *to* the corresponding *parameter type* `Tᵢ`.
-
+>
+> * An *input type inference* is made *from* `Eᵢ` *to* the corresponding *parameter type* `Tᵢ`.
+>
 > An *input type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> - If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *input type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
-> - *[existing rules from first phase]* ...
+> * If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *input type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
+> * *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
-> 
+>
 > An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
-> 
-> - If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *output type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
-> - *[existing rules from output type inferences]* ...
+>
+> * If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *output type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
+> * *[existing rules from output type inferences]* ...
 
 ## Extension methods
+
 No changes to [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11783-extension-method-invocations) rules. 
 
 > 11.7.8.3 Extension method invocations
 >
 > An extension method `Cᵢ.Mₑ` is *eligible* if:
-> 
-> - ...
-> - An implicit identity, reference, or boxing conversion exists from *expr* to the type of the first parameter of `Mₑ`.
+>
+> * ...
+> * An implicit identity, reference, or boxing conversion exists from *expr* to the type of the first parameter of `Mₑ`.
 
 A collection expression does not have a natural type so the existing conversions from *type* are not applicable. As a result, a collection expression cannot be used directly as the first parameter for an extension method invocation.
 
@@ -321,18 +328,20 @@ var z = Extensions.AsImmutableArray([3]); // ok
 [*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11644-better-conversion-from-expression) is updated to prefer certain target types in collection expression conversions.
 
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
-> 
-> - ...
-> - `C₁` and `C₂` are collection expression conversions and one of the following holds:
->   - `T₁` is a *span type* and `T₂` is not a *span type*
->   - `T₁` is not an *interface type* and `T₂` is an *interface type*
+>
+> * ...
+> * `C₁` and `C₂` are collection expression conversions and one of the following holds:
+>   * `T₁` is a *span type* and `T₂` is not a *span type*
+>   * `T₁` is not an *interface type* and `T₂` is an *interface type*
 
 The additional rule groups the collection target types from best to worst:
-- span types
-- arrays, inline arrays, and concrete types
-- interfaces
+
+* span types
+* arrays, inline arrays, and concrete types
+* interfaces
 
 Changing the grouping in the future is a potential breaking change. For example, with the grouping above, overload resolution will prefer the array overload because the second parameter type is more specific in that overload. But if the grouping is changed so concrete types are preferred over array types, the call is ambiguous.
+
 ```c#
 Concat([1, 2, 3], 4); // Concat(int[], int)
 
@@ -382,23 +391,16 @@ Span<T> __result = __array;
 * The types of each `spread_element` expression are examined to see if they contain an accessible instance `int Length { get; }` or `int Count { get; }` property in the same fashion as [list patterns](https://github.com/dotnet/csharplang/blob/main/proposals/list-patterns.md).  
 If they all have such a property, the literal is considered to have a *known length*.
 
-    * In examples below, references to `.Count` refer to this computed length, however it was obtained.
+  * In examples below, references to `.Count` refer to this computed length, however it was obtained.
+  * A literal without any `spread_element` expressions has *known length*.
+  * If at least one `spread_element` cannot have its count of elements determined, then the literal is considered to have an *unknown length*.
+  * Each `spread_element` can have a different type and a different `Length` or `Count` property than the other elements.
+  * Having a *known length* does not affect what collections can be created.  It only affects how efficiently the construction can happen. For example, a *known length* literal is statically guaranteed to efficiently create an array or span at runtime.  Specifically, allocating the precise storage needed, and placing all values in the right location once.
 
-    * A literal without any `spread_element` expressions has *known length*.
-
-    * If at least one `spread_element` cannot have its count of elements determined, then the literal is considered to have an *unknown length*.
-
-    * Each `spread_element` can have a different type and a different `Length` or `Count` property than the other elements.
-
-    * Having a *known length* does not affect what collections can be created.  It only affects how efficiently the construction can happen. For example, a *known length* literal is statically guaranteed to efficiently create an array or span at runtime.  Specifically, allocating the precise storage needed, and placing all values in the right location once.
-
-* A literal without a *known length* does not have a guarantee around efficient construction.  However, such a literal may still be efficient at runtime.  For example, the compiler is free to use helpers like [`TryGetNonEnumeratedCount(IEnumerable<T>, out int count)`](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.trygetnonenumeratedcount) to determine *at runtime* the capacity needed for the constructed collection.  As above, in examples below, references to `.Count` refer to this computed length, however it was obtained.
-
+* A literal without a *known length* does not have a guarantee around efficient construction.  However, such a literal may still be efficient at runtime.  For example, the compiler is free to use helpers like [`TryGetNonEnumeratedCount(IEnumerable<T>, out int count)`](https://learn.microsoft.com/dotnet/api/system.linq.enumerable.trygetnonenumeratedcount) to determine *at runtime* the capacity needed for the constructed collection.  As above, in examples below, references to `.Count` refer to this computed length, however it was obtained.
 * All elements expressions are evaluated left to right (similar to [array_creation_expression](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#array-creation-expressions)).  These expressions are only evaluated once and any further references to them will refer to the result of that evaluation.
-
 * Evaluation of the element expressions happens entirely first.  Only after all those evaluations happen are calls to `Count` (or `Length` or `TryGetNonEnumeratedCount`) and all enumerations made.
-
-*  All methods/properties utilized in a translation (for example `Add`, `this[...]`, `Length`, `Count`, etc.) do not have to be the same.  For example, `SomeCollection<X> x = [a, b];` may invoke different `SomeCollection.Add` methods for each element in the collection literal.
+* All methods/properties utilized in a translation (for example `Add`, `this[...]`, `Length`, `Count`, etc.) do not have to be the same.  For example, `SomeCollection<X> x = [a, b];` may invoke different `SomeCollection.Add` methods for each element in the collection literal.
 
 ### Interface translation
 [interface-translation]: #interface-translation
@@ -415,6 +417,7 @@ Given a target type `T` for a literal:
 In other words, the translation works by using the specified rules with the concrete `List<T>` type as the target type.  That translated value is then implicitly converted to the resultant interface type.
 
 The compiler is free to not use the specific `List<T>`.  Specifically:
+
 1. it may choose to use entirely different types altogether (including types not referenceable by the user).
 2. it is only required to expose a type that supports the specific members of the `I` interface.
 
@@ -429,90 +432,69 @@ Not having a *known length* does not prevent any result from being created. Howe
 
 * For a *known length* literal `[e1, ..s1, etc]`, the translation first starts with the following:
 
-    ```c#
-    int __len = count_of_expression_elements +
-                __s1.Count;
-                ...
-                __s_n.Count;
+  ```c#
+  int __len = count_of_expression_elements +
+              __s1.Count;
+              ...
+              __s_n.Count;
     ```
 
 * Given a target type `T` for that literal:
 
-    * If `T` is some `T1[]`, then the literal is translated as:
+  * If `T` is some `T1[]`, then the literal is translated as:
 
-        ```c#
-        T1[] __result = new T1[__len];
-        int __index = 0;
+    ```c#
+    T1[] __result = new T1[__len];
+    int __index = 0;
 
-        __result[__index++] = __e1;
-        foreach (T1 __t in __s1)
-            __result[__index++] = __t;
+    __result[__index++] = __e1;
+    foreach (T1 __t in __s1)
+        __result[__index++] = __t;
 
-        // further assignments of the remaining elements
-        ```
+    // further assignments of the remaining elements
+    ```
 
-    *  If `T` is some `Span<T1>`, then the literal is translated as the same as above, except that the `__result` initialization is translated as:
+  * If `T` is some `Span<T1>`, then the literal is translated as the same as above, except that the `__result` initialization is translated as:
 
-        ```c#
-        Span<T1> __result = new T1[__len];
+    ```c#
+    Span<T1> __result = new T1[__len];
 
-        // same assignments as the array translation
-        ```
+    // same assignments as the array translation
+    ```
 
-        The translation may use `stackalloc T1[]` rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
+    The translation may use `stackalloc T1[]` rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
 
-    * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](https://learn.microsoft.com/en-us/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
+  * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](https://learn.microsoft.com/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
 
     The above forms (for arrays and spans) are the base representations of the literal value and are used for the following translation rules.
 
     * If `T` supports [object creation](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#object-creation-expressions), then [member lookup](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#member-lookup) on `T` is performed to find an accessible `void Construct(T1 values)` method. If found, and if `T1` is a [*constructible*](#constructible-collection-types) collection type, then the literal is translated as:
 
-        ```c#
-        // Generate __storage using existing rules.
-        T1 __storage = [...];
-
-        T __result = new T();
-        __result.Construct(__storage);
-        ```
+      ```c#
+      // Generate __storage using existing rules.
+      T1 __storage = [...];
+      T __result = new T();
+      __result.Construct(__storage);
+      ```
 
     * If `T` supports [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), then:
 
-        * if the type `T` contains an accessible constructor with a single parameter `int capacity`, then the literal is translated as:
+      * if the type `T` contains an accessible constructor with a single parameter `int capacity`, then the literal is translated as:
 
-            ```c#
-            T __result = new T(capacity: __len);
+        ```c#
+        T __result = new T(capacity: __len);
+        __result.Add(__e1);
+        foreach (var __t in __s1)
+            __result.Add(__t);
 
-            __result.Add(__e1);
-            foreach (var __t in __s1)
-                __result.Add(__t);
+        // further additions of the remaining elements
+        ```
 
-            // further additions of the remaining elements
-            ```
+        Note: the name of the parameter is required to be `capacity`.
 
-            Note: the name of the parameter is required to be `capacity`.
+        This form allows for a literal to inform the newly constructed type of the count of elements to allow for efficient allocation of internal storage.  This avoids wasteful reallocations as the elements are added.
 
-            This form allows for a literal to inform the newly constructed type of the count of elements to allow for efficient allocation of internal storage.  This avoids wasteful reallocations as the elements are added.
-
-        * otherwise, the literal is translated as:
-
-            ```c#
-            T __result = new T();
-
-            __result.Add(__e1);
-            foreach (var __t in __s1)
-                __result.Add(__t);
-
-            // further additions of the remaining elements
-            ```
-
-            This allows creating the target type, albeit with no capacity optimization to prevent internal reallocation of storage.
-
-### Unknown length translation
-[unknown-length-translation]: #unknown-length-translation
-
-* Given a target type `T` for an *unknown length* literal:
-
-    * If `T` supports [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), then the literal is translated as:
+      * otherwise, the literal is translated as:
 
         ```c#
         T __result = new T();
@@ -524,34 +506,53 @@ Not having a *known length* does not prevent any result from being created. Howe
         // further additions of the remaining elements
         ```
 
-        This allows spreading of any iterable type, albeit with the least amount of optimization possible.
+        This allows creating the target type, albeit with no capacity optimization to prevent internal reallocation of storage.
 
-    * If `T` is some `T1[]`, then the literal has the same semantics as:
+### Unknown length translation
+[unknown-length-translation]: #unknown-length-translation
 
-        ```c#
-        List<T1> __list = [...]; /* initialized using predefined rules */
-        T1[] __result = __list.ToArray();
-        ```
+* Given a target type `T` for an *unknown length* literal:
 
-        The above is inefficient though; it creates the intermediary list, and then creates a copy of the final array from it.  Implementations are free to optimize this away, for example producing code like so:
+  * If `T` supports [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), then the literal is translated as:
 
-        ```c#
-        T1[] __result = <private_details>.CreateArray<T1>(
-            count_of_expression_elements);
-        int __index = 0;
+    ```c#
+    T __result = new T();
 
-        <private_details>.Add(ref __result, __index++, __e1);
-        foreach (var __t in __s1)
-            <private_details>.Add(ref __result, __index++, __t);
+    __result.Add(__e1);
+    foreach (var __t in __s1)
+        __result.Add(__t);
 
-        // further additions of the remaining elements
+    // further additions of the remaining elements
+    ```
 
-        <private_details>.Resize(ref __result, __index);
-        ```
+    This allows spreading of any iterable type, albeit with the least amount of optimization possible.
 
-        This allows for minimal waste and copying, without additional overhead that library collections might incur.
+  * If `T` is some `T1[]`, then the literal has the same semantics as:
 
-        The counts passed to `CreateArray` are used to provide a starting size hint to prevent wasteful resizes.
+    ```c#
+    List<T1> __list = [...]; /* initialized using predefined rules */
+    T1[] __result = __list.ToArray();
+    ```
+
+    The above is inefficient though; it creates the intermediary list, and then creates a copy of the final array from it.  Implementations are free to optimize this away, for example producing code like so:
+
+    ```c#
+    T1[] __result = <private_details>.CreateArray<T1>(
+        count_of_expression_elements);
+    int __index = 0;
+
+    <private_details>.Add(ref __result, __index++, __e1);
+    foreach (var __t in __s1)
+        <private_details>.Add(ref __result, __index++, __t);
+
+    // further additions of the remaining elements
+
+    <private_details>.Resize(ref __result, __index);
+    ```
+
+    This allows for minimal waste and copying, without additional overhead that library collections might incur.
+
+    The counts passed to `CreateArray` are used to provide a starting size hint to prevent wasteful resizes.
 
 ## Unsupported scenarios
 [unsupported-scenarios]: #unsupported-scenarios
@@ -559,9 +560,7 @@ Not having a *known length* does not prevent any result from being created. Howe
 While collection literals can be used for many scenarios, there are a few that they are not capable of replacing.  These include:
 
 * Multi-dimensional arrays (e.g. `new int[5, 10] { ... }`). There is no facility to include the dimensions, and all collection literals are either linear or map structures only.
-
 * Collections which pass special values to their constructors. There is no facility to access the constructor being used.
-
 * Nested collection initializers, e.g. `new Widget { Children = { w1, w2, w3 } }`.  This form needs to stay since it has very different semantics from `Children = [w1, w2, w3]`.  The former calls `.Add` repeatedly on `.Children` while the latter would assign a new collection over `.Children`.  We could consider having the latter form fall back to adding to an existing collection if `.Children` can't be assigned, but that seems like it could be extremely confusing.
 
 ## Syntax ambiguities
@@ -569,70 +568,67 @@ While collection literals can be used for many scenarios, there are a few that t
 
 * There are two "true" syntactic ambiguities where there are multiple legal syntactic interpretations of code that uses a `collection_literal_expression`.
 
-    * The `spread_element` is ambiguous with a [`range_expression`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#systemrange).  One could technically have:
+  * The `spread_element` is ambiguous with a [`range_expression`](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#systemrange).  One could technically have:
 
-        ```c#
-        Range[] ranges = [range1, ..e, range2];
-        ```
+    ```c#
+    Range[] ranges = [range1, ..e, range2];
+    ```
 
-        To resolve this, we can either:
+    To resolve this, we can either:
 
-        * Require users to parenthesize `(..e)` or include a start index `0..e` if they want a range.
-        * Choose a different syntax (like `...`) for spread.  This would be unfortunate for the lack of consistency with slice patterns.
+    * Require users to parenthesize `(..e)` or include a start index `0..e` if they want a range.
+    * Choose a different syntax (like `...`) for spread.  This would be unfortunate for the lack of consistency with slice patterns.
 
 * There are two cases where there isn't a true ambiguity but where the syntax greatly increases parsing complexity.  While not a problem given engineering time, this does still increase cognitive overhead for users when looking at code.
 
-    * Ambiguity between `collection_literal_expression` and `attributes` on statements or local functions.  Consider:
+  * Ambiguity between `collection_literal_expression` and `attributes` on statements or local functions.  Consider:
 
-        ```c#
-        [X(), Y, Z()]
-        ```
+    ```c#
+    [X(), Y, Z()]
+    ```
 
-        This could be one of:
+    This could be one of:
 
-        ```c#
-        // A list literal inside some expression statement
-        [X(), Y, Z()].ForEach(() => ...);
+    ```c#
+    // A list literal inside some expression statement
+    [X(), Y, Z()].ForEach(() => ...);
 
-        // The attributes for a statement or local function
-        [X(), Y, Z()] void LocalFunc() { }
-        ```
+    // The attributes for a statement or local function
+    [X(), Y, Z()] void LocalFunc() { }
+    ```
 
-        Without complex lookahead, it would be impossible to tell without consuming the entirety of the literal.
+    Without complex lookahead, it would be impossible to tell without consuming the entirety of the literal.
 
-        Options to address this include:
+    Options to address this include:
 
-        * Allow this, doing the parsing work to determine which of these cases this is.
-
-        * Disallow this, and require the user wrap the literal in parentheses like `([X(), Y, Z()]).ForEach(...)`.
-
+    * Allow this, doing the parsing work to determine which of these cases this is.
+    * Disallow this, and require the user wrap the literal in parentheses like `([X(), Y, Z()]).ForEach(...)`.
     * Ambiguity between a `collection_literal_expression` in a `conditional_expression` and a `null_conditional_operations`.  Consider:
 
-        ```c#
-        M(x ? [a, b, c]
-        ```
+    ```c#
+    M(x ? [a, b, c]
+    ```
 
-        This could be one of:
+    This could be one of:
 
-        ```c#
-        // A ternary conditional picking between two collections
-        M(x ? [a, b, c] : [d, e, f]);
+    ```c#
+    // A ternary conditional picking between two collections
+    M(x ? [a, b, c] : [d, e, f]);
 
-        // A null conditional safely indexing into 'x':
-        M(x ? [a, b, c]);
-        ```
+    // A null conditional safely indexing into 'x':
+    M(x ? [a, b, c]);
+    ```
 
-        Without complex lookahead, it would be impossible to tell without consuming the entirety of the literal.
+    Without complex lookahead, it would be impossible to tell without consuming the entirety of the literal.
 
-        Note: this is a problem even without a *natural type* because target typing applies through `conditional_expressions`.
+    Note: this is a problem even without a *natural type* because target typing applies through `conditional_expressions`.
 
-        As with the others, we could require parentheses to disambiguate.  In other words, presume the `null_conditional_operation` interpretation unless written like so: `x ? ([1, 2, 3]) :`.  However, that seems rather unfortunate. This sort of code does not seem unreasonable to write and will likely trip people up.
+    As with the others, we could require parentheses to disambiguate.  In other words, presume the `null_conditional_operation` interpretation unless written like so: `x ? ([1, 2, 3]) :`.  However, that seems rather unfortunate. This sort of code does not seem unreasonable to write and will likely trip people up.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
 * This introduces [yet another form](https://xkcd.com/927/) for collection expressions on top of the myriad ways we already have. This is extra complexity for the language.  That said, this also makes it possible to unify on one ~~ring~~ syntax to rule them all, which means existing codebases can be simplified and moved to a uniform look everywhere.
-
 * Using `[`...`]` instead of `{`...`}` moves away from the syntax we've generally used for arrays and collection initializers already.  Specifically that it uses `[`...`]` instead of `{`...`}`.  However, this was already settled on by the language team when we did list patterns.  We attempted to make `{`...`}` work with list patterns and ran into insurmountable issues.  Because of this, we moved to `[`...`]` which, while new for C#, feels natural in many programming languages and allowed us to start fresh with no ambiguity.  Using `[`...`]` as the corresponding literal form is complementary with our latest decisions, and gives us a clean place to work without problem.
 
 This does introduce warts into the language.  For example, the following are both legal and (fortunately) mean the exact same thing:
@@ -647,97 +643,93 @@ However, given the breadth and consistency brought by the new literal syntax, we
 ## Alternatives
 [alternatives]: #alternatives
 
- * What other designs have been considered? What is the impact of not doing this?
+* What other designs have been considered? What is the impact of not doing this?
 
 ## Resolved questions
 [resolved]: #resolved-questions
 
 * Should the compiler use `stackalloc` for stack allocation when *inline arrays* are not available and the *iteration type* is a primitive type?
 
-    Resolution: No. Managing a `stackalloc` buffer requires additional effort over an *inline array* to ensure the buffer is not allocated repeatedly when the collection expression is within a loop. The additional complexity in the compiler and in the generated code outweighs the benefit of stack allocation on older platforms.
+  Resolution: No. Managing a `stackalloc` buffer requires additional effort over an *inline array* to ensure the buffer is not allocated repeatedly when the collection expression is within a loop. The additional complexity in the compiler and in the generated code outweighs the benefit of stack allocation on older platforms.
 
 * In what order should we evaluate literal elements compared with Length/Count property evaluation?  Should we evaluate all elements first, then all lengths?  Or should we evaluate an element, then its length, then the next element, and so on?
 
-    Resolution: We evaluate all elements first, then everything else follows that.
+  Resolution: We evaluate all elements first, then everything else follows that.
 
 * Can an *unknown length* literal create a collection type that needs a *known length*, like an array, span, or Construct(array/span) collection?  This would be harder to do efficiently, but it might be possible through clever use of pooled arrays and/or builders.
 
-    Resolution: Yes, we allow creating a fixes-length collection from an *unknown length* literal.  The compiler is permitted to implement this in as efficient a manner as possible.
+  Resolution: Yes, we allow creating a fixes-length collection from an *unknown length* literal.  The compiler is permitted to implement this in as efficient a manner as possible.
 
-    The following text exists to record the original discussion of this topic.
+  The following text exists to record the original discussion of this topic.
 
-    <details>
+  <details>
 
-    Users could always make an *unknown length* literal into a *known length* one with code like this:
+  Users could always make an *unknown length* literal into a *known length* one with code like this:
 
-    ```c#
-    ImmutableArray<int> x = [a, ..unknownLength.ToArray(), b];
-    ```
+  ```c#
+  ImmutableArray<int> x = [a, ..unknownLength.ToArray(), b];
+  ```
 
-    However, this is unfortunate due to the need to force allocations of temporary storage.  We could potentially be more efficient if we controlled how this was emitted.
+  However, this is unfortunate due to the need to force allocations of temporary storage.  We could potentially be more efficient if we controlled how this was emitted.
 
-    </details>
+  </details>
 
 * Can a `collection_literal_expression` be target-typed to an `IEnumerable<T>` or other collection interfaces?
 
-    For example:
+  For example:
 
-    ```c#
-    void DoWork(IEnumerable<long> values) { ... }
-    // Needs to produce `longs` not `ints` for this to work.
-    DoWork([1, 2, 3]);
-    ```
+  ```c#
+  void DoWork(IEnumerable<long> values) { ... }
+  // Needs to produce `longs` not `ints` for this to work.
+  DoWork([1, 2, 3]);
+  ```
 
-    Resolution: Yes, a literal can be target-typed to any interface type `I<T>` that `List<T>` implements.  For example, `IEnumerable<long>`. This is the same as target-typing to `List<long>` and then assigning that result to the specified interface type. The following text exists to record the original discussion of this topic.
+  Resolution: Yes, a literal can be target-typed to any interface type `I<T>` that `List<T>` implements.  For example, `IEnumerable<long>`. This is the same as target-typing to `List<long>` and then assigning that result to the specified interface type. The following text exists to record the original discussion of this topic.
 
-    <details>
+  <details>
 
-    The open question here is determining what underlying type to actually create.  One option is to look at the proposal for [`params IEnumerable<T>`](https://github.com/dotnet/csharplang/issues/179).  There, we would generate an array to pass the values along, similar to what happens with `params T[]`.
+  The open question here is determining what underlying type to actually create.  One option is to look at the proposal for [`params IEnumerable<T>`](https://github.com/dotnet/csharplang/issues/179).  There, we would generate an array to pass the values along, similar to what happens with `params T[]`.
 
-    </details>
+  </details>
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
 * Can/should the compiler emit Array.Empty for `[]`?  Should we mandate that it does this, to avoid allocations whenever possible?
-
 * Should it be legal to create and immediately index into a collection literal?  Note: this requires an answer to the unresolved question below of whether collection literals have a *natural type*.
-
 * Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757).
-
 * Should we expand on collection initializers to look for the very common `AddRange` method? It could be used by the underlying constructed type to perform adding of spread elements potentially more efficiently.  We might also want to look for things like `.CopyTo` as well.  There may be drawbacks here as those methods might end up causing excess allocations/dispatches versus directly enumerating in the translated code.
-
 * Do we need to target-type `spread_element`?  Consider, for example:
 
-    ```c#
-    Span<int> span = [a, ..b ? [c] : [d, e], f];
-    ```
+  ```c#
+  Span<int> span = [a, ..b ? [c] : [d, e], f];
+  ```
 
-    Note: this may commonly come up in the following form to allow conditional inclusion of some set of elements, or nothing if the condition is false:
+  Note: this may commonly come up in the following form to allow conditional inclusion of some set of elements, or nothing if the condition is false:
 
-    ```c#
-    Span<int> span = [a, ..b ? [c, d, e] : [], f];
-    ```
+  ```c#
+  Span<int> span = [a, ..b ? [c, d, e] : [], f];
+  ```
 
-    In order to evaluate this full literal, we need to evaluate the element expressions within.  That means being able to evaluate `b ? [c] : [d, e]`.  However, absent a target type to evaluate this expression in the context of, and absent any sort of *natural type*, this would we would be unable to determine what to do with either `[c]` or `[d, e]` here.
+  In order to evaluate this full literal, we need to evaluate the element expressions within.  That means being able to evaluate `b ? [c] : [d, e]`.  However, absent a target type to evaluate this expression in the context of, and absent any sort of *natural type*, this would we would be unable to determine what to do with either `[c]` or `[d, e]` here.
 
-    To resolve this, we could say that when evaluating a literal's `spread_element` expression, there was an implicit target type equivalent to the target type of the literal itself.  So, in the above, that would be rewritten as:
+  To resolve this, we could say that when evaluating a literal's `spread_element` expression, there was an implicit target type equivalent to the target type of the literal itself.  So, in the above, that would be rewritten as:
 
-    ```c#
-    int __e1 = a;
-    Span<int> __s1 = b ? [c] : [d, e];
-    int __e2 = f;
+  ```c#
+  int __e1 = a;
+  Span<int> __s1 = b ? [c] : [d, e];
+  int __e2 = f;
 
-    Span<int> __result = stackalloc int[2 + __s1.Length];
-    int __index = 0;
+  Span<int> __result = stackalloc int[2 + __s1.Length];
+  int __index = 0;
 
-    __result[__index++] = a;
-    foreach (int __t in __s1)
-        __result[index++] = __t;
-    __result[__index++] = f;
+  __result[__index++] = a;
+  foreach (int __t in __s1)
+    __result[index++] = __t;
+  __result[__index++] = f;
 
-    Span<int> span = __result;
-    ```
+  Span<int> span = __result;
+  ```
 
 ## Design meetings
 [design-meetings]: #design-meetings
@@ -764,56 +756,53 @@ https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collectio
 
 * Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow what the spec/impl does for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757). Options are:
 
-    * Always stackalloc.  Teach people to be careful with Span.  This allows things like `Span<T> span = [1, 2, ..s]` to work, and be fine as long as `s` is small.  If this could blow the stack, users could always create an array instead, and then get a span around this.  This seems like the most in line with what people might want, but with extreme danger.
-
-    * Only stackalloc when the literal has a *fixed* number of elements (i.e. no spread elements).  This then likely makes things always safe, with fixed stack usage, and the compiler (hopefully) able to reuse that fixed buffer.  However, it means things like `[1, 2, ..s]` would never be possible, even if the user knows it is completely safe at runtime.
+  * Always stackalloc.  Teach people to be careful with Span.  This allows things like `Span<T> span = [1, 2, ..s]` to work, and be fine as long as `s` is small.  If this could blow the stack, users could always create an array instead, and then get a span around this.  This seems like the most in line with what people might want, but with extreme danger.
+  * Only stackalloc when the literal has a *fixed* number of elements (i.e. no spread elements).  This then likely makes things always safe, with fixed stack usage, and the compiler (hopefully) able to reuse that fixed buffer.  However, it means things like `[1, 2, ..s]` would never be possible, even if the user knows it is completely safe at runtime.
 
 * How does overload resolution work?  If an API has:
 
-    ```C#
-    public void M(T[] values);
-    public void M(List<T> values);
-    ```
+  ```C#
+  public void M(T[] values);
+  public void M(List<T> values);
+  ```
 
-    What happens with `M([1, 2, 3])`?  We likely need to define 'betterness' for these conversions.
-
+  What happens with `M([1, 2, 3])`?  We likely need to define 'betterness' for these conversions.
 
 * Should we expand on collection initializers to look for the very common `AddRange` method? It could be used by the underlying constructed type to perform adding of spread elements potentially more efficiently.  We might also want to look for things like `.CopyTo` as well.  There may be drawbacks here as those methods might end up causing excess allocations/dispatches versus directly enumerating in the translated code.
-
 * Generic type inference should be updated to flow type information to/from collection literals.  For example:
 
-    ```C#
-    void M<T>(T[] values);
-    M([1, 2, 3]);
-    ```
+  ```C#
+  void M<T>(T[] values);
+  M([1, 2, 3]);
+  ```
 
-    It seems natural that this should be something the inference algorithm can be made aware of.  Once this is supported for the 'base' constructible collection type cases (`T[]`, `I<T>`, `Span<T>` `new T()`), then it should also fall out of the `Collect(constructible_type)` case.  For example:
+  It seems natural that this should be something the inference algorithm can be made aware of.  Once this is supported for the 'base' constructible collection type cases (`T[]`, `I<T>`, `Span<T>` `new T()`), then it should also fall out of the `Collect(constructible_type)` case.  For example:
 
-    ```C#
-    void M<T>(ImmutableArray<T> values);
-    M([1, 2, 3]);
-    ```
+  ```C#
+  void M<T>(ImmutableArray<T> values);
+  M([1, 2, 3]);
+  ```
 
-    Here, `Immutable<T>` is constructible through an `init void Construct(T[] values)` method.  So the `T[] values` type would be used with inference against `[1, 2, 3]` leading to an inference of `int` for `T`.
+  Here, `Immutable<T>` is constructible through an `init void Construct(T[] values)` method.  So the `T[] values` type would be used with inference against `[1, 2, 3]` leading to an inference of `int` for `T`.
 
 * Cast/Index ambiguity.
 
-Today the following is an expression that is indexed into
+  Today the following is an expression that is indexed into
 
-```c#
-var v = (Expr)[1, 2, 3];
-```
+  ```c#
+  var v = (Expr)[1, 2, 3];
+  ```
 
-But it would be nice to be able to do things like:
+  But it would be nice to be able to do things like:
 
-```c#
-var v = (ImmutableArray<int>)[1, 2, 3];
-```
+  ```c#
+  var v = (ImmutableArray<int>)[1, 2, 3];
+  ```
 
-Can/should we take a break here?
+  Can/should we take a break here?
 
 * Syntactic ambiguities with `?[`.  
 
-It might be worthwhile to change the rules for `nullable index access` to state that no space can occur between `?` and `[`.  That would be a breaking change (but likely minor as VS already forces those together if you type them with a space).  If we do this, then we can have `x?[y]` be parsed differently than `x ? [y]`.
+  It might be worthwhile to change the rules for `nullable index access` to state that no space can occur between `?` and `[`.  That would be a breaking change (but likely minor as VS already forces those together if you type them with a space).  If we do this, then we can have `x?[y]` be parsed differently than `x ? [y]`.
 
-A similar thing occurs if we want to go with https://github.com/dotnet/csharplang/issues/2926.  In that world `x?.y` is ambiguous with `x ? .y`.  If we require the `?.` to abut, we can syntactically distinguish the two cases trivially.  
+  A similar thing occurs if we want to go with https://github.com/dotnet/csharplang/issues/2926.  In that world `x?.y` is ambiguous with `x ? .y`.  If we require the `?.` to abut, we can syntactically distinguish the two cases trivially.  

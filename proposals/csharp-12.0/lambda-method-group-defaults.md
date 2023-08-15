@@ -1,6 +1,6 @@
 # Optional and parameter array parameters for lambdas and method groups
 
-[!INCLUDE[Specletdisclaimer](speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 ## Summary
 
