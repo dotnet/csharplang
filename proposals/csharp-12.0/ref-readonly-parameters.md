@@ -1,5 +1,7 @@
 # `ref readonly` parameters
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 
@@ -33,6 +35,7 @@ However, APIs which capture or return references from their parameters would lik
 `ref readonly` parameters are ideal in such cases as they warn if used with rvalues or without any annotation at the callsite.
 
 Furthermore, there are APIs that need only read-only references but use
+
 - `ref` parameters since they were introduced before `in` became available and changing to `in` would be a source and binary breaking change, e.g., `QueryInterface`, or
 - `in` parameters to accept readonly references even though passing rvalues to them doesn't really make sense, e.g., `ReadOnlySpan<T>..ctor(in T value)`, or
 - `ref` parameters to disallow rvalues even though they don't mutate the passed reference, e.g., `Unsafe.IsNullRef`.
@@ -40,12 +43,14 @@ Furthermore, there are APIs that need only read-only references but use
 These APIs could migrate to `ref readonly` parameters without breaking users.
 For details on binary compatibility, see the proposed [metadata encoding][metadata].
 Specifically, changing
+
 - `ref` → `ref readonly` would only be a binary breaking change for virtual methods,
 - `ref` → `in` would also be a binary breaking change for virtual methods, but not a source breaking change (because the rules change to only warn for `ref` arguments passed to `in` parameters),
 - `in` → `ref readonly` would not be a breaking change (but no callsite annotation or rvalue would result in a warning),
   - note that this would be a source breaking change for users using older compiler versions (as they interpret `ref readonly` parameters as `ref` parameters, disallowing `in` or no annotation at the callsite) and new compiler versions with `LangVersion <= 11` (for consistency with older compiler versions, an error will be emitted that `ref readonly` parameters are not supported unless the corresponding arguments are passed with the `ref` modifier).
 
 In the opposite direction, changing
+
 - `ref readonly` → `ref` would be potentially a source breaking change (unless only `ref` callsite annotation was used and only readonly references used as arguments), and a binary breaking change for virtual methods,
 - `ref readonly` → `in` would not be a breaking change (but `ref` callsite annotation would result in a warning).
 
@@ -69,6 +74,7 @@ This allows API authors to change `in` parameters with default values to `ref re
 [value-kind-checks]: #value-kind-checks
 
 Note that even though `ref` argument modifier is allowed for `ref readonly` parameters, nothing changes w.r.t. value kind checks, i.e.,
+
 - `ref` can only be used with assignable values;
 - to pass readonly references, one has to use the `in` argument modifier instead;
 - to pass rvalues, one has to use no modifier (which results in a warning for `ref readonly` parameters as described in [the summary of this proposal][summary]).
@@ -80,6 +86,7 @@ Overload resolution will allow mixing `ref`/`ref readonly`/`in`/no callsite anno
 Specifically, there's a change in existing behavior where methods with `in` parameter will match calls with the corresponding argument marked as `ref`&mdash;this change will be gated on LangVersion.
 
 However, the warning for passing an argument with no callsite modifier to a `ref readonly` parameter will be suppressed if the parameter is
+
 - the receiver in an extension method invocation,
 - used implicitly as part of custom collection initializer or interpolated string handler.
 
@@ -89,6 +96,7 @@ By-value overloads will be preferred over `ref readonly` overloads in case there
 [method-conversions]: #method-conversions
 
 Similarly, for the purpose of anonymous function [[§10.7](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#107-anonymous-function-conversions)] and method group [[§10.8](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#108-method-group-conversions)] conversions, these modifiers are considered compatible (but the conversion results in a warning):
+
 - `ref readonly` can be interchanged with `in` or `ref` modifier,
 - `in` can be interchanged with `ref` modifier (this change will be gated on LangVersion).
 
@@ -108,6 +116,7 @@ For consistency, the same is true for other signature matching purposes (e.g., h
 [metadata]: #metadata-encoding
 
 As a reminder,
+
 - `ref` parameters are emitted as plain byref types (`T&` in IL),
 - `in` parameters are like `ref` plus they are annotated with `System.Runtime.CompilerServices.IsReadOnlyAttribute`.
   In C# 7.3 and later, they are also emitted with `[in]` and if virtual, `modreq(System.Runtime.InteropServices.InAttribute)`.
@@ -274,6 +283,7 @@ or it could be always allowed without any errors.
 
 This proposal suggests accepting a behavior breaking change because it should be rare to hit, is gated by LangVersion, and users can work around it by calling the extension method explicitly.
 Instead, we could mitigate it by
+
 - disallowing the `ref`/`in` mismatch (that would only prevent migration to `in` for old APIs that used `ref` because `in` wasn't available yet),
 - modifying the overload resolution rules to continue looking for a better match (determined by betterness rules specified below) when there's a ref kind mismatch introduced in this proposal,
   - or alternatively continue only for `ref` vs. `in` mismatch, not the others (`ref readonly` vs. `ref`/`in`/by-value).

@@ -1,6 +1,8 @@
 Inline Arrays
 =====
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 
 Provide a general-purpose and safe mechanism for consuming struct types utilizing
