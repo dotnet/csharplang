@@ -22,16 +22,20 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Experimental] attribute (Julien)
 - [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
 
-## Mon Aug 14, 2023
-
-- More collection expression [details](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-LDM-2023-08-14.md) (Chuck/Cyrus)
-
 ## Wed Mar 15, 2023
 
 - Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
 - Interceptors (Rikki)
 
 # C# Language Design Notes for 2023
+
+## Mon Aug 14, 2023
+
+[C# Language Design Meeting for August 14th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-08-14.md)
+
+- Betterness for collection expressions and span types
+- Type inference from collection expression elements
+- Collection expression conversions
 
 ## Wed Aug 9, 2023
 
