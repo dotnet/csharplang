@@ -125,9 +125,9 @@ The following implicit *collection literal conversions* exist from a collection 
 
   *Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?*
 
-* To an *interface type* `I<T0>` where `System.Collections.Generic.List<T>` implements `I<T>` and where:
+* To an *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`, `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>` where:
 
-  * For each *element* `Ei` there is an *implicit conversion* to `T0`.
+  * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 In the cases above, a collection literal *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
 
@@ -331,9 +331,9 @@ var z = Extensions.AsImmutableArray([3]); // ok
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
 >
 > * ...
-> * `C₁` and `C₂` are collection expression conversions and one of the following holds:
->   * `T₁` is a *span type* and `T₂` is not a *span type*
->   * `T₁` is not an *interface type* and `T₂` is an *interface type*
+> * `C₁` and `C₂` are collection expression conversions and the following hold:
+>   * `T₁` is a *`ref stuct` type* with *iteration type* `E₁`, and `T₂` is a *non&dash; `ref stuct` type* with *iteration type* `E₂`, and
+>   * `E₁` is implicitly convertible to `E₂`
 
 The additional rule groups the collection target types from best to worst:
 
