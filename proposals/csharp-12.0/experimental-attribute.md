@@ -1,6 +1,6 @@
 ExperimentalAttribute
 =====================
-Report warnings for references to types and members marked with `System.Diagnostics.CodeAnalysis`.
+Report warnings for references to types and members marked with `System.Diagnostics.CodeAnalysis.ExperimentalAttribute`.
 ```
 namespace System.Diagnostics.CodeAnalysis
 {
