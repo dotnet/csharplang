@@ -83,7 +83,7 @@ There are two primary directions we can go here:
 
         This feels punishing to the common/default case that users will want.  Importantly, it means that if a user wants to switch off from `stackalloc` to collection-expressions they get less pleasant code. 
 
-    - Option B: Ref-struct local always has local scope.
+    - Option B: Collection expressions of `ref struct` type have local scope.
 
         ```c#
         void M()
