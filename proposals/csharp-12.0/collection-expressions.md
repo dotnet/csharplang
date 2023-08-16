@@ -205,13 +205,13 @@ ImmutableArray<int> ia =
 ```
 
 ## Construction
-[constructible-collection-types]: #constructible-collection-types
+[construction]: #construction
 
 *Give specific ordering for determining how to construct the constructible collection types.*
 
 ## Empty collection literal
 
-* The empty literal `[]` has no type.  However, similar to the [*null-literal*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md#6457-the-null-literal), this literal can be implicitly converted to any [*constructible*](#constructible-collection-types) collection type.
+* The empty literal `[]` has no type.  However, similar to the [*null-literal*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md#6457-the-null-literal), this literal can be implicitly converted to any [*constructible*](#conversions) collection type.
 
     For example, the following is not legal as there is no *target type* and there are no other conversions involved:
 
@@ -353,7 +353,7 @@ static List<int> Concat(List<int> x, object y);
 ## Span types
 [span-types]: #span-types
 
-The span types `ReadOnlySpan<T>` and `Span<T>` are both [*constructible collection types*](#constructible-collection-types).  Support for them follows the design for [`params Span<T>`](https://github.com/dotnet/csharplang/blob/main/proposals/params-span.md). Specifically, constructing either of those spans will result in an array T[] created on the [stack](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#229-stack-allocation) if the params array is within limits (if any) set by the compiler. Otherwise the array will be allocated on the heap.
+The span types `ReadOnlySpan<T>` and `Span<T>` are both [*constructible collection types*](#conversions).  Support for them follows the design for [`params Span<T>`](https://github.com/dotnet/csharplang/blob/main/proposals/params-span.md). Specifically, constructing either of those spans will result in an array T[] created on the [stack](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/unsafe-code.md#229-stack-allocation) if the params array is within limits (if any) set by the compiler. Otherwise the array will be allocated on the heap.
 
 If the compiler chooses to allocate on the stack, it is not required to translate a literal directly to a `stackalloc` at that specific point.  For example, given:
 
