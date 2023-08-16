@@ -158,7 +158,7 @@ However, we have options on how to specify things to get the above outcome.
     ```c#
     ref struct ValueList<T> { ... }
 
-    void M(T[] list);
+    void M(int[] list);
     void M(ValueList<int> list);
 
     M([1, 2, 3]); // calls the ValueList version.
