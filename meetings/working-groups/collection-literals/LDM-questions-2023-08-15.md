@@ -128,7 +128,7 @@ We know we want a `Span<T>` overload to be preferred over a `T[]` overload or an
 
 However, we have options on how to specify things to get the above outcome.
 
-1. Option A: Span/ReadOnlySpan is better than arrays and those specific interfaces.
+1. Option A: Span/ReadOnlySpan is preferred over arrays and those specific interfaces when the iteration type of the span is implicitly convertible to the iteration type of the array or interface.
 
     The general intuition here is Spans/Arrays/Interfaces have a natural ordering we can make an airtight case around.  Specifically:
 
