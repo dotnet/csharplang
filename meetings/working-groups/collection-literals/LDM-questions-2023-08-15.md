@@ -175,7 +175,7 @@ However, we have options on how to specify things to get the above outcome.
     M([1, 2, 3]); // Ambiguous.
     ```
 
-1. Option C: Ref-structs are always considered better than all other types.
+1. Option C: `ref struct` collection types are preferred over non-`ref struct` collection types when there is an implicit conversion from the iteration type of the `ref struct` type to the iteration type of the non-`ref struct` type.
 
     The general intuition here is that if the user provides a ref-struct overload that that is the 'fast' option, and thus would be preferred over other types.  This seems like the 'more likely than not' case that extends beyond just Span/ReadOnlySpan. Also seems to align with things like interpolated string handlers over System.String.
 
