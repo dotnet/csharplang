@@ -132,8 +132,7 @@ However, we have options on how to specify things to get the above outcome.
 
     The general intuition here is Spans/Arrays/Interfaces have a natural ordering we can make an airtight case around.  Specifically:
 
-    Spans are better than arrays as they're the fast form
-    that can subsume arrays and also be on the stack.
+    Spans are better than arrays as they're the fast form that can subsume arrays and also be on the stack.
 
     Arrays are better than all those interfaces because it's a more specific type that implements the interface.
 
