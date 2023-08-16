@@ -120,7 +120,7 @@ There are two primary directions we can go here:
 
 Working group suggestion:
 
-Option 2B. Collection-expressions of ref-struct type have local-scope.
+Option 2B. Collection expressions of `ref struct` type have local scope.
 
 ### Overload resolution priority
 
