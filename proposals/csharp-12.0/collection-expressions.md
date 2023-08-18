@@ -339,8 +339,8 @@ var z = Extensions.AsImmutableArray([3]); // ok
 
 Examples of differences with overload resolution between array initializers and collection expressions:
 ```c#
-static void Identical(Span<string> value) { }
-static void Identical(string[] value) { }
+static void Generic<T>(Span<T> value) { }
+static void Generic<T>(T[] value) { }
 
 static void SpanDerived(Span<string> value) { }
 static void SpanDerived(object[] value) { }
@@ -349,12 +349,12 @@ static void ArrayDerived(Span<object> value) { }
 static void ArrayDerived(string[] value) { }
 
 // Array initializers
-Identical(new[] { "" });    // string[]
+Generic(new[] { "" });      // string[]
 SpanDerived(new[] { "" });  // ambiguous
 ArrayDerived(new[] { "" }); // string[]
 
 // Collection expressions
-Identical([""]);            // Span<string>
+Generic([""]);              // Span<string>
 SpanDerived([""]);          // Span<string>
 ArrayDerived([""]);         // ambiguous
 ```
