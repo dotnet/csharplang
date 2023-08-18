@@ -335,21 +335,6 @@ var z = Extensions.AsImmutableArray([3]); // ok
 >   * `T₁` is a *`ref stuct` type* with *iteration type* `E₁`, and `T₂` is a *non&dash; `ref stuct` type* with *iteration type* `E₂`, and
 >   * `E₁` is implicitly convertible to `E₂`
 
-The additional rule groups the collection target types from best to worst:
-
-* span types
-* arrays, inline arrays, and concrete types
-* interfaces
-
-Changing the grouping in the future is a potential breaking change. For example, with the grouping above, overload resolution will prefer the array overload because the second parameter type is more specific in that overload. But if the grouping is changed so concrete types are preferred over array types, the call is ambiguous.
-
-```c#
-Concat([1, 2, 3], 4); // Concat(int[], int)
-
-static int[] Concat(int[] x, int y);
-static List<int> Concat(List<int> x, object y);
-```
-
 ## Span types
 [span-types]: #span-types
 
