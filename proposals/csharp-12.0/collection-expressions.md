@@ -334,9 +334,7 @@ var z = Extensions.AsImmutableArray([3]); // ok
 > * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a better conversion target than `T₂` **and one of the following holds:**
 >   * **`C₁` and `C₂` are *not* collection expression conversions or**
 >   * **`T₁` and `T₂` are both *ref struct types* or neither are *ref struct types***
-> * **`C₁` and `C₂` are collection expression conversions and the following hold:**
->   * **`T₁` is a *ref struct type* with *iteration type* `E₁`, and `T₂` is a *non&dash; ref struct type* with *iteration type* `E₂`, and**
->   * **`E₁` is implicitly convertible to `E₂`**
+> * **`C₁` and `C₂` are collection expression conversions, and `T₁` is a *ref struct type* with *iteration type* `E₁`, and `T₂` is a *non&dash; ref struct type* with *iteration type* `E₂`, and `E₁` is implicitly convertible to `E₂`**
 > * ...
 
 ## Span types
