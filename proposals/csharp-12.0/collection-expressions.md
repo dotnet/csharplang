@@ -331,7 +331,9 @@ var z = Extensions.AsImmutableArray([3]); // ok
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
 >
 > * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
-> * **`C₁` and `C₂` are *not* collection expression conversions and** `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a better conversion target than `T₂` 
+> * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a better conversion target than `T₂` **and one of the following holds:**
+>   * **`C₁` and `C₂` are *not* collection expression conversions or**
+>   * **`T₁` and `T₂` are both *ref struct types* or neither are *ref struct types***
 > * **`C₁` and `C₂` are collection expression conversions and the following hold:**
 >   * **`T₁` is a *ref struct type* with *iteration type* `E₁`, and `T₂` is a *non&dash; ref struct type* with *iteration type* `E₂`, and**
 >   * **`E₁` is implicitly convertible to `E₂`**
