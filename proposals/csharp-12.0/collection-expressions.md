@@ -330,10 +330,12 @@ var z = Extensions.AsImmutableArray([3]); // ok
 
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
 >
+> * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
+> * **`C₁` and `C₂` are *not* collection expression conversions** and `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a better conversion target than `T₂` 
+> * **`C₁` and `C₂` are collection expression conversions and the following hold:**
+>   * **`T₁` is a *`ref stuct` type* with *iteration type* `E₁`, and `T₂` is a *non&dash; `ref stuct` type* with *iteration type* `E₂`, and**
+>   * **`E₁` is implicitly convertible to `E₂`**
 > * ...
-> * `C₁` and `C₂` are collection expression conversions and the following hold:
->   * `T₁` is a *`ref stuct` type* with *iteration type* `E₁`, and `T₂` is a *non&dash; `ref stuct` type* with *iteration type* `E₂`, and
->   * `E₁` is implicitly convertible to `E₂`
 
 ## Span types
 [span-types]: #span-types
