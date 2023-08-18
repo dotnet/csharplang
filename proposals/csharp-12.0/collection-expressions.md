@@ -337,6 +337,28 @@ var z = Extensions.AsImmutableArray([3]); // ok
 > * **`C₁` and `C₂` are collection expression conversions, and `T₁` is a *ref struct type* with *iteration type* `E₁`, and `T₂` is a *non&dash; ref struct type* with *iteration type* `E₂`, and `E₁` is implicitly convertible to `E₂`**
 > * ...
 
+Examples of differences with overload resolution between array initializers and collection expressions:
+```c#
+static void Identical(Span<string> value) { }
+static void Identical(string[] value) { }
+
+static void SpanDerived(Span<string> value) { }
+static void SpanDerived(object[] value) { }
+
+static void ArrayDerived(Span<object> value) { }
+static void ArrayDerived(string[] value) { }
+
+// Array initializers
+Identical(new[] { "" });    // string[]
+SpanDerived(new[] { "" });  // ambiguous
+ArrayDerived(new[] { "" }); // string[]
+
+// Collection expressions
+Identical([""]);            // Span<string>
+SpanDerived([""]);          // Span<string>
+ArrayDerived([""]);         // ambiguous
+```
+
 ## Span types
 [span-types]: #span-types
 
