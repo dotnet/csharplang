@@ -491,7 +491,7 @@ Not having a *known length* does not prevent any result from being created. Howe
 
     The above forms (for arrays and spans) are the base representations of the literal value and are used for the following translation rules.
 
-    * If `T` is some `C<S0, S1, …>` which has a corresponding [create-methods](#create-methods) `B.M<U0, U1, …>()`, then the literal is translated as:
+    * If `T` is some `C<S0, S1, …>` which has a corresponding [create-method](#create-methods) `B.M<U0, U1, …>()`, then the literal is translated as:
 
       ```c#
       // Collection literal is passed as is as the single B.M<...>(...) argument
