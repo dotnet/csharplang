@@ -92,6 +92,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
   * It is assumed that the value of `Count` on a collection will produce that same value as the number of elements when enumerated.
   * The types used in this spec defined in the `System.Collections.Generic` namespace are presumed to be side-effect free.  As such, the compiler can optimize scenarios where such types might be used as intermediary values, but otherwise not be exposed.
+  * It is assumed that a call to some applicable `.AddRange(x)` member on a collection will result in the same final value as iterating over `x` and adding all of its enumerated values individually to the collection with `.Add`.
   * The behavior of collection literals with collections that are not well-behaved is undefined.
 
 ## Conversions
@@ -415,23 +416,35 @@ If they all have such a property, the literal is considered to have a *known len
 ### Interface translation
 [interface-translation]: #interface-translation
 
-Given a target type `T` for a literal:
+Given a target type `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, `ICollection<T>`, or `IList<T>`a compliant implementation is only required to produce a value that implements that interface.  A compliant implementation is free to: 
 
-* If `T` is some interface `I<T1>` where that interface is implemented by `List<T1>`, then the literal is translated as:
+1. Use an existing type that implements that interface.
+1. Synthesize a type that implements the interface.
 
-    ```c#
-    List<T1> __temp = [...]; /* standard translation */
-    I<T1> __result = __temp;
-    ```
+In either case, the type used is allowed to implement a larger set of interfaces than those strictly required.
 
-In other words, the translation works by using the specified rules with the concrete `List<T>` type as the target type.  That translated value is then implicitly converted to the resultant interface type.
+Synthesized types are free to employ any strategy they want to implement the required interfaces properly.  For example, a synthesized type might inline the elements directly within itself, avoiding the need for additional internal collection allocations.  A synthesized type could also not use any storage whatsoever, opting to compute the values directly.  For example, using `Enumerable.Range(1, 10)` for `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
 
-The compiler is free to not use the specific `List<T>`.  Specifically:
+#### Non-mutable interface translation
+[non-mutable-interface-translation]: #non-mutable-interface-translation
 
-1. it may choose to use entirely different types altogether (including types not referenceable by the user).
-2. it is only required to expose a type that supports the specific members of the `I` interface.
+Given a target type or `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, the value generated is allowed to implement more interfaces than required.  For example, implementing the mutable interfaces as well (specifically, implementing `ICollection<T>` or `IList<T>`).  However, in that case:
 
-Doing this allows the compiler to specialize even further, producing less potential garbage.  For example: `IEnumerable<string> e = [""];` could be implemented with a very specialized `singleton collection` that only requires one allocation, and one pointer, instead of the more heavyweight cost that `List<string>` would incur.
+1. The value must return `true` when queried for `ICollection<T>.IsReadOnly`.   This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
+1. The value must throw on any call to a mutation method (like `IList<T>.Add`).  This ensure safety, preventing a non-mutable collection from being accidentally mutated.
+
+It is recommended that any type that is synthesized implement all these interfaces. This ensures that maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in order to light up performance optimizations.
+
+#### Mutable interface translation
+[non-mutable-interface-translation]: #non-mutable-interface-translation
+
+Given a target type or `ICollection<T>` or `IList<T>`:
+
+1. The value must return `false` when queried for `ICollection<T>.IsReadOnly`. 
+
+The value generated is allowed to implement more interfaces than required.  Specifically, implementing `IList<T>` even when only targeting `ICollection<T>`.  However, in that case:
+
+1. The value must support all mutation methods (like `IList<T>.RemoveAt`).
 
 ### Known length translation
 [known-length-translation]: #known-length-translation
@@ -472,20 +485,20 @@ Not having a *known length* does not prevent any result from being created. Howe
     // same assignments as the array translation
     ```
 
-    The translation may use `stackalloc T1[]` rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
+    The translation may use `stackalloc T1[]` or an [*inline array*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
 
   * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](https://learn.microsoft.com/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
 
     The above forms (for arrays and spans) are the base representations of the literal value and are used for the following translation rules.
 
-    * If `T` supports [object creation](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#object-creation-expressions), then [member lookup](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#member-lookup) on `T` is performed to find an accessible `void Construct(T1 values)` method. If found, and if `T1` is a [*constructible*](#conversions) collection type, then the literal is translated as:
+    * If `T` is some `C<S0, S1, …>` which has a corresponding [create-method](#create-methods) `B.M<U0, U1, …>()`, then the literal is translated as:
 
       ```c#
-      // Generate __storage using existing rules.
-      T1 __storage = [...];
-      T __result = new T();
-      __result.Construct(__storage);
+      // Collection literal is passed as is as the single B.M<...>(...) argument
+      C<S0, S1, …> __result = B.M<S0, S1, …>([...])
       ```
+
+      As the *create method* must have an argument type of some instantiated `ReadOnlySpan<T>`, the translation rule for spans applies when passing the collection expression to the create method.
 
     * If `T` supports [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), then:
 
@@ -702,10 +715,13 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
   </details>
 
+* Can/should the compiler emit Array.Empty for `[]`?  Should we mandate that it does this, to avoid allocations whenever possible?
+
+    Yes. The compiler should emit Array.Empty<T>() for any case where this is legal and the final result is non-mutable.  For example, targeting `T[]`, `IEnumerable<T>`, `IReadOnlyCollection<T>` or `IReadOnlyList<T>`.  It should not use `Array.Empty<T>` when the target is mutable (`ICollection<T>` or `IList<T>`).
+
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-* Can/should the compiler emit Array.Empty for `[]`?  Should we mandate that it does this, to avoid allocations whenever possible?
 * Should it be legal to create and immediately index into a collection literal?  Note: this requires an answer to the unresolved question below of whether collection literals have a *natural type*.
 * Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757).
 * Should we expand on collection initializers to look for the very common `AddRange` method? It could be used by the underlying constructed type to perform adding of spread elements potentially more efficiently.  We might also want to look for things like `.CopyTo` as well.  There may be drawbacks here as those methods might end up causing excess allocations/dispatches versus directly enumerating in the translated code.
