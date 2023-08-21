@@ -125,9 +125,9 @@ The following implicit *collection literal conversions* exist from a collection 
 
   *Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?*
 
-* To an *interface type* `I<T0>` where `System.Collections.Generic.List<T>` implements `I<T>` and where:
+* To an *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`, `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>` where:
 
-  * For each *element* `Ei` there is an *implicit conversion* to `T0`.
+  * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 In the cases above, a collection literal *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
 
@@ -330,24 +330,33 @@ var z = Extensions.AsImmutableArray([3]); // ok
 
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
 >
+> * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
+> * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a [*better conversion target*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11646-better-conversion-target) than `T₂` **and one of the following holds:**
+>   * **`C₁` and `C₂` are *not* collection expression conversions or**
+>   * **`T₁` and `T₂` are both *ref struct types* or neither are *ref struct types***
+> * **`C₁` and `C₂` are collection expression conversions, and `T₁` is a *ref struct type* with *iteration type* `E₁`, and `T₂` is a *non&dash; ref struct type* with *iteration type* `E₂`, and `E₁` is implicitly convertible to `E₂`**
 > * ...
-> * `C₁` and `C₂` are collection expression conversions and one of the following holds:
->   * `T₁` is a *span type* and `T₂` is not a *span type*
->   * `T₁` is not an *interface type* and `T₂` is an *interface type*
 
-The additional rule groups the collection target types from best to worst:
-
-* span types
-* arrays, inline arrays, and concrete types
-* interfaces
-
-Changing the grouping in the future is a potential breaking change. For example, with the grouping above, overload resolution will prefer the array overload because the second parameter type is more specific in that overload. But if the grouping is changed so concrete types are preferred over array types, the call is ambiguous.
-
+Examples of differences with overload resolution between array initializers and collection expressions:
 ```c#
-Concat([1, 2, 3], 4); // Concat(int[], int)
+static void Generic<T>(Span<T> value) { }
+static void Generic<T>(T[] value) { }
 
-static int[] Concat(int[] x, int y);
-static List<int> Concat(List<int> x, object y);
+static void SpanDerived(Span<string> value) { }
+static void SpanDerived(object[] value) { }
+
+static void ArrayDerived(Span<object> value) { }
+static void ArrayDerived(string[] value) { }
+
+// Array initializers
+Generic(new[] { "" });      // string[]
+SpanDerived(new[] { "" });  // ambiguous
+ArrayDerived(new[] { "" }); // string[]
+
+// Collection expressions
+Generic([""]);              // Span<string>
+SpanDerived([""]);          // Span<string>
+ArrayDerived([""]);         // ambiguous
 ```
 
 ## Span types
