@@ -415,23 +415,35 @@ If they all have such a property, the literal is considered to have a *known len
 ### Interface translation
 [interface-translation]: #interface-translation
 
-Given a target type `T` for a literal:
+Given a target type `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, `ICollection<T>`, or `IList<T>`a compliant implementation is only required to produce a value that implements that interface.  A compliant implementation is free to: 
 
-* If `T` is some interface `I<T1>` where that interface is implemented by `List<T1>`, then the literal is translated as:
+1. Use an existing type that implements that interface.
+1. Synthesize a type that implements the interface.
 
-    ```c#
-    List<T1> __temp = [...]; /* standard translation */
-    I<T1> __result = __temp;
-    ```
+In either case, the type used is allowed to implement a larger set of interfaces than those strictly required.
 
-In other words, the translation works by using the specified rules with the concrete `List<T>` type as the target type.  That translated value is then implicitly converted to the resultant interface type.
+Synthesized types are free to employ any strategy they want to implement the required interfaces properly.  For example, a synthesized type might inline the elements directly within itself, avoiding the need for additional internal collection allocations.  A synthesized type could also not use any storage whatsoever, opting to compute the values directly.  For example, using `Enumerable.Range(1, 10)` for `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
 
-The compiler is free to not use the specific `List<T>`.  Specifically:
+#### Non-mutable interface translation
+[non-mutable-interface-translation]: #non-mutable-interface-translation
 
-1. it may choose to use entirely different types altogether (including types not referenceable by the user).
-2. it is only required to expose a type that supports the specific members of the `I` interface.
+Given a target type or `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, the value generated is allowed to implement more interfaces than required.  For example, implementing the mutable interfaces as well (specifically, implementing `ICollection<T>` or `IList<T>`).  However, in that case:
 
-Doing this allows the compiler to specialize even further, producing less potential garbage.  For example: `IEnumerable<string> e = [""];` could be implemented with a very specialized `singleton collection` that only requires one allocation, and one pointer, instead of the more heavyweight cost that `List<string>` would incur.
+1. The value must return `true` when queried for `ICollection<T>.IsReadOnly`. 
+1. The value must throw on any call to a mutation method (like `IList<T>.Add`).
+
+It is recommended that any type that is synthesized implement all these interfaces. This ensures that maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in order to light up performance optimizations.
+
+#### Mutable interface translation
+[non-mutable-interface-translation]: #non-mutable-interface-translation
+
+Given a target type or `ICollection<T>` or `IList<T>`:
+
+1. The value must return `false` when queried for `ICollection<T>.IsReadOnly`. 
+
+The value generated is allowed to implement more interfaces than required.  Specifically, implementing `IList<T>` even when only targeting `ICollection<T>`.  However, in that case:
+
+1. The value support all mutation methods (like `IList<T>.Add`).
 
 ### Known length translation
 [known-length-translation]: #known-length-translation
