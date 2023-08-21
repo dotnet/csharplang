@@ -100,7 +100,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 ## Conversions
 [conversions]: #conversions
 
-A *collection expression conversion* allows a collection literal expression to be converted to a type.
+A *collection expression conversion* allows a collection expression to be converted to a type.
 
 The following implicit *collection expression conversions* exist from a collection literal expression:
 
