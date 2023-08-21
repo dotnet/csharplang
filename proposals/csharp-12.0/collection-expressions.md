@@ -125,9 +125,15 @@ The following implicit *collection literal conversions* exist from a collection 
 
   *Open issue: Relying on a parameter named `capacity` seems brittle. Is there an alternative?*
 
-* To an *interface type* `I<T0>` where `System.Collections.Generic.List<T>` implements `I<T>` and where:
+* To one of the following interface types:
 
-  * For each *element* `Ei` there is an *implicit conversion* to `T0`.
+  1. `IEnumerable<T>`
+  2. `IReadOnlyCollection<T>`
+  3. `IReadOnlyList<T>`
+  4. `ICollection<T>`
+  5. `IList<T>`
+
+  and where for each *element* `Ei` there is an *implicit conversion* to `T`.
 
 In the cases above, a collection literal *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
 
