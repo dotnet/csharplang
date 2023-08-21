@@ -490,14 +490,14 @@ Not having a *known length* does not prevent any result from being created. Howe
 
     The above forms (for arrays and spans) are the base representations of the literal value and are used for the following translation rules.
 
-    * If `T` supports [object creation](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#object-creation-expressions), then [member lookup](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#member-lookup) on `T` is performed to find an accessible `void Construct(T1 values)` method. If found, and if `T1` is a [*constructible*](#conversions) collection type, then the literal is translated as:
+    * If `T` is some `C<S0, S1, …>` which has a corresponding [create-methods](#create-methods) `B.M<U0, U1, …>()`, then the literal is translated as:
 
       ```c#
-      // Generate __storage using existing rules.
-      T1 __storage = [...];
-      T __result = new T();
-      __result.Construct(__storage);
+      // Collection literal is passed as is as the single B.M<...>(...) argument
+      C<S0, S1, …> __result = B.M<S0, S1, …>([...])
       ```
+
+      As the `create method` must have an argument type of some instantiated `ReadOnlySpan<T>`, the base translation rule applies there when passing the collection literal to it
 
     * If `T` supports [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), then:
 
