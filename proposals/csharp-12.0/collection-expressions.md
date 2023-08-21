@@ -105,18 +105,23 @@ A *collection expression conversion* allows a collection literal expression to b
 The following implicit *collection expression conversions* exist from a collection literal expression:
 
 * To a single dimensional *array type* `T[]` where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>` where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *type* with a *[create method](#create-methods)* with *parameter type* `System.ReadOnlySpan<T>` where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To an *[inline array type](https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md)* with *element type* `T` where:
+
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *type* that implements `System.Collections.IEnumerable` where:
+
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
   * For each *expression element* `Ei` there is an applicable instance or extension method `Add` for a single argument `Ei`.
   * For each *spread element* `Si` there is an applicable instance or extension method `Add` for a single argument of the *iteration type* of `Si`.
