@@ -92,6 +92,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 
   * It is assumed that the value of `Count` on a collection will produce that same value as the number of elements when enumerated.
   * The types used in this spec defined in the `System.Collections.Generic` namespace are presumed to be side-effect free.  As such, the compiler can optimize scenarios where such types might be used as intermediary values, but otherwise not be exposed.
+  * It is assumed that a call to some applicable `.AddRange(x)` member on a collection will result in the same final value as iterating over `x` and adding all of its enumerated values individually to the collection with `.Add`.
   * The behavior of collection literals with collections that are not well-behaved is undefined.
 
 ## Conversions
