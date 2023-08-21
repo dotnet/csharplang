@@ -443,7 +443,7 @@ Given a target type or `ICollection<T>` or `IList<T>`:
 
 The value generated is allowed to implement more interfaces than required.  Specifically, implementing `IList<T>` even when only targeting `ICollection<T>`.  However, in that case:
 
-1. The value support all mutation methods (like `IList<T>.Add`).
+1. The value support all mutation methods (like `IList<T>.RemoveAt`).
 
 ### Known length translation
 [known-length-translation]: #known-length-translation
