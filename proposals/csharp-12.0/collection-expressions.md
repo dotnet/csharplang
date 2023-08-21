@@ -43,15 +43,15 @@ The following [grammar](https://github.com/dotnet/csharplang/blob/main/spec/expr
 ```diff
 primary_no_array_creation_expression
   ...
-+ | collection_literal_expression
++ | collection_expression
   ;
 
-+ collection_literal_expression
++ collection_expression
   : '[' ']'
-  | '[' collection_literal_element ( ',' collection_literal_element )* ']'
+  | '[' collection_element ( ',' collection_element )* ']'
   ;
 
-+ collection_literal_element
++ collection_element
   : expression_element
   | spread_element
   ;
@@ -70,7 +70,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 ### Spec clarifications
 [spec-clarifications]: #spec-clarifications
 
-* For brevity, `collection_literal_expression` will be referred to as "literal" in the following sections.
+* For brevity, `collection_expression` will be referred to as "literal" in the following sections.
 * `expression_element` instances will commonly be referred to as `e1`, `e_n`, etc.
 * `spread_element` instances will commonly be referred to as `..s1`, `..s_n`, etc.
 * *span type* means either `Span<T>` or `ReadOnlySpan<T>`.
@@ -88,6 +88,8 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 * An implementation is not required to translate literals exactly as specified below.  Any translation is legal if the same result is produced and there are no observable differences in the production of the result.
   * For example, an implementation could translate literals like `[1, 2, 3]` directly to a `new int[] { 1, 2, 3 }` expression that itself bakes the raw data into the assembly, eliding the need for `__index` or a sequence of instructions to assign each value. Importantly, this does mean if any step of the translation might cause an exception at runtime that the program state is still left in the state indicated by the translation.
 
+* References to 'stack allocation' refer to any strategy to allocate on the stack and not the heap.  Importantly, it does not imply or require that that strategy be through the actual `stackalloc` mechanism.  For example, the use of [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) is also an allowed and desirable approach to accomplish stack allocation where available. 
+
 * Collections are assumed to be well-behaved.  For example:
 
   * It is assumed that the value of `Count` on a collection will produce that same value as the number of elements when enumerated.
@@ -98,28 +100,23 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 ## Conversions
 [conversions]: #conversions
 
-A *collection literal conversion* allows a collection literal expression to be converted to a type.
+A *collection expression conversion* allows a collection literal expression to be converted to a type.
 
-The following implicit *collection literal conversions* exist from a collection literal expression:
+The following implicit *collection expression conversions* exist from a collection literal expression:
 
 * To a single dimensional *array type* `T[]` where:
-
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *span type* `System.Span<T>` or `System.ReadOnlySpan<T>` where:
-
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *type* with a *[create method](#create-methods)* with *parameter type* `System.ReadOnlySpan<T>` where:
-
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To an *[inline array type](https://github.com/dotnet/csharplang/blob/main/proposals/inline-arrays.md)* with *element type* `T` where:
-
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
 * To a *type* that implements `System.Collections.IEnumerable` where:
-
   * The *type* contains an applicable instance constructor that can be invoked with no arguments or invoked with a single argument for the 0-th parameter where the parameter has type `System.Int32` and name `capacity`.
   * For each *expression element* `Ei` there is an applicable instance or extension method `Add` for a single argument `Ei`.
   * For each *spread element* `Si` there is an applicable instance or extension method `Add` for a single argument of the *iteration type* of `Si`.
@@ -135,12 +132,12 @@ In the cases above, a collection literal *element* `Ei` is considered to have an
 * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
 * `Ei` is a *spread element* `Si` and there is an implicit conversion from the *iteration type* of `Si` to `T`.
 
-Types for which there is an implicit collection literal conversion from a collection literal are the valid *target types* for that collection literal.
+Types for which there is an implicit collection expression conversion from a collection literal are the valid *target types* for that collection literal.
 
 ## Create methods
 [create-methods]: #create-methods
 
-A *create method* is indicated with a `[CollectionBuilder]` attribute on the *collection type*.
+A *create method* is indicated with a `[CollectionBuilder(...)]` attribute on the *collection type*.
 The attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
 
 ```c#
@@ -228,6 +225,21 @@ ImmutableArray<int> ia =
     ```
 
     Here, if `b` is false, it is not required that any value actually be constructed for the empty literal since it would immediately be spread into zero values in the final literal.
+
+* The empty literal is permitted to be a singleton if used to construct a final collection value that is known to not be mutable.  For example:
+
+    ```c#
+    // Can be a singleton, like Array.Empty<int>()
+    int[] x = []; 
+
+    // Can be a singleton. Allowed to use Array.Empty<int>(), Enumerable.Empty<int>(),
+    // or any other implementation that can not be mutated.
+    IEnumerable<int> y = [];
+
+    // Must not be a singleton.  Value must be allowed to mutate, and should not mutate
+    // other references elsewhere.
+    List<int> z = [];
+    ```
 
 ## Ref safety
 [ref-safety]: #ref-safety
@@ -389,6 +401,8 @@ foreach (var x in y)
 }
 ```
 
+The compiler can also [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md), if available, when choosing to allocate on the stack.
+
 If the compiler decides to allocate on the heap, the translation for `Span<T>` is simply:
 
 ```c#
@@ -477,6 +491,8 @@ Not having a *known length* does not prevent any result from being created. Howe
     // further assignments of the remaining elements
     ```
 
+    The implementation is allowed to utilize other means to populate the array.  For example, utilizing efficient bulk-copy methods like `.CopyTo()`.
+
   * If `T` is some `Span<T1>`, then the literal is translated as the same as above, except that the `__result` initialization is translated as:
 
     ```c#
@@ -489,7 +505,9 @@ Not having a *known length* does not prevent any result from being created. Howe
 
   * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](https://learn.microsoft.com/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
 
-    The above forms (for arrays and spans) are the base representations of the literal value and are used for the following translation rules.
+    A `ReadOnlySpan<T1>` where `T1` is some primitive type, and all collection elements are constant does not need its data to be on the heap, or on the stack.  For example, an implementation could construct this span directly as a reference to portion of the data segment of the program.
+
+    The above forms (for arrays and spans) are the base representations of the literal value and are used for the following translation rules:
 
     * If `T` is some `C<S0, S1, …>` which has a corresponding [create-method](#create-methods) `B.M<U0, U1, …>()`, then the literal is translated as:
 
@@ -576,6 +594,8 @@ Not having a *known length* does not prevent any result from being created. Howe
     This allows for minimal waste and copying, without additional overhead that library collections might incur.
 
     The counts passed to `CreateArray` are used to provide a starting size hint to prevent wasteful resizes.
+
+  * If `T` is some `span type` an implementation can follow the above `T[]` strategy, or any other strategy with the same semantic, but better performance.  For example, instead of allocating the array as a copy of the `List` elements, `CollectionsMarshal.AsSpan(__list)` could be used to obtain a `span` value directly.
 
 ## Unsupported scenarios
 [unsupported-scenarios]: #unsupported-scenarios
@@ -697,7 +717,7 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
   </details>
 
-* Can a `collection_literal_expression` be target-typed to an `IEnumerable<T>` or other collection interfaces?
+* Can a `collection_expression` be target-typed to an `IEnumerable<T>` or other collection interfaces?
 
   For example:
 
@@ -715,16 +735,21 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
   </details>
 
-* Can/should the compiler emit Array.Empty for `[]`?  Should we mandate that it does this, to avoid allocations whenever possible?
+* Can/should the compiler emit `Array.Empty<T>()` for `[]`?  Should we mandate that it does this, to avoid allocations whenever possible?
 
-    Yes. The compiler should emit Array.Empty<T>() for any case where this is legal and the final result is non-mutable.  For example, targeting `T[]`, `IEnumerable<T>`, `IReadOnlyCollection<T>` or `IReadOnlyList<T>`.  It should not use `Array.Empty<T>` when the target is mutable (`ICollection<T>` or `IList<T>`).
+    Yes. The compiler should emit `Array.Empty<T>()` for any case where this is legal and the final result is non-mutable.  For example, targeting `T[]`, `IEnumerable<T>`, `IReadOnlyCollection<T>` or `IReadOnlyList<T>`.  It should not use `Array.Empty<T>` when the target is mutable (`ICollection<T>` or `IList<T>`).
+
+* Should we expand on collection initializers to look for the very common `AddRange` method? It could be used by the underlying constructed type to perform adding of spread elements potentially more efficiently.  We might also want to look for things like `.CopyTo` as well.  There may be drawbacks here as those methods might end up causing excess allocations/dispatches versus directly enumerating in the translated code.
+
+    Yes.  An implementation is allowed to utilize other methods to initialize a collection value, under the presumption that these methods have well-defined semantics, and that collection types should be "well behaved".  In practice though, an implementation should be cautious as benefits in one way (bulk copying) may come with negative consequences as well (for example, boxing a struct collection).
+
+    An implementation should take advantage in the cases where there are no downsides (like no boxing).  For example, with a `.AddRange(ReadOnlySpan<T>)` method.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
 * Should it be legal to create and immediately index into a collection literal?  Note: this requires an answer to the unresolved question below of whether collection literals have a *natural type*.
 * Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757).
-* Should we expand on collection initializers to look for the very common `AddRange` method? It could be used by the underlying constructed type to perform adding of spread elements potentially more efficiently.  We might also want to look for things like `.CopyTo` as well.  There may be drawbacks here as those methods might end up causing excess allocations/dispatches versus directly enumerating in the translated code.
 * Do we need to target-type `spread_element`?  Consider, for example:
 
   ```c#
