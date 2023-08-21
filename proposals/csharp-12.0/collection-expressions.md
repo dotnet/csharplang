@@ -231,7 +231,7 @@ ImmutableArray<int> ia =
 
     Here, if `b` is false, it is not required that any value actually be constructed for the empty collection expression since it would immediately be spread into zero values in the final literal.
 
-* The empty literal is permitted to be a singleton if used to construct a final collection value that is known to not be mutable.  For example:
+* The empty collection expression is permitted to be a singleton if used to construct a final collection value that is known to not be mutable.  For example:
 
     ```c#
     // Can be a singleton, like Array.Empty<int>()
