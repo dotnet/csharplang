@@ -249,6 +249,52 @@ ImmutableArray<int> ia =
     List<int> z = [];
     ```
 
+## Spreads
+[spreads]: #spreads
+
+```csharp
+bool b = true;
+int[] x = [.. []];            // x = []
+byte[] y = [.. b ? [1] : []]; // y = [(byte)1]
+```
+
+A *spread element* `..E` is applicable as an iterator of type `T` if any of the following hold:
+
+* There is an implicit conversion from the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of `E` to `T`.
+* `E` is a *collection expression* and for each element `Eᵢ` there is an implicit conversion to `T`.
+* `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y` where one or both of `x` and `y` is a *collection expression* and for each of the operands `x` and `y` one of the following hold:
+  * The operand is a collection expression and for each element `Eᵢ` there is an implicit conversion to `T`.
+  * The operand has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` and there is an implicit conversion from `Tₑ` to `T`.
+
+For a collection expression used a spread element expression, or for a collection expression as the second or third operand in a conditional expression used as a spread element expression, the compiler may use any conforming representation for the collection instance, including eliding the collection.
+
+For example, the code generated for `List<int> list = [x, y, .. b ? [z] : []]` could avoid an intermediate collection:
+```c#
+List<int> list = new();
+list.Add(x);
+list.Add(y);
+if (b) list.Add(z);
+```
+
+*Should `switch` expressions be supported in spread elements?*
+
+## Foreach
+[foreach]: #foreach
+
+```csharp
+foreach (bool? b in [false, true, null]) { ... }
+```
+
+A *collection expression* may be used as the collection in a `foreach` statement with an *explicitly typed iteration variable* of type `T` if:
+
+* For each element `Eᵢ` in the collection expression there is an implicit conversion to `T`.
+
+An error is reported if the `foreach` iteration variable is *implicitly typed*.
+
+For a collection expression used as the collection in a `foreach` statement, the compiler may use any conforming representation for the collection instance, including eliding the collection.
+
+*Should we use [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) to infer the collection expression element type when `foreach` has an implicitly typed variable? We'd need to apply best common type across the containing collection and any nested spread elements that contain collection expressions.*
+
 ## Ref safety
 [ref-safety]: #ref-safety
 
@@ -291,8 +337,9 @@ static ReadOnlySpan<T> AsSpan3<T>(T x, T y, T z)
 [type-inference]: #type-inference
 
 ```c#
-var a = AsArray([1, 2, 3]);          // AsArray<int>(int[])
-var b = AsListOfArray([[4, 5], []]); // AsListOfArray<int>(List<int[]>)
+var a = AsArray([1, 2, 3]);                // AsArray<int>(int[])
+var b = AsListOfArray([[4, 5], []]);       // AsListOfArray<int>(List<int[]>)
+AsArray([.. b ? ["hello", "world"] : []]); // AsArray<string>(string[])?
 
 static T[] AsArray<T>(T[] arg) => arg;
 static List<T[]> AsListOfArray<T>(List<T[]> arg) => arg;
@@ -312,6 +359,8 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *input type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
 > * If `E` is a *collection expression spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Tₑ` *to* `T`.
+> * If `E` is a *collection expression spread element* where the expression is a *collection expression* `C`, an *input type inference* is made *from* `C` *to* `T`.
+> * If `E` is a *collection expression spread element* where the expression is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y` and where one or both of `x` and `y` is a *collection expression*, an *input type inference* is made from `x` *to* `T` and an *input type inference* is made from `y` *to* `T`.
 > * *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
