@@ -498,7 +498,7 @@ Not having a *known length* does not prevent any result from being created. Howe
       C<S0, S1, …> __result = B.M<S0, S1, …>([...])
       ```
 
-      As the `create method` must have an argument type of some instantiated `ReadOnlySpan<T>`, the base translation rule applies there when passing the collection literal to it
+      As the *create method* must have an argument type of some instantiated `ReadOnlySpan<T>`, the translation rule for spans applies when passing the collection expression to the create method.
 
     * If `T` supports [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), then:
 
