@@ -429,7 +429,7 @@ Synthesized types are free to employ any strategy they want to implement the req
 
 Given a target type or `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, the value generated is allowed to implement more interfaces than required.  For example, implementing the mutable interfaces as well (specifically, implementing `ICollection<T>` or `IList<T>`).  However, in that case:
 
-1. The value must return `true` when queried for `ICollection<T>.IsReadOnly`.   This ensures consumers can appropriately tell that the collection it non-mutable, despite implementing the mutable views.
+1. The value must return `true` when queried for `ICollection<T>.IsReadOnly`.   This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
 1. The value must throw on any call to a mutation method (like `IList<T>.Add`).  This ensure safety, preventing a non-mutable collection from being accidentally mutated.
 
 It is recommended that any type that is synthesized implement all these interfaces. This ensures that maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in order to light up performance optimizations.
