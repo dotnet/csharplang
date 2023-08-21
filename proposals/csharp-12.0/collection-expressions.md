@@ -743,7 +743,7 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
     Yes.  An implementation is allowed to utilize other methods to initialize a collection value, under the presumption that these methods have well-defined semantics, and that collection types should be "well behaved".  In practice though, an implementation should be cautious as benefits in one way (bulk copying) may come with negative consequences as well (for example, boxing a struct collection).
 
-    An implementation should take advantage in the cases where there are no downsides (like no boxing).  For example, with a `.AddRange(ReadOnlySpan<T>)` method.
+    An implementation should take advantage in the cases where there are no downsides.  For example, with a `.AddRange(ReadOnlySpan<T>)` method.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
