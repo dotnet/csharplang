@@ -484,7 +484,7 @@ Not having a *known length* does not prevent any result from being created. Howe
     // same assignments as the array translation
     ```
 
-    The translation may use `stackalloc T1[]` or an [Inline Array](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
+    The translation may use `stackalloc T1[]` or an [*inline array*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
 
   * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](https://learn.microsoft.com/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
 
