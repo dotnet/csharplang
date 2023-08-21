@@ -512,7 +512,7 @@ Not having a *known length* does not prevent any result from being created. Howe
 
     A `ReadOnlySpan<T1>` where `T1` is some primitive type, and all collection elements are constant does not need its data to be on the heap, or on the stack.  For example, an implementation could construct this span directly as a reference to portion of the data segment of the program.
 
-    The above forms (for arrays and spans) are the base representations of the literal value and are used for the following translation rules:
+    The above forms (for arrays and spans) are the base representations of the collection expression and are used for the following translation rules:
 
     * If `T` is some `C<S0, S1, …>` which has a corresponding [create-method](#create-methods) `B.M<U0, U1, …>()`, then the literal is translated as:
 
