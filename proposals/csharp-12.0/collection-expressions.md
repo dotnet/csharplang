@@ -600,7 +600,7 @@ Not having a *known length* does not prevent any result from being created. Howe
 
     The counts passed to `CreateArray` are used to provide a starting size hint to prevent wasteful resizes.
 
-  * If `T` is some `span type` an implementation can follow the above `T[]` strategy, or any other strategy with the same semantic, but better performance.  For example, instead of allocating the array as a copy of the `List` elements, `CollectionsMarshal.AsSpan(__list)` could be used to obtain a `span` value directly.
+  * If `T` is some *span type*, an implementation may follow the above `T[]` strategy, or any other strategy with the same semantics, but better performance.  For example, instead of allocating the array as a copy of the list elements, `CollectionsMarshal.AsSpan(__list)` could be used to obtain a span value directly.
 
 ## Unsupported scenarios
 [unsupported-scenarios]: #unsupported-scenarios
