@@ -174,7 +174,45 @@ private void RefSwitchAssignLocal()
 
 > Note: this does not align with the current behavior of ref ternary expressions (`a ? ref b : ref c`). This is intentional, and the handling of this case in ref ternary expressions is a separate concern.
 
-Ref return safety relies on the individual switch arms. If any of the switch arms that does not throw is unsafe to return, the entire switch expression is unsafe to return. Otherwise, the entire `switch` expression's result is safe to return.
+The scope of the returned expression relies on the narrowest scope of each individual arm that is not a throw expression. That means, the scope of ref safety, and the scope of the actual value are both taken into account, and the narrowest of all is applied to the entire switch expression. This rule is similar to ref ternary expressions.
+
+For example, the following is unsafe to return:
+```csharp
+private void RefSwitchNarrowScope(ref int paramRef)
+{
+    int x = 1;
+    int outer = 2;
+
+    // outerRef contains a reference to the narrowest scope,
+    // which is that of 'x' and 'outer'
+    ref int outerRef = ref axis switch
+    {
+        Axis.X => ref x,
+        Axis.Y => ref outer,
+    };
+
+    {
+        int inner = 3;
+
+        // innerRef contains a reference to the narrowest scope,
+        // which is that of 'inner'
+        ref int innerRef = ref axis switch
+        {
+            Axis.X => ref x,
+            Axis.Y => ref inner,
+        };
+        
+        // 'innerRef' holds a reference to a narrower scope than
+        // that of 'outerRef', so the following is illegal
+        outerRef = ref innerRef;
+    }
+
+    // The scope of 'paramRef' is outer than that of the current method
+    // 'outerRef' holds a reference to a scope within the method,
+    // so the following is illegal
+    paramRef = ref outerRef;
+}
+```
 
 ## Drawbacks
 [drawbacks]: #drawbacks
