@@ -44,12 +44,10 @@ It is also possible to suppress the warning by usual means, such as an explicit 
 
 The attribute is not inherited from base types or overridden members.
 
+The warning is promoted to an error for purpose of reporting.
+
 ## ObsoleteAttribute and DeprecatedAttribute
 
 Warnings for `[Experimental]` are reported within `[Obsolete]` or `[Deprecated]` members.  
 Warnings and errors for `[Obsolete]` and `[Deprecated]` are reported inside `[Experimental]` members.  
 But warnings and errors for `[Obsolete]` and `[Deprecated]` are reported instead of `[Experimental]` if there are multiple attributes.  
-
-## Open questions
-- confirm the behavior we want for assembly/module-level attributes
-- discuss warning vs. error
