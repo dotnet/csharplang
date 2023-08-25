@@ -297,7 +297,7 @@ static List<T[]> AsListOfArray<T>(List<T[]> arg) => arg;
 
 The [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are updated as follows.
 
-The existing rules for the [*first phase*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11632-the-first-phase) are extracted to a new *input type inference* section, and a  rule is added to *input type inference* and *output type inference* for collection literal expressions.
+The existing rules for the [*first phase*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11632-the-first-phase) are extracted to a new *input type inference* section, and a  rule is added to *input type inference* and *output type inference* for collection expression expressions.
 
 > 11.6.3.2 The first phase
 >
@@ -307,14 +307,16 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > An *input type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> * If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *input type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
+> * If `E` is a *collection expression* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *input type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
+> * If `E` is a *collection expression spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Tₑ` *to* `T`.
 > * *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
 >
 > An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> * If `E` is a *collection literal* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *output type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
+> * If `E` is a *collection expression* with elements `Eᵢ` and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *output type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
+> * If `E` is a *collection expression spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Tₑ` *to* `T`.
 > * *[existing rules from output type inferences]* ...
 
 ## Extension methods
