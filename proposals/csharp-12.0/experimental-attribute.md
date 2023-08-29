@@ -38,7 +38,8 @@ The warning message is a specific message, where `'{0}'` is the fully-qualified 
 The warning is reported for any reference to a type or member that is either:
 - marked with the attribute,
 - in an assembly or module marked with the attribute,
-except when the reference occurs  within `[Experimental]` members (automatic suppression).
+
+except when the reference occurs within `[Experimental]` members (automatic suppression).
 
 It is also possible to suppress the warning by usual means, such as an explicit compiler option or `#pragma`.
 
