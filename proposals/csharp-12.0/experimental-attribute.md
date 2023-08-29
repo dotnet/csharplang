@@ -1,7 +1,7 @@
 ExperimentalAttribute
 =====================
 Report warnings for references to types and members marked with `System.Diagnostics.CodeAnalysis.ExperimentalAttribute`.
-```
+```cs
 namespace System.Diagnostics.CodeAnalysis
 {
     [AttributeUsage(AttributeTargets.Assembly |
