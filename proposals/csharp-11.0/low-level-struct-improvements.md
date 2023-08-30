@@ -887,14 +887,14 @@ There are a few predefined lifetimes for convenience and brevity below:
 
 - `$heap`: this is the lifetime of any value that exists on the heap. It is available in all scopes and method signatures.
 - `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*. It is implicitly defined in methods and can appear in method signatures except for any output position.
-- `$ro`: name place holder for the *return only* safe to escape scope
-- `$cm`: name place holder for the *calling method* safe to escape scope
+- `$ro`: name place holder for *return only*
+- `$cm`: name place holder for *calling method* 
 
 There are a few predefined relationships between lifetimes:
 
 - `where $heap : $a` for all lifetimes `$a`
 - `where $cm : $ro` 
-- `where $x : $local` for all predefined lifetimes. User defined lifetimes have no relationship to local unless explictly defined.
+- `where $x : $local` for all predefined lifetimes. User defined lifetimes have no relationship to local unless explicitly defined.
 
 Lifetime variables when defined on types can be invariant or covariant. These are expressed using the same syntax as generic parameters:
 
@@ -913,7 +913,7 @@ The basic rules for the lifetime are defined as:
 - All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `$heap` and `$local`. 
 - All types `T` that are not a `ref struct` implicitly have lifetime of `T<$heap>`. This is implicit, there is no need to write `int<$heap>` in every sample.
 - For a ref field defined as `ref T<$l1, $l2, ... $ln>` all lifetimes `$l1` through `$ln` must be invariant. 
-- For a ref defined as `ref<$a> T<$b, ...>`, `$b` must wider or equal to `$a`
+- For a ref defined as `ref<$a> T<$b, ...>`, `$b` must convertible to `$a`
 - The `ref` of a variable has a lifetime of the 
     - For a ref local, parameter, field or return of type `ref<$a> T` the lifetime is `$a`
     - `$heap` for all reference types and fields of reference types
@@ -934,12 +934,24 @@ The lifetime parameter `$this` on type definitions is _not_ predefined but it do
 
 For brevity sake a type which has no explicit lifetime parameters treated as if there is `out $this` defined and applied to all fields of the type. A type with a `ref` field must define explicit lifetime parameters.
 
-These rules exists to support our existing invariant that `T` can be assigned to `scoped T` for all types. That maps down to `T<$a, ...>` being assignable to `T<$local, ...>` for all lifetimes known to wider than ype of `$local`. Further this supports other items like being able to assign `Span<T>` from the heap to those on the stack. This does exclude types where fields have differing lifetimes for non-ref values but that is the reality of C# today. Changing that would require a significant change of C# rules that would need to be mapped out. 
+These rules exists to support our existing invariant that `T` can be assigned to `scoped T` for all types. That maps down to `T<$a, ...>` being assignable to `T<$local, ...>` for all lifetimes known to be convertible to `$local`. Further this supports other items like being able to assign `Span<T>` from the heap to those on the stack. This does exclude types where fields have differing lifetimes for non-ref values but that is the reality of C# today. Changing that would require a significant change of C# rules that would need to be mapped out. 
 
 The type of `this` for a type `S<out $this, ...>` inside an instance method is implicitly defined as the following:
-- For normal instance method: `ref<$local> S<$ro, ...>`
-- For instance method annotated with `[UnscopedRef]`: `ref<$ro> S<$ro, ...>`
-The lack of an explicit `this` parameter forces the implicit rules here. For complex samples and discussions likely better to use an explicit parameter.
+- For normal instance method: `ref<$local> S<$cm, ...>`
+- For instance method annotated with `[UnscopedRef]`: `ref<$ro> S<$cm, ...>`
+
+The lack of an explicit `this` parameter forces the implicit rules here. For complex samples and discussions consider writing as a `static` method and making `this` an explicit parameter.
+
+```csharp
+ref struct S<out $this>
+{
+    // Implicit this can make discussion confusing 
+    void M<$ro, $cm>(ref<$ro> S<$cm> s) {  }
+
+    // Rewrite as explicit this to simplify discussion
+    static void M<$ro, $cm>(ref<$local> S<$cm> this, ref<$ro> S<$cm> s) { }
+}
+```
 
 The C# method syntax maps to the model in the following ways: 
 
@@ -947,7 +959,7 @@ The C# method syntax maps to the model in the following ways:
 - parameters of type `ref struct` have a this lifetime of `$cm`
 - ref returns have a ref lifetime of `$ro`
 - returns of type `ref struct` have a value lifetime of `$ro`
-- `scoped` on a parameter or `ref` changes the lifetime to be `$local`
+- `scoped` on a parameter or `ref` changes the ref lifetime to be `$local`
 
 Given that let's explore a simple example that demonstrates the model here: 
 
@@ -1061,6 +1073,40 @@ ref struct S<out $this>
         // error: the types work out here to ref<$cm> int = ref<$ro> int and that is 
         // illegal as $ro has no conversion to $cm (the relationship is the other direction)
         s.refField = ref<$ro> s.field;
+    }
+}
+```
+
+Next let's see how this helps with the silly capture parameter problem: 
+
+```csharp
+ref struct S
+{
+    ref int refField;
+
+    void Use(ref int parameter)
+    {
+        // error: this needs to be an error else every call to this.Use(ref local) would fail 
+        // because compiler would assume the `ref` was captured by ref.
+        this.refField = ref parameter;
+    }
+}
+
+// Maps to 
+
+ref struct S<out $this>
+{
+    ref<$this> int refField;
+    
+    // Using static form of this method signature so the type of this is explicit. 
+    static void Use<$ro, $cm>(ref<$local> S<$cm> @this, ref<$ro> int parameter)
+    {
+        // error: the types here are:
+        //  - refField is ref<$cm> int
+        //  - ref parameter is ref<$ro> int
+        // That means the RHS is not convertible to the LHS ($ro is not covertible to $cm) and 
+        // hence this reassignment is illegal
+        @this.refField = ref<$ro> parameter;
     }
 }
 ```
