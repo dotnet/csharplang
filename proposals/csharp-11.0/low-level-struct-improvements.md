@@ -887,8 +887,8 @@ There are a few predefined lifetimes for convenience and brevity below:
 
 - `$heap`: this is the lifetime of any value that exists on the heap. It is available in all scopes and method signatures.
 - `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*. It is implicitly defined in methods and can appear in method signatures except for any output position.
-- `$ro`: name place holder for the *return only*
-- `$cm`: name place holder for the *calling method* 
+- `$ro`: name place holder for *return only*
+- `$cm`: name place holder for *calling method* 
 
 There are a few predefined relationships between lifetimes:
 
@@ -939,6 +939,7 @@ These rules exists to support our existing invariant that `T` can be assigned to
 The type of `this` for a type `S<out $this, ...>` inside an instance method is implicitly defined as the following:
 - For normal instance method: `ref<$local> S<$cm, ...>`
 - For instance method annotated with `[UnscopedRef]`: `ref<$ro> S<$cm, ...>`
+
 The lack of an explicit `this` parameter forces the implicit rules here. For complex samples and discussions consider writing as a `static` method and making `this` an explicit parameter.
 
 ```csharp
@@ -947,7 +948,7 @@ ref struct S<out $this>
     // Implicit this can make discussion confusing 
     void M<$ro, $cm>(ref<$ro> S<$cm> s) {  }
 
-    // Rewrite as explicit this to make discussion require less memory
+    // Rewrite as explicit this to simplify discussion
     static void M<$ro, $cm>(ref<$local> S<$cm> this, ref<$ro> S<$cm> s) { }
 }
 ```
@@ -1087,7 +1088,7 @@ ref struct S
     {
         // error: this needs to be an error else every call to this.Use(ref local) would fail 
         // because compiler would assume the `ref` was captured by ref.
-        s.refField = ref parameter;
+        this.refField = ref parameter;
     }
 }
 
@@ -1105,7 +1106,7 @@ ref struct S<out $this>
         //  - ref parameter is ref<$ro> int
         // That means the RHS is not convertible to the LHS ($ro is not covertible to $cm) and 
         // hence this reassignment is illegal
-        s.refField = ref<$ro> parameter;
+        @this.refField = ref<$ro> parameter;
     }
 }
 ```
