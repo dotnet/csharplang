@@ -170,7 +170,7 @@ For the *create method*:
 * The *builder type* must be a non-generic `class` or `struct`.
 * The method must be defined on the *builder type* directly.
 * The method must be `static`.
-* The method must be accessible.
+* The method must be accessible where the collection expression is used.
 * The *arity* of the method must match the *arity* of the collection type.
 * The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) between `E` and the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type*.
 * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions)  between the method return type and the *collection type*.
