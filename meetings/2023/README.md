@@ -22,18 +22,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Sept 18, 2023
 
+# C# Language Design Notes for 2023
+
 ## Wed Aug 16 2023
 
-- Even more collection expression details (Cyrus) - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/LDM-questions-2023-08-15.md
-- [Experimental] attribute (Julien)
-- [ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/ref-readonly-parameters.md) (Jared/Jan)
+[C# Language Design Meeting for August 16th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-08-16.md)
 
-## Wed Mar 15, 2023
-
-- Discriminated Unions (Fred and Matt) - https://github.com/dotnet/csharplang/discussions/7010
-- Interceptors (Rikki)
-
-# C# Language Design Notes for 2023
+- Ref-safety scope for collection expressions
+- Experimental attribute
 
 ## Mon Aug 14, 2023
 
@@ -165,6 +161,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Collection Literals
 - Fixed-size buffers
+
+## Wed Mar 15, 2023 (No notes)
+
+- Discriminated Unions
+- Interceptors
 
 ## Mon Mar 13, 2023 (Shorter meeting)
 
