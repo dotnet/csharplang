@@ -319,7 +319,6 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 > An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then an *output type inference* is made *from* each `Eᵢ` *to* `Tₑ`.
-> * If `E` is a *collection expression spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Tₑ` *to* `T`.
 > * *[existing rules from output type inferences]* ...
 
 ## Extension methods
