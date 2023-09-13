@@ -132,14 +132,20 @@ The following implicit *collection expression conversions* exist from a collecti
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-* To a *nullable value type* `T?` where there is *collection expression conversion* from the collection expression to `T`.
-
 In the cases above, a collection literal *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
 
 * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
 * `Ei` is a *spread element* `Si` and there is an implicit conversion from the *iteration type* of `Si` to `T`.
 
 Types for which there is an implicit collection expression conversion from a collection literal are the valid *target types* for that collection literal.
+
+The following additional implicit conversions exist from a *collection expression*:
+
+* To a *nullable value type* `T?` where there is a *collection expression conversion* from the collection expression to a value type `T`. The conversion is a *collection expression conversion* to `T` followed by an *implicit nullable conversion* from `T` to `T?`.
+
+* To a reference type `T` where there is a *[create method](#create-methods)* associated with `T` that returns a type `U` and an *implicit reference conversion* from `U` to `T`. The conversion is a *collection expression conversion* to `U` followed by an *implicit reference conversion* from `U` to `T`.
+
+* To an interface type `I` where there is a *[create method](#create-methods)* associated with `I` that returns a type `V` and an *implicit boxing conversion* from `V` to `I`. The conversion is a *collection expression conversion* to `V` followed by an *implicit boxing conversion* from `V` to `I`.
 
 ## Create methods
 [create-methods]: #create-methods
