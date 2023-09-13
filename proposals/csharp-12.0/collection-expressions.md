@@ -141,7 +141,7 @@ Types for which there is an implicit collection expression conversion from a col
 
 The following additional implicit conversions exist from a *collection expression*:
 
-* To a *nullable value type* `T?` where there is a *collection expression conversion* from the collection expression to `T`. The conversion is a *collection expression conversion* to `T` followed by an *implicit nullable conversion* to `T?`.
+* To a *nullable value type* `T?` where there is a *collection expression conversion* from the collection expression to a value type `T`. The conversion is a *collection expression conversion* to `T` followed by an *implicit nullable conversion* from `T` to `T?`.
 
 * To a reference type `T` where there is a *[create method](#create-methods)* associated with `T` that returns a type `U` and an *implicit reference conversion* from `U` to `T`. The conversion is a *collection expression conversion* to `U` followed by an *implicit reference conversion* from `U` to `T`.
 
