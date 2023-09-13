@@ -38,7 +38,7 @@ of a `delegate*` will use `calli` where invocation of a `delegate` will use `cal
 Syntactically though invocation is identical for both constructs.
 
 The ECMA-335 definition of method pointers includes the calling convention as part of the type signature (section 7.1).
-The default calling convention will be `managed`. Unmanaged calling conventions can by specified by putting an `unmanaged`
+The default calling convention will be `managed`. Unmanaged calling conventions can be specified by putting an `unmanaged`
 keyword afer the `delegate*` syntax, which will use the runtime platform default. Specific unmanaged conventions can then
 be specified in brackets to the `unmanaged` keyword by specifying any type starting with `CallConv` in the
 `System.Runtime.CompilerServices` namespace, leaving off the `CallConv` prefix. These types must come from the program's
