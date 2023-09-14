@@ -18,7 +18,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Wed Sept 20, 2023
 
 - Futures: reflection alternatives (Andy)
-- 
+
 ## Mon Sept 18, 2023
 
 - Updated on the C# standard process (Bill)
