@@ -1,5 +1,5 @@
 Low Level Struct Improvements
-=====
+====
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
@@ -904,6 +904,12 @@ Lifetime variables when defined on types can be invariant or covariant. These ar
 ref struct S<out $this, $a> 
 ```
 
+The lifetime parameter `$this` on type definitions is _not_ predefined but it does have a few rules associated with it when it is defined:
+- It must be the first lifetime parameter.
+- It must be covariant: `out $this`. 
+- The lifetime of `ref` fields must be convertible to `$this`
+- The `$this` lifetime of all non-ref fields must `$heap` or `$this`.
+
 The lifetime of a ref is expressed by providing a lifetime argument to the ref. For example a `ref` that refers to the heap is expressed as `ref<$heap>`.
 
 When defining a constructor in the model the name `new` will be used for the method. It is necessary to have a parameter list for the returned value as well as the constructor arguments. This is necessary to express the relationship between constructor inputs and the constructed value. Rather than having `Span<$a><$ro>` the model will use `Span<$a> new<$ro>` instead. The type of `this` in the constructor, including lifetimes, will be the defined return value.
@@ -912,10 +918,12 @@ The basic rules for the lifetime are defined as:
 
 - All lifetimes are expressed syntactically as generic arguments, coming before type arguments. This is true for predefined lifetimes except `$heap` and `$local`. 
 - All types `T` that are not a `ref struct` implicitly have lifetime of `T<$heap>`. This is implicit, there is no need to write `int<$heap>` in every sample.
-- For a ref field defined as `ref T<$l1, $l2, ... $ln>` all lifetimes `$l1` through `$ln` must be invariant. 
-- For a ref defined as `ref<$a> T<$b, ...>`, `$b` must convertible to `$a`
-- The `ref` of a variable has a lifetime of the 
-    - For a ref local, parameter, field or return of type `ref<$a> T` the lifetime is `$a`
+- For a `ref` field defined as `ref<$l0> T<$l1, $l2, ... $ln>`:
+    - All lifetimes `$l1` through `$ln` must be invariant. 
+    - The lifetime of `$l0` must be convertible to `$this`
+- For a `ref`` defined as `ref<$a> T<$b, ...>`, `$b` must convertible to `$a`
+- The `ref` of a variable has a lifetime defined by:
+    - For a `ref` local, parameter, field or return of type `ref<$a> T` the lifetime is `$a`
     - `$heap` for all reference types and fields of reference types
     - `$local` for everything else
 - An assignment or return is legal when the underlying type conversion is legal
@@ -926,11 +934,6 @@ The basic rules for the lifetime are defined as:
 For the purpose of lifetime rules a `ref` is considered part of the type of the expression for purposes of conversions. It is logically represented by converting `ref<$a> T<...>` to `ref<$a, T<...>>` where `$a` is covariant and `T` is invariant. 
 
 Next let's define the rules that allow us to map C# syntax to the underlying model.
-
-The lifetime parameter `$this` on type definitions is _not_ predefined but it does have a few rules associated with it when it is defined:
-- It must be the first lifetime parameter.
-- It must be covariant: `out $this`. 
-- The lifetime parameters of all non-ref fields, and the ref lifetime of ref fields, must be `$this`
 
 For brevity sake a type which has no explicit lifetime parameters treated as if there is `out $this` defined and applied to all fields of the type. A type with a `ref` field must define explicit lifetime parameters.
 
