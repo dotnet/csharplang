@@ -6,9 +6,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- Updated on the C# standard process (Bill, after Aug 10)
-- Futures: reflection alternatives (Andy, after Aug 15)
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -20,7 +17,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Sept 20, 2023
 
+- Futures: reflection alternatives (Andy)
+- 
 ## Mon Sept 18, 2023
+
+- Updated on the C# standard process (Bill)
 
 # C# Language Design Notes for 2023
 
