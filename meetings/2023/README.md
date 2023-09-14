@@ -21,6 +21,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Sept 18, 2023
 
+- Collection expression details (Chuck, Cyrus)
 - Updated on the C# standard process (Bill)
 
 # C# Language Design Notes for 2023
