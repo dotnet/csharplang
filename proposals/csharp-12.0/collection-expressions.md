@@ -291,15 +291,17 @@ if (b) list.Add(z);
 foreach (bool? b in [false, true, null]) { ... }
 ```
 
-A *collection expression* may be used as the collection in a `foreach` statement with an *explicitly typed iteration variable* of type `T` if:
+A *collection expression* may be used as the collection in a `foreach` statement.
+
+If the `foreach` statement has an *explicitly typed iteration variable* of type `T`, the compiler verifies:
 
 * For each element `Eᵢ` in the collection expression there is an implicit conversion to `T`.
 
-An error is reported if the `foreach` iteration variable is *implicitly typed*.
+If the `foreach` statement has an *implicitly typed iteration variable*, the type of the *iteration variable* is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of the collection expression *elements*.
+
+*The [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) is defined using *output type inference* from each expression `Ei`. Do we need to update *output type inference* below to infer from nested spread elements that contain collection expressions such as `[x, y, .. b ? [z] : []]`?*
 
 For a collection expression used as the collection in a `foreach` statement, the compiler may use any conforming representation for the collection instance, including eliding the collection.
-
-*Should we use [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) to infer the collection expression element type when `foreach` has an implicitly typed variable? We'd need to apply best common type across the containing collection and any nested spread elements that contain collection expressions.*
 
 ## Ref safety
 [ref-safety]: #ref-safety
