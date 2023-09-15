@@ -225,7 +225,7 @@ If the target type is a *struct* or *class type* that implements `System.Collect
   * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument. (Interleaving `Add` calls matches classic [*collection initializer behavior*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#117154-collection-initializers).)
   * If the element is a *spread element* then:
     * If the target type has an `AddRange` instance or extension method that is applicable when invoked with the spread element *expression*, the `AddRange` method *may be* invoked with expression as the argument.
-    * Otherwise the spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and the applicable `Add` instance or extension method is invoked for each item from the enumerator in order.
+    * Otherwise, the spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and the applicable `Add` instance or extension method is invoked for each item from the enumerator in order.
 
 If the target type is an *array*, a *span*, a type with a *[create method](#create-methods)*, or an *interface*, the construction of the collection instance is as follows:
 
@@ -235,13 +235,13 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
 
 * If the target type is an *array*, a *span*, or a type with a *create method*, and the collection expression has a *known length*, the compiler will allocate the underlying storage directly with the expected length. If the collection length is not known, an intermediate buffer *may be* used to construct the collection before copying to the target collection instance.
 
-* *The compiler *may* attempt to determine the length *at runtime* for otherwise unknown length spread elements using the countable properties or using alternatives when the behavior difference is not observable &mdash; for well-known collection types in particular.*
+* *The compiler *may* attempt to determine the length *at runtime* for otherwise unknown length spread elements, by using `ICollection<T>` or `ICollection`, or using alternatives when the behavior difference is not observable &mdash; for well-known collection types in particular.*
 
 * For each element in order:
   * If the element is an *expression element*, the evaluated expression is assigned to the collection.
   * If the element is a *spread element* then:
     * If the spread element *expression* type implements `IEnumerable<T>`, the interface implementation *may be* used to iterate the items, with each item added to the collection in order.
-    * Otherwise the spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and each item from the enumerator is assigned to the collection in order.
+    * Otherwise, the spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and each item from the enumerator is assigned to the collection in order.
     * *The compiler *may* use alternatives for copying items from the spread element *expression* when the behavior difference is not observable &mdash; when copying between well-known collection types in particular.*
 
 ## Empty collection literal
