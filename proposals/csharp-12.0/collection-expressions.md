@@ -214,8 +214,8 @@ ImmutableArray<int> ia =
 [construction]: #construction
 
 A collection expression has a *known length* if the compile-time type of each *spread element* in the collection expression is [*countable*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types).
-
-*Does *countable* include explicit implementations of `ICollection<T>.Count` and `ICollection.Count`? We should check for those interfaces as well.*
+The *countable* properties, `Length` and `Count`, are assumed to have no side effects.
+The *countable* properties do not include *explicit implementations* of `ICollection<T>.Count` or `ICollection.Count`.
 
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *[create method](#create-methods)*, the construction of the collection instance as follows:
 
@@ -230,8 +230,6 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 If the target type is an *array*, a *span*, a type with a *[create method](#create-methods)*, or an *interface*, the construction of the collection instance is as follows:
 
 * The elements expressions are evaluated in order, exactly once each. Any further references to the element expressions refer to the results of this initial evaluation. All element expressions are evaluated before any references to the evaluated expressions.
-
-* If the target type is an *array*, a *span*, or a type with a *create method*, and the collection expression has a *known length*, the compiler will allocate the underlying storage directly using the 
 
 * If the target type is an *array*, a *span*, or a type with a *create method*, and the collection expression has a *known length*, the compiler will allocate the underlying storage directly with the expected length. If the collection length is not known, an intermediate buffer *may be* used to construct the collection before copying to the target collection instance.
 
