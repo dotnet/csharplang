@@ -11,6 +11,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
+## Wed Oct 18, 2023
+
+## Mon Oct 16, 2023
+
+## Wed Oct 11, 2023
+
+## Mon Oct 9, 2023
+
+## Wed Oct 4, 2023
+
+## Mon Oct 2, 2023
+
 ## Wed Sept 27, 2023
 
 - Futures: reflection alternatives (Andy)
