@@ -22,7 +22,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Sept 18, 2023
 
 - [Collection expression details](https://microsoft.sharepoint.com/:w:/t/DotNetTeam/Ef1ZkWfhHEFGnUS4si5pZCkBADpQtrgszlakh7s-PvnV6w?e=aLerYh) (Chuck, Cyrus)
-- Updated on the C# standard process (Bill)
+- [Update on the C# standard process](https://gist.github.com/BillWagner/826dca373a801f11a908e86b1e448c51) (Bill)
 
 # C# Language Design Notes for 2023
 
