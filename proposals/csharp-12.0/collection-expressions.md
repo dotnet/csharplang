@@ -452,6 +452,8 @@ Span<T> __result = __array;
 ## Collection literal translation
 [collection-literal-translation]: #collection-literal-translation
 
+A collection expression has a *known length* if the compile-time type of each *spread element* in the collection expression is [*countable*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types).
+
 ### Interface translation
 [interface-translation]: #interface-translation
 
