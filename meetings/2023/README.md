@@ -35,12 +35,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Collection expression details](https://github.com/dotnet/csharplang/issues/7542) (Chuck, Cyrus)
 
+# C# Language Design Notes for 2023
+
 ## Mon Sept 18, 2023
 
-- [Collection expression details](https://github.com/dotnet/csharplang/issues/7542) (Chuck, Cyrus)
+[C# Language Design Meeting for September 18th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-18.md)
 
-
-# C# Language Design Notes for 2023
+- Collection expression questions
+    - Optimizing non-pattern collection construction
+    - Avoiding intermediate buffers for known-length cases
 
 ## Wed Aug 16 2023
 
