@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#lookup-order-for-type-parameters (Aleksey)
+
 ## Schedule when convenient
 
 ## Recurring topics
