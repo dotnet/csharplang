@@ -356,13 +356,16 @@ var z = Extensions.AsImmutableArray([3]); // ok
 
 [*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11644-better-conversion-from-expression) is updated to prefer certain target types in collection expression conversions.
 
+In the following rules, an *array_or_array_interface_type* is a type that is either an *array type* or one of the following *interface types* implemented by an array type: `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, `ICollection<T>`, or `IList<T>`.
+
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
 >
 > * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
-> * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a [*better conversion target*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11646-better-conversion-target) than `T₂` **and one of the following holds:**
->   * **`C₁` and `C₂` are *not* collection expression conversions or**
->   * **`T₁` and `T₂` are both *ref struct types* or neither are *ref struct types***
-> * **`C₁` and `C₂` are collection expression conversions, and `T₁` is a *ref struct type* with *iteration type* `E₁`, and `T₂` is a *non&dash; ref struct type* with *iteration type* `E₂`, and `E₁` is implicitly convertible to `E₂`**
+> * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a [*better conversion target*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11646-better-conversion-target) than `T₂` **and *none* of the following holds:**
+>   * **`C₁` and `C₂` are collection expression conversions**
+>   * **`T₁` is a *span type*, and `T₂` is an *array_or_array_interface_type***
+>   * **`T₂` is a *span type*, and `T₁` is an *array_or_array_interface_type***
+> * **`C₁` and `C₂` are collection expression conversions, and `T₁` is a *span type* with *iteration type* `E₁`, and `T₂` is an *array_or_array_interface_type* with *iteration type* `E₂`, and `E₁` is implicitly convertible to `E₂`**
 > * ...
 
 Examples of differences with overload resolution between array initializers and collection expressions:
