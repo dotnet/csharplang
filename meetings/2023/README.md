@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#lookup-order-for-type-parameters (Aleksey)
-
 ## Schedule when convenient
 
 ## Recurring topics
@@ -25,13 +23,17 @@ https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-con
 
 ## Mon Oct 2, 2023
 
+- Update on the C# standard process (Bill)
+
 ## Wed Sept 27, 2023
 
 - Futures: reflection alternatives (Andy)
 
 ## Mon Sept 25, 2023
 
-- Update on the C# standard process (Bill)
+- [Primary constructory details](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#lookup-order-for-type-parameters) (Aleksey)
+
+- [Collection expression details](https://github.com/dotnet/csharplang/issues/7542) (Chuck, Cyrus)
 
 ## Wed Sept 20, 2023
 
