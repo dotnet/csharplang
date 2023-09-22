@@ -363,10 +363,9 @@ In the updated rules:
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
 >
 > * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
-> * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a [*better conversion target*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11646-better-conversion-target) than `T₂` **and *none* of the following holds:**
->   * **`C₁` and `C₂` are collection expression conversions**
->   * **`T₁` is a *span_type*, and `T₂` is an *array_or_array_interface_type***
->   * **`T₂` is a *span_type*, and `T₁` is an *array_or_array_interface_type***
+> * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a [*better conversion target*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11646-better-conversion-target) than `T₂` **and the following is *not true*:**
+>   * **`C₁` and `C₂` are collection expression conversions *and***
+>   * **`T₁` is a *span_type* and `T₂` is an *array_or_array_interface_type*, *or* `T₂` is a *span_type* and `T₁` is an *array_or_array_interface_type***
 > * **`C₁` and `C₂` are collection expression conversions, and `T₁` is a *span_type* with *iteration type* `E₁`, and `T₂` is an *array_or_array_interface_type* with *iteration type* `E₂`, and `E₁` is implicitly convertible to `E₂`**
 > * ...
 
