@@ -213,6 +213,9 @@ ImmutableArray<int> ia =
 ## Construction
 [construction]: #construction
 
+The element expressions of a collection expression are evaluated in order, left to right.
+The element expressions are evaluated exactly once each &mdash; assuming no exceptions are thrown evaluating preceding elements &mdash; and any further references to the element expressions refer to the results of this initial evaluation.
+
 `Length` and `Count` properties, and `GetEnumerator` methods, are assumed to have no side effects.
 
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *[create method](#create-methods)*, the construction of the collection instance as follows:
@@ -221,9 +224,12 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 
 * For each element in order:
   * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument. (Interleaving `Add` calls matches classic [*collection initializer behavior*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#117154-collection-initializers).)
-  * If the element is a *spread element* then:
-    * If the target type has an `AddRange` instance or extension method that is applicable when invoked with the spread element *expression*, the `AddRange` method *may be* invoked with expression as the argument.
-    * Otherwise, the spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and the applicable `Add` instance or extension method is invoked for each item from the enumerator in order.
+  * If the element is a *spread element* then one of the following is used:
+    * An applicable `AddRange` instance or extension method is invoked on the *collection instance* with the spread element *expression* as the argument.
+    * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the collection instance and `int` index as arguments.
+    * The spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and the applicable `Add` instance or extension method is invoked for each item from the enumerator in order.
+
+* During the construction steps above, an applicable `EnsureCapacity` instance or extension method *may* be invoked one or more times on the *collection instance* with an `int` capacity argument.
 
 If the target type is an *array*, a *span*, a type with a *[create method](#create-methods)*, or an *interface*, the construction of the collection instance is as follows:
 
@@ -244,6 +250,28 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
 * If intermediate storage was allocated for the collection, a collection instance is allocated with the expected type and length, and the values from the intermediate storage are copied to the target collection instance.
 
 * If the target type has a *create method*, the create method is invoked with the span instance.
+
+> *Note:*
+> The compiler may *delay* adding elements to the collection &mdash; or *delay* iterating through spread elements &mdash; until after evaluating subsequent elements. (When subsequent spread elements have *countable* properties that would allow calculating the expected length of the collection before allocating the collection.) Conversely, the compiler may *eagerly* add elements to the collection &mdash; and *eagerly* iterate through spread elements &mdash; when there is no advantage to delaying.
+>
+> Consider the following collection expression:
+> ```c#
+> int[] x = [a, ..b, ..c, d];
+> ```
+> 
+> If spread elements `b` and `c` are *countable*, the compiler could delay adding items from `a` and `b` until after `c` is evaluated, to allow allocating the resulting array at the expected length. After that, the compiler could eagerly add items from `c`, before evaluating `d`.
+> ```c#
+> var __tmp1 = a;
+> var __tmp2 = b;
+> var __tmp3 = c;
+> var __result = new int[2 + __tmp2.Length + __tmp3.Length];
+> int __index = 0;
+> __result[__index++] = __tmp1;
+> foreach (var __i in __tmp2) __result[__index++] = __i;
+> foreach (var __i in __tmp3) __result[__index++] = __i;
+> __result[__index++] = d;
+> x = __result;
+> ```
 
 ## Empty collection literal
 
