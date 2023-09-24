@@ -213,41 +213,55 @@ ImmutableArray<int> ia =
 ## Construction
 [construction]: #construction
 
-The element expressions of a collection expression are evaluated in order, left to right.
-The element expressions are evaluated exactly once each &mdash; assuming no exceptions are thrown evaluating preceding elements &mdash; and any further references to the element expressions refer to the results of this initial evaluation.
+The elements of a collection expression are *evaluated* in order, left to right.
+Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
+
+Spread elements are *iterated* in the order the elements appear in the collection expression, left to right. A spread element may be *iterated* before or after the subsequent elements in the collection expression are *evaluated*.
+
+An unhandled exception thrown from any of the methods used during construction will be uncaught and will prevent further steps in the construction.
 
 `Length` and `Count` properties, and `GetEnumerator` methods, are assumed to have no side effects.
 
-If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *[create method](#create-methods)*, the construction of the collection instance as follows:
+---
+
+If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *[create method](#create-methods)*, the construction of the collection instance is as follows:
+
+* The elements are evaluated in order. Some or all elements may be evaluated *during* the steps below rather than before.
+
+* The compiler *may* determine the *known length* of the collection expression by invoking [*countable*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types) properties &mdash; or equivalent properties from well-known interfaces or types &mdash; on each *spread element expression*.
 
 * The constructor that is applicable with no arguments is invoked.
 
 * For each element in order:
   * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument. (Interleaving `Add` calls matches classic [*collection initializer behavior*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#117154-collection-initializers).)
   * If the element is a *spread element* then one of the following is used:
+    * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable `Add` instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
     * An applicable `AddRange` instance or extension method is invoked on the *collection instance* with the spread element *expression* as the argument.
     * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the collection instance and `int` index as arguments.
-    * The spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and the applicable `Add` instance or extension method is invoked for each item from the enumerator in order.
 
 * During the construction steps above, an applicable `EnsureCapacity` instance or extension method *may* be invoked one or more times on the *collection instance* with an `int` capacity argument.
 
+---
+
 If the target type is an *array*, a *span*, a type with a *[create method](#create-methods)*, or an *interface*, the construction of the collection instance is as follows:
 
-* The elements expressions are evaluated in order, exactly once each. Any further references to the element expressions refer to the results of this initial evaluation. All element expressions are evaluated before any references to the evaluated expressions.
+* The elements are evaluated in order. Some or all elements may be evaluated *during* the steps below rather than before.
+
+* The compiler *may* determine the *known length* of the collection expression by invoking [*countable*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types) properties &mdash; or equivalent properties from well-known interfaces or types &mdash; on each *spread element expression*.
 
 * A collection instance is created as follows:
-  * If the target type is an *array* and the collection expression has no *spread elements*, an array is allocated with the expected length.
-  * If the target type is a *span* or a type with a *create method*, and the collection has no *spread elements*, a span with the expected length is created referring to allocated storage.
+  * If the target type is an *array* and the collection expression has a *known length*, an array is allocated with the expected length.
+  * If the target type is a *span* or a type with a *create method*, and the collection has a *known length*, a span with the expected length is created referring to allocated storage.
   * Otherwise intermediate storage is allocated.
-  * *The compiler may determine the expected length of a collection expression that contains spread elements, at compile-time or at runtime, by checking for [*countable*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types) properties or well-known interfaces or types on each spread element. In those cases, the compiler may allocate the target *array* or *span* with the expected length directly rather than allocating intermediate storage.*
 
 * For each element in order:
-  * If the element is an *expression element*, the evaluated expression is assigned to the collection.
-  * If the element is a *spread element* then:
-    * The spread element *expression* is iterated using the applicable `GetEnumerator` instance or extension method, and each item from the enumerator is assigned to the collection in order.
-    * *The compiler *may* copy items from the spread element *expression* by using well-known interfaces or types directly when the behavior difference is not otherwise observable.*
+  * If the element is an *expression element*, the collection *indexer* is invoked to add the evaluated expression at the current index.
+  * If the element is a *spread element* then one of the following is used:
+    * A member of a well-known interface or type is invoked to copy items from the spread element expression to the collection instance.
+    * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the collection *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+    * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the collection instance and `int` index as arguments.
 
-* If intermediate storage was allocated for the collection, a collection instance is allocated with the expected type and length, and the values from the intermediate storage are copied to the target collection instance.
+* If intermediate storage was allocated for the collection, a collection instance is allocated with the actual length, and the values from the intermediate storage are copied to the target collection instance.
 
 * If the target type has a *create method*, the create method is invoked with the span instance.
 
