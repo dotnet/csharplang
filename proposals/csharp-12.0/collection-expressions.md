@@ -261,7 +261,7 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
     * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the collection *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
     * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the collection instance and `int` index as arguments.
 
-* If the target type has a *create method*, the create method is invoked with the span instance created initially or a span from intermediate storage.
+* If the target type has a *create method*, the create method is invoked with the span instance created initially or a span of the expected length from intermediate storage.
 
 * Otherwise if intermediate storage was allocated for the collection, a collection instance is allocated with the actual length, and the values from the intermediate storage are copied to the target collection instance.
 
