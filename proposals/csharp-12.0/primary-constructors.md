@@ -461,6 +461,19 @@ This is a potential future addition that can be adopted or not. The current prop
 
 ## Open questions
 
+### Lookup order for type parameters
+
+The https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#lookup section specifies that type parameters
+of declaring type should come before type's primary constructor parameters in every context where those parameters are in scope. However,
+we already have existing behavior with records - primary constructor parameters come before type parameters in base initializer and field
+initializers. 
+
+What should we do about this discrepancy?
+- Adjust the rules to match the behavior.
+- Adjust the behavior (a possible breaking change).
+- Disallow a primiry constructor parameter to use type parameter's name (a possible breaking change).
+- Do nothing, accept the inconsistency between the spec and implementation.
+
 ### Field targeting attributes for captured primary constructor parameters
 
 Should we allow field targeting attributes for captured primary constructor parameters?

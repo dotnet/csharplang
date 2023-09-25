@@ -6,23 +6,50 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- Updated on the C# standard process (Bill, after Aug 10)
-- Futures: reflection alternatives (Andy, after Aug 15)
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
 - *Design review*
 
+## Wed Oct 18, 2023
+
+## Mon Oct 16, 2023
+
+## Wed Oct 11, 2023
+
+## Mon Oct 9, 2023
+
+## Wed Oct 4, 2023
+
+## Mon Oct 2, 2023
+
+- Update on the C# standard process (Bill)
+
 ## Wed Sept 27, 2023
+
+- Futures: reflection alternatives (Andy)
 
 ## Mon Sept 25, 2023
 
+- [Primary constructory details](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#lookup-order-for-type-parameters) (Aleksey)
+
+# C# Language Design Notes for 2023
+
 ## Wed Sept 20, 2023
+
+[C# Language Design Meeting for September 20th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-20.md)
+
+- Collection expressions
+    - Type inference from spreads
+    - Overload resolution fallbacks
 
 ## Mon Sept 18, 2023
 
-# C# Language Design Notes for 2023
+[C# Language Design Meeting for September 18th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-18.md)
+
+- Collection expression questions
+    - Optimizing non-pattern collection construction
+    - Avoiding intermediate buffers for known-length cases
 
 ## Wed Aug 16 2023
 
