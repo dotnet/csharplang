@@ -216,7 +216,7 @@ ImmutableArray<int> ia =
 The elements of a collection expression are *evaluated* in order, left to right.
 Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 
-Spread elements are *iterated* in the order the elements appear in the collection expression, left to right. A spread element may be *iterated* before or after the subsequent elements in the collection expression are *evaluated*.
+A spread element may be *iterated* before or after the subsequent elements in the collection expression are *evaluated*.
 
 An unhandled exception thrown from any of the methods used during construction will be uncaught and will prevent further steps in the construction.
 
