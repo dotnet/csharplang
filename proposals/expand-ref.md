@@ -131,6 +131,46 @@ ref struct Deserializer
 
 This is accomplished by giving every `ref scoped` field a new two new escape scopes named _current field N_ and _current ref field N_ where _N_ is the numeric order of the field. For example the first field has a _safe-to-escape_ of _current field 1_ and a _ref-safe-to-escape_ of _current ref field N_. Both escape scopes can be converted to _current method_, and _current field N_ can be converted to _current ref field N_, but no other defined relationships exist. That serves to restrict their usage to the current method where the containing value is used. This escape scope applies to both 
 
+Below are a few examples of these rules in action
+
+```csharp
+ref struct NestedRefStruct { }
+ref struct RefStruct
+{
+    public NestedRefStruct NestedField;
+}
+
+ref struct S
+{
+    ref scoped RefStruct field;
+
+    RefStruct M1(RefStruct s)
+    {
+        // Okay
+        field = new(); 
+
+        // Error: calling-method is not convertible to current-field-1 as they have 
+        // no relationship
+        field = s;
+
+        // Error: safe-to-escape is current-field-1 which isn't returnable 
+        return field;
+    }
+
+    NestedRefStruct M2()
+    {
+        // Error: safe-to-escape is current-field-1 which isn't returnable 
+        return field.NestedField;
+    }
+
+    ref RefStruct M3()
+    {
+        // Error: safe-to-escape is current-ref-field-1 which isn't returnable 
+        return ref field;
+    }
+}
+```
+
 The [method arguments must match](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/low-level-struct-improvements.md#rules-method-arguments-must-match) rules do not need to be updated here as they already account for `ref` parameters being captured as `ref` field. Even though a `ref` to `ref struct` was not directly returnable before, it could be returned indirectly by a `ref` to a `struct` field of the value.
 
 The language will also allow for `ref` fields to be declared as `scoped ref`. There are less use cases for this but `ref scoped` implies `scoped ref` hence the rules must be adjusted to account for this. As such the syntax will be exposed because while the use cases are small the infrastructure already exists. The _ref-safe-to-escape_ of such fields follows the logic above for `ref scoped` fields.
