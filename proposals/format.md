@@ -260,7 +260,7 @@ the compiler won't emit a call to it.
 
 ### CLR stack allocation helpers
 The CLR only provides only 
-[localloc](https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.localloc?redirectedfrom=MSDN&view=netframework-4.7.2)
+[localloc](https://learn.microsoft.com/dotnet/api/system.reflection.emit.opcodes.localloc)
  for stack allocation of contiguous memory. This instruction is limited in that it only works for `unmanaged` types. 
  This means it can't be used as a universal solution for efficiently allocating the backing storage for `params 
  Span<T>`. 
