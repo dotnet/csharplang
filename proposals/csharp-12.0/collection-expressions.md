@@ -220,7 +220,7 @@ A spread element may be *iterated* before or after the subsequent elements in th
 
 An unhandled exception thrown from any of the methods used during construction will be uncaught and will prevent further steps in the construction.
 
-`Length` and `Count` properties, and `GetEnumerator` methods, are assumed to have no side effects.
+`Length`, `Count`, and `GetEnumerator` are assumed to have no side effects.
 
 ---
 
@@ -249,19 +249,19 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
 
 * The compiler *may* determine the *known length* of the collection expression by invoking [*countable*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#adding-index-and-range-support-to-existing-library-types) properties &mdash; or equivalent properties from well-known interfaces or types &mdash; on each *spread element expression*.
 
-* A collection instance is created as follows:
+* An *initialization instance* is created as follows:
   * If the target type is an *array* and the collection expression has a *known length*, an array is allocated with the expected length.
   * If the target type is a *span* or a type with a *create method*, and the collection has a *known length*, a span with the expected length is created referring to contiguous storage.
   * Otherwise intermediate storage is allocated.
 
 * For each element in order:
-  * If the element is an *expression element*, the collection instance *indexer* is invoked to add the evaluated expression at the current index.
+  * If the element is an *expression element*, the initialization instance *indexer* is invoked to add the evaluated expression at the current index.
   * If the element is a *spread element* then one of the following is used:
-    * A member of a well-known interface or type is invoked to copy items from the spread element expression to the collection instance.
-    * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the collection instance *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
-    * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the collection instance and `int` index as arguments.
+    * A member of a well-known interface or type is invoked to copy items from the spread element expression to the initialization instance.
+    * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the initialization instance *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+    * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the initialization instance and `int` index as arguments.
 
-* If intermediate storage was allocated for the collection, a collection instance is allocated with the actual collection length and the values from the intermediate storage are copied to the target collection instance, or if a span is required the compiler *may* use a span of the actual collection length from the intermediate storage.
+* If intermediate storage was allocated for the collection, a collection instance is allocated with the actual collection length and the values from the initialization instance are copied to the collection instance, or if a span is required the compiler *may* use a span of the actual collection length from the intermediate storage. Otherwise the initialization instance is the collection instance.
 
 * If the target type has a *create method*, the create method is invoked with the span instance.
 
