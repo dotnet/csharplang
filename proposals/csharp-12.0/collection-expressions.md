@@ -116,11 +116,11 @@ The following implicit *collection expression conversions* exist from a collecti
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-* To a *struct* or *class type* that implements `System.Collections.IEnumerable` where:
+* To a *struct* or *class type* `T` that implements `System.Collections.IEnumerable` where:
 
-  * The *type* contains an applicable instance constructor that can be invoked with no arguments.
-  * For each *expression element* `Ei` there is an applicable instance or extension method `Add` for a single argument `Ei`.
-  * For each *spread element* `Si` there is an applicable instance or extension method `Add` for a single argument of the *iteration type* of `Si`.
+  * The *type* contains an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* instance constructor that can be invoked with no arguments.
+  * For each *expression element* `Ei` there is an applicable instance or extension method `Add`  for `T` invocable with a single argument `Ei`.
+  * For each *spread element* `Si` there is an applicable instance or extension method `Add` for `T` invocable with a single argument of the *iteration type* of `Si`.
 
 * To an *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`, `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>` where:
 
@@ -255,10 +255,10 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
   * Otherwise intermediate storage is allocated.
 
 * For each element in order:
-  * If the element is an *expression element*, the collection *indexer* is invoked to add the evaluated expression at the current index.
+  * If the element is an *expression element*, the collection instance *indexer* is invoked to add the evaluated expression at the current index.
   * If the element is a *spread element* then one of the following is used:
     * A member of a well-known interface or type is invoked to copy items from the spread element expression to the collection instance.
-    * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the collection *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+    * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the collection instance *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
     * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the collection instance and `int` index as arguments.
 
 * If intermediate storage was allocated for the collection, a collection instance is allocated with the actual collection length and the values from the intermediate storage are copied to the target collection instance, or if a span is required the compiler *may* use a span of the actual collection length from the intermediate storage.
