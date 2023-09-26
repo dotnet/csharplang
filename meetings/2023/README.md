@@ -29,11 +29,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Futures: reflection alternatives (Andy)
 
+# C# Language Design Notes for 2023
+
 ## Mon Sept 25, 2023
 
-- [Primary constructory details](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#lookup-order-for-type-parameters) (Aleksey)
+[C# Language Design Meeting for September 25th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-25.md)
 
-# C# Language Design Notes for 2023
+- Primary constructors
+- Defining well-defined behavior for collection expression types
 
 ## Wed Sept 20, 2023
 
