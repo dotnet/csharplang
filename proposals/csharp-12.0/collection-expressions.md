@@ -261,9 +261,9 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
     * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the collection *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
     * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the collection instance and `int` index as arguments.
 
-* If the target type has a *create method*, the create method is invoked with the span instance created initially or a span of the expected length from intermediate storage.
+* If intermediate storage was allocated for the collection, a collection instance is allocated with the actual collection length and the values from the intermediate storage are copied to the target collection instance, or if a span is required the compiler *may* use a span of the actual collection length from the intermediate storage.
 
-* Otherwise if intermediate storage was allocated for the collection, a collection instance is allocated with the actual length, and the values from the intermediate storage are copied to the target collection instance.
+* If the target type has a *create method*, the create method is invoked with the span instance.
 
 > *Note:*
 > The compiler may *delay* adding elements to the collection &mdash; or *delay* iterating through spread elements &mdash; until after evaluating subsequent elements. (When subsequent spread elements have *countable* properties that would allow calculating the expected length of the collection before allocating the collection.) Conversely, the compiler may *eagerly* add elements to the collection &mdash; and *eagerly* iterate through spread elements &mdash; when there is no advantage to delaying.
