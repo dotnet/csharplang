@@ -205,7 +205,7 @@ These operators are considered during overload resolution based on normal rules 
 | `>>` | `nuint operator >>(nuint left, int right)` | `shr.un` |
 
 For some binary operators, the IL operators support additional operand types
-(see [ECMA-335](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf) III.1.5 Operand type table).
+(see [ECMA-335](https://www.ecma-international.org/publications-and-standards/standards/ecma-335/) III.1.5 Operand type table).
 But the set of operand types supported by C# is limited for simplicity and for consistency with existing operators in the language.
 
 Lifted versions of the operators, where the arguments and return types are `nint?` and `nuint?`, are supported.
@@ -334,7 +334,7 @@ enum E : nint // error: byte, sbyte, short, ushort, int, uint, long, or ulong ex
 Reads and writes are atomic for `nint` and `nuint`.
 
 Fields may be marked `volatile` for types `nint` and `nuint`.
-[ECMA-334](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-334.pdf) 15.5.4 does not include `enum` with base type `System.IntPtr` or `System.UIntPtr` however.
+[ECMA-334](https://www.ecma-international.org/publications-and-standards/standards/ecma-334/) 15.5.4 does not include `enum` with base type `System.IntPtr` or `System.UIntPtr` however.
 
 `default(nint)` and `new nint()` are equivalent to `(nint)0`; `default(nuint)` and `new nuint()` are equivalent to `(nuint)0`.
 
