@@ -17,17 +17,21 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Oct 11, 2023
 
+- Update on the C# standard process (Bill)
+
 ## Mon Oct 9, 2023
 
 ## Wed Oct 4, 2023
 
+- Futures: reflection alternatives (Andy)
+
 ## Mon Oct 2, 2023
 
-- Update on the C# standard process (Bill)
+- [Collection Expression details](https://github.com/dotnet/csharplang/issues/7542) (Cyrus and Chuck
 
 ## Wed Sept 27, 2023
 
-- Futures: reflection alternatives (Andy)
+- [Collection Expression details](https://github.com/dotnet/csharplang/issues/7542) (Cyrus and Chuck
 
 # C# Language Design Notes for 2023
 
