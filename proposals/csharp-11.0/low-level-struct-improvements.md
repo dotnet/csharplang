@@ -908,7 +908,7 @@ The lifetime parameter `$this` on type definitions is _not_ predefined but it do
 - It must be the first lifetime parameter.
 - It must be covariant: `out $this`. 
 - The lifetime of `ref` fields must be convertible to `$this`
-- The `$this` lifetime of all non-ref fields must `$heap` or `$this`.
+- The `$this` lifetime of all non-ref fields must be `$heap` or `$this`.
 
 The lifetime of a ref is expressed by providing a lifetime argument to the ref. For example a `ref` that refers to the heap is expressed as `ref<$heap>`.
 
@@ -921,7 +921,7 @@ The basic rules for the lifetime are defined as:
 - For a `ref` field defined as `ref<$l0> T<$l1, $l2, ... $ln>`:
     - All lifetimes `$l1` through `$ln` must be invariant. 
     - The lifetime of `$l0` must be convertible to `$this`
-- For a `ref`` defined as `ref<$a> T<$b, ...>`, `$b` must convertible to `$a`
+- For a `ref` defined as `ref<$a> T<$b, ...>`, `$b` must be convertible to `$a`
 - The `ref` of a variable has a lifetime defined by:
     - For a `ref` local, parameter, field or return of type `ref<$a> T` the lifetime is `$a`
     - `$heap` for all reference types and fields of reference types

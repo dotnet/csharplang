@@ -27,8 +27,8 @@ The language will allow for parameters to be declared as `ref scoped`. This will
 ```csharp
 Span<int> M(Span<T> p1, ref scoped Span<int> p2)
 {
-    // Error: cannot returned scoped value
-    return span;
+    // Error: cannot return scoped value
+    return p2;
 
     // Error: the safe-to-escape of p1 is not convertible to p2.
     p2 = p1;
@@ -79,7 +79,7 @@ void Swap(ref scoped Span<int> p1, ref scoped Span<int> p2)
     scoped Span<int> local1 = p1; 
     scoped Span<int> local2 = p2; 
 
-    // Okay: however the safe-to-escape here is current parameter X, not 
+    // Okay: however the safe-to-escape here is current parameter N, not 
     // current method so this could cause a bit of confusion later on
     Span<int> local3 = p1; 
     Span<int> local4 = p2; 
@@ -91,7 +91,7 @@ void Swap(ref scoped Span<int> p1, ref scoped Span<int> p2)
 }
 ```
 
-A `ref scoped` parameter is also implicitly `scoped ref`. That means neither the value nor it's `ref` can be returned from the method. Both `ref` and `in` parameters can have their values modified with `scoped`. An `out` parameter cannot have its value modified with `scoped` as such a declaration is non-sensical. 
+A `ref scoped` parameter is also implicitly `scoped ref`. That means neither the value nor its `ref` can be returned from the method. Both `ref` and `in` parameters can have their values modified with `scoped`. An `out` parameter cannot have its value modified with `scoped` as such a declaration is non-sensical. 
 
 ```csharp
 void M(
@@ -105,7 +105,7 @@ The [method arguments must match](https://github.com/dotnet/csharplang/blob/main
 
 Detailed notes:
 - A `ref scoped` parameter is implicitly `scoped ref`
-- A `out scoped` parameter declaration is an error
+- An `out scoped` parameter declaration is an error
 
 ### ref field to ref struct
 The language will allow for `ref struct` to appear as `ref scoped` fields. This `scoped` will serve to ensure the values cannot be escaped outside the containing instance but can be read and manipulated within it. 
@@ -129,7 +129,7 @@ ref struct Deserializer
 }
 ```
 
-This is accomplished by giving every `ref scoped` field a new two new escape scopes named _current field N_ and _current ref field N_ where _N_ is the numeric order of the field. For example the first field has a _safe-to-escape_ of _current field 1_ and a _ref-safe-to-escape_ of _current ref field N_. Both escape scopes can be converted to _current method_, and _current field N_ can be converted to _current ref field N_, but no other defined relationships exist. That serves to restrict their usage to the current method where the containing value is used. This escape scope applies to both 
+This is accomplished by giving every `ref scoped` field two new escape scopes named _current field N_ and _current ref field N_ where _N_ is the numeric order of the field. For example, the first field has a _safe-to-escape_ of _current field 1_ and a _ref-safe-to-escape_ of _current ref field N_. Both escape scopes can be converted to _current method_, and _current field N_ can be converted to _current ref field N_, but no other defined relationships exist. That serves to restrict their usage to the current method where the containing value is used. This escape scope applies to both.
 
 Below are a few examples of these rules in action
 
@@ -214,7 +214,7 @@ void M<$param1>(ref<$local> S<$param1> s)
 
 This definition prevents the value from escaping from the method as the lifetime is not returnable. It also prevents local data from escaping from the current method through the parameter as the lifetime is wider that `$local` but not equivalent.
 
-```
+```csharp
 void M<$param1>(ref<$local> S<$param1> p)
     where $param1 : $local
 {
@@ -227,7 +227,7 @@ void M<$param1>(ref<$local> S<$param1> p)
 ```
 
 <a name="annotations-field"></a>
-At an annotation level every field marked `scoped ref` (explicitly or implicitly via `ref scoped`)will have a new lifetime parameter defined. The name will be `$refFieldN` where _N_ is the numerical order of the field. That lifetime will have the relationship `where $refFieldN : $local` in all methods that use the type.
+At an annotation level every field marked `scoped ref` (explicitly or implicitly via `ref scoped`) will have a new lifetime parameter defined. The name will be `$refFieldN` where _N_ is the numerical order of the field. That lifetime will have the relationship `where $refFieldN : $local` in all methods that use the type.
 
 ```csharp
 ref struct S
@@ -242,14 +242,14 @@ ref struct S<out $this, $refField1>
     ref<$refField1> int i;
 }
 
-S<$cm> M<$cm, $l1>M(S<$cm, $l1> p)
+S<$cm> M<$cm, $l1>(S<$cm, $l1> p)
     where $l1 : $local
 {
 
 }
 ```
 
-Every field marked as `ref scoped` will have a new lifetime parameter defined. Th name will be `$fieldN` where _N_ is the numerical order of the field. That lifetime will have the relationship `where $fieldN : $refFieldN` defined on the type. It will also have the relationship `where $fieldN : $local` in all method that use the type.
+Every field marked as `ref scoped` will have a new lifetime parameter defined. The name will be `$fieldN` where _N_ is the numerical order of the field. That lifetime will have the relationship `where $fieldN : $refFieldN` defined on the type. It will also have the relationship `where $fieldN : $local` in all method that use the type.
 
 ```csharp
 ref struct S1 { }
