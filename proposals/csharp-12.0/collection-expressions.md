@@ -116,11 +116,11 @@ The following implicit *collection expression conversions* exist from a collecti
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-* To a *struct* or *class type* `T` that implements `System.Collections.IEnumerable` where:
+* To a *struct* or *class type* that implements `System.Collections.Generic.IEnumerable<T>` where:
 
-  * The *type* contains an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* instance constructor that can be invoked with no arguments.
-  * For each *expression element* `Ei` there is an applicable instance or extension method `Add`  for `T` invocable with a single argument `Ei`.
-  * For each *spread element* `Si` there is an applicable instance or extension method `Add` for `T` invocable with a single argument of the *iteration type* of `Si`.
+  * For each *element* `Ei` there is an *implicit conversion* to `T`.
+
+* To a *struct* or *class type* that implements `System.Collections.IEnumerable` and *does not implement* `System.Collections.Generic.IEnumerable<T>`.
 
 * To an *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`, `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>` where:
 
@@ -425,16 +425,26 @@ var z = Extensions.AsImmutableArray([3]); // ok
 [*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11644-better-conversion-from-expression) is updated to prefer certain target types in collection expression conversions.
 
 In the updated rules:
-* A *span_type* is `System.Span<T>` or `System.ReadOnlySpan<T>`.
-* An *array_or_array_interface_type* is an *array type* or one of the following *interface types* from `System.Collections.Generic` implemented by an *array type*: `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, `ICollection<T>`, `IList<T>`.
+* A *span_type* is one of:
+  * `System.Span<T>`
+  * `System.ReadOnlySpan<T>`.
+* An *array_or_array_interface_or_string_type* is one of:
+  * an *array type*
+  * `System.String`
+  * one of the following *interface types* implemented by an *array type*:
+    * `System.Collections.Generic.IEnumerable<T>`
+    * `System.Collections.Generic.IReadOnlyCollection<T>`
+    * `System.Collections.Generic.IReadOnlyList<T>`
+    * `System.Collections.Generic.ICollection<T>`
+    * `System.Collections.Generic.IList<T>`
 
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
 >
 > * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
 > * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a [*better conversion target*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11646-better-conversion-target) than `T₂` **and the following is *not true*:**
 >   * **`C₁` and `C₂` are collection expression conversions *and***
->   * **`T₁` is a *span_type* and `T₂` is an *array_or_array_interface_type*, *or* `T₂` is a *span_type* and `T₁` is an *array_or_array_interface_type***
-> * **`C₁` and `C₂` are collection expression conversions, and `T₁` is a *span_type* with *iteration type* `E₁`, and `T₂` is an *array_or_array_interface_type* with *iteration type* `E₂`, and `E₁` is implicitly convertible to `E₂`**
+>   * **`T₁` is a *span_type* and `T₂` is an *array_or_array_interface_or_string_type*, *or* `T₂` is a *span_type* and `T₁` is an *array_or_array_interface_or_string_type***
+> * **`C₁` and `C₂` are collection expression conversions, and `T₁` is a *span_type* with *iteration type* `E₁`, and `T₂` is an *array_or_array_interface_or_string_type* with *iteration type* `E₂`, and `E₁` is implicitly convertible to `E₂`**
 > * ...
 
 Examples of differences with overload resolution between array initializers and collection expressions:
