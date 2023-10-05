@@ -18,8 +18,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Wed Oct 11, 2023
 
 - Update on the C# standard process (Bill)
+- *Triage championed features and milestones*
 
 ## Mon Oct 9, 2023
+
+- *Triage championed features and milestones*
 
 # C# Language Design Notes for 2023
 
