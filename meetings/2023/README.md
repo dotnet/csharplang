@@ -21,11 +21,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Oct 9, 2023
 
+# C# Language Design Notes for 2023
+
 ## Wed Oct 4, 2023
 
-- Futures: reflection alternatives (Andy)
+[C# Language Design Meeting for October 4th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-04.md)
 
-# C# Language Design Notes for 2023
+- Trimming and AOT
 
 ## Mon Oct 2, 2023
 
