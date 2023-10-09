@@ -30,11 +30,21 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Update on the C# standard process (Bill)
 - *Triage championed features and milestones*
 
+# C# Language Design Notes for 2023
+
 ## Mon Oct 9, 2023
 
-- *Triage championed features and milestones*
+[C# Language Design Meeting for October 9th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-09.md)
 
-# C# Language Design Notes for 2023
+- Triage(#discussion)
+    - ReadOnlySpan initialization from static data
+    - Embedded Language Indicators for raw string literals
+    - list-patterns on enumerables
+    - Make generated \`Program\`\` for top-level statements public by default
+    - CallerCharacterNumberAttribute
+    - Add private and namespace accessibility modifiers for top-level types
+    - Require await to apply nullable postconditions to task-returning calls
+    - `is` expression evaluating `const` expression should be considered constant
 
 ## Wed Oct 4, 2023
 
