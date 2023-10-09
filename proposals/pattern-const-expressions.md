@@ -94,4 +94,4 @@ Currently, equality and comparison operators can be used to compare against othe
 ## Design meetings
 [meetings]: #design-meetings
 
-None.
+- Approval for Any Time milestone: [Here](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-09.md#is-expression-evaluating-const-expression-should-be-considered-constant)
