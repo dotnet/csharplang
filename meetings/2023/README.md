@@ -36,7 +36,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 [C# Language Design Meeting for October 9th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-09.md)
 
-- Triage(#discussion)
+- Triage
     - ReadOnlySpan initialization from static data
     - Embedded Language Indicators for raw string literals
     - list-patterns on enumerables
