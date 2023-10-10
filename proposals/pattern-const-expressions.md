@@ -113,7 +113,6 @@ Currently, equality and comparison operators can be used to compare against othe
 [unresolved]: #unresolved-questions
 
 - [ ] Requires LDM review
-- [ ] Should we introduce a new error for non-constant subpatterns in order to isolate the root cause of the inability to consider the expression constant?
 
 ## Design meetings
 [meetings]: #design-meetings
