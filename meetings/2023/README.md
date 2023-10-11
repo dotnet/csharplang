@@ -25,12 +25,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Oct 16, 2023
 
+# C# Language Design Notes for 2023
+
 ## Wed Oct 11, 2023
 
-- Update on the C# standard process (Bill)
-- *Triage championed features and milestones*
+[C# Language Design Meeting for October 11th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-11.md)
 
-# C# Language Design Notes for 2023
+- C# spec update
+- Collection expressions
 
 ## Mon Oct 9, 2023
 
