@@ -23,7 +23,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Oct 18, 2023
 
-- C# 13 planning (Jared and Mads)
+- C# 13 planning (Jared and Mads - no notes)
 
 ## Mon Oct 16, 2023
 
