@@ -54,10 +54,6 @@ The diagnostic message is a specific message, where `'{0}'` is the fully-qualifi
 '{0}' is for evaluation purposes only and is subject to change or removal in future updates.
 ```
 
-
-
-
-
 The attribute is not inherited from base types or overridden members.
 
 ## ObsoleteAttribute and DeprecatedAttribute
