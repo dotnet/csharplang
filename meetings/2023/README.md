@@ -25,9 +25,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - C# 13 planning (Jared and Mads - no notes)
 
+# C# Language Design Notes for 2023
+
 ## Mon Oct 16, 2023
 
-# C# Language Design Notes for 2023
+[C# Language Design Meeting for October 16th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-16.md)
+
+- Triage
+    - Breaking change warnings
+    - Determine natural type of method group by looking scope-by-scope
+    - u8 string interpolation
+    - Lock statement pattern
+    - String/Character escape sequence \\e as a short-hand for \\u001b 
+    - New operator %% for canonical Modulus operations
 
 ## Wed Oct 11, 2023
 
