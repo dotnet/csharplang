@@ -46,7 +46,7 @@ For example, if the API is marked with `[Experimental("DiagID")]` or `[Experimen
 the diagnostic can be suppressed with `#pragma warning disable DiagID`.
 
 The diagnostic ID given to the experimental attribute must be a [valid C# identifier](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/lexical-structure.md#643-identifiers).  
-This means the diagnostic ID should be valid as a variable name in C#. 
+This means the diagnostic ID needs to follow the same naming rules as a variable in C#. 
 
 
 The diagnostic message is a specific message, where `'{0}'` is the fully-qualified type or member name.
