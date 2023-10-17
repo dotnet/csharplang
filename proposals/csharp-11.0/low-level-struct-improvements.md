@@ -6,6 +6,8 @@ Low Level Struct Improvements
 ## Summary
 This proposal is an aggregation of several different proposals for `struct` performance improvements: `ref` fields and the ability to override lifetime defaults. The goal being a design which takes into account the various proposals to create a single overarching feature set for low level `struct` improvements.
 
+> Note: Previous versions of this spec used the terms "ref-safe-to-escape" and "safe-to-escape", which were introduced in the [Span safety](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) feature specification. The [ECMA standard committee](https://www.ecma-international.org/task-groups/tc49-tg2/) changed the names to ["ref-safe-context"](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/variables#972-ref-safe-contexts) and ["safe-context"](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/structs#16412-safe-context-constraint), respectively. The values of the safe context have been refined to use "declaration-block", "function-member", and "caller-context" consistently. The speclets had used "caller-context" and "safe-to-return" as synonyms. This speclet has been updated to use the terms in the standard.
+
 ## Motivation
 Earlier versions of C# added a number of low level performance features to the language: `ref` returns, `ref struct`, function pointers, etc. ... These enabled .NET developers to write highly performant code while continuing to leverage the C# language rules for type and memory safety.  It also allowed the creation of fundamental performance types in the .NET libraries like `Span<T>`.
 
@@ -122,14 +124,14 @@ This feature requires runtime support and changes to the ECMA spec. As such thes
 
 The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref reassigned. 
 
-First the rules establishing *ref-safe-to-escape* values for fields need to be updated for `ref` fields as follows:
+First the rules establishing *ref-safe-context* values for fields need to be updated for `ref` fields as follows:
 
 <a name="rules-field-lifetimes"></a>
 
-> An expression in the form `ref e.F` *ref-safe-to-escape* as follows:
-> 1. If `F` is a `ref` field its *ref-safe-to-escape* scope is the *safe-to-escape* scope of `e`.
-> 2. Else if `e` is of a reference type, it has *ref-safe-to-escape* of *calling method*
-> 3. Else its *ref-safe-to-escape* is taken from the *ref-safe-to-escape* of `e`.
+> An expression in the form `ref e.F` *ref-safe-context* as follows:
+> 1. If `F` is a `ref` field its *ref-safe-context* is the *safe-context* of `e`.
+> 2. Else if `e` is of a reference type, it has *ref-safe-context* of *caller-context*
+> 3. Else its *ref-safe-context* is taken from the *ref-safe-context* of `e`.
 
 This does not represent a rule change though as the rules have always accounted for `ref` state to exist inside a `ref struct`. This is in fact how the `ref` state in `Span<T>` has always worked and the consumption rules correctly account for this. The change here is just accounting for developers to be able to access `ref` fields directly and ensure they do so by the existing rules implicitly applied to `Span<T>`. 
 
@@ -144,8 +146,8 @@ ref struct RS
     // Okay: this falls into bullet one above. 
     public ref int Prop1 => ref _refField;
 
-    // Error: This is bullet four above and the ref-safe-to-escape of `this`
-    // in a `struct` is the current method scope.
+    // Error: This is bullet four above and the ref-safe-context of `this`
+    // in a `struct` is function-member.
     public ref int Prop2 => ref _field;
 }
 ```
@@ -160,8 +162,8 @@ Next the rules for ref reassignment need to be adjusted for the presence of `ref
 The left operand of the `= ref` operator must be an expression that binds to a ref local variable, a ref parameter (other than `this`), an out parameter, **or a ref field**.
 
 > For a ref reassignment in the form `e1 = ref e2` both of the following must be true:
-> 1. `e2` must have *ref-safe-to-escape* at least as large as the *ref-safe-to-escape* of `e1`
-> 2. `e1` must have the same *safe-to-escape* as `e2` [Note](#examples-ref-reassignment-safety)
+> 1. `e2` must have *ref-safe-context* at least as large as the *ref-safe-context* of `e1`
+> 2. `e1` must have the same *safe-context* as `e2` [Note](#examples-ref-reassignment-safety)
 
 That means the desired `Span<T>` constructor works without any extra annotation:
 
@@ -174,29 +176,29 @@ readonly ref struct Span<T>
     public Span(ref T value)
     {
         // Falls into the `x.e1 = ref e2` case, where `x` is the implicit `this`. The 
-        // safe-to-escape of `this` is *return only* and ref-safe-to-escape of `value` is 
-        // *calling method* hence this is legal.
+        // safe-context of `this` is *return-only* and ref-safe-context of `value` is 
+        // *caller-context* hence this is legal.
         _field = ref value;
         _length = 1;
     }
 }
 ```
 
-The change to ref reassignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based solely on their declaration not on their usage. All `ref` and `in` parameters have *ref-safe-to-escape* of *return only* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
+The change to ref reassignment rules means `ref` parameters can now escape from a method as a `ref` field in a `ref struct` value. As discussed in the [compat considerations section](#new-span-challenges) this can change the rules for existing APIs that never intended for `ref` parameters to escape as a `ref` field. The lifetime rules for parameters are based solely on their declaration not on their usage. All `ref` and `in` parameters have *ref-safe-context* of *caller-context* and hence can now be returned by `ref` or a `ref` field. In order to support APIs having `ref` parameters that can be escaping or non-escaping, and thus restore C# 10 call site semantics, the language will introduce limited lifetime annotations.
 
 #### `scoped` modifier
 <a name="rules-scoped"></a>
 
-The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or a value that is a `ref struct` and has the impact of restricting the *ref-safe-to-escape* or *safe-to-escape* lifetime, respectively, to the *current method*. For example: 
+The keyword `scoped` will be used to restrict the lifetime of a value. It can be applied to a `ref` or a value that is a `ref struct` and has the impact of restricting the *ref-safe-context* or *safe-context* lifetime, respectively, to the *function-member*. For example: 
 
-| Parameter or Local | ref-safe-to-escape | safe-to-escape |
+| Parameter or Local | ref-safe-context | safe-context |
 |---|---|---|
-| `Span<int> s` | *current method* | *calling method* | 
-| `scoped Span<int> s` | *current method* | *current method* | 
-| `ref Span<int> s` | *calling method* | *calling method* | 
-| `scoped ref Span<int> s` | *current method* | *calling method* | 
+| `Span<int> s` | *function-member* | *caller-context* | 
+| `scoped Span<int> s` | *function-member* | *function-member* | 
+| `ref Span<int> s` | *caller-context* | *caller-context* | 
+| `scoped ref Span<int> s` | *function-member* | *caller-context* | 
 
-In this relationship the *ref-safe-to-escape* of a value can never exceed the *safe-to-escape*.  
+In this relationship the *ref-safe-context* of a value can never be wider the *safe-context*.  
 
 This allows for APIs in C# 11 to be annotated such that they have the same rules as C# 10:
 
@@ -221,28 +223,28 @@ Span<int> BadUseExamples(int parameter)
 }
 ```
 
-The `scoped` annotation also means that the `this` parameter of a `struct` can now be defined as `scoped ref T`. Previously it had to be special cased in the rules as `ref` parameter that had different *ref-safe-to-escape* rules than other `ref` parameters (see all the references to including or excluding the receiver in the span safety rules). Now it can be expressed as a general concept throughout the rules which further simplifies them.
+The `scoped` annotation also means that the `this` parameter of a `struct` can now be defined as `scoped ref T`. Previously it had to be special cased in the rules as `ref` parameter that had different *ref-safe-context* rules than other `ref` parameters (see all the references to including or excluding the receiver in the span safety rules). Now it can be expressed as a general concept throughout the rules which further simplifies them.
 
 The `scoped` annotation can also be applied to the following locations:
 
-- locals: This annotation sets the lifetime as *safe-to-escape*, or *ref-safe-to-escape* in case of a `ref` local, to of *current method* irrespective of the initializer lifetime. 
+- locals: This annotation sets the lifetime as *safe-context*, or *ref-safe-context* in case of a `ref` local, to of *function-member* irrespective of the initializer lifetime. 
 
 ```c#
 Span<int> ScopedLocalExamples()
 {
-    // Error: `span` has a safe-to-escape of *current method*. That is true even though the 
-    // initializer has a safe-to-escape of *calling method*. The annotation overrides the 
+    // Error: `span` has a safe-context of *function-member*. That is true even though the 
+    // initializer has a safe-context of *caller-context*. The annotation overrides the 
     // initializer
     scoped Span<int> span = default;
     return span;
 
-    // Okay: the initializer has safe-to-escape of *calling method* hence so does `span2` 
+    // Okay: the initializer has safe-context of *caller-context* hence so does `span2` 
     // and the return is legal.
     Span<int> span2 = default;
     return span2;
 
     // The declarations of `span3` and `span4` are functionally identical because the 
-    // initializer has a safe-to-escape of *current method* meaning the `scoped` annotation
+    // initializer has a safe-context of *function-member* meaning the `scoped` annotation
     // is effectively implied on `span3`
     Span<int> span3 = stackalloc int[42];
     scoped Span<int> span4 = stackalloc int[42];
@@ -256,14 +258,14 @@ The `scoped` annotation cannot be applied to any other location including return
 #### Change the behavior of `out` parameters
 <a name="out-compat-change"></a>
 
-To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *ref-safe-to-escape* value for `out` parameters to be *current method*. Effectively `out` parameters are implicitly `scoped out` going forward. From a compat perspective this means they cannot be returned by `ref`:
+To further limit the impact of the compat change of making `ref` and `in` parameters returnable as `ref` fields, the language will change the default *ref-safe-context* value for `out` parameters to be *function-member*. Effectively `out` parameters are implicitly `scoped out` going forward. From a compat perspective this means they cannot be returned by `ref`:
 
 ```c#
 ref int Sneaky(out int i) 
 {
     i = 42;
 
-    // Error: ref-safe-to-escape of out is now the current method
+    // Error: ref-safe-context of out is now function-member
     return ref i;
 }
 ```
@@ -280,10 +282,10 @@ Span<byte> Use()
 {
     var buffer = new byte[256];
 
-    // If we keep current `out` ref-safe-to-escape this is an error. The language must consider
+    // If we keep current `out` ref-safe-context this is an error. The language must consider
     // the `read` parameter as returnable as a `ref` field
     //
-    // If we change `out` ref-safe-to-escape this is legal. The language does not consider the 
+    // If we change `out` ref-safe-context this is legal. The language does not consider the 
     // `read` parameter to be returnable hence this is safe
     int read;
     return Read(buffer, out read);
@@ -302,18 +304,18 @@ Span<int> StrangeButLegal(out Span<int> span)
 }
 ```
 
-Together these changes mean the argument to an `out` parameter does not contribute *safe-to-escape* or *ref-safe-to-escape* values to method invocations. This significantly reduces the overall compat impact of `ref` fields as well as simplifies how developers think about `out`. An argument to an `out` parameter does not contribute to the return, it is simply an output. 
+Together these changes mean the argument to an `out` parameter does not contribute *safe-context* or *ref-safe-context* values to method invocations. This significantly reduces the overall compat impact of `ref` fields as well as simplifies how developers think about `out`. An argument to an `out` parameter does not contribute to the return, it is simply an output. 
 
-#### Infer *safe-to-escape* of declaration expressions
+#### Infer *safe-context* of declaration expressions
 <a id="infer-safe-to-escape-of-declaration-expressions"></a>
-The *safe-to-escape* of a declaration variable from an `out` argument (`M(x, out var y)`) or deconstruction (`(var x, var y) = M()`) is the *narrowest* of the following:
-* calling method
-* if out variable is marked `scoped`, then the current local scope (i.e. current method or narrower).
+The *safe-context* of a declaration variable from an `out` argument (`M(x, out var y)`) or deconstruction (`(var x, var y) = M()`) is the *narrowest* of the following:
+* caller-context
+* if out variable is marked `scoped`, then *declaration-block* (i.e. function-member or narrower).
 * if out variable's type is ref struct, consider all arguments to the containing invocation, including the receiver:
-  * STE of any argument where its corresponding parameter is not `out` and has STE of ReturnOnly or wider
-  * RSTE of any argument where its corresponding parameter has RSTE of ReturnOnly or wider
+  * *safe-context* of any argument where its corresponding parameter is not `out` and has *safe-context* of *return-only* or wider
+  * *ref-safe-context* of any argument where its corresponding parameter has *ref-safe-context* of *return-only* or wider
     
-See also [Examples of inferred *safe-to-escape* of declaration expressions](#examples-of-inferred-safe-to-escape-of-declaration-expressions).
+See also [Examples of inferred *safe-context* of declaration expressions](#examples-of-inferred-safe-context-of-declaration-expressions).
 
 #### Implicitly `scoped` parameters
 <a name="implicitly-scoped"></a>
@@ -323,87 +325,87 @@ Overall there are two `ref` location which are implicitly declared as `scoped`:
 
 The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
 
-When discussing the *ref-safe-to-escape* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-to-escape* is that of the lvalue, otherwise it is *current method*. Again `in` will only be called out here when it is important to the semantic of the current rule.
+When discussing the *ref-safe-context* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-context* is that of the lvalue, otherwise it is *function-member*. Again `in` will only be called out here when it is important to the semantic of the current rule.
 
-#### Return-only escape scope
+#### Return-only safe context
 <a name="return-only"></a>
-The design also requires that the introduction of a new escape scope: *return only*. This is similar to *calling method* in that it can be returned but it can **only** be returned through a `return` statement. 
+The design also requires that the introduction of a new safe-context: *return-only*. This is similar to *caller-context* in that it can be returned but it can **only** be returned through a `return` statement. 
 
-The details of *return only* is that it's a scope which is greater than *current method* but smaller than *calling method*. An expression provided to a `return` statement must be at least *return only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-to-escape* of *return only* will fail because it's smaller than the `ref` parameter's *safe-to-escape* which is *calling method*. The need for this new escape scope will be discussed [below](#rules-unscoped). 
+The details of *return-only* is that it's a context which is greater than *function-member* but smaller than *caller-context*. An expression provided to a `return` statement must be at least *return-only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-context* of *return-only* will fail because it's smaller than the `ref` parameter's *safe-context* which is *caller-context*. The need for this new escape context will be discussed [below](#rules-unscoped). 
 
-There are three locations which default to *return only*:
+There are three locations which default to *return-only*:
 - A `ref` or `in` parameter. This is done in part for `ref struct` to prevent [silly cyclic assignment](#cyclic-assignment) issues. It is done uniformly though to simplify the model as well as minimize compat changes.
-- A `out` parameter for a `ref struct` will have *safe-to-escape* of *return only*. This allows for return and `out` to be equally expressive. This does not have the silly cyclic assignment problem because `out` is implicitly `scoped` so the *ref-safe-to-escape* is still smaller than the *safe-to-escape*.
+- A `out` parameter for a `ref struct` will have *safe-context* of *return-only*. This allows for return and `out` to be equally expressive. This does not have the silly cyclic assignment problem because `out` is implicitly `scoped` so the *ref-safe-context* is still smaller than the *safe-context*.
 - A `this` parameter for a `struct` constructor. This falls out due to being modeled as `out` parameters. 
 
-Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-to-escape*, and if applicable a *ref-safe-to-escape*, of at least *return only*. That includes `return` statements, expression bodied members and lambda expressions.
+Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-context*, and if applicable a *ref-safe-context*, of at least *return-only*. That includes `return` statements, expression bodied members and lambda expressions.
 
-Likewise any assignment to an `out` must have a *safe-to-escape* of at least *return only*. This is not a special case though, this just follows from the existing assignment rules.
+Likewise any assignment to an `out` must have a *safe-context* of at least *return-only*. This is not a special case though, this just follows from the existing assignment rules.
 
-Note: An expression whose type is not a `ref struct` type always has a *safe-to-return* of *calling method*. 
+Note: An expression whose type is not a `ref struct` type always has a *safe-context* of *caller-context*. 
 
 #### Rules for method invocation
 <a name="rules-method-invocation"></a>
 
 The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `expr` that is passed to parameter `p`:
 
-> 1. If `p` is `scoped ref` then `expr` does not contribute *ref-safe-to-escape* when considering arguments.
-> 2. If `p` is `scoped` then `expr` does not contribute *safe-to-escape* when considering arguments. 
-> 3. If `p` is `out` then `expr` does not contribute *ref-safe-to-escape* or *safe-to-escape* [more details](#out-compat-change)
+> 1. If `p` is `scoped ref` then `expr` does not contribute *ref-safe-context* when considering arguments.
+> 2. If `p` is `scoped` then `expr` does not contribute *safe-context* when considering arguments. 
+> 3. If `p` is `out` then `expr` does not contribute *ref-safe-context* or *safe-context* [more details](#out-compat-change)
 
-The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-to-escape* or *safe-to-escape* value of the method return respectively. That is because the values can't contribute to that lifetime as the `scoped` annotation prevents it.
+The language "does not contribute" means the arguments are simply not considered when calculating the *ref-safe-context* or *safe-context* value of the method return respectively. That is because the values can't contribute to that lifetime as the `scoped` annotation prevents it.
 
 The method invocation rules can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`. The value rules need to change to account for `ref` field returns:
 
-> A value resulting from a method invocation `e1.M(e2, ...)`, where `M()` does not return ref-to-ref-struct, is *safe-to-escape* from the narrowest of the following scopes:
-> 1. The *calling method*
-> 2. When the return is a `ref struct` the *safe-to-escape* contributed by all argument expressions
-> 3. When the return is a `ref struct` the *ref-safe-to-escape* contributed by all `ref` arguments
+> A value resulting from a method invocation `e1.M(e2, ...)`, where `M()` does not return ref-to-ref-struct, is *safe-context* from the narrowest of the following:
+> 1. The *caller-context*
+> 2. When the return is a `ref struct` the *safe-context* contributed by all argument expressions
+> 3. When the return is a `ref struct` the *ref-safe-context* contributed by all `ref` arguments
 >
-> If `M()` does return ref-to-ref-struct, the *safe-to-escape* is the same as the *safe-to-escape* of all arguments which are ref-to-ref-struct. It is an error if there are multiple arguments with different *safe-to-escape* because of [method arguments must match](#rules-method-arguments-must-match).
+> If `M()` does return ref-to-ref-struct, the *safe-context* is the same as the *safe-context* of all arguments which are ref-to-ref-struct. It is an error if there are multiple arguments with different *safe-context* because of [method arguments must match](#rules-method-arguments-must-match).
 
 The `ref` calling rules can be simplified to:
 
-> A value resulting from a method invocation `ref e1.M(e2, ...)`, where `M()` does not return ref-to-ref-struct, is *ref-safe-to-escape* the narrowest of the following scopes:
-> 1. The *calling method*
-> 2. The *safe-to-escape* contributed by all argument expressions
-> 3. The *ref-safe-to-escape* contributed by all `ref` arguments
+> A value resulting from a method invocation `ref e1.M(e2, ...)`, where `M()` does not return ref-to-ref-struct, is *ref-safe-context* the narrowest of the following contexts:
+> 1. The *caller-context*
+> 2. The *safe-context* contributed by all argument expressions
+> 3. The *ref-safe-context* contributed by all `ref` arguments
 >
-> If `M()` does return ref-to-ref-struct, the *ref-safe-to-escape* is the narrowest *ref-safe-to-escape* contributed by all arguments which are ref-to-ref-struct.
+> If `M()` does return ref-to-ref-struct, the *ref-safe-context* is the narrowest *ref-safe-context* contributed by all arguments which are ref-to-ref-struct.
 
 This rule now lets us define the two variants of desired methods:
 
 ```c#
 Span<int> CreateWithoutCapture(scoped ref int value)
 {
-    // Error: value Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
-    // of the ref argument. That is the *current method* for value hence this is not allowed.
+    // Error: value Rule 3 specifies that the safe-context be limited to the ref-safe-context
+    // of the ref argument. That is the *function-member* for value hence this is not allowed.
     return new Span<int>(ref value);
 }
 
 Span<int> CreateAndCapture(ref int value)
 {
-    // Okay: value Rule 3 specifies that the safe-to-escape be limited to the ref-safe-to-escape
-    // of the ref argument. That is the *calling method* for value hence this is not allowed.
+    // Okay: value Rule 3 specifies that the safe-context be limited to the ref-safe-context
+    // of the ref argument. That is the *caller-context* for value hence this is not allowed.
     return new Span<int>(ref value);
 }
 
 Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 {
-    // Okay: the safe-to-escape of `span` is *calling method* hence this is legal.
+    // Okay: the safe-context of `span` is *caller-context* hence this is legal.
     return span;
 
-    // Okay: the local `refLocal` has a ref-safe-to-escape of *current method* and a 
-    // safe-to-escape of *calling method*. In the call below it is passed to a 
+    // Okay: the local `refLocal` has a ref-safe-context of *function-member* and a 
+    // safe-context of *caller-context*. In the call below it is passed to a 
     // parameter that is `scoped ref` which means it does not contribute 
-    // ref-safe-to-escape. It only contributes its safe-to-escape hence the returned
-    // rvalue ends up as safe-to-escape of *calling method*
+    // ref-safe-context. It only contributes its safe-context hence the returned
+    // rvalue ends up as safe-context of *caller-context*
     Span<int> local = default;
     ref Span<int> refLocal = ref local;
     return ComplexScopedRefExample(ref refLocal);
 
-    // Error: similar analysis as above but the safe-to-escape scope of `stackLocal` is 
-    // *current method* hence this is illegal
+    // Error: similar analysis as above but the safe-context of `stackLocal` is 
+    // *function-member* hence this is illegal
     Span<int> stackLocal = stackalloc int[42];
     return ComplexScopedRefExample(ref stackLocal);
 }
@@ -415,18 +417,18 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 The presence of `ref` fields means the rules around method arguments must match need to be updated as a `ref` parameter can now be stored as a field in a `ref struct` argument to the method. Previously the rule only had to consider another `ref struct` being stored as a field. The impact of this is discussed in [the compat considerations](#compat-considerations). The new rule is ... 
 
 > For any method invocation `e.M(a1, a2, ... aN)`
-> 1. Calculate the narrowest *safe-to-escape* from:
->     - *calling method*
->     - The *safe-to-escape* of all arguments
->     - The *ref-safe-to-escape* of all ref arguments whose corresponding parameters have a *ref-safe-to-escape* of *calling method*
-> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*. This is a case where `ref` does **not** generalize to include `in` and `out`
+> 1. Calculate the narrowest *safe-context* from:
+>     - *caller-context*
+>     - The *safe-context* of all arguments
+>     - The *ref-safe-context* of all ref arguments whose corresponding parameters have a *ref-safe-context* of *caller-context*
+> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-cpmtext*. This is a case where `ref` does **not** generalize to include `in` and `out`
 
 > For any method invocation `e.M(a1, a2, ... aN)`
-> 1. Calculate the narrowest *safe-to-escape* from:
->     - *calling method*
->     - The *safe-to-escape* of all arguments
->     - The *ref-safe-to-escape* of all ref arguments whose corresponding parameters are not `scoped` 
-> 2. All `out` arguments of `ref struct` types must be assignable by a value with that *safe-to-escape*.
+> 1. Calculate the narrowest *safe-context* from:
+>     - *caller-context*
+>     - The *safe-context* of all arguments
+>     - The *ref-safe-context* of all ref arguments whose corresponding parameters are not `scoped` 
+> 2. All `out` arguments of `ref struct` types must be assignable by a value with that *safe-context*.
 
 The presence of `scoped` allows developers to reduce the friction this rule creates by marking parameters which are not returned as `scoped`. This removes their arguments from (1) in both cases above and provides greater flexibility to callers.
 
@@ -459,8 +461,8 @@ The `scoped` modifier and `[UnscopedRef]` attribute also have the following effe
 
 The section on `ref` field and `scoped` is long so wanted to close with a brief summary of the proposed breaking changes:
 
-* A value that has *ref-safe-to-escape* to the *calling method* is returnable by `ref` or `ref` field.
-* A `out` parameter would be considered `safe-to-escape` within the *current method*.
+* A value that has *ref-safe-context* to the *caller-context* is returnable by `ref` or `ref` field.
+* A `out` parameter would have a  *safe-context* of *function-member*.
 
 Detailed Notes:
 - A `ref` field can only be declared inside of a `ref struct` 
@@ -554,8 +556,8 @@ To support this our span safety rules will be updated as follows:
 
 - `__makeref` will be treated as a method with the signature `static TypedReference __makeref<T>(ref T value)`
 - `__refvalue` will be treated as a method with the signature `static ref T __refvalue<T>(TypedReference tr)`. The expression `__refvalue(tr, int)` will effectively use the second argument as the type parameter.
-- `__arglist` as a parameter will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
-- `__arglist(...)` as an expression will have a *ref-safe-to-escape* and *safe-to-escape* of *current method*. 
+- `__arglist` as a parameter will have a *ref-safe-context* and *safe-context* of *function-member*. 
+- `__arglist(...)` as an expression will have a *ref-safe-context* and *safe-context* of *function-member*. 
 
 Conforming runtimes will ensure that `TypedReference`, `RuntimeArgumentHandle` and `ArgIterator` are defined as `ref struct`. Further `TypedReference` must be viewed as having a `ref` field to a `ref struct` for any possible type (it can store any value). That combined with the above rules will ensure references to the stack do not escape beyond their lifetime.
 
@@ -578,9 +580,9 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 <a name="rules-unscoped"></a>
 
-To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` and it will change the *ref-safe-to-escape* to be one level wider than its default. For example:
+To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` and it will change the *ref-safe-context* to be one level wider than its default. For example:
 - if applied to a `struct` instance method it will become *return only* where previously it was *containing method*.
-- if applied to a `ref` parameter it will become *calling method* where previously it was *return only*
+- if applied to a `ref` parameter it will become *caller-context* where previously it was *return only*
 
 When applying `[UnscopedRef]` to an instance method of a `struct` it has the impact of modifying the implicit `this` parameter. This means `this` acts as an unannotated `ref` of the same type. 
 
@@ -589,11 +591,11 @@ struct S
 {
     int field; 
 
-    // Error: `field` has the ref-safe-to-escape of `this` which is *current method* because 
+    // Error: `field` has the ref-safe-context of `this` which is *function-member* because 
     // it is a `scoped ref`
     ref int Prop1 => ref field;
 
-    // Okay: `field` has the ref-safe-to-escape of `this` which is *calling method* because 
+    // Okay: `field` has the ref-safe-context of `this` which is *caller-context* because 
     // it is a `ref`
     [UnscopedRef] ref int Prop1 => ref field;
 }
@@ -629,7 +631,7 @@ namespace System.Diagnostics.CodeAnalysis
 ```
 
 Detailed Notes:
-- An instance method or property annotated with `[UnscopedRef]` has *ref-safe-to-escape* of `this` set to the *calling method*.
+- An instance method or property annotated with `[UnscopedRef]` has *ref-safe-context* of `this` set to the *caller-context*.
 - A member annotated with `[UnscopedRef]` cannot implement an interface.
 - It is an error to use `[UnscopedRef]` on 
     - A member that is not declared on a `struct`
@@ -717,7 +719,7 @@ When indexing into a `fixed` buffer of type `T` the `readonly` state of the cont
 
 Accessing a `fixed` buffer without an indexer has no natural type however it is convertible to `Span<T>` types. In the case the container is `readonly` the buffer is implicitly convertible to `ReadOnlySpan<T>`, else it can implicitly convert to `Span<T>` or `ReadOnlySpan<T>` (the `Span<T>` conversion is considered *better*). 
 
-The resulting `Span<T>` instance will have a length equal to the size declared on the `fixed` buffer. The *safe-to-escape* scope of the returned value will be equal to the *safe-to-escape* scope of the container, just as it would if the backing data was accessed as a field.
+The resulting `Span<T>` instance will have a length equal to the size declared on the `fixed` buffer. The *safe-context* of the returned value will be equal to the *safe-context* of the container, just as it would if the backing data was accessed as a field.
 
 For each `fixed` declaration in a type where the element type is `T` the language will generate a corresponding `get` only indexer method whose return type is `ref T`. The indexer will be annotated with the `[UnscopedRef]` attribute as the implementation will be returning fields of the declaring type. The accessibility of the member will match the accessibility on the `fixed` field.
 
@@ -765,12 +767,12 @@ The escape rules for [constructor invocations](https://github.com/dotnet/csharpl
 > A `new` expression that invokes a constructor obeys the same rules as a method invocation that is considered to return the type being constructed.
 
 Namely the rules of [method invocation](#rules-method-invocation) updated above:
-> An rvalue resulting from a method invocation `e1.M(e2, ...)` is *safe-to-escape* from the smallest of the following scopes:
-> 1. The *calling method*
-> 2. The *safe-to-escape* contributed by all argument expressions
-> 3. When the return is a `ref struct` then *ref-safe-to-escape* contributed by all `ref` arguments
+> An rvalue resulting from a method invocation `e1.M(e2, ...)` has *safe-context* from the smallest of the following contexts:
+> 1. The *caller-context*
+> 2. The *safe-context* contributed by all argument expressions
+> 3. When the return is a `ref struct` then *ref-safe-context* contributed by all `ref` arguments
 
-For a `new` expression with initializers, the initializer expressions count as arguments (they contribute their *safe-to-escape*) and the `ref` initializer expressions count as `ref` arguments (they contribute their *ref-safe-to-escape*), recursively.
+For a `new` expression with initializers, the initializer expressions count as arguments (they contribute their *safe-context*) and the `ref` initializer expressions count as `ref` arguments (they contribute their *ref-safe-context*), recursively.
 
 ## Changes in unsafe context
 
@@ -885,10 +887,10 @@ The below examples make use of named lifetimes. The syntax `$a` refers to a life
 
 There are a few predefined lifetimes for convenience and brevity below:
 
-- `$heap`: this is the lifetime of any value that exists on the heap. It is available in all scopes and method signatures.
-- `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *current method*. It is implicitly defined in methods and can appear in method signatures except for any output position.
+- `$heap`: this is the lifetime of any value that exists on the heap. It is available in all contexts and method signatures.
+- `$local`: this is the lifetime of any value that exists on the method stack. It's effectively a name place holder for *function-member*. It is implicitly defined in methods and can appear in method signatures except for any output position.
 - `$ro`: name place holder for *return only*
-- `$cm`: name place holder for *calling method* 
+- `$cm`: name place holder for *caller-context* 
 
 There are a few predefined relationships between lifetimes:
 
@@ -1116,9 +1118,9 @@ ref struct S<out $this>
 ### Change the design to avoid compat breaks
 This design proposes several compatibility breaks with our existing span safety rules. Even though the breaks are believed to be minimally impactful significant consideration was given to a design which had no breaking changes.
 
-The compat preserving design though was significantly more complex than this one. In order to preserve compat `ref` fields need distinct lifetimes for the ability to return by `ref` and return by `ref` field. Essentially it requires us to provide *ref-field-safe-to-escape* tracking for all parameters to a method. This needs to be calculated for all expressions and tracked in all values virtually everywhere that *ref-safe-to-escape* is tracked today.
+The compat preserving design though was significantly more complex than this one. In order to preserve compat `ref` fields need distinct lifetimes for the ability to return by `ref` and return by `ref` field. Essentially it requires us to provide *ref-field-safe-context* tracking for all parameters to a method. This needs to be calculated for all expressions and tracked in all values virtually everywhere that *ref-safe-context* is tracked today.
 
-Further this value has relationships with *ref-safe-to-escape*. For example it's non-sensical to have a value can be returned as a `ref` field but not directly as `ref`. That is because `ref` fields can be trivially returned by `ref` already (`ref` state in a `ref struct` can be returned by `ref` even when the containing value cannot). Hence the rules further need constant adjustment to ensure these values are sensible with respect to each other. 
+Further this value has relationships with *ref-safe-context*. For example it's non-sensical to have a value can be returned as a `ref` field but not directly as `ref`. That is because `ref` fields can be trivially returned by `ref` already (`ref` state in a `ref struct` can be returned by `ref` even when the containing value cannot). Hence the rules further need constant adjustment to ensure these values are sensible with respect to each other. 
 
 Also it means the language needs syntax to represent `ref` parameters that can be returned in three different ways: by `ref` field, by `ref` and by value. The default being returnable by `ref`. Going forward though the more natural return, particularly when `ref struct` are involved is expected to be by `ref` field or `ref`. That means new APIs require an extra syntax annotation to be correct by default. This is undesirable. 
 
@@ -1254,7 +1256,7 @@ ref struct Sneaky
         Sneaky local = default;
 
         // Error: this is illegal, and must be illegal, by our existing rules as the 
-        // ref-safe-to-escape of local is now an input into method arguments must match. 
+        // ref-safe-context of local is now an input into method arguments must match. 
         local.SelfAssign();
 
         // This would be dangerous as local now has a dangerous `ref` but the above 
@@ -1310,7 +1312,7 @@ readonly ref struct Container
 
 This means when thinking about method arguments must match rules we must consider `readonly ref T` is potential method output when `T` potentially has a `ref` field to a `ref struct`.
 
-The second issue is language must consider a new type of escape scope: *ref-field-safe-to-escape*. All `ref struct` which transitively contain a `ref` field have another escape scope representing the value(s) in the `ref` field(s). In the case of multiple `ref` fields they can be collectively tracked as a single value. The default value for this for parameters is *calling method*. 
+The second issue is language must consider a new type of safe context: *ref-field-safe-context*. All `ref struct` which transitively contain a `ref` field have another escape scope representing the value(s) in the `ref` field(s). In the case of multiple `ref` fields they can be collectively tracked as a single value. The default value for this for parameters is *caller-context*. 
 
 ```c#
 ref struct Nested
@@ -1321,7 +1323,7 @@ ref struct Nested
 Span<int> M(ref Nested nested) => nested.Span;
 ```
 
-This value is not related to the escape scope of the container; that is as the container scope gets smaller it has no impact on the *ref-field-safe-to-escape* of the `ref` field values. Further the *ref-field-safe-to-escape* can never be smaller than the *safe-to-escape* of the container.
+This value is not related to the *safe-context* of the container; that is as the container context gets smaller it has no impact on the *ref-field-safe-context* of the `ref` field values. Further the *ref-field-safe-context* can never be smaller than the *safe-context* of the container.
 
 ```c#
 ref struct Nested
@@ -1333,21 +1335,21 @@ void M(ref Nested nested)
 {
     scoped ref Nested refLocal = ref nested;
 
-    // the ref-field-safe-to-escape of local is still *calling method* which means the following
+    // the ref-field-safe-context of local is still *caller-context* which means the following
     // is illegal
     refLocal.Span = stackalloc int[42];
 
     scoped Nested valLocal = nested;
 
-    // the ref-field-safe-to-escape of local is still *calling method* which means the following
+    // the ref-field-safe-context of local is still *caller-context* which means the following
     // is still illegal
     valLocal.Span = stackalloc int[42];
 }
 ```
 
-This *ref-field-safe-to-escape-scope* has essentially always existed. Up until now `ref` fields could only point to normal `struct` hence it was trivially collapsed to *calling method*.  To support `ref` fields to `ref struct` our existing rules need to be updated to take into account this new escape scope.
+This *ref-field-safe-context* has essentially always existed. Up until now `ref` fields could only point to normal `struct` hence it was trivially collapsed to *caller-context*.  To support `ref` fields to `ref struct` our existing rules need to be updated to take into account this new *ref-safe-context*.
 
-Third the rules for ref reassignment need to be updated to ensure that we don't violate *ref-field-safe-to-escape* for the values. Essentially for `x.e1 = ref e2` where the type of `e1` is a `ref struct` the *ref-field-safe-to-escape* must be equal. 
+Third the rules for ref reassignment need to be updated to ensure that we don't violate *ref-field-context* for the values. Essentially for `x.e1 = ref e2` where the type of `e1` is a `ref struct` the *ref-field-safe-context* must be equal. 
 
 These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes us in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
 
@@ -1414,7 +1416,7 @@ This particular snippet requires unsafe because it runs into issues with passing
 
 [Utf8JsonWriter](https://github.com/dotnet/runtime/blob/f1a7cb3fdd7ffc4ce7d996b7ac6867ffe2c953b9/src/libraries/System.Text.Json/src/System/Text/Json/Writer/Utf8JsonWriter.WriteProperties.String.cs#L122-L127)
 
-This snippet wants to mutate a parameter by escaping elements of the data. The escaped data can be stack allocated for efficiency. Even though the parameter is not escaped the compiler assigns it a *safe-to-escape* scope of outside the enclosing method because it is a parameter. This means in order to use stack allocation the implementation must use `unsafe` in order to assign back to the parameter after escaping the data.
+This snippet wants to mutate a parameter by escaping elements of the data. The escaped data can be stack allocated for efficiency. Even though the parameter is not escaped the compiler assigns it a *safe-context* of outside the enclosing method because it is a parameter. This means in order to use stack allocation the implementation must use `unsafe` in order to assign back to the parameter after escaping the data.
 
 ### Fun Samples
 
@@ -1492,47 +1494,47 @@ ref struct RS
     public ref int M1(RS rs)
     {
         // The call site arguments for Prop contribute here:
-        //   - `rs` contributes no ref-safe-to-escape as the corresponding parameter, 
+        //   - `rs` contributes no ref-safe-context as the corresponding parameter, 
         //      which is `this`, is `scoped ref`
-        //   - `rs` contribute safe-to-escape of *calling method*
+        //   - `rs` contribute safe-context of *caller-context*
         // 
-        // This is an lvalue invocation and the arguments contribute only safe-to-escape 
-        // values of *calling method*. That means `local1` is ref-safe-to-escape to 
-        // *calling method*
+        // This is an lvalue invocation and the arguments contribute only safe-context 
+        // values of *caller-context*. That means `local1` has ref-safe-context of 
+        // *caller-context*
         ref int local1 = ref rs.Prop;
 
-        // Okay: this is legal because `local` has ref-safe-to-escape of *calling method*
+        // Okay: this is legal because `local` has ref-safe-context of *caller-context*
         return ref local1;
 
         // The arguments contribute here:
-        //   - `this` contributes no ref-safe-to-escape as the corresponding parameter
+        //   - `this` contributes no ref-safe-context as the corresponding parameter
         //     is `scoped ref`
-        //   - `this` contributes safe-to-escape of *calling method*
+        //   - `this` contributes safe-context of *caller-context*
         //
-        // This is an rvalue invocation and following those rules the safe-to-escape of 
-        // `local2` will be *calling method*
+        // This is an rvalue invocation and following those rules the safe-context of 
+        // `local2` will be *caller-context*
         RS local2 = CreateRS();
 
         // Okay: this follows the same analysis as `ref rs.Prop` above
         return ref local2.Prop;
 
         // The arguments contribute here:
-        //   - `local3` contributes ref-safe-to-escape of *current method*
-        //   - `local3` contributes safe-to-escape of *calling method*
+        //   - `local3` contributes ref-safe-context of *function-member*
+        //   - `local3` contributes safe-context of *caller-context*
         // 
         // This is an rvalue invocation which returns a `ref struct` and following those 
-        // rules the safe-to-escape of `local4` will be *current method*
+        // rules the safe-context of `local4` will be *function-member*
         int local3 = 42;
         var local4 = new RS(ref local3);
 
         // Error: 
         // The arguments contribute here:
-        //   - `local4` contributes no ref-safe-to-escape as the corresponding parameter
+        //   - `local4` contributes no ref-safe-context as the corresponding parameter
         //     is `scoped ref`
-        //   - `local4` contributes safe-to-escape of *current method*
+        //   - `local4` contributes safe-context of *function-member*
         // 
-        // This is an lvalue invocation and following those rules the ref-safe-to-escape 
-        // of the return is *current method*
+        // This is an lvalue invocation and following those rules the ref-safe-context 
+        // of the return is *function-member*
         return ref local4.Prop;
     }
 }
@@ -1543,7 +1545,7 @@ ref struct RS
 
 The reason for the following line in the [ref reassignment rules](#rules-ref-reassignment) may not be obvious at first glance:
 
-> `e1` must have the same *safe-to-escape* as `e2`
+> `e1` must have the same *safe-context* as `e2`
 
 This is because the lifetime of the values pointed to by `ref` locations are invariant. The indirection prevents us from allowing any kind of variance here, even to narrower lifetimes. If narrowing is allowed then it opens up the following unsafe code:
 
@@ -1553,14 +1555,14 @@ void Example(ref Span<int> p)
     Span<int> local = stackalloc int[42];
     ref Span<int> refLocal = ref local;
 
-    // The safe-to-escape of refLocal is narrower than p. For a non-ref reassignment 
+    // The safe-context of refLocal is narrower than p. For a non-ref reassignment 
     // this would be allowed as its safe to assign wider lifetimes to narrower ones.
     // In the case of ref reassignment though this rule prevents it as the 
-    // safe-to-escape values are different.
+    // safe-context values are different.
     refLocal = ref p;
 
-    // If it were allowed this would be legal as the safe-to-escape of refLocal
-    // is *containing method* and that is satisfied by stackalloc. At the same time
+    // If it were allowed this would be legal as the safe-context of refLocal
+    // is *caller-context* and that is satisfied by stackalloc. At the same time
     // it would be assigning through p and escaping the stackalloc to the calling
     // method
     // 
@@ -1569,14 +1571,14 @@ void Example(ref Span<int> p)
 }
 ```
 
-For a `ref` to non `ref struct` this rule is trivially satisfied as the values all have the same *safe-to-escape* scope. This rule really only comes into play when the value is a `ref struct`. 
+For a `ref` to non `ref struct` this rule is trivially satisfied as the values all have the same *safe-context*. This rule really only comes into play when the value is a `ref struct`. 
 
 This behavior of `ref` will also be important in a future where we allow `ref` fields to `ref struct`. 
 
 #### scoped locals
 <a name="examples-scoped-locals"></a>
 
-The use of `scoped` on locals will be particularly helpful to code patterns which conditionally assign values with different *safe-to-escape* scope to locals. It means code no longer needs to rely on initialization tricks like `= stackalloc byte[0]` to define a local *safe-to-escape* but now can simply use `scoped`. 
+The use of `scoped` on locals will be particularly helpful to code patterns which conditionally assign values with different *safe-context* to locals. It means code no longer needs to rely on initialization tricks like `= stackalloc byte[0]` to define a local *safe-context* but now can simply use `scoped`. 
 
 ```c#
 // Old way 
@@ -1599,7 +1601,7 @@ This pattern comes up frequently in low level code. When the `ref struct` involv
 #### scoped parameter values
 <a name="examples-method-arguments-must-match"></a>
 
-One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-to-escape* to the *calling method*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
+One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-context* to the *caller-context*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
 
 The main friction point occurs because of the [method arguments must match](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#method-arguments-must-match) rule. This rule most commonly comes into play with instance methods on `ref struct` where at least one parameter is also a `ref struct`. This is a common pattern in low level code where `ref struct` types commonly leverage `Span<T>` parameters in their methods. For example it will occur on any writer style `ref struct` that uses `Span<T>` to pass around buffers.
 
@@ -1625,7 +1627,7 @@ ref struct RS
 }
 ```
 
-Essentially this rule exists because the language must assume that all inputs to a method escape to their maximum allowed scope. When there are `ref` or `out` parameters, including the receivers, it's possible for the inputs to escape as fields of those `ref` values (as happens in `RS.Set` above).
+Essentially this rule exists because the language must assume that all inputs to a method escape to their maximum allowed *safe-context*. When there are `ref` or `out` parameters, including the receivers, it's possible for the inputs to escape as fields of those `ref` values (as happens in `RS.Set` above).
 
 In practice though there are many such methods which pass `ref struct` as parameters that never intend to capture them in output. It is just a value that is used within the current method. For example:
 
@@ -1651,8 +1653,8 @@ class C
         span[1] = 'o';
         span[2] = 'g';
 
-        // Error: The safe-to-escape of `span` is the current method scope 
-        // while `reader` is outside the current method scope hence this fails
+        // Error: The safe-context of `span` is function-member 
+        // while `reader` is outside function-member hence this fails
         // by the above rule.
         if (reader.TextEquals(span))
         {
@@ -1737,8 +1739,8 @@ readonly ref struct S
 
 The proposal prevents this though because it violates the span safety rules. Consider the following:
 
-- The *ref-safe-to-escape* of `this` is *current method* and *safe-to-escape* is *calling method*. These are both standard for `this` in a `struct` member.
-- The *ref-safe-to-escape* of `i` is *current method*. This falls out from the [field lifetimes rules](#rules-field-lifetimes). Specifically rule 4.
+- The *ref-safe-context* of `this` is *function-member* and *safe-context* is *caller-context*. These are both standard for `this` in a `struct` member.
+- The *ref-safe-context* of `i` is *function-member*. This falls out from the [field lifetimes rules](#rules-field-lifetimes). Specifically rule 4.
 
 At that point the line `r = ref i` is illegal by [ref reassignment rules](#rules-ref-reassignment). 
 
@@ -1771,7 +1773,7 @@ void M(ref S s)
 
 void Usage()
 {
-    // safe-to-escape to calling method
+    // safe-context to caller-context
     S local = default; 
 
     // Error: compiler is forced to assume the worst and concludes a self assignment
@@ -1780,9 +1782,9 @@ void Usage()
 }
 ```
 
-To make these APIs usable the compiler ensures that the `ref` lifetime for a `ref` parameter is smaller than lifetime of any references in the associated parameter value. This is the rationale for having *ref-safe-to-escape* for `ref` to `ref struct` be *return only* and `out` be *containing method*. That prevents cyclic assignment because of the difference in lifetimes.
+To make these APIs usable the compiler ensures that the `ref` lifetime for a `ref` parameter is smaller than lifetime of any references in the associated parameter value. This is the rationale for having *ref-safe-context* for `ref` to `ref struct` be *return-only* and `out` be *caller-context*. That prevents cyclic assignment because of the difference in lifetimes.
 
-It is also why `[UnscopedRef]` only promotes the *ref-safe-to-escape* of any `ref` to `ref struct` values to *return only* and not *calling method*. Consider that using *calling method* allows for cyclic assignment and would force a viral use of `[UnscopedRef]` for a `ref struct`:
+It is also why `[UnscopedRef]` only promotes the *ref-safe-context* of any `ref` to `ref struct` values to *return-only* and not *caller-context*. Consider that using *caller-context* allows for cyclic assignment and would force a viral use of `[UnscopedRef]` for a `ref struct`:
 
 ```c#
 ref struct S
@@ -1800,9 +1802,9 @@ void M(ref S s)
 }
 ```
 
-This is correctly illegal in that case because the compiler has to consider the pathological case that `S.Data` could cyclic assign via `this`. That forces methods all methods that call `S.Data` to further mark their `ref` parameters as `[UnscopedRef]`. This is viral until the method which creates the value as a local. This is why *return only* exists as an escape scope. It does complicate the spec / implementation but it serves to make the feature significantly more usable.
+This is correctly illegal in that case because the compiler has to consider the pathological case that `S.Data` could cyclic assign via `this`. That forces methods all methods that call `S.Data` to further mark their `ref` parameters as `[UnscopedRef]`. This is viral until the method which creates the value as a local. This is why *return-only* exists as a *safe-context*. It does complicate the spec / implementation but it serves to make the feature significantly more usable.
 
-Note: this cyclic assignment problem does continue to exist for `[UnscopedRef] out` to `ref struct` because that causes the *safe-to-escape* and *ref-safe-to-escape* to be equivalent. 
+Note: this cyclic assignment problem does continue to exist for `[UnscopedRef] out` to `ref struct` because that causes the *safe-context* and *ref-safe-context* to be equivalent. 
 
 ```c#
 ref struct RS
@@ -1814,8 +1816,8 @@ ref struct RS
 void M1(out RS p)
 {
     // Error: from method arguments must match:
-    // Step 1 would calculate the narrowest escape as *containing method*
-    // Step 2 would fail the assignment check because p safe-to-escape is *return only*
+    // Step 1 would calculate the narrowest escape as *caller-context*
+    // Step 2 would fail the assignment check because p has safe-context of *return-only*
     M2(out p);
 }
 
@@ -1899,7 +1901,7 @@ ref struct S
 
 There are roughly two approaches:
 
-1. Model as a `static` method where `this` is a local where its *safe-to-escape* is *calling method*
+1. Model as a `static` method where `this` is a local where its *safe-context* is *caller-context*
 2. Model as a `static` method where `this` is an `out` parameter. 
 
 Further a constructor must meet the following invariants:
@@ -1912,20 +1914,20 @@ The intent is to pick the form that satisfies our invariants without introductio
 ```c#
 public static void ctor(out S @this, ref int f)
 {
-    // The ref-safe-to-escape of `ref f` is *return only* which is also the 
-    // safe-to-escape of `this.field` hence this assignment is allowed
+    // The ref-safe-context of `ref f` is *return-only* which is also the 
+    // safe-context of `this.field` hence this assignment is allowed
     @this.field = ref f;
 }
 ```
 
 #### Method arguments must match
-The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule. For the sake of better understanding the reasons for the rule we will simplify ref-safe-to-escape* and *safe-to-escape* to simply *escape-scope*. 
+The method arguments must match rule is a common source of confusion for developers. It's a rule which has a number of special cases that are hard to understand unless you are familiar with the reasoning behind the rule. For the sake of better understanding the reasons for the rule we will simplify *ref-safe-context* and *safe-context* to simply *context*. 
 
 Methods can pretty liberally return state passed to them as parameters. Essentially any reachable state which is unscoped can be returned (including returning by `ref`). This can be returned directly through a `return` statement or indirectly by assigning into a `ref` value. 
 
-Direct returns don't pose much problems for ref safety. The compiler simply needs to look at all the returnable inputs to a method and then it effectively restricts the return value to be the minimum *escape-scope* of the input. That return value then goes through normal processing.
+Direct returns don't pose much problems for ref safety. The compiler simply needs to look at all the returnable inputs to a method and then it effectively restricts the return value to be the minimum *context* of the input. That return value then goes through normal processing.
 
-Indirect returns pose a significant problem because all `ref` are both an input and output to the method. These outputs already have a known *escape-scope*. The compiler can't infer new ones, it has to consider them at their current level. That means the compiler has to look at every single `ref` which is assignable in the called method, evaluate it's *escape-scope*, and then verify no returnable input to the method has a smaller *escape-scope* than that `ref`. If any such case exists then the method call must be illegal because it could violate `ref` safety. 
+Indirect returns pose a significant problem because all `ref` are both an input and output to the method. These outputs already have a known *context*. The compiler can't infer new ones, it has to consider them at their current level. That means the compiler has to look at every single `ref` which is assignable in the called method, evaluate it's *context*, and then verify no returnable input to the method has a smaller *context* than that `ref`. If any such case exists then the method call must be illegal because it could violate `ref` safety. 
 
 Method arguments must match is the process by which the compiler asserts this safety check.
 
@@ -1936,8 +1938,8 @@ A different way to evaluate this which is often easier for developers to conside
     b. Mutable `ref` parameters with ref assignable `ref` fields
     c. Assignable `ref` params or `ref` fields pointing to `ref struct` (consider recursively)
 2. Look at the call site
-    a. Identify the escape scopes that line up with the locations identified above
-    b. Identify the escape scopes of all inputs to the method that are returnable (don't line up with `scoped` parameters)
+    a. Identify the contexts that line up with the locations identified above
+    b. Identify the contexts of all inputs to the method that are returnable (don't line up with `scoped` parameters)
 
 If any value in 2.b is smaller than 2.a then the method call must be illegal. Let's look at a few examples to illustrate the rules:
 
@@ -1957,14 +1959,14 @@ class Program
 
 Looking at the call to `F0` lets go through (1) and (2). The parameters with potential for indirect return are `a` and `b` as both can be directly assigned. The arguments which line up to those parameters are:
 
-- `a` which maps to `x` that has *escape-scope* of *calling method*
-- `b` which maps to `y` that has with *escape-scope* of *current method*
+- `a` which maps to `x` that has *context* of *caller-context*
+- `b` which maps to `y` that has with *context* of *function-member*
 
 The set of returnable input to the method are
 
-- `x` with *escape-scope* of *calling method*
-- `ref x` with *escape-scope* of *calling method*
-- `y` with *escape-scope* of *current method*
+- `x` with *escape-scope* of *caller-context*
+- `ref x` with *escape-scope* of *caller-context*
+- `y` with *escape-scope* of *function-member*
 
 The value `ref y` is not returnable since it maps to a `scoped ref` hence it is not considered an input. But given that there is at least one input with a smaller *escape scope* (`y` argument) than one of the outputs (`x` argument) the method call is illegal. 
 
@@ -1987,22 +1989,22 @@ class Program
 
 Again the parameters with potential for indirect return are `a` and `b` as both can be directly assigned. But `b` can be excluded because it does not point to a `ref struct` hence cannot be used to store `ref` state. Thus we have:
 
-- `a` which maps to `x` that has *escape-scope* of *calling method*
+- `a` which maps to `x` that has *context* of *caller-context*
 
 The set of returnable input to the method are:
 
-- `x` with *escape-scope* of *calling method*
-- `ref x` with *escape-scope* of *calling method*
-- `ref y` with *escape-scope* of *current method*
+- `x` with *context* of *caller-context*
+- `ref x` with *context* of *caller-context*
+- `ref y` with *context* of *function-member*
 
 Given that there is at least one input with a smaller *escape scope* (`ref y` argument) than one of the outputs (`x` argument) the method call is illegal. 
 
 This is the logic that the method arguments must match rule is trying to encompass. It goes further as it considers both `scoped` as a way to remove inputs from consideration and `readonly` as a way to remove `ref` as an output (can't assign into a `readonly ref` so it can't be a source of output). These special cases do add complexity to the rules but it's done so for the benefit of the developer. The compiler seeks to remove all inputs and outputs it knows can't contribute to the result to give developers maximum flexibility when calling a member. Much like overload resolution it's worth the effort to make our rules more complex when it creates more flexibility for consumers.
 
-#### Examples of inferred *safe-to-escape* of declaration expressions
+#### Examples of inferred *safe-context* of declaration expressions
 <a id="examples-of-inferred-safe-to-escape-of-declaration-expressions"></a>
 
-Related to [Infer *safe-to-escape* of declaration expressions](#infer-safe-to-escape-of-declaration-expressions).
+Related to [Infer *safe-context* of declaration expressions](#infer-safe-to-escape-of-declaration-expressions).
     
 ```cs
 ref struct RS
@@ -2014,21 +2016,21 @@ ref struct RS
     static void M1()
     {
         var i = 0;
-        var rs1 = new RS(ref i); // safe-to-escape of 'rs1' is CurrentMethod
-        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CurrentMethod
+        var rs1 = new RS(ref i); // safe-context of 'rs1' is function-member
+        M0(rs1, out var rs2); // safe-context of 'rs2' is function-member
     }
 
     static void M2(RS rs1)
     {
-        M0(rs1, out var rs2); // safe-to-escape of 'rs2' is CallingMethod
+        M0(rs1, out var rs2); // safe-context of 'rs2' is function-member
     }
 
     static void M3(RS rs1)
     {
-        M0(rs1, out scoped var rs2); // 'scoped' modifier forces safe-to-escape of 'rs2' to the current local scope (CurrentMethod or narrower).
+        M0(rs1, out scoped var rs2); // 'scoped' modifier forces safe-context of 'rs2' to the current local context (function-member or narrower).
     }
 }
 
 ```
 
-Note that the local scope which results from the `scoped` modifier is the narrowest which could possibly be used for the variable--to be any narrower would mean the expression refers to variables which are only declared in a narrower scope than the expression.
+Note that the local context which results from the `scoped` modifier is the narrowest which could possibly be used for the variable--to be any narrower would mean the expression refers to variables which are only declared in a narrower context than the expression.
