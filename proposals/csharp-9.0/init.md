@@ -90,7 +90,7 @@ This means the `Student` class can be used in the following ways:
 var s = new Student()
 {
     FirstName = "Jared",
-    LastName = "Parosns",
+    LastName = "Parsons",
 };
 s.LastName = "Parsons"; // Error: LastName is not settable
 ```
