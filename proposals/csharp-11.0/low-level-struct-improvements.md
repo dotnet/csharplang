@@ -6,7 +6,7 @@ Low Level Struct Improvements
 ## Summary
 This proposal is an aggregation of several different proposals for `struct` performance improvements: `ref` fields and the ability to override lifetime defaults. The goal being a design which takes into account the various proposals to create a single overarching feature set for low level `struct` improvements.
 
-> Note: Previous versions of this spec used the terms "ref-safe-to-escape" and "safe-to-escape", which were introduced in the [Span safety](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) feature specification. The [ECMA standard committee](https://www.ecma-international.org/task-groups/tc49-tg2/) changed the names to ["ref-safe-context"](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/variables#972-ref-safe-contexts) and ["safe-context"](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/structs#16412-safe-context-constraint), respectively. The values of the safe context have been refined to use "declaration-block", "function-member", and "caller-context" consistently. The speclets had used "caller-context" and "safe-to-return" as synonyms. This speclet has been updated to use the terms in the standard.
+> Note: Previous versions of this spec used the terms "ref-safe-to-escape" and "safe-to-escape", which were introduced in the [Span safety](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) feature specification. The [ECMA standard committee](https://www.ecma-international.org/task-groups/tc49-tg2/) changed the names to ["ref-safe-context"](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/variables#972-ref-safe-contexts) and ["safe-context"](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/structs#16412-safe-context-constraint), respectively. The values of the safe context have been refined to use "declaration-block", "function-member", and "caller-context" consistently. The speclets had used different phrasing for these terms, and also used "safe-to-return" as a synonym for "caller-context". This speclet has been updated to use the terms in the C# 7.3 standard.
 
 ## Motivation
 Earlier versions of C# added a number of low level performance features to the language: `ref` returns, `ref struct`, function pointers, etc. ... These enabled .NET developers to write highly performant code while continuing to leverage the C# language rules for type and memory safety.  It also allowed the creation of fundamental performance types in the .NET libraries like `Span<T>`.
@@ -24,7 +24,7 @@ This proposal plans to address these issues by building on top of our existing l
 - Allow the declaration of safe `fixed` buffers for managed and unmanaged types in `struct`
 
 ## Detailed Design 
-The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md). This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.
+The rules for `ref struct` safety are defined in the [span safety document](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.2/span-safety.md) using the previous terms. Those rules have been incorporated into the C# 7 standard in [§9.7.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#972-ref-safe-contexts) and [§16.4.12](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#16412-safe-context-constraint). This document will describe the required changes to this document as a result of this proposal. Once accepted as an approved feature these changes will be incorporated into that document.
 
 Once this design is complete our `Span<T>` definition will be as follows:
 
@@ -122,7 +122,7 @@ A `readonly ref` will be emitted to metadata using the `initonly` flag, same as 
 
 This feature requires runtime support and changes to the ECMA spec. As such these will only be enabled when the corresponding feature flag is set in corelib. The issue tracking the exact API is tracked here https://github.com/dotnet/runtime/issues/64165
 
-The set of changes to our span safety rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref reassigned. 
+The set of changes to our safe context rules necessary to allow `ref` fields is small and targeted. The rules already account for `ref` fields existing and being consumed from APIs. The changes need to focus on only two aspects: how they are created and how they are ref reassigned. 
 
 First the rules establishing *ref-safe-context* values for fields need to be updated for `ref` fields as follows:
 
@@ -223,7 +223,7 @@ Span<int> BadUseExamples(int parameter)
 }
 ```
 
-The `scoped` annotation also means that the `this` parameter of a `struct` can now be defined as `scoped ref T`. Previously it had to be special cased in the rules as `ref` parameter that had different *ref-safe-context* rules than other `ref` parameters (see all the references to including or excluding the receiver in the span safety rules). Now it can be expressed as a general concept throughout the rules which further simplifies them.
+The `scoped` annotation also means that the `this` parameter of a `struct` can now be defined as `scoped ref T`. Previously it had to be special cased in the rules as `ref` parameter that had different *ref-safe-context* rules than other `ref` parameters (see all the references to including or excluding the receiver in the safe context rules). Now it can be expressed as a general concept throughout the rules which further simplifies them.
 
 The `scoped` annotation can also be applied to the following locations:
 
@@ -294,7 +294,7 @@ Span<byte> Use()
 
 The language will also no longer consider arguments passed to an `out` parameter to be returnable. Treating the input to an `out` parameter as returnable was extremely confusing to developers. It essentially subverts the intent of `out` by forcing developers to consider the value passed by the caller which is never used except in languages that don't respect `out`. Going forward languages that support `ref struct` must ensure the original value passed to an `out` parameter is never read. 
 
-C# achieves this via it's definite assignment rules. That both achieves our ref safety rules as well as allowing for existing code which assigns and then returns `out` parameters values.
+C# achieves this via it's definite assignment rules. That both achieves our ref safe context rules as well as allowing for existing code which assigns and then returns `out` parameters values.
 
 ```c#
 Span<int> StrangeButLegal(out Span<int> span)
@@ -323,7 +323,7 @@ Overall there are two `ref` location which are implicitly declared as `scoped`:
 - `this` on a `struct` instance method
 - `out` parameters 
 
-The span safety rules will be written in terms of `scoped ref` and `ref`. For span safety purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
+The ref safe context rules will be written in terms of `scoped ref` and `ref`. For ref safe context purposes an `in` parameter is equivalent to `ref` and `out` is equivalent to `scoped ref`. Both `in` and `out` will only be specifically called out when it is important to the semantic of the rule. Otherwise they are just considered `ref` and `scoped ref` respectively.
 
 When discussing the *ref-safe-context* of arguments that correspond to `in` parameters they will be generalized as `ref` arguments in the spec. In the case the argument is an lvalue then the *ref-safe-context* is that of the lvalue, otherwise it is *function-member*. Again `in` will only be called out here when it is important to the semantic of the current rule.
 
@@ -347,7 +347,7 @@ Note: An expression whose type is not a `ref struct` type always has a *safe-con
 #### Rules for method invocation
 <a name="rules-method-invocation"></a>
 
-The span safety rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `expr` that is passed to parameter `p`:
+The ref safe context rules for method invocation will be updated in several ways. The first is by recognizing the impact that `scoped` has on arguments. For a given argument `expr` that is passed to parameter `p`:
 
 > 1. If `p` is `scoped ref` then `expr` does not contribute *ref-safe-context* when considering arguments.
 > 2. If `p` is `scoped` then `expr` does not contribute *safe-context* when considering arguments. 
@@ -357,7 +357,7 @@ The language "does not contribute" means the arguments are simply not considered
 
 The method invocation rules can now be simplified. The receiver no longer needs to be special cased, in the case of `struct` it is now simply a `scoped ref T`. The value rules need to change to account for `ref` field returns:
 
-> A value resulting from a method invocation `e1.M(e2, ...)`, where `M()` does not return ref-to-ref-struct, is *safe-context* from the narrowest of the following:
+> A value resulting from a method invocation `e1.M(e2, ...)`, where `M()` does not return ref-to-ref-struct, has a *safe-context* taken from the narrowest of the following:
 > 1. The *caller-context*
 > 2. When the return is a `ref struct` the *safe-context* contributed by all argument expressions
 > 3. When the return is a `ref struct` the *ref-safe-context* contributed by all `ref` arguments
@@ -451,9 +451,9 @@ The compiler will report a diagnostic for _unsafe scoped mismatches_ across over
 
 The rules above ignore `this` parameters because `ref struct` instance methods cannot be used for overrides, interface implementations, or delegate conversions.
 
-The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safety rules; otherwise, the diagnostic is a _warning_.
+The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safe context rules; otherwise, the diagnostic is a _warning_.
 
-The scoped mismatch warning may be reported on a module compiled with C#7.2 ref safety rules where `scoped` is not available. In some such cases, it may be necessary to suppress the warning if the other mismatched signature cannot be modified.
+The scoped mismatch warning may be reported on a module compiled with C#7.2 ref safe context rules where `scoped` is not available. In some such cases, it may be necessary to suppress the warning if the other mismatched signature cannot be modified.
 
 The `scoped` modifier and `[UnscopedRef]` attribute also have the following effects on method signatures:
 - The `scoped` modifier and `[UnscopedRef]` attribute do not affect hiding
@@ -472,7 +472,7 @@ Detailed Notes:
 - A `readonly ref struct` must declare its `ref` fields as `readonly ref`
 - For by-ref values the `scoped` modifier must appear before `in`, `out`, or `ref`
 - The span safety rules document will be updated as outlined in this document
-- The new span safety rules will be in effect when either 
+- The new ref safe context rules will be in effect when either 
     - The core library contains the feature flag indicating support for `ref` fields
     - The `langversion` value is 11 or higher
 
@@ -552,7 +552,7 @@ The compiler has a concept of a set of "restricted types" which is largely undoc
 
 Once `ref` fields are available and extended to support `ref struct` these types can be correctly defined in C# using a combination of `ref struct` and `ref` fields. Therefore when the compiler detects that a runtime supports `ref` fields it will no longer have a notion of restricted types. It will instead use the types as they are defined in the code. 
 
-To support this our span safety rules will be updated as follows:
+To support this our ref safe context rules will be updated as follows:
 
 - `__makeref` will be treated as a method with the signature `static TypedReference __makeref<T>(ref T value)`
 - `__refvalue` will be treated as a method with the signature `static ref T __refvalue<T>(TypedReference tr)`. The expression `__refvalue(tr, int)` will effectively use the second argument as the type parameter.
@@ -576,7 +576,7 @@ struct S
 }
 ```
 
-The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#struct-this-escape) for this default is reasonable but there is nothing inherently wrong with a `struct` escaping `this` by reference, it is simply the default chosen by the span safety rules. 
+The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#struct-this-escape) for this default is reasonable but there is nothing inherently wrong with a `struct` escaping `this` by reference, it is simply the default chosen by the ref safe context rules. 
 
 <a name="rules-unscoped"></a>
 
@@ -611,7 +611,7 @@ ref int SneakyOut([UnscopedRef] out int i)
 }
 ```
 
-For the purposes of span safety rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. 
+For the purposes of ref safe cotnext rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. 
 
 The `[UnscopedRef]` annotation will be disallowed on `init` members and constructors inside `struct`. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `[UnscopedRef]` would permit such a `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
 
@@ -660,19 +660,19 @@ namespace System.Runtime.CompilerServices
 The compiler will emit this attribute on the parameter with `scoped` syntax. This will only be emitted when the syntax causes the value to differ from its default state. For example `scoped out` will cause no attribute to be emitted.
 
 ### RefSafetyRulesAttribute
-There are several differences in the _ref safety rules_ between C#7.2 and C#11. Any of these differences could result in breaking changes when recompiling with C#11 against references compiled with C#10 or earlier.
+There are several differences in the _ref safe context_ rules between C#7.2 and C#11. Any of these differences could result in breaking changes when recompiling with C#11 against references compiled with C#10 or earlier.
 1. unscoped `ref`/`in`/`out` parameters may escape a method invocation as a `ref` field of a `ref struct` in C#11, not in C#7.2
 1. `out` parameters are implicitly scoped in C#11, and unscoped in C#7.2
 1. `ref`/`in` parameters to `ref struct` types are implicitly scoped in C#11, and unscoped in C#7.2
 
-To reduce the chance of breaking changes when recompiling with C#11, we will update the C#11 compiler to use the ref safety rules _for method invocation_ that _match the rules that were used to analyze the method declaration_. Essentially, when analyzing a call to a method compiled with an older compiler, the C#11 compiler will use C#7.2 ref safety rules. 
+To reduce the chance of breaking changes when recompiling with C#11, we will update the C#11 compiler to use the ref safe context rules _for method invocation_ that _match the rules that were used to analyze the method declaration_. Essentially, when analyzing a call to a method compiled with an older compiler, the C#11 compiler will use C#7.2 ref safe context rules. 
 
 To enable this, the compiler will emit a new `[module: RefSafetyRules(11)]` attribute when the module is compiled with `-langversion:11` or higher or compiled with a corlib containing the feature flag for `ref` fields.
 
-The argument to the attribute indicates the language version of the _ref safety rules_ used when the module was compiled.
+The argument to the attribute indicates the language version of the _ref safe context_ rules used when the module was compiled.
 The version is currently fixed at `11` regardless of the actual language version passed to the compiler.
 
-The expectation is that future versions of the compiler will update the ref safety rules and emit attributes with distinct versions.
+The expectation is that future versions of the compiler will update the ref safe context rules and emit attributes with distinct versions.
 
 If the compiler loads a module that includes a `[module: RefSafetyRules(version)]` _with a `version` other than `11`_, the compiler will report a warning for the unrecognized version if there are any calls to methods declared in that module.
 
@@ -791,7 +791,7 @@ There are considerations other parts of the development stack should consider wh
 ### Compat Considerations
 <a name="compat-considerations">
 
-The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The span safety rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
+The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md), or [§9.7.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#972-ref-safe-contexts). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The ref safe cpmtext rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor), or [§16.4.12.8](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#164128-constructor-invocations) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
 
 ```c#
 Span<int> CreateSpanOfInt()
@@ -825,7 +825,7 @@ In C# 10 callers of such APIs never had to consider that `ref` state input to th
 Span<int> CreateSpan(ref int parameter)
 {
     // The implementation of this method is irrelevant when considering the lifetime of the 
-    // returned Span<T>. The span safety rules only look at the method signature, not the 
+    // returned Span<T>. The ref safe context rules only look at the method signature, not the 
     // implementation. In C# 10 ref fields didn't exist hence there was no way for `parameter`
     // to escape by ref in this method
 }
@@ -850,11 +850,11 @@ The impact of this compatibility break is expected to be very small. The impacte
 Even so the design must account for such APIs existing because it expresses a valid pattern, just not a common one. Hence the design must give developers the tools to restore the existing lifetime rules when upgrading to C# 10. Specifically it must provide mechanisms that allow developers to annotate `ref` parameters as unable to escape by `ref` or `ref` field. That allows customers to define APIs in C# 11 that have the same C# 10 callsite rules.
 
 ### Reference Assemblies
-A reference assembly for a compilation using features described in this proposal must maintain the elements that convey span safety information. That means all lifetime annotation attributes must be preserved in their original position. Any attempt to replace or omit them can lead to invalid reference assemblies.
+A reference assembly for a compilation using features described in this proposal must maintain the elements that convey ref safe context information. That means all lifetime annotation attributes must be preserved in their original position. Any attempt to replace or omit them can lead to invalid reference assemblies.
 
 Representing `ref` fields is more nuanced. Ideally a `ref` field would appear in a reference assembly as would any other field. However a `ref` field represents a change to the metadata format and that can cause issues with tool chains that are not updated to understand this metadata change. A concrete example is C++/CLI which will likely error if it consumes a `ref` field. Hence it's advantageous if `ref` fields can be omitted from reference assemblies in our core libraries. 
 
-A `ref` field by itself has no impact on span safety rules. As a concrete example consider that flipping the existing `Span<T>` definition to use a `ref` field has no impact on consumption. Hence the `ref` itself can be omitted safely. However a `ref` field does have other impacts to consumption that must be preserved: 
+A `ref` field by itself has no impact on ref safe context rules. As a concrete example consider that flipping the existing `Span<T>` definition to use a `ref` field has no impact on consumption. Hence the `ref` itself can be omitted safely. However a `ref` field does have other impacts to consumption that must be preserved: 
 
 - A `ref struct` which has a `ref` field is never considered `unmanaged` 
 - The type of the `ref` field impacts infinite generic expansion rules. Hence if the type of a `ref` field contains a type parameter that must be preserved 
@@ -1116,7 +1116,7 @@ ref struct S<out $this>
 ## Open Issues
 
 ### Change the design to avoid compat breaks
-This design proposes several compatibility breaks with our existing span safety rules. Even though the breaks are believed to be minimally impactful significant consideration was given to a design which had no breaking changes.
+This design proposes several compatibility breaks with our existing ref-safe-context rules. Even though the breaks are believed to be minimally impactful significant consideration was given to a design which had no breaking changes.
 
 The compat preserving design though was significantly more complex than this one. In order to preserve compat `ref` fields need distinct lifetimes for the ability to return by `ref` and return by `ref` field. Essentially it requires us to provide *ref-field-safe-context* tracking for all parameters to a method. This needs to be calculated for all expressions and tracked in all values virtually everywhere that *ref-safe-context* is tracked today.
 
@@ -1192,13 +1192,13 @@ Example of where this would be beneficial: https://github.com/dotnet/runtime/pul
 ### To use modreqs or not
 A decision needs to be made if methods marked with new lifetime attributes should or should not translate to `modreq` in emit. There would be effectively a 1:1 mapping between annotations and `modreq` if this approach was taken.
 
-The rationale for adding a `modreq` is the attributes change the semantics of span safety. Only languages which understand these semantics should be calling the methods in question. Further when applied to OHI scenarios, the lifetimes become a contract that all derived methods must implement. Having the annotations exist without `modreq` can lead to situations where `virtual` method chains with conflicting lifetime annotations are loaded (can happen if only one part of `virtual` chain is compiled and other is not). 
+The rationale for adding a `modreq` is the attributes change the semantics of ref safe context rules. Only languages which understand these semantics should be calling the methods in question. Further when applied to OHI scenarios, the lifetimes become a contract that all derived methods must implement. Having the annotations exist without `modreq` can lead to situations where `virtual` method chains with conflicting lifetime annotations are loaded (can happen if only one part of `virtual` chain is compiled and other is not). 
 
-The initial span safety work did not use `modreq` but instead relied on languages and the framework to understand. At the same time though all of the elements that contribute to the span safety rules are a strong part of the method signature: `ref`, `in`, `ref struct`, etc ... Hence any change to the existing rules of a method already results in a binary change to the signature. To give the new lifetime annotations the same impact they will need `modreq` enforcement.
+The initial ref safe context work did not use `modreq` but instead relied on languages and the framework to understand. At the same time though all of the elements that contribute to the ref safe context rules are a strong part of the method signature: `ref`, `in`, `ref struct`, etc ... Hence any change to the existing rules of a method already results in a binary change to the signature. To give the new lifetime annotations the same impact they will need `modreq` enforcement.
 
 The concern is whether or not this is overkill. It does have the negative impact that making signatures more flexible, by say adding `[DoesNotEscape]` to a parameter, will result in a binary compat change. That trade off means that over time frameworks like BCL likely won't be able to relax such signatures. It could be mitigated to a degree by taking some approach the language does with `in` parameters and only apply `modreq` in virtual positions. 
 
-**Decision** Do not use `modreq` in metadata. The difference between `out` and `ref` is not `modreq` but they now have different span safety lifetimes. There is no real benefit to only half enforcing the rules with `modreq` here.
+**Decision** Do not use `modreq` in metadata. The difference between `out` and `ref` is not `modreq` but they now have different ref safe context values. There is no real benefit to only half enforcing the rules with `modreq` here.
 
 ### Allow multi-dimensional fixed buffers
 Should the design for `fixed` buffers be extended to include multi-dimensional style arrays? Essentially allowing for declarations like the following:
@@ -1294,7 +1294,7 @@ Some thought was given to the idea of having `this` have different defaults base
 **Decision** Keep `this` as `scoped ref`
 
 ### ref fields to ref struct
-This feature opens up a new set of ref safety rules because it allows for a `ref` field to refer to a `ref struct`. This generic nature of `ByReference<T>` meant that up until now the runtime could not have such a construct. As a result all of our rules are written under the assumption this is not possible. The `ref` field feature is largely not about making new rules but codifying the existing rules in our system. Allowing `ref` fields to `ref struct` requires us to codify new rules because there are several new scenarios to consider.
+This feature opens up a new set of ref safe context rules because it allows for a `ref` field to refer to a `ref struct`. This generic nature of `ByReference<T>` meant that up until now the runtime could not have such a construct. As a result all of our rules are written under the assumption this is not possible. The `ref` field feature is largely not about making new rules but codifying the existing rules in our system. Allowing `ref` fields to `ref struct` requires us to codify new rules because there are several new scenarios to consider.
 
 The first is that a `readonly ref` is now capable of storing `ref` state. For example:
 
@@ -1601,7 +1601,7 @@ This pattern comes up frequently in low level code. When the `ref struct` involv
 #### scoped parameter values
 <a name="examples-method-arguments-must-match"></a>
 
-One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-context* to the *caller-context*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the span safety rules.
+One source of repeated friction in low level code is the default escape for parameters is permissive. They are *safe-context* to the *caller-context*. This is a sensible default because it lines up with the coding patterns of .NET as a whole. In low level code though there is a larger use of  `ref struct` and this default can cause friction with other parts of the ref safe context rules.
 
 The main friction point occurs because of the [method arguments must match](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#method-arguments-must-match) rule. This rule most commonly comes into play with instance methods on `ref struct` where at least one parameter is also a `ref struct`. This is a common pattern in low level code where `ref struct` types commonly leverage `Span<T>` parameters in their methods. For example it will occur on any writer style `ref struct` that uses `Span<T>` to pass around buffers.
 
@@ -1737,7 +1737,7 @@ readonly ref struct S
     }
 ```
 
-The proposal prevents this though because it violates the span safety rules. Consider the following:
+The proposal prevents this though because it violates the ref safe context rules. Consider the following:
 
 - The *ref-safe-context* of `this` is *function-member* and *safe-context* is *caller-context*. These are both standard for `this` in a `struct` member.
 - The *ref-safe-context* of `i` is *function-member*. This falls out from the [field lifetimes rules](#rules-field-lifetimes). Specifically rule 4.
