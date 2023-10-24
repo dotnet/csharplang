@@ -32,7 +32,7 @@ IDisposable d = f;
 
 The ability to implement interfaces is only useful when combined with the ability for `ref struct` to participate in generic arguments (as [laid out later](#ref-struct-generic)).
 
-To allow for interfaces to cover the full expressiveness of a `ref struct`, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that `ref struct` member must also be decorated with `[UnscopedRef]`. The attribute is ignored when the `class` implements the interface. 
+To allow for interfaces to cover the full expressiveness of a `ref struct`, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that `ref struct` member must also be decorated with `[UnscopedRef]`. The attribute is ignored when a `class` or non-ref `struct` implements the interface. 
 
 Default interface methods pose a problem for `ref struct` as there are no protections against the default implementation boxing the `this` member. 
 
@@ -67,7 +67,7 @@ T Identity<T>(T p)
     => p;
 
 // Okay
-Span<T> local = Identity(new Span<int>(new int[10]));
+Span<int> local = Identity(new Span<int>(new int[10]));
 ```
 
 This is similar to a `where` in that it specifies the capabilities of the generic parameter. The difference is `where` limits the set of types that can fulfill a generic parameter while the behavior defined here expands the set of types. This is effectively an anti-constraint as it removes the implicit constraint that `ref struct` cannot satisfy a generic parameter. As such this is given a new syntax, `allow`, to make that clearer.
@@ -168,7 +168,7 @@ This feature requires several pieces of support from the runtime / libraries tea
 
 Most of this support is likely already in place. The general `ref struct` as generic parameter support is already implemented as described [here](https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md). It's possible the DIM implementation already account for `ref struct`. But each of these items needs to be tracked down.
 
-### Span<Span<T>>
+### Span&lt;Span&lt;T&gt;&gt;
 This combination of features does not allow for constructs such as `Span<Span<T>>`. This is made a bit clearer by looking at the definition of `Span<T>`: 
 
 ```csharp
