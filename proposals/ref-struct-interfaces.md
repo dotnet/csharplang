@@ -5,7 +5,7 @@ Ref Struct Interfaces
 This proposal will expand the capabilities of `ref struct` such that they can implement interfaces and participate as generic type arguments.
 
 ## Motivation
-The inability for `ref struct` to implement interfaces means they cannot partipcate in fairly fundamental abstraction techniques of .NET. A `Span<T>`, even though it has all the attributes of a sequential list cannot participate in methods that take `IReadOnlyList<T>`, `IEnumerable<T>`, etc ... Instead specific methods must be coded for `Span<T>` that have virtually the same implementation. Allowing `ref struct` to implement interfaces will allow operations to be abstracted over them as they are for other types. 
+The inability for `ref struct` to implement interfaces means they cannot participate in fairly fundamental abstraction techniques of .NET. A `Span<T>`, even though it has all the attributes of a sequential list cannot participate in methods that take `IReadOnlyList<T>`, `IEnumerable<T>`, etc ... Instead specific methods must be coded for `Span<T>` that have virtually the same implementation. Allowing `ref struct` to implement interfaces will allow operations to be abstracted over them as they are for other types. 
 
 ## Detailed Design
 
@@ -32,7 +32,7 @@ IDisposable d = f;
 
 The ability to implement interfaces is only useful when combined with the ability for `ref struct` to participate in generic arguments (as [laid out later](#ref-struct-generic)).
 
-To allow for interfaces to cover the full expressiveness of a `ref struct`, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that `ref struct` member must also be decorated with `[UnscopedRef]`. The attribute is ignored when the a `class` implements the interface. 
+To allow for interfaces to cover the full expressiveness of a `ref struct`, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that `ref struct` member must also be decorated with `[UnscopedRef]`. The attribute is ignored when the `class` implements the interface. 
 
 Default interface methods pose a problem for `ref struct` as there are no protections against the default implementation boxing the `this` member. 
 
@@ -70,7 +70,7 @@ T Identity<T>(T p)
 Span<T> local = Identity(new Span<int>(new int[10]));
 ```
 
-This is similar to a `where` in that it specifies the capabilities of the generic parameter. The difference is `where` limits the set of types that can fullfill a generic parameter while the behavior defined here expands the set of types. This is effectively an anti-constraint as it removes the implicit constraint that `ref struct` cannot satisfy a generic parameter. As such this is given a new syntax, `allow`, to make that clearer.
+This is similar to a `where` in that it specifies the capabilities of the generic parameter. The difference is `where` limits the set of types that can fulfill a generic parameter while the behavior defined here expands the set of types. This is effectively an anti-constraint as it removes the implicit constraint that `ref struct` cannot satisfy a generic parameter. As such this is given a new syntax, `allow`, to make that clearer.
 
 A type parameter bound by `allow T: ref struct` has all of the behaviors of a `ref struct` type: 
 
@@ -151,7 +151,7 @@ Given there is no actual variance when `struct` are involved these should be com
 ### Auto-applying to delegate members
 **Decision**: do not auto-apply
 
-For many generic `delegate` members the language could automatically apply `allow T: ref struct` as it's purely an upside change. Consider that for `Func<> / Action<>` style delegetes there is no downside to expanding to allowing `ref struct`. The language can outline rules where it is safe to automatically apply this anti-constraint. This removes the manual process and would speed up the adoption of this feature.
+For many generic `delegate` members the language could automatically apply `allow T: ref struct` as it's purely an upside change. Consider that for `Func<> / Action<>` style delegates there is no downside to expanding to allowing `ref struct`. The language can outline rules where it is safe to automatically apply this anti-constraint. This removes the manual process and would speed up the adoption of this feature.
 
 While that is true it can present a problem in multi-targeted scenarios. Code would compile in one target framework but fail in another. This could lead to confusion with customers and result in a desire for a more explicit opt-in.
 
@@ -161,7 +161,7 @@ Adding `allow T: ref struct` to an existing API is not a source breaking change.
 ## Considerations
 
 ### Runtime support
-This feature requires several pieces of support from the runtime / libaries team: 
+This feature requires several pieces of support from the runtime / libraries team: 
 - Preventing default interface methods from applying to `ref struct`
 - API in `System.Reflection.Metadata` for encoding the `gpAcceptByRefLike` value.
 - Support for generic parameters being a `ref struct`
