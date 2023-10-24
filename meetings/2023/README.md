@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [nullability analysis of collection expressions](https://github.com/dotnet/csharplang/issues/7626) (Julien)
+
 ## Schedule when convenient
 
 ## Recurring topics
