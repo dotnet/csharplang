@@ -142,3 +142,4 @@ Related Items:
 - https://github.com/dotnet/csharplang/issues/7608
 - https://github.com/dotnet/csharplang/pull/7555
 - https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md
+- https://github.com/dotnet/runtime/pull/67783
