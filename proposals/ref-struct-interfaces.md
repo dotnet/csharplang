@@ -41,6 +41,7 @@ interface I1
 {
     void M()
     {
+        // Error: both of these box if I1 is implemented by a ref struct
         I1 local1 = this;
         object local2 = this;
     }
@@ -50,6 +51,7 @@ ref struct S = I1 { }
 ```
 
 To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations. The runtime will also be updated to throw an exception if a default interface member is called on a `ref struct` type.
+
 Detailed Notes:
 - A `ref struct` can implement an interface
 - A `ref struct` cannot participate in default interface members
@@ -68,13 +70,55 @@ T Identity<T>(T p)
 Span<T> local = Identity(new Span<int>(new int[10]));
 ```
 
-**TO COVER**
-- lifetime rules
+This is similar to a `where` in that it specifies the capabilities of the generic parameter. The difference is `where` limits the set of types that can fullfill a generic parameter while the behavior defined here expands the set of types. This is effectively an anti-constraint as it removes the implicit constraint that `ref struct` cannot satisfy a generic parameter. As such this is given a new syntax, `allow`, to make that clearer.
+
+A type parameter bound by `allow T: ref struct` has all of the behaviors of a `ref struct` type: 
+
+1. Instances of it cannot be boxed
+2. Instances participate in lifetime rules like a normal `ref struct`
+3. The type parameter cannot be used in `static` fields, elements of an array, etc ...
+4. Instances can be marked with `scoped`
+
+Examples of these rules in action: 
+
+```csharp
+interface I1 { }
+I1 M1<T>(T p)
+    allow T : ref struct, I1
+{
+    // Error: cannot box potential ref struct
+    return p;
+}
+
+T M2<T>(T p)
+{
+    Span<int> span = stackalloc int[42];
+
+    // The safe-to-escape of the return is current method because one of the inputs is 
+    // current method
+    T t = M3<T>(span);
+
+    // Error: the safe-to-escape is current method.
+    return t;
+
+    // Okay
+    return default;
+    return p;
+}
+
+T M3<T>(Span<int> span)
+{
+    return default;
+}
+```
+
+These parameters will be encoded in metadata as described in the [byref-like generics doc](https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md). Specifically by using the `gpAcceptByRefLike(0x0020)` attribute value.
 
 Detailed notes: 
 - A `allow T : ref struct` generic parameter cannot 
     - Have `where T : U` where `U` is a known reference type
     - Have `where T : class` constraint
+    - Cannot be used as a generic argument unless the corresponding parameter is also `allow T: ref struct`
 - A type parameter `T` which has `allow T: ref struct` has all the same limitations as a `ref struct` type.
 
 ## Open Issues
@@ -100,23 +144,29 @@ void M<T>(T p)
 ```
 
 ### Co and contra variance
-To be maximally useful type parameters that are `allow T : ref struct` must be able to participate in generic variance. Lacking that they would not be usable in many of the most popular `delegate` and `interface` types in .NET like `Func<T>`, `Action<T>`, `IEnumerable<T>`, etc ...
+To be maximally useful type parameters that are `allow T : ref struct` must be compatible with generic variance. Specifically it must be legal for a parameter to be both co/contravariant and also `allow T: ref struct`. Lacking that they would not be usable in many of the most popular `delegate` and `interface` types in .NET like `Func<T>`, `Action<T>`, `IEnumerable<T>`, etc ...
 
-This feels very approachable but the author lacks the right background to properly sketch this out. Going to be relying on others like @agocke to help out here.
+Given there is no actual variance when `struct` are involved these should be compatible. There is still some concern that I'm missing deeply generic variance cases. Need to sit down with @agocke to work out if this is truly safe or if there are deeply generic scenarios that need to be worked out.
 
 ### Auto-applying to delegate members
-The design auto-applies `allow T : ref struct` to delegates with compatible type parameters. The rationale is there is no downside to doing so, it purely increases the expressiveness of the type.
+**Decision**: do not auto-apply
+
+For many generic `delegate` members the language could automatically apply `allow T: ref struct` as it's purely an upside change. Consider that for `Func<> / Action<>` style delegetes there is no downside to expanding to allowing `ref struct`. The language can outline rules where it is safe to automatically apply this anti-constraint. This removes the manual process and would speed up the adoption of this feature.
 
 While that is true it can present a problem in multi-targeted scenarios. Code would compile in one target framework but fail in another. This could lead to confusion with customers and result in a desire for a more explicit opt-in.
 
-### Metadata encoding
+### Binary breaking change
+Adding `allow T: ref struct` to an existing API is not a source breaking change. It is purely expanding the set of allowed types for an API. Need to track down if this is a binary breaking change or not. Unclear if updating the attributes of a generic parameter constitute a binary breaking change.
 
 ## Considerations
 
 ### Runtime support
-DIM
-SRM
+This feature requires several pieces of support from the runtime / libaries team: 
+- Preventing default interface methods from applying to `ref struct`
+- API in `System.Reflection.Metadata` for encoding the `gpAcceptByRefLike` value.
+- Support for generic parameters being a `ref struct`
 
+Most of this support is likely already in place. The general `ref struct` as generic parameter support is already implemented as described [here](https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md). It's possible the DIM implementation already account for `ref struct`. But each of these items needs to be tracked down.
 
 ### Span<Span<T>>
 This combination of features does not allow for constructs such as `Span<Span<T>>`. This is made a bit clearer by looking at the definition of `Span<T>`: 
