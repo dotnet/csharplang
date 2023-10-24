@@ -5,15 +5,13 @@ Ref Struct Interfaces
 This proposal will expand the capabilities of `ref struct` such that they can implement interfaces and participate as generic type arguments.
 
 ## Motivation
+The inability for `ref struct` to implement interfaces means they cannot partipcate in fairly fundamental abstraction techniques of .NET. A `Span<T>`, even though it has all the attributes of a sequential list cannot participate in methods that take `IReadOnlyList<T>`, `IEnumerable<T>`, etc ... Instead specific methods must be coded for `Span<T>` that have virtually the same implementation. Allowing `ref struct` to implement interfaces will allow operations to be abstracted over them as they are for other types. 
 
 ## Detailed Design
 
 ### ref struct interfaces
-The language will allow for `ref struct` types to implement interfaces. 
-
-**TO COVER**
-- DIM
-- `[UnscopedRef]`
+<a name="ref-struct-interface"></a>
+The language will allow for `ref struct` types to implement interfaces. The syntax and rules are the same as for normal `struct` with a few exceptions to account for the limitations of `ref struct` types. 
 
 The ability to implement interfaces does not impact the existing limitations against boxing `ref struct` instances. That means even if a `ref struct` implements a particular interface,  it cannot be directly cast to it as that represents a boxing action.
 
@@ -32,14 +30,33 @@ File f = ...;
 IDisposable d = f;
 ```
 
-The ability to implement interfaces is only useful when combined with the ability for `ref struct` to participate in generic arguments (as laid out later).
+The ability to implement interfaces is only useful when combined with the ability for `ref struct` to participate in generic arguments (as [laid out later](#ref-struct-generic)).
 
+To allow for interfaces to cover the full expressiveness of a `ref struct`, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that `ref struct` member must also be decorated with `[UnscopedRef]`. The attribute is ignored when the a `class` implements the interface. 
+
+Default interface methods pose a problem for `ref struct` as there are no protections against the default implementation boxing the `this` member. 
+
+```csharp
+interface I1
+{
+    void M()
+    {
+        I1 local1 = this;
+        object local2 = this;
+    }
+}
+
+ref struct S = I1 { }
+```
+
+To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations. The runtime will also be updated to throw an exception if a default interface member is called on a `ref struct` type.
 Detailed Notes:
 - A `ref struct` can implement an interface
 - A `ref struct` cannot participate in default interface members
 - A `ref struct` cannot be cast to interfaces it implements as that is a boxing operation
 
 ### ref struct Generic Parameters
+<a name="ref-struct-generic"></a>
 The language will allow for generic parameters to opt into supporting `ref struct` as arguments by using the `allow T : ref struct` syntax: 
 
 ```csharp
@@ -50,6 +67,9 @@ T Identity<T>(T p)
 // Okay
 Span<T> local = Identity(new Span<int>(new int[10]));
 ```
+
+**TO COVER**
+- lifetime rules
 
 Detailed notes: 
 - A `allow T : ref struct` generic parameter cannot 
@@ -93,6 +113,11 @@ While that is true it can present a problem in multi-targeted scenarios. Code wo
 
 ## Considerations
 
+### Runtime support
+DIM
+SRM
+
+
 ### Span<Span<T>>
 This combination of features does not allow for constructs such as `Span<Span<T>>`. This is made a bit clearer by looking at the definition of `Span<T>`: 
 
@@ -112,7 +137,8 @@ The first is for APIs like `Span(T[] array)` as a `ref struct` cannot be an arra
 
 The second is that the language does not support `ref` fields that are `ref struct`. There is a [design proposal](https://github.com/dotnet/csharplang/pull/7555) for allowing that feature. It's unclear if that will be accepted into the language or if it's expressive enough to handle the full set of scenarios around `Span<T>`.
 
-## Related Issues
-Issues
+## Related Items
+Related Items:
 - https://github.com/dotnet/csharplang/issues/7608
 - https://github.com/dotnet/csharplang/pull/7555
+- https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md
