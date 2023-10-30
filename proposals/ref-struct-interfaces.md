@@ -106,7 +106,7 @@ T M2<T>(T p)
     return p;
 }
 
-T M3<T>(Span<int> span)
+T M3<T>(Span<T> span)
     allow T : ref struct
 {
     return default;
