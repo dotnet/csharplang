@@ -209,10 +209,10 @@ void M(ref scoped S s)
 // maps to 
 
 void M<$param1>(ref<$local> S<$param1> s)
-    where $param1 : $cm
+    where $param1 : $local
 ```
 
-This definition prevents the value from escaping from the method as the lifetime is not returnable. It also prevents local data from escaping from the current method through the parameter as the lifetime is wider that `$local` but not equivalent.
+This definition prevents the value from escaping from the method as the lifetime is not returnable. It also prevents local data from escaping from the current method through the parameter as the lifetime is wider than `$local` but not equivalent.
 
 ```csharp
 void M<$param1>(ref<$local> S<$param1> p)
