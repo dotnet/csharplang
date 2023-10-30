@@ -22,6 +22,8 @@ using_alias_directive
     ;
 ```
 
+Note: this grammar excludes top-level reference type nullability annotations.
+
 Interestingly, most of the spec language in [§13.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#1352-using-alias-directives) does not need to change.  Most language in it already refers to 'namespace or type', for example:
 
 > A using_alias_directive introduces an identifier that serves as an alias for a namespace or type within the immediately enclosing compilation unit or namespace body.
