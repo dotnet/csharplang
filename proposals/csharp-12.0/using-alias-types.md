@@ -22,7 +22,7 @@ using_alias_directive
     ;
 ```
 
-Note: this grammar excludes top-level reference type nullability annotations.
+Top-level reference type nullability annotations are disallowed.
 
 Interestingly, most of the spec language in [§13.5.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/namespaces.md#1352-using-alias-directives) does not need to change.  Most language in it already refers to 'namespace or type', for example:
 
