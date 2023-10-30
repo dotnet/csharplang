@@ -91,6 +91,7 @@ I1 M1<T>(T p)
 }
 
 T M2<T>(T p)
+    allow T : ref struct
 {
     Span<int> span = stackalloc int[42];
 
