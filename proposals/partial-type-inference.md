@@ -1,10 +1,5 @@
 # Partial type inference
 
-* [x] Proposed
-* [ ] Prototype
-* [ ] Implementation
-* [ ] Specification
-
 > Note: This proposal was created because of championed [Partial type inference](https://github.com/dotnet/csharplang/issues/1349). It is a continuation of the proposed second version published in [csharplang/discussions/7467](https://github.com/dotnet/csharplang/discussions/7467) and the first version published in [csharplang/discussions/7286](https://github.com/dotnet/csharplang/discussions/7286)
 
 ## Summary
