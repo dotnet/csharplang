@@ -85,7 +85,7 @@ Besides the changes described above, the proposal mentions further interactions 
   Method type inference is not defined on *object_creation_expression*, prohibiting taking advantage of type inference.
   We divide use cases into the following categories, where type inference would help the programmer. 
 
-  1. Cases where the method type inference would success.
+  1. Cases where the method type inference would succeed.
    
   > Example
   > 
