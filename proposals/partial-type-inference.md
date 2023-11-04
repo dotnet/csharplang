@@ -64,7 +64,7 @@ Besides the changes described above, the proposal mentions further interactions 
   > public void log<T, U>(T message, U appendix) { ... }
   > ```
 
-  The first improvement, which would improve the method type inference algorithm, has a significant disadvantage of the breaking change.
+  The first improvement, which would improve the method type inference algorithm, has a significant disadvantage of introducing a breaking change.
   On the other hand, the second improvement, which would enable specifying some of the method's type arguments, does not influence old code, solves problems regarding the "all or nothing" principle, and reduces the first weakness.
   
   > Example
