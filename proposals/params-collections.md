@@ -51,18 +51,46 @@ The *type* of a parameter collection shall be one of the following valid target 
 - An *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`,
   `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>`
 
-In a method invocation, a parameter collection permits:
-- either a single argument of the given parameter type to be specified, or
-- zero arguments specified, or
-- one or more arguments specified, and the given parameter type is a valid target type as specified at
-  https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions
-  for a collection expression that consists of these arguments used as expression elements.
+In a method invocation, a parameter collection permits either a single argument of the given parameter type to be specified, or
+zero or more arguments specified.
 
 Parameter collections are described further in *[Parameter collections](#parameter-collections)*.
 
 ### Parameter collections
 
-https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/classes.md#15626-parameter-arrays
+The [Parameter arrays](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/classes.md#15626-parameter-arrays) section is renamed and adjusted as follows.
+
+A parameter declared with a `params` modifier is a parameter collection. If a formal parameter list includes a parameter collection,
+it shall be the last parameter in the list and it shall be of type specified in *[Method parameters](#method-parameters)* section.
+
+> *Note*: It is not possible to combine the `params` modifier with the modifiers `in`, `out`, or `ref`. *end note*
+
+A parameter collection permits arguments to be specified in one of two ways in a method invocation:
+
+- The argument given for a parameter collection can be a single expression that is implicitly convertible to the parameter collection type.
+  In this case, the parameter collection acts precisely like a value parameter.
+- Or, the invocation can specify zero arguments for the parameter collection. In this case, the invocation creates an instance of the
+  parameter collection type with no items according to the rules specified in [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+  for an empty literal ```[]```, and uses the newly created collection instance as the actual argument.
+- Finally, the invocation can specify one or more arguments for the parameter collection, assuming the given parameter type
+  is a valid target type for a collection expression that consists of these arguments used as expression elements in it,
+  according to the rules specified in [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md).
+  In this case, the invocation creates an instance of the parameter collection type according to the rules specified in
+  [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
+  as though the arguments were used as expression elements in a collection expression in the same order,
+  and uses the newly created collection instance as the actual argument.
+
+Except for allowing a variable number of arguments in an invocation, a parameter collection is precisely equivalent to
+a value parameter of the same type.
+
+When performing overload resolution, a method with a parameter collection might be applicable, either in its normal form or
+in its expanded form. The expanded form of a method is available only if the normal form of the method is not applicable and
+only if an applicable method with the same signature as the expanded form is not already declared in the same type.
+
+A potential ambiguity arises between the normal form and the expanded form of the method with a single parameter collection
+argument when it can be used as the parameter collection itself and as the element of the parameter collection at the same time.
+The ambiguity presents no problem, however, since it can be resolved by inserting a cast or using a collection expression,
+if needed.
 
 ### Overload resolution
 
