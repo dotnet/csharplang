@@ -92,6 +92,11 @@ argument when it can be used as the parameter collection itself and as the eleme
 The ambiguity presents no problem, however, since it can be resolved by inserting a cast or using a collection expression,
 if needed.
 
+### Signatures and overloading
+
+All the rules around `params` modifier in [Signatures and overloading](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/basic-concepts.md#76-signatures-and-overloading)
+remain as is.
+
 ### Overload resolution
 
 ## Open questions
