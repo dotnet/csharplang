@@ -194,11 +194,33 @@ So will want to look ahead to other potential directions, which can be done afte
 
 > Specification: Original section changed in the following way
 
-* We change the meaning of the content of *type_argument_list* in two contexts.
-  * [Constructed types](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#84-constructed-types) occuring in [*object_creation_expression*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128162-object-creation-expressions)
-  * Constructed types and type arguments occuring in method [invocation](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations)
+> We change [type arguments](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/types.md#842-type-arguments) section as follows:
 
 * ***inferred_type_argument*** represents an unknown type, which will be resolved during type inference. 
+
+* Each argument in a type argument list is ~~simply a type~~ **a type or an inferred type**.
+
+```diff
+type_argument_list
+  : '<' type_arguments '>'
+  ;
+  
+type_arguments
+-  : type_argument (',' type_argument)*
++  : type_argument (',' type_arguments)
++  | inferred_type_argument (',' type_arguments)
+  ;   
+
+type_argument
+  : type
+  ;
+
++inferred_type_argument
++  : '_'
++  ;
+```
+
+* When a type with `_` identifier is presented in the scope where **inferred_type_argument** is used, a warning should appear since the **inferred_type_argument** hides the type's name causing a breaking change.
 
 * `_` identifier is considered to represent *inferred_type_argument* when:
   * It occurs in *type_argument_list* of a method group during method invocation.
