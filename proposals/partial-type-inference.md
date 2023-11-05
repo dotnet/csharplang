@@ -5,14 +5,14 @@
 ## Summary
 [summary]: #summary
 
-Partial type inference introduces a syntax skipping obvious type arguments in the argument list of
+Partial type inference introduces a syntax skipping inferrable type arguments in the argument list of
 
 1. *invocation_expression*
 2. *object_creation_expresssion*
 
 and allowing to specify just ambiguous ones.
 
-> Example of skipping obvious type arguments
+> Example of skipping inferrable type arguments
 >
 > ```csharp
 > M<_, object>(42, null); 
@@ -97,12 +97,12 @@ Besides the changes described above, the proposal mentions further interactions 
   > class Wrapper<T> { public Wrapper(T item) { ... } }
   > ```
   
-  2. Cases where the method type inference would be weak. (Using type info from target type, or type arguments' constrains)
+  2. Cases where the method type inference would be weak. (Using type info from target type, or type arguments' constraints)
   
   > Example
   >
   > ```csharp
-  > var alg = Create(new MyData()); // Method type inference can't infer TLogger because it doesn't use type constrains specified by `where` clauses
+  > var alg = Create(new MyData()); // Method type inference can't infer TLogger because it doesn't use type constraints specified by `where` clauses
   > 
   > public static Algorithm<TData, TLogger> Create<TData, TLogger>(TData data) where TLogger : Logger<TData> { return new Algorithm<TData, TLogger>(data); } 
   > class Algorithm<TData, TLogger> where TLogger : Logger<TData> { public Algorithm(TData data) { ... }}
@@ -153,7 +153,7 @@ Besides the changes described above, the proposal mentions further interactions 
 
 No matter how the partial type inference would work, we should be careful about the following things.
 
-- **Convenience** - We want an easy and intuitive syntax that we can skip the obvious type arguments.
+- **Convenience** - We want an easy and intuitive syntax that we can skip the inferrable type arguments.
 - **Performance** - Type inference is a complicated problem when we introduce subtyping and overloading in a type system.
 Although it can be done, the computation can take exponential time which we don't want.
 So it has to be restricted to cases, where the problem can be solved effectively but it still has practical usage.
@@ -169,16 +169,14 @@ So will want to look ahead to other potential directions, which can be done afte
 
 > Specification: Original section changed in the following way
 
-We modify [Identifiers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#643-identifiers) as follows:
-
-> [Identifiers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#643-identifiers)
+> We modify [Identifiers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#643-identifiers) as follows:
 
 - The semantics of an identifier named `_` depends on the context in which it appears:
   - It can denote a named program element, such as a variable, class, or method, or
   - It can denote a discard (§9.2.9.1).
-  - \***It can denote an inferred type argument avoiding specifying type arguments which can be inferred by the compiler.**
+  - **It will denote a type argument to be inferred.**
 
-> [Keywords](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#644-keywords)
+> We modify [Keywords](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#644-keywords) as follows:
 
 * A ***contextual keyword*** is an identifier-like sequence of characters that has special meaning in certain contexts, but is not reserved, and can be used as an identifier outside of those contexts as well as when prefaced by the `@` character.
 
@@ -356,7 +354,7 @@ We change the [type inference](https://github.com/dotnet/csharpstandard/blob/dra
     * We perform *shape inference* from each type argument to the corresponding type parameter.
   * If the target type should be used based on the expression binding, perform *upper-bound inference* from it to the type containing the constructor
   * If the expression contains an *object_initializer_list*, for each *initializer_element* of the list perform *lower-bound inference* from the type of the element to the type of *initializer_target*. If the binding of the element fails, skip it.
-  * If the expression contains *where* clauses defining type constraints of type parameters of the type containing constructor, for each constraint not representing *constructor* constrain, *reference type constraint*, *value type constraint* and *unmanaged type constraint* perform *lower-bound inference* from the constraint to the corresponding type parameter.
+  * If the expression contains *where* clauses defining type constraints of type parameters of the type containing constructor, for each constraint not representing *constructor* constraint, *reference type constraint*, *value type constraint* and *unmanaged type constraint* perform *lower-bound inference* from the constraint to the corresponding type parameter.
   * If the expression contains a *collection_initializer_list* and the type doesn't have overloads of the `Add` method, for each *initializer_element* of the list perform *lower-bound inference* from the types of the elements contained in the *initializer_element* to the types of the method's parameters. If the binding of any element fails, skip it.  
   * If the expression contains a *collection_initializer_list* using an indexer, use the indexer defined in the type and perform *lower_bound_inference* from the types in *initializer_element* to types of matching parameters of the indexer. 
 
