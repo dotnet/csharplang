@@ -90,8 +90,6 @@ Besides the changes described above, the proposal mentions further interactions 
   > Example
   > 
   > ```csharp
-  > var wrappedData = Create(new MyData());
-  > 
   > public static Wrapper<T> Create<T>(T item) { return new Wrapper<T>(item); }
   > 
   > class Wrapper<T> { public Wrapper(T item) { ... } }
