@@ -148,10 +148,13 @@ the construction of parameter collections when APIs are invoked in their expande
 
 ## Open questions
 
-### Opting out of implicit allocation on the call stack
+### Stack allocations 
 
-Should we allow opt-ing out of _implicit allocation_ on the call stack?
-Perhaps an attribute that can be applied to a method, type, or assembly.
+Here is a quote from https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#unresolved-questions:
+"Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?
+Should the language be unspecified to allow for this flexibility?
+We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757)." It sounds like we have to answer
+the questions in context of this proposal.
 
 ## Alternatives 
 
