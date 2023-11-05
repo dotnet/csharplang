@@ -244,8 +244,8 @@ If there is an ambiguity in the current scope, a compilation-time error occurs.
   > {
   >     void M() 
   >     {
-  >         new C1<>( ... ); // Refers generic_inferred type C1<T>
-  >         new C2<>( ... ); // Refers generic_inferred type C2<T1,T2>
+  >         new C1<>( ... ); // generic_inferred type C1<> refers to generic type C<T> where the type argument will be inferred from inspecting candidate constructors of C<T> 
+  >         new C2<>( ... ); // generic_inferred type C1<> refers to generic type C<T1, T2> where the type arguments will be inferred from inspecting candidate constructors of C<T1, T2> 
   >     }
   >     class C1<T> { ... }
   >     class C2<T1, T2> { ... }
