@@ -169,7 +169,7 @@ So will want to look ahead to other potential directions, which can be done afte
 
 > Specification: Original section changed in the following way
 
-The following changes are made in [tokens](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#64-tokens) located in the [grammar](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#62-grammars) section.
+We modify [Identifiers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#643-identifiers) as follows:
 
 > [Identifiers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#643-identifiers)
 
