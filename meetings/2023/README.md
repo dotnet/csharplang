@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule ASAP
 
 - [nullability analysis of collection expressions](https://github.com/dotnet/csharplang/issues/7626) (Julien)
+- [params collection](https://github.com/dotnet/csharplang/pull/7661) proposal (Aleksey)
 
 ## Schedule when convenient
 
