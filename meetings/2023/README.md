@@ -6,6 +6,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [nullability analysis of collection expressions](https://github.com/dotnet/csharplang/issues/7626) (Julien)
 - [params collection](https://github.com/dotnet/csharplang/pull/7661) proposal (Aleksey)
+- [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) (Julien)
 
 ## Schedule when convenient
 
