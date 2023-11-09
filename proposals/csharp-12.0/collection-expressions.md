@@ -129,7 +129,7 @@ The following implicit *collection expression conversions* exist from a collecti
 In the cases above, a collection expression *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
 
 * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
-* `Ei` is a *spread element* and there is an implicit conversion from the *iteration type* of the spread element *collection* to `T`.
+* `Ei` is a *spread element* and there is an implicit conversion from the *iteration type* of the spread element *expression* to `T`.
 
 Types for which there is an implicit collection expression conversion from a collection expression are the valid *target types* for that collection expression.
 
