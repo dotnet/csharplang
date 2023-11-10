@@ -24,7 +24,7 @@ public class C(bool b, int i, string s) : B(b) // b passed to base constructor
     public string S // s used directly in function members
     {
         get => s;
-        set => s = value ?? throw new NullArgumentException(nameof(X));
+        set => s = value ?? throw new ArgumentNullException(nameof(S));
     }
     public C(string s) : this(true, 0, s) { } // must call this(...)
 }
