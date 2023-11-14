@@ -4,9 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [nullability analysis of collection expressions](https://github.com/dotnet/csharplang/issues/7626) (Julien)
-- [params collection](https://github.com/dotnet/csharplang/pull/7661) proposal (Aleksey)
-- [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) and [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien)
 - [implicit indexers in object initializers](https://github.com/dotnet/csharplang/issues/7684) (Julien)
 
 ## Schedule when convenient
@@ -27,6 +24,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Wed Nov 29, 2023
 
 ## Wed Nov 15, 2023
+
+- [nullability analysis of collection expressions](https://github.com/dotnet/csharplang/issues/7626) (Julien)
+- [params collection](https://github.com/dotnet/csharplang/pull/7661) proposal (Aleksey)
+
+And if time allows: 
+
+- [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) and [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien)
 
 ## Wed Oct 18, 2023
 
