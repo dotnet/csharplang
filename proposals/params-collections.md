@@ -12,9 +12,14 @@ A `params` array parameter provides a convenient way to call a method that takes
 Today `params` parameter must be an array type. However, it might be beneficial for a developer to be able to have the same
 convenience when calling APIs that take other collection types. For example, an `ImmutableArray<T>`, `ReadOnlySpan<T>`, or 
 plain `IEnumerable`. Especially in cases when compiler is able to avoid an implicit array allocation for the purpose of
-creating the collection (`ImmutableArray<T>`, `ReadOnlySpan<T>`, etc). Today, in situations when an API takes a collection type,
-developers add `params` overload that takes an array, construct the target collection and call the original overload with that
-collection, thus consumers of the API have to trade an extra array allocation for convenience.
+creating the collection (`ImmutableArray<T>`, `ReadOnlySpan<T>`, etc).
+
+Today, in situations when an API takes a collection type, developers usually add `params` overload that takes an array,
+construct the target collection and call the original overload with that collection, thus consumers of the API have to
+trade an extra array allocation for convenience.
+
+Another motivation is ability to add a params span overload and have it take precedence over the array version,
+just by recompiling existing source code.
 
 ## Detailed design
 
