@@ -167,7 +167,8 @@ There is an alternative [proposal](https://github.com/dotnet/csharplang/blob/mai
 `params` only for `ReadOnlySpan<T>`.
 
 Also, one might say, that with [collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
-now in the language, there is no need to extend `params` support at all. Foe any collection type. To consume an API with collection type, a developer
+now in the language, there is no need to extend `params` support at all. For any collection type. To consume an API with collection type, a developer
+``` #Pending
 simply needs to add two characters, `[` before the expanded list of arguments, and `]` after it. Given that, extending `params` support might be an overkill,
 especially that other languages are unlikely to support consumption of non-array `params` parameters any time soon.
 
