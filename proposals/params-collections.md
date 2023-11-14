@@ -161,6 +161,15 @@ Should the language be unspecified to allow for this flexibility?
 We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757)." It sounds like we have to answer
 the questions in context of this proposal.
 
+### Implicitly `scoped` params
+
+There was a suggestion that, when `params` modifies a `ref struct` parameter, it should be considered as declared `scoped`.
+The argument is made that number of cases where you want the parameter to be scoped is virtually 100% when looking through
+the BCL cases. In a few cases that need that, the default could be overwritten with `[UnscopedRef]`.
+
+However, it might be undesirable to change the default simply based on presence of `params` modifier. Especially, that
+in overrides/implements scenarios `params` modifier doesn't have to match.
+
 ## Alternatives 
 
 There is an alternative [proposal](https://github.com/dotnet/csharplang/blob/main/proposals/params-span.md) that extends
