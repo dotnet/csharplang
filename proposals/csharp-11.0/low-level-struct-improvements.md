@@ -334,9 +334,9 @@ The design also requires that the introduction of a new safe-context: *return-on
 The details of *return-only* is that it's a context which is greater than *function-member* but smaller than *caller-context*. An expression provided to a `return` statement must be at least *return-only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-context* of *return-only* will fail because it's smaller than the `ref` parameter's *safe-context* which is *caller-context*. The need for this new escape context will be discussed [below](#rules-unscoped). 
 
 There are three locations which default to *return-only*:
-- A `ref` or `in` parameter. This is done in part for `ref struct` to prevent [silly cyclic assignment](#cyclic-assignment) issues. It is done uniformly though to simplify the model as well as minimize compat changes.
+- A `ref` or `in` parameter with have a *ref-safe-context* of *return-only*. This is done in part for `ref struct` to prevent [silly cyclic assignment](#cyclic-assignment) issues. It is done uniformly though to simplify the model as well as minimize compat changes.
 - A `out` parameter for a `ref struct` will have *safe-context* of *return-only*. This allows for return and `out` to be equally expressive. This does not have the silly cyclic assignment problem because `out` is implicitly `scoped` so the *ref-safe-context* is still smaller than the *safe-context*.
-- A `this` parameter for a `struct` constructor. This falls out due to being modeled as `out` parameters. 
+- A `this` parameter for a `struct` constructor will have a *safe-context* of *return-only*. This falls out due to being modeled as `out` parameters. 
 
 Any expression or statement which explicitly returns a value from a method or lambda must have a *safe-context*, and if applicable a *ref-safe-context*, of at least *return-only*. That includes `return` statements, expression bodied members and lambda expressions.
 
