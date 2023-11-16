@@ -10,6 +10,7 @@ Features Added in C# Language Versions
 - [Ref readonly parameters](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/ref-readonly-parameters.md): `ref readonly` parameters mandate that arguments are passed by reference instead of potentially copied, can’t be modified, and warn if a temporary variable must be created.
 - [Nameof accessing instance members](https://github.com/dotnet/csharplang/issues/4037): relaxes some restrictions on usage of instance members inside `nameof` (`nameof(field.ToString)`)
 - [Lambda optional parameters](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/lambda-method-group-defaults.md): allows lambda parameters to declare default values (`(int i = 42) => { }`)
+- UnsafeAccessorAttribute to allow access even to inaccessible members of a type using extern methods
 
 # C# 11.0 - .NET 7 and Visual Studio 2022 version 17.4
 
