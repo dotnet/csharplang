@@ -23,20 +23,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Nov 29, 2023
 
+# C# Language Design Notes for 2023
+
 ## Wed Nov 15, 2023
 
-- [nullability analysis of collection expressions](https://github.com/dotnet/csharplang/issues/7626) (Julien)
-- [params collection](https://github.com/dotnet/csharplang/pull/7661) proposal (Aleksey)
+[C# Language Design Meeting for November 15th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md)
 
-And if time allows: 
-
-- [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) and [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien)
-
-## Wed Oct 18, 2023
-
-- C# 13 planning (Jared and Mads - no notes)
-
-# C# Language Design Notes for 2023
+- `params` improvements
+- Nullability analysis of collection expressions
+- Evaluation of implicit indexers in object initializers
 
 ## Mon Oct 16, 2023
 
