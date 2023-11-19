@@ -9,6 +9,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - [spec review for `is` constant expressions](https://github.com/dotnet/csharplang/pull/7589) (Fred)
+- [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
 
 ## Recurring topics
 
