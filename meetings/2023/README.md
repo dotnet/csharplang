@@ -18,11 +18,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Dec 18, 2023
 
-## Wed Dec 13, 2023
+## Mon Dec 11, 2023
 
 ## Mon Dec 4, 2023
 
-## Wed Nov 29, 2023
+## Mon Nov 27, 2023
 
 # C# Language Design Notes for 2023
 
