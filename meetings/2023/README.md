@@ -4,7 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [implicit indexers in object initializers](https://github.com/dotnet/csharplang/issues/7684) (Julien)
+- [Lock statement pattern](https://github.com/dotnet/csharplang/issues/7104) (Stephen)
 
 ## Schedule when convenient
 
@@ -23,6 +23,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Mon Dec 4, 2023
 
 ## Mon Nov 27, 2023
+
+- [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) (Julien)
+- [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien
 
 # C# Language Design Notes for 2023
 
