@@ -9,6 +9,8 @@ Provide a general-purpose and safe mechanism for consuming struct types utilizin
 [InlineArrayAttribute](https://github.com/dotnet/runtime/issues/61135) feature.
 Provide a general-purpose and safe mechanism for declaring inline arrays within C# classes, structs, and interfaces.
 
+> Note: Previous versions of this spec used the terms "ref-safe-to-escape" and "safe-to-escape", which were introduced in the [Span safety](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) feature specification. The [ECMA standard committee](https://www.ecma-international.org/task-groups/tc49-tg2/) changed the names to ["ref-safe-context"](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/variables#972-ref-safe-contexts) and ["safe-context"](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/structs#16412-safe-context-constraint), respectively. The values of the safe context have been refined to use "declaration-block", "function-member", and "caller-context" consistently. The speclets had used different phrasing for these terms, and also used "safe-to-return" as a synonym for "caller-context". This speclet has been updated to use the terms in the C# 7.3 standard.
+
 ## Motivation
 
 This proposal plans to address the many limitations of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
@@ -115,21 +117,21 @@ For an inline array element access, the *primary_no_array_creation_expression* o
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a writable variable
 equivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.span-1.item) with
-that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
+that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context*
 of the access are equivalent to the same for an invocation of a method with the signature ```static ref T GetItem(ref InlineArrayType array)```.
 The resulting variable is considered movable if and only if *primary_no_array_creation_expression* is movable.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a readonly variable
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.item) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
-method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
+method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context*
 of the access are equivalent to the same for an invocation of a method with the signature ```static ref readonly T GetItem(in InlineArrayType array)```.
 The resulting variable is considered movable if and only if *primary_no_array_creation_expression* is movable.
 
 If *primary_no_array_creation_expression* is a value, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.item) with
 that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
-method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape*
+method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context*
 of the access are equivalent to the same for an invocation of a method with the signature ```static T GetItem(InlineArrayType array)```. 
 
 For example:
@@ -179,14 +181,14 @@ the *primary_no_array_creation_expression*. Then the element access is interpret
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/dotnet/api/system.span-1.slice)
 on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*.
-For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape* of the access are equivalent to the same
+For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context* of the access are equivalent to the same
 for an invocation of a method with the signature ```static System.Span<T> GetSlice(ref InlineArrayType array)```.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.slice)
 on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
 method on *primary_no_array_creation_expression*.
-For the purpose of ref-safety analysis the *ref-safe-to-escape*/*safe-to-escape* of the access are equivalent to the same
+For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context* of the access are equivalent to the same
 for an invocation of a method with the signature ```static System.ReadOnlySpan<T> GetSlice(in InlineArrayType array)```.
 
 If *primary_no_array_creation_expression* is a value, an error is reported. 
@@ -254,7 +256,7 @@ void M3()
 }
 ```
 
-For the purpose of ref-safety analysis the *safe-to-escape* of the conversion is equivalent to *safe-to-escape*
+For the purpose of ref-safety analysis the *safe-context* of the conversion is equivalent to *safe-context*
 for an invocation of a method with the signature ```static System.Span<T> Convert(ref InlineArrayType array)```, or
 ```static System.ReadOnlySpan<T> Convert(in InlineArrayType array)```.
 
@@ -553,7 +555,7 @@ This limits the set of types that can be used as a fixed-size buffer element typ
 The resulting span instance will have a length equal to the size declared on the fixed-size buffer.
 Indexing into the span with a constant expression outside of the declared fixed-size buffer bounds is a compile time error.
 
-The *safe-to-escape* scope of the value will be equal to the *safe-to-escape* scope of the container, just as it would if the backing data was accessed as a field.
+The *safe-context* of the value will be equal to the *safe-context* of the container, just as it would if the backing data was accessed as a field.
 
 #### Fixed-size buffers in expressions
 

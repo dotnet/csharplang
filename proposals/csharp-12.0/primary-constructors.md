@@ -24,7 +24,7 @@ public class C(bool b, int i, string s) : B(b) // b passed to base constructor
     public string S // s used directly in function members
     {
         get => s;
-        set => s = value ?? throw new NullArgumentException(nameof(X));
+        set => s = value ?? throw new ArgumentNullException(nameof(S));
     }
     public C(string s) : this(true, 0, s) { } // must call this(...)
 }
@@ -104,8 +104,8 @@ A class or struct with a `parameter_list` has an implicit public constructor who
 The [lookup of simple names](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1174-simple-names) is augmented to handle primary constructor parameters. The changes are highlighted in **bold** in the following excerpt:
 
 > - Otherwise, for each instance type `T` ([§14.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1432-the-instance-type)), starting with the instance type of the immediately enclosing type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):
->   - If `e` is zero and the declaration of `T` includes a type parameter with name `I`, then the *simple_name* refers to that type parameter.
->   - **Otherwise, if the declaration of `T` includes a primary constructor parameter `I` and the reference occurs within the `argument_list` of `T`'s `class_base` or within an initializer of a field, property or event of `T`, the result is the primary constructor parameter `I`**
+>   - **If the declaration of `T` includes a primary constructor parameter `I` and the reference occurs within the `argument_list` of `T`'s `class_base` or within an initializer of a field, property or event of `T`, the result is the primary constructor parameter `I`**
+>   - **Otherwise,** if `e` is zero and the declaration of `T` includes a type parameter with name `I`, then the *simple_name* refers to that type parameter.
 >   - Otherwise, if a member lookup ([§11.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup)) of `I` in `T` with `e` type arguments produces a match:
 >     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method ([§11.7.8.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11782-method-invocations)).
 >     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor ([§11.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1121-general)), the result is the same as a member access ([§11.7.6](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access)) of the form `this.I`. This can only happen when `e` is zero.
@@ -474,6 +474,10 @@ What should we do about this discrepancy?
 - Disallow a primiry constructor parameter to use type parameter's name (a possible breaking change).
 - Do nothing, accept the inconsistency between the spec and implementation.
 
+#### Conclusion:
+
+Adjust the rules to match the behavior (https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-25.md#primary-constructors).
+
 ### Field targeting attributes for captured primary constructor parameters
 
 Should we allow field targeting attributes for captured primary constructor parameters?
@@ -601,4 +605,5 @@ Approved, see https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md#primary-constructors
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-08.md#primary-constructors
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-15.md#primary-constructors
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-25.md#primary-constructors
 

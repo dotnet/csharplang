@@ -4,36 +4,96 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Lock statement pattern](https://github.com/dotnet/csharplang/issues/7104) (Stephen)
+
 ## Schedule when convenient
+
+- [spec review for `is` constant expressions](https://github.com/dotnet/csharplang/pull/7589) (Fred)
+- [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
 
 ## Recurring topics
 
 - *Triage championed features and milestones*
 - *Design review*
 
-## Wed Oct 18, 2023
+## Mon Dec 18, 2023
+
+## Mon Dec 11, 2023
+
+## Mon Dec 4, 2023
+
+## Mon Nov 27, 2023
+
+- [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) (Julien)
+- [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien
+
+# C# Language Design Notes for 2023
+
+## Wed Nov 15, 2023
+
+[C# Language Design Meeting for November 15th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md)
+
+- `params` improvements
+- Nullability analysis of collection expressions
+- Evaluation of implicit indexers in object initializers
 
 ## Mon Oct 16, 2023
 
+[C# Language Design Meeting for October 16th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-16.md)
+
+- Triage
+    - Breaking change warnings
+    - Determine natural type of method group by looking scope-by-scope
+    - u8 string interpolation
+    - Lock statement pattern
+    - String/Character escape sequence \\e as a short-hand for \\u001b 
+    - New operator %% for canonical Modulus operations
+
 ## Wed Oct 11, 2023
+
+[C# Language Design Meeting for October 11th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-11.md)
+
+- C# spec update
+- Collection expressions
 
 ## Mon Oct 9, 2023
 
+[C# Language Design Meeting for October 9th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-09.md)
+
+- Triage
+    - ReadOnlySpan initialization from static data
+    - Embedded Language Indicators for raw string literals
+    - list-patterns on enumerables
+    - Make generated \`Program\`\` for top-level statements public by default
+    - CallerCharacterNumberAttribute
+    - Add private and namespace accessibility modifiers for top-level types
+    - Require await to apply nullable postconditions to task-returning calls
+    - `is` expression evaluating `const` expression should be considered constant
+
 ## Wed Oct 4, 2023
+
+[C# Language Design Meeting for October 4th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-04.md)
+
+- Trimming and AOT
 
 ## Mon Oct 2, 2023
 
-- Update on the C# standard process (Bill)
+[C# Language Design Meeting for October 2nd, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-02.md)
+
+- Collection expressions
 
 ## Wed Sept 27, 2023
 
-- Futures: reflection alternatives (Andy)
+[C# Language Design Meeting for September 27th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-27.md)
+
+- Collection expressions
 
 ## Mon Sept 25, 2023
 
-- [Primary constructory details](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#lookup-order-for-type-parameters) (Aleksey)
+[C# Language Design Meeting for September 25th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-25.md)
 
-# C# Language Design Notes for 2023
+- Primary constructors
+- Defining well-defined behavior for collection expression types
 
 ## Wed Sept 20, 2023
 
