@@ -25,7 +25,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [spec review for `is` constant expressions](https://github.com/dotnet/csharplang/pull/7589) (Fred)
 - [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) (Julien)
-- [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien
+- [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien)
 
 # C# Language Design Notes for 2023
 
