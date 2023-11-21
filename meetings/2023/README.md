@@ -4,11 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Lock statement pattern](https://github.com/dotnet/csharplang/issues/7104) (Stephen)
-
 ## Schedule when convenient
 
-- [spec review for `is` constant expressions](https://github.com/dotnet/csharplang/pull/7589) (Fred)
 - [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
 
 ## Recurring topics
@@ -22,8 +19,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Dec 4, 2023
 
+- [Lock statement pattern](https://github.com/dotnet/csharplang/issues/7104) (Stephen)
+
 ## Mon Nov 27, 2023
 
+- [spec review for `is` constant expressions](https://github.com/dotnet/csharplang/pull/7589) (Fred)
 - [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) (Julien)
 - [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien
 
