@@ -17,6 +17,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Dec 11, 2023
 
+## Wed Dec 6, 2023
+
 ## Mon Dec 4, 2023
 
 - [Lock statement pattern](https://github.com/dotnet/csharplang/issues/7104) (Stephen)
