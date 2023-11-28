@@ -13,15 +13,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - *Triage championed features and milestones*
 - *Design review*
 
-## Mon Dec 18, 2023
-
 ## Mon Dec 11, 2023
 
-## Wed Dec 6, 2023
+- Extensions (Mads and Julien)
 
 ## Mon Dec 4, 2023
 
 - [Lock statement pattern](https://github.com/dotnet/csharplang/issues/7104) (Stephen)
+- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
+- [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
 
 ## Mon Nov 27, 2023
 
