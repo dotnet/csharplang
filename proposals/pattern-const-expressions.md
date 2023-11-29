@@ -59,14 +59,14 @@ The [§12.23 section](https://github.com/dotnet/csharpstandard/blob/standard-v7/
 > - sizeof expressions, provided the unmanaged-type is one of the types specified in §23.6.9 for which sizeof returns a constant value.
 > - Default value expressions, provided the type is one of the types listed above.
 > - **`is` expressions with only the following subpatterns:**
->   - **Boolean literal patterns.**
->   - **Numeric literal patterns.**
->   - **Character literal patterns.**
->   - **String literal patterns.**
->   - **Relative numeric literal patterns.**
->   - **Relative character literal patterns.**
->   - **Null literal patterns.**
->   - **Default literal patterns.**
+>   - **Boolean patterns.**
+>   - **Numeric patterns.**
+>   - **Character patterns.**
+>   - **String patterns.**
+>   - **Relative numeric patterns.**
+>   - **Relative character patterns.**
+>   - **Null patterns.**
+>   - **Default patterns.**
 >   - **And, or and not patterns.**
 >   - **Parenthesized patterns.**
 >   - **References to constant fields or locals inside constant patterns.**
