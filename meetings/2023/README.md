@@ -23,13 +23,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
 - [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
 
+# C# Language Design Notes for 2023
+
 ## Mon Nov 27, 2023
 
-- [spec review for `is` constant expressions](https://github.com/dotnet/csharplang/pull/7589) (Fred)
-- [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) (Julien)
-- [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien)
+[C# Language Design Meeting for November 27th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-27.md)
 
-# C# Language Design Notes for 2023
+- Pattern order optimizations
+- Subarray slicing breaking change
+- Making patterns constant expressions
 
 ## Wed Nov 15, 2023
 
