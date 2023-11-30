@@ -126,6 +126,8 @@ The following implicit *collection expression conversions* exist from a collecti
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
+There is no *collection expression conversion* from a collection expression to a multi dimensional *array type*.
+
 In the cases above, a collection expression *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
 
 * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
