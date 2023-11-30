@@ -115,37 +115,58 @@ const bool p = b is null; // always false
 
 All the above are currently valid pattern matching expressions, that also emit warnings about their constant evaluation results, being always true or false.
 
-When assigning those expressions in a constant context, these warnings about the constant result of the expression will **not** be reported, as the user intends to capture the constant value of the expression. Constant context involves:
-- initializers for const symbols (fields or locals)
-- attribute arguments
-- parameter default value
-- switch statement case labels
-- switch expression arms
+When assigning those expressions in a constant context, these warnings about the constant result of the expression will **not** be reported, as the user intends to capture the constant value of the expression.
+
+Constant context includes contexts where a constant expression is required, as indicated in the [§12.23 section](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1223-constant-expressions), specifically:
+
+> Constant expressions are required in the contexts listed below and this is indicated in the grammar by using *constant_expression*. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
+> 
+> - Constant declarations ([§15.4](classes.md#154-constants))
+> - Enumeration member declarations ([§19.4](enums.md#194-enum-members))
+> - Default arguments of formal parameter lists ([§15.6.2](classes.md#1562-method-parameters))
+> - `case` labels of a `switch` statement ([§13.8.3](statements.md#1383-the-switch-statement)).
+> - `goto case` statements ([§13.10.4](statements.md#13104-the-goto-statement))
+> - Dimension lengths in an array creation expression ([§12.8.16.5](expressions.md#128165-array-creation-expressions)) that includes an initializer.
+> - Attributes ([§22](attributes.md#22-attributes))
+> - In a *constant_pattern* ([§11.2.3](patterns.md#1123-constant-pattern))
+
+Based on the above, we only filter constant contexts that accept `bool` values, namely:
+- Constant declarations
+- Default arguments of formal parameter lists
+- Attribute arguments
+- `case` labels of a `switch` statement
+- `goto case` statements
+- Switch expression arms
 
 Examples for the above:
 ```csharp
 const int a = 4;
 const bool b = false;
-const long c = 4;
+const int c = 4;
 const string d = "hello";
 const Sign e = Sign.Negative;
 
-// local or field
+// constant declaration
 const bool x = a is default(int); // always false, no warning/error
 
 // attribute argument
 [assembly: Something(a is 4)] // always true, no warning/error
 
-// parameter default value
+// default argument of formal parameter list
 // always true, no warning/error
 int Negate(int value, bool negate = e is Sign.Negative) { }
 
 // switch statement case label
+// + goto case statement
 switch (b)
 {
     // always true, no warning/error
     case a is c:
         break;
+
+    default:
+        // always true, no warning/error
+        goto case a is c;
 }
 
 // switch expression arm
