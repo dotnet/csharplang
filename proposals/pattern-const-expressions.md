@@ -111,9 +111,54 @@ const bool z = d is not null; // always true
 const bool p = b is null; // always false
 ```
 
-All the above are currently valid pattern matching expressions, that also emit warnings about their constant evaluation results, about them being always true or false.
+### Diagnostics
 
-When assigning those expressions to a constant symbol, these warnings about the constant result of the expression will **not** be reported, as the user intends to capture the constant value of the expression.
+All the above are currently valid pattern matching expressions, that also emit warnings about their constant evaluation results, being always true or false.
+
+When assigning those expressions in a constant context, these warnings about the constant result of the expression will **not** be reported, as the user intends to capture the constant value of the expression. Constant context involves:
+- initializers for const symbols (fields or locals)
+- attribute arguments
+- parameter default value
+- switch statement case labels
+- switch expression arms
+
+Examples for the above:
+```csharp
+const int a = 4;
+const bool b = false;
+const long c = 4;
+const string d = "hello";
+const Sign e = Sign.Negative;
+
+// local or field
+const bool x = a is default(int); // always false, no warning/error
+
+// attribute argument
+[assembly: Something(a is 4)] // always true, no warning/error
+
+// parameter default value
+// always true, no warning/error
+int Negate(int value, bool negate = e is Sign.Negative) { }
+
+// switch statement case label
+switch (b)
+{
+    // always true, no warning/error
+    case a is c:
+        break;
+}
+
+// switch expression arm
+var p = b switch
+{
+    // always true, no warning/error
+    a is c => 1,
+};
+```
+
+**NOTE**: we do not introduce any breaking changes in the reported diagnostics. Currently, all the above cases are illegal reporting "CS0150: A constant value is expected". A warning about the values always evaluating to either true or false is also reported alongside the error. We remove the warnings from those places where `is` expressions are currently not permitted to be used due to the error.
+
+### Other patterns
 
 Pattern expressions containing non-constant subpatterns, like accessing properties, list patterns and var patterns, are **not** constant. In the below examples, all expressions will report compiler errors:
 
@@ -143,3 +188,4 @@ Currently, equality and comparison operators can be used to compare against othe
 [meetings]: #design-meetings
 
 - Approval for Any Time milestone: [Here](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-09.md#is-expression-evaluating-const-expression-should-be-considered-constant)
+- November 27th, 2023 [Discussion](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-27.md#making-patterns-constant-expressions)
