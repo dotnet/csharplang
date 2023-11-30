@@ -120,7 +120,7 @@ The following implicit *collection expression conversions* exist from a collecti
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-* To a *struct* or *class type* that implements `System.Collections.IEnumerable` and *does not implement* `System.Collections.Generic.IEnumerable<T>`.
+* To a *struct* or *class type*, other than a multi dimensional *array type*, that implements `System.Collections.IEnumerable` and *does not implement* `System.Collections.Generic.IEnumerable<T>`.
 
 * To an *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`, `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>` where:
 
