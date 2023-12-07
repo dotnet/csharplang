@@ -874,6 +874,34 @@ However, given the breadth and consistency brought by the new literal syntax, we
   Span<int> span = __result;
   ```
 
+### Should *collection expression conversion* require availability of a minimal set of APIs for construction?
+
+A *constructible* collection type according to [*conversions*](#conversions) can actually be not constructible,
+which is likely to lead to some unexpected overload resolution behavior. For example:
+``` C#
+class C1
+{
+    public static void M1(string x)
+    {
+    }
+    public static void M1(char[] x)
+    {
+    }
+    
+    void Test()
+    {
+        M1(['a', 'b']); // error CS0121: The call is ambiguous between the following methods or properties: 'C1.M1(string)' and 'C1.M1(char[])'
+    }
+}
+```
+
+However, the 'C1.M1(string)' is not a candidate that can be used because:
+```
+error CS1729: 'string' does not contain a constructor that takes 0 arguments
+error CS1061: 'string' does not contain a definition for 'Add' and no accessible extension method 'Add' accepting a first argument of type 'string' could be found (are you missing a using directive or an assembly reference?)
+```
+
+
 ## Design meetings
 [design-meetings]: #design-meetings
 
