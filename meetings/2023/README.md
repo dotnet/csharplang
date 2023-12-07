@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
+- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
 
 ## Recurring topics
 
