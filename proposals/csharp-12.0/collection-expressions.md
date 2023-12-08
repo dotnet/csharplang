@@ -927,11 +927,11 @@ class C1 : IEnumerable<char>
 ```
 
 It looks like the situation is very similar to what we used to have with method group to delegate conversions. I.e.
-there were scenarios where the conversion existed, but was erroneus. We decided to improve that by ensuring that,
+there were scenarios where the conversion existed, but was erroneous. We decided to improve that by ensuring that,
 if conversion is erroneous, then it doesn't exist.
 
-Note, that with "Params Coolections" feature we will be running into a similar issue. It might be good to disallow
-usage of `params` modifier for not constructible collections. However the current proposal that check is based on 
+Note, that with "Params Collections" feature we will be running into a similar issue. It might be good to disallow
+usage of `params` modifier for not constructible collections. However in the current proposal that check is based on 
 [*conversions*](#conversions) section.
 
 
