@@ -901,6 +901,39 @@ error CS1729: 'string' does not contain a constructor that takes 0 arguments
 error CS1061: 'string' does not contain a definition for 'Add' and no accessible extension method 'Add' accepting a first argument of type 'string' could be found (are you missing a using directive or an assembly reference?)
 ```
 
+Here is another example with a user-defined type and a stronger error that doesn't even mention a valid candidate:
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+class C1 : IEnumerable<char>
+{
+    public static void M1(C1 x)
+    {
+    }
+    public static void M1(char[] x)
+    {
+    }
+
+    void Test()
+    {
+        M1(['a', 'b']); // error CS1061: 'C1' does not contain a definition for 'Add' and no accessible extension method 'Add' accepting a first argument of type 'C1' could be found (are you missing a using directive or an assembly reference?)
+    }
+
+    public static implicit operator char[](C1 x) => throw null;
+    IEnumerator<char> IEnumerable<char>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+}
+```
+
+It looks like the situation is very similar to what we used to have with method group to delegate conversions. I.e.
+there were scenarios where the conversion existed, but was erroneus. We decided to improve that by ensuring that,
+if conversion is erroneous, then it doesn't exist.
+
+Note, that with "Params Coolections" feature we will be running into a similar issue. It might be good to disallow
+usage of `params` modifier for not constructible collections. However the current proposal that check is based on 
+[*conversions*](#conversions) section.
+
 
 ## Design meetings
 [design-meetings]: #design-meetings
