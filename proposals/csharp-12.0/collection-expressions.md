@@ -932,7 +932,35 @@ if conversion is erroneous, then it doesn't exist.
 
 Note, that with "Params Collections" feature we will be running into a similar issue. It might be good to disallow
 usage of `params` modifier for not constructible collections. However in the current proposal that check is based on 
-[*conversions*](#conversions) section.
+[*conversions*](#conversions) section. Here is an example:
+
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+class C1 : IEnumerable<char>
+{
+    public static void M1(params C1 x) // It is probably better to report an error about an invalid `params` modifier
+    {
+    }
+    public static void M1(params ushort[] x)
+    {
+    }
+
+    void Test()
+    {
+        M1('a', 'b'); // error CS1061: 'C1' does not contain a definition for 'Add' and no accessible extension method 'Add' accepting a first argument of type 'C1' could be found (are you missing a using directive or an assembly reference?)
+        M2('a', 'b'); // Ok
+    }
+
+    public static void M2(params ushort[] x)
+    {
+    }
+
+    IEnumerator<char> IEnumerable<char>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+}
+```
 
 It looks like the issue was somewhat discussed previously, see https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-02.md#collection-expressions.
 At that time an argument was made that the rules, as specified right now, are consistent with how interpolated string handlers
@@ -950,7 +978,7 @@ _interpolated\_string\_expression_s and using only `+` operators.
 The target type must have a special attribute which is a strong indicator of author's intent for the type to be
 an interpolated string handler. It is fair to assume that presence of the attribute is not a coincidence.
 In contrast, the fact that a type is "enumerable", doesn't necessary mean that there was author's intent for
-the type to be constructible. Presence of a *[create method](#create-methods)*, however, which is indicated with
+the type to be constructible. A pPresence of a *[create method](#create-methods)*, however, which is indicated with
 a `[CollectionBuilder(...)]` attribute on the *collection type*, feels like a strong indicator of author's intent
 for the type to be constructible.
 
