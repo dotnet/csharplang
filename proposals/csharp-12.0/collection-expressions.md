@@ -934,6 +934,25 @@ Note, that with "Params Collections" feature we will be running into a similar i
 usage of `params` modifier for not constructible collections. However in the current proposal that check is based on 
 [*conversions*](#conversions) section.
 
+It looks like the issue was somewhat discussed previously, see https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-02.md#collection-expressions.
+At that time an argument was made that the rules, as specified right now, are consistent with how interpolated string handlers
+are specified. Here is a quote:
+
+>In particular, interpolated string handlers were originally specified this way, but we revised the specification after considering this issue.
+
+While there is some similarity, there is also an important distinction worth
+considering. Here is a quote from https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-interpolated-strings.md#interpolated-string-handler-conversion:
+
+> Type `T` is said to be an _applicable\_interpolated\_string\_handler\_type_ if it is attributed with `System.Runtime.CompilerServices.InterpolatedStringHandlerAttribute`.
+There exists an implicit _interpolated\_string\_handler\_conversion_ to `T` from an _interpolated\_string\_expression_, or an _additive\_expression_ composed entirely of
+_interpolated\_string\_expression_s and using only `+` operators.
+
+The target type must have a special attribute which is a strong indicator of author's intent for the type to be
+an interpolated string handler. It is fair to assume that presence of the attribute is not a coincidence.
+In contrast, the fact that a type is "enumerable", doesn't necessary mean that there was author's intent for
+the type to be constructible. Presence of a *[create method](#create-methods)*, however, which is indicated with
+a `[CollectionBuilder(...)]` attribute on the *collection type*, feels like a strong indicator of author's intent
+for the type to be constructible.
 
 ## Design meetings
 [design-meetings]: #design-meetings
