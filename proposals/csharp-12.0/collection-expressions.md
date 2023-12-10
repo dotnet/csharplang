@@ -874,6 +874,121 @@ However, given the breadth and consistency brought by the new literal syntax, we
   Span<int> span = __result;
   ```
 
+### Specification of a [*constructible*](#conversions) collection type utilizing a [*create method*](#create-methods) is sensitive to the context at which conversion is classified
+
+An existence of the conversion in this case depends on the notion of an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement)
+of the *collection type*. If there is a *create method* that takes a `ReadOnlySpan<T>` where `T` is the *iteration type*, the conversion exists. Otherwise, it doesn't.
+
+However, an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement)
+is sensitive to the context at which `foreach` is performed. For the same *collection type* it can be different based on what extension methods
+are in scope, and it can also be undefined.
+
+That feels fine for the purpose of `foreach` when the type isn't designed to be
+foreach-able on itself. If it is, extension methods cannot change how the type is foreach-ed over, no matter what the context is.
+
+However, that feels somewhat strange for a conversion to be context sensitive like that. Effectively the conversion is "unstable".
+A *collection type* explicitly designed to be *constructible* is allowed to leave out a definition of a very important detail - its *iteration type*.
+Leaving the type "unconvertible" on itself.
+
+Here is an example:
+``` C#
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+[CollectionBuilder(typeof(MyCollectionBuilder), nameof(MyCollectionBuilder.Create))]
+class MyCollection
+{
+}
+class MyCollectionBuilder
+{
+    public static MyCollection Create(ReadOnlySpan<long> items) => throw null;
+    public static MyCollection Create(ReadOnlySpan<string> items) => throw null;
+}
+
+namespace Ns1
+{
+    static class Ext
+    {
+        public static IEnumerator<long> GetEnumerator(this MyCollection x) => throw null;
+    }
+    
+    class Program
+    {
+        static void Main()
+        {
+            foreach (var l in new MyCollection())
+            {
+                long s = l;
+            }
+        
+            MyCollection x1 = ["a", // error CS0029: Cannot implicitly convert type 'string' to 'long'
+                               2];
+        }
+    }
+}
+
+namespace Ns2
+{
+    static class Ext
+    {
+        public static IEnumerator<string> GetEnumerator(this MyCollection x) => throw null;
+    }
+    
+    class Program
+    {
+        static void Main()
+        {
+            foreach (var l in new MyCollection())
+            {
+                string s = l;
+            }
+        
+            MyCollection x1 = ["a",
+                               2]; // error CS0029: Cannot implicitly convert type 'int' to 'string'
+        }
+    }
+}
+
+namespace Ns3
+{
+    class Program
+    {
+        static void Main()
+        {
+            // error CS1579: foreach statement cannot operate on variables of type 'MyCollection' because 'MyCollection' does not contain a public instance or extension definition for 'GetEnumerator'
+            foreach (var l in new MyCollection())
+            {
+            }
+        
+            MyCollection x1 = ["a", 2]; // error CS9188: 'MyCollection' has a CollectionBuilderAttribute but no element type.
+        }
+    }
+}
+```
+
+Given the current design, if the type doesn't define *iteration type* itself, compiler is unable to reliably validate
+an application of a `CollectionBuilder` attribute. If we don't know the *iteration type*, we don't know what the
+signature of the *create method* should be. If the *iteration type* comes from context, there is no guarantee that
+the type is always going to be used in a similar context.
+
+[Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#method-parameters) feature
+is also affected by this. It feels strange to be unable to reliably predict element type of a `params` parameter at the
+declaration point. The current proposal also requires to ensure that the *create method* is at least as accessible as the
+`params` *collection type*. It is unable to perform this check in a reliable fashion, unless the *collection type*
+defines its *iteration type* itself.
+
+#### Proposal
+
+Require a type utilizing `CollectionBuilder` attribute to define its *iteration type* on itself.
+In other words this means, that the type should either implement `IEnumarable`/`IEnumerable<T>`, or 
+it should have public `GetEnumerator` method with the right signature (this excludes any extension methods).
+
+Also, right now [*create method*](#create-methods) is required to "be accessible where the collection expression is used".
+This is another point of context dependency based on accessibility. The purpose of this method is very similar to
+the purpose of a user-defined conversion method, and that one must be public. Therefore, we should consider
+requiring the *create method* to be public as well.
+
 ### Should *collection expression conversion* require availability of a minimal set of APIs for construction?
 
 A *constructible* collection type according to [*conversions*](#conversions) can actually be not constructible,
