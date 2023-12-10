@@ -989,6 +989,142 @@ This is another point of context dependency based on accessibility. The purpose 
 the purpose of a user-defined conversion method, and that one must be public. Therefore, we should consider
 requiring the *create method* to be public as well.
 
+
+### The notion of [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) is not applied consistently throughout [*conversions*](#conversions)
+
+> * To a *struct* or *class type* that implements `System.Collections.Generic.IEnumerable<T>` where:
+>   * For each *element* `Ei` there is an *implicit conversion* to `T`.
+
+It looks like an assumption is made that `T` is necessary the *iteration type* of the *struct* or *class type* in this case.
+However, that assumption is incorrect. Which can lead to a very strange behavior. For example:
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+class MyCollection : IEnumerable<long>
+{
+    IEnumerator<long> IEnumerable<long>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+
+    public void Add(string l) => throw null;
+    
+    public IEnumerator<string> GetEnumerator() => throw null; 
+}
+
+class Program
+{
+    static void Main()
+    {
+        foreach (var l in new MyCollection())
+        {
+            string s = l; // Iteration type is string
+        }
+        
+        MyCollection x1 = ["a", // error CS0029: Cannot implicitly convert type 'string' to 'long'
+                           2];
+        MyCollection x2 = new MyCollection() { "b" };
+    }
+}
+```
+
+> * To a *struct* or *class type* that implements `System.Collections.IEnumerable` and *does not implement* `System.Collections.Generic.IEnumerable<T>`.
+
+It looks like implementation assumes that the *iteration type* is `object`, but the specification leaves this fact unspecified,
+and simply doesn't require each *element* to convert to anything. In general, however, the *iteration type* is not
+necessary the `object` type. Which can be observed in the following example:
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+class MyCollection : IEnumerable
+{
+    public IEnumerator<string> GetEnumerator() => throw null; 
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+}
+
+class Program
+{
+    static void Main()
+    {
+        foreach (var l in new MyCollection())
+        {
+            string s = l; // Iteration type is string
+        }
+    }
+}
+```
+
+The notion of *iteration type* is fundamental to [Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#applicable-function-member) feature.
+And this issue leads to a strange discrepancy between the two features. For Example:
+
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+class MyCollection : IEnumerable<long>
+{
+    IEnumerator<long> IEnumerable<long>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+
+    public IEnumerator<string> GetEnumerator() => throw null; 
+
+    public void Add(long l) => throw null; 
+    public void Add(string l) => throw null; 
+}
+
+class Program
+{
+    static void Main()
+    {
+        Test("2"); // error CS0029: Cannot implicitly convert type 'string' to 'long'
+        Test(["2"]); // error CS1503: Argument 1: cannot convert from 'collection expressions' to 'string'
+        Test(3); // error CS1503: Argument 1: cannot convert from 'int' to 'string'
+        Test([3]); // Ok
+
+        MyCollection x1 = ["2"]; // error CS0029: Cannot implicitly convert type 'string' to 'long'
+        MyCollection x2 = [3];
+    }
+
+    static void Test(params MyCollection a)
+    {
+    }
+}
+```
+
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+class MyCollection : IEnumerable
+{
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+
+    public IEnumerator<string> GetEnumerator() => throw null; 
+    public void Add(object l) => throw null;
+}
+
+class Program
+{
+    static void Main()
+    {
+        Test("2", 3); // error CS1503: Argument 2: cannot convert from 'int' to 'string'
+        Test(["2", 3]); // Ok
+    }
+
+    static void Test(params MyCollection a)
+    {
+    }
+}
+```
+
+It will probably be good to align one way or the other.
+
+#### Proposal
+
+Specify convertibility of *struct* or *class type* that implements `System.Collections.Generic.IEnumerable<T>` or `System.Collections.IEnumerable`
+in terms of *iteration type* and require an *implicit conversion* for each *element* `Ei` to the *iteration type*.
+
+
 ### Should *collection expression conversion* require availability of a minimal set of APIs for construction?
 
 A *constructible* collection type according to [*conversions*](#conversions) can actually be not constructible,
