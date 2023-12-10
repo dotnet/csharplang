@@ -4,7 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Should *collection expression conversion* require availability of a minimal set of APIs for construction?](https://github.com/dotnet/csharplang/pull/7749/files) (Aleksey)
+- [New design questions for *collection expression conversion*s](https://github.com/dotnet/csharplang/pull/7749/files) (Aleksey)
 
 ## Schedule when convenient
 
