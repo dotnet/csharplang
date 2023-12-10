@@ -1229,9 +1229,20 @@ _interpolated\_string\_expression_s and using only `+` operators.
 The target type must have a special attribute which is a strong indicator of author's intent for the type to be
 an interpolated string handler. It is fair to assume that presence of the attribute is not a coincidence.
 In contrast, the fact that a type is "enumerable", doesn't necessary mean that there was author's intent for
-the type to be constructible. A pPresence of a *[create method](#create-methods)*, however, which is indicated with
+the type to be constructible. A presence of a *[create method](#create-methods)*, however, which is indicated with
 a `[CollectionBuilder(...)]` attribute on the *collection type*, feels like a strong indicator of author's intent
 for the type to be constructible.
+
+#### Proposal
+
+For a *struct* or *class type* that implements `System.Collections.IEnumerable` and that does not have a [*create method*](#create-methods)
+[*conversions*](#conversions) section should require presence of at least the following APIs:
+- An accessible constructor that is applicable with no arguments.
+- An accessible `Add` instance or extension method that can be invoked with value of *iteration type* as the argument.
+
+For the purpose of [Params Collectons](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#method-parameters) feature,
+such types are valid `params` types when these APIs are declared public and are instance (vs. extension) methods.
+
 
 ## Design meetings
 [design-meetings]: #design-meetings
