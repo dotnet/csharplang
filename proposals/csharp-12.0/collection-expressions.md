@@ -975,8 +975,11 @@ the type is always going to be used in a similar context.
 [Params Collections](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#method-parameters) feature
 is also affected by this. It feels strange to be unable to reliably predict element type of a `params` parameter at the
 declaration point. The current proposal also requires to ensure that the *create method* is at least as accessible as the
-`params` *collection type*. It is unable to perform this check in a reliable fashion, unless the *collection type*
+`params` *collection type*. It is impossible to perform this check in a reliable fashion, unless the *collection type*
 defines its *iteration type* itself.
+
+Note, that we also have https://github.com/dotnet/roslyn/issues/69676 opened for compiler, which basically observes the same
+issue, but talks about it from the perspective of optimization. 
 
 #### Proposal
 
