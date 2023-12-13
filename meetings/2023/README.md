@@ -4,7 +4,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [New design questions for *collection expression conversion*s](https://github.com/dotnet/csharplang/pull/7749/files) (Aleksey)
+- New design questions for *collection expression conversion*s (Aleksey)
+  - https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#specification-of-a-constructible-collection-type-utilizing-a-create-method-is-sensitive-to-the-context-at-which-conversion-is-classified
+  - https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#the-notion-of-iteration-type-is-not-applied-consistently-throughout-conversions
+  - https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#should-collection-expression-conversion-require-availability-of-a-minimal-set-of-apis-for-construction
+ 
+- Overload resolution rules for "Params Collections" (the link is TBD) (Aleksey) 
 
 ## Schedule when convenient
 
