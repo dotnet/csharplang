@@ -151,6 +151,10 @@ In case the parameter type sequences `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂,
 The [collection expressions ref safety section](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#ref-safety) is applicable to
 the construction of parameter collections when APIs are invoked in their expanded form.
 
+### Metadata
+
+In metadata `params` parameters are marked with `System.ParamArrayAttribute` as `params` arrays are marked today.
+
 ## Open questions
 
 ### Stack allocations 
