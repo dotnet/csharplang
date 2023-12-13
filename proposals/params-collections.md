@@ -153,7 +153,7 @@ the construction of parameter collections when APIs are invoked in their expande
 
 ### Metadata
 
-In metadata `params` parameters are going to be marked with `System.ParamArrayAttribute` as `params` arrays are marked today.
+In metadata `params` parameters are marked with `System.ParamArrayAttribute` as `params` arrays are marked today.
 
 ## Open questions
 
