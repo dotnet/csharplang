@@ -123,6 +123,11 @@ If a function member that includes a parameter collection is not applicable in i
 
 The [Better function member](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12643-better-function-member) section is adjusted as follows.
 
+Given an argument list `A` with a set of argument expressions `{E₁, E₂, ..., Eᵥ}` and two applicable function members `Mᵥ` and `Mₓ` with parameter types `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂, ..., Qᵥ}`, `Mᵥ` is defined to be a ***better function member*** than `Mₓ` if
+
+- for each argument, the implicit conversion from `Eᵥ` to `Qᵥ` is not better than the implicit conversion from `Eᵥ` to `Pᵥ`, and
+- for at least one argument, the conversion from `Eᵥ` to `Pᵥ` is better than the conversion from `Eᵥ` to `Qᵥ`.
+
 In case the parameter type sequences `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂, ..., Qᵥ}` are equivalent (i.e., each `Pᵢ` has an identity conversion to the corresponding `Qᵢ`), the following tie-breaking rules are applied, in order, to determine the better function member.
 
 - If `Mᵢ` is a non-generic method and `Mₑ` is a generic method, then `Mᵢ` is better than `Mₑ`.
@@ -158,7 +163,7 @@ class Program
 {
     static void Main()
     {
-        Test(1); 
+        Test(1);
     }
 
     static void Test(in int x, params C2[] y) {} // There is an implicit conversion from `C2[]` to `C1[]`
@@ -168,6 +173,56 @@ class Program
 class C1 {}
 class C2 : C1 {}
 ```
+
+If any of the previous tie-breaking rules apply (including the "better arguments conversions" rule), the overload resolution result
+can be different by comparison to the case when an explicit collection expression is used as an argument instead.
+
+For example:
+``` C#
+class Program
+{
+    static void Test1()
+    {
+        M1(['1', '2', '3']); // Span overload is used
+        M1('1', '2', '3');   // String overload is used because `char` is an exact match
+    }
+
+    static void M1(params string value) {}
+    static void M1(params System.ReadOnlySpan<MyChar> value) {}
+
+    class MyChar
+    {
+        private readonly int _i;
+        public MyChar(int i) { _i = i; }
+        public static implicit operator MyChar(int i) => new MyChar(i);
+        public static implicit operator char(MyChar c) => (char)c._i;
+    }
+
+    static void Test2()
+    {
+        M2([1]); // Span overload is used
+        M2(1);   // Array overload is used, not generic
+    }
+
+    static void M2<T>(params System.Span<T> y){}
+    static void M2(params int[] y){}
+
+    static void Test3()
+    {
+        M3("3", ["4"]); // Span overload is used, better on the first argument conversion, none is better on the second
+        M3("3", "4");   // Ambiguity, better-ness of argument conversions goes in opposite directions.
+                        // Since parameter types are different ("object, string" vs. "string, object"), tie-breaking rules do not apply
+    }
+
+    static void M3(object x, params string[] y) {}
+    static void M3(string x, params Span<object> y) {}
+}
+```
+
+However, our primary concern are scenarios where overloads differ only by params collection type,
+but the collection types have the same element type. The behavior should be consistent with 
+explicit collection expressions for these cases.
+
 
 The "**if the same set of arguments corresponds to the collection elements for both methods**" condition is important for scenarios like:
 ``` C#
@@ -182,6 +237,8 @@ class Program
     static void Test(int y, params System.Span<int> x) {}
 }
 ```
+
+It doesn't feel reasonable to "compare" collections that are built from different elements.
 
   
 ### Ref safety
