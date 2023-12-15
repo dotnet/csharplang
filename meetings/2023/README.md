@@ -25,13 +25,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extensions (Mads and Julien)
 
+# C# Language Design Notes for 2023
+
 ## Mon Dec 4, 2023
 
-- [Lock statement pattern](https://github.com/dotnet/csharplang/issues/7104) (Stephen)
-- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
-- [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
+[C# Language Design Meeting for December 4th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-12-04.md)
 
-# C# Language Design Notes for 2023
+- Lock statement pattern
+- `BinaryCompatOnlyAttribute`
 
 ## Mon Nov 27, 2023
 
