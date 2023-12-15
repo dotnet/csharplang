@@ -141,7 +141,7 @@ The new rules apply to the `heap` constraint:
 
   1. Fields of classes must have types that satisfy the `heap` constraint.
   2. Static fields must have types that satisfy the `heap` constraint.
-  3. Variables of types which do not satisfy the `heap` constraint cannot be converted to a type without the `heap` constraint.
+  3. Types with the `heap` constraint have only the identity conversion.
   4. Variables of ref-struct type can only be substituted for type parameters without the `heap` constraint.
   5. Ref-struct types may only implement interfaces without default-interface-members.
 
