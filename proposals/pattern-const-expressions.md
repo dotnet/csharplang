@@ -8,7 +8,7 @@
 ## Summary
 [summary]: #summary
 
-Consider `is` pattern expressions as constant if the LHS is constant.
+Consider `is` pattern expressions as constant if both the RHS and the LHS are constant values, expressions, or patterns.
 
 ## Motivation
 [motivation]: #motivation
@@ -112,12 +112,13 @@ const bool p = b is null; // always false
 ```
 
 ### Diagnostics
+[diagnostics]: #diagnostics
 
 All the above are currently valid pattern matching expressions, that also emit warnings about their constant evaluation results, being always true or false.
 
 When assigning those expressions in a constant context, these warnings about the constant result of the expression will **not** be reported, as the user intends to capture the constant value of the expression.
 
-Constant context includes contexts where a constant expression is required, as indicated in the [§12.23 section](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1223-constant-expressions), specifically:
+Constant contexts are contexts where a constant expression is required, as indicated in the [§12.23 section](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1223-constant-expressions), specifically:
 
 > Constant expressions are required in the contexts listed below and this is indicated in the grammar by using *constant_expression*. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
 > 
@@ -130,7 +131,7 @@ Constant context includes contexts where a constant expression is required, as i
 > - Attributes ([§22](attributes.md#22-attributes))
 > - In a *constant_pattern* ([§11.2.3](patterns.md#1123-constant-pattern))
 
-Based on the above, we only filter constant contexts that accept `bool` values, namely:
+Based on the above, the contexts that will accept constant `is` pattern expressions are constant contexts that accept `bool` values, namely:
 - Constant declarations
 - Default arguments of formal parameter lists
 - Attribute arguments
@@ -150,7 +151,7 @@ const Sign e = Sign.Negative;
 const bool x = a is default(int); // always false, no warning/error
 
 // attribute argument
-[assembly: Something(a is 4)] // always true, no warning/error
+[assembly: Something(a is 3)] // always false, no warning/error
 
 // default argument of formal parameter list
 // always true, no warning/error
@@ -160,13 +161,13 @@ int Negate(int value, bool negate = e is Sign.Negative) { }
 // + goto case statement
 switch (b)
 {
-    // always true, no warning/error
-    case a is c:
+    // always false, no warning/error
+    case a is not c:
         break;
 
     default:
-        // always true, no warning/error
-        goto case a is c;
+        // always false, no warning/error
+        goto case a is not c;
 }
 
 // switch expression arm
@@ -180,6 +181,7 @@ var p = b switch
 **NOTE**: we do not introduce any breaking changes in the reported diagnostics. Currently, all the above cases are illegal reporting "CS0150: A constant value is expected". A warning about the values always evaluating to either true or false is also reported alongside the error. We remove the warnings from those places where `is` expressions are currently not permitted to be used due to the error.
 
 ### Other patterns
+[other-patterns]: #other-patterns
 
 Pattern expressions containing non-constant subpatterns, like accessing properties, list patterns and var patterns, are **not** constant. In the below examples, all expressions will report compiler errors:
 
@@ -187,6 +189,38 @@ Pattern expressions containing non-constant subpatterns, like accessing properti
 const bool q = d is string { Length: 5 }; // Error: not a constant expression
 const bool r = d is [.. var prefix, 'l', 'o']; // Error: not a constant expression
 const bool s = d is var someString; // Error: not a constant expression
+```
+
+### Switch expressions
+[switch-expressions]: #switch-expressions
+
+When evaluating a constant value on a switch expression, we adjust the reported diagnostics based on the matching arms:
+- If any subpattern is matched, we do **not** report a warning for the uncovered default case.
+- If no subpattern is matched, we report an **error** instead of a warning about the unmatched subpattern, asking the user to either handle the specific value, or the default case.
+
+For example:
+```csharp
+const int a = 1;
+const int b = 2;
+const int c = 3;
+
+// no warning about the missing default arm,
+// the expression always returns the value of b
+int x = a switch
+{
+    a => b,
+    b => a,
+    c => a + b,
+};
+
+// the matching subpatterns are not all constant,
+// therefore the user will be warned about missing
+// the default arm
+int y = [a, b] switch
+{
+    [0, 1] => 1,
+    [.., 3] => 3,
+};
 ```
 
 ## Drawbacks
