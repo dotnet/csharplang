@@ -1,31 +1,10 @@
-# Upcoming meetings for 2023
-
-All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
-
-## Schedule ASAP
-
-- New design questions for *collection expression conversion*s (Aleksey)
-  - https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#specification-of-a-constructible-collection-type-utilizing-a-create-method-is-sensitive-to-the-context-at-which-conversion-is-classified
-  - https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#the-notion-of-iteration-type-is-not-applied-consistently-throughout-conversions
-  - https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#should-collection-expression-conversion-require-availability-of-a-minimal-set-of-apis-for-construction
- 
-- Overload resolution rules for "Params Collections" (the link is TBD) (Aleksey) 
-
-## Schedule when convenient
-
-- [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
-- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
-
-## Recurring topics
-
-- *Triage championed features and milestones*
-- *Design review*
+# C# Language Design Notes for 2023
 
 ## Mon Dec 11, 2023
 
-- Extensions (Mads and Julien)
+[C# Language Design Meeting for December 11th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-12-11.md)
 
-# C# Language Design Notes for 2023
+- Extensions
 
 ## Mon Dec 4, 2023
 
