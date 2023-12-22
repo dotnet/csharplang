@@ -276,9 +276,7 @@ An inline array type is a valid *constructible collection* target type for a [co
 
 For example:
 ``` C#
-int[5] a = [1, 2, 3, 4, 5]; // initializes anonymous inline array of length 5
 Buffer10<int> b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // initializes user-defined inline array
-var d = new int[][2] {[11, 12], [21, 22], [31, 32]}; // regular array with an element type of an anonymous inline array type with element type int and length 2
 ```
 
 The length of the collection literal must match the length of the target inline array type. If the length of the literal
