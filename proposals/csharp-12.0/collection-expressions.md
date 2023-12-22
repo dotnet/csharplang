@@ -116,11 +116,7 @@ The following implicit *collection expression conversions* exist from a collecti
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
-* To a *struct* or *class type* that implements `System.Collections.Generic.IEnumerable<U>` and has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `T` where:
-
-  * For each *element* `Ei` there is an *implicit conversion* to `T`.
-
-* To a *struct* or *class type* that implements `System.Collections.IEnumerable` and *does not implement* `System.Collections.Generic.IEnumerable<T>`, and has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `T`.
+* To a *struct* or *class type* that implements `System.Collections.IEnumerable` and has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `T`.
 
   * For each *element* `Ei` there is an *implicit conversion* to `T`.
 
