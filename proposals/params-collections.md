@@ -240,7 +240,60 @@ class Program
 
 It doesn't feel reasonable to "compare" collections that are built from different elements.
 
-  
+### Dynamic vs. Static Binding
+
+From [Static and Dynamic Binding](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#123-static-and-dynamic-binding):
+> When no dynamic expressions are involved, C# defaults to static binding, which means that the compile-time types of subexpressions are used in the selection process.
+> However, when one of the subexpressions in the operations listed above is a dynamic expression, **the operation is instead dynamically bound**.
+>
+> It is a compile time error if a method invocation is dynamically bound and any of the parameters, including the receiver, has the `in` modifier.
+
+However, an exception to this rule exists for local functions.
+From [Local function declarations](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1364-local-function-declarations):
+> If the type of the argument to a local function is `dynamic`, **the function to be called must be resolved at compile time, not runtime**.
+
+From [Compile-time checking of dynamic member invocation](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation):
+> Even though overload resolution of a dynamically bound operation takes place at run-time, it is sometimes possible at compile-time to know
+> the list of function members from which an overload will be chosen:
+>
+> - For a delegate invocation ([§12.8.9.4](expressions.md#12894-delegate-invocations)), the list is a single function member with the same parameter list as the *delegate_type* of the invocation
+> - For a method invocation ([§12.8.9.2](expressions.md#12892-method-invocations)) on a type, or on a value whose static type is not dynamic, the set of accessible methods in the method group
+>   is known at compile-time.
+> - For an object creation expression ([§12.8.16.2](expressions.md#128162-object-creation-expressions)) the set of accessible constructors in the type is known at compile-time.
+> - For an indexer access ([§12.8.11.3](expressions.md#128113-indexer-access)) the set of accessible indexers in the receiver is known at compile-time.
+>
+> In these cases a limited compile-time check is performed on each member in the known set of function members, to see if it can be known for certain never to be invoked at run-time.
+> For each function member `F` a modified parameter and argument list are constructed:
+>
+> - First, if `F` is a generic method and type arguments were provided, then those are substituted for the type parameters in the parameter list.
+>   However, if type arguments were not provided, no such substitution happens.
+> - Then, any parameter whose type is open (i.e., contains a type parameter; see [§8.4.3](types.md#843-open-and-closed-types)) is elided, along with its corresponding parameter(s).
+>
+> For `F` to pass the check, all of the following shall hold:
+>
+> - The modified parameter list for `F` is applicable to the modified argument list in terms of [§12.6.4.2](expressions.md#12642-applicable-function-member).
+> - All constructed types in the modified parameter list satisfy their constraints ([§8.4.5](types.md#845-satisfying-constraints)).
+> - If the type parameters of `F` were substituted in the step above, their constraints are satisfied.
+> - If `F` is a static method, the method group shall not have resulted from a *member_access* whose receiver is known at compile-time to be a variable or value.
+> - If `F` is an instance method, the method group shall not have resulted from a *member_access* whose receiver is known at compile-time to be a type.
+> 
+> If no candidate passes this test, a compile-time error occurs.
+
+From [Invocation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12891-general):
+> An *invocation_expression* is dynamically bound ([§12.3.3](expressions.md#1233-dynamic-binding)) if at least one of the following holds:
+>
+> - The *primary_expression* has compile-time type `dynamic`.
+> - At least one argument of the optional *argument_list* has compile-time type `dynamic`.
+>
+> In this case, the compiler classifies the *invocation_expression* as a value of type `dynamic`. The rules below to determine
+> the meaning of the *invocation_expression* are then applied at run-time, using the run-time type instead of the compile-time
+> type of those of the *primary_expression* and arguments that have the compile-time type `dynamic`.
+> If the *primary_expression* does not have compile-time type `dynamic`, then the method invocation undergoes a limited
+> compile-time check as described in [§12.6.5 Compile-time checking of dynamic member invocation](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
+
+Similar wording exists for [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128111-general),
+[Object creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128162-object-creation-expressions).
+ 
 ### Ref safety
 
 The [collection expressions ref safety section](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#ref-safety) is applicable to
