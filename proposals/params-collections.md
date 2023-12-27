@@ -242,6 +242,10 @@ It doesn't feel reasonable to "compare" collections that are built from differen
 
 ### Dynamic vs. Static Binding
 
+Expanded forms of candidates utilizing non-array params collections won't be considered as valid candidates by the current C# runtime binder.
+
+#### Recap of the current rules
+
 From [Static and Dynamic Binding](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#123-static-and-dynamic-binding):
 > When no dynamic expressions are involved, C# defaults to static binding, which means that the compile-time types of subexpressions are used in the selection process.
 > However, when one of the subexpressions in the operations listed above is a dynamic expression, **the operation is instead dynamically bound**.
@@ -291,8 +295,42 @@ From [Invocation expressions](https://github.com/dotnet/csharpstandard/blob/draf
 > If the *primary_expression* does not have compile-time type `dynamic`, then the method invocation undergoes a limited
 > compile-time check as described in [§12.6.5 Compile-time checking of dynamic member invocation](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
 
-Similar wording exists for [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128111-general),
+Similar wording exists for [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128111-general) and 
 [Object creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128162-object-creation-expressions).
+
+#### New rules
+
+As mentioned above, there is already an exception around binding invocations of local functions involving dynamic arguments.
+A comment in the code implies that the exception is needed due to limitations of C# runtime binder. Apparently it cannot
+handle invocations of local functions due to the way compiler emits them.  
+Here are the precise rules for these cases:
+- Invocations of local functions are bound statically
+- If local function is generic and its type arguments are not specified explicitly, an error is reported
+- If there is an ambiguity between normal and expanded forms of the function that cannot be resolved at compile time,
+  an error is reported. Such ambiguity occurs when a single argument corresponds to params parameter,
+  and the argument has type dynamic.   
+
+New rules generalize and expand this behavior to [Invocation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12891-general), 
+[Element access](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128111-general), and 
+[Object creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128162-object-creation-expressions)
+
+If the *primary_expression* does not have compile-time type `dynamic`, then the method invocation undergoes a limited
+compile-time check as described in [§12.6.5 Compile-time checking of dynamic member invocation](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
+
+If no candidate passes this test, a compile-time error occurs.
+
+If only a single candidate passes the test, the invocation of the candidate is statically bound when all the following conditions are met:
+- the candidate is either not generic, or its type arguments are explicitly specified;
+- there is no ambiguity between normal and expanded forms of the candidate that cannot be resolved at compile time. 
+
+Otherwise, the *invocation_expression* is dynamically bound.
+- If only a single candidate passed the test above:
+    - if that candidate is a local function, a compile-time error occurs;
+    - if that candidate has a non-array params parameter, a compile-time error occurs.
+- Otherwise, if any candidate passing the test has non-array params parameter and it could possibly be applicable only in an expanded form,
+  a compile-time warning occurs.
+
+We also should consider reverting/fixing spec violation that affects local functions today, see https://github.com/dotnet/roslyn/issues/71399. 
  
 ### Ref safety
 
