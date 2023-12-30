@@ -331,6 +331,165 @@ Otherwise, the *invocation_expression* is dynamically bound.
   a compile-time warning occurs.
 
 We also should consider reverting/fixing spec violation that affects local functions today, see https://github.com/dotnet/roslyn/issues/71399. 
+
+### Order of evaluation with non-array collections in non-trivial scenarios
+
+#### Named arguments
+
+A collection instance is created and populated after the lexically previous argument is evaluated, 
+but before the lexically following argument is evaluated.
+
+For example:
+``` C#
+class Program
+{
+    static void Main()
+    {
+        Test(b: GetB(), c: GetC(), a: GetA());
+    }
+
+    static void Test(int a, int b, params MyCollection c) {}
+
+    static int GetA() => 0;
+    static int GetB() => 0;
+    static int GetC() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetB` is called
+2. `MyCollection` is created and populated, `GetC` is called in the process
+3. `GetA` is called
+4. `Test` is called
+
+Note, in params array case, the array is created right before the target methos is invoked, after all
+arguments are evaluated in their lexical order.
+
+#### Compound assignment
+
+A collection instance is created and populated after the lexically previous index is evaluated, 
+but before the lexically following index is evaluated. The instance is used to invoke getter
+and setter of the target indexer.
+
+For example:
+``` C#
+class Program
+{
+    static void Test(Program p)
+    {
+        p[GetA(), GetC()]++;
+    }
+
+    int this[int a, params MyCollection c] { get => 0; set {} }
+
+    static int GetA() => 0;
+    static int GetC() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetA` is called and cached
+2. `MyCollection` is created, populated and cached, `GetC` is called in the process
+3. Indexer's getter is invoked with cached values for indexes
+4. Result is incremented
+5. Indexer's setter is invoked with cached values for indexes and the result of the increment
+
+An example with an empty collection:
+``` C#
+class Program
+{
+    static void Test(Program p)
+    {
+        p[GetA()]++;
+    }
+
+    int this[int a, params MyCollection c] { get => 0; set {} }
+
+    static int GetA() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetA` is called and cached
+2. An empty `MyCollection` is created and cached
+3. Indexer's getter is invoked with cached values for indexes
+4. Result is incremented
+5. Indexer's setter is invoked with cached values for indexes and the result of the increment
+
+#### Object Initializer
+
+A collection instance is created and populated after the lexically previous index is evaluated, 
+but before the lexically following index is evaluated. The instance is used to invoke indexer's
+getter as many times as necessary, if any.
+
+For example:
+``` C#
+class C1
+{
+    public int F1;
+    public int F2;
+}
+
+class Program
+{
+    static void Test()
+    {
+        _ = new Program() { [GetA(), GetC()] = { F1 = GetF1(), F2 = GetF2() } };
+    }
+
+    C1 this[int a, params MyCollection c] => new C1();
+
+    static int GetA() => 0;
+    static int GetC() => 0;
+    static int GetF1() => 0;
+    static int GetF2() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetA` is called and cached
+2. `MyCollection` is created, populated and cached, `GetC` is called in the process
+3. Indexer's getter is invoked with cached values for indexes
+4. `GetF1` is evaluated and assigned to `F1` field of `C1` retuned on the previous step
+5. Indexer's getter is invoked with cached values for indexes
+6. `GetF2` is evaluated and assigned to `F2` field of `C1` retuned on the previous step
+
+Note, in params array case, its elements are evaluated and cached, but a new instance of an array (with the same values inside)
+is used for each invocation of indexer's getter instead. For the example above, the order of evaluation is the following:
+1. `GetA` is called and cached
+2. `GetC` is called and cached
+3. Indexer's getter is invoked with cached `GetA` and new array populated with cached `GetC`
+4. `GetF1` is evaluated and assigned to `F1` field of `C1` retuned on the previous step
+5. Indexer's getter is invoked with cached `GetA` and new array populated with cached `GetC`
+6. `GetF2` is evaluated and assigned to `F2` field of `C1` retuned on the previous step
+
+
+An example with an empty collection:
+``` C#
+class C1
+{
+    public int F1;
+    public int F2;
+}
+
+class Program
+{
+    static void Test()
+    {
+        _ = new Program() { [GetA()] = { F1 = GetF1(), F2 = GetF2() } };
+    }
+
+    C1 this[int a, params MyCollection c] => new C1();
+
+    static int GetA() => 0;
+    static int GetF1() => 0;
+    static int GetF2() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetA` is called and cached
+2. An empty `MyCollection` is created and cached
+3. Indexer's getter is invoked with cached values for indexes
+4. `GetF1` is evaluated and assigned to `F1` field of `C1` retuned on the previous step
+5. Indexer's getter is invoked with cached values for indexes
+6. `GetF2` is evaluated and assigned to `F2` field of `C1` retuned on the previous step
+
  
 ### Ref safety
 
