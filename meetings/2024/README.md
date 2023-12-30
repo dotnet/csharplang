@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
+
 ## Schedule when convenient
 
 - [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
@@ -31,7 +33,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [New design questions for collection expression conversions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#unresolved-questions). (Aleksey)
 
-- Overload resolution rules for "Params Collections" (the link is TBD) (Aleksey)
+- Overload resolution rules for "Params Collections" (Aleksey)
+  - [Better function member](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#better-function-member)
+  - [Binding in presence of dynamic arguments](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#dynamic-vs-static-binding)
 
 # C# Language Design Notes for 2024
 
