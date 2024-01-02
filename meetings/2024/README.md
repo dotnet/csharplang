@@ -23,6 +23,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Mon Jan 22, 2024
 
+- [ref struct interfaces and generics](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) (Jared)
+
 ## Wed Jan 10, 2024
 
 - [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
