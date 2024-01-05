@@ -54,6 +54,10 @@ In the opposite direction, changing
 - `ref readonly` → `ref` would be potentially a source breaking change (unless only `ref` callsite annotation was used and only readonly references used as arguments), and a binary breaking change for virtual methods,
 - `ref readonly` → `in` would not be a breaking change (but `ref` callsite annotation would result in a warning).
 
+Note that the rules outlined above apply to method signatures, but not to delegate signatures.
+For example, changing `ref` to `in` in a delegate signature can be a source breaking change
+(if a user is assigning a method with `ref` parameter to that delegate type, it would become an error after the API change).
+
 ## Detailed design
 [design]: #detailed-design
 
@@ -95,10 +99,25 @@ By-value overloads will be preferred over `ref readonly` overloads in case there
 #### Method conversions
 [method-conversions]: #method-conversions
 
-Similarly, for the purpose of anonymous function [[§10.7](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#107-anonymous-function-conversions)] and method group [[§10.8](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#108-method-group-conversions)] conversions, these modifiers are considered compatible (but the conversion results in a warning):
+Similarly, for the purpose of anonymous function [[§10.7](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#107-anonymous-function-conversions)] and method group [[§10.8](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#108-method-group-conversions)] conversions, these modifiers are considered compatible
+(but any allowed conversion between different modifiers results in a warning):
 
-- `ref readonly` can be interchanged with `in` or `ref` modifier,
-- `in` can be interchanged with `ref` modifier (this change will be gated on LangVersion).
+- `ref readonly` can be interchanged with `in` and converted to `ref` modifier (but `ref` cannot be converted to `ref readonly`),
+- `in` can be converted to `ref` modifier, gated on LangVersion (but `ref` cannot be converted to `in`).
+
+For example:
+
+```cs
+DIn dIn = (ref int p) => { }; // error: cannot convert `ref` to `in`
+DRef dRef = (in int p) => { }; // warning: mismatch between `in` and `ref`
+DRR dRR = (ref int p) => { }; // error: cannot convert `ref` to `ref readonly`
+dRR = (in int p) => { }; // warning: mismatch between `in` and `ref readonly`
+dIn = (ref readonly int p) => { }; // warning: mismatch between `ref readonly` and `in`
+dRef = (ref readonly int p) => { }; // warning: mismatch between `ref readonly` and `ref`
+delegate void DIn(in int p);
+delegate void DRef(ref int p);
+delegate void DRR(ref readonly int p);
+```
 
 Note that there is no change in behavior of [function pointer conversions](https://github.com/dotnet/csharplang/blob/4b17ebb49654d21d4e96f415339c15c9f8a9ccde/proposals/csharp-9.0/function-pointers.md#function-pointer-conversions).
 As a reminder, implicit function pointer conversions are disallowed if there is a mismatch between reference kind modifiers, and explicit casts are always allowed without any warnings.
@@ -254,6 +273,25 @@ The same warning could be reported when using custom collection initializer or i
 `ref readonly` overloads could be preferred over by-value overloads when there is no callsite modifier or there could be an ambiguity error.
 
 #### [Method conversions][method-conversions]
+
+We could allow conversions of `ref` to `in`/`ref readonly`.
+This would enable API authors to change for example `ref` to `in` in delegate signatures without breaking their users
+(consistently with what is allowed for normal method signatures).
+However, it would also result in the following violation of `readonly` guarantees with just a warning:
+
+```cs
+class Program
+{
+    static readonly int f = 123;
+    static void Main()
+    {
+        var d = (in int x) => { };
+        d = (ref int x) => { x = 42; }; // warning: mismatch between `ref` and `in`
+        d(f); // changes value of `f` even though it is `readonly`!
+        System.Console.WriteLine(f); // prints 42
+    }
+}
+```
 
 Function pointer conversions could warn on `ref readonly`/`ref`/`in` mismatch, but if we wanted to gate that on LangVersion, a significant implementation investment would be required as today type conversions do not need access to compilation.
 Furthermore, even though mismatch is currently an error, it is easy for users to add a cast to allow the mismatch if they want.
