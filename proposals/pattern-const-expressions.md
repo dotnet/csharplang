@@ -173,8 +173,9 @@ switch (b)
 // switch expression arm
 var p = b switch
 {
-    // always true, no warning/error
+    // 'a is c' is always true, no warning/error about the expression
     a is c => 1,
+    _ => 2,
 };
 ```
 
@@ -195,7 +196,7 @@ const bool s = d is var someString; // Error: not a constant expression
 [switch-expressions]: #switch-expressions
 
 When evaluating a constant value on a switch expression, we adjust the reported diagnostics based on the matching arms:
-- If any subpattern is matched, we do **not** report a warning for the uncovered default case.
+- If any subpattern is matched, we keep reporting the warning about the missing default arm.
 - If no subpattern is matched, we report an **error** instead of a warning about the unmatched subpattern, asking the user to either handle the specific value, or the default case.
 
 For example:
@@ -204,7 +205,7 @@ const int a = 1;
 const int b = 2;
 const int c = 3;
 
-// no warning about the missing default arm,
+// we get a warning about the missing default arm,
 // the expression always returns the value of b
 int x = a switch
 {
@@ -213,13 +214,30 @@ int x = a switch
     c => a + b,
 };
 
-// the matching subpatterns are not all constant,
-// therefore the user will be warned about missing
-// the default arm
-int y = [a, b] switch
+// we get a warning about the missing default arm,
+// the expression results in xc being assigned the value of b
+const int xc = a switch
 {
-    [0, 1] => 1,
-    [.., 3] => 3,
+    a => b,
+    b => a,
+    c => a + b,
+};
+
+// we get a warning about the missing default arm,
+// as no subpattern matches the constant value,
+// and the program will throw at runtime
+int y = a switch
+{
+    b => a,
+    c => a + b,
+};
+
+// we get an error about the missing default arm,
+// as no subpattern matches the constant value
+const int yc = a switch
+{
+    b => a,
+    c => a + b,
 };
 ```
 
@@ -237,7 +255,7 @@ Currently, equality and comparison operators can be used to compare against othe
 [unresolved]: #unresolved-questions
 
 - [ ] Requires LDM review
-- [ ] Should this be extended to `switch` expressions too? (Discussion [#7489](https://github.com/dotnet/csharplang/discussions/7489))
+- [ ] Should we also consider `switch` expressions evaluating and returning constant expressions as constant too? (Discussion [#7489](https://github.com/dotnet/csharplang/discussions/7489))
 
 ## Design meetings
 [meetings]: #design-meetings
