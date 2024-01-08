@@ -274,7 +274,7 @@ The same warning could be reported when using custom collection initializer or i
 
 #### [Method conversions][method-conversions]
 
-We could allow conversions of `ref` to `in`/`ref readonly`.
+We could allow conversions of `ref` method/lambda parameters to `in`/`ref readonly` delegate parameters.
 This would enable API authors to change for example `ref` to `in` in delegate signatures without breaking their users
 (consistently with what is allowed for normal method signatures).
 However, it would also result in the following violation of `readonly` guarantees with just a warning:
