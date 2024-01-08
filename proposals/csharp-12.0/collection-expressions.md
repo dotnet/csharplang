@@ -116,7 +116,7 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Collections.Generic.ICollection<T>`
   * `System.Collections.Generic.IList<T>`
 
-The implicit conversion exists for the type if following holds:
+The implicit conversion exists for the type if the following hold:
 * The type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` where the iteration type is determined from a `GetEnumerator` instance method or enumerable interface, not from extension methods.
 * For each *element* `Eᵢ` in the collection expression:
   * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
