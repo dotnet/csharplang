@@ -71,6 +71,19 @@ The [§12.23 section](https://github.com/dotnet/csharpstandard/blob/standard-v7/
 >   - **Parenthesized patterns.**
 >   - **References to constant fields or locals inside constant patterns.**
 
+We additionally define the concept of constant contexts, which are contexts where a constant expression is required, as indicated in the [§12.23 section](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1223-constant-expressions), specifically:
+
+> Constant expressions are required in the contexts listed below and this is indicated in the grammar by using *constant_expression*. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
+> 
+> - Constant declarations ([§15.4](classes.md#154-constants))
+> - Enumeration member declarations ([§19.4](enums.md#194-enum-members))
+> - Default arguments of formal parameter lists ([§15.6.2](classes.md#1562-method-parameters))
+> - `case` labels of a `switch` statement ([§13.8.3](statements.md#1383-the-switch-statement)).
+> - `goto case` statements ([§13.10.4](statements.md#13104-the-goto-statement))
+> - Dimension lengths in an array creation expression ([§12.8.16.5](expressions.md#128165-array-creation-expressions)) that includes an initializer.
+> - Attributes ([§22](attributes.md#22-attributes))
+> - In a *constant_pattern* ([§11.2.3](patterns.md#1123-constant-pattern))
+
 ### Grammar
 [grammar]: #grammar
 The grammar remains untouched, as nothing changes syntactically for this feature.
@@ -118,20 +131,7 @@ All the above are currently valid pattern matching expressions, that also emit w
 
 When assigning those expressions in a constant context, these warnings about the constant result of the expression will **not** be reported, as the user intends to capture the constant value of the expression.
 
-Constant contexts are contexts where a constant expression is required, as indicated in the [§12.23 section](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1223-constant-expressions), specifically:
-
-> Constant expressions are required in the contexts listed below and this is indicated in the grammar by using *constant_expression*. In these contexts, a compile-time error occurs if an expression cannot be fully evaluated at compile-time.
-> 
-> - Constant declarations ([§15.4](classes.md#154-constants))
-> - Enumeration member declarations ([§19.4](enums.md#194-enum-members))
-> - Default arguments of formal parameter lists ([§15.6.2](classes.md#1562-method-parameters))
-> - `case` labels of a `switch` statement ([§13.8.3](statements.md#1383-the-switch-statement)).
-> - `goto case` statements ([§13.10.4](statements.md#13104-the-goto-statement))
-> - Dimension lengths in an array creation expression ([§12.8.16.5](expressions.md#128165-array-creation-expressions)) that includes an initializer.
-> - Attributes ([§22](attributes.md#22-attributes))
-> - In a *constant_pattern* ([§11.2.3](patterns.md#1123-constant-pattern))
-
-Based on the above, the contexts that will accept constant `is` pattern expressions are constant contexts that accept `bool` values, namely:
+The contexts that will accept constant `is` pattern expressions are constant contexts that accept `bool` values, namely:
 - Constant declarations
 - Default arguments of formal parameter lists
 - Attribute arguments
@@ -214,7 +214,7 @@ int x = a switch
     c => a + b,
 };
 
-// we get a warning about the missing default arm,
+// we get no warning about the missing default arm, since we are in constant context
 // the expression results in xc being assigned the value of b
 const int xc = a switch
 {
