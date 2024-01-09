@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
-
 ## Schedule when convenient
 
 - [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
@@ -18,19 +16,25 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Wed Jan 31, 2024
 
+- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
+
 ## Mon Jan 29, 2024
 
+- Meeting on the meeting
+
 ## Wed Jan 24, 2024
+
+- Meeting on the meeting
 
 ## Mon Jan 22, 2024
 
 - [ref struct interfaces and generics](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) (Jared)
+- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
 
 ## Wed Jan 10, 2024
 
-- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
-
-- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
+- [Collection expression details](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#should-collection-expression-conversion-require-availability-of-a-minimal-set-of-apis-for-construction)
+- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 
 ## Mon Jan 8, 2024
 
