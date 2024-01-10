@@ -983,7 +983,7 @@ requiring the *create method* to be public as well.
 
 #### Conclusion
 
-Approved [LDM-2024-01-08](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md#iteration-type-of-collectionbuilderattribute-collections)
+Approved with modifications [LDM-2024-01-08](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md#iteration-type-of-collectionbuilderattribute-collections)
 
 ### The notion of [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) is not applied consistently throughout [*conversions*](#conversions)
 
