@@ -107,7 +107,7 @@ An implicit *collection expression conversion* exists from a collection expressi
 * A *span type*:
   * `System.Span<T>`
   * `System.ReadOnlySpan<T>`
-* A *type* with a *[create method](#create-methods)*
+* A *type* with a *[create method](#create-methods)* an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
 * A *struct* or *class type* that implements `System.Collections.IEnumerable`
 * An *interface type*:
   * `System.Collections.Generic.IEnumerable<T>`
@@ -116,11 +116,9 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Collections.Generic.ICollection<T>`
   * `System.Collections.Generic.IList<T>`
 
-The implicit conversion exists for the type if the following hold:
-* The type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` where the iteration type is determined from a `GetEnumerator` instance method or enumerable interface, not from extension methods.
-* For each *element* `Eᵢ` in the collection expression:
-  * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
-  * If `Eᵢ` is an *spread element* `Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
+The implicit conversion exists if the type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` where for each *element* `Eᵢ` in the collection expression:
+* If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
+* If `Eᵢ` is an *spread element* `Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
 
 There is no *collection expression conversion* from a collection expression to a multi dimensional *array type*.
 
@@ -983,6 +981,9 @@ This is another point of context dependency based on accessibility. The purpose 
 the purpose of a user-defined conversion method, and that one must be public. Therefore, we should consider
 requiring the *create method* to be public as well.
 
+#### Conclusion
+
+Approved [LDM-2024-01-08](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md#iteration-type-of-collectionbuilderattribute-collections)
 
 ### The notion of [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) is not applied consistently throughout [*conversions*](#conversions)
 
@@ -1118,6 +1119,9 @@ It will probably be good to align one way or the other.
 Specify convertibility of *struct* or *class type* that implements `System.Collections.Generic.IEnumerable<T>` or `System.Collections.IEnumerable`
 in terms of *iteration type* and require an *implicit conversion* for each *element* `Ei` to the *iteration type*.
 
+#### Conclusion
+
+Approved [LDM-2024-01-08](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md#iteration-type-in-conversions)
 
 ### Should *collection expression conversion* require availability of a minimal set of APIs for construction?
 
@@ -1244,6 +1248,7 @@ such types are valid `params` types when these APIs are declared public and are 
 https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-11-01.md#collection-literals
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-09.md#ambiguity-of--in-collection-expressions
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-28.md#collection-literals
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md
 
 ## Working group meetings
 [working-group-meetings]: #working-group-meetings
