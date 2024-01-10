@@ -107,7 +107,7 @@ An implicit *collection expression conversion* exists from a collection expressi
 * A *span type*:
   * `System.Span<T>`
   * `System.ReadOnlySpan<T>`
-* A *type* with a *[create method](#create-methods)* an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
+* A *type* with a *[create method](#create-methods)* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
 * A *struct* or *class type* that implements `System.Collections.IEnumerable`
 * An *interface type*:
   * `System.Collections.Generic.IEnumerable<T>`
