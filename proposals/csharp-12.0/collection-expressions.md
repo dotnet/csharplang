@@ -81,7 +81,7 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
   * Literals with no `spread_element` in them.
   * Literals with arbitrary ordering of any element type.
 
-* The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
+* The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement).
 * Variables starting with `__name` are used to represent the results of the evaluation of `name`, stored in a location so that it is only evaluated once.  For example `__e1` is the evaluation of `e1`.
 * `List<T>`, `IEnumerable<T>`, etc. refer to the respective types in the `System.Collections.Generic` namespace.
 * The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11173-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
@@ -131,7 +131,7 @@ There is no *collection expression conversion* from a collection expression to a
 In the cases above, a collection expression *element* `Ei` is considered to have an *implicit conversion* to *type* `T` if:
 
 * `Ei` is an *expression element* and there is an implicit conversion from `Ei` to `T`.
-* `Ei` is a *spread element* `Si` and there is an implicit conversion from the *iteration type* of `Si` to `T`.
+* `Ei` is a *spread element* and there is an implicit conversion from the *iteration type* of the spread element *expression* to `T`.
 
 Types for which there is an implicit collection expression conversion from a collection expression are the valid *target types* for that collection expression.
 
@@ -167,7 +167,7 @@ namespace System.Runtime.CompilerServices
 The attribute can be applied to a `class`, `struct`, `ref struct`, or `interface`.
 The attribute is not inherited although the attribute can be applied to a base `class` or an `abstract class`.
 
-The collection type must have an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
+The collection type must have an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement).
 
 For the *create method*:
 
@@ -176,7 +176,7 @@ For the *create method*:
 * The method must be `static`.
 * The method must be accessible where the collection expression is used.
 * The *arity* of the method must match the *arity* of the collection type.
-* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type*.
+* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement) of the *collection type*.
 * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invocable method with the expected signature.
@@ -212,6 +212,51 @@ ImmutableArray<int> ia =
     ImmutableArray.Create((ReadOnlySpan<int>)__tmp);
 ```
 
+## Spreads
+[spreads]: #spreads
+
+A *spread element* enumerates the elements of a collection and adds those elements, in order, to the containing *collection expression*.
+A spread element is only valid as an element of a collection expression.
+
+```diff
+spread_element
+  : '..' expression
+  ;
+```
+
+Compile-time processing of the spread element relies on the *collection type*, *enumerator type*, and *iteration type* of the *expression*, as those types are defined for the [*foreach statement*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement).
+
+If the spread element expression is an *inline array type* with element type `T`, the collection type is `System.ReadOnlySpan<T>`, the enumerator type is the return type of `System.ReadOnlySpan<T>.GetEnumerator()`, and the iteration type is `T`.
+
+If the collection type, enumerator type, or iteration type cannot be determined for the spread element expression, an error is reported.
+
+For a spread element `..x`, with collection type `C`, enumerator type `E`, and iteration type `T`, `ref T`, or `ref readonly T`, the spread element is essentially expanded to:
+```csharp
+E __e = ((C)(x)).GetEnumerator();
+try
+{
+    while (__e.MoveNext())
+    {
+      T __t = (T)__e.Current;
+      // ... add __t to containing collection
+    }
+}
+finally
+{
+    // ... dispose __e
+}
+```
+
+The compiler may use an alternate approach for enumerating and adding the elements of the spread if the behavior is otherwise consistent.
+
+The `finally` block for disposing the enumerator matches the [*foreach statement*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement).
+
+The order for enumerating elements of arrays matches the [*foreach statement*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement).
+
+The `GetEnumerator` method identified in the compile-time processing may be an extension method.
+
+The `Current` property identified in the compile-time processing may be *ref returning*.
+
 ## Construction
 [construction]: #construction
 
@@ -219,6 +264,8 @@ The elements of a collection expression are *evaluated* in order, left to right.
 Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 
 A spread element may be *iterated* before or after the subsequent elements in the collection expression are *evaluated*.
+
+A spread element will be *iterated* at most once.
 
 An unhandled exception thrown from any of the methods used during construction will be uncaught and will prevent further steps in the construction.
 
@@ -259,13 +306,16 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
 * For each element in order:
   * If the element is an *expression element*, the initialization instance *indexer* is invoked to add the evaluated expression at the current index.
   * If the element is a *spread element* then one of the following is used:
-    * A member of a well-known interface or type is invoked to copy items from the spread element expression to the initialization instance.
-    * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the initialization instance *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
-    * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the initialization instance and `int` index as arguments.
+    * A member of a well-known interface or type is invoked to copy items from the spread element *collection* to the initialization instance.
+    * An applicable `GetEnumerator` instance or extension method is invoked on the spread element *collection* and for each item from the enumerator, the initialization instance *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+    * An applicable `CopyTo` instance or extension method is invoked on the spread element *collection* with the initialization instance and `int` index as arguments.
 
-* If intermediate storage was allocated for the collection, a collection instance is allocated with the actual collection length and the values from the initialization instance are copied to the collection instance, or if a span is required the compiler *may* use a span of the actual collection length from the intermediate storage. Otherwise the initialization instance is the collection instance.
-
-* If the target type has a *create method*, the create method is invoked with the span instance.
+* The *collection instance* is created as follows:
+  * If the target is an *array* and intermediate storage was allocated for the collection, an array is allocated with the actual collection length and the values from the initialization instance are copied to the array.
+  * If the target is a *span* or a type with a *[create method](#create-methods)*, and intermediate storage was allocated for the collection, a span may be created with the actual collection length and the values from the initialization instance are copied to the array, or a span of the actual collection length may be created referring to the initialization instance directly.
+  * If the target is a type with a *[create method](#create-methods)*, the create method is invoked with the span instance.
+  * If the target is an *interface*, an instance of a type that implements that interface is created from the intermediate storage.
+  * Otherwise, if no intermediate storage was allocated for the collection, the initialization instance is the collection instance.
 
 ---
 
@@ -386,18 +436,18 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > An *input type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
+> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
+>   * If `Eᵢ` is a *spread element* where the spread element *collection* has [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement) `Sᵢ`, `ref Sᵢ`, or `ref readonly Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
 >
 > An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
+> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/statements.md#1395-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *output type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element*, no inference is made from `Eᵢ`.
+>   * If `Eᵢ` is a *spread element*, no inference is made from `Eᵢ`.
 > * *[existing rules from output type inferences]* ...
 
 ## Extension methods
