@@ -424,9 +424,8 @@ In the updated rules:
 * A *span_type* is one of:
   * `System.Span<T>`
   * `System.ReadOnlySpan<T>`.
-* An *array_or_array_interface_or_string_type* is one of:
+* An *array_or_array_interface* is one of:
   * an *array type*
-  * `System.String`
   * one of the following *interface types* implemented by an *array type*:
     * `System.Collections.Generic.IEnumerable<T>`
     * `System.Collections.Generic.IReadOnlyCollection<T>`
@@ -438,7 +437,7 @@ In the updated rules:
 >
 > * **`E` is a *collection expression* and one of the following holds:**
 >   * **`T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, and an implicit conversion exists from `E₁` to `E₂`**
->   * **`T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface_or_string_type* with *iteration type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`**
+>   * **`T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *iteration type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`**
 >   * **`T₁` is not a *span_type*, and `T₂` is not a *span_type*, and an implicit conversion exists from `T₁` to `T₂`**
 > * **`E` is not a *collection expression* and one of the following holds:**
 >   * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
