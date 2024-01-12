@@ -102,15 +102,16 @@ By-value overloads will be preferred over `ref readonly` overloads in case there
 Similarly, for the purpose of anonymous function [[§10.7](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#107-anonymous-function-conversions)] and method group [[§10.8](https://github.com/dotnet/csharpstandard/blob/47912d4fdae2bb8c3750e6485bdc6509560ec6bf/standard/conversions.md#108-method-group-conversions)] conversions, these modifiers are considered compatible
 (but any allowed conversion between different modifiers results in a warning):
 
-- `ref readonly` can be interchanged with `in` and converted to `ref` modifier (but `ref` cannot be converted to `ref readonly`),
-- `in` can be converted to `ref` modifier, gated on LangVersion (but `ref` cannot be converted to `in`).
+- `ref readonly` parameter of the target method is allowed to match `in` or `ref` parameter of the delegate,
+- `in` parameter of the target method is allowed to match `ref readonly` or, gated on LangVersion, `ref` parameter of the delegate.
+- Note: `ref` parameter of the target method is *not* allowed to match `in` nor `ref readonly` parameter of the delegate.
 
 For example:
 
 ```cs
-DIn dIn = (ref int p) => { }; // error: cannot convert `ref` to `in`
+DIn dIn = (ref int p) => { }; // error: cannot match `ref` to `in`
 DRef dRef = (in int p) => { }; // warning: mismatch between `in` and `ref`
-DRR dRR = (ref int p) => { }; // error: cannot convert `ref` to `ref readonly`
+DRR dRR = (ref int p) => { }; // error: cannot match `ref` to `ref readonly`
 dRR = (in int p) => { }; // warning: mismatch between `in` and `ref readonly`
 dIn = (ref readonly int p) => { }; // warning: mismatch between `ref readonly` and `in`
 dRef = (ref readonly int p) => { }; // warning: mismatch between `ref readonly` and `ref`
@@ -274,7 +275,7 @@ The same warning could be reported when using custom collection initializer or i
 
 #### [Method conversions][method-conversions]
 
-We could allow conversions of `ref` method/lambda parameters to `in`/`ref readonly` delegate parameters.
+We could allow `ref` parameter of the target method to match `in` and `ref readonly` parameter of the delegate.
 This would enable API authors to change for example `ref` to `in` in delegate signatures without breaking their users
 (consistently with what is allowed for normal method signatures).
 However, it would also result in the following violation of `readonly` guarantees with just a warning:
