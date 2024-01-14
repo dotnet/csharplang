@@ -123,17 +123,15 @@ If a function member that includes a parameter collection is not applicable in i
 
 The [Better function member](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12643-better-function-member) section is adjusted as follows.
 
+Given an argument list `A` with a set of argument expressions `{E₁, E₂, ..., Eᵥ}` and two applicable function members `Mᵥ` and `Mₓ` with parameter types `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂, ..., Qᵥ}`, `Mᵥ` is defined to be a ***better function member*** than `Mₓ` if
+
+- for each argument, the implicit conversion from `Eᵥ` to `Qᵥ` is not better than the implicit conversion from `Eᵥ` to `Pᵥ`, and
+- for at least one argument, the conversion from `Eᵥ` to `Pᵥ` is better than the conversion from `Eᵥ` to `Qᵥ`.
+
 In case the parameter type sequences `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂, ..., Qᵥ}` are equivalent (i.e., each `Pᵢ` has an identity conversion to the corresponding `Qᵢ`), the following tie-breaking rules are applied, in order, to determine the better function member.
 
 - If `Mᵢ` is a non-generic method and `Mₑ` is a generic method, then `Mᵢ` is better than `Mₑ`.
 - Otherwise, if `Mᵢ` is applicable in its normal form and `Mₑ` has a params collection and is applicable only in its expanded form, then `Mᵢ` is better than `Mₑ`.
-- **Otherwise, if both methods have params collections and are applicable only in their expanded forms then
-   `Mᵢ` is better than `Mₑ` if one of the following holds
-   (this corresponds to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution):**
-  - **params collections of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>`, and params collection of `Mₑ` is `System.Span<Eₑ>`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
-  - **params collections of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>` or `System.Span<Eᵢ>`, and params collection of `Mₑ` is
-    an *[array_or_array_interface_or_string_type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution)*
-    with *[iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)* `Eₑ`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
 - Otherwise, if both methods have params collections and are applicable only in their expanded forms,
   and if the params collection of `Mᵢ` has fewer elements than the params collection of `Mₑ`,
   then `Mᵢ` is better than `Mₑ`.
@@ -144,12 +142,363 @@ In case the parameter type sequences `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂,
 - Otherwise if one member is a non-lifted operator and the other is a lifted operator, the non-lifted one is better.
 - If neither function member was found to be better, and all parameters of `Mᵥ` have a corresponding argument whereas default arguments need to be substituted for at least one optional parameter in `Mₓ`, then `Mᵥ` is better than `Mₓ`.
 - If for at least one parameter `Mᵥ` uses the ***better parameter-passing choice*** ([§12.6.4.4](expressions.md#12644-better-parameter-passing-mode)) than the corresponding parameter in `Mₓ` and none of the parameters in `Mₓ` use the better parameter-passing choice than `Mᵥ`, `Mᵥ` is better than `Mₓ`.
+- **Otherwise, if both methods have params collections and are applicable only in their expanded forms then
+   `Mᵢ` is better than `Mₑ` if the same set of arguments corresponds to the collection elements for both methods, and one of the following holds
+   (this corresponds to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution):**
+  - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>`, and params collection of `Mₑ` is `System.Span<Eₑ>`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
+  - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>` or `System.Span<Eᵢ>`, and params collection of `Mₑ` is
+    an *[array_or_array_interface_or_string_type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution)*
+    with *[iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)* `Eₑ`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
+  - **both params collections are not *span_type*s, and an implicit conversion exists from params collection of `Mᵢ` to params collection of `Mₑ`**  
 - Otherwise, no function member is better.
 
+The reason why the new tie-breaking rule is placed at the end of the list is the last sub item
+> - **both params collections are not *span_type*s, and an implicit conversion exists from params collection of `Mᵢ` to params collection of `Mₑ`** 
+
+it is applicable to arrays and, therefore, performing the tie-break earlier will introduce a behavior change for existing scenarios.
+
+For example:
+``` C#
+class Program
+{
+    static void Main()
+    {
+        Test(1);
+    }
+
+    static void Test(in int x, params C2[] y) {} // There is an implicit conversion from `C2[]` to `C1[]`
+    static void Test(int x, params C1[] y) {} // Better candidate because of "better parameter-passing choice"
+}
+
+class C1 {}
+class C2 : C1 {}
+```
+
+If any of the previous tie-breaking rules apply (including the "better arguments conversions" rule), the overload resolution result
+can be different by comparison to the case when an explicit collection expression is used as an argument instead.
+
+For example:
+``` C#
+class Program
+{
+    static void Test1()
+    {
+        M1(['1', '2', '3']); // Span overload is used
+        M1('1', '2', '3');   // String overload is used because `char` is an exact match
+    }
+
+    static void M1(params string value) {}
+    static void M1(params System.ReadOnlySpan<MyChar> value) {}
+
+    class MyChar
+    {
+        private readonly int _i;
+        public MyChar(int i) { _i = i; }
+        public static implicit operator MyChar(int i) => new MyChar(i);
+        public static implicit operator char(MyChar c) => (char)c._i;
+    }
+
+    static void Test2()
+    {
+        M2([1]); // Span overload is used
+        M2(1);   // Array overload is used, not generic
+    }
+
+    static void M2<T>(params System.Span<T> y){}
+    static void M2(params int[] y){}
+
+    static void Test3()
+    {
+        M3("3", ["4"]); // Span overload is used, better on the first argument conversion, none is better on the second
+        M3("3", "4");   // Ambiguity, better-ness of argument conversions goes in opposite directions.
+                        // Since parameter types are different ("object, string" vs. "string, object"), tie-breaking rules do not apply
+    }
+
+    static void M3(object x, params string[] y) {}
+    static void M3(string x, params Span<object> y) {}
+}
+```
+
+However, our primary concern are scenarios where overloads differ only by params collection type,
+but the collection types have the same element type. The behavior should be consistent with 
+explicit collection expressions for these cases.
+
+
+The "**if the same set of arguments corresponds to the collection elements for both methods**" condition is important for scenarios like:
+``` C#
+class Program
+{
+    static void Main()
+    {
+        Test(x: 1, y: 2); // Ambiguous
+    }
+
+    static void Test(int x, params System.ReadOnlySpan<int> y) {}
+    static void Test(int y, params System.Span<int> x) {}
+}
+```
+
+It doesn't feel reasonable to "compare" collections that are built from different elements.
+
+### Dynamic vs. Static Binding
+
+Expanded forms of candidates utilizing non-array params collections won't be considered as valid candidates by the current C# runtime binder.
+
+#### Recap of the current rules
+
+From [Static and Dynamic Binding](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#123-static-and-dynamic-binding):
+> When no dynamic expressions are involved, C# defaults to static binding, which means that the compile-time types of subexpressions are used in the selection process.
+> However, when one of the subexpressions in the operations listed above is a dynamic expression, **the operation is instead dynamically bound**.
+>
+> It is a compile time error if a method invocation is dynamically bound and any of the parameters, including the receiver, has the `in` modifier.
+
+However, an exception to this rule exists for local functions.
+From [Local function declarations](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1364-local-function-declarations):
+> If the type of the argument to a local function is `dynamic`, **the function to be called must be resolved at compile time, not runtime**.
+
+From [Compile-time checking of dynamic member invocation](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation):
+> Even though overload resolution of a dynamically bound operation takes place at run-time, it is sometimes possible at compile-time to know
+> the list of function members from which an overload will be chosen:
+>
+> - For a delegate invocation ([§12.8.9.4](expressions.md#12894-delegate-invocations)), the list is a single function member with the same parameter list as the *delegate_type* of the invocation
+> - For a method invocation ([§12.8.9.2](expressions.md#12892-method-invocations)) on a type, or on a value whose static type is not dynamic, the set of accessible methods in the method group
+>   is known at compile-time.
+> - For an object creation expression ([§12.8.16.2](expressions.md#128162-object-creation-expressions)) the set of accessible constructors in the type is known at compile-time.
+> - For an indexer access ([§12.8.11.3](expressions.md#128113-indexer-access)) the set of accessible indexers in the receiver is known at compile-time.
+>
+> In these cases a limited compile-time check is performed on each member in the known set of function members, to see if it can be known for certain never to be invoked at run-time.
+> For each function member `F` a modified parameter and argument list are constructed:
+>
+> - First, if `F` is a generic method and type arguments were provided, then those are substituted for the type parameters in the parameter list.
+>   However, if type arguments were not provided, no such substitution happens.
+> - Then, any parameter whose type is open (i.e., contains a type parameter; see [§8.4.3](types.md#843-open-and-closed-types)) is elided, along with its corresponding parameter(s).
+>
+> For `F` to pass the check, all of the following shall hold:
+>
+> - The modified parameter list for `F` is applicable to the modified argument list in terms of [§12.6.4.2](expressions.md#12642-applicable-function-member).
+> - All constructed types in the modified parameter list satisfy their constraints ([§8.4.5](types.md#845-satisfying-constraints)).
+> - If the type parameters of `F` were substituted in the step above, their constraints are satisfied.
+> - If `F` is a static method, the method group shall not have resulted from a *member_access* whose receiver is known at compile-time to be a variable or value.
+> - If `F` is an instance method, the method group shall not have resulted from a *member_access* whose receiver is known at compile-time to be a type.
+> 
+> If no candidate passes this test, a compile-time error occurs.
+
+From [Invocation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12891-general):
+> An *invocation_expression* is dynamically bound ([§12.3.3](expressions.md#1233-dynamic-binding)) if at least one of the following holds:
+>
+> - The *primary_expression* has compile-time type `dynamic`.
+> - At least one argument of the optional *argument_list* has compile-time type `dynamic`.
+>
+> In this case, the compiler classifies the *invocation_expression* as a value of type `dynamic`. The rules below to determine
+> the meaning of the *invocation_expression* are then applied at run-time, using the run-time type instead of the compile-time
+> type of those of the *primary_expression* and arguments that have the compile-time type `dynamic`.
+> If the *primary_expression* does not have compile-time type `dynamic`, then the method invocation undergoes a limited
+> compile-time check as described in [§12.6.5 Compile-time checking of dynamic member invocation](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
+
+Similar wording exists for [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128111-general) and 
+[Object creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128162-object-creation-expressions).
+
+#### New rules
+
+As mentioned above, there is already an exception around binding invocations of local functions involving dynamic arguments.
+A comment in the code implies that the exception is needed due to limitations of C# runtime binder. Apparently it cannot
+handle invocations of local functions due to the way compiler emits them.  
+Here are the precise rules for these cases:
+- Invocations of local functions are bound statically
+- If local function is generic and its type arguments are not specified explicitly, an error is reported
+- If there is an ambiguity between normal and expanded forms of the function that cannot be resolved at compile time,
+  an error is reported. Such ambiguity occurs when a single argument corresponds to params parameter,
+  and the argument has type dynamic.   
+
+New rules generalize and expand this behavior to [Invocation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12891-general), 
+[Element access](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128111-general), and 
+[Object creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#128162-object-creation-expressions)
+
+If the *primary_expression* does not have compile-time type `dynamic`, then the method invocation undergoes a limited
+compile-time check as described in [§12.6.5 Compile-time checking of dynamic member invocation](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
+
+If no candidate passes this test, a compile-time error occurs.
+
+If only a single candidate passes the test, the invocation of the candidate is statically bound when all the following conditions are met:
+- the candidate is either not generic, or its type arguments are explicitly specified;
+- there is no ambiguity between normal and expanded forms of the candidate that cannot be resolved at compile time. 
+
+Otherwise, the *invocation_expression* is dynamically bound.
+- If only a single candidate passed the test above:
+    - if that candidate is a local function, a compile-time error occurs;
+    - if that candidate has a non-array params parameter, a compile-time error occurs.
+- Otherwise, if any candidate passing the test has non-array params parameter and it could possibly be applicable only in an expanded form,
+  a compile-time warning occurs.
+
+We also should consider reverting/fixing spec violation that affects local functions today, see https://github.com/dotnet/roslyn/issues/71399. 
+
+### Order of evaluation with non-array collections in non-trivial scenarios
+
+#### Named arguments
+
+A collection instance is created and populated after the lexically previous argument is evaluated, 
+but before the lexically following argument is evaluated.
+
+For example:
+``` C#
+class Program
+{
+    static void Main()
+    {
+        Test(b: GetB(), c: GetC(), a: GetA());
+    }
+
+    static void Test(int a, int b, params MyCollection c) {}
+
+    static int GetA() => 0;
+    static int GetB() => 0;
+    static int GetC() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetB` is called
+2. `MyCollection` is created and populated, `GetC` is called in the process
+3. `GetA` is called
+4. `Test` is called
+
+Note, in params array case, the array is created right before the target methos is invoked, after all
+arguments are evaluated in their lexical order.
+
+#### Compound assignment
+
+A collection instance is created and populated after the lexically previous index is evaluated, 
+but before the lexically following index is evaluated. The instance is used to invoke getter
+and setter of the target indexer.
+
+For example:
+``` C#
+class Program
+{
+    static void Test(Program p)
+    {
+        p[GetA(), GetC()]++;
+    }
+
+    int this[int a, params MyCollection c] { get => 0; set {} }
+
+    static int GetA() => 0;
+    static int GetC() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetA` is called and cached
+2. `MyCollection` is created, populated and cached, `GetC` is called in the process
+3. Indexer's getter is invoked with cached values for indexes
+4. Result is incremented
+5. Indexer's setter is invoked with cached values for indexes and the result of the increment
+
+An example with an empty collection:
+``` C#
+class Program
+{
+    static void Test(Program p)
+    {
+        p[GetA()]++;
+    }
+
+    int this[int a, params MyCollection c] { get => 0; set {} }
+
+    static int GetA() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetA` is called and cached
+2. An empty `MyCollection` is created and cached
+3. Indexer's getter is invoked with cached values for indexes
+4. Result is incremented
+5. Indexer's setter is invoked with cached values for indexes and the result of the increment
+
+#### Object Initializer
+
+A collection instance is created and populated after the lexically previous index is evaluated, 
+but before the lexically following index is evaluated. The instance is used to invoke indexer's
+getter as many times as necessary, if any.
+
+For example:
+``` C#
+class C1
+{
+    public int F1;
+    public int F2;
+}
+
+class Program
+{
+    static void Test()
+    {
+        _ = new Program() { [GetA(), GetC()] = { F1 = GetF1(), F2 = GetF2() } };
+    }
+
+    C1 this[int a, params MyCollection c] => new C1();
+
+    static int GetA() => 0;
+    static int GetC() => 0;
+    static int GetF1() => 0;
+    static int GetF2() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetA` is called and cached
+2. `MyCollection` is created, populated and cached, `GetC` is called in the process
+3. Indexer's getter is invoked with cached values for indexes
+4. `GetF1` is evaluated and assigned to `F1` field of `C1` retuned on the previous step
+5. Indexer's getter is invoked with cached values for indexes
+6. `GetF2` is evaluated and assigned to `F2` field of `C1` retuned on the previous step
+
+Note, in params array case, its elements are evaluated and cached, but a new instance of an array (with the same values inside)
+is used for each invocation of indexer's getter instead. For the example above, the order of evaluation is the following:
+1. `GetA` is called and cached
+2. `GetC` is called and cached
+3. Indexer's getter is invoked with cached `GetA` and new array populated with cached `GetC`
+4. `GetF1` is evaluated and assigned to `F1` field of `C1` retuned on the previous step
+5. Indexer's getter is invoked with cached `GetA` and new array populated with cached `GetC`
+6. `GetF2` is evaluated and assigned to `F2` field of `C1` retuned on the previous step
+
+
+An example with an empty collection:
+``` C#
+class C1
+{
+    public int F1;
+    public int F2;
+}
+
+class Program
+{
+    static void Test()
+    {
+        _ = new Program() { [GetA()] = { F1 = GetF1(), F2 = GetF2() } };
+    }
+
+    C1 this[int a, params MyCollection c] => new C1();
+
+    static int GetA() => 0;
+    static int GetF1() => 0;
+    static int GetF2() => 0;
+}
+```
+The order of evaluation is the following:
+1. `GetA` is called and cached
+2. An empty `MyCollection` is created and cached
+3. Indexer's getter is invoked with cached values for indexes
+4. `GetF1` is evaluated and assigned to `F1` field of `C1` retuned on the previous step
+5. Indexer's getter is invoked with cached values for indexes
+6. `GetF2` is evaluated and assigned to `F2` field of `C1` retuned on the previous step
+
+ 
 ### Ref safety
 
 The [collection expressions ref safety section](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#ref-safety) is applicable to
 the construction of parameter collections when APIs are invoked in their expanded form.
+
+### Metadata
+
+In metadata `params` parameters are marked with `System.ParamArrayAttribute` as `params` arrays are marked today.
 
 ## Open questions
 
@@ -177,7 +526,6 @@ There is an alternative [proposal](https://github.com/dotnet/csharplang/blob/mai
 
 Also, one might say, that with [collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
 now in the language, there is no need to extend `params` support at all. For any collection type. To consume an API with collection type, a developer
-``` #Pending
 simply needs to add two characters, `[` before the expanded list of arguments, and `]` after it. Given that, extending `params` support might be an overkill,
 especially that other languages are unlikely to support consumption of non-array `params` parameters any time soon.
 

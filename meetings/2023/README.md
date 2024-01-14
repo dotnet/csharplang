@@ -1,33 +1,25 @@
-# Upcoming meetings for 2023
-
-All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
-
-## Schedule ASAP
-
-- [Lock statement pattern](https://github.com/dotnet/csharplang/issues/7104) (Stephen)
-
-## Schedule when convenient
-
-- [spec review for `is` constant expressions](https://github.com/dotnet/csharplang/pull/7589) (Fred)
-- [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
-
-## Recurring topics
-
-- *Triage championed features and milestones*
-- *Design review*
-
-## Mon Dec 18, 2023
+# C# Language Design Notes for 2023
 
 ## Mon Dec 11, 2023
 
+[C# Language Design Meeting for December 11th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-12-11.md)
+
+- Extensions
+
 ## Mon Dec 4, 2023
+
+[C# Language Design Meeting for December 4th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-12-04.md)
+
+- Lock statement pattern
+- `BinaryCompatOnlyAttribute`
 
 ## Mon Nov 27, 2023
 
-- [order of evaluation in list patterns](https://github.com/dotnet/roslyn/issues/60091) (Julien)
-- [impossible list pattern with type test](https://github.com/dotnet/roslyn/issues/69053) (Julien
+[C# Language Design Meeting for November 27th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-27.md)
 
-# C# Language Design Notes for 2023
+- Pattern order optimizations
+- Subarray slicing breaking change
+- Making patterns constant expressions
 
 ## Wed Nov 15, 2023
 
