@@ -226,7 +226,7 @@ Fixing ([§11.6.3.12](https://github.com/dotnet/csharpstandard/blob/draft-v6/sta
 ### Best common type
 Best common type ([§11.6.3.15](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions)) is defined in terms of type inference so the type inference changes above apply to best common type as well.
 ```csharp
-var fs = new[] { (string s) => s.Length; (string s) => int.Parse(s) } // Func<string, int>[]
+var fs = new[] { (string s) => s.Length, (string s) => int.Parse(s) }; // Func<string, int>[]
 ```
 
 ### `var`
