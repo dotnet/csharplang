@@ -500,7 +500,7 @@ the construction of parameter collections when APIs are invoked in their expande
 
 In metadata we could mark non-array `params` parameters with `System.ParamArrayAttribute`, as `params` arrays are marked today.
 However, it looks like we will be much safer to use a different attribute for non-array `params` parameters.
-For example, the current VB compiler will not be able to consume them decorated with `ParamArrayAttribute` neither in normal, nor in expanded form. Therefore, an addition of 'params' modifier is likely to be break VB consumers, and very likely consumers from other languages or tools.
+For example, the current VB compiler will not be able to consume them decorated with `ParamArrayAttribute` neither in normal, nor in expanded form. Therefore, an addition of 'params' modifier is likely to break VB consumers, and very likely consumers from other languages or tools.
 
 Given that, non-array `params` parameters are marked with a new `System.Runtime.CompilerServices.ParamCollectionAttribute`.
 ```
