@@ -46,12 +46,17 @@ are changed to special-case the `System.Threading.Lock` type:
 >    ```
 > 2. where `x` is an expression of a *reference_type*, is precisely equivalent to: [...]
 
-Additionally, new warning is added to implicit reference conversions ([§10.2.8](https://github.com/dotnet/csharpstandard/blob/9af5bdaa7af535f34fbb7923e5406e01db8489f7/standard/conversions.md#1028-implicit-reference-conversions)):
+Additionally, new warnings are added to implicit reference conversions ([§10.2.8](https://github.com/dotnet/csharpstandard/blob/9af5bdaa7af535f34fbb7923e5406e01db8489f7/standard/conversions.md#1028-implicit-reference-conversions))
+when upcasting the `System.Threading.Lock` type:
 
 > The implicit reference conversions are:
 >
 > - From any *reference_type* to `object` and `dynamic`.
 >   - **A warning is reported when the *reference_type* is known to be `System.Threading.Lock`.**
+> - From any *class_type* `S` to any *class_type* `T`, provided `S` is derived from `T`.
+>   - **A warning is reported when `S` is known to be `System.Threading.Lock`.**
+> - From any *class_type* `S` to any *interface_type* `T`, provided `S` implements `T`.
+>   - **A warning is reported when `S` is known to be `System.Threading.Lock`.**
 > - [...]
 
 ```cs
