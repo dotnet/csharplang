@@ -12,7 +12,7 @@ However, we currently require absolute paths for `InterceptsLocationAttribute`, 
 
 Having looked at several strategies to address here, including adjusting when the build system passes `/pathmap` to the compiler, it seems the most straightforward way is to permit relative paths. This is a strategy which is already proven out by `#line` directives.
 
-When a relative path appears in an `[InterceptsLocation]`, we will resolve it relative to the path of the containing file. The relative path used in the attribute must have `\` normalized to `/`, again, for portability.
+When a relative path appears in an `[InterceptsLocation]`, we will resolve it relative to the path of the containing file, just as we would for `#line`. We recommend that relative paths appearing in source use `/` directory separators for portability.
 
 ```cs
 // /project/src/file1.cs
@@ -34,9 +34,7 @@ class Interceptors
 }
 ```
 
-This means that generator authors will be best advised to produce relative paths using e.g. `Path.GetRelativePath("/project/src/file1.cs", "/project/obj/generated/file2.g.cs")`.
-
-One reason why we haven't added relative path support already is that source generated files haven't had clearly defined paths. Now, there is a need for a generated file to know what path it "would be written out" to, while the text is being generated, before calling `AddSource` with a `hintName`. We may want to add a new public API like the following for this:
+Since we want generated files to refer relatively to "user" files, we now need to define the paths of generated files. Also, for source generators to be able to insert the correct relative paths into the generated source, a source generator needs to know what the file path will be before the file is actually added to the compilation. We may want to add new public API like the following for this:
 
 ```diff
  namespace Microsoft.CodeAnalysis;
@@ -45,10 +43,13 @@ One reason why we haven't added relative path support already is that source gen
  {
      public void AddSource(string hintName, string source);
 +    public string GetFilePath(string hintName);
++    public string GetInterceptsFilePath(SyntaxNode intercepted, string hintName);
  }
 ```
 
-`GetFilePath()` will return the file path which the generated file *would be written to* if `$(EmitCompilerGeneratedFiles)` is true in the project. Additionally, the syntax tree for the file added by a subsequent call to `AddSource` using the same `hintName` will have a `FilePath` which exactly matches the result of `GetFilePath()`.
+`GetFilePath()` will return the absolute file path which the generated file *would be written to* if `$(EmitCompilerGeneratedFiles)` is true in the project. Additionally, the syntax tree for the file added by a subsequent call to `AddSource` using the same `hintName` will have a `FilePath` which exactly matches the result of `GetFilePath()`.
+
+`GetInterceptsFilePath(intercepted, hintName)` will return a relative file path equivalent to the path returned by `GetFilePath(hintName)` relative to `intercepted.SyntaxTree.FilePath`. We think this API will be helpful for generator authors, in significant part, because no built-in API exists on netstandard2.0 to get a relative path.
 
 This solution will not work when the intercepted call and the interceptor method are in completely "disjunct" parts of the file system, for example, if one of the source files is included through a NuGet package which is outside the project folder, and the other is within the project folder. This limitation is similar in nature to what already exists for `#line` directives.
 
@@ -146,8 +147,6 @@ Currently the interceptors feature only supports intercepting ordinary methods. 
 
 For all the member kinds we want to support, we will need to decide how usages of each member kind are denoted syntactically. Where possible, we should try to be consistent with [UnsafeAccessorAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.unsafeaccessorattribute?view=net-8.0), which also works by referencing members in attribute arguments.
 
-For method invocations like `receiver.M(args)`, we use the location of the `M` token to intercept the call. Perhaps for property accesses like `receiver.P` we can use the `P` token. Things may get ambiguous if the property returns a delegate which is immediately invoked, e.g. `receiver.P()`. (TODO: do we support intercepting a delegate invocation? I think no, but check.)
-
-For constructors we may use either the `new` token or the type name. It's possible the type name would be more consistent in some sense, but it's not clear.
+For method invocations like `receiver.M(args)`, we use the location of the `M` token to intercept the call. Perhaps for property accesses like `receiver.P` we can use location of the `P` token. For constructors should use the location of the `new` token.
 
 For member usages such as user-defined implicit conversions which do not have any specific corresponding syntax, we expect that interception will never be possible.
