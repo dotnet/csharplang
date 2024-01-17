@@ -22,11 +22,26 @@ are changed to special-case the `System.Threading.Lock` type:
 
 > A `lock` statement of the form `lock (x) { ... }`
 >
-> 1. **where `x` is an expression of type `System.Threading.Lock` is precisely equivalent to:**
+> 1. **where `x` is an expression of type `System.Threading.Lock`, is precisely equivalent to:**
 >    ```cs
 >    using (x.EnterLockScope())
 >    {
 >        ...
+>    }
+>    ```
+>    **and `System.Threading.Lock` must have the following shape:**
+>    ```cs
+>    namespace System.Threading
+>    {
+>        class Lock
+>        {
+>            public Scope EnterLockScope();
+>    
+>            public ref struct Scope
+>            {
+>                public void Dispose();
+>            }
+>        }
 >    }
 >    ```
 > 2. where `x` is an expression of a *reference_type*, is precisely equivalent to: [...]
