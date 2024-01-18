@@ -84,6 +84,24 @@ To escape out of the warning and force use of monitor-based locking, one can use
 
 - The codegen could be hardened against thread aborts (which are themselves obsoleted).
 
+- We could warn also when `Lock` is passed as a type parameter, because locking on a type parameter always uses monitor-based locking:
+
+  ```cs
+  M(new Lock()); // could warn here
+
+  void M<T>(T x) // (specifying `where T : Lock` makes no difference)
+  {
+      lock (x) { } // because this uses Monitor
+  }
+  ```
+
+  However, that would cause warnings when storing `Lock`s in a list which is undesirable:
+
+  ```cs
+  List<Lock> list = new();
+  list.Add(new Lock()); // would warn here
+  ```
+
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
