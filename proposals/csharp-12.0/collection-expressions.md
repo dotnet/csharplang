@@ -108,7 +108,9 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Span<T>`
   * `System.ReadOnlySpan<T>`
 * A *type* with a *[create method](#create-methods)* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
-* A *struct* or *class type* that implements `System.Collections.IEnumerable`
+* A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* instance or extension method `Add` that can be invoked with a single argument of the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement), and the method is accessible at the location of the collection expression.
 * An *interface type*:
   * `System.Collections.Generic.IEnumerable<T>`
   * `System.Collections.Generic.IReadOnlyCollection<T>`
@@ -422,9 +424,8 @@ In the updated rules:
 * A *span_type* is one of:
   * `System.Span<T>`
   * `System.ReadOnlySpan<T>`.
-* An *array_or_array_interface_or_string_type* is one of:
+* An *array_or_array_interface* is one of:
   * an *array type*
-  * `System.String`
   * one of the following *interface types* implemented by an *array type*:
     * `System.Collections.Generic.IEnumerable<T>`
     * `System.Collections.Generic.IReadOnlyCollection<T>`
@@ -436,7 +437,7 @@ In the updated rules:
 >
 > * **`E` is a *collection expression* and one of the following holds:**
 >   * **`T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, and an implicit conversion exists from `E₁` to `E₂`**
->   * **`T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface_or_string_type* with *iteration type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`**
+>   * **`T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *iteration type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`**
 >   * **`T₁` is not a *span_type*, and `T₂` is not a *span_type*, and an implicit conversion exists from `T₁` to `T₂`**
 > * **`E` is not a *collection expression* and one of the following holds:**
 >   * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
@@ -1241,6 +1242,9 @@ For a *struct* or *class type* that implements `System.Collections.IEnumerable` 
 For the purpose of [Params Collectons](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#method-parameters) feature,
 such types are valid `params` types when these APIs are declared public and are instance (vs. extension) methods.
 
+#### Conclusion
+
+Approved with modifications [LDM-2024-01-10](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md)
 
 ## Design meetings
 [design-meetings]: #design-meetings
@@ -1249,6 +1253,7 @@ https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-11-01.md#c
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-09.md#ambiguity-of--in-collection-expressions
 https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-28.md#collection-literals
 https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md
 
 ## Working group meetings
 [working-group-meetings]: #working-group-meetings
