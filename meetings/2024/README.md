@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- Collection-expressions: Discuss fallout and options around new 'instance add' rule for collection expressions (Cyrus)
+
 ## Schedule when convenient
 
 - [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
