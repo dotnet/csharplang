@@ -11,7 +11,7 @@ Interceptors MVP:
 - Why is the location format implementation-defined?
     - We want to reserve the ability to improve it in the future. Because we expect generators to obtain the attribute argument by calling a public API, we think it's useful for the location specifier to be "opaque" to the generator itself.
     - We want to continue to optimize for the source generator scenario, at least for now. The current format that we have is already not amenable to hand-authoring.
-    - We anticipate that producing and consuming format-string will be a "conversation" between generator and compiler, where compiler is parsing out the location specifier from a fragment of source code which the compiler itself produced in `GetInterceptableLocation` on behalf of a generator.
+    - We intend that producing and consuming format-string is a "conversation" between generator and compiler, where compiler is parsing out the location specifier from a fragment of source code which the compiler itself produced in `GetInterceptableLocation` on behalf of a generator.
 
 - Why are these APIs specialized to intercepting methods?
     - If we had `TryGetInterceptableLocation(SyntaxNode node)` we would still be leaving in a usability/clarity gap for generators. Which syntax node is the generator supposed to pass in? Should it be the `NameSyntax` whose location is currently used to denote the location of the intercepted call? Or should it be the containing `InvocationExpressionSyntax`? What is the failure mode supposed to be if the syntax node is of a kind which doesn't support interceptors? Do we just return null?
