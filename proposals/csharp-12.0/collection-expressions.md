@@ -388,16 +388,16 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > An *input type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
->   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is a *spread element* `..s`, then a *spread element inference* is made *from* `s` *to* `Tₑ`.
+> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ` a *collection element inference* is made *from* `Eᵢ` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
 >
-> A *spread element inference* is made *from* an expression `E` to a collection expression *iteration type* `T` as follows:
-> * If `E` is a *collection expression* with elements `Eᵢ`, then for each `Eᵢ`:
->   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element* `..s`, then an *spread element inference* is made *from* `s` *to* `Tₑ`.
-> * If `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y`, then an *spread element inference* is made *from* `x` *to* `Tₑ` and an *spread element inference* is made *from* `y` *to* `Tₑ`.
+> A *collection element inference* is made *from* a collection expression element `Eᵢ` *to* an *iteration type* `Tₑ` as follows:
+> * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
+> * If `Eᵢ` is a *spread element* `..s`, then a *spread element inference* is made *from* `s` *to* `Tₑ`.
+>
+> A *spread element inference* is made *from* an expression `E` to a collection expression *iteration type* `Tₑ` as follows:
+> * If `E` is a *collection expression* with elements `Eᵢ`, then for each `Eᵢ` a *collection element inference* is made *from* `Eᵢ` *to* `Tₑ`.
+> * If `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y`, then a *spread element inference* is made *from* `x` *to* `Tₑ` and a *spread element inference* is made *from* `y` *to* `Tₑ`.
 > * If `E` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Eₑ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Eₑ` *to* `Tₑ`.
 
 > 11.6.3.7 Output type inferences
@@ -406,7 +406,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *output type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element*, no inference is made from `Eᵢ`.
+>   * If `Eᵢ` is a *spread element*, no inference is made from `Eᵢ`.
 > * *[existing rules from output type inferences]* ...
 
 ## Extension methods
