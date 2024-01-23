@@ -118,9 +118,16 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Collections.Generic.ICollection<T>`
   * `System.Collections.Generic.IList<T>`
 
-The implicit conversion exists if the type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` where for each *element* `Eᵢ` in the collection expression:
-* If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
-* If `Eᵢ` is an *spread element* `Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
+The implicit conversion exists if the type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` and for each *element* `Eᵢ` in the collection expression one of the following holds:
+* `Eᵢ` is an *expression element* and there is an implicit conversion from `Eᵢ` to `U`.
+* `Eᵢ` is a *spread element* `..s` and `s` is *spreadable* as values of type `U`.
+
+An expression `E` is *spreadable* as values of type `U` if one of the following holds:
+* `E` is a *collection expression* and for each element `Eᵢ` in the collection expression there is an implicit conversion to `U`.
+* `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y`, and `x` and `y` are *spreadable* as values of type `U`.
+* `E` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Uₑ` and there is an implicit conversion from `Uₑ` to `U`.
+
+*Should `switch` expressions be supported in spread elements?*
 
 There is no *collection expression conversion* from a collection expression to a multi dimensional *array type*.
 
@@ -228,6 +235,8 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 * For each element in order:
   * If the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element *expression* as the argument. (Unlike classic [*collection initializer behavior*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#117154-collection-initializers), element evaluation and `Add` calls are not necessarily interleaved.)
   * If the element is a *spread element* then one of the following is used:
+    * If the spread element expression is a *collection expression*, then the collection expression elements are evaluated in order as if the elements were in the containing collection expression.
+    * If the spread element expression is a *conditional expression*, then the condition is evaluated and if `true` the second-, otherwise the third-operand is evaluated as if the operand was an element in the containing collection expression.
     * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable `Add` instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
     * An applicable `AddRange` instance or extension method is invoked on the *collection instance* with the spread element *expression* as the argument.
     * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the collection instance and `int` index as arguments.
@@ -250,6 +259,8 @@ If the target type is an *array*, a *span*, a type with a *[create method](#crea
 * For each element in order:
   * If the element is an *expression element*, the initialization instance *indexer* is invoked to add the evaluated expression at the current index.
   * If the element is a *spread element* then one of the following is used:
+    * If the spread element expression is a *collection expression*, then the collection expression elements are evaluated in order as if the elements were in the containing collection expression.
+    * If the spread element expression is a *conditional expression*, then the condition is evaluated and if `true` the second-, otherwise the third-operand is evaluated as if the operand was an element in the containing collection expression.
     * A member of a well-known interface or type is invoked to copy items from the spread element expression to the initialization instance.
     * An applicable `GetEnumerator` instance or extension method is invoked on the *spread element expression* and for each item from the enumerator, the initialization instance *indexer* is invoked to add the item at the current index. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
     * An applicable `CopyTo` instance or extension method is invoked on the *spread element expression* with the initialization instance and `int` index as arguments.
@@ -379,8 +390,15 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
+>   * If `Eᵢ` is a *spread element* `..s`, then a *spread element inference* is made *from* `s` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
+>
+> A *spread element inference* is made *from* an expression `E` to a collection expression *iteration type* `T` as follows:
+> * If `E` is a *collection expression* with elements `Eᵢ`, then for each `Eᵢ`:
+>   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
+>   * If `Eᵢ` is an *spread element* `..s`, then an *spread element inference* is made *from* `s` *to* `Tₑ`.
+> * If `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y`, then an *spread element inference* is made *from* `x` *to* `Tₑ` and an *spread element inference* is made *from* `y` *to* `Tₑ`.
+> * If `E` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Eₑ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Eₑ` *to* `Tₑ`.
 
 > 11.6.3.7 Output type inferences
 >
