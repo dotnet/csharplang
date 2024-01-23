@@ -15,6 +15,7 @@ Interceptors MVP:
 
 - Why are these APIs specialized to intercepting methods?
     - If we had `TryGetInterceptableLocation(SyntaxNode node)` we would still be leaving in a usability/clarity gap for generators. Which syntax node is the generator supposed to pass in? Should it be the `NameSyntax` whose location is currently used to denote the location of the intercepted call? Or should it be the containing `InvocationExpressionSyntax`? What is the failure mode supposed to be if the syntax node is of a kind which doesn't support interceptors? Do we just return null?
+    - Many or all of the above questions are obviated by using specialized types in the public API.
     - When we add support for more member kinds, we should add more public APIs corresponding to that. e.g. `MemberAccessExpression`/`ElementAccessExpression` overload for a property/indexer access or `ObjectCreationExpression` for a constructor call.
     - The commitment we are making when we support intercepting a particular member kind, is equal in significance to the commitment we make when introducing a public API. It doesn't serve generator authors to try and optimize for fewest number of public APIs in this case.
 
