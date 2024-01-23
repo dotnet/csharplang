@@ -18,6 +18,8 @@ Interceptors MVP:
     - When we add support for more member kinds, we should add more public APIs corresponding to that. e.g. `MemberAccessExpression`/`ElementAccessExpression` overload for a property/indexer access or `ObjectCreationExpression` for a constructor call.
     - The commitment we are making when we support intercepting a particular member kind, is equal in significance to the commitment we make when introducing a public API. It doesn't serve generator authors to try and optimize for fewest number of public APIs in this case.
 
+-----
+
 - Variance (later on in C# 13)
     - https://github.com/dotnet/aspnetcore/issues/47338
     - ASP.NET has indicated this can wait till later in cycle
