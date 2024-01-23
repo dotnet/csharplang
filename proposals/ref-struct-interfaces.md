@@ -72,7 +72,7 @@ T Identity<T>(T p)
 Span<int> local = Identity(new Span<int>(new int[10]));
 ```
 
-This is similar to other items in a `where` clause in that it specifies the capabilities of the generic parameter. The difference is other syntax items limit theh set of types that can fulfill a generic parameter while `allows ref struct` expands the set of types. This is effectively an anti-constraint as it removes the implicit constraint that `ref struct` cannot satisfy a generic parameter. As such this is given a new syntax prefix, `allows`, to make that clearer.
+This is similar to other items in a `where` clause in that it specifies the capabilities of the generic parameter. The difference is other syntax items limit the set of types that can fulfill a generic parameter while `allows ref struct` expands the set of types. This is effectively an anti-constraint as it removes the implicit constraint that `ref struct` cannot satisfy a generic parameter. As such this is given a new syntax prefix, `allows`, to make that clearer.
 
 A type parameter bound by `allows ref struct` has all of the behaviors of a `ref struct` type:
 
@@ -193,17 +193,36 @@ The `where T: allows ref struct` syntax had a slightly stronger preference in LD
 
 ### Co and contra variance
 
+**Decision**: no new issues
+
 To be maximally useful type parameters that are `allows ref struct` must be compatible with generic variance. Specifically it must be legal for a parameter to be both co/contravariant and also `allows ref struct`. Lacking that they would not be usable in many of the most popular `delegate` and `interface` types in .NET like `Func<T>`, `Action<T>`, `IEnumerable<T>`, etc ...
 
-Given there is no actual variance when `struct` are involved these should be compatible. There is still some concern that I'm missing deeply generic variance cases. Need to sit down with @agocke to work out if this is truly safe or if there are deeply generic scenarios that need to be worked out.
+After discussion it was concluded this is a non-issue. The `allows ref struct` constraint is just another way that `struct` can be used as generic arguments. Just as a normal `struct` argument removes the variance of an API so will a `ref struct`. 
 
 ### Auto-applying to delegate members
 
 **Decision**: do not auto-apply
 
-For many generic `delegate` members the language could automatically apply `allows ref struct` as it's purely an upside change. Consider that for `Func<> / Action<>` style delegates there is no downside to expanding to allowing `ref struct`. The language can outline rules where it is safe to automatically apply this anti-constraint. This removes the manual process and would speed up the adoption of this feature.
+For many generic `delegate` members the language could automatically apply `allows ref struct` as it's purely an upside change. Consider that for `Func<> / Action<>` style delegates and most interface definitions there is no downside to expanding to allowing `ref struct`. The language can outline rules where it is safe to automatically apply this anti-constraint. This removes the manual process and would speed up the adoption of this feature.
 
-While that is true it can present a problem in multi-targeted scenarios. Code would compile in one target framework but fail in another. This could lead to confusion with customers and result in a desire for a more explicit opt-in.
+This auto application of `allows ref struct` poses a few problems though. The first is in multi-targeted scenarios. Code would compile in one target framework but fail in another and there is no syntactic indicator of why the APIs should behave differently.
+
+```csharp
+// Works in net9.0 but fails in all other TF
+Func<Span<char>> func;
+```
+
+This is likely to lead to customer confusion and looking at changes in `Func<T>` in the `net9.0` source wouldn't give customers any clue as to what changed.
+
+The other issue is that very subtle changes in code can cause _spooky action at a distance_ problems. Consider the following code:
+
+```csharp
+interface I1<T>
+{
+}
+```
+
+This interface would be eligable for auto-application of `allows ref struct`. If a developer comes around later though and adds a default interface method then suddenly it would not be and it would break any consumers that had already created invocations like `I1<Span<char>>`. This is a very subtle change that would be hard to track down.
 
 ### Binary breaking change
 
@@ -216,10 +235,26 @@ Adding `allows ref struct` to an existing API is not a source breaking change. I
 This feature requires several pieces of support from the runtime / libraries team:
 
 - Preventing default interface methods from applying to `ref struct`
-- API in `System.Reflection.Metadata` for encoding the `gpAcceptByRefLike` value.
+- API in `System.Reflection.Metadata` for encoding the `gpAcceptByRefLike` value
 - Support for generic parameters being a `ref struct`
 
 Most of this support is likely already in place. The general `ref struct` as generic parameter support is already implemented as described [here][byref-like-generics]. It's possible the DIM implementation already account for `ref struct`. But each of these items needs to be tracked down.
+
+## API versioning
+
+The `allows ref struct` anti-constraint can be safely applied to a large number of generic definitions that do not have implementations. That means most delegates, interfaces and `abstract` methods can safely apply `allows ref struct` to their parameters. These are just API definitions without implementations and hence expanding the set of allowed types is only going to result in errors if they're used as type arguments where `ref struct` are not allowed.
+
+API owners can rely on a simple rule of "if it compiles, it's safe". The compiler will error on any unsafe uses of `allows ref struct`, just as it does for other `ref struct` uses.
+
+At the same time though there are versioning considerations API authors should consider. Essentially API owners should avoid adding `allows ref struct` to type parameters where the owning type / member may change in the future to be incompatible with `allows ref struct`. For example:
+
+- An `abstract` method which may later change to a `virtual` method
+- An `abstract` type which may later add implementations
+- An `interface` which may later add a default interface method
+
+In such cases an API author should be careful about adding `allows ref struct` unless they are certain the type / member evolution will not break `ref struct` rules.
+
+Removing the `allows ref struct` anti-constraint is always a breaking change: source and binary.
 
 ### Span&lt;Span&lt;T&gt;&gt;
 
@@ -232,14 +267,20 @@ readonly ref struct Span<T>
     public readonly int _length;
 
     public Span(T[] array) { ... }
+
+    public static implicit operator Span<T>(T[]? array) { }
+ 
+    public static implicit operator Span<T>(ArraySegment<T> segment) { }
 }
 ```
 
 If this type definition were to include `allows ref struct` then all `T` instances in the definition would need be treated as if they were potentially a `ref struct` type. That presents two classes of problems.
 
-The first is for APIs like `Span(T[] array)` as a `ref struct` cannot be an array element. There are a handful of public APIs on `Span<T>` that represent `T` in an illegal place if it were a `ref struct`. These are public API that cannot be deleted and it's hard to generalize these into a feature. The most likely path forward is the compiler will special case `Span<T>` and issue an error code ever bound to one of these APIs when the argument for `T` is _potentially_ a `ref struct`.
+The first is for APIs like `Span(T[] array)` and the implicit operators the `T` cannot be a `ref struct`: it's either used as an array element or as generic parameter which cannot be `allows ref struct`. There are a handful of public APIs on `Span<T>` that have uses of `T` that cannot be compatible with a `ref struct`. These are public API that cannot be deleted and hence must be rationalized by the language. The most likely path forward is the compiler will special case `Span<T>` and issue an error code ever bound to one of these APIs when the argument for `T` is _potentially_ a `ref struct`.
 
 The second is that the language does not support `ref` fields that are `ref struct`. There is a [design proposal][ref-struct-ref-fields] for allowing that feature. It's unclear if that will be accepted into the language or if it's expressive enough to handle the full set of scenarios around `Span<T>`.
+
+Both of these issues are beyond the scope of this proposal.
 
 ## Related Items
 
