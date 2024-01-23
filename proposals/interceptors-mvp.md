@@ -3,7 +3,7 @@ Interceptors MVP:
 - generated SyntaxTree.FilePath
 - `InterceptsLocation(string location)` accepts a *location specifier* which denotes the source file and location of the interceptee. Format is *implementation defined*.
 - public API:
-    - `string SourceProductionContext.GetInterceptableLocation(InvocationExpressionSyntax intercepted, string interceptorFileHintName, [NotNullWhen(true)] out string? interceptableLocation)`
+    - `string SourceProductionContext.GetInterceptableLocation(InvocationExpressionSyntax intercepted, string interceptorFileHintName)`
         - Returns a string which is the "latest version" of the implementation-defined location format
         - We expect the compiler to support *consuming* previous versions of the location format, but we don't need a point of control for *producing* previous versions of that format
     - `bool CSharpExtensions.TryGetInterceptor(this SemanticModel model, InvocationExpressionSyntax intercepted, [NotNullWhen(true)] out IMethodSymbol? interceptor)`
