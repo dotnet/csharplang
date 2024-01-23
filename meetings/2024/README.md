@@ -4,10 +4,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Collection-expressions: Discuss fallout and options around new 'instance add' rule for collection expressions (Cyrus)
 - Overload resolution rules for "Params Collections" (Aleksey)
   - [Better function member](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#better-function-member)
   - [Binding in presence of dynamic arguments](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#dynamic-vs-static-binding)
+
+- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space.
 
 ## Schedule when convenient
 
