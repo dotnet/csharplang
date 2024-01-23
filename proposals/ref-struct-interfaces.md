@@ -61,20 +61,20 @@ Detailed Notes:
 
 ### ref struct Generic Parameters
 
-The language will allow for generic parameters to opt into supporting `ref struct` as arguments by using the `allow T : ref struct` syntax:
+The language will allow for generic parameters to opt into supporting `ref struct` as arguments by using the `allows ref struct` syntax inside a `where` clause:
 
 ```csharp
 T Identity<T>(T p)
-    allow T : ref struct
+    where T : allows ref struct
     => p;
 
 // Okay
 Span<int> local = Identity(new Span<int>(new int[10]));
 ```
 
-This is similar to a `where` in that it specifies the capabilities of the generic parameter. The difference is `where` limits the set of types that can fulfill a generic parameter while the behavior defined here expands the set of types. This is effectively an anti-constraint as it removes the implicit constraint that `ref struct` cannot satisfy a generic parameter. As such this is given a new syntax, `allow`, to make that clearer.
+This is similar to other items in a `where` clause in that it specifies the capabilities of the generic parameter. The difference is other syntax items limit theh set of types that can fulfill a generic parameter while `allows ref struct` expands the set of types. This is effectively an anti-constraint as it removes the implicit constraint that `ref struct` cannot satisfy a generic parameter. As such this is given a new syntax prefix, `allows`, to make that clearer.
 
-A type parameter bound by `allow T: ref struct` has all of the behaviors of a `ref struct` type:
+A type parameter bound by `allows ref struct` has all of the behaviors of a `ref struct` type:
 
 1. Instances of it cannot be boxed
 2. Instances participate in lifetime rules like a normal `ref struct`
@@ -86,14 +86,14 @@ Examples of these rules in action:
 ```csharp
 interface I1 { }
 I1 M1<T>(T p)
-    allow T : ref struct, I1
+    where T : allows ref struct, I1
 {
     // Error: cannot box potential ref struct
     return p;
 }
 
 T M2<T>(T p)
-    allow T : ref struct
+    where T : allows ref struct
 {
     Span<int> span = stackalloc int[42];
 
@@ -110,7 +110,7 @@ T M2<T>(T p)
 }
 
 T M3<T>(Span<T> span)
-    allow T : ref struct
+    where T : allows ref struct
 {
     return default;
 }
@@ -120,11 +120,12 @@ These parameters will be encoded in metadata as described in the [byref-like gen
 
 Detailed notes:
 
-- A `allow T : ref struct` generic parameter cannot
+- A `where T : allows ref struct` generic parameter cannot
   - Have `where T : U` where `U` is a known reference type
   - Have `where T : class` constraint
-  - Cannot be used as a generic argument unless the corresponding parameter is also `allow T: ref struct`
-- A type parameter `T` which has `allow T: ref struct` has all the same limitations as a `ref struct` type.
+  - Cannot be used as a generic argument unless the corresponding parameter is also `where T: allows ref struct`
+- The `allows ref struct` can appear anywhere in the `where` clause
+- A type parameter `T` which has `allows ref struct` has all the same limitations as a `ref struct` type.
 
 ## Soundness
 
@@ -150,7 +151,7 @@ The new rules apply to the `heap` constraint:
 
 Rules (4) and (5) are slightly altered. Note that rule (4) does not need to be transferred exactly because we have a notion of type parameters without the `heap` contraint. Rule (5) is complicated. Implementing interfaces is not universally unsound, but default interface methods imply a receiver of interface type, which is a non-value type and violates rule (3). Thus, default-interface-members are disallowed.
 
-With these rules, "constraint-C#" is ref-struct safe, supports type substitution, and supports interface implementation. The next step is to translate the language defined in this proposal, which we may call "allow-C#", into "constraint-C#". Fortunately, this is trivial. The lowering is a straightforward syntactic transformation. The syntax `allow T : ref struct` in "allow-C#" is equivalent in "constraint-C#" to no constraint and the absence of "allow clauses" is equivalent to the `heap` constraint. Since the abstract semantics and typing are equivalent, "allow-C#" is also sound.
+With these rules, "constraint-C#" is ref-struct safe, supports type substitution, and supports interface implementation. The next step is to translate the language defined in this proposal, which we may call "allow-C#", into "constraint-C#". Fortunately, this is trivial. The lowering is a straightforward syntactic transformation. The syntax `where T : allows ref struct` in "allow-C#" is equivalent in "constraint-C#" to no constraint and the absence of "allow clauses" is equivalent to the `heap` constraint. Since the abstract semantics and typing are equivalent, "allow-C#" is also sound.
 
 There is one last property which we might consider: whether all typed terms in C# are also typed in "constraint-C#". In other words, we want to know if, for all terms `t` in C#, whether the corresponding term `t'` after lowering to "constraint-C#" is well-typed. This is not a soundness constraint -- making terms ill-typed in our target language would never allow unsafety -- rather, it concerns backwards-compatibility. If we decide to use the typing of "constraint-C#" to validate "allow-C#", we would like to confirm that we are not making any existing C# code illegal.
 
@@ -160,18 +161,16 @@ Since all C# terms start as valid "constraint-C#" terms, we can validate preserv
 
 ### Anti-Constraint syntax
 
-This proposal chooses the `allow T: ref struct` syntax for expressing anti-constraints. There are alternative proposals like using `where T: ~...` to express an anti-constraint. Essentially letting `~` negate the constraint listed after. This is a valid approach to the problem that should be considered.
+**Decision**: use `where T: allows ref struct`
+
+This proposal chose to expose the `ref struct` anti-constraint by augmenting the existing `where` syntax to include `allows ref struct`. This both succinctly describes the feature and is also expandable to include other anti-constraints in the future like pointers. There are other solutions considered that are worth discussing.
+
+The first is simply picking another syntax to use within the `where` clause. Other proposed options included:
+
+- `~ref struct`: the `~` serves as a marker that the syntax that follows is an anti-constraint.
+- `include ref struct`: using `includes` instead of `allows`
 
 ```csharp
-// Proposed
-void M<T>(T p)
-    where T : IDisposable
-    allow T : ref struct
-{
-    p.Dispose();
-}
-
-// Alternative
 void M<T>(T p)
     where T : IDisposable, ~ref struct
 {
@@ -179,9 +178,22 @@ void M<T>(T p)
 }
 ```
 
+The second is to use a new clause entirely to make it clear that what follows is expanding the set of allowed types. Proponents of this feel that using syntax within `where` could lead to confusion when reading. The initial proposal used the following syntax: `allow T: ref struct`:
+
+```csharp
+void M<T>(T p)
+    where T : IDisposable
+    allow T : ref struct
+{
+    p.Dispose();
+}
+```
+
+The `where T: allows ref struct` syntax had a slightly stronger preference in LDM discussions.
+
 ### Co and contra variance
 
-To be maximally useful type parameters that are `allow T : ref struct` must be compatible with generic variance. Specifically it must be legal for a parameter to be both co/contravariant and also `allow T: ref struct`. Lacking that they would not be usable in many of the most popular `delegate` and `interface` types in .NET like `Func<T>`, `Action<T>`, `IEnumerable<T>`, etc ...
+To be maximally useful type parameters that are `allows ref struct` must be compatible with generic variance. Specifically it must be legal for a parameter to be both co/contravariant and also `allows ref struct`. Lacking that they would not be usable in many of the most popular `delegate` and `interface` types in .NET like `Func<T>`, `Action<T>`, `IEnumerable<T>`, etc ...
 
 Given there is no actual variance when `struct` are involved these should be compatible. There is still some concern that I'm missing deeply generic variance cases. Need to sit down with @agocke to work out if this is truly safe or if there are deeply generic scenarios that need to be worked out.
 
@@ -189,13 +201,13 @@ Given there is no actual variance when `struct` are involved these should be com
 
 **Decision**: do not auto-apply
 
-For many generic `delegate` members the language could automatically apply `allow T: ref struct` as it's purely an upside change. Consider that for `Func<> / Action<>` style delegates there is no downside to expanding to allowing `ref struct`. The language can outline rules where it is safe to automatically apply this anti-constraint. This removes the manual process and would speed up the adoption of this feature.
+For many generic `delegate` members the language could automatically apply `allows ref struct` as it's purely an upside change. Consider that for `Func<> / Action<>` style delegates there is no downside to expanding to allowing `ref struct`. The language can outline rules where it is safe to automatically apply this anti-constraint. This removes the manual process and would speed up the adoption of this feature.
 
 While that is true it can present a problem in multi-targeted scenarios. Code would compile in one target framework but fail in another. This could lead to confusion with customers and result in a desire for a more explicit opt-in.
 
 ### Binary breaking change
 
-Adding `allow T: ref struct` to an existing API is not a source breaking change. It is purely expanding the set of allowed types for an API. Need to track down if this is a binary breaking change or not. Unclear if updating the attributes of a generic parameter constitute a binary breaking change.
+Adding `allows ref struct` to an existing API is not a source breaking change. It is purely expanding the set of allowed types for an API. Need to track down if this is a binary breaking change or not. Unclear if updating the attributes of a generic parameter constitute a binary breaking change.
 
 ## Considerations
 
@@ -223,7 +235,7 @@ readonly ref struct Span<T>
 }
 ```
 
-If this type definition were to include `allow T : ref struct` then all `T` instances in the definition would need be treated as if they were potentially a `ref struct` type. That presents two classes of problems.
+If this type definition were to include `allows ref struct` then all `T` instances in the definition would need be treated as if they were potentially a `ref struct` type. That presents two classes of problems.
 
 The first is for APIs like `Span(T[] array)` as a `ref struct` cannot be an array element. There are a handful of public APIs on `Span<T>` that represent `T` in an illegal place if it were a `ref struct`. These are public API that cannot be deleted and it's hard to generalize these into a feature. The most likely path forward is the compiler will special case `Span<T>` and issue an error code ever bound to one of these APIs when the argument for `T` is _potentially_ a `ref struct`.
 
