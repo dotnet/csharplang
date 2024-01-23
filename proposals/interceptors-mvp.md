@@ -18,10 +18,12 @@ Interceptors MVP:
     - When we add support for more member kinds, we should add more public APIs corresponding to that. e.g. `MemberAccessExpression`/`ElementAccessExpression` overload for a property/indexer access or `ObjectCreationExpression` for a constructor call.
     - The commitment we are making when we support intercepting a particular member kind, is equal in significance to the commitment we make when introducing a public API. It doesn't serve generator authors to try and optimize for fewest number of public APIs in this case.
 
-- Properties
-    - UnsafeAccessor does not support properties directly. Instead, a given usage of UnsafeAccessor decorates a method which calls through to a single property accessor.
-    - Consider: What happens when we want to intercept `obj.Prop += a`? We can't choose a single method to replace `Prop`.
-    - Conclusion: We should probably favor intercepting a property with a property. We are likely blocked here until we ship extensions.
-
-- Variance
+- Variance (later on in C# 13)
     - https://github.com/dotnet/aspnetcore/issues/47338
+    - ASP.NET has indicated this can wait till later in cycle
+    - Argument type is `Func<TCaptured>`. Interceptee parameter is `System.Delegate`. Interceptor parameter wants to be `Func<T>` and to have call site pass the `TCaptured` as a type argument.
+
+- Properties (post C# 13)
+    - UnsafeAccessor does not support properties directly. Instead, a given usage of UnsafeAccessor decorates a method which calls through to a single property accessor.
+    - Consider: What happens when we want to intercept `obj.Prop += a`? We can't choose a single method to replace usage of `Prop`.
+    - Conclusion: We should probably favor intercepting a property with an extension property. We are likely blocked here until we ship extensions.
