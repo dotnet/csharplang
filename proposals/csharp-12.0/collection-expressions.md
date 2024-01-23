@@ -118,14 +118,14 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Collections.Generic.ICollection<T>`
   * `System.Collections.Generic.IList<T>`
 
-The implicit conversion exists if the type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` and for each *element* `Eᵢ` in the collection expression one of the following holds:
-* `Eᵢ` is an *expression element* and there is an implicit conversion from `Eᵢ` to `U`.
-* `Eᵢ` is a *spread element* `..s` and `s` is *spreadable* as values of type `U`.
+The implicit conversion exists if the type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` and for each *element* `Eᵢ` in the collection expression one of the following holds:
+* `Eᵢ` is an *expression element* and there is an implicit conversion from `Eᵢ` to `Tₑ`.
+* `Eᵢ` is a *spread element* `..s` and `s` is *spreadable* as values of type `Tₑ`.
 
-An expression `E` is *spreadable* as values of type `U` if one of the following holds:
-* `E` is a *collection expression* and for each element `Eᵢ` in the collection expression there is an implicit conversion to `U`.
-* `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y`, and `x` and `y` are *spreadable* as values of type `U`.
-* `E` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Uₑ` and there is an implicit conversion from `Uₑ` to `U`.
+An expression `E` is *spreadable* as values of type `Tₑ` if one of the following holds:
+* `E` is a *collection expression* and for each element `Eᵢ` in the collection expression there is an implicit conversion to `Tₑ`.
+* `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y`, and `x` and `y` are *spreadable* as values of type `Tₑ`.
+* `E` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Eₑ` and there is an implicit conversion from `Eₑ` to `Tₑ`.
 
 *Should `switch` expressions be supported in spread elements?*
 
