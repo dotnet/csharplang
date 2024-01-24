@@ -496,6 +496,8 @@ The order of evaluation is the following:
 The [collection expressions ref safety section](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#ref-safety) is applicable to
 the construction of parameter collections when APIs are invoked in their expanded form.
 
+Params parameters are implicitly `scoped` when their type is a ref struct.
+
 ### Metadata
 
 In metadata `params` parameters are marked with `System.ParamArrayAttribute` as `params` arrays are marked today.
@@ -510,7 +512,7 @@ Should the language be unspecified to allow for this flexibility?
 We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757)." It sounds like we have to answer
 the questions in context of this proposal.
 
-### Implicitly `scoped` params
+### [Resolved] Implicitly `scoped` params 
 
 There was a suggestion that, when `params` modifies a `ref struct` parameter, it should be considered as declared `scoped`.
 The argument is made that number of cases where you want the parameter to be scoped is virtually 100% when looking through
@@ -518,6 +520,9 @@ the BCL cases. In a few cases that need that, the default could be overwritten w
 
 However, it might be undesirable to change the default simply based on presence of `params` modifier. Especially, that
 in overrides/implements scenarios `params` modifier doesn't have to match.
+
+#### Resolution:
+Params parameters are implicitly scoped - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements.
 
 ## Alternatives 
 
@@ -532,3 +537,8 @@ especially that other languages are unlikely to support consumption of non-array
 ## Related proposals
 - https://github.com/dotnet/csharplang/issues/1757
 - https://github.com/dotnet/csharplang/blob/main/proposals/format.md#extending-params
+ 
+## Related design meetings
+
+https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements
+
