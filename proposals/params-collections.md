@@ -496,7 +496,7 @@ The order of evaluation is the following:
 The [collection expressions ref safety section](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#ref-safety) is applicable to
 the construction of parameter collections when APIs are invoked in their expanded form.
 
-Params parameters are implicitly `scoped` when their type is a ref struct.
+Params parameters are implicitly `scoped` when their type is a ref struct. UnscopedRefAttribute can be used to override that.
 
 ### Metadata
 
