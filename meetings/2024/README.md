@@ -14,6 +14,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
 - Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
+- Discriminated Union WG (Matt)
+- Extensions (Julien and Mads (after Feb 5))
 
 ## Recurring topics
 
@@ -35,8 +37,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
 
 ### Mon Jan 29, 2024
-
-- Meeting on the meeting
 
 ### Wed Jan 24, 2024
 
