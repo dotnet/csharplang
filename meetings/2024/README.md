@@ -4,16 +4,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Overload resolution rules for "Params Collections" (Aleksey)
-  - [Better function member](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#better-function-member)
-  - [Binding in presence of dynamic arguments](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#dynamic-vs-static-binding)
-
+- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space.
 
 ## Schedule when convenient
 
 - [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
-- Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
 - Discriminated Union WG (Matt)
 - Extensions (Julien and Mads (after Feb 5))
 
@@ -35,8 +31,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jan 31, 2024
 
 - [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
+- Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
 
 ### Mon Jan 29, 2024
+
+- Overload resolution rules for "Params Collections" (Aleksey)
+  - [Better function member](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#better-function-member)
+  - [Binding in presence of dynamic arguments](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#dynamic-vs-static-binding)
 
 ### Wed Jan 24, 2024
 
@@ -46,10 +47,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [ref struct interfaces and generics](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) (Jared)
 - [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
-
-### Wed Jan 10, 2024
-
-- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 
 ## C# Language Design Notes for 2024
 
