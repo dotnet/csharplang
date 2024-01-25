@@ -3,6 +3,7 @@
 TODO3 disallow variance in type parameters of extensions  
 TODO3 No duplicate base extensions (to avoid ambiguities)  
 TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.  
+TODO3 overload resolution disambiguation between extension and underlying members
 
 TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
@@ -208,6 +209,8 @@ Furthermore, the access is required to take place *through* an instance of that
 derived extension type or an extension type constructed from it.
 This restriction prevents one derived extension from accessing protected members of 
 other derived extensions, even when the members are inherited from the same base extension.**
+
+Note: the rules still disallow access to protected members of the underlying type through the extension type.
 
 TODO
 
@@ -424,9 +427,10 @@ TODO2 types may not be called "extension" (reserved, break)
 
 ## Lookup rules
 
-TODO2 give an overview
-TODO2 Will need to spec or disallow `base.` syntax?
-Casting seems an adequate solution to access hidden members: `((R)r2).M()`.  
+TL;DR: For certain syntaxes on non-extension types (member access, element access), 
+we'll fall back to an implicit extension member lookup.  
+For extension types, accessible members of the underlying type are available
+because of member lookup.
 
 ### Simple names
 
@@ -530,6 +534,27 @@ We modify the [method invocations rules](https://github.com/dotnet/csharpstandar
 \[...]
 
 ### Extension invocations
+
+TODO3 lookup disambiguation or priority rules?
+Yes, let's find a way to prefer the extension on more specific underlying type.  
+
+```
+System.Console.Write(new C().M(42));
+
+public class Base { }
+
+public class C : Base { }
+
+public static class E1
+{
+    public static int M(this Base b, int i) => throw null;
+}
+
+public static class E2
+{
+    public static int M(this C c, int i) => i;
+}
+```
 
 We replace the [extension method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12893-extension-method-invocations)
 with the following:
@@ -680,8 +705,6 @@ The binding-time processing of an indexer access of the form `P[A]`, where `P` i
 
 #### Extension indexer access
 
-TODO3 Confirm what expressions can be the receiver. How about `base`?
-
 In an element access of one of the forms
 
 ```csharp
@@ -689,7 +712,9 @@ In an element access of one of the forms
 «expr» [ «args» ]
 ```
 
-if the normal processing of the element access finds no applicable indexers, an attempt is made to process the construct as an extension indexer access. If «expr» or any of the «args» has compile-time type `dynamic`, extension methods will not apply.
+if the normal processing of the element access finds no applicable indexers, 
+an attempt is made to process the construct as an extension indexer access. 
+If «expr» or any of the «args» has compile-time type `dynamic`, extension methods will not apply.
 
 This succeeds if, given that «expr» has type `Type`, we find
 a substituted compatible implicit extension type `X` for `Type`
@@ -708,7 +733,6 @@ The search proceeds as follows:
     those will be considered first.
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types or methods, those will be considered second.
-
   - Check which extension types in the current scope are compatible with the given underlying type `Type` and 
     collect resulting compatible substituted extension types.
   - The set of indexers is constructed from all indexers declared in each substituted extension type
@@ -727,15 +751,9 @@ The search proceeds as follows:
 - If no extension indexer is found to be suitable for the element access
   in any enclosing scope, a compile-time error occurs.
 
+### Member lookup > Base types
 
-### Member lookup
-
-No change to the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup),
-because the changes to the "base types" section means that an extension type inherits members from its base extensions and its extended type.
-
-### Base types
-
-TL;DR: An extension type inherits from its base extensions and its extended type.
+TL;DR: Member lookup on an extension type includes members from its base extensions, its extended type and base types.
 
 We modify the [base types rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1252-base-types) 
 as follows:
@@ -749,7 +767,7 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is an *interface_type*, the base types of `T` are the base interfaces of `T` and the class type `object`.
 - If `T` is an *array_type*, the base types of `T` are the class types `System.Array` and `object`.
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
-- \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T` and the extended type of `T`.**
+- \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T` and the extended type of `T` and its base types.**
 
 ```csharp
 explicit extension R : U
@@ -760,11 +778,6 @@ explicit extension R : U
     }
 }
 ```
-
-This change also affects the [method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations):
-
-> The set of candidate methods is reduced to contain only methods from the most derived types:
-> For each method `C.F` in the set, where `C` is the type in which the method `F` is declared, all methods declared in a base type of `C` are removed from the set.
 
 ### Compatible substituted extension type
 
@@ -858,6 +871,12 @@ TODO3 explain static usings:
   meaning of `using static SomeType;` (probably should look for extension types declared within `SomeType`)
   meaning of `using static Extension;`
 
+```
+using static ClassicExtensionType;
+using static NewExtensionType; // What should this do? 
+// Are the static methods from that extension in scope?
+```
+
 The preceding rules mean that:
 1. extension members available in inner type declarations take precedence over
 extension members available in outer type declarations,
@@ -882,6 +901,111 @@ For context see [extension method invocation rules](https://github.com/dotnet/cs
 
 For context see [Identical simple names and type names](https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#identical-simple-names-and-type-names).
 TODO3
+
+### Better function member
+
+We modify the [better function member rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member) as follows:
+
+Parameter lists for each of the candidate function members are constructed in the following way:
+- \***For methods on an extension type, a parameter with the extended type is prepended to the parameter list.**
+- \[...]
+
+This means that we'll prefer an extension on a derived type over an extension on a base type,
+the same way that we prefer an extension method on a derived type over an extension method on a base type.
+
+For example:
+```csharp
+C.M(42); // M(C, int) is a better function than M(Base, int)
+
+class Base { }
+
+class C : Base { }
+
+implicit extension E1 for Base
+{
+    public static int M(int i) => throw null;
+}
+
+implicit extension E2 for C
+{
+    public static int M(int i) => i;
+}
+```
+
+TODO3 how do we achieve the same result for properties or other members?  For example:
+```csharp
+_ = C.P;
+
+class Base { }
+
+class C : Base { }
+
+implicit extension E1 for Base
+{
+    public static int P => throw null;
+}
+
+implicit extension E2 for C
+{
+    public static int P => i;
+}
+```
+
+### Base access
+
+TODO review with LDM  
+
+We'll start by disallowing [base access](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12814-base-access) 
+within extension types.  
+Casting seems an adequate solution to access hidden members: `((R)r2).M()`.  
+TODO Maybe `base.` could refer to underlying value.   
+
+### Method invocations
+
+The change to the Base Types section also affects the [method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations):
+
+> The set of candidate methods is reduced to contain only methods from the most derived types:
+> For each method `C.F` in the set, where `C` is the type in which the method `F` is declared, all methods declared in a base type of `C` are removed from the set.
+
+For example:
+
+```csharp
+E.Method(); // picks `E.Method` over `C.Method`
+
+static class C
+{
+    public static void Method() => throw null;
+}
+
+static explicit extension E for C
+{
+    public static void Method() { } // picked
+}
+```
+
+### Element access
+
+TODO3 write this section
+
+TL;DR: For non-extension types, we'll fall back to an implicit extension member lookup. For extension types, we include indexers from the underlying type.
+
+We modify the [indexer access](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117103-indexer-access) section as follows:
+
+For an indexer access, the *primary_no_array_creation_expression* of the *element_access* shall be a variable or value 
+of a class, struct, interface, /***or extension** type, and this type shall implement one or more indexers that are 
+applicable with respect to the *argument_list* of the *element_access*.
+
+The binding-time processing of an indexer access of the form `P[A]`, where `P` is a *primary_no_array_creation_expression* 
+of a class, struct, interface, /***or extension** type `T`, and `A` is an *argument_list*, consists of the following steps:
+
+- The set of indexers provided by `T` is constructed. The set consists of all indexers declared in `T` or a base type of `T` that are not override declarations and are accessible in the current context ([§7.5](basic-concepts.md#75-member-access)).
+- The set is reduced to those indexers that are applicable and not hidden by other indexers. The following rules are applied to each indexer `S.I` in the set, where `S` is the type in which the indexer `I` is declared:
+  - If `I` is not applicable with respect to `A`, then `I` is removed from the set.
+  - If `I` is applicable with respect to `A`, then all indexers declared in a base type of `S` are removed from the set.
+  - If `I` is applicable with respect to `A` and `S` is a class type other than `object`, all indexers declared in an interface are removed from the set.
+- If the resulting set of candidate indexers is empty, then no applicable indexers exist, and a binding-time error occurs.
+- The best indexer of the set of candidate indexers is identified using the overload resolution rules. If a single best indexer cannot be identified, the indexer access is ambiguous, and a binding-time error occurs.
+- The index expressions of the *argument_list* are evaluated in order, from left to right. The result of processing the indexer access is an expression classified as an indexer access. The indexer access expression references the indexer determined in the step above, and has an associated instance expression of `P` and an associated argument list of `A`, and an associated type that is the type of the indexer. If `T` is a class type, the associated type is picked from the first declaration or override of the indexer found when starting with `T` and searching through its base classes.
 
 ### Operators
 
@@ -913,6 +1037,14 @@ TODO Need to scan through all pattern-based rules for known members to consider 
   Otherwise, we should consider it (for example `Current` property in `foreach`).
 
 ## Implementation details
+
+TODO3 revise this to use a regular struct
+
+struct Extension
+{
+  UnderlyingType underlyingValue;
+}
+// Avoid copying via Unsafe.As 
 
 Extensions are implemented as ref structs with an extension marker method.  
 The type is marked with Obsolete and CompilerFeatureRequired attributes.  
