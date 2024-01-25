@@ -49,10 +49,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jan 10, 2024
 
-- [Collection expression details](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#should-collection-expression-conversion-require-availability-of-a-minimal-set-of-apis-for-construction)
 - Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 
 ## C# Language Design Notes for 2024
+
+### Wed Jan 10, 2024
+
+[C# Language Design Meeting for January 10th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md)
+
+- [Collection expressions: conversion vs construction](#collection-expressions-conversion-vs-construction)
 
 ### Mon Jan 8, 2024
 
