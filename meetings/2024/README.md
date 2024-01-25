@@ -57,7 +57,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 [C# Language Design Meeting for January 10th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md)
 
-- [Collection expressions: conversion vs construction](#collection-expressions-conversion-vs-construction)
+- Collection expressions: conversion vs construction
 
 ### Mon Jan 8, 2024
 
