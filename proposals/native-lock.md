@@ -33,7 +33,7 @@ are changed to special-case the `System.Threading.Lock` type:
 >    ```cs
 >    namespace System.Threading
 >    {
->        class Lock
+>        public sealed class Lock
 >        {
 >            public Scope EnterLockScope();
 >    
@@ -45,6 +45,10 @@ are changed to special-case the `System.Threading.Lock` type:
 >    }
 >    ```
 > 2. where `x` is an expression of a *reference_type*, is precisely equivalent to: [...]
+
+Note that the shape might not be fully checked (e.g., there will be no errors nor warnings if the `Lock` type is not `sealed`),
+but the feature might not work as expected (e.g., there will be no warnings when converting `Lock` to a derived type,
+since the feature assumes there are no derived types).
 
 Additionally, new warnings are added to implicit reference conversions ([§10.2.8](https://github.com/dotnet/csharpstandard/blob/9af5bdaa7af535f34fbb7923e5406e01db8489f7/standard/conversions.md#1028-implicit-reference-conversions))
 when upcasting the `System.Threading.Lock` type:
@@ -111,8 +115,10 @@ To escape out of the warning and force use of monitor-based locking, one can use
   Although there might need to be an opt-out mechanism as some lock types might be allowed to be used with `await`.)
   Alternatively, this could be an analyzer shipped as part of the runtime.
 
-- Should the `Lock` type have an `Obsolete` attribute to prevent people with older compilers from accidentally misusing it?
-  (The attribute would be recognized and ignored by compilers supporting the feature.)
+- Can we allow the new `lock` statement in async methods?
+  Since `await` is disallowed inside the `lock`, this would be safe.
+  Currently, since `lock` is lowered to `using` with a `ref struct` as the resource, this results in a compile-time error.
+  The workaround is to extract the `lock` into a separate non-async method.
 
 ## Design meetings
 
