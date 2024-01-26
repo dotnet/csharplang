@@ -48,13 +48,23 @@ a *type*, and an *identifier*. A parameter collection declares a single paramete
 The *type* of a parameter collection shall be one of the following valid target types for a collection expression
 (see https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions):
 - A single dimensional *array type* `T[]`
-- A *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`
-- A *type* with a valid [create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)
-  with *parameter type* `System.ReadOnlySpan<T>` and the method is at least as accessible as the *type*.
-- A *struct* or *class type* that implements `System.Collections.Generic.IEnumerable<T>`
-- A *struct* or *class type* that implements `System.Collections.IEnumerable` and *does not implement* `System.Collections.Generic.IEnumerable<T>`.
-- An *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`,
-  `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>`
+- A *span type*
+  - `System.Span<T>`
+  - `System.ReadOnlySpan<T>`
+- A *type* with a *[create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)*,
+  which is at least as accessible as the declaring member, and with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)
+  determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
+- A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
+  - The *type* has a constructor that can be invoked with no arguments, and the constructor is at least as accessible as the declaring member.
+  - The *type* has an instance (not an extension) method `Add` that can be invoked with a single argument of
+    the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement),
+    and the method is at least as accessible as the declaring member.
+- An *interface type*
+  - `System.Collections.Generic.IEnumerable<T>`,
+  - `System.Collections.Generic.IReadOnlyCollection<T>`,
+  - `System.Collections.Generic.IReadOnlyList<T>`,
+  - `System.Collections.Generic.ICollection<T>`,
+  - `System.Collections.Generic.IList<T>`
 
 In a method invocation, a parameter collection permits either a single argument of the given parameter type to be specified, or
 it permits zero or more arguments of the collection [iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)
@@ -554,5 +564,7 @@ especially that other languages are unlikely to support consumption of non-array
  
 ## Related design meetings
 
-https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md
 
