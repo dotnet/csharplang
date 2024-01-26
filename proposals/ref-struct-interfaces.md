@@ -33,37 +33,7 @@ IDisposable d = f;
 
 The ability to implement interfaces is only useful when combined with the ability for `ref struct` to participate in generic arguments (as [laid out later][ref-struct-generics]).
 
-To allow for interfaces to cover the full expressiveness of a `ref struct` and the lifetime issues they can present, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `struct` / `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that member must also be decorated with `[UnscopedRef]`. The attribute is ignored when a `class` implements the interface.
-
-```csharp
-interface I1
-{
-    [UnscopedRef]
-    ref int Prop { get; }
-}
-
-struct S1 : I1
-{
-    // Error: missing [UnscopedRef]
-    ref int Prop { get; }
-
-}
-
-struct S2 : I1
-{
-    // Okay
-    [UnscopedRef]
-    ref int Prop { get; }
-}
-
-class C1 : I1
-{
-    // Okay
-    ref int Prop { get; }
-}
-```
-
-This is necessary as it allows for interfaces that abstract over `struct` to have the same flexibility as using a `struct` directly. Consider the following example:
+To allow for interfaces to cover the full expressiveness of a `ref struct` and the lifetime issues they can present, the language will allow `[UnscopedRef]` to appear on interface methods and properties. This is necessary as it allows for interfaces that abstract over `struct` to have the same flexibility as using a `struct` directly. Consider the following example:
 
 ```csharp
 interface I1
@@ -94,6 +64,45 @@ int M<T>(T t, S1 s)
 
     // Okay
     return s.p2;
+}
+```
+
+When a `struct` / `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, the implementing member may also be decorated with `[UnscopedRef]` but it is not required. However a member with `[UnscopedRef]` may not be used to implement a member that lacks the attribute ([details][unscoped-ref-impl]).
+
+```csharp
+interface I1
+{
+    [UnscopedRef]
+    ref int P1 { get; }
+    ref int P2 { get; }
+}
+
+struct S1 : I1
+{
+    ref int P1 { get; }
+    ref int P2 { get; }
+}
+
+struct S2 : I1
+{
+    [UnscopedRef]
+    ref int P1 { get; }
+    ref int P2 { get; }
+}
+
+struct S3 : I1
+{
+    ref int P1 { get; }
+    // Error: P2 is marked with [UnscopedRef] and cannot implement I1.P2 as is not marked 
+    // with [UnscopedRef]
+    [UnscopedRef]
+    ref int P2 { get; }
+}
+
+class C1 : I1
+{
+    ref int P1 { get; }
+    ref int P2 { get; }
 }
 ```
 
@@ -353,6 +362,31 @@ The second is that the language does not support `ref` fields that are `ref stru
 
 Both of these issues are beyond the scope of this proposal.
 
+### UnscopedRef Implementation Logic
+
+The rationale behind the `[UnscopedRef]` rules for interface implementation is easiest to understand when visualizing the `this` parameter as an explicit, rather than implicit, argument to the methods. Consider for example the following `struct` where `this` is visualized as an implicit parameter (similar to how Python handles it):
+
+```csharp
+struct S
+{
+    public void M(scoped ref S this) { }
+}
+```
+
+The `[UnscopedRef]` on an interface member is specifying that `this` lacks `scoped` for lifetime purposes at the call site. Allowing `[UnscopedRef]` to be ommitted on the implementing member is effectively allowing a parameter that is `ref T` to be implemented by a parameter that is `scoped ref T`. The language already allows this:
+
+```csharp
+interface I1
+{
+    void M(ref Span<char> span);
+}
+
+struct S : I1
+{
+    public void M(scoped ref Span<char> span) { }
+}
+```
+
 ## Related Items
 
 Related Items:
@@ -367,3 +401,4 @@ Related Items:
 [ref-struct-generics]: #ref-struct-generic-parameters
 [byref-like-generics]: https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md
 [dim-diamond]: https://github.com/dotnet/csharplang/blob/main/meetings/2018/LDM-2018-10-17.md#diamond-inheritance
+[unscoped-ref-impl]: #unscopedref-implementation-logic
