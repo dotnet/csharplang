@@ -157,7 +157,7 @@ In case the parameter type sequences `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂,
    (this corresponds to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution):**
   - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>`, and params collection of `Mₑ` is `System.Span<Eₑ>`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
   - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>` or `System.Span<Eᵢ>`, and params collection of `Mₑ` is
-    an *[array_or_array_interface_or_string_type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution)*
+    an *[array_or_array_interface__type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution)*
     with *[iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)* `Eₑ`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
   - **both params collections are not *span_type*s, and an implicit conversion exists from params collection of `Mᵢ` to params collection of `Mₑ`**  
 - Otherwise, no function member is better.
@@ -194,10 +194,10 @@ class Program
     static void Test1()
     {
         M1(['1', '2', '3']); // Span overload is used
-        M1('1', '2', '3');   // String overload is used because `char` is an exact match
+        M1('1', '2', '3');   // IEnumerable<char> overload is used because `char` is an exact match
     }
 
-    static void M1(params string value) {}
+    static void M1(params IEnumerable<char> value) {}
     static void M1(params System.ReadOnlySpan<MyChar> value) {}
 
     class MyChar
