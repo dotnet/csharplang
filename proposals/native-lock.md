@@ -109,12 +109,6 @@ To escape out of the warning and force use of monitor-based locking, one can use
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-- Do we want to include static analysis to prevent usage of `System.Threading.Lock` in `using`s with `await`?
-  We could emit either an error or a warning for code like `using (lockVar.EnterLockScope()) { await ... }`.
-  (We would also likely need to consider for this all lock types matching the general pattern if implemented in the future.
-  Although there might need to be an opt-out mechanism as some lock types might be allowed to be used with `await`.)
-  Alternatively, this could be an analyzer shipped as part of the runtime.
-
 - Can we allow the new `lock` statement in async methods?
   Since `await` is disallowed inside the `lock`, this would be safe.
   Currently, since `lock` is lowered to `using` with a `ref struct` as the resource, this results in a compile-time error.
