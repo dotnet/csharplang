@@ -40,26 +40,21 @@ All schedule items must have a public issue or checked-in proposal that can be l
   - [Better function member](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#better-function-member)
   - [Binding in presence of dynamic arguments](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#dynamic-vs-static-binding)
 
-### Wed Jan 24, 2024
-
-- Meeting on the meeting
+## C# Language Design Notes for 2024
 
 ### Mon Jan 22, 2024
 
-- [ref struct interfaces and generics](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) (Jared)
-- [Interceptors](https://github.com/dotnet/csharplang/issues/7009) (Rikki)
-
-## C# Language Design Notes for 2024
+[C# Language Design Meeting for January 22nd, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-22.md)
 
 ### Wed Jan 10, 2024
 
-[C# Language Design Meeting for January 10th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md)
+[C# Language Design Meeting for January 10th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md)
 
 - Collection expressions: conversion vs construction
 
 ### Mon Jan 8, 2024
 
-[C# Language Design Meeting for January 8th, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md)
+[C# Language Design Meeting for January 8th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md)
 
 - Collection expressions
     - Iteration type of `CollectionBuilderAttribute` collections
