@@ -2,6 +2,7 @@ Interceptors MVP:
 
 - generated SyntaxTree.FilePath
 - `InterceptsLocation(string location)` accepts a *location specifier* which denotes the source file and location of the interceptee. Format is *implementation defined*.
+    - v1: copy format of `src\ConsoleApp1\ConsoleApp1\Program.cs(2,34)`
 - public API:
     - `string SourceProductionContext.GetInterceptableLocation(InvocationExpressionSyntax intercepted, string interceptorFileHintName)`
         - Returns a string which is the "latest version" of the implementation-defined location format

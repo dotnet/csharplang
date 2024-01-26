@@ -6,13 +6,15 @@ Further down there is a "Future" section containing issues which do not block th
 
 ## File path portability
 
-One of our design goals with interceptors was for them to conform to the "portability" requirement of source generators. That means we should be able to run the source generators for a project containing interceptors, commit the results to disk, then remove the source generators from the project and be able to build in a variety of environments. Note that this is different from *determinism*--we don't mind if the resulting assembly differs in things like layout, etc. in each build environment, but want it to be the case that if an interceptor declaration functions in one environment, then it also functions in a different environment, assuming all the sources and dependencies are fully available in each environment.
+One of our design goals with interceptors was for them to conform to the "portability" requirement of source generators. That means we should be able to run the source generators for a project containing interceptors, commit the results to disk, then remove the source generators from the project and be able to build in a variety of environments. Note that this is different from *determinism*--we don't mind if the resulting assembly differs in things like layout, etc. in each build environment, but want it to be the case that if an interceptor declaration *functions* in one environment, then it also *functions* in a different environment, assuming all the sources and dependencies are fully available in each environment.
 
 However, we currently require absolute paths for `InterceptsLocationAttribute`, with pathmap substitution performed if present. This doesn't work between local builds on different paths, or across local builds and CI, because only CI will actually pass `/pathmap` during the build. The local build prefers to preserve local paths (e.g. in the PDB) so that the local versions of the sources can be discovered easily during debugging. The different environments will have different answers for what they expect the paths to be, and the InterceptsLocation will have errors in environments which differ from the "generation-time" environment.
 
-Having looked at several strategies to address here, including adjusting when the build system passes `/pathmap` to the compiler, it seems the most straightforward way is to permit relative paths. This is a strategy which is already proven out by `#line` directives.
+### Permit relative paths in `[InterceptsLocation(filePath, line, column)]`
 
-When a relative path appears in an `[InterceptsLocation]`, we will resolve it relative to the path of the containing file, just as we would for `#line`. We recommend that relative paths appearing in source use `/` directory separators for portability.
+Having looked at several strategies to address here, including adjusting when the build system passes `/pathmap` to the compiler, it seems the most straightforward way is to permit relative paths for interceptors. This is a strategy which is already proven out by `#line` directives.
+
+When a relative path appears in an `[InterceptsLocation]`, we will resolve it relative to the path of the containing file, just as we would for `#line`.
 
 ```cs
 // /project/src/file1.cs
@@ -34,24 +36,69 @@ class Interceptors
 }
 ```
 
-Since we want generated files to refer relatively to "user" files, we now need to define the paths of generated files. Also, for source generators to be able to insert the correct relative paths into the generated source, a source generator needs to know what the file path will be before the file is actually added to the compilation. We may want to add new public API like the following for this:
+We recommend that relative paths appearing in source use `/` directory separators for portability.
 
+Note that the "portability" requirement of generators still cannot be met by interceptors when there is no relative path from the interceptor to the interceptee. For example, if the two source files are on different drives. This limitation already exists for `#line` directives, and we do not expect it to be problematic for real-world usage.
+
+### Define generated `SyntaxTree.FilePath`
+
+Generated files need to refer to user files using relative paths. The sample in the previous section shows this. However, generated files don't currently have file paths which can be related to user files. Instead, they use an invented path with the form `$"{assemblyName}/{generatorTypeName}/{hintName}.cs"`.
+
+We propose changing this to define the `SyntaxTree.FilePath` for a generated file to be equivalent to the file path which the generated file *would be written to* if `$(EmitCompilerGeneratedFiles)` is true in the project. This will also have the effect of increasing the behavioral consistency of a project which is compiled with generators in-box, versus emitting the generated files, removing the generators, and recompiling.
+
+### Add `[InterceptsLocation(string locationSpecifier)]`
+
+We propose adding the following well-known constructor:
 ```diff
+ namespace System.Runtime.CompilerServices;
+ class InterceptsLocationAttribute
+ {
+     public InterceptsLocationAttribute(string filePath, int line, int character) { }
++    public InterceptsLocationAttribute(string locationSpecifier) { }
+ }
+```
+
+Example usage:
+```cs
+static file class Interceptors
+{
+    [InterceptsLocation("../../src/MyFile.cs(12,34)")]
+    public void Interceptor() { }
+}
+```
+
+The location specifier encoding is intended to resemble the way diagnostic locations are written out on the command line: `path(line, character)`.
+
+We reserve the ability to evolve the exact encoding of the location specifier in future versions of the language and compiler. For example, in order to introduce an encoding which denotes the location of call(s) based on criteria other than a simple line and column number. At the same time, we expect to maintain "back compatibility" with consuming previous "versions" of the location specifier encoding.
+
+This constructor will be introduced simultaneously with the following public API, which generators will consume:
+
+### Add public API for obtaining a location specifier for a call
+
+```
  namespace Microsoft.CodeAnalysis;
 
  public readonly struct SourceProductionContext
  {
      public void AddSource(string hintName, string source);
-+    public string GetFilePath(string hintName);
-+    public string GetInterceptsFilePath(SyntaxNode intercepted, string hintName);
++    public string GetInterceptsLocationSpecifier(InvocationExpressionSyntax intercepted, string interceptorHintName);
  }
 ```
 
-`GetFilePath()` will return the absolute file path which the generated file *would be written to* if `$(EmitCompilerGeneratedFiles)` is true in the project. Additionally, the syntax tree for the file added by a subsequent call to `AddSource` using the same `hintName` will have a `FilePath` which exactly matches the result of `GetFilePath()`.
+TODO: usage sample! Review RegexGenerator code to show where usage would be inserted.
+This is intended to streamline the communication which is occurring between the generator and compiler:
+1. Generator analyzes an interceptable call and decides it should insert an interceptor for it.
+2. Generator calls `GetInterceptsLocationSpecifier`, to effectively ask the compiler for a "handle" to the interceptable call.
+3. Generator inserts the location specifier into generated source text, and adds the generated source to the compilation using `AddSource`.
+4. Post-generators compilation sees the location specifier in the generated source and understands which call to associate the interceptor with.
 
-`GetInterceptsFilePath(intercepted, hintName)` will return a relative file path equivalent to the path returned by `GetFilePath(hintName)` relative to `intercepted.SyntaxTree.FilePath`. We think this API will be helpful for generator authors, in significant part, because no built-in API exists on netstandard2.0 to get a relative path.
+Benefits of the API:
+- No built-in API exists on netstandard2.0 to get a relative path.
 
-This solution will not work when the intercepted call and the interceptor method are in completely "disjunct" parts of the file system, for example, if one of the source files is included through a NuGet package which is outside the project folder, and the other is within the project folder. This limitation is similar in nature to what already exists for `#line` directives.
+- TODO: sample of why parameter of type InvocationExpressionSyntax is better/more usable.
+The above API shape is specific to `InvocationExpressionSyntax`. The reason for this is that we are trying to make correct usage easy. If we took a more general syntax type such as `ExpressionSyntax` or `SyntaxNode`, then correct usage would become more ambiguous. Which node is the generator supposed to pass in? Should it be the `NameSyntax` whose location is used to denote the location of the intercepted call? If so, what is the proper way to dig through an `InvocationExpressionSyntax` to obtain that name syntax? What is the failure mode supposed to be if the syntax node is of a kind which doesn't support interceptors?
+
+We expect that if support for intercepting more member kinds is permitted, then additional API for those member kinds should be introduced. The commitment we are making when we support intercepting a particular member kind is similar in significance to the commitment we make when introducing a public API. It doesn't serve generator authors to try and optimize for fewest number of public APIs in this case.
 
 ## Need for interceptor semantic info in IDE
 
@@ -150,3 +197,14 @@ For all the member kinds we want to support, we will need to decide how usages o
 For method invocations like `receiver.M(args)`, we use the location of the `M` token to intercept the call. Perhaps for property accesses like `receiver.P` we can use location of the `P` token. For constructors should use the location of the `new` token.
 
 For member usages such as user-defined implicit conversions which do not have any specific corresponding syntax, we expect that interception will never be possible.
+
+### Generic unification
+
+Currently interceptors have a limited support for generics which is outlined [here](https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md#arity). However, users have raised [concerns](https://github.com/dotnet/roslyn/pull/68218#discussion_r1220428975) about the inability to intercept methods where the original signature includes type parameters which are "captured" from a containing scope.
+
+```cs
+class C<T>
+{
+    public void Original(T t);
+}
+```
