@@ -35,6 +35,34 @@ The ability to implement interfaces is only useful when combined with the abilit
 
 To allow for interfaces to cover the full expressiveness of a `ref struct` and the lifetime issues they can present, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `struct` / `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that member must also be decorated with `[UnscopedRef]`. The attribute is ignored when a `class` implements the interface.
 
+```csharp
+interface I1
+{
+    [UnscopedRef]
+    ref int Prop { get; }
+}
+
+struct S1 : I1
+{
+    // Error: missing [UnscopedRef]
+    ref int Prop { get; }
+
+}
+
+struct S2 : I1
+{
+    // Okay
+    [UnscopedRef]
+    ref int Prop { get; }
+}
+
+class C1 : I1
+{
+    // Okay
+    ref int Prop { get; }
+}
+```
+
 This is necessary as it allows for interfaces that abstract over `struct` to have the same flexibility as using a `struct` directly. Consider the following example:
 
 ```csharp
