@@ -33,7 +33,41 @@ IDisposable d = f;
 
 The ability to implement interfaces is only useful when combined with the ability for `ref struct` to participate in generic arguments (as [laid out later][ref-struct-generics]).
 
-To allow for interfaces to cover the full expressiveness of a `ref struct`, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that `ref struct` member must also be decorated with `[UnscopedRef]`. The attribute is ignored when a `class` or non-ref `struct` implements the interface.
+To allow for interfaces to cover the full expressiveness of a `ref struct` and the lifetime issues they can present, the language will allow `[UnscopedRef]` to appear on interface methods and properties. When a `struct` / `ref struct` member implements an interface member with a `[UnscopedRef]` attribute, that member must also be decorated with `[UnscopedRef]`. The attribute is ignored when a `class` implements the interface.
+
+This is necessary as it allows for interfaces that abstract over `struct` to have the same flexibility as using a `struct` directly. Consider the following example:
+
+```csharp
+interface I1
+{
+    [UnscopedRef]
+    ref int P1 { get; }
+    ref int P2 { get; }
+}
+
+struct S1
+{
+    [UnscopedRef]
+    ref int P1 { get; }
+    ref int P2 { get; }
+}
+
+int M<T>(T t, S1 s)
+    where T : allows ref struct, I1
+{
+    // Error: may return ref to t
+    return t.P1;
+
+    // Error: may return ref to t
+    return s.P1;
+
+    // Okay
+    return t.P2;
+
+    // Okay
+    return s.p2;
+}
+```
 
 Default interface methods pose a problem for `ref struct` as there are no protections against the default implementation boxing the `this` member.
 
@@ -222,7 +256,7 @@ interface I1<T>
 }
 ```
 
-This interface would be eligable for auto-application of `allows ref struct`. If a developer comes around later though and adds a default interface method then suddenly it would not be and it would break any consumers that had already created invocations like `I1<Span<char>>`. This is a very subtle change that would be hard to track down.
+This interface would be eligible for auto-application of `allows ref struct`. If a developer comes around later though and adds a default interface method then suddenly it would not be and it would break any consumers that had already created invocations like `I1<Span<char>>`. This is a very subtle change that would be hard to track down.
 
 ### Binary breaking change
 
@@ -240,7 +274,9 @@ This feature requires several pieces of support from the runtime / libraries tea
 
 Most of this support is likely already in place. The general `ref struct` as generic parameter support is already implemented as described [here][byref-like-generics]. It's possible the DIM implementation already account for `ref struct`. But each of these items needs to be tracked down.
 
-## API versioning
+### API versioning
+
+#### allows ref struct anti-constraint
 
 The `allows ref struct` anti-constraint can be safely applied to a large number of generic definitions that do not have implementations. That means most delegates, interfaces and `abstract` methods can safely apply `allows ref struct` to their parameters. These are just API definitions without implementations and hence expanding the set of allowed types is only going to result in errors if they're used as type arguments where `ref struct` are not allowed.
 
@@ -250,11 +286,18 @@ At the same time though there are versioning considerations API authors should c
 
 - An `abstract` method which may later change to a `virtual` method
 - An `abstract` type which may later add implementations
-- An `interface` which may later add a default interface method
 
-In such cases an API author should be careful about adding `allows ref struct` unless they are certain the type / member evolution will not break `ref struct` rules.
+In such cases an API author should be careful about adding `allows ref struct` unless they are certain the type / member evolution will not using `T` in a way that breaks `ref struct` rules.
 
 Removing the `allows ref struct` anti-constraint is always a breaking change: source and binary.
+
+#### Default Interface Methods
+
+API authors need to be aware that adding DIMS will break `ref struct` implementors until they are recompiled. This is similar to [existing DIM behavior][dim-diamond] where by adding a DIM to an interface will break existing implementations until they are recompiled. That means API authors need to consider the likelihood of `ref struct` implementations when adding DIMs. 
+
+#### UnscopedRef
+
+Adding or removing `[UnscopedRef]` from `interface` members is a source breaking change (and potentially creating runtime issues). The attribute should be applied when defining an interface member and not added or removed later.
 
 ### Span&lt;Span&lt;T&gt;&gt;
 
@@ -295,3 +338,4 @@ Related Items:
 [ref-struct-ref-fields]: https://github.com/dotnet/csharplang/blob/main/proposals/expand-ref.md
 [ref-struct-generics]: #ref-struct-generic-parameters
 [byref-like-generics]: https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md
+[dim-diamond]: https://github.com/dotnet/csharplang/blob/main/meetings/2018/LDM-2018-10-17.md#diamond-inheritance
