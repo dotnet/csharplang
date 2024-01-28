@@ -48,3 +48,22 @@ For construction of a *collection expression*, ...
 > * If `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y`, then a *spread element inference* is made *from* `x` *to* `Tₑ` and a *spread element inference* is made *from* `y` *to* `Tₑ`.
 > * If `E` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Eₑ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Eₑ` *to* `Tₑ`.
 
+### Foreach
+
+A *collection expression* may be used as the collection in a `foreach` statement.
+
+If the `foreach` statement has an *explicitly typed iteration variable* of type `Tₑ`, the compiler verifies the following for each element `Eᵢ` and reports an error otherwise:
+* `Eᵢ` is an *expression element* and there is an implicit conversion from `Eᵢ` to `Tₑ`.
+* `Eᵢ` is a *spread element* `..s` and `s` is *spreadable* as values of type `Tₑ`.
+
+*The verification above is exactly the requirement for *conversions*. We should re-use the verification statement rather than restating here.*
+
+If the `foreach` statement has an *implicitly typed iteration variable*, the type of the *iteration variable* is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of the collection expression *elements*. If there is no best common type, an error is reported.
+
+*State the rules for *best common type* using the recursive iteration of elements and any nested collection expressions.*
+
+*The [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) is defined using *output type inference* from each expression. Do we need to update *output type inference* to infer from spread elements that contain nested collection expressions? Why didn't we need inference from spread elements previously without nested collection expressions?*
+
+For a collection expression used as the collection in a `foreach` statement, the compiler may use any conforming representation for the collection instance, including eliding the collection.
+
+*What are the order of operations? Particularly, what do we guarantee with respect to evaluating the loop body before evaluating subsequent elements?*
