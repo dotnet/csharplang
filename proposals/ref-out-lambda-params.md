@@ -25,55 +25,30 @@ TryParse<int> parse2 = (string text, out int result) => Int32.TryParse(text, out
 
 Parameter declarations in lambda expressions with parenthesized parameters now permit a single identifier after a modifier on the parameter. This does not apply to lambda expressions with a single parameter with omitted parentheses.
 
-For example,
+For example, these would not be legal:
 ```csharp
 SelfReturnerIn<string> fin = in x => x;
 SelfReturnerRef<string> fref = ref x => x;
 SelfReturnerOut<string> fout = out x => x;
-SelfReturnerRefReadonly<string> frr = ref readonly x => x;
-SelfReturnerScoped<string> fs = scoped x => x;
-SelfReturnerScopedRef<string> fsr = scoped ref x => x;
-SelfReturnerParams<string> fp = params x => x;
 
 delegate T SelfReturnerIn<T>(in T t);
 delegate T SelfReturnerRef<T>(ref T t);
 delegate T SelfReturnerOut<T>(out T t);
-delegate T SelfReturnerRefReadonly<T>(ref readonly T t);
-delegate T SelfReturnerScoped<T>(scoped T t);
-delegate T SelfReturnerScopedRef<T>(scoped ref T t);
-delegate T SelfReturnerParams<T>(params T[] t);
 ```
 
-are all illegal, due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, all other modifiers are also left unsupported and illegal.
+All the above examples are not legal due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, all other modifiers are also left unsupported and illegal.
 
-Using the `scoped` modifier alone is supported, since it was explicitly ruled out as a type name without the presence of `@` before the identifier in C# 11. This means that the following code will work:
+Using the `scoped` modifier alone is supported, since it was explicitly ruled out as a type name without the presence of `@` before the identifier in C# 11. This means that the following code will resolve `x` as an implicitly-typed lambda parameter with the `scoped` modifier:
 
 ```csharp
-SelfReturnerScoped<string> frr = (scoped x) => x;
+SelfReturnerScoped<string> fs = (scoped x) => x;
 
 delegate T SelfReturnerScoped<T>(scoped T t);
-```
-
-with `x` being resolved as an implicitly-typed lambda parameter with the `scoped` modifier.
-
-The change in the spec will require that [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) be adjusted as follows:
-
-```diff
-  implicit_anonymous_function_parameter_list
--     : implicit_anonymous_function_parameter
--       (',' implicit_anonymous_function_parameter)*
-+     : implicit_parenthesized_anonymous_function_parameter
-+       (',' implicit_parenthesized_anonymous_function_parameter)*
-      ;
-
-+ implicit_parenthesized_anonymous_function_parameter
-+     : anonymous_function_parameter_modifier? implicit_anonymous_function_parameter
-      ;
 ```
 
 The type of the parameters matches the type of the parameter in the target delegate type, including the modifiers.
 
-Attributes on the parameters will not be affected in any way.
+Implicitly-typed parameters with modifiers can be assigned attributes. Implicitly-typed parameters with modifiers will be eligible for being assigned a default value. Currently, only `scoped` ref-struct parameters can have default values.
 
 Discard identifiers will be supported, as long as the modifiers are properly and correctly provided for the respective parameters, matching the target delegate type. This means that a parameter simply declared as `_` will not match a parameter declared `ref int x`, since the discard parameter needs to be accompanied by the `ref` modifier to match.
 
@@ -108,6 +83,43 @@ var dd = (a, b) => Method2(a, b);
 int Method2(int a, int b) => a + b;
 ```
 
+### Grammar
+
+The change in the spec will require that [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) be adjusted as follows:
+
+```diff
+  implicit_anonymous_function_signature
+      : '(' implicit_anonymous_function_parameter_list? ')'
+      | implicit_anonymous_function_parameter
+      ;
+
+  implicit_anonymous_function_parameter_list
+-     : implicit_anonymous_function_parameter
+-       (',' implicit_anonymous_function_parameter)*
++     : implicit_parenthesized_anonymous_function_parameter
++       (',' implicit_parenthesized_anonymous_function_parameter)*
+      ;
+
++ implicit_parenthesized_anonymous_function_parameter
++     : attributes? anonymous_function_parameter_modifier* identifier default_argument?
+      ;
+```
+
+We take into account the fact that the `anonymous_function_parameter_modifier` rule is declared as follows:
+
+```antlr
+anonymous_function_parameter_modifier
+  : 'ref'
+  | 'out'
+  | 'in'
+  | 'scoped'
+  | 'readonly'
+  | 'params'
+  ;
+```
+
+Should the above production rule be updated to only reflect the valid combinations of modifiers, the `implicit_parenthesized_anonymous_function_parameter` rule is updated accordingly to reflect the applicable modifiers.
+
 # Open Questions
 
 - [x] Question: Do we consider making a breaking change supporting `scoped` as the parameter modifier in implicitly-typed parameters?
@@ -132,6 +144,6 @@ public ref struct @scoped { }
 ```
 `sc` in `mSc1` would now mean an implicitly-typed parameter with the `scoped` modifier, causing an error about not specifying its type explicitly, given the presence of `scsc` in that lambda. As of C# 11, `scoped` in this case refers to the type of the lambda parameter. The delegate and method declarations are unaffected from this behavior adjustment.
 
-Without this breaking change, we have to special-case implicitly-typed lambda parameters over explicitly-typed ones, and adjust the parsing behavior accordingly, which sounds like too much work for supporting a pathogenic case.
+Without this breaking change, we have to special-case implicitly-typed lambda parameters over explicitly-typed ones, and adjust the parsing behavior accordingly, which sounds like too much work for supporting a pathological case.
 
-An even further step is to introduce this breaking change in parameters in all signatures, methods, delegates and anonymous functions. However, other than consistency and alignment with the breaking changes around `scoped`, there is no real reason.
+An even further step is to introduce this breaking change in parameters in all signatures, methods, delegates and anonymous functions. However, there is no motivation other than consistency and alignment with the breaking changes around `scoped`.
