@@ -6,7 +6,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space.
-- Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey) 
+- Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
+- Review: Allow lambdas with parameter modifiers, but without parameter types: https://github.com/dotnet/csharplang/pull/7369 (Cyrus)
 
 ## Schedule when convenient
 
