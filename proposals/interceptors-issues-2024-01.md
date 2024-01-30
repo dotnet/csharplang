@@ -46,6 +46,8 @@ Generated files need to refer to user files using relative paths. The sample in 
 
 We propose changing this to define the `SyntaxTree.FilePath` for a generated file to be equivalent to the file path which the generated file *would be written to* if `$(EmitCompilerGeneratedFiles)` is true in the project. This will also have the effect of increasing the behavioral consistency of a project which is compiled with generators in-box, versus emitting the generated files, removing the generators, and recompiling.
 
+To support this, we will add a compiler flag `/outputgeneratedfiles`, which defaults to `true` on the command line. It instructs the compiler to write generated files to disk when `/generatedfilesout=...` is also provided. TODO: Our goal is to just get default behaviors consistent when using the msbuild task. e.g. generated code should not be written to disk, unless `$(EmitCompilerGeneratedFiles)` is true, and so on. It might make more sense to default the flag to false given this. The only concern would be breaking handwritten invocations of csc, but that might be fine. Then, if the flag is set to true but no `generatedfilesout` is given, a warning is reported.
+
 ### Add `[InterceptsLocation(string locationSpecifier)]`
 
 We propose adding the following well-known constructor:
@@ -75,27 +77,66 @@ This constructor will be introduced simultaneously with the following public API
 
 ### Add public API for obtaining a location specifier for a call
 
-```
+We propose adding a public API for obtaining a "location specifier", which is intended to be easily passed through as an attribute argument in generated code.
+
+```diff
  namespace Microsoft.CodeAnalysis;
 
  public readonly struct SourceProductionContext
  {
      public void AddSource(string hintName, string source);
-+    public string GetInterceptsLocationSpecifier(InvocationExpressionSyntax intercepted, string interceptorHintName);
++    public string GetInterceptsLocationSpecifier(InvocationExpressionSyntax intercepted, string interceptorFileHintName);
  }
 ```
 
-TODO: usage sample! Review RegexGenerator code to show where usage would be inserted.
+```cs
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
+[Generator(LanguageNames.CSharp)]
+public class MyGenerator : IIncrementalGenerator
+{
+    private void AddInterceptorMethod(SourceProductionContext context, StringBuilder builder, InvocationExpressionSyntax invocation, string hintName)
+    {
+        builder.Add($$"""
+            [InterceptsLocation({{context.GetInterceptsLocationSpecifier(invocation, hintName)}})]
+            public static void Interceptor(this ReceiverType receiver, ParamType param) { ... }
+            """);
+    }
+
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        var interceptableCalls = context.SyntaxProvider
+            .FindInterceptableCalls() // impl intentionally elided
+            .Collect();
+
+        context.RegisterSourceOutput(interceptableMethods, (context, interceptableCalls) => {
+            var hintName = "MyInterceptors.cs";
+            var builder = new StringBuilder();
+            // builder boilerplate..
+            foreach (var interceptableCall in interceptableCalls)
+            {
+                // interceptableCall is of some type declared by the generator
+                // which holds the call that the 
+                InvocationExpressionSyntax invocationSyntax = interceptableCall.InvocationSyntax;
+                AddInterceptorMethod(context, builder, invocationSyntax, hintName);
+            }
+            // builder boilerplate..
+
+            context.AddSource(builder.ToString(), hintName);
+        });
+    }
+}
+```
+
 This is intended to streamline the communication which is occurring between the generator and compiler:
 1. Generator analyzes an interceptable call and decides it should insert an interceptor for it.
 2. Generator calls `GetInterceptsLocationSpecifier`, to effectively ask the compiler for a "handle" to the interceptable call.
 3. Generator inserts the location specifier into generated source text, and adds the generated source to the compilation using `AddSource`.
 4. Post-generators compilation sees the location specifier in the generated source and understands which call to associate the interceptor with.
 
-Benefits of the API:
-- No built-in API exists on netstandard2.0 to get a relative path.
+Where parts (1), (2), and (3) are occurring in the above sample, and (4) occurs in the compiler and analyzers which are working with a "post-generators" compilation.
 
-- TODO: sample of why parameter of type InvocationExpressionSyntax is better/more usable.
 The above API shape is specific to `InvocationExpressionSyntax`. The reason for this is that we are trying to make correct usage easy. If we took a more general syntax type such as `ExpressionSyntax` or `SyntaxNode`, then correct usage would become more ambiguous. Which node is the generator supposed to pass in? Should it be the `NameSyntax` whose location is used to denote the location of the intercepted call? If so, what is the proper way to dig through an `InvocationExpressionSyntax` to obtain that name syntax? What is the failure mode supposed to be if the syntax node is of a kind which doesn't support interceptors?
 
 We expect that if support for intercepting more member kinds is permitted, then additional API for those member kinds should be introduced. The commitment we are making when we support intercepting a particular member kind is similar in significance to the commitment we make when introducing a public API. It doesn't serve generator authors to try and optimize for fewest number of public APIs in this case.
@@ -112,9 +153,11 @@ We ended up working around this in .NET 8 by having the interceptor author also 
 routes.MapGet("/products/", () => { ... }); // ASP.NET suppressor is suppressing warning: MapGet is not NativeAOT-compatible
 ```
 
-This is not ideal as it essentially requires interceptor authors to know the meaning of all diagnostics reported by analyzers whose results would be influenced by knowing the interceptor method in use at a call site. The interceptor authors must also know whether suppression is appropriate based on what the interceptor and the analyzer are each doing. For example, if the interceptor were inserting a method which *also* `[RequiresUnreferencedCode]`, it would be bad to suppress the ILLinker analyzer warning.
+This is not ideal, because it requires interceptor authors to know, when a particular diagnostic is reported on a call, that the diagnostic "wouldn't have been reported" if the interceptor method were being used instead.
 
-Ideally if an analyzer needs to know if an interceptor is being used, it could simply make a public API call to ask. This adds an extra decision that component authors need to make. For some use cases, such as rename-refactoring, it doesn't make sense to rename the interceptor method--instead the original method is what needs to be renamed. We think that in most cases, the original method is what should be analyzed, but it should still be noted as a pit that people may fall into.
+This is not scalable, and it is error prone. For example, if the interceptor were inserting a method which *also* `[RequiresUnreferencedCode]`, it would be bad to suppress the ILLinker analyzer warning.
+
+Ideally if an analyzer needs to know if an interceptor is being used, it could simply make a public API call to ask. This adds an extra decision that component authors need to make. For some use cases, such as rename-refactoring, it doesn't make sense to inspect the interceptor method--instead the original method is what needs to be renamed. We think that in most cases, the original method is what should be analyzed, but it should still be noted as a pit that people may fall into.
 
 That public API could look something like the following:
 
@@ -131,72 +174,26 @@ Note that if we do something like this, there will be a deep need to discover in
 
 ## Future (possibly post-C# 13)
 
-### Brittleness of line/column approaches
-
-While we want interceptor info to be readily available to components in the IDE, we also want the IDE to be able to provide the best possible function while not running source generators on every "keystroke plus delay". Even after our work on incremental source generators, they are still quite expensive to run, and we will need a strategy such as "regenerate on save" or "regenerate on build" in order to claw back IDE performance.
-
-The desire for less-frequent source generation is at odds with the desire for interceptor info in IDE components, as interceptors are currently designed.
-
-For example, we want the ILLinker analyzer's results to be as useful as possible, and ideally to not include *spurious transient warnings* while the user is making edits. For example, if a user inserts some white spaces in a method body which contains intercepted calls, we don't want the ILLinker analyzer to report that some non-intercepted call is using an unsupported method. But this requires source generators to run. This *strongly* pushes the ILLinker analyzer to run *only as frequently as interceptor source generators do*.
-
-This would be an undesirable degradation in the user experience. Instead of being able to give users confidence that their mistakes "Native AOT-wise" will be caught very quickly by the tooling and shown to them as they type, they instead are looking at longer delays, or even not being told something is wrong until they save or hit build.
-
-#### Opaque identifier and "syntax path" approach
-
-We could consider replacing the line/column approach of identifying a location in a source text, with one slightly more amenable to modification of the text: a "key path" of sorts which indicates the traversal to be made through the syntax tree to arrive at the desired location. e.g. for
-
-```cs
-class C
-{
-    void M0() { }
-
-    void M()
-    {
-        Call();
-    }
-}
-```
-
-e.g. in the above, we might identify the invocation `Call` by saying:
-- it's in the first member of the compilation unit (`class C`)
-- it's in the second member of `class C`
-- it's in the first statement of method `M()`
-- it's in the expression of expression statement `Call();`
-- it's in the receiver of invocation expression `Call()`.
-
-This sequence could be encoded somehow and stuffed into the attribute. This would make it so that edits in other method bodies etc. will not necessarily require regenerating the interceptor. However, it's not clear how source generators, or the generator driver, could make use of this information in order to reduce the frequency of rerunning generators. Also, public API would likely be needed for this in order for generators to create the expected InterceptsLocationAttribute argument.
-
-#### "Handle all"
-
-Some SGs might want to mitigate the need to rerun by simply "blanket handling" all calls to a certain set of methods in a certain context (e.g. an entire source file) at design time. Then during command line build we can actually generate granular calls.
-
-```cs
-public static void Usage()
-{
-    Original(42); // intercepted
-    Original(42, 43); // NOT intercepted, no diagnostic reported
-}
-
-public static void Original(int item) { }
-public static void Original(int item, int item2) { }
-
-[InterceptsLocation("path/to/file.cs", memberName: "Original")]
-public static void Interceptor(int item) { }
-```
-
-There is a risk with this approach that somehow a method would end up being intercepted with the "handle all" approach but not with the granular interceptors which are actually emitted.
-TODO: how to find misuse and help generator authors fix? maybe if *nothing* is intercepted by it?
-TODO: when we f12 on SG'd code, do we go to implementation code, even if SG is publishing "definition-only" versions of the sources?
-
-### Intercepting more member kinds
-
+### Intercepting properties
 Currently the interceptors feature only supports intercepting ordinary methods. Much like with partial methods and the upcoming partial properties, users want to be able to intercept usages of more kinds of members, such as properties and constructors.
+
+    - UnsafeAccessor does not support properties directly. Instead, a given usage of UnsafeAccessor decorates a method which calls through to a single property accessor.
+    - Consider: What happens when we want to intercept `obj.Prop += a`? We can't choose a single method to replace usage of `Prop`.
+    - Conclusion: We should probably favor intercepting a property with an extension property. We are likely blocked here until we ship extensions.
+
+### Intercepting constructors and other member kinds
 
 For all the member kinds we want to support, we will need to decide how usages of each member kind are denoted syntactically. Where possible, we should try to be consistent with [UnsafeAccessorAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.unsafeaccessorattribute?view=net-8.0), which also works by referencing members in attribute arguments.
 
 For method invocations like `receiver.M(args)`, we use the location of the `M` token to intercept the call. Perhaps for property accesses like `receiver.P` we can use location of the `P` token. For constructors should use the location of the `new` token.
 
 For member usages such as user-defined implicit conversions which do not have any specific corresponding syntax, we expect that interception will never be possible.
+
+### Interceptor signature variance
+    - https://github.com/dotnet/aspnetcore/issues/47338
+    - ASP.NET has indicated this can wait till later in cycle
+    - Argument type is `Func<TCaptured>`. Interceptee parameter is `System.Delegate`. Interceptor parameter wants to be `Func<T>` and to have call site pass the `TCaptured` as a type argument.
+
 
 ### Generic unification
 
