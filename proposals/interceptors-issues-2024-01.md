@@ -46,7 +46,7 @@ Generated files need to refer to user files using relative paths. The sample in 
 
 We propose changing this to define the `SyntaxTree.FilePath` for a generated file to be equivalent to the file path which the generated file *would be written to* if `$(EmitCompilerGeneratedFiles)` is true in the project. This will also have the effect of increasing the behavioral consistency of a project which is compiled with generators in-box, versus emitting the generated files, removing the generators, and recompiling.
 
-To support this, we will add a compiler flag `/outputgeneratedfiles`, which defaults to `true` on the command line. It instructs the compiler to write generated files to disk when `/generatedfilesout=...` is also provided. TODO: Our goal is to just get default behaviors consistent when using the msbuild task. e.g. generated code should not be written to disk, unless `$(EmitCompilerGeneratedFiles)` is true, and so on. It might make more sense to default the flag to false given this. The only concern would be breaking handwritten invocations of csc, but that might be fine. Then, if the flag is set to true but no `generatedfilesout` is given, a warning is reported.
+In the compiler, when no argument is specified for `/generatedfilesout`, the implementation will use the containing directory of the `/out` argument (i.e. for the resulting DLL), as the base path for `SyntaxTree.FilePath` of generated files, but we will not write the generated files to disk. In most normal project configurations, this path can be made relative to the source files.
 
 ### Add `[InterceptsLocation(string locationSpecifier)]`
 
@@ -64,14 +64,14 @@ Example usage:
 ```cs
 static file class Interceptors
 {
-    [InterceptsLocation("../../src/MyFile.cs(12,34)")]
+    [InterceptsLocation("v1:../../src/MyFile.cs(12,34)")]
     public void Interceptor() { }
 }
 ```
 
-The location specifier encoding is intended to resemble the way diagnostic locations are written out on the command line: `path(line, character)`.
+The location specifier encoding is intended to resemble the way diagnostic locations are written out on the command line: `v1:path(line, character)`.
 
-We reserve the ability to evolve the exact encoding of the location specifier in future versions of the language and compiler. For example, in order to introduce an encoding which denotes the location of call(s) based on criteria other than a simple line and column number. At the same time, we expect to maintain "back compatibility" with consuming previous "versions" of the location specifier encoding.
+We reserve the ability to evolve the exact encoding of the location specifier in future versions of the language and compiler. For example, in order to introduce an encoding which denotes the location of call(s) based on criteria other than a simple line and column number. At the same time, we expect to maintain "back compatibility" with consuming previous "versions" of the location specifier encoding. We expect to be able to indicate future versions of the location format by prefixing with `v2:`, `v3:`, and so on.
 
 This constructor will be introduced simultaneously with the following public API, which generators will consume:
 
