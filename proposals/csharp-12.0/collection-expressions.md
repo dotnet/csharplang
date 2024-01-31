@@ -176,7 +176,7 @@ For the *create method*:
 Determination of the *element type*:
 
 * If the collection type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) (with above restriction) then the *element type* is the *iteration type*.
-* Otherwise, if there is a single *create method* then the *element type* is `E` given by the method's only parameter (of type `System.ReadOnlySpan<E>`).
+* Otherwise, if there is a single non-generic *create method* then the *element type* is `E` given by the method's only parameter (of type `System.ReadOnlySpan<E>`).
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invocable method with the expected signature.
 
