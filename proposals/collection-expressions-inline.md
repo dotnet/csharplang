@@ -1,16 +1,25 @@
-# Collection expressions: spread inline collections
+# Collection expressions: inline collections
 
 ## Summary
 
-Support collection expressions *inline* within spread elements.
+Support collection expressions *inline* in expression contexts where the collection type is not important or not observable.
 
 ## Motivation
 
-Allow collection expressions to contain conditional elements by using spreads of *conditional expressions with nested collection expressions*.
+Collection expressions could be used with spreads to allow adding elements *conditionally* to the containing collection:
+```csharp
+int[] array = [x, y, .. b ? [z] : []];
+```
 
-## Detailed design
+Collection expressions could be used directly in `foreach`:
+```csharp
+foreach (bool value in [false, true]) { }
+```
+In these cases, the *collection type* of the inline collection expression is unspecified and the choice of how or whether to instantiate the collection is left to the compiler.
 
-To support spreads of conditional expressions with nested collection expressions, the following changes are made to the [*collection expressions specification*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md).
+## Spreads with collection expressions
+
+To support spreads of conditional expressions with nested collection expressions, the following changes are made to the [*spec*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md).
 
 ### Conversions
 
@@ -64,15 +73,15 @@ The [*type inference*](https://github.com/dotnet/csharplang/blob/main/proposals/
 > * **If `E` is a [*conditional expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1115-conditional-operator) `b ? x : y`, then a *spread element inference* is made *from* `x` *to* `Tₑ` and a *spread element inference* is made *from* `y` *to* `Tₑ`.**
 > * If `E` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Eₑ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Eₑ` *to* `Tₑ`.
 
-### Foreach
+*The type of the nested collection expression in a conditional expression may be distinct depending on whether the conditional expression is in a spread element or outside a collection expression.*
 
-A *collection expression* may be used as the collection in a `foreach` statement.
+## Foreach
 
-If the `foreach` statement has an *explicitly typed iteration variable* of type `Tₑ`, the compiler verifies the following for each element `Eᵢ` and reports an error otherwise:
+The collection in a `foreach` statement may be a *collection expression*.
+
+If the `foreach` statement has an *explicitly typed iteration variable* of type `Tₑ`, the compiler verifies the following for each element `Eᵢ` in the collection expression and reports an error otherwise:
 * `Eᵢ` is an *expression element* and there is an implicit conversion from `Eᵢ` to `Tₑ`.
 * `Eᵢ` is a *spread element* `..s` and `s` is *spreadable* as values of type `Tₑ`.
-
-*The verification above is exactly the requirement for *conversions*. We should re-use the verification statement rather than restating here.*
 
 If the `foreach` statement has an *implicitly typed iteration variable*, the type of the *iteration variable* is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of the collection expression *elements*. If there is no best common type, an error is reported.
 
