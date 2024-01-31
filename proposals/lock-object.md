@@ -1,4 +1,4 @@
-# Native lock
+# `Lock` object
 
 ## Summary
 [summary]: #summary
