@@ -161,6 +161,8 @@ namespace System.Runtime.CompilerServices
 The attribute can be applied to a `class`, `struct`, `ref struct`, or `interface`.
 The attribute is not inherited although the attribute can be applied to a base `class` or an `abstract class`.
 
+The determination of an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) must be from a `GetEnumerator` instance method or enumerable interface (not from an extension method).
+
 For the *create method*:
 
 * The *builder type* must be a non-generic `class` or `struct`.
@@ -168,12 +170,12 @@ For the *create method*:
 * The method must be `static`.
 * The method must be accessible where the collection expression is used.
 * The *arity* of the method must match the *arity* of the collection type.
-* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and if the collection type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement), there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *iteration type*.
+* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and if the collection type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) (with above restriction), there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *iteration type*.
 * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
 
 Determination of the *element type*:
 
-* If the collection type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface (not from an extension method) then the *element type* is the *iteration type*.
+* If the collection type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) (with above restriction) then the *element type* is the *iteration type*.
 * Otherwise, if there is a single *create method* then the *element type* is `E` given by the method's only parameter (of type `System.ReadOnlySpan<E>`).
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invocable method with the expected signature.
