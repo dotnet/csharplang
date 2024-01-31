@@ -47,10 +47,10 @@ A *parameter_collection* consists of an optional set of *attributes*, a `params`
 a *type*, and an *identifier*. A parameter collection declares a single parameter of the given type with the given name.
 The *type* of a parameter collection shall be one of the following valid target types for a collection expression
 (see https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions):
-- A single dimensional *array type* `T[]` in which case the *element type* is `T`
+- A single dimensional *array type* `T[]`, in which case the *element type* is `T`
 - A *span type*
   - `System.Span<T>`
-  - `System.ReadOnlySpan<T>`
+  - `System.ReadOnlySpan<T>`  
   in which cases the *element type* is `T`
 - A *type* with an appropriate *[create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)*,
   which is at least as accessible as the declaring member and a corresponding *element type* resulting from that determination
@@ -58,14 +58,14 @@ The *type* of a parameter collection shall be one of the following valid target 
   - The *type* has a constructor that can be invoked with no arguments, and the constructor is at least as accessible as the declaring member.
   - The *type* has an instance (not an extension) method `Add` that can be invoked with a single argument of
     the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement),
-    and the method is at least as accessible as the declaring member.
+    and the method is at least as accessible as the declaring member.  
   in which case the *element type* is the *iteration type*
 - An *interface type*
   - `System.Collections.Generic.IEnumerable<T>`,
   - `System.Collections.Generic.IReadOnlyCollection<T>`,
   - `System.Collections.Generic.IReadOnlyList<T>`,
   - `System.Collections.Generic.ICollection<T>`,
-  - `System.Collections.Generic.IList<T>`
+  - `System.Collections.Generic.IList<T>`  
   in which cases the *element type* is `T`
 
 In a method invocation, a parameter collection permits either a single argument of the given parameter type to be specified, or
