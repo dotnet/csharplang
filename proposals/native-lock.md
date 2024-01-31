@@ -114,6 +114,10 @@ To escape out of the warning and force use of monitor-based locking, one can use
   Although there might need to be an opt-out mechanism as some lock types might be allowed to be used with `await`.)
   Alternatively, this could be implemented as an analyzer shipped as part of the runtime.
 
+- We could relax the restriction that value types cannot be `lock`ed
+  - for the new `Lock` type (only needed if the API proposal changed it from `class` to `struct`),
+  - for the general pattern where any type can participate when implemented in the future.
+
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
