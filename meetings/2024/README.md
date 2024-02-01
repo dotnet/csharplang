@@ -35,6 +35,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jan 31, 2024
 
 - Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
+- Confirm order of evaluation with non-array params collections in non-trivial scenarios (Aleksey)
 
 ### Mon Jan 29, 2024
 
