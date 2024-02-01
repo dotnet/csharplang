@@ -4,10 +4,10 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space.
 - Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
 - Review: Allow lambdas with parameter modifiers, but without parameter types: https://github.com/dotnet/csharplang/pull/7369 (Cyrus)
-- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
 
 ## Schedule when convenient
 
