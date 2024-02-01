@@ -15,6 +15,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Partial type inference](https://github.com/dotnet/csharplang/pull/7582) (Rikki / [Tomas](https://github.com/TomatorCZ))
 - Discriminated Union WG (Matt)
 - Extensions (Julien and Mads (after Feb 5))
+- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill)
 
 ## Recurring topics
 
