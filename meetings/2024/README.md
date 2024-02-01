@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space.
 - Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
 - Review: Allow lambdas with parameter modifiers, but without parameter types: https://github.com/dotnet/csharplang/pull/7369 (Cyrus)
@@ -35,7 +34,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jan 31, 2024
 
 - Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
-- Confirm order of evaluation with non-array params collections in non-trivial scenarios (Aleksey)
+- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 
 ### Mon Jan 29, 2024
 
