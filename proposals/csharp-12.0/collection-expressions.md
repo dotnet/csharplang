@@ -161,26 +161,34 @@ namespace System.Runtime.CompilerServices
 The attribute can be applied to a `class`, `struct`, `ref struct`, or `interface`.
 The attribute is not inherited although the attribute can be applied to a base `class` or an `abstract class`.
 
-The determination of an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) must be from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
+The *builder type* must be a non-generic `class` or `struct`.
 
-For the *create method*:
+First, the set of applicable *create method*s `CM` is determined.  
+It consists of methods that meet the following requirements:
 
-* The *builder type* must be a non-generic `class` or `struct`.
+* The method must have name specified in the `[CollectionBuilder(...)]` attribute. 
 * The method must be defined on the *builder type* directly.
 * The method must be `static`.
 * The method must be accessible where the collection expression is used.
 * The *arity* of the method must match the *arity* of the collection type.
-* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and if the collection type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) (with above restriction), there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *iteration type*.
+* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value.
 * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
 
-Determination of the *element type*:
+Methods declared on base types or interfaces are ignored and not part of the `CM` set.
 
-* If the collection type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) (with above restriction) then the *element type* is the *iteration type*.
-* Otherwise, if there is a single non-generic *create method* then the *element type* is `E` given by the method's only parameter (of type `System.ReadOnlySpan<E>`).
+If the `CM` set is empty, then the *collection type* doesn't have *element type* and doesn't have *create method*. None of the following steps apply.
 
-An error is reported if the `[CollectionBuilder]` attribute does not refer to an invocable method with the expected signature.
+Second, an attempt is made to determine [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type* from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
 
-Method overloads on the *builder type* with distinct signatures are ignored. Methods declared on base types or interfaces are ignored.
+- If an *iteration type* can be determined, then the *element type* of the *collection type* is the *iteration type*. If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have *create method*. None of the following steps apply.  
+- Otherwise, then the *collection type* doesn't have *element type* and doesn't have *create method*. None of the following steps apply. 
+
+Third, an attempt is made to infer the *element type*.
+If the `CM` set contains more than one method, the inference fails and the *collection type* doesn't have an *element type* and doesn't have a *create method*.
+
+Otherwise, type `E1` is determined by substituting type parameters of the only method from the `CM` set (`M`) with corresponding *collection type* type parameters in its `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have *element type* and doesn't have *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
+
+An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
 
 For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
 
@@ -837,6 +845,28 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
+
+* Should we allow inferring the *element type* when the *iteration type* is "ambiguous" (by some definition)?
+For example:
+```csharp
+Collection x = [1L, 2L];
+
+// error CS1640: foreach statement cannot operate on variables of type 'Collection' because it implements multiple instantiations of 'IEnumerable<T>'; try casting to a specific interface instantiation
+foreach (var x in new Collection) { }
+
+static class Builder
+{
+    public Collection Create(ReadOnlySpan<long> items) => throw null;
+}
+
+[CollectionBuilder(...)]
+class Collection : IEnumerable<int>, IEnumerable<string>
+{
+    IEnumerator<int> IEnumerable<int>.GetEnumerator() => throw null;
+    IEnumerator<string> IEnumerable<string>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+}
+```
 
 * Should it be legal to create and immediately index into a collection literal?  Note: this requires an answer to the unresolved question below of whether collection literals have a *natural type*.
 * Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757).
