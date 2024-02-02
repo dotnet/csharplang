@@ -10,8 +10,8 @@ Collection expressions introduce a new terse syntax, `[e1, e2, e3, etc]`, to cre
 Several collection-like types can be created without requiring external BCL support.  These types are:
 
 * [Array types](https://github.com/dotnet/csharplang/blob/main/spec/types.md#array-types), such as `int[]`.
-* [`Span<T>`](https://learn.microsoft.com/dotnet/api/system.span-1) and [`ReadOnlySpan<T>`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1).
-* Types that support [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), such as [`List<T>`](https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1).
+* [`Span<T>`](/dotnet/api/system.span-1) and [`ReadOnlySpan<T>`](/dotnet/api/system.readonlyspan-1).
+* Types that support [collection initializers](https://github.com/dotnet/csharplang/blob/main/spec/expressions.md#collection-initializers), such as [`List<T>`](/dotnet/api/system.collections.generic.list-1).
 
 Further support is present for collection-like types not covered under the above through a new attribute and API pattern that can be adopted directly on the type itself.
 
@@ -585,7 +585,7 @@ Not having a *known length* does not prevent any result from being created. Howe
 
     The translation may use `stackalloc T1[]` or an [*inline array*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) rather than `new T1[]` if [*span-safety*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) is maintained.
 
-  * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](https://learn.microsoft.com/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
+  * If `T` is some `ReadOnlySpan<T1>`, then the literal is translated the same as for the `Span<T1>` case except that the final result will be that `Span<T1>` [implicitly converted](/dotnet/api/system.span-1.op_implicit#system-span-1-op-implicit(system-span((-0)))-system-readonlyspan((-0))) to a `ReadOnlySpan<T1>`.
 
     A `ReadOnlySpan<T1>` where `T1` is some primitive type, and all collection elements are constant does not need its data to be on the heap, or on the stack.  For example, an implementation could construct this span directly as a reference to portion of the data segment of the program.
 
