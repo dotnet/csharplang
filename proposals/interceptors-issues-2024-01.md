@@ -151,6 +151,17 @@ We ended up working around this in .NET 8 by having the interceptor author also 
 
 ```cs
 routes.MapGet("/products/", () => { ... }); // ASP.NET suppressor is suppressing warning: MapGet is not NativeAOT-compatible
+
+static class Extensions
+{
+    // Original method signature looks like:
+    [RequiresUnreferencedCode]
+    public static IRouteEndpointBuilder MapGet(this IRouteEndpointBuilder builder, string route, Delegate handler) => ...;
+
+    // Interceptor signature looks like (i.e. lacks '[RequiresUnreferencedCode]'):
+    [InterceptsLocation(...)]
+    public static IRouteEndpointBuilder Interceptor(this IRouteEndpointBuilder builder, string route, Delegate handler) => ...;
+}
 ```
 
 This is not ideal, because it requires interceptor authors to know, when a particular diagnostic is reported on a call, that the diagnostic "wouldn't have been reported" if the interceptor method were being used instead.
