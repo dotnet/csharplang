@@ -180,10 +180,9 @@ If the `CM` set is empty, then the *collection type* doesn't have *element type*
 
 Second, an attempt is made to determine the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type* from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
 
-- If an *iteration type* can be determined, then the *element type* of the *collection type* is the *iteration type*. If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have *create method*. None of the following steps apply.  
-- Otherwise, then the *collection type* doesn't have *element type* and doesn't have *create method*. None of the following steps apply. 
+If an *iteration type* can be determined, then the *element type* of the *collection type* is the *iteration type*. If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have *create method*. None of the following steps apply.  
 
-Third, an attempt is made to infer the *element type*.
+Third (ie. if an *iteration type* cannot be determined), an attempt is made to infer the *element type*.
 If the `CM` set contains more than one method, the inference fails and the *collection type* doesn't have an *element type* and doesn't have a *create method*.
 
 Otherwise, type `E1` is determined from the only method `M` in the `CM` set by substituting the type parameters of the *collection type* for the type parameters of `M` in `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have *element type* and doesn't have *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
