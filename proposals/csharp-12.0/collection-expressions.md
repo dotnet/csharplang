@@ -110,8 +110,8 @@ An implicit *collection expression conversion* exists from a collection expressi
   in which cases the *element type* is `T`
 * A *type* with an appropriate *[create method](#create-methods)* and a corresponding *element type* resulting from that determination
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
-  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
-  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* instance or extension method `Add` that can be invoked with a single argument of the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement), and the method is accessible at the location of the collection expression.  
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression, and
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* instance or extension method `Add` that can be invoked with a single argument of the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement), and the method is accessible at the location of the collection expression,
   in which case the *element type* is the *iteration type* of the *type*.
 * An *interface type*:
   * `System.Collections.Generic.IEnumerable<T>`
@@ -121,7 +121,7 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Collections.Generic.IList<T>`  
   in which cases the *element type* is `T`
 
-The implicit conversion exists if the type has an [*element type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` where for each *element* `Eᵢ` in the collection expression:
+The implicit conversion exists if the type has an *element type* `U` where for each *element* `Eᵢ` in the collection expression:
 * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
 * If `Eᵢ` is an *spread element* `Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
 
@@ -163,7 +163,7 @@ The attribute is not inherited although the attribute can be applied to a base `
 
 The *builder type* must be a non-generic `class` or `struct`.
 
-First, the set of applicable *create method*s `CM` is determined.  
+First, the set of applicable *create methods* `CM` is determined.  
 It consists of methods that meet the following requirements:
 
 * The method must have name specified in the `[CollectionBuilder(...)]` attribute. 
@@ -178,7 +178,7 @@ Methods declared on base types or interfaces are ignored and not part of the `CM
 
 If the `CM` set is empty, then the *collection type* doesn't have *element type* and doesn't have *create method*. None of the following steps apply.
 
-Second, an attempt is made to determine [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type* from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
+Second, an attempt is made to determine the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type* from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
 
 - If an *iteration type* can be determined, then the *element type* of the *collection type* is the *iteration type*. If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have *create method*. None of the following steps apply.  
 - Otherwise, then the *collection type* doesn't have *element type* and doesn't have *create method*. None of the following steps apply. 
@@ -186,7 +186,7 @@ Second, an attempt is made to determine [*iteration type*](https://github.com/do
 Third, an attempt is made to infer the *element type*.
 If the `CM` set contains more than one method, the inference fails and the *collection type* doesn't have an *element type* and doesn't have a *create method*.
 
-Otherwise, type `E1` is determined by substituting type parameters of the only method from the `CM` set (`M`) with corresponding *collection type* type parameters in its `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have *element type* and doesn't have *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
+Otherwise, type `E1` is determined from the only method `M` in the `CM` set by substituting the type parameters of the *collection type* for the type parameters of `M` in `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have *element type* and doesn't have *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
 
