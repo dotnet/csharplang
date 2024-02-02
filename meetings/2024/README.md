@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space.
 - Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
 - Review: Allow lambdas with parameter modifiers, but without parameter types: https://github.com/dotnet/csharplang/pull/7369 (Cyrus)
+- First class span types (Fred)
 
 ## Schedule when convenient
 
