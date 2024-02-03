@@ -333,7 +333,7 @@ We change the [type inference](https://github.com/dotnet/csharpstandard/blob/dra
       *  We perform *lower-bound* inference from all lower-bounds of `V` to `U` if `U` contains an unfixed type variable.
       *  We perform *exact* inference from all exact-bounds of `V` to `U` if `U` contains unfixed type variable.
       *  We perform *upper-type* inference from all upper-bounds of `V` to `U` if `U` contains an unfixed type variable.
-    * Otherwise, on inferences are made
+    * Otherwise, no inferences are made
 
 * Lower-bound inference
   * When a new bound `U` is added to the set of lower-bounds of `V`:
