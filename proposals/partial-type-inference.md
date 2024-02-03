@@ -355,7 +355,7 @@ We change the [type inference](https://github.com/dotnet/csharpstandard/blob/dra
 
 * Exact inference
   * When new bound `U` is added to the set of lower-bounds of `V`:
-    *  We perform *exact-bound* inference from `U` to the shape of `V` , if has any and the shape contains an unfixed type variable.
+    * We perform *exact-bound* inference from `U` to the shape of `V`, if has any and the shape contains an unfixed type variable.
     * We perform *exact* inference from the shape of `V` to `U`, if `V` has a shape and `U` contains an unfixed type variable.
     * We perform *exact* inference from `U` to all exact-bounds of `V`, which contains an unfixed type variable.
     * We perform *lower-bound* inference from `U` to all lower-bounds of `V`, which contains an unfixed type variable.
