@@ -1,6 +1,6 @@
 # Partial type inference
 
-> Note: This proposal was created because of championed [Partial type inference](https://github.com/dotnet/csharplang/issues/1349). It is a continuation of the proposed second version published in [csharplang/discussions/7467](https://github.com/dotnet/csharplang/discussions/7467) and the first version published in [csharplang/discussions/7286](https://github.com/dotnet/csharplang/discussions/7286)
+Note: This proposal was created because of championed [Partial type inference](https://github.com/dotnet/csharplang/issues/1349). It is a continuation of the proposed second version published in [csharplang/discussions/7467](https://github.com/dotnet/csharplang/discussions/7467) and the first version published in [csharplang/discussions/7286](https://github.com/dotnet/csharplang/discussions/7286)
 
 ## Summary
 [summary]: #summary
@@ -12,21 +12,17 @@ Partial type inference introduces a syntax skipping inferrable type arguments in
 
 and allowing to specify just ambiguous ones.
 
-> Example of skipping inferrable type arguments
->
-> ```csharp
-> M<_, object>(42, null); 
-> void M<T1, T2>(T1 t1, T2 t2) { ... }
-> ```
+```csharp
+M<_, object>(42, null); 
+void M<T1, T2>(T1 t1, T2 t2) { ... }
+```
 
 It also improves the type inference in the case of *object_creation_expression* by leveraging type bounds obtained from the target and *type_parameter_constraints_clauses*. 
 
-> Example of inferring type arguments of type from the initializer list
-> 
-> ```csharp
-> using System.Collections.Generic;
-> IList<int> temp = new List<_>();
-> ```
+```csharp
+using System.Collections.Generic;
+IList<int> temp = new List<_>();
+```
 
 Besides the changes described above, the proposal mentions further interactions and possibilities to extend the partial type inference.
 
@@ -37,54 +33,49 @@ Besides the changes described above, the proposal mentions further interactions 
   The first improvement regards the strength of the method type inference, which uses only arguments' types to deduce the method's type arguments.
   Concretely, we can see the weakness in cases where type arguments only depend on target type or type parameter restrictions.
 
-  > Example
-  >
-  > ```csharp
-  > object data = database.fetch();
-  > // Error below, method type inference can't infer the return type. We have to specify the type argument.
-  > int count = data.Field("count"); 
-  > 
-  > public static class Extensions
-  > {
-  >     public static TReturn Field<TReturn>(this object inst, string fieldName) { ... }
-  > }
-  > ```
-  >
-  > ```csharp
-  > // Error below, method type inference can't infer T. We have to specify all type arguments.
-  > test(new MyData()); 
-  >
-  > public void test<T, U>(U data) where T : TestCaseDefault<U> { ... }
-  > ```
+  ```csharp
+  object data = database.fetch();
+  // Error below, method type inference can't infer the return type. We have to specify the type argument.
+  int count = data.Field("count"); 
+   
+  public static class Extensions
+  {
+    public static TReturn Field<TReturn>(this object inst, string fieldName) { ... }
+  }
+  ```
+
+  ```csharp
+  // Error below, method type inference can't infer T. We have to specify all type arguments.
+  test(new MyData()); 
+  
+  public void test<T, U>(U data) where T : TestCaseDefault<U> { ... }
+  ```
 
   The second improvement regards the "all or nothing" principle, where the method type inference infers either all of the type arguments or nothing.
 
-  > Example
-  > ```csharp
-  > // Error below, impossible to specify just one type argument. We have to specify all of them. 
-  > log<, object>(new Message( ... ), null); 
-  >
-  > public void log<T, U>(T message, U appendix) { ... }
-  > ```
+  ```csharp
+  // Error below, impossible to specify just one type argument. We have to specify all of them. 
+  log<, object>(new Message( ... ), null); 
+  
+  public void log<T, U>(T message, U appendix) { ... }
+  ```
 
   The first improvement, which would improve the method type inference algorithm, has a significant disadvantage of introducing a breaking change.
   On the other hand, the second improvement, which would enable specifying some of the method's type arguments, does not influence old code, solves problems regarding the "all or nothing" principle, and reduces the first weakness.
   
-  > Example
-  > 
-  > ```csharp
-  > // We can use _ to mark type arguments which should be inferred by the compiler.
-  > test<TestCaseDefault<MyData>, _>(new MyData());
-  >
-  > public void test<T, U>(U data) where T : TestCaseDefault<U> { ... }
-  > ```
-  >
-  > ```csharp
-  > // We can use _ to mark type arguments which should be inferred by the compiler.
-  > log<_, object>(new Message( ... ), null); 
-  >
-  > public void log<T, U>(T message, U appendix) { ... }
-  > ```
+  ```csharp
+  // We can use _ to mark type arguments which should be inferred by the compiler.
+  test<TestCaseDefault<MyData>, _>(new MyData());
+  
+  public void test<T, U>(U data) where T : TestCaseDefault<U> { ... }
+  ```
+  
+  ```csharp
+  // We can use _ to mark type arguments which should be inferred by the compiler.
+  log<_, object>(new Message( ... ), null); 
+  
+  public void log<T, U>(T message, U appendix) { ... }
+  ```
 
 * The next motivation is constructor type inference. 
   Method type inference is not defined on *object_creation_expression*, prohibiting taking advantage of type inference.
@@ -92,51 +83,46 @@ Besides the changes described above, the proposal mentions further interactions 
 
   1. Cases where the method type inference would succeed.
    
-  > Example
-  > 
-  > ```csharp
-  > public static Wrapper<T> Create<T>(T item) { return new Wrapper<T>(item); }
-  > 
-  > class Wrapper<T> { public Wrapper(T item) { ... } }
-  > ```
+  
+  ```csharp
+  public static Wrapper<T> Create<T>(T item) { return new Wrapper<T>(item); }
+  
+  class Wrapper<T> { public Wrapper(T item) { ... } }
+  ```
   
   2. Cases where the method type inference would be weak. (Using type info from target type, or type arguments' constraints)
   
-  > Example
-  >
-  > ```csharp
-  > // Method type inference can't infer TLogger because it doesn't use type constraints specified by `where` clauses
-  > var alg = Create(new MyData()); 
-  > 
-  > public static Algorithm<TData, TLogger> Create<TData, TLogger>(TData data) where TLogger : Logger<TData> 
-  > { 
-  >   return new Algorithm<TData, TLogger>(data); 
-  > } 
-  >
-  > class Algorithm<TData, TLogger> where TLogger : Logger<TData> 
-  > { 
-  >   public Algorithm(TData data) { ... }
-  > }
-  > ```
+  ```csharp
+  // Method type inference can't infer TLogger because it doesn't use type constraints specified by `where` clauses
+  var alg = Create(new MyData()); 
+   
+  public static Algorithm<TData, TLogger> Create<TData, TLogger>(TData data) where TLogger : Logger<TData> 
+  { 
+    return new Algorithm<TData, TLogger>(data); 
+  } 
+  
+  class Algorithm<TData, TLogger> where TLogger : Logger<TData> 
+  { 
+    public Algorithm(TData data) { ... }
+  }
+  ```
 
   An existing solution can be seen in `Create()` method wrappers of constructors enabling a type inference through method type inference as you can see in the examples above.
   However, we can't use it with *object_or_collection_initializer*; we are limited by method type inference strength, and it adds unnecessary boiler code.
 
   Adding constructor type inference as we will describe in the following section would solve above mentioned examples.
-
-  > Example
-  >
-  > ```csharp
-  > var wrappedData = new Wrapper<_>(new MyData());
-  > class Wrapper<T> { public Wrapper(T item) { ... } }
-  > ```
-  > 
-  > ```csharp
-  > var alg = new Algorithm<_, _>(new MyData());
-  > var algWithSpecialLogger = new Algorithm<_ , SpecialLogger<_>>(new MyData());
-  > 
-  > class Algorithm<TData, TLogger> where TLogger : Logger<TData> { public Algorithm(TData data) { ... }}
-  > ```
+  
+  ```csharp
+  var wrappedData = new Wrapper<_>(new MyData());
+  class Wrapper<T> { public Wrapper(T item) { ... } }
+  ```
+   
+  ```csharp
+  var alg = new Algorithm<_, _>(new MyData());
+  var algWithSpecialLogger = new Algorithm<_ , SpecialLogger<_>>(new MyData());
+   
+  class Algorithm<TData, TLogger> where TLogger : Logger<TData> { public Algorithm(TData data) { ... }}
+  ```
 
 No matter how the partial type inference would work, we should be careful about the following things.
 
@@ -154,16 +140,14 @@ So we will want to look ahead to other potential directions, which can be done a
 
 ### Grammar
 
-> Specification: Original section changed in the following way
-
-> We modify [Identifiers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#643-identifiers) as follows:
+We modify [Identifiers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#643-identifiers) as follows:
 
 - The semantics of an identifier named `_` depends on the context in which it appears:
   - It can denote a named program element, such as a variable, class, or method, or
   - It can denote a discard (§9.2.9.1).
   - **It will denote a type argument to be inferred.**
 
-> We modify [Keywords](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#644-keywords) as follows:
+We modify [Keywords](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/lexical-structure.md#644-keywords) as follows:
 
 * A ***contextual keyword*** is an identifier-like sequence of characters that has special meaning in certain contexts, but is not reserved, and can be used as an identifier outside of those contexts as well as when prefaced by the `@` character.
 
@@ -181,9 +165,7 @@ So we will want to look ahead to other potential directions, which can be done a
 
 ### Type arguments
 
-> Specification: Original section changed in the following way
-
-> We change [type arguments](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/types.md#842-type-arguments) section as follows:
+We change [type arguments](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/types.md#842-type-arguments) section as follows:
 
 * ***inferred_type_argument*** represents an unknown type, which will be resolved during type inference. 
 
@@ -221,26 +203,23 @@ type_argument
   * It occurs in *type_argument_list* of a method group during method invocation.
   * It occurs in *type_argument_list* of a type in *object_creation_expression*.
   * It occurs as an arbitrary nested identifier in the expressions mentioned above.
-  > Example
-  >
-  > ```csharp
-  > F<_, int>( ... ); // _ represents an inferred type argument.
-  > new C<_, int>( ... ); // _ represents an inferred type argument.
-  > F<C<_>, int>( ... ); // _ represents an inferred type argument.
-  > new C<C<_>, int>( ... ); // _ represents an inferred type argument.
-  > C<_> temp = ...; // _ doesn't represent an inferred type argument.
-  > new _( ... ) // _ doesn't represent an inferred type argument.
-  >
-  > // _ of Container<_> doesn't represent an inferred type argument. 
-  > // (Containing type's type argument won't be inferred)
-  > Container<_>.Method<_>(arg); 
-  > ```   
+  
+  ```csharp
+  F<_, int>( ... ); // _ represents an inferred type argument.
+  new C<_, int>( ... ); // _ represents an inferred type argument.
+  F<C<_>, int>( ... ); // _ represents an inferred type argument.
+  new C<C<_>, int>( ... ); // _ represents an inferred type argument.
+  C<_> temp = ...; // _ doesn't represent an inferred type argument.
+  new _( ... ) // _ doesn't represent an inferred type argument.
+  
+  // _ of Container<_> doesn't represent an inferred type argument. 
+  // (Containing type's type argument won't be inferred)
+  Container<_>.Method<_>(arg); 
+  ```   
 
 * A method group and type are said to be *partial_inferred* if it contains at least one *inferred_type_argument*. 
 
 ### Method invocations
-
-> Specification: Original section changed in the following way
 
 The binding-time processing of a [method invocation](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations) of the form `M(A)`, where `M` is a method group (possibly including a *type_argument_list*), and `A` is an optional *argument_list* is changed in the following way.
 
@@ -261,11 +240,9 @@ The initial set of candidate methods for is changed by adding new condition.
 
 ### Object creation expressions
 
-> Specification: Original section changed in the following way
-
 The binding-time processing of an [*object_creation_expression*](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128162-object-creation-expressions) of the form new `T(A)`, where `T` is a *class_type*, or a *value_type*, and `A` is an optional *argument_list*, is changed in the following way.
 
-> Note: Type inference of constructor is described later in the type inference section.
+Note: Type inference of constructor is described later in the type inference section.
 
 The binding-time processing of an *object_creation_expression* of the form new `T(A)`, where `T` is a *class_type*, or a *value_type*, and `A` is an optional *argument_list*, consists of the following steps:
 
@@ -289,31 +266,27 @@ The binding-time processing of an *object_creation_expression* of the form new `
 
 ### Type inference
 
-> Specification: Original section changed in the following way
-
 We replace the [type inference/general](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12631-general) section with the following section.
 
 * Type inference for generic method invocation is performed when the invocation:
   * Doesn't have a *type_argument_list*.
   * The type argument list contains at least one *inferred_type_argument*.
-  > Example
-  > 
-  > ```csharp
-  > M( ... ); // Type inference is invoked.
-  > M<_, string>( ... ); // Type inference is invoked.
-  > M<List<_>, string>( ... ); // Type inference is invoked.
-  > ```
+
+  ```csharp
+  M( ... ); // Type inference is invoked.
+  M<_, string>( ... ); // Type inference is invoked.
+  M<List<_>, string>( ... ); // Type inference is invoked.
+  ```
 
 * Type inference is applied to each generic method in the method group. 
 
 * Type inference for constructors is performed when the generic type of *object_creation_expression*:
   * Its *type_argument_list* contains at least one *inferred_type_argument*.
-  > Example
-  >
-  > ```csharp
-  > new C<_, string>( ... ); // Type inference is invoked.
-  > new C<List<_>, string>( ... ); // Type inference is invoked.
-  > ```
+  
+  ```csharp
+  new C<_, string>( ... ); // Type inference is invoked.
+  new C<List<_>, string>( ... ); // Type inference is invoked.
+  ```
 
 * Type inference is applied to each constructor which is contained in the type. 
 
@@ -337,31 +310,30 @@ We replace the [type inference/general](https://github.com/dotnet/csharpstandard
   * We treat it in the same manner as an unconverted *new()* operator.
 
 * If each supplied argument does not correspond to exactly one parameter in the method or constructor [corresponding-parameters](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12622-corresponding-parameters), or there is a non-optional parameter with no corresponding argument, then inference immediately fails. 
+  Otherwise, assume that the generic method has the following signature:
 
-Otherwise, assume that the generic method has the following signature:
+  `Tₑ M<X₁...Xᵥ>(T₁ p₁ ... Tₓ pₓ)`
 
-`Tₑ M<X₁...Xᵥ>(T₁ p₁ ... Tₓ pₓ)`
+  With a method call of the form `M<...>(E₁ ...Eₓ)` the task of type inference is to find unique type arguments `S₁...Sᵥ` for each of the type parameters `X₁...Xᵥ` so that the call `M<S₁...Sᵥ>(E₁...Eₓ)` becomes valid.
 
-With a method call of the form `M(E₁ ...Eₓ)` the task of type inference is to find unique type arguments `S₁...Sᵥ` for each of the type parameters `X₁...Xᵥ` so that the call `M<S₁...Sᵥ>(E₁...Eₓ)` becomes valid.
-
-In case of construtor, assume the following signature:
+  In case of construtor, assume the following signature:
   
-`M<X₁...Xᵥ>..ctor(T₁ p₁ ... Tₓ pₓ)` 
+  `M<X₁...Xᵥ>..ctor(T₁ p₁ ... Tₓ pₓ)` 
 
-With a constructor call of the form `new M<...>(E₁ ...Eₓ)` the task of type inference is to find unique type arguments `S₁...Sᵥ` for each of the type parameters `X₁...Xᵥ` so that the call `new M<S₁...Sᵥ>(E₁...Eₓ)` becomes valid.
+  With a constructor call of the form `new M<...>(E₁ ...Eₓ)` the task of type inference is to find unique type arguments `S₁...Sᵥ` for each of the type parameters `X₁...Xᵥ` so that the call `new M<S₁...Sᵥ>(E₁...Eₓ)` becomes valid.
 
 * The process of type inference is described below as an algorithm. A conformant compiler may be implemented using an alternative approach, provided it reaches the same result in all cases.
 
-* During the process of inference each type parameter `Xᵢ` is either *fixed* to a particular type `Sᵢ` or *unfixed* with an associated set of *bounds.* Each of the bounds is some type `T`. Initially each type variable `Xᵢ` is unfixed with an empty set of bounds.
+* During the process of inference each type variable `Xᵢ` is either *fixed* to a particular type `Sᵢ` or *unfixed* with an associated set of *bounds.* Each of the bounds is some type `T`. Initially each type variable `Xᵢ` is unfixed with an empty set of bounds.
 
 * Type inference takes place in phases. Each phase will try to infer type arguments for more type variables based on the findings of the previous phase. The first phase makes some initial inferences of bounds, whereas the second phase fixes type variables to specific types and infers further bounds. The second phase may have to be repeated a number of times.
 
-* Additional inferences of method type inference algorithm are made as follows:
+* Additional changes of method type inference algorithm are made as follows:
   * If the inferred method group contains a nonempty *type_argument_list*.
     * We replace each `_` identifier with a new type variable `X`.
     * We perform *shape inference* from each type argument to the corresponding type parameter.
 
-* Additional inferences of constructor type inference algorithm are made as follows:
+* Additional changes of constructor type inference algorithm are made as follows:
   * If the inferred type contains a nonempty *type_argument_list*.
     * We replace each `_` identifier with a new type variable `X`.
     * We perform *shape inference* from each type argument to the corresponding type parameter.
@@ -370,7 +342,7 @@ With a constructor call of the form `new M<...>(E₁ ...Eₓ)` the task of type 
 
 #### Type inference algorithm change
 
-> Specification: Original section changed in the following way.
+We change the type inference algorithm contained in the [type inference](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1263-type-inference) section as follows and continue with an explanation of the changes at the end. 
 
 * Shape dependence
   * An *unfixed* type variable `Xᵢ` *shape-depends directly on* an *unfixed* type variable `Xₑ` if `Xₑ` represents *inferred_type_argument* and it is contained in *shape bound* of the type variable `Xᵢ`.
@@ -440,63 +412,52 @@ With a constructor call of the form `new M<...>(E₁ ...Eₓ)` the task of type 
     * **If the type variable has a shape bound, check the type has no conflicts with other bounds of that type variable in the same way as the standard says. It it has no conflicts, the type variable is *fixed* to that type. Otherwise type inference failed.**
     * Otherwise, fix it as the standard says. 
 
-> Explanation of inference improvements
->
-> Now, the inferred bounds can contain other unfixed type variables.
-> So we have to propagate the type info also through these bounds.
-> 
-> > Example
-> > 
-> >  ```csharp
-> >     void F<T1> (T1 p1) { ... }
-> >   ...
-> >    F<IList<_>>(new List<int>());
-> >  ```
-> >  We have now two type variables `T1` and `_`. From the first bound, we get that `IList<_>` is a shape bound of `T1`(Ignore now the type of bound, it would be the same in other types of bound).
-> >  When we investigate the second bound `List<int>`, we will figure out that it would be a lower bound of `T1`.
-> >  But now, we have to somehow propagate the int type to the `_` type variable, because it relates to it.
-> >  That means, in the process of adding new bounds, we have to also propagate this info through bounds, which contain unfixed type variables.
-> >  In this case, we do additional inference of `IList<_>` and `List<int>` yielding exact bound `int` of `_`.
+* Explanation of inference improvements
+  * Now, the inferred bounds can contain other unfixed type variables.
+    So we have to propagate the type info also through these bounds.
+ 
+    ```csharp
+    void F<T1> (T1 p1) { ... }
+    ...
+    F<IList<_>>(new List<int>());
+    ```
 
-> Explanation of type-dependence
-> 
-> Type-dependence is required because, till this time when a type variable had any bounds, it didn't contain any unfixed type variable.
-> It was important because we could do the parameter fixation, where we work with exact types(not unfixed type variables).
-> However now, the type variable can contain bounds containing unfixed type variables.
-> We have to ensure that we will not start fixing the type variable till these unfixed type variables are unfixed(In some cases, we can be in a situation, where this dependency will form a cycle. In this case, we will allow the fixation earlier).
->
-> >  Example
-> > 
-> >  We use the previous example.
-> >  After the first phase. `T1` has bounds `IList<_>` and `List<int>`. `_` has bound `int`.
-> >  In this situation, we can't start to fix `T1` because `_` is not fixed yet.
-> >  `T1` is type-dependent on `_`.
-> >  So, we will first fix `_`, which becomes `int`.
-> >  Then, `T1` is not type-dependent anymore, because all bounds don't contain any unfixed type variables.
-> >  `IList<_>` is now `IList<int>` after the `_` fixation.
-> >  We can fix `T1` now.
+  * Consider an example above. 
+    We have now two type variables `T1` and `_`. From the first bound, we get that `IList<_>` is a shape bound of `T1`(Ignore now the type of bound, it would be the same in other types of bound).
+    When we investigate the second bound `List<int>`, we will figure out that it would be a lower bound of `T1`.
+    But now, we have to somehow propagate the int type to the `_` type variable, because it relates to it.
+    That means, in the process of adding new bounds, we have to also propagate this info through bounds, which contain unfixed type variables.
+    In this case, we do additional inference of `IList<_>` and `List<int>` yielding exact bound `int` of `_`.
 
-> Explanation of shape-dependence
->
-> A similar thing is for shape-dependence.
-> Although it cares about bounds received from the type argument list.
-> We want a shape bound to be exact (not containing any unfixed type variables) because it is later important for the fixation.
-> An intention is to keep the exact form of the given hint(`IList<_>`).
->
-> >  Example
-> > 
-> >  Given `IList<_>` as a type argument, when we treat nullability, we want the hinted type parameter to be non-nullable(not `IList<_>?`).
-> >  It can happen, other bounds would infer the nullable version, and although `IList<_>` can be converted to `IList<_>?`, it is not the user's intention.
+* Explanation of type-dependence
+  * Type-dependence is required because, till this time when a type variable had any bounds, it didn't contain any unfixed type variable.
+    It was important because we could do the parameter fixation, where we work with exact types(not unfixed type variables).
+    However now, the type variable can contain bounds containing unfixed type variables.
+    We have to ensure that we will not start fixing the type variable till these unfixed type variables are unfixed(In some cases, we can be in a situation, where this dependency will form a cycle. In this case, we will allow the fixation earlier).
+  
+  * We use the previous example.
+    After the first phase. `T1` has bounds `IList<_>` and `List<int>`. `_` has bound `int`.
+    In this situation, we can't start to fix `T1` because `_` is not fixed yet.
+    `T1` is type-dependent on `_`.
+    So, we will first fix `_`, which becomes `int`.
+    Then, `T1` is not type-dependent anymore, because all bounds don't contain any unfixed type variables.
+    `IList<_>` is now `IList<int>` after the `_` fixation.
+    We can fix `T1` now.
 
+* Explanation of shape-dependence
+  * A similar thing is for shape-dependence.
+    Although it cares about bounds received from the type argument list.
+    We want a shape bound to be exact (not containing any unfixed type variables) because it is later important for the fixation.
+    An intention is to keep the exact form of the given hint(`IList<_>`).
 
-> Explanation of inference restriction during constructor type inference
->
-> Because performing type inference can even take exponential time when a type system contains overloading, the restriction was made above to avoid it. 
-> It regards binding arguments before the overload resolution when we bind all *object_creation_expressions* without target info and then in case of overload resolution success and some of these arguments failed in the binding, we try to bind it again with already known target type information.
+  * Example: Given `IList<_>` as a type argument, when we treat nullability, we want the hinted type parameter to be non-nullable(not `IList<_>?`).
+    It can happen, other bounds would infer the nullable version, and although `IList<_>` can be converted to `IList<_>?`, it is not the user's intention.
+
+* Explanation of inference restriction during constructor type inference
+  * Because performing type inference can even take exponential time when a type system contains overloading, the restriction was made above to avoid it. 
+    It regards binding arguments before the overload resolution when we bind all *object_creation_expressions* without target info and then in case of overload resolution success and some of these arguments failed in the binding, we try to bind it again with already known target type information.
 
 ### Compile-time checking of dynamic member invocation
-
-> Specification: Original section changed in the following way 
 
 We change the [compile-time checking](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation) in order to be useful during partial type inferece.
 
@@ -509,14 +470,16 @@ We add the following
 
 ### Nullability
 
-> Specification: New section
+We add the following section about nullability. 
 
-We can use an examination mark `?` to say that the inferred type argument should be a nullable type (e.g. `F<_?>(...)`).
+* We can use an examination mark `?` to say that the inferred type argument should be a nullable type (e.g. `F<_?>(...)`).
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
-Difference between constructor type inference and method type inference could confuse the programmer.
+Difference between constructor type inference and method type inference could confuse the programmer. 
+However, a generic type doesn't usually have constructors containing parameters which types contain all type parameters of the generic type. 
+So original method type inference would be too weak to infer the type arguments of the generic type.
 
 ## Alternatives
 [alternatives]: #alternatives
@@ -551,49 +514,45 @@ What other designs have been considered? What is the impact of not doing this?
   * A type is said to be *generic_inferred* when all the following hold:
   * It has an empty *type_argument_list*.
   * It occurs as a *type* of *object_creation_expression*.
-  > Example
-  >
-  > ```csharp
-  > new C<>(...) // Valid code, C is generic_inferred.
-  > new C<G<>>(...) // Invalid code, C nor G are generic_inferred.
-  > F<>(...) // Invalid code, F isn't generic_inferred.
-  > ```
+  
+  ```csharp
+  new C<>(...) // Valid code, C is generic_inferred.
+  new C<G<>>(...) // Invalid code, C nor G are generic_inferred.
+  F<>(...) // Invalid code, F isn't generic_inferred.
+  ```
 
   ### Namespace and type names
 
-  > Specification: Original section changed in the following way
-
-  Determining the [meaning](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#781-general) of a *namespace_or_type_name* is changed as follow.
+  Determining the [meaning](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#781-general) of a *namespace_or_type_name* is changed as follows.
 
   * If a type is a *generic_inferred*, then we resolve the identifier in the same manner except ignoring the arity of type parameters (Types of arity 0 is ignored). 
   If there is an ambiguity in the current scope, a compilation-time error occurs.
-    > Example
-    >
-    > ```csharp
-    > class P1
-    > {
-    >   void M() 
-    >   {
-    >     // generic_inferred type C1<> refers to generic type C<T> where 
-    >     // the type argument will be inferred from inspecting candidate constructors of C<T> 
-    >     new C1<>( ... );  
-    >     // generic_inferred type C1<> refers to generic type C<T1, T2> where 
-    >     // the type arguments will be inferred from inspecting candidate constructors of C<T1, T2> 
-    >     new C2<>( ... ); 
-    >   }
-    >   class C1<T> { ... }
-    >   class C2<T1, T2> { ... }
-    > }
-    > class P2
-    > {
-    >   void M() 
-    >   {
-    >     new C1<>( ... ); // Compile-time error occurs because of ambiguity between C1<T> and C1<T1, T2>
-    >   }
-    >   class C1<T> { ... }
-    >   class C1<T1, T2> { ... }
-    > }
-    > ``` 
+
+    ```csharp
+    class P1
+    {
+      void M() 
+      {
+        // generic_inferred type C1<> refers to generic type C<T> where 
+        // the type argument will be inferred from inspecting candidate constructors of C<T> 
+        new C1<>( ... );  
+        // generic_inferred type C1<> refers to generic type C<T1, T2> where 
+        // the type arguments will be inferred from inspecting candidate constructors of C<T1, T2> 
+        new C2<>( ... ); 
+      }
+      class C1<T> { ... }
+      class C2<T1, T2> { ... }
+    }
+    class P2
+    {
+      void M() 
+      {
+        new C1<>( ... ); // Compile-time error occurs because of ambiguity between C1<T> and C1<T1, T2>
+      }
+      class C1<T> { ... }
+     class C1<T1, T2> { ... }
+    }
+    ``` 
 
   ### Object creation expressions
 
@@ -615,24 +574,23 @@ What other designs have been considered? What is the impact of not doing this?
   * Type inference for constructors is performed when the generic type of *object_creation_expression*:
   * **Has a diamond operator.**
   * Its *type_argument_list* contains at least one *inferred_type_argument*.
-  > Example
-  >
-  > ```diff
-  > +new C<>( ... ); // Type inference is invoked.
-  > new C<_, string>( ... ); // Type inference is invoked.
-  > new C<List<_>, string>( ... ); // Type inference is invoked.
-  > ```
+  
+  ```diff
+  +new C<>( ... ); // Type inference is invoked.
+  new C<_, string>( ... ); // Type inference is invoked.
+  new C<List<_>, string>( ... ); // Type inference is invoked.
+  ```
 
   </details>
 
 * Alternative: Allowing object initializers contribute to the inference in object creation: 
 
-  > Example of inferring type arguments of type from the initializer list
-  > 
-  > ```csharp
-  > using System.Collections.Generic;
-  > var statistics = new Dictionary<,>(){["Joe"] = 20}; // Inferred: Dictionary<string, int>
-  > ```
+  Example of inferring type arguments of type from the initializer list:
+
+  ```csharp
+  using System.Collections.Generic;
+  var statistics = new Dictionary<,>(){["Joe"] = 20}; // Inferred: Dictionary<string, int>
+  ```
    
   Reason not to do that: Maybe much controversial ?
 
@@ -644,7 +602,7 @@ What other designs have been considered? What is the impact of not doing this?
 
   ...
 
-  * Inputs for **constructor type inference** are constructed as follows:
+  * Additional changes of constructor type inference algorithm are made as follows:
     * ...
     * If the expression contains an *object_initializer_list*, for each *initializer_element* of the list perform *lower-bound inference* from the type of the element to the type of *initializer_target*. If the binding of the element fails, skip it.
     * If the expression contains a *collection_initializer_list* and the type doesn't have overloads of the `Add` method, for each *initializer_element* of the list perform *lower-bound inference* from the types of the elements contained in the *initializer_element* to the types of the method's parameters. If the binding of any element fails, skip it.
@@ -844,7 +802,7 @@ var[] temp = ...
 ```
 
 5. State of the art.
-
+   
 ```csharp
 var temp = ...
 ```
