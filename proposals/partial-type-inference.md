@@ -41,7 +41,8 @@ Besides the changes described above, the proposal mentions further interactions 
   >
   > ```csharp
   > object data = database.fetch();
-  > int count = data.Field("count"); // Error, method type inference can't infer the return type. We have to specify the type argument.
+  > // Error below, method type inference can't infer the return type. We have to specify the type argument.
+  > int count = data.Field("count"); 
   > 
   > public static class Extensions
   > {
@@ -50,7 +51,8 @@ Besides the changes described above, the proposal mentions further interactions 
   > ```
   >
   > ```csharp
-  > test(new MyData()); // Error, method type inference can't infer T. We have to specify all type arguments.
+  > // Error below, method type inference can't infer T. We have to specify all type arguments.
+  > test(new MyData()); 
   >
   > public void test<T, U>(U data) where T : TestCaseDefault<U> { ... }
   > ```
@@ -59,7 +61,8 @@ Besides the changes described above, the proposal mentions further interactions 
 
   > Example
   > ```csharp
-  > log<, object>(new Message( ... ), null); // Error, impossible to specify just one type argument. We have to specify all of them. 
+  > // Error below, impossible to specify just one type argument. We have to specify all of them. 
+  > log<, object>(new Message( ... ), null); 
   >
   > public void log<T, U>(T message, U appendix) { ... }
   > ```
@@ -70,13 +73,15 @@ Besides the changes described above, the proposal mentions further interactions 
   > Example
   > 
   > ```csharp
-  > test<TestCaseDefault<MyData>, _>(new MyData()); // We can use _ to mark type arguments which should be inferred by the compiler.
+  > // We can use _ to mark type arguments which should be inferred by the compiler.
+  > test<TestCaseDefault<MyData>, _>(new MyData());
   >
   > public void test<T, U>(U data) where T : TestCaseDefault<U> { ... }
   > ```
   >
   > ```csharp
-  > log<_, object>(new Message( ... ), null); // We can use _ to mark type arguments which should be inferred by the compiler.
+  > // We can use _ to mark type arguments which should be inferred by the compiler.
+  > log<_, object>(new Message( ... ), null); 
   >
   > public void log<T, U>(T message, U appendix) { ... }
   > ```
@@ -100,10 +105,18 @@ Besides the changes described above, the proposal mentions further interactions 
   > Example
   >
   > ```csharp
-  > var alg = Create(new MyData()); // Method type inference can't infer TLogger because it doesn't use type constraints specified by `where` clauses
+  > // Method type inference can't infer TLogger because it doesn't use type constraints specified by `where` clauses
+  > var alg = Create(new MyData()); 
   > 
-  > public static Algorithm<TData, TLogger> Create<TData, TLogger>(TData data) where TLogger : Logger<TData> { return new Algorithm<TData, TLogger>(data); } 
-  > class Algorithm<TData, TLogger> where TLogger : Logger<TData> { public Algorithm(TData data) { ... }}
+  > public static Algorithm<TData, TLogger> Create<TData, TLogger>(TData data) where TLogger : Logger<TData> 
+  > { 
+  >   return new Algorithm<TData, TLogger>(data); 
+  > } 
+  >
+  > class Algorithm<TData, TLogger> where TLogger : Logger<TData> 
+  > { 
+  >   public Algorithm(TData data) { ... }
+  > }
   > ```
 
   An existing solution can be seen in `Create()` method wrappers of constructors enabling a type inference through method type inference as you can see in the examples above.
@@ -211,7 +224,10 @@ type_argument
   > new C<C<_>, int>( ... ); // _ represents an inferred type argument.
   > C<_> temp = ...; // _ doesn't represent an inferred type argument.
   > new _( ... ) // _ doesn't represent an inferred type argument.
-  > Container<_>.Method<_>(arg); // _ of Container<_> doesn't represent an inferred type argument. (Containing type's type argument won't be inferred)
+  >
+  > // _ of Container<_> doesn't represent an inferred type argument. 
+  > // (Containing type's type argument won't be inferred)
+  > Container<_>.Method<_>(arg); 
   > ```   
 
 * A method group and type are said to be *partial_inferred* if it contains at least one *inferred_type_argument*. 
@@ -506,22 +522,26 @@ What other designs have been considered? What is the impact of not doing this?
     > ```csharp
     > class P1
     > {
-    >     void M() 
-    >     {
-    >         new C1<>( ... ); // generic_inferred type C1<> refers to generic type C<T> where the type argument will be inferred from inspecting candidate constructors of C<T> 
-    >         new C2<>( ... ); // generic_inferred type C1<> refers to generic type C<T1, T2> where the type arguments will be inferred from inspecting candidate constructors of C<T1, T2> 
-    >     }
-    >     class C1<T> { ... }
-    >     class C2<T1, T2> { ... }
+    >   void M() 
+    >   {
+    >     // generic_inferred type C1<> refers to generic type C<T> where 
+    >     // the type argument will be inferred from inspecting candidate constructors of C<T> 
+    >     new C1<>( ... );  
+    >     // generic_inferred type C1<> refers to generic type C<T1, T2> where 
+    >     // the type arguments will be inferred from inspecting candidate constructors of C<T1, T2> 
+    >     new C2<>( ... ); 
+    >   }
+    >   class C1<T> { ... }
+    >   class C2<T1, T2> { ... }
     > }
     > class P2
     > {
-    >     void M() 
-    >     {
-    >         new C1<>( ... ); // Compile-time error occurs because of ambiguity between C1<T> and C1<T1, T2>
-    >     }
-    >     class C1<T> { ... }
-    >     class C1<T1, T2> { ... }
+    >   void M() 
+    >   {
+    >     new C1<>( ... ); // Compile-time error occurs because of ambiguity between C1<T> and C1<T1, T2>
+    >   }
+    >   class C1<T> { ... }
+    >   class C1<T1, T2> { ... }
     > }
     > ``` 
 
@@ -607,7 +627,9 @@ What other designs have been considered? What is the impact of not doing this?
   With the `_` placeholder we would be able to specify more the shape of the variable avoiding unnecessary specification of type arguments.
 
   ```csharp
-  Wrapper<_> wrapper = ... // I get an wrapper, which I'm interested in, but I don't care about the type arguments, because I don't need them in my code.
+  // I get an wrapper, which I'm interested in, but I don't care about the type arguments, 
+  // because I don't need them in my code.
+  Wrapper<_> wrapper = ... 
   wrapper.DoSomething( ... );
   ```
 
