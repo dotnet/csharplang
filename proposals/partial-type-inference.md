@@ -215,7 +215,7 @@ type_argument
   If the `_` identifier should represent a type, the user should use `@_` to explicitly reference a typename.
 
 * When there is a type or alias declaration with the `_` identifier, a warning should appear since it is a contextual keyword.
-  A possible resolution would be to rename the definition or suppress the warning when the declaration can't be renamed.     
+  A possible resolution would be to rename the declaration or suppress the warning when the declaration can't be renamed.     
 
 * `_` identifier is considered to represent *inferred_type_argument* when:
   * It occurs in *type_argument_list* of a method group during method invocation.
