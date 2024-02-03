@@ -106,7 +106,7 @@ Besides the changes described above, the proposal mentions further interactions 
   > class Algorithm<TData, TLogger> where TLogger : Logger<TData> { public Algorithm(TData data) { ... }}
   > ```
 
-  An existing solution can be seen in `Create()` method wrappers of constructors enabling a type inference through method type inference as you can ses in the examples above.
+  An existing solution can be seen in `Create()` method wrappers of constructors enabling a type inference through method type inference as you can see in the examples above.
   However, we can't use it with *object_or_collection_initializer*; we are limited by method type inference strength, and it adds unnecessary boiler code.
 
   Adding constructor type inference as we will describe in the following section would solve above mentioned examples.
@@ -134,7 +134,7 @@ So it has to be restricted to cases, where the problem can be solved effectively
 - **IDE** - Improvement of the type inference can complicate IDE hints during coding. 
 We should give the user clear and not overwhelming errors when there will be an error and try to provide info that helps him to fix it.
 - **Extensions** - We don't want to make this change blocker for another potential feature in the future. 
-So will want to look ahead to other potential directions, which can be done after this feature.
+So we will want to look ahead to other potential directions, which can be done after this feature.
 
 ## Detailed design
 [design]: #detailed-design
