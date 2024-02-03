@@ -209,7 +209,13 @@ type_argument
 +  ;
 ```
 
-* When a type with `_` identifier is presented in the scope where **inferred_type_argument** is used, a warning should appear since the **inferred_type_argument** hides the type's name causing a breaking change.
+* When a type with `_` identifier is presented in the scope where **inferred_type_argument** is used, a warning should appear since the **inferred_type_argument** hides the type's name causing a breaking change. 
+  There are two possible resolutions of this warning. 
+  If the `_` identifier should represent **inferred_type_argument**, the user should suppress the warning or should rename the type or alias declaration.
+  If the `_` identifier should represent a type, the user should use `@_` to explicitly reference a typename.
+
+* When there is a type or alias declaration with the `_` identifier, a warning should appear since it is a contextual keyword.
+  A possible resolution would be to rename the definition or suppress the warning when the declaration can't be renamed.     
 
 * `_` identifier is considered to represent *inferred_type_argument* when:
   * It occurs in *type_argument_list* of a method group during method invocation.
