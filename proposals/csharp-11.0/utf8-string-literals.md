@@ -122,7 +122,7 @@ This scenario was discussed with the runtime team and we do not feel it has the 
 The design could rely on target typing only and remove the `u8` suffix on `string` literals. In the majority of cases today the `string` literal is being assigned directly to a `ReadOnlySpan<byte>` hence it's unnecessary. 
 
 ```c#
-ReadOnlySpan<byte> span = "Hello World; 
+ReadOnlySpan<byte> span = "Hello World;" 
 ```
 
 The `u8` suffix exists primarily to support two scenarios: `var` and overload resolution. For the latter consider the following use case: 
