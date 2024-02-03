@@ -31,7 +31,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Feb 5, 2024
 
-- First class span types (Fred)
+- [First class span types](https://github.com/dotnet/csharplang/issues/7905) (Fred)
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ### Wed Jan 31, 2024
