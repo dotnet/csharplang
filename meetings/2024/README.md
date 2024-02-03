@@ -9,7 +9,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
+- [Overload resolution priority](https://github.com/dotnet/csharplang/pull/7906) (Fred)
 - Discriminated Union WG (Matt)
 - Extensions (Julien and Mads (after Feb 5))
 
