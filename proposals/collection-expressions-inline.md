@@ -73,7 +73,7 @@ If the `foreach` statement has an *explicitly typed iteration variable* of type 
 
 If the `foreach` statement has an *implicitly typed iteration variable*, the type of the *iteration variable* is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of the types of the elements. If there is no *best common type*, an error is reported.
 
-For each element `Eᵢ` in the collection expression, the type contributing to the *best common type* is the following if any:
+For each element `Eᵢ` in the collection expression, the type if any contributing to the *best common type* is the following:
 * If `Eᵢ` is an *expression element*, the type of `Eᵢ`.
 * If `Eᵢ` is a *spread element* `..Sᵢ`, the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of `Sᵢ`.
 
