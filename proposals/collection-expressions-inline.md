@@ -97,8 +97,8 @@ The natural type would be a combination of the *best common type* for the elemen
 |List&lt;T&gt;|Yes|2|Yes|Yes|
 |Span&lt;T&gt;|Items only|0/1|No|No/Yes|
 |ReadOnlySpan&lt;T&gt;|No|0/1|No|No/Yes|
-|Memory&lt;T&gt;|Items only|0/1|Yes|No/Yes|
-|ReadOnlyMemory&lt;T&gt;|No|0/1|Yes|No/Yes|
+|Memory&lt;T&gt;|Items only|1|Yes|Yes|
+|ReadOnlyMemory&lt;T&gt;|No|1|Yes|Yes|
 
 Natural type would allow use of collection expressions in cases where there is no target type:
 ```csharp
