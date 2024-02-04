@@ -87,7 +87,20 @@ The elements of the collection are evaluated in order, and the loop body is exec
 
 ### Natural type
 
-If collection expressions have a *natural type*, that will allow use of collection expressions in cases where there is no target type:
+Add collection expression *natural type*.
+
+The natural type would be a combination of the *best common type* for the element type (see [foreach](#foreach) above), and a choice of collection type, such as one of the following:
+
+|Collection type|Mutable|Allocations|Async code|Returnable
+|:---:|:---:|:---:|:---:|:---:|
+|T[]|Items only|1|Yes|Yes|
+|List&lt;T&gt;|Yes|2|Yes|Yes|
+|Span&lt;T&gt;|Items only|0*|No|No*|
+|ReadOnlySpan&lt;T&gt;|No|0*|No|No*|
+|Memory&lt;T&gt;|Items only|0*|Yes|No*|
+|ReadOnlyMemory&lt;T&gt;|No|0*|Yes|No*|
+
+Natural type would allow use of collection expressions in cases where there is no target type:
 ```csharp
 var a = [1, 2, 3];                    // var
 var b = [x, y].Where(e => e != null); // extension methods
@@ -96,9 +109,16 @@ var c = Identity([x, y]);             // type inference
 static T Identity<T>(T t) => t;
 ```
 
+Natural type would likely only apply when there is a *best common type* for the elements.
+```csharp
+var d = [];        // error
+var e = [default]; // error: no type for default
+var f = [1, null]; // error: no common type for int and <null>
+```
+
 Natural type would also allow a subset of the scenarios that are supported above. But since the above proposal relies on target typing and natural type relies on *best common type* of the elements within the collection expression, there will be some limitations if we don't also support target typing with nested collection expressions.
 ```csharp
 byte[] x = [1, .. b ? [2] : []];       // error: cannot convert int to byte
 int[]  y = [1, .. b ? [default] : []]; // error: no type for [default]
-int?[] z = [1, .. b ? [2, null] : []]; // error: no common type for [2, null]
+int?[] z = [1, .. b ? [2, null] : []]; // error: no common type for int and <null>
 ```
