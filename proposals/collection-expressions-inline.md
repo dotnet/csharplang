@@ -2,26 +2,28 @@
 
 ## Summary
 
-Support collection expressions *inline* in expression contexts where the collection type is not important or not observable.
+Support collection expressions *inline* in expression contexts where the *collection type* is not observable.
 
 ## Motivation
 
-Collection expressions could be used with spreads to allow adding elements *conditionally* to the containing collection:
+Inline collection expressions could be used with spreads to allow adding elements *conditionally* to the containing collection:
 ```csharp
-int[] array = [x, y, .. b ? [z] : []];
+int[] items = [x, y, .. b ? [z] : []];
 ```
 
-Collection expressions could be used directly in `foreach`:
+Inline collection expressions could be used directly in `foreach`:
 ```csharp
-foreach (bool value in [false, true]) { }
+foreach (var b in [false, true]) { }
 ```
-In these cases, the *collection type* of the inline collection expression is unspecified and the choice of how or whether to instantiate the collection is left to the compiler.
+In these cases, the *collection type* of the inline collection expression is unspecified. The choice of how or whether to instantiate the collection is left to the compiler.
 
 ## Detailed design
 
 ### Conversions
 
-A *collection_type* is introduced to represent an enumerable type with a specific element type and an *unspecified* collection type.
+To support conversions for inline collection expressions, an abstract *collection_type* is introduced.
+
+A *collection_type* represents an enumerable type with a specific element type and an *unspecified* collection type.
 A *collection_type* with element type `E` is referred to here as *`col<E>`*.
 
 A *collection_type* exists at compile time only; a *collection_type* cannot be referenced in source or metadata.
@@ -43,22 +45,13 @@ The collection expression [*conversions*](https://github.com/dotnet/csharplang/b
 
 ### Construction
 
-The elements of a nested collection expression within a spread can be added to the containing collection instance without requiring an intermediate collection.
+The elements of a nested collection expression within a spread can be added to the containing collection instance directly, without instantiating an intermediate collection.
 
-The [*construction*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#construction) section is updated as follows:
-
-> * For each element in order:
->   * If the element is an *expression element* ...
->   * If the element is a *spread element* then one of the following is used:
->     * **If the spread element expression is a *collection expression*, then the collection expression elements are evaluated in order as if the elements were in the containing collection expression.**
->     * **If the spread element expression is a *conditional expression*, then the condition is evaluated and if `true` the second-, otherwise the third-operand is evaluated as if the operand was an element in the containing collection expression.**
->     * ...
-
-*Is there any implied order of evaluation of the elements in the nested collection expression with respect to the following elements in the containing collection expression?*
+The elements of the nested collection expression are evaluated in order within the nested collection. There is no implied evaluation order between the elements of the nested collection and other elements within the containing collection expression.
 
 ### Type inference
 
-No changes are made to the [*type inference*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#type-inference) section.
+No changes are made for [*type inference*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#type-inference).
 Since *type inference* from a spread element relies on the *iteration type* of the spread element expression, and since collection expressions do not have a *type* or an *iteration type*, there is no type inference from a collection expression nested within a spread element.
 
 The relevant part of the [*type inference*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#type-inference) section is included here for reference:
@@ -78,8 +71,34 @@ If the `foreach` statement has an *explicitly typed iteration variable* of type 
 * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `Tₑ`.
 * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from `Sᵢ` to the *collection_type* `col<Tₑ>`.
 
-If the `foreach` statement has an *implicitly typed iteration variable*, the type of the *iteration variable* is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of the collection expression *elements*. If there is no best common type, an error is reported.
+If the `foreach` statement has an *implicitly typed iteration variable*, the type of the *iteration variable* is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of the types of the elements. If there is no *best common type*, an error is reported.
+
+For each element `Eᵢ` in the collection expression, the type contributing to the *best common type* is the following if any:
+* If `Eᵢ` is an *expression element*, the type of `Eᵢ`.
+* If `Eᵢ` is a *spread element* `..Sᵢ`, the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of `Sᵢ`.
+
+Since collection expressions do not have a *type* or an *iteration type*, the *best common type* does not consider elements from nested collection expressions.
 
 For a collection expression used as the collection in a `foreach` statement, the compiler may use any conforming representation for the collection instance, including eliding the collection.
 
-*What are the order of operations? Particularly, what do we guarantee with respect to evaluating the loop body before evaluating subsequent elements?*
+The elements of the collection are evaluated in order, and the loop body is executed for each element in order. The compiler *may* evaluate subsequent elements before executing the loop body for preceding elements.
+
+## Alternatives
+
+### Natural type
+
+If collection expressions have a *natural type*, that will allow use of collection expressions in cases where there is no target type:
+```csharp
+var a = [1, 2, 3];                    // var
+var b = [x, y].Where(e => e != null); // extension methods
+var c = Identity([x, y]);             // type inference
+
+static T Identity<T>(T t) => t;
+```
+
+Natural type would also allow a subset of the scenarios that are supported above. But since the above proposal relies on target typing and natural type relies on *best common type* of the elements within the collection expression, there will be some limitations if we don't also support target typing with nested collection expressions.
+```csharp
+byte[] x = [1, .. b ? [2] : []];       // error: cannot convert int to byte
+int[]  y = [1, .. b ? [default] : []]; // error: no type for [default]
+int?[] z = [1, .. b ? [2, null] : []]; // error: no common type for [2, null]
+```
