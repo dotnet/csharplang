@@ -1,4 +1,4 @@
-# Native lock
+# `Lock` object
 
 ## Summary
 [summary]: #summary
@@ -105,6 +105,18 @@ To escape out of the warning and force use of monitor-based locking, one can use
   List<Lock> list = new();
   list.Add(new Lock()); // would warn here
   ```
+
+- We could include static analysis to prevent usage of `System.Threading.Lock` in `using`s with `await`s.
+  I.e., we could emit either an error or a warning for code like `using (lockVar.EnterLockScope()) { await ... }`.
+  Currently, this is not needed since `Lock.Scope` is a `ref struct`, so that code is illegal anyway.
+  However, if we ever allowed `ref struct`s in `async` methods or changed `Lock.Scope` to not be a `ref struct`, this analysis would become beneficial.
+  (We would also likely need to consider for this all lock types matching the general pattern if implemented in the future.
+  Although there might need to be an opt-out mechanism as some lock types might be allowed to be used with `await`.)
+  Alternatively, this could be implemented as an analyzer shipped as part of the runtime.
+
+- We could relax the restriction that value types cannot be `lock`ed
+  - for the new `Lock` type (only needed if the API proposal changed it from `class` to `struct`),
+  - for the general pattern where any type can participate when implemented in the future.
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions

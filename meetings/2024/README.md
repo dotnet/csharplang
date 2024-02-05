@@ -4,16 +4,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space.
 - Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
+- 2 hours please. Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 - Review: Allow lambdas with parameter modifiers, but without parameter types: https://github.com/dotnet/csharplang/pull/7369 (Cyrus)
 
 ## Schedule when convenient
 
-- [BinaryCompatOnlyAttribute](https://github.com/dotnet/csharplang/pull/7707) (Fred)
+- [Overload resolution priority](https://github.com/dotnet/csharplang/pull/7906) (Fred)
 - Discriminated Union WG (Matt)
 - Extensions (Julien and Mads (after Feb 5))
+- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill)
 
 ## Recurring topics
 
@@ -22,18 +22,32 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Mon Feb 11, 2024
+
+### Wed Feb 6, 2024
+
+### Mon Mar 4, 2024
+
+### Wed Feb 28, 2024
+
 ### Mon Feb 26, 2024
 
 ### Wed Feb 21, 2024
 
 ### Wed Feb 7, 2024
 
+- [Partial type inference](https://github.com/dotnet/csharplang/pull/7582) (Rikki / [Tomas](https://github.com/TomatorCZ))
+- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
+
 ### Mon Feb 5, 2024
+
+- [First class span types](https://github.com/dotnet/csharplang/issues/7905) (Fred)
+- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ### Wed Jan 31, 2024
 
-- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
 - Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
+- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 
 ### Mon Jan 29, 2024
 
