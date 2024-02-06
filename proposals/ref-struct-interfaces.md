@@ -133,7 +133,7 @@ interface I1
 void M<T>(T p)
     where T : allows ref struct, I1
 {
-    // Warning: default interface method may box the `this` parameter if `T` is a ref struct
+    // Warning: this may fail at runtime if `T` is a ref struct which doesn't implement the default interface member
     p.M();
 }
 ```
