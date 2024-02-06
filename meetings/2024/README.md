@@ -66,13 +66,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
 - Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
 
+## C# Language Design Notes for 2024
+
 ### Mon Jan 29, 2024
 
-- Overload resolution rules for "Params Collections" (Aleksey)
-  - [Better function member](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#better-function-member)
-  - [Binding in presence of dynamic arguments](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#dynamic-vs-static-binding)
+[C# Language Design Meeting for January 29th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md)
 
-## C# Language Design Notes for 2024
+- `params` collections
+  - Better function member changes
+  - `dynamic` support
+- `dynamic` and `ref` local function bugfixing
 
 ### Mon Jan 22, 2024
 
