@@ -185,7 +185,7 @@ If an *iteration type* can be determined, then the *element type* of the *collec
 Third (ie. if an *iteration type* cannot be determined), an attempt is made to infer the *element type*.
 If the `CM` set contains more than one method, the inference fails and the *collection type* doesn't have an *element type* and doesn't have a *create method*.
 
-Otherwise, type `E1` is determined from the only method `M` in the `CM` set by substituting the type parameters of the *collection type* for the type parameters of `M` in `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have *element type* and doesn't have *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
+Otherwise, type `E1` is determined by substituting type parameters of the only method from the `CM` set (`M`) with corresponding *collection type* type parameters in its `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have *element type* and doesn't have *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
 
