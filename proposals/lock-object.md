@@ -14,6 +14,23 @@ as a better alternative to existing monitor-based locking.
 The presence of the `lock` keyword in C# might lead developers to think they can use it with this new type.
 Doing so wouldn't lock according to the semantics of this type but would instead treat it as any other object and would use monitor-based locking.
 
+```cs
+namespace System.Threading
+{
+    public sealed class Lock
+    {
+        public void Enter();
+        public void Exit();
+        public Scope EnterLockScope();
+    
+        public ref struct Scope
+        {
+            public void Dispose();
+        }
+    }
+}
+```
+
 ## Detailed design
 [design]: #detailed-design
 
