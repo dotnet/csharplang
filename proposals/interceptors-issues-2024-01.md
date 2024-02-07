@@ -44,9 +44,13 @@ Note that the "portability" requirement of generators still cannot be met by int
 
 Generated files need to refer to user files using relative paths. The sample in the previous section shows this. However, generated files don't currently have file paths which can be related to user files. Instead, they use an invented path with the form `$"{assemblyName}/{generatorTypeName}/{hintName}.cs"`.
 
-We propose changing this to define the `SyntaxTree.FilePath` for a generated file to be equivalent to the file path which the generated file *would be written to* if `$(EmitCompilerGeneratedFiles)` is true in the project. This will also have the effect of increasing the behavioral consistency of a project which is compiled with generators in-box, versus emitting the generated files, removing the generators, and recompiling.
+We propose changing this to define the `SyntaxTree.FilePath` for a generated file to be *either* within the directory indicated by the `/generatedfilesout` compiler argument, or, if no value is specified for `/generatedfilesout`, to be within the containing directory of the `/out` argument instead (i.e. the containing directory of the output assembly). In most normal project configurations, either of these paths can be made relative to the user source files.
 
-In the compiler, when no argument is specified for `/generatedfilesout`, the implementation will use the containing directory of the `/out` argument (i.e. for the resulting DLL), as the base path for `SyntaxTree.FilePath` of generated files, but we will not write the generated files to disk. In most normal project configurations, this path can be made relative to the source files.
+In the `/out` case, the generated files are not written to disk, so the generated file path is only used to inform the language semantics. At time of writing, that includes the behavior of interceptors and `[CallerFilePath]`.
+
+We are only proposing to change the prefix of the generated file paths. We expect that the existing format `$"{assemblyName}/{generatorTypeName}/{hintName}.cs"` will remain as the suffix of generated file paths.
+
+TODO: samples of what paths are used for generated files with a few different combinations of `/out` and `/generatedfilesout`, including when the generated files are read back in from disk.
 
 ### Add `[InterceptsLocation(string locationSpecifier)]`
 
@@ -69,16 +73,17 @@ static file class Interceptors
 }
 ```
 
-The location specifier encoding is intended to resemble the way diagnostic locations are written out on the command line: `v1:path(line, character)`.
+The location specifier encoding is intended to resemble the way diagnostic locations are written out on the command line, e.g. `ConsoleApp1\Program.cs(2,34): error CS1003: Syntax error, ',' expected`. A side benefit of this encoding is that when a suffix of the location specifier is pasted into IDE "Go To" commands, the editor can often go to the exact file, line and column of the indicated call.
 
-We reserve the ability to evolve the exact encoding of the location specifier in future versions of the language and compiler. For example, in order to introduce an encoding which denotes the location of call(s) based on criteria other than a simple line and column number. At the same time, we expect to maintain "back compatibility" with consuming previous "versions" of the location specifier encoding. We expect to be able to indicate future versions of the location format by prefixing with `v2:`, `v3:`, and so on.
+We prefix the location specifier with a "version tag", starting with `v1:`. We reserve the ability to evolve the exact encoding of the location specifier in future versions of the language and compiler. For example, in order to introduce an encoding which denotes the location of intercepted call(s) based on criteria other than a simple line and column number. We anticipate that any future version of the encoding will be prefixed with `v2:`, `v3:`, and so on.
 
-This constructor will be introduced simultaneously with the following public API, which generators will consume:
+When new versions of the location specifier are introduced, we will still maintain "back compatibility" with consuming previous versions of the location specifier.
+
+The constructor `InterceptsLocationAttribute(string locationSpecifier)` will be introduced simultaneously with the following public API, which generators will consume:
 
 ### Add public API for obtaining a location specifier for a call
 
 We propose adding a public API for obtaining a "location specifier", which is intended to be easily passed through as an attribute argument in generated code.
-
 ```diff
  namespace Microsoft.CodeAnalysis;
 
@@ -89,6 +94,7 @@ We propose adding a public API for obtaining a "location specifier", which is in
  }
 ```
 
+Usage:
 ```cs
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -117,7 +123,7 @@ public class MyGenerator : IIncrementalGenerator
             foreach (var interceptableCall in interceptableCalls)
             {
                 // interceptableCall is of some type declared by the generator
-                // which holds the call that the 
+                // which holds the call which should be intercepted
                 InvocationExpressionSyntax invocationSyntax = interceptableCall.InvocationSyntax;
                 AddInterceptorMethod(context, builder, invocationSyntax, hintName);
             }
@@ -137,7 +143,7 @@ This is intended to streamline the communication which is occurring between the 
 
 Where parts (1), (2), and (3) are occurring in the above sample, and (4) occurs in the compiler and analyzers which are working with a "post-generators" compilation.
 
-The above API shape is specific to `InvocationExpressionSyntax`. The reason for this is that we are trying to make correct usage easy. If we took a more general syntax type such as `ExpressionSyntax` or `SyntaxNode`, then correct usage would become more ambiguous. Which node is the generator supposed to pass in? Should it be the `NameSyntax` whose location is used to denote the location of the intercepted call? If so, what is the proper way to dig through an `InvocationExpressionSyntax` to obtain that name syntax? What is the failure mode supposed to be if the syntax node is of a kind which doesn't support interceptors?
+The above API shape is specific to `InvocationExpressionSyntax`. The reason for this is that we are trying to make correct usage easy. If we took a more general syntax type such as `ExpressionSyntax` or `SyntaxNode`, then correct usage would become more ambiguous. Which node is the generator supposed to pass in? Should it be the `NameSyntax` whose location is used to denote the location of the intercepted call? If so, what is the proper way to dig through an `InvocationExpressionSyntax` to obtain that name syntax? What is the failure mode supposed to be if the syntax passed as an argument doesn't support interceptors?
 
 We expect that if support for intercepting more member kinds is permitted, then additional API for those member kinds should be introduced. The commitment we are making when we support intercepting a particular member kind is similar in significance to the commitment we make when introducing a public API. It doesn't serve generator authors to try and optimize for fewest number of public APIs in this case.
 
@@ -183,6 +189,10 @@ That public API could look something like the following:
 
 Note that if we do something like this, there will be a deep need to discover interceptors, and incrementally update compilations containing interceptors, with as little binding work as possible. It will be non-tenable perf-wise if, for example, we had to bind all the attributes in a compilation in order to decide what the interceptor for a given invocation is. We may need to store some additional information in the declaration tree, which can be incrementally updated, in order to address this.
 
+### `<InterceptorsNamespaces>` property
+
+We introduced an MSBuild property `<InterceptorsPreviewNamespaces>` as part of the experimental release of the interceptors feature. A compilation error occurs if an interceptor is declared outside of one of the namespaces listed in this property. We suggest keeping this property under the name `<InterceptorsNamespaces>`, eventually phasing out the original name. This will help us get a better level of performance with the `GetInterceptorMethod` public API, by reducing the set of declarations which need to be searched for possible `[InterceptsLocation]` attributes.
+
 ## Future (possibly post-C# 13)
 
 ### Intercepting properties
@@ -200,19 +210,39 @@ For method invocations like `receiver.M(args)`, we use the location of the `M` t
 
 For member usages such as user-defined implicit conversions which do not have any specific corresponding syntax, we expect that interception will never be possible.
 
-### Interceptor signature variance
-    - https://github.com/dotnet/aspnetcore/issues/47338
-    - ASP.NET has indicated this can wait till later in cycle
-    - Argument type is `Func<TCaptured>`. Interceptee parameter is `System.Delegate`. Interceptor parameter wants to be `Func<T>` and to have call site pass the `TCaptured` as a type argument.
+### Interceptor signature variance and advanced generics cases
 
+In the experimental release of interceptors, we've used a fairly stringent [signature matching](https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md#signature-matching) requirement which does not permit variance of the parameter or return types between the interceptor and original methods.
 
-### Generic unification
+We also have limited support for [generics](https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md#arity). Essentially, an interceptor needs to either have the same arity as the original method, or it needs to not be generic at all.
 
-Currently interceptors have a limited support for generics which is outlined [here](https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md#arity). However, users have raised [concerns](https://github.com/dotnet/roslyn/pull/68218#discussion_r1220428975) about the inability to intercept methods where the original signature includes type parameters which are "captured" from a containing scope.
+ASP.NET has a [use case](https://github.com/dotnet/aspnetcore/issues/47338), which in order to address, we would need to make adjustments in both the above areas.
 
 ```cs
-class C<T>
+class Original<TCaptured>
 {
-    public void Original(T t);
+    public void M1()
+    {
+        API.M2(() => this);
+    }
+}
+
+class API
+{
+    public static void M2(Delegate del) { }
+}
+
+class Interceptors
+{
+    [InterceptsLocation(/* API.M2(() => this) */)]
+    public static void M3<T>(Func<T> func) { }
 }
 ```
+
+In `M3<T>`, the generator author wants to be able to use the the type parameter `TCaptured` within the return value `=> this`. This means that we would need to permit a parameter type difference between interceptor and original methods where an implicit reference conversion exists from the interceptor parameter type (`Func<T>`) to the original method parameter type (`Delegate`). We would need to start reporting errors when the argument of an intercepted call is not convertible to the interceptor parameter type.
+
+Any change we make in this vein, we should be careful has no possibility for "ripple effects", e.g. use of an interceptor changing the type of an expression, then changing the overload resolution of another call, changing the type of a `var`, and so on.
+
+We would also need to define how the type arguments to the `M3<T>` call are determined. This might require doing a type argument inference on the intercepted "version" of the call.
+
+There are more specifics which need to be investigated here before we can be sure how to move forward. ASP.NET has indicated this can wait till later in the .NET 9 cycle, so we'd like to push this question out until we've addressed the more urgent aspects of the feature design.
