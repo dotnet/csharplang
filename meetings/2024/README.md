@@ -29,7 +29,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 1, 2024
 
-- Meeting on meeting (Mads)
+- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
+- _Open slot_
 
 ### Wed Mar 27, 2024
 
@@ -37,8 +38,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 11, 2024
 
-- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
-- _Open slot_
+- Meeting on meeting (Mads)
 
 ### Mon Mar 4, 2024
 
