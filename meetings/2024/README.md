@@ -15,6 +15,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Extensions (Julien and Mads (after Feb 5))
 - [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
 - [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
+- [Runtime Async Experiment](https://github.com/dotnet/runtime/issues/94620)
 
 ## Recurring topics
 
