@@ -54,7 +54,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Feb 7, 2024
 
 - [Partial type inference](https://github.com/dotnet/csharplang/pull/7582) (Rikki / [Tomas](https://github.com/TomatorCZ))
-- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7189) (Mads)
+- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7918) (Mads)
 
 ### Mon Feb 5, 2024
 
