@@ -548,6 +548,31 @@ in overrides/implements scenarios `params` modifier doesn't have to match.
 #### Resolution:
 Params parameters are implicitly scoped - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements.
 
+### Consider enforcing `scoped` or `params` across overrides
+
+We've previously stated that `params` parameters should be `scoped` by default. However, this introduces odd behavior in overridding, due
+to our existing rules around restating `params`:
+
+```cs
+class Base
+{
+    internal virtual Span<int> M1(scoped Span<int> s1, params Span<int> s2) => throw null!;
+}
+
+class Derived : Base
+{
+    internal override Span<int> M1(Span<int> s1, // Error, missing `scoped` on override
+                                   Span<int> s2  // No error: parameter is implicitly params, and therefore implicitly scoped
+                                  ) => throw null!;
+}
+```
+
+We have a difference in behavior between carrying the `params` and carrying the `scoped` across overrides here: `params` is inherited implicitly,
+and with it `scoped`, while `scoped` by itself is _not_ inherited implicitly and must be repeated at every level.
+
+**Proposal**: We should enforce that overrides of `params` parameters must explicitly state `params` or `scoped` if the original definition is a
+`scoped` parameter. In other words, `s2` in `Derived` must have `params`, `scoped`, or both.
+
 ## Alternatives 
 
 There is an alternative [proposal](https://github.com/dotnet/csharplang/blob/main/proposals/params-span.md) that extends
