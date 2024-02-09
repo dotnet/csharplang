@@ -4,12 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Open question: [`params` mismatches across inheritance](../../proposals/params-collections.md#consider-enforcing-scoped-or-params-across-overrides) (Fred, Aleksey)
-
 ## Schedule when convenient
-
-- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
-- [Runtime Async Experiment](https://github.com/dotnet/runtime/issues/94620) (Andy)
 
 ## Recurring topics
 
@@ -32,10 +27,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 8, 2024
 
+- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
+
 ### Mon Apr 1, 2024
 
-
-- _Open slot_
+- Open question: [`params` mismatches across inheritance](../../proposals/params-collections.md#consider-enforcing-scoped-or-params-across-overrides) (Fred, Aleksey)
+- [Runtime Async Experiment](https://github.com/dotnet/runtime/issues/94620) (Andy)
 
 ### Wed Mar 27, 2024
 
