@@ -1,9 +1,8 @@
 # Extension types
 
-TODO3 disallow variance in type parameters of extensions  
 TODO3 No duplicate base extensions (to avoid ambiguities)  
 TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.  
-TODO3 overload resolution disambiguation between extension and underlying members
+TODO4 overload resolution disambiguation between extension and underlying members
 
 TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
@@ -535,27 +534,6 @@ We modify the [method invocations rules](https://github.com/dotnet/csharpstandar
 
 ### Extension invocations
 
-TODO3 lookup disambiguation or priority rules?
-Yes, let's find a way to prefer the extension on more specific underlying type.  
-
-```
-System.Console.Write(new C().M(42));
-
-public class Base { }
-
-public class C : Base { }
-
-public static class E1
-{
-    public static int M(this Base b, int i) => throw null;
-}
-
-public static class E2
-{
-    public static int M(this C c, int i) => i;
-}
-```
-
 We replace the [extension method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12893-extension-method-invocations)
 with the following:
 
@@ -751,12 +729,50 @@ The search proceeds as follows:
 - If no extension indexer is found to be suitable for the element access
   in any enclosing scope, a compile-time error occurs.
 
-### Member lookup > Base types
+### 12.5 Member lookup
 
-TL;DR: Member lookup on an extension type includes members from its base extensions, its extended type and base types.
+TL;DR: Member lookup on an extension type includes members from its base extensions, its extended type and base types.  
+We prefer extension fields/properties/... on more specific extension types.
 
-We modify the [base types rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1252-base-types) 
+We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#125-member-lookup) 
 as follows:
+
+#### 12.5.1 General
+
+A member lookup of a name `N` with `K` type arguments in a type `T` is processed as follows:
+
+- First, a set of accessible members named `N` is determined:
+  \[...]
+- Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process might be able to infer the type arguments.
+- Next, if the member is invoked, all non-invocable members are removed from the set.
+- Next, members that are hidden by other members are removed from the set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied:
+  - If `M` is a constant, field, property, event, or enumeration member, then all members declared in a base type of `S` are removed from the set.
+  - \***If `M` is a constant, field, property, event, or enumeration member of an extension type with underlying type `U`, then all extension members declared for a base type of `U` are removed from the set.**
+  - If `M` is a type declaration, then all non-types declared in a base type of `S` are removed from the set, and all type declarations with the same number of type parameters as `M` declared in a base type of `S` are removed from the set.
+  - If `M` is a method, then all non-method members declared in a base type of `S` are removed from the set.
+\[...]
+
+TODO4 this doesn't work... Member lookup doesn't look for extension members. That's done by Simple Name and Member Access.
+TODO4 what if the member lookup was in a non-extension scenario (eg. E.)
+As a result, we'll prefer more specific constant/property/field/... extension members:
+```
+_ = C.Property; // find `E2.Property` as opposed to `E1.Property`
+
+public class Base { }
+public class C : Base { }
+
+public implicit extension E1 for Base
+{
+    public static int Property => throw null;
+}
+
+public implicit extension E2 for C
+{
+    public static int Property => throw null;
+}
+```
+
+#### 12.5.2 Base types
 
 For purposes of member lookup, a type `T` is considered to have the following base types:
 
@@ -899,7 +915,7 @@ For context see [extension method invocation rules](https://github.com/dotnet/cs
 
 ### Identical simple names and type names
 
-For context see [Identical simple names and type names](https://github.com/dotnet/csharplang/blob/main/proposals/primary-constructors.md#identical-simple-names-and-type-names).
+For context see [Identical simple names and type names](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#identical-simple-names-and-type-names).
 TODO3
 
 ### Better function member
