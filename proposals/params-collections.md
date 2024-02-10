@@ -250,6 +250,9 @@ class Program
 
 It doesn't feel reasonable to "compare" collections that are built from different elements.
 
+>This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#better-function-member-changes)
+>and was approved.
+
 ### Dynamic vs. Static Binding
 
 Expanded forms of candidates utilizing non-array params collections won't be considered as valid candidates by the current C# runtime binder.
@@ -340,9 +343,20 @@ Otherwise, the *invocation_expression* is dynamically bound.
 - Otherwise, if any candidate passing the test has non-array params parameter and it could possibly be applicable only in an expanded form,
   a compile-time warning occurs.
 
+> The proposed new rules were reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#dynamic-support)
+> and were approved.
+
 We also should consider reverting/fixing spec violation that affects local functions today, see https://github.com/dotnet/roslyn/issues/71399. 
 
+>[LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#dynamic-and-ref-local-function-bugfixing)
+>confirmed that we want to fix this spec violation. 
+
 ### Order of evaluation with non-array collections in non-trivial scenarios
+
+> This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md#params-collections-evaluation-orders)
+> and was approved. Despite the fact that array cases deviate from other collections, the official language specification
+> doesn't have to specify different rules for arrays. The deviations could simply be treated as an implementation artifact.
+> At the same time we do not intend to change the existing behavior around arrays.
 
 #### Named arguments
 
@@ -592,4 +606,6 @@ especially that other languages are unlikely to support consumption of non-array
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements
 - https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md#params-collections-evaluation-orders
 
