@@ -67,6 +67,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jan 31, 2024
 
+[C# Language Design Meeting for January 31st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md)
+
 - Relax "enumerable" requirement for collection expressions
 - `params` collections evaluation orders
 
