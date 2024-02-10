@@ -63,12 +63,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [First class span types](https://github.com/dotnet/csharplang/issues/7905) (Fred)
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
+## C# Language Design Notes for 2024
+
 ### Wed Jan 31, 2024
 
-- Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
-- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
-
-## C# Language Design Notes for 2024
+- Relax "enumerable" requirement for collection expressions
+- `params` collections evaluation orders
 
 ### Mon Jan 29, 2024
 
