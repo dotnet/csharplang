@@ -117,11 +117,12 @@ string M1(int i) => M2(i);
 string M2(IPrettyPrint p) { … }
 ```
 This represents a problem for both the compiler and the runtime.
+
 [ ] Open question: What should be the behavior when extensions are ambiguous? There are a number of options:
-•	It could be illegal to define duplicate instances (multiple extensions for the exact same type and exact same interface). This would only work for extensions defined in the same assembly. In addition, what about “overlapping” but not duplicate instances?
-•	Extensions have names. In some cases, the extension could be disambiguated via name. However, this does not work for Composite extensions as detailed previously as there is no single extension which conforms to the stated constraints.
-•	If extension disambiguation is by treating extensions as types, it runs into the semantic violations detailed in Interface parameter. Extensions are broadly not compatible with conventional notions of types in C#. Treating them as types risks large scale confusion.
-•	It could be illegal to define duplicate or overlapping instances via an “orphan rule.” The rule defined by Rust is that either the type being extended or the interface being implemented must be defined in the same compilation unit as the extension. This would allow the compiler to check for overlapping at extension definition time.
+ - It could be illegal to define duplicate instances (multiple extensions for the exact same type and exact same interface). This would only work for extensions defined in the same assembly. In addition, what about “overlapping” but not duplicate instances?
+ - Extensions have names. In some cases, the extension could be disambiguated via name. However, this does not work for Composite extensions as detailed previously as there is no single extension which conforms to the stated constraints.
+ - If extension disambiguation is by treating extensions as types, it runs into the semantic violations detailed in Interface parameter. Extensions are broadly not compatible with conventional notions of types in C#. Treating them as types risks large scale confusion.
+ - It could be illegal to define duplicate or overlapping instances via an “orphan rule.” The rule defined by Rust is that either the type being extended or the interface being implemented must be defined in the same compilation unit as the extension. This would allow the compiler to check for overlapping at extension definition time.
 
 ### Incompatible implementations
 Consider a Dictionary implementation which depended on an `IHashable` interface instead of `object.GetHashCode()`. Then, consider the usage of such a dictionary from two different assemblies, each of which define their own extension implementations of `IHashable` for a given type.
@@ -150,9 +151,10 @@ void M2(Dictionary<int, int> dict) {
 ```
 If the dictionary from `M` were to ever somehow appear as an argument to `M2` then a big problem would occur. It is not clear what implementation to use for any given substitution. Even though `int` implements `IHashable` in both assemblies, the implementations are not compatible. If the extension implementation in Assembly 2 is used for the Dictionary, the hash code result is not the same for the same input. If that implementation is not used, it is not clear how Assembly 2 would properly type check, given that the validity of the type `Dictionary<int, int>` depends on the extension `IntHash` only visible in Assembly 2.
 One way to clearly make the above situation impossible is to consider an “orphan rule”, as described in Ambiguous Implementations
+
 [ ] Open questions:
-•	Is the above code valid? Does it produce any errors?
-•	Is there a difference in type between the Dictionary<int, int> clauses in Assembly 1 and Assembly 2?
+ - Is the above code valid? Does it produce any errors?
+ - Is there a difference in type between the Dictionary<int, int> clauses in Assembly 1 and Assembly 2?
 
 ## Implementations
 
