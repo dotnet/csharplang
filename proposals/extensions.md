@@ -491,6 +491,8 @@ We can also get to extension invocation in:
 
 That is covered below.
 
+TODO3 Is the "where `T` is not a type parameter" portion still relevant?
+
 ### Method invocations
 
 TL;DR: Instead of falling back to "extension method invocation" directly, we'll now fall back to "extension invocations" which replaces it.
