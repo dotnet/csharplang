@@ -428,42 +428,11 @@ TODO2 types may not be called "extension" (reserved, break)
 
 TL;DR: For certain syntaxes on non-extension types (member access, element access), 
 we'll fall back to an implicit extension member lookup.  
-For extension types, accessible members of the underlying type are available
-because of member lookup.
 
 ### Simple names
 
-TL;DR: After doing an unsuccessful member lookup in an extension, we'll also perform a
-member lookup in the underlying type.  
-
-We modify the [simple names rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1174-simple-names) as follows:
-
-The *simple_name* with identifier `I` is evaluated and classified as follows:
-- ... the *simple_name* refers to that local variable, parameter or constant.
-- ... the *simple_name* refers to that [generic method declaration's] type parameter.
-- Otherwise, for each instance type `T`, starting with the instance type of the 
-  immediately enclosing type declaration and continuing with the instance type 
-  of each enclosing class or struct declaration (if any):
-  - ... the *simple_name* refers to that [type declaration's] type parameter.
-  - Otherwise, if a member lookup of `I` in `T` with `e` type arguments produces a match:
-    - If `T` is the instance type of the immediately enclosing class or struct 
-      type and the lookup identifies one or more methods, the result is a method group 
-      with an associated instance expression of `this`. 
-      If a type argument list was specified, it is used in calling a generic method.
-    - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, 
-      if the lookup identifies an instance member, and if the reference occurs 
-      within the *block* of an instance constructor, an instance method, or an instance accessor, 
-      the result is the same as a member access of the form `this.I`. 
-      This can only happen when `e` is zero.
-    - Otherwise, the result is the same as a member access of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
-  - \***Otherwise, if `T` is an extension (only relevant in phase B) and 
-    a member lookup of `I` in underlying type `U` with `e` type arguments produces a match:**  
-    ...
-- Otherwise, for each namespace `N`, starting with the namespace in which the *simple_name* occurs, 
-  continuing with each enclosing namespace (if any), and ending with the global namespace, 
-  the following steps are evaluated until an entity is located:  
-  ...
-- Otherwise, the simple_name is undefined and a compile-time error occurs.
+No changes to [simple names rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1174-simple-names) 
+are needed. Member lookup on a type or value of extension type includes accessible members from its extended type.
 
 ### Member access
 
@@ -471,7 +440,7 @@ TL;DR: After doing an unsuccessful member lookup in a type,
 we'll perform an extension member lookup for non-invocations
 or attempt an extension invocation for invocations.
 
-We modify the [member access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access) as follows:
+We modify the [member access rules](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1287-member-access) as follows:
 
 - ... the result is that namespace.
 - ... the result is that type constructed with the given type arguments.
