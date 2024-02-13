@@ -59,12 +59,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Partial type inference](https://github.com/dotnet/csharplang/pull/7582) (Rikki / [Tomas](https://github.com/TomatorCZ))
 - [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7918) (Mads)
 
-### Mon Feb 5, 2024
+### Mon Feb 5, 2024 (unvisited topics)
 
-- [First class span types](https://github.com/dotnet/csharplang/issues/7905) (Fred)
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Mon Feb 5, 2024
+
+[C# Language Design Meeting for Feb 5th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-05.md)
+
+- First-class span types
+- Collection expressions: inline collections
 
 ### Wed Jan 31, 2024
 
