@@ -198,9 +198,9 @@ We introduced an MSBuild property `<InterceptorsPreviewNamespaces>` as part of t
 ### Intercepting properties
 Currently the interceptors feature only supports intercepting ordinary methods. Much like with partial methods and the upcoming partial properties, users want to be able to intercept usages of more kinds of members, such as properties and constructors.
 
-    - UnsafeAccessor does not support properties directly. Instead, a given usage of UnsafeAccessor decorates a method which calls through to a single property accessor.
-    - Consider: What happens when we want to intercept `obj.Prop += a`? We can't choose a single method to replace usage of `Prop`.
-    - Conclusion: We should probably favor intercepting a property with an extension property. We are likely blocked here until we ship extensions.
+  - UnsafeAccessor does not support properties directly. Instead, a given usage of UnsafeAccessor decorates a method which calls through to a single property accessor.
+  - Consider: What happens when we want to intercept `obj.Prop += a`? We can't choose a single method to replace usage of `Prop`.
+  - Conclusion: We should probably favor intercepting a property with an extension property. We are likely blocked here until we ship extensions.
 
 ### Intercepting constructors and other member kinds
 
