@@ -187,6 +187,36 @@ That public API could look something like the following:
  }
 ```
 
+Usage:
+```cs
+public sealed override void Initialize(AnalysisContext context)
+{
+    context.RegisterOperationAction(handleInvocation, OperationKind.Invocation);
+
+    void handleInvocation(OperationAnalysisContext context)
+    {
+        var invocationOperation = (IInvocationOperation)context.Operation;
+        if (invocationOperation.Syntax is InvocationExpressionSyntax invocationSyntax
+            && context.SemanticModel.GetInterceptorMethod(invocationSyntax, context.CancellationToken) is IMethodSymbol interceptor)
+        {
+            AnalyzeInterceptor(interceptor);
+        }
+    }
+
+
+    context.RegisterSyntaxNodeAction(handleSyntax, SyntaxKind.InvocationExpression);
+
+    void handleSyntax(SyntaxNodeAnalysisContext context)
+    {
+        var invocationSyntax = (InvocationExpressionSyntax)context.Node;
+        if (context.SemanticModel.GetInterceptorMethod(invocationSyntax, context.CancellationToken) is IMethodSymbol interceptor)
+        {
+            AnalyzeInterceptor(interceptor);
+        }
+    }
+}
+```
+
 Note that if we do something like this, there will be a deep need to discover interceptors, and incrementally update compilations containing interceptors, with as little binding work as possible. It will be non-tenable perf-wise if, for example, we had to bind all the attributes in a compilation in order to decide what the interceptor for a given invocation is. We may need to store some additional information in the declaration tree, which can be incrementally updated, in order to address this.
 
 ### `<InterceptorsNamespaces>` property
