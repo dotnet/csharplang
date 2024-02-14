@@ -54,16 +54,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 21, 2024
 
-### Wed Feb 7, 2024
-
-- [Partial type inference](https://github.com/dotnet/csharplang/pull/7582) (Rikki / [Tomas](https://github.com/TomatorCZ))
-- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7918) (Mads)
-
 ### Mon Feb 5, 2024 (unvisited topics)
 
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Wed Feb 7, 2024
+
+[C# Language Design Meeting for Feb 7th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-07.md)
+
+- Partial type inference
+- Breaking change warnings
 
 ### Mon Feb 5, 2024
 
