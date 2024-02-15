@@ -3,7 +3,7 @@
 ## Summary
 [summary]: #summary
 
-Special-case how `System.Threading.Lock` interacts with the `lock` keyword (calling its `EnterLockScope` method under the hood).
+Special-case how `System.Threading.Lock` interacts with the `lock` keyword (calling its `EnterScope` method under the hood).
 Add static analysis warnings to prevent accidental misuse of the type where possible.
 
 ## Motivation
@@ -21,7 +21,7 @@ namespace System.Threading
     {
         public void Enter();
         public void Exit();
-        public Scope EnterLockScope();
+        public Scope EnterScope();
     
         public ref struct Scope
         {
@@ -41,7 +41,7 @@ are changed to special-case the `System.Threading.Lock` type:
 >
 > 1. **where `x` is an expression of type `System.Threading.Lock`, is precisely equivalent to:**
 >    ```cs
->    using (x.EnterLockScope())
+>    using (x.EnterScope())
 >    {
 >        ...
 >    }
@@ -52,7 +52,7 @@ are changed to special-case the `System.Threading.Lock` type:
 >    {
 >        public sealed class Lock
 >        {
->            public Scope EnterLockScope();
+>            public Scope EnterScope();
 >    
 >            public ref struct Scope
 >            {
@@ -124,7 +124,7 @@ To escape out of the warning and force use of monitor-based locking, one can use
   ```
 
 - We could include static analysis to prevent usage of `System.Threading.Lock` in `using`s with `await`s.
-  I.e., we could emit either an error or a warning for code like `using (lockVar.EnterLockScope()) { await ... }`.
+  I.e., we could emit either an error or a warning for code like `using (lockVar.EnterScope()) { await ... }`.
   Currently, this is not needed since `Lock.Scope` is a `ref struct`, so that code is illegal anyway.
   However, if we ever allowed `ref struct`s in `async` methods or changed `Lock.Scope` to not be a `ref struct`, this analysis would become beneficial.
   (We would also likely need to consider for this all lock types matching the general pattern if implemented in the future.
