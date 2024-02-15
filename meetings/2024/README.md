@@ -51,14 +51,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extensions (Julien and Mads)
 
-### Mon Feb 26, 2024
+
+### Wed Feb 26, 2024
+
+- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
+
+### Mon Feb 21, 2024
 
 - Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
 - Review: [Allow lambdas with parameter modifiers, but without parameter types](https://github.com/dotnet/csharplang/pull/7369) (Cyrus)
 
-### Wed Feb 21, 2024
-
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ### Wed Feb 7, 2024
 
