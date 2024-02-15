@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
+
 ## Schedule when convenient
 
 - Open question: [Should presence of required members prevent declaration of params parameter?](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#should-presence-of-required-members-prevent-declaration-of-params-parameter) (Aleksey)
