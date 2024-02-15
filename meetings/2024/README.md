@@ -8,8 +8,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- Open question: [Should presence of required members prevent declaration of params parameter?](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#should-presence-of-required-members-prevent-declaration-of-params-parameter) (Aleksey)
-
 ## Schedule when convenient
 
 - [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582)
@@ -39,7 +37,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 1, 2024
 
-- Open question: [`params` mismatches across inheritance](../../proposals/params-collections.md#consider-enforcing-scoped-or-params-across-overrides) (Fred, Aleksey)
+
 - [Runtime Async Experiment](https://github.com/dotnet/runtime/issues/94620) (Andy)
 
 ### Wed Mar 27, 2024
@@ -65,8 +63,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 21, 2024
 
-- Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
 - Review: [Allow lambdas with parameter modifiers, but without parameter types](https://github.com/dotnet/csharplang/pull/7369) (Cyrus)
+- Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
+- Open question: [`params` mismatches across inheritance](../../proposals/params-collections.md#consider-enforcing-scoped-or-params-across-overrides) (Fred, Aleksey)
+- Open question: [Should presence of required members prevent declaration of params parameter?](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#should-presence-of-required-members-prevent-declaration-of-params-parameter) (Aleksey)
+
 
 ## C# Language Design Notes for 2024
 
