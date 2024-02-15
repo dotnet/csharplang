@@ -51,7 +51,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extensions (Julien and Mads)
 
-
 ### Wed Feb 26, 2024
 
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
