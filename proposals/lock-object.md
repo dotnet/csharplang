@@ -135,13 +135,13 @@ To escape out of the warning and force use of monitor-based locking, one can use
   - for the new `Lock` type (only needed if the API proposal changed it from `class` to `struct`),
   - for the general pattern where any type can participate when implemented in the future.
 
-## Unresolved questions
-[unresolved]: #unresolved-questions
-
-- Can we allow the new `lock` statement in async methods?
-  Since `await` is disallowed inside the `lock`, this would be safe.
-  Currently, since `lock` is lowered to `using` with a `ref struct` as the resource, this results in a compile-time error.
-  The workaround is to extract the `lock` into a separate non-async method.
+- We could allow the new `lock` in `async` methods where `await` is not used inside the `lock`.
+  - Currently, since `lock` is lowered to `using` with a `ref struct` as the resource, this results in a compile-time error.
+    The workaround is to extract the `lock` into a separate non-`async` method.
+  - Instead of using the `ref struct Scope`, we could emit `Lock.Enter` and `Lock.Exit` methods in `try`/`finally`.
+    However, the `Exit` method must throw when it's called from a different thread than `Enter`,
+    hence it contains a thread lookup which is avoided when using the `Scope`.
+  - Best would be to allow compiling `using` on a `ref struct` in `async` methods if there is no `await` inside the `using` body.
 
 ## Design meetings
 
