@@ -4,20 +4,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
-- 2 hours please. Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
-- Review: Allow lambdas with parameter modifiers, but without parameter types: https://github.com/dotnet/csharplang/pull/7369 (Cyrus)
-- Open question: [`params` mismatches across inheritance](../../proposals/params-collections.md#consider-enforcing-scoped-or-params-across-overrides) (Fred, Aleksey)
+## Schedule when convenient
+
 - Open question: [Should presence of required members prevent declaration of params parameter?](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#should-presence-of-required-members-prevent-declaration-of-params-parameter) (Aleksey)
 
 ## Schedule when convenient
 
-- [Overload resolution priority](https://github.com/dotnet/csharplang/pull/7906) (Fred)
-- Discriminated Union WG (Matt)
-- Extensions (Julien and Mads (after Feb 5))
-- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
-- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
-- [Runtime Async Experiment](https://github.com/dotnet/runtime/issues/94620)
 - [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582)
 
 ## Recurring topics
@@ -41,23 +33,38 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 8, 2024
 
+- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
+
 ### Mon Apr 1, 2024
+
+- Open question: [`params` mismatches across inheritance](../../proposals/params-collections.md#consider-enforcing-scoped-or-params-across-overrides) (Fred, Aleksey)
+- [Runtime Async Experiment](https://github.com/dotnet/runtime/issues/94620) (Andy)
 
 ### Wed Mar 27, 2024
 
+- Discriminated Union WG (Matt)
+
 ### Mon Mar 11, 2024
+
+- Meeting on meeting (Mads)
 
 ### Mon Mar 4, 2024
 
+- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
+- [Overload resolution priority](https://github.com/dotnet/csharplang/pull/7906) (Fred)
+
 ### Wed Feb 28, 2024
+
+- Extensions (Julien and Mads)
 
 ### Mon Feb 26, 2024
 
+- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
+
 ### Wed Feb 21, 2024
 
-### Mon Feb 5, 2024 (unvisited topics)
-
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
+- Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
+- Review: [Allow lambdas with parameter modifiers, but without parameter types](https://github.com/dotnet/csharplang/pull/7369) (Cyrus)
 
 ## C# Language Design Notes for 2024
 
