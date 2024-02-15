@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - 2 hours please. Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 - Review: Allow lambdas with parameter modifiers, but without parameter types: https://github.com/dotnet/csharplang/pull/7369 (Cyrus)
 - Open question: [`params` mismatches across inheritance](../../proposals/params-collections.md#consider-enforcing-scoped-or-params-across-overrides) (Fred, Aleksey)
+- Open question: [Should presence of required members prevent declaration of params parameter?](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#should-presence-of-required-members-prevent-declaration-of-params-parameter) (Aleksey)
 
 ## Schedule when convenient
 
