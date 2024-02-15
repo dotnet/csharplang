@@ -587,6 +587,38 @@ and with it `scoped`, while `scoped` by itself is _not_ inherited implicitly and
 **Proposal**: We should enforce that overrides of `params` parameters must explicitly state `params` or `scoped` if the original definition is a
 `scoped` parameter. In other words, `s2` in `Derived` must have `params`, `scoped`, or both.
 
+### Should presence of required members prevent declaration of `params` parameter?
+
+Consider the following example:
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+public class MyCollection1 : IEnumerable<long>
+{
+    IEnumerator<long> IEnumerable<long>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+    public void Add(long l) => throw null;
+
+    public required int F; // Collection has required member and constructor doesn't initialize it explicitly
+}
+
+class Program
+{
+    static void Main()
+    {
+        Test(2, 3); // error CS9035: Required member 'MyCollection1.F' must be set in the object initializer or attribute constructor.
+    }
+
+    // Should an error be reported for the parameter indicating that the constructor that is required
+    // to be available doesn't initialize required members? In other words, should one be able
+    // to declare such a parameter under the specified conditions?
+    static void Test(params MyCollection1 a)
+    {
+    }
+}
+```
+
 ## Alternatives 
 
 There is an alternative [proposal](https://github.com/dotnet/csharplang/blob/main/proposals/params-span.md) that extends
