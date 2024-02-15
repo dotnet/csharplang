@@ -6,6 +6,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- Open question: [Should presence of required members prevent declaration of params parameter?](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#should-presence-of-required-members-prevent-declaration-of-params-parameter) (Aleksey)
+
+## Schedule when convenient
+
+- [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -60,29 +66,37 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
 - Review: [Allow lambdas with parameter modifiers, but without parameter types](https://github.com/dotnet/csharplang/pull/7369) (Cyrus)
 
+## C# Language Design Notes for 2024
 
 ### Wed Feb 7, 2024
 
-- [Partial type inference](https://github.com/dotnet/csharplang/pull/7582) (Rikki / [Tomas](https://github.com/TomatorCZ))
-- [Breaking change warnings](https://github.com/dotnet/csharplang/issues/7918) (Mads)
+[C# Language Design Meeting for Feb 7th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-07.md)
+
+- Partial type inference
+- Breaking change warnings
 
 ### Mon Feb 5, 2024
 
-- [First class span types](https://github.com/dotnet/csharplang/issues/7905) (Fred)
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
+[C# Language Design Meeting for Feb 5th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-05.md)
+
+- First-class span types
+- Collection expressions: inline collections
 
 ### Wed Jan 31, 2024
 
-- Collections: [Relaxing enumerability requirement on types with \[CollectionBuilder\]](https://github.com/dotnet/csharplang/issues/7744) (Julien)
-- Confirm [order of evaluation with non-array params collections in non-trivial scenarios](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#order-of-evaluation-with-non-array-collections-in-non-trivial-scenarios) (Aleksey)
+[C# Language Design Meeting for January 31st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md)
+
+- Relax "enumerable" requirement for collection expressions
+- `params` collections evaluation orders
 
 ### Mon Jan 29, 2024
 
-- Overload resolution rules for "Params Collections" (Aleksey)
-  - [Better function member](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#better-function-member)
-  - [Binding in presence of dynamic arguments](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#dynamic-vs-static-binding)
+[C# Language Design Meeting for January 29th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md)
 
-## C# Language Design Notes for 2024
+- `params` collections
+  - Better function member changes
+  - `dynamic` support
+- `dynamic` and `ref` local function bugfixing
 
 ### Mon Jan 22, 2024
 
