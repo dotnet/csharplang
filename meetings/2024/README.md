@@ -57,6 +57,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Feb 26, 2024
 
+- Breaking change with collection expressions and UI collection types (https://github.com/dotnet/roslyn/issues/72098).  Cyrus + Chuck
+- Breaking change with immutable arrays and collection expressions on downlevel scenarios (https://github.com/dotnet/roslyn/issues/72170).  Cyrus + Chuck
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ### Wed Feb 21, 2024
