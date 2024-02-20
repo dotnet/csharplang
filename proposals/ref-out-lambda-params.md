@@ -64,8 +64,8 @@ then the set of compatible delegate types and expression tree types is restricte
 to those that have no out parameters.
 
 + If an anonymous function contains an `implicit_anonymous_function_parameter_ex` 
-with modifiers, then the set of compatible delegate types and expression tree types 
-is restricted to those that have the same modifiers in the same order (§10.7).
++ with modifiers, then the set of compatible delegate types and expression tree types 
++ is restricted to those that have the same modifiers in the same order (§10.7).
 ```
 
 ### Open questions
@@ -88,16 +88,16 @@ We would also update the semantic specification to say:
 
 ```diff
 - The parameters of an anonymous function in the form of a lambda_expression can 
-be explicitly or implicitly typed. In an explicitly typed parameter list, the type
- of each parameter is explicitly stated. In an implicitly typed parameter list, 
-the types of the parameters are inferred from the context in which the anonymous 
-function occurs—specifically, when the anonymous function is converted to a compatible
- delegate type or expression tree type, that type provides the parameter types (§10.7).
+- be explicitly or implicitly typed. In an explicitly typed parameter list, the type
+- of each parameter is explicitly stated. In an implicitly typed parameter list, 
+- the types of the parameters are inferred from the context in which the anonymous 
+-function occurs—specifically, when the anonymous function is converted to a compatible
+- delegate type or expression tree type, that type provides the parameter types (§10.7).
 + The parameters of an anonymous function in the form of a lambda_expression can 
-be explicitly or implicitly typed. In an `anonymous_function_signature` whose 
-parameters have a provided `type`, the type of each parameter is explicitly stated. 
-In all other signatures the types of the parameters are inferred from the context 
-in which the anonymous function occurs—specifically, when the anonymous function 
-is converted to a compatible delegate type or expression tree type, that type 
-provides the parameter types (§10.7).
++ be explicitly or implicitly typed. In an `anonymous_function_signature` whose 
++ parameters have a provided `type`, the type of each parameter is explicitly stated. 
++ In all other signatures the types of the parameters are inferred from the context 
++ in which the anonymous function occurs—specifically, when the anonymous function 
++ is converted to a compatible delegate type or expression tree type, that type 
++ provides the parameter types (§10.7).
 ```
