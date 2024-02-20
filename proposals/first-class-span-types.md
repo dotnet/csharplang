@@ -27,8 +27,8 @@ _implicit span conversion_. This conversion is defined as follows:
 ------
 
 An implicit span conversion permits `array_types`, `System.Span<T>`, `System.ReadOnlySpan<T>`, and `string` to be converted between each other as follows:
-* From any `array_type` with element type `Ei` to `System.Span<Ei>`
-* From any `array_type` with element type `Ei` to `System.ReadOnlySpan<Ui>`, provided that `Ei` is covariance-convertible ([§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion)) to `Ui`
+* From any single-dimensional `array_type` with element type `Ei` to `System.Span<Ei>`
+* From any single-dimensional `array_type` with element type `Ei` to `System.ReadOnlySpan<Ui>`, provided that `Ei` is covariance-convertible ([§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion)) to `Ui`
 * From `System.Span<Ti>` to `System.ReadOnlySpan<Ui>`, provided that `Ti` is covariance-convertible ([§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion)) to `Ui`
 * From `System.ReadOnlySpan<Ti>` to `System.ReadOnlySpan<Ui>`, provided that `Ti` is covariance-convertible ([§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion)) to `Ui`
 * From `string` to `System.ReadOnlySpan<char>`
@@ -47,7 +47,7 @@ We also add _implicit span conversion_ to the list of acceptable implicit conver
 > - `Cᵢ` is a non-generic, non-nested class
 > - The name of `Mₑ` is *identifier*
 > - `Mₑ` is accessible and applicable when applied to the arguments as a static method as shown above
-> - An implicit identity, reference ~~or boxing~~**, boxing, or span** conversion exists from *expr* to the type of the first parameter of `Mₑ`.
+> - An implicit identity, reference ~~or boxing~~ **, boxing, or span** conversion exists from *expr* to the type of the first parameter of `Mₑ`.
 
 #### Variance
 
