@@ -23,89 +23,67 @@ TryParse<int> parse2 = (string text, out int result) => Int32.TryParse(text, out
 
 ### Parameter declaration
 
-Parameter declarations in lambda expressions with parenthesized parameters now permit a single identifier after a modifier on the parameter.
-
 ### Grammar
 
-The change in the spec will require that [the grammar for lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12191-general) be adjusted as follows:
-
 ```diff
-  implicit_anonymous_function_signature
-      : '(' implicit_anonymous_function_parameter_list? ')'
-      | implicit_anonymous_function_parameter
-      ;
+implicit_anonymous_function_signature
+    : '(' implicit_anonymous_function_parameter_list? ')'
+    | implicit_anonymous_function_parameter
+    ;
 
-  implicit_anonymous_function_parameter_list
--     : implicit_anonymous_function_parameter
--       (',' implicit_anonymous_function_parameter)*
-+     : implicit_parenthesized_anonymous_function_parameter
-+       (',' implicit_parenthesized_anonymous_function_parameter)*
-      ;
+implicit_anonymous_function_parameter_list
+-    : implicit_anonymous_function_parameter (',' implicit_anonymous_function_parameter)*
++    : implicit_anonymous_function_parameter_ex (',' implicit_anonymous_function_parameter_ex)*
+    ;
 
-+ implicit_parenthesized_anonymous_function_parameter
-+     : attributes? anonymous_function_parameter_modifier* identifier default_argument?
-      ;
+implicit_anonymous_function_parameter
+    : identifier
+    ;
+
+implicit_anonymous_function_parameter_ex
+    : anonymous_function_parameter_modifier? identifier
+    ;
 ```
 
-Note: This does not apply to lambda expressions with a single parameter with omitted parentheses.
+Notes
 
-For example, these would not be legal:
-```csharp
-SelfReturnerIn<string> fin = in x => x;
-SelfReturnerRef<string> fref = ref x => x;
-SelfReturnerOut<string> fout = out x => x;
-
-delegate T SelfReturnerIn<T>(in T t);
-delegate T SelfReturnerRef<T>(ref T t);
-delegate T SelfReturnerOut<T>(out T t);
-```
-
-All the above examples are not legal due to ambiguity with taking the reference of the returned expression in the `ref` case. For consistency, all other modifiers are also left unsupported and illegal.
-
-Using the `scoped` modifier alone is supported, since it was explicitly ruled out as a type name without the presence of `@` before the identifier in C# 11. This means that the following code will resolve `x` as an implicitly-typed lambda parameter with the `scoped` modifier:
-
-```csharp
-SelfReturnerScoped<string> fs = (scoped x) => x;
-
-delegate T SelfReturnerScoped<T>(scoped T t);
-```
+1. This does not apply lambda without a parameter list.  e.g. `x => x.ToString()`.
+2. A lambda parameter list cannot mix `implicit_anonymous_function_parameter_ex` and `explicit_anonymous_function_parameter` parameters.
+3. An implicit lambda with a parameter list cannot have attributes (open question on if we want to allow that though).
+4. An implicit lambda with a parameter list cannot have a default value.
 
 The type of the parameters matches the type of the parameter in the target delegate type, including the modifiers.
 
-Implicitly-typed parameters with modifiers can be assigned attributes. Implicitly-typed parameters with modifiers will be eligible for being assigned a default value. Currently, only `scoped` ref-struct parameters can have default values.
+### Semantics
 
-Discard identifiers will be supported, as long as the modifiers are properly and correctly provided for the respective parameters, matching the target delegate type. This means that a parameter simply declared as `_` will not match a parameter declared `ref int x`, since the discard parameter needs to be accompanied by the `ref` modifier to match.
+https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12192-anonymous-function-signatures is updated as follows:
 
-More specifically, a proper lambda declaration involving discarded parameter names would be:
-```csharp
-delegate void Test(ref int x, scoped ref int y, params int[] p);
+```
+If an anonymous function has an explicit_anonymous_function_signature, then the set of compatible delegate types and expression tree types is restricted to those that have the same parameter types and modifiers in the same order (§10.7). In contrast to method group conversions (§10.8), contra-variance of anonymous function parameter types is not supported. If an anonymous function does not have an anonymous_function_signature, then the set of compatible delegate types and expression tree types is restricted to those that have no out parameters.
 
-Test t = (ref _, scoped ref _, params _) => { };
++ If an anonymous function contains an `implicit_anonymous_function_parameter_ex` with modifiers, then the set of compatible delegate types and expression tree types is restricted to those that have the same modifiers in the
+same order (§10.7).
 ```
 
-It will still be illegal for `async` lambdas to contain by-ref parameters, since it is illegal to have by-ref parameters in async methods.
+### Open questions
 
-If the lambda expression is not assigned to an expression with an explicit type, the type cannot be inferred from usage. For example, the following is illegal:
-```csharp
-var d = (in a, ref b, out c) =>
-{
-    Method(in a, ref b, out c);
-}
+1. Should attributes be allowed as well?
+2. Should default parameter values be allowed?
 
-void Method(in int a, ref int b, out int c)
-{
-    c = a;
-    b = c;
-}
+Both seem viable, and may be worth it if we're doing the rest of this work.  With this formalization, we would instead say that:
+
+```diff
+explicit_anonymous_function_parameter
+-    : attributes anonymous_function_parameter_modifier? type identifier default_argument?
++    : attributes anonymous_function_parameter_modifier? type? identifier default_argument?
+    ;
 ```
 
-This remains illegal as the current behavior for implicit-typed parameters without modifiers does not infer the type of the parameters through usage inside the body of the lambda expression. For example, the following is illegal:
-```csharp
-// Error: The delegate type could not be inferred
-var dd = (a, b) => Method2(a, b);
+With a rule that all parameters would have to supply a type, or eschew a type.
 
-int Method2(int a, int b) => a + b;
+We would also update the semantic specification to say:
+
 ```
-
-
-Should the above production rule be updated to only reflect the valid combinations of modifiers, the `implicit_parenthesized_anonymous_function_parameter` rule is updated accordingly to reflect the applicable modifiers.
+- The parameters of an anonymous function in the form of a lambda_expression can be explicitly or implicitly typed. In an explicitly typed parameter list, the type of each parameter is explicitly stated. In an implicitly typed parameter list, the types of the parameters are inferred from the context in which the anonymous function occurs—specifically, when the anonymous function is converted to a compatible delegate type or expression tree type, that type provides the parameter types (§10.7).
++ The parameters of an anonymous function in the form of a lambda_expression can be explicitly or implicitly typed. In an `anonymous_function_signature` whose parameters have a provided `type`, the type of each parameter is explicitly stated. In all other signatures the types of the parameters are inferred from the context in which the anonymous function occurs—specifically, when the anonymous function is converted to a compatible delegate type or expression tree type, that type provides the parameter types (§10.7).
+```
