@@ -82,7 +82,9 @@ explicit_anonymous_function_parameter
     ;
 ```
 
-With a rule that all parameters in the list would have to supply a type, or eschew a type.
+Note: This grammar is technically ambiguous with implicit_anonymous_function_parameter.  We'd need
+to clarify that at least one of `attributes, modifier, type or default-argument` would have to be provided.
+We'd also need a rule that all parameters in the list would have to supply a type, or eschew a type.
 
 We would also update the semantic specification to say:
 
