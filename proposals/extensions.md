@@ -834,7 +834,7 @@ We process as follows:
   - Perform member lookup for `I` in each compatible substituted extension type `X` 
     (note this takes into account whether the member is invoked).
   - Merge the results
-TODO3 spec how we deal with duplicate or near duplicate entries
+TODO4 spec how we deal with duplicate or near duplicate entries (for example, field E1.Member and method E2.Member)
   - Next, members that are hidden by other members are removed from the set.  
     (note: "base types" means "base extensions and underlying type" for extension types)
   - Finally, having removed hidden members, the result of the lookup is determined:
@@ -883,6 +883,20 @@ has a string property, an assignment of a string to that property will fail, as
 extension member lookup will find the `int` property and stop there.  
 
 For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
+
+### Natural function type
+
+The rules for determining the [natural function type of a method group](https://github.com/dotnet/csharplang/blob/main/proposals/method-group-natural-type-improvements.md) are modified as follows:
+
+1. For each scope, we construct the set of all candidate methods:
+  - for the initial scope, methods on the relevant type with arity matching the provided type arguments and satisfying constraints with the provided type arguments are in the set if they are static and the receiver is a type, or if they are non-static and the receiver is a value
+  - \***each subsequence scope is split to consider methods from extension types and extension methods in turn.**
+    - \***methods from compatible implicit extension types applicable in that scope which can be substituted with the provided type arguments and satisfying constraints with those are in the set to be considered first**
+    - extension methods in that scope that can be substituted with the provided type arguments and reduced using the value of the receiver while satisfying constraints are in the set
+  1. If we have no candidates in the given \***scope/set**, proceed to the next \***scope/set**.
+  2. If the signatures of all the candidates do not match, then the method group doesn't have a natural type
+  3. Otherwise, resulting signature is used as the natural type
+2. If the scopes are exhausted, then the method group doesn't have a natural type
 
 ### Identical simple names and type names
 
