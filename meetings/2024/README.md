@@ -61,15 +61,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Breaking change with immutable arrays and collection expressions on downlevel scenarios (https://github.com/dotnet/roslyn/issues/72170).  Cyrus + Chuck
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
+## C# Language Design Notes for 2024
+
 ### Wed Feb 21, 2024
 
-- Review: [Allow lambdas with parameter modifiers, but without parameter types](https://github.com/dotnet/csharplang/pull/7369) (Cyrus)
-- Review [metadata](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#metadata) section for"Params Collections". (Aleksey)
-- Open question: [`params` mismatches across inheritance](../../proposals/params-collections.md#consider-enforcing-scoped-or-params-across-overrides) (Fred, Aleksey)
-- Open question: [Should presence of required members prevent declaration of params parameter?](https://github.com/dotnet/csharplang/blob/main/proposals/params-collections.md#should-presence-of-required-members-prevent-declaration-of-params-parameter) (Aleksey)
+[C# Language Design Meeting for Feb 21st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md)
 
-
-## C# Language Design Notes for 2024
+- Declaration of ref/out parameters in lambdas without typename
+- `params` collections
+    - Metadata format
+    - `params` and `scoped` across `override`s
+    - `required` members and `params` parameters
 
 ### Wed Feb 7, 2024
 
