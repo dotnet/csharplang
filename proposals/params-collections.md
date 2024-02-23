@@ -540,6 +540,9 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
+> This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#metadata-format)
+> and was approved.
+
 ## Open questions
 
 ### Stack allocations 
@@ -562,7 +565,7 @@ in overrides/implements scenarios `params` modifier doesn't have to match.
 #### Resolution:
 Params parameters are implicitly scoped - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements.
 
-### Consider enforcing `scoped` or `params` across overrides
+### [Resolved] Consider enforcing `scoped` or `params` across overrides
 
 We've previously stated that `params` parameters should be `scoped` by default. However, this introduces odd behavior in overridding, due
 to our existing rules around restating `params`:
@@ -587,7 +590,12 @@ and with it `scoped`, while `scoped` by itself is _not_ inherited implicitly and
 **Proposal**: We should enforce that overrides of `params` parameters must explicitly state `params` or `scoped` if the original definition is a
 `scoped` parameter. In other words, `s2` in `Derived` must have `params`, `scoped`, or both.
 
-### Should presence of required members prevent declaration of `params` parameter?
+#### Resolution:
+
+We will require explicitly stating `scoped` or `params` on override of a `params` parameter when a non-`params` parameter would be required to do so -
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#params-and-scoped-across-overrides.
+
+### [Resolved] Should presence of required members prevent declaration of `params` parameter?
 
 Consider the following example:
 ``` C#
@@ -618,6 +626,10 @@ class Program
     }
 }
 ```
+#### Resolution:
+
+We will validate `required` members against the constructor that is used to determine eligibility to be a `params` parameter at the declaration site -
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#required-members-and-params-parameters.
 
 ## Alternatives 
 
@@ -640,4 +652,5 @@ especially that other languages are unlikely to support consumption of non-array
 - https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md#params-collections-evaluation-orders
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#params-collections
 
