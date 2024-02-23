@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule ASAP
 
 - Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
+- [`field` and `value` as contextual keywords](https://github.com/dotnet/csharplang/issues/7964) (Mads)
 
 ## Schedule when convenient
 
