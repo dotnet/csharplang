@@ -30,12 +30,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 10, 2024
 
+- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
+
 ### Mon Apr 8, 2024
 
 - [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
 
 ### Mon Apr 1, 2024
-
 
 - [Runtime Async Experiment](https://github.com/dotnet/runtime/issues/94620) (Andy)
 
