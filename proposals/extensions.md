@@ -1,5 +1,6 @@
 # Extension types
 
+TODO4 revise preference of extension types over extension methods (should mix and disambiguate duplicates if needed instead)
 TODO3 No duplicate base extensions (to avoid ambiguities)  
 TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.  
 TODO4 overload resolution disambiguation between extension and underlying members
@@ -10,6 +11,45 @@ TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces
 TODO2 extensions are disallowed within interfaces with variant type parameters  
 TODO2 We should likely allow constructors and `required` properties  
 TODO attributes and attribute targets  
+
+TODO3 We want to prefer an extension on a derived type over an extension on a base type, but not sure how to specify that yet.
+For example:
+```csharp
+C.M(42); // Should prefer extension method E2.M, as M(C, int) is a better function than M(Base, int)
+
+class Base { }
+
+class C : Base { }
+
+implicit extension E1 for Base
+{
+    public static int M(int i) => throw null;
+}
+
+implicit extension E2 for C
+{
+    public static int M(int i) => i;
+}
+```
+
+```csharp
+_ = C.P; // Should prefer E2.P
+
+class Base { }
+
+class C : Base { }
+
+implicit extension E1 for Base
+{
+    public static int P => throw null;
+}
+
+implicit extension E2 for C
+{
+    public static int P => i;
+}
+```
+
 
 ## Summary
 [summary]: #summary
@@ -718,7 +758,7 @@ The search proceeds as follows:
 - If no extension indexer is found to be suitable for the element access
   in any enclosing scope, a compile-time error occurs.
 
-### Member lookup
+### Member lookup (reviewed in LDM 2024-02-24)
 
 TL;DR: Member lookup on an extension type includes members from its base extensions, its extended type and base types.  
 
@@ -755,7 +795,7 @@ explicit extension R : U
 }
 ```
 
-Note: this also affects what members are considered hidden, so that we don't get an overload resolution ambiguity in a scenario like this:
+Note: this also affects what members are considered shadowed, so that we don't get an overload resolution ambiguity in a scenario like this:
 ```csharp
 class U
 {
@@ -834,29 +874,30 @@ We process as follows:
     those will be considered first.
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types, those will be considered second.
-- Look for members in extension types:
-  - Check which extension types are compatible with the given underlying type `U` and 
-    collect resulting compatible substituted extension types.
-  - Perform member lookup for `I` in each compatible substituted extension type `X` 
-    (note this takes into account whether the member is invoked).
-  - Merge the results
+- Build a set of extension methods and extension types members:
+  - If `E` is a value (not a type) and if the scope contains eligible extension methods, 
+    then merge this set into the result of the lookup. 
+    TODO4 this doesn't fit, as eligibility is based on applicability which requires arguments
+  - Look for extension type members:
+    - Check which extension types are compatible with the given underlying type `U` and 
+      collect resulting compatible substituted extension types.
+    - Perform member lookup for `I` in each compatible substituted extension type `X` 
+      (note this takes into account whether the member is invoked).
+    - Merge the results
 TODO4 spec how we deal with duplicate or near duplicate entries (for example, field E1.Member and method E2.Member)
   - Next, members that are hidden by other members are removed from the set.  
     (note: "base types" means "base extensions and underlying type" for extension types)
-  - Finally, having removed hidden members, the result of the lookup is determined:
-    - If the set is empty, proceed to the next enclosing scope.
-    - If the set consists of a single member that is not a method,
-      then this member is the result of the lookup.
-    - Otherwise, if the set contains only methods and the member is invoked,
-      overload resolution is applied to the candidate set. TODO3 we can never get here...
-      - If a single best method is found, this member is the result of the lookup.
-      - If no best method is found, continue the search.
-      - Otherwise (ambiguity), a compile-time error occurs.
-    - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
-- If `E` is a value (not a type), look for extension methods:
-  - If the scope contains eligible extension methods, then this set is the result of the lookup. 
-    TODO3 this doesn't fit, as eligibility is based on applicability which requires arguments
-  - Otherwise, continue the search through namespaces and their imports.
+- Finally, having removed hidden members, the result of the lookup is determined:
+  - If the set is empty, proceed to the next enclosing scope.
+  - If the set consists of a single member that is not a method,
+    then this member is the result of the lookup.
+  - Otherwise, if the set contains only methods and the member is invoked,
+    overload resolution is applied to the candidate set. TODO3 we can never get here...
+    - If a single best method is found, this member is the result of the lookup.
+    - If no best method is found, continue the search.
+    - Otherwise (ambiguity), a compile-time error occurs.
+  - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
+- Otherwise, continue the search through namespaces and their imports.
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
   the result of the lookup is empty.
 
@@ -896,18 +937,16 @@ The rules for determining the [natural function type of a method group](https://
 
 1. For each scope, we construct the set of all candidate methods:
   - for the initial scope, methods on the relevant type with arity matching the provided type arguments and satisfying constraints with the provided type arguments are in the set if they are static and the receiver is a type, or if they are non-static and the receiver is a value
-  - \***each subsequence scope is split to consider methods from extension types and extension methods in turn.**
-    - \***methods from compatible implicit extension types applicable in that scope which can be substituted with the provided type arguments and satisfying constraints with those are in the set to be considered first**
     - extension methods in that scope that can be substituted with the provided type arguments and reduced using the value of the receiver while satisfying constraints are in the set
-  1. If we have no candidates in the given \***scope/set**, proceed to the next \***scope/set**.
+    - \***methods from compatible implicit extension types applicable in that scope which can be substituted with the provided type arguments and satisfying constraints with those are in the set**
+  1. If we have no candidates in the given scope, proceed to the next scope.
   2. If the signatures of all the candidates do not match, then the method group doesn't have a natural type
   3. Otherwise, resulting signature is used as the natural type
 2. If the scopes are exhausted, then the method group doesn't have a natural type
 
-TODO3 confirm that extension type methods are looked at first and separately 
-Note: extension types are considered first, and then extension methods, as illustrated by this example:  
+Note: extension types members and extension methods are considered on par, as illustrated by this example:  
 ```
-var x = new C().M; // finds E.M, no ambiguity
+var x = new C().M; // no natural function type
 
 class C { }
 
@@ -918,12 +957,28 @@ implicit extension E for C
 
 static class Extensions
 {
-	public static void M(this C c) { }
 	public static void M(this C c, int i) { }
 }
 ```
 
-TODO3 would like to brainstorm tweaks to member access and natural function type to make this work better:
+TODO4 we should disambiguate when signatures match
+```
+var x = new C().M; // ambiguous
+
+class C { }
+
+implicit extension E for C
+{
+    public static void M() { }
+}
+
+static class Extensions
+{
+    public static void M(this C c) { }
+}
+```
+
+TODO4 would like to brainstorm tweaks to member access and natural function type to make this work better:
 
 Note: by the current rules, there are some unfortunate interactions between member access and natural function type.
 > Note: When the result of such a member lookup is a method group and K is zero, 
@@ -939,7 +994,7 @@ class C
 
 implicit extension E for C
 {
-	public static int Member = 42;
+    public static int Member = 42;
 }
 ```
 
@@ -947,55 +1002,6 @@ implicit extension E for C
 
 For context see [Identical simple names and type names](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/primary-constructors.md#identical-simple-names-and-type-names).
 TODO3
-
-### Better function member
-
-We modify the [better function member rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member) as follows:
-
-Parameter lists for each of the candidate function members are constructed in the following way:
-- \***For methods on an extension type, a parameter with the extended type is prepended to the parameter list.**
-- \[...]
-
-This means that we'll prefer an extension on a derived type over an extension on a base type,
-the same way that we prefer an extension method on a derived type over an extension method on a base type.
-
-For example:
-```csharp
-C.M(42); // M(C, int) is a better function than M(Base, int)
-
-class Base { }
-
-class C : Base { }
-
-implicit extension E1 for Base
-{
-    public static int M(int i) => throw null;
-}
-
-implicit extension E2 for C
-{
-    public static int M(int i) => i;
-}
-```
-
-TODO3 how do we achieve the same result for properties or other members?  For example:
-```csharp
-_ = C.P;
-
-class Base { }
-
-class C : Base { }
-
-implicit extension E1 for Base
-{
-    public static int P => throw null;
-}
-
-implicit extension E2 for C
-{
-    public static int P => i;
-}
-```
 
 ### Base access
 
