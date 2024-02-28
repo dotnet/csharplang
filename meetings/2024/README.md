@@ -5,7 +5,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule ASAP
 
 - Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
-- [`field` and `value` as contextual keywords](https://github.com/dotnet/csharplang/issues/7964) (Mads)
+- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
 
 ## Schedule when convenient
 
@@ -50,7 +50,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 4, 2024
 
-- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
+- [`field` and `value` as contextual keywords](https://github.com/dotnet/csharplang/issues/7964) (Mads)
 - [Overload resolution priority](https://github.com/dotnet/csharplang/pull/7906) (Fred)
 
 ### Wed Feb 28, 2024
