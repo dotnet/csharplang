@@ -620,6 +620,24 @@ The preceding rules mean:
 
 TODO clarify behavior for extension on `object` or `dynamic` used as `dynamic.M()`?
 
+TODO3 we prefer new extension methods over old extension methods. Confirm that is what we want.  
+Note: we look at extension members first and separately from classic extension methods:  
+```
+new C().M(); // finds E.M, not Extensions.M
+
+class C { }
+
+extension E for C
+{
+	public void M() { }
+}
+
+static class Extensions
+{
+	public void M(this C c) { }
+}
+```
+
 ### Indexer access
 
 TL;DR: If no candidate is applicable, then we attempt extension indexer access instead.
@@ -700,48 +718,12 @@ The search proceeds as follows:
 - If no extension indexer is found to be suitable for the element access
   in any enclosing scope, a compile-time error occurs.
 
-### 12.5 Member lookup
+### Member lookup
 
 TL;DR: Member lookup on an extension type includes members from its base extensions, its extended type and base types.  
-We prefer extension fields/properties/... on more specific extension types.
 
 We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#125-member-lookup) 
 as follows:
-
-#### 12.5.1 General
-
-A member lookup of a name `N` with `K` type arguments in a type `T` is processed as follows:
-
-- First, a set of accessible members named `N` is determined:
-  \[...]
-- Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process might be able to infer the type arguments.
-- Next, if the member is invoked, all non-invocable members are removed from the set.
-- Next, members that are hidden by other members are removed from the set. For every member `S.M` in the set, where `S` is the type in which the member `M` is declared, the following rules are applied:
-  - If `M` is a constant, field, property, event, or enumeration member, then all members declared in a base type of `S` are removed from the set.
-  - \***If `M` is a constant, field, property, event, or enumeration member of an extension type with underlying type `U`, then all extension members declared for a base type of `U` are removed from the set.**
-  - If `M` is a type declaration, then all non-types declared in a base type of `S` are removed from the set, and all type declarations with the same number of type parameters as `M` declared in a base type of `S` are removed from the set.
-  - If `M` is a method, then all non-method members declared in a base type of `S` are removed from the set.
-\[...]
-
-TODO4 this doesn't work... Member lookup doesn't look for extension members. That's done by Simple Name and Member Access.
-TODO4 what if the member lookup was in a non-extension scenario (eg. E.)
-As a result, we'll prefer more specific constant/property/field/... extension members:
-```
-_ = C.Property; // find `E2.Property` as opposed to `E1.Property`
-
-public class Base { }
-public class C : Base { }
-
-public implicit extension E1 for Base
-{
-    public static int Property => throw null;
-}
-
-public implicit extension E2 for C
-{
-    public static int Property => throw null;
-}
-```
 
 #### 12.5.2 Base types
 
@@ -756,12 +738,36 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
 - \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T` and the extended type of `T` and its base types.**
 
+Note: this allows method groups that contain members from the extension and the extended type together:
 ```csharp
+class U
+{
+    public void M2() { }
+}
+
 explicit extension R : U
 {
+    public void M2(int i) { }
     void M()
     {
-        var s = ToString(); // find `U.ToString()` as opposed to `object.ToString()`
+        M2(); // find `U.M2()`
+    }
+}
+```
+
+Note: this also affects what members are considered hidden, so that we don't get an overload resolution ambiguity in a scenario like this:
+```csharp
+class U
+{
+    public void M2() { }
+}
+
+explicit extension R : U
+{
+    public void M2() { } // warning: needs `new`
+    void M()
+    {
+        M2(); // find `R.M2()`, no ambiguity
     }
 }
 ```
@@ -897,6 +903,45 @@ The rules for determining the [natural function type of a method group](https://
   2. If the signatures of all the candidates do not match, then the method group doesn't have a natural type
   3. Otherwise, resulting signature is used as the natural type
 2. If the scopes are exhausted, then the method group doesn't have a natural type
+
+TODO3 confirm that extension type methods are looked at first and separately 
+Note: extension types are considered first, and then extension methods, as illustrated by this example:  
+```
+var x = new C().M; // finds E.M, no ambiguity
+
+class C { }
+
+implicit extension E for C
+{
+	public static void M() { }
+}
+
+static class Extensions
+{
+	public static void M(this C c) { }
+	public static void M(this C c, int i) { }
+}
+```
+
+TODO3 would like to brainstorm tweaks to member access and natural function type to make this work better:
+
+Note: by the current rules, there are some unfortunate interactions between member access and natural function type.
+> Note: When the result of such a member lookup is a method group and K is zero, 
+> the method group can contain methods having type parameters. 
+> This allows such methods to be considered for type argument inferencing. end note
+```
+var x = C.Member; // error: member lookup finds C.Member (method group) and lacks type arguments to apply to that match
+
+class C 
+{
+    public static void Member<T>() { }
+}
+
+implicit extension E for C
+{
+	public static int Member = 42;
+}
+```
 
 ### Identical simple names and type names
 
