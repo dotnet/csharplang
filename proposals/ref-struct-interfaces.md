@@ -146,6 +146,58 @@ Detailed Notes:
 
 ### ref struct Generic Parameters
 
+```ANTLR
+type_parameter_constraints_clause
+    : 'where' type_parameter ':' type_parameter_constraints
+    ;
+
+type_parameter_constraints
+    : restrictive_type_parameter_constraints
+    | allows_type_parameter_constraints_clause
+    | restrictive_type_parameter_constraints ',' allows_type_parameter_constraints_clause
+
+restrictive_type_parameter_constraints
+    : primary_constraint
+    | secondary_constraints
+    | constructor_constraint
+    | primary_constraint ',' secondary_constraints
+    | primary_constraint ',' constructor_constraint
+    | secondary_constraints ',' constructor_constraint
+    | primary_constraint ',' secondary_constraints ',' constructor_constraint
+    ;
+
+primary_constraint
+    : class_type
+    | 'class'
+    | 'struct'
+    | 'unmanaged'
+    ;
+
+secondary_constraints
+    : interface_type
+    | type_parameter
+    | secondary_constraints ',' interface_type
+    | secondary_constraints ',' type_parameter
+    ;
+
+constructor_constraint
+    : 'new' '(' ')'
+    ;
+
+allows_type_parameter_constraints_clause
+    : 'allows' allows_type_parameter_constraints
+
+allows_type_parameter_constraints
+    : allows_type_parameter_constraint
+    | allows_type_parameter_constraints ',' allows_type_parameter_constraint
+
+allows_type_parameter_constraint
+    : ref_struct_clause
+
+ref_struct_clause
+    : 'ref' 'struct'
+```
+
 The language will allow for generic parameters to opt into supporting `ref struct` as arguments by using the `allows ref struct` syntax inside a `where` clause:
 
 ```csharp
