@@ -30,7 +30,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 10, 2024
 
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
+- Meeting on meeting (Mads)
 
 ### Mon Apr 8, 2024
 
@@ -46,7 +46,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 11, 2024
 
-- Meeting on meeting (Mads)
+- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ### Mon Mar 4, 2024
 
