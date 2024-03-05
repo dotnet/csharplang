@@ -98,7 +98,7 @@ We introduce the following attribute to the BCL:
 ```cs
 namespace System.Runtime.CompilerServices;
 
-[AttributeUsage(AttributeTargets.Method AllowMultiple = false, Inherited = false)]
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class OverloadResolutionPriorityAttribute(int priority)
 {
     public int Priority => priority;
@@ -107,7 +107,7 @@ public sealed class OverloadResolutionPriorityAttribute(int priority)
 
 **Open question**: Should the attribute be inherited? If not, what is the priority of the overriding member?  
 **Open question**: If the attribute is specified on a virtual member, should an override of that member be required to repeat the attribute?  
-**Open question**: Should the attribute support constructors?
+**Open question**: Should the attribute support constructors and indexer?
 
 All methods in C# have a default ***overload_resolution_priority*** of 0, unless they are attributed with `OverloadResolutionPriorityAttribute`. If they are
 attributed with that attribute, then their ***overload_resolution_priority*** is the integer value provided to the first argument of the attribute.
