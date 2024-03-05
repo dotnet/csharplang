@@ -53,16 +53,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [`field` and `value` as contextual keywords](https://github.com/dotnet/csharplang/issues/7964) (Mads)
 - [Overload resolution priority](https://github.com/dotnet/csharplang/pull/7906) (Fred)
 
-### Wed Feb 28, 2024
-
-- Extensions (Julien and Mads)
-
 ### Mon Feb 26, 2024 (unresolved topics)
 
 - Breaking change with collection expressions and UI collection types (https://github.com/dotnet/roslyn/issues/72098).  Cyrus + Chuck
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Wed Feb 28, 2024
+
+[C# Language Design Meeting for Feb 28th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-28.md)
+
+- Extensions
 
 ### Mon Feb 26, 2024
 
