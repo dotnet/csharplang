@@ -1,12 +1,12 @@
 # Extension types
 
-TODO3 No duplicate base extensions (to avoid ambiguities)  
-TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.  
+TODO(inheritance) No duplicate base extensions (to avoid ambiguities)  
+TODO(inheritance) issue with variance of extended type if we erase to a ref struct with a ref field.  
 
-TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them  
-TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
+TODO(instance) need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them  
+TODO(static) adjust scoping rules so that type parameters are in scope within the 'for'  
 TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces  
-TODO2 extensions are disallowed within interfaces with variant type parameters  
+TODO(static) extensions are disallowed within interfaces with variant type parameters  
 TODO2 We should likely allow constructors and `required` properties  
 TODO attributes and attribute targets  
 
@@ -218,7 +218,7 @@ An example with multiple base explicit extension:
 explicit extension DiamondExtension for NarrowerUnderlyingType : BaseExtension1, Interface1, BaseExtension2, Interface2 { }`
 ```
 
-TODO should we have a naming convention like `Extension` suffixes? (`DataObjectExtension`)  
+TODO(static) should we have a naming convention like `Extension` suffixes? (`DataObjectExtension`)  
 
 ## Extension type
 
@@ -232,13 +232,13 @@ There is an identity conversion between an extension and its underlying type,
 and between an extension and its base extensions.
 
 An extension type satisfies the constraints satisfied by its underlying type (see section on constraints). 
-In phase C, some additional constraints can be satisfied (additional implemented interfaces).  
+In the Interface Phase, some additional constraints can be satisfied (additional implemented interfaces).  
 
 ### Underlying type
 
 The *extension_underlying_type* type may not be `dynamic`, a pointer, 
 a ref struct type, a ref type or an extension.  
-The underlying type may not include an *interface_type_list* (this is part of Phase C).  
+The underlying type may not include an *interface_type_list* (this is part of the Interface Phase).  
 The extension type must be static if its underlying type is static.  
 
 When a partial extension declaration includes an underlying type specification,
@@ -250,9 +250,9 @@ an underlying type specification.
 It is a compile-time error if the underlying type differs amongst all the parts
 of an extension declaration.  
 
-TODO2 we need rules to only allow an underlying type that is compatible with the base extensions.  
+TODO2(inheritance) we need rules to only allow an underlying type that is compatible with the base extensions.  
 
-TODO should the underlying type be inferred when none was specified but
+TODO(inheritance) should the underlying type be inferred when none was specified but
   base extensions are specified?
 
 ### Modifiers
@@ -328,7 +328,7 @@ other derived extensions, even when the members are inherited from the same base
 
 Note: the rules still disallow access to protected members of the underlying type through the extension type.
 
-TODO
+TODO(static)
 
 Let `B` be a base class that declares a protected instance member `M`, 
 and let `D` be a class that derives from `B`. Within the *class_body* of `D`, 
@@ -371,7 +371,7 @@ The existing [rules for signatures](https://github.com/dotnet/csharpstandard/blo
 Two signatures differing by an extension vs. its underlying type, or an extension vs. 
 one of its base extensions are considered to be the *same signature*.
 
-TODO2 this needs to be refined to allow overload on different underlying types.
+TODO2(inheritance) this needs to be refined to allow overload on different underlying types.
 ```
 explicit extension ObjectExtension : object;
 explicit extension StringExtension : string, ObjectExtension;
@@ -413,7 +413,7 @@ Otherwise, existing [rules for fields](https://github.com/dotnet/csharpstandard/
 
 #### Methods
 
-TODO allow `this` (of type current extension).  
+TODO(instance) allow `this` (of type current extension).  
 Parameters with the `this` modifier are disallowed.
 Otherwise, existing [rules for methods](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#146-methods) apply.
 In particular, a static method does not operate on a specific instance, 
@@ -422,7 +422,7 @@ Extension methods are disallowed.
 
 #### Properties
 
-TODO allow `this` (of type current extension).  
+TODO(instance) allow `this` (of type current extension).  
 Auto-properties must be static (since instance fields are disallowed).  
 
 Existing [rules for properties](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#147-properties) apply.
@@ -431,7 +431,7 @@ and it is a compile-time error to refer to `this` in a static property.
 
 #### Nested types
 
-TODO any special rules?
+TODO(static) any special rules?
 
 ```
 extension Extension : UnderlyingType
@@ -450,7 +450,7 @@ TODO2 Event with an associated instance field (error)
 
 #### Fields
 
-TODO
+TODO(static)
 
 #### Constructors
 
@@ -460,7 +460,7 @@ TODO
 
 ##### Conversions
 
-TODO
+TODO(static)
 ```
 explicit extension R for U { } 
 R r = default;
@@ -475,7 +475,7 @@ Conversion to interface still disallowed.
 
 #### Indexers
 
-TODO
+TODO(instance)
 
 ## Constraints
 
@@ -534,12 +534,12 @@ and the parameter type may not be a pointer **or an extension** type.
 
 ## Nullability
 
-TODO2 Open question on top-level nullability on underlying type.
-TODO2 disallow nullable annotation on base extension? Or at least need to clarify what `Extension?` means in various scenarios.
+TODO2(static) Open question on top-level nullability on underlying type.
+TODO2(instance) disallow nullable annotation on base extension? Or at least need to clarify what `Extension?` means in various scenarios.
 
 ## Compat breaks
 
-TODO2 types may not be called "extension" (reserved, break)  
+TODO2(static) types may not be called "extension" (reserved, break)  
 
 ## Lookup rules
 
@@ -591,7 +591,7 @@ We modify the [member access rules](https://github.com/dotnet/csharpstandard/blo
   and a member lookup of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:  
   ...
-- \***(only relevant in phase B) If `E.I` is not invoked and `E` is a property access, indexer access, variable, or value, 
+- \***(only relevant in Instance Phase) If `E.I` is not invoked and `E` is a property access, indexer access, variable, or value, 
   the type of which is `T`, where `T` is not a type parameter, and 
   an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
@@ -603,11 +603,11 @@ Note: the path to extension invocation from this section is only for empty resul
 We can also get to extension invocation in:
 1. invocation scenarios where the set of *applicable* candidate methods is empty.
 2. indexer access scenarios where the set of *applicable* candidate indexers is empty.
-3. TODO there may be more scenarios (operator resolution, delegate conversion, natural function types)
+3. TODO(static) there may be more scenarios (operator resolution, delegate conversion, natural function types)
 
 That is covered below.
 
-TODO3 Is the "where `T` is not a type parameter" portion still relevant?
+TODO3(static) Is the "where `T` is not a type parameter" portion still relevant?
 
 ### Method invocations
 
@@ -683,7 +683,7 @@ The search proceeds as follows:
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types or methods, those will be considered second.
 
-TODO4 need to merge extension members and extension methods
+TODO4(static) need to merge extension members and extension methods
   - First, try extension types: 
     - Check which extension types in the current scope are compatible with the given underlying type `Type` and 
       collect resulting compatible substituted extension types.
@@ -735,7 +735,7 @@ The preceding rules mean:
 - and that extension methods declared directly in a namespace take precedence
   over extension methods imported into that same namespace with a using namespace directive.
 
-TODO clarify behavior for extension on `object` or `dynamic` used as `dynamic.M()`?
+TODO(static) clarify behavior for extension on `object` or `dynamic` used as `dynamic.M()`?
 
 ### Indexer access
 
@@ -838,7 +838,7 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
 - \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T` and the extended type of `T` and its base types.**
 
-TODO will need to revisit once we have inheritance and we allow variance of extended types.
+TODO(inheritance) will need to revisit once we have inheritance and we allow variance of extended types.
 
 Note: this allows method groups that contain members from the extension and the extended type together:
 ```csharp
@@ -965,7 +965,7 @@ TODO4 spec how we deal with duplicate or near duplicate entries (for example, fi
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
   the result of the lookup is empty.
 
-TODO3 explain static usings:
+TODO3(static) explain static usings:
   meaning of `using static SomeType;` (probably should look for extension types declared within `SomeType`)
   meaning of `using static Extension;`
 
@@ -1025,7 +1025,7 @@ static class Extensions
 }
 ```
 
-TODO4 should we disambiguate when signatures match?
+TODO4(instance) should we disambiguate when signatures match?
 ```
 var x = new C().M; // ambiguous
 
@@ -1069,12 +1069,12 @@ TODO3
 
 ### Base access
 
-TODO review with LDM  
+TODO(instance) review with LDM  
 
 We'll start by disallowing [base access](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12814-base-access) 
 within extension types.  
 Casting seems an adequate solution to access hidden members: `((R)r2).M()`.  
-TODO Maybe `base.` could refer to underlying value.   
+TODO(instance) Maybe `base.` could refer to underlying value.   
 
 ### Method invocations
 
@@ -1101,7 +1101,7 @@ static explicit extension E for C
 
 ### Element access
 
-TODO3 write this section
+TODO3(instance) write this section
 
 TL;DR: For non-extension types, we'll fall back to an implicit extension member lookup. For extension types, we include indexers from the underlying type.
 
@@ -1125,36 +1125,40 @@ of a class, struct, interface, /***or extension** type `T`, and `A` is an *argum
 
 ### Operators
 
-TODO
+TODO(static)
 User-defined conversion should be allowed, except where it conflicts with a built-in
 conversion (such as with an underlying type).  
 
 ### Collection initializers
 
-TODO
+TODO(instance)
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128164-collection-initializers
 Explain how extension types factor in when resolving `Add` calls.
 
 ### Method group conversions
 
+TODO4 spec this section
+
 https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions
 TODO A single method is selected corresponding to a method invocation, 
 but with some tweaks related to normal form and optional parameters.  
-TODO There's also the scenario where a method group contains a single method (lambda improvements).  
-TODO There's also the scenario where method groups have a natural type even in the presence
-  of multiple extension methods, and even though the scenario remains an error for other reasons.
-  > A method group has a natural type if all candidate methods in the method group have a common signature.
-    (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
 
 ### Pattern-based invocations and member access
 
-TODO Need to scan through all pattern-based rules for known members to consider whether to include extension type members.
+TODO(static) Need to scan through all pattern-based rules for known members to consider whether to include extension type members.
   If extension methods were already included, then we should certainly include extension type methods.
   Otherwise, we should consider it (for example `Current` property in `foreach`).
+  - `Deconstruct` in deconstruction and patterns
+  - `GetEnumerator`, `Current` and `MoveNext` in `foreach`
+  - CollectionBuilder in collection expressions
+  - `Add` in collection initializers
+  - `GetPinnableReference` in fixed statements
+  - `GetAwaiter` in `await` expressions
+  - `Dispose` in `using` statements
 
-## Implementation details
+# Implementation details
 
-TODO3 revise this to use a regular struct
+TODO3(static) revise this to use a regular struct
 
 struct Extension
 {
@@ -1172,7 +1176,7 @@ For example: `implicit extension R for UnderlyingType : BaseExtension1, BaseExte
 
 If the extension has any instance member, then we emit a ref field (of underlying type)
 into the ref struct and a constructor.  
-TODO2 The wrapping can be done with a static unspeakable factory method  
+TODO2(instance) The wrapping can be done with a static unspeakable factory method  
 
 Values of extension types are left as values of the underlying value type, until an extension
 member is accessed. When an extension member is accessed, an extension instance is created
@@ -1190,24 +1194,30 @@ marked with a modopt of the extension type.
 void M(Extension r) // emitted as `void M(modopt(Extension) UnderlyingType r)`
 ```
 
-TODO issues in async code with ref structs
+TODO(static) issues in async code with ref structs
 
-## Phase A: Adding static constants, fields, methods and properties
+## Phases 
 
-In this first subset of the feature, the syntax is restricted to implicit *extension_declaration*
-and containing only *constant_declaration* members and static *field_declaration*, 
-*method_declaration*, *property_declaration* and *type_declaration* members.  
-TODO: events?
+### Static extension members
 
-## Phase B. Explicit extensions with members
+In this first subset of the feature, only static members are allowed in extension types.  
 
-In this second subset of the feature, the explicit *extension_declaration* becomes allowed
-and non-static members other than fields or auto-properties become allowed.
+### Instance extension members
+
+In this second subset of the feature, instance members become allowed.
+
+## Inheritance
+
+In this third subset of the feature, extensions are allowed to have base extensions.
+
+## Interfaces
+
+In this final subset of the feature, extensions are allowed to implement interfaces.
 
 ### Extension type members
 
-The restrictions on modifiers from phase A remain (`new`).  
-Non-static members become allowed in phase B.  
+The restrictions on modifiers from Static Phase remain (`new`).  
+Non-static members become allowed in Instance Phase.  
 
 #### Fields
 
@@ -1252,6 +1262,4 @@ TODO
 ### Instance invocations
 
 TODO
-
-## Phase C. Extensions that implement interfaces
 
