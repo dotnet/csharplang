@@ -543,8 +543,7 @@ TODO2 types may not be called "extension" (reserved, break)
 
 ## Lookup rules
 
-TL;DR: For certain syntaxes on non-extension types (member access, element access), 
-we'll fall back to an implicit extension member lookup.  
+TL;DR: For certain syntaxes (member access, element access), we'll fall back to an implicit extension member lookup.  
 
 ### Simple names
 
@@ -684,7 +683,8 @@ The search proceeds as follows:
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types or methods, those will be considered second.
 
-  - First, try extension types:
+TODO4 need to merge extension members and extension methods
+  - First, try extension types: 
     - Check which extension types in the current scope are compatible with the given underlying type `Type` and 
       collect resulting compatible substituted extension types.
     - Perform member lookup for `identifier` in each compatible substituted extension type.
@@ -737,24 +737,6 @@ The preceding rules mean:
 
 TODO clarify behavior for extension on `object` or `dynamic` used as `dynamic.M()`?
 
-TODO3 we prefer new extension methods over old extension methods. Confirm that is what we want.  
-Note: we look at extension members first and separately from classic extension methods:  
-```
-new C().M(); // finds E.M, not Extensions.M
-
-class C { }
-
-extension E for C
-{
-	public void M() { }
-}
-
-static class Extensions
-{
-	public void M(this C c) { }
-}
-```
-
 ### Indexer access
 
 TL;DR: If no candidate is applicable, then we attempt extension indexer access instead.
@@ -800,7 +782,7 @@ if the normal processing of the element access finds no applicable indexers,
 an attempt is made to process the construct as an extension indexer access. 
 If «expr» or any of the «args» has compile-time type `dynamic`, extension methods will not apply.
 
-This succeeds if, given that «expr» has type `Type`, we find
+This succeeds if, given that «expr» has underlying type `Type`, we find
 a substituted compatible implicit extension type `X` for `Type`
 so that the corresponding element access can take place:
 ```csharp
@@ -809,7 +791,8 @@ so that the corresponding element access can take place:
 ```
 
 The search proceeds as follows:
-
+- If «expr» has an extension type, `Type` is the underlying type of that extension type. Otherwise,
+ `Type` is the compile-time type of «expr».
 - Starting with the closest enclosing type declaration, continuing with each type declaration,
   then continuing with each enclosing namespace declaration, and ending with
   the containing compilation unit, successive attempts are made:
@@ -897,8 +880,6 @@ TL;DR: We can determine whether an implicit extension is compatible with a given
 and when successful this process yields an extension type we can use
 (including required substitutions).  
 
-TODO3 we prefer new extension methods over old extension methods. Confirm that is what we want.
-
 An extension type `X` is compatible with given type `U` if:
 - `X` is non-generic and its underlying type is `U`, a base type of `U` or an implemented interface of `U`
 - a possible type substitution on the type parameters of `X` yields underlying type `U`, 
@@ -920,6 +901,7 @@ Underlying<string?> u3; // Extensions<string?> is a compatible extension with u3
                        // but its usage will produce a warning
 ```
 
+Note: members from some other implicit extension type can apply to an extension type:
 ```csharp
 explicit extension E1 for C
 {
@@ -938,14 +920,17 @@ implicit extension E2 for C
 
 TL;DR: Given an underlying type, we'll search enclosing types and namespaces 
 (and their imports) for compatible extensions and for each "layer" we'll do member lookups.  
+Given an extension type, we'll do an extension member lookup for its extended type.  
+TODO4 confirm this with WG and LDM
 
 If the *member_access* occurs as the *primary_expression* of an *invocation_expression*, 
 the member is said to be invoked.
 
-Given a *member_access* of the form `E.I` and `U` the type of `E`, the objective
+Given a *member_access* of the form `E.I` and `T` the type of `E`, the objective
 is to find an extension member `X.I` or an extension method group `X.I`, if possible.
 
 We process as follows:
+- We find `U` as the underlying type of `T`. If `T` is not an extension type, then `U` is `T`.
 - Starting with the closest enclosing type declaration, continuing with each enclosing type declaration,
   then continuing with each enclosing namespace declaration, and ending with
   the containing compilation unit, successive attempts are made to find a candidate set of extension members:
@@ -1040,7 +1025,7 @@ static class Extensions
 }
 ```
 
-TODO4 we should disambiguate when signatures match
+TODO4 should we disambiguate when signatures match?
 ```
 var x = new C().M; // ambiguous
 
