@@ -1,9 +1,7 @@
 # Extension types
 
-TODO4 revise preference of extension types over extension methods (should mix and disambiguate duplicates if needed instead)
 TODO3 No duplicate base extensions (to avoid ambiguities)  
 TODO3 issue with variance of extended type if we erase to a ref struct with a ref field.  
-TODO4 overload resolution disambiguation between extension and underlying members
 
 TODO2 need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them  
 TODO2 adjust scoping rules so that type parameters are in scope within the 'for'  
@@ -12,7 +10,87 @@ TODO2 extensions are disallowed within interfaces with variant type parameters
 TODO2 We should likely allow constructors and `required` properties  
 TODO attributes and attribute targets  
 
-TODO3 We want to prefer an extension on a derived type over an extension on a base type, but not sure how to specify that yet.
+## Open issue: merging extension methods and extension members
+
+TODO4 revise preference of extension types over extension methods (should mix and disambiguate duplicates if needed instead)
+
+```c#
+static class Extensions
+{
+    public static X ToX<Y>(this IEnumerable<Y> values) => ...
+}
+
+implicit extension ImmutableArrayExtensions<Y> for ImmutableArray<Y>
+{
+    public X ToX() => ...
+}
+
+// or reverse:
+
+static class Extensions
+{
+    public static X ToX<Y>(this ImmutableArray<Y> values) => ...
+}
+
+implicit extension IEnumerableExtensions<Y> for IEnumerable<Y>
+{
+    public X ToX() => ...
+}
+```
+
+In this world, i have existing extensions and i add the new features because it feels like the right way to do
+modern C#.  And either has a problem depending on a priority system picking the "worse" overload.  I *want* these
+mixed.  Just as if i had done:
+
+```c#
+static class Extensions
+{
+    public static X ToX<Y>(this ImmutableArray<Y> values) => ...
+    public static X ToX<Y>(this IEnumerable<Y> values) => ...
+}
+```
+
+TODO4 confirm what happens when we have different kinds of members
+
+```cs
+var c = new C();
+c.M(ImmutableArray.Create(1, 2, 3)); // What should happen?
+
+class C
+{
+}
+
+public static class CExt
+{
+    public static void M(this C c, IEnumerable<int> e) => ...
+}
+
+public implicit extension E1 for C
+{
+    public Action<ImmutableArray<int>> M => ...
+}
+```
+
+```c#
+class TableIDoNotOwn : IEnumerable<Item> { }
+
+static class IEnumerableExtensions
+{
+    public int Count<T>(this IEnumerable<T> t);
+}
+
+implicit extension MyTableExtensions for TableIDoNotOwn
+{
+    public int Count { get { ... } }
+}
+
+// What happens here?
+var v = table.Count; // Let's get a read from LDM
+```
+
+## Open issue: preference of more specific extension members
+
+TODO4 We want to prefer an extension on a derived type over an extension on a base type, but not sure how to specify that yet.
 For example:
 ```csharp
 C.M(42); // Should prefer extension method E2.M, as M(C, int) is a better function than M(Base, int)
@@ -49,7 +127,6 @@ implicit extension E2 for C
     public static int P => i;
 }
 ```
-
 
 ## Summary
 [summary]: #summary
@@ -704,7 +781,7 @@ The binding-time processing of an indexer access of the form `P[A]`, where `P` i
   along the following steps are abandoned, and instead an attempt is made 
   to process the indexer access as an extension indexer access. If this fails, 
   then no applicable indexers exist, and a binding-time error occurs.**
-- If the resulting set of candidate indexers is empty, then no applicable indexers exist, and a binding-time error occurs.
+- ~~If the resulting set of candidate indexers is empty, then no applicable indexers exist, and a binding-time error occurs.~~
 - The best indexer of the set of candidate indexers is identified using the overload resolution rules. If a single best indexer cannot be identified, the indexer access is ambiguous, and a binding-time error occurs.
 - /[...]
 
@@ -777,6 +854,8 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is an *array_type*, the base types of `T` are the class types `System.Array` and `object`.
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
 - \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T` and the extended type of `T` and its base types.**
+
+TODO will need to revisit once we have inheritance and we allow variance of extended types.
 
 Note: this allows method groups that contain members from the extension and the extended type together:
 ```csharp
@@ -867,7 +946,7 @@ Given a *member_access* of the form `E.I` and `U` the type of `E`, the objective
 is to find an extension member `X.I` or an extension method group `X.I`, if possible.
 
 We process as follows:
-- Starting with the closest enclosing type declaration, continuing with each type declaration,
+- Starting with the closest enclosing type declaration, continuing with each enclosing type declaration,
   then continuing with each enclosing namespace declaration, and ending with
   the containing compilation unit, successive attempts are made to find a candidate set of extension members:
   - If the given type, namespace or compilation unit directly contains extension types,
