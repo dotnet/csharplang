@@ -48,17 +48,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
-### Mon Mar 4, 2024
-
-- [`field` and `value` as contextual keywords](https://github.com/dotnet/csharplang/issues/7964) (Mads)
-- [Overload resolution priority](https://github.com/dotnet/csharplang/pull/7906) (Fred)
-
 ### Mon Feb 26, 2024 (unresolved topics)
 
 - Breaking change with collection expressions and UI collection types (https://github.com/dotnet/roslyn/issues/72098).  Cyrus + Chuck
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Mon Mar 4, 2024
+
+[C# Language Design Meeting for Mar 4th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-04.md)
+
+- Breaking changes: making `field` and `value` contextual keywords
+- Overload resolution priority
 
 ### Wed Feb 28, 2024
 
