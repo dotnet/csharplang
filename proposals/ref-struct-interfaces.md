@@ -122,7 +122,21 @@ interface I1
 ref struct S = I1 { }
 ```
 
-To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations. The runtime will also be updated to throw an exception if a default interface member is called on a `ref struct` type.
+To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations. The runtime will also be updated to throw an exception if a default interface member is called on a `ref struct` type. To help avoid the unexpected runtime exceptions the compiler [will warn][warn-DIM] when a default interface method is invoked on a type parameter that has the `ref struct` anti-constraint.
+
+```csharp
+interface I1
+{
+    void M() { }
+}
+
+void M<T>(T p)
+    where T : allows ref struct, I1
+{
+    // Warning: this may fail at runtime if `T` is a ref struct which doesn't implement the default interface member
+    p.M();
+}
+```
 
 Detailed Notes:
 
@@ -131,6 +145,58 @@ Detailed Notes:
 - A `ref struct` cannot be cast to interfaces it implements as that is a boxing operation
 
 ### ref struct Generic Parameters
+
+```ANTLR
+type_parameter_constraints_clause
+    : 'where' type_parameter ':' type_parameter_constraints
+    ;
+
+type_parameter_constraints
+    : restrictive_type_parameter_constraints
+    | allows_type_parameter_constraints_clause
+    | restrictive_type_parameter_constraints ',' allows_type_parameter_constraints_clause
+
+restrictive_type_parameter_constraints
+    : primary_constraint
+    | secondary_constraints
+    | constructor_constraint
+    | primary_constraint ',' secondary_constraints
+    | primary_constraint ',' constructor_constraint
+    | secondary_constraints ',' constructor_constraint
+    | primary_constraint ',' secondary_constraints ',' constructor_constraint
+    ;
+
+primary_constraint
+    : class_type
+    | 'class'
+    | 'struct'
+    | 'unmanaged'
+    ;
+
+secondary_constraints
+    : interface_type
+    | type_parameter
+    | secondary_constraints ',' interface_type
+    | secondary_constraints ',' type_parameter
+    ;
+
+constructor_constraint
+    : 'new' '(' ')'
+    ;
+
+allows_type_parameter_constraints_clause
+    : 'allows' allows_type_parameter_constraints
+
+allows_type_parameter_constraints
+    : allows_type_parameter_constraint
+    | allows_type_parameter_constraints ',' allows_type_parameter_constraint
+
+allows_type_parameter_constraint
+    : ref_struct_clause
+
+ref_struct_clause
+    : 'ref' 'struct'
+```
 
 The language will allow for generic parameters to opt into supporting `ref struct` as arguments by using the `allows ref struct` syntax inside a `where` clause:
 
@@ -299,6 +365,26 @@ This interface would be eligible for auto-application of `allows ref struct`. If
 
 Adding `allows ref struct` to an existing API is not a source breaking change. It is purely expanding the set of allowed types for an API. Need to track down if this is a binary breaking change or not. Unclear if updating the attributes of a generic parameter constitute a binary breaking change.
 
+### Warn on DIM invocation
+
+Should the compiler warn on the following invocation of `M` as it creates the opportunity for a runtime exception?
+
+```csharp
+interface I1
+{
+    // DIM method
+    void M() { }
+}
+
+// Invocation of the DIM method in a generic method that has the `allows ref struct`
+// anti-constraint
+void M<T>(T p)
+    where T : allows ref struct, I1
+{
+    p.M();
+}
+```
+
 ## Considerations
 
 ### Runtime support
@@ -330,7 +416,31 @@ Removing the `allows ref struct` anti-constraint is always a breaking change: so
 
 #### Default Interface Methods
 
-API authors need to be aware that adding DIMS will break `ref struct` implementors until they are recompiled. This is similar to [existing DIM behavior][dim-diamond] where by adding a DIM to an interface will break existing implementations until they are recompiled. That means API authors need to consider the likelihood of `ref struct` implementations when adding DIMs. 
+API authors need to be aware that adding DIMS will break `ref struct` implementors until they are recompiled. This is similar to [existing DIM behavior][dim-diamond] where by adding a DIM to an interface will break existing implementations until they are recompiled. That means API authors need to consider the likelihood of `ref struct` implementations when adding DIMs.
+
+There are three code components that are needed to create this situation:
+
+```csharp
+interface I1
+{
+    // 1. The addition of a DIM method to an _existing_ interface
+    void M() { }
+}
+
+// 2. A ref struct implementing the interface but not explicitly defining the DIM 
+// method
+ref struct S : I1 { }
+
+// 3. The invocation of the DIM method in a generic method that has the `allows ref struct`
+// anti-constraint
+void M<T>(T p)
+    where T : allows ref struct, I1
+{
+    p.M();
+}
+```
+
+All of three of these components are needed to create this particular issue. Further at least (1) and (2) must be in different assemblies. If they were in the same assembly then a compilation error would occur.
 
 #### UnscopedRef
 
@@ -396,9 +506,11 @@ Related Items:
 - https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md
 - https://github.com/dotnet/runtime/pull/67783
 - https://github.com/dotnet/runtime/issues/27229#issuecomment-1537274804
+- https://github.com/dotnet/runtime/issues/68002
 
 [ref-struct-ref-fields]: https://github.com/dotnet/csharplang/blob/main/proposals/expand-ref.md
 [ref-struct-generics]: #ref-struct-generic-parameters
 [byref-like-generics]: https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md
 [dim-diamond]: https://github.com/dotnet/csharplang/blob/main/meetings/2018/LDM-2018-10-17.md#diamond-inheritance
 [unscoped-ref-impl]: #unscopedref-implementation-logic
+[warn-DIM]: #warn-on-DIM-invocation

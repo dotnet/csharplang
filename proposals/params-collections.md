@@ -250,6 +250,9 @@ class Program
 
 It doesn't feel reasonable to "compare" collections that are built from different elements.
 
+>This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#better-function-member-changes)
+>and was approved.
+
 ### Dynamic vs. Static Binding
 
 Expanded forms of candidates utilizing non-array params collections won't be considered as valid candidates by the current C# runtime binder.
@@ -340,9 +343,20 @@ Otherwise, the *invocation_expression* is dynamically bound.
 - Otherwise, if any candidate passing the test has non-array params parameter and it could possibly be applicable only in an expanded form,
   a compile-time warning occurs.
 
+> The proposed new rules were reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#dynamic-support)
+> and were approved.
+
 We also should consider reverting/fixing spec violation that affects local functions today, see https://github.com/dotnet/roslyn/issues/71399. 
 
+>[LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#dynamic-and-ref-local-function-bugfixing)
+>confirmed that we want to fix this spec violation. 
+
 ### Order of evaluation with non-array collections in non-trivial scenarios
+
+> This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md#params-collections-evaluation-orders)
+> and was approved. Despite the fact that array cases deviate from other collections, the official language specification
+> doesn't have to specify different rules for arrays. The deviations could simply be treated as an implementation artifact.
+> At the same time we do not intend to change the existing behavior around arrays.
 
 #### Named arguments
 
@@ -526,6 +540,9 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
+> This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#metadata-format)
+> and was approved.
+
 ## Open questions
 
 ### Stack allocations 
@@ -548,6 +565,72 @@ in overrides/implements scenarios `params` modifier doesn't have to match.
 #### Resolution:
 Params parameters are implicitly scoped - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements.
 
+### [Resolved] Consider enforcing `scoped` or `params` across overrides
+
+We've previously stated that `params` parameters should be `scoped` by default. However, this introduces odd behavior in overridding, due
+to our existing rules around restating `params`:
+
+```cs
+class Base
+{
+    internal virtual Span<int> M1(scoped Span<int> s1, params Span<int> s2) => throw null!;
+}
+
+class Derived : Base
+{
+    internal override Span<int> M1(Span<int> s1, // Error, missing `scoped` on override
+                                   Span<int> s2  // No error: parameter is implicitly params, and therefore implicitly scoped
+                                  ) => throw null!;
+}
+```
+
+We have a difference in behavior between carrying the `params` and carrying the `scoped` across overrides here: `params` is inherited implicitly,
+and with it `scoped`, while `scoped` by itself is _not_ inherited implicitly and must be repeated at every level.
+
+**Proposal**: We should enforce that overrides of `params` parameters must explicitly state `params` or `scoped` if the original definition is a
+`scoped` parameter. In other words, `s2` in `Derived` must have `params`, `scoped`, or both.
+
+#### Resolution:
+
+We will require explicitly stating `scoped` or `params` on override of a `params` parameter when a non-`params` parameter would be required to do so -
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#params-and-scoped-across-overrides.
+
+### [Resolved] Should presence of required members prevent declaration of `params` parameter?
+
+Consider the following example:
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+public class MyCollection1 : IEnumerable<long>
+{
+    IEnumerator<long> IEnumerable<long>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+    public void Add(long l) => throw null;
+
+    public required int F; // Collection has required member and constructor doesn't initialize it explicitly
+}
+
+class Program
+{
+    static void Main()
+    {
+        Test(2, 3); // error CS9035: Required member 'MyCollection1.F' must be set in the object initializer or attribute constructor.
+    }
+
+    // Should an error be reported for the parameter indicating that the constructor that is required
+    // to be available doesn't initialize required members? In other words, should one be able
+    // to declare such a parameter under the specified conditions?
+    static void Test(params MyCollection1 a)
+    {
+    }
+}
+```
+#### Resolution:
+
+We will validate `required` members against the constructor that is used to determine eligibility to be a `params` parameter at the declaration site -
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#required-members-and-params-parameters.
+
 ## Alternatives 
 
 There is an alternative [proposal](https://github.com/dotnet/csharplang/blob/main/proposals/params-span.md) that extends
@@ -567,4 +650,7 @@ especially that other languages are unlikely to support consumption of non-array
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements
 - https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md
 - https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md#params-collections-evaluation-orders
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#params-collections
 

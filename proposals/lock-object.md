@@ -3,7 +3,7 @@
 ## Summary
 [summary]: #summary
 
-Special-case how `System.Threading.Lock` interacts with the `lock` keyword (calling its `EnterLockScope` method under the hood).
+Special-case how `System.Threading.Lock` interacts with the `lock` keyword (calling its `EnterScope` method under the hood).
 Add static analysis warnings to prevent accidental misuse of the type where possible.
 
 ## Motivation
@@ -13,6 +13,23 @@ Add static analysis warnings to prevent accidental misuse of the type where poss
 as a better alternative to existing monitor-based locking.
 The presence of the `lock` keyword in C# might lead developers to think they can use it with this new type.
 Doing so wouldn't lock according to the semantics of this type but would instead treat it as any other object and would use monitor-based locking.
+
+```cs
+namespace System.Threading
+{
+    public sealed class Lock
+    {
+        public void Enter();
+        public void Exit();
+        public Scope EnterScope();
+    
+        public ref struct Scope
+        {
+            public void Dispose();
+        }
+    }
+}
+```
 
 ## Detailed design
 [design]: #detailed-design
@@ -24,7 +41,7 @@ are changed to special-case the `System.Threading.Lock` type:
 >
 > 1. **where `x` is an expression of type `System.Threading.Lock`, is precisely equivalent to:**
 >    ```cs
->    using (x.EnterLockScope())
+>    using (x.EnterScope())
 >    {
 >        ...
 >    }
@@ -35,7 +52,7 @@ are changed to special-case the `System.Threading.Lock` type:
 >    {
 >        public sealed class Lock
 >        {
->            public Scope EnterLockScope();
+>            public Scope EnterScope();
 >    
 >            public ref struct Scope
 >            {
@@ -107,7 +124,7 @@ To escape out of the warning and force use of monitor-based locking, one can use
   ```
 
 - We could include static analysis to prevent usage of `System.Threading.Lock` in `using`s with `await`s.
-  I.e., we could emit either an error or a warning for code like `using (lockVar.EnterLockScope()) { await ... }`.
+  I.e., we could emit either an error or a warning for code like `using (lockVar.EnterScope()) { await ... }`.
   Currently, this is not needed since `Lock.Scope` is a `ref struct`, so that code is illegal anyway.
   However, if we ever allowed `ref struct`s in `async` methods or changed `Lock.Scope` to not be a `ref struct`, this analysis would become beneficial.
   (We would also likely need to consider for this all lock types matching the general pattern if implemented in the future.
@@ -118,13 +135,13 @@ To escape out of the warning and force use of monitor-based locking, one can use
   - for the new `Lock` type (only needed if the API proposal changed it from `class` to `struct`),
   - for the general pattern where any type can participate when implemented in the future.
 
-## Unresolved questions
-[unresolved]: #unresolved-questions
-
-- Can we allow the new `lock` statement in async methods?
-  Since `await` is disallowed inside the `lock`, this would be safe.
-  Currently, since `lock` is lowered to `using` with a `ref struct` as the resource, this results in a compile-time error.
-  The workaround is to extract the `lock` into a separate non-async method.
+- We could allow the new `lock` in `async` methods where `await` is not used inside the `lock`.
+  - Currently, since `lock` is lowered to `using` with a `ref struct` as the resource, this results in a compile-time error.
+    The workaround is to extract the `lock` into a separate non-`async` method.
+  - Instead of using the `ref struct Scope`, we could emit `Lock.Enter` and `Lock.Exit` methods in `try`/`finally`.
+    However, the `Exit` method must throw when it's called from a different thread than `Enter`,
+    hence it contains a thread lookup which is avoided when using the `Scope`.
+  - Best would be to allow compiling `using` on a `ref struct` in `async` methods if there is no `await` inside the `using` body.
 
 ## Design meetings
 
