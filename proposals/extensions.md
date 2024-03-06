@@ -683,8 +683,10 @@ The search proceeds as follows:
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types or methods, those will be considered second.
 
-TODO4(static) need to merge extension members and extension methods
-  - First, try extension types: 
+  - First, collect extension methods (only for the `expr` case):
+    - Check which extension methods in the current scope are eligible and add those to the set.
+
+  - Then, collect members from extension types: 
     - Check which extension types in the current scope are compatible with the given underlying type `Type` and 
       collect resulting compatible substituted extension types.
     - Perform member lookup for `identifier` in each compatible substituted extension type.
@@ -692,30 +694,23 @@ TODO4(static) need to merge extension members and extension methods
       (note this doesn't include members from the underlying type)
     - Merge the results
     - Next, members that are hidden by other members are removed from the set.  
-      (note: "base types" means "base extensions and underlying type" for extension types)
-    - Finally, having removed hidden members:
-      - If the set is empty, proceed to extension methods below.
-      - If the set consists of a single member that is not a method, then:
-        - If it is a value of a *delegate_type*, the *invocation_expression* 
-          is evaluated as a delegate invocation.
-        - If it is a value of a *function_pointer_type*, the *invocation_expression* 
-          is evaluated as a function pointer invocation.
-        - If it is a value of a type `dynamic`, the *invocation_expression* 
-          is evaluated as a dynamic member invocation.
-      - If the set contains only methods, we remove all the methods that are not 
-        accessible or applicable (see "method invocations").
-        - If the set is empty, proceed to extension methods below.
-        - Otherwise, overload resolution is applied to the candidate methods:
-          - If a single best method is found, the *invocation_expression* 
-            is evaluated as the invocation of this method.
-          - If no single best method is found, a compile-time error occurs.
+      (note: "base types" means "base extensions and underlying type" for extension types for purpose of shadowing)
 
-  - Next, try extension methods (only for the `expr` case):
-    - Check which extension methods in the current scope are eligible.
-      - If the set is empty, proceed to the next enclosing scope.
-      - Otherwise, overload resolution is applied to the candidate set. 
+  - Finally, look at the set:
+    - If the set is empty, proceed to extension methods below.
+    - If the set consists of a single member that is not a method, then:
+      - If it is a value of a *delegate_type*, the *invocation_expression* 
+        is evaluated as a delegate invocation.
+      - If it is a value of a *function_pointer_type*, the *invocation_expression* 
+        is evaluated as a function pointer invocation.
+      - If it is a value of a type `dynamic`, the *invocation_expression* 
+        is evaluated as a dynamic member invocation.
+    - If the set contains only methods, we remove all the methods that are not 
+      accessible or applicable (see "method invocations").
+      - If the set is empty, proceed to extension methods below.
+      - Otherwise, overload resolution is applied to the candidate methods:
         - If a single best method is found, the *invocation_expression* 
-          is evaluated as a static method invocation.
+          is evaluated as the invocation of this method.
         - If no single best method is found, a compile-time error occurs.
 
   - Proceed to the next enclosing scope
@@ -921,7 +916,6 @@ implicit extension E2 for C
 TL;DR: Given an underlying type, we'll search enclosing types and namespaces 
 (and their imports) for compatible extensions and for each "layer" we'll do member lookups.  
 Given an extension type, we'll do an extension member lookup for its extended type.  
-TODO4 confirm this with WG and LDM
 
 If the *member_access* occurs as the *primary_expression* of an *invocation_expression*, 
 the member is said to be invoked.
@@ -938,7 +932,7 @@ We process as follows:
     those will be considered first.
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types, those will be considered second.
-- Build a set of extension methods and extension types members:
+- Build a set of extension methods and extension types members: 
   - If `E` is a value (not a type) and if the scope contains eligible extension methods, 
     then merge this set into the result of the lookup. 
     TODO4 this doesn't fit, as eligibility is based on applicability which requires arguments
