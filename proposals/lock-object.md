@@ -67,9 +67,6 @@ Note that the shape might not be fully checked (e.g., there will be no errors no
 but the feature might not work as expected (e.g., there will be no warnings when converting `Lock` to a derived type,
 since the feature assumes there are no derived types).
 
-Unlike the equivalent `using` statement, the `lock` statement on the new `Lock` type is allowed in `async` methods
-(but `await`s inside the `lock`'s body are still disallowed).
-
 Additionally, new warnings are added to implicit reference conversions ([§10.2.8](https://github.com/dotnet/csharpstandard/blob/9af5bdaa7af535f34fbb7923e5406e01db8489f7/standard/conversions.md#1028-implicit-reference-conversions))
 when upcasting the `System.Threading.Lock` type:
 
@@ -148,10 +145,13 @@ To escape out of the warning and force use of monitor-based locking, one can use
   - for the new `Lock` type (only needed if the API proposal changed it from `class` to `struct`),
   - for the general pattern where any type can participate when implemented in the future.
 
-- Instead of using the `ref struct Scope`, we could emit `Lock.Enter` and `Lock.Exit` methods in `try`/`finally`.
-  Such alternative codegen could help in scenarios where `ref struct`s are disallowed.
-  However, the `Exit` method must throw when it's called from a different thread than `Enter`,
-  hence it contains a thread lookup which is avoided when using the `Scope`.
+- We could allow the new `lock` in `async` methods where `await` is not used inside the `lock`.
+  - Currently, since `lock` is lowered to `using` with a `ref struct` as the resource, this results in a compile-time error.
+    The workaround is to extract the `lock` into a separate non-`async` method.
+  - Instead of using the `ref struct Scope`, we could emit `Lock.Enter` and `Lock.Exit` methods in `try`/`finally`.
+    However, the `Exit` method must throw when it's called from a different thread than `Enter`,
+    hence it contains a thread lookup which is avoided when using the `Scope`.
+  - Best would be to allow compiling `using` on a `ref struct` in `async` methods if there is no `await` inside the `using` body.
 
 ## Design meetings
 
