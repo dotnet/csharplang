@@ -3,14 +3,15 @@
 ## Summary
 [summary]: #summary
 
-- Allow `using (ref struct)` and `unsafe` blocks in iterators and async methods provided there is no `yield` or `await` inside the blocks.
+- Allow `ref`/`ref struct` locals and `unsafe` blocks in iterators and async methods
+  provided they are used in code blocks without any `yield` or `await`.
 - Warn about `yield` inside `lock`.
 
 ## Motivation
 [motivation]: #motivation
 
-It is not necessary to disallow `using` blocks with `ref struct` resources and `unsafe` blocks in async/iterator methods
-if there is no `yield` or `await` inside the blocks, because nothing from the blocks needs to be hoisted.
+It is not necessary to disallow `ref`/`ref struct` locals and `unsafe` blocks in async/iterator methods
+if they are not used across `yield` or `await`, because they do not need to be hoisted.
 
 On the other hand, having `yield` inside a `lock` means the caller also holds the lock while iterating which might lead to unexpected behavior.
 This is even more problematic in async iterators where the caller can `await` between iterations, but `await` is not allowed in `lock`.
@@ -29,15 +30,16 @@ See also https://github.com/dotnet/roslyn/issues/72443.
 
 > It is a compile-time error to declare a ref local variable, or a variable of a `ref struct` type,
 > within a method declared with the *method_modifier* `async`, or within an iterator ([§15.14][iterators])
-> **unless the variable is the resource of a `using` statement ([§13.14][using-statement])
-> which does not contain any `await` or `yield` inside**.
+> **unless the variable is declared and used only in a block ([§13.3.1][blocks-general])
+> which does not have any `await` or `yield` statements inside itself and inside any of its nested blocks
+> (excluding declarations like anonymous methods and local functions)**.
 
 [§13.13 The lock statement][lock-statement]:
 
 > [...]
 > 
 > **A warning is reported (as part of the next warning wave) when a `yield` statement
-> ([§13.15][yield-statement]) is used inside a `lock` statement.**
+> ([§13.15][yield-statement]) is used inside the body of a `lock` statement.**
 
 Note that no change in the spec is needed to allow `unsafe` blocks which do not contain `await`s in async methods,
 because the spec has never disallowed `unsafe` blocks in async methods.
@@ -50,6 +52,28 @@ However, the spec should have always disallowed `await` inside `unsafe` blocks
 > any `in`, `out`, or `ref` parameters, or any parameter of a `ref struct` type.
 >
 > **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain `await`.**
+
+## Alternatives
+[alternatives]: #alternatives
+
+- `ref`/`ref struct` locals could be allowed even in blocks that contain `await`/`yield`
+  provided the locals are not declared and used across `await`/`yield`:
+
+  ```cs
+  // error always since `x` is declared/used both before and after `await`
+  {
+      ref int x = ...;
+      await ...;
+      x.ToString();
+  }
+  // error as proposed (`await` in the same block) but alternatively could be allowed
+  // (`x` does not need to be hoisted as it is not used after `await`)
+  {
+      ref int x = ...;
+      x.ToString();
+      await ...;
+  }
+  ```
 
 [blocks-general]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#1331-general
 [ref-local]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#13624-ref-local-variable-declarations
