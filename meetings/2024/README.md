@@ -42,16 +42,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Discriminated Union WG (Matt)
 
-### Mon Mar 11, 2024
-
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
-
 ### Mon Feb 26, 2024 (unresolved topics)
 
 - Breaking change with collection expressions and UI collection types (https://github.com/dotnet/roslyn/issues/72098).  Cyrus + Chuck
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Mon Mar 11, 2024
+
+[C# Language Design Meeting for Mar 11th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md)
+
+- Dictionary expressions
 
 ### Mon Mar 4, 2024
 
