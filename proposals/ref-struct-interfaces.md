@@ -253,16 +253,43 @@ T M3<T>(Span<T> span)
 }
 ```
 
-These parameters will be encoded in metadata as described in the [byref-like generics doc][byref-like-generics]. Specifically by using the `gpAcceptByRefLike(0x0020)` attribute value.
-
+The anti-constraint is not "inherited" from a type parameter type constraint.
+For example, `S` in the code bellow cannot be substituted with a ref struct:
+```csharp
+class C<T, S> where T : allows ref struct, S : T
+{}
+```
 Detailed notes:
 
 - A `where T : allows ref struct` generic parameter cannot
   - Have `where T : U` where `U` is a known reference type
   - Have `where T : class` constraint
   - Cannot be used as a generic argument unless the corresponding parameter is also `where T: allows ref struct`
-- The `allows ref struct` can appear anywhere in the `where` clause
+- The `allows ref struct` must be the last constraint in the `where` clause
 - A type parameter `T` which has `allows ref struct` has all the same limitations as a `ref struct` type.
+
+### Representation in metadata
+
+Type parameters allowing ref structs will be encoded in metadata as described in the [byref-like generics doc][byref-like-generics].
+Specifically by using the `CorGenericParamAttr.gpAllowByRefLike(0x0020)` or `System.Reflection.GenericParameterAttributes.AllowByRefLike(0x0020)` flag value.
+Whether runtime supports the feature can be determined by checking presence of `System.Runtime.CompilerServices.RuntimeFeature.ByRefLikeGenerics` field.
+The APIs were added in https://github.com/dotnet/runtime/pull/98070.
+
+### Delegate type for the anonymous function or method group
+
+The https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#delegate-types section states:
+>The compiler may allow more signatures to bind to `System.Action<>` and `System.Func<>` types in the future (if `ref struct` types are allowed type arguments for instance).
+
+We should consider using `Action<>` and `Func<>` types in more scenarios once the types are adjusted to allow ref structs as type arguments, however that is not a must have
+at the time the feature is shipped.
+
+### Inline arrays
+
+The https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md#detailed-design section states:
+>Language will provide a type-safe/ref-safe way for accessing elements of inline array types. The access will be span based.
+>This limits support to inline array types with element types that can be used as a type argument.
+
+When span types are changed to support spans of ref structs, the limitation should be lifted for inline arrays of ref structs. 
 
 ## Soundness
 
