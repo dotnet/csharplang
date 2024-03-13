@@ -472,7 +472,7 @@ We add the following
 
 We add the following section about nullability. 
 
-* We can use an examination mark `?` to say that the inferred type argument should be a nullable type (e.g. `F<_?>(...)`).
+* We can use a question mark `?` to say that the inferred type argument should be a nullable type (e.g. `F<_?>(...)`).
 
 ## Drawbacks
 [drawbacks]: #drawbacks
