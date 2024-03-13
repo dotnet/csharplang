@@ -217,6 +217,8 @@ type_argument
   Container<_>.Method<_>(arg); 
   ```   
 
+* We can use a question mark `?` to say that the inferred type argument should be a nullable type (e.g. `F<_?>(...)`).
+
 * A method group and type are said to be *partial_inferred* if it contains at least one *inferred_type_argument*. 
 
 ### Method invocations
@@ -467,12 +469,6 @@ We change the [compile-time checking](https://github.com/dotnet/csharpstandard/b
 
 We add the following
 - If an object creation expression is inferred and the argument list contains a dynamic value, an error should appear since constructor type inference is not supported by runtime.  
-
-### Nullability
-
-We add the following section about nullability. 
-
-* We can use a question mark `?` to say that the inferred type argument should be a nullable type (e.g. `F<_?>(...)`).
 
 ## Drawbacks
 [drawbacks]: #drawbacks
