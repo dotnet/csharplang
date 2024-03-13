@@ -65,7 +65,7 @@ Besides the changes described above, the proposal mentions further interactions 
   
   ```csharp
   // We can use _ to mark type arguments which should be inferred by the compiler.
-  test<TestCaseDefault<MyData>, _>(new MyData());
+  test<TestCaseDefault<_>, _>(new MyData());
   
   public void test<T, U>(U data) where T : TestCaseDefault<U> { ... }
   ```
