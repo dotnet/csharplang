@@ -256,7 +256,9 @@ T M3<T>(Span<T> span)
 The anti-constraint is not "inherited" from a type parameter type constraint.
 For example, `S` in the code below cannot be substituted with a ref struct:
 ```csharp
-class C<T, S> where T : allows ref struct, S : T
+class C<T, S>
+    where T : allows ref struct
+    where S : T
 {}
 ```
 Detailed notes:
