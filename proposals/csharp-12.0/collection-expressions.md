@@ -118,9 +118,9 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Collections.Generic.ICollection<T>`
   * `System.Collections.Generic.IList<T>`
 
-The implicit conversion exists if the type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` where for each *element* `Eᵢ` in the collection expression:
-* If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
-* If `Eᵢ` is an *spread element* `Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
+The implicit conversion exists if the type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` where for each *element* `Eᵢ` in the collection expression:
+* If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `Tₑ`.
+* If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `Tₑ`.
 
 There is no *collection expression conversion* from a collection expression to a multi dimensional *array type*.
 
@@ -379,7 +379,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
+>   * If `Eᵢ` is a *spread element* `..Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of `Sᵢ` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
@@ -388,7 +388,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *output type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element*, no inference is made from `Eᵢ`.
+>   * If `Eᵢ` is a *spread element*, no inference is made from `Eᵢ`.
 > * *[existing rules from output type inferences]* ...
 
 ## Extension methods
