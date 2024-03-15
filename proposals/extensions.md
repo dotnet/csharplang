@@ -694,10 +694,10 @@ The search proceeds as follows:
       (note this doesn't include members from the underlying type)
     - Merge the results
     - Next, members that are hidden by other members are removed from the set.  
-      (note: "base types" means "base extensions and underlying type" for extension types for purpose of shadowing)
+    - Next, extension members are removed if any more specific extension member is applicable.
 
   - Finally, look at the set:
-    - If the set is empty, proceed to extension methods below.
+    - If the set is empty, proceed to the next scope.
     - If the set consists of a single member that is not a method, then:
       - If it is a value of a *delegate_type*, the *invocation_expression* 
         is evaluated as a delegate invocation.
@@ -706,7 +706,8 @@ The search proceeds as follows:
       - If it is a value of a type `dynamic`, the *invocation_expression* 
         is evaluated as a dynamic member invocation.
     - If the set contains only methods, we remove all the methods that are not 
-      accessible or applicable (see "method invocations").
+      accessible or applicable (see "method invocations"). We remove less specific
+      extension members
       - If the set is empty, proceed to extension methods below.
       - Otherwise, overload resolution is applied to the candidate methods:
         - If a single best method is found, the *invocation_expression* 
@@ -953,18 +954,15 @@ We process as follows:
     - Perform member lookup for `I` in each compatible substituted extension type `X` 
       (note this takes into account whether the member is invoked).
     - Merge the results
-TODO4 spec how we deal with duplicate or near duplicate entries (for example, field E1.Member and method E2.Member)
   - Next, members that are hidden by other members are removed from the set.  
     (note: "base types" means "base extensions and underlying type" for extension types)
+  - Next, extension members are removed if they are less specific than another extension member.  
 - Finally, having removed hidden members, the result of the lookup is determined:
   - If the set is empty, proceed to the next enclosing scope.
   - If the set consists of a single member that is not a method,
     then this member is the result of the lookup.
-  - Otherwise, if the set contains only methods and the member is invoked,
-    overload resolution is applied to the candidate set. TODO3 we can never get here...
-    - If a single best method is found, this member is the result of the lookup.
-    - If no best method is found, continue the search.
-    - Otherwise (ambiguity), a compile-time error occurs.
+  - Otherwise, if the set contains only methods,
+    then this method group is the result of the lookup.
   - Otherwise, the lookup is ambiguous, and a binding-time error occurs.
 - Otherwise, continue the search through namespaces and their imports.
 - If no candidate set is found in any enclosing namespace declaration or compilation unit, 
