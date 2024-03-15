@@ -683,10 +683,8 @@ The search proceeds as follows:
   - If namespaces imported by using-namespace directives in the given namespace or 
     compilation unit directly contain extension types or methods, those will be considered second.
 
-  - First, collect extension methods (only for the `expr` case):
-    - Check which extension methods in the current scope are eligible and add those to the set.
-
-  - Then, collect members from extension types: 
+TODO4(instance) need to merge extension members and extension methods
+  - First, try extension types: 
     - Check which extension types in the current scope are compatible with the given underlying type `Type` and 
       collect resulting compatible substituted extension types.
     - Perform member lookup for `identifier` in each compatible substituted extension type.
@@ -694,24 +692,31 @@ The search proceeds as follows:
       (note this doesn't include members from the underlying type)
     - Merge the results
     - Next, members that are hidden by other members are removed from the set.  
+      (note: "base types" means "base extensions and underlying type" for extension types)
     - Next, extension members are removed if any more specific extension member is applicable.
-
-  - Finally, look at the set:
-    - If the set is empty, proceed to the next scope.
-    - If the set consists of a single member that is not a method, then:
-      - If it is a value of a *delegate_type*, the *invocation_expression* 
-        is evaluated as a delegate invocation.
-      - If it is a value of a *function_pointer_type*, the *invocation_expression* 
-        is evaluated as a function pointer invocation.
-      - If it is a value of a type `dynamic`, the *invocation_expression* 
-        is evaluated as a dynamic member invocation.
-    - If the set contains only methods, we remove all the methods that are not 
-      accessible or applicable (see "method invocations"). We remove less specific
-      extension members
+    - Finally, having removed hidden and less specific members:
       - If the set is empty, proceed to extension methods below.
-      - Otherwise, overload resolution is applied to the candidate methods:
+      - If the set consists of a single member that is not a method, then:
+        - If it is a value of a *delegate_type*, the *invocation_expression* 
+          is evaluated as a delegate invocation.
+        - If it is a value of a *function_pointer_type*, the *invocation_expression* 
+          is evaluated as a function pointer invocation.
+        - If it is a value of a type `dynamic`, the *invocation_expression* 
+          is evaluated as a dynamic member invocation.
+      - If the set contains only methods, we remove all the methods that are not 
+        accessible or applicable (see "method invocations").
+        - If the set is empty, proceed to extension methods below.
+        - Otherwise, overload resolution is applied to the candidate methods:
+          - If a single best method is found, the *invocation_expression* 
+            is evaluated as the invocation of this method.
+          - If no single best method is found, a compile-time error occurs.
+
+  - Next, try extension methods (only for the `expr` case):
+    - Check which extension methods in the current scope are eligible.
+      - If the set is empty, proceed to the next enclosing scope.
+      - Otherwise, overload resolution is applied to the candidate set. 
         - If a single best method is found, the *invocation_expression* 
-          is evaluated as the invocation of this method.
+          is evaluated as a static method invocation.
         - If no single best method is found, a compile-time error occurs.
 
   - Proceed to the next enclosing scope
