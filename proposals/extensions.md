@@ -747,7 +747,7 @@ We modify the [element access rules](https://github.com/dotnet/csharpstandard/bl
 /[...]
 An *element_access* is dynamically bound if \[...]
 If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access. 
-Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type 
+Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type  TODOTODO
 that has one or more indexer members, in which case the *element_access* is an indexer access.
 \***Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type 
 that has no indexer members, in which case the *element_access* is an extension indexer access.**
@@ -1003,6 +1003,15 @@ extension member lookup will find the `int` property and stop there.
 
 For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
 
+### 12.6.4 Overload resolution
+
+We update the [overload resolution section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12641-general) as follows:
+
+Each of these contexts defines the set of candidate function members and the list of arguments in its own unique way. 
+For instance, the set of candidates for a method invocation does not include methods marked override, 
+methods in a base class are not candidates if any method in a derived class is applicable,
+\***and extension methods in a less specific extension type are not candidates if any extension method in a more specific extension type is applicable**.
+
 ### Natural function type
 
 The rules for determining the [natural function type of a method group](https://github.com/dotnet/csharplang/blob/main/proposals/method-group-natural-type-improvements.md) are modified as follows:
@@ -1109,7 +1118,7 @@ static explicit extension E for C
 
 ### Element access
 
-TODO3(instance) write this section
+TODO3(instance) write this section, including preference for more specific extension indexers
 
 TL;DR: For non-extension types, we'll fall back to an implicit extension member lookup. For extension types, we include indexers from the underlying type.
 
@@ -1122,7 +1131,7 @@ applicable with respect to the *argument_list* of the *element_access*.
 The binding-time processing of an indexer access of the form `P[A]`, where `P` is a *primary_no_array_creation_expression* 
 of a class, struct, interface, /***or extension** type `T`, and `A` is an *argument_list*, consists of the following steps:
 
-- The set of indexers provided by `T` is constructed. The set consists of all indexers declared in `T` or a base type of `T` that are not override declarations and are accessible in the current context ([§7.5](basic-concepts.md#75-member-access)).
+- The set of indexers provided by `T` is constructed. The set consists of all indexers declared in `T` or a base type of `T` that are not override declarations and are accessible in the current context.
 - The set is reduced to those indexers that are applicable and not hidden by other indexers. The following rules are applied to each indexer `S.I` in the set, where `S` is the type in which the indexer `I` is declared:
   - If `I` is not applicable with respect to `A`, then `I` is removed from the set.
   - If `I` is applicable with respect to `A`, then all indexers declared in a base type of `S` are removed from the set.
