@@ -877,11 +877,9 @@ and when successful this process yields an extension type we can use
 
 An extension type `X` is compatible with given type `U` if:
 - `X` is non-generic and its underlying type is `U`, a base type of `U` or an implemented interface of `U`
-- a possible type substitution on the type parameters of `X` yields underlying type `U`, 
+- we collect all the possible type substitutions on the type parameters of `X` yields underlying type `U`, 
   a base type of `U` or an implemented interface of `U`.  
-  Such substitution is unique (because of the requirement that all type parameters
-  from the extension appear in the underlying type).  
-  We call the resulting substituted type `X` the "compatible substituted extension type".
+  We call the resulting substituted types of `X` the "compatible substituted extension types".
 
 ```csharp
 #nullable enable
@@ -908,6 +906,19 @@ explicit extension E1 for C
 implicit extension E2 for C
 {
     public void M2() { }
+}
+```
+
+Note: there may be multiple substitutions for a given compatible extension type:
+```csharp
+_ = C.M; // ambiguous, C<int>.M and C<string>.M are both applicable
+
+interface I<T> { }
+class C : I<int>, I<string> { }
+
+implicit extension E<T> for I<T>
+{
+    public static string M = null;
 }
 ```
 
