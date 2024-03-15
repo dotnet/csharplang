@@ -4,7 +4,7 @@
 [summary]: #summary
 
 - Allow `ref`/`ref struct` locals and `unsafe` blocks in iterators and async methods
-  provided they are used in code blocks without any `yield` or `await`.
+  provided they are used in code segments without any `yield` or `await`.
 - Warn about `yield` inside `lock`.
 
 ## Motivation
@@ -17,12 +17,10 @@ if they are not used across `yield` or `await`, because they do not need to be h
 async void M()
 {
     await ...;
-    {
-        ref int x = ...; // error previously, proposed to be allowed
-        // await ...; // still disallowed if await is here
-        x.ToString();
-    }
+    ref int x = ...; // error previously, proposed to be allowed
+    x.ToString();
     await ...;
+    // x.ToString(); // still error
 }
 ```
 
@@ -42,17 +40,15 @@ lock (this)
 
 [§13.3.1 Blocks > General][blocks-general]:
 
-> It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts])
-> **unless the unsafe context does not contain any iterator blocks**.
+> ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).~~
 > An iterator block always defines a safe context, even when its declaration is nested in an unsafe context.
 
 [§13.6.2.4 Ref local variable declarations][ref-local]:
 
-> It is a compile-time error to declare a ref local variable, or a variable of a `ref struct` type,
-> within a method declared with the *method_modifier* `async`, or within an iterator ([§15.14][iterators])
-> **unless the variable is declared and used only in a block ([§13.3.1][blocks-general])
-> which does not have any `await` or `yield` statements inside itself and inside any of its nested blocks
-> (excluding declarations like anonymous methods and local functions)**.
+> ~~It is a compile-time error to declare a ref local variable, or a variable of a `ref struct` type,
+> within a method declared with the *method_modifier* `async`, or within an iterator ([§15.14][iterators]).~~
+> **It is a compile-time error to declare and use a ref local variable, or a variable of a `ref struct` type
+> across `await` or `yield` statements.**
 
 [§13.13 The lock statement][lock-statement]:
 
@@ -61,19 +57,19 @@ lock (this)
 > **A warning is reported (as part of the next warning wave) when a `yield` statement
 > ([§13.15][yield-statement]) is used inside the body of a `lock` statement.**
 
-Note that no change in the spec is needed to allow `unsafe` blocks which do not contain `await`s in async methods,
+No change in the spec is needed to allow `unsafe` blocks which do not contain `await`s in async methods,
 because the spec has never disallowed `unsafe` blocks in async methods.
 However, the spec should have always disallowed `await` inside `unsafe` blocks
-(it already disallows `yield` in `unsafe` in [§13.3.1][blocks-general] as cited above), for example:
+(it had already disallowed `yield` in `unsafe` in [§13.3.1][blocks-general] as cited above), for example:
 
 [§15.15.1 Async Functions > General][async-funcs-general]:
 
 > It is a compile-time error for the formal parameter list of an async function to specify
 > any `in`, `out`, or `ref` parameters, or any parameter of a `ref struct` type.
 >
-> **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain `await`.**
+> **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain `await` or `yield`.**
 
-Note that more constructs can work thanks to `ref` allowed inside blocks without `await` and `yield` in async/iterator methods
+Note that more constructs can work thanks to `ref` allowed inside segments without `await` and `yield` in async/iterator methods
 even though no spec change is needed specifically for them as it all falls out from the aforementioned spec changes:
 
 ```cs
@@ -91,12 +87,10 @@ class C
     async void M()
     {
         await Task.Yield();
-        {
-            using (new R()) { } // allowed under this proposal
-            foreach (var x in new C()) { } // allowed under this proposal
-            foreach (ref int x in new int[0]) { } // allowed under this proposal
-            lock (new System.Threading.Lock()) { } // allowed under this proposal
-        }
+        using (new R()) { } // allowed under this proposal
+        foreach (var x in new C()) { } // allowed under this proposal
+        foreach (ref int x in new int[0]) { } // allowed under this proposal
+        lock (new System.Threading.Lock()) { } // allowed under this proposal
         await Task.Yield();
     }
 }
@@ -105,22 +99,22 @@ class C
 ## Alternatives
 [alternatives]: #alternatives
 
-- `ref`/`ref struct` locals could be allowed even in blocks that contain `await`/`yield`
-  provided the locals are not declared and used across `await`/`yield`:
+- `ref`/`ref struct` locals could be allowed only in blocks ([§13.3.1][blocks-general])
+  which do not contain `await`/`yield`:
 
   ```cs
   // error always since `x` is declared/used both before and after `await`
   {
       ref int x = ...;
-      await ...;
+      await Task.Yield();
       x.ToString();
   }
-  // error as proposed (`await` in the same block) but alternatively could be allowed
-  // (`x` does not need to be hoisted as it is not used after `await`)
+  // allowed as proposed (`x` does not need to be hoisted as it is not used after `await`)
+  // but alternatively could be an error (`await` in the same block)
   {
       ref int x = ...;
       x.ToString();
-      await ...;
+      await Task.Yield();
   }
   ```
 
