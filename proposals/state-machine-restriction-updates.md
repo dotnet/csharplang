@@ -151,7 +151,6 @@ class C
     but would not match the semantics of `fixed` because the `stackalloc` expression is not a moveable value.
     (Note that it would not be *impossible* to use the `stackalloc` result across `await`/`yield` similarly as
     you can save any `fixed` pointer today into another pointer variable and use it outside the `fixed` block.)
-    Finally, if we keep `await`/`yield` disallowed inside `unsafe`, this is not a problem.
 
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
 [captured-vars]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#121962-captured-outer-variables
