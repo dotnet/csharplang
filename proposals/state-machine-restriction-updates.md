@@ -118,6 +118,19 @@ class C
   }
   ```
 
+- We could allow `await`/`yield` inside `unsafe` except inside `fixed` statements (compiler cannot pin variables across method boundaries).
+  That might result in some unexpected behavior, for example around `stackalloc` as described below.
+  - We could disallow the unsafe variant of `stackalloc` in async/iterator methods,
+    because the stack-allocated buffer does not live across `await`/`yield` statements.
+    It does not feel necessary because unsafe code by design does not prevent "use after free".
+    Note that we could also allow unsafe `stackalloc` provided it is not used across `await`/`yield`, but
+    that might be difficult to analyze (the resulting pointer can be passed around in any pointer variable).
+    Or we could require it being `fixed` in async/iterator methods. That would *discourage* using it across `await`/`yield`
+    but would not match the semantics of `fixed` because the `stackalloc` expression is not a moveable value.
+    (Note that it would not be *impossible* to use the `stackalloc` result across `await`/`yield` similarly as
+    you can save any `fixed` pointer today into another pointer variable and use it outside the `fixed` block.)
+    Finally, if we keep `await`/`yield` disallowed inside `unsafe`, this is not a problem.
+
 [blocks-general]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#1331-general
 [ref-local]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#13624-ref-local-variable-declarations
 [lock-statement]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#1313-the-lock-statement
