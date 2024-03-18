@@ -6,6 +6,8 @@
 - Allow `ref`/`ref struct` locals and `unsafe` blocks in iterators and async methods
   provided they are used in code segments without any `yield` or `await`.
 - Warn about `yield` inside `lock`.
+- Consolidate spec: disallow pointers to hoisted variables
+  (pointers to captured variables are already disallowed).
 
 ## Motivation
 [motivation]: #motivation
@@ -70,8 +72,8 @@ However, the spec should have always disallowed `await` inside `unsafe` blocks
 > **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain `await` or `yield`.**
 
 Furthermore, variables inside async or iterator methods should not be "fixed" but rather "moveable"
-if they need to be hoisted to fields of the state machine.
-Note that this is a pre-existing bug in the spec independent of the feature
+if they need to be hoisted to fields of the state machine (similarly to captured variables).
+Note that this is a pre-existing bug in the spec independent of the rest of the proposal
 because `unsafe` blocks inside `async` methods were always allowed.
 
 [§23.4 Fixed and moveable variables][fixed-vars]:
