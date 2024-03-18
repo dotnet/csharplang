@@ -69,6 +69,20 @@ However, the spec should have always disallowed `await` inside `unsafe` blocks
 >
 > **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain `await` or `yield`.**
 
+Furthermore, variables inside async or iterator methods should not be "fixed" but rather "moveable"
+if they need to be hoisted to fields of the state machine.
+Note that this is a pre-existing bug in the spec independent of the feature
+because `unsafe` blocks inside `async` methods were always allowed.
+
+[§23.4 Fixed and moveable variables][fixed-vars]:
+
+> In precise terms, a fixed variable is one of the following:
+>
+> - A variable resulting from a *simple_name* ([§12.8.4][simple-names]) that refers to a local variable, value parameter, or parameter array,
+> unless the variable is captured by an anonymous function ([§12.19.6.2][captured-vars]) **or a local function ([§13.6.4][local-funcs])
+> or the variable needs to be hoisted as part of an async ([§15.15][async-funcs]) or an iterator ([§15.14][iterators]) method**.
+> - [...]
+
 Note that more constructs can work thanks to `ref` allowed inside segments without `await` and `yield` in async/iterator methods
 even though no spec change is needed specifically for them as it all falls out from the aforementioned spec changes:
 
@@ -118,6 +132,12 @@ class C
   }
   ```
 
+- It could be possible to use `fixed` to get the address of a hoisted or captured variable
+  although the fact that those are fields is an implementation detail
+  so in other implementations it might not be possible to use `fixed` on them.
+  Note that we only propose to consider also hoisted variables as "moveable",
+  but captured variables were already "moveable" and `fixed` was not allowed for them.
+
 - We could allow `await`/`yield` inside `unsafe` except inside `fixed` statements (compiler cannot pin variables across method boundaries).
   That might result in some unexpected behavior, for example around `stackalloc` as described below.
   - We could disallow the unsafe variant of `stackalloc` in async/iterator methods,
@@ -131,11 +151,16 @@ class C
     you can save any `fixed` pointer today into another pointer variable and use it outside the `fixed` block.)
     Finally, if we keep `await`/`yield` disallowed inside `unsafe`, this is not a problem.
 
+[simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
+[captured-vars]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#121962-captured-outer-variables
 [blocks-general]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#1331-general
 [ref-local]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#13624-ref-local-variable-declarations
+[local-funcs]: https://github.com/dotnet/csharpstandard/blob/d11d5a1a752bff9179f8207e86d63d12782c31ff/standard/statements.md#1364-local-function-declarations
 [lock-statement]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#1313-the-lock-statement
 [using-statement]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#1314-the-using-statement
 [yield-statement]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#1315-the-yield-statement
 [iterators]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/classes.md#1514-iterators
+[async-funcs]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/classes.md#1515-async-functions
 [async-funcs-general]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/classes.md#15151-general
 [unsafe-contexts]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/unsafe-code.md#232-unsafe-contexts
+[fixed-vars]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/unsafe-code.md#234-fixed-and-moveable-variables
