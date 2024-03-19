@@ -693,7 +693,10 @@ TODO4(instance) need to merge extension members and extension methods
     - Merge the results
     - Next, members that are hidden by other members are removed from the set.  
       (note: "base types" means "base extensions and underlying type" for extension types)
-    - Next, extension members are removed if any more specific extension member is applicable.
+    - Next, extension members are removed if they are "hidden" by more specific extension members. 
+      For every member `X.M` in the set, where `X` is the type in which the member `M` is declared, the following rules are applied:
+      - If `M` is a method, then all non-method members declared in a less specific type than `X` are removed from the set.
+      - Otherwise, all members declared in a less specific type than `X` are removed from the set.
     - Finally, having removed hidden and less specific members:
       - If the set is empty, proceed to extension methods below.
       - If the set consists of a single member that is not a method, then:
@@ -964,7 +967,13 @@ We process as follows:
     - Merge the results
   - Next, members that are hidden by other members are removed from the set.  
     (note: "base types" means "base extensions and underlying type" for extension types)
-  - Next, extension members are removed if they are less specific than another extension member.  
+  - Next, extension members are removed if they are "hidden" by more specific extension members.  
+    For every member `X.M` in the set, where `X` is the extension type in which the member `M` is declared, the following rules are applied:
+    - If `M` is a constant, field, property, event, or enumeration member, 
+      then all members declared in a less specific type than `X` are removed from the set.
+    - If `M` is a type declaration, then all non-types declared in a less specific type than `X` are removed from the set, 
+      and all type declarations with the same number of type parameters as `M` declared in a less specific type than `X` are removed from the set.
+    - If `M` is a method, then all non-method members declared in a less specific type than `X` are removed from the set.
 - Finally, having removed hidden members, the result of the lookup is determined:
   - If the set is empty, proceed to the next enclosing scope.
   - If the set consists of a single member that is not a method,
