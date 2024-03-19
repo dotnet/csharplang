@@ -875,17 +875,20 @@ explicit extension R : U
 }
 ```
 
-### Compatible substituted extension type
+### Compatible substituted extension types
 
 TL;DR: We can determine whether an implicit extension is compatible with a given underlying type
-and when successful this process yields an extension type we can use
+and when successful this process yields one or more extension types we can use
 (including required substitutions).  
 
 An extension type `X` is compatible with given type `U` if:
 - `X` is non-generic and its underlying type is `U`, a base type of `U` or an implemented interface of `U`
-- we collect all the possible type substitutions on the type parameters of `X` yields underlying type `U`, 
+- a possible type substitution on the type parameters of `X` yields underlying type `U`, 
   a base type of `U` or an implemented interface of `U`.  
-  We call the resulting substituted types of `X` the "compatible substituted extension types".
+
+Note: it is possible for multiple substitutions on the type parameters of `X` to satisfy the condition above.
+
+We call the resulting substituted types of `X` the "compatible substituted extension types".
 
 ```csharp
 #nullable enable
@@ -1002,6 +1005,16 @@ has a string property, an assignment of a string to that property will fail, as
 extension member lookup will find the `int` property and stop there.  
 
 For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
+
+### More specific extension member
+
+TL;DR: As part of extension member lookup, extension invocations and overload resolution,
+we consider that "more specific" extension members "hide" "less specific" extension members.
+
+If `X` extends `C` and `Y` extends `D`, a member `X.I` is considered more specific than a member `Y.I`
+when:
+- `D` is a base type of `C`, or
+- `D` is an interface implemented by `C`.
 
 ### 12.6.4 Overload resolution
 
@@ -1164,7 +1177,7 @@ but with some tweaks related to normal form and optional parameters.
 
 TODO(static) Need to scan through all pattern-based rules for known members to consider whether to include extension type members.
   If extension methods were already included, then we should certainly include extension type methods.
-  Otherwise, we should consider it (for example `Current` property in `foreach`).
+  Otherwise, we should consider it.
   - `Deconstruct` in deconstruction and patterns
   - `GetEnumerator`, `Current` and `MoveNext` in `foreach`
   - CollectionBuilder in collection expressions
