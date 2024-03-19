@@ -3,6 +3,8 @@
 ## Summary
 [summary]: #summary
 
+Unify behavior between iterators and async methods. Specifically:
+
 - Allow `ref`/`ref struct` locals and `unsafe` blocks in iterators and async methods
   provided they are used in code segments without any `yield` or `await`.
 - Warn about `yield` inside `lock`.
@@ -52,12 +54,19 @@ lock (this)
 > **It is a compile-time error to declare and use a ref local variable, or a variable of a `ref struct` type
 > across `await` or `yield` statements.**
 
+Note that this error is not downgraded to a warning in `unsafe` contexts like [some other ref safety errors][ref-safety-unsafe-warnings].
+That is because these ref-like locals cannot be manipulated in `unsafe` contexts without relying on implementation details of how the state machine rewrite works,
+hence this error falls outside the boundaries of what we want to downgrade to warnings in `unsafe` contexts.
+
 [§13.13 The lock statement][lock-statement]:
 
 > [...]
 > 
 > **A warning is reported (as part of the next warning wave) when a `yield` statement
 > ([§13.15][yield-statement]) is used inside the body of a `lock` statement.**
+
+Note that [the new `Lock`-object-based `lock`][lock-object] reports compile-time errors for `yield`s in its body,
+because such `lock` statement is equivalent to a `using` on a `ref struct` which disallows `yield`s in its body.
 
 No change in the spec is needed to allow `unsafe` blocks which do not contain `await`s in async methods,
 because the spec has never disallowed `unsafe` blocks in async methods.
@@ -134,6 +143,8 @@ class C
   }
   ```
 
+- `yield` inside `lock` could be an error (like `await` inside `lock` is) but that would be a breaking change.
+
 - It could be possible to use `fixed` to get the address of a hoisted or captured variable
   although the fact that those are fields is an implementation detail
   so in other implementations it might not be possible to use `fixed` on them.
@@ -165,3 +176,5 @@ class C
 [async-funcs-general]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/classes.md#15151-general
 [unsafe-contexts]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/unsafe-code.md#232-unsafe-contexts
 [fixed-vars]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/unsafe-code.md#234-fixed-and-moveable-variables
+[lock-object]: ./lock-object.md
+[ref-safety-unsafe-warnings]: https://github.com/dotnet/csharplang/issues/6476
