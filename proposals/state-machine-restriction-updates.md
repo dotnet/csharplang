@@ -8,8 +8,6 @@ Unify behavior between iterators and async methods. Specifically:
 - Allow `ref`/`ref struct` locals and `unsafe` blocks in iterators and async methods
   provided they are used in code segments without any `yield` or `await`.
 - Warn about `yield` inside `lock`.
-- Consolidate spec: disallow pointers to hoisted variables
-  (pointers to captured variables are already disallowed).
 
 ## Motivation
 [motivation]: #motivation
@@ -80,20 +78,6 @@ However, the spec should have always disallowed `await` inside `unsafe` blocks
 >
 > **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain `await` or `yield`.**
 
-Furthermore, variables inside async or iterator methods should not be "fixed" but rather "moveable"
-if they need to be hoisted to fields of the state machine (similarly to captured variables).
-Note that this is a pre-existing bug in the spec independent of the rest of the proposal
-because `unsafe` blocks inside `async` methods were always allowed.
-
-[§23.4 Fixed and moveable variables][fixed-vars]:
-
-> In precise terms, a fixed variable is one of the following:
->
-> - A variable resulting from a *simple_name* ([§12.8.4][simple-names]) that refers to a local variable, value parameter, or parameter array,
-> unless the variable is captured by an anonymous function ([§12.19.6.2][captured-vars]) **or a local function ([§13.6.4][local-funcs])
-> or the variable needs to be hoisted as part of an async ([§15.15][async-funcs]) or an iterator ([§15.14][iterators]) method**.
-> - [...]
-
 Note that more constructs can work thanks to `ref` allowed inside segments without `await` and `yield` in async/iterator methods
 even though no spec change is needed specifically for them as it all falls out from the aforementioned spec changes:
 
@@ -145,11 +129,27 @@ class C
 
 - `yield` inside `lock` could be an error (like `await` inside `lock` is) but that would be a breaking change.
 
-- It could be possible to use `fixed` to get the address of a hoisted or captured variable
-  although the fact that those are fields is an implementation detail
-  so in other implementations it might not be possible to use `fixed` on them.
-  Note that we only propose to consider also hoisted variables as "moveable",
-  but captured variables were already "moveable" and `fixed` was not allowed for them.
+- Variables inside async or iterator methods should not be "fixed" but rather "moveable"
+  if they need to be hoisted to fields of the state machine (similarly to captured variables).
+  Note that this is a pre-existing bug in the spec independent of the rest of the proposal
+  because `unsafe` blocks inside `async` methods were always allowed.
+  There is currently [a warning for this in C# 12 warning wave][async-pointer]
+  and making it an error would be a breaking change.
+
+  [§23.4 Fixed and moveable variables][fixed-vars]:
+  
+  > In precise terms, a fixed variable is one of the following:
+  >
+  > - A variable resulting from a *simple_name* ([§12.8.4][simple-names]) that refers to a local variable, value parameter, or parameter array,
+  > unless the variable is captured by an anonymous function ([§12.19.6.2][captured-vars]) **or a local function ([§13.6.4][local-funcs])
+  > or the variable needs to be hoisted as part of an async ([§15.15][async-funcs]) or an iterator ([§15.14][iterators]) method**.
+  > - [...]
+
+  - It could be possible to use `fixed` to get the address of a hoisted or captured variable
+    although the fact that those are fields is an implementation detail
+    so in other implementations it might not be possible to use `fixed` on them.
+    Note that we only propose to consider also hoisted variables as "moveable",
+    but captured variables were already "moveable" and `fixed` was not allowed for them.
 
 - We could allow `await`/`yield` inside `unsafe` except inside `fixed` statements (compiler cannot pin variables across method boundaries).
   That might result in some unexpected behavior, for example around `stackalloc` as described below.
@@ -178,3 +178,4 @@ class C
 [fixed-vars]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/unsafe-code.md#234-fixed-and-moveable-variables
 [lock-object]: ./lock-object.md
 [ref-safety-unsafe-warnings]: https://github.com/dotnet/csharplang/issues/6476
+[async-pointer]: https://github.com/dotnet/roslyn/pull/66915
