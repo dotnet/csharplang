@@ -49,8 +49,12 @@ lock (this)
 
 > ~~It is a compile-time error to declare a ref local variable, or a variable of a `ref struct` type,
 > within a method declared with the *method_modifier* `async`, or within an iterator ([§15.14][iterators]).~~
-> **It is a compile-time error to declare and use a ref local variable, or a variable of a `ref struct` type
-> across `await` or `yield` statements.**
+> **It is a compile-time error to declare and use (even implicitly in compiler-synthesized code)
+> a ref local variable, or a variable of a `ref struct` type across `await` expressions or `yield` statements.
+> More precisely, the error is driven by the following mechanism:
+> after an `await` expression ([§12.9.8][await-expressions]) or a `yield` statement ([§13.15][yield-statement]),
+> all ref local variables and variables of a `ref struct` type in scope
+> are considered definitely unassigned ([§9.4][definite-assignment]).**
 
 Note that this error is not downgraded to a warning in `unsafe` contexts like [some other ref safety errors][ref-safety-unsafe-warnings].
 That is because these ref-like locals cannot be manipulated in `unsafe` contexts without relying on implementation details of how the state machine rewrite works,
@@ -163,7 +167,9 @@ class C
     (Note that it would not be *impossible* to use the `stackalloc` result across `await`/`yield` similarly as
     you can save any `fixed` pointer today into another pointer variable and use it outside the `fixed` block.)
 
+[definite-assignment]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/variables.md#94-definite-assignment
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
+[await-expressions]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1298-await-expressions
 [captured-vars]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#121962-captured-outer-variables
 [blocks-general]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#1331-general
 [ref-local]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/statements.md#13624-ref-local-variable-declarations
