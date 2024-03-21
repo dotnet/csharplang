@@ -136,7 +136,7 @@ when those types are not under your control, or where changing them would
 negatively impact other uses of them. The adaptation can be in the form of
 adding new function members as well as implementing additional interfaces.
 
-`explicit extension CustomerExtension for ReadOnlySpan<byte> : PersonExtension { ... }`
+`explicit extension CustomerExtension for byte[] : PersonExtension { ... }`
 `implicit extension EnumExtension for Enum { ... }`
 
 ## Motivation
@@ -290,6 +290,7 @@ We'll use "inherits" for relationship to inherited/base extensions
 ```csharp
 struct U { }
 explicit extension X for U { }
+explicit extension X1 for U { }
 explicit extension Y for U : X, X1 { }
 ```
 "Y has underlying type U"  
