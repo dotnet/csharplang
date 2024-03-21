@@ -12,7 +12,7 @@ TODO attributes and attribute targets
 
 ## Open issue: merging extension methods and extension members
 
-TODO4 revise preference of extension types over extension methods (should mix and disambiguate duplicates if needed instead)
+TODO(instance) revise preference of extension types over extension methods (should mix and disambiguate duplicates if needed instead)
 
 ```c#
 static class Extensions
@@ -50,7 +50,7 @@ static class Extensions
 }
 ```
 
-TODO4 confirm what happens when we have different kinds of members
+TODO(instance) confirm what happens when we have different kinds of members
 
 ```cs
 var c = new C();
@@ -86,46 +86,6 @@ implicit extension MyTableExtensions for TableIDoNotOwn
 
 // What happens here?
 var v = table.Count; // Let's get a read from LDM
-```
-
-## Open issue: preference of more specific extension members
-
-TODO4 We want to prefer an extension on a derived type over an extension on a base type, but not sure how to specify that yet.
-For example:
-```csharp
-C.M(42); // Should prefer extension method E2.M, as M(C, int) is a better function than M(Base, int)
-
-class Base { }
-
-class C : Base { }
-
-implicit extension E1 for Base
-{
-    public static int M(int i) => throw null;
-}
-
-implicit extension E2 for C
-{
-    public static int M(int i) => i;
-}
-```
-
-```csharp
-_ = C.P; // Should prefer E2.P
-
-class Base { }
-
-class C : Base { }
-
-implicit extension E1 for Base
-{
-    public static int P => throw null;
-}
-
-implicit extension E2 for C
-{
-    public static int P => i;
-}
 ```
 
 ## Summary
@@ -694,7 +654,7 @@ TODO4(instance) need to merge extension members and extension methods
     - Merge the results
     - Next, members that are hidden by other members are removed from the set.  
       (note: "base types" means "base extensions and underlying type" for extension types)
-    - Next, extension members are removed if they are "hidden" by more specific extension members. 
+    - Next, less specific extension members are removed if they are "hidden" by more specific extension members. 
       For every member `X.M` in the set, where `X` is the type in which the member `M` is declared, the following rules are applied:
       - If `M` is a method, then all non-method members declared in a less specific type than `X` are removed from the set.
       - Otherwise, all members declared in a less specific type than `X` are removed from the set.
@@ -968,7 +928,7 @@ We process as follows:
     - Merge the results
   - Next, members that are hidden by other members are removed from the set.  
     (note: "base types" means "base extensions and underlying type" for extension types)
-  - Next, extension members are removed if they are "hidden" by more specific extension members.  
+  - Next, less specific extension members are removed if they are "hidden" by more specific extension members.  
     For every member `X.M` in the set, where `X` is the extension type in which the member `M` is declared, the following rules are applied:
     - If `M` is a constant, field, property, event, or enumeration member, 
       then all members declared in a less specific type than `X` are removed from the set.
@@ -1016,15 +976,52 @@ extension member lookup will find the `int` property and stop there.
 
 For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
 
-### More specific extension member
+### Less specific extension member
 
 TL;DR: As part of extension member lookup, extension invocations and overload resolution,
-we consider that "more specific" extension members "hide" "less specific" extension members.
+we consider that "less specific" extension members are "hidden" by "more specific" extension members.
 
-If `X` extends `C` and `Y` extends `D`, a member `X.I` is considered more specific than a member `Y.I`
+If `X` extends `C` and `Y` extends `D`, a member `X.I` is considered less specific than a member `Y.I`
 when:
-- `D` is a base type of `C`, or
-- `D` is an interface implemented by `C`.
+- `C` is a base type of `D`, or
+- `C` is an interface implemented by `D`.
+
+For example:
+```csharp
+C.M(42); // extension method E2.M is preferred as E1.M is less specific
+
+class Base { }
+
+class C : Base { }
+
+implicit extension E1 for Base
+{
+    public static int M(int i) => throw null;
+}
+
+implicit extension E2 for C
+{
+    public static int M(int i) => i;
+}
+```
+
+```csharp
+_ = C.P; // extension property E2.P is preferred as E1.P is less specific
+
+class Base { }
+
+class C : Base { }
+
+implicit extension E1 for Base
+{
+    public static int P => throw null;
+}
+
+implicit extension E2 for C
+{
+    public static int P => i;
+}
+```
 
 ### 12.6.4 Overload resolution
 
