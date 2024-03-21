@@ -103,22 +103,25 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
 A *collection expression conversion* allows a collection expression to be converted to a type.
 
 An implicit *collection expression conversion* exists from a collection expression to the following types:
-* A single dimensional *array type* `T[]`
+* A single dimensional *array type* `T[]`, in which case the *element type* is `T`
 * A *span type*:
   * `System.Span<T>`
-  * `System.ReadOnlySpan<T>`
-* A *type* with a *[create method](#create-methods)* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
+  * `System.ReadOnlySpan<T>`  
+  in which cases the *element type* is `T`
+* A *type* with an appropriate *[create method](#create-methods)* and a corresponding *element type* resulting from that determination
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
-  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
-  * If the collection expression has any elements, the *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* instance or extension method `Add` that can be invoked with a single argument of the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement), and the method is accessible at the location of the collection expression.
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression, and
+  * If the collection expression has any elements, the *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* instance or extension method `Add` that can be invoked with a single argument of the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement), and the method is accessible at the location of the collection expression,
+    in which case the *element type* is the *iteration type* of the *type*.
 * An *interface type*:
   * `System.Collections.Generic.IEnumerable<T>`
   * `System.Collections.Generic.IReadOnlyCollection<T>`
   * `System.Collections.Generic.IReadOnlyList<T>`
   * `System.Collections.Generic.ICollection<T>`
-  * `System.Collections.Generic.IList<T>`
+  * `System.Collections.Generic.IList<T>`  
+  in which cases the *element type* is `T`
 
-The implicit conversion exists if the type has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `U` where for each *element* `Eᵢ` in the collection expression:
+The implicit conversion exists if the type has an *element type* `U` where for each *element* `Eᵢ` in the collection expression:
 * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
 * If `Eᵢ` is an *spread element* `Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
 
@@ -158,21 +161,33 @@ namespace System.Runtime.CompilerServices
 The attribute can be applied to a `class`, `struct`, `ref struct`, or `interface`.
 The attribute is not inherited although the attribute can be applied to a base `class` or an `abstract class`.
 
-The collection type must have an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
+The *builder type* must be a non-generic `class` or `struct`.
 
-For the *create method*:
+First, the set of applicable *create methods* `CM` is determined.  
+It consists of methods that meet the following requirements:
 
-* The *builder type* must be a non-generic `class` or `struct`.
+* The method must have the name specified in the `[CollectionBuilder(...)]` attribute. 
 * The method must be defined on the *builder type* directly.
 * The method must be `static`.
 * The method must be accessible where the collection expression is used.
 * The *arity* of the method must match the *arity* of the collection type.
-* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type*.
+* The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value.
 * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
 
-An error is reported if the `[CollectionBuilder]` attribute does not refer to an invocable method with the expected signature.
+Methods declared on base types or interfaces are ignored and not part of the `CM` set.
 
-Method overloads on the *builder type* with distinct signatures are ignored. Methods declared on base types or interfaces are ignored.
+If the `CM` set is empty, then the *collection type* doesn't have an *element type* and doesn't have a *create method*. None of the following steps apply.
+
+Second, an attempt is made to determine the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type* from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
+
+If an *iteration type* can be determined, then the *element type* of the *collection type* is the *iteration type*. If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*. None of the following steps apply.  
+
+Third (ie. if an *iteration type* cannot be determined), an attempt is made to infer the *element type*.
+If the `CM` set contains more than one method, the inference fails and the *collection type* doesn't have an *element type* and doesn't have a *create method*.
+
+Otherwise, type `E1` is determined by substituting type parameters of the only method from the `CM` set (`M`) with corresponding *collection type* type parameters in its `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have an *element type* and doesn't have a *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
+
+An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
 
 For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
 
@@ -377,7 +392,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > An *input type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
+> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an *element type* `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
 >   * If `Eᵢ` is an *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
@@ -386,7 +401,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
 >
-> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Tₑ`, then for each `Eᵢ`:
+> * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an *element type* `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *output type inference* is made *from* `Eᵢ` *to* `Tₑ`.
 >   * If `Eᵢ` is an *spread element*, no inference is made from `Eᵢ`.
 > * *[existing rules from output type inferences]* ...
@@ -437,7 +452,7 @@ In the updated rules:
 >
 > * **`E` is a *collection expression* and one of the following holds:**
 >   * **`T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, and an implicit conversion exists from `E₁` to `E₂`**
->   * **`T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *iteration type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`**
+>   * **`T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *element type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`**
 >   * **`T₁` is not a *span_type*, and `T₂` is not a *span_type*, and an implicit conversion exists from `T₁` to `T₂`**
 > * **`E` is not a *collection expression* and one of the following holds:**
 >   * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
@@ -829,6 +844,28 @@ However, given the breadth and consistency brought by the new literal syntax, we
 
 ## Unresolved questions
 [unresolved]: #unresolved-questions
+
+* Should we allow inferring the *element type* when the *iteration type* is "ambiguous" (by some definition)?
+For example:
+```csharp
+Collection x = [1L, 2L];
+
+// error CS1640: foreach statement cannot operate on variables of type 'Collection' because it implements multiple instantiations of 'IEnumerable<T>'; try casting to a specific interface instantiation
+foreach (var x in new Collection) { }
+
+static class Builder
+{
+    public Collection Create(ReadOnlySpan<long> items) => throw null;
+}
+
+[CollectionBuilder(...)]
+class Collection : IEnumerable<int>, IEnumerable<string>
+{
+    IEnumerator<int> IEnumerable<int>.GetEnumerator() => throw null;
+    IEnumerator<string> IEnumerable<string>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+}
+```
 
 * Should it be legal to create and immediately index into a collection literal?  Note: this requires an answer to the unresolved question below of whether collection literals have a *natural type*.
 * Stack allocations for huge collections might blow the stack.  Should the compiler have a heuristic for placing this data on the heap?  Should the language be unspecified to allow for this flexibility?  We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757).
