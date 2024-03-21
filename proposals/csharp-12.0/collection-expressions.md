@@ -176,7 +176,7 @@ It consists of methods that meet the following requirements:
 
 Methods declared on base types or interfaces are ignored and not part of the `CM` set.
 
-If the `CM` set is empty, then the *collection type* doesn't have *element type* and doesn't have *create method*. None of the following steps apply.
+If the `CM` set is empty, then the *collection type* doesn't have an *element type* and doesn't have a *create method*. None of the following steps apply.
 
 Second, an attempt is made to determine the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type* from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
 
