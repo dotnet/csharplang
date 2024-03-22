@@ -40,6 +40,10 @@ lock (this)
 ## Detailed design
 [design]: #detailed-design
 
+The following changes are tied to LangVersion, i.e., C# 12 and lower will continue to disallow
+ref-like locals and `unsafe` blocks in async methods and iterators,
+and C# 13 will lift these restrictions as described below.
+
 [§13.3.1 Blocks > General][blocks-general]:
 
 > ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).~~
