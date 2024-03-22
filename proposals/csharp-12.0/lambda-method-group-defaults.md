@@ -229,6 +229,8 @@ The following addition (in bold) is required to anonymous function conversions (
 
 The following addition (in bold) is required to the [function types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#natural-function-type) specification in a prior proposal:
 
+> A _method group_ has a natural type if all candidate methods in the method group have a common signature **including default values and `params` modifiers**. (If the method group may include extension methods, the candidates include the containing type and all extension method scopes.)
+
 > The natural type of an anonymous function expression or method group is a *function_type*. A *function_type* represents a method signature: the parameter types, **default values, ref kinds, `params` modifiers**, and return type and ref kind. Anonymous function expressions or method groups with the same signature have the same *function_type*.
 
 The following addition (in bold) is required to the [delegate types](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#delegate-types) specification in a prior proposal:
