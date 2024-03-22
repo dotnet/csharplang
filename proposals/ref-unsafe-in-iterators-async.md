@@ -1,4 +1,4 @@
-# State machine restriction updates
+# Allow ref and unsafe in iterators and async
 
 ## Summary
 [summary]: #summary
