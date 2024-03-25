@@ -54,9 +54,9 @@ and C# 13 will lift these restrictions as described below.
 > ~~It is a compile-time error to declare a ref local variable, or a variable of a `ref struct` type,
 > within a method declared with the *method_modifier* `async`, or within an iterator ([§15.14][iterators]).~~
 > **It is a compile-time error to declare and use (even implicitly in compiler-synthesized code)
-> a ref local variable, or a variable of a `ref struct` type across `await` expressions or `yield` statements.
+> a ref local variable, or a variable of a `ref struct` type across `await` expressions or `yield return` statements.
 > More precisely, the error is driven by the following mechanism:
-> after an `await` expression ([§12.9.8][await-expressions]) or a `yield` statement ([§13.15][yield-statement]),
+> after an `await` expression ([§12.9.8][await-expressions]) or a `yield return` statement ([§13.15][yield-statement]),
 > all ref local variables and variables of a `ref struct` type in scope
 > are considered definitely unassigned ([§9.4][definite-assignment]).**
 
@@ -68,11 +68,11 @@ hence this error falls outside the boundaries of what we want to downgrade to wa
 
 > [...]
 > 
-> **A warning is reported (as part of the next warning wave) when a `yield` statement
+> **A warning is reported (as part of the next warning wave) when a `yield return` statement
 > ([§13.15][yield-statement]) is used inside the body of a `lock` statement.**
 
-Note that [the new `Lock`-object-based `lock`][lock-object] reports compile-time errors for `yield`s in its body,
-because such `lock` statement is equivalent to a `using` on a `ref struct` which disallows `yield`s in its body.
+Note that [the new `Lock`-object-based `lock`][lock-object] reports compile-time errors for `yield return`s in its body,
+because such `lock` statement is equivalent to a `using` on a `ref struct` which disallows `yield return`s in its body.
 
 No change in the spec is needed to allow `unsafe` blocks which do not contain `await`s in async methods,
 because the spec has never disallowed `unsafe` blocks in async methods.
@@ -84,7 +84,8 @@ However, the spec should have always disallowed `await` inside `unsafe` blocks
 > It is a compile-time error for the formal parameter list of an async function to specify
 > any `in`, `out`, or `ref` parameters, or any parameter of a `ref struct` type.
 >
-> **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain `await` or `yield`.**
+> **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain
+> an `await` expression ([§12.9.8][await-expressions]) or a `yield return` statement ([§13.15][yield-statement]).**
 
 Note that more constructs can work thanks to `ref` allowed inside segments without `await` and `yield` in async/iterator methods
 even though no spec change is needed specifically for them as it all falls out from the aforementioned spec changes:
