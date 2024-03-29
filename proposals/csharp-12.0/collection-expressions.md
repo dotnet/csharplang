@@ -112,10 +112,11 @@ An implicit *collection expression conversion* exists from a collection expressi
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
   * If the collection expression has any elements, the *type* has an instance or extension method `Add` where:
-    * The method can be invoked with a single argument and the corresponding parameter is either by value or `in`.
+    * The method can be invoked with a single value argument.
     * If the method is generic, the type arguments can be inferred from the collection and argument.
     * The method is accessible at the location of the collection expression.
-  * In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *type*.
+
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *type*.
 * An *interface type*:
   * `System.Collections.Generic.IEnumerable<T>`
   * `System.Collections.Generic.IReadOnlyCollection<T>`
