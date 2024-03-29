@@ -55,11 +55,13 @@ The *type* of a parameter collection shall be one of the following valid target 
 - A *type* with an appropriate *[create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)*,
   which is at least as accessible as the declaring member, and with a corresponding *element type* resulting from that determination
 - A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
-  - The *type* has a constructor that can be invoked with no arguments, and the constructor is at least as accessible as the declaring member, and
-  - The *type* has an instance (not an extension) method `Add` that can be invoked with a single argument of
-    the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement),
-    and the method is at least as accessible as the declaring member,
-  in which case the *element type* is the *iteration type*
+  - The *type* has a constructor that can be invoked with no arguments, and the constructor is at least as accessible as the declaring member.
+  - The *type* has an instance (not an extension) method `Add` where:
+    - The method can be invoked with a single value argument.
+    - If the method is generic, the type arguments can be inferred from the argument.
+    - The method is at least as accessible as the declaring member.
+
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement) of the *type*.
 - An *interface type*
   - `System.Collections.Generic.IEnumerable<T>`,
   - `System.Collections.Generic.IReadOnlyCollection<T>`,
@@ -94,6 +96,7 @@ A parameter collection permits arguments to be specified in one of two ways in a
   [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
   as though the arguments were used as expression elements in a collection expression in the same order,
   and uses the newly created collection instance as the actual argument.
+  When constructing the collection instance, the original *unconverted* arguments are used.
 
 Except for allowing a variable number of arguments in an invocation, a parameter collection is precisely equivalent to
 a value parameter of the same type.
