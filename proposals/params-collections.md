@@ -96,6 +96,7 @@ A parameter collection permits arguments to be specified in one of two ways in a
   [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
   as though the arguments were used as expression elements in a collection expression in the same order,
   and uses the newly created collection instance as the actual argument.
+  When constructing the collection instance, the original *unconverted* arguments are used.
 
 Except for allowing a variable number of arguments in an invocation, a parameter collection is precisely equivalent to
 a value parameter of the same type.
