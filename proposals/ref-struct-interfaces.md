@@ -285,7 +285,7 @@ Specifically by using the `CorGenericParamAttr.gpAllowByRefLike(0x0020)` or `Sys
 Whether runtime supports the feature can be determined by checking presence of `System.Runtime.CompilerServices.RuntimeFeature.ByRefLikeGenerics` field.
 The APIs were added in https://github.com/dotnet/runtime/pull/98070.
 
-### Using statement
+### `using` statement
 
 A `using` statement will recognize and use implementation of `IDisposable` interface when resource is a ref struct.
 ```csharp
@@ -293,7 +293,6 @@ ref struct S2 : System.IDisposable
 {
     void System.IDisposable.Dispose()
     {
-        System.Console.Write('D');
     }
 }
 
@@ -342,6 +341,72 @@ class C
         }
 
         using (s) // Error, the pattern is not recognized
+        {
+        }
+    }
+}
+```
+
+### `await using` statement
+
+Currently language disallows using ref structs as resources in `await using` statement. The same limitation will be
+applied to a type parameter that `allows ref struct`.
+
+There is a proposal to lift general restrictions around usage of ref structs in async methods - https://github.com/dotnet/csharplang/pull/7994.
+The remainder of the section describes behavior after the general limitation for `await using` statement will be lifted, if/when that will happen. 
+
+An `await using` statement will recognize and use implementation of `IAsyncDisposable` interface when resource is a ref struct.
+```csharp
+ref struct S2 : IAsyncDisposable
+{
+    ValueTask IAsyncDisposable.DisposeAsync()
+    {
+    }
+}
+
+class C
+{
+    static async Task Main()
+    {
+        await using (new S2())
+        {
+        } // S2.IAsyncDisposable.DisposeAsync
+    }
+}
+```
+
+Note that preference is given to a `DisposeAsync` method that implements the pattern, and only if one is not found, `IAsyncDisposable`
+implementation is used.
+
+A `using` statement will recognize and use implementation of `IAsyncDisposable` interface when resource is a type parameter that 
+`allows ref strict` and `IAsyncDisposable` is in its effective interfaces set.
+```csharp
+class C
+{
+    static async Task Test<T>() where T : IAsyncDisposable, new(), allows ref struct
+    {
+        await using (new T())
+        {
+            System.Console.Write(123);
+        }
+    }
+}
+```
+
+Note that a pattern `DisposeAsync` method will be recognized on a type parameter that `allows ref struct` as it is recognized on
+type parameters without that constraint today.
+
+```csharp
+interface IMyAsyncDisposable
+{
+    ValueTask DisposeAsync();
+}
+
+class C
+{
+    static async Task Test<T>() where T : IMyAsyncDisposable, new(), allows ref struct
+    {
+        await using (new T())
         {
         }
     }
