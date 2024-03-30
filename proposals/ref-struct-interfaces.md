@@ -122,21 +122,29 @@ interface I1
 ref struct S = I1 { }
 ```
 
-To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations. The runtime will also be updated to throw an exception if a default interface member is called on a `ref struct` type. To help avoid the unexpected runtime exceptions the compiler [will warn][warn-DIM] when a default interface method is invoked on a type parameter that has the `ref struct` anti-constraint.
+To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations.
+The runtime will also be updated to throw an exception if a default interface member is called on a `ref struct` type.
 
+To avoid an exception at runtime the compiler will report an error for an invocation of a non-virtual instance method (or property)
+on a type parameter that allows ref struct. Here is an example:
 ```csharp
-interface I1
+public interface I1
 {
-    void M() { }
+    sealed void M3() {}
 }
 
-void M<T>(T p)
-    where T : allows ref struct, I1
+class C
 {
-    // Warning: this may fail at runtime if `T` is a ref struct which doesn't implement the default interface member
-    p.M();
+    static void Test2<T>(T x) where T : I1, allows ref struct
+    {
+#line 100
+        x.M3(); // (100,9): error CS9506: A non-virtual instance interface member cannot be accessed on a type parameter that allows ref struct.
+    }
 }
 ```
+
+There is also an open design question about reporting a [warning][warn-DIM] for an invocation of a virtual (not abstract) instance method (or property)
+on a type parameter that allows ref struct.
 
 Detailed Notes:
 
