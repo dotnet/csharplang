@@ -285,6 +285,69 @@ Specifically by using the `CorGenericParamAttr.gpAllowByRefLike(0x0020)` or `Sys
 Whether runtime supports the feature can be determined by checking presence of `System.Runtime.CompilerServices.RuntimeFeature.ByRefLikeGenerics` field.
 The APIs were added in https://github.com/dotnet/runtime/pull/98070.
 
+### Using statement
+
+A `using` statement will recognize and use implementation of `IDisposable` interface when resource is a ref struct.
+```csharp
+ref struct S2 : System.IDisposable
+{
+    void System.IDisposable.Dispose()
+    {
+        System.Console.Write('D');
+    }
+}
+
+class C
+{
+    static void Main()
+    {
+        using (new S2())
+        {
+        } // S2.System.IDisposable.Dispose is called
+    }
+}
+```
+
+Note that preference is given to a `Dispose` method that implements the pattern, and only if one is not found, `IDisposable`
+implementation is used.
+
+A `using` statement will recognize and use implementation of `IDisposable` interface when resource is a type parameter that 
+`allows ref strict` and `IDisposable` is in its effective interfaces set.
+```csharp
+class C
+{
+    static void Test<T>(T t) where T : System.IDisposable, allows ref struct
+    {
+        using (t)
+        {
+        }
+    }
+}
+```
+
+Note that a pattern `Dispose` method still will not be recognized on a type parameter that `allows ref struct` since
+there is no guarantee that the type is going to be substituted with a ref struct and the pattern recognition is limited
+to ref structs only.
+```csharp
+interface IMyDisposable
+{
+    void Dispose();
+}
+class C
+{
+    static void Test<T>(T t, IMyDisposable s) where T : IMyDisposable, allows ref struct
+    {
+        using (t) // Error, the pattern is not recognized
+        {
+        }
+
+        using (s) // Error, the pattern is not recognized
+        {
+        }
+    }
+}
+```
+
 ### Delegate type for the anonymous function or method group
 
 The https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#delegate-types section states:
