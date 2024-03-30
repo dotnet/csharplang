@@ -409,18 +409,23 @@ Should the compiler warn on the following invocation of `M` as it creates the op
 ```csharp
 interface I1
 {
-    // DIM method
+    // Virtual method with default implementation
     void M() { }
 }
 
-// Invocation of the DIM method in a generic method that has the `allows ref struct`
+// Invocation of a virtual instance method with default implementation in a generic method that has the `allows ref struct`
 // anti-constraint
 void M<T>(T p)
     where T : allows ref struct, I1
 {
-    p.M();
+    p.M(); // Warn?
 }
 ```
+
+This, however, could be noisy and not very helpful in majority of scenarios. C# will require ref structs to implement all virtual APIs.
+Therefore, assuming that other players follow the same rule, the only situation when this might cause an exception is when the method
+is added after the fact. The author of the consuming code often has no knowledge of all these details and often has no control over 
+ref structs that will be consumed by the code. Therefore, the only action the author can really take is to suppress the warning.
 
 ## Considerations
 
