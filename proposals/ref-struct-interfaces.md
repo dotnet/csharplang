@@ -324,7 +324,7 @@ class C
 }
 ```
 
-Note that a pattern `Dispose` method still will not be recognized on a type parameter that `allows ref struct` since
+Note that a pattern `Dispose` method will not be recognized on a type parameter that `allows ref struct` since
 there is no guarantee that the type is going to be substituted with a ref struct and the pattern recognition is limited
 to ref structs only.
 ```csharp
@@ -378,22 +378,7 @@ class C
 Note that preference is given to a `DisposeAsync` method that implements the pattern, and only if one is not found, `IAsyncDisposable`
 implementation is used.
 
-A `using` statement will recognize and use implementation of `IAsyncDisposable` interface when resource is a type parameter that 
-`allows ref strict` and `IAsyncDisposable` is in its effective interfaces set.
-```csharp
-class C
-{
-    static async Task Test<T>() where T : IAsyncDisposable, new(), allows ref struct
-    {
-        await using (new T())
-        {
-            System.Console.Write(123);
-        }
-    }
-}
-```
-
-Note that a pattern `DisposeAsync` method will be recognized on a type parameter that `allows ref struct` as it is recognized on
+A pattern `DisposeAsync` method will be recognized on a type parameter that `allows ref struct` as it is recognized on
 type parameters without that constraint today.
 
 ```csharp
@@ -409,6 +394,31 @@ class C
         await using (new T())
         {
         }
+    }
+}
+```
+
+A `using` statement will recognize and use implementation of `IAsyncDisposable` interface when resource is a type parameter that 
+`allows ref strict`, there is no `DisposeAsync` pattern match, and `IAsyncDisposable` is in type parameter's effective interfaces set.
+```csharp
+interface IMyAsyncDisposable1
+{
+    ValueTask DisposeAsync();
+}
+
+interface IMyAsyncDisposable2
+{
+    ValueTask DisposeAsync();
+}
+
+class C
+{
+    static async Task Test<T>() where T : IMyAsyncDisposable1, IMyAsyncDisposable2, IAsyncDisposable, new(), allows ref struct
+    {
+        await using (new T())
+        {
+            System.Console.Write(123);
+        } // IAsyncDisposable.DisposeAsync
     }
 }
 ```
