@@ -488,6 +488,52 @@ class C
 }
 ```
 
+An `enumarator` pattern will be recognized on a type parameter that `allows ref struct` as it is recognized on
+type parameters without that constraint today.
+
+```csharp
+interface IGetEnumerator<TEnumerator> where TEnumerator : allows ref struct 
+{
+    TEnumerator GetEnumerator();
+}
+
+class C
+{
+    static void Test1<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>, allows ref struct
+        where TEnumerator : IEnumerator, IDisposable, allows ref struct 
+    {
+        foreach (var i in t) // IEnumerator.MoveNext/Current
+        {
+        }
+    }
+
+    static void Test2<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>, allows ref struct
+        where TEnumerator : IEnumerator<int>, allows ref struct 
+    {
+        foreach (var i in t) // IEnumerator<int>.MoveNext/Current
+        {
+        }
+    }
+
+    static void Test2<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>, allows ref struct
+        where TEnumerator : IMyEnumerator<int>, allows ref struct 
+    {
+        foreach (var i in t) // IMyEnumerator<int>.MoveNext/Current
+        {
+        }
+    }
+}
+
+interface IMyEnumerator<T> : System.IDisposable
+{
+    T Current {get;}
+    bool MoveNext();
+}
+```
+
 ### `await foreach` statement
 
 An `await foreach` statement will recognize and use implementation of ```IAsyncEnumerable<T>``` interface when collection is a ref struct.
@@ -552,6 +598,9 @@ class C
     }
 }
 ```
+
+An `await foreach` statement will continue disallowing a ref struct enumerator and a type parameter enumerator that `allows ref struct`. The reason
+is the fact that the enumerator must be preserved across `await MoveNextAsync()` calls.
 
 ### Delegate type for the anonymous function or method group
 
