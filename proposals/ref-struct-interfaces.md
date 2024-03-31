@@ -324,9 +324,8 @@ class C
 }
 ```
 
-Note that a pattern `Dispose` method will not be recognized on a type parameter that `allows ref struct` since
-there is no guarantee that the type is going to be substituted with a ref struct and the pattern recognition is limited
-to ref structs only.
+Note that a pattern `Dispose` method will not be recognized on a type parameter that `allows ref struct` because
+an interface (and this is the only place where we could possibly look for a pattern) is not a ref struct.
 ```csharp
 interface IMyDisposable
 {
@@ -531,6 +530,102 @@ interface IMyEnumerator<T> : System.IDisposable
 {
     T Current {get;}
     bool MoveNext();
+}
+```
+
+A `foreach` statement will recognize and use implementation of `IDisposable` interface when enumerator is a ref struct.
+```csharp
+struct S1
+{
+    public S2 GetEnumerator()
+    {
+        return new S2();
+    }
+}
+
+ref struct S2 : System.IDisposable
+{
+    public int Current {...}
+    public bool MoveNext() {...}
+    void System.IDisposable.Dispose() {...}
+}
+
+class C
+{
+    static void Main()
+    {
+        foreach (var i in new S1())
+        {
+        } // S2.System.IDisposable.Dispose()
+    }
+}
+```
+
+Note that preference is given to a `Dispose` method that implements the pattern, and only if one is not found, `IDisposable`
+implementation is used.
+
+A `foreach` statement will recognize and use implementation of `IDisposable` interface when enumerator is a type parameter that 
+`allows ref strict` and `IDisposable` is in its effective interfaces set.
+```csharp
+interface ICustomEnumerator
+{
+    int Current {get;}
+    bool MoveNext();
+}
+
+interface IGetEnumerator<TEnumerator> where TEnumerator : allows ref struct 
+{
+    TEnumerator GetEnumerator();
+}
+
+class C
+{
+    static void Test<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>
+        where TEnumerator : ICustomEnumerator, System.IDisposable, allows ref struct 
+    {
+        foreach (var i in t)
+        {
+        } // System.IDisposable.Dispose()
+    }
+}
+```
+
+Note that a pattern `Dispose` method will not be recognized on a type parameter that `allows ref struct` because
+an interface (and this is the only place where we could possibly look for a pattern) is not a ref struct.
+Also, since runtime doesn't provide a way to check whether at runtime a type parameter that `allows ref struct`
+implements `IDisposable` interface, a type parameter enumerator that `allows ref struct` will be disallowed,
+unless `IDisposable` is in its effective interfaces set.
+```csharp
+interface ICustomEnumerator
+{
+    int Current {get;}
+    bool MoveNext();
+}
+
+interface IMyDisposable
+{
+    void Dispose();
+}
+
+interface IGetEnumerator<TEnumerator> where TEnumerator : allows ref struct 
+{
+    TEnumerator GetEnumerator();
+}
+
+class C
+{
+    static void Test<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>
+        where TEnumerator : ICustomEnumerator, IMyDisposable, allows ref struct 
+    {
+        // error CS9507: foreach statement cannot operate on enumerators of type 'TEnumerator'
+        //               because it is a type parameter that allows ref struct and
+        //               it is not known at compile time to implement IDisposable.
+        foreach (var i in t)
+        {
+        }
+    }
 }
 ```
 
