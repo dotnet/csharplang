@@ -488,6 +488,71 @@ class C
 }
 ```
 
+### `await foreach` statement
+
+An `await foreach` statement will recognize and use implementation of ```IAsyncEnumerable<T>``` interface when collection is a ref struct.
+```csharp
+ref struct S : IAsyncEnumerable<int>
+{
+    IAsyncEnumerator<int> IAsyncEnumerable<int>.GetAsyncEnumerator(CancellationToken token) {...}
+}
+
+class C
+{
+    static async Task Main()
+    {
+        await foreach (var i in new S()) // S.IAsyncEnumerable<int>.GetAsyncEnumerator
+        {
+        }
+    }
+}
+```
+
+A pattern `GetAsyncEnumerator` method will be recognized on a type parameter that `allows ref struct` as it is recognized on
+type parameters without that constraint today.
+
+```csharp
+interface IMyAsyncEnumerable<T>
+{
+    IAsyncEnumerator<int> GetAsyncEnumerator(CancellationToken cancellationToken = default);
+}
+
+class C
+{
+    static async Task Test<T>() where T : IMyAsyncEnumerable<int>, allows ref struct
+    {
+        await foreach (var i in default(T)) // IMyAsyncEnumerable<int>.GetAsyncEnumerator
+        {
+        }
+    }
+}
+```
+
+An `await foreach` statement will recognize and use implementation of ```IAsyncEnumerable<T>``` interface when collection is a type parameter that 
+`allows ref strict`, there is no `GetAsyncEnumerator` pattern match, and ```IAsyncEnumerable<T>``` is in type parameter's effective interfaces set.
+```csharp
+interface IMyAsyncEnumerable1<T>
+{
+    IAsyncEnumerator<int> GetAsyncEnumerator(CancellationToken cancellationToken = default);
+}
+
+interface IMyAsyncEnumerable2<T>
+{
+    IAsyncEnumerator<int> GetAsyncEnumerator(CancellationToken cancellationToken = default);
+}
+
+class C
+{
+    static async Task Test<T>() where T : IMyAsyncEnumerable1<int>, IMyAsyncEnumerable2<int>, IAsyncEnumerable<int>, allows ref struct
+    {
+        await foreach (var i in default(T)) // IAsyncEnumerable<int>.GetAsyncEnumerator
+        {
+            System.Console.Write(i);
+        }
+    }
+}
+```
+
 ### Delegate type for the anonymous function or method group
 
 The https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#delegate-types section states:
