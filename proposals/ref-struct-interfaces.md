@@ -393,7 +393,7 @@ class C
     {
         await using (new T())
         {
-        }
+        } // IMyAsyncDisposable.DisposeAsync
     }
 }
 ```
@@ -419,6 +419,71 @@ class C
         {
             System.Console.Write(123);
         } // IAsyncDisposable.DisposeAsync
+    }
+}
+```
+
+### `foreach` statement
+
+A `foreach` statement will recognize and use implementation of ```IEnumerable<T>```/```IEnumerable``` interface when collection is a ref struct.
+```csharp
+ref struct S : IEnumerable<int>
+{
+    IEnumerator<int> IEnumerable<int>.GetEnumerator() {...}
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {...}
+}
+
+class C
+{
+    static void Main()
+    {
+        foreach (var i in new S()) // IEnumerable<int>.GetEnumerator
+        {
+        }
+    }
+}
+```
+
+A pattern `GetEnumerator` method will be recognized on a type parameter that `allows ref struct` as it is recognized on
+type parameters without that constraint today.
+
+```csharp
+interface IMyEnumerable<T>
+{
+    IEnumerator<T> GetEnumerator();
+}
+
+class C
+{
+    static void Test<T>(T t) where T : IMyEnumerable<int>, allows ref struct
+    {
+        foreach (var i in t) // IMyEnumerable<int>.GetEnumerator
+        {
+        }
+    }
+}
+```
+
+A `foreach` statement will recognize and use implementation of ```IEnumerable<T>```/```IEnumerable``` interface when collection is a type parameter that 
+`allows ref strict`, there is no `GetEnumerator` pattern match, and ```IEnumerable<T>```/```IEnumerable``` is in type parameter's effective interfaces set.
+```csharp
+interface IMyEnumerable1<T>
+{
+    IEnumerator<int> GetEnumerator();
+}
+
+interface IMyEnumerable2<T>
+{
+    IEnumerator<int> GetEnumerator();
+}
+
+class C
+{
+    static void Test<T>(T t) where T : IMyEnumerable1<int>, IMyEnumerable2<int>, IEnumerable<int>, allows ref struct
+    {
+        foreach (var i in t) // IEnumerable<int>.GetEnumerator
+        {
+        }
     }
 }
 ```
