@@ -311,7 +311,7 @@ Note that preference is given to a `Dispose` method that implements the pattern,
 implementation is used.
 
 A `using` statement will recognize and use implementation of `IDisposable` interface when resource is a type parameter that 
-`allows ref strict` and `IDisposable` is in its effective interfaces set.
+`allows ref struct` and `IDisposable` is in its effective interfaces set.
 ```csharp
 class C
 {
