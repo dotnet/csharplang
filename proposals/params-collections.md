@@ -355,7 +355,7 @@ unsafe public class C
         var c = Test3(d); // dynamic
         c.InvokeOnDynamic(); // No error
 
-        var d = test4(d); // int
+        var e = test4(d); // int
         static int test4(int x) => x;
     }
     
