@@ -138,7 +138,7 @@ class C
     static void Test2<T>(T x) where T : I1, allows ref struct
     {
 #line 100
-        x.M3(); // (100,9): error CS9506: A non-virtual instance interface member cannot be accessed on a type parameter that allows ref struct.
+        x.M3(); // (100,9): error: A non-virtual instance interface member cannot be accessed on a type parameter that allows ref struct.
     }
 }
 ```
@@ -398,7 +398,7 @@ class C
 ```
 
 A `using` statement will recognize and use implementation of `IAsyncDisposable` interface when resource is a type parameter that 
-`allows ref strict`, there is no `DisposeAsync` pattern match, and `IAsyncDisposable` is in type parameter's effective interfaces set.
+`allows ref struct`, there is no `DisposeAsync` pattern match, and `IAsyncDisposable` is in type parameter's effective interfaces set.
 ```csharp
 interface IMyAsyncDisposable1
 {
@@ -464,7 +464,7 @@ class C
 ```
 
 A `foreach` statement will recognize and use implementation of ```IEnumerable<T>```/```IEnumerable``` interface when collection is a type parameter that 
-`allows ref strict`, there is no `GetEnumerator` pattern match, and ```IEnumerable<T>```/```IEnumerable``` is in type parameter's effective interfaces set.
+`allows ref struct`, there is no `GetEnumerator` pattern match, and ```IEnumerable<T>```/```IEnumerable``` is in type parameter's effective interfaces set.
 ```csharp
 interface IMyEnumerable1<T>
 {
@@ -487,7 +487,7 @@ class C
 }
 ```
 
-An `enumarator` pattern will be recognized on a type parameter that `allows ref struct` as it is recognized on
+An `enumerator` pattern will be recognized on a type parameter that `allows ref struct` as it is recognized on
 type parameters without that constraint today.
 
 ```csharp
@@ -516,7 +516,7 @@ class C
         }
     }
 
-    static void Test2<TEnumerable, TEnumerator>(TEnumerable t)
+    static void Test3<TEnumerable, TEnumerator>(TEnumerable t)
         where TEnumerable : IGetEnumerator<TEnumerator>, allows ref struct
         where TEnumerator : IMyEnumerator<int>, allows ref struct 
     {
@@ -565,7 +565,7 @@ Note that preference is given to a `Dispose` method that implements the pattern,
 implementation is used.
 
 A `foreach` statement will recognize and use implementation of `IDisposable` interface when enumerator is a type parameter that 
-`allows ref strict` and `IDisposable` is in its effective interfaces set.
+`allows ref struct` and `IDisposable` is in its effective interfaces set.
 ```csharp
 interface ICustomEnumerator
 {
@@ -670,7 +670,7 @@ class C
 ```
 
 An `await foreach` statement will recognize and use implementation of ```IAsyncEnumerable<T>``` interface when collection is a type parameter that 
-`allows ref strict`, there is no `GetAsyncEnumerator` pattern match, and ```IAsyncEnumerable<T>``` is in type parameter's effective interfaces set.
+`allows ref struct`, there is no `GetAsyncEnumerator` pattern match, and ```IAsyncEnumerable<T>``` is in type parameter's effective interfaces set.
 ```csharp
 interface IMyAsyncEnumerable1<T>
 {
