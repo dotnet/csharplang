@@ -398,7 +398,7 @@ class C
 ```
 
 A `using` statement will recognize and use implementation of `IAsyncDisposable` interface when resource is a type parameter that 
-`allows ref struct`, there is no `DisposeAsync` pattern match, and `IAsyncDisposable` is in type parameter's effective interfaces set.
+`allows ref struct`, the process of looking for `DisposeAsync` pattern method failed, and `IAsyncDisposable` is in type parameter's effective interfaces set.
 ```csharp
 interface IMyAsyncDisposable1
 {
@@ -467,7 +467,7 @@ class C
 ```
 
 A `foreach` statement will recognize and use implementation of ```IEnumerable<T>```/```IEnumerable``` interface when collection is a type parameter that 
-`allows ref struct`, there is no `GetEnumerator` pattern match, and ```IEnumerable<T>```/```IEnumerable``` is in type parameter's effective interfaces set.
+`allows ref struct`, the process of looking for `GetEnumerator` pattern method failed, and ```IEnumerable<T>```/```IEnumerable``` is in type parameter's effective interfaces set.
 ```csharp
 interface IMyEnumerable1<T>
 {
@@ -676,7 +676,7 @@ class C
 ```
 
 An `await foreach` statement will recognize and use implementation of ```IAsyncEnumerable<T>``` interface when collection is a type parameter that 
-`allows ref struct`, there is no `GetAsyncEnumerator` pattern match, and ```IAsyncEnumerable<T>``` is in type parameter's effective interfaces set.
+`allows ref struct`, the process of looking for `GetAsyncEnumerator` pattern method failed, and ```IAsyncEnumerable<T>``` is in type parameter's effective interfaces set.
 ```csharp
 interface IMyAsyncEnumerable1<T>
 {
