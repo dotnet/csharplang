@@ -424,6 +424,9 @@ class C
 
 ### `foreach` statement
 
+The https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement section should be updated accordingly
+to incorporate the following.
+
 A `foreach` statement will recognize and use implementation of ```IEnumerable<T>```/```IEnumerable``` interface when collection is a ref struct.
 ```csharp
 ref struct S : IEnumerable<int>
@@ -630,6 +633,9 @@ class C
 ```
 
 ### `await foreach` statement
+
+The https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement section should be updated accordingly
+to incorporate the following.
 
 An `await foreach` statement will recognize and use implementation of ```IAsyncEnumerable<T>``` interface when collection is a ref struct.
 ```csharp
