@@ -77,7 +77,8 @@ because such `lock` statement is equivalent to a `using` on a `ref struct` which
 No change in the spec is needed to allow `unsafe` blocks which do not contain `await`s in async methods,
 because the spec has never disallowed `unsafe` blocks in async methods.
 However, the spec should have always disallowed `await` inside `unsafe` blocks
-(it had already disallowed `yield` in `unsafe` in [§13.3.1][blocks-general] as cited above), for example:
+(it had already disallowed `yield` in `unsafe` in [§13.3.1][blocks-general] as cited above),
+so we propose the following change to the spec:
 
 [§15.15.1 Async Functions > General][async-funcs-general]:
 
