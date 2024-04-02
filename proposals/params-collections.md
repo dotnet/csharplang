@@ -341,8 +341,8 @@ If only a single candidate passes the test, the invocation of the candidate is s
 - the candidate is either not generic, or its type arguments are explicitly specified;
 - there is no ambiguity between normal and expanded forms of the candidate that cannot be resolved at compile time. 
 
-In this case, if the single candidate is not a local function and returns a value (doesn't have type `void`) and there is an
-implicit conversion from result type to `dynamic`, then result of the invocation is the returned value converted to `dynamic`.
+In this case, if the single candidate is not a local function and returns a value (doesn't have type `void`, doesn't return a `ref`) and
+there is an implicit conversion from result type to `dynamic`, then result of the invocation is the returned value converted to `dynamic`.
 For example:
 ```csharp
 unsafe public class C
@@ -357,11 +357,14 @@ unsafe public class C
 
         var e = test4(d); // int
         static int test4(int x) => x;
+
+        var f = Test5(d); // int
     }
     
     static void Test1(int x) {}
     static void* Test2(int x) => null;
     static int Test3(int x) => x;
+    static ref int Test5(int x) => ...;
 }
 ```
 
