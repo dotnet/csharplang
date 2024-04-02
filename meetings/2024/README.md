@@ -60,13 +60,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 [C# Language Design Meeting for Apr 1st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-01.md)
 
-- [Async improvements (Async2)](#async-improvements-async2)
+- Async improvements (Async2)
 
 ### Wed Mar 27, 2024
 
 [C# Language Design Meeting for Mar 27th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-27.md)
 
-- [Discriminated Unions](#discriminated-unions)
+- Discriminated Unions
 
 ### Mon Mar 11, 2024
 
