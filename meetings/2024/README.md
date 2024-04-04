@@ -4,10 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
-- Extensions syntax (Julien)
-- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
-
 ## Schedule when convenient
 
 - [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582) (Rikki)
@@ -39,7 +35,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 17, 2024
 
+- Extensions syntax (Julien)
+
 ### Mon Apr 15, 2024
+
+- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
+- Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
 
 ### Wed Apr 10, 2024
 
