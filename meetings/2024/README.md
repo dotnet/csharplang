@@ -35,7 +35,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 17, 2024
 
-- Extensions syntax (Julien)
+- Extensions (Julien)
 
 ### Mon Apr 15, 2024
 
