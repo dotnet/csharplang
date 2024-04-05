@@ -341,8 +341,8 @@ If only a single candidate passes the test, the invocation of the candidate is s
 - the candidate is either not generic, or its type arguments are explicitly specified;
 - there is no ambiguity between normal and expanded forms of the candidate that cannot be resolved at compile time. 
 
-In this case, if the single candidate is not a local function and all the following conditions are met,
-then result of the invocation is the returned value converted to `dynamic`.
+In this case, when all the following conditions are met, the result of the invocation is the returned value converted to `dynamic`.
+- the candidate is not a local function;
 - the candidate returns a value (doesn't have type `void`, doesn't return a `ref`);
 - there is an implicit conversion from result type to `dynamic`;
 - the receiver and argument list would be supported for dynamically bound invocation.
