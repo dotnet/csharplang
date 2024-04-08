@@ -122,21 +122,29 @@ interface I1
 ref struct S = I1 { }
 ```
 
-To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations. The runtime will also be updated to throw an exception if a default interface member is called on a `ref struct` type. To help avoid the unexpected runtime exceptions the compiler [will warn][warn-DIM] when a default interface method is invoked on a type parameter that has the `ref struct` anti-constraint.
+To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations.
+The runtime will also be updated to throw an exception if a default interface member is called on a `ref struct` type.
 
+To avoid an exception at runtime the compiler will report an error for an invocation of a non-virtual instance method (or property)
+on a type parameter that allows ref struct. Here is an example:
 ```csharp
-interface I1
+public interface I1
 {
-    void M() { }
+    sealed void M3() {}
 }
 
-void M<T>(T p)
-    where T : allows ref struct, I1
+class C
 {
-    // Warning: this may fail at runtime if `T` is a ref struct which doesn't implement the default interface member
-    p.M();
+    static void Test2<T>(T x) where T : I1, allows ref struct
+    {
+#line 100
+        x.M3(); // (100,9): error: A non-virtual instance interface member cannot be accessed on a type parameter that allows ref struct.
+    }
 }
 ```
+
+There is also an open design question about reporting a [warning][warn-DIM] for an invocation of a virtual (not abstract) instance method (or property)
+on a type parameter that allows ref struct.
 
 Detailed Notes:
 
@@ -277,6 +285,424 @@ Specifically by using the `CorGenericParamAttr.gpAllowByRefLike(0x0020)` or `Sys
 Whether runtime supports the feature can be determined by checking presence of `System.Runtime.CompilerServices.RuntimeFeature.ByRefLikeGenerics` field.
 The APIs were added in https://github.com/dotnet/runtime/pull/98070.
 
+### `using` statement
+
+A `using` statement will recognize and use implementation of `IDisposable` interface when resource is a ref struct.
+```csharp
+ref struct S2 : System.IDisposable
+{
+    void System.IDisposable.Dispose()
+    {
+    }
+}
+
+class C
+{
+    static void Main()
+    {
+        using (new S2())
+        {
+        } // S2.System.IDisposable.Dispose is called
+    }
+}
+```
+
+Note that preference is given to a `Dispose` method that implements the pattern, and only if one is not found, `IDisposable`
+implementation is used.
+
+A `using` statement will recognize and use implementation of `IDisposable` interface when resource is a type parameter that 
+`allows ref struct` and `IDisposable` is in its effective interfaces set.
+```csharp
+class C
+{
+    static void Test<T>(T t) where T : System.IDisposable, allows ref struct
+    {
+        using (t)
+        {
+        }
+    }
+}
+```
+
+Note that a pattern `Dispose` method will not be recognized on a type parameter that `allows ref struct` because
+an interface (and this is the only place where we could possibly look for a pattern) is not a ref struct.
+```csharp
+interface IMyDisposable
+{
+    void Dispose();
+}
+class C
+{
+    static void Test<T>(T t, IMyDisposable s) where T : IMyDisposable, allows ref struct
+    {
+        using (t) // Error, the pattern is not recognized
+        {
+        }
+
+        using (s) // Error, the pattern is not recognized
+        {
+        }
+    }
+}
+```
+
+### `await using` statement
+
+Currently language disallows using ref structs as resources in `await using` statement. The same limitation will be
+applied to a type parameter that `allows ref struct`.
+
+There is a proposal to lift general restrictions around usage of ref structs in async methods - https://github.com/dotnet/csharplang/pull/7994.
+The remainder of the section describes behavior after the general limitation for `await using` statement will be lifted, if/when that will happen. 
+
+An `await using` statement will recognize and use implementation of `IAsyncDisposable` interface when resource is a ref struct.
+```csharp
+ref struct S2 : IAsyncDisposable
+{
+    ValueTask IAsyncDisposable.DisposeAsync()
+    {
+    }
+}
+
+class C
+{
+    static async Task Main()
+    {
+        await using (new S2())
+        {
+        } // S2.IAsyncDisposable.DisposeAsync
+    }
+}
+```
+
+Note that preference is given to a `DisposeAsync` method that implements the pattern, and only if one is not found, `IAsyncDisposable`
+implementation is used.
+
+A pattern `DisposeAsync` method will be recognized on a type parameter that `allows ref struct` as it is recognized on
+type parameters without that constraint today.
+
+```csharp
+interface IMyAsyncDisposable
+{
+    ValueTask DisposeAsync();
+}
+
+class C
+{
+    static async Task Test<T>() where T : IMyAsyncDisposable, new(), allows ref struct
+    {
+        await using (new T())
+        {
+        } // IMyAsyncDisposable.DisposeAsync
+    }
+}
+```
+
+A `using` statement will recognize and use implementation of `IAsyncDisposable` interface when resource is a type parameter that 
+`allows ref struct`, the process of looking for `DisposeAsync` pattern method failed, and `IAsyncDisposable` is in type parameter's effective interfaces set.
+```csharp
+interface IMyAsyncDisposable1
+{
+    ValueTask DisposeAsync();
+}
+
+interface IMyAsyncDisposable2
+{
+    ValueTask DisposeAsync();
+}
+
+class C
+{
+    static async Task Test<T>() where T : IMyAsyncDisposable1, IMyAsyncDisposable2, IAsyncDisposable, new(), allows ref struct
+    {
+        await using (new T())
+        {
+            System.Console.Write(123);
+        } // IAsyncDisposable.DisposeAsync
+    }
+}
+```
+
+### `foreach` statement
+
+The https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement section should be updated accordingly
+to incorporate the following.
+
+A `foreach` statement will recognize and use implementation of ```IEnumerable<T>```/```IEnumerable``` interface when collection is a ref struct.
+```csharp
+ref struct S : IEnumerable<int>
+{
+    IEnumerator<int> IEnumerable<int>.GetEnumerator() {...}
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {...}
+}
+
+class C
+{
+    static void Main()
+    {
+        foreach (var i in new S()) // IEnumerable<int>.GetEnumerator
+        {
+        }
+    }
+}
+```
+
+A pattern `GetEnumerator` method will be recognized on a type parameter that `allows ref struct` as it is recognized on
+type parameters without that constraint today.
+
+```csharp
+interface IMyEnumerable<T>
+{
+    IEnumerator<T> GetEnumerator();
+}
+
+class C
+{
+    static void Test<T>(T t) where T : IMyEnumerable<int>, allows ref struct
+    {
+        foreach (var i in t) // IMyEnumerable<int>.GetEnumerator
+        {
+        }
+    }
+}
+```
+
+A `foreach` statement will recognize and use implementation of ```IEnumerable<T>```/```IEnumerable``` interface when collection is a type parameter that 
+`allows ref struct`, the process of looking for `GetEnumerator` pattern method failed, and ```IEnumerable<T>```/```IEnumerable``` is in type parameter's effective interfaces set.
+```csharp
+interface IMyEnumerable1<T>
+{
+    IEnumerator<int> GetEnumerator();
+}
+
+interface IMyEnumerable2<T>
+{
+    IEnumerator<int> GetEnumerator();
+}
+
+class C
+{
+    static void Test<T>(T t) where T : IMyEnumerable1<int>, IMyEnumerable2<int>, IEnumerable<int>, allows ref struct
+    {
+        foreach (var i in t) // IEnumerable<int>.GetEnumerator
+        {
+        }
+    }
+}
+```
+
+An `enumerator` pattern will be recognized on a type parameter that `allows ref struct` as it is recognized on
+type parameters without that constraint today.
+
+```csharp
+interface IGetEnumerator<TEnumerator> where TEnumerator : allows ref struct 
+{
+    TEnumerator GetEnumerator();
+}
+
+class C
+{
+    static void Test1<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>, allows ref struct
+        where TEnumerator : IEnumerator, IDisposable, allows ref struct 
+    {
+        foreach (var i in t) // IEnumerator.MoveNext/Current
+        {
+        }
+    }
+
+    static void Test2<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>, allows ref struct
+        where TEnumerator : IEnumerator<int>, allows ref struct 
+    {
+        foreach (var i in t) // IEnumerator<int>.MoveNext/Current
+        {
+        }
+    }
+
+    static void Test3<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>, allows ref struct
+        where TEnumerator : IMyEnumerator<int>, allows ref struct 
+    {
+        foreach (var i in t) // IMyEnumerator<int>.MoveNext/Current
+        {
+        }
+    }
+}
+
+interface IMyEnumerator<T> : System.IDisposable
+{
+    T Current {get;}
+    bool MoveNext();
+}
+```
+
+A `foreach` statement will recognize and use implementation of `IDisposable` interface when enumerator is a ref struct.
+```csharp
+struct S1
+{
+    public S2 GetEnumerator()
+    {
+        return new S2();
+    }
+}
+
+ref struct S2 : System.IDisposable
+{
+    public int Current {...}
+    public bool MoveNext() {...}
+    void System.IDisposable.Dispose() {...}
+}
+
+class C
+{
+    static void Main()
+    {
+        foreach (var i in new S1())
+        {
+        } // S2.System.IDisposable.Dispose()
+    }
+}
+```
+
+Note that preference is given to a `Dispose` method that implements the pattern, and only if one is not found, `IDisposable`
+implementation is used.
+
+A `foreach` statement will recognize and use implementation of `IDisposable` interface when enumerator is a type parameter that 
+`allows ref struct` and `IDisposable` is in its effective interfaces set.
+```csharp
+interface ICustomEnumerator
+{
+    int Current {get;}
+    bool MoveNext();
+}
+
+interface IGetEnumerator<TEnumerator> where TEnumerator : allows ref struct 
+{
+    TEnumerator GetEnumerator();
+}
+
+class C
+{
+    static void Test<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>
+        where TEnumerator : ICustomEnumerator, System.IDisposable, allows ref struct 
+    {
+        foreach (var i in t)
+        {
+        } // System.IDisposable.Dispose()
+    }
+}
+```
+
+Note that a pattern `Dispose` method will not be recognized on a type parameter that `allows ref struct` because
+an interface (and this is the only place where we could possibly look for a pattern) is not a ref struct.
+Also, since runtime doesn't provide a way to check whether at runtime a type parameter that `allows ref struct`
+implements `IDisposable` interface, a type parameter enumerator that `allows ref struct` will be disallowed,
+unless `IDisposable` is in its effective interfaces set.
+```csharp
+interface ICustomEnumerator
+{
+    int Current {get;}
+    bool MoveNext();
+}
+
+interface IMyDisposable
+{
+    void Dispose();
+}
+
+interface IGetEnumerator<TEnumerator> where TEnumerator : allows ref struct 
+{
+    TEnumerator GetEnumerator();
+}
+
+class C
+{
+    static void Test<TEnumerable, TEnumerator>(TEnumerable t)
+        where TEnumerable : IGetEnumerator<TEnumerator>
+        where TEnumerator : ICustomEnumerator, IMyDisposable, allows ref struct 
+    {
+        // error CS9507: foreach statement cannot operate on enumerators of type 'TEnumerator'
+        //               because it is a type parameter that allows ref struct and
+        //               it is not known at compile time to implement IDisposable.
+        foreach (var i in t)
+        {
+        }
+    }
+}
+```
+
+### `await foreach` statement
+
+The https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement section should be updated accordingly
+to incorporate the following.
+
+An `await foreach` statement will recognize and use implementation of ```IAsyncEnumerable<T>``` interface when collection is a ref struct.
+```csharp
+ref struct S : IAsyncEnumerable<int>
+{
+    IAsyncEnumerator<int> IAsyncEnumerable<int>.GetAsyncEnumerator(CancellationToken token) {...}
+}
+
+class C
+{
+    static async Task Main()
+    {
+        await foreach (var i in new S()) // S.IAsyncEnumerable<int>.GetAsyncEnumerator
+        {
+        }
+    }
+}
+```
+
+A pattern `GetAsyncEnumerator` method will be recognized on a type parameter that `allows ref struct` as it is recognized on
+type parameters without that constraint today.
+
+```csharp
+interface IMyAsyncEnumerable<T>
+{
+    IAsyncEnumerator<int> GetAsyncEnumerator(CancellationToken cancellationToken = default);
+}
+
+class C
+{
+    static async Task Test<T>() where T : IMyAsyncEnumerable<int>, allows ref struct
+    {
+        await foreach (var i in default(T)) // IMyAsyncEnumerable<int>.GetAsyncEnumerator
+        {
+        }
+    }
+}
+```
+
+An `await foreach` statement will recognize and use implementation of ```IAsyncEnumerable<T>``` interface when collection is a type parameter that 
+`allows ref struct`, the process of looking for `GetAsyncEnumerator` pattern method failed, and ```IAsyncEnumerable<T>``` is in type parameter's effective interfaces set.
+```csharp
+interface IMyAsyncEnumerable1<T>
+{
+    IAsyncEnumerator<int> GetAsyncEnumerator(CancellationToken cancellationToken = default);
+}
+
+interface IMyAsyncEnumerable2<T>
+{
+    IAsyncEnumerator<int> GetAsyncEnumerator(CancellationToken cancellationToken = default);
+}
+
+class C
+{
+    static async Task Test<T>() where T : IMyAsyncEnumerable1<int>, IMyAsyncEnumerable2<int>, IAsyncEnumerable<int>, allows ref struct
+    {
+        await foreach (var i in default(T)) // IAsyncEnumerable<int>.GetAsyncEnumerator
+        {
+            System.Console.Write(i);
+        }
+    }
+}
+```
+
+An `await foreach` statement will continue disallowing a ref struct enumerator and a type parameter enumerator that `allows ref struct`. The reason
+is the fact that the enumerator must be preserved across `await MoveNextAsync()` calls.
+
 ### Delegate type for the anonymous function or method group
 
 The https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#delegate-types section states:
@@ -401,18 +827,23 @@ Should the compiler warn on the following invocation of `M` as it creates the op
 ```csharp
 interface I1
 {
-    // DIM method
+    // Virtual method with default implementation
     void M() { }
 }
 
-// Invocation of the DIM method in a generic method that has the `allows ref struct`
+// Invocation of a virtual instance method with default implementation in a generic method that has the `allows ref struct`
 // anti-constraint
 void M<T>(T p)
     where T : allows ref struct, I1
 {
-    p.M();
+    p.M(); // Warn?
 }
 ```
+
+This, however, could be noisy and not very helpful in majority of scenarios. C# will require ref structs to implement all virtual APIs.
+Therefore, assuming that other players follow the same rule, the only situation when this might cause an exception is when the method
+is added after the fact. The author of the consuming code often has no knowledge of all these details and often has no control over 
+ref structs that will be consumed by the code. Therefore, the only action the author can really take is to suppress the warning.
 
 ## Considerations
 
