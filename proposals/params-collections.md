@@ -368,7 +368,7 @@ unsafe public class C
         var g = Test6(name: "name", d); // int : named before regular argument
 
         string name = "name";
-        var h = Test(&name, d); // int : pointer argument
+        var h = Test7(&name, d); // int : pointer argument
     }
     
     static void Test1(int x) {}
