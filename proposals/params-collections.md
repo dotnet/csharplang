@@ -380,6 +380,40 @@ unsafe public class C
 }
 ```
 
+Note, that the term "invocation" in "invocation of the candidate is statically bound" is used in a somewhat loose terms.
+- For a method or delegate invocations, this means an invocation of the method or the delegate.
+- For an indexer used as a value, this means an invocation of its getter.
+- For an indexer as a target of an assignment, this means the whole assignment operation, which includes 
+an invocation of the setter, conversion of the assigned value, and, if this is a compound assignment,
+invocation of the getter and the compound operation. What is being converted to `dynamic` is the result
+produced by the whole assignment operation. Result of any mentioned constituent operations is not converted to
+`dynamic`, unless they themselves involve `dynamic` input beyond indexer's arguments.
+
+To illustrate:
+```csharp
+public class C1
+{
+    public void M(dynamic d, object o)
+    {
+        // conversion is static
+        this[d] = o; // error CS0266: Cannot implicitly convert type 'object' to 'System.IO.Stream'. An explicit conversion exists (are you missing a cast?)
+    }
+
+    System.IO.Stream this[int x] {...}
+}
+
+public class C2
+{
+    public void M(dynamic d, object o)
+    {
+        // the addition is static
+        this[d] += o; // error CS0019: Operator '+=' cannot be applied to operands of type 'object' and 'object'
+    }
+
+    object this[int x] {...}
+}
+```
+
 Otherwise, the *invocation_expression* is dynamically bound.
 - If only a single candidate passed the test above:
     - if that candidate is a local function, a compile-time error occurs;
