@@ -4,11 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`](https://github.com/dotnet/csharplang/issues/8034) (Chuck)
-
 ## Schedule when convenient
-
-- [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582) (Rikki)
 
 ## Recurring topics
 
@@ -39,16 +35,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 22, 2024
 
+- [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582) (Rikki)
+
 ### Wed Apr 17, 2024
 
-- Extensions (Julien)
+- Extensions (Julien) 
+- [Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`](https://github.com/dotnet/csharplang/issues/8034) (Chuck)
 
 ### Mon Apr 15, 2024
 
 - [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
 - Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
-
-### Wed Apr 10, 2024
 
 ### Mon Feb 26, 2024 (unresolved topics)
 
