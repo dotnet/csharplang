@@ -16,7 +16,8 @@ We finally arrived at checksums as a more satisfactory way of identifying the fi
 
 It also pushes us toward an opaque representation of "interceptable locations". In the design we have now, it's expected that InterceptsLocation attribute arguments are produced solely by calling the public APIs. We don't expect users to create or to interpret the arguments to InterceptsLocationAttribute.
 
-See https://github.com/dotnet/roslyn/issues/72133 for further details on this.
+See https://github.com/dotnet/roslyn/issues/72133 for further details on the public API design.
+https://github.com/RikkiGibson/roslyn/blob/interceptablelocation/docs/features/interceptors.md includes more precise details on the location format.
 
 ## Need for interceptor semantic info in IDE
 
