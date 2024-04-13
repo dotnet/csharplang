@@ -1193,6 +1193,26 @@ TODO(static) Need to scan through all pattern-based rules for known members to c
   - `GetAwaiter` in `await` expressions
   - `Dispose` in `using` statements
 
+### Simple assignment
+
+The current [simple assignment rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12212-simple-assignment) state:
+
+> When a property or indexer declared in a struct_type is the target of an assignment,
+> the instance expression associated with the property or indexer access shall be classified as a variable.
+> If the instance expression is classified as a value, a binding-time error occurs.
+
+We're expecting those rules to be updated to check whether the receiver is a reference or value type instead.
+Then the rule will also apply to extension properties/indexers/events.
+
+```
+1.Property = 42; // Error reporting that 1 (which is a struct) is not a variable
+
+implicit extension E for int
+{
+    public int Property { set => throw null; }
+}
+```
+
 # Implementation details
 
 TODO3(static) revise this to use a regular struct
