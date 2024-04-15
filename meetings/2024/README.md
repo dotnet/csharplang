@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Adjust dynamic binding rules for a situation of a single applicable candidate.](https://github.com/dotnet/csharplang/pull/8027) Aleksey
+
 ## Schedule when convenient
 
 ## Recurring topics
