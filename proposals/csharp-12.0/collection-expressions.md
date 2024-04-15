@@ -184,12 +184,8 @@ If the `CM` set is empty, then the *collection type* doesn't have an *element ty
 
 Second, an attempt is made to determine the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type* from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
 
-If an *iteration type* can be determined, then the *element type* of the *collection type* is the *iteration type*. If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*. None of the following steps apply.  
-
-Third (ie. if an *iteration type* cannot be determined), an attempt is made to infer the *element type*.
-If the `CM` set contains more than one method, the inference fails and the *collection type* doesn't have an *element type* and doesn't have a *create method*.
-
-Otherwise, type `E1` is determined by substituting type parameters of the only method from the `CM` set (`M`) with corresponding *collection type* type parameters in its `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have an *element type* and doesn't have a *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
+If an *iteration type* can be determined, then the *element type* of the *collection type* is the *iteration type*. Otherwise, the *collection type* doesn't have an *element type* and doesn't have a *create method*.
+If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
 
