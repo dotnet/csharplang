@@ -367,10 +367,6 @@ We change the type inference algorithm contained in the [type inference](https:/
   * Example: Given `IList<_>` as a type argument, when we treat nullability, we want the hinted type parameter to be non-nullable(not `IList<_>?`).
     It can happen, other bounds would infer the nullable version, and although `IList<_>` can be converted to `IList<_>?`, it is not the user's intention.
 
-* Explanation of inference restriction during constructor type inference
-  * Because performing type inference can even take exponential time when a type system contains overloading, the restriction was made above to avoid it. 
-    It regards binding arguments before the overload resolution when we bind all *object_creation_expressions* without target info and then in case of overload resolution success and some of these arguments failed in the binding, we try to bind it again with already known target type information.
-
 ### Compile-time checking of dynamic member invocation
 
 We change the [compile-time checking](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
