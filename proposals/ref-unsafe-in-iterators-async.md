@@ -88,6 +88,9 @@ so we propose the following change to the spec:
 > **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain
 > an `await` expression ([§12.9.8][await-expressions]) or a `yield return` statement ([§13.15][yield-statement]).**
 
+A compile-time error will be also reported for taking an address of a local or a parameter in an iterator.
+Currently, taking an address of a local or a parameter in an async method is [a warning in C# 12 warning wave][async-pointer].
+
 Note that more constructs can work thanks to `ref` allowed inside segments without `await` and `yield` in async/iterator methods
 even though no spec change is needed specifically for them as it all falls out from the aforementioned spec changes:
 
