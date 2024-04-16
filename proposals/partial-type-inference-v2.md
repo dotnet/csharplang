@@ -375,8 +375,7 @@ We change the type inference algorithm contained in the [type inference](https:/
 
 We change the [compile-time checking](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
 
-- First, if `F` is a generic method and type arguments were provided, then if the type argument list contains an *partially_inferred* type, an binding error occurs since it is not supported in the runtime binding.
-- Then, any parameter whose type is open (i.e., contains a type parameter; see §8.4.3) is elided, along with its corresponding parameter(s).
+- First, if `F` is a generic method and type arguments were provided, then if the method group is *partial_inferred*, an binding error occurs since it is not supported in the runtime binding.
 
 We add the following
 - If an object creation expression is inferred and the argument list contains a dynamic value, an binding error appears since constructor type inference is not supported by runtime.
