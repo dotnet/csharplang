@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- Effect of language version on overload resolution in presence of `params` collections (link TBD) Aleksey, Stephen Toub
 - [Adjust dynamic binding rules for a situation of a single applicable candidate.](https://github.com/dotnet/csharplang/pull/8027) Aleksey
 
 ## Schedule when convenient
