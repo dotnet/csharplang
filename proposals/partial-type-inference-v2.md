@@ -173,11 +173,7 @@ The binding-time processing of an [*object_creation_expression*](https://github.
 
 The binding-time processing of an *object_creation_expression* of the form new `T(A)`, where `T` is a *class_type*, or a *value_type*, and `A` is an optional *argument_list*, consists of the following steps:
 
-- If `T` is a *value_type* and `A` is not present:
-  - **The *object_creation_expression* is a default constructor invocation.**
-    - **If the type is *partial_inferred*, Constructor type inference (See the [Type Inference] section) of the default constructor occurs to determine closed type. If it succeeded, construct the type using the inferred type arguments. If it failed the binding-time error occurs.**
-    - **If the type inference above succeeded, the result of the *object_creation_expression* is a value of (constructed) type `T`, namely the default value for `T` as defined in [§8.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#833-default-constructors).**
-- Otherwise, if `T` is a *type_parameter* and `A` is not present:
+- if `T` is a *type_parameter* and `A` is not present:
   - If no value type constraint or constructor constraint (§15.2.5) has been specified for `T`, a binding-time error occurs.
   - The result of the *object_creation_expression* is a value of the run-time type that the type parameter has been bound to, namely the result of invoking the default constructor of that type. The run-time type may be a reference type or a value type.
 - Otherwise, if `T` is a *class_type* or a *struct_type*:
