@@ -160,7 +160,7 @@ The initial set of candidate methods for is changed by adding new condition.
 - If `F` is generic and `M` has no type argument list, `F` is a candidate when:
   - Type inference (§12.6.3) succeeds, inferring a list of type arguments for the call, and
   - Once the inferred type arguments are substituted for the corresponding method type parameters, all constructed types in the parameter list of `F` satisfy their constraints ([§8.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#845-satisfying-constraints)), and the parameter list of `F` is applicable with respect to `A` (§12.6.4.2)
-- **If `F` is generic and `M` has a type argument list containing at least one *inferred_type* or *partial_inferred_type*, `F` is a candidate when:**
+- **If `F` is generic and `M` is *partial_inferred*, `F` is a candidate when:**
   - **Method type inference (See the [Type Inference] section) succeeds, inferring the type arguments list for the call, and**
   - **Once the inferred type arguments are substituted for the corresponding method type parameters, all constructed types in the parameter list of `F` satisfy their constraints ([§8.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#845-satisfying-constraints)), and the parameter list of `F` is applicable with respect to `A` ([§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12642-applicable-function-member))**
 - If `F` is generic and `M` includes a type argument list, `F` is a candidate when:
@@ -175,7 +175,7 @@ The binding-time processing of an *object_creation_expression* of the form new `
 
 - If `T` is a *value_type* and `A` is not present:
   - **The *object_creation_expression* is a default constructor invocation.**
-    - **If the type is *partially_inferred*, Constructor type inference (See the [Type Inference] section) of the default constructor occurs to determine closed type. If it succeeded, construct the type using the inferred type arguments. If it failed the binding-time error occurs.**
+    - **If the type is *partial_inferred*, Constructor type inference (See the [Type Inference] section) of the default constructor occurs to determine closed type. If it succeeded, construct the type using the inferred type arguments. If it failed the binding-time error occurs.**
     - **If the type inference above succeeded or the type is not inferred, the result of the *object_creation_expression* is a value of (constructed) type `T`, namely the default value for `T` as defined in [§8.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#833-default-constructors).**
 - Otherwise, if `T` is a *type_parameter* and `A` is not present:
   - If no value type constraint or constructor constraint (§15.2.5) has been specified for `T`, a binding-time error occurs.
@@ -183,8 +183,8 @@ The binding-time processing of an *object_creation_expression* of the form new `
 - Otherwise, if `T` is a *class_type* or a *struct_type*:
   - If `T` is an abstract or static *class_type*, a compile-time error occurs.
   - **The instance constructor to invoke is determined using the overload resolution rules of [§12.6.4](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1264-overload-resolution). The set of candidate instance constructors is determined as follows:**
-    - **`T` is not inferrred (*partially_inferred*), the constructor is accessible in `T`, and is applicable with respect to `A` ([§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12642-applicable-function-member)).**
-    - **If `T` is *partially_constructed* and the constructor is accessible in `T`, partial constructor type inference of the constructor is performed. Once the type arguments are inferred and substituted for the corresponding type parameters, all constructed types in the parameter list of the constructor satisfy their constraints, and the parameter list of the constructor is applicable with respect to `A` ([§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12642-applicable-function-member)).**
+    - **`T` is not inferrred (*partial_inferred*), the constructor is accessible in `T`, and is applicable with respect to `A` ([§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12642-applicable-function-member)).**
+    - **If `T` is *partial_inferred* and the constructor is accessible in `T`, constructor type inference of the constructor is performed. Once the type arguments are inferred and substituted for the corresponding type parameters, all constructed types in the parameter list of the constructor satisfy their constraints, and the parameter list of the constructor is applicable with respect to `A` ([§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12642-applicable-function-member)).**
   - A binding-time error occurs when:
     - The set of candidate instance constructors is empty, or if a single best instance constructor cannot be identified.
   - The result of the *object_creation_expression* is a value of type `T`, namely the value produced by invoking the instance constructor determined in the two steps above.
