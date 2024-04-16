@@ -125,7 +125,7 @@ new Container<_>.Type<_>(arg);
 * *inferred_type_placeholder* represents an unknown type denoted by the `_` identifier, which will be resolved during type inference.
 
 * *partial_inferred_type* represents a type which contains *inferred_type_placeholder* in its syntax but it is not *inferred_type_placeholder*.
-The contained uknown type(s) are resolved during type inference assembling closed type. 
+The contained uknown type(s) are inferred during type inference assembling the closed type. 
 
 ```csharp
 _ // inferred_type_placeholder, but not partial_inferred_type
@@ -176,7 +176,7 @@ The binding-time processing of an *object_creation_expression* of the form new `
 - If `T` is a *value_type* and `A` is not present:
   - **The *object_creation_expression* is a default constructor invocation.**
     - **If the type is *partial_inferred*, Constructor type inference (See the [Type Inference] section) of the default constructor occurs to determine closed type. If it succeeded, construct the type using the inferred type arguments. If it failed the binding-time error occurs.**
-    - **If the type inference above succeeded or the type is not inferred, the result of the *object_creation_expression* is a value of (constructed) type `T`, namely the default value for `T` as defined in [§8.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#833-default-constructors).**
+    - **If the type inference above succeeded, the result of the *object_creation_expression* is a value of (constructed) type `T`, namely the default value for `T` as defined in [§8.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#833-default-constructors).**
 - Otherwise, if `T` is a *type_parameter* and `A` is not present:
   - If no value type constraint or constructor constraint (§15.2.5) has been specified for `T`, a binding-time error occurs.
   - The result of the *object_creation_expression* is a value of the run-time type that the type parameter has been bound to, namely the result of invoking the default constructor of that type. The run-time type may be a reference type or a value type.
@@ -196,7 +196,7 @@ We replace the [type inference/general](https://github.com/dotnet/csharpstandard
 
 * Type inference for generic method invocation is performed when the invocation:
   * Doesn't have a *type_argument_list*.
-  * The type argument list contains at least one *partial_inferred* type.
+  * The method group is *partial_inferred*.
 
   ```csharp
   M( ... ); // Type inference is invoked.
@@ -206,7 +206,7 @@ We replace the [type inference/general](https://github.com/dotnet/csharpstandard
 
 * Type inference is applied to each generic method in the method group. 
 
-* Type inference for constructors is performed when the generic type of *object_creation_expression* is *partially_inferred*:
+* Type inference for constructors is performed when the generic type of *object_creation_expression* is *partially_inferred*.
   
   ```csharp
   new C<_, string>( ... ); // Type inference is invoked.
