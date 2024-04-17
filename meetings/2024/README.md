@@ -4,9 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Effect of language version on overload resolution in presence of `params` collections (link TBD) Aleksey, Stephen Toub
-- [Adjust dynamic binding rules for a situation of a single applicable candidate.](https://github.com/dotnet/csharplang/pull/8027) Aleksey
-
 ## Schedule when convenient
 
 ## Recurring topics
@@ -36,8 +33,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Apr 24, 2024
 
+- [Adjust dynamic binding rules for a situation of a single applicable candidate.](https://github.com/dotnet/csharplang/pull/8027) Aleksey
+- Triage or special topics
+
 ### Mon Apr 22, 2024
 
+- Effect of language version on overload resolution in presence of `params` collections (link TBD) Aleksey, Stephen Toub
 - [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582) (Rikki)
 
 ### Wed Apr 17, 2024
