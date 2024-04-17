@@ -47,7 +47,11 @@ and C# 13 will lift these restrictions as described below.
 [§13.3.1 Blocks > General][blocks-general]:
 
 > ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).~~
-> An iterator block always defines a safe context, even when its declaration is nested in an unsafe context.
+> An iterator block always defines a safe context, even when its declaration is nested in an unsafe context
+> **unless the iterator method itself is marked with the `unsafe` modifier ([§23.2][unsafe-contexts])**.
+
+Note that `yield return`s in unsafe contexts are compile-time errors (see below), so the only way
+to have a successfully compiling unsafe iterator method is if it contains only `yield break`s.
 
 [§13.6.2.4 Ref local variable declarations][ref-local]:
 
