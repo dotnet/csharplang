@@ -162,6 +162,9 @@ class C
   > or the variable needs to be hoisted as part of an async ([§15.15][async-funcs]) or an iterator ([§15.14][iterators]) method**.
   > - [...]
 
+  - Currently, we have an existing C# 12 warning for address-of in async methods and a proposed C# 13 error for address-of in iterators.
+    We could relax both of these to apply only to variables that are actually hoisted, not all locals and parameters. 
+
   - It could be possible to use `fixed` to get the address of a hoisted or captured variable
     although the fact that those are fields is an implementation detail
     so in other implementations it might not be possible to use `fixed` on them.
