@@ -38,7 +38,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Apr 22, 2024
 
-- Effect of language version on overload resolution in presence of `params` collections (link TBD) Aleksey, Stephen Toub
+- [Effect of language version on overload resolution in presence of `params` collections](https://github.com/dotnet/csharplang/issues/8061) Jared, Aleksey, Stephen Toub
 - [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582) (Rikki)
 
 ### Wed Apr 17, 2024
