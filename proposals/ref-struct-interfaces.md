@@ -708,8 +708,12 @@ is the fact that the enumerator must be preserved across `await MoveNextAsync()`
 The https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md#delegate-types section states:
 >The compiler may allow more signatures to bind to `System.Action<>` and `System.Func<>` types in the future (if `ref struct` types are allowed type arguments for instance).
 
-We should consider using `Action<>` and `Func<>` types in more scenarios once the types are adjusted to allow ref structs as type arguments, however that is not a must have
-at the time the feature is shipped.
+`Action<>` and `Func<>` types with `allows ref struct` constraints on their type parameters will be used in more scenarios
+involving ref struct types in the delegate's signature.
+
+If target runtime supports `allows ref struct` constraints, generic anonymous delegate types will include `allows ref struct` constraint for
+their type parameters. This will enable substitution of those type parameters with ref struct types and other type parameters with
+ `allows ref struct` constraint.
 
 ### Inline arrays
 
