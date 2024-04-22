@@ -86,3 +86,26 @@ partial class C3
     public partial string Prop { get => field; set => field = value; }
 }
 ```
+
+## Drawbacks
+[drawbacks]: #drawbacks
+
+As always, this feature adds to the language concept count and must be weighed accordingly.
+
+The fact that adding the `partial` modifier can change an auto-property declaration to a defining partial declaration may be confusing.
+
+## Alternatives
+[alternatives]: #alternatives
+
+We could consider more flexible designs which permit different accessor definitions or implementations to be spread across different declarations.
+
+We could consider introducing some special way to denote that a partial property implementation is an auto-property, separate from the `field` keyword.
+
+We could also consider doing nothing, which means that source generators and perhaps our tooling will need to establish conventions for working around the limitations of the field-based approach.
+
+## Unresolved questions
+[unresolved]: #unresolved-questions
+
+Should we permit partial indexers as part of this feature? It would increase orthogonality to allow this, but the word "indexer" is mentioned zero times since 2020 in the community discussion for this feature.
+
+Similarly, should we permit other kinds of partial members like fields, events, constructors, operators, etc? The same is mentioned in [extending-partial-methods.md](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/extending-partial-methods.md#partial-on-all-members).
