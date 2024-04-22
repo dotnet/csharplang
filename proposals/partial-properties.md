@@ -17,7 +17,7 @@ property_declaration
 ### Defining and implementing declarations
 When a property declaration includes a *partial* modifier, that property is said to be a *partial property*. Partial properties may only be declared as members of partial types.
 
-A *partial property* declaration is said to be a *defining declaration* when its accessors all have semicolon bodies, and it lacks the `extern` modifier. Otherwise, it is an *implementing declaration*. A *partial property* cannot be an auto-property.
+A *partial property* declaration is said to be a *defining declaration* when its accessors all have semicolon bodies, and it lacks the `extern` modifier. Otherwise, it is an *implementing declaration*.
 
 ```cs
 partial class C
@@ -29,6 +29,10 @@ partial class C
     public partial string Prop { get => field; set => field = value; }
 }
 ```
+
+Because we have reserved the syntactic form with semicolon accessor bodies for the *defining declaration*, a partial property cannot be *automatically implemented*. We therefore adjust [Automatically implemented properties (§15.7.4)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties) as follows:
+
+> An automatically implemented property (or auto-property for short), is a non-abstract, non-extern, **non-partial,** non-ref-valued property with semicolon-only accessor bodies.
 
 **Remarks**. It is useful for the compiler to be able to look at a single declaration in isolation and know whether it is a defining or an implementing declaration. Therefore we don't want to permit auto-properties by including two identical `partial` property declarations, for example. We don't think that the use cases for this feature involve implementing the partial property with an auto-property, but in cases where a trivial implementation is desired, we think the `field` keyword makes things simple enough.
 
