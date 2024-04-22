@@ -87,25 +87,52 @@ partial class C3
 }
 ```
 
-## Drawbacks
-[drawbacks]: #drawbacks
+### Indexers
 
-As always, this feature adds to the language concept count and must be weighed accordingly.
+Per [LDM meeting on 2nd November 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-11-02.md#partial-properties), indexers will be supported with this feature.
 
-The fact that adding the `partial` modifier can change an auto-property declaration to a defining partial declaration may be confusing.
+Indexer parameters must match in the same way that partial method parameters must match, and merging of parameter attributes across partial indexer declarations occurs in the same way that it does for partial methods.
 
-## Alternatives
-[alternatives]: #alternatives
 
-We could consider more flexible designs which permit different accessor definitions or implementations to be spread across different declarations.
+```cs
+partial class C
+{
+    public partial int this[int x] { get; set; }
+    public partial int this[int x]
+    {
+        get => this._store[x];
+        set => this._store[x] = value;
+    }
+}
 
-We could consider introducing some special way to denote that a partial property implementation is an auto-property, separate from the `field` keyword.
+// attribute merging
+partial class C
+{
+    public partial int this[[Attr1] int x]
+    {
+        [Attr2] get;
+        set;
+    }
 
-We could also consider doing nothing, which means that source generators and perhaps our tooling will need to establish conventions for working around the limitations of the field-based approach.
+    public partial int this[[Attr3] int x]
+    {
+        get => this._store[x];
+        [Attr4] set => this._store[x] = value;
+    }
 
-## Unresolved questions
-[unresolved]: #unresolved-questions
+    // results in a merged member emitted to metadata:
+    public int this[[Attr1, Attr3] int x]
+    {
+        [Attr2] get => this._store[x];
+        [Attr4] set => this._store[x] = value;
+    }
+}
+```
 
-Should we permit partial indexers as part of this feature? It would increase orthogonality to allow this, but the word "indexer" is mentioned zero times since 2020 in the community discussion for this feature.
+## Open Issues
 
-Similarly, should we permit other kinds of partial members like fields, events, constructors, operators, etc? The same is mentioned in [extending-partial-methods.md](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/extending-partial-methods.md#partial-on-all-members).
+### Other member kinds
+
+A community member opened a discussion to request support for [partial events](https://github.com/dotnet/csharplang/discussions/8064). In the [LDM meeting on 2nd November 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-11-02.md#partial-properties), we decided to punt on support for events, in part because nobody at the time had requested it. We may want to revisit this question, since this request has now come in, and it has been over a year since we last discussed it.
+
+We could also go even further in permitting partial declarations of constructors, operators, fields, and so on, but it's unclear if the design burden of these is justified, just because we are already doing partial properties.
