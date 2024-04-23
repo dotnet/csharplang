@@ -49,7 +49,9 @@ However, spec clarifications which match the existing Roslyn implementation shou
 
 > A *block* that contains one or more `yield` statements ([§13.15][yield-statement]) is called an iterator block,
 > **even if those `yield` statements are contained only indirectly in nested blocks (excluding nested lambdas and local functions).**
+>
 > [...]
+>
 > ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).
 > An iterator block always defines a safe context, even when its declaration is nested in an unsafe context.~~
 > **The iterator block used to implement an iterator ([§15.14][iterators])
