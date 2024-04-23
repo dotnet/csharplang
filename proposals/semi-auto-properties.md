@@ -10,6 +10,228 @@ Two common scenarios are that you want to apply a constraint on the setter, ensu
 
 In these cases by now you always have to create an instance field and write the whole property yourself.  This not only adds a fair amount of code, but it also leaks the `field` into the rest of the type's scope, when it is often desirable to only have it be available to the bodies of the accessors.
 
+## Detailed design
+
+For properties with an `init` accessor, everything that applies below to `set` would apply instead to the `init` accessor.
+
+**Principle 1:** Every property can be thought of as having a backing field by default, which is elided when not used. The field is referenced using the keyword `field` and its visibility is scoped to the accessor bodies.
+
+**Principle 2:** `get;` will now be considered syntactic sugar for `get => field;`, and `set;` will now be considered syntactic sugar for `set => field = value;`.
+
+This means that properties may now mix and match auto accessors with full accessors. For example:
+
+```cs
+{ get; set => Set(ref field, value); }
+```
+
+```cs
+{ get => field ?? GetDefault(); set; }
+```
+
+Both accessors may be full accessors with either one or both making use of `field`:
+
+```cs
+{ get => field; set => field = value; }
+```
+
+```cs
+{ get => field; set => throw new InvalidOperationException(); }
+```
+
+```cs
+{ get => overriddenValue; set => field = value; }
+```
+
+Expression-bodied properties and properties with only a `get` accessor may also use `field`:
+
+```cs
+public string LazilyComputed => field ??= Compute();
+```
+
+```cs
+public string LazilyComputed { get => field ??= Compute(); }
+```
+
+A special case is made to prevent properties with only a `set` accessor from using `field` because there would be no way to access the value of `field` except in subsequent sets, when it will be presumed to be overwritten.
+
+```cs
+// ❌ Error, will not compile
+public string Why { set => field = value; }
+```
+
+### Field-targeted attributes
+
+Just as with regular auto-properties, any property that uses a backing field in one of its accessors will be able to use field-targeted attributes:
+
+```cs
+[field: Xyz]
+public string Name => field ??= Compute();
+
+[field: Xyz]
+public string Name { get => field; set => field = value; }
+```
+
+A field-targeted attribute will remain invalid unless an accessor uses a backing field:
+
+```cs
+// ❌ Error, will not compile
+[field: Xyz]
+public string Name => Compute();
+```
+
+### Constructor assignment
+
+Just like with existing auto-properties, assignment in the constructor calls the setter if it exists, and if there is no setter it falls back to directly assigning to the backing field.
+
+```cs
+class C
+{
+    public C()
+    {
+        P1 = 1; // Assigns P1's backing field directly
+        P2 = 2; // Assigns P2's backing field directly
+        P3 = 3; // Calls P3's setter
+    }
+
+    public int P1 => field;
+    public int P2 { get => field; }
+    public int P3 { get => field; set => field = value; }
+}
+```
+
+### Property initializers
+
+Properties with initializers may use `field`. The backing field is directly initialized rather than the setter being called ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#open-questions-in-field)).
+
+Calling a setter for an initializer is not an option; initializers are processed before calling base constructors, and it is illegal to call any instance method before the base constructor is called. This is also important for default initialization/definite assignment of structs.
+
+This luckily gives control over whether or not you want to initialize the backing field directly or call the property setter: if you want to initialize without calling the setter, you use a property initializer. If you want to initialize by calling the setter, you use assign the property an initial value in the constructor.
+
+Here's an example of where this is useful. The `field` keyword will find a lot of its use with view models because of the neat solution it brings for the `INotifyPropertyChanged` pattern. View model property setters are likely to be databound to UI and likely to cause change tracking or trigger other behaviors. The following code needs to initialize the default value of `IsActive` without setting `HasPendingChanges` to `true`:
+
+```cs
+using System.Runtime.CompilerServices;
+
+class SomeViewModel
+{
+    public bool HasPendingChanges { get; private set; }
+
+    public bool IsActive { get; set => Set(ref field, value); } = true;
+
+    private bool Set<T>(ref T location, T value)
+    {
+        if (RuntimeHelpers.Equals(location, value)) return false;
+        location = value;
+        HasPendingChanges = true;
+        return true;
+    }
+}
+```
+
+This difference in behavior between a property initializer and assigning from the constructor can also be seen with virtual auto-properties in previous versions of the language:
+
+```cs
+using System;
+
+// Nothing is printed; the property initializer is not
+// equivalent to `this.IsActive = true`.
+_ = new Derived();
+
+class Base
+{
+    public virtual bool IsActive { get; set; } = true;
+}
+
+class Derived : Base
+{
+    public override bool IsActive
+    {
+        get => base.IsActive;
+        set
+        {
+            base.IsActive = value;
+            Console.WriteLine("This will not be reached");
+        }
+    }
+}
+```
+
+### Definite assignment in structs
+
+A semi-auto property will be treated as a regular auto property for the purposes of calculating default backing field initialization if its setter is automatically implemented, or if it does not have a setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#property-assignment-in-structs)).
+
+Default initialize a struct when calling a manually implemented semi-auto property setter, and issue a warning when doing so, like a regular property setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)).
+
+### Nullability
+
+When `{ get; }` is written as `{ get => field; }`, or `{ get; set; }` is written as `{ get => field; set => field = value; }`, a similar warning should be produced when a non-nullable property is not initialized:
+
+```cs
+class C
+{
+    // ⚠️ CS8618: Non-nullable property 'P' must contain a
+    // non-null value when exiting constructor.
+    public string P { get => field; set => field = value; }
+}
+```
+
+No warning should be produced if the property is initialized to a non-null value via constructor assignment or property initializer:
+
+```cs
+class C
+{
+    public C() { P = ""; }
+
+    public string P { get => field; set => field = value; }
+}
+```
+
+```cs
+class C
+{
+    public string P { get => field; set => field = value; } = "";
+}
+```
+
+For reference-typed fields, the `field` type should be nullable. No warning should be produced in the following example:
+
+```cs
+class C
+{
+    public string P => field ??= "test";
+}
+```
+
+### `nameof`
+
+`nameof(field)` will be disallowed. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases. If it did anything, it would return the string `"field"`, consistent with how `nameof` behaves in other circumstances by returning the C# name or alias, rather than the metadata name.
+
+### Overrides
+
+Like with regular auto properties, semi-auto properties that override a base property must override all accessors ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#partial-overrides-of-virtual-properties)).
+
+### Shadowing
+
+`field` can be shadowed by parameters or locals in a nested scope ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#open-questions-in-field)). Since `field` represents a field in the type, even if anonymously, the shadowing rules of regular fields should apply.
+
+### Captures
+
+`field` should be able to be captured in local functions and lambdas, and references to `field` from inside local functions and lambdas should be allowed even if there are no other references ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-21.md#open-question-in-semi-auto-properties)):
+
+```cs
+public class C
+{
+    public static int P
+    {
+        get
+        {
+            Func<int> f = static () => field;
+            return f();
+        }
+    }
+}
+```
+
 ## Specification changes
 
 The following changes are to be made to [§14.7.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1474-automatically-implemented-properties):
@@ -120,70 +342,9 @@ The following changes are to be made to [§14.7.4](https://github.com/dotnet/csh
 +```
 ````
 
-## Open LDM questions:
+## Open LDM questions
 
 1. If a type does have an existing accessible `field` symbol in scope (like a field called `field`) should there be any way for an auto-prop to still use `field` internally to both create and refer to an auto-prop field.  Under the current rules there is no way to do that.  This is certainly unfortunate for those users, however this is ideally not a significant enough issue to warrant extra dispensation.  The user, after all, can always still write out their properties like they do today, they just lose out from the convenience here in that small case.
-
-2. Should initializers use the backing field or the property setter? If the latter, what about `public int P { get => field; } = 5;`?
-
-    * Calling a setter for an initializer is not an option because initializers are processed before calling base constructor and it is illegal to call any instance method before the base constructor is called.
-
-    * If the initializer assigns directly to the backing field when there is a setter, then the initializer does one thing and an assignment to the property within constructors does a different thing (calls the setter). Today there is already a semantic difference between an initializer and an assignment in constructors in such cases. This difference can be observed with virtual auto properties:
-
-      ```cs
-      using System;
-
-       // Nothing is printed; the property initializer is not
-       // equivalent to `this.IsActive = true`.
-      _ = new Derived();
-
-      class Base
-      {
-          public virtual bool IsActive { get; set; } = true;
-      }
-
-      class Derived : Base
-      {
-          public override bool IsActive
-          {
-              get => base.IsActive;
-              set
-              {
-                  base.IsActive = value;
-                  Console.WriteLine("This will not be called");
-              }
-          }
-      }
-      ```
-
-    * There is a practical benefit when initializers skip calling the setter. It allows users of the language to choose whether to invoke the setter or not (constructor assignment or property initializer). If property initializers call the setter, this choice is taken away. Allowing language users to make this choice means that the `field` feature would be able to be used in more scenarios.
-
-      One example of this is view models. The `field` keyword will  find a lot of its use with view models because of the neat solution it brings for the `INotifyPropertyChanged` pattern. View model property setters are likely to be databound to UI and likely to cause change tracking or trigger other behaviors. Consider the following example which needs to initialize the default value of `Foo` without setting `HasPendingChanges` to `true`. If initializers call the setter, using the `field` keyword would not be an option or would require setting `HasPendingChanges` back to false in the constructor(s) which feels like a workaround: unnecessary work is being done which also leaves behind a "mess" which needs to be manually reversed, if the property initializer calls the setter.
-
-      ```cs
-      using System.Runtime.CompilerServices;
-
-      class SomeViewModel
-      {
-          public bool HasPendingChanges { get; private set; }
-
-          public int Foo { get; set => Set(ref field, value); } = 1;
-
-          private bool Set<T>(ref T location, T value)
-          {
-              if (RuntimeHelpers.Equals(location, value)) return false;
-              location = value;
-              HasPendingChanges = true;
-              return true;
-          }
-      }
-      ```
-
-    * A preexisting expectation may exist as a result of refactoring to and from auto properties. Some language users turn field initializers into property initializers and vice versa rather than moving the initialization far away from the field declaration into the constructor(s). This forms a mental model that is consistent with how the language already behaves with virtual auto properties. (See the virtual auto property example above.)
-
-3. Definite assignment related questions:
-    - https://github.com/dotnet/csharplang/issues/5563
-    - https://github.com/dotnet/csharplang/pull/5573#issuecomment-1002110830
 
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
