@@ -43,12 +43,93 @@ lock (this)
 The following changes are tied to LangVersion, i.e., C# 12 and lower will continue to disallow
 ref-like locals and `unsafe` blocks in async methods and iterators,
 and C# 13 will lift these restrictions as described below.
+However, spec clarifications which match the existing Roslyn implementation should hold across all LangVersions.
 
 [§13.3.1 Blocks > General][blocks-general]:
 
-> ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).~~
-> An iterator block always defines a safe context, even when its declaration is nested in an unsafe context
-> **unless the iterator method itself is marked with the `unsafe` modifier ([§23.2][unsafe-contexts])**.
+> A *block* that contains one or more `yield` statements ([§13.15][yield-statement]) is called an iterator block,
+> **even if those `yield` statements are contained only indirectly in nested blocks (excluding nested lambdas and local functions).**
+> [...]
+> ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).
+> An iterator block always defines a safe context, even when its declaration is nested in an unsafe context.~~
+> **The iterator block used to implement an iterator ([§15.14][iterators])
+> always defines a safe context, even when its declaration is nested in an unsafe context
+> unless the iterator declaration itself is marked with the `unsafe` modifier ([§23.2][unsafe-contexts]).**
+
+For example:
+
+```cs
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+unsafe class C1
+{ // unsafe context
+    IEnumerable<int> M1(
+        /* unsafe context */)
+    { // safe context (this is the iterator block implementing the iterator)
+        yield return 1;
+    }
+    IEnumerable<int> M2()
+    { // safe context (this is the iterator block implementing the iterator)
+        unsafe
+        { // unsafe context
+            { // unsafe context (this is *not* the block implementing the iterator)
+                yield return 1; // error: `yield return` in unsafe context
+            }
+        }
+    }
+    unsafe IEnumerable<int> this[
+        /* unsafe context */ int x]
+    { // unsafe context (the iterator declaration is unsafe)
+        get
+        { // unsafe context
+            yield return 1; // error: `yield return` in unsafe context
+        }
+        set { /* unsafe context */ }
+    }
+    IEnumerable<int> this[
+        /* unsafe context */ string x]
+    { // unsafe context
+        get
+        { // safe context (this is the block used to implement the iterator)
+            yield return 1;
+        }
+        set { /* unsafe context */ }
+    }
+    IEnumerable<int> M3()
+    {
+        yield return 1;
+        var lam = async () =>
+        { // safe context
+          // note: in Roslyn, this is an unsafe context in LangVersion 12 and lower
+            await Task.Yield();
+        };
+        async void local()
+        { // safe context
+          // note: in Roslyn, this is an unsafe context in LangVersion 12 and lower
+            await Task.Yield();
+        }
+        local();
+    }
+}
+class C2
+{ // safe context
+    unsafe IEnumerable<int> M(
+        /* unsafe context */)
+    { // unsafe context (the iterator declaration is unsafe)
+        yield return 1; // error: `yield return` in unsafe context
+    }
+    unsafe IEnumerable<int> this[
+        /* unsafe context */]
+    { // unsafe context (the iterator declaration is unsafe)
+        get
+        { // unsafe context
+            yield return 1; // error: `yield return` in unsafe context
+        }
+        set { /* unsafe context */ }
+    }
+}
+```
 
 Note that `yield return`s in unsafe contexts are compile-time errors (see below), so the only way
 to have a successfully compiling unsafe iterator method is if it contains only `yield break`s.
@@ -78,6 +159,12 @@ hence this error falls outside the boundaries of what we want to downgrade to wa
 Note that [the new `Lock`-object-based `lock`][lock-object] reports compile-time errors for `yield return`s in its body,
 because such `lock` statement is equivalent to a `using` on a `ref struct` which disallows `yield return`s in its body.
 
+[§15.14.1 Iterators > General][iterators]:
+
+> When a function member is implemented using an iterator block,
+> it is a compile-time error for the formal parameter list of the function member to specify any
+> `in`, `ref readonly`, `out`, or `ref` parameters, or an parameter of a `ref struct` type **or a pointer type**.
+
 No change in the spec is needed to allow `unsafe` blocks which do not contain `await`s in async methods,
 because the spec has never disallowed `unsafe` blocks in async methods.
 However, the spec should have always disallowed `await` inside `unsafe` blocks
@@ -92,8 +179,13 @@ so we propose the following change to the spec:
 > **It is a compile-time error for an unsafe context ([§23.2][unsafe-contexts]) to contain
 > an `await` expression ([§12.9.8][await-expressions]) or a `yield return` statement ([§13.15][yield-statement]).**
 
-A compile-time error will be also reported for taking an address of a local or a parameter in an iterator.
+[§23.6.5 The address-of operator][address-of]:
+
+> **A compile-time error will be reported for taking an address of a local or a parameter in an iterator.**
+
 Currently, taking an address of a local or a parameter in an async method is [a warning in C# 12 warning wave][async-pointer].
+
+---
 
 Note that more constructs can work thanks to `ref` allowed inside segments without `await` and `yield` in async/iterator methods
 even though no spec change is needed specifically for them as it all falls out from the aforementioned spec changes:
@@ -162,7 +254,8 @@ class C
   > or the variable needs to be hoisted as part of an async ([§15.15][async-funcs]) or an iterator ([§15.14][iterators]) method**.
   > - [...]
 
-  - Currently, we have an existing C# 12 warning for address-of in async methods and a proposed C# 13 error for address-of in iterators.
+  - Currently, we have an existing warning in C# 12 warning wave for address-of in async methods and a proposed error for address-of in iterators
+    reported for LangVersion 13+ (does not need to be reported in earlier versions because it was impossible to use unsafe code in iterators).
     We could relax both of these to apply only to variables that are actually hoisted, not all locals and parameters. 
 
   - It could be possible to use `fixed` to get the address of a hoisted or captured variable
@@ -172,7 +265,10 @@ class C
     but captured variables were already "moveable" and `fixed` was not allowed for them.
 
 - We could allow `await`/`yield` inside `unsafe` except inside `fixed` statements (compiler cannot pin variables across method boundaries).
-  That might result in some unexpected behavior, for example around `stackalloc` as described below.
+  That might result in some unexpected behavior, for example around `stackalloc` as described in the nested bullet point below.
+  Otherwise, hoisting pointers is supported even today in some scenarios (there is an example below related to pointers as arguments),
+  so there should be no other limitations in allowing this.
+
   - We could disallow the unsafe variant of `stackalloc` in async/iterator methods,
     because the stack-allocated buffer does not live across `await`/`yield` statements.
     It does not feel necessary because unsafe code by design does not prevent "use after free".
@@ -182,6 +278,30 @@ class C
     but would not match the semantics of `fixed` because the `stackalloc` expression is not a moveable value.
     (Note that it would not be *impossible* to use the `stackalloc` result across `await`/`yield` similarly as
     you can save any `fixed` pointer today into another pointer variable and use it outside the `fixed` block.)
+
+  - Note that allowing this would make the following scenario more interesting (allowing pointer arguments of iterator/async methods).
+
+- Iterator and async methods could be allowed to have pointer parameters.
+  They would need to be hoisted, but that should not be a problem as
+  hoisting pointers is supported even today, for example:
+
+  ```cs
+  unsafe public void* M(void* p)
+  {
+      var d = () => p;
+      return d();
+  }
+  ```
+
+  However, such iterator/async methods would not be very useful since they could not contain `await`/`yield return` anyway
+  (as it is disallowed to have `await`/`yield return` in an unsafe context).
+
+- The proposal currently keeps (and extends/clarifies) the pre-existing spec that
+  iterator methods begin a safe context even if they are in an unsafe context.
+  For example, an iterator method is not an unsafe context even if it is defined in a class which has the `unsafe` modifier.
+  Without this, iterators inside unsafe classes would not be very useful as they could not contain `yield return` statements.
+  On the other hand, this adds complexity and if iterators could not be defined in `unsafe` class declarations,
+  a workaround would be to define them in a separate `partial` class declaration without `unsafe` modifier, for example.
 
 [definite-assignment]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/variables.md#94-definite-assignment
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
@@ -198,6 +318,7 @@ class C
 [async-funcs-general]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/classes.md#15151-general
 [unsafe-contexts]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/unsafe-code.md#232-unsafe-contexts
 [fixed-vars]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/unsafe-code.md#234-fixed-and-moveable-variables
+[address-of]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/unsafe-code.md#2365-the-address-of-operator
 [lock-object]: ./lock-object.md
 [ref-safety-unsafe-warnings]: https://github.com/dotnet/csharplang/issues/6476
 [async-pointer]: https://github.com/dotnet/roslyn/pull/66915
