@@ -52,16 +52,16 @@ public string LazilyComputed => field ??= Compute();
 public string LazilyComputed { get => field ??= Compute(); }
 ```
 
-A special case is made to prevent properties with only a `set` accessor from using `field` because there would be no way to access the value of `field` except in subsequent sets, when it will be presumed to be overwritten.
+As with regular auto-properties, a setter that uses a backing field is disallowed when there is no getter. This restriction could be loosened in the future to allow the setter to do something only in response to changes, by comparing `value` to `field` (see open questions).
 
 ```cs
 // ❌ Error, will not compile
-public string Why { set => field = value; }
+{ set => field = value; }
 ```
 
 ### Field-targeted attributes
 
-Just as with regular auto-properties, any property that uses a backing field in one of its accessors will be able to use field-targeted attributes:
+As with regular auto-properties, any property that uses a backing field in one of its accessors will be able to use field-targeted attributes:
 
 ```cs
 [field: Xyz]
@@ -77,26 +77,6 @@ A field-targeted attribute will remain invalid unless an accessor uses a backing
 // ❌ Error, will not compile
 [field: Xyz]
 public string Name => Compute();
-```
-
-### Constructor assignment
-
-Just like with existing auto-properties, assignment in the constructor calls the setter if it exists, and if there is no setter it falls back to directly assigning to the backing field.
-
-```cs
-class C
-{
-    public C()
-    {
-        P1 = 1; // Assigns P1's backing field directly
-        P2 = 2; // Assigns P2's backing field directly
-        P3 = 3; // Calls P3's setter
-    }
-
-    public int P1 => field;
-    public int P2 { get => field; }
-    public int P3 { get => field; set => field = value; }
-}
 ```
 
 ### Property initializers
@@ -153,6 +133,26 @@ class Derived : Base
             Console.WriteLine("This will not be reached");
         }
     }
+}
+```
+
+### Constructor assignment
+
+As with existing auto-properties, assignment in the constructor calls the setter if it exists, and if there is no setter it falls back to directly assigning to the backing field.
+
+```cs
+class C
+{
+    public C()
+    {
+        P1 = 1; // Assigns P1's backing field directly
+        P2 = 2; // Assigns P2's backing field directly
+        P3 = 3; // Calls P3's setter
+    }
+
+    public int P1 => field;
+    public int P2 { get => field; }
+    public int P3 { get => field; set => field = value; }
 }
 ```
 
@@ -345,6 +345,34 @@ The following changes are to be made to [§14.7.4](https://github.com/dotnet/csh
 ## Open LDM questions
 
 1. If a type does have an existing accessible `field` symbol in scope (like a field called `field`) should there be any way for an auto-prop to still use `field` internally to both create and refer to an auto-prop field.  Under the current rules there is no way to do that.  This is certainly unfortunate for those users, however this is ideally not a significant enough issue to warrant extra dispensation.  The user, after all, can always still write out their properties like they do today, they just lose out from the convenience here in that small case.
+
+1. Which of these scenarios should be allowed to compile? Assume that the "field is never read" warning would apply just like with a manually declared field.
+
+   1. `{ set; }` - Disallowed today, continue disallowing
+   1. `{ set => field = value; }`
+   1. `{ get => unrelated; set => field = value; }`
+   1. `{ get => unrelated; set; }`
+   1. ```cs
+      {
+          set
+          {
+              if (field == value) return;
+              field = value;
+              SendEvent(nameof(Prop), value);
+          }
+      }
+      ```
+   1. ```cs
+      {
+          get => unrelated;
+          set
+          {
+              if (field == value) return;
+              field = value;
+              SendEvent(nameof(Prop), value);
+          }
+      }
+      ```
 
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
