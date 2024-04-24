@@ -324,7 +324,8 @@ class C
 
 - Instead of an iterator defining a safe context for the whole declaration, only the iterator body could define a safe context.
   That might be easier to implement (declarations do not need to look for `yield` in bodies during binding)
-  but might be confusing and inconsistent (`unsafe` affects the whole declaration in other cases in the language).
+  and consistent in the way that bodies should not affect declarations
+  but inconsistent in the way that `unsafe` normally affects the whole declaration.
 
 [definite-assignment]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/variables.md#94-definite-assignment
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
