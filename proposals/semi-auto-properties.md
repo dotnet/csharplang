@@ -14,7 +14,7 @@ In these cases by now you always have to create an instance field and write the 
 
 For properties with an `init` accessor, everything that applies below to `set` would apply instead to the `init` accessor.
 
-**Principle 1:** Every property can be thought of as having a backing field by default, which is elided when not used. The field is referenced using the keyword `field` and its visibility is scoped to the accessor bodies.
+**Principle 1:** Every property declaration can be thought of as having a backing field by default, which is elided when not used. The field is referenced using the keyword `field` and its visibility is scoped to the accessor bodies.
 
 **Principle 2:** `get;` will now be considered syntactic sugar for `get => field;`, and `set;` will now be considered syntactic sugar for `set => field = value;`.
 
@@ -25,7 +25,7 @@ This means that properties may now mix and match auto accessors with full access
 ```
 
 ```cs
-{ get => field ?? GetDefault(); set; }
+{ get => field ?? parent.AmbientValue; set; }
 ```
 
 Both accessors may be full accessors with either one or both making use of `field`:
@@ -40,6 +40,18 @@ Both accessors may be full accessors with either one or both making use of `fiel
 
 ```cs
 { get => overriddenValue; set => field = value; }
+```
+
+```cs
+{
+    get;
+    set
+    {
+        if (field == value) return;
+        field == value;
+        OnXyzChanged();
+    }
+}
 ```
 
 Expression-bodied properties and properties with only a `get` accessor may also use `field`:
@@ -148,11 +160,13 @@ class C
         P1 = 1; // Assigns P1's backing field directly
         P2 = 2; // Assigns P2's backing field directly
         P3 = 3; // Calls P3's setter
+        P4 = 4; // Calls P4's setter
     }
 
     public int P1 => field;
     public int P2 { get => field; }
-    public int P3 { get => field; set => field = value; }
+    public int P4 { get => field; set => field = value; }
+    public int P3 { get => field; set; }
 }
 ```
 
@@ -193,20 +207,29 @@ class C
 }
 ```
 
-For reference-typed fields, the `field` type should be nullable. No warning should be produced in the following example:
+In the same vein as how `var` infers as nullable for reference types, the `field` type should be nullable for reference types. This makes sense of `field ??` as not being followed by dead code, and it avoids producing a misleading warning in the following example:
 
 ```cs
-class C
+public string AmbientValue
 {
-    public string P => field ??= "test";
+    get => field ?? parent.AmbientValue;
+    set
+    {
+        if (value == parent.AmbientValue)
+            field = null; // No warning here. Resume following the parent's value.
+        else
+            field = value; // Stop following the parent's value
+    }
 }
 ```
 
 ### `nameof`
 
-`nameof(field)` will be disallowed. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases. If it did anything, it would return the string `"field"`, consistent with how `nameof` behaves in other circumstances by returning the C# name or alias, rather than the metadata name.
+`nameof(field)` will fail to compile, like `nameof(nint)`. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases. If it did anything, it would return the string `"field"`, consistent with how `nameof` behaves in other circumstances by returning the C# name or alias, rather than the metadata name.
 
 ### Overrides
+
+Overriding properties may use `field`. Such usages of `field` refer to the backing field for the overriding property, separate from the backing field of the base property if it has one. There is no ABI for exposing the backing field of a base property to overriding classes since this would break encapsulation.
 
 Like with regular auto properties, semi-auto properties that override a base property must override all accessors ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#partial-overrides-of-virtual-properties)).
 
