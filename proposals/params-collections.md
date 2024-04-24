@@ -121,6 +121,7 @@ The [Applicable function member](https://github.com/dotnet/csharpstandard/blob/d
 
 If a function member that includes a parameter collection is not applicable in its normal form, the function member might instead be applicable in its ***expanded form***:
 
+- If parameter collection is not an array, an expanded form is not applicable for language versions C# 12 and below.
 - The expanded form is constructed by replacing the parameter collection in the function member declaration with
   zero or more value parameters of the parameter collection's *element type*
   such that the number of arguments in the argument list `A` matches the total number of parameters.
