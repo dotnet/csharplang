@@ -157,6 +157,14 @@ Which approach should we go with with our dictionary expressions? Options includ
 
 **Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
+### Open question 6
+
+From [Open Question 3](#open-question-3), we will support *dictionary elements* for C#12 collection expression target types. Which approach should we use for initialization for those types? Options include:
+
+1. Use applicable instance indexer if available; otherwise use C#12 initialization.
+2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
+3. Use C#12 initialization always.
+
 ## Conversions
 
 > A *collection expression conversion* allows a collection expression to be converted to a type.
