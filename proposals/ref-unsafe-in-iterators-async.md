@@ -295,9 +295,12 @@ class C
 - The proposal currently keeps (and extends/clarifies) the pre-existing spec that
   iterator methods begin a safe context even if they are in an unsafe context.
   For example, an iterator method is not an unsafe context even if it is defined in a class which has the `unsafe` modifier.
-  Without this, iterators inside unsafe classes would not be very useful as they could not contain `yield return` statements.
-  On the other hand, this adds complexity and if iterators could not be defined in `unsafe` class declarations,
-  a workaround would be to define them in a separate `partial` class declaration without `unsafe` modifier, for example.
+  Alternatively, we could make iterators "inherit" the `unsafe` modifier like other methods do.
+  - Advantage: removes complexity from the spec and implementation.
+  - Advantage: aligns iterators with async methods (one of the motivations of the feature).
+  - Disadvantage: iterators inside unsafe classes could not contain `yield return` statements,
+    such iterators would have to be defined in a separate partial class declaration without the `unsafe` modifier.
+  - Disadvantage: this would be a breaking change in LangVersion=13 (iterators in unsafe classes are allowed in C# 12).
 
 [definite-assignment]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/variables.md#94-definite-assignment
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
