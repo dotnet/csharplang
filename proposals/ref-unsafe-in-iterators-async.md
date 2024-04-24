@@ -52,11 +52,14 @@ However, spec clarifications which match the existing Roslyn implementation shou
 >
 > [...]
 >
-> ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).
-> An iterator block always defines a safe context, even when its declaration is nested in an unsafe context.~~
-> **The iterator block used to implement an iterator ([§15.14][iterators])
-> always defines a safe context, even when its declaration is nested in an unsafe context
-> unless the iterator declaration itself is marked with the `unsafe` modifier ([§23.2][unsafe-contexts]).**
+> ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).~~
+> An iterator ~~block~~ **declaration ([§15.14][iterators])** always defines a safe context
+> **(its signature included),** even when the declaration is nested in an unsafe context,
+> **unless the iterator declaration is marked with the `unsafe` modifier ([§23.2][unsafe-contexts]).**
+
+Note that this also means that a property or an indexer defines a safe context including its `set` accessor provided:
+- it is an iterator (because its `get` accessor is implemented via an iterator block) and
+- it does not have the `unsafe` modifier.
 
 For example:
 
@@ -64,43 +67,51 @@ For example:
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-unsafe class C1
+class A : System.Attribute { }
+unsafe class C
 { // unsafe context
+    [/* safe context */ A]
     IEnumerable<int> M1(
-        /* unsafe context */)
-    { // safe context (this is the iterator block implementing the iterator)
+        /* safe context */)
+    { // safe context
         yield return 1;
     }
     IEnumerable<int> M2()
-    { // safe context (this is the iterator block implementing the iterator)
+    { // safe context
         unsafe
         { // unsafe context
-            { // unsafe context (this is *not* the block implementing the iterator)
-                yield return 1; // error: `yield return` in unsafe context
+            { // unsafe context
+                yield return 2; // error: `yield return` in unsafe context
             }
         }
     }
+    [/* unsafe context */ A]
+    unsafe IEnumerable<int> M3(
+        /* unsafe context */)
+    { // unsafe context
+        yield return 3; // error: `yield return` in unsafe context
+    }
+    IEnumerable<int> this[
+        /* safe context */ string x]
+    { // safe context
+        get
+        { // safe context
+            yield return 1;
+        }
+        set { /* safe context */ }
+    }
     unsafe IEnumerable<int> this[
         /* unsafe context */ int x]
-    { // unsafe context (the iterator declaration is unsafe)
+    { // unsafe context
         get
         { // unsafe context
             yield return 1; // error: `yield return` in unsafe context
         }
         set { /* unsafe context */ }
     }
-    IEnumerable<int> this[
-        /* unsafe context */ string x]
-    { // unsafe context
-        get
-        { // safe context (this is the block used to implement the iterator)
-            yield return 1;
-        }
-        set { /* unsafe context */ }
-    }
-    IEnumerable<int> M3()
+    IEnumerable<int> M4()
     {
-        yield return 1;
+        yield return 4;
         var lam = async () =>
         { // safe context
           // note: in Roslyn, this is an unsafe context in LangVersion 12 and lower
@@ -112,23 +123,6 @@ unsafe class C1
             await Task.Yield();
         }
         local();
-    }
-}
-class C2
-{ // safe context
-    unsafe IEnumerable<int> M(
-        /* unsafe context */)
-    { // unsafe context (the iterator declaration is unsafe)
-        yield return 1; // error: `yield return` in unsafe context
-    }
-    unsafe IEnumerable<int> this[
-        /* unsafe context */]
-    { // unsafe context (the iterator declaration is unsafe)
-        get
-        { // unsafe context
-            yield return 1; // error: `yield return` in unsafe context
-        }
-        set { /* unsafe context */ }
     }
 }
 ```
