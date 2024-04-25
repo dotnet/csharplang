@@ -12,7 +12,7 @@ property_declaration
     ;  
 ```
 
-**Remarks**: This is similar to how *method_header* [(§14.6.1)](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1461-general) and *class_declaration* [(§14.2.1)](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1421-general) are specified. (Note that [Issue #946](https://github.com/dotnet/csharplang/issues/946) proposes to relax the ordering requirement, and would probably apply to all declarations which allow the `partial` modifier.)
+**Remarks**: This is somewhat similar to how *method_header* [(§15.6.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1561-general) and *class_declaration* [(§15.2.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1521-general) are specified. (Note that [Issue #946](https://github.com/dotnet/csharplang/issues/946) proposes to relax the ordering requirement, and would probably apply to all declarations which allow the `partial` modifier. We intend to specify such an ordering relaxation in the near future, and implement it in the same release that this feature is implemented.)
 
 ### Defining and implementing declarations
 When a property declaration includes a *partial* modifier, that property is said to be a *partial property*. Partial properties may only be declared as members of partial types.
@@ -40,7 +40,6 @@ A partial property must have one *defining declaration* and one *implementing de
 
 **Remarks**. We also don't think it is useful to allow splitting the declaration across more than two parts, to allow different accessors to be implemented in different places, for example. Therefore we simply imitate the scheme established by partial methods.
 
-Similar to partial methods, the attributes in the resulting property are the combined attributes of the parts are concatenated in an unspecified order, and duplicates are not removed.
 
 Only the defining declaration of a partial property participates in lookup, similar to how only the defining declaration of a partial method participates in overload resolution.
 
@@ -58,12 +57,24 @@ partial class C
 }
 ```
 
-### Matching signatures
-The property declarations must have the same type and ref kind. The property declarations must have the same set of accessors.
-
-The property declarations and their accessor declarations must have the same modifiers, though the modifiers may appear in a different order. This does not apply to the `extern` modifier, which may only appear on an *implementing declaration*.
-
 A partial property is not permitted to have the `abstract` modifier.
+
+### Attribute merging
+
+Similar to partial methods, the attributes in the resulting property are the combined attributes of the parts are concatenated in an unspecified order, and duplicates are not removed.
+
+### Matching signatures
+
+The LDM meeting on [14th September 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-09-14.md#partial-method-signature-matching) defined a set of "strict" requirements for signature matching of partial methods, which were introduced in a warning wave. Partial properties have analogous requirements to partial methods for signature matching as much as is possible, except that all of the diagnostics for mismatch are reported by default, and are not held behind a warning wave.
+
+Signature matching requirements include:
+1. Type and ref kind differences between partial property declarations which are significant to the runtime result in a compile-time error.
+2. Differences in tuple element names within partial property declarations results in a compile-time error, same as for partial methods.
+3. The property declarations and their accessor declarations must have the same modifiers, though the modifiers may appear in a different order.
+    - Exception: this does not apply to the `extern` modifier, which may only appear on an *implementing declaration*.
+3. All other syntactic differences in the signatures of partial property declarations result in a compile-time warning, with the following exceptions:
+    - Attribute lists on or within partial property declarations do not need to match. Instead, merging of attributes in corresponding positions is performed, per [Attribute merging](#attribute-merging).
+    - Nullable context differences do not cause warnings. In other words, a difference where one of the types is nullable-oblivious and the other type is either nullable-annotated or not-nullable-annotated does not result in any warnings.
 
 ```cs
 partial class C1
@@ -95,8 +106,17 @@ partial class C3
 
 Per [LDM meeting on 2nd November 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-11-02.md#partial-properties), indexers will be supported with this feature.
 
-Indexer parameters must match in the same way that partial method parameters must match, and merging of parameter attributes across partial indexer declarations occurs in the same way that it does for partial methods.
+The indexers grammar is modified as follows:
+```diff
+indexer_declaration
+-    : attributes? indexer_modifier* indexer_declarator indexer_body
++    : attributes? indexer_modifier* 'partial'? indexer_declarator indexer_body
+-    | attributes? indexer_modifier* ref_kind indexer_declarator ref_indexer_body
++    | attributes? indexer_modifier* 'partial'? ref_kind indexer_declarator ref_indexer_body
+    ;
+```
 
+Partial indexer parameters must match across declarations per the same rules as [Matching signatures](#matching-signatures). [Attribute merging](#attribute-merging) is performed across partial indexer parameters.
 
 ```cs
 partial class C
