@@ -151,15 +151,15 @@ class C2
     [/* unsafe context */ A]
     unsafe IEnumerable<int> M(
         /* unsafe context */ int*[] x)
-    { // unsafe context (the iterator declaration is unsafe)
-        yield return 1; // error: `yield return` in unsafe context
+    { // safe context
+        yield return 1;
     }
     unsafe IEnumerable<int> this[
         /* unsafe context */ int*[] x]
-    { // unsafe context (the iterator declaration is unsafe)
+    { // unsafe context
         get
-        { // unsafe context
-            yield return 1; // error: `yield return` in unsafe context
+        { // safe context
+            yield return 1;
         }
         set { /* unsafe context */ }
     }
