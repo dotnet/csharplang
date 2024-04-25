@@ -165,47 +165,47 @@ From [Open Question 3](#open-question-3), we will support *dictionary elements* 
 2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
 3. Use C#12 initialization always.
 
+## Dictionary types
+
+The following are considered *dictionary types*:
+
+* A *type* with an appropriate *[create method](#create-methods)* where:
+  * The *iteration type* is `KeyValuePair<TKey, TValue>` determined from a `GetEnumerator` instance method or enumerable interface.
+  * The *type* has an instance *indexer* where:
+    * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.
+    * There is an identity conversion from the indexer type to `TValue`.
+    * The getter is `public`.
+* A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
+  * The *iteration type* is `KeyValuePair<TKey, TValue>` determined from a `GetEnumerator` instance method or enumerable interface.
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
+  * The *type* has an instance *indexer* where:
+    * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.
+    * There is an identity conversion from the indexer type to `TValue`.
+    * The getter and setter are `public`.
+* An *interface type*:
+  * `System.Collections.Generic.IDictionary<TKey, TValue>`
+  * `System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`
+
+Types supported as target types for *collection expressions* in C#12, *other than those above,* are considered *collection types*.
+
 ## Conversions
 
-> A *collection expression conversion* allows a collection expression to be converted to a type.
->
-> An *implicit collection expression conversion* exists from a collection expression to the following types:
->
-> - Array rules...
-> - Span rules...
->
-> - A type with a create method with an iteration type determined from a GetEnumerator instance method or enumerable interface, not from an extension method.
-> - ```diff
->   + A type with a create method with an iteration type determined
->   + from a GetEnumerator instance method or enumerable interface,
->   + not from an extension method, that is some `KeyValuePair<TKey, TValue>`
->   + and an argument type `IEnumerable<KeyValuePair<TKey, TValue>`.
-> 
->   + For example:
->   + `public static ImmutableDictionary CreateRange<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>>)`.
->   + Note: it is an open question what collection types are supported for the argument type.
->   ```
-> - A struct or class type that implements System.Collections.IEnumerable where:
->   - The type has an applicable constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
->   - If the collection expression has any elements, the type has an applicable instance or extension method Add that can be invoked with a single argument of the iteration type, and the method is accessible at the location of the collection expression.
->   - ```diff
->     + If the collection expression has any elements and the type 
->     + has an iteration type of some `KeyValuePair<TKey, TValue>`
->     + and the type has applicable indexer that can be invoked with
->     + a single argument of the `TKey` type, and a value of the `TValue`
->     + type, and the indexer is accessible at the location of the
->     + collection expression.
->     ```
-> - An interface type:
->   - `System.Collections.Generic.IEnumerable<T>`
->   - `System.Collections.Generic.IReadOnlyCollection<T>`
->   - `System.Collections.Generic.IReadOnlyList<T>`
->   - `System.Collections.Generic.ICollection<T>`
->   - `System.Collections.Generic.IList<T>`
->   - ```diff
->     + System.Collections.Generic.IDictionary<TKey, TValue>
->     + System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>
->     ```
+*Collection expression conversions* are updated to include conversions to *dictionary types*. The conversion rules are different based on whether the *iteration type* of the target type is `KeyValuePair<,>`.
+
+The conversion rules for a type with an *iteration type* other than `KeyValuePair<,>` are unchanged from *language version 12*:
+
+> An implicit *collection expression conversion* exists from a collection expression to a *collection type* with *iteration type* `T` **where `T` is not `KeyValuePair<,>` and** where for each *element* `Eᵢ` in the collection expression:
+> * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
+> * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
+
+The conversion rules for a type with an *iteration type* of `KeyValuePair<,>` are added for *language version 13*:
+
+> An implicit *collection expression conversion* exists from a collection expression to a *collection type* or *dictionary type* with *iteration type* `KeyValuePair<K, V>` where for each *element* `Eᵢ` in the collection expression:
+> * If `Eᵢ` is an *expression element*, then the type of `Eᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
+> * If `Eᵢ` is a *dictionary element* `Kᵢ:Vᵢ`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
+> * If `Eᵢ` is a *spread element* `..Sᵢ`, then the *iteration type* of `Sᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
+
+The new rules above represent a breaking change: For types that are a valid conversion target in *language version 12* and have an *iteration type* of `KeyValuePair<,>`, the element conversion rules change between language versions 12 and 13.
 
 ## Create methods
 
@@ -291,7 +291,7 @@ No changes here.  Like with collection expressions, dictionary expressions do no
 
 ## Overload resolution
 
-No changes currently.  But open question if any `better conversion from expression` rules are needed.
+No changes currently.  But open question if any *better conversion from expression* rules are needed.
 
 Tentatively we think the answer is no.  The types that would appear in signatures would likely be:
 
