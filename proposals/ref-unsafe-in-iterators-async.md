@@ -52,16 +52,18 @@ However, spec clarifications which match the existing Roslyn implementation shou
 >
 > [...]
 >
-> ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).~~
-> An iterator ~~block~~ **declaration ([§15.14][iterators])** always defines a safe context
-> **(its signature included),** even when the declaration is nested in an unsafe context,
-> **unless the iterator declaration is marked with the `unsafe` modifier ([§23.2][unsafe-contexts]).**
+> ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).
+> An iterator block always defines a safe context, even when its declaration is nested in an unsafe context.~~
+> **The iterator block used to implement an iterator ([§15.14][iterators])
+> always defines a safe context, even when its declaration is nested in an unsafe context.**
 
-This also means that a property or an indexer defines a safe context including its `set` accessor provided:
-- it is an iterator (because its `get` accessor is implemented via an iterator block) and
-- it does not have the `unsafe` modifier.
-
-If a method is `partial`, only the implementing declaration can be an iterator.
+From this spec it also follows:
+- If an iterator declaration is marked with the `unsafe` modifier, the signature is in an unsafe scope
+  but the iterator block used to implement that iterator still defines a safe scope.
+- The `set` accessor of an iterator property or indexer (i.e., its `get` accessor is implemented via an iterator block)
+  "inherits" its safe/unsafe scope from the declaration.
+- This does not affect partial declarations without implementation as they are only signatures and cannot have an iterator body.
+- In C# 12 it is an error to have an iterator method marked with the `unsafe` modifier, but that is allowed in C# 13.
 
 For example:
 
@@ -70,46 +72,46 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 class A : System.Attribute { }
-unsafe partial class C
+unsafe partial class C1
 { // unsafe context
-    [/* safe context */ A]
+    [/* unsafe context */ A]
     IEnumerable<int> M1(
-        /* safe context */)
-    { // safe context
+        /* unsafe context */ int*[] x)
+    { // safe context (this is the iterator block implementing the iterator)
         yield return 1;
     }
     IEnumerable<int> M2()
-    { // safe context
+    { // safe context (this is the iterator block implementing the iterator)
         unsafe
         { // unsafe context
-            { // unsafe context
+            { // unsafe context (this is *not* the block implementing the iterator)
                 yield return 1; // error: `yield return` in unsafe context
             }
         }
     }
     [/* unsafe context */ A]
     unsafe IEnumerable<int> M3(
-        /* unsafe context */)
-    { // unsafe context
-        yield return 1; // error: `yield return` in unsafe context
-    }
-    [/* safe context */ A]
-    IEnumerable<int> this[
-        /* safe context */ string x]
+        /* unsafe context */ int*[] x)
     { // safe context
+        yield return 1;
+    }
+    [/* unsafe context */ A]
+    IEnumerable<int> this[
+        /* unsafe context */ int*[] x]
+    { // unsafe context
         get
         { // safe context
             yield return 1;
         }
-        set { /* safe context */ }
+        set { /* unsafe context */ }
     }
     [/* unsafe context */ A]
     unsafe IEnumerable<int> this[
-        /* unsafe context */ int x]
-    { // unsafe context
+        /* unsafe context */ long*[] x]
+    { // unsafe context (the iterator declaration is unsafe)
         get
-        { // unsafe context
-            yield return 1; // error: `yield return` in unsafe context
+        { // safe context
+            yield return 1;
         }
         set { /* unsafe context */ }
     }
@@ -118,7 +120,7 @@ unsafe partial class C
         yield return 1;
         var lam1 = async () =>
         { // safe context
-          // note: in Roslyn, this is an unsafe context in LangVersion 12 and lower
+          // spec violation: in Roslyn, this is an unsafe context in LangVersion 12 and lower
             await Task.Yield();
         };
         unsafe
@@ -130,25 +132,39 @@ unsafe partial class C
         }
         async void local()
         { // safe context
-          // note: in Roslyn, this is an unsafe context in LangVersion 12 and lower
+          // spec violation: in Roslyn, this is an unsafe context in LangVersion 12 and lower
             await Task.Yield();
         }
         local();
     }
-    partial IEnumerable<int> M5(); // unsafe context, no iterator body
-}
-unsafe partial class C
-{
-    // this declaration is in safe context
-    partial IEnumerable<int> M5()
-    {
+    public partial IEnumerable<int> M5() // unsafe context (inherits from parent)
+    { // safe context
         yield return 1;
     }
 }
+partial class C1
+{
+    public partial IEnumerable<int> M5(); // safe context (inherits from parent)
+}
+class C2
+{ // safe context
+    [/* unsafe context */ A]
+    unsafe IEnumerable<int> M(
+        /* unsafe context */ int*[] x)
+    { // unsafe context (the iterator declaration is unsafe)
+        yield return 1; // error: `yield return` in unsafe context
+    }
+    unsafe IEnumerable<int> this[
+        /* unsafe context */ int*[] x]
+    { // unsafe context (the iterator declaration is unsafe)
+        get
+        { // unsafe context
+            yield return 1; // error: `yield return` in unsafe context
+        }
+        set { /* unsafe context */ }
+    }
+}
 ```
-
-Note that `yield return`s in unsafe contexts are compile-time errors (see below), so the only way
-to have a successfully compiling unsafe iterator method is if it contains only `yield break`s.
 
 [§13.6.2.4 Ref local variable declarations][ref-local]:
 
@@ -295,8 +311,6 @@ class C
     (Note that it would not be *impossible* to use the `stackalloc` result across `await`/`yield` similarly as
     you can save any `fixed` pointer today into another pointer variable and use it outside the `fixed` block.)
 
-  - Note that allowing this would make the following scenario more interesting (allowing pointer arguments of iterator/async methods).
-
 - Iterator and async methods could be allowed to have pointer parameters.
   They would need to be hoisted, but that should not be a problem as
   hoisting pointers is supported even today, for example:
@@ -309,9 +323,6 @@ class C
   }
   ```
 
-  However, such iterator/async methods would not be very useful since they could not contain `await`/`yield return` anyway
-  (as it is disallowed to have `await`/`yield return` in an unsafe context).
-
 - The proposal currently keeps (and extends/clarifies) the pre-existing spec that
   iterator methods begin a safe context even if they are in an unsafe context.
   For example, an iterator method is not an unsafe context even if it is defined in a class which has the `unsafe` modifier.
@@ -322,10 +333,13 @@ class C
     such iterators would have to be defined in a separate partial class declaration without the `unsafe` modifier.
   - Disadvantage: this would be a breaking change in LangVersion=13 (iterators in unsafe classes are allowed in C# 12).
 
-- Instead of an iterator defining a safe context for the whole declaration, only the iterator body could define a safe context.
-  That might be easier to implement (declarations do not need to look for `yield` in bodies during binding)
-  and consistent in the way that bodies should not affect declarations
-  but inconsistent in the way that `unsafe` normally affects the whole declaration.
+- Instead of an iterator defining a safe context for the body only, the whole signature could be a safe context.
+  That is inconsistent with the rest of the language in that bodies normally do not affect declarations but here
+  a declaration would be either safe or unsafe depending on whether the body is an iterator or not.
+  It would be also a breaking change in LangVersion=13 as in C# 12 iterator signatures are unsafe (they can contain pointer array parameters, for example).
+
+- Applying the `unsafe` modifier to an iterator could affect the body as well as the signature.
+  Such iterators would not be very useful though because their unsafe bodies could not contain `yield return`s, they could have only `yield break`s.
 
 [definite-assignment]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/variables.md#94-definite-assignment
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
