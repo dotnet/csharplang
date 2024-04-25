@@ -338,8 +338,13 @@ class C
   a declaration would be either safe or unsafe depending on whether the body is an iterator or not.
   It would be also a breaking change in LangVersion=13 as in C# 12 iterator signatures are unsafe (they can contain pointer array parameters, for example).
 
-- Applying the `unsafe` modifier to an iterator could affect the body as well as the signature.
-  Such iterators would not be very useful though because their unsafe bodies could not contain `yield return`s, they could have only `yield break`s.
+- Applying the `unsafe` modifier to an iterator:
+ - Could affect the body as well as the signature. Such iterators would not be very useful though
+   because their unsafe bodies could not contain `yield return`s, they could have only `yield break`s.
+ - Could be an error in `LangVersion >= 13` as it is in `LangVersion <= 12` because
+   it is not very useful to have an unsafe iterator member as it only allows one to have
+   pointer array parameters or unsafe setters without additional unsafe block.
+   But normal pointer arguments could be allowed in the future.
 
 [definite-assignment]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/variables.md#94-definite-assignment
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
