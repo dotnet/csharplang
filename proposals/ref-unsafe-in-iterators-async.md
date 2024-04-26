@@ -55,7 +55,7 @@ However, spec clarifications which match the existing Roslyn implementation shou
 > ~~It is a compile-time error for an iterator block to contain an unsafe context ([§23.2][unsafe-contexts]).
 > An iterator block always defines a safe context, even when its declaration is nested in an unsafe context.~~
 > **The iterator block used to implement an iterator ([§15.14][iterators])
-> always defines a safe context, even when its declaration is nested in an unsafe context.**
+> always defines a safe context, even when the iterator declaration is nested in an unsafe context.**
 
 From this spec it also follows:
 - If an iterator declaration is marked with the `unsafe` modifier, the signature is in an unsafe scope
@@ -63,7 +63,9 @@ From this spec it also follows:
 - The `set` accessor of an iterator property or indexer (i.e., its `get` accessor is implemented via an iterator block)
   "inherits" its safe/unsafe scope from the declaration.
 - This does not affect partial declarations without implementation as they are only signatures and cannot have an iterator body.
-- In C# 12 it is an error to have an iterator method marked with the `unsafe` modifier, but that is allowed in C# 13.
+
+Note that in C# 12 it is an error to have an iterator method marked with the `unsafe` modifier,
+but that is allowed in C# 13 due to the spec change.
 
 For example:
 
