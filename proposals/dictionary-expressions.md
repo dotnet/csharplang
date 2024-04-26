@@ -76,6 +76,8 @@ Dictionary<string, int> nameToAge = ["mads": 21, existingKvp]; // A user would h
 Dictionary<string, int> nameToAge = ["mads": 21, existingKvp.Key: existingKvp.Value];
 ```
 
+**Resolution:** *Expression elements* of key-value pairs will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
 ### Open question 2
 
 Having spreads in a *dictionary expression* only be concerned with element types (and not the collection type being spread itself), matches the equivalent case in the collection-expression case:
@@ -96,6 +98,8 @@ Note: this seems particularly restrictive given that people may commonly use thi
 Dictionary<string, int> nameToAge = ["mads": 21, .. existingDict.Where(kvp => kvp.Value >= 21)];
 ```
 
+**Resolution:** *Spread elements* of key-value pair collections will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
 ### Open question 3
 
 How far do we want to take this KeyValuePair representation of things? Do we allow *dictionary elements* when producing normal collections? For example, should the following be allowed:
@@ -111,6 +115,8 @@ Importantly, we do not believe it wise to *require* the presence of a `k:v` elem
 ```c#
 Dictionary<string, int> everyone = [.. students, .. teachers];
 ```
+
+**Resolution:** *Dictionary elements* will be supported in collection expressions for collection types that have a key-value pair element type. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
 ### Open question 4
 
@@ -149,6 +155,15 @@ Which approach should we go with with our dictionary expressions? Options includ
 2. Purely permissive.  All elements are added using the indexer.  Perhaps with compiler warnings if the exact same key is given the same constant value twice.
 3. Perhaps a hybrid model.  `.Add` if only using `k:v` and switching to indexers if using spread elements.  There is deep potential for confusion here.
 
+**Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+### Open question 6
+
+From [Open Question 3](#open-question-3), we will support *dictionary elements* for C#12 collection expression target types. Which approach should we use for initialization for those types? Options include:
+
+1. Use applicable instance indexer if available; otherwise use C#12 initialization.
+2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
+3. Use C#12 initialization always.
 
 ## Conversions
 
