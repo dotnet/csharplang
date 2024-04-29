@@ -43,6 +43,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon May 6, 2024
 
+- Meeting on meeting (Mads)
+
 ### Wed May 1, 2024
 
 - [Adjust dynamic binding rules for a situation of a single applicable candidate.](https://github.com/dotnet/csharplang/pull/8027) Aleksey
