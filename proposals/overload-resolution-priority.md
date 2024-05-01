@@ -26,28 +26,17 @@ ambiguity, so that they can evolve their API surface areas and steer users towar
 We define a new concept, ***overload_resolution_priority***, which is used during the process of resolving a method group. ***overload_resolution_priority*** is a 32-bit integer
 value. All methods have an ***overload_resolution_priority*** of 0 by default, and this can be changed by applying
 [`OverloadResolutionPriorityAttribute`](#systemruntimecompilerservicesoverloadresolutionpriorityattribute) to a method. We update section 
-[§12.8.9.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12892-method-invocations) of the C# specification as
+[§12.6.4.1](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12641-general) of the C# specification as
 follows (change in **bold**):
 
-> For a method invocation, the *primary_expression* of the *invocation_expression* shall be a method group. The method group identifies the one method to invoke or the set of overloaded methods from which to choose a specific method to invoke. In the latter case, determination of the specific method to invoke is based on the context provided by the types of the arguments in the *argument_list*.
->
-> The binding-time processing of a method invocation of the form `M(A)`, where `M` is a method group (possibly including a *type_argument_list*), and `A` is an optional *argument_list*, consists of the following steps:
+> Once the candidate function members and the argument list have been identified, the selection of the best function member is the same in all cases:
 > 
-> - The set of candidate methods for the method invocation is constructed. For each method `F` associated with the method group `M`:
->   - If `F` is non-generic, `F` is a candidate when:
->     - `M` has no type argument list, and
->     - `F` is applicable with respect to `A` ([§12.6.4.2](expressions.md#12642-applicable-function-member)).
->   - If `F` is generic and `M` has no type argument list, `F` is a candidate when:
->     - Type inference ([§12.6.3](expressions.md#1263-type-inference)) succeeds, inferring a list of type arguments for the call, and
->     - Once the inferred type arguments are substituted for the corresponding method type parameters, all constructed types in the parameter list of `F` satisfy their constraints ([§8.4.5](types.md#845-satisfying-constraints)), and the parameter list of `F` is applicable with respect to `A` ([§12.6.4.2](expressions.md#12642-applicable-function-member))
->   - If `F` is generic and `M` includes a type argument list, `F` is a candidate when:
->     - `F` has the same number of method type parameters as were supplied in the type argument list, and
->     - Once the type arguments are substituted for the corresponding method type parameters, all constructed types in the parameter list of `F` satisfy their constraints ([§8.4.5](types.md#845-satisfying-constraints)), and the parameter list of `F` is applicable with respect to `A` ([§12.6.4.2](expressions.md#12642-applicable-function-member)).
-> - The set of candidate methods is reduced to contain only methods from the most derived types: For each method `C.F` in the set, where `C` is the type in which the method `F` is declared, all methods declared in a base type of `C` are removed from the set. Furthermore, if `C` is a class type other than `object`, all methods declared in an interface type are removed from the set.  
->   > *Note*: This latter rule only has an effect when the method group was the result of a member lookup on a type parameter having an effective base class other than `object` and a non-empty effective interface set. *end note*
-> - If the resulting set of candidate methods is empty, then further processing along the following steps are abandoned, and instead an attempt is made to process the invocation as an extension method invocation ([§12.8.9.3](expressions.md#12893-extension-method-invocations)). If this fails, then no applicable methods exist, and a binding-time error occurs.
-> - **The resulting set of candidate methods is grouped by ***overload_resolution_priority***. All candidates not in the highest (by standard integer comparison) ***overload_resolution_priority*** group are removed from the set.**
-> - The best method of the set of candidate methods is identified using the overload resolution rules of [§12.6.4](expressions.md#1264-overload-resolution). If a single best method cannot be identified, the method invocation is ambiguous, and a binding-time error occurs. When performing overload resolution, the parameters of a generic method are considered after substituting the type arguments (supplied or inferred) for the corresponding method type parameters.
+> - First, the set of candidate function members is reduced to those function members that are applicable with respect to the given argument list ([§12.6.4.2](expressions.md#12642-applicable-function-member)). If this reduced set is empty, a compile-time error occurs.
+> - **Then, the reduced set of candidate members is grouped by declaring type. Within each group:**
+>     - **Candidate function members are ordered by ***overload_resolution_priority***.
+>     - **All members that have a lower ***overload_resolution_priority*** than the highest found within its declaring type group are removed.**
+> - **The reduced groups are then recombined into the final set of applicable candidate function members.**
+> - Then, the best function member from the set of applicable candidate function members is located. If the set contains only one function member, then that function member is the best function member. Otherwise, the best function member is the one function member that is better than all other function members with respect to the given argument list, provided that each function member is compared to all other function members using the rules in [§12.6.4.3](expressions.md#12643-better-function-member). If there is not exactly one function member that is better than all other function members, then the function member invocation is ambiguous and a binding-time error occurs.
 
 As an example, this feature would cause the following code snippet to print "Span", rather than "Array":
 
@@ -98,7 +87,7 @@ We introduce the following attribute to the BCL:
 ```cs
 namespace System.Runtime.CompilerServices;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 public sealed class OverloadResolutionPriorityAttribute(int priority)
 {
     public int Priority => priority;
@@ -107,10 +96,11 @@ public sealed class OverloadResolutionPriorityAttribute(int priority)
 
 **Open question**: Should the attribute be inherited? If not, what is the priority of the overriding member?  
 **Open question**: If the attribute is specified on a virtual member, should an override of that member be required to repeat the attribute?  
-**Open question**: Should the attribute support constructors and indexer?
 
 All methods in C# have a default ***overload_resolution_priority*** of 0, unless they are attributed with `OverloadResolutionPriorityAttribute`. If they are
 attributed with that attribute, then their ***overload_resolution_priority*** is the integer value provided to the first argument of the attribute.
+
+It is an error to apply `OverloadResolutionPriorityAttribute` to a non-indexer property.
 
 ## Alternatives
 [alternatives]: #alternatives
