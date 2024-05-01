@@ -100,7 +100,8 @@ public sealed class OverloadResolutionPriorityAttribute(int priority)
 All methods in C# have a default ***overload_resolution_priority*** of 0, unless they are attributed with `OverloadResolutionPriorityAttribute`. If they are
 attributed with that attribute, then their ***overload_resolution_priority*** is the integer value provided to the first argument of the attribute.
 
-It is an error to apply `OverloadResolutionPriorityAttribute` to a non-indexer property.
+It is an error to apply `OverloadResolutionPriorityAttribute` to a non-indexer property, or to property, indexer, or event accessors. Attributes encountered on
+these locations in metadata are ignored by C#.
 
 ## Alternatives
 [alternatives]: #alternatives
