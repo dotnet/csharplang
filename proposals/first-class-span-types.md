@@ -145,9 +145,8 @@ We update the type inferences section of the specification as follows (changes i
 > - If `V` is one of the *unfixed* `Xᵢ` then `U` is added to the set of upper bounds for `Xᵢ`.
 > - Otherwise, sets `V₁...Vₑ` and `U₁...Uₑ` are determined by checking if any of the following cases apply:
 >   - `U` is an array type `U₁[...]` and `V` is an array type `V₁[...]` of the same rank
->   - **`U` is an array type `U₁[]` and `V` is a `Span<V₁>` or `ReadOnlySpan<V₁>`**
->   - **`U` is a `Span<V₁>` and `V` is a `Span<V₁>` or `ReadOnlySpan<V₁>`**
->   - **`U` is a `ReadOnlySpan<V₁>` and `V` is a `ReadOnlySpan<V₁>`**
+>   - **`U` is a `Span<U₁>` and `V` is an array type `V₁[]` or a `Span<V₁>`**
+>   - **`U` is a `ReadOnlySpan<U₁>` and `V` is an array type `V₁[]` or a `Span<V₁>` or `ReadOnlySpan<V₁>`**
 >   - `U` is one of `IEnumerable<Uₑ>`, `ICollection<Uₑ>`, `IReadOnlyList<Uₑ>`, `IReadOnlyCollection<Uₑ>` or `IList<Uₑ>` and `V` is a single-dimensional array type `Vₑ[]`
 >   - `U` is the type `U1?` and `V` is the type `V1?`
 >   - `U` is constructed class, struct, interface or delegate type `C<U₁...Uₑ>` and `V` is a `class, struct, interface` or `delegate` type which is `identical` to, `inherits` from (directly or indirectly), or implements (directly or indirectly) a unique type `C<V₁...Vₑ>`
