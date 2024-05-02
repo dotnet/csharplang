@@ -36,8 +36,10 @@ An implicit span conversion permits `array_types`, `System.Span<T>`, `System.Rea
 ------
 
 We also add _implicit span conversion_ to the list of standard implicit conversions
-([§10.5.4](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1054-user-defined-implicit-conversions)). This allows overload resolution to consider
+([§10.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1042-standard-implicit-conversions)). This allows overload resolution to consider
 them when performing argument resolution, as in the previously-linked API proposal.
+
+There are no additional _explicit conversions_ ([§10.3.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#103-explicit-conversions)) other than the _implicit span conversions_.
 
 We also add _implicit span conversion_ to the list of acceptable implicit conversions on the first parameter of an extension method when determining applicability
 ([12.8.9.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12893-extension-method-invocations)) (change in bold):
@@ -101,9 +103,8 @@ We update the type inferences section of the specification as follows (changes i
 > - If `V` is one of the *unfixed* `Xᵢ` then `U` is added to the set of exact bounds for `Xᵢ`.
 > - Otherwise, sets `V₁...Vₑ` and `U₁...Uₑ` are determined by checking if any of the following cases apply:
 >   - `V` is an array type `V₁[...]` and `U` is an array type `U₁[...]` of the same rank
->   - **`V` is an array type `V₁[]` and `U` is a `Span<U₁>` or `ReadOnlySpan<U₁>`**
->   - **`V` is a `Span<V₁>` and `U` is a `Span<U₁>` or `ReadOnlySpan<U₁>`**
->   - **`V` is a `ReadOnlySpan<V₁>` and `U` is a `ReadOnlySpan<U₁>`**
+>   - **`V` is a `Span<V₁>` and `U` is an array type `U₁[]` or a `Span<U₁>`**
+>   - **`V` is a `ReadOnlySpan<V₁>` and `U` is an array type `U₁[]` or a `Span<U₁>` or `ReadOnlySpan<U₁>`**
 >   - `V` is the type `V₁?` and `U` is the type `U₁`
 >   - `V` is a constructed type `C<V₁...Vₑ>` and `U` is a constructed type `C<U₁...Uₑ>`  
 >   If any of these cases apply then an *exact inference* is made from each `Uᵢ` to the corresponding `Vᵢ`.
@@ -117,9 +118,8 @@ We update the type inferences section of the specification as follows (changes i
 > - Otherwise, if `V` is the type `V₁?` and `U` is the type `U₁?` then a lower bound inference is made from `U₁` to `V₁`.
 > - Otherwise, sets `U₁...Uₑ` and `V₁...Vₑ` are determined by checking if any of the following cases apply:
 >   - `V` is an array type `V₁[...]` and `U` is an array type `U₁[...]`of the same rank
->   - **`V` is an array type `V₁[]` and `U` is a `Span<U₁>` or `ReadOnlySpan<U₁>`**
->   - **`V` is a `Span<V₁>` and `U` is a `Span<U₁>` or `ReadOnlySpan<U₁>`**
->   - **`V` is a `ReadOnlySpan<V₁>` and `U` is a `ReadOnlySpan<U₁>`**
+>   - **`V` is a `Span<V₁>` and `U` is an array type `U₁[]` or a `Span<U₁>`**
+>   - **`V` is a `ReadOnlySpan<V₁>` and `U` is an array type `U₁[]` or a `Span<U₁>` or `ReadOnlySpan<U₁>`**
 >   - `V` is one of `IEnumerable<V₁>`, `ICollection<V₁>`, `IReadOnlyList<V₁>>`, `IReadOnlyCollection<V₁>` or `IList<V₁>` and `U` is a single-dimensional array type `U₁[]`
 >   - `V` is a constructed `class`, `struct`, `interface` or `delegate` type `C<V₁...Vₑ>` and there is a unique type `C<U₁...Uₑ>` such that `U` (or, if `U` is a type `parameter`, its effective base class or any member of its effective interface set) is identical to, `inherits` from (directly or indirectly), or implements (directly or indirectly) `C<U₁...Uₑ>`.
 >   - (The “uniqueness” restriction means that in the case interface `C<T>{} class U: C<X>, C<Y>{}`, then no inference is made when inferring from `U` to `C<T>` because `U₁` could be `X` or `Y`.)  
