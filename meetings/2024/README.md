@@ -41,6 +41,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed May 8, 2024
 
+- `readonly` parameters in non-record primary constructors
+- State of C# 
+
 ### Mon May 6, 2024
 
 - Meeting on meeting (Mads)
