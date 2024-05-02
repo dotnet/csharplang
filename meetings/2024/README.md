@@ -41,8 +41,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed May 8, 2024
 
-- `readonly` parameters in non-record primary constructors
-- State of C# 
+- [`readonly` parameters in non-record primary constructors](https://github.com/dotnet/csharplang/blob/bc2c69e6f2bd28373e341effaa1182ebcb7ea72c/proposals/readonly-parameters.md) (Fred/Kathleen)
+- State of C# (Mads/Jared)
 
 ### Mon May 6, 2024
 
