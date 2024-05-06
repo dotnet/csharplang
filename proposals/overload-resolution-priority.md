@@ -80,6 +80,30 @@ class Derived : Base
 
 Negative numbers are allowed to be used, and can be used to mark a specific overload as worse than all other default overloads.
 
+**Open Question**: As currently worded, extension methods are ordered by priority _only within their own type_. For example:
+
+```cs
+new C2().M([1, 2, 3]); // Will print Ext2 ReadOnlySpan
+
+static class Ext1
+{
+    [OverloadResolutionPriority(1)]
+    public static void M(this C2 c, Span<int> s) => Console.WriteLine("Ext1 Span");
+    [OverloadResolutionPriority(0)]
+    public static void M(this C2 c, ReadOnlySpan<int> s) => Console.WriteLine("Ext1 ReadOnlySpan");
+}
+
+static class Ext2
+{
+    [OverloadResolutionPriority(0)]
+    public static void M(this C2 c, ReadOnlySpan<int> s) => Console.WriteLine("Ext2 ReadOnlySpan");
+}
+
+class C2 {}
+```
+
+When doing overload resolution for extension members, should we not sort by declaring type, and instead consider all extensions within the same scope?
+
 ### `System.Runtime.CompilerServices.OverloadResolutionPriorityAttribute`
 
 We introduce the following attribute to the BCL:
