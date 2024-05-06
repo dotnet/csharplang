@@ -174,14 +174,15 @@ The following are considered *dictionary types*:
   * The *type* has an instance *indexer* where:
     * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.
     * There is an identity conversion from the indexer type to `TValue`.
-    * The getter is `public`.
+    * The getter returns by value.
+    * The getter is as accessible as the declaring type.
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   * The *iteration type* is `KeyValuePair<TKey, TValue>` determined from a `GetEnumerator` instance method or enumerable interface.
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
   * The *type* has an instance *indexer* where:
-    * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.
+    * The indexer has a single parameter with an identity conversion from `TKey` to the parameter type.
     * There is an identity conversion from the indexer type to `TValue`.
-    * The getter and setter are `public`.
+    * The getter and setter are as accessible as the declaring type.
 * An *interface type*:
   * `System.Collections.Generic.IDictionary<TKey, TValue>`
   * `System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`
