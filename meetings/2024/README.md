@@ -6,8 +6,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- [Open questions in overload resolution priority](https://github.com/dotnet/csharplang/issues/7706) (Fred)
-
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -40,6 +38,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed May 15, 2024
 
 ### Mon May 13, 2024
+
+- [Open questions in overload resolution priority](https://github.com/dotnet/csharplang/issues/7706) (Fred)
 
 ### Wed May 8, 2024
 
