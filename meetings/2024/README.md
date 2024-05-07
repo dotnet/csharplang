@@ -46,25 +46,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [`readonly` parameters in non-record primary constructors](https://github.com/dotnet/csharplang/blob/bc2c69e6f2bd28373e341effaa1182ebcb7ea72c/proposals/readonly-parameters.md) (Fred/Kathleen)
 - State of C# (Mads/Jared)
 
-### Mon May 6, 2024
-
-- Meeting on meeting (Mads)
-
-### Wed May 1, 2024
-
-- [Adjust dynamic binding rules for a situation of a single applicable candidate.](https://github.com/dotnet/csharplang/pull/8027) Aleksey
-
-### Mon Apr 29, 2024
-
-- Meeting on meeting (Mads)
-
-
 ### Mon Feb 26, 2024 (unresolved topics)
 
 - Breaking change with collection expressions and UI collection types (https://github.com/dotnet/roslyn/issues/72098).  Cyrus + Chuck
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Wed May 1, 2024
+
+[C# Language Design Meeting for May 1st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-01.md)
+
+- Adjust binding rules in the presence of a single candidate
 
 ### Wed Apr 24, 2024
 
