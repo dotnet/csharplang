@@ -58,25 +58,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Meeting on meeting (Mads)
 
-### Wed Apr 24, 2024
-
-- [Adjust dynamic binding rules for a situation of a single applicable candidate.](https://github.com/dotnet/csharplang/pull/8027) Aleksey
-- Triage or special topics
-
-### Mon Apr 22, 2024
-
-- [Effect of language version on overload resolution in presence of `params` collections](https://github.com/dotnet/csharplang/issues/8061) Jared, Aleksey, Stephen Toub
-- [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582) (Rikki)
-
-### Wed Apr 17, 2024
-
-- Extensions (Julien) 
-- [Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`](https://github.com/dotnet/csharplang/issues/8034) (Chuck)
-
-### Mon Apr 15, 2024
-
-- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
-- Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
 
 ### Mon Feb 26, 2024 (unresolved topics)
 
@@ -84,6 +65,34 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Wed Apr 24, 2024
+
+[C# Language Design Meeting for Apr 24th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-24.md)
+
+- Adjust dynamic binding rules for a situation of a single applicable candidate
+
+### Mon Apr 22, 2024
+
+[C# Language Design Meeting for Apr 22nd, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-22.md)
+
+- Effect of language version on overload resolution in presence of `params` collections
+- Partial type inference: '_' in method and object creation type argument lists
+
+### Wed Apr 17, 2024
+
+[C# Language Design Meeting for Apr 17th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-17.md)
+
+- Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`
+- Extensions
+
+### Mon Apr 15, 2024
+
+[C# Language Design Meeting for Apr 15th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-15.md)
+
+- Non-enumerable collection types
+- Interceptors
+- Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`
 
 ### Mon Apr 8, 2024
 
