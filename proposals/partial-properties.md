@@ -59,6 +59,8 @@ partial class C
 
 A partial property is not permitted to have the `abstract` modifier.
 
+A partial property cannot explicitly implement interface properties.
+
 ### Attribute merging
 
 Similar to partial methods, the attributes in the resulting property are the combined attributes of the parts are concatenated in an unspecified order, and duplicates are not removed.
