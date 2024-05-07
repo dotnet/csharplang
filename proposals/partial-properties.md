@@ -36,10 +36,13 @@ Because we have reserved the syntactic form with semicolon accessor bodies for t
 
 **Remarks**. It is useful for the compiler to be able to look at a single declaration in isolation and know whether it is a defining or an implementing declaration. Therefore we don't want to permit auto-properties by including two identical `partial` property declarations, for example. We don't think that the use cases for this feature involve implementing the partial property with an auto-property, but in cases where a trivial implementation is desired, we think the `field` keyword makes things simple enough.
 
+---
+
 A partial property must have one *defining declaration* and one *implementing declaration*.
 
 **Remarks**. We also don't think it is useful to allow splitting the declaration across more than two parts, to allow different accessors to be implemented in different places, for example. Therefore we simply imitate the scheme established by partial methods.
 
+---
 
 Only the defining declaration of a partial property participates in lookup, similar to how only the defining declaration of a partial method participates in overload resolution.
 
@@ -56,6 +59,8 @@ partial class C
     }
 }
 ```
+
+---
 
 A partial property is not permitted to have the `abstract` modifier.
 
