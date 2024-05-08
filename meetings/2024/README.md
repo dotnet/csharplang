@@ -41,17 +41,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Open questions in overload resolution priority](https://github.com/dotnet/csharplang/issues/7706) (Fred)
 
-### Wed May 8, 2024
-
-- [`readonly` parameters in non-record primary constructors](https://github.com/dotnet/csharplang/blob/bc2c69e6f2bd28373e341effaa1182ebcb7ea72c/proposals/readonly-parameters.md) (Fred/Kathleen)
-- State of C# (Mads/Jared)
-
 ### Mon Feb 26, 2024 (unresolved topics)
 
 - Breaking change with collection expressions and UI collection types (https://github.com/dotnet/roslyn/issues/72098).  Cyrus + Chuck
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Wed May 8, 2024
+
+[C# Language Design Meeting for May 8th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-08.md)
+
+- `readonly` for primary constructor parameters
 
 ### Wed May 1, 2024
 
