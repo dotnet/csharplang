@@ -193,7 +193,6 @@ An implicit *collection expression conversion* exists from a collection expressi
 
 *Collection expression conversions* require implicit conversions for each element.
 The element conversion rules are now differentiated based on whether the *element type* of the target type is `KeyValuePair<,>`.
-(That includes target types other than dictionary types.)
 
 If the *element type* is a type *other than* `KeyValuePair<,>`, the rules are *unchanged* from *language version 12* other than **clarifications**:
 
@@ -202,7 +201,7 @@ If the *element type* is a type *other than* `KeyValuePair<,>`, the rules are *u
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
 > * **Otherwise there is *no implicit conversion* from the collection expression to the target type.**
 
-If the *element type* is `KeyValuePair<,>` the rules are *modified* for *language version 13*:
+If the *element type* is `KeyValuePair<,>`, the rules are *modified* for *language version 13* (this applies to any type with an *element type* of `KeyValuePair<,>`, not only *dictionary types*):
 
 > An implicit *collection expression conversion* exists from a collection expression to a *type* with *element type* `KeyValuePair<K, V>` where for each *element* `Eᵢ` in the collection expression:
 > * If `Eᵢ` is an *expression element*, then the type of `Eᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
