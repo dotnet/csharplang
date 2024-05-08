@@ -195,11 +195,12 @@ An implicit *collection expression conversion* exists from a collection expressi
 The element conversion rules are now differentiated based on whether the *element type* of the target type is `KeyValuePair<,>`.
 (That includes target types other than dictionary types.)
 
-If the *element type* is a type *other than* `KeyValuePair<,>`, the rules are *unchanged* from *language version 12*:
+If the *element type* is a type *other than* `KeyValuePair<,>`, the rules are *unchanged* from *language version 12* other than **clarifications**:
 
 > An implicit *collection expression conversion* exists from a collection expression to a *type* with *element type* `T` **where `T` is not `KeyValuePair<,>` and** where for each *element* `Eᵢ` in the collection expression:
 > * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
+> * **Otherwise there is *no implicit conversion* from the collection expression to the target type.**
 
 If the *element type* is `KeyValuePair<,>` the rules are *modified* for *language version 13*:
 
@@ -207,6 +208,7 @@ If the *element type* is `KeyValuePair<,>` the rules are *modified* for *languag
 > * If `Eᵢ` is an *expression element*, then the type of `Eᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
 > * If `Eᵢ` is a *dictionary element* `Kᵢ:Vᵢ`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, then the *iteration type* of `Sᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
+> * Otherwise there is *no implicit conversion* from the collection expression to the target type.
 
 The new rules above represent a breaking change: For types that are a valid conversion target in *language version 12* and have an *element type* of `KeyValuePair<,>`, the element conversion rules change between language versions 12 and 13.
 
