@@ -168,7 +168,7 @@ From [Open Question 3](#open-question-3), we will support *dictionary elements* 
 ## Dictionary types
 
 A type is considered a *dictionary type* if the following hold:
-* The *iteration type* is `KeyValuePair<TKey, TValue>` and the *iteration type* is determined from a `GetEnumerator` instance method or enumerable interface.
+* The *element type* is `KeyValuePair<TKey, TValue>`.
 * The *type* has an instance *indexer* where:
   * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.\*
   * There is an identity conversion from the indexer type to `TValue`.\*
@@ -184,29 +184,30 @@ A type is considered a *dictionary type* if the following hold:
 An implicit *collection expression conversion* exists from a collection expression to the following *dictionary types*:
 * A *dictionary type* with an appropriate *[create method](#create-methods)*.
 * A *struct* or *class* *dictionary type* that implements `System.Collections.IEnumerable` where:
+  * The *element type* is determined from a `GetEnumerator` instance method or enumerable interface.
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
   * The *indexer* has a setter that is as accessible as the declaring type.
 * An *interface type*:
   * `System.Collections.Generic.IDictionary<TKey, TValue>`
   * `System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`
 
-The conversion rules are differentiated based on whether the *iteration type* of the target type is `KeyValuePair<,>`.
+The conversion rules are differentiated based on whether the *element type* of the target type is `KeyValuePair<,>`.
 (That includes types other than dictionary types.)
 
-The conversion rules for a type with an *iteration type* other than `KeyValuePair<,>` are unchanged from *language version 12*:
+The conversion rules for a type with an *element type* other than `KeyValuePair<,>` are *unchanged* from *language version 12*:
 
-> An implicit *collection expression conversion* exists from a collection expression to a *collection type* with *iteration type* `T` **where `T` is not `KeyValuePair<,>` and** where for each *element* `Eᵢ` in the collection expression:
+> An implicit *collection expression conversion* exists from a collection expression to a *collection type* with *element type* `T` **where `T` is not `KeyValuePair<,>` and** where for each *element* `Eᵢ` in the collection expression:
 > * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
 
-The conversion rules for a type with an *iteration type* of `KeyValuePair<,>` are changed for *language version 13*:
+The conversion rules for a type with an *element type* of `KeyValuePair<,>` are *changed* for *language version 13*:
 
-> An implicit *collection expression conversion* exists from a collection expression to a *collection type* or *dictionary type* with *iteration type* `KeyValuePair<K, V>` where for each *element* `Eᵢ` in the collection expression:
+> An implicit *collection expression conversion* exists from a collection expression to a *collection type* or *dictionary type* with *element type* `KeyValuePair<K, V>` where for each *element* `Eᵢ` in the collection expression:
 > * If `Eᵢ` is an *expression element*, then the type of `Eᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
 > * If `Eᵢ` is a *dictionary element* `Kᵢ:Vᵢ`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, then the *iteration type* of `Sᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
 
-The new rules above represent a breaking change: For types that are a valid conversion target in *language version 12* and have an *iteration type* of `KeyValuePair<,>`, the element conversion rules change between language versions 12 and 13.
+The new rules above represent a breaking change: For types that are a valid conversion target in *language version 12* and have an *element type* of `KeyValuePair<,>`, the element conversion rules change between language versions 12 and 13.
 
 ## Create methods
 
