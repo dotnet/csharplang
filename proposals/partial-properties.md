@@ -115,7 +115,7 @@ partial class C4
     public partial string this[string s] { get => s; set { } } // ok
 
     public partial string this[int i, string s = "a"] { get; set; }
-    public partial string this[int i, string s = "a"] { get => s; set { } } // CS1066: The default value specified for parameter 'x' will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+    public partial string this[int i, string s = "a"] { get => s; set { } } // CS1066: The default value specified for parameter 's' will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 }
 ```
 
