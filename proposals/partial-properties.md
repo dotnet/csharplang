@@ -82,6 +82,7 @@ Signature matching requirements include:
 3. All other syntactic differences in the signatures of partial property declarations result in a compile-time warning, with the following exceptions:
     - Attribute lists on or within partial property declarations do not need to match. Instead, merging of attributes in corresponding positions is performed, per [Attribute merging](#attribute-merging).
     - Nullable context differences do not cause warnings. In other words, a difference where one of the types is nullable-oblivious and the other type is either nullable-annotated or not-nullable-annotated does not result in any warnings.
+    - Default parameter values do not need to match. A warning is reported when the implementation part of a partial indexer has default parameter values. This is similar to an existing warning which occurs when the implementation part of a partial method has default parameter values.
 
 ```cs
 partial class C1
@@ -106,6 +107,15 @@ partial class C3
 
     // Error: implementation of 'Prop' cannot have a 'set' accessor because the definition does not have a 'set' accessor.
     public partial string Prop { get => field; set => field = value; }
+}
+
+partial class C4
+{
+    public partial string this[string s = "a"] { get; set; }
+    public partial string this[string s] { get => s; set { } } // ok
+
+    public partial string this[int i, string s = "a"] { get; set; }
+    public partial string this[int i, string s = "a"] { get => s; set { } } // CS1066: The default value specified for parameter 's' will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 }
 ```
 
