@@ -655,7 +655,8 @@ TODO4(instance) need to merge extension members and extension methods
     - Next, members that are hidden by other members are removed from the set.  
       (note: "base types" means "base extensions and underlying type" for extension types)
     - Next, less specific extension members are removed if they are "hidden" by more specific extension members. 
-      For every member `X.M` in the set, where `X` is the type in which the member `M` is declared, the following rules are applied:
+      For every member `X.M` in the set, where `X` is the type in which the member `M` is declared,
+      if no member in the set has a containing type `Y` that is more specific than `X` then the following rules are applied:
       - If `M` is a method, then all non-method members declared in a less specific type than `X` are removed from the set.
       - Otherwise, all members declared in a less specific type than `X` are removed from the set.
     - Finally, having removed hidden and less specific members:
@@ -976,15 +977,20 @@ extension member lookup will find the `int` property and stop there.
 
 For context see [extension method invocation rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11783-extension-method-invocations).
 
+### Less specific extension type
+
+If `X` extends `C` and `Y` extends `D`, `X` is considered less specific than `Y`
+when:
+- `C` is a base type of `D`, or
+- `C` is an interface implemented by `D`.
+
 ### Less specific extension member
 
 TL;DR: As part of extension member lookup, extension invocations and overload resolution,
 we consider that "less specific" extension members are "hidden" by "more specific" extension members.
 
-If `X` extends `C` and `Y` extends `D`, a member `X.I` is considered less specific than a member `Y.I`
-when:
-- `C` is a base type of `D`, or
-- `C` is an interface implemented by `D`.
+Considering two extension members, `X.I` and `Y.I`, `X.I` is considered less specific than `Y.I`
+when extension type `X` is less specific than extension type `Y`.
 
 For example:
 ```csharp
