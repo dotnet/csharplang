@@ -6,6 +6,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Dictionary expressions: KeyValuePair correspondence (Cyrus)
 - Dictionary expressions: [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#conversions) (Chuck)
+- First-class span types: [delegate conversions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#delegate-signature-matching) (Jan/Chuck/Fred)
 
 ## Schedule when convenient
 
