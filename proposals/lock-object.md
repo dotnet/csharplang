@@ -86,6 +86,16 @@ lock (l) { } // monitor-based locking is used here
 ```
 
 Note that this warning occurs even for equivalent explicit conversions.
+
+The compiler avoids reporting the warning in some cases when the instance cannot be locked after converting to `object`:
+- when the conversion is implicit and part of an object equality operator invocation.
+
+```cs
+var l = new System.Threading.Lock();
+if (l != null) // no warning even though `l` is implicitly converted to `object` for `operator!=(object, object)`
+    // ...
+```
+
 To escape out of the warning and force use of monitor-based locking, one can use
 - the usual warning suppression means (`#pragma warning disable`),
 - `Monitor` APIs directly,

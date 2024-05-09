@@ -59,4 +59,4 @@ Attribute authors who want users to be able to discover the requirements for the
 ## Design meetings
 
 - https://github.com/dotnet/csharplang/blob/main/meetings/2017/LDM-2017-02-21.md#generic-attributes
-    - At the time there was a concern that we would have to gate the feature on whether the target runtime supports it. (However, we now only support C# 10 on .NET 6. It would be nice to for the implementation to be aware of what minimum target framework supports the feature, but seems less essential today.)
+    - At the time there was a concern that we would have to gate the feature on whether the target runtime supports it. (However, we now only support C# 10 on .NET 6. It would be nice for the implementation to be aware of what minimum target framework supports the feature, but seems less essential today.)

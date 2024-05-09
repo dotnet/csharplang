@@ -47,28 +47,32 @@ A *parameter_collection* consists of an optional set of *attributes*, a `params`
 a *type*, and an *identifier*. A parameter collection declares a single parameter of the given type with the given name.
 The *type* of a parameter collection shall be one of the following valid target types for a collection expression
 (see https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions):
-- A single dimensional *array type* `T[]`
+- A single dimensional *array type* `T[]`, in which case the *element type* is `T`
 - A *span type*
   - `System.Span<T>`
-  - `System.ReadOnlySpan<T>`
-- A *type* with a *[create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)*,
-  which is at least as accessible as the declaring member, and with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)
-  determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
+  - `System.ReadOnlySpan<T>`  
+  in which cases the *element type* is `T`
+- A *type* with an appropriate *[create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)*,
+  which is at least as accessible as the declaring member, and with a corresponding *element type* resulting from that determination
 - A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   - The *type* has a constructor that can be invoked with no arguments, and the constructor is at least as accessible as the declaring member.
-  - The *type* has an instance (not an extension) method `Add` that can be invoked with a single argument of
-    the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement),
-    and the method is at least as accessible as the declaring member.
+  - The *type* has an instance (not an extension) method `Add` where:
+    - The method can be invoked with a single value argument.
+    - If the method is generic, the type arguments can be inferred from the argument.
+    - The method is at least as accessible as the declaring member.
+
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement) of the *type*.
 - An *interface type*
   - `System.Collections.Generic.IEnumerable<T>`,
   - `System.Collections.Generic.IReadOnlyCollection<T>`,
   - `System.Collections.Generic.IReadOnlyList<T>`,
   - `System.Collections.Generic.ICollection<T>`,
-  - `System.Collections.Generic.IList<T>`
+  - `System.Collections.Generic.IList<T>`  
+  in which cases the *element type* is `T`
 
 In a method invocation, a parameter collection permits either a single argument of the given parameter type to be specified, or
-it permits zero or more arguments of the collection [iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)
-to be specified. Parameter collections are described further in *[Parameter collections](#parameter-collections)*.
+it permits zero or more arguments of the collection's *element type* to be specified. 
+Parameter collections are described further in *[Parameter collections](#parameter-collections)*.
 
 A *parameter_collection* may occur after an optional parameter, but cannot have a default value – the omission of arguments for a *parameter_collection*
 would instead result in the creation of an empty collection.
@@ -87,11 +91,12 @@ A parameter collection permits arguments to be specified in one of two ways in a
 - The argument given for a parameter collection can be a single expression that is implicitly convertible to the parameter collection type.
   In this case, the parameter collection acts precisely like a value parameter.
 - Alternatively, the invocation can specify zero or more arguments for the parameter collection, where each argument is an expression
-  that is implicitly convertible to the parameter collection [iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement).
+  that is implicitly convertible to the parameter collection's *element type*.
   In this case, the invocation creates an instance of the parameter collection type according to the rules specified in
   [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
   as though the arguments were used as expression elements in a collection expression in the same order,
   and uses the newly created collection instance as the actual argument.
+  When constructing the collection instance, the original *unconverted* arguments are used.
 
 Except for allowing a variable number of arguments in an invocation, a parameter collection is precisely equivalent to
 a value parameter of the same type.
@@ -116,8 +121,9 @@ The [Applicable function member](https://github.com/dotnet/csharpstandard/blob/d
 
 If a function member that includes a parameter collection is not applicable in its normal form, the function member might instead be applicable in its ***expanded form***:
 
+- If parameter collection is not an array, an expanded form is not applicable for language versions C# 12 and below.
 - The expanded form is constructed by replacing the parameter collection in the function member declaration with
-  zero or more value parameters of the parameter collection [iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)
+  zero or more value parameters of the parameter collection's *element type*
   such that the number of arguments in the argument list `A` matches the total number of parameters.
   If `A` has fewer arguments than the number of fixed parameters in the function member declaration,
   the expanded form of the function member cannot be constructed and is thus not applicable.
@@ -158,7 +164,7 @@ In case the parameter type sequences `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂,
   - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>`, and params collection of `Mₑ` is `System.Span<Eₑ>`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
   - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>` or `System.Span<Eᵢ>`, and params collection of `Mₑ` is
     an *[array_or_array_interface__type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution)*
-    with *[iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)* `Eₑ`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
+    with *element type* `Eₑ`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
   - **both params collections are not *span_type*s, and an implicit conversion exists from params collection of `Mᵢ` to params collection of `Mₑ`**  
 - Otherwise, no function member is better.
 

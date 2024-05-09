@@ -4,12 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
-- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
-
 ## Schedule when convenient
-
-- [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582)
 
 ## Recurring topics
 
@@ -18,35 +13,33 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Mon Apr 29, 2024
+### Wed Jun 26, 2024
 
-### Wed Apr 24, 2024
+### Mon Jun 24, 2024
 
-### Mon Apr 22, 2024
+### Wed Jun 19, 2024
 
-### Wed Apr 17, 2024
+### Mon Jun 17, 2024
 
-### Mon Apr 15, 2024
+### Wed Jun 12, 2024
 
-### Wed Apr 10, 2024
+### Mon Jun 10, 2024
 
-- Meeting on meeting (Mads)
+### Wed Jun 5, 2024
 
-### Mon Apr 8, 2024
+### Mon Jun 3, 2024
 
-- [Implementation specific documentation](https://github.com/dotnet/csharplang/issues/7898). (Bill, on a Monday)
+### Fri May 31, 2024
 
-### Mon Apr 1, 2024
+### Mon May 20, 2024
 
-- [Runtime Async Experiment](https://github.com/dotnet/runtime/issues/94620) (Andy)
+### Fri May 17, 2024
 
-### Wed Mar 27, 2024
+### Wed May 15, 2024
 
-- Discriminated Union WG (Matt)
+### Mon May 13, 2024
 
-### Mon Mar 11, 2024
-
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
+- [Open questions in overload resolution priority](https://github.com/dotnet/csharplang/issues/7706) (Fred)
 
 ### Mon Feb 26, 2024 (unresolved topics)
 
@@ -54,6 +47,70 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
+
+### Wed May 8, 2024
+
+[C# Language Design Meeting for May 8th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-08.md)
+
+- `readonly` for primary constructor parameters
+
+### Wed May 1, 2024
+
+[C# Language Design Meeting for May 1st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-01.md)
+
+- Adjust binding rules in the presence of a single candidate
+
+### Wed Apr 24, 2024
+
+[C# Language Design Meeting for Apr 24th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-24.md)
+
+- Adjust dynamic binding rules for a situation of a single applicable candidate
+
+### Mon Apr 22, 2024
+
+[C# Language Design Meeting for Apr 22nd, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-22.md)
+
+- Effect of language version on overload resolution in presence of `params` collections
+- Partial type inference: '_' in method and object creation type argument lists
+
+### Wed Apr 17, 2024
+
+[C# Language Design Meeting for Apr 17th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-17.md)
+
+- Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`
+- Extensions
+
+### Mon Apr 15, 2024
+
+[C# Language Design Meeting for Apr 15th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-15.md)
+
+- Non-enumerable collection types
+- Interceptors
+- Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`
+
+### Mon Apr 8, 2024
+
+[C# Language Design Meeting for Apr 8th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-08.md)
+
+- Implementation specific documentation
+
+### Mon Apr 1, 2024
+
+[C# Language Design Meeting for Apr 1st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-01.md)
+
+- Async improvements (Async2)
+
+### Wed Mar 27, 2024
+
+[C# Language Design Meeting for Mar 27th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-27.md)
+
+- Discriminated Unions
+
+### Mon Mar 11, 2024
+
+[C# Language Design Meeting for Mar 11th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md)
+
+- Dictionary expressions
 
 ### Mon Mar 4, 2024
 
