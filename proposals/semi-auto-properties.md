@@ -18,6 +18,8 @@ For properties with an `init` accessor, everything that applies below to `set` w
 
 **Principle 2:** `get;` will now be considered syntactic sugar for `get => field;`, and `set;` will now be considered syntactic sugar for `set => field = value;`.
 
+Both of these principles only apply in locations where `{ get; }` or `{ get; set; }` already declares an auto property. Abstract and interface properties are excluded, as well as indexers.
+
 This means that properties may now mix and match auto accessors with full accessors. For example:
 
 ```cs
