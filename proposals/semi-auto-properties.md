@@ -50,7 +50,7 @@ Both accessors may be full accessors with either one or both making use of `fiel
     set
     {
         if (field == value) return;
-        field == value;
+        field = value;
         OnXyzChanged();
     }
 }
