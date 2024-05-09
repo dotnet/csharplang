@@ -231,7 +231,7 @@ To land in this sweet spot implicitly, without having to write an attribute each
 
 ### `nameof`
 
-`nameof(field)` will fail to compile, like `nameof(nint)`. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases. If it did anything, it would return the string `"field"`, consistent with how `nameof` behaves in other circumstances by returning the C# name or alias, rather than the metadata name.
+In places where `field` is a keyword (see the [Shadowing](#shadowing) section), `nameof(field)` will fail to compile, like `nameof(nint)`. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases. If it did anything, it would return the string `"field"`, consistent with how `nameof` behaves in other circumstances by returning the C# name or alias, rather than the metadata name.
 
 ### Overrides
 
