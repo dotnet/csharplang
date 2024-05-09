@@ -4,6 +4,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- Dictionary expressions: KeyValuePair correspondence (Cyrus)
+- Dictionary expressions: [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#conversions) (Chuck)
+
 ## Schedule when convenient
 
 ## Recurring topics
@@ -40,11 +43,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon May 13, 2024
 
 - [Open questions in overload resolution priority](https://github.com/dotnet/csharplang/issues/7706) (Fred)
-
-### Mon Feb 26, 2024 (unresolved topics)
-
-- Breaking change with collection expressions and UI collection types (https://github.com/dotnet/roslyn/issues/72098).  Cyrus + Chuck
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
 
 ## C# Language Design Notes for 2024
 
