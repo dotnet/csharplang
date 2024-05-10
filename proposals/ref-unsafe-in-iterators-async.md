@@ -37,6 +37,42 @@ lock (this)
 }
 ```
 
+## Breaking changes
+[break]: #breaking-changes
+
+There are no breaking changes in the language specification,
+but there is one breaking change in the Roslyn implementation (due to a spec violation).
+
+Roslyn violates the part of the spec which states that iterators introduce a safe context ([§13.3.1][blocks-general]).
+For example, if there is an `unsafe class` with an iterator method which contains a local function
+then that local function inherits the unsafe context from the class,
+although it should have been in a safe context per the spec due to the iterator method.
+In fact, the whole iterator method inherited the unsafe context in Roslyn,
+it was just disallowed to use any unsafe constructs in iterators.
+In `LangVersion >= 13`, iterators will correctly introduce a safe context
+because we want to allow unsafe constructs in iterators.
+
+```cs
+unsafe class C // unsafe context
+{
+    System.Collections.Generic.IEnumerable<int> M() // an iterator
+    {
+        yield return 1;
+        local();
+        async void local()
+        {
+            int* p = null; // allowed in C# 12; error in C# 13 (breaking change)
+            await Task.Yield(); // error in C# 12, allowed in C# 13
+        }
+    }
+}
+```
+
+Note:
+- The break can be worked around simply by adding the `unsafe` modifier to the local function.
+- This does not affect lambdas as they "inherit" the "iterator context"
+  and therefore it was impossible to use unsafe constructs inside them.
+
 ## Detailed design
 [design]: #detailed-design
 
@@ -123,7 +159,8 @@ unsafe partial class C1
         var lam1 = async () =>
         { // safe context
           // spec violation: in Roslyn, this is an unsafe context in LangVersion 12 and lower
-            await Task.Yield();
+            await Task.Yield(); // error in C# 12, allowed in C# 13
+            int* p = null; // error in both C# 12 and C# 13 (unsafe in iterator)
         };
         unsafe
         {
@@ -135,7 +172,8 @@ unsafe partial class C1
         async void local()
         { // safe context
           // spec violation: in Roslyn, this is an unsafe context in LangVersion 12 and lower
-            await Task.Yield();
+            await Task.Yield(); // error in C# 12, allowed in C# 13
+            int* p = null; // allowed in C# 12, error in C# 13 (breaking change in Roslyn)
         }
         local();
     }
@@ -341,12 +379,21 @@ class C
   It would be also a breaking change in LangVersion=13 as in C# 12 iterator signatures are unsafe (they can contain pointer array parameters, for example).
 
 - Applying the `unsafe` modifier to an iterator:
- - Could affect the body as well as the signature. Such iterators would not be very useful though
-   because their unsafe bodies could not contain `yield return`s, they could have only `yield break`s.
- - Could be an error in `LangVersion >= 13` as it is in `LangVersion <= 12` because
-   it is not very useful to have an unsafe iterator member as it only allows one to have
-   pointer array parameters or unsafe setters without additional unsafe block.
-   But normal pointer arguments could be allowed in the future.
+  - Could affect the body as well as the signature. Such iterators would not be very useful though
+    because their unsafe bodies could not contain `yield return`s, they could have only `yield break`s.
+  - Could be an error in `LangVersion >= 13` as it is in `LangVersion <= 12` because
+    it is not very useful to have an unsafe iterator member as it only allows one to have
+    pointer array parameters or unsafe setters without additional unsafe block.
+    But normal pointer arguments could be allowed in the future.
+
+- Roslyn breaking change:
+  - We could preserve the current behavior (and even modify the spec to match it)
+    for example by introducing the safe context in the iterator method
+    but then reverting to the unsafe context in the local function.
+  - Or we could break all LangVersions, not just 13 and newer.
+  - It is also possible to more drastically simplify the rules by making iterators
+    inherit unsafe context like all other methods do. Discussed above.
+    Could be done across all LangVersions or just for `LangVersion >= 13`.
 
 [definite-assignment]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/variables.md#94-definite-assignment
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
