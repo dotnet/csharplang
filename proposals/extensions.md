@@ -930,7 +930,8 @@ We process as follows:
   - Next, members that are hidden by other members are removed from the set.  
     (note: "base types" means "base extensions and underlying type" for extension types)
   - Next, less specific extension members are removed if they are "hidden" by more specific extension members.  
-    For every member `X.M` in the set, where `X` is the extension type in which the member `M` is declared, the following rules are applied:
+    For every member `X.M` in the set, where `X` is the extension type in which the member `M` is declared, 
+    if no member in the set has a containing type `Y` that is more specific than `X` then the following rules are applied:
     - If `M` is a constant, field, property, event, or enumeration member, 
       then all members declared in a less specific type than `X` are removed from the set.
     - If `M` is a type declaration, then all non-types declared in a less specific type than `X` are removed from the set, 
@@ -979,18 +980,13 @@ For context see [extension method invocation rules](https://github.com/dotnet/cs
 
 ### Less specific extension type
 
+TL;DR: As part of extension member lookup, extension invocations and overload resolution,
+we consider that members from "less specific" extension types are "hidden" by members from "more specific" extension types.
+
 If `X` extends `C` and `Y` extends `D`, `X` is considered less specific than `Y`
 when:
 - `C` is a base type of `D`, or
 - `C` is an interface implemented by `D`.
-
-### Less specific extension member
-
-TL;DR: As part of extension member lookup, extension invocations and overload resolution,
-we consider that "less specific" extension members are "hidden" by "more specific" extension members.
-
-Considering two extension members, `X.I` and `Y.I`, `X.I` is considered less specific than `Y.I`
-when extension type `X` is less specific than extension type `Y`.
 
 For example:
 ```csharp
@@ -1209,6 +1205,8 @@ The current [simple assignment rules](https://github.com/dotnet/csharpstandard/b
 
 We're expecting those rules to be updated to check whether the receiver is a reference or value type instead.
 Then the rule will also apply to extension properties/indexers/events.
+
+TODO update this section once the rules are spelled out for https://github.com/dotnet/csharpstandard/issues/1078
 
 ```
 1.Property = 42; // Error reporting that 1 (which is a struct) is not a variable
