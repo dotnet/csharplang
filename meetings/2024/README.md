@@ -10,6 +10,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
