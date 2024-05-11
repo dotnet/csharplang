@@ -38,57 +38,55 @@ In these cases by now you always have to create an instance field and write the 
 > **The backing field can be referenced directly using the `field` keyword within all accessors and within the property expression body.**
 > **Because the field is unnamed, it cannot be used in a `nameof` expression.**
 
-````diff
-+The following example:
-+```csharp
-+// No 'field' symbol in scope.
-+public class Point
-+{
-+    public int X { get; set; }
-+    public int Y { get; set; }
-+}
-+```
-+is equivalent to the following declaration:
-+```csharp
-+// No 'field' symbol in scope.
-+public class Point
-+{
-+    public int X { get { return field; } set { field = value; } }
-+    public int Y { get { return field; } set { field = value; } }
-+}
-+```
-+which is equivalent to:
-+```csharp
-+// No 'field' symbol in scope.
-+public class Point
-+{
-+    private int __x;
-+    private int __y;
-+    public int X { get { return __x; } set { __x = value; } }
-+    public int Y { get { return __y; } set { __y = value; } }
-+}
-+```
+The following example:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+}
+```
+is equivalent to the following declaration:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    public int X { get { return field; } set { field = value; } }
+    public int Y { get { return field; } set { field = value; } }
+}
+```
+which is equivalent to:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    private int __x;
+    private int __y;
+    public int X { get { return __x; } set { __x = value; } }
+    public int Y { get { return __y; } set { __y = value; } }
+}
+```
 
-+The following example:
-+```csharp
-+// No 'field' symbol in scope.
-+public class LazyInit
-+{
-+    public string Value => field ??= ComputeValue();
-+    private static string ComputeValue() { /*...*/ }
-+}
-+```
-+is equivalent to the following declaration:
-+```csharp
-+// No 'field' symbol in scope.
-+public class Point
-+{
-+    private string __value;
-+    public string Value { get { return __value ??= ComputeValue(); } }
-+    private static string ComputeValue() { /*...*/ }
-+}
-+```
-````
+The following example:
+```csharp
+// No 'field' symbol in scope.
+public class LazyInit
+{
+    public string Value => field ??= ComputeValue();
+    private static string ComputeValue() { /*...*/ }
+}
+```
+is equivalent to the following declaration:
+```csharp
+// No 'field' symbol in scope.
+public class Point
+{
+    private string __value;
+    public string Value { get { return __value ??= ComputeValue(); } }
+    private static string ComputeValue() { /*...*/ }
+}
+```
 
 ## Open LDM questions:
 
