@@ -207,7 +207,7 @@ if (b ? x != null && Set(out y) : x != null && Set(out y))
 bool Set(out int x) { x = 0; return true; }
 ```
 
-This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification at the time. See [internal issue](https://vstfdevdiv.corp.microsoft.com/DevDiv2/DevDiv/_workitems/edit/529603).
+This is an admittedly niche scenario, that compiles without error in the native compiler, but was broken in Roslyn in order to match the specification at the time. 
 
 ### ==/!= (relational equality operator) expressions
 We introduce a new section **==/!= (relational equality operator) expressions**.

@@ -47,18 +47,32 @@ A *parameter_collection* consists of an optional set of *attributes*, a `params`
 a *type*, and an *identifier*. A parameter collection declares a single parameter of the given type with the given name.
 The *type* of a parameter collection shall be one of the following valid target types for a collection expression
 (see https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions):
-- A single dimensional *array type* `T[]`
-- A *span type* `System.Span<T>` or `System.ReadOnlySpan<T>`
-- A *type* with a valid [create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)
-  with *parameter type* `System.ReadOnlySpan<T>` and the method is at least as accessible as the *type*.
-- A *struct* or *class type* that implements `System.Collections.Generic.IEnumerable<T>`
-- A *struct* or *class type* that implements `System.Collections.IEnumerable` and *does not implement* `System.Collections.Generic.IEnumerable<T>`.
-- An *interface type* `System.Collections.Generic.IEnumerable<T>`, `System.Collections.Generic.IReadOnlyCollection<T>`,
-  `System.Collections.Generic.IReadOnlyList<T>`, `System.Collections.Generic.ICollection<T>`, or `System.Collections.Generic.IList<T>`
+- A single dimensional *array type* `T[]`, in which case the *element type* is `T`
+- A *span type*
+  - `System.Span<T>`
+  - `System.ReadOnlySpan<T>`  
+  in which cases the *element type* is `T`
+- A *type* with an appropriate *[create method](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods)*,
+  which is at least as accessible as the declaring member, and with a corresponding *element type* resulting from that determination
+- A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
+  - The *type* has a constructor that can be invoked with no arguments, and the constructor is at least as accessible as the declaring member.
+  - The *type* has an instance (not an extension) method `Add` where:
+    - The method can be invoked with a single value argument.
+    - If the method is generic, the type arguments can be inferred from the argument.
+    - The method is at least as accessible as the declaring member.
+
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement) of the *type*.
+- An *interface type*
+  - `System.Collections.Generic.IEnumerable<T>`,
+  - `System.Collections.Generic.IReadOnlyCollection<T>`,
+  - `System.Collections.Generic.IReadOnlyList<T>`,
+  - `System.Collections.Generic.ICollection<T>`,
+  - `System.Collections.Generic.IList<T>`  
+  in which cases the *element type* is `T`
 
 In a method invocation, a parameter collection permits either a single argument of the given parameter type to be specified, or
-it permits zero or more arguments of the collection [iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)
-to be specified. Parameter collections are described further in *[Parameter collections](#parameter-collections)*.
+it permits zero or more arguments of the collection's *element type* to be specified. 
+Parameter collections are described further in *[Parameter collections](#parameter-collections)*.
 
 A *parameter_collection* may occur after an optional parameter, but cannot have a default value – the omission of arguments for a *parameter_collection*
 would instead result in the creation of an empty collection.
@@ -77,11 +91,12 @@ A parameter collection permits arguments to be specified in one of two ways in a
 - The argument given for a parameter collection can be a single expression that is implicitly convertible to the parameter collection type.
   In this case, the parameter collection acts precisely like a value parameter.
 - Alternatively, the invocation can specify zero or more arguments for the parameter collection, where each argument is an expression
-  that is implicitly convertible to the parameter collection [iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement).
+  that is implicitly convertible to the parameter collection's *element type*.
   In this case, the invocation creates an instance of the parameter collection type according to the rules specified in
   [Collection expressions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md)
   as though the arguments were used as expression elements in a collection expression in the same order,
   and uses the newly created collection instance as the actual argument.
+  When constructing the collection instance, the original *unconverted* arguments are used.
 
 Except for allowing a variable number of arguments in an invocation, a parameter collection is precisely equivalent to
 a value parameter of the same type.
@@ -106,8 +121,9 @@ The [Applicable function member](https://github.com/dotnet/csharpstandard/blob/d
 
 If a function member that includes a parameter collection is not applicable in its normal form, the function member might instead be applicable in its ***expanded form***:
 
+- If parameter collection is not an array, an expanded form is not applicable for language versions C# 12 and below.
 - The expanded form is constructed by replacing the parameter collection in the function member declaration with
-  zero or more value parameters of the parameter collection [iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)
+  zero or more value parameters of the parameter collection's *element type*
   such that the number of arguments in the argument list `A` matches the total number of parameters.
   If `A` has fewer arguments than the number of fixed parameters in the function member declaration,
   the expanded form of the function member cannot be constructed and is thus not applicable.
@@ -147,8 +163,8 @@ In case the parameter type sequences `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂,
    (this corresponds to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution):**
   - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>`, and params collection of `Mₑ` is `System.Span<Eₑ>`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
   - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>` or `System.Span<Eᵢ>`, and params collection of `Mₑ` is
-    an *[array_or_array_interface_or_string_type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution)*
-    with *[iteration type](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement)* `Eₑ`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
+    an *[array_or_array_interface__type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution)*
+    with *element type* `Eₑ`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
   - **both params collections are not *span_type*s, and an implicit conversion exists from params collection of `Mᵢ` to params collection of `Mₑ`**  
 - Otherwise, no function member is better.
 
@@ -184,10 +200,10 @@ class Program
     static void Test1()
     {
         M1(['1', '2', '3']); // Span overload is used
-        M1('1', '2', '3');   // String overload is used because `char` is an exact match
+        M1('1', '2', '3');   // IEnumerable<char> overload is used because `char` is an exact match
     }
 
-    static void M1(params string value) {}
+    static void M1(params IEnumerable<char> value) {}
     static void M1(params System.ReadOnlySpan<MyChar> value) {}
 
     class MyChar
@@ -239,6 +255,9 @@ class Program
 ```
 
 It doesn't feel reasonable to "compare" collections that are built from different elements.
+
+>This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#better-function-member-changes)
+>and was approved.
 
 ### Dynamic vs. Static Binding
 
@@ -330,9 +349,20 @@ Otherwise, the *invocation_expression* is dynamically bound.
 - Otherwise, if any candidate passing the test has non-array params parameter and it could possibly be applicable only in an expanded form,
   a compile-time warning occurs.
 
+> The proposed new rules were reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#dynamic-support)
+> and were approved.
+
 We also should consider reverting/fixing spec violation that affects local functions today, see https://github.com/dotnet/roslyn/issues/71399. 
 
+>[LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#dynamic-and-ref-local-function-bugfixing)
+>confirmed that we want to fix this spec violation. 
+
 ### Order of evaluation with non-array collections in non-trivial scenarios
+
+> This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md#params-collections-evaluation-orders)
+> and was approved. Despite the fact that array cases deviate from other collections, the official language specification
+> doesn't have to specify different rules for arrays. The deviations could simply be treated as an implementation artifact.
+> At the same time we do not intend to change the existing behavior around arrays.
 
 #### Named arguments
 
@@ -496,9 +526,28 @@ The order of evaluation is the following:
 The [collection expressions ref safety section](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#ref-safety) is applicable to
 the construction of parameter collections when APIs are invoked in their expanded form.
 
+Params parameters are implicitly `scoped` when their type is a ref struct. UnscopedRefAttribute can be used to override that.
+
 ### Metadata
 
-In metadata `params` parameters are marked with `System.ParamArrayAttribute` as `params` arrays are marked today.
+In metadata we could mark non-array `params` parameters with `System.ParamArrayAttribute`, as `params` arrays are marked today.
+However, it looks like we will be much safer to use a different attribute for non-array `params` parameters.
+For example, the current VB compiler will not be able to consume them decorated with `ParamArrayAttribute` neither in normal, nor in expanded form. Therefore, an addition of 'params' modifier is likely to break VB consumers, and very likely consumers from other languages or tools.
+
+Given that, non-array `params` parameters are marked with a new `System.Runtime.CompilerServices.ParamCollectionAttribute`.
+```
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
+    public sealed class ParamCollectionAttribute : Attribute
+    {
+        public ParamCollectionAttribute() { }
+    }
+}
+```
+
+> This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#metadata-format)
+> and was approved.
 
 ## Open questions
 
@@ -510,7 +559,7 @@ Should the language be unspecified to allow for this flexibility?
 We should follow the spec for [`params Span<T>`](https://github.com/dotnet/csharplang/issues/1757)." It sounds like we have to answer
 the questions in context of this proposal.
 
-### Implicitly `scoped` params
+### [Resolved] Implicitly `scoped` params 
 
 There was a suggestion that, when `params` modifies a `ref struct` parameter, it should be considered as declared `scoped`.
 The argument is made that number of cases where you want the parameter to be scoped is virtually 100% when looking through
@@ -518,6 +567,75 @@ the BCL cases. In a few cases that need that, the default could be overwritten w
 
 However, it might be undesirable to change the default simply based on presence of `params` modifier. Especially, that
 in overrides/implements scenarios `params` modifier doesn't have to match.
+
+#### Resolution:
+Params parameters are implicitly scoped - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements.
+
+### [Resolved] Consider enforcing `scoped` or `params` across overrides
+
+We've previously stated that `params` parameters should be `scoped` by default. However, this introduces odd behavior in overridding, due
+to our existing rules around restating `params`:
+
+```cs
+class Base
+{
+    internal virtual Span<int> M1(scoped Span<int> s1, params Span<int> s2) => throw null!;
+}
+
+class Derived : Base
+{
+    internal override Span<int> M1(Span<int> s1, // Error, missing `scoped` on override
+                                   Span<int> s2  // No error: parameter is implicitly params, and therefore implicitly scoped
+                                  ) => throw null!;
+}
+```
+
+We have a difference in behavior between carrying the `params` and carrying the `scoped` across overrides here: `params` is inherited implicitly,
+and with it `scoped`, while `scoped` by itself is _not_ inherited implicitly and must be repeated at every level.
+
+**Proposal**: We should enforce that overrides of `params` parameters must explicitly state `params` or `scoped` if the original definition is a
+`scoped` parameter. In other words, `s2` in `Derived` must have `params`, `scoped`, or both.
+
+#### Resolution:
+
+We will require explicitly stating `scoped` or `params` on override of a `params` parameter when a non-`params` parameter would be required to do so -
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#params-and-scoped-across-overrides.
+
+### [Resolved] Should presence of required members prevent declaration of `params` parameter?
+
+Consider the following example:
+``` C#
+using System.Collections;
+using System.Collections.Generic;
+
+public class MyCollection1 : IEnumerable<long>
+{
+    IEnumerator<long> IEnumerable<long>.GetEnumerator() => throw null;
+    IEnumerator IEnumerable.GetEnumerator() => throw null;
+    public void Add(long l) => throw null;
+
+    public required int F; // Collection has required member and constructor doesn't initialize it explicitly
+}
+
+class Program
+{
+    static void Main()
+    {
+        Test(2, 3); // error CS9035: Required member 'MyCollection1.F' must be set in the object initializer or attribute constructor.
+    }
+
+    // Should an error be reported for the parameter indicating that the constructor that is required
+    // to be available doesn't initialize required members? In other words, should one be able
+    // to declare such a parameter under the specified conditions?
+    static void Test(params MyCollection1 a)
+    {
+    }
+}
+```
+#### Resolution:
+
+We will validate `required` members against the constructor that is used to determine eligibility to be a `params` parameter at the declaration site -
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#required-members-and-params-parameters.
 
 ## Alternatives 
 
@@ -532,3 +650,13 @@ especially that other languages are unlikely to support consumption of non-array
 ## Related proposals
 - https://github.com/dotnet/csharplang/issues/1757
 - https://github.com/dotnet/csharplang/blob/main/proposals/format.md#extending-params
+ 
+## Related design meetings
+
+- https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#params-improvements
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md#params-collections-evaluation-orders
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-21.md#params-collections
+
