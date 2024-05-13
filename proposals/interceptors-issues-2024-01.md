@@ -82,3 +82,8 @@ Any change we make in this vein, we should be careful has no possibility for "ri
 We would also need to define how the type arguments to the `M3<T>` call are determined. This might require doing a type argument inference on the intercepted "version" of the call.
 
 There are more specifics which need to be investigated here before we can be sure how to move forward. ASP.NET has indicated this can wait till later in the .NET 9 cycle, so we'd like to push this question out until we've addressed the more urgent aspects of the feature design.
+
+### Design meetings
+
+https://github.com/dotnet/csharplang/blob/d5bab90e846f9b3e9a7a4e552249643148f0194d/meetings/2024/LDM-2024-04-15.md#interceptors
+
