@@ -19,15 +19,21 @@ It also pushes us toward an opaque representation of "interceptable locations". 
 See https://github.com/dotnet/roslyn/issues/72133 for further details on the public API design.
 https://github.com/RikkiGibson/roslyn/blob/interceptablelocation/docs/features/interceptors.md includes more precise details on the location format.
 
+**Resolution**: The described design was approved by LDM on [2024-04-15](https://github.com/dotnet/csharplang/blob/d5bab90e846f9b3e9a7a4e552249643148f0194d/meetings/2024/LDM-2024-04-15.md#interceptors).
+
 ## Need for interceptor semantic info in IDE
 
 We added public API which allows determining if a call in a compilation is being intercepted, and if so, which method declaration is decorated with the InterceptsLocationAttribute referencing the call.
 
 See https://github.com/dotnet/roslyn/issues/72093 for further details.
 
+**Resolution**: No LDM decision here, this was informational to help LDM understand the larger context which the design sits in.
+
 ### `<InterceptorsNamespaces>` property
 
 We introduced an MSBuild property `<InterceptorsPreviewNamespaces>` as part of the experimental release of the interceptors feature. A compilation error occurs if an interceptor is declared outside of one of the namespaces listed in this property. We suggest keeping this property under the name `<InterceptorsNamespaces>`, eventually phasing out the original name. This will help us get a better level of performance with the `GetInterceptorMethod` public API, by reducing the set of declarations which need to be searched for possible `[InterceptsLocation]` attributes.
+
+**Not yet resolved.** As of 2024-05-13 the property is still present in the implementation as `<InterceptorsPreviewNamespaces>`. We'll seek confirmation with LDM whether to proceed with the suggested requirement that generators and/or users specify `<InterceptorsNamespaces>` (perhaps phasing out the use of the original property name).
 
 ## Future (possibly post-C# 13)
 
@@ -85,5 +91,5 @@ There are more specifics which need to be investigated here before we can be sur
 
 ### Design meetings
 
-https://github.com/dotnet/csharplang/blob/d5bab90e846f9b3e9a7a4e552249643148f0194d/meetings/2024/LDM-2024-04-15.md#interceptors
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-15.md#interceptors
 
