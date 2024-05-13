@@ -33,7 +33,7 @@ follows (change in **bold**):
 > 
 > - First, the set of candidate function members is reduced to those function members that are applicable with respect to the given argument list ([§12.6.4.2](expressions.md#12642-applicable-function-member)). If this reduced set is empty, a compile-time error occurs.
 > - **Then, the reduced set of candidate members is grouped by declaring type. Within each group:**
->     - **Candidate function members are ordered by ***overload_resolution_priority***.
+>     - **Candidate function members are ordered by ***overload_resolution_priority***. If the member is an override, the ***overload_resolution_priority*** comes from the least-derived declaration of that member.**
 >     - **All members that have a lower ***overload_resolution_priority*** than the highest found within its declaring type group are removed.**
 > - **The reduced groups are then recombined into the final set of applicable candidate function members.**
 > - Then, the best function member from the set of applicable candidate function members is located. If the set contains only one function member, then that function member is the best function member. Otherwise, the best function member is the one function member that is better than all other function members with respect to the given argument list, provided that each function member is compared to all other function members using the rules in [§12.6.4.3](expressions.md#12643-better-function-member). If there is not exactly one function member that is better than all other function members, then the function member invocation is ambiguous and a binding-time error occurs.
@@ -80,7 +80,33 @@ class Derived : Base
 
 Negative numbers are allowed to be used, and can be used to mark a specific overload as worse than all other default overloads.
 
-**Open Question**: As currently worded, extension methods are ordered by priority _only within their own type_. For example:
+The **overload_resolution_priority** of a member comes from the least-derived declaration of that member.
+
+### `System.Runtime.CompilerServices.OverloadResolutionPriorityAttribute`
+
+We introduce the following attribute to the BCL:
+
+```cs
+namespace System.Runtime.CompilerServices;
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+public sealed class OverloadResolutionPriorityAttribute(int priority) : Attribute
+{
+    public int Priority => priority;
+}
+```
+
+All methods in C# have a default ***overload_resolution_priority*** of 0, unless they are attributed with `OverloadResolutionPriorityAttribute`. If they are
+attributed with that attribute, then their ***overload_resolution_priority*** is the integer value provided to the first argument of the attribute.
+
+It is an error to apply `OverloadResolutionPriorityAttribute` to a non-indexer property, or to property, indexer, or event accessors. Attributes encountered on
+these locations in metadata are ignored by C#.
+
+## Open Questions
+
+### Extension method grouping (answered)
+
+As currently worded, extension methods are ordered by priority _only within their own type_. For example:
 
 ```cs
 new C2().M([1, 2, 3]); // Will print Ext2 ReadOnlySpan
@@ -104,28 +130,70 @@ class C2 {}
 
 When doing overload resolution for extension members, should we not sort by declaring type, and instead consider all extensions within the same scope?
 
-### `System.Runtime.CompilerServices.OverloadResolutionPriorityAttribute`
+#### Answer
 
-We introduce the following attribute to the BCL:
+We will always group. The above example will print `Ext2 ReadOnlySpan`
+
+### Attribute inheritance on overrides (answered)
+
+Should the attribute be inherited? If not, what is the priority of the overriding member?  
+If the attribute is specified on a virtual member, should an override of that member be required to repeat the attribute?  
+
+#### Answer
+
+The attribute will not be marked as inherited. We will look at the least-derived declaration of a member to determine its overload resolution priority.
+
+### Application error or warning on override
 
 ```cs
-namespace System.Runtime.CompilerServices;
-
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-public sealed class OverloadResolutionPriorityAttribute(int priority)
+class Base
 {
-    public int Priority => priority;
+    [OverloadResolutionPriority(1)] public virtual void M() {}
+}
+class Derived
+{
+    [OverloadResolutionPriority(2)] public override void M() {} // Warn or error for the useless and ignored attribute?
 }
 ```
 
-**Open question**: Should the attribute be inherited? If not, what is the priority of the overriding member?  
-**Open question**: If the attribute is specified on a virtual member, should an override of that member be required to repeat the attribute?  
+Which should we do on the application of a `OverloadResolutionPriorityAttribute` in a context where it is ignored, such as an override:
 
-All methods in C# have a default ***overload_resolution_priority*** of 0, unless they are attributed with `OverloadResolutionPriorityAttribute`. If they are
-attributed with that attribute, then their ***overload_resolution_priority*** is the integer value provided to the first argument of the attribute.
+1. Do nothing, let it silently be ignored.
+2. Issue a warning that the attribute will be ignored.
+3. Issue an error that the attribute is not allowed.
 
-It is an error to apply `OverloadResolutionPriorityAttribute` to a non-indexer property, or to property, indexer, or event accessors. Attributes encountered on
-these locations in metadata are ignored by C#.
+3 is the most cautious approach, if we think there may be a space in the future where we might want to allow an override to specify this attribute.
+
+### Implicit interface implementation
+
+What should the behavior of an implicit interface implementation be? Should it be required to specify `OverloadResolutionPriority`? What should the behavior of the compiler be when it encounters
+an implicit implementation without a priority? This will nearly certainly happen, as an interface library may be updated, but not an implementation. Prior art here with `params` is to not specify,
+and not carry over the value:
+
+```cs
+using System;
+
+var c = new C();
+c.M(1, 2, 3); // error CS1501: No overload for method 'M' takes 3 arguments
+((I)c).M(1, 2, 3);
+
+interface I
+{
+    void M(params int[] ints);
+}
+
+class C : I
+{
+    public void M(int[] ints) { Console.WriteLine("params"); }
+}
+```
+
+Our options are:
+
+1. Follow `params`. `OverloadResolutionPriorityAttribute` will not be implicitly carried over or be required to be specified.
+2. Carry over the attribute implicitly.
+3. Do not carry over the attribute implicitly, require it to be specified at the call site.
+   1. This brings an extra question: what should the behavior be when the compiler encounters this scenario with compiled references?
 
 ## Alternatives
 [alternatives]: #alternatives
