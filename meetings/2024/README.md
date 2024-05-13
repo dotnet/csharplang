@@ -4,8 +4,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-## Schedule when convenient
+- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
 
+## Schedule when convenient
 
 ## Recurring topics
 
@@ -39,13 +40,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Dictionary expressions: KeyValuePair correspondence (Cyrus)
 - Dictionary expressions: [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#conversions) (Chuck)
 
+## C# Language Design Notes for 2024
+
 ### Mon May 13, 2024
 
-- First-class span types: [delegate conversions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#delegate-signature-matching) (Jan/Chuck/Fred)
-- [Open questions in overload resolution priority](https://github.com/dotnet/csharplang/issues/7706) (Fred)
-- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
+[C# Language Design Meeting for May 13th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-13.md)
 
-## C# Language Design Notes for 2024
+- First-class span types questions
+    - Delegate conversions
+    - Variant conversion existence
+- Overload resolution priority questions
+    - Attribute shape and inheritance
+    - Extension overload resolution
 
 ### Wed May 8, 2024
 
