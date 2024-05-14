@@ -60,6 +60,9 @@ as if the `T` was declared as `out T` in some scenarios. We do not, however, plu
 variance-convertible in [§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion). If in the future, we change the runtime
 to more deeply understand the variance here, we can take the minor breaking change to fully recognize it in the language.
 
+This conversion will always exist, regardless of whether any runtime helpers used to implement it are present. If the helper is not present, attempting to use the conversion will result
+in an error that a compiler-required member is missing.
+
 Practically, this will also mean that in pattern matching for generic scenarios, we'd have behavior as follows:
 
 ```cs
@@ -248,7 +251,7 @@ namespace N2
 
 ## Open questions
 
-### Delegate signature matching
+### Delegate signature matching (answered)
 
 Should we allow variance conversion in delegate signature matching? For example:
 
@@ -278,6 +281,10 @@ D4 d4 = M4; // Convert void(object[]) to void(string[])
 
 These conversions may not be possible to do without creating a wrapper lambda without runtime changes; the existing variant delegate conversions are possible to emit
 without needing to create wrappers. We don't have precedent in the language for silent wrappers like this, and generally require users to create such wrapper lambdas themselves.
+
+#### Answer
+
+We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d2 = M2;` will not compile. We could reconsider at a later point if use cases are discovered.
 
 ## Alternatives
 
