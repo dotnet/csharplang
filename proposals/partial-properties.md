@@ -70,6 +70,14 @@ A partial property cannot explicitly implement interface properties.
 
 Similar to partial methods, the attributes in the resulting property are the combined attributes of the parts are concatenated in an unspecified order, and duplicates are not removed.
 
+### Caller-info attributes
+We adjust the following language from the [standard](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/attributes.md#22551-general):
+
+> It is an error to have the same caller-info attribute on a parameter of both the defining and implementing part of a partial ~~method~~ **member** declaration. Only caller-info attributes in the defining part are applied, whereas caller-info attributes occurring only in the implementing part are ignored.
+
+- The described error falls out from the definitions of these attributes not having `AllowMultiple = true`. Using them multiple times, including across partial declarations, results in an error.
+- When caller-info attributes are applied to a parameter in the implementation part of a partial method, the Roslyn compiler reports a warning. It will also report a warning for the same scenario in a partial property.
+
 ### Matching signatures
 
 The LDM meeting on [14th September 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-09-14.md#partial-method-signature-matching) defined a set of "strict" requirements for signature matching of partial methods, which were introduced in a warning wave. Partial properties have analogous requirements to partial methods for signature matching as much as is possible, except that all of the diagnostics for mismatch are reported by default, and are not held behind a warning wave.
