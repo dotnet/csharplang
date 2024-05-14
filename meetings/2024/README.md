@@ -8,6 +8,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
