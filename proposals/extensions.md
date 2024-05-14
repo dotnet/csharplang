@@ -1219,34 +1219,68 @@ implicit extension E for int
 
 # Implementation details
 
-TODO3(static) revise this to use a regular struct
+Extensions are emitted as structs with an extension marker method and an instance field for non-static extensions.  
+The type is marked with Obsolete and CompilerFeatureRequired attributes.  TODO we'll need to relax that
 
-struct Extension
-{
-  UnderlyingType underlyingValue;
-}
-// Avoid copying via Unsafe.As 
+## Marker method
 
-Extensions are implemented as ref structs with an extension marker method.  
-The type is marked with Obsolete and CompilerFeatureRequired attributes.  
 The extension marker method encodes the underlying type and base extensions as parameters in that order.  
-The marker method is called `<ImplicitExtension>$` for implicit extensions and 
+It is private and static, and is called `<ImplicitExtension>$` for implicit extensions and 
 `<ExplicitExtension>$` for explicit extensions.  
+
 For example: `implicit extension R for UnderlyingType : BaseExtension1, BaseExtension2` yields
 `private static void <ImplicitExtension>$(UnderlyingType, BaseExtension1, BaseExtension2)`.  
 
-If the extension has any instance member, then we emit a ref field (of underlying type)
-into the ref struct and a constructor.  
-TODO2(instance) The wrapping can be done with a static unspeakable factory method  
+## Instance field
 
-Values of extension types are left as values of the underlying value type, until an extension
-member is accessed. When an extension member is accessed, an extension instance is created
-with a reference to the underlying value and the member is accessed on that instance.
+If the extension not static, then we emit a private instance field of the underlying type
+into the struct.  
+We use the default layout for structs (sequential layout, with pack and size 0)
+ensuring that the single instance field is placed at offset zero.
 
+Note: Although we could not find an explicit statement to that effect,
+this behavior falls out from ECMA 335 (II.10.1.2), which states for sequential layout:
+> The CLI shall lay out the fields in sequential order, based on the order of the fields in the logical metadata table (§II.22.15).
+
+> [Rationale: ... sequential layout is intended to instruct the CLI to match layout rules commonly followed by languages like C and C++
+> on an individual platform, where this is possible while still guaranteeing verifiable layout. ...]
+
+and from the C99 standard section 6.7.2.1 bullet point 13 (gated):
+
+> Within a structure object, the non-bit-field members and the units in which bit-fields 
+> reside have addresses that increase in the order in which they are declared. 
+> A pointer to a structure object, suitably converted, points to its initial member 
+> (or if that member is a bit-field, then to the unit in which it resides), 
+> and vice versa. There may be unnamed padding within a structure object, but not at its beginning.
+
+For example `implicit extension E for UnderlyingType` yields
+```csharp
+struct E
+{
+	private UnderlyingType <UnderlyingInstance>$;
+	private static void <ImplicitExtension>$(UnderlyingType) { }
+}
 ```
-Extension r = default(UnderlyingType); // emitted as a local of type `UnderlyingType`
-r.ExtensionMember(); // emitted as `new Extension(ref r).ExtensionMember();`
-```
+
+## Instance invocations
+
+The design and layout of the instance field will allow us to re-interpret an instance of `UnderlyingType`
+as an instance of `E` with `public static ref TTo Unsafe.As<TFrom,TTo>(ref TFrom source)`.  
+
+If the receiver of an extension member invocation on a value of the underlying type is `r`,
+we will replace it with `Unsafe.As<UnderlyingType, E>(ref r)`.
+If `r` does not refer to a location, a temporary variable will be created and initialized, and its reference
+will be used.
+
+The re-interpreted receiver will be only computed once where possible. For example, in a compound assignment
+`r.P += value;`.
+
+TODO we may wrap this method in a compiler-generated helper to increase verifiability of the generated code.  
+TODO there is also a verifiability issue with taking a reference to `this` (which is readonly)
+
+## Type references
+
+TODO4 this section is not finalized
 
 Extensions appearing in signatures are emitted as the extension's underlying type
 marked with a modopt of the extension type.
@@ -1254,8 +1288,6 @@ marked with a modopt of the extension type.
 ```
 void M(Extension r) // emitted as `void M(modopt(Extension) UnderlyingType r)`
 ```
-
-TODO(static) issues in async code with ref structs
 
 ## Phases 
 
