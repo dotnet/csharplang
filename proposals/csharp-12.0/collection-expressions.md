@@ -5,7 +5,7 @@
 ## Summary
 [summary]: #summary
 
-Collection expressions introduce a new terse syntax, `[e1, e2, e3, etc]`, to create common collection values.  Inlining other collections into these values is possible using a spread operator `..` like so: `[e1, ..c2, e2, ..c2]`.
+Collection expressions introduce a new terse syntax, `[e1, e2, e3, etc]`, to create common collection values.  Inlining other collections into these values is possible using a spread element `..` syntax like so: `[e1, ..c2, e2, ..c2]`.
 
 Several collection-like types can be created without requiring external BCL support.  These types are:
 
