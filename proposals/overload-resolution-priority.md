@@ -18,6 +18,16 @@ resolution failures when there is a perfectly good alternative, but that alterna
 overload resolution to end early without ever considering the good member. For this purpose, we want to have a way for API authors to guide overload resolution on resolving the
 ambiguity, so that they can evolve their API surface areas and steer users towards performant APIs without having to compromise the user experience.
 
+The Base Class Libraries (BCL) team has several examples of where this can prove useful. Some (hypothetical) examples are:
+* Creating an overload of `Debug.Assert` that uses `CallerArgumentExpression` to get the expression being asserted, so that it can be included in the message, and make it preferred
+  over the existing overload.
+* Making `string.IndexOf(string, StringComparison = Ordinal)` preferred over `string.IndexOf(string)`. This would have to be discussed as a potential breaking change, but there
+  is some thought that it is the better default, and more likely to be what the user intended.
+* A combination of this proposal and [`CallerAssemblyAttribute`](https://github.com/dotnet/csharplang/issues/4984) would allow methods that have an implicit caller identity to
+  avoid expensive stack walks. `Assembly.Load(AssemblyName)` does this today, and it could be much more efficient.
+* `Microsoft.Extensions.Primitives.StringValues` exposes an implicit conversion to both `string` and `string[]`. This means that it is ambiguous when passed to a method with both
+  `params string[]` and `params ReadOnlySpan<string>` overloads. This attribute could be used to prioritize one of the overloads to prevent the ambiguity.
+
 ## Detailed Design
 [detailed-design]: #detailed-design
 
@@ -101,6 +111,44 @@ attributed with that attribute, then their ***overload_resolution_priority*** is
 
 It is an error to apply `OverloadResolutionPriorityAttribute` to a non-indexer property, or to property, indexer, or event accessors. Attributes encountered on
 these locations in metadata are ignored by C#.
+
+### Callability of members
+
+An important caveat for `OverloadResolutionPriorityAttribute` is that it can make certain members effectively uncallable from source. For example:
+
+```cs
+using System.Runtime.CompilerServices;
+
+int i = 1;
+var c = new C3();
+c.M1(i); // Will call C3.M1(long), even though there's an identity conversion for M1(int)
+c.M2(i); // Will call C3.M2(int, string), even though C3.M1(int) has less default parameters
+
+class C3
+{
+    public void M1(int i) {}
+    [OverloadResolutionPriority(1)]
+    public void M1(long l) {}
+
+    [Conditional("DEBUG")]
+    public void M2(int i) {}
+    [OverloadResolutionPriority(1), Conditional("DEBUG")]
+    public void M2(int i, [CallerArgumentExpression(nameof(i))] string s = "") {}
+
+    public void M3(string s) {}
+    [OverloadResolutionPriority(1)]
+    public void M2(object o) {}
+}
+```
+
+For these examples, the default priority overloads effectively become vestigal, and only callable through a few steps that take some extra effort:
+* Converting the method to a delegate, and then using that delegate.
+    * For some reference type variance scenarios, such as `M3(object)` that is prioritized over `M3(string)`, this strategy will fail.
+    * Conditional methods, such as `M2`, would also not be callable with this strategy, as conditional methods cannot be converted to delegates.
+* Using the `UnsafeAccessor` runtime feature to call it via matching signature.
+* Manually using reflection to obtain a reference to the method and then invoking it.
+* Code that is not recompiled will continue to call old methods.
+* Handwritten IL can specify whatever it chooses.
 
 ## Open Questions
 
