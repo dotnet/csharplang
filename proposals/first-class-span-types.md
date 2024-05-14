@@ -284,7 +284,7 @@ without needing to create wrappers. We don't have precedent in the language for 
 
 #### Answer
 
-We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d2 = M2;` will not compile.
+We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d2 = M2;` will not compile. We could reconsider at a later point if use cases are discovered.
 
 ## Alternatives
 
