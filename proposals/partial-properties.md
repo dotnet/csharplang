@@ -127,6 +127,54 @@ partial class C4
 }
 ```
 
+### Documentation comments
+
+We want the behavior of doc comments on partial properties to be consistent with what we shipped for partial methods. That behavior is detailed in https://github.com/dotnet/csharplang/issues/5193.
+
+It is permitted to include doc comments on either the partial or implementation part of a partial property. (Note that doc comments are not supported on property accessors.)
+
+When doc comments are present on only one of the parts of the property, those doc comments are used normally (surfaced through `ISymbol.GetDocumentationCommentXml()`, written out to the documentation XML file, etc.).
+
+When doc comments are present on both parts, all the doc comments on the definition part are dropped, and only the doc comments on the implementation part are used.
+
+For example, the following program:
+```cs
+/// <summary>
+/// My type
+/// </summary>
+partial class C
+{
+    /// <summary>Definition part comment</summary>
+    /// <returns>Return value comment</returns>
+    public partial int Prop { get; set; }
+    
+    /// <summary>Implementation part comment</summary>
+    public partial int Prop { get => 1; set { } }
+}
+```
+
+Results in the following XML documentation file:
+```xml
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ConsoleApp1</name>
+    </assembly>
+    <members>
+        <member name="T:C">
+            <summary>
+            My type
+            </summary>
+        </member>
+        <member name="P:C.Prop">
+            <summary>
+            Implementation part comment
+            </summary>
+        </member>
+    </members>
+</doc>
+```
+
 ### Indexers
 
 Per [LDM meeting on 2nd November 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-11-02.md#partial-properties), indexers will be supported with this feature.
