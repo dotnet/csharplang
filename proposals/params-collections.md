@@ -1,5 +1,7 @@
 # `params Collections`
 
+[!INCLUDE[Specletdisclaimer](speclet-disclaimer.md)]
+
 ## Summary
 
 In C# 12 language added support for creating instances of collection types beyond just arrays.
