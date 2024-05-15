@@ -131,7 +131,7 @@ partial class C4
 
 We want the behavior of doc comments on partial properties to be consistent with what we shipped for partial methods. That behavior is detailed in https://github.com/dotnet/csharplang/issues/5193.
 
-It is permitted to include doc comments on either the partial or implementation part of a partial property. (Note that doc comments are not supported on property accessors.)
+It is permitted to include doc comments on either the definition or implementation part of a partial property. (Note that doc comments are not supported on property accessors.)
 
 When doc comments are present on only one of the parts of the property, those doc comments are used normally (surfaced through `ISymbol.GetDocumentationCommentXml()`, written out to the documentation XML file, etc.).
 
