@@ -99,7 +99,7 @@ There is also an open question below about participation in delegate signature m
 The conversions will always exist, regardless of whether any runtime helpers used to implement them are present.
 If the helpers are not present, attempting to use the conversion will result in a compile-time error that a compiler-required member is missing.
 
-The compiler will use the following helpers to implement the conversions:
+The compiler expects to use the following helpers or equivalents to implement the conversions:
 
 | Conversion | Helpers |
 |---|---|
