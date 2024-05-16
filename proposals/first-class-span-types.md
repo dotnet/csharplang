@@ -62,9 +62,6 @@ as if the `T` was declared as `out T` in some scenarios. We do not, however, plu
 variance-convertible in [§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion). If in the future, we change the runtime
 to more deeply understand the variance here, we can take the minor breaking change to fully recognize it in the language.
 
-This conversion will always exist, regardless of whether any runtime helpers used to implement it are present. If the helper is not present, attempting to use the conversion will result
-in an error that a compiler-required member is missing.
-
 Practically, this will also mean that in pattern matching for generic scenarios, we'd have behavior as follows:
 
 ```cs
@@ -96,6 +93,21 @@ void M<T>(T t)
 ```
 
 There is also an open question below about participation in delegate signature matching.
+
+#### Code generation
+
+The conversions will always exist, regardless of whether any runtime helpers used to implement them are present.
+If the helpers are not present, attempting to use the conversion will result in a compile-time error that a compiler-required member is missing.
+
+The compiler will use the following helpers to implement the conversions:
+
+| Conversion | Helpers |
+|---|---|
+| array to Span | `Span<T>.ctor(T[])` |
+| array to ReadOnlySpan | `ReadOnlySpan<T>.ctor(T[])` |
+| Span to ReadOnlySpan | `static implicit operator ReadOnlySpan<T>(Span<T>)` (defined in `Span<T>`) and `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
+| ReadOnlySpan to ReadOnlySpan | `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
+| string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
 
 ### Type inference
 
