@@ -19,6 +19,8 @@ having the language more directly recognize these types and conversions.
 
 ## Detailed Design
 
+The changes in this proposal will be tied to `LangVersion >= 13`.
+
 ### Implicit Span Conversions
 
 We add a new type of implicit conversion to the list in [§10.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1021-general), an
