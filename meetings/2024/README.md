@@ -35,8 +35,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Fri May 31, 2024
 
-### Mon May 20, 2024
-
 ### Wed May 15, 2024
 
 - Dictionary expressions: KeyValuePair correspondence (Cyrus)
