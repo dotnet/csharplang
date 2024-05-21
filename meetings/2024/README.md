@@ -35,12 +35,19 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Fri May 31, 2024
 
-### Wed May 15, 2024
-
-- Dictionary expressions: KeyValuePair correspondence (Cyrus)
-- Dictionary expressions: [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#conversions) (Chuck)
 
 ## C# Language Design Notes for 2024
+
+### Wed May 15, 2024
+
+[C# Language Design Meeting for May 15th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md)
+
+- `field` and `value` as contextual keywords
+  - Usage in `nameof`
+  - Should `value` be a keyword in a property or indexer get? Should `field` be a keyword in an indexer?
+  - Should `field` and `value` be considered keywords in lambdas and local functions within property accessors?
+  - Should `field` and `value` be keywords in property or accessor signatures? What about `nameof` in those spaces?
+- Dictionary expressions
 
 ### Mon May 13, 2024
 
