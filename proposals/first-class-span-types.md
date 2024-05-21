@@ -62,37 +62,46 @@ as if the `T` was declared as `out T` in some scenarios. We do not, however, plu
 variance-convertible in [§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion). If in the future, we change the runtime
 to more deeply understand the variance here, we can take the minor breaking change to fully recognize it in the language.
 
-Practically, this will also mean that in pattern matching for generic scenarios, we'd have behavior as follows:
-
-```cs
-using System;
-
-M<object[]>(["0"]); // Does not print
-M<ReadOnlySpan<string>>(["1"]); // Does not print
-M<Span<object>>(["2"]); // Does not print
-M<ReadOnlySpan<object>>(["3"]); // Prints
-
-void M<T>(T t) where T : allows ref struct
-{
-    if (t is ReadOnlySpan<object> r) Console.WriteLine(r[0]);
-}
-```
-
-In array variance scenarios, this pattern would return true for all reference type arrays:
-
-```cs
-using System;
-
-M<object[]>(["0"]); // Prints
-M<string[]>(["1"]); // Prints
-
-void M<T>(T t)
-{
-    if (t is object[] r) Console.WriteLine(r[0]);
-}
-```
-
 There is also an open question below about participation in delegate signature matching.
+
+#### Patterns
+
+Note that `ref struct`s are not supported in patterns, except for trivial identity patterns:
+
+```cs
+class C<T> where T : allows ref struct
+{
+    void M1(T t) { if (t is T x) { } } // ok
+    void M2(R r) { if (r is R x) { } } // ok
+    void M3(T t) { if (t is R x) { } } // error
+    void M4(R r) { if (r is T x) { } } // error
+}
+ref struct R { }
+```
+
+From the specification of *the is-type operator* ([§12.12.12.1][is-type-operator]):
+
+> If `T` is a non-nullable value type, the result is `true` if `D` and `T` are the same type.
+
+This behavior does not change with this feature, hence it will not be possible to write patterns for `Span`/`ReadOnlySpan`,
+although similar patterns are possible for arrays (including variance):
+
+```cs
+using System;
+
+M1<object[]>(["0"]); // prints
+M1<string[]>(["1"]); // prints
+
+void M1<T>(T t)
+{
+    if (t is object[] r) Console.WriteLine(r[0]); // ok
+}
+
+void M2<T>(T t) where T : allows ref struct
+{
+    if (t is ReadOnlySpan<object> r) Console.WriteLine(r[0]); // error
+}
+```
 
 #### Code generation
 
@@ -303,3 +312,5 @@ We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d
 ## Alternatives
 
 Keep things as they are.
+
+[is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator
