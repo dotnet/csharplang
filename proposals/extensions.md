@@ -88,6 +88,78 @@ implicit extension MyTableExtensions for TableIDoNotOwn
 var v = table.Count; // Let's get a read from LDM
 ```
 
+## Open issue: readonly members
+
+Currently, readonly members are disallowed in extensions. This means that
+a `ref readonly` variable cannot be used as a receiver for an extension member without cloning.  
+We should consider allowing `readonly` members and finding a way to adjust the receiver
+to re-interpret a `ref readonly` receiver of the underlying type as a `ref readonly` receiver of the extension type.
+
+```
+var s = new S() { field = 42 };
+M(in s);
+System.Console.Write(s.field); // we can observe whether the receiver was cloned or not
+
+void M(in S s)
+{
+    s.M();
+}
+
+public struct S
+{
+    public int field;
+    public void Increment() { field++; }
+}
+
+public implicit extension E for S
+{
+    public void M() // readonly modifier is currently disallowed
+    {
+        ref S sThis = ref System.Runtime.CompilerServices.Unsafe.As<E, S>(ref this); // re-interpret `this` as not being readonly
+        sThis.Increment();
+    }
+}
+```
+
+## Open issue: type of `this` instance receiver for interpolation handlers
+
+It is possible for an interpolation handler to capture the receiver,
+by specifying an empty argument name: `[InterpolatedStringHandlerArgument("")]`.  
+In such cases, we capture the receiver so that it can be used twice:
+once as receiver, and once as argument to the constructor for interpolation handler.  
+Then the constructor signature needs two integers (`literalLength` and `formattedCount`)
+and one more parameter for the captured receiver/`this` instance.
+
+The extension receiver adjustment replaces the receiver of underlying type
+with a receiver of extension type. We need to decide which one should get captured
+for the interpolation handler.  
+Given that the method with interpolation handler attribute is declared in the extension type
+and the type of `this` within the extension is the extension type itself,
+I think we should capture the adjusted receiver (ie. after `Unsafe.As`).  
+
+Note: even if the interpolation handler uses the underlying type, this should work by virtue
+of the implicit conversion from extension type to underlying type.  
+
+```
+using System;
+using System.Runtime.CompilerServices;
+
+(new object()).M($"literal");
+
+public implicit extension E for object
+{
+    public void M([InterpolatedStringHandlerArgument("")] CustomHandler c) { }
+}
+
+[InterpolatedStringHandler]
+public struct CustomHandler
+{
+    // which type should this last parameter be and which receiver will it be given?
+    public CustomHandler(int literalLength, int formattedCount, E e) { }
+    public bool AppendLiteral(string literal) => true;
+}
+```
+
 ## Summary
 [summary]: #summary
 
