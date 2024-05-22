@@ -62,25 +62,28 @@ as if the `T` was declared as `out T` in some scenarios. We do not, however, plu
 variance-convertible in [§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion). If in the future, we change the runtime
 to more deeply understand the variance here, we can take the minor breaking change to fully recognize it in the language.
 
-There is also an open question below about participation in delegate signature matching.
-
 #### Patterns
 
-Note that `ref struct`s are not supported in patterns, except for trivial identity patterns:
+Note that when `ref struct`s are used as a type in any pattern, only identity conversions are allowed:
 
 ```cs
 class C<T> where T : allows ref struct
 {
-    void M1(T t) { if (t is T x) { } } // ok
-    void M2(R r) { if (r is R x) { } } // ok
-    void M3(T t) { if (t is R x) { } } // error
-    void M4(R r) { if (r is T x) { } } // error
+    void M1(T t) { if (t is T x) { } } // ok (T is T)
+    void M2(R r) { if (r is R x) { } } // ok (R is R)
+    void M3(T t) { if (t is R x) { } } // error (T is R)
+    void M4(R r) { if (r is T x) { } } // error (R is T)
 }
 ref struct R { }
 ```
 
 From the specification of *the is-type operator* ([§12.12.12.1][is-type-operator]):
 
+> The result of the operation `E is T` [...] is a Boolean value indicating whether `E` is non-null and can successfully be converted to type `T`
+> by a reference conversion, a boxing conversion, an unboxing conversion, a wrapping conversion, or an unwrapping conversion.
+>
+> [...]
+>
 > If `T` is a non-nullable value type, the result is `true` if `D` and `T` are the same type.
 
 This behavior does not change with this feature, hence it will not be possible to write patterns for `Span`/`ReadOnlySpan`,
