@@ -109,6 +109,55 @@ The compiler expects to use the following helpers or equivalents to implement th
 | ReadOnlySpan to ReadOnlySpan | `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
 | string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
 
+#### Overload resolution
+
+*Better conversion from expression* ([§12.6.4.5][better-conversion-from-expression]) is updated to prefer implicit span conversions.
+This is based on [collection expressions overload resolution changes][ce-or].
+
+> Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a *better conversion* than `C₂` if one of the following holds:
+>
+> - `E` is a *collection expression* and one of the following holds:
+>   - `T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, and an implicit conversion exists from `E₁` to `E₂`.
+>   - `T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *element type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`.
+>   - `T₁` is not a *span_type*, and `T₂` is not a *span_type*, and an implicit conversion exists from `T₁` to `T₂`.
+> - `E` is not a *collection expression* and one of the following holds:
+>   - `E` exactly matches `T₁` and `E` does not exactly match `T₂`
+>   - `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a better conversion target than `T₂`
+>   - **the rules above do not hold and `C₁` is an implicit span conversion and `C₂` is not an implicit span conversion**
+> - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
+
+Without this rule, the following code that successfully compiled in C# 12 would result in an ambiguity error in C# 13
+because of the new standard implicit conversion from array to ReadOnlySpan applicable to an extension method receiver:
+
+```cs
+using System;
+using System.Collections.Generic;
+
+var a = new int[] { 1, 2, 3 };
+a.M();
+
+static class E
+{
+    public static void M(this IEnumerable<int> x) { }
+    public static void M(this ReadOnlySpan<int> x) { }
+}
+```
+
+The rule also allows introducing new APIs that would previously result in ambiguities, for example:
+
+```cs
+using System;
+using System.Collections.Generic;
+
+C.M(new int[] { 1, 2, 3 }); // would be ambiguous before
+
+static class C
+{
+    public static void M(IEnumerable<int> x) { }
+    public static void M(ReadOnlySpan<int> x) { } // can be added now
+}
+```
+
 ### Type inference
 
 We update the type inferences section of the specification as follows (changes in **bold**).
@@ -303,3 +352,7 @@ We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d
 ## Alternatives
 
 Keep things as they are.
+
+[better-conversion-from-expression]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#12645-better-conversion-from-expression
+
+[ce-or]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/csharp-12.0/collection-expressions.md#overload-resolution
