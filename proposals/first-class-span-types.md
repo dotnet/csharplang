@@ -115,8 +115,8 @@ The compiler expects to use the following helpers or equivalents to implement th
 
 | Conversion | Helpers |
 |---|---|
-| array to Span | `Span<T>.ctor(T[])` |
-| array to ReadOnlySpan | `ReadOnlySpan<T>.ctor(T[])` |
+| array to Span | `static implicit operator Span<T>(T[])` (defined in `Span<T>`) |
+| array to ReadOnlySpan | `static implicit operator ReadOnlySpan<T>(T[])` (defined in `ReadOnlySpan<T>`) |
 | Span to ReadOnlySpan | `static implicit operator ReadOnlySpan<T>(Span<T>)` (defined in `Span<T>`) and `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
 | ReadOnlySpan to ReadOnlySpan | `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
 | string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
