@@ -10,6 +10,14 @@ Two common scenarios are that you want to apply a constraint on the setter, ensu
 
 In these cases by now you always have to create an instance field and write the whole property yourself.  This not only adds a fair amount of code, but it also leaks the `field` into the rest of the type's scope, when it is often desirable to only have it be available to the bodies of the accessors.
 
+## Glossary
+
+- **Auto property**: Short for "automatically implemented property" ([§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties)). Accessors on an auto property have no body. The implementation and backing storage are both provided by the compiler.
+
+- **Auto accessor**: Short for "automatically implemented accessor." This is an accessor that has no body. The implementation and backing storage are both provided by the compiler.
+
+- **Full accessor**: This is an accessor that has a body. The implementation is not provided by the compiler, though the backing storage may still be (as in the example `set => field = value;`).
+
 ## Detailed design
 
 For properties with an `init` accessor, everything that applies below to `set` would apply instead to the `init` accessor.
