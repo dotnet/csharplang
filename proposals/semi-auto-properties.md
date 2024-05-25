@@ -111,13 +111,11 @@ Properties with initializers may use `field`. The backing field is directly init
 
 Calling a setter for an initializer is not an option; initializers are processed before calling base constructors, and it is illegal to call any instance method before the base constructor is called. This is also important for default initialization/definite assignment of structs.
 
-This luckily gives control over whether or not you want to initialize the backing field directly or call the property setter: if you want to initialize without calling the setter, you use a property initializer. If you want to initialize by calling the setter, you use assign the property an initial value in the constructor.
+This yields flexible control over initialization. If you want to initialize without calling the setter, you use a property initializer. If you want to initialize by calling the setter, you use assign the property an initial value in the constructor.
 
-Here's an example of where this is useful. The `field` keyword will find a lot of its use with view models because of the neat solution it brings for the `INotifyPropertyChanged` pattern. View model property setters are likely to be databound to UI and likely to cause change tracking or trigger other behaviors. The following code needs to initialize the default value of `IsActive` without setting `HasPendingChanges` to `true`:
+Here's an example of where this is useful. We believe the `field` keyword will find a lot of its use with view models because of the elegant solution it brings for the `INotifyPropertyChanged` pattern. View model property setters are likely to be databound to UI and likely to cause change tracking or trigger other behaviors. The following code needs to initialize the default value of `IsActive` without setting `HasPendingChanges` to `true`:
 
 ```cs
-using System.Runtime.CompilerServices;
-
 class SomeViewModel
 {
     public bool HasPendingChanges { get; private set; }
@@ -126,7 +124,9 @@ class SomeViewModel
 
     private bool Set<T>(ref T location, T value)
     {
-        if (RuntimeHelpers.Equals(location, value)) return false;
+        if (RuntimeHelpers.Equals(location, value))
+            return false;
+
         location = value;
         HasPendingChanges = true;
         return true;
@@ -221,7 +221,7 @@ class C
 }
 ```
 
-In the same vein as how `var` infers as nullable for reference types, the `field` type should be nullable for reference types. This makes sense of `field ??` as not being followed by dead code, and it avoids producing a misleading warning in the following example:
+In the same vein as how `var` infers as nullable for reference types, the `field` type is the nullable type of the property whenever the property's type is not a value type. Otherwise, `field ??` would appear to be followed by dead code, and it avoids producing a misleading warning in the following example:
 
 ```cs
 public string AmbientValue
@@ -237,7 +237,7 @@ public string AmbientValue
 }
 ```
 
-Just like with nullability of `var`, it's expected that such patterns will exist with manually-declared backing fields.
+`var` was designed to declare nullability so that subsequent assignments to the variable could be nullable, due to established patterns in C#. It's expected that the same rationale would apply to property backing fields.
 
 To land in this sweet spot implicitly, without having to write an attribute each time, nullability analysis will combine an inherent nullability of the field with the behavior of `[field: NotNull]`. This allows maybe-null assignments without warning, which is desirable as shown above, while simultaneously allowing a scenario like `=> field.Trim();` without requiring an intervention to silence a warning that `field` could be null. Making sure `field` has been assigned is already covered by the warning that ensures non-nullable properties are assigned by the end of each constructor.
 
@@ -275,7 +275,7 @@ Like with auto properties, properties which use the `field` keyword and override
 
 ### Captures
 
-`field` should be able to be captured in local functions and lambdas, and references to `field` from inside local functions and lambdas should be allowed even if there are no other references ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-21.md#open-question-in-semi-auto-properties)):
+`field` should be able to be captured in local functions and lambdas, and references to `field` from inside local functions and lambdas are allowed even if there are no other references ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-21.md#open-question-in-semi-auto-properties)):
 
 ```cs
 public class C
