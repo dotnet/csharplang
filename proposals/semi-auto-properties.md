@@ -1,14 +1,16 @@
-# Semi-auto-properties (a.k.a. `field` keyword in properties)
+# `field` keyword in properties
 
 ## Summary
-Extend auto-properties to allow them to still have an automatically generated backing field, while still allowing for bodies to be provided for accessors.  Auto-properties can also use a new contextual `field` keyword in their body to refer to the auto-prop field.
+
+Extend all properties to allow them to reference an automatically generated backing field using the new contextual keyword `field`. Properties may now also contain an accessor _without_ a body alongside an accessor _with_ a body.
 
 ## Motivation
-Standard auto-properties only allow for setting or getting the backing field directly, giving some control only by access modifying the accessor methods. Sometimes there is more need to have control over what happens when accessing an auto-property, without being confronted with all overhead of a standard property.
 
-Two common scenarios are that you want to apply a constraint on the setter, ensuring the validity of a value. The other being raising an event that informs about the property going to be changed/having been changed.
+Auto properties only allow for directly setting or getting the backing field, giving some control only by placing access modifiers on the accessors. Sometimes there is a need to have additional control over what happens in one or both accessors, but this confronts users with the overhead of declaring a backing field. The backing field name must then be kept in sync with the property, and the backing field is scoped to the entire class which can result in accidental bypassing of the accessors from within the class.
 
-In these cases by now you always have to create an instance field and write the whole property yourself.  This not only adds a fair amount of code, but it also leaks the `field` into the rest of the type's scope, when it is often desirable to only have it be available to the bodies of the accessors.
+There are two common scenarios in particular: applying a constraint on the setter to ensuring the validity of a value, and raising an event such as `INotifyPropertyChanged.PropertyChanged`.
+
+In these cases by now you always have to create an instance field and write the whole property yourself.  This not only adds a fair amount of code, but it also leaks the backing field into the rest of the type's scope, when it is often desirable to only have it be available to the bodies of the accessors.
 
 ## Glossary
 
@@ -74,7 +76,7 @@ public string LazilyComputed => field ??= Compute();
 public string LazilyComputed { get => field ??= Compute(); }
 ```
 
-As with regular auto-properties, a setter that uses a backing field is disallowed when there is no getter. This restriction could be loosened in the future to allow the setter to do something only in response to changes, by comparing `value` to `field` (see open questions).
+As with auto properties, a setter that uses a backing field is disallowed when there is no getter. This restriction could be loosened in the future to allow the setter to do something only in response to changes, by comparing `value` to `field` (see open questions).
 
 ```cs
 // ❌ Error, will not compile
@@ -83,7 +85,7 @@ As with regular auto-properties, a setter that uses a backing field is disallowe
 
 ### Field-targeted attributes
 
-As with regular auto-properties, any property that uses a backing field in one of its accessors will be able to use field-targeted attributes:
+As with auto properties, any property that uses a backing field in one of its accessors will be able to use field-targeted attributes:
 
 ```cs
 [field: Xyz]
@@ -130,7 +132,7 @@ class SomeViewModel
 }
 ```
 
-This difference in behavior between a property initializer and assigning from the constructor can also be seen with virtual auto-properties in previous versions of the language:
+This difference in behavior between a property initializer and assigning from the constructor can also be seen with virtual auto properties in previous versions of the language:
 
 ```cs
 using System;
@@ -160,7 +162,7 @@ class Derived : Base
 
 ### Constructor assignment
 
-As with existing auto-properties, assignment in the constructor calls the setter if it exists, and if there is no setter it falls back to directly assigning to the backing field.
+As with auto properties, assignment in the constructor calls the setter if it exists, and if there is no setter it falls back to directly assigning to the backing field.
 
 ```cs
 class C
@@ -182,9 +184,9 @@ class C
 
 ### Definite assignment in structs
 
-A semi-auto property will be treated as a regular auto property for the purposes of calculating default backing field initialization if its setter is automatically implemented, or if it does not have a setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#property-assignment-in-structs)).
+A property which uses an automatic backing field will be treated as an auto property for the purposes of calculating default backing field initialization if its setter is automatically implemented, or if it does not have a setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#property-assignment-in-structs)).
 
-Default initialize a struct when calling a manually implemented semi-auto property setter, and issue a warning when doing so, like a regular property setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)).
+Default-initialize a struct when calling a manually implemented setter of a property which uses an automatic backing field, and issue a warning when doing so, like a regular property setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)).
 
 ### Nullability
 
@@ -245,7 +247,7 @@ In places where `field` is a keyword (see the [Shadowing](#shadowing) section), 
 
 Overriding properties may use `field`. Such usages of `field` refer to the backing field for the overriding property, separate from the backing field of the base property if it has one. There is no ABI for exposing the backing field of a base property to overriding classes since this would break encapsulation.
 
-Like with regular auto properties, semi-auto properties that override a base property must override all accessors ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#partial-overrides-of-virtual-properties)).
+Like with auto properties, properties which use the `field` keyword and override a base property must override all accessors ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#partial-overrides-of-virtual-properties)).
 
 ### Shadowing
 
@@ -381,7 +383,7 @@ The following changes are to be made to [§14.7.4](https://github.com/dotnet/csh
 
 ## Open LDM questions
 
-1. If a type does have an existing accessible `field` symbol in scope (like a field called `field`) should there be any way for an auto-prop to still use `field` internally to both create and refer to an auto-prop field.  Under the current rules there is no way to do that.  This is certainly unfortunate for those users, however this is ideally not a significant enough issue to warrant extra dispensation.  The user, after all, can always still write out their properties like they do today, they just lose out from the convenience here in that small case.
+1. If a type does have an existing accessible `field` symbol in scope (like a field called `field`) should there be any way for a property to still use `field` internally to both create and refer to an automatically-implemented backing field.  Under the current rules there is no way to do that.  This is certainly unfortunate for those users, however this is ideally not a significant enough issue to warrant extra dispensation.  The user, after all, can always still write out their properties like they do today, they just lose out from the convenience here in that small case.
 
 1. Which of these scenarios should be allowed to compile? Assume that the "field is never read" warning would apply just like with a manually declared field.
 
