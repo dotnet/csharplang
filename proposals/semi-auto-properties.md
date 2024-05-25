@@ -30,6 +30,8 @@ For properties with an `init` accessor, everything that applies below to `set` w
 
 Both of these principles only apply under the same conditions where `{ get; }` or `{ get; set; }` already declares an auto property ([§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties)). For example, abstract and interface properties are excluded. Indexers also remain unaffected.
 
+"Auto property" will continue to mean a property whose accessors have no bodies. None of the examples below will be considered auto properties.
+
 This means that properties may now mix and match auto accessors with full accessors. For example:
 
 ```cs
