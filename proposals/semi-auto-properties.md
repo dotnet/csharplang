@@ -241,6 +241,24 @@ Just like with nullability of `var`, it's expected that such patterns will exist
 
 To land in this sweet spot implicitly, without having to write an attribute each time, nullability analysis will combine an inherent nullability of the field with the behavior of `[field: NotNull]`. This allows maybe-null assignments without warning, which is desirable as shown above, while simultaneously allowing a scenario like `=> field.Trim();` without requiring an intervention to silence a warning that `field` could be null. Making sure `field` has been assigned is already covered by the warning that ensures non-nullable properties are assigned by the end of each constructor.
 
+This sweet spot does come with the downside that there would be no warning in this situation:
+
+```cs
+public string AmbientValue
+{
+    get => field; // No warning, but could return null!
+    set
+    {
+        if (value == parent.AmbientValue)
+            field = null;
+        else
+            field = value;
+    }
+}
+```
+
+Open question: Should flow analysis combine the maybe-null end state for `field` from the setter with the "depends on nullness of `field`" for the getter's return, enabling a warning in the scenario above?
+
 ### `nameof`
 
 In places where `field` is a keyword (see the [Shadowing](#shadowing) section), `nameof(field)` will fail to compile, like `nameof(nint)`. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases. If it did anything, it would return the string `"field"`, consistent with how `nameof` behaves in other circumstances by returning the C# name or alias, rather than the metadata name.
@@ -414,6 +432,8 @@ The following changes are to be made to [§14.7.4](https://github.com/dotnet/csh
           }
       }
       ```
+
+1. Should nullable flow analysis provide a warning for non-nullable properties when a setter allows `field` to be null and the getter returns something whose nullability depends on `field`?
 
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
