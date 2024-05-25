@@ -85,6 +85,12 @@ As with auto properties, a setter that uses a backing field is disallowed when t
 { set => field = value; }
 ```
 
+### Breaking changes
+
+The existence of the `field` contextual keyword within property accessor bodies is a potentially breaking change, proposed as part of a larger [Breaking Changes](https://github.com/dotnet/csharplang/issues/7964) feature.
+
+Since `field` is a keyword and not an identifier, it can only be "shadowed" by an identifier using the normal keyword-escaping route: `@field`. All identifiers named `field` declared within property accessor bodies can safeguard against breaks when upgrading from C# versions prior to 13 by adding the initial `@`.
+
 ### Field-targeted attributes
 
 As with auto properties, any property that uses a backing field in one of its accessors will be able to use field-targeted attributes:
@@ -188,7 +194,19 @@ class C
 
 A property which uses an automatic backing field will be treated as an auto property for the purposes of calculating default backing field initialization if its setter is automatically implemented, or if it does not have a setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#property-assignment-in-structs)).
 
-Default-initialize a struct when calling a manually implemented setter of a property which uses an automatic backing field, and issue a warning when doing so, like a regular property setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)).
+Default-initialize a struct when calling a manually implemented setter of a property which uses an automatic backing field, and issue a warning when doing so, like a regular property setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)). That enables the following code to compile without warning "CS9020: The 'this' object is read before all of its fields have been assigned, causing preceding implicit assignments of 'default' to non-explicitly assigned fields":
+
+```cs
+public struct C
+{
+    public C()
+    {
+        P = 5; // No warning
+    }
+
+    public int P { get => field; set => field = value; }
+}
+```
 
 ### Nullability
 
@@ -261,7 +279,7 @@ Open question: Should flow analysis combine the maybe-null end state for `field`
 
 ### `nameof`
 
-In places where `field` is a keyword (see the [Shadowing](#shadowing) section), `nameof(field)` will fail to compile, like `nameof(nint)`. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases. If it did anything, it would return the string `"field"`, consistent with how `nameof` behaves in other circumstances by returning the C# name or alias, rather than the metadata name.
+In places where `field` is a keyword, `nameof(field)` will fail to compile ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#usage-in-nameof)), like `nameof(nint)`. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases.
 
 ### Overrides
 
@@ -269,13 +287,9 @@ Overriding properties may use `field`. Such usages of `field` refer to the backi
 
 Like with auto properties, properties which use the `field` keyword and override a base property must override all accessors ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#partial-overrides-of-virtual-properties)).
 
-### Shadowing
-
-`field` can be shadowed by parameters or locals in a nested scope ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-16.md#open-questions-in-field)). Since `field` represents a field in the type, even if anonymously, the shadowing rules of regular fields should apply.
-
 ### Captures
 
-`field` should be able to be captured in local functions and lambdas, and references to `field` from inside local functions and lambdas are allowed even if there are no other references ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-21.md#open-question-in-semi-auto-properties)):
+`field` should be able to be captured in local functions and lambdas, and references to `field` from inside local functions and lambdas are allowed even if there are no other references ([LDM decision 1](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-21.md#open-question-in-semi-auto-properties), [LDM decision 2](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#should-field-and-value-be-considered-keywords-in-lambdas-and-local-functions-within-property-accessors)):
 
 ```cs
 public class C
@@ -373,8 +387,6 @@ public class Point
 ```
 
 ## Open LDM questions
-
-1. If a type does have an existing accessible `field` symbol in scope (like a field called `field`) should there be any way for a property to still use `field` internally to both create and refer to an automatically-implemented backing field.  Under the current rules there is no way to do that.  This is certainly unfortunate for those users, however this is ideally not a significant enough issue to warrant extra dispensation.  The user, after all, can always still write out their properties like they do today, they just lose out from the convenience here in that small case.
 
 1. Which of these scenarios should be allowed to compile? Assume that the "field is never read" warning would apply just like with a manually declared field.
 
