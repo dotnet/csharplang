@@ -5,7 +5,7 @@
 ## Summary
 [summary]: #summary
 
-Collection expressions introduce a new terse syntax, `[e1, e2, e3, etc]`, to create common collection values.  Inlining other collections into these values is possible using a spread operator `..` like so: `[e1, ..c2, e2, ..c2]`.
+Collection expressions introduce a new terse syntax, `[e1, e2, e3, etc]`, to create common collection values.  Inlining other collections into these values is possible using a spread element `..e` like so: `[e1, ..c2, e2, ..c2]`.
 
 Several collection-like types can be created without requiring external BCL support.  These types are:
 
@@ -108,7 +108,7 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Span<T>`
   * `System.ReadOnlySpan<T>`  
   in which cases the *element type* is `T`
-* A *type* with an appropriate *[create method](#create-methods)* and a corresponding *element type* resulting from that determination
+* A *type* with an appropriate *[create method](#create-methods)*, in which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
   * If the collection expression has any elements, the *type* has an instance or extension method `Add` where:
@@ -127,7 +127,7 @@ An implicit *collection expression conversion* exists from a collection expressi
 
 The implicit conversion exists if the type has an *element type* `U` where for each *element* `Eᵢ` in the collection expression:
 * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
-* If `Eᵢ` is an *spread element* `Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
+* If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
 
 There is no *collection expression conversion* from a collection expression to a multi dimensional *array type*.
 
@@ -182,14 +182,7 @@ Methods declared on base types or interfaces are ignored and not part of the `CM
 
 If the `CM` set is empty, then the *collection type* doesn't have an *element type* and doesn't have a *create method*. None of the following steps apply.
 
-Second, an attempt is made to determine the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *collection type* from a `GetEnumerator` instance method or enumerable interface, not from an extension method.
-
-If an *iteration type* can be determined, then the *element type* of the *collection type* is the *iteration type*. If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*. None of the following steps apply.  
-
-Third (ie. if an *iteration type* cannot be determined), an attempt is made to infer the *element type*.
-If the `CM` set contains more than one method, the inference fails and the *collection type* doesn't have an *element type* and doesn't have a *create method*.
-
-Otherwise, type `E1` is determined by substituting type parameters of the only method from the `CM` set (`M`) with corresponding *collection type* type parameters in its `E`. If any generic constraints are violated for `E1`, the *collection type* doesn't have an *element type* and doesn't have a *create method*. Otherwise, `E1` is the *element type* and `M` is the *create method* for the *collection type*.
+If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
 
@@ -398,7 +391,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an *element type* `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
+>   * If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
@@ -407,7 +400,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an *element type* `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *output type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is an *spread element*, no inference is made from `Eᵢ`.
+>   * If `Eᵢ` is a *spread element*, no inference is made from `Eᵢ`.
 > * *[existing rules from output type inferences]* ...
 
 ## Extension methods

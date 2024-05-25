@@ -19,6 +19,8 @@ having the language more directly recognize these types and conversions.
 
 ## Detailed Design
 
+The changes in this proposal will be tied to `LangVersion >= 13`.
+
 ### Implicit Span Conversions
 
 We add a new type of implicit conversion to the list in [§10.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1021-general), an
@@ -36,8 +38,10 @@ An implicit span conversion permits `array_types`, `System.Span<T>`, `System.Rea
 ------
 
 We also add _implicit span conversion_ to the list of standard implicit conversions
-([§10.5.4](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1054-user-defined-implicit-conversions)). This allows overload resolution to consider
+([§10.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1042-standard-implicit-conversions)). This allows overload resolution to consider
 them when performing argument resolution, as in the previously-linked API proposal.
+
+There are no additional _explicit conversions_ ([§10.3.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#103-explicit-conversions)) other than the _implicit span conversions_.
 
 We also add _implicit span conversion_ to the list of acceptable implicit conversions on the first parameter of an extension method when determining applicability
 ([12.8.9.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12893-extension-method-invocations)) (change in bold):
@@ -58,37 +62,64 @@ as if the `T` was declared as `out T` in some scenarios. We do not, however, plu
 variance-convertible in [§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion). If in the future, we change the runtime
 to more deeply understand the variance here, we can take the minor breaking change to fully recognize it in the language.
 
-Practically, this will also mean that in pattern matching for generic scenarios, we'd have behavior as follows:
+#### Patterns
+
+Note that when `ref struct`s are used as a type in any pattern, only identity conversions are allowed:
+
+```cs
+class C<T> where T : allows ref struct
+{
+    void M1(T t) { if (t is T x) { } } // ok (T is T)
+    void M2(R r) { if (r is R x) { } } // ok (R is R)
+    void M3(T t) { if (t is R x) { } } // error (T is R)
+    void M4(R r) { if (r is T x) { } } // error (R is T)
+}
+ref struct R { }
+```
+
+From the specification of *the is-type operator* ([§12.12.12.1][is-type-operator]):
+
+> The result of the operation `E is T` [...] is a Boolean value indicating whether `E` is non-null and can successfully be converted to type `T`
+> by a reference conversion, a boxing conversion, an unboxing conversion, a wrapping conversion, or an unwrapping conversion.
+>
+> [...]
+>
+> If `T` is a non-nullable value type, the result is `true` if `D` and `T` are the same type.
+
+This behavior does not change with this feature, hence it will not be possible to write patterns for `Span`/`ReadOnlySpan`,
+although similar patterns are possible for arrays (including variance):
 
 ```cs
 using System;
 
-M<object[]>(["0"]); // Does not print
-M<ReadOnlySpan<string>>(["1"]); // Does not print
-M<Span<object>>(["2"]); // Does not print
-M<ReadOnlySpan<object>>(["3"]); // Prints
+M1<object[]>(["0"]); // prints
+M1<string[]>(["1"]); // prints
 
-void M<T>(T t) where T : allows ref struct
+void M1<T>(T t)
 {
-    if (t is ReadOnlySpan<object> r) Console.WriteLine(r[0]);
+    if (t is object[] r) Console.WriteLine(r[0]); // ok
+}
+
+void M2<T>(T t) where T : allows ref struct
+{
+    if (t is ReadOnlySpan<object> r) Console.WriteLine(r[0]); // error
 }
 ```
 
-In array variance scenarios, this pattern would return true for all reference type arrays:
+#### Code generation
 
-```cs
-using System;
+The conversions will always exist, regardless of whether any runtime helpers used to implement them are present.
+If the helpers are not present, attempting to use the conversion will result in a compile-time error that a compiler-required member is missing.
 
-M<object[]>(["0"]); // Prints
-M<string[]>(["1"]); // Prints
+The compiler expects to use the following helpers or equivalents to implement the conversions:
 
-void M<T>(T t)
-{
-    if (t is object[] r) Console.WriteLine(r[0]);
-}
-```
-
-There is also an open question below about participation in delegate signature matching.
+| Conversion | Helpers |
+|---|---|
+| array to Span | `static implicit operator Span<T>(T[])` (defined in `Span<T>`) |
+| array to ReadOnlySpan | `static implicit operator ReadOnlySpan<T>(T[])` (defined in `ReadOnlySpan<T>`) |
+| Span to ReadOnlySpan | `static implicit operator ReadOnlySpan<T>(Span<T>)` (defined in `Span<T>`) and `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
+| ReadOnlySpan to ReadOnlySpan | `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
+| string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
 
 ### Type inference
 
@@ -101,9 +132,8 @@ We update the type inferences section of the specification as follows (changes i
 > - If `V` is one of the *unfixed* `Xᵢ` then `U` is added to the set of exact bounds for `Xᵢ`.
 > - Otherwise, sets `V₁...Vₑ` and `U₁...Uₑ` are determined by checking if any of the following cases apply:
 >   - `V` is an array type `V₁[...]` and `U` is an array type `U₁[...]` of the same rank
->   - **`V` is an array type `V₁[]` and `U` is a `Span<U₁>` or `ReadOnlySpan<U₁>`**
->   - **`V` is a `Span<V₁>` and `U` is a `Span<U₁>` or `ReadOnlySpan<U₁>`**
->   - **`V` is a `ReadOnlySpan<V₁>` and `U` is a `ReadOnlySpan<U₁>`**
+>   - **`V` is a `Span<V₁>` and `U` is an array type `U₁[]` or a `Span<U₁>`**
+>   - **`V` is a `ReadOnlySpan<V₁>` and `U` is an array type `U₁[]` or a `Span<U₁>` or `ReadOnlySpan<U₁>`**
 >   - `V` is the type `V₁?` and `U` is the type `U₁`
 >   - `V` is a constructed type `C<V₁...Vₑ>` and `U` is a constructed type `C<U₁...Uₑ>`  
 >   If any of these cases apply then an *exact inference* is made from each `Uᵢ` to the corresponding `Vᵢ`.
@@ -117,9 +147,8 @@ We update the type inferences section of the specification as follows (changes i
 > - Otherwise, if `V` is the type `V₁?` and `U` is the type `U₁?` then a lower bound inference is made from `U₁` to `V₁`.
 > - Otherwise, sets `U₁...Uₑ` and `V₁...Vₑ` are determined by checking if any of the following cases apply:
 >   - `V` is an array type `V₁[...]` and `U` is an array type `U₁[...]`of the same rank
->   - **`V` is an array type `V₁[]` and `U` is a `Span<U₁>` or `ReadOnlySpan<U₁>`**
->   - **`V` is a `Span<V₁>` and `U` is a `Span<U₁>` or `ReadOnlySpan<U₁>`**
->   - **`V` is a `ReadOnlySpan<V₁>` and `U` is a `ReadOnlySpan<U₁>`**
+>   - **`V` is a `Span<V₁>` and `U` is an array type `U₁[]` or a `Span<U₁>`**
+>   - **`V` is a `ReadOnlySpan<V₁>` and `U` is an array type `U₁[]` or a `Span<U₁>` or `ReadOnlySpan<U₁>`**
 >   - `V` is one of `IEnumerable<V₁>`, `ICollection<V₁>`, `IReadOnlyList<V₁>>`, `IReadOnlyCollection<V₁>` or `IList<V₁>` and `U` is a single-dimensional array type `U₁[]`
 >   - `V` is a constructed `class`, `struct`, `interface` or `delegate` type `C<V₁...Vₑ>` and there is a unique type `C<U₁...Uₑ>` such that `U` (or, if `U` is a type `parameter`, its effective base class or any member of its effective interface set) is identical to, `inherits` from (directly or indirectly), or implements (directly or indirectly) `C<U₁...Uₑ>`.
 >   - (The “uniqueness” restriction means that in the case interface `C<T>{} class U: C<X>, C<Y>{}`, then no inference is made when inferring from `U` to `C<T>` because `U₁` could be `X` or `Y`.)  
@@ -145,9 +174,8 @@ We update the type inferences section of the specification as follows (changes i
 > - If `V` is one of the *unfixed* `Xᵢ` then `U` is added to the set of upper bounds for `Xᵢ`.
 > - Otherwise, sets `V₁...Vₑ` and `U₁...Uₑ` are determined by checking if any of the following cases apply:
 >   - `U` is an array type `U₁[...]` and `V` is an array type `V₁[...]` of the same rank
->   - **`U` is an array type `U₁[]` and `V` is a `Span<V₁>` or `ReadOnlySpan<V₁>`**
->   - **`U` is a `Span<V₁>` and `V` is a `Span<V₁>` or `ReadOnlySpan<V₁>`**
->   - **`U` is a `ReadOnlySpan<V₁>` and `V` is a `ReadOnlySpan<V₁>`**
+>   - **`U` is a `Span<U₁>` and `V` is an array type `V₁[]` or a `Span<V₁>`**
+>   - **`U` is a `ReadOnlySpan<U₁>` and `V` is an array type `V₁[]` or a `Span<V₁>` or `ReadOnlySpan<V₁>`**
 >   - `U` is one of `IEnumerable<Uₑ>`, `ICollection<Uₑ>`, `IReadOnlyList<Uₑ>`, `IReadOnlyCollection<Uₑ>` or `IList<Uₑ>` and `V` is a single-dimensional array type `Vₑ[]`
 >   - `U` is the type `U1?` and `V` is the type `V1?`
 >   - `U` is constructed class, struct, interface or delegate type `C<U₁...Uₑ>` and `V` is a `class, struct, interface` or `delegate` type which is `identical` to, `inherits` from (directly or indirectly), or implements (directly or indirectly) a unique type `C<V₁...Vₑ>`
@@ -249,7 +277,7 @@ namespace N2
 
 ## Open questions
 
-### Delegate signature matching
+### Delegate signature matching (answered)
 
 Should we allow variance conversion in delegate signature matching? For example:
 
@@ -280,6 +308,12 @@ D4 d4 = M4; // Convert void(object[]) to void(string[])
 These conversions may not be possible to do without creating a wrapper lambda without runtime changes; the existing variant delegate conversions are possible to emit
 without needing to create wrappers. We don't have precedent in the language for silent wrappers like this, and generally require users to create such wrapper lambdas themselves.
 
+#### Answer
+
+We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d2 = M2;` will not compile. We could reconsider at a later point if use cases are discovered.
+
 ## Alternatives
 
 Keep things as they are.
+
+[is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator

@@ -4,7 +4,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
+- https://github.com/dotnet/roslyn/issues/73643 (Aleksey)
+- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
+
 ## Schedule when convenient
+
+- [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
 
 ## Recurring topics
 
@@ -13,50 +19,88 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Mon May 20, 2024
+### Wed Jun 26, 2024
+
+### Mon Jun 24, 2024
+
+### Wed Jun 19, 2024
+
+### Mon Jun 17, 2024
+
+### Wed Jun 12, 2024
+
+### Mon Jun 10, 2024
+
+### Wed Jun 5, 2024
+
+### Mon Jun 3, 2024
+
+### Fri May 31, 2024
+
+
+## C# Language Design Notes for 2024
 
 ### Wed May 15, 2024
 
+[C# Language Design Meeting for May 15th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md)
+
+- `field` and `value` as contextual keywords
+  - Usage in `nameof`
+  - Should `value` be a keyword in a property or indexer get? Should `field` be a keyword in an indexer?
+  - Should `field` and `value` be considered keywords in lambdas and local functions within property accessors?
+  - Should `field` and `value` be keywords in property or accessor signatures? What about `nameof` in those spaces?
+- Dictionary expressions
+
 ### Mon May 13, 2024
+
+[C# Language Design Meeting for May 13th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-13.md)
+
+- First-class span types questions
+    - Delegate conversions
+    - Variant conversion existence
+- Overload resolution priority questions
+    - Attribute shape and inheritance
+    - Extension overload resolution
 
 ### Wed May 8, 2024
 
-### Mon May 6, 2024
+[C# Language Design Meeting for May 8th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-08.md)
+
+- `readonly` for primary constructor parameters
 
 ### Wed May 1, 2024
 
-- *Design review* (no notes)
+[C# Language Design Meeting for May 1st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-01.md)
 
-### Mon Apr 29, 2024
-
-- Meeting on meeting (Mads)
+- Adjust binding rules in the presence of a single candidate
 
 ### Wed Apr 24, 2024
 
-- [Adjust dynamic binding rules for a situation of a single applicable candidate.](https://github.com/dotnet/csharplang/pull/8027) Aleksey
-- Triage or special topics
+[C# Language Design Meeting for Apr 24th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-24.md)
+
+- Adjust dynamic binding rules for a situation of a single applicable candidate
 
 ### Mon Apr 22, 2024
 
-- [Effect of language version on overload resolution in presence of `params` collections](https://github.com/dotnet/csharplang/issues/8061) Jared, Aleksey, Stephen Toub
-- [Partial type inference: '_' in method and object creation type argument lists](https://github.com/dotnet/csharplang/pull/7582) (Rikki)
+[C# Language Design Meeting for Apr 22nd, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-22.md)
+
+- Effect of language version on overload resolution in presence of `params` collections
+- Partial type inference: '_' in method and object creation type argument lists
 
 ### Wed Apr 17, 2024
 
-- Extensions (Julien) 
-- [Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`](https://github.com/dotnet/csharplang/issues/8034) (Chuck)
+[C# Language Design Meeting for Apr 17th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-17.md)
+
+- Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`
+- Extensions
 
 ### Mon Apr 15, 2024
 
-- [Non-enumerable collection types](https://github.com/dotnet/csharplang/pull/7895) (Julien)
-- Interceptors [location specifier](https://github.com/dotnet/csharplang/blob/interceptors-2024-01/proposals/interceptors-issues-2024-01.md#add-interceptslocationstring-locationspecifier) (Rikki)
+[C# Language Design Meeting for Apr 15th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-15.md)
 
-### Mon Feb 26, 2024 (unresolved topics)
-
-- Breaking change with collection expressions and UI collection types (https://github.com/dotnet/roslyn/issues/72098).  Cyrus + Chuck
-- Dictionary-expressions + Collection-expressions future: WG to go over our plans, and the initial design space (Cyrus)
-
-## C# Language Design Notes for 2024
+- Non-enumerable collection types
+- Interceptors
+- Relax `Add` requirement for collection expression conversions to types implementing `IEnumerable`
 
 ### Mon Apr 8, 2024
 
