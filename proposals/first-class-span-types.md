@@ -324,6 +324,27 @@ namespace N2
 }
 ```
 
+#### Extension invocations as delegates
+
+In the following code snippet, `Enumerable.Contains` was chosen previously,
+but `MemoryExtensions.Contains` will be chosen with this feature
+(thanks to the betterness rule, otherwise this would become an ambiguity).
+However, it will result in this error:
+
+```
+error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)' defined on value type 'Span<int>' cannot be used to create delegates
+```
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+var a = new[] { 1, 2 };
+var l = new List<int> { 1, 2, 3, 4 };
+l.RemoveAll(a.Contains); // works today, error tomorrow
+```
+
 ## Open questions
 
 ### Delegate signature matching (answered)
