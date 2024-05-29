@@ -192,19 +192,19 @@ class C
 
 ### Definite assignment in structs
 
-A property which uses an automatic backing field will be treated as an auto property for the purposes of calculating default backing field initialization if its setter is automatically implemented, or if it does not have a setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#property-assignment-in-structs)).
-
-Default-initialize a struct when calling a manually implemented setter of a property which uses an automatic backing field, and issue a warning when doing so, like a regular property setter ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)). That enables the following code to compile without warning "CS9020: The 'this' object is read before all of its fields have been assigned, causing preceding implicit assignments of 'default' to non-explicitly assigned fields":
+Even though they can't be referenced in the constructor, backing fields denoted by the `field` keyword are subject to default-initialization and disabled-by-default warnings under the same conditions as any other struct fields ([LDM decision 1](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#property-assignment-in-structs), [LDM decision 2](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)). For example:
 
 ```cs
-public struct C
+public struct S
 {
-    public C()
+    public S()
     {
-        P = 5; // No warning
+        _ = P1; // Disabled-by-default warning
+        P2 = 5; // Disabled-by-default warning
     }
 
-    public int P { get => field; set => field = value; }
+    public int P1 { get => field; }
+    public int P2 { get => field; set => field = value; }
 }
 ```
 
