@@ -177,6 +177,49 @@ Results in the following XML documentation file:
 </doc>
 ```
 
+When parameter names differ between partial declarations, `<paramref>` elements use the parameter names from the declaration associated with the documentation comment in source code. For example, a paramref on a doc comment placed on an implementing declaration refers to the parameter symbols on the implementing declaration using their parameter names. This is consistent with partial methods.
+
+```cs
+/// <summary>
+/// My type
+/// </summary>
+partial class C
+{
+    public partial int this[int x] { get; set; }
+
+    /// <summary>
+    /// <paramref name="x"/> // warning CS1734: XML comment on 'C.this[int]' has a paramref tag for 'x', but there is no parameter by that name
+    /// <paramref name="y"/> // ok. 'Go To Definition' will go to 'int y'.
+    /// </summary>
+    public partial int this[int y] { get => 1; set { } } // warning CS9256: Partial property declarations 'int C.this[int x]' and 'int C.this[int y]' have signature differences.
+}
+```
+
+Results in the following XML documentation file:
+```xml
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ConsoleApp1</name>
+    </assembly>
+    <members>
+        <member name="T:C">
+            <summary>
+            My type
+            </summary>
+        </member>
+        <member name="P:C.Item(System.Int32)">
+            <summary>
+            <paramref name="x"/> // warning CS1734: XML comment on 'C.this[int]' has a paramref tag for 'x', but there is no parameter by that name
+            <paramref name="y"/> // ok. 'Go To Definition' will go to 'int y'.
+            </summary>
+        </member>
+    </members>
+</doc>
+```
+
+This can be confusing, because the metadata signature will use parameter names from the definition part. It is recommended to ensure that parameter names match across parts to avoid this confusion.
+
 ### Indexers
 
 Per [LDM meeting on 2nd November 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-11-02.md#partial-properties), indexers will be supported with this feature.
