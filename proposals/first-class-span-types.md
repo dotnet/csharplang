@@ -134,7 +134,7 @@ This is based on [collection expressions overload resolution changes][ce-or].
 >   - `T₁` is not a *span_type*, and `T₂` is not a *span_type*, and an implicit conversion exists from `T₁` to `T₂`.
 > - `E` is not a *collection expression* and one of the following holds:
 >   - `E` exactly matches `T₁` and `E` does not exactly match `T₂`
->   - **`E` exactly matches both or neither of `T₁` and `T₂`,
+>   - **`E` exactly matches neither of `T₁` and `T₂`,
 >     and `C₁` is an implicit span conversion and `C₂` is not an implicit span conversion**
 >   - `E` exactly matches both or neither of `T₁` and `T₂`,
 >     **both or neither of `C₁` and `C₂` are an implicit span conversion**,
