@@ -87,10 +87,12 @@ Signature matching requirements include:
 2. Differences in tuple element names within partial property declarations results in a compile-time error, same as for partial methods.
 3. The property declarations and their accessor declarations must have the same modifiers, though the modifiers may appear in a different order.
     - Exception: this does not apply to the `extern` modifier, which may only appear on an *implementing declaration*.
-3. All other syntactic differences in the signatures of partial property declarations result in a compile-time warning, with the following exceptions:
+4. All other syntactic differences in the signatures of partial property declarations result in a compile-time warning, with the following exceptions:
     - Attribute lists on or within partial property declarations do not need to match. Instead, merging of attributes in corresponding positions is performed, per [Attribute merging](#attribute-merging).
     - Nullable context differences do not cause warnings. In other words, a difference where one of the types is nullable-oblivious and the other type is either nullable-annotated or not-nullable-annotated does not result in any warnings.
     - Default parameter values do not need to match. A warning is reported when the implementation part of a partial indexer has default parameter values. This is similar to an existing warning which occurs when the implementation part of a partial method has default parameter values.
+5. A warning occurs when parameter names differ across defining and implementing declarations. The parameter names from the definition part are used at use sites and in emit.
+6. Nullability differences which do not involve oblivious nullability result in warnings. When analyzing an accessor body, the parameter nullability from the definition part is used, and the return type nullability from the implementation part is used. Only the nullability of the definition part is used at use sites and in emit. This is consistent with partial methods.
 
 ```cs
 partial class C1
