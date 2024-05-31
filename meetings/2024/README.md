@@ -5,8 +5,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule ASAP
 
 - [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
-- https://github.com/dotnet/roslyn/issues/73643 (Aleksey)
-- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
 
 ## Schedule when convenient
 
@@ -35,8 +33,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jun 3, 2024
 
-### Fri May 31, 2024
-
+- https://github.com/dotnet/roslyn/issues/73643 (Aleksey)
+- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
 
 ## C# Language Design Notes for 2024
 

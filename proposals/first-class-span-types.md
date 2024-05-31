@@ -41,7 +41,17 @@ We also add _implicit span conversion_ to the list of standard implicit conversi
 ([§10.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1042-standard-implicit-conversions)). This allows overload resolution to consider
 them when performing argument resolution, as in the previously-linked API proposal.
 
-There are no additional _explicit conversions_ ([§10.3.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#103-explicit-conversions)) other than the _implicit span conversions_.
+The explicit span conversions are the following:
+- All *implicit span conversions*.
+- From an *array_type* with element type `Ti` to `System.Span<Ui>` or `System.ReadOnlySpan<Ui>` provided an explicit reference conversion exists from `Ti` to `Ui`.
+
+There is no standard explicit span conversion unlike other *standard explicit conversions* ([§10.4.3][standard-explicit-conversions])
+which always exist given the opposite standard implicit conversion.
+
+User-defined conversions are not considered when converting between
+- any single-dimensional `array_type` and `System.Span<T>`/`System.ReadOnlySpan<T>`,
+- any combination of `System.Span<T>`/`System.ReadOnlySpan<T>`,
+- `string` and `System.ReadOnlySpan<char>`.
 
 We also add _implicit span conversion_ to the list of acceptable implicit conversions on the first parameter of an extension method when determining applicability
 ([12.8.9.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12893-extension-method-invocations)) (change in bold):
@@ -389,6 +399,7 @@ We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d
 
 Keep things as they are.
 
+[standard-explicit-conversions]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/conversions.md#1043-standard-explicit-conversions
 [better-conversion-from-expression]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#12645-better-conversion-from-expression
 [is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator
 
