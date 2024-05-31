@@ -92,7 +92,7 @@ Signature matching requirements include:
     - Nullable context differences do not cause warnings. In other words, a difference where one of the types is nullable-oblivious and the other type is either nullable-annotated or not-nullable-annotated does not result in any warnings.
     - Default parameter values do not need to match. A warning is reported when the implementation part of a partial indexer has default parameter values. This is similar to an existing warning which occurs when the implementation part of a partial method has default parameter values.
 5. A warning occurs when parameter names differ across defining and implementing declarations. The parameter names from the definition part are used at use sites and in emit.
-6. Nullability differences which do not involve oblivious nullability result in warnings. When analyzing an accessor body, the parameter nullability from the definition part is used, and the return type nullability from the implementation part is used. Only the nullability of the definition part is used at use sites and in emit. This is consistent with partial methods.
+6. Nullability differences which do not involve oblivious nullability result in warnings. When analyzing an accessor body, the implementation part signature is used. The definition part signature is used when analyzing use sites and in emit. This is consistent with partial methods.
 
 ```cs
 partial class C1
