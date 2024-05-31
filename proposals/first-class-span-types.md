@@ -183,6 +183,12 @@ static class C
 }
 ```
 
+> [!WARNING]
+> Because the betterness rule is gated on `LangVersion >= 13`,
+> API authors cannot add such new overloads if they want to keep supporting users on `LangVersion <= 12`.
+> For example, if .NET 9 BCL introduced such overloads, users that upgrade to .NET 9 but stay on lower LangVersion
+> would suddenly get ambiguity errors for existing code.
+
 ### Type inference
 
 We update the type inferences section of the specification as follows (changes in **bold**).
