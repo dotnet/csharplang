@@ -150,6 +150,7 @@ extension_modifier
     | 'partial'
     | 'unsafe'
     | 'static'
+    | 'protected'
     | 'internal'
     | 'private'
     | 'file'
