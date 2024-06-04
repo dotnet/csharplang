@@ -1,8 +1,5 @@
 # Extension types
 
-TODO(inheritance) No duplicate base extensions (to avoid ambiguities)  
-TODO(inheritance) issue with variance of extended type if we erase to a ref struct with a ref field.  
-
 TODO(instance) need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them  
 TODO(static) adjust scoping rules so that type parameters are in scope within the 'for'  
 TODO2 check Method type inference: 7.5.2.9 Lower-bound interfaces  
@@ -107,7 +104,7 @@ Explicit extensions address two main classes of scenarios: "augmentation" scenar
 (fit an existing value to an *existing* interface).
 
 In addition, implicit extensions would provide for additional kinds of extension members
-beyond today's extension methods, and for "extension interfaces".
+beyond today's extension methods, and potentially for "extension interfaces" in the future.
 
 ### Augmentation scenarios
 
@@ -117,14 +114,10 @@ a "stronger" type - an extension that provides additional function members on th
 ### Adaptation scenarios
 
 Adaptation scenarios allow existing values to be adapted to existing interfaces,
-where an extension provides details on how the interface members are implemented.
+where an extension provides details on how the interface members are implemented.  
+Those are not out-of-scope for this document.  
 
 ## Design
-
-This proposal is divided into three parts, all relating to extending existing types:  
-A. static implicit extensions  
-B. implicit and explicit extensions with members  
-C. implicit and explixit extensions that implement interfaces  
 
 The syntax for extensions is as follows:
 
@@ -135,16 +128,7 @@ type_declaration
     ;
 
 extension_declaration
-    : extension_modifier* ('implicit' | 'explicit') 'extension' identifier type_parameter_list? ('for' type)? extension_base_type_list? type_parameter_constraints_clause* extension_body
-    ;
-
-extension_base_type_list
-    : ':' extension_or_interface_type_list
-    ;
-
-extension_or_interface_type_list
-    : interface_type_list
-    : extension_type (',' extension_or_interface_type_list)
+    : extension_modifier* ('implicit' | 'explicit') 'extension' identifier type_parameter_list? ('for' type)? type_parameter_constraints_clause* extension_body
     ;
 
 extension_body
@@ -173,11 +157,6 @@ extension_modifier
     ;
 ```
 
-An example with multiple base explicit extension:
-```
-explicit extension DiamondExtension for NarrowerUnderlyingType : BaseExtension1, Interface1, BaseExtension2, Interface2 { }`
-```
-
 TODO(static) should we have a naming convention like `Extension` suffixes? (`DataObjectExtension`)  
 
 ## Extension type
@@ -188,11 +167,9 @@ The extension type does not **inherit** members from its underlying type
 (which may be `sealed` or a struct), but
 the lookup rules are modified to achieve a similar effect (see below).  
 
-There is an identity conversion between an extension and its underlying type,
-and between an extension and its base extensions.
+There is an identity conversion between an extension and its underlying type.
 
 An extension type satisfies the constraints satisfied by its underlying type (see section on constraints). 
-In the Interface Phase, some additional constraints can be satisfied (additional implemented interfaces).  
 
 ### Underlying type
 
@@ -209,11 +186,6 @@ an underlying type specification.
 
 It is a compile-time error if the underlying type differs amongst all the parts
 of an extension declaration.  
-
-TODO2(inheritance) we need rules to only allow an underlying type that is compatible with the base extensions.  
-
-TODO(inheritance) should the underlying type be inferred when none was specified but
-  base extensions are specified?
 
 ### Modifiers
 
@@ -244,25 +216,13 @@ The underlying type must include all the type parameters from the implicit exten
 
 We'll use "extends" for relationship to underlying/extended type 
 (comparable to "inherits" for relationship to base type).  
-We'll use "inherits" for relationship to inherited/base extensions 
-(comparable to "implements" for relationship to implemented interfaces).  
 
 ```csharp
 struct U { }
 explicit extension X for U { }
-explicit extension X1 for U { }
-explicit extension Y for U : X, X1 { }
 ```
-"Y has underlying type U"  
-"Y extends U"  
-"Y inherits X and X1"  
-"Derived extension Y inherits members from inherited/base extensions X and X1"  
-
-Similarly, extension don't have a base type, but have base extensions.  
-
-`implicit extension R<T> for T where T : I1, I2 { }`
-`implicit extension R<T> for T where T : INumber<T> { }`
-An extension may be a value or reference type, and this may not be known at compile-time. 
+"X has underlying type U"  
+"X extends U"  
 
 ### Accessibility constraints
 
@@ -271,55 +231,13 @@ We modify the [accessibility constraints](https://github.com/dotnet/csharpstanda
 The following accessibility constraints exist:
 - [...]
 - \***The underlying type of an extension type shall be at least as accessible as the extension type itself.**
-- \***The base extensions of an extension type shall be at least as accessible as the extension type itself.**
 
 Note those also apply to visibility constraints of file-local types (TODO not yet specified).
 
-### Protected access
-
-We modify the [protected access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#754-protected-access) as follows:
-
-\***When a `protected` (or other accessibility with `protected`) extension member is accessed, 
-the access shall take place within an extension declaration that derives from 
-the extension in which it is declared. 
-Furthermore, the access is required to take place *through* an instance of that 
-derived extension type or an extension type constructed from it.
-This restriction prevents one derived extension from accessing protected members of 
-other derived extensions, even when the members are inherited from the same base extension.**
-
-Note: the rules still disallow access to protected members of the underlying type through the extension type.
-
-TODO(static)
-
-Let `B` be a base class that declares a protected instance member `M`, 
-and let `D` be a class that derives from `B`. Within the *class_body* of `D`, 
-access to `M` can take one of the following forms:
-
-- An unqualified *type_name* or *primary_expression* of the form `M`.
-- A *primary_expression* of the form `E.M`, provided the type of `E` is `T` or 
-  a class derived from `T`, where `T` is the class `D`, or a class type constructed from `D`.
-- A *primary_expression* of the form `base.M`.
-- A *primary_expression* of the form `base[`*argument_list*`]`.
-
-```csharp
-class Base
-{
-    protected void M() { }
-}
-extension E1 for Base
-{
-    // cannot use Base.M
-    protected void M2() { }
-}
-extension E2 for Base : E1
-{
-    // can use E1.M2
-}
-```
-
 ### Extension type members
 
-The extension type members may not use the `virtual`, `abstract`, `sealed`, `override` modifiers.  
+The extension type members may not use the `virtual`, `abstract`, `sealed`, `override` modifiers,
+or the `protected` access modifier.  
 Member methods may not use the `readonly` modifier.  
 The `new` modifier is allowed and the compiler will warn that you should
 use `new` when shadowing.  
@@ -329,18 +247,9 @@ An extension cannot contain a member declaration with the same name as the exten
 #### Signatures, overloading and hiding
 
 The existing [rules for signatures](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#76-signatures-and-overloading) apply.  
-Two signatures differing by an extension vs. its underlying type, or an extension vs. 
-one of its base extensions are considered to be the *same signature*.
+Two signatures differing by an extension vs. its underlying type are considered to be the *same signature*.
 
-TODO2(inheritance) this needs to be refined to allow overload on different underlying types.
-```
-explicit extension ObjectExtension : object;
-explicit extension StringExtension : string, ObjectExtension;
-void M(ObjectExtension r)
-void M(StringExtension r) // overload is okay
-```
-
-Shadowing includes underlying type and inherited extensions.  
+Shadowing includes underlying type.  
 
 ```
 class U { public void M() { } }
@@ -354,12 +263,6 @@ U u;
 u.M(); // U.M (ignored X.M)
 X x;
 x.M(); // X.M
-```
-
-```
-class U { }
-explicit extension R for U { public void M() { } }
-explicit extension R2 for U : R { /*new*/ public void M() { } } // wins when dealing with an R2
 ```
 
 #### Constants
@@ -391,8 +294,6 @@ In particular, a static property does not operate on a specific instance,
 and it is a compile-time error to refer to `this` in a static property.
 
 #### Nested types
-
-TODO(static) any special rules?
 
 ```
 extension Extension : UnderlyingType
@@ -496,7 +397,6 @@ and the parameter type may not be a pointer **or an extension** type.
 ## Nullability
 
 TODO2(static) Open question on top-level nullability on underlying type.
-TODO2(instance) disallow nullable annotation on base extension? Or at least need to clarify what `Extension?` means in various scenarios.
 
 ## Compat breaks
 
@@ -653,7 +553,7 @@ TODO4(instance) need to merge extension members and extension methods
       (note this doesn't include members from the underlying type)
     - Merge the results
     - Next, members that are hidden by other members are removed from the set.  
-      (note: "base types" means "base extensions and underlying type" for extension types)
+      (note: "base types" means "underlying type" for extension types)
     - Next, less specific extension members are removed if they are "hidden" by more specific extension members. 
       For every member `X.M` in the set, where `X` is the type in which the member `M` is declared,
       if no member in the set has a containing type `Y` that is more specific than `X` then the following rules are applied:
@@ -772,7 +672,7 @@ The search proceeds as follows:
     that are not override declarations and are accessible in the current context.
   - Merge the results
   - Next, members that are hidden by other members are removed from the set.  
-    (note: "base types" means "base extensions and underlying type" for extension types)
+    (note: "base types" means "underlying type" for extension types)
   - Next, members that are not applicable with respect to the given **argument_list** are removed from the set.
   - Finally, having removed hidden and inapplicable members:
     - If the set is empty, proceed to the next enclosing scope.
@@ -786,7 +686,7 @@ The search proceeds as follows:
 
 ### Member lookup (reviewed in LDM 2024-02-24)
 
-TL;DR: Member lookup on an extension type includes members from its base extensions, its extended type and base types.  
+TL;DR: Member lookup on an extension type includes members from its extended type and base types.  
 
 We modify the [member lookup rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#125-member-lookup) 
 as follows:
@@ -802,9 +702,7 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is an *interface_type*, the base types of `T` are the base interfaces of `T` and the class type `object`.
 - If `T` is an *array_type*, the base types of `T` are the class types `System.Array` and `object`.
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
-- \***If `T` is an *extension_type*, the base types of `T` are the base extensions of `T` and the extended type of `T` and its base types.**
-
-TODO(inheritance) will need to revisit once we have inheritance and we allow variance of extended types.
+- \***If `T` is an *extension_type*, the base type of `T` is the extended type of `T` and its base types.**
 
 Note: this allows method groups that contain members from the extension and the extended type together:
 ```csharp
@@ -928,7 +826,7 @@ We process as follows:
       (note this takes into account whether the member is invoked).
     - Merge the results
   - Next, members that are hidden by other members are removed from the set.  
-    (note: "base types" means "base extensions and underlying type" for extension types)
+    (note: "base types" means "underlying type" for extension types)
   - Next, less specific extension members are removed if they are "hidden" by more specific extension members.  
     For every member `X.M` in the set, where `X` is the extension type in which the member `M` is declared, 
     if no member in the set has a containing type `Y` that is more specific than `X` then the following rules are applied:
@@ -1219,34 +1117,68 @@ implicit extension E for int
 
 # Implementation details
 
-TODO3(static) revise this to use a regular struct
+Extensions are emitted as structs with an extension marker method and an instance field for non-static extensions.  
+The type is marked with Obsolete and CompilerFeatureRequired attributes.  TODO we'll need to relax that
 
-struct Extension
-{
-  UnderlyingType underlyingValue;
-}
-// Avoid copying via Unsafe.As 
+## Marker method
 
-Extensions are implemented as ref structs with an extension marker method.  
-The type is marked with Obsolete and CompilerFeatureRequired attributes.  
-The extension marker method encodes the underlying type and base extensions as parameters in that order.  
-The marker method is called `<ImplicitExtension>$` for implicit extensions and 
+The extension marker method encodes the underlying type as parameter.  
+It is private and static, and is called `<ImplicitExtension>$` for implicit extensions and 
 `<ExplicitExtension>$` for explicit extensions.  
-For example: `implicit extension R for UnderlyingType : BaseExtension1, BaseExtension2` yields
-`private static void <ImplicitExtension>$(UnderlyingType, BaseExtension1, BaseExtension2)`.  
 
-If the extension has any instance member, then we emit a ref field (of underlying type)
-into the ref struct and a constructor.  
-TODO2(instance) The wrapping can be done with a static unspeakable factory method  
+For example: `implicit extension R for UnderlyingType` yields
+`private static void <ImplicitExtension>$(UnderlyingType)`.  
 
-Values of extension types are left as values of the underlying value type, until an extension
-member is accessed. When an extension member is accessed, an extension instance is created
-with a reference to the underlying value and the member is accessed on that instance.
+## Instance field
 
+If the extension not static, then we emit a private instance field of the underlying type
+into the struct.  
+We use the default layout for structs (sequential layout, with pack and size 0)
+ensuring that the single instance field is placed at offset zero.
+
+Note: Although we could not find an explicit statement to that effect,
+this behavior falls out from ECMA 335 (II.10.1.2), which states for sequential layout:
+> The CLI shall lay out the fields in sequential order, based on the order of the fields in the logical metadata table (§II.22.15).
+
+> [Rationale: ... sequential layout is intended to instruct the CLI to match layout rules commonly followed by languages like C and C++
+> on an individual platform, where this is possible while still guaranteeing verifiable layout. ...]
+
+and from the C99 standard section 6.7.2.1 bullet point 13 (gated):
+
+> Within a structure object, the non-bit-field members and the units in which bit-fields 
+> reside have addresses that increase in the order in which they are declared. 
+> A pointer to a structure object, suitably converted, points to its initial member 
+> (or if that member is a bit-field, then to the unit in which it resides), 
+> and vice versa. There may be unnamed padding within a structure object, but not at its beginning.
+
+For example `implicit extension E for UnderlyingType` yields
+```csharp
+struct E
+{
+	private UnderlyingType <UnderlyingInstance>$;
+	private static void <ImplicitExtension>$(UnderlyingType) { }
+}
 ```
-Extension r = default(UnderlyingType); // emitted as a local of type `UnderlyingType`
-r.ExtensionMember(); // emitted as `new Extension(ref r).ExtensionMember();`
-```
+
+## Instance invocations
+
+The design and layout of the instance field will allow us to re-interpret an instance of `UnderlyingType`
+as an instance of `E` with `public static ref TTo Unsafe.As<TFrom,TTo>(ref TFrom source)`.  
+
+If the receiver of an extension member invocation on a value of the underlying type is `r`,
+we will replace it with `Unsafe.As<UnderlyingType, E>(ref r)`.
+If `r` does not refer to a location, a temporary variable will be created and initialized, and its reference
+will be used.
+
+The re-interpreted receiver will be only computed once where possible. For example, in a compound assignment
+`r.P += value;`.
+
+TODO we may wrap this method in a compiler-generated helper to increase verifiability of the generated code.  
+TODO there is also a verifiability issue with taking a reference to `this` (which is readonly)
+
+## Type references
+
+TODO4 this section is not finalized
 
 Extensions appearing in signatures are emitted as the extension's underlying type
 marked with a modopt of the extension type.
@@ -1255,30 +1187,7 @@ marked with a modopt of the extension type.
 void M(Extension r) // emitted as `void M(modopt(Extension) UnderlyingType r)`
 ```
 
-TODO(static) issues in async code with ref structs
-
-## Phases 
-
-### Static extension members
-
-In this first subset of the feature, only static members are allowed in extension types.  
-
-### Instance extension members
-
-In this second subset of the feature, instance members become allowed.
-
-## Inheritance
-
-In this third subset of the feature, extensions are allowed to have base extensions.
-
-## Interfaces
-
-In this final subset of the feature, extensions are allowed to implement interfaces.
-
 ### Extension type members
-
-The restrictions on modifiers from Static Phase remain (`new`).  
-Non-static members become allowed in Instance Phase.  
 
 #### Fields
 
