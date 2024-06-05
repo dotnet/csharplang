@@ -12,6 +12,24 @@ In these cases by now you always have to create an instance field and write the 
 
 ## Specification changes
 
+### Syntax
+
+```diff
++ field_or_value
++   : 'field'
++   | 'value'
++   ;
+
+primary_no_array_creation_expression
+    : literal
++   | field_or_value
+    | interpolated_string_expression
+    | ...
+    ;
+```
+
+### Properties
+
 [§14.7.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/classes.md#1471-general) *Properties - General*
 
 > A *property_initializer* may only be given for ~~an automatically implemented property, and~~ **a property that has a backing field that will be emitted and the property either does not have a setter, or its setter is auto-implemented. The *property_initializer*** causes the initialization of the underlying field of such properties with the value given by the *expression*.
