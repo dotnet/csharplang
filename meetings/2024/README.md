@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
 - Extensions - misc topics (Julien)
 - Better conversion from collection expression with `ReadOnlySpan<T>` overloads (see https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
+- https://github.com/dotnet/roslyn/issues/73504 (Aleksey)
 
 ## Schedule when convenient
 
