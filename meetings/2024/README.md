@@ -33,8 +33,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Better conversion from collection expression with `ReadOnlySpan<T>` overloads (see https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
 - https://github.com/dotnet/roslyn/issues/73504 (Aleksey)
 
-### Wed Jun 5, 2024
-
 ### Mon Jun 3, 2024
 
 - https://github.com/dotnet/roslyn/issues/73643 (Aleksey)
