@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- https://github.com/dotnet/roslyn/issues/73743 (Aleksey, Jared): new overloads interacting badly with existing expression tree code.
+
 ## Schedule when convenient
 
 - [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
