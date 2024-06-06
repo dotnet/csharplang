@@ -4,11 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
-- Extensions - misc topics (Julien)
-- Better conversion from collection expression with `ReadOnlySpan<T>` overloads (see https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
-- https://github.com/dotnet/roslyn/issues/73504 (Aleksey)
-
 ## Schedule when convenient
 
 - [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
@@ -30,7 +25,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 12, 2024
 
+- Extensions - misc topics (Julien)
+- [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
+
 ### Mon Jun 10, 2024
+
+- Better conversion from collection expression with `ReadOnlySpan<T>` overloads (see https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
+- https://github.com/dotnet/roslyn/issues/73504 (Aleksey)
 
 ### Wed Jun 5, 2024
 
