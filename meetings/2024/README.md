@@ -4,7 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- https://github.com/dotnet/roslyn/issues/73743 (Aleksey, Jared): new overloads interacting badly with existing expression tree code.
+- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
+- [Record structs with InlineArray attribute compares only by the first value](https://github.com/dotnet/roslyn/issues/73504) (Aleksey)
 
 ## Schedule when convenient
 
@@ -27,13 +28,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 12, 2024
 
+- https://github.com/dotnet/roslyn/issues/73743 (Aleksey, Jared): new overloads interacting badly with existing expression tree code
 - Extensions - misc topics (Julien)
-- [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
 
 ### Mon Jun 10, 2024
 
-- Better conversion from collection expression with `ReadOnlySpan<T>` overloads (see https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
-- https://github.com/dotnet/roslyn/issues/73504 (Aleksey)
+- [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
 
 ### Mon Jun 3, 2024
 
