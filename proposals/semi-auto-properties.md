@@ -416,6 +416,25 @@ public class Point
 
 1. Should nullable flow analysis provide a warning for non-nullable properties when a setter allows `field` to be null and the getter returns something whose nullability depends on `field`?
 
+   ```cs
+   public string AmbientValue
+   {
+       get => field; // No warning, but could return null!
+       set
+       {
+           if (value == parent.AmbientValue)
+           {
+               // A valid strategy if the getter returned field ?? parent.AmbientValue
+               field = null;
+           }
+           else
+           {
+               field = value;
+           }
+       }
+   }
+   ```
+
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-14.md#field-keyword
