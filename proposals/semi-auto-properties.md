@@ -24,15 +24,13 @@ In these cases by now you always have to create an instance field and write the 
 
 For properties with an `init` accessor, everything that applies below to `set` would apply instead to the `init` accessor.
 
-**Principle 1:** Every property declaration can be thought of as having a backing field by default, which is elided when not used. The field is referenced using the keyword `field` and its visibility is scoped to the accessor bodies.
+There are two syntax changes:
 
-**Principle 2:** `get;` will now be considered syntactic sugar for `get => field;`, and `set;` will now be considered syntactic sugar for `set => field = value;`.
+1. There is a new contextual keyword, `field`, which may be used within property accessor bodies to access a backing field for the property declaration.
 
-Both of these principles only apply under the same conditions where `{ get; }` or `{ get; set; }` already declares an auto property ([§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties)). For example, abstract and interface properties are excluded. Indexers also remain unaffected.
+2. Properties may now mix and match auto accessors with full accessors. "Auto property" will continue to mean a property whose accessors have no bodies. None of the examples below will be considered auto properties.
 
-"Auto property" will continue to mean a property whose accessors have no bodies. None of the examples below will be considered auto properties.
-
-This means that properties may now mix and match auto accessors with full accessors. For example:
+Examples:
 
 ```cs
 { get; set => Set(ref field, value); }
