@@ -14,9 +14,9 @@ In these cases by now you always have to create an instance field and write the 
 
 ## Glossary
 
-- **Auto property**: Short for "automatically implemented property" ([§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties)). Accessors on an auto property have no body. The implementation and backing storage are both provided by the compiler.
+- **Auto property**: Short for "automatically implemented property" ([§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties)). Accessors on an auto property have no body. The implementation and backing storage are both provided by the compiler. Auto properties have `{ get; }`, `{ get; set; }`, or `{ get; init; }`.
 
-- **Auto accessor**: Short for "automatically implemented accessor." This is an accessor that has no body. The implementation and backing storage are both provided by the compiler.
+- **Auto accessor**: Short for "automatically implemented accessor." This is an accessor that has no body. The implementation and backing storage are both provided by the compiler. `get;`, `set;` and `init;` are auto accessors.
 
 - **Full accessor**: This is an accessor that has a body. The implementation is not provided by the compiler, though the backing storage may still be (as in the example `set => field = value;`).
 
