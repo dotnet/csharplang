@@ -515,11 +515,14 @@ A collection expression has a *known length* if the compile-time type of each *s
 ### Interface translation
 [interface-translation]: #interface-translation
 
-Given a target type `IEnumerable<T>`, `IReadOnlyCollection<T>`, `IReadOnlyList<T>`, `ICollection<T>`, or `IList<T>`, a compliant implementation is required to produce a value that implements that interface. It is recommended that any type that is synthesized implement all these interfaces. This ensures maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in order to light up performance optimizations.
+#### Non-mutable interface translation
+[non-mutable-interface-translation]: #non-mutable-interface-translation
+
+Given a target type which does not contain mutating members, namely `IEnumerable<T>`, `IReadOnlyCollection<T>`, and `IReadOnlyList<T>`, a compliant implementation is required to produce a value that implements that interface. If a type is synthesized, it is recommended the synthesized type implements all these interfaces, as well as `ICollection<T>` and `IList<T>`, regardless of which interface type was targeted. This ensures maximal compatibility with existing libraries, including those that introspect the interfaces implemented by a value in order to light up performance optimizations.
 
 In addition, the value must implement the nongeneric `ICollection` and `IList` interfaces. This enables collection expressions to support dynamic introspection in scenarios such as data binding.
 
-A compliant implementation is free to: 
+A compliant implementation is free to:
 
 1. Use an existing type that implements the required interfaces.
 1. Synthesize a type that implements the required interfaces.
@@ -528,22 +531,15 @@ In either case, the type used is allowed to implement a larger set of interfaces
 
 Synthesized types are free to employ any strategy they want to implement the required interfaces properly.  For example, a synthesized type might inline the elements directly within itself, avoiding the need for additional internal collection allocations.  A synthesized type could also not use any storage whatsoever, opting to compute the values directly.  For example, returning `index + 1` for `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
 
-#### Non-mutable interface translation
-[non-mutable-interface-translation]: #non-mutable-interface-translation
-
 1. The value must return `true` when queried for `ICollection<T>.IsReadOnly` (if implemented) and nongeneric `IList.IsReadOnly` and `IList.IsFixedSize`.  This ensures consumers can appropriately tell that the collection is non-mutable, despite implementing the mutable views.
 1. The value must throw on any call to a mutation method (like `IList<T>.Add`).  This ensures safety, preventing a non-mutable collection from being accidentally mutated.
 
 #### Mutable interface translation
-[non-mutable-interface-translation]: #non-mutable-interface-translation
+[mutable-interface-translation]: #mutable-interface-translation
 
-Given a target type or `ICollection<T>` or `IList<T>`:
+Given target type that contains mutating members, namely `ICollection<T>` or `IList<T>`:
 
-1. The value must return `false` when queried for `ICollection<T>.IsReadOnly` and nongeneric `IList.IsReadOnly` and `IList.IsFixedSize`. 
-
-The value generated is allowed to implement more interfaces than required.  Specifically, implementing `IList<T>` even when only targeting `ICollection<T>`.  However, in that case:
-
-1. The value must support all mutation methods (like `IList<T>.RemoveAt`).
+1. The value must be an instance of `List<T>`.
 
 ### Known length translation
 [known-length-translation]: #known-length-translation
