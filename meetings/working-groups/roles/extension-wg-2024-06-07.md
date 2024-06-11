@@ -6,7 +6,7 @@
 We need to encode the extension type (for extension-aware compiler) and the underlying type (erasure and for non-extension-aware tools).
 
 We'll need to encode tuple names, dynamic bits, nullability, native integer for both types. 
-Ideally, this should be done in a way that leave any tools that understand current attribute/constructor.
+Ideally, this should be done in a way that doesn't break tools that understand the current attribute/constructor encoding.
 
 Options for encoding extension type:
 - generic attribute (pinging David to ask limitations/bugs on older frameworks)
@@ -33,6 +33,7 @@ override void M2(E e)
 
 Con: binary break to change API from extension to underlying type and back
 Con: problem for override at language level (might be solvable)
+Con: need to new solution encode the second set of tuples names/dynamic/nullability
 
 ### Generic attribute
 ```
@@ -42,8 +43,9 @@ void M(E e)
 // codegen
 void M([Extension<E>] Underlying e) // System.Extension`1 (new)
 ```
-Attribute doesn't exist downlevel (we should synthesize)
-Generic attribute not supported before .NET 7 (prove there's enough support, or block off)
+Con: Attribute doesn't exist downlevel (we should synthesize)
+Con: Generic attribute not supported before .NET 7 (prove there's enough support, or block off)
+Con: need to new solution encode the second set of tuples names/dynamic/nullability
 
 ### Attribute with typeof
 
@@ -83,6 +85,7 @@ Pro: Nested type reduces pollution of members for other tools
 Pro: Runtime may not need to load the members of nested type (to be confirmed)
 Pro: natural encoding of tuple names/dynamic/etc
 Con: copies all the parameters
+Pro: it naturally offers a place to encode the second set of tuples names/dynamic/nullability information
 
 Secret class is abstract and parallel methods are abstract
 Note: Hard to point backwards from parallel method, so attribute is on visible method
