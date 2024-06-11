@@ -51,12 +51,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
 
+## C# Language Design Notes for 2024
+
 ### Mon Jun 3, 2024
 
-- https://github.com/dotnet/roslyn/issues/73643 (Aleksey)
-- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
+[C# Language Design Meeting for June 6th, 2024]((https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-03.md)
 
-## C# Language Design Notes for 2024
+- Params collections and dynamic
+- Allow ref and unsafe in iterators and async
 
 ### Wed May 15, 2024
 
