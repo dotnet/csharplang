@@ -55,7 +55,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jun 3, 2024
 
-[C# Language Design Meeting for June 6th, 2024]((https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-03.md)
+[C# Language Design Meeting for June 6th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-03.md)
 
 - Params collections and dynamic
 - Allow ref and unsafe in iterators and async
