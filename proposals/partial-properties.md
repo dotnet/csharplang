@@ -70,6 +70,14 @@ A partial property cannot explicitly implement interface properties.
 
 Similar to partial methods, the attributes in the resulting property are the combined attributes of the parts are concatenated in an unspecified order, and duplicates are not removed.
 
+### Caller-info attributes
+We adjust the following language from the [standard](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/attributes.md#22551-general):
+
+> It is an error to have the same caller-info attribute on a parameter of both the defining and implementing part of a partial ~~method~~ **member** declaration. Only caller-info attributes in the defining part are applied, whereas caller-info attributes occurring only in the implementing part are ignored.
+
+- The described error falls out from the definitions of these attributes not having `AllowMultiple = true`. Using them multiple times, including across partial declarations, results in an error.
+- When caller-info attributes are applied to a parameter in the implementation part of a partial method, the Roslyn compiler reports a warning. It will also report a warning for the same scenario in a partial property.
+
 ### Matching signatures
 
 The LDM meeting on [14th September 2020](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-09-14.md#partial-method-signature-matching) defined a set of "strict" requirements for signature matching of partial methods, which were introduced in a warning wave. Partial properties have analogous requirements to partial methods for signature matching as much as is possible, except that all of the diagnostics for mismatch are reported by default, and are not held behind a warning wave.
@@ -79,10 +87,12 @@ Signature matching requirements include:
 2. Differences in tuple element names within partial property declarations results in a compile-time error, same as for partial methods.
 3. The property declarations and their accessor declarations must have the same modifiers, though the modifiers may appear in a different order.
     - Exception: this does not apply to the `extern` modifier, which may only appear on an *implementing declaration*.
-3. All other syntactic differences in the signatures of partial property declarations result in a compile-time warning, with the following exceptions:
+4. All other syntactic differences in the signatures of partial property declarations result in a compile-time warning, with the following exceptions:
     - Attribute lists on or within partial property declarations do not need to match. Instead, merging of attributes in corresponding positions is performed, per [Attribute merging](#attribute-merging).
     - Nullable context differences do not cause warnings. In other words, a difference where one of the types is nullable-oblivious and the other type is either nullable-annotated or not-nullable-annotated does not result in any warnings.
     - Default parameter values do not need to match. A warning is reported when the implementation part of a partial indexer has default parameter values. This is similar to an existing warning which occurs when the implementation part of a partial method has default parameter values.
+5. A warning occurs when parameter names differ across defining and implementing declarations. The parameter names from the definition part are used at use sites and in emit.
+6. Nullability differences which do not involve oblivious nullability result in warnings. When analyzing an accessor body, the implementation part signature is used. The definition part signature is used when analyzing use sites and in emit. This is consistent with partial methods.
 
 ```cs
 partial class C1
@@ -118,6 +128,97 @@ partial class C4
     public partial string this[int i, string s = "a"] { get => s; set { } } // CS1066: The default value specified for parameter 's' will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 }
 ```
+
+### Documentation comments
+
+We want the behavior of doc comments on partial properties to be consistent with what we shipped for partial methods. That behavior is detailed in https://github.com/dotnet/csharplang/issues/5193.
+
+It is permitted to include doc comments on either the definition or implementation part of a partial property. (Note that doc comments are not supported on property accessors.)
+
+When doc comments are present on only one of the parts of the property, those doc comments are used normally (surfaced through `ISymbol.GetDocumentationCommentXml()`, written out to the documentation XML file, etc.).
+
+When doc comments are present on both parts, all the doc comments on the definition part are dropped, and only the doc comments on the implementation part are used.
+
+For example, the following program:
+```cs
+/// <summary>
+/// My type
+/// </summary>
+partial class C
+{
+    /// <summary>Definition part comment</summary>
+    /// <returns>Return value comment</returns>
+    public partial int Prop { get; set; }
+    
+    /// <summary>Implementation part comment</summary>
+    public partial int Prop { get => 1; set { } }
+}
+```
+
+Results in the following XML documentation file:
+```xml
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ConsoleApp1</name>
+    </assembly>
+    <members>
+        <member name="T:C">
+            <summary>
+            My type
+            </summary>
+        </member>
+        <member name="P:C.Prop">
+            <summary>
+            Implementation part comment
+            </summary>
+        </member>
+    </members>
+</doc>
+```
+
+When parameter names differ between partial declarations, `<paramref>` elements use the parameter names from the declaration associated with the documentation comment in source code. For example, a paramref on a doc comment placed on an implementing declaration refers to the parameter symbols on the implementing declaration using their parameter names. This is consistent with partial methods.
+
+```cs
+/// <summary>
+/// My type
+/// </summary>
+partial class C
+{
+    public partial int this[int x] { get; set; }
+
+    /// <summary>
+    /// <paramref name="x"/> // warning CS1734: XML comment on 'C.this[int]' has a paramref tag for 'x', but there is no parameter by that name
+    /// <paramref name="y"/> // ok. 'Go To Definition' will go to 'int y'.
+    /// </summary>
+    public partial int this[int y] { get => 1; set { } } // warning CS9256: Partial property declarations 'int C.this[int x]' and 'int C.this[int y]' have signature differences.
+}
+```
+
+Results in the following XML documentation file:
+```xml
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ConsoleApp1</name>
+    </assembly>
+    <members>
+        <member name="T:C">
+            <summary>
+            My type
+            </summary>
+        </member>
+        <member name="P:C.Item(System.Int32)">
+            <summary>
+            <paramref name="x"/> // warning CS1734: XML comment on 'C.this[int]' has a paramref tag for 'x', but there is no parameter by that name
+            <paramref name="y"/> // ok. 'Go To Definition' will go to 'int y'.
+            </summary>
+        </member>
+    </members>
+</doc>
+```
+
+This can be confusing, because the metadata signature will use parameter names from the definition part. It is recommended to ensure that parameter names match across parts to avoid this confusion.
 
 ### Indexers
 

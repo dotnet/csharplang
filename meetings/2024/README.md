@@ -4,8 +4,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
+- [Record structs with InlineArray attribute compares only by the first value](https://github.com/dotnet/roslyn/issues/73504) (Aleksey)
+
 ## Schedule when convenient
 
+- [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
 
 ## Recurring topics
 
@@ -13,6 +17,22 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - *Design review*
 
 ## Schedule
+
+### Wed Aug 28, 2024
+
+### Mon Aug 26, 2024
+
+### Wed Aug 21, 2024
+
+### Mon Aug 19, 2024
+
+### Wed Jul 17, 2024
+
+### Mon Jul 15, 2024
+
+### Wed Jul 10, 2024
+
+### Mon Jul 8, 2024
 
 ### Wed Jun 26, 2024
 
@@ -24,28 +44,43 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 12, 2024
 
+- https://github.com/dotnet/roslyn/issues/73743 (Aleksey, Jared): new overloads interacting badly with existing expression tree code
+- Extensions - misc topics (Julien)
+
 ### Mon Jun 10, 2024
 
-### Wed Jun 5, 2024
+- [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
+
+## C# Language Design Notes for 2024
 
 ### Mon Jun 3, 2024
 
-### Fri May 31, 2024
+[C# Language Design Meeting for June 3rd, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-03.md)
 
-### Mon May 20, 2024
+- Params collections and dynamic
+- Allow ref and unsafe in iterators and async
 
 ### Wed May 15, 2024
 
-- Dictionary expressions: KeyValuePair correspondence (Cyrus)
-- Dictionary expressions: [conversions](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md#conversions) (Chuck)
+[C# Language Design Meeting for May 15th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md)
+
+- `field` and `value` as contextual keywords
+  - Usage in `nameof`
+  - Should `value` be a keyword in a property or indexer get? Should `field` be a keyword in an indexer?
+  - Should `field` and `value` be considered keywords in lambdas and local functions within property accessors?
+  - Should `field` and `value` be keywords in property or accessor signatures? What about `nameof` in those spaces?
+- Dictionary expressions
 
 ### Mon May 13, 2024
 
-- First-class span types: [delegate conversions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#delegate-signature-matching) (Jan/Chuck/Fred)
-- [Open questions in overload resolution priority](https://github.com/dotnet/csharplang/issues/7706) (Fred)
-- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
+[C# Language Design Meeting for May 13th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-13.md)
 
-## C# Language Design Notes for 2024
+- First-class span types questions
+    - Delegate conversions
+    - Variant conversion existence
+- Overload resolution priority questions
+    - Attribute shape and inheritance
+    - Extension overload resolution
 
 ### Wed May 8, 2024
 

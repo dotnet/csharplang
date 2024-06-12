@@ -76,7 +76,7 @@ A new bullet point will be added to [§11.9.5 Addition operator](https://github.
   ```
 
   This binary `+` operator performs byte sequences concatenation and is applicable if and only if both operands are semantically UTF8 byte representations.
-  An operand is semantically a UTF8 byte representation when it is eiher a value of a `u8` literal, or a value produced by the UTF8 byte representation concatenation operator. 
+  An operand is semantically a UTF8 byte representation when it is either a value of a `u8` literal, or a value produced by the UTF8 byte representation concatenation operator. 
 
   The result of the UTF8 byte representation concatenation is a ```ReadOnlySpan<byte>``` that consists of the bytes of the left operand followed by the bytes of the right operand. A null terminator is placed beyond the last byte in memory (and outside the length of the ```ReadOnlySpan<byte>```) in order to handle some
 interop scenarios where the call expects null terminated strings.
@@ -94,7 +94,7 @@ ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(new byte[] { 0x68, 0x65, 0x6c, 
                                Slice(0,5); // The `Slice` call will be optimized away by the compiler.
 ```
 
-That means all optimizations that apply to the `new byte[] { ... }` form will apply to utf8 literals as well. This means the call site will be allocation free as C# will optimize this be stored in the `.data` section of the PE file.
+That means all optimizations that apply to the `new byte[] { ... }` form will apply to utf8 literals as well. This means the call site will be allocation free as C# will optimize this to be stored in the `.data` section of the PE file.
 
 Multiple consecutive applications of UTF8 byte representation concatenation operators are collapsed into a single creation of `ReadOnlySpan<byte>` with byte array containing the final byte sequence.
 
@@ -113,7 +113,7 @@ The compiler implementation will use `UTF8Encoding` for both invalid string dete
 
 Historically the compiler has avoided using runtime APIs for literal processing. That is because it takes control of how constants are processed away from the language and into the runtime. Concretely it means items like bug fixes can change constant encoding and mean that the outcome of C# compilation depends on which runtime the compiler is executing on. 
 
-This is not a hypothetical problem. Early versions of Roslyn used `double.Parse` to handle floating point constant parsing. That caused a number of problems. First it meant that some floating point values had different representations between the native compiler and Roslyn. Second as .NET core envolved and fixed long standing bugs in the `double.Parse` code it meant that the meaning of those constants changed in the language depending on what runtime the compiler executed on. As a result the compiler ended up writing it's own version of floating point parsing code and removing the dependency on `double.Parse`. 
+This is not a hypothetical problem. Early versions of Roslyn used `double.Parse` to handle floating point constant parsing. That caused a number of problems. First it meant that some floating point values had different representations between the native compiler and Roslyn. Second as .NET core evolved and fixed long standing bugs in the `double.Parse` code it meant that the meaning of those constants changed in the language depending on what runtime the compiler executed on. As a result the compiler ended up writing its own version of floating point parsing code and removing the dependency on `double.Parse`. 
 
 This scenario was discussed with the runtime team and we do not feel it has the same problems we've hit before. The UTF8 parsing is stable across runtimes and there are no known issues in this area that are areas for future compat concerns. If one does come up we can re-evaluate the strategy. 
 
@@ -167,7 +167,7 @@ byte[] bytes = text; // Error: the input string is not valid UTF16
 ```
 
 The predominant usage of this feature is expected to be with literals but it will work with any `string` constant value.
-A conversion from a `string` constant with `null` value will be supprted as well. The result of the conversion will be `default`
+A conversion from a `string` constant with `null` value will be supported as well. The result of the conversion will be `default`
 value of the target type.
 
 ```c#
@@ -385,7 +385,7 @@ Note that there is no proposal to make _string_constant_to_UTF8_byte_representat
 
 Are we Ok with this behavior? Should it be documented as a breaking change?
 
-The new rule also is not going to prevent breaks involving tuple litearal conversions. For example,
+The new rule also is not going to prevent breaks involving tuple literal conversions. For example,
 ``` C#
 class C
 {
