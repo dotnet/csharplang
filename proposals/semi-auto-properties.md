@@ -198,11 +198,21 @@ public struct S
     public S()
     {
         _ = P1; // Disabled-by-default warning
+    }
+
+    public int P1 { get => field; }
+}
+```
+
+```cs
+public struct S
+{
+    public S()
+    {
         P2 = 5; // Disabled-by-default warning
     }
 
     public int P1 { get => field; }
-    public int P2 { get => field; set => field = value; }
 }
 ```
 
