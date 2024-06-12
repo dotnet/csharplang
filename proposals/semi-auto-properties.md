@@ -253,6 +253,8 @@ class C
 }
 ```
 
+#### Open question: nullability of `field`
+
 In the same vein as how `var` infers as nullable for reference types, the `field` type is the nullable type of the property whenever the property's type is not a value type. Otherwise, `field ??` would appear to be followed by dead code, and it avoids producing a misleading warning in the following example:
 
 ```cs
@@ -402,6 +404,20 @@ public class Point
 
 ## Open LDM questions
 
+1. Should it be disallowed to pair a manually implemented accessor with an automatically implemented accessor? An original guiding principle for the design was that, in places where `get; set;` defines an auto property, `get;` is now considered syntax sugar for `get => field;` and `set;` is now short for `set => field = value;`. This allowance was encoded in the original name for the feature, "semi-auto properties," where half the property would be automatically implemented and the other half would not be automatically implemented.
+
+   The typical INotifyPropertyChanged use case would be:
+
+   ```cs
+   public string Name { get; set => Set(ref field, value); }
+   ```
+
+   If this was disallowed, the typical use case would expand slightly to:
+
+   ```cs
+   public string Name { get => field; set => Set(ref field, value); }
+   ```
+
 1. Which of these scenarios should be allowed to compile? Assume that the "field is never read" warning would apply just like with a manually declared field.
 
    1. `{ set; }` - Disallowed today, continue disallowing
@@ -430,26 +446,7 @@ public class Point
       }
       ```
 
-1. Should nullable flow analysis provide a warning for non-nullable properties when a setter allows `field` to be null and the getter returns something whose nullability depends on `field`?
-
-   ```cs
-   public string AmbientValue
-   {
-       get => field; // No warning, but could return null!
-       set
-       {
-           if (value == parent.AmbientValue)
-           {
-               // A valid strategy if the getter returned field ?? parent.AmbientValue
-               field = null;
-           }
-           else
-           {
-               field = value;
-           }
-       }
-   }
-   ```
+1. Should the proposed nullability of `field` be accepted? See the [Nullability](#nullability) section, and the open question within.
 
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
