@@ -1130,17 +1130,6 @@ Instance methods/accessors in the extension type are emitted as static
 methods with an additional parameter for the instance.  
 The instance parameter is by-value for reference types and `ref` otherwise.
 
-## Type references
-
-TODO4 this section is not finalized
-
-Extensions appearing in signatures are emitted as the extension's underlying type
-marked with a modopt of the extension type.
-
-```
-void M(Extension r) // emitted as `void M(modopt(Extension) UnderlyingType r)`
-```
-
 ### Extension type members
 
 #### Fields
