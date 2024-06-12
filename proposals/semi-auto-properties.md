@@ -8,7 +8,7 @@ Extend all properties to allow them to reference an automatically generated back
 
 Auto properties only allow for directly setting or getting the backing field, giving some control only by placing access modifiers on the accessors. Sometimes there is a need to have additional control over what happens in one or both accessors, but this confronts users with the overhead of declaring a backing field. The backing field name must then be kept in sync with the property, and the backing field is scoped to the entire class which can result in accidental bypassing of the accessors from within the class.
 
-There are two common scenarios in particular: applying a constraint on the setter to ensuring the validity of a value, and raising an event such as `INotifyPropertyChanged.PropertyChanged`.
+There are two common scenarios in particular: applying a constraint on the setter to ensure the validity of a value, and raising an event such as `INotifyPropertyChanged.PropertyChanged`.
 
 In these cases by now you always have to create an instance field and write the whole property yourself.  This not only adds a fair amount of code, but it also leaks the backing field into the rest of the type's scope, when it is often desirable to only have it be available to the bodies of the accessors.
 
