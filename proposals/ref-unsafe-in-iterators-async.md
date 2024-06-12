@@ -395,6 +395,11 @@ class C
     inherit unsafe context like all other methods do. Discussed above.
     Could be done across all LangVersions or just for `LangVersion >= 13`.
 
+## Design meetings
+[ldm]: #design-meetings
+
+- [2024-06-03](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-03.md): post-implementation review of the speclet
+
 [definite-assignment]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/variables.md#94-definite-assignment
 [simple-names]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1284-simple-names
 [await-expressions]: https://github.com/dotnet/csharpstandard/blob/ee38c3fa94375cdac119c9462b604d3a02a5fcd2/standard/expressions.md#1298-await-expressions
