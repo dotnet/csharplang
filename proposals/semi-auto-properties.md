@@ -190,14 +190,18 @@ class C
 
 ### Definite assignment in structs
 
-Even though they can't be referenced in the constructor, backing fields denoted by the `field` keyword are subject to default-initialization and disabled-by-default warnings under the same conditions as any other struct fields ([LDM decision 1](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#property-assignment-in-structs), [LDM decision 2](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)). For example:
+Even though they can't be referenced in the constructor, backing fields denoted by the `field` keyword are subject to default-initialization and disabled-by-default warnings under the same conditions as any other struct fields ([LDM decision 1](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#property-assignment-in-structs), [LDM decision 2](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-05-02.md#definite-assignment-of-manually-implemented-setters)).
+
+For example (these diagnostics are silent by default):
 
 ```cs
 public struct S
 {
     public S()
     {
-        _ = P1; // Disabled-by-default warning
+        // CS9020 The 'this' object is read before all of its fields have been assigned, causing preceding implicit
+        // assignments of 'default' to non-explicitly assigned fields.
+        _ = P1;
     }
 
     public int P1 { get => field; }
@@ -209,7 +213,9 @@ public struct S
 {
     public S()
     {
-        P2 = 5; // Disabled-by-default warning
+        // CS9020 The 'this' object is read before all of its fields have been assigned, causing preceding implicit
+        // assignments of 'default' to non-explicitly assigned fields.
+        P2 = 5;
     }
 
     public int P1 { get => field; }
