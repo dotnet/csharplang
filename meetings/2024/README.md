@@ -48,11 +48,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - https://github.com/dotnet/roslyn/issues/73743 (Aleksey, Jared): new overloads interacting badly with existing expression tree code
 - Extensions - misc topics (Julien)
 
+## C# Language Design Notes for 2024
+
 ### Mon Jun 10, 2024
 
-- [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
+[C# Language Design Meeting for June 10th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-10.md)
 
-## C# Language Design Notes for 2024
+- `ref struct`s implementing interfaces and in generics
 
 ### Mon Jun 3, 2024
 
