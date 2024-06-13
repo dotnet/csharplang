@@ -1120,8 +1120,9 @@ implicit extension E for int
 Extensions are emitted as static class types with an extension marker method.  
 
 The extension marker method encodes the underlying type as parameter.  
-It is private and static, and is called `<ImplicitExtension>$` for implicit extensions and 
+It is public and static, and is called `<ImplicitExtension>$` for implicit extensions and 
 `<ExplicitExtension>$` for explicit extensions.  
+It allows roundtripping of extension symbols through metadata (full and reference assemblies).  
 
 For example: `implicit extension R for UnderlyingType` yields
 `private static void <ImplicitExtension>$(UnderlyingType)`.  
