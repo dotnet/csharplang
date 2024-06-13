@@ -4,12 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
-- [Record structs with InlineArray attribute compares only by the first value](https://github.com/dotnet/roslyn/issues/73504) (Aleksey)
-
 ## Schedule when convenient
-
-- [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
 
 ## Recurring topics
 
@@ -40,7 +35,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 19, 2024
 
+- Expression trees and params collections (Aleksey/Jared)
+- [Record structs with InlineArray attribute compares only by the first value](https://github.com/dotnet/roslyn/issues/73504) (Aleksey)
+
 ### Mon Jun 17, 2024
+
+- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
+- [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
 
 ### Wed Jun 12, 2024
 
