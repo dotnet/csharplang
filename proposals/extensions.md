@@ -85,6 +85,37 @@ implicit extension MyTableExtensions for TableIDoNotOwn
 var v = table.Count; // Let's get a read from LDM
 ```
 
+## Open issue: readonly members
+
+Currently, readonly members are disallowed in extensions. This means that
+a `ref readonly` variable cannot be used as the instance argument for an extension member without cloning.  
+We should consider allowing `readonly` members.
+
+```
+var s = new S() { field = 42 };
+M(in s);
+System.Console.Write(s.field); // we can observe whether the receiver was cloned or not
+
+void M(in S s)
+{
+    s.M();
+}
+
+public struct S
+{
+    public int field;
+    public void Increment() { field++; }
+}
+
+public implicit extension E for S
+{
+    public void M() // readonly modifier is currently disallowed
+    {
+        this.Increment();
+    }
+}
+```
+
 ## Summary
 [summary]: #summary
 
@@ -1125,7 +1156,7 @@ It is public and static, and is called `<ImplicitExtension>$` for implicit exten
 It allows roundtripping of extension symbols through metadata (full and reference assemblies).  
 
 For example: `implicit extension R for UnderlyingType` yields
-`private static void <ImplicitExtension>$(UnderlyingType)`.  
+`public static void <ImplicitExtension>$(UnderlyingType)`.  
 
 Instance methods/accessors in the extension type are emitted as static
 methods with an additional parameter for the instance.  
