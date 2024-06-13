@@ -88,39 +88,6 @@ implicit extension MyTableExtensions for TableIDoNotOwn
 var v = table.Count; // Let's get a read from LDM
 ```
 
-## Open issue: readonly members
-
-Currently, readonly members are disallowed in extensions. This means that
-a `ref readonly` variable cannot be used as a receiver for an extension member without cloning.  
-We should consider allowing `readonly` members and finding a way to adjust the receiver
-to re-interpret a `ref readonly` receiver of the underlying type as a `ref readonly` receiver of the extension type.
-
-```
-var s = new S() { field = 42 };
-M(in s);
-System.Console.Write(s.field); // we can observe whether the receiver was cloned or not
-
-void M(in S s)
-{
-    s.M();
-}
-
-public struct S
-{
-    public int field;
-    public void Increment() { field++; }
-}
-
-public implicit extension E for S
-{
-    public void M() // readonly modifier is currently disallowed
-    {
-        ref S sThis = ref System.Runtime.CompilerServices.Unsafe.As<E, S>(ref this); // re-interpret `this` as not being readonly
-        sThis.Increment();
-    }
-}
-```
-
 ## Open issue: type of `this` instance receiver for interpolation handlers
 
 It is possible for an interpolation handler to capture the receiver,
