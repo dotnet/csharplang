@@ -1158,10 +1158,6 @@ It allows roundtripping of extension symbols through metadata (full and referenc
 For example: `implicit extension R for UnderlyingType` yields
 `public static void <ImplicitExtension>$(UnderlyingType)`.  
 
-Instance methods/accessors in the extension type are emitted as static
-methods with an additional parameter for the instance.  
-The instance parameter is by-value for reference types and `ref` otherwise.
-
 ### Extension type members
 
 #### Fields
