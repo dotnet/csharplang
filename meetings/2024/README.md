@@ -35,6 +35,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jun 26, 2024
 
 ### Mon Jun 24, 2024
+
+### Wed Jun 19, 2024
   
 ### Mon Jun 17, 2024
 
