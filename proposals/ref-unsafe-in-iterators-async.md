@@ -26,17 +26,6 @@ async void M()
 }
 ```
 
-On the other hand, having `yield` inside a `lock` means the caller also holds the lock while iterating which might lead to unexpected behavior.
-This is even more problematic in async iterators where the caller can `await` between iterations, but `await` is not allowed in `lock`.
-See also https://github.com/dotnet/roslyn/issues/72443.
-
-```cs
-lock (this)
-{
-    yield return 1; // warning proposed
-}
-```
-
 ## Breaking changes
 [break]: #breaking-changes
 
@@ -221,16 +210,6 @@ Note that this error is not downgraded to a warning in `unsafe` contexts like [s
 That is because these ref-like locals cannot be manipulated in `unsafe` contexts without relying on implementation details of how the state machine rewrite works,
 hence this error falls outside the boundaries of what we want to downgrade to warnings in `unsafe` contexts.
 
-[§13.13 The lock statement][lock-statement]:
-
-> [...]
-> 
-> **A warning is reported (as part of the next warning wave) when a `yield return` statement
-> ([§13.15][yield-statement]) is used inside the body of a `lock` statement.**
-
-Note that [the new `Lock`-object-based `lock`][lock-object] reports compile-time errors for `yield return`s in its body,
-because such `lock` statement is equivalent to a `using` on a `ref struct` which disallows `yield return`s in its body.
-
 [§15.14.1 Iterators > General][iterators]:
 
 > When a function member is implemented using an iterator block,
@@ -307,6 +286,10 @@ class C
       await Task.Yield();
   }
   ```
+
+- There is a related issue to make `yield return` inside a `lock` a warning-wave warning or an error: https://github.com/dotnet/roslyn/issues/72443.
+  Note that [the new `Lock`-object-based `lock`][lock-object] reports compile-time errors for `yield return`s in its body,
+  because such `lock` statement is equivalent to a `using` on a `ref struct` which disallows `yield return`s in its body.
 
 - `yield` inside `lock` could be an error (like `await` inside `lock` is) but that would be a breaking change.
 
