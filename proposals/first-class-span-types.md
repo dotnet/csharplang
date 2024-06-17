@@ -144,7 +144,7 @@ The compiler expects to use the following helpers or equivalents to implement th
 | ReadOnlySpan to ReadOnlySpan | `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
 | string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
 
-#### Overload resolution
+#### Better conversion from expression
 
 *Better conversion from expression* ([§12.6.4.5][better-conversion-from-expression]) is updated to prefer implicit span conversions.
 This is based on [collection expressions overload resolution changes][ce-or].
@@ -205,6 +205,30 @@ static class C
 > For example, if .NET 9 BCL introduces such overloads, users that upgrade to `net9.0` TFM but stay on lower LangVersion
 > will get ambiguity errors for existing code, unless BCL also applies
 > [the new `OverloadResolutionPriorityAttribute`][overload-resolution-priority].
+
+#### Better conversion target
+
+*Better conversion target* ([§12.6.4.7][better-conversion-target]) is updated to consider implicit span conversions.
+
+> Given two types `T₁` and `T₂`, `T₁` is a *better conversion target* than `T₂` if one of the following holds:
+>
+> - An implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
+>   **(the implicit span conversion is considered in this bullet point, even though it's a conversion from expression)**
+> - [...]
+
+This change is needed to avoid ambiguities in existing code that would arise
+because we are now ignoring user-defined Span conversions which were considered in the "better conversion target" rule,
+whereas "implicit Span conversion" would not be considered as it is a "conversion from expression", not a "conversion from type".
+
+```cs
+using System;
+C.M(null); // used to print 1, would be ambiguous without this rule
+static class C
+{
+    public static void M(object[] x) => Console.Write(1);
+    public static void M(ReadOnlySpan<object> x) => Console.Write(2);
+}
+```
 
 ### Type inference
 
@@ -424,6 +448,7 @@ Keep things as they are.
 
 [standard-explicit-conversions]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/conversions.md#1043-standard-explicit-conversions
 [better-conversion-from-expression]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#12645-better-conversion-from-expression
+[better-conversion-target]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#12647-better-conversion-target
 [is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator
 
 [ce-or]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/csharp-12.0/collection-expressions.md#overload-resolution
