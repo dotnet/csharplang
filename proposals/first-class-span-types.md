@@ -24,12 +24,10 @@ For example, the BCL can add only one overload of any `MemoryExtensions` helper 
 public static class MemoryExtensions
 {
     public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T>;
-    public static bool StartsWith<T>(this Span<T> span, T value) where T : IEquatable<T>; // not needed
-    public static bool StartsWith<T>(this T[] array, T value) where T : IEquatable<T>; // not needed
 }
 ```
 
-Previously the Span and array overloads would be needed to make the extension method usable on Span/array-typed variables
+Previously, Span and array overloads would be needed to make the extension method usable on Span/array-typed variables
 because user-defined conversions (which exist between Span/array/ReadOnlySpan) are not considered for extension receivers.
 
 ## Detailed Design
