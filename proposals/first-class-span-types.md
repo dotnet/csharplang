@@ -145,6 +145,7 @@ The compiler expects to use the following helpers or equivalents to implement th
 | string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
 
 #### Better conversion from expression
+[betterness-rule]: #better-conversion-from-expression
 
 *Better conversion from expression* ([§12.6.4.5][better-conversion-from-expression]) is updated to prefer implicit span conversions.
 This is based on [collection expressions overload resolution changes][ce-or].
@@ -205,6 +206,7 @@ static class C
 > For example, if .NET 9 BCL introduces such overloads, users that upgrade to `net9.0` TFM but stay on lower LangVersion
 > will get ambiguity errors for existing code, unless BCL also applies
 > [the new `OverloadResolutionPriorityAttribute`][overload-resolution-priority].
+> See also [an open question](#unrestricted-betterness-rule) below.
 
 #### Better conversion target
 
@@ -441,6 +443,15 @@ without needing to create wrappers. We don't have precedent in the language for 
 #### Answer
 
 We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d2 = M2;` will not compile. We could reconsider at a later point if use cases are discovered.
+
+### Unrestricted betterness rule
+
+Should we make [the betterness rule][betterness-rule] unconditional on LangVersion?
+That would allow API authors to add new Span APIs where IEnumerable equivalents exist
+without breaking users on older LangVersions and without needing to use the `OverloadResolutionPriorityAttribute`.
+However, that would mean users could get different behavior after updating the toolset (without changing LangVersion or TargetFramework):
+- Compiler could choose different overloads (technically a breaking change, but hopefully those overloads would have equivalent behavior).
+- Other breaks could arise, who knows when it comes to overload resolution...
 
 ## Alternatives
 
