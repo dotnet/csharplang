@@ -931,6 +931,7 @@ implicit extension E for C
     public new int this[string s] => throw null;
 }
 ```
+
 #### Extension indexer access
 TODO3(instance) write this section, including preference for more specific extension indexers
 
