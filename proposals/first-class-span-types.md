@@ -75,6 +75,22 @@ We also add _implicit span conversion_ to the list of acceptable implicit conver
 > - The name of `Mₑ` is *identifier*
 > - `Mₑ` is accessible and applicable when applied to the arguments as a static method as shown above
 > - An implicit identity, reference ~~or boxing~~ **, boxing, or span** conversion exists from *expr* to the type of the first parameter of `Mₑ`.
+>   **Span conversion is not considered when overload resolution is performed for a method group conversion.**
+
+Note that implicit span conversion is not considered for extension receiver in method group conversions
+which makes the following code continue working as opposed to resulting in a compile-time error
+`CS1113: Extension method 'E.M<int>(Span<int>, int)' defined on value type 'Span<int>' cannot be used to create delegates`:
+
+```cs
+using System;
+using System.Collections.Generic;
+Action<int> a = new int[0].M; // binds to M<int>(IEnumerable<int>, int)
+static class E
+{
+    public static void M<T>(this Span<T> s, T x) => Console.Write(1);
+    public static void M<T>(this IEnumerable<T> e, T x) => Console.Write(2);
+}
+```
 
 #### Variance
 
