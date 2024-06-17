@@ -35,8 +35,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
 - [Record structs with InlineArray attribute compares only by the first value](https://github.com/dotnet/roslyn/issues/73504) (Aleksey)
-
-### Wed Jun 19, 2024
   
 ### Mon Jun 17, 2024
 
