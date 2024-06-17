@@ -10,12 +10,25 @@ allowing more natural programming with these integral types.
 Since their introduction in C# 7.2, `Span<T>` and `ReadOnlySpan<T>` have worked their way into the language and base class library (BCL) in many key ways. This is great for
 developers, as their introduction improves performance without costing developer safety. However, the language has held these types at arm's length in a few key ways,
 which makes it hard to express the intent of APIs and leads to a significant amount of surface area duplication for new APIs. For example, the BCL has added a number of new
-[tensor primitive APIs](https://github.com/dotnet/runtime/issues/94553) in .NET 9, but these APIs are all offered on `ReadOnlySpan<T>`. Because C# doesn't recognize the
-relationship between `ReadOnlySpan<T>`, `Span<T>`, and `T[]`, it means that any developers looking to use those APIs with anything other than a `ReadOnlySpan<T>` have to explicitly
-convert to a `ReadOnlySpan<T>`. Further, it also means that they don't have IDE tooling guiding them to use these APIs, since nothing will indicate to the IDE that it is valid
-to pass them after conversion. There are also issues with generic inference in these scenarios. In order to provide maximum usability for this style of API, the BCL will have to
+[tensor primitive APIs](https://github.com/dotnet/runtime/issues/94553) in .NET 9, but these APIs are all offered on `ReadOnlySpan<T>`. C# doesn't recognize the
+relationship between `ReadOnlySpan<T>`, `Span<T>`, and `T[]`, so even though there are user-defined conversions between these types,
+they cannot be used for extension method receivers, cannot compose with other user-defined conversions, and don't help with all generic type inference scenarios.
+Users would need to use explicit conversions or type arguments, which means that IDE tooling is not guiding users to use these APIs, since nothing will indicate to the IDE that it is valid
+to pass these types after conversion. In order to provide maximum usability for this style of API, the BCL will have to
 define an entire set of `Span<T>` and `T[]` overloads, which is a lot of duplicate surface area to maintain for no real gain. This proposal seeks to address the problem by
 having the language more directly recognize these types and conversions.
+
+For example, the BCL can add only one overload of any `MemoryExtensions` helper like:
+
+```cs
+public static class MemoryExtensions
+{
+    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T>;
+}
+```
+
+Previously, Span and array overloads would be needed to make the extension method usable on Span/array-typed variables
+because user-defined conversions (which exist between Span/array/ReadOnlySpan) are not considered for extension receivers.
 
 ## Detailed Design
 
@@ -151,6 +164,9 @@ This is based on [collection expressions overload resolution changes][ce-or].
 >     and `T₁` is a better conversion target than `T₂`
 > - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
 
+This rule should ensure that whenever an overload becomes applicable due to the new span conversions,
+any potential ambiguity with another overload is avoided because the newly-applicable overload is preferred.
+
 Without this rule, the following code that successfully compiled in C# 12 would result in an ambiguity error in C# 13
 because of the new standard implicit conversion from array to ReadOnlySpan applicable to an extension method receiver:
 
@@ -186,8 +202,9 @@ static class C
 > [!WARNING]
 > Because the betterness rule is gated on `LangVersion >= 13`,
 > API authors cannot add such new overloads if they want to keep supporting users on `LangVersion <= 12`.
-> For example, if .NET 9 BCL introduced such overloads, users that upgrade to .NET 9 but stay on lower LangVersion
-> would suddenly get ambiguity errors for existing code.
+> For example, if .NET 9 BCL introduces such overloads, users that upgrade to `net9.0` TFM but stay on lower LangVersion
+> will get ambiguity errors for existing code, unless BCL also applies
+> [the new `OverloadResolutionPriorityAttribute`][overload-resolution-priority].
 
 ### Type inference
 
@@ -410,3 +427,4 @@ Keep things as they are.
 [is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator
 
 [ce-or]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/csharp-12.0/collection-expressions.md#overload-resolution
+[overload-resolution-priority]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/overload-resolution-priority.md
