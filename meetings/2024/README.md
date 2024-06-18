@@ -32,17 +32,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jun 26, 2024
 
 - [https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md](Extension open issues) (Julien/Mads)
-- Summertime 2024 (Kathleen)
 
 ### Mon Jun 24, 2024
 
 - [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
-- [Record structs with InlineArray attribute compares only by the first value](https://github.com/dotnet/roslyn/issues/73504) (Aleksey)
   
 ### Mon Jun 17, 2024
 
 - Expression trees and params collections (Aleksey/Jared)
 - [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
+- [Record structs with InlineArray attribute compares only by the first value](https://github.com/dotnet/roslyn/issues/73504) (Aleksey)
 
 ### Wed Jun 12, 2024
 
