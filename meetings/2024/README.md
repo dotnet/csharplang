@@ -3,7 +3,6 @@
 All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
 
 ## Schedule ASAP
-- [https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md](Extension open issues) (Julien/Mads)
 
 ## Schedule when convenient
 
@@ -31,6 +30,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Jul 8, 2024
 
 ### Wed Jun 26, 2024
+
+- [https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md](Extension open issues) (Julien/Mads)
+- Summertime 2024 (Kathleen)
 
 ### Mon Jun 24, 2024
 
