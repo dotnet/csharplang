@@ -36,19 +36,25 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Jun 24, 2024
 
 - [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
-  
+
+## C# Language Design Notes for 2024
+
 ### Mon Jun 17, 2024
 
-- Expression trees and params collections (Aleksey/Jared)
-- [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
-- [Record structs with InlineArray attribute compares only by the first value](https://github.com/dotnet/roslyn/issues/73504) (Aleksey)
+[C# Language Design Meeting for June 17th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md)
+
+- `params` Span breaks
+- Overload resolution priority questions
+    - Application error or warning on `override`s
+    - Implicit interface implementation
+- Inline arrays as `record struct`s
 
 ### Wed Jun 12, 2024
 
-- https://github.com/dotnet/roslyn/issues/73743 (Aleksey, Jared): new overloads interacting badly with existing expression tree code
-- Extensions - misc topics (Julien)
+[C# Language Design Meeting for June 12th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-12.md)
 
-## C# Language Design Notes for 2024
+- `params Span` breaks
+- Extensions
 
 ### Mon Jun 10, 2024
 
