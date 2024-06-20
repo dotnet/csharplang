@@ -4,7 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md) (Jan/Fred)
+- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
 
 ## Schedule when convenient
 
@@ -33,12 +33,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 26, 2024
 
+- Summertime 2024 Intro (Kathleen)
 - [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (Julien/Mads)
 
 ### Mon Jun 24, 2024
 
-- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
-
+- [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md) (Jan/Fred)
+- [Field-backed properties open questions](https://github.com/dotnet/csharplang/blob/main/proposals/semi-auto-properties.md#open-ldm-questions) (Chuck, Joseph, Rikki)
+  
 ## C# Language Design Notes for 2024
 
 ### Mon Jun 17, 2024
