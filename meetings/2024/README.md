@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md) (Jan/Fred)
+
 ## Schedule when convenient
 
 ## Recurring topics
