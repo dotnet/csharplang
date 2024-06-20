@@ -178,8 +178,6 @@ class MyClass
 
 In the example above, binding to the backing field should result in an error: "initializer cannot reference non-static field".
 
-**Recommendation**: `field` is a keyword within a property initializer, and binds to the backing field.
-
 ### `field` and `value` in event accessor
 
 Should `value` be a keyword in an event accessor?
