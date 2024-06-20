@@ -156,6 +156,66 @@ public class Point
     - https://github.com/dotnet/csharplang/issues/5563
     - https://github.com/dotnet/csharplang/pull/5573#issuecomment-1002110830
 
+### Feature name
+
+Some options for the name of the feature:
+1. semi-auto properties
+1. field-backed properties
+1. field keyword
+
+### `field` in property initializer
+
+Should `field` be a keyword in a property initializer and bind to the backing field?
+
+```csharp
+class MyClass
+{
+    private const int field = -1;
+
+    public object Property { get; } = field; // bind to const (ok) or backing field (error)?
+}
+```
+
+In the example above, binding to the backing field should result in an error: "initializer cannot reference non-static field".
+
+**Recommendation**: `field` is a keyword within a property initializer, and binds to the backing field.
+
+### `value` in event accessor
+
+Should `value` be a keyword in an event accessor?
+
+```csharp
+class MyClass
+{
+    private EventHandler _e;
+
+    public event EventHandler E
+    {
+        add { _e += value; }
+        remove { _e -= value; }
+    }
+}
+```
+
+**Recommendation**: `value` is a keyword within an event accessor.
+
+### `field` in event accessor
+
+Should `field` be a keyword in an event accessor with the compiler generating a backing field?
+
+```csharp
+class MyClass
+{
+    public event EventHandler E
+    {
+        add { field += value; }
+        remove { field -= value; }
+    }
+}
+```
+
+**Recommendation**: `field` is *not* a keyword within an event accessor, and no backing field is generated.
+
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-14.md#field-keyword
