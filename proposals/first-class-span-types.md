@@ -92,6 +92,8 @@ static class E
 }
 ```
 
+There's [an open question](#delegate-extension-receiver-break) whether this break should be avoided or not.
+
 #### Variance
 
 The goal of the variance section in _implicit span conversion_ is to replicate some amount of covariance for `System.ReadOnlySpan<T>`. Runtime changes would be required to fully
@@ -468,6 +470,21 @@ without breaking users on older LangVersions and without needing to use the `Ove
 However, that would mean users could get different behavior after updating the toolset (without changing LangVersion or TargetFramework):
 - Compiler could choose different overloads (technically a breaking change, but hopefully those overloads would have equivalent behavior).
 - Other breaks could arise, who knows when it comes to overload resolution...
+
+### Delegate extension receiver break
+
+Should we break existing code like the following (real code found in runtime)?
+LDM recently allowed breaks related to new Span overloads (https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#params-span-breaks).
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+var list = new List<int> { 1, 2, 3, 4 };
+var toRemove = new int[] { 2, 3 };
+list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)' defined on value type 'Span<int>' cannot be used to create delegates
+```
 
 ## Alternatives
 
