@@ -31,7 +31,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jun 26, 2024
 
-- [https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md](Extension open issues) (Julien/Mads)
+- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (Julien/Mads)
 
 ### Mon Jun 24, 2024
 
