@@ -180,7 +180,7 @@ In the example above, binding to the backing field should result in an error: "i
 
 **Recommendation**: `field` is a keyword within a property initializer, and binds to the backing field.
 
-### `value` in event accessor
+### `field` and `value` in event accessor
 
 Should `value` be a keyword in an event accessor?
 
@@ -199,9 +199,7 @@ class MyClass
 
 **Recommendation**: `value` is a keyword within an event accessor.
 
-### `field` in event accessor
-
-Should `field` be a keyword in an event accessor with the compiler generating a backing field?
+Should `field` be a keyword in an event accessor, and should the compiler generate a backing field?
 
 ```csharp
 class MyClass
