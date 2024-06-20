@@ -250,6 +250,9 @@ static class C
 }
 ```
 
+This rule is not needed if the span conversion is a conversion from type.
+See [an open question][conversion-from-type] below.
+
 ### Type inference
 
 We update the type inferences section of the specification as follows (changes in **bold**).
@@ -465,11 +468,34 @@ var toRemove = new int[] { 2, 3 };
 list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)' defined on value type 'Span<int>' cannot be used to create delegates
 ```
 
+### Conversion from type vs. from expression
+[conversion-from-type]: #conversion-from-type-vs-from-expression
+
+We now think it would be better if the span conversion would be a conversion from type:
+
+- Nothing about span conversions cares what form the expression takes; it can be a local variable, a `new[]`, a collection expression, a field, a `stackalloc`, etc.
+- We have to go through everywhere in the spec that doesn't accept conversions from expression and check if they need updating to accept span conversions.
+  Like [better conversion target](#better-conversion-target) above.
+
+Note that it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists ([§10.5.2 Permitted user-defined conversions][permitted-udcs]).
+Hence, we would need to make an exception, so BCL can keep defining the existing Span conversion operators even when they switch to C# 13
+(to avoid binary breaking changes and also because we use these operators in codegen of the new standard span conversion).
+
+In Roslyn, type conversions do not have access to Compilation which is needed to access well-known type Span.
+We see a couple of ways of solving this concern:
+
+1. We make the new conversions only applicable to the case where Span comes from the corelib, which would significantly simplify this space for us.
+   This would mean the rules don't exist downlevel; on the one hand, they already partly have issues downlevel
+   (covariance won't exist downlevel because the helper API doesn't exist).
+   On the other hand, that could affect partners abilities to take them up.
+2. We couple type conversions to a Compilation or look at other ways of providing the well-known type to it. This will take a bit of investigation.
+
 ## Alternatives
 
 Keep things as they are.
 
 [standard-explicit-conversions]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/conversions.md#1043-standard-explicit-conversions
+[permitted-udcs]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/conversions.md#1052-permitted-user-defined-conversions
 [better-conversion-from-expression]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#12645-better-conversion-from-expression
 [better-conversion-target]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#12647-better-conversion-target
 [is-type-operator]: https://github.com/dotnet/csharpstandard/blob/8c5e008e2fd6057e1bbe802a99f6ce93e5c29f64/standard/expressions.md#1212121-the-is-type-operator
