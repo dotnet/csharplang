@@ -287,10 +287,10 @@ class C
   }
   ```
 
-- `yield return` inside `lock` could be an error (like `await` inside `lock` is) or a warning-wave warning but that would be a breaking change: https://github.com/dotnet/roslyn/issues/72443.
+- `yield return` inside `lock` could be an error (like `await` inside `lock` is) or a warning-wave warning,
+  but that would be a breaking change: https://github.com/dotnet/roslyn/issues/72443.
   Note that [the new `Lock`-object-based `lock`][lock-object] reports compile-time errors for `yield return`s in its body,
   because such `lock` statement is equivalent to a `using` on a `ref struct` which disallows `yield return`s in its body.
-
 
 - Variables inside async or iterator methods should not be "fixed" but rather "moveable"
   if they need to be hoisted to fields of the state machine (similarly to captured variables).
