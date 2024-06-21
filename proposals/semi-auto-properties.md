@@ -156,6 +156,63 @@ public class Point
     - https://github.com/dotnet/csharplang/issues/5563
     - https://github.com/dotnet/csharplang/pull/5573#issuecomment-1002110830
 
+### Feature name
+
+Some options for the name of the feature:
+1. semi-auto properties
+1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
+1. field-backed properties
+1. field keyword
+
+### `field` in property initializer
+
+Should `field` be a keyword in a property initializer and bind to the backing field?
+
+```csharp
+class MyClass
+{
+    private const int field = -1;
+
+    public object Property { get; } = field; // bind to const (ok) or backing field (error)?
+}
+```
+
+In the example above, binding to the backing field should result in an error: "initializer cannot reference non-static field".
+
+### `field` and `value` in event accessor
+
+Should `value` be a keyword in an event accessor?
+
+```csharp
+class MyClass
+{
+    private EventHandler _e;
+
+    public event EventHandler E
+    {
+        add { _e += value; }
+        remove { _e -= value; }
+    }
+}
+```
+
+**Recommendation**: `value` is a keyword within an event accessor.
+
+Should `field` be a keyword in an event accessor, and should the compiler generate a backing field?
+
+```csharp
+class MyClass
+{
+    public event EventHandler E
+    {
+        add { field += value; }
+        remove { field -= value; }
+    }
+}
+```
+
+**Recommendation**: `field` is *not* a keyword within an event accessor, and no backing field is generated.
+
 ### Interaction with partial properties
 
 #### Initializers
