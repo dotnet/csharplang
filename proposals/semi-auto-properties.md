@@ -160,6 +160,7 @@ public class Point
 
 Some options for the name of the feature:
 1. semi-auto properties
+1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
 1. field-backed properties
 1. field keyword
 
