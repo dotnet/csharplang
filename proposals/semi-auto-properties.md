@@ -213,6 +213,50 @@ class MyClass
 
 **Recommendation**: `field` is *not* a keyword within an event accessor, and no backing field is generated.
 
+### Interaction with partial properties
+
+#### Initializers
+
+When a partial property uses `field`, which parts should be allowed to have an initializer?
+
+```cs
+partial class C
+{
+    public partial int Prop { get; set; } = 1;
+    public partial int Prop { get => field; set => field = value; } = 2;
+}
+```
+
+- It seems clear that an error should occur when both parts have an initializer.
+- We can think of use cases where either the definition or implementation part might want to set the initial value of the `field`.
+- It seems like if we permit the initializer on the definition part, it is effectively forcing the implementer to use `field` in order for the program to be valid. Is that fine?
+- We think it will be common for generators to use `field` whenever a backing field of the same type is needed in the implementation. This is in part because generators often want to enable their users to use `[field: ...]` targeted attributes on the property definition part. Using the `field` keyword saves the generator implementer the trouble of "forwarding" such attributes to some generated field and suppressing the warnings on the property. Those same generators are likely to also want to allow the user to specify an initial value for the field.
+
+**Recommendation**: Permit an initializer on either part of a partial property when the implementation part uses `field`. Report an error if both parts have an initializer.
+
+#### Auto-accessors
+
+As originally designed, partial property implementation must have bodies for all the accessors. However, recent iterations of the `field` keyword feature have included the notion of "auto-accessors". Should partial property implementations be able to use such accessors? If they are used exclusively, it will be indistinguishable from a defining declaration.
+
+```cs
+partial class C
+{
+    public partial int Prop0 { get; set; }
+    public partial int Prop0 { get => field; set => field = value; } // this is equivalent to the two "semi-auto" forms below.
+
+    public partial int Prop1 { get; set; }
+    public partial int Prop1 { get => field; set; } // is this a valid implementation part?
+
+    public partial int Prop2 { get; set; }
+    public partial int Prop2 { get; set => field = value; } // what about this? will there be disagreement about which is the "best" style?
+    
+
+    public partial int Prop3 { get; }
+    public partial int Prop3 { get => field; } // it will only be valid to use at most 1 auto-accessor, when a second accessor is manually implemented.
+```
+
+**Recommendation**: Disallow auto-accessors in partial property implementations, because the limitations around when they would be usable are more confusing to follow than the benefit of allowing them.
+
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-04-14.md#field-keyword

@@ -90,7 +90,10 @@ class Derived : Base
 
 Negative numbers are allowed to be used, and can be used to mark a specific overload as worse than all other default overloads.
 
-The **overload_resolution_priority** of a member comes from the least-derived declaration of that member.
+The **overload_resolution_priority** of a member comes from the least-derived declaration of that member. **overload_resolution_priority** is not
+inherited or inferred from any interface members a type member may implement, and given a member `Mx` that implements an interface member `Mi`, no
+warning is issued if `Mx` and `Mi` have different **overload_resolution_priorities**.
+> NB: The intent of this rule is to replicate the behavior of the `params` modifier.
 
 ### `System.Runtime.CompilerServices.OverloadResolutionPriorityAttribute`
 
@@ -111,6 +114,10 @@ attributed with that attribute, then their ***overload_resolution_priority*** is
 
 It is an error to apply `OverloadResolutionPriorityAttribute` to a non-indexer property, or to property, indexer, or event accessors. Attributes encountered on
 these locations in metadata are ignored by C#.
+
+It is an error to apply `OverloadResolutionPriorityAttribute` in a location it would be ignored, such as on an override of a base method, as the priority is read
+from the least-derived declaration of a member.
+> NB: This intentionally differs from the behavior of the `params` modifier, which allows respecifying or adding when ignored.
 
 ### Callability of members
 
@@ -212,6 +219,10 @@ Which should we do on the application of a `OverloadResolutionPriorityAttribute`
 
 3 is the most cautious approach, if we think there may be a space in the future where we might want to allow an override to specify this attribute.
 
+#### Answer
+
+We will go with 3, and block application on locations it would be ignored.
+
 ### Implicit interface implementation
 
 What should the behavior of an implicit interface implementation be? Should it be required to specify `OverloadResolutionPriority`? What should the behavior of the compiler be when it encounters
@@ -243,6 +254,10 @@ Our options are:
 3. Do not carry over the attribute implicitly, require it to be specified at the call site.
    1. This brings an extra question: what should the behavior be when the compiler encounters this scenario with compiled references?
 
+#### Answer
+
+We will go with 1.
+
 ## Alternatives
 [alternatives]: #alternatives
 
@@ -250,6 +265,10 @@ A [previous](https://github.com/dotnet/csharplang/pull/7707) proposal tried to s
 in removing things from visibility. However, that has lots of hard implementation problems that either mean the proposal is too strong to be useful (preventing
 testing old APIs, for example) or so weak that it missed some of the original goals (such as being able have an API that would otherwise be considered ambiguous
 call a new API). That version is replicated below.
+
+<details>
+
+<summary>BinaryCompatOnlyAttribute Proposal (obsolete)</summary>
 
 ### BinaryCompatOnlyAttribute
 
@@ -341,5 +360,4 @@ likely cloning the same body as the `BinaryCompatOnly` member as the explicit in
 
 What do we do when an interface member has been marked as `BinaryCompatOnly`? The type still needs to provide an implementation for that member; it may be
 that we must simply say that interface members cannot be marked as `BinaryCompatOnly`.
-
-
+</details>
