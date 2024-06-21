@@ -451,7 +451,7 @@ That would allow API authors to add new Span APIs where IEnumerable equivalents 
 without breaking users on older LangVersions and without needing to use the `OverloadResolutionPriorityAttribute`.
 However, that would mean users could get different behavior after updating the toolset (without changing LangVersion or TargetFramework):
 - Compiler could choose different overloads (technically a breaking change, but hopefully those overloads would have equivalent behavior).
-- Other breaks could arise, who knows when it comes to overload resolution...
+- Other breaks could arise, unknown at this time.
 
 ### Delegate extension receiver break
 
