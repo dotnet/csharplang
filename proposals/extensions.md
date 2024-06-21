@@ -154,50 +154,6 @@ implicit extension E for C
 }
 ```
 
-## Open issue: codegen a preamble for instance methods (semantics of `this`)
-
-In the "`this` access" section, we need to add a case for an extension type with a type parameter underlying type,
-but it's not obvious how to spec it.
-
-Since it could be a reference type, we should disallow `this = ...` (ie. it's not a variable).
-
-It behaves mostly like a `ref` parameter. We want proper side-effects take place when T is a value type at run-time (no copy).
-But it is not just a value: when T is a reference type at run-time, the object reference should be captured (see illustration below).
-
-We need to ask for the blessed way to detect value vs. reference type at run-time.
-
-```csharp
-interface I { void Increment() }
-
-implicit extension E<T> for : T where T : I
-{
-  void M() { this.Increment(); }
-}
-
-static class E<T>
-{
-  static void M(ref this T self) // we need the `ref` for the case where T is a struct
-  {
-     T selfForClass;
-     ref T savedThis;
-     if (... some check ...) // check and one of the branches could be elided as part of generic specialization in the JIT
-     {
-       // class case
-       // since self is a `ref T`, we need to capture the object reference (to protect against modification)
-       selfForClass = self;
-       savedThis = ref selfForClass;
-     }
-     else
-     {
-       // struct case
-       savedThis = ref self;
-     }
-
-     savedThis.Increment();
-  }
-}
-```
-
 ## Open issue: behavior of `static using` directives
 
 We'll need to update "extension member lookup section" and "using static directives" to allow the following two scenarios:
