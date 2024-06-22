@@ -404,7 +404,9 @@ public class Point
 
 ## Open LDM questions
 
-1. Should it be disallowed to pair a manually implemented accessor with an automatically implemented accessor? An original guiding principle for the design was that, in places where `get; set;` defines an auto property, `get;` is now considered syntax sugar for `get => field;` and `set;` is now short for `set => field = value;`. This allowance was encoded in the original name for the feature, "semi-auto properties," where half the property would be automatically implemented and the other half would not be automatically implemented.
+### Mixing auto and full accessors
+
+Should it be disallowed to pair a manually implemented accessor with an automatically implemented accessor? An original guiding principle for the design was that, in places where `get; set;` defines an auto property, `get;` is now considered syntax sugar for `get => field;` and `set;` is now short for `set => field = value;`. This allowance was encoded in the original name for the feature, "semi-auto properties," where half the property would be automatically implemented and the other half would not be automatically implemented.
 
    The typical INotifyPropertyChanged use case would be:
 
@@ -418,7 +420,11 @@ public class Point
    public string Name { get => field; set => Set(ref field, value); }
    ```
 
-1. Which of these scenarios should be allowed to compile? Assume that the "field is never read" warning would apply just like with a manually declared field.
+### Scenarios similar to `{ set; }`
+
+`{ set; }` is currently disallowed and this makes sense: the field which this creates can never be read. There are now new ways to end up in a situation where the setter introduces a backing field that is never read, such as the expansion of `{ set; }` into `{ set => field = value; }`.
+
+Which of these scenarios should be allowed to compile? Assume that the "field is never read" warning would apply just like with a manually declared field.
 
    1. `{ set; }` - Disallowed today, continue disallowing
    1. `{ set => field = value; }`
@@ -446,7 +452,9 @@ public class Point
       }
       ```
 
-1. Should the proposed nullability of `field` be accepted? See the [Nullability](#nullability) section, and the open question within.
+### Nullability of `field`
+
+Should the proposed nullability of `field` be accepted? See the [Nullability](#nullability) section, and the open question within.
 
 ## LDM history:
 - https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-03-10.md#field-keyword
