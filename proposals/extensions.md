@@ -1,7 +1,5 @@
 # Extension types
 
-TODO(static) extensions are disallowed within interfaces with variant type parameters  
-
 ## Open issue: merging extension methods and extension members
 
 We need to revise the preference of extension types over extension methods (should mix and disambiguate duplicates if needed instead)
@@ -270,11 +268,11 @@ Need to spec why extension properties are not found during lookup for attribute 
 From WG discussion, we'd allow attributes on extensions types, using the AttributeTargets.Class target,
 since extensions are emitted as static classes.
 
-## Open issue: usings
+## Open issue: extension member lookup in usings
 
-TODO
-static usings
-cycles
+We don't resolve implicit extension members in usings, due to cycles.  
+This needs to be investigated further to disentangle whether all cycles are implementation-specific
+or some are inherent to the language feature.
 
 ## Open issue: need to specify scoping rules for `for UnderlyingType`
 
@@ -323,7 +321,7 @@ void M<T>(T t1, T t2) { }
 
 Should we have a naming convention like `Extension` suffixes? (`DataObjectExtension`)  
 
-### Open issue: need to specify pattern-based invocations and member access
+## Open issue: need to specify pattern-based invocations and member access
 
 We need to scan through all pattern-based rules for known members to consider whether to include extension type members.
   If extension methods were already included, then we should certainly include extension type methods.
@@ -335,6 +333,21 @@ We need to scan through all pattern-based rules for known members to consider wh
   - `GetPinnableReference` in fixed statements
   - `GetAwaiter` in `await` expressions
   - `Dispose` in `using` statements
+
+## Open issue: need to disallow extensions within interfaces with variant type parameters  
+
+Will need to check with the WG as I don't recall the reasoning for this.
+
+## Open issue: need to specify the type erasure design
+
+The current proposal is to use an attribute with a string representing the type with extensions un-erased.
+For example: `void M(E)` would be emitted as `void M([Attribute("E")] UnderlyingType)`.
+The serialization format would be the same as the one used for `typeof` in attributes, but with support for type parameters (using `T!` and `T!!` syntax).  
+Note: the serialization format does not support function pointers at the moment. Tracked by https://github.com/dotnet/roslyn/issues/48765
+
+The attribute would also encode the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
+For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underlying type for `E<dynamic>` would be emitted as
+`void M([Attribute("E<object>"", TupleNames = "..."}] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
 
 ## Summary
 [summary]: #summary
@@ -889,7 +902,7 @@ implicit extension E for C
 ```
 
 #### Extension indexer access
-TODO3(instance) write this section, including preference for more specific extension indexers
+TODO write this section, including preference for more specific extension indexers
 
 In an element access of one of the forms
 
@@ -1237,11 +1250,8 @@ TODO3
 
 ### Method group conversions
 
-TODO4 spec this section
-
-https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions
-TODO A single method is selected corresponding to a method invocation, 
-but with some tweaks related to normal form and optional parameters.  
+No changes to [method group conversion rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions).  
+The extension behavior falls out of method invocation rules.
 
 ### Simple assignment
 
