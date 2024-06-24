@@ -289,7 +289,7 @@ An instance of an inline array type is a valid expression in a [*spread_element*
 ### Validation of the InlineArrayAttribute applications
 
 Compiler will validate the following aspects of the InlineArrayAttribute applications:
-- The target type is a struct
+- The target type is a [non-record](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#conclusion-3) struct
 - The target type has only one field
 - Specified length > 0
 - The target struct doesn't have an explicit layout specified
@@ -730,3 +730,4 @@ able to interop with that.
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-01.md#fixed-size-buffers
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md#inline-arrays
 - https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-17.md#inline-arrays
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#inline-arrays-as-record-structs

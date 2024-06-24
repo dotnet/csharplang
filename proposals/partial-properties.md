@@ -87,10 +87,12 @@ Signature matching requirements include:
 2. Differences in tuple element names within partial property declarations results in a compile-time error, same as for partial methods.
 3. The property declarations and their accessor declarations must have the same modifiers, though the modifiers may appear in a different order.
     - Exception: this does not apply to the `extern` modifier, which may only appear on an *implementing declaration*.
-3. All other syntactic differences in the signatures of partial property declarations result in a compile-time warning, with the following exceptions:
+4. All other syntactic differences in the signatures of partial property declarations result in a compile-time warning, with the following exceptions:
     - Attribute lists on or within partial property declarations do not need to match. Instead, merging of attributes in corresponding positions is performed, per [Attribute merging](#attribute-merging).
     - Nullable context differences do not cause warnings. In other words, a difference where one of the types is nullable-oblivious and the other type is either nullable-annotated or not-nullable-annotated does not result in any warnings.
     - Default parameter values do not need to match. A warning is reported when the implementation part of a partial indexer has default parameter values. This is similar to an existing warning which occurs when the implementation part of a partial method has default parameter values.
+5. A warning occurs when parameter names differ across defining and implementing declarations. The parameter names from the definition part are used at use sites and in emit.
+6. Nullability differences which do not involve oblivious nullability result in warnings. When analyzing an accessor body, the implementation part signature is used. The definition part signature is used when analyzing use sites and in emit. This is consistent with partial methods.
 
 ```cs
 partial class C1
@@ -174,6 +176,49 @@ Results in the following XML documentation file:
     </members>
 </doc>
 ```
+
+When parameter names differ between partial declarations, `<paramref>` elements use the parameter names from the declaration associated with the documentation comment in source code. For example, a paramref on a doc comment placed on an implementing declaration refers to the parameter symbols on the implementing declaration using their parameter names. This is consistent with partial methods.
+
+```cs
+/// <summary>
+/// My type
+/// </summary>
+partial class C
+{
+    public partial int this[int x] { get; set; }
+
+    /// <summary>
+    /// <paramref name="x"/> // warning CS1734: XML comment on 'C.this[int]' has a paramref tag for 'x', but there is no parameter by that name
+    /// <paramref name="y"/> // ok. 'Go To Definition' will go to 'int y'.
+    /// </summary>
+    public partial int this[int y] { get => 1; set { } } // warning CS9256: Partial property declarations 'int C.this[int x]' and 'int C.this[int y]' have signature differences.
+}
+```
+
+Results in the following XML documentation file:
+```xml
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ConsoleApp1</name>
+    </assembly>
+    <members>
+        <member name="T:C">
+            <summary>
+            My type
+            </summary>
+        </member>
+        <member name="P:C.Item(System.Int32)">
+            <summary>
+            <paramref name="x"/> // warning CS1734: XML comment on 'C.this[int]' has a paramref tag for 'x', but there is no parameter by that name
+            <paramref name="y"/> // ok. 'Go To Definition' will go to 'int y'.
+            </summary>
+        </member>
+    </members>
+</doc>
+```
+
+This can be confusing, because the metadata signature will use parameter names from the definition part. It is recommended to ensure that parameter names match across parts to avoid this confusion.
 
 ### Indexers
 

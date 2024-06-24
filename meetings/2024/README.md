@@ -4,13 +4,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Ref Struct Interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md) -  post-implementation review of the speclet (Aleksey)
-- https://github.com/dotnet/roslyn/issues/73643 (Aleksey)
-- [Ref and unsafe in iterators and async](https://github.com/dotnet/csharplang/blob/main/proposals/ref-unsafe-in-iterators-async.md): post-implementation review of the speclet and a breaking change (Jan)
+- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
 
 ## Schedule when convenient
-
-- [Open questions in overload resolution priority](../../proposals/overload-resolution-priority.md#open-questions) (Fred)
 
 ## Recurring topics
 
@@ -19,26 +15,63 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Aug 28, 2024
+
+### Mon Aug 26, 2024
+
+### Wed Aug 21, 2024
+
+### Mon Aug 19, 2024
+
+### Wed Jul 24, 2024
+
+### Mon Jul 22, 2024
+
+### Wed Jul 17, 2024
+
+### Mon Jul 15, 2024
+
 ### Wed Jun 26, 2024
+
+- Summertime 2024 Intro (Kathleen)
+- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (Julien/Mads)
 
 ### Mon Jun 24, 2024
 
-### Wed Jun 19, 2024
+- [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md) (Jan/Fred)
+- [Field-backed properties open questions](https://github.com/dotnet/csharplang/blob/main/proposals/semi-auto-properties.md#open-ldm-questions) (Chuck, Joseph, Rikki)
+  
+## C# Language Design Notes for 2024
 
 ### Mon Jun 17, 2024
 
+[C# Language Design Meeting for June 17th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md)
+
+- `params` Span breaks
+- Overload resolution priority questions
+    - Application error or warning on `override`s
+    - Implicit interface implementation
+- Inline arrays as `record struct`s
+
 ### Wed Jun 12, 2024
+
+[C# Language Design Meeting for June 12th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-12.md)
+
+- `params Span` breaks
+- Extensions
 
 ### Mon Jun 10, 2024
 
-### Wed Jun 5, 2024
+[C# Language Design Meeting for June 10th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-10.md)
+
+- `ref struct`s implementing interfaces and in generics
 
 ### Mon Jun 3, 2024
 
-### Fri May 31, 2024
+[C# Language Design Meeting for June 3rd, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-03.md)
 
-
-## C# Language Design Notes for 2024
+- Params collections and dynamic
+- Allow ref and unsafe in iterators and async
 
 ### Wed May 15, 2024
 
