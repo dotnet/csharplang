@@ -342,12 +342,16 @@ Will need to check with the WG as I don't recall the reasoning for this.
 
 The current proposal is to use an attribute with a string representing the type with extensions un-erased.
 For example: `void M(E)` would be emitted as `void M([Attribute("E")] UnderlyingType)`.
+
 The serialization format would be the same as the one used for `typeof` in attributes, but with support for type parameters (using `T!` and `T!!` syntax).  
 Note: the serialization format does not support function pointers at the moment. Tracked by https://github.com/dotnet/roslyn/issues/48765
 
 The attribute would also encode the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
 For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underlying type for `E<dynamic>` would be emitted as
 `void M([Attribute("E<object>"", TupleNames = "..."}] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
+
+Should we instead extend support for type parameters in `typeof` in attributes (including runtime/reflection),
+and use a `Type` parameter in the attribute constructor?
 
 ## Summary
 [summary]: #summary
