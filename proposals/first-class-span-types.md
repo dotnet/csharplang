@@ -37,7 +37,7 @@ The changes in this proposal will be tied to `LangVersion >= 13`.
 ### Implicit Span Conversions
 
 We add a new type of implicit conversion to the list in [§10.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1021-general), an
-_implicit span conversion_. This conversion is a conversion from expression and is defined as follows:
+_implicit span conversion_. This conversion is a conversion from type and is defined as follows:
 
 ------
 
@@ -50,6 +50,9 @@ An implicit span conversion permits `array_types`, `System.Span<T>`, `System.Rea
 
 ------
 
+Any Span/ReadOnlySpan types are considered applicable for the conversion if they match by their fully-qualified name.
+If they do not match the types that are selected by the compiler's well-known type resolution logic, a compile-time error is reported.
+
 We also add _implicit span conversion_ to the list of standard implicit conversions
 ([§10.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1042-standard-implicit-conversions)). This allows overload resolution to consider
 them when performing argument resolution, as in the previously-linked API proposal.
@@ -61,10 +64,20 @@ The explicit span conversions are the following:
 There is no standard explicit span conversion unlike other *standard explicit conversions* ([§10.4.3][standard-explicit-conversions])
 which always exist given the opposite standard implicit conversion.
 
+#### User defined conversions
+
 User-defined conversions are not considered when converting between
 - any single-dimensional `array_type` and `System.Span<T>`/`System.ReadOnlySpan<T>`,
 - any combination of `System.Span<T>`/`System.ReadOnlySpan<T>`,
 - `string` and `System.ReadOnlySpan<char>`.
+
+The implicit span conversions are exempted from the rule
+that it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists
+([§10.5.2 Permitted user-defined conversions][permitted-udcs]).
+This is needed so BCL can keep defining the existing Span conversion operators even when they switch to C# 13
+(to avoid binary breaking changes and also because we use these operators in codegen of the new standard span conversion).
+
+#### Extension receiver
 
 We also add _implicit span conversion_ to the list of acceptable implicit conversions on the first parameter of an extension method when determining applicability
 ([12.8.9.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12893-extension-method-invocations)) (change in bold):
@@ -225,33 +238,6 @@ static class C
 > will get ambiguity errors for existing code, unless BCL also applies
 > [the new `OverloadResolutionPriorityAttribute`][overload-resolution-priority].
 > See also [an open question](#unrestricted-betterness-rule) below.
-
-#### Better conversion target
-
-*Better conversion target* ([§12.6.4.7][better-conversion-target]) is updated to consider implicit span conversions.
-
-> Given two types `T₁` and `T₂`, `T₁` is a *better conversion target* than `T₂` if one of the following holds:
->
-> - An implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
->   **(the implicit span conversion is considered in this bullet point, even though it's a conversion from expression)**
-> - [...]
-
-This change is needed to avoid ambiguities in existing code that would arise
-because we are now ignoring user-defined Span conversions which were considered in the "better conversion target" rule,
-whereas "implicit Span conversion" would not be considered as it is a "conversion from expression", not a "conversion from type".
-
-```cs
-using System;
-C.M(null); // used to print 1, would be ambiguous without this rule
-static class C
-{
-    public static void M(object[] x) => Console.Write(1);
-    public static void M(ReadOnlySpan<object> x) => Console.Write(2);
-}
-```
-
-This rule is not needed if the span conversion is a conversion from type.
-See [an open question][conversion-from-type] below.
 
 ### Type inference
 
@@ -457,6 +443,7 @@ However, that would mean users could get different behavior after updating the t
 
 Should we break existing code like the following (real code found in runtime)?
 LDM recently allowed breaks related to new Span overloads (https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#params-span-breaks).
+Currently, this speclet has a mitigation for this break in [the extension receiver section](#extension-receiver).
 
 ```cs
 using System;
@@ -468,14 +455,13 @@ var toRemove = new int[] { 2, 3 };
 list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)' defined on value type 'Span<int>' cannot be used to create delegates
 ```
 
-### Conversion from type vs. from expression
-[conversion-from-type]: #conversion-from-type-vs-from-expression
+### Conversion from type vs. from expression (answered)
 
 We now think it would be better if the span conversion would be a conversion from type:
 
 - Nothing about span conversions cares what form the expression takes; it can be a local variable, a `new[]`, a collection expression, a field, a `stackalloc`, etc.
 - We have to go through everywhere in the spec that doesn't accept conversions from expression and check if they need updating to accept span conversions.
-  Like [better conversion target](#better-conversion-target) above.
+  Like *better conversion target* ([§12.6.4.7][better-conversion-target]).
 
 Note that it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists ([§10.5.2 Permitted user-defined conversions][permitted-udcs]).
 Hence, we would need to make an exception, so BCL can keep defining the existing Span conversion operators even when they switch to C# 13
@@ -489,6 +475,14 @@ We see a couple of ways of solving this concern:
    (covariance won't exist downlevel because the helper API doesn't exist).
    On the other hand, that could affect partners abilities to take them up.
 2. We couple type conversions to a Compilation or look at other ways of providing the well-known type to it. This will take a bit of investigation.
+
+#### Answer
+
+Go with a third option: match the Span types by their full name.
+Then later check that the type matches the well-known type and report a compile-time error if it does not.
+Although this type selection logic is inconsistent with the rest of the compiler,
+it should not affect the vast majority of users,
+does not break downlevel scenarios, and is straightforward to implement.
 
 ## Alternatives
 
