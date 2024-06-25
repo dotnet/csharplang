@@ -1263,6 +1263,51 @@ signature of a user defined static method. Support for interface implementation 
 conflict can possibly occur in some edge cases. If there is a concern, we should consider strengthening uniqueness of the
 signature.
 
+However, other tools and compilers (VB, for example) won't be able to disambiguate APIs based on presence of the `modopt`.
+``` C#
+public implicit extension E for C
+{
+    public void Method()
+    {
+        System.Console.Write(1);
+    }
+
+    public static void Method(C c)
+    {
+        System.Console.Write(2);
+    }
+}
+
+public class C
+{
+}
+```
+
+C# consumer:
+``` C#
+class Program
+{
+    static void Main()
+    {
+        var c = new C();
+        c.Method(); // Prints 1
+        C.Method(c); // Prints 2
+    }
+}
+```
+
+VB consumer:
+``` VB
+Class Program
+    Shared Sub Main()
+        Dim c = new C()
+        E.Method(c) ' BC31429: 'Method' is ambiguous because multiple kinds of members with this name exist in structure 'E'.
+    End Sub
+End Class
+```
+
+
+
 When a reference is provided for the special `ref <>4__this` parameter and the type of the parameter could be a reference
 type at runtime, compiler should ensure that a reference to a temporary location with a copy of a value from
 the user specified location is provided instead of the original user specified location. This redirection should happen only when the type
