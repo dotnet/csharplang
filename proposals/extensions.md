@@ -353,6 +353,10 @@ For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underl
 Should we instead extend support for type parameters in `typeof` in attributes (including runtime/reflection),
 and use a `Type` parameter in the attribute constructor?
 
+## Open issue: consider allowing ref structs as underlying types
+
+The static+this codegen strategy should work for ref structs and classic extension methods are allowed on ref structs.
+
 ## Summary
 [summary]: #summary
 
