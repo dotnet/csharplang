@@ -75,7 +75,7 @@ The implicit span conversions are exempted from the rule
 that it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists
 ([§10.5.2 Permitted user-defined conversions][permitted-udcs]).
 This is needed so BCL can keep defining the existing Span conversion operators even when they switch to C# 13
-(to avoid binary breaking changes and also because we use these operators in codegen of the new standard span conversion).
+(to avoid binary breaking changes and also because these operators are used in codegen of the new standard span conversion).
 
 #### Extension receiver
 
