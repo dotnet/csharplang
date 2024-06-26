@@ -199,13 +199,22 @@ but rather by adding general rules ("an extension on a class type is considered 
 
 ## Open issue: need to specify type erasure
 
-The codegen for erased extension types is not yet specified.  
 It should be done in a way that allows switching between the extension type and the underlying type without binary break.  
 It should allow for using type parameters as type parameters: `void M<T>(E<T> e)`.  
 It should allow for using extension types as type arguments without violating type parameter constraints: `C<E>` with `class C<T> where T : struct, I { }`.  
 
-If we encode the un-erased type as a string (similar to `typeof` but with support for type parameters) in an attributes,
-should the attribute constructor have a `string` or a `Type` parameter? (the latter would require ecoystem changes).
+The current proposal is to use an attribute with a string representing the type with extensions un-erased.
+For example: `void M(E)` would be emitted as `void M([Attribute("E")] UnderlyingType)`.
+
+The serialization format would be the same as the one used for `typeof` in attributes, but with support for type parameters (using `T!` and `T!!` syntax).  
+Note: the serialization format does not support function pointers at the moment. Tracked by https://github.com/dotnet/roslyn/issues/48765
+
+The attribute would also encode the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
+For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underlying type for `E<dynamic>` would be emitted as
+`void M([Attribute("E<object>"", TupleNames = "..."}] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
+
+Should we instead extend support for type parameters in `typeof` in attributes (including runtime/reflection),
+and use a `Type` parameter in the attribute constructor?
 
 ## Open issue: allow variance in implicit extension compatibility
 
@@ -337,21 +346,6 @@ We need to scan through all pattern-based rules for known members to consider wh
 ## Open issue: need to disallow extensions within interfaces with variant type parameters  
 
 Will need to check with the WG as I don't recall the reasoning for this.
-
-## Open issue: need to specify the type erasure design
-
-The current proposal is to use an attribute with a string representing the type with extensions un-erased.
-For example: `void M(E)` would be emitted as `void M([Attribute("E")] UnderlyingType)`.
-
-The serialization format would be the same as the one used for `typeof` in attributes, but with support for type parameters (using `T!` and `T!!` syntax).  
-Note: the serialization format does not support function pointers at the moment. Tracked by https://github.com/dotnet/roslyn/issues/48765
-
-The attribute would also encode the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
-For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underlying type for `E<dynamic>` would be emitted as
-`void M([Attribute("E<object>"", TupleNames = "..."}] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
-
-Should we instead extend support for type parameters in `typeof` in attributes (including runtime/reflection),
-and use a `Type` parameter in the attribute constructor?
 
 ## Open issue: consider allowing ref structs as underlying types
 
