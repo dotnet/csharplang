@@ -222,6 +222,9 @@ The current rules are pretty strict:
 > a possible type substitution on the type parameters of `X` yields underlying type `U`, 
 >  a base type of `U` or an implemented interface of `U`.  
 
+Whereas extension method invocation says:
+> An implicit identity, reference or boxing conversion exists from expr to the type of the first parameter of Mₑ.
+
 We'll likely want to allow variance such as `object` vs. `dynamic`, tuple names, nullability.
 
 Also, we may want to allow for variance (see example below).
