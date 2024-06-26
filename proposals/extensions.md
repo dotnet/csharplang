@@ -1167,6 +1167,7 @@ Instance method/property/indexer declarations in source are represented as stati
      Location of the type and its other properties are not checked.
   - The parameter is a 'ref' parameter, unless its type is known to be a reference type
 
+A method example:
 ``` C#
 public implicit extension E for C
 {
@@ -1184,6 +1185,10 @@ public class C {}
 		) cil managed 
 ```
 
+Other tools and compilers will likely be able to consume the method as a regular static method of type `E`. For example, VB
+compiler is able to.
+
+A property example: 
 ``` C#
 public implicit extension E for C
 {
@@ -1219,6 +1224,11 @@ public struct C
 	}
 ```
 
+Other tools and compilers will likely be able to consume the property/indexer as a static parameterized property of type `E`, possibly with some
+limitations. For example, VB compiler is able to, but all arguments for properties are passed by value regardless of ref-ness of
+parameters. Therefore, struct mutations are not preserved. The accessors cannot be used explicitly in VB.
+
+An event example:
 ``` C#
 public implicit extension E for C
 {
@@ -1253,8 +1263,9 @@ public class C
 	}
 ```
 
-Note, the extra parameter for event accessors are not CLS compliant, therefore, tools and other compilers (VB, for example)
-likely won't be able to consume them as regular static events.
+Note, the extra parameter for event accessors are not CLS compliant, therefore, tools and other compilers
+likely won't be able to consume them as regular static events. For example, VB compiler is not able to and
+the event accessors cannot be used directly in VB as well.
 
 Since at the moment we are not supporting overriding or interface implementation by extension types, presence of the
 `modopt(System.Runtime.CompilerServices.ExtensionAttribute)` is sufficient to avoid a signature conflict with a user
