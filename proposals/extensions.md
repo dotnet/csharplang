@@ -860,7 +860,7 @@ We modify the [element access rules](https://github.com/dotnet/csharpstandard/bl
 
 An *element_access* is dynamically bound if \[...]
 If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access. 
-Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, interface, /***or extension** type
+Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, interface, \***or extension** type
 that has one or more indexer members, in which case the *element_access* is an indexer access.
 \***Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type 
 that has no indexer members, in which case the *element_access* is an extension indexer access.**
@@ -868,11 +868,11 @@ that has no indexer members, in which case the *element_access* is an extension 
 We modify the [indexer access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128113-indexer-access) as follows:
 
 For an indexer access, the *primary_no_array_creation_expression* of the *element_access* shall be a variable or value 
-of a class, struct, interface, /***or extension** type, and this type shall implement one or more indexers that are 
+of a class, struct, interface, \***or extension** type, and this type shall implement one or more indexers that are 
 applicable with respect to the *argument_list* of the *element_access*.
 
 The binding-time processing of an indexer access of the form `P[A]`, where `P` is a *primary_no_array_creation_expression* 
-of a class, struct, interface, /***or extension** type `T`, and `A` is an *argument_list*, consists of the following steps:
+of a class, struct, interface, \***or extension** type `T`, and `A` is an *argument_list*, consists of the following steps:
 
 - The set of indexers provided by `T` is constructed. 
   The set consists of all indexers declared in `T` or a base type of `T` that are not override declarations and are accessible in the current context.
@@ -886,7 +886,7 @@ of a class, struct, interface, /***or extension** type `T`, and `A` is an *argum
 - ~~If the resulting set of candidate indexers is empty, then no applicable indexers exist, and a binding-time error occurs.~~
 - The best indexer of the set of candidate indexers is identified using the overload resolution rules. 
   If a single best indexer cannot be identified, the indexer access is ambiguous, and a binding-time error occurs.
-- /[...]
+- \[...]
 
 ```csharp
 new C()[42]; // binds to C.this[int] from instance type
@@ -962,10 +962,10 @@ We modify the [this access rules](https://github.com/dotnet/csharpstandard/blob/
 
 A this_access has one of the following meanings:
 - [...]
-- /***When this is used in a primary_expression within an instance method or instance accessor of an extension with a class underlying type,
+- \***When this is used in a primary_expression within an instance method or instance accessor of an extension with a class underlying type,
   it is classified as a value. The type of the value is the instance type of the extension within which the usage occurs, 
   and the value is a reference to the object for which the method or accessor was invoked.**
-- /***When this is used in a primary_expression within an instance method or instance accessor of an extension with a struct underlying type, 
+- \***When this is used in a primary_expression within an instance method or instance accessor of an extension with a struct underlying type, 
   it is classified as a variable. The type of the variable is the instance type of the extension within which the usage occurs.
   - If the method or accessor is not an iterator or async function, the `this` variable represents the extension for which the method or accessor was invoked.
     - If the struct is a readonly struct, the `this` variable behaves exactly the same as an in parameter of the struct type
