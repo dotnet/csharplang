@@ -497,7 +497,7 @@ We modify the [accessibility constraints](https://github.com/dotnet/csharpstanda
 
 The following accessibility constraints exist:
 - [...]
-- \***The underlying type of an extension type shall be at least as accessible as the extension type itself.**
+- ***The underlying type of an extension type shall be at least as accessible as the extension type itself.**
 
 Note those also apply to visibility constraints of file-local types (not yet specified).
 
@@ -596,11 +596,11 @@ is checked against each constraint as follows:
 - If the constraint is the reference type constraint (`class`), the type `A` shall satisfy one of the following:
   - `A` is an interface type, class type, delegate type, array type or the dynamic type.
   - `A` is a type parameter that is known to be a reference type.
-  - \***`A` is an extension type with an underlying type that satisfies the reference type constraint.**
+  - ***`A` is an extension type with an underlying type that satisfies the reference type constraint.**
 - If the constraint is the value type constraint (`struct`), the type `A` shall satisfy one of the following:
   - `A` is a `struct` type or `enum` type, but not a nullable value type.
   - `A` is a type parameter having the value type constraint.
-  - \***`A` is an extension type with an underlying type that satisfies the value type constraint.**
+  - ***`A` is an extension type with an underlying type that satisfies the value type constraint.**
 - If the constraint is the constructor constraint `new()`, 
   the type `A` shall not be `abstract` and shall have a public parameterless constructor. 
   This is satisfied if one of the following is true:
@@ -609,7 +609,7 @@ is checked against each constraint as follows:
   - `A` is a type parameter having the value type constraint.
   - `A` is a `class` that is not abstract and contains an explicitly declared public constructor with no parameters.
   - `A` is not `abstract` and has a default constructor.
-  - \***`A` is an extension type with an underlying type that satisfies the constructor constraint.**
+  - ***`A` is an extension type with an underlying type that satisfies the constructor constraint.**
 
 A compile-time error occurs if one or more of a type parameter’s constraints are not satisfied by the given type arguments.
 
@@ -669,9 +669,9 @@ The member_access is evaluated and classified as follows:
     - Otherwise, the result is an event access with no associated instance expression.
   - If `I` identifies a constant, then the result is a value, namely the value of that constant.
   - If `I` identifies an enumeration member, then the result is a value, namely the value of that enumeration member.
-  - \***~~Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.~~**
+  - ***~~Otherwise, `E.I` is an invalid member reference, and a compile-time error occurs.~~**
 
-- \***If `E.I` is not invoked and `E` is classified as a type, if `E` is not a type parameter, 
+- ***If `E.I` is not invoked and `E` is classified as a type, if `E` is not a type parameter, 
   and if an ***extension member lookup*** of `I` in `E` with `K` type parameters produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
@@ -679,12 +679,12 @@ The member_access is evaluated and classified as follows:
   and a member lookup of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:  
   ...
-- \***If `E.I` is not invoked and `E` is a property access, indexer access, variable, or value, 
+- ***If `E.I` is not invoked and `E` is a property access, indexer access, variable, or value, 
   the type of which is `T`, and 
   an **extension member lookup** of `I` in `T` with `K` type arguments produces a match, 
   then `E.I` is evaluated and classified as follows:**  
   ...
-- Otherwise, an attempt is made to process `E.I` as an \***extension invocation**.
+- Otherwise, an attempt is made to process `E.I` as an ***extension invocation**.
   If this fails, `E.I` is an invalid member reference, and a binding-time error occurs.
 
 Note: the path to extension invocation from this section is only for empty results from member lookup.
@@ -710,9 +710,9 @@ TL;DR: Instead of falling back to "extension method invocation" directly, we'll 
 
 We modify the [method invocations rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#12892-method-invocations) as follows:
 
-\[...]
-- If the resulting set of candidate methods is empty, then further processing along the following steps are abandoned, and instead an attempt is made to process the invocation as \***an extension invocation**. If this fails, then no applicable methods exist, and a binding-time error occurs.
-\[...]
+[...]
+- If the resulting set of candidate methods is empty, then further processing along the following steps are abandoned, and instead an attempt is made to process the invocation as ***an extension invocation**. If this fails, then no applicable methods exist, and a binding-time error occurs.
+[...]
 
 Note: the change to the Base Types section also affects the method invocation rules:
 
@@ -787,7 +787,7 @@ C . «identifier» < «typeargs» > ( «expr» )
 C . «identifier» < «typeargs» > ( «expr» , «args» )
 ```
 
-\[Extension method eligibility remains unchanged]
+[Extension method eligibility remains unchanged]
 
 The search proceeds as follows:
 
@@ -858,35 +858,35 @@ TL;DR: For non-extension types, we'll fall back to an implicit extension member 
 
 We modify the [element access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128111-general) as follows:
 
-An *element_access* is dynamically bound if \[...]
+An *element_access* is dynamically bound if [...]
 If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access. 
-Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, interface, \***or extension** type
+Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, interface, ***or extension** type
 that has one or more indexer members, in which case the *element_access* is an indexer access.
-\***Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type 
+***Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type 
 that has no indexer members, in which case the *element_access* is an extension indexer access.**
 
 We modify the [indexer access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128113-indexer-access) as follows:
 
 For an indexer access, the *primary_no_array_creation_expression* of the *element_access* shall be a variable or value 
-of a class, struct, interface, \***or extension** type, and this type shall implement one or more indexers that are 
+of a class, struct, interface, ***or extension** type, and this type shall implement one or more indexers that are 
 applicable with respect to the *argument_list* of the *element_access*.
 
 The binding-time processing of an indexer access of the form `P[A]`, where `P` is a *primary_no_array_creation_expression* 
-of a class, struct, interface, \***or extension** type `T`, and `A` is an *argument_list*, consists of the following steps:
+of a class, struct, interface, ***or extension** type `T`, and `A` is an *argument_list*, consists of the following steps:
 
 - The set of indexers provided by `T` is constructed. 
   The set consists of all indexers declared in `T` or a base type of `T` that are not override declarations and are accessible in the current context.
 - The set is reduced to those indexers that are applicable and not hidden by other indexers.
   (note: "base types" means "underlying type" for extension types)
-  \[...]
-- \***If the resulting set of candidate indexers is empty, then further processing 
+  [...]
+- ***If the resulting set of candidate indexers is empty, then further processing 
   along the following steps are abandoned, and instead an attempt is made 
   to process the indexer access as an extension indexer access. If this fails, 
   then no applicable indexers exist, and a binding-time error occurs.**
 - ~~If the resulting set of candidate indexers is empty, then no applicable indexers exist, and a binding-time error occurs.~~
 - The best indexer of the set of candidate indexers is identified using the overload resolution rules. 
   If a single best indexer cannot be identified, the indexer access is ambiguous, and a binding-time error occurs.
-- \[...]
+- [...]
 
 ```csharp
 new C()[42]; // binds to C.this[int] from instance type
@@ -962,10 +962,10 @@ We modify the [this access rules](https://github.com/dotnet/csharpstandard/blob/
 
 A this_access has one of the following meanings:
 - [...]
-- \***When this is used in a primary_expression within an instance method or instance accessor of an extension with a class underlying type,
+- ***When this is used in a primary_expression within an instance method or instance accessor of an extension with a class underlying type,
   it is classified as a value. The type of the value is the instance type of the extension within which the usage occurs, 
   and the value is a reference to the object for which the method or accessor was invoked.**
-- \***When this is used in a primary_expression within an instance method or instance accessor of an extension with a struct underlying type, 
+- ***When this is used in a primary_expression within an instance method or instance accessor of an extension with a struct underlying type, 
   it is classified as a variable. The type of the variable is the instance type of the extension within which the usage occurs.
   - If the method or accessor is not an iterator or async function, the `this` variable represents the extension for which the method or accessor was invoked.
     - If the struct is a readonly struct, the `this` variable behaves exactly the same as an in parameter of the struct type
@@ -998,7 +998,7 @@ For purposes of member lookup, a type `T` is considered to have the following b
 - If `T` is an *interface_type*, the base types of `T` are the base interfaces of `T` and the class type `object`.
 - If `T` is an *array_type*, the base types of `T` are the class types `System.Array` and `object`.
 - If `T` is a *delegate_type*, the base types of `T` are the class types `System.Delegate` and `object`.
-- \***If `T` is an *extension_type*, the base types of `T` are the extended type of `T` and its base types.**
+- ***If `T` is an *extension_type*, the base types of `T` are the extended type of `T` and its base types.**
 
 Note: this allows method groups that contain members from the extension and the extended type together:
 ```csharp
@@ -1216,7 +1216,7 @@ We update the [overload resolution section](https://github.com/dotnet/csharpstan
 Each of these contexts defines the set of candidate function members and the list of arguments in its own unique way. 
 For instance, the set of candidates for a method invocation does not include methods marked override, 
 methods in a base class are not candidates if any method in a derived class is applicable,
-\***and extension methods in a less specific extension type are not candidates if any extension method in a more specific extension type is applicable**.
+***and extension methods in a less specific extension type are not candidates if any extension method in a more specific extension type is applicable**.
 
 ### Natural function type
 
@@ -1225,7 +1225,7 @@ The rules for determining the [natural function type of a method group](https://
 1. For each scope, we construct the set of all candidate methods:
   - for the initial scope, methods on the relevant type with arity matching the provided type arguments and satisfying constraints with the provided type arguments are in the set if they are static and the receiver is a type, or if they are non-static and the receiver is a value
     - extension methods in that scope that can be substituted with the provided type arguments and reduced using the value of the receiver while satisfying constraints are in the set
-    - \***methods from compatible implicit extension types applicable in that scope which can be substituted with the provided type arguments and satisfying constraints with those are in the set**
+    - ***methods from compatible implicit extension types applicable in that scope which can be substituted with the provided type arguments and satisfying constraints with those are in the set**
   1. If we have no candidates in the given scope, proceed to the next scope.
   2. If the signatures of all the candidates do not match, then the method group doesn't have a natural type
   3. Otherwise, resulting signature is used as the natural type
