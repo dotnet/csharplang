@@ -1158,6 +1158,207 @@ It allows roundtripping of extension symbols through metadata (full and referenc
 For example: `implicit extension R for UnderlyingType` yields
 `public static void <ImplicitExtension>$(UnderlyingType)`.  
 
+Instance method/property/indexer declarations in source are represented as static declarations in metadata:
+  - A new parameter is added at the beginning, it represents `this` with erased extension type.
+  - The parameter's name is unspeakable
+  - The type of the parameter is the extended type
+  -  A `modopt(System.Runtime.CompilerServices.ExtensionAttribute)` is added to the type.
+     On import the presence of the modopt is checked by verifying fully qualified name of the ExtensionAttribute type.
+     Location of the type and its other properties are not checked.
+  - The parameter is a 'ref' parameter, unless its type is known to be a reference type
+
+A method example:
+``` C#
+public implicit extension E for C
+{
+    public void Method()
+    {
+    }
+}
+
+public class C {}
+```
+``` IL
+	.method public hidebysig static 
+		void Method (
+			class C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute) '<>4__this'
+		) cil managed 
+```
+
+Other tools and compilers will likely be able to consume the method as a regular static method of type `E`. For example, VB
+compiler and previous C# compiler can.
+
+A property example: 
+``` C#
+public implicit extension E for C
+{
+    public int P1
+    {
+        get => ...;
+        set => ...; 
+    }
+}
+
+public struct C
+{
+}
+```
+``` IL
+	.method public hidebysig specialname static 
+		int32 get_P1 (
+			valuetype C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute)& '<>4__this'
+		) cil managed 
+
+ 	.method public hidebysig specialname static 
+		void set_P1 (
+			valuetype C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute)& '<>4__this',
+			int32 'value'
+		) cil managed 
+
+ 	.property int32 P1(
+		valuetype C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute)& '<>4__this'
+	)
+	{
+		.get int32 E::get_P1(valuetype C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute)&)
+		.set void E::set_P1(valuetype C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute)&, int32)
+	}
+```
+
+Other tools and compilers will likely be able to consume the property/indexer as a static parameterized property of type `E`, possibly with some
+limitations. For example, VB compiler is able to, but all arguments for properties are passed by value regardless of ref-ness of
+parameters. Therefore, struct mutations are not preserved. The accessors cannot be used explicitly in VB. Previous version of C# compiler can consume property accessors as static methods, cannot access the property. For indexers, however, only accessors with `ref` parameter can be consumed
+(indexer itself cannot be accessed).
+
+An event example:
+``` C#
+public implicit extension E for C
+{
+    public event System.Action E1
+    {
+        add => ...;
+        remove => ...; 
+    }
+}
+
+public class C
+{
+}
+```
+``` IL
+	.method public hidebysig specialname static 
+		void add_E1 (
+			class C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute) '<>4__this',
+			class [System.Runtime]System.Action 'value'
+		) cil managed 
+
+	.method public hidebysig specialname static 
+		void remove_E1 (
+			class C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute) '<>4__this',
+			class [System.Runtime]System.Action 'value'
+		) cil managed 
+
+ 	.event [System.Runtime]System.Action E1
+	{
+		.addon void E::add_E1(class C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute), class [System.Runtime]System.Action)
+		.removeon void E::remove_E1(class C modopt([System.Runtime]System.Runtime.CompilerServices.ExtensionAttribute), class [System.Runtime]System.Action)
+	}
+```
+
+Note, the extra parameter for event accessors are not CLS compliant, therefore, tools and other compilers
+likely won't be able to consume them as regular static events. For example, VB compiler is not able to and
+the event accessors cannot be used directly in VB as well. Previous version of C# compiler cannot access the
+event, but can access its accessors as regular static methods.
+
+Since at the moment we are not supporting overriding or interface implementation by extension types, presence of the
+`modopt(System.Runtime.CompilerServices.ExtensionAttribute)` is sufficient to avoid a signature conflict with a user
+defined static member because, given the restriction, there is no way for any `modopt` to get its way into
+signature of a user defined static method. Support for interface implementation is likely to change that and a signature
+conflict can possibly occur in some edge cases. If there is a concern, we should consider strengthening uniqueness of the
+signature.
+
+However, other tools and compilers (VB, for example) won't be able to disambiguate APIs based on presence of the `modopt`.
+``` C#
+public implicit extension E for C
+{
+    public void Method()
+    {
+        System.Console.Write(1);
+    }
+
+    public static void Method(C c)
+    {
+        System.Console.Write(2);
+    }
+}
+
+public class C
+{
+}
+```
+
+C# consumer:
+``` C#
+class Program
+{
+    static void Main()
+    {
+        var c = new C();
+        c.Method(); // Prints 1
+        C.Method(c); // Prints 2
+    }
+}
+```
+
+VB consumer:
+``` VB
+Class Program
+    Shared Sub Main()
+        Dim c = new C()
+        E.Method(c) ' BC31429: 'Method' is ambiguous because multiple kinds of members with this name exist in structure 'E'.
+    End Sub
+End Class
+```
+
+
+
+When a reference is provided for the special `ref <>4__this` parameter and the type of the parameter could be a reference
+type at runtime, compiler should ensure that a reference to a temporary location with a copy of a value from
+the user specified location is provided instead of the original user specified location. This redirection should happen only when the type
+is a reference type during execution of the code. The goal is to ensure that the instance on which the extension method is executed
+doesn't change for the duration of the method call.
+
+Example:
+``` C#
+class C
+{
+}
+
+class Program
+{
+    C _f;
+    
+    void Test() => _f.Method();
+}
+
+public implicit extension E<T> for T
+{
+    public void Method() {}
+}
+``` 
+
+The emitted body of `Program.Test` will be something like:
+``` C#
+C temp = _f;
+E<C>.Method(ref temp);
+```
+
+instead of 
+``` C#
+E<C>.Method(ref _f);
+```
+
+which would allow to change the target instance by changing value stored in `_f` while `Method` is executed.
+
 ### Extension type members
 
 #### Fields
