@@ -1186,7 +1186,7 @@ public class C {}
 ```
 
 Other tools and compilers will likely be able to consume the method as a regular static method of type `E`. For example, VB
-compiler is able to.
+compiler and previous C# compiler can.
 
 A property example: 
 ``` C#
@@ -1226,7 +1226,8 @@ public struct C
 
 Other tools and compilers will likely be able to consume the property/indexer as a static parameterized property of type `E`, possibly with some
 limitations. For example, VB compiler is able to, but all arguments for properties are passed by value regardless of ref-ness of
-parameters. Therefore, struct mutations are not preserved. The accessors cannot be used explicitly in VB.
+parameters. Therefore, struct mutations are not preserved. The accessors cannot be used explicitly in VB. Previous version of C# compiler can consume property accessors as static methods, cannot access the property. For indexers, however, only accessors with `ref` parameter can be consumed
+(indexer itself cannot be accessed).
 
 An event example:
 ``` C#
@@ -1265,7 +1266,8 @@ public class C
 
 Note, the extra parameter for event accessors are not CLS compliant, therefore, tools and other compilers
 likely won't be able to consume them as regular static events. For example, VB compiler is not able to and
-the event accessors cannot be used directly in VB as well.
+the event accessors cannot be used directly in VB as well. Previous version of C# compiler cannot access the
+event, but can access its accessors as regular static methods.
 
 Since at the moment we are not supporting overriding or interface implementation by extension types, presence of the
 `modopt(System.Runtime.CompilerServices.ExtensionAttribute)` is sufficient to avoid a signature conflict with a user
