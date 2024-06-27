@@ -1271,7 +1271,7 @@ event, but can access its accessors as regular static methods.
 
 Since at the moment we are not supporting overriding or interface implementation by extension types, presence of the
 `modopt(System.Runtime.CompilerServices.ExtensionAttribute)` is sufficient to avoid a signature conflict with a user
-defined static member because, because given the restriction, there is no way for any `modopt` to get its way into
+defined static member because, given the restriction, there is no way for any `modopt` to get its way into
 signature of a user defined static method. Support for interface implementation is likely to change that and a signature
 conflict can possibly occur in some edge cases. If there is a concern, we should consider strengthening uniqueness of the
 signature.
