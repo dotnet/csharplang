@@ -415,7 +415,7 @@ Span<int> ComplexScopedRefExample(scoped ref Span<int> span)
 The *safe-context* of an object initializer expression is narrowest of:
 
 1. The *safe-context* of the constructor call.
-2. The *safe-context* arguments to member initializer indexers that can escape to the receiver (can escape to *caller-context*)
+2. The *safe-context* and *ref-safe-context* of arguments to member initializer indexers that can escape to the receiver.
 3. The *safe-context* of the RHS of assignments in member initializers to non-readonly setters or *ref-safe-context* in case of ref assignment.
 
 Another way of modeling this is to think of any argument to a member initializer that can be assigned to the receiver as being an argument to the constructor. This is because the member initializer is effectively a constructor call.
@@ -432,7 +432,7 @@ var x = new S(ref heapSpan)
 var x = new S(ref heapSpan, stackSpan)
 ```
 
-This modeling is important because it demonstrates that our [MAMM][rules-method-arguments-must-match] need to account specially for member initializers. Consider that this particular case needs to be illegal as it allows for a value with a narrower *safe-context* to be assigned to a higher one.
+This modeling is important because it demonstrates that our [MAMM](#rules-method-arguments-must-match) need to account specially for member initializers. Consider that this particular case needs to be illegal as it allows for a value with a narrower *safe-context* to be assigned to a higher one.
 
 ### Method arguments must match
 <a name="rules-method-arguments-must-match"></a>
