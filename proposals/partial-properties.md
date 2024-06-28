@@ -3,16 +3,28 @@ https://github.com/dotnet/csharplang/issues/6420
 
 ### Grammar
 
-The *property_declaration* grammar [(§14.7.1)](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1471-general) is updated as follows:
+The partial modifier on properties is treated just like any other modifier and can be included in any position in a modifier list.
+
+The property grammar [(§15.7.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1571-general) is updated as follows:
 
 ```diff
-property_declaration
--    : attributes? property_modifier* type member_name property_body
-+    : attributes? property_modifier* 'partial'? type member_name property_body
-    ;  
+ property_modifier
+     : 'new'
+     | 'public'
+     | 'protected'
+     | 'internal'
+     | 'private'
+     | 'static'
+     | 'virtual'
+     | 'sealed'
+     | 'override'
+     | 'abstract'
+     | 'extern'
++    | 'partial'
+     ;
 ```
 
-**Remarks**: This is somewhat similar to how *method_header* [(§15.6.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1561-general) and *class_declaration* [(§15.2.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1521-general) are specified. (Note that [Issue #946](https://github.com/dotnet/csharplang/issues/946) proposes to relax the ordering requirement, and would probably apply to all declarations which allow the `partial` modifier. We intend to specify such an ordering relaxation in the near future, and implement it in the same release that this feature is implemented.)
+See also [Relaxed ordering requirement](#relaxed-ordering-requirement) for similar changes to the method, class, struct and interface grammars.
 
 ### Defining and implementing declarations
 When a property declaration includes a *partial* modifier, that property is said to be a *partial property*. Partial properties may only be declared as members of partial types.
@@ -269,6 +281,119 @@ partial class C
         [Attr4] set => this._store[x] = value;
     }
 }
+```
+
+### Relaxed ordering requirement
+
+- https://github.com/dotnet/csharplang/issues/946
+- https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-09-09.md#champion-relax-ordering-constraints-around-ref-and-partial-modifiers-on-type-declarations
+
+In C# 12 and prior, `partial` can only be used as the last modifier before a method return type, or as the last modifier before type declaration keywords `class`, `struct`, or `interface`. Similar restrictions are in place for the `ref` modifier on a `struct` declaration.
+
+In C# 13, `partial` will become just like any other modifier on the above-mentioned declarations, and can appear in any order in the modifier list. The same behavior will apply for properties. The `ref` modifier will be similarly relaxed on `struct` declarations.
+
+#### Detailed design
+
+The property grammar is given in [Grammar](#grammar).
+
+The method grammar [(§15.6.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1561-general) is updated as follows:
+
+```diff
+ method_modifiers
+-    : method_modifier* 'partial'?
++    : method_modifier*
+     ;
+
+ method_modifier
+     : ref_method_modifier
+     | 'async'
+     ;
+ 
+ ref_method_modifier
+     : 'new'
+     | 'public'
+     | 'protected'
+     | 'internal'
+     | 'private'
+     | 'static'
+     | 'virtual'
+     | 'sealed'
+     | 'override'
+     | 'abstract'
+     | 'extern'
++    | 'partial'
+     | unsafe_modifier   // unsafe code support
+     ;
+```
+
+The classes grammar [(§15.2.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1521-general) is updated as follows:
+
+```diff
+ class_declaration
+-    : attributes? class_modifier* 'partial'? 'class' identifier
++    : attributes? class_modifier* 'class' identifier
+         type_parameter_list? class_base? type_parameter_constraints_clause*
+         class_body ';'?
+     ;
+
+ class_modifier
+     : 'new'
+     | 'public'
+     | 'protected'
+     | 'internal'
+     | 'private'
+     | 'abstract'
+     | 'sealed'
+     | 'static'
++    | 'partial'
+     | unsafe_modifier   // unsafe code support
+     ;
+```
+
+The interfaces grammar [(§18.2.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/interfaces.md#1821-general) is updated as follows:
+
+```diff
+ interface_declaration
+-    : attributes? interface_modifier* 'partial'? 'interface'
++    : attributes? interface_modifier* 'interface'
+       identifier variant_type_parameter_list? interface_base?
+       type_parameter_constraints_clause* interface_body ';'?
+     ;
+
+ interface_modifier
+     : 'new'
+     | 'public'
+     | 'protected'
+     | 'internal'
+     | 'private'
++    | 'partial'
+     | unsafe_modifier   // unsafe code support
+     ;
+```
+
+The structs grammar [(§18.2.1)](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/structs.md#1621-general) is updated as follows:
+
+```diff
+ struct_declaration
+-    : attributes? struct_modifier* 'ref'? 'partial'? 'struct'
++    : attributes? struct_modifier* 'struct'
+       identifier type_parameter_list? struct_interfaces?
+       type_parameter_constraints_clause* struct_body ';'?
+     ;
+```
+
+```diff
+ struct_modifier
+     : 'new'
+     | 'public'
+     | 'protected'
+     | 'internal'
+     | 'private'
+     | 'readonly'
++    | 'ref'
++    | 'partial'
+     | unsafe_modifier   // unsafe code support
+     ;
 ```
 
 ## Open Issues
