@@ -129,29 +129,6 @@ static class Extensions
 }
 ```
 
-## Open issue: removing zero-arity-matches-any from var scenario
-
-By the current rules, there are some unfortunate interactions between member access and natural function type.
-> Note: When the result of such a member lookup is a method group and K is zero,
-> the method group can contain methods having type parameters.
-> This allows such methods to be considered for type argument inferencing. end note
-
-I would like to brainstorm tweaks to member access and natural function type to make this work better.
-
-```csharp
-var x = C.Member; // error: member lookup finds C.Member (method group) and lacks type arguments to apply to that match
-
-class C
-{
-    public static void Member<T>() { }
-}
-
-implicit extension E for C
-{
-    public static int Member = 42;
-}
-```
-
 ## Open issue: behavior of `static using` directives
 
 We'll need to update "extension member lookup section" and "using static directives" to allow the following two scenarios:
@@ -192,21 +169,46 @@ considers whether `P` is a nullable value type. So it will need to handle the ca
 where `P` is an instance of an extension type on a nullable value type,
 - the spec for an object creation considers whether the type is
 a value_type, a type_parameter, a class_type or a struct_type,
-- the spec for satisfying constraints also consider what kind of type were dealing with.
+- the spec for satisfying constraints also consider what kind of type we're dealing with.
 
 It may be possible to address all those cases without changing each such section of the spec,
 but rather by adding general rules ("an extension on a class type is considered a class type" or some such).
 
+## Open issue: specify semantics for type parameter receivers
+
+The `this` access section needs to be updated to handle type parameters.  
+
+The implementation details section needs to be updated to explain how
+we capture the receiver when the type parameter is a reference type.  
+
+```csharp
+var o = new object();
+o.M(o = null);
+
+implicit extension E<T> for T
+{
+    // emitted as `void M(ref modopt(ExtensionAttribute) T, object)`
+    void M(object x) { this.ToString(); }
+}
+```
+
 ## Open issue: need to specify type erasure
 
 It should be done in a way that allows switching between the extension type and the underlying type without binary break.  
-It should allow for using type parameters as type parameters: `void M<T>(E<T> e)`.  
+It should allow for using type parameters as type arguments: `void M<T>(E<T> e)`.  
 It should allow for using extension types as type arguments without violating type parameter constraints: `C<E>` with `class C<T> where T : struct, I { }`.  
 
 The current proposal is to use an attribute with a string representing the type with extensions un-erased.
 For example: `void M(E)` would be emitted as `void M([Attribute("E")] UnderlyingType)`.
 
-The serialization format would be the same as the one used for `typeof` in attributes, but with support for type parameters (using `T!` and `T!!` syntax).  
+The serialization format would be the same as the one used for `typeof` in attributes, but with support for type parameters (using `!N` and `!!N` notation from ECMA 335).  
+
+> II.9 Generics
+> Within a generic type definition, its generic parameters are referred to by their index. Generic
+> parameter zero is referred to as !0, generic parameter one as !1, and so on. Similarly, within the body
+> of a generic method definition, its generic parameters are referred to by their index; generic parameter
+> zero is referred to as !!0, generic parameter one as !!1, and so on.
+
 Note: the serialization format does not support function pointers at the moment. Tracked by https://github.com/dotnet/roslyn/issues/48765
 
 The attribute would also encode the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
@@ -692,7 +694,7 @@ Note: the path to extension invocation from this section is only for empty resul
 Note: We allow static lookups on type parameters only for members that are static virtual members. 
 Since extensions members are not virtual, we don't allow static extension lookups on type parameters either.
 ```
-void M<T>(T t) where T
+void M<T>(T t)
 {
     T.MStatic() // disallow
     t.MInstance() // allow
@@ -962,16 +964,16 @@ We modify the [this access rules](https://github.com/dotnet/csharpstandard/blob/
 
 A this_access has one of the following meanings:
 - [...]
-- ***When this is used in a primary_expression within an instance method or instance accessor of an extension with a class underlying type,
+- ***When this is used in a primary_expression within an instance method or instance accessor of an extension with an underlying type known to be a reference type,
   it is classified as a value. The type of the value is the instance type of the extension within which the usage occurs, 
   and the value is a reference to the object for which the method or accessor was invoked.**
-- ***When this is used in a primary_expression within an instance method or instance accessor of an extension with a struct underlying type, 
+- ***When this is used in a primary_expression within an instance method or instance accessor of an extension with an underlying type known to be a value type, 
   it is classified as a variable. The type of the variable is the instance type of the extension within which the usage occurs.
   - If the method or accessor is not an iterator or async function, the `this` variable represents the extension for which the method or accessor was invoked.
-    - If the struct is a readonly struct, the `this` variable behaves exactly the same as an in parameter of the struct type
-    - Otherwise the this variable behaves exactly the same as a ref parameter of the struct type
-  - If the method or accessor is an iterator or async function, the `this` variable represents a copy of the extension/struct
-    for which the method or accessor was invoked, and behaves exactly the same as a value parameter of the extension/struct type.**
+    - If the value type is a readonly struct, the `this` variable behaves exactly the same as an `in` parameter of the struct type
+    - Otherwise the `this` variable behaves exactly the same as a `ref` parameter of the value type
+  - If the method or accessor is an iterator or async function, the `this` variable represents a copy of the value
+    for which the method or accessor was invoked, and behaves exactly the same as a value parameter of the value type.**
 
 #### Base access
 
