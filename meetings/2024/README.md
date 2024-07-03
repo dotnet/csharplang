@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
-
 ## Schedule when convenient
 
 ## Recurring topics
@@ -30,6 +28,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jul 17, 2024
 
 ### Mon Jul 15, 2024
+
+- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
 
 ### Wed Jun 26, 2024
 
