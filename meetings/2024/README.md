@@ -36,12 +36,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Summertime 2024 Intro (Kathleen)
 - [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (Julien/Mads)
 
+## C# Language Design Notes for 2024
+
 ### Mon Jun 24, 2024
 
-- [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md) (Jan/Fred)
-- [Field-backed properties open questions](https://github.com/dotnet/csharplang/blob/main/proposals/semi-auto-properties.md#open-ldm-questions) (Chuck, Joseph, Rikki)
-  
-## C# Language Design Notes for 2024
+[C# Language Design Meeting for June 24th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-24.md)
+
+- First-Class Spans
+- `field` questions
+    - Mixing auto-accessors
+    - Nullability
 
 ### Mon Jun 17, 2024
 
