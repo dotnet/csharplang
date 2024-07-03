@@ -26,7 +26,7 @@ For properties with an `init` accessor, everything that applies below to `set` w
 
 There are two syntax changes:
 
-1. There is a new contextual keyword, `field`, which may be used within property accessor bodies to access a backing field for the property declaration.
+1. There is a new contextual keyword, `field`, which may be used within property accessor bodies to access a backing field for the property declaration ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#should-field-and-value-be-keywords-in-property-or-accessor-signatures-what-about-nameof-in-those-spaces)).
 
 2. Properties may now mix and match auto accessors with full accessors ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-24.md#mixing-auto-accessors)). "Auto property" will continue to mean a property whose accessors have no bodies. None of the examples below will be considered auto properties.
 
