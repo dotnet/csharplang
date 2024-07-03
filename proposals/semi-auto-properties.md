@@ -28,7 +28,7 @@ There are two syntax changes:
 
 1. There is a new contextual keyword, `field`, which may be used within property accessor bodies to access a backing field for the property declaration.
 
-2. Properties may now mix and match auto accessors with full accessors. "Auto property" will continue to mean a property whose accessors have no bodies. None of the examples below will be considered auto properties.
+2. Properties may now mix and match auto accessors with full accessors ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-24.md#mixing-auto-accessors)). "Auto property" will continue to mean a property whose accessors have no bodies. None of the examples below will be considered auto properties.
 
 Examples:
 
@@ -403,22 +403,6 @@ public class Point
 ```
 
 ## Open LDM questions
-
-### Mixing auto and full accessors
-
-Should it be disallowed to pair a manually implemented accessor with an automatically implemented accessor? An original guiding principle for the design was that, in places where `get; set;` defines an auto property, `get;` is now considered syntax sugar for `get => field;` and `set;` is now short for `set => field = value;`. This allowance was encoded in the original name for the feature, "semi-auto properties," where half the property would be automatically implemented and the other half would not be automatically implemented.
-
-   The typical INotifyPropertyChanged use case would be:
-
-   ```cs
-   public string Name { get; set => Set(ref field, value); }
-   ```
-
-   If this was disallowed, the typical use case would expand slightly to:
-
-   ```cs
-   public string Name { get => field; set => Set(ref field, value); }
-   ```
 
 ### Scenarios similar to `{ set; }`
 
