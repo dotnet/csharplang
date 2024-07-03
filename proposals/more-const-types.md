@@ -50,10 +50,11 @@ What other designs have been considered? What is the impact of not doing this?
 
 What parts of the design are still undecided?
 
-- What types should be allowed?
-- What are the implications of allowing constant ref structs? Are they even useful?
-- How will down-level scenarios work? Can these constants be accessed by code using previous compilers? What about using Reflection to access fields?
-- Does a type need to "opt in" to all constant definitions? (Otherwise, changes later could introduce a field that disallows all existing `const` declarations):
+- **What types should be allowed?**:  Preventing mutation for types whose members are all unmanaged types (or `struct` types whose members are all unmanaged types) is a manageable problem: a `const` instance can't be accessed as a writable `ref`. However, if any member is a reference type, that problem is harder to solve.
+- **Are there implications for the runtime?** Depending on how constants are stored in memory, is there an impact on the runtime?
+- **What are the implications of allowing constant ref structs? Are they even useful?**: Are the rules surrounding ref safety consistent with where constants are used?
+- **How will down-level scenarios work?** Can these constants be accessed by code using previous compilers? What about using Reflection to access fields?
+- **Does a type need to "opt in" to all constant definitions?** (Otherwise, changes later could introduce a field that disallows all existing `const` declarations):
 
    ```csharp
     public struct Point
@@ -75,5 +76,3 @@ What parts of the design are still undecided?
 ## Design meetings
 
 Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to.
-
-
