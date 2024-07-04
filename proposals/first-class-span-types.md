@@ -438,6 +438,9 @@ However, that would mean users could get different behavior after updating the t
 - Compiler could choose different overloads (technically a breaking change, but hopefully those overloads would have equivalent behavior).
 - Other breaks could arise, unknown at this time.
 
+On the other hand, the new Span APIs would still be ambiguous from VB unless we implement the betterness rule there as well.
+So it might be easier if API authors solve this themselves via the `OverloadResolutionPriorityAttribute`.
+
 ### Delegate extension receiver break
 
 Should we break existing code like the following (real code found in runtime)?
