@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule ASAP
 
 - [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#open-questions) (Jan)
+- [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar) Recommend schedule for 7/22
 
 ## Schedule when convenient
 
