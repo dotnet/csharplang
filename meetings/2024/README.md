@@ -33,12 +33,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - 
 ### Mon Jul 15, 2024
 
+## C# Language Design Notes for 2024
+
 ### Wed Jun 26, 2024
 
-- Summertime 2024 Intro (Kathleen)
-- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) (Julien/Mads)
+[C# Language Design Meeting for June 26th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-26.md)
 
-## C# Language Design Notes for 2024
+- Extensions
 
 ### Mon Jun 24, 2024
 
