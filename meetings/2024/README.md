@@ -4,7 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#open-questions) (Jan)
 - [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar) Recommend schedule for 7/22
 
 ## Schedule when convenient
@@ -30,9 +29,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jul 17, 2024
 
+- Overload resolution priority (Fred)
 - [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
-- 
+
 ### Mon Jul 15, 2024
+
+- Field backed autoproperties (Jared, Chuck)
+- [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#open-questions) (Jan)
 
 ## C# Language Design Notes for 2024
 
