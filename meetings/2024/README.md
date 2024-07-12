@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule ASAP
 
 - [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar) Recommend schedule for 7/22
+- Extension open issues (Julien/Mads)
 
 ## Schedule when convenient
 
