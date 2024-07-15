@@ -174,6 +174,10 @@ The compiler expects to use the following helpers or equivalents to implement th
 | ReadOnlySpan to ReadOnlySpan | `static ReadOnlySpan<T>.CastUp<TDerived>(ReadOnlySpan<TDerived>)` |
 | string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
 
+Note that `MemoryExtensions.AsSpan` is used instead of the equivalent implicit operator defined on `string`.
+This means the codegen is different between LangVersions (the implicit operator is used in C# 12; the static method `AsSpan` is used in C# 13).
+On the other hand, the conversion can be emitted on .NET Framework (the `AsSpan` method exists there whereas the `string` operator does not).
+
 #### Better conversion from expression
 [betterness-rule]: #better-conversion-from-expression
 
@@ -443,9 +447,11 @@ So it might be easier if API authors solve this themselves via the `OverloadReso
 
 ### Delegate extension receiver break
 
-Should we break existing code like the following (real code found in runtime)?
-LDM recently allowed breaks related to new Span overloads (https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#params-span-breaks).
+Should we break existing code like the following? (It's a sample of real code found in runtime.)
 Currently, this speclet has a mitigation for this break in [the extension receiver section](#extension-receiver).
+Allowing this break might mean the BCL will be adding more overloads to mitigate it which would defy the purpose of this feature.
+On the other hand, LDM recently allowed breaks related to new Span overloads (https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#params-span-breaks),
+albeit limited to expression trees.
 
 ```cs
 using System;
@@ -454,7 +460,8 @@ using System.Linq;
 
 var list = new List<int> { 1, 2, 3, 4 };
 var toRemove = new int[] { 2, 3 };
-list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)' defined on value type 'Span<int>' cannot be used to create delegates
+list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)'
+                                   // defined on value type 'Span<int>' cannot be used to create delegates
 ```
 
 ## Alternatives
