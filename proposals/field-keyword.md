@@ -448,7 +448,7 @@ class MyClass
     public int P => this.field; // error: expected identifier
 
     private int value;
-    public Q
+    public int Q
     {
         set { this.value = value; } // error: expected identifier
     }
@@ -469,7 +469,7 @@ There is also a break when `field` or `value` is redeclared in a nested function
 class MyClass
 {
     private IEnumerable<string> _fields;
-    public int NotNullFields
+    public bool HasNotNullField
     {
         get => _fields.Any(field => field is { }); // 'field' binds to synthesized backing field
     }
