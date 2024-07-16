@@ -104,7 +104,11 @@ static class E
 }
 ```
 
-There's [an open question](#delegate-extension-receiver-break) whether this break should be avoided or not.
+As possible future work, we could consider removing this condition that span conversion is not considered for extension receiver in method group conversions
+and instead implement changes so the scenario like the one above would end up successfully calling the `Span` overload instead:
+- The compiler could emit a thunk that would take the array as the receiver and perform the span conversion inside
+  (similarly to the user manually creating the delegate like `x => new int[0].M(x)`).
+- Value delegates if implemented could be able to take the `Span` as receiver directly.
 
 #### Variance
 
@@ -445,7 +449,7 @@ However, that would mean users could get different behavior after updating the t
 On the other hand, the new Span APIs would still be ambiguous from VB unless we implement the betterness rule there as well.
 So it might be easier if API authors solve this themselves via the `OverloadResolutionPriorityAttribute`.
 
-### Delegate extension receiver break
+### Delegate extension receiver break (answered)
 
 Should we break existing code like the following? (It's a sample of real code found in runtime.)
 Currently, this speclet has a mitigation for this break in [the extension receiver section](#extension-receiver).
@@ -463,6 +467,10 @@ var toRemove = new int[] { 2, 3 };
 list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)'
                                    // defined on value type 'Span<int>' cannot be used to create delegates
 ```
+
+#### Answer
+
+The break will be mitigated by not considering span conversions for extension receiver in method group conversions.
 
 ## Alternatives
 
