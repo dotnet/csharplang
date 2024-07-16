@@ -325,25 +325,17 @@ public class C
 
 ### Syntax
 
-When compiling with language version 13 or higher, `field` and `value` are considered keywords when both of the following hold:
-- When used as a `primary_no_array_creation_expression` ([open question](#syntax-locations-for-keywords))
-- When used in any of the following locations ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#field-and-value-as-contextual-keywords)):
-  - For `field`, in `get`, `set`, and `init` accessors in properties *but not* indexers
-  - For `value`, in `set` and `init` accessors in properties *or* indexers
-  - In signatures and attributes of those accessors
-  - In nested lambda expressions and local functions, and in LINQ expressions in those accessors
+When compiling with language version 13 or higher, `field` is considered a keyword when used as a *primary expression* ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-15.md)) in the following locations ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#field-and-value-as-contextual-keywords)):
+- In method bodies of `get`, `set`, and `init` accessors in properties *but not* indexers
+- In attributes applied to those accessors
+- In nested lambda expressions and local functions, and in LINQ expressions in those accessors
 
-In all other cases, including when compiling with language version 12 or lower, `field` and `value` are considered identifiers.
+In all other cases, including when compiling with language version 12 or lower, `field` is considered an identifier.
 
 ```diff
-+ field_or_value
-+   : 'field'
-+   | 'value'
-+   ;
-
 primary_no_array_creation_expression
     : literal
-+   | field_or_value
++   | 'field'
     | interpolated_string_expression
     | ...
     ;
@@ -431,7 +423,7 @@ public class Point
 
 ## Open LDM questions
 
-### Syntax locations for keywords
+### Syntax locations for keywords (answered)
 
 In accessors where `field` and `value` could bind to a synthesized backing field or an implicit setter parameter, in which syntax locations should the identifiers be considered keywords?
 1. always
@@ -482,6 +474,10 @@ class MyClass
 ```
 
 If the identifiers are *never* considered keywords, the identifiers will only bind to a synthesized backing field or the implicit parameter when the identifiers do not bind to other members. There is no breaking change for this case.
+
+#### Answer
+
+`field` is a keyword in appropriate accessors when used as a *primary expression* only; `value` is never considered a keyword.
 
 ### Scenarios similar to `{ set; }`
 
