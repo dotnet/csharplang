@@ -36,12 +36,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Overload resolution priority (Fred)
 - [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
 
-### Mon Jul 15, 2024
-
-- Field backed autoproperties (Jared, Chuck)
-- [First-class Span open questions](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#open-questions) (Jan)
 
 ## C# Language Design Notes for 2024
+
+### Mon Jul 15, 2024
+
+[C# Language Design Meeting for July 15th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-15.md)
+
+- `field` keyword
+- First-Class Spans Open Question
 
 ### Wed Jun 26, 2024
 
