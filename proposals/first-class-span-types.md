@@ -449,6 +449,29 @@ However, that would mean users could get different behavior after updating the t
 On the other hand, the new Span APIs would still be ambiguous from VB unless we implement the betterness rule there as well.
 So it might be easier if API authors solve this themselves via the `OverloadResolutionPriorityAttribute`.
 
+### Delegate extension receiver break (answered)
+
+Should we break existing code like the following? (It's a sample of real code found in runtime.)
+Currently, this speclet has a mitigation for this break in [the extension receiver section](#extension-receiver).
+Allowing this break might mean the BCL will be adding more overloads to mitigate it which would defy the purpose of this feature.
+On the other hand, LDM recently allowed breaks related to new Span overloads (https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#params-span-breaks),
+albeit limited to expression trees.
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+var list = new List<int> { 1, 2, 3, 4 };
+var toRemove = new int[] { 2, 3 };
+list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)'
+                                   // defined on value type 'Span<int>' cannot be used to create delegates
+```
+
+#### Answer
+
+The break will be mitigated by not considering span conversions for extension receiver in method group conversions.
+
 ## Alternatives
 
 Keep things as they are.
