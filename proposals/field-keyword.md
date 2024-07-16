@@ -325,38 +325,28 @@ public class C
 
 ### Syntax
 
-When compiling with language version 13 or higher, `field` is considered a keyword when used as a *primary expression* ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-15.md)) in the following locations ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#field-and-value-as-contextual-keywords)):
-- In method bodies of `get`, `set`, and `init` accessors in properties *but not* indexers
-- In attributes applied to those accessors
-- In nested lambda expressions and local functions, and in LINQ expressions in those accessors
+When compiling with language version 13 or higher, `field` and `value` are considered keywords when both of the following hold:
+- When used as a `primary_no_array_creation_expression` ([open question](#syntax-locations-for-keywords))
+- When used in any of the following locations ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#field-and-value-as-contextual-keywords)):
+  - For `field`, in `get`, `set`, and `init` accessors in properties *but not* indexers
+  - For `value`, in `set` and `init` accessors in properties *or* indexers
+  - In signatures and attributes of those accessors
+  - In nested lambda expressions and local functions, and in LINQ expressions in those accessors
 
-In all other cases, including when compiling with language version 12 or lower, `field` is considered an identifier.
+In all other cases, including when compiling with language version 12 or lower, `field` and `value` are considered identifiers.
 
 ```diff
++ field_or_value
++   : 'field'
++   | 'value'
++   ;
+
 primary_no_array_creation_expression
     : literal
-+   | 'field'
++   | field_or_value
     | interpolated_string_expression
     | ...
     ;
-```
-
-The `field` keyword binds to a synthesized backing field for the property in which it is contained.
-
-This is a breaking change, from language version 12 or lower, in cases where `field` would otherwise bind to an existing member or variable.
-
-```csharp
-class A
-{
-    private int field;
-    public int Field => field; // binds to synthesized backing field rather than 'this.field'
-}
-
-class B
-{
-    private IEnumerable<string> _fields;
-    public bool HasNotNullField => _fields.Any(field => field is { }); // 'field' binds to synthesized backing field
-}
 ```
 
 ### Properties
@@ -440,6 +430,58 @@ public class Point
 ```
 
 ## Open LDM questions
+
+### Syntax locations for keywords
+
+In accessors where `field` and `value` could bind to a synthesized backing field or an implicit setter parameter, in which syntax locations should the identifiers be considered keywords?
+1. always
+1. *primary expressions* only
+1. never
+
+The first two cases are breaking changes.
+
+If the identifiers are *always* considered keywords, that is a breaking change for the following for instance:
+```csharp
+class MyClass
+{
+    private int field;
+    public int P => this.field; // error: expected identifier
+
+    private int value;
+    public int Q
+    {
+        set { this.value = value; } // error: expected identifier
+    }
+}
+```
+
+If the identifiers are keywords when used as *primary expressions* only, the breaking change is smaller. The most common break may be unqualified use of an existing member named `field`.
+```csharp
+class MyClass
+{
+    private int field;
+    public int P => field; // binds to synthesized backing field rather than 'this.field'
+}
+```
+
+There is also a break when `field` or `value` is redeclared in a nested function. This may be the only break for `value` for *primary expressions*.
+```csharp
+class MyClass
+{
+    private IEnumerable<string> _fields;
+    public bool HasNotNullField
+    {
+        get => _fields.Any(field => field is { }); // 'field' binds to synthesized backing field
+    }
+    public IEnumerable<string> Fields
+    {
+        get { return _fields; }
+        set { _fields = value.Where(value => Filter(value)); } // 'value' binds to setter parameter
+    }
+}
+```
+
+If the identifiers are *never* considered keywords, the identifiers will only bind to a synthesized backing field or the implicit parameter when the identifiers do not bind to other members. There is no breaking change for this case.
 
 ### Scenarios similar to `{ set; }`
 
