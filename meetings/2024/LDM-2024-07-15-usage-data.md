@@ -30,7 +30,7 @@ Random repos found with GH queries
     - https://github.com/Real-Serious-Games/Unity-Editor-UI
     - https://github.com/VeeamHub/SuperEdit
     - https://github.com/moto2002/mobahero_src
-- [this.field](https://github.com/search?q=%2Fthis%5C.%5Ba-z%5D%2B%5C.value%2F+language%3AC%23&type=code) 41K results, 8% hit rate of real bugs through 3 pages
+- [this.field](https://github.com/search?q=%22this.field%22+language%3AC%23&type=code) 41K results, 8% hit rate of real bugs through 3 pages
     - https://github.com/HaloMods/Halo1AnimationEditor
     - https://github.com/Team-COCONUT/Minotaur
     - https://github.com/moto2002/mobahero_src
