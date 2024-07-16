@@ -9,6 +9,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- Unions update (Matt)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
