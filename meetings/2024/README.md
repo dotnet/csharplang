@@ -4,13 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar) Recommend schedule for 7/22
-- Extension open issues (Julien/Mads)
-
 ## Schedule when convenient
-
-- Unions update (Matt)
-- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
 
 ## Recurring topics
 
@@ -29,7 +23,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jul 24, 2024
 
+- Unions update (Matt)
+- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
+
 ### Mon Jul 22, 2024
+
+- [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar) Recommend schedule for 7/22
+- Extension open issues (Julien/Mads)
 
 ### Wed Jul 17, 2024
 
