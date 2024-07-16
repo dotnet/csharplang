@@ -500,24 +500,7 @@ class MyClass
 
 In the example above, binding to the backing field should result in an error: "initializer cannot reference non-static field".
 
-### `field` and `value` in event accessor
-
-Should `value` be a keyword in an event accessor?
-
-```csharp
-class MyClass
-{
-    private EventHandler _e;
-
-    public event EventHandler E
-    {
-        add { _e += value; }
-        remove { _e -= value; }
-    }
-}
-```
-
-**Recommendation**: `value` is a keyword within an event accessor.
+### `field` in event accessor
 
 Should `field` be a keyword in an event accessor, and should the compiler generate a backing field?
 
