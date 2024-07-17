@@ -977,4 +977,4 @@ Related Items:
 [byref-like-generics]: https://github.com/dotnet/runtime/blob/main/docs/design/features/byreflike-generics.md
 [dim-diamond]: https://github.com/dotnet/csharplang/blob/main/meetings/2018/LDM-2018-10-17.md#diamond-inheritance
 [unscoped-ref-impl]: #unscopedref-implementation-logic
-[warn-DIM]: #warn-on-DIM-invocation
+[warn-DIM]: #warn-on-dim-invocation
