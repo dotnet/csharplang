@@ -218,7 +218,7 @@ public struct S
         P2 = 5;
     }
 
-    public int P1 { get => field; }
+    public int P2 { get => field; set => field = value; }
 }
 ```
 
