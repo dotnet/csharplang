@@ -45,24 +45,24 @@ More GH queries:
 - [\_value](https://github.com/search?q=%2F%28%5E%7C%5CW%29_value%28%24%7C%5CW%29%2F+language%3AC%23&type=code) as a field name. 137K results, near 100% hit rate
 
 Largest intentional breaking change we've in last ~5 years was lambda inference and overload changes:
-    - Had a very long lead and got plenty of preview feedback about it. 
-    - In total we had ~20-30 bugs filed against it.-
-    - That is number of customers who did not self correct. Let's assume for sake of argument that total number of users that hit this problem is 10x reported. So 200-300
+- Had a very long lead and got plenty of preview feedback about it. 
+- In total we had ~20-30 bugs filed against it.
+- That is number of customers who did not self correct. Let's assume for sake of argument that total number of users that hit this problem is 10x reported. So 200-300
 
 My conclusions from data:
 
 1. Generated code is a challenge for our fixer
 2. `field` and `_field` are uncommon but not rare field names
-    a. The use of `field/_field` is a style decision
-    b. Breaking change is about the style in which it is declared and accessed: `this.field =` vs. `field =`
+    - The use of `field/_field` is a style decision
+    - Breaking change is about the style in which it is declared and accessed: `this.field =` vs. `field =`
 3. `value` and `_value` are common field names
-    a. The use of `value/_value` is a style decision
-    b. Breaking change is about the style in which it is declared and accessed: `this.value` vs. `value =`
+    - The use of `value/_value` is a style decision
+    - Breaking change is about the style in which it is declared and accessed: `this.value` vs. `value =`
 4. Ratio of field:value virtually every query is 1:8-1:12
 5. Breaks on `this.value` or `this.field` are not viable 
-    a. In the range of 20K and 10K impacted GH samples
-    b. That is roughly 2 orders of magnitude greater than the upper bound of our highest breaking change
+    - In the range of 20K and 10K impacted GH samples
+    - That is roughly 2 orders of magnitude greater than the upper bound of our highest breaking change
 6. It is very hard to quantify what the breaks on naked field / value would be. 
-    a. Hard to construct a GH query to narrow down to uses of field / value without keywords. 
-    b. Metadata queries can't distinguish between this.field and simply field in an accessor 
+    - Hard to construct a GH query to narrow down to uses of field / value without keywords. 
+    - Metadata queries can't distinguish between this.field and simply field in an accessor 
  
