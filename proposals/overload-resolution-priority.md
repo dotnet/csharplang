@@ -198,7 +198,7 @@ If the attribute is specified on a virtual member, should an override of that me
 
 The attribute will not be marked as inherited. We will look at the least-derived declaration of a member to determine its overload resolution priority.
 
-### Application error or warning on override
+### Application error or warning on override (answered)
 
 ```cs
 class Base
@@ -223,7 +223,7 @@ Which should we do on the application of a `OverloadResolutionPriorityAttribute`
 
 We will go with 3, and block application on locations it would be ignored.
 
-### Implicit interface implementation
+### Implicit interface implementation (answered)
 
 What should the behavior of an implicit interface implementation be? Should it be required to specify `OverloadResolutionPriority`? What should the behavior of the compiler be when it encounters
 an implicit implementation without a priority? This will nearly certainly happen, as an interface library may be updated, but not an implementation. Prior art here with `params` is to not specify,
@@ -257,6 +257,32 @@ Our options are:
 #### Answer
 
 We will go with 1.
+
+### Further application errors
+
+There are a few more locations like [this](#application-error-or-warning-on-override-answered) that need to be confirmed. They include:
+
+* Conversion operators - The spec never says that conversion operators go through overload resolution, so the implementation blocks application on these members.
+  Should that be confirmed?
+* Lambdas - Similarly, lambdas are never subject to overload resolution, so the implementation blocks them. Should that be confirmed?
+* Destructors - again, currently blocked.
+* Static constructors - again, currently blocked.
+* Local functions - These are not currently blocked, because they _do_ undergo overload resolution, you just can't overload them. This is simlar to how we don't
+  error when the attribute is applied to a member of a type that is not overloaded. Should this behavior be confirmed?
+
+### Langversion Behavior
+
+The implementation currently only issues langversion errors when `OverloadResolutionPriorityAttribute` is applied, _not_ when it actually influences anything. This
+decision was made because the there are APIs that the BCL will add (both now and over time) that will start using this attribute; if the user manually sets their
+language version back to C# 12 or prior, they may see these members and, depending our langversion behavior, either:
+
+* If we ignore the attribute in C# <13, run into an ambiguity error because the api is truly ambiguous without the attribute, or;
+* If we error when the attribute affected the outcome, run into an error that the api is unconsumable. This will be especially bad because `Debug.Assert(bool)`
+  is being de-prioritized in .NET 9, or;
+* If we silently change resolution, encounter potentially different behavior between machines if one machine understands the attribute and another doesn't.
+
+The last behavior was chosen, because it results in the most forward-compatibility, but the changing result could be surprising to some users. Should we confirm
+this, or should we choose one of the other options?
 
 ## Alternatives
 [alternatives]: #alternatives
