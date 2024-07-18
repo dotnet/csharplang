@@ -112,8 +112,17 @@ public sealed class OverloadResolutionPriorityAttribute(int priority) : Attribut
 All methods in C# have a default ***overload_resolution_priority*** of 0, unless they are attributed with `OverloadResolutionPriorityAttribute`. If they are
 attributed with that attribute, then their ***overload_resolution_priority*** is the integer value provided to the first argument of the attribute.
 
-It is an error to apply `OverloadResolutionPriorityAttribute` to a non-indexer property, or to property, indexer, or event accessors. Attributes encountered on
-these locations in metadata are ignored by C#.
+It is an error to apply `OverloadResolutionPriorityAttribute` to the following locations:
+
+* Non-indexer properties
+* Property, indexer, or event accessors
+* Conversion operators
+* Lambdas
+* Local functions
+* Destructors
+* Static constructors
+
+Attributes encountered on these locations in metadata are ignored by C#.
 
 It is an error to apply `OverloadResolutionPriorityAttribute` in a location it would be ignored, such as on an override of a base method, as the priority is read
 from the least-derived declaration of a member.
@@ -258,7 +267,7 @@ Our options are:
 
 We will go with 1.
 
-### Further application errors
+### Further application errors (Answered)
 
 There are a few more locations like [this](#application-error-or-warning-on-override-answered) that need to be confirmed. They include:
 
@@ -270,7 +279,11 @@ There are a few more locations like [this](#application-error-or-warning-on-over
 * Local functions - These are not currently blocked, because they _do_ undergo overload resolution, you just can't overload them. This is simlar to how we don't
   error when the attribute is applied to a member of a type that is not overloaded. Should this behavior be confirmed?
 
-### Langversion Behavior
+#### Answer
+
+All of the locations listed above are blocked.
+
+### Langversion Behavior (Answered)
 
 The implementation currently only issues langversion errors when `OverloadResolutionPriorityAttribute` is applied, _not_ when it actually influences anything. This
 decision was made because the there are APIs that the BCL will add (both now and over time) that will start using this attribute; if the user manually sets their
@@ -283,6 +296,10 @@ language version back to C# 12 or prior, they may see these members and, dependi
 
 The last behavior was chosen, because it results in the most forward-compatibility, but the changing result could be surprising to some users. Should we confirm
 this, or should we choose one of the other options?
+
+#### Answer
+
+We will go with option 1, silently ignoring the attribute in previous language versions.
 
 ## Alternatives
 [alternatives]: #alternatives
