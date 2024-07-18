@@ -598,3 +598,44 @@ partial class C
 ```
 
 **Recommendation**: Disallow auto-accessors in partial property implementations, because the limitations around when they would be usable are more confusing to follow than the benefit of allowing them.
+
+### Readonly field
+
+When should the synthesized backing field be considered *read-only*?
+
+```csharp
+struct S
+{
+    object P1          { get { field ??= ""; }}        // ok
+    readonly object P2 { get { field ??= ""; }}        // error: 'field' is readonly
+    readonly object P3 { get; set { _ = field; } }     // ok
+    readonly object P4 { get; set { field = value; } } // error: 'field' is readonly
+}
+```
+
+When the synthesized backing field is marked `initonly` in metadata, and an error is reported if `field` is modified other than in an initializer or constructor.
+
+**Recommendation**: The synthesized backing field is *read-only* when the containing type is a `struct` and the property or containing type is declared `readonly`.
+
+### `[Conditional]` code
+
+Should the synthesized field be generated when `field` is used only in omitted calls to [*conditional methods*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/attributes.md#21532-conditional-methods)?
+
+For instance, should a backing field be generated for the following in a non-DEBUG build?
+```csharp
+class C
+{
+    object P
+    {
+        get
+        {
+            Debug.Assert(field is null);
+            return null;
+        }
+    }
+}
+```
+
+For reference, fields for *primary constructor parameters* are generated in similar cases - see [sharplab.io](https://sharplab.io/#v2:EYLgxg9gTgpgtADwGwBYA+ABADAAgwRgDoARASwEMBzAOwgGcAXUsOgbgFgAoLjAJhwDCACgjAAVjDAMcAM1IwANgBMAlFwDeXHNrwocAWSFrOOnJpOmdxGMACulQgEE6dGFAZC5ipTlJ0c1LYKCiocFtoAvlxR3JyMULZSOADKIuKS0l7KxuamGHqGxqa5ltrWdg7Oru6e8sq+/oHBoVo6MRFAA).
+
+**Recommendation**: The backing field is generated when `field` is used only in calls to *conditional methods*.
