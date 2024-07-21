@@ -30,7 +30,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jul 22, 2024
 
-- [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar) Recommend schedule for 7/22
+- [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar)
 - Extension open issues (Julien/Mads)
 
 ### Wed Jul 17, 2024
