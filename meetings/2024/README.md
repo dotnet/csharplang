@@ -6,6 +6,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
@@ -23,8 +25,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jul 24, 2024
 
+- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Jared, Chuck, Cyrus)
 - Unions update (Matt)
-- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
 
 ### Mon Jul 22, 2024
 
