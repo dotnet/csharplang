@@ -242,8 +242,7 @@ static class C
 > Because the betterness rule is gated on `LangVersion >= 13`,
 > API authors cannot add such new overloads if they want to keep supporting users on `LangVersion <= 12`.
 > For example, if .NET 9 BCL introduces such overloads, users that upgrade to `net9.0` TFM but stay on lower LangVersion
-> will get ambiguity errors for existing code, unless BCL also applies
-> [the new `OverloadResolutionPriorityAttribute`][overload-resolution-priority].
+> will get ambiguity errors for existing code.
 > See also [an open question](#unrestricted-betterness-rule) below.
 
 ### Type inference
@@ -441,13 +440,14 @@ We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d
 
 Should we make [the betterness rule][betterness-rule] unconditional on LangVersion?
 That would allow API authors to add new Span APIs where IEnumerable equivalents exist
-without breaking users on older LangVersions and without needing to use the `OverloadResolutionPriorityAttribute`.
+without breaking users on older LangVersions or other compilers or languages (e.g., VB).
 However, that would mean users could get different behavior after updating the toolset (without changing LangVersion or TargetFramework):
 - Compiler could choose different overloads (technically a breaking change, but hopefully those overloads would have equivalent behavior).
 - Other breaks could arise, unknown at this time.
 
-On the other hand, the new Span APIs would still be ambiguous from VB unless we implement the betterness rule there as well.
-So it might be easier if API authors solve this themselves via the `OverloadResolutionPriorityAttribute`.
+Note that [`OverloadResolutionPriorityAttribute`][overload-resolution-priority] cannot fully solve this
+because it's also ignored on older LangVersions.
+However, it should be possible to use it to avoid ambiguities from VB where the attribute should be recognized.
 
 ### Delegate extension receiver break (answered)
 
