@@ -78,6 +78,18 @@ implicit extension MyTableExtensions for TableIDoNotOwn
 var v = table.Count; // Let's get a read from LDM
 ```
 
+## Open issue: migration from classic extension methods
+
+https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-26.md#conclusion
+For instance members, we will explore making the emit binary-compatible, 
+and how much we will have to overhaul to get that to work, 
+then come back and make a final decision on whether to block consumption.
+
+## Open issue: how much support from other languages?
+
+We're currently blocking usage of instance members from other languages
+by using a `modreq`.
+
 ## Open issue: readonly members
 
 Currently, readonly members are disallowed in extensions. This means that
@@ -192,31 +204,6 @@ implicit extension E<T> for T
 }
 ```
 
-## Open issue: need to specify type erasure
-
-It should be done in a way that allows switching between the extension type and the underlying type without binary break.  
-It should allow for using type parameters as type arguments: `void M<T>(E<T> e)`.  
-It should allow for using extension types as type arguments without violating type parameter constraints: `C<E>` with `class C<T> where T : struct, I { }`.  
-
-The current proposal is to use an attribute with a string representing the type with extensions un-erased.
-For example: `void M(E)` would be emitted as `void M([Attribute("E")] UnderlyingType)`.
-
-The serialization format would be the same as the one used for `typeof` in attributes, but with support for type parameters (using `!N` and `!!N` notation from ECMA 335).  
-
-> II.9 Generics
-> Within a generic type definition, its generic parameters are referred to by their index. Generic
-> parameter zero is referred to as !0, generic parameter one as !1, and so on. Similarly, within the body
-> of a generic method definition, its generic parameters are referred to by their index; generic parameter
-> zero is referred to as !!0, generic parameter one as !!1, and so on.
-
-Note: the serialization format does not support function pointers at the moment. Tracked by https://github.com/dotnet/roslyn/issues/48765
-
-The attribute would also encode the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
-For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underlying type for `E<dynamic>` would be emitted as
-`void M([Attribute("E<object>"", TupleNames = "..."}] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
-
-Should we instead extend support for type parameters in `typeof` in attributes (including runtime/reflection),
-and use a `Type` parameter in the attribute constructor?
 
 ## Open issue: allow variance in implicit extension compatibility
 
@@ -1492,6 +1479,44 @@ E<C>.Method(ref _f);
 ```
 
 which would allow to change the target instance by changing value stored in `_f` while `Method` is executed.
+
+## Type erasure
+
+It should be done in a way that allows switching between the extension type and the underlying type without binary break.  
+It should allow for using type parameters as type arguments: `void M<T>(E<T> e)`.  
+It should allow for using extension types as type arguments without violating type parameter constraints: `C<E>` with `class C<T> where T : struct, I { }`.  
+
+This is solved by erasing the extension types and storing all the information needed
+to roundtrip back to the un-erased type in an attribute as a string.
+For example:
+- `void M(E)` would be emitted as `void M([Attribute("E")] UnderlyingType)`.
+- `void M(C<E>)` would be emitted as `void M([Attribute("C<E>")] C<UnderlyingType>)`.
+
+The serialization format is based on the one used for `typeof` in attributes.  
+A few examples:  
+- `E, AssemblyE, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null`
+- ```E`1[[System.String, netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51]]```
+- ```Container+NestedE```
+
+Support for type parameters is added using `!N` and `!!N` notation from ECMA-335:  
+
+> II.9 Generics
+> Within a generic type definition, its generic parameters are referred to by their index. Generic
+> parameter zero is referred to as !0, generic parameter one as !1, and so on. Similarly, within the body
+> of a generic method definition, its generic parameters are referred to by their index; generic parameter
+> zero is referred to as !!0, generic parameter one as !!1, and so on.
+
+For example:
+- `class C<T> { void M(E<T> e) { } }` would be emitted as `void M([Attribute("E[!0]")] Underlying)`.
+- `void M<T>(E<T> e) { }` would be emitted as `void M<T>([Attribute("E[!!0]")] Underlying)`.
+
+The attribute also encodes the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
+For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underlying type for `E<dynamic>` would be emitted as
+`void M([Attribute("E<object>"", Dynamic = ... }] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
+
+Note: the `typeof` serialization format does not support function pointers at the moment. Tracked by https://github.com/dotnet/roslyn/issues/48765
+
+Note: A number of alternatives were considered in https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/roles/extension-wg-2024-06-07.md
 
 ### Extension type members
 
