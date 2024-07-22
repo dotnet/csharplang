@@ -204,6 +204,16 @@ implicit extension E<T> for T
 }
 ```
 
+## Open issue: type erasure
+
+Confirm the format with partner teams.  
+Monitor the volume of metadata with some preview usage.  
+Finalize the format to support tuple names, dynamic, nullability and other erased information.  
+Confirm how the encoding works with local functions.  
+
+## Open issue: consider disallowing pointers to extension types
+
+This question was raised in LDM 2024-07-22 but was not resolved.
 
 ## Open issue: allow variance in implicit extension compatibility
 
@@ -1482,15 +1492,29 @@ which would allow to change the target instance by changing value stored in `_f`
 
 ## Type erasure
 
-It should be done in a way that allows switching between the extension type and the underlying type without binary break.  
-It should allow for using type parameters as type arguments: `void M<T>(E<T> e)`.  
-It should allow for using extension types as type arguments without violating type parameter constraints: `C<E>` with `class C<T> where T : struct, I { }`.  
+The codegen for type references involving extension types has the following requirements:
+- It should be done in a way that allows switching between the extension type and the underlying type without binary break.  
+- It should allow for using type parameters as type arguments: `void M<T>(E<T> e)`.  
+- It should allow for using extension types as type arguments without violating type parameter constraints: `C<E>` with `class C<T> where T : struct, I { }`.  
+- It should allow encoding tuple names, dynamic, nullability and other such information twice: once the erased type and once for the un-erased type.  
 
 This is solved by erasing the extension types and storing all the information needed
 to roundtrip back to the un-erased type in an attribute as a string.
+
+```
+namespace System.Runtime.CompilerServices
+{
+    public class ExtensionErasureAttribute : System.Attribute
+    {
+        public ExtensionErasureAttribute(string encodedType) { }
+        ... tuple names, dynamic, nullability, etc ...
+    }
+}
+```
+
 For example:
-- `void M(E)` would be emitted as `void M([Attribute("E")] UnderlyingType)`.
-- `void M(C<E>)` would be emitted as `void M([Attribute("C<E>")] C<UnderlyingType>)`.
+- `void M(E)` would be emitted as `void M([ExtensionErasure("E")] UnderlyingType)`.
+- `void M(C<E>)` would be emitted as `void M([ExtensionErasure("C[E]")] C<UnderlyingType>)`.
 
 The serialization format is based on the one used for `typeof` in attributes.  
 A few examples:  
@@ -1512,11 +1536,14 @@ For example:
 
 The attribute also encodes the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
 For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underlying type for `E<dynamic>` would be emitted as
-`void M([Attribute("E<object>"", Dynamic = ... }] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
+`void M([ExtensionErasure("E<object>"", Dynamic = ... }] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
 
-Note: the `typeof` serialization format does not support function pointers at the moment. Tracked by https://github.com/dotnet/roslyn/issues/48765
+The attribute may not be applied in source.  
 
-Note: A number of alternatives were considered in https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/roles/extension-wg-2024-06-07.md
+Note: when an extension type appears as a containing type, it should not be erased. For example: `E.Nested`.  
+
+Note: the `typeof` serialization format does not support function pointers at the moment.
+This support is not planned as part of the extensions work. Tracked by https://github.com/dotnet/roslyn/issues/48765
 
 ### Extension type members
 
