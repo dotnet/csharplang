@@ -26,7 +26,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jul 24, 2024
 
 - [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Jared, Chuck, Cyrus)
-- Unions update (Matt)
+- [Union Types proposal](https://github.com/dotnet/csharplang/blob/main/proposals/TypeUnions.md) (Matt)
 
 ### Mon Jul 22, 2024
 
