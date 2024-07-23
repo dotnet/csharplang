@@ -33,13 +33,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar)
 - Extension open issues (Julien/Mads)
 
+## C# Language Design Notes for 2024
+
 ### Wed Jul 17, 2024
 
-- [Overload resolution priority](https://github.com/dotnet/csharplang/pull/8296)(Fred)
-- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Chuck, Cyrus)
+[C# Language Design Meeting for July 17th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-17.md)
 
-
-## C# Language Design Notes for 2024
+- Overload resolution priority open questions
+- Better conversion from collection expression with `ReadOnlySpan<T>` overloads
 
 ### Mon Jul 15, 2024
 
