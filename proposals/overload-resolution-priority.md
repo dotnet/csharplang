@@ -286,13 +286,13 @@ All of the locations listed above are blocked.
 ### Langversion Behavior (Answered)
 
 The implementation currently only issues langversion errors when `OverloadResolutionPriorityAttribute` is applied, _not_ when it actually influences anything. This
-decision was made because the there are APIs that the BCL will add (both now and over time) that will start using this attribute; if the user manually sets their
+decision was made because there are APIs that the BCL will add (both now and over time) that will start using this attribute; if the user manually sets their
 language version back to C# 12 or prior, they may see these members and, depending our langversion behavior, either:
 
 * If we ignore the attribute in C# <13, run into an ambiguity error because the api is truly ambiguous without the attribute, or;
-* If we error when the attribute affected the outcome, run into an error that the api is unconsumable. This will be especially bad because `Debug.Assert(bool)`
+* If we error when the attribute affected the outcome, run into an error that the API is unconsumable. This will be especially bad because `Debug.Assert(bool)`
   is being de-prioritized in .NET 9, or;
-* If we silently change resolution, encounter potentially different behavior between machines if one machine understands the attribute and another doesn't.
+* If we silently change resolution, encounter potentially different behavior between different compiler versions if one understands the attribute and another doesn't.
 
 The last behavior was chosen, because it results in the most forward-compatibility, but the changing result could be surprising to some users. Should we confirm
 this, or should we choose one of the other options?
