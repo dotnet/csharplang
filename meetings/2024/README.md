@@ -28,12 +28,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Jared, Chuck, Cyrus)
 - [Union Types proposal](https://github.com/dotnet/csharplang/blob/main/proposals/TypeUnions.md) (Matt)
 
+## C# Language Design Notes for 2024
+
 ### Mon Jul 22, 2024
 
-- [Revisit decision on ref struct implementing interfaces](https://github.com/dotnet/roslyn/issues/73923) (JaredPar)
-- Extension open issues (Julien/Mads)
+[C# Language Design Meeting for July 22nd, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-22.md)
 
-## C# Language Design Notes for 2024
+- Extensions
+- Ref structs implementing interfaces
 
 ### Wed Jul 17, 2024
 
