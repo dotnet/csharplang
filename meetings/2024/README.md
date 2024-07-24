@@ -23,12 +23,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Aug 19, 2024
 
+## C# Language Design Notes for 2024
+
 ### Wed Jul 24, 2024
 
-- [Better conversion from collection expression with `ReadOnlySpan<T>` overloads](https://github.com/dotnet/roslyn/issues/73857) (Jared, Chuck, Cyrus)
-- [Union Types proposal](https://github.com/dotnet/csharplang/blob/main/proposals/TypeUnions.md) (Matt)
+[C# Language Design Meeting for July 24th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-24.md)
 
-## C# Language Design Notes for 2024
+- Discriminated Unions
+- Better conversion from collection expression with `ReadOnlySpan<T>` overloads
 
 ### Mon Jul 22, 2024
 
