@@ -34,7 +34,7 @@ because user-defined conversions (which exist between Span/array/ReadOnlySpan) a
 
 The changes in this proposal will be tied to `LangVersion >= 13`.
 
-### Implicit Span Conversions
+### Span conversions
 
 We add a new type of implicit conversion to the list in [§10.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1021-general), an
 _implicit span conversion_. This conversion is a conversion from type and is defined as follows:
