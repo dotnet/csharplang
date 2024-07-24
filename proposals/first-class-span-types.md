@@ -65,10 +65,7 @@ which always exist given the opposite standard implicit conversion.
 
 #### User defined conversions
 
-User-defined conversions are not considered when converting between
-- any single-dimensional `array_type` and `System.Span<T>`/`System.ReadOnlySpan<T>`,
-- any combination of `System.Span<T>`/`System.ReadOnlySpan<T>`,
-- `string` and `System.ReadOnlySpan<char>`.
+User-defined conversions are not considered when converting between types for which an implicit or an explicit span conversion exists.
 
 The implicit span conversions are exempted from the rule
 that it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists
