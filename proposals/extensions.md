@@ -292,12 +292,21 @@ Adjust scoping rules so that type parameters are in scope within the 'for':
 implicit extension E<T> for T { }
 ```
 
-## Open issue: need to specify conversion rules
+## Open issue: need to specify user-defined conversion rules
 
 ```
-explicit extension R for U { } 
-R r = default;
-object o = r; // what conversion is that? if R doesn't have `object` as base type. What about interfaces?
+implicit extension EU for U
+{
+    public static implicit operator EU(int i) => ...;
+}
+implicit extension EInt for int { }
+
+R r = 42;
+U u = 43;
+
+EInt ei = 44;
+R r = ei;
+U u = ei;
 ```
 
 Should allow conversion operators. Extension conversion is useful. 
@@ -624,6 +633,20 @@ TODO Does this restriction on constraints cause issues with structs?
 ## Compat breaks
 
 Types and aliases may not be called "extension".  
+
+## Conversions
+
+https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10-conversions
+
+For each of the implicit or explicit conversions that convert from a non-extension type `S` to a non-extension type `T`,
+the following extension conversions exist:
+- A conversion from `ES` to `T` if `ES` is an extension compatible with `S`
+- A conversion from `S` to `ET` if `ET` is an extension compatible with `T`
+
+The implicit extension conversions are those extension conversions derived from implicit conversions.
+The explicit extension conversions are those extension conversions derived from explicit conversions.
+
+Note: this does not include conversions between different extension types (ie. from `ES` to `ET`).
 
 ## Expressions
 
