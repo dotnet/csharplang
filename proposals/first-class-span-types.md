@@ -50,7 +50,7 @@ An implicit span conversion permits `array_types`, `System.Span<T>`, `System.Rea
 
 ------
 
-Any Span/ReadOnlySpan types are considered applicable for the conversion if they are `struct`s and they match by their fully-qualified name.
+Any Span/ReadOnlySpan types are considered applicable for the conversion if they are `ref struct`s and they match by their fully-qualified name.
 
 We also add _implicit span conversion_ to the list of standard implicit conversions
 ([§10.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1042-standard-implicit-conversions)). This allows overload resolution to consider
