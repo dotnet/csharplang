@@ -634,9 +634,26 @@ TODO Does this restriction on constraints cause issues with structs?
 
 Types and aliases may not be called "extension".  
 
+## Types
+
+We update the [Types section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general) as follows:
+
+A reference type is a class type, an interface type, an array type, a delegate type, the dynamic type,
+***or an extension type with an underlying type that is a reference type**.
+
+A value type is either a struct type or an enumeration type,
+***or an extension type with an underlying type that is a value type**.
+
+All value types ***except extension types** implicitly inherit from the class System.ValueType
+
+A nullable value type can represent all values of its underlying type plus an additional null value. 
+A nullable value type is written `T?`, where T is the underlying type. 
+This syntax is shorthand for `System.Nullable<T>`, and the two forms can be used interchangeably.
+***An extension type with an underlying type that is a nullable value type is also a nullable value type.**
+
 ## Conversions
 
-https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10-conversions
+We update the [Conversions section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10-conversions) as follows:
 
 For each of the implicit or explicit conversions that convert from a non-extension type `S` to a non-extension type `T`,
 the following extension conversions exist:
