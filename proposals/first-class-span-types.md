@@ -64,6 +64,7 @@ There is no standard explicit span conversion unlike other *standard explicit co
 which always exist given the opposite standard implicit conversion.
 
 #### User defined conversions
+[udc]: #user-defined-conversions
 
 User-defined conversions are not considered when converting between types for which an implicit or an explicit span conversion exists.
 
@@ -468,6 +469,33 @@ list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExte
 #### Answer
 
 The break will be mitigated by not considering span conversions for extension receiver in method group conversions.
+
+### Ignoring more user-defined conversions
+
+We defined a set of type pairs for which there are language-defined implicit and explicit span conversions.
+Whenever a span conversion exists from `T1` to `T2`, any user-defined conversion from `T1` to `T2` is [ignored][udc]
+(regardless of the span and user-defined conversion being implicit or explicit).
+
+Note that this includes all the conditions, so for example there is no span conversion from `Span<object>` to `ReadOnlySpan<string>`
+(there is a span conversion from `Span<T>` to `ReadOnlySpan<U>` but it must hold that `T : U`),
+hence a user-defined conversion would be considered between those types if it existed
+(that would have to be a specialized conversion like `Span<T>` to `ReadOnlySpan<string>` because conversion operators cannot have generic parameters).
+
+Should we ignore user-defined conversions also between other combinations of array/Span/ReadOnlySpan/string types
+where no corresponding language-defined span conversion exists?
+For example, if there is a user-defined conversion from `ReadOnlySpan<T>` to `Span<T>`, should we ignore it?
+
+Spec possibilities to consider:
+
+1. > Whenever a span conversion exists from `T1` to `T2`, ignore any user-defined conversion from `T1` to `T2` *or from `T2` to `T1`*.
+2. > User-defined conversions are not considered when converting between
+   > - any single-dimensional `array_type` and `System.Span<T>`/`System.ReadOnlySpan<T>`,
+   > - any combination of `System.Span<T>`/`System.ReadOnlySpan<T>`,
+   > - `string` and `System.ReadOnlySpan<char>`.
+3. Like above but replacing the last bullet point with:
+   > - `string` and `System.Span<char>`/`System.ReadOnlySpan<char>`.
+4. Like above but replacing the last bullet point with:
+   > - `string` and `System.Span<T>`/`System.ReadOnlySpan<T>`.
 
 ## Alternatives
 
