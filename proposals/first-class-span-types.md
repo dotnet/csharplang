@@ -32,7 +32,7 @@ because user-defined conversions (which exist between Span/array/ReadOnlySpan) a
 
 ## Detailed Design
 
-The changes in this proposal will be tied to `LangVersion >= 13`.
+The changes in this proposal will be tied to `LangVersion >= 14`.
 
 ### Span conversions
 
@@ -71,7 +71,7 @@ User-defined conversions are not considered when converting between types for wh
 The implicit span conversions are exempted from the rule
 that it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists
 ([§10.5.2 Permitted user-defined conversions][permitted-udcs]).
-This is needed so the BCL can keep defining the existing Span conversion operators even when they switch to C# 13
+This is needed so the BCL can keep defining the existing Span conversion operators even when they switch to C# 14
 (they are still needed for lower LangVersions and also because these operators are used in codegen of the new standard span conversions).
 But it can be viewed as an implementation detail (codegen and lower LangVersions are not part of the spec)
 and Roslyn violates this part of the spec anyway (this particular rule about user-defined conversions is not enforced).
@@ -179,7 +179,7 @@ The compiler expects to use the following helpers or equivalents to implement th
 | string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
 
 Note that `MemoryExtensions.AsSpan` is used instead of the equivalent implicit operator defined on `string`.
-This means the codegen is different between LangVersions (the implicit operator is used in C# 12; the static method `AsSpan` is used in C# 13).
+This means the codegen is different between LangVersions (the implicit operator is used in C# 13; the static method `AsSpan` is used in C# 14).
 On the other hand, the conversion can be emitted on .NET Framework (the `AsSpan` method exists there whereas the `string` operator does not).
 
 #### Better conversion from expression
@@ -206,7 +206,7 @@ This is based on [collection expressions overload resolution changes][ce-or].
 This rule should ensure that whenever an overload becomes applicable due to the new span conversions,
 any potential ambiguity with another overload is avoided because the newly-applicable overload is preferred.
 
-Without this rule, the following code that successfully compiled in C# 12 would result in an ambiguity error in C# 13
+Without this rule, the following code that successfully compiled in C# 13 would result in an ambiguity error in C# 14
 because of the new standard implicit conversion from array to ReadOnlySpan applicable to an extension method receiver:
 
 ```cs
@@ -239,8 +239,8 @@ static class C
 ```
 
 > [!WARNING]
-> Because the betterness rule is gated on `LangVersion >= 13`,
-> API authors cannot add such new overloads if they want to keep supporting users on `LangVersion <= 12`.
+> Because the betterness rule is gated on `LangVersion >= 14`,
+> API authors cannot add such new overloads if they want to keep supporting users on `LangVersion <= 13`.
 > For example, if .NET 9 BCL introduces such overloads, users that upgrade to `net9.0` TFM but stay on lower LangVersion
 > will get ambiguity errors for existing code.
 > See also [an open question](#unrestricted-betterness-rule) below.
@@ -326,7 +326,7 @@ As any proposal that changes conversions of existing scenarios, this proposal do
 #### User-defined conversions through inheritance
 
 By adding _implicit span conversions_ to the list of standard implicit conversions, we can potentially change behavior when user-defined conversions are involved in a type hierarchy.
-This example shows that change, in comparison to an integer scenario that already behaves as the new C# 13 behavior will.
+This example shows that change, in comparison to an integer scenario that already behaves as the new C# 14 behavior will.
 
 ```cs
 Span<string> span = [];
