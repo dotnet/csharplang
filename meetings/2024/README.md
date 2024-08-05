@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Ignoring more user-defined span conversions](../../proposals/first-class-span-types.md#ignoring-more-user-defined-conversions) (Jan/Chuck/Fred)
+
 ## Schedule when convenient
 
 - Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
