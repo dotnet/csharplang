@@ -71,8 +71,10 @@ User-defined conversions are not considered when converting between types for wh
 The implicit span conversions are exempted from the rule
 that it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists
 ([§10.5.2 Permitted user-defined conversions][permitted-udcs]).
-This is needed so BCL can keep defining the existing Span conversion operators even when they switch to C# 13
-(to avoid binary breaking changes and also because these operators are used in codegen of the new standard span conversion).
+This is needed so the BCL can keep defining the existing Span conversion operators even when they switch to C# 13
+(they are still needed for lower LangVersions and also because these operators are used in codegen of the new standard span conversions).
+But it can be viewed as an implementation detail (codegen and lower LangVersions are not part of the spec)
+and Roslyn violates this part of the spec anyway (this particular rule about user-defined conversions is not enforced).
 
 #### Extension receiver
 
@@ -473,7 +475,7 @@ The break will be mitigated by not considering span conversions for extension re
 ### Ignoring more user-defined conversions
 
 We defined a set of type pairs for which there are language-defined implicit and explicit span conversions.
-Whenever a span conversion exists from `T1` to `T2`, any user-defined conversion from `T1` to `T2` is [ignored][udc]
+Whenever a language-defined span conversion exists from `T1` to `T2`, any user-defined conversion from `T1` to `T2` is [ignored][udc]
 (regardless of the span and user-defined conversion being implicit or explicit).
 
 Note that this includes all the conditions, so for example there is no span conversion from `Span<object>` to `ReadOnlySpan<string>`
@@ -496,6 +498,17 @@ Spec possibilities to consider:
    > - `string` and `System.Span<char>`/`System.ReadOnlySpan<char>`.
 4. Like above but replacing the last bullet point with:
    > - `string` and `System.Span<T>`/`System.ReadOnlySpan<T>`.
+
+Technically, the spec disallows some of these user-defined conversions to be even defined:
+it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists ([§10.5.2][permitted-udcs]).
+But Roslyn intentionally violates this part of the spec.
+And some conversions like between `Span` and `string` are allowed anyway
+(no language-defined conversion between these types exist).
+
+Nevertheless, alternatively to just *ignoring* the conversions, we could *disallow* them to be defined at all
+and perhaps break out of the spec violation at least for these new span conversions,
+i.e., change Roslyn to actually report a compile-time error if these conversions are defined
+(likely except those already defined by the BCL).
 
 ## Alternatives
 
