@@ -644,6 +644,8 @@ A reference type is a class type, an interface type, an array type, a delegate t
 A value type is either a struct type or an enumeration type,
 ***or an extension type with an underlying type that is a value type**.
 
+***An extension type with an underlying type that is an enumeration type is an enumeration type.**
+
 All value types ***except extension types** implicitly inherit from the class System.ValueType
 
 A nullable value type can represent all values of its underlying type plus an additional null value. 
@@ -654,16 +656,7 @@ This syntax is shorthand for `System.Nullable<T>`, and the two forms can be used
 ## Conversions
 
 We update the [Conversions section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10-conversions) as follows:
-
-For each of the implicit or explicit conversions that convert from a non-extension type `S` to a non-extension type `T`,
-the following extension conversions exist:
-- A conversion from `ES` to `T` if `ES` is an extension compatible with `S`
-- A conversion from `S` to `ET` if `ET` is an extension compatible with `T`
-
-The implicit extension conversions are those extension conversions derived from implicit conversions.
-The explicit extension conversions are those extension conversions derived from explicit conversions.
-
-Note: this does not include conversions between different extension types (ie. from `ES` to `ET`).
+TODO2
 
 ## Expressions
 
