@@ -25,6 +25,10 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Aug 19, 2024
 
+### Wed Aug 14, 2024
+
+- Field access in auto properties and nullable-ref-types (Cyrus/Jared)
+
 ## C# Language Design Notes for 2024
 
 ### Wed Jul 24, 2024
