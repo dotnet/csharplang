@@ -20,9 +20,9 @@ public List<int> LazyProp => field ??= new();
 public string DefaultingProp { get => field ?? GetDefault(); private set; }
 ```
 
-These scenarios are made possible using the existing nullability attributes, like `[MaybeNull]`, just as they would be for manually-declared fields.
+These are not speculative use cases. They've been highly requested by the community and have been a core part of the design from the beginning. People have been expecting these scenarios to work. It would be a bitter pill to swallow if the scenarios were onerous to use.
 
-We'll walk first through enabling the user to provide these nullability attributes explicitly for the backing field, and then through how the compiler builds on this capability to apply these attributes automatically in a simple and intuitive fashion.
+First, we'll walk through enabling the user to provide existing nullability attributes explicitly for the backing field just as for manually declared fields, such as `[field: MaybeNull]`. Then, we'll walk through how the compiler builds on this capability to apply these attributes automatically in a simple and intuitive fashion.
 
 ## Introduction
 
