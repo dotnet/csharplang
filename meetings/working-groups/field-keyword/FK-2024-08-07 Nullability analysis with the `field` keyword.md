@@ -38,7 +38,7 @@ The following sections will walk through how these concepts play out.
 
 ## Constructor initialization
 
-In C# today, a non-nullable auto property is required to be initialized in the constructor. We will preserve this requirement for all field-backed properties. This requirement is in the form of the existing warning "CS8618: Non-nullable property 'Prop' must contain a non-null value when exiting constructor."
+In C# today, a non-nullable auto property which has no property initializer and is not marked `required` is forced to be initialized in the constructor. We will preserve this enforcement for all field-backed properties. This enforcement is in the form of the existing warning "CS8618: Non-nullable property 'Prop' must contain a non-null value when exiting constructor."
 
 Initializing the property this way, by calling the setter in the constructor, will appease the requirement. This is the case even though a manually implemented setter of a field-backed property does not guarantee that the backing field is actually initialized:
 
@@ -94,7 +94,7 @@ The reverse is true for `[field: NotNull]` on a *nullable* property. Just like h
 
 #### Examples 
 
-This will give "CS8603: Possible null reference return," on `field` just as with a manually declared field:
+This will give "CS8603: Possible null reference return" on `field` just as with a manually declared field:
 
 ```cs
 // CS8603: Possible null reference return
@@ -134,7 +134,7 @@ public string ResetIfSetToDefault
 }
 ```
 
-Automatic `field` nullability is granted by the [null-resilient getter proposal](#null-resilient-getters) below. `[field: AllowNull, MaybeNull]` will be automatically applied due to the `?? GetDefault();` in the example above, and will not be applied if the `?? Default();` is removed.
+Automatic `field` nullability is covered by the [null-resilient getter proposal](#null-resilient-getters) below. `[field: AllowNull, MaybeNull]` will be automatically applied due to the `?? GetDefault();` in the example above, and will not be applied if the `?? Default();` is removed.
 
 This is safer than manually declaring `[field: AllowNull]` because there is an existing hole in C#'s nullability analysis that allows null to be returned from the property with no warning:
 
@@ -214,7 +214,7 @@ public List<int> Prop => field ??= new();
 
 A null-resilient getter is a getter which continues to fulfill the property's contract of not returning a `null` value, even when `field` is maybe-null at the start of the getter. For properties with a null-resilient getter, the backing field does not need to be initialized, and it may be assigned a maybe-null value at any point, all without risk of returning `null` from a non-nullable property.
 
-Null resilience is further extended to mean that there are no nullability warnings when `field` is maybe-null. This is inclusive of checking that no exit point returns a maybe-null expression. We would determine null resilience by analyzing the getter with a pass that starts `field` out as maybe-null and checks to see that there are no nullability warnings. (The less inclusive alternative is considered in [Definition of null resilience](#definition-of-null-resilience). This alternative would only check that there is no exit point returning a maybe-null expression.)
+Null resilience is further extended to mean that there are no nullability warnings when `field` is maybe-null. This is inclusive of checking that no exit point returns a maybe-null expression. We would determine null resilience by analyzing the getter with a pass that starts `field` out as maybe-null and checks to see that there are no nullability warnings. (A less inclusive alternative is considered in [Definition of null resilience](#definition-of-null-resilience).)
 
 These getters are null-resilient because there are no nullability warnings when `field` is maybe-null:
 
