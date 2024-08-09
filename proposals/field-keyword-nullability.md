@@ -23,8 +23,8 @@ The variable denoted by the `field` keyword in a property's accessors is the *ba
 
 The *backing field* has the same type as the property. However, its nullable annotation may differ from the property. To determine this nullable annotation, we introduce the concept of *null-resiliency*. *Null-resiliency* intuitively means that the property's `get` accessor behaves properly even when the field contains the `default` value for its type.
 
-A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its get accessor.
-- For the purposes of this analysis, `field` is temporarily assumed to have *annotated* nullability, e.g. `string?`. This causes `field` to have *maybe-null* or *maybe-default* initial state in the get accessor, depending on its type.
+A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its `get` accessor.
+- For the purposes of this analysis, `field` is temporarily assumed to have *annotated* nullability, e.g. `string?`. This causes `field` to have *maybe-null* or *maybe-default* initial state in the `get` accessor, depending on its type.
 - Then, if nullable analysis of the getter yields no nullable warnings, the property is *null-resilient*. Otherwise, it is not *null-resilient*.
 - If the property does not have a get accessor, it is (vacuously) null-resilient.
 - If the get accessor is auto-implemented, the property is not null-resilient.
