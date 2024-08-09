@@ -36,21 +36,33 @@ Given:
 `T'₁` is at least as good as `T'₂` if there is an identity conversion between them.  
 `T'₁` is better than `T'₂` if:
 - `T'₁` is ReadOnlySpan<T>, and `T'₂` is not ReadOnlySpan<T>
-- `T'₂` is Span<T>, and `T'₂` is an *array_or_array_interface*
-- `T'₂` is implicitly convertible to `T'₁`, and `T'₁` is not implicitly convertible to `T'₂`.
+- `T'₁` is Span<T>, and `T'₂` is an *array_or_array_interface*
+- `T'₁` is implicitly convertible to `T'₂`, and `T'₂` is not implicitly convertible to `T'₁`.
   
-Otherwise, `T'₁` neither as good as nor better than `T₂`.
+Otherwise, `T'₁` neither as good as nor better than `T'₂`.
 
 If `E₁` and `E₂` have an identity conversion, then the element conversions are as good as each other. Otherwise, the element conversions to `E₁` are better than the element conversions to `E₂` if:
 - For every `ELᵢ`, `CE₁ᵢ` is at least as good as `CE₂ᵢ`, and
 - There is at least one i where `CE₁ᵢ` is better than `CE₂ᵢ`
   
 Otherwise, neither set of element conversions is better than the other, and they are also not as good as each other.  
-Conversion comparisons are made using better conversion from expression if `ELᵢ` is not a spread expression. If `ELᵢ` is a spread expression, we use better conversion from the element type of the spread collection to `E₁` or `E₂`, respectively.
+Conversion comparisons are made using better conversion from expression if `ELᵢ` is not a spread element. If `ELᵢ` is a spread element, we use better conversion from the element type of the spread collection to `E₁` or `E₂`, respectively.
 
 `T₁` is a ***better collection conversion from expression*** than `T₂` if:
+- `T₁` is implicitly convertible to `T₂`, and `T₂` is not implicitly convertible to `T₁`, or
 - `T'₁` is better than `T'₂`, and the element conversions to `E₁` are at least as good as the element conversions to `E₂`, or
 - `T'₁` is at least as good as `T'₂`, and the element conversions to `E₁` are better than the element conversions to `E₂`.
+
+> [!NOTE]
+> We include the `T₁` to `T₂` conversion as a first step because otherwise, this scenario would fail:
+> ```cs
+> public void C<TUnrelated> : IEnumerable<int> { public void Add(int i) {} }
+>
+> void M(IEnumerable<int> e) {}
+> void M(C<string> c) {}
+> M([1, 2, 3]);
+> ```
+> There is an open question below on whether it needs to go further.
 
 ### Scenarios:
 
@@ -71,13 +83,13 @@ the element conversions for the better collection type must also be the same or 
 | `IEnumerable<int>` | `List<byte>` | `[(byte)1, (byte)2]` | `[Implicit Numeric, Implicit Numeric]` | `[Identity, Identity]` | `T'₂` is better than `T'₁` | `CE₂ᵢ` is better | `List<byte>` is picked |
 | `int[]` | `List<byte>` | - | - | - | Neither is better | - | Ambiguous |
 | `ReadOnlySpan<string>` | `ReadOnlySpan<object>` | `["", "", ""]` | `[Identity, Identity, Identity]` | `[Implicit Reference, Implicit Reference, Implicit Reference]` | `T'₁` is as good as `T'₂` | `CE₁ᵢ` is better | `ReadOnlySpan<string>` is picked |
-| `ReadOnlySpan<string>` | `ReadOnlySpan<object>` | `["", new object()]` | - | `[Implicit Reference, Identity]` | `T'₁` is as good as `T'₂` | `CE₂ᵢ` is better | `ReadOnlySpan<object>` is picked |
+| `ReadOnlySpan<string>` | `ReadOnlySpan<object>` | `["", new object()]` | Not applicable | `[Implicit Reference, Identity]` | `T'₁` is as good as `T'₂` | `T₁` is not applicable | `ReadOnlySpan<object>` is picked |
 | `ReadOnlySpan<object>` | `Span<string>` | `["", ""]` | `[Implicit Reference]` | `[Identity]` | `T'₁` is better than `T'₂` | `CE₂ᵢ` is better | Ambiguous |
-| `ReadOnlySpan<object>` | `Span<string>` | `[new object()]` | `[Identity]` | - | $`T'₁` is better than `T'₂` | `CE₁ᵢ` is better | `ReadOnlySpan<object>` is picked |
+| `ReadOnlySpan<object>` | `Span<string>` | `[new object()]` | `[Identity]` | Not applicable | $`T'₁` is better than `T'₂` | `T₁` is not applicable | `ReadOnlySpan<object>` is picked |
 | `ReadOnlySpan<InterpolatedStringHandler>` | `ReadOnlySpan<string>` | `[${1}]` | `[Interpolated String Handler]` | `[Identity]` | `T'₁` is as good as `T'₂` | `CE₁ᵢ` is better | `ReadOnlySpan<InterpolatedStringHandler>` is picked |
 | `ReadOnlySpan<InterpolatedStringHandler>` | `ReadOnlySpan<string>` | `[${"blah"}]` | `[Interpolated String Handler]` | `[Identity]` - But constant | `T'₁` is as good as `T'₂` | `CE₂ᵢ` is better | `ReadOnlySpan<string>` is picked |
 | `ReadOnlySpan<string>` | `ReadOnlySpan<FormattableString>` | `[${1}]` | `[Identity]` | `[Interpolated String]` | `T'₁` is as good as `T'₂` | `CE₂ᵢ` is better | `ReadOnlySpan<string>` is picked |
-| `ReadOnlySpan<string>` | `ReadOnlySpan<FormattableString>` | `[${1}, (FormattableString)null]` | - | `[Interpolated String, Identity]` | `T'₁` is as good as `T'₂` | `T₁` isn't applicable | `ReadOnlySpan<FormattableString>` is picked |
+| `ReadOnlySpan<string>` | `ReadOnlySpan<FormattableString>` | `[${1}, (FormattableString)null]` | Not applicable | `[Interpolated String, Identity]` | `T'₁` is as good as `T'₂` | `T₁` isn't applicable | `ReadOnlySpan<FormattableString>` is picked |
 | `HashSet<short>` | `Span<long>` | `[1, 2]` | `[Implicit Constant, Implicit Constant]` | `[Implicit Numeric, Implicit Numeric]` | Neither is better | `CE₁ᵢ` is better | Ambiguous |
 | `HashSet<long>` | `Span<short>` | `[1, 2]` | `[Implicit Numeric, Implicit Numeric]` | `[Implicit Constant, Implicit Constant]` | Neither is better | `CE₂ᵢ` is better | Ambiguous |
 
@@ -101,25 +113,26 @@ class C<T> : IEnumerable<T>
 }
 ```
 
-The element types are the same, so it's a simply a question of whether we recognize that there's user-defined relationship between `C<T>` and `Span<T>`; if we include the conversion, then `Span<T>` is more specific than `C<T>`, and
+The element types are the same, so it's a simply a question of whether we recognize that there's user-defined relationship between `C<T>` and `Span<T>`; if we include the conversion, then `C<T>` is more specific than `Span<T>`, and
 that's the one we choose. Otherwise, we say this is ambiguous.
 
-### Should we look at conversions `T₁` between `T₂` when non-generic?
+### How far should we go in comparing base types
 
-Assuming the answer to the above is yes. For example:
+Consider this scenario:
 
 ```cs
-C<int>.M([1, 2]);
+class C<T> : IEnumerable<int> { public void Add(int i) { } }
 
-class C : IEnumerable<int>
-{
-    public static implicit operator Span<int>(C t) => new int[];
-
-    public static void M(C c) {}
-    public static void M(Span<int> c) {}
-
-    // Implementation of IEnumerable<int> and Add(int)
-}
+static void M(IEnumerable<byte>) { }
+static void M(C<string>) { }
+M([1, 2, 3]);
 ```
 
-If we only look at the non-substituted types, then there is no relationship, as the conversion is only between `Span<int>` and `C`, not `Span<T>` and `C`. We should consider looking at the substituted types in this case.
+By the current rules, `C<T>` and `IEnumerable<byte>` are not as good as each other, and neither is better.
+
+* `T₁` - `C<string>`
+* `T'₁` - `C<T>`
+* `T₂` - `IEnumerable<int>`
+* `T'₂` - `IEnumerable<T>`
+
+`T₁` and `T₂` aren't related, and neither are `T'₁` or `T'₂`. One possibly way to solve this is to also go through every unsubstituted interface of `T'₁` and compare them with `T'₂`, but is this complexity worth it in this scenario?
