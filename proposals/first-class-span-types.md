@@ -291,34 +291,14 @@ We update the type inferences section of the specification as follows (changes i
 >     - If it is contravariant then an *upper-bound inference* is made.
 >     - If it is invariant then an *exact inference* is made.
 > - Otherwise, no inferences are made.
-> 
-> #### 12.6.3.11 Upper-bound inferences
-> 
-> An *upper-bound inference from* a type `U` *to* a type `V` is made as follows:
-> 
-> - If `V` is one of the *unfixed* `Xᵢ` then `U` is added to the set of upper bounds for `Xᵢ`.
-> - Otherwise, sets `V₁...Vₑ` and `U₁...Uₑ` are determined by checking if any of the following cases apply:
->   - `U` is an array type `U₁[...]` and `V` is an array type `V₁[...]` of the same rank
+
+There are no rules for *upper-bound inference* because it would not be possible to hit them.
+Type inference never starts as upper-bound, it would have to go through a lower-bound inference and a contravariant type parameter.
+Because of the rule "if `Uᵢ` is not known to be a reference type then an *exact inference* is made,"
+the source type argument could not be `Span`/`ReadOnlySpan` (those cannot be reference types).
+However, the upper-bound span inference would only apply if the source type were a `Span`/`ReadOnlySpan`, since it would have rules like:
 >   - **`U` is a `Span<U₁>` and `V` is an array type `V₁[]` or a `Span<V₁>`**
 >   - **`U` is a `ReadOnlySpan<U₁>` and `V` is an array type `V₁[]` or a `Span<V₁>` or `ReadOnlySpan<V₁>`**
->   - `U` is one of `IEnumerable<Uₑ>`, `ICollection<Uₑ>`, `IReadOnlyList<Uₑ>`, `IReadOnlyCollection<Uₑ>` or `IList<Uₑ>` and `V` is a single-dimensional array type `Vₑ[]`
->   - `U` is the type `U1?` and `V` is the type `V1?`
->   - `U` is constructed class, struct, interface or delegate type `C<U₁...Uₑ>` and `V` is a `class, struct, interface` or `delegate` type which is `identical` to, `inherits` from (directly or indirectly), or implements (directly or indirectly) a unique type `C<V₁...Vₑ>`
->   - (The “uniqueness” restriction means that given an interface `C<T>{} class V<Z>: C<X<Z>>, C<Y<Z>>{}`, then no inference is made when inferring from `C<U₁>` to `V<Q>`. Inferences are not made from `U₁` to either `X<Q>` or `Y<Q>`.)  
->   If any of these cases apply then an inference is made from each `Uᵢ` to the corresponding `Vᵢ` as follows:
->   - If `Uᵢ` is not known to be a reference type then an *exact inference* is made
->   - Otherwise, if `V` is an array type then ~~an *upper-bound inference* is made~~ **inference depends on the type of `U`**:
->     - **If `U` is a `Span<Uᵢ>`, then an *exact inference* is made**
->     - **If `U` is an array type or a `ReadOnlySpan<Uᵢ>`, then a *upper-bound inference* is made**
->   - **Otherwise, if `V` is a `Span<Vᵢ>` then inference depends on the type of `U`**:
->     - **If `U` is a `Span<Uᵢ>`, then an *exact inference* is made**
->     - **If `U` is a `ReadOnlySpan<Uᵢ>`, then an *upper-bound inference* is made**
->   - **Otherwise, if `V` is a `ReadOnlySpan<Vᵢ>` and `U` is a `ReadOnlySpan<Uᵢ>` an *upper-bound inference* is made**:
->   - Otherwise, if `U` is `C<U₁...Uₑ>` then inference depends on the `i-th` type parameter of `C`:
->     - If it is covariant then an *upper-bound inference* is made.
->     - If it is contravariant then a *lower-bound inference* is made.
->     - If it is invariant then an *exact inference* is made.
-> - Otherwise, no inferences are made.
 
 ### Breaking changes
 
