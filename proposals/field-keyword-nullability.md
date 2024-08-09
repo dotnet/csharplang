@@ -30,10 +30,11 @@ A *field-backed property* is determined to be *null-resilient* or not by perform
 - If the get accessor is auto-implemented, the property is not null-resilient.
 
 The nullability of the backing field is determined as follows:
-- If the containing property has ***oblivious*** nullability, then the backing field has ***oblivious*** nullability.
-- If the containing property has ***annotated*** nullability (e.g. `string?` or `T?`) or the `[MaybeNull]` attribute, then the backing field has ***annotated*** nullability.
-- If the containing property has *not-annotated* nullability (e.g. `string` or `T`) or the `[NotNull]` attribute, and the property is ***null-resilient***, then the backing field has ***annotated*** nullability.
-- If the containing property has *not-annotated* nullability (e.g. `string` or `T`) or the `[NotNull]` attribute, and the property is ***not null-resilient***, then the backing field has ***not-annotated*** nullability.
+- If the field has nullability attributes such as `[field: MaybeNull]`, `AllowNull`, `NotNull`, or `DisallowNull`, then the field's nullable annotation is the same as the property's nullable annotation.
+    - This is because when the user starts applying nullability attributes to the field, we no longer want to infer anything, we just want the nullability to be *what the user said*.
+- If the containing property has ***oblivious*** or ***annotated*** nullability, then the backing field has the same nullability as the property.
+- If the containing property has *not-annotated* nullability (e.g. `string` or `T`), and the property is ***null-resilient***, then the backing field has ***annotated*** nullability.
+- If the containing property has *not-annotated* nullability (e.g. `string` or `T`), and the property is ***not null-resilient***, then the backing field has ***not-annotated*** nullability.
 
 ## Constructor analysis
 
