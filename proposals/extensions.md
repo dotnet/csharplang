@@ -292,12 +292,21 @@ Adjust scoping rules so that type parameters are in scope within the 'for':
 implicit extension E<T> for T { }
 ```
 
-## Open issue: need to specify conversion rules
+## Open issue: need to specify user-defined conversion rules
 
 ```
-explicit extension R for U { } 
-R r = default;
-object o = r; // what conversion is that? if R doesn't have `object` as base type. What about interfaces?
+implicit extension EU for U
+{
+    public static implicit operator EU(int i) => ...;
+}
+implicit extension EInt for int { }
+
+R r = 42;
+U u = 43;
+
+EInt ei = 44;
+R r = ei;
+U u = ei;
 ```
 
 Should allow conversion operators. Extension conversion is useful. 
@@ -624,6 +633,30 @@ TODO Does this restriction on constraints cause issues with structs?
 ## Compat breaks
 
 Types and aliases may not be called "extension".  
+
+## Types
+
+We update the [Types section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general) as follows:
+
+A reference type is a class type, an interface type, an array type, a delegate type, the dynamic type,
+***or an extension type with an underlying type that is a reference type**.
+
+A value type is either a struct type or an enumeration type,
+***or an extension type with an underlying type that is a value type**.
+
+***An extension type with an underlying type that is an enumeration type is an enumeration type.**
+
+All value types ***except extension types** implicitly inherit from the class System.ValueType
+
+A nullable value type can represent all values of its underlying type plus an additional null value. 
+A nullable value type is written `T?`, where T is the underlying type. 
+This syntax is shorthand for `System.Nullable<T>`, and the two forms can be used interchangeably.
+***An extension type with an underlying type that is a nullable value type is also a nullable value type.**
+
+## Conversions
+
+We update the [Conversions section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10-conversions) as follows:
+TODO2
 
 ## Expressions
 
