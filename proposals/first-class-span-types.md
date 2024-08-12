@@ -32,9 +32,9 @@ because user-defined conversions (which exist between Span/array/ReadOnlySpan) a
 
 ## Detailed Design
 
-The changes in this proposal will be tied to `LangVersion >= 13`.
+The changes in this proposal will be tied to `LangVersion >= 14`.
 
-### Implicit Span Conversions
+### Span conversions
 
 We add a new type of implicit conversion to the list in [§10.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1021-general), an
 _implicit span conversion_. This conversion is a conversion from type and is defined as follows:
@@ -64,17 +64,17 @@ There is no standard explicit span conversion unlike other *standard explicit co
 which always exist given the opposite standard implicit conversion.
 
 #### User defined conversions
+[udc]: #user-defined-conversions
 
-User-defined conversions are not considered when converting between
-- any single-dimensional `array_type` and `System.Span<T>`/`System.ReadOnlySpan<T>`,
-- any combination of `System.Span<T>`/`System.ReadOnlySpan<T>`,
-- `string` and `System.ReadOnlySpan<char>`.
+User-defined conversions are not considered when converting between types for which an implicit or an explicit span conversion exists.
 
 The implicit span conversions are exempted from the rule
 that it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists
 ([§10.5.2 Permitted user-defined conversions][permitted-udcs]).
-This is needed so BCL can keep defining the existing Span conversion operators even when they switch to C# 13
-(to avoid binary breaking changes and also because these operators are used in codegen of the new standard span conversion).
+This is needed so the BCL can keep defining the existing Span conversion operators even when they switch to C# 14
+(they are still needed for lower LangVersions and also because these operators are used in codegen of the new standard span conversions).
+But it can be viewed as an implementation detail (codegen and lower LangVersions are not part of the spec)
+and Roslyn violates this part of the spec anyway (this particular rule about user-defined conversions is not enforced).
 
 #### Extension receiver
 
@@ -179,7 +179,7 @@ The compiler expects to use the following helpers or equivalents to implement th
 | string to ReadOnlySpan | `static ReadOnlySpan<char> MemoryExtensions.AsSpan(string)` |
 
 Note that `MemoryExtensions.AsSpan` is used instead of the equivalent implicit operator defined on `string`.
-This means the codegen is different between LangVersions (the implicit operator is used in C# 12; the static method `AsSpan` is used in C# 13).
+This means the codegen is different between LangVersions (the implicit operator is used in C# 13; the static method `AsSpan` is used in C# 14).
 On the other hand, the conversion can be emitted on .NET Framework (the `AsSpan` method exists there whereas the `string` operator does not).
 
 #### Better conversion from expression
@@ -206,7 +206,7 @@ This is based on [collection expressions overload resolution changes][ce-or].
 This rule should ensure that whenever an overload becomes applicable due to the new span conversions,
 any potential ambiguity with another overload is avoided because the newly-applicable overload is preferred.
 
-Without this rule, the following code that successfully compiled in C# 12 would result in an ambiguity error in C# 13
+Without this rule, the following code that successfully compiled in C# 13 would result in an ambiguity error in C# 14
 because of the new standard implicit conversion from array to ReadOnlySpan applicable to an extension method receiver:
 
 ```cs
@@ -239,11 +239,10 @@ static class C
 ```
 
 > [!WARNING]
-> Because the betterness rule is gated on `LangVersion >= 13`,
-> API authors cannot add such new overloads if they want to keep supporting users on `LangVersion <= 12`.
+> Because the betterness rule is gated on `LangVersion >= 14`,
+> API authors cannot add such new overloads if they want to keep supporting users on `LangVersion <= 13`.
 > For example, if .NET 9 BCL introduces such overloads, users that upgrade to `net9.0` TFM but stay on lower LangVersion
-> will get ambiguity errors for existing code, unless BCL also applies
-> [the new `OverloadResolutionPriorityAttribute`][overload-resolution-priority].
+> will get ambiguity errors for existing code.
 > See also [an open question](#unrestricted-betterness-rule) below.
 
 ### Type inference
@@ -307,7 +306,7 @@ As any proposal that changes conversions of existing scenarios, this proposal do
 #### User-defined conversions through inheritance
 
 By adding _implicit span conversions_ to the list of standard implicit conversions, we can potentially change behavior when user-defined conversions are involved in a type hierarchy.
-This example shows that change, in comparison to an integer scenario that already behaves as the new C# 13 behavior will.
+This example shows that change, in comparison to an integer scenario that already behaves as the new C# 14 behavior will.
 
 ```cs
 Span<string> span = [];
@@ -421,13 +420,14 @@ We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d
 
 Should we make [the betterness rule][betterness-rule] unconditional on LangVersion?
 That would allow API authors to add new Span APIs where IEnumerable equivalents exist
-without breaking users on older LangVersions and without needing to use the `OverloadResolutionPriorityAttribute`.
+without breaking users on older LangVersions or other compilers or languages (e.g., VB).
 However, that would mean users could get different behavior after updating the toolset (without changing LangVersion or TargetFramework):
 - Compiler could choose different overloads (technically a breaking change, but hopefully those overloads would have equivalent behavior).
 - Other breaks could arise, unknown at this time.
 
-On the other hand, the new Span APIs would still be ambiguous from VB unless we implement the betterness rule there as well.
-So it might be easier if API authors solve this themselves via the `OverloadResolutionPriorityAttribute`.
+Note that [`OverloadResolutionPriorityAttribute`][overload-resolution-priority] cannot fully solve this
+because it's also ignored on older LangVersions.
+However, it should be possible to use it to avoid ambiguities from VB where the attribute should be recognized.
 
 ### Delegate extension receiver break (answered)
 
@@ -451,6 +451,44 @@ list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExte
 #### Answer
 
 The break will be mitigated by not considering span conversions for extension receiver in method group conversions.
+
+### Ignoring more user-defined conversions
+
+We defined a set of type pairs for which there are language-defined implicit and explicit span conversions.
+Whenever a language-defined span conversion exists from `T1` to `T2`, any user-defined conversion from `T1` to `T2` is [ignored][udc]
+(regardless of the span and user-defined conversion being implicit or explicit).
+
+Note that this includes all the conditions, so for example there is no span conversion from `Span<object>` to `ReadOnlySpan<string>`
+(there is a span conversion from `Span<T>` to `ReadOnlySpan<U>` but it must hold that `T : U`),
+hence a user-defined conversion would be considered between those types if it existed
+(that would have to be a specialized conversion like `Span<T>` to `ReadOnlySpan<string>` because conversion operators cannot have generic parameters).
+
+Should we ignore user-defined conversions also between other combinations of array/Span/ReadOnlySpan/string types
+where no corresponding language-defined span conversion exists?
+For example, if there is a user-defined conversion from `ReadOnlySpan<T>` to `Span<T>`, should we ignore it?
+
+Spec possibilities to consider:
+
+1. > Whenever a span conversion exists from `T1` to `T2`, ignore any user-defined conversion from `T1` to `T2` *or from `T2` to `T1`*.
+2. > User-defined conversions are not considered when converting between
+   > - any single-dimensional `array_type` and `System.Span<T>`/`System.ReadOnlySpan<T>`,
+   > - any combination of `System.Span<T>`/`System.ReadOnlySpan<T>`,
+   > - `string` and `System.ReadOnlySpan<char>`.
+3. Like above but replacing the last bullet point with:
+   > - `string` and `System.Span<char>`/`System.ReadOnlySpan<char>`.
+4. Like above but replacing the last bullet point with:
+   > - `string` and `System.Span<T>`/`System.ReadOnlySpan<T>`.
+
+Technically, the spec disallows some of these user-defined conversions to be even defined:
+it is not possible to define a user-defined operator between types for which a non-user-defined conversion exists ([§10.5.2][permitted-udcs]).
+But Roslyn intentionally violates this part of the spec.
+And some conversions like between `Span` and `string` are allowed anyway
+(no language-defined conversion between these types exist).
+
+Nevertheless, alternatively to just *ignoring* the conversions, we could *disallow* them to be defined at all
+and perhaps break out of the spec violation at least for these new span conversions,
+i.e., change Roslyn to actually report a compile-time error if these conversions are defined
+(likely except those already defined by the BCL).
 
 ## Alternatives
 
