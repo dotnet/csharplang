@@ -639,4 +639,4 @@ class C
 
 For reference, fields for *primary constructor parameters* are generated in similar cases - see [sharplab.io](https://sharplab.io/#v2:EYLgxg9gTgpgtADwGwBYA+ABADAAgwRgDoARASwEMBzAOwgGcAXUsOgbgFgAoLjAJhwDCACgjAAVjDAMcAM1IwANgBMAlFwDeXHNrwocAWSFrOOnJpOmdxGMACulQgEE6dGFAZC5ipTlJ0c1LYKCiocFtoAvlxR3JyMULZSOADKIuKS0l7KxuamGHqGxqa5ltrWdg7Oru6e8sq+/oHBoVo6MRFAA).
 
-**Recommendation**: The backing field is generated when `field` is used only in calls to *conditional methods*.
+**Recommendation**: The backing field is generated when `field` is used only in omitted calls to *conditional methods*.
