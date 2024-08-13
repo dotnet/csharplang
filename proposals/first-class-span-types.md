@@ -303,6 +303,42 @@ However, the upper-bound span inference would only apply if the source type were
 
 As any proposal that changes conversions of existing scenarios, this proposal does introduce some new breaking changes. Here's a few examples:
 
+#### Calling `Reverse` on an array
+
+Calling `x.Reverse()` where `x` is an instance of type `T[]`
+would previously bind to `IEnumerable<T> Enumerable.Reverse<T>(this IEnumerable<T>)`,
+whereas now it binds to `void MemoryExtensions.Reverse<T>(this Span<T>)`.
+Unfortunately these APIs are incompatible (the latter does the reversal in-place and returns `void`).
+The workaround is for the BCL to introduce an array-specific overload like `IEnumerable<T> Reverse<T>(this T[])`.
+
+```cs
+void M(int[] a)
+{
+    foreach (var x in a.Reverse()) // fine previously, an error now (`Reverse` returns `void`)
+    {
+    }
+}
+```
+
+#### Covariant arrays
+
+Overloads taking `IEnumerable<T>` worked on covariant arrays,
+but overloads taking `Span<T>` (which we now prefer) don't,
+because the span conversion throws an `ArrayTypeMismatchException` for covariant arrays.
+
+```cs
+string[] s = new[] { "a" };
+object[] o = s;
+
+C.R(o); // wrote 1 previously, now crashes in Span<T> constructor with ArrayTypeMismatchException
+
+static class C
+{
+    public static void R<T>(IEnumerable<T> e) => Console.Write(1);
+    public static void R<T>(Span<T> s) => Console.Write(2);
+}
+```
+
 #### User-defined conversions through inheritance
 
 By adding _implicit span conversions_ to the list of standard implicit conversions, we can potentially change behavior when user-defined conversions are involved in a type hierarchy.
