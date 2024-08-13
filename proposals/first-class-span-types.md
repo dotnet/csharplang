@@ -303,6 +303,24 @@ However, the upper-bound span inference would only apply if the source type were
 
 As any proposal that changes conversions of existing scenarios, this proposal does introduce some new breaking changes. Here's a few examples:
 
+#### Ambiguities
+
+The following examples previously failed type inference for the Span overload,
+but now type inference from array to Span succeeds, hence these are ambiguous.
+
+```cs
+var x = new long[] { 1 };
+Assert.Equal([2], x); // previously Assert.Equal<T>(T[], T[]), now ambiguous with Assert.Equal<T>(ReadOnlySpan<T>, Span<T>)
+Assert.Equal([2], x.AsSpan()); // workaround
+```
+
+```cs
+var x = new int[] { 1, 2 };
+var s = new ArraySegment<int>(x, 1, 1);
+Assert.Equal(x, s); // previously Assert.Equal<T>(T, T), now ambiguous with Assert.Equal<T>(Span<T>, Span<T>)
+Assert.Equal(x.AsSpan(), s); // workaround
+```
+
 #### Calling `Reverse` on an array
 
 Calling `x.Reverse()` where `x` is an instance of type `T[]`
