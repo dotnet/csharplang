@@ -32,7 +32,7 @@ The variable denoted by the `field` keyword in a property's accessors is the *ba
 
 ## Nullability of the *backing field*
 
-The *backing field* has the same type as the property. However, its nullable annotation may differ from the property. To determine this nullable annotation, we introduce the concept of *null-resiliency*. *Null-resiliency* intuitively means that the property's `get` accessor behaves properly even when the field contains the `default` value for its type.
+The *backing field* has the same type as the property. However, its nullable annotation may differ from the property. To determine this nullable annotation, we introduce the concept of *null-resiliency*. *Null-resiliency* intuitively means that the property's `get` accessor preserves null-safety even when the field contains the `default` value for its type.
 
 A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its `get` accessor.
 - For the purposes of this analysis, `field` is temporarily assumed to have *annotated* nullability, e.g. `string?`. This causes `field` to have *maybe-null* or *maybe-default* initial state in the `get` accessor, depending on its type.
@@ -111,6 +111,8 @@ We could introduce no special behavior at all here. In effect:
 
 Note that this would result in nuisance warnings for "lazy property" scenarios, in which case users would likely need to assign `null!` or similar to silence constructor warnings.  
 A "sub-alternative" we can consider is to also completely ignore properties using `field` keyword for nullable constructor analysis. In that case, there would be no warnings anywhere about the user needing to initialize anything, but also no nuisance for the user, regardless of what initialization pattern they may be using.
+
+Because we are only planning to ship the `field` keyword feature under the Preview LangVersion in .NET 9, we expect to have some ability to change the nullable behavior for the feature in .NET 10. Therefore, we could consider adopting a "lower-cost" solution like this one in the short term, and growing up to one of the more complex solutions in the long term.
 
 ### `field`-targeted nullability attributes
 
