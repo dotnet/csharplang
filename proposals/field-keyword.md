@@ -606,8 +606,9 @@ When should the synthesized backing field be considered *read-only*?
 ```csharp
 struct S
 {
-    object P1          { get { field ??= ""; }}        // ok
-    readonly object P2 { get { field ??= ""; }}        // error: 'field' is readonly
+    readonly object P0 { get => field; } = "";         // ok
+    object P1          { get => field ??= ""; }        // ok
+    readonly object P2 { get => field ??= ""; }        // error: 'field' is readonly
     readonly object P3 { get; set { _ = field; } }     // ok
     readonly object P4 { get; set { field = value; } } // error: 'field' is readonly
 }
