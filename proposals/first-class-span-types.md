@@ -330,7 +330,7 @@ because the span conversion throws an `ArrayTypeMismatchException` for covariant
 string[] s = new[] { "a" };
 object[] o = s;
 
-C.R(o); // wrote 1 previously, now crashes with ArrayTypeMismatchException
+C.R(o); // wrote 1 previously, now crashes in Span<T> constructor with ArrayTypeMismatchException
 
 static class C
 {
