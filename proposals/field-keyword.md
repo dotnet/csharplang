@@ -76,11 +76,17 @@ public string LazilyComputed => field ??= Compute();
 public string LazilyComputed { get => field ??= Compute(); }
 ```
 
-As with auto properties, a setter that uses a backing field is disallowed when there is no getter. This restriction could be loosened in the future to allow the setter to do something only in response to changes, by comparing `value` to `field` (see open questions).
+Set-only properties may also use `field`:
 
 ```cs
-// ❌ Error, will not compile
-{ set => field = value; }
+{
+    set
+    {
+        if (field == value) return;
+        field = value;
+        OnXyzChanged(new XyzEventArgs(value));
+    }
+}
 ```
 
 ### Breaking changes
@@ -321,6 +327,13 @@ public class C
 }
 ```
 
+## Field usage warnings
+
+When the `field` keyword is used in an accessor, the compiler's existing analysis of unassigned or unread fields will include that field.
+
+- CS0414: The backing field for property 'Xyz' is assigned but its value is never used
+- CS0649: The backing field for property 'Xyz' is never assigned to, and will always have its default value
+
 ## Specification changes
 
 ### Syntax
@@ -421,9 +434,9 @@ public class Point
 }
 ```
 
-## Open LDM questions
+## Answered LDM questions
 
-### Syntax locations for keywords (answered)
+### Syntax locations for keywords
 
 In accessors where `field` and `value` could bind to a synthesized backing field or an implicit setter parameter, in which syntax locations should the identifiers be considered keywords?
 1. always
@@ -511,6 +524,33 @@ Which of these scenarios should be allowed to compile? Assume that the "field is
       }
       ```
 
+#### Answer
+
+Only disallow what is already disallowed today in auto properties, the bodyless `set;`.
+
+### `field` in event accessor
+
+Should `field` be a keyword in an event accessor, and should the compiler generate a backing field?
+
+```csharp
+class MyClass
+{
+    public event EventHandler E
+    {
+        add { field += value; }
+        remove { field -= value; }
+    }
+}
+```
+
+**Recommendation**: `field` is *not* a keyword within an event accessor, and no backing field is generated.
+
+#### Answer
+
+Recommendation taken. `field` is *not* a keyword within an event accessor, and no backing field is generated.
+
+## Open LDM questions
+
 ### Nullability of `field`
 
 Should the proposed nullability of `field` be accepted? See the [Nullability](#nullability) section, and the open question within.
@@ -537,23 +577,6 @@ class MyClass
 ```
 
 In the example above, binding to the backing field should result in an error: "initializer cannot reference non-static field".
-
-### `field` in event accessor
-
-Should `field` be a keyword in an event accessor, and should the compiler generate a backing field?
-
-```csharp
-class MyClass
-{
-    public event EventHandler E
-    {
-        add { field += value; }
-        remove { field -= value; }
-    }
-}
-```
-
-**Recommendation**: `field` is *not* a keyword within an event accessor, and no backing field is generated.
 
 ### Interaction with partial properties
 
