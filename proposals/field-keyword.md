@@ -76,11 +76,17 @@ public string LazilyComputed => field ??= Compute();
 public string LazilyComputed { get => field ??= Compute(); }
 ```
 
-As with auto properties, a setter that uses a backing field is disallowed when there is no getter. This restriction could be loosened in the future to allow the setter to do something only in response to changes, by comparing `value` to `field` (see open questions).
+Set-only properties may also use `field`:
 
 ```cs
-// ❌ Error, will not compile
-{ set => field = value; }
+{
+    set
+    {
+        if (field == value) return;
+        field = value;
+        OnXyzChanged(new XyzEventArgs(value));
+    }
+}
 ```
 
 ### Breaking changes
@@ -511,6 +517,10 @@ Which of these scenarios should be allowed to compile? Assume that the "field is
       }
       ```
 
+#### Answer
+
+Only disallow what is already disallowed today in auto properties, the bodyless `set;`.
+
 ### Nullability of `field`
 
 Should the proposed nullability of `field` be accepted? See the [Nullability](#nullability) section, and the open question within.
@@ -554,6 +564,10 @@ class MyClass
 ```
 
 **Recommendation**: `field` is *not* a keyword within an event accessor, and no backing field is generated.
+
+#### Answer
+
+Recommendation taken. `field` is *not* a keyword within an event accessor, and no backing field is generated.
 
 ### Interaction with partial properties
 
