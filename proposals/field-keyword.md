@@ -434,7 +434,7 @@ public class Point
 }
 ```
 
-## Open LDM questions
+## Answered LDM questions
 
 ### Syntax locations for keywords (answered)
 
@@ -528,6 +528,29 @@ Which of these scenarios should be allowed to compile? Assume that the "field is
 
 Only disallow what is already disallowed today in auto properties, the bodyless `set;`.
 
+### `field` in event accessor
+
+Should `field` be a keyword in an event accessor, and should the compiler generate a backing field?
+
+```csharp
+class MyClass
+{
+    public event EventHandler E
+    {
+        add { field += value; }
+        remove { field -= value; }
+    }
+}
+```
+
+**Recommendation**: `field` is *not* a keyword within an event accessor, and no backing field is generated.
+
+#### Answer
+
+Recommendation taken. `field` is *not* a keyword within an event accessor, and no backing field is generated.
+
+## Open LDM questions
+
 ### Nullability of `field`
 
 Should the proposed nullability of `field` be accepted? See the [Nullability](#nullability) section, and the open question within.
@@ -554,27 +577,6 @@ class MyClass
 ```
 
 In the example above, binding to the backing field should result in an error: "initializer cannot reference non-static field".
-
-### `field` in event accessor
-
-Should `field` be a keyword in an event accessor, and should the compiler generate a backing field?
-
-```csharp
-class MyClass
-{
-    public event EventHandler E
-    {
-        add { field += value; }
-        remove { field -= value; }
-    }
-}
-```
-
-**Recommendation**: `field` is *not* a keyword within an event accessor, and no backing field is generated.
-
-#### Answer
-
-Recommendation taken. `field` is *not* a keyword within an event accessor, and no backing field is generated.
 
 ### Interaction with partial properties
 
