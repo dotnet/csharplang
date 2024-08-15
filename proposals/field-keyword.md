@@ -327,6 +327,13 @@ public class C
 }
 ```
 
+## Field usage warnings
+
+When the `field` keyword is used in an accessor, the compiler's existing analysis of unassigned or unread fields will include that field.
+
+- CS0414: The backing field for property 'Xyz' is assigned but its value is never used
+- CS0649: The backing field for property 'Xyz' is never assigned to, and will always have its default value
+
 ## Specification changes
 
 ### Syntax
