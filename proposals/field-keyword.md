@@ -436,7 +436,7 @@ public class Point
 
 ## Answered LDM questions
 
-### Syntax locations for keywords (answered)
+### Syntax locations for keywords
 
 In accessors where `field` and `value` could bind to a synthesized backing field or an implicit setter parameter, in which syntax locations should the identifiers be considered keywords?
 1. always
