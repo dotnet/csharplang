@@ -303,6 +303,22 @@ However, the upper-bound span inference would only apply if the source type were
 
 As any proposal that changes conversions of existing scenarios, this proposal does introduce some new breaking changes. Here's a few examples:
 
+#### Calling `Reverse` on an array
+
+Calling `x.Reverse()` where `x` is an instance of type `T[]`
+would previously bind to `IEnumerable<T> Enumerable.Reverse<T>(this IEnumerable<T>)`,
+whereas now it binds to `void MemoryExtensions.Reverse<T>(this Span<T>)`.
+Unfortunately these APIs are incompatible (the latter does the reversal in-place and returns `void`).
+The best solution would be if the BCL introduced an array-specific overload like `IEnumerable<T> Reverse<T>(this T[])`.
+
+```cs
+void M(int[] a)
+{
+    foreach (var x in a.Reverse()) { } // fine previously, an error now (`Reverse` returns `void`)
+    foreach (var x in Enumerable.Reverse(a)) { } // workaround
+}
+```
+
 #### Ambiguities
 
 The following examples previously failed type inference for the Span overload,
@@ -320,22 +336,6 @@ var x = new int[] { 1, 2 };
 var s = new ArraySegment<int>(x, 1, 1);
 Assert.Equal(x, s); // previously Assert.Equal<T>(T, T), now ambiguous with Assert.Equal<T>(Span<T>, Span<T>)
 Assert.Equal(x.AsSpan(), s); // workaround
-```
-
-#### Calling `Reverse` on an array
-
-Calling `x.Reverse()` where `x` is an instance of type `T[]`
-would previously bind to `IEnumerable<T> Enumerable.Reverse<T>(this IEnumerable<T>)`,
-whereas now it binds to `void MemoryExtensions.Reverse<T>(this Span<T>)`.
-Unfortunately these APIs are incompatible (the latter does the reversal in-place and returns `void`).
-The best solution would be if the BCL introduced an array-specific overload like `IEnumerable<T> Reverse<T>(this T[])`.
-
-```cs
-void M(int[] a)
-{
-    foreach (var x in a.Reverse()) { } // fine previously, an error now (`Reverse` returns `void`)
-    foreach (var x in Enumerable.Reverse(a)) { } // workaround
-}
 ```
 
 #### Covariant arrays
