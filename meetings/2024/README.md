@@ -23,7 +23,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 21, 2024
 
+- Open questions in `field` (Chuck/Cyrus) - https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions
+
 ### Mon Aug 19, 2024
+
+- [Better conversion from collection expression](https://github.com/dotnet/csharplang/pull/8348) (Fred)
 
 ### Wed Aug 14, 2024
 
