@@ -307,6 +307,7 @@ As any proposal that changes conversions of existing scenarios, this proposal do
 
 The following examples previously failed type inference for the Span overload,
 but now type inference from array to Span succeeds, hence these are ambiguous.
+To work around this, users can use `.AsSpan()` or API authors can use `OverloadResolutionPriorityAttribute`.
 
 ```cs
 var x = new long[] { 1 };
@@ -327,14 +328,13 @@ Calling `x.Reverse()` where `x` is an instance of type `T[]`
 would previously bind to `IEnumerable<T> Enumerable.Reverse<T>(this IEnumerable<T>)`,
 whereas now it binds to `void MemoryExtensions.Reverse<T>(this Span<T>)`.
 Unfortunately these APIs are incompatible (the latter does the reversal in-place and returns `void`).
-The workaround is for the BCL to introduce an array-specific overload like `IEnumerable<T> Reverse<T>(this T[])`.
+The best solution would be if the BCL introduced an array-specific overload like `IEnumerable<T> Reverse<T>(this T[])`.
 
 ```cs
 void M(int[] a)
 {
-    foreach (var x in a.Reverse()) // fine previously, an error now (`Reverse` returns `void`)
-    {
-    }
+    foreach (var x in a.Reverse()) { } // fine previously, an error now (`Reverse` returns `void`)
+    foreach (var x in Enumerable.Reverse(a)) { } // workaround
 }
 ```
 
@@ -343,17 +343,23 @@ void M(int[] a)
 Overloads taking `IEnumerable<T>` worked on covariant arrays,
 but overloads taking `Span<T>` (which we now prefer) don't,
 because the span conversion throws an `ArrayTypeMismatchException` for covariant arrays.
+Arguably, the `Span<T>` overload should not exist, it should take `ReadOnlySpan<T>` instead.
+To work around this, users can use `.AsEnumerable()` or API authors can use `OverloadResolutionPriorityAttribute`.
 
 ```cs
 string[] s = new[] { "a" };
 object[] o = s;
 
 C.R(o); // wrote 1 previously, now crashes in Span<T> constructor with ArrayTypeMismatchException
+C.R(o.AsEnumerable()); // workaround
 
 static class C
 {
     public static void R<T>(IEnumerable<T> e) => Console.Write(1);
     public static void R<T>(Span<T> s) => Console.Write(2);
+    // another workaround:
+    [OverloadResolutionPriority(1)]
+    public static void R<T>(ReadOnlySpan<T> s) => Console.Write(3);
 }
 ```
 
