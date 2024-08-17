@@ -759,7 +759,7 @@ If all sub-types are accounted for in a switch expression or statement, no defau
 
 ### Singleton values
 
-Types that are singletons (with an static `Singleton`) property can used as values in non-type contexts by implicitly accessing the property.
+Types that are singletons (with a static `Singleton` property) can be used as values in non-type contexts by implicitly accessing the property.
 
 Instead of:
     
