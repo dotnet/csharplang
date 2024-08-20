@@ -663,3 +663,49 @@ class C
 For reference, fields for *primary constructor parameters* are generated in similar cases - see [sharplab.io](https://sharplab.io/#v2:EYLgxg9gTgpgtADwGwBYA+ABADAAgwRgDoARASwEMBzAOwgGcAXUsOgbgFgAoLjAJhwDCACgjAAVjDAMcAM1IwANgBMAlFwDeXHNrwocAWSFrOOnJpOmdxGMACulQgEE6dGFAZC5ipTlJ0c1LYKCiocFtoAvlxR3JyMULZSOADKIuKS0l7KxuamGHqGxqa5ltrWdg7Oru6e8sq+/oHBoVo6MRFAA).
 
 **Recommendation**: The backing field is generated when `field` is used only in omitted calls to *conditional methods*.
+
+### Require overriding both accessors
+
+An auto-implemented property that overrides a virtual read-write property is currently required to override both accessors. Should that requirement be extended to accessors that use `field`?
+
+```csharp
+class A
+{
+    public virtual object P1 { get; set; }
+    public virtual object P2 { get; set; }
+    public virtual object P3 { get; set; }
+}
+
+class B : A
+{
+    public override object P1 { get; } // error: must override all accessors
+    public override object P2 { get => null; }  // ok
+    public override object P3 { get => field; } // ok?
+}
+```
+
+### Default interface implementation
+
+Is `field` supported in a default interface implementation of a property, for `static` properties at least?
+
+```csharp
+interface IA
+{
+    object P1 { get => field; } // error: interface cannot contain instance field
+
+    static object P2 { get => field; set { field = value; } } // ok?
+}
+```
+
+Currently, a property declared in an interface cannot have two accessors with only implemented.
+(See [LDM-2017-04-18](https://github.com/dotnet/csharplang/blob/main/meetings/2017/LDM-2017-04-18.md#default-implementations-for-event-accessors-in-interfaces) for the related discussion for *events* where this seems to have been decided.)
+Should we change that and support mixed accessors in interfaces? If so, the empty accessor *unimplemented* or *auto-implemented*?
+
+```csharp
+interface IB
+{
+    object P1 { get => null; set; } // ok?
+
+    static object P2 { get => field; set; } // ok?
+}
+```
