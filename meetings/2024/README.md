@@ -25,12 +25,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Open questions in `field` (Chuck/Cyrus) - https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions
 
+## C# Language Design Notes for 2024
+
 ### Mon Aug 19, 2024
 
-- [Better conversion from collection expression](https://github.com/dotnet/csharplang/pull/8348) (Fred)
+[C# Language Design Meeting for August 19th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-08-19.md)
 
-
-## C# Language Design Notes for 2024
+- Better conversion from collection expression
 
 ### Wed Aug 14, 2024
 
