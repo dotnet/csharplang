@@ -678,7 +678,7 @@ class A
 
 class B : A
 {
-    public override object P1 { get; } // error: must override all accessors
+    public override object P1 { get; }          // error: must override both accessors
     public override object P2 { get => null; }  // ok
     public override object P3 { get => field; } // ok?
 }
@@ -698,13 +698,13 @@ interface IA
 ```
 
 Currently, a property declared in an interface cannot have two accessors with only implemented.
-(See [LDM-2017-04-18](https://github.com/dotnet/csharplang/blob/main/meetings/2017/LDM-2017-04-18.md#default-implementations-for-event-accessors-in-interfaces) for the related discussion for *events* where this seems to have been decided.)
+(See [LDM-2017-04-18](https://github.com/dotnet/csharplang/blob/main/meetings/2017/LDM-2017-04-18.md#default-implementations-for-event-accessors-in-interfaces) for the related discussion for *events* where that may have been decided.)
 Should we change that and support mixed accessors in interfaces? If so, the empty accessor *unimplemented* or *auto-implemented*?
 
 ```csharp
 interface IB
 {
-    object P1 { get => null; set; } // ok?
+    object P1 { get => null; set; }         // ok?
 
     static object P2 { get => field; set; } // ok?
 }
