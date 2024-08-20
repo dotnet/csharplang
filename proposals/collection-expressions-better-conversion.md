@@ -54,7 +54,7 @@ the element conversions for the better collection type must also be the same or 
 | `List<int>` | `List<byte>` | `[(int)1, (byte)2]` | `[Identity, Implicit Numeric]` | Not applicable | `T₂` is not applicable | `List<int>` is picked |
 | `List<int>` | `List<byte>` | `[1, (byte)2]` | `[Identity, Implicit Numeric]` | `[Implicit Constant, Identity]` | Neither is better | Ambiguous |
 | `List<int>` | `List<byte>` | `[(byte)1, (byte)2]` | `[Implicit Numeric, Implicit Numeric]` | `[Identity, Identity]` | `CE₂ᵢ` is better | `List<byte>` is picked |
-| `List<int?>` | `List<long>` | `[1, 2, 3]` | `[Implicit Nullable, Implicit Nullable, Implicit Nullable]` | `[Implicit Numeric, Implicit Nullable, Implicit Nullable]` | Neither is better | Ambiguous |
+| `List<int?>` | `List<long>` | `[1, 2, 3]` | `[Implicit Nullable, Implicit Nullable, Implicit Nullable]` | `[Implicit Numeric, Implicit Numeric, Implicit Numeric]` | Neither is better | Ambiguous |
 | `List<int?>` | `List<ulong>` | `[1, 2, 3]` | `[Implicit Nullable, Implicit Nullable, Implicit Nullable]` | `[Implicit Numeric, Implicit Numeric, Implicit Numeric]` | `CE₁ᵢ` is better | `List<int?>` is picked |
 | `List<short>` | `List<long>` | `[1, 2, 3]` | `[Implicit Numeric, Implicit Numeric, Implicit Numeric]` | `[Implicit Numeric, Implicit Numeric, Implicit Numeric]` | `CE₁ᵢ` is better | `List<short>` is picked |
 | `IEnumerable<int>` | `List<byte>` | `[1, 2, 3]` | `[Identity, Identity, Identity]` | `[Implicit Constant, Implicit Constant, Implicit Constant]` | `CE₁ᵢ` is better | `IEnumerable<int>` is picked |
@@ -64,10 +64,10 @@ the element conversions for the better collection type must also be the same or 
 | `ReadOnlySpan<string>` | `ReadOnlySpan<object>` | `["", new object()]` | Not applicable | `[Implicit Reference, Identity]` | `T₁` is not applicable | `ReadOnlySpan<object>` is picked |
 | `ReadOnlySpan<object>` | `Span<string>` | `["", ""]` | `[Implicit Reference]` | `[Identity]` | `CE₂ᵢ` is better | `Span<string>` is picked |
 | `ReadOnlySpan<object>` | `Span<string>` | `[new object()]` | `[Identity]` | Not applicable | `T₁` is not applicable | `ReadOnlySpan<object>` is picked |
-| `ReadOnlySpan<InterpolatedStringHandler>` | `ReadOnlySpan<string>` | `[${1}]` | `[Interpolated String Handler]` | `[Identity]` | `CE₁ᵢ` is better | `ReadOnlySpan<InterpolatedStringHandler>` is picked |
-| `ReadOnlySpan<InterpolatedStringHandler>` | `ReadOnlySpan<string>` | `[${"blah"}]` | `[Interpolated String Handler]` | `[Identity]` - But constant | `CE₂ᵢ` is better | `ReadOnlySpan<string>` is picked |
-| `ReadOnlySpan<string>` | `ReadOnlySpan<FormattableString>` | `[${1}]` | `[Identity]` | `[Interpolated String]` | `CE₂ᵢ` is better | `ReadOnlySpan<string>` is picked |
-| `ReadOnlySpan<string>` | `ReadOnlySpan<FormattableString>` | `[${1}, (FormattableString)null]` | Not applicable | `[Interpolated String, Identity]` | `T₁` isn't applicable | `ReadOnlySpan<FormattableString>` is picked |
+| `ReadOnlySpan<InterpolatedStringHandler>` | `ReadOnlySpan<string>` | `[$"{1}"]` | `[Interpolated String Handler]` | `[Identity]` | `CE₁ᵢ` is better | `ReadOnlySpan<InterpolatedStringHandler>` is picked |
+| `ReadOnlySpan<InterpolatedStringHandler>` | `ReadOnlySpan<string>` | `[$"{"blah"}"]` | `[Interpolated String Handler]` | `[Identity]` - But constant | `CE₂ᵢ` is better | `ReadOnlySpan<string>` is picked |
+| `ReadOnlySpan<string>` | `ReadOnlySpan<FormattableString>` | `[$"{1}"]` | `[Identity]` | `[Interpolated String]` | `CE₂ᵢ` is better | `ReadOnlySpan<string>` is picked |
+| `ReadOnlySpan<string>` | `ReadOnlySpan<FormattableString>` | `[$"{1}", (FormattableString)null]` | Not applicable | `[Interpolated String, Identity]` | `T₁` isn't applicable | `ReadOnlySpan<FormattableString>` is picked |
 | `HashSet<short>` | `Span<long>` | `[1, 2]` | `[Implicit Constant, Implicit Constant]` | `[Implicit Numeric, Implicit Numeric]` | `CE₁ᵢ` is better | `HashSet<short>` is picked |
 | `HashSet<long>` | `Span<short>` | `[1, 2]` | `[Implicit Numeric, Implicit Numeric]` | `[Implicit Constant, Implicit Constant]` | `CE₂ᵢ` is better | `Span<short>` is picked |
 
