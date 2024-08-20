@@ -24,6 +24,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Aug 21, 2024
 
 - Open questions in `field` (Chuck/Cyrus) - https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions
+- Better conversion from collection expression (Fred) - https://github.com/dotnet/csharplang/pull/8377
 
 ## C# Language Design Notes for 2024
 
