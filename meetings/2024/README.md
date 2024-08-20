@@ -29,11 +29,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Better conversion from collection expression](https://github.com/dotnet/csharplang/pull/8348) (Fred)
 
-### Wed Aug 14, 2024
-
-- Field access in auto properties and nullable-ref-types (Cyrus/Jared)
 
 ## C# Language Design Notes for 2024
+
+### Wed Aug 14, 2024
+
+[C# Language Design Meeting for August 14th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-08-14.md)
+
+- `field` keyword
+    - `field` nullability
+    - `field` in event accessor
+    - Scenarios similar to `set;`
 
 ### Wed Jul 24, 2024
 
