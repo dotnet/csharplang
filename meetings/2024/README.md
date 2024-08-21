@@ -38,12 +38,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Open questions in `field`](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions) (Chuck/Cyrus) (more)
 - Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
 
-### Wed Aug 21, 2024
-
-- Open questions in `field` (Chuck/Cyrus) - https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions
-- Better conversion from collection expression (Fred) - https://github.com/dotnet/csharplang/pull/8377
 
 ## C# Language Design Notes for 2024
+
+### Wed Aug 21, 2024
+
+[C# Language Design Meeting for August 21st, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-08-21.md)
+
+- Better conversion from collection expression
+- `field` keyword nullability
 
 ### Mon Aug 19, 2024
 
