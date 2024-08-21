@@ -4,11 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien/Mads)
-
 ## Schedule when convenient
-
-- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
 
 ## Recurring topics
 
@@ -19,7 +15,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Aug 28, 2024
 
+- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien/Mads)
+
 ### Mon Aug 26, 2024
+
+- [Open questions in `field`](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions) (Chuck/Cyrus) (more)
+- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
 
 ### Wed Aug 21, 2024
 
