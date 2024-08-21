@@ -13,6 +13,22 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Mon Sep 30, 2024
+
+### Wed Sep 25, 2024
+
+### Mon Sep 23, 2024
+
+### Wed Sep 18, 2024
+
+### Mon Sep 16, 2024
+
+### Wed Sep 11, 2024
+
+### Mon Sep 9, 2024
+
+### Wed Sep 4, 2024
+
 ### Wed Aug 28, 2024
 
 - Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien/Mads)
