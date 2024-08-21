@@ -28,7 +28,7 @@ Given:
 - `CE₁ᵢ` are the series of conversions from `ELᵢ` to `E₁`
 - `CE₂ᵢ` are the series of conversions from `ELᵢ` to `E₂`
 
-If there is an identity conversoin from `E₁` to `E₂`, then the element conversions are as good as each other. Otherwise, the element conversions to `E₁` are better than the element conversions to `E₂` if:
+If there is an identity conversion from `E₁` to `E₂`, then the element conversions are as good as each other. Otherwise, the element conversions to `E₁` are better than the element conversions to `E₂` if:
 - For every `ELᵢ`, `CE₁ᵢ` is at least as good as `CE₂ᵢ`, and
 - There is at least one i where `CE₁ᵢ` is better than `CE₂ᵢ`
 Otherwise, neither set of element conversions is better than the other, and they are also not as good as each other.  
