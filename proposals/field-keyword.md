@@ -378,13 +378,13 @@ primary_no_array_creation_expression
 > **within all accessors and within the property expression body. Because the field is unnamed, it cannot be used in a**
 > **`nameof` expression.**
 > 
-> If the auto-property has ~~no set accessor~~ **only a semicolon-only get accessor**, the backing field is considered `readonly` ([§15.5.3](classes.md#1553-readonly-fields)).
+> If the auto-property has ~~no set accessor~~ **only a semicolon-only get accessor**, the backing field is considered `readonly` ([§15.5.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1553-readonly-fields)).
 > Just like a `readonly` field, a read-only auto-property **(without a set accessor or an init accessor)** may also be assigned to in the body of a constructor
 > of the enclosing class. Such an assignment assigns directly to the ~~read-only~~ backing field of the property.
 > 
 > **An auto-property is not allowed to only have a single semicolon-only `set` accessor without a `get` accessor.**
 > 
-> An auto-property may optionally have a *property_initializer*, which is applied directly to the backing field as a *variable_initializer* ([§17.7](arrays.md#177-array-initializers)).
+> An auto-property may optionally have a *property_initializer*, which is applied directly to the backing field as a *variable_initializer* ([§17.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/arrays.md#177-array-initializers)).
 
 The following example:
 ```csharp
