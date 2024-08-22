@@ -358,7 +358,7 @@ primary_no_array_creation_expression
 
 [§15.7.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1571-general) *Properties - General*
 
-A *property_initializer* may only be given for ~~an automatically implemented property, and~~ **a property that has a backing field that will be emitted and the property either does not have a setter, or its setter is auto-implemented. The *property_initializer*** causes the initialization of the underlying field of such properties with the value given by the *expression*.
+> A *property_initializer* may only be given for ~~an automatically implemented property, and~~ **a property that has a backing field that will be emitted and the property either does not have a setter, or its setter is auto-implemented. The *property_initializer*** causes the initialization of the underlying field of such properties with the value given by the *expression*.
 
 [§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties) *Automatically implemented properties*
 
@@ -367,7 +367,8 @@ A *property_initializer* may only be given for ~~an automatically implemented pr
 > 2. **usage of the `field` contextual keyword within the accessors or**
 >    **expression body of the property**
 > 
-> When a property is specified as an automatically implemented property, a hidden **unnamed** backing field is automatically available for the property ~~, and the accessors are implemented to read from and write to that backing field~~.
+> When a property is specified as an automatically implemented property, a hidden **unnamed** backing field is automatically
+> available for the property ~~, and the accessors are implemented to read from and write to that backing field~~.
 > **For auto-properties, any semicolon-only `get` accessor is implemented to read from, and any semicolon-only**
 > **`set` accessor to write to its backing field.**
 > 
@@ -377,7 +378,8 @@ A *property_initializer* may only be given for ~~an automatically implemented pr
 > **`nameof` expression.**
 > 
 > If the auto-property has ~~no set accessor~~ **only a semicolon-only get accessor**, the backing field is considered `readonly` ([§15.5.3](classes.md#1553-readonly-fields)).
-> Just like a `readonly` field, a read-only auto-property **(without a set accessor or an init accessor)** may also be assigned to in the body of a constructor of the enclosing class. Such an assignment assigns directly to the ~~read-only~~ backing field of the property.
+> Just like a `readonly` field, a read-only auto-property **(without a set accessor or an init accessor)** may also be assigned to in the body of a constructor
+> of the enclosing class. Such an assignment assigns directly to the ~~read-only~~ backing field of the property.
 > 
 > **An auto-property is not allowed to only have a single semicolon-only `set` accessor without a `get` accessor.**
 > 
