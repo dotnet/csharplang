@@ -362,7 +362,8 @@ primary_no_array_creation_expression
 
 [§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties) *Automatically implemented properties*
 
-> An automatically implemented property (or auto-property for short), is a non-abstract, non-extern, non-ref-valued property with ~~semicolon-only accessor bodies. Auto-properties shall have a get accessor and may optionally have a set accessor.~~ **either or both of:**
+> An automatically implemented property (or auto-property for short), is a non-abstract, non-extern, non-ref-valued
+> property with ~~semicolon-only accessor bodies. Auto-properties shall have a get accessor and may optionally have a set accessor.~~ **either or both of:**
 > 1. **an accessor with a semicolon-only body**
 > 2. **usage of the `field` contextual keyword within the accessors or**
 >    **expression body of the property**
