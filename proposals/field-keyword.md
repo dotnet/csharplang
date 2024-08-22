@@ -356,33 +356,35 @@ primary_no_array_creation_expression
 
 ### Properties
 
-[§14.7.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/classes.md#1471-general) *Properties - General*
+[§15.7.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1571-general) *Properties - General*
 
 > A *property_initializer* may only be given for ~~an automatically implemented property, and~~ **a property that has a backing field that will be emitted and the property either does not have a setter, or its setter is auto-implemented. The *property_initializer*** causes the initialization of the underlying field of such properties with the value given by the *expression*.
 
-[§14.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/classes.md#1474-automatically-implemented-properties) *Automatically implemented properties*
+[§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties) *Automatically implemented properties*
 
-> An automatically implemented property (or ***auto-property*** for short), is a non-abstract non-extern
-> property with ~~semicolon-only accessor bodies. Auto-properties must have a get accessor and can optionally~~
-> ~~have a set accessor.~~ **either or both of:**
+> An automatically implemented property (or auto-property for short), is a non-abstract, non-extern, non-ref-valued
+> property with ~~semicolon-only accessor bodies. Auto-properties shall have a get accessor and may optionally have a set accessor.~~ **either or both of:**
 > 1. **an accessor with a semicolon-only body**
 > 2. **usage of the `field` contextual keyword within the accessors or**
 >    **expression body of the property**
 > 
-> When a property is specified as an ~~automatically implemented property~~ **auto-property**, a hidden **unnamed** backing field is automatically
+> When a property is specified as an automatically implemented property, a hidden **unnamed** backing field is automatically
 > available for the property ~~, and the accessors are implemented to read from and write to that backing field~~.
 > **For auto-properties, any semicolon-only `get` accessor is implemented to read from, and any semicolon-only**
 > **`set` accessor to write to its backing field.**
 > 
+> ~~The hidden backing field is inaccessible, it can be read and written only through the automatically implemented property accessors, even within the containing type.~~
 > **The backing field can be referenced directly using the `field` keyword**
 > **within all accessors and within the property expression body. Because the field is unnamed, it cannot be used in a**
 > **`nameof` expression.**
 > 
-> If the auto-property has ~~no set accessor~~ **only a semicolon-only get accessor**, the backing field is considered `readonly` ([§14.5.3](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/classes.md#1453-readonly-fields)).
-> Just like a `readonly` field, a getter-only auto property **(without a set accessor or an init accessor)** can also be assigned to in the body of a constructor
-> of the enclosing class. Such an assignment assigns directly to the ~~readonly~~ backing field of the property.
+> If the auto-property has ~~no set accessor~~ **only a semicolon-only get accessor**, the backing field is considered `readonly` ([§15.5.3](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1553-readonly-fields)).
+> Just like a `readonly` field, a read-only auto-property **(without a set accessor or an init accessor)** may also be assigned to in the body of a constructor
+> of the enclosing class. Such an assignment assigns directly to the ~~read-only~~ backing field of the property.
 > 
 > **An auto-property is not allowed to only have a single semicolon-only `set` accessor without a `get` accessor.**
+> 
+> An auto-property may optionally have a *property_initializer*, which is applied directly to the backing field as a *variable_initializer* ([§17.7](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/arrays.md#177-array-initializers)).
 
 The following example:
 ```csharp
@@ -568,11 +570,21 @@ Some options for the name of the feature:
 Should `field` be a keyword in a property initializer and bind to the backing field?
 
 ```csharp
-class MyClass
+class A
 {
-    private const int field = -1;
+    const int field = -1;
 
-    public object Property { get; } = field; // bind to const (ok) or backing field (error)?
+    object P1 { get; } = field; // bind to const (ok) or backing field (error)?
+}
+```
+
+Are there useful scenarios for referencing the backing field in the initializer?
+
+```csharp
+class B
+{
+    object P2 { get; } = (field = 2);        // error: initializer cannot reference instance member
+    static object P3 { get; } = (field = 3); // ok, but useful?
 }
 ```
 
@@ -637,13 +649,13 @@ struct S
 }
 ```
 
-When the synthesized backing field is marked `initonly` in metadata, and an error is reported if `field` is modified other than in an initializer or constructor.
+When the backing field is considered *read-only*, the field emitted to metadata is marked `initonly`, and an error is reported if `field` is modified other than in an initializer or constructor.
 
 **Recommendation**: The synthesized backing field is *read-only* when the containing type is a `struct` and the property or containing type is declared `readonly`.
 
 ### `[Conditional]` code
 
-Should the synthesized field be generated when `field` is used only in omitted calls to [*conditional methods*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/attributes.md#21532-conditional-methods)?
+Should the synthesized field be generated when `field` is used only in omitted calls to [*conditional methods*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/attributes.md#22532-conditional-methods)?
 
 For instance, should a backing field be generated for the following in a non-DEBUG build?
 ```csharp
