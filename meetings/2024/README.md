@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [ref ternary operator nullability suppressions](https://github.com/dotnet/csharplang/issues/8379) (Jan/Julien)
+
 ## Schedule when convenient
 
 ## Recurring topics
