@@ -653,6 +653,28 @@ When the backing field is considered *read-only*, the field emitted to metadata 
 
 **Recommendation**: The synthesized backing field is *read-only* when the containing type is a `struct` and the property or containing type is declared `readonly`.
 
+### Readonly context and `set`
+
+Should a `set` accessor be allowed in a `readonly` context for a property that uses `field`?
+
+```csharp
+readonly struct S1
+{
+    readonly object _p1;
+    object P1 { get => _p1; set { } }   // ok
+    object P2 { get; set; }             // error: auto-prop in readonly struct must be readonly
+    object P3 { get => field; set { } } // ok?
+}
+
+struct S2
+{
+    readonly object _p1;
+    readonly object P1 { get => _p1; set { } }   // ok
+    readonly object P2 { get; set; }             // error: auto-prop with set marked readonly
+    readonly object P3 { get => field; set { } } // ok?
+}
+ ```
+
 ### `[Conditional]` code
 
 Should the synthesized field be generated when `field` is used only in omitted calls to [*conditional methods*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/attributes.md#22532-conditional-methods)?
