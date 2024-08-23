@@ -358,7 +358,7 @@ primary_no_array_creation_expression
 
 [§15.7.1](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1571-general) *Properties - General*
 
-> A *property_initializer* may only be given for ~~an automatically implemented property, and~~ **a property that has a backing field that will be emitted and the property either does not have a setter, or its setter is auto-implemented. The *property_initializer*** causes the initialization of the underlying field of such properties with the value given by the *expression*.
+> A *property_initializer* may only be given for ~~an automatically implemented property, and~~ **a property that has a backing field that will be emitted. The *property_initializer*** causes the initialization of the underlying field of such properties with the value given by the *expression*.
 
 [§15.7.4](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/classes.md#1574-automatically-implemented-properties) *Automatically implemented properties*
 
