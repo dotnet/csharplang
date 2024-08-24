@@ -20,6 +20,11 @@ In these cases by now you always have to create an instance field and write the 
 
 - **Full accessor**: This is an accessor that has a body. The implementation is not provided by the compiler, though the backing storage may still be (as in the example `set => field = value;`).
 
+- **Field-backed property**: This is either a property using the `field` keyword within an accessor body, or an auto property.
+
+- **Backing field**: This is the variable denoted by the `field` keyword in a property's accessors, which is also implicitly read or written in automatically implemented accessors (`get;`, `set;`, or `init;`).
+
+
 ## Detailed design
 
 For properties with an `init` accessor, everything that applies below to `set` would apply instead to the `init` accessor.
@@ -251,22 +256,9 @@ public class C
 
 The following nullability rules will apply not just to properties that use the `field` keyword, but also to existing auto properties.
 
-#### Terms
-
-A property is a *field-backed property* if it meets any of the following conditions:
-1. It contains any automatically implemented accessors (`get;`/`set;`/`init;`).
-2. It uses the `field` keyword within any accessor bodies.
-
-Some examples of *field-backed properties* include:
-```cs
-public string Prop1 { get; set; }
-public string Prop2 { get => field; set; }
-public string? Prop3 { get => field; }
-```
-
-The variable denoted by the `field` keyword in a property's accessors is the *backing field* of that property.
-
 #### Nullability of the *backing field*
+
+See [Glossary](#glossary) for definitions of new terms.
 
 The *backing field* has the same type as the property. However, its nullable annotation may differ from the property. To determine this nullable annotation, we introduce the concept of *null-resilience*. *Null-resilience* intuitively means that the property's `get` accessor preserves null-safety even when the field contains the `default` value for its type.
 
