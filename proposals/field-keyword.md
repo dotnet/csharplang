@@ -230,74 +230,110 @@ public struct S
 
 ### Nullability
 
-When `{ get; }` is written as `{ get => field; }`, or `{ get; set; }` is written as `{ get => field; set => field = value; }`, a similar warning should be produced when a non-nullable property is not initialized:
+A principle of the the Nullable Reference Types feature was to understand existing idiomatic coding patterns in C# and to require as little ceremony as possible around those patterns. The `field` keyword proposal enables simple, idiomatic patterns to address widely asked-for scenarios, such as lazily initialized properties. It's important for the Nullable Reference Types to mesh well with these new coding patterns.
+
+Goals:
+
+- A reasonable level of null-safety should be ensured for various usage patterns of the `field` keyword feature.
+
+- Patterns that use the `field` keyword should feel as though they've always been part of the language. Avoid making the user jump through hoops to enable Nullable Reference Types in code that is perfectly idiomatic for the `field` keyword feature.
+
+One of the key scenarios is lazily initialized properties:
+
+```cs
+public class C
+{
+    public C() { } // It would be undesirable to warn about 'Prop' being uninitialized here
+
+    string Prop => field ??= GetPropValue();
+}
+```
+
+The following nullability rules will apply not just to properties that use the `field` keyword, but also to existing auto properties.
+
+#### Terms
+
+A property is a *field-backed property* if it meets any of the following conditions:
+1. It contains any automatically implemented accessors (`get;`/`set;`/`init;`).
+2. It uses the `field` keyword within any accessor bodies.
+
+Some examples of *field-backed properties* include:
+```cs
+public string Prop1 { get; set; }
+public string Prop2 { get => field; set; }
+public string? Prop3 { get => field; }
+```
+
+The variable denoted by the `field` keyword in a property's accessors is the *backing field* of that property.
+
+#### Nullability of the *backing field*
+
+The *backing field* has the same type as the property. However, its nullable annotation may differ from the property. To determine this nullable annotation, we introduce the concept of *null-resilience*. *Null-resilience* intuitively means that the property's `get` accessor preserves null-safety even when the field contains the `default` value for its type.
+
+A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its `get` accessor.
+- For the purposes of this analysis, `field` is temporarily assumed to have *annotated* nullability, e.g. `string?`. This causes `field` to have *maybe-null* or *maybe-default* initial state in the `get` accessor, depending on its type.
+- Then, if nullable analysis of the getter yields no nullable warnings, the property is *null-resilient*. Otherwise, it is not *null-resilient*.
+- If the property does not have a get accessor, it is (vacuously) null-resilient.
+- If the get accessor is auto-implemented, the property is not null-resilient.
+
+The nullability of the backing field is determined as follows:
+- If the field has nullability attributes such as `[field: MaybeNull]`, `AllowNull`, `NotNull`, or `DisallowNull`, then the field's nullable annotation is the same as the property's nullable annotation.
+    - This is because when the user starts applying nullability attributes to the field, we no longer want to infer anything, we just want the nullability to be *what the user said*.
+- If the containing property has ***oblivious*** or ***annotated*** nullability, then the backing field has the same nullability as the property.
+- If the containing property has *not-annotated* nullability (e.g. `string` or `T`) or has the `[NotNull]` attribute, and the property is ***null-resilient***, then the backing field has ***annotated*** nullability.
+- If the containing property has *not-annotated* nullability (e.g. `string` or `T`) or has the `[NotNull]` attribute, and the property is ***not null-resilient***, then the backing field has ***not-annotated*** nullability.
+
+#### Constructor analysis
+
+Currently, an auto property is treated very similarly to an ordinary field in [nullable constructor analysis](nullable-constructor-analysis.md). We extend this treatment to *field-backed properties*, by treating every *field-backed property* as a proxy to its backing field.
+
+We update the following spec language from [An alternative approach (TODO rename that section?)](nullable-constructor-analysis.md#an-alternative-approach) to accomplish this:
+
+> At each explicit or implicit 'return' in a constructor, we give a warning for each member whose flow state is incompatible with its annotations and nullability attributes. **If the member is a field-backed property, the nullable annotation of the backing field is used for this check. Otherwise, the nullable annotation of the member itself is used.** A reasonable proxy for this is: if assigning the member to itself at the return point would produce a nullability warning, then a nullability warning will be produced at the return point.
+
+Note that this is essentially a constrained interprocedural analysis. We anticipate that in order to analyze a constructor, it will be necessary to do binding and "null-resilience" analysis on all applicable get accessors in the same type, which use the `field` contextual keyword and have *not-annotated* nullability. We speculate that this is not prohibitively expensive because getter bodies are usually not very complex, and that the "null-resilience" analysis only needs to be performed once regardless of how many constructors are in the type.
+
+#### Setter analysis
+
+For simplicity, we use the terms "setter" and "set accessor" to refer to either a `set` or `init` accessor.
+
+There is a need to check that setters of *field-backed properties* actually initialize the backing field.
 
 ```cs
 class C
 {
-    // ⚠️ CS8618: Non-nullable property 'P' must contain a
-    // non-null value when exiting constructor.
-    public string P { get => field; set => field = value; }
-}
-```
-
-No warning should be produced if the property is initialized to a non-null value via constructor assignment or property initializer:
-
-```cs
-class C
-{
-    public C() { P = ""; }
-
-    public string P { get => field; set => field = value; }
-}
-```
-
-```cs
-class C
-{
-    public string P { get => field; set => field = value; } = "";
-}
-```
-
-#### Open question: nullability of `field`
-
-In the same vein as how `var` infers as nullable for reference types, the `field` type is the nullable type of the property whenever the property's type is not a value type. Otherwise, `field ??` would appear to be followed by dead code, and it avoids producing a misleading warning in the following example:
-
-```cs
-public string AmbientValue
-{
-    get => field ?? parent.AmbientValue;
-    set
+    string Prop
     {
-        if (value == parent.AmbientValue)
-            field = null; // No warning here. Resume following the parent's value.
-        else
-            field = value; // Stop following the parent's value
+        get => field;
+
+        // getter is not null-resilient, so `field` is not-annotated.
+        // We should warn here that `field` may be null when exiting.
+        set { }
+    }
+
+    public C()
+    {
+        F = "a"; // ok
+    }
+
+    public static void Main()
+    {
+        new C().F.ToString(); // NRE at runtime
     }
 }
 ```
 
-`var` was designed to declare nullability so that subsequent assignments to the variable could be nullable, due to established patterns in C#. It's expected that the same rationale would apply to property backing fields.
+The initial flow state of the *backing field* in the setter of a *field-backed property* is determined as follows:
+- If the property has an initializer, then the initial flow state is the same as the flow state of the property after visiting the initializer.
+- Otherwise, the initial flow state is the same as the flow state given by `field = default;`.
 
-To land in this sweet spot implicitly, without having to write an attribute each time, nullability analysis will combine an inherent nullability of the field with the behavior of `[field: NotNull]`. This allows maybe-null assignments without warning, which is desirable as shown above, while simultaneously allowing a scenario like `=> field.Trim();` without requiring an intervention to silence a warning that `field` could be null. Making sure `field` has been assigned is already covered by the warning that ensures non-nullable properties are assigned by the end of each constructor.
+At each explicit or implicit 'return' in the setter, a warning is reported if the flow state of the *backing field* is incompatible with its annotations and nullability attributes.
 
-This sweet spot does come with the downside that there would be no warning in this situation:
+#### Remarks
 
-```cs
-public string AmbientValue
-{
-    get => field; // No warning, but could return null!
-    set
-    {
-        if (value == parent.AmbientValue)
-            field = null;
-        else
-            field = value;
-    }
-}
-```
+This formulation is intentionally very similar to ordinary fields in constructors. Essentially, because only the property accessors can actually refer to the backing field, the setter is treated as a "mini-constructor" for the backing field.
 
-Open question: Should flow analysis combine the maybe-null end state for `field` from the setter with the "depends on nullness of `field`" for the getter's return, enabling a warning in the scenario above?
+Much like with ordinary fields, we usually know the property was initialized in the constructor because it was set, but not necessarily. Simply returning within a branch where `Prop != null` was true is also good enough for our constructor analysis, since we understand that untracked mechanisms may have been used to set the property.
 
 ### `nameof`
 
@@ -551,11 +587,15 @@ class MyClass
 
 Recommendation taken. `field` is *not* a keyword within an event accessor, and no backing field is generated.
 
-## Open LDM questions
-
 ### Nullability of `field`
 
 Should the proposed nullability of `field` be accepted? See the [Nullability](#nullability) section, and the open question within.
+
+#### Answer
+
+General proposal is adopted. Specific behavior still needs more review.
+
+## Open LDM questions
 
 ### Feature name
 
