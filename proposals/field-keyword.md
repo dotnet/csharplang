@@ -327,6 +327,8 @@ This formulation is intentionally very similar to ordinary fields in constructor
 
 Much like with ordinary fields, we usually know the property was initialized in the constructor because it was set, but not necessarily. Simply returning within a branch where `Prop != null` was true is also good enough for our constructor analysis, since we understand that untracked mechanisms may have been used to set the property.
 
+Alternatives were considered; see the [Nullability alternatives](#nullability-alternatives) section.
+
 ### `nameof`
 
 In places where `field` is a keyword, `nameof(field)` will fail to compile ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#usage-in-nameof)), like `nameof(nint)`. It is not like `nameof(value)`, which is the thing to use when property setters throw ArgumentException as some do in the .NET core libraries. In contrast, `nameof(field)` has no expected use cases.
@@ -463,6 +465,48 @@ public class Point
     private static string ComputeValue() { /*...*/ }
 }
 ```
+
+## Alternatives
+
+### Nullability alternatives
+
+In addition to the *null-resilience* approach outlined in the [Nullability](#nullability) section, the working group suggested the following alternatives for the LDM's consideration:
+
+#### Do nothing
+
+We could introduce no special behavior at all here. In effect:
+- Treat a field-backed property the same way auto-properties are treated today--must be initialized in constructor except when marked required, etc.
+- No special treatment of the field variable when analyzing property accessors. It is simply a variable with the same type and nullability as the property.
+
+Note that this would result in nuisance warnings for "lazy property" scenarios, in which case users would likely need to assign `null!` or similar to silence constructor warnings.  
+A "sub-alternative" we can consider is to also completely ignore properties using `field` keyword for nullable constructor analysis. In that case, there would be no warnings anywhere about the user needing to initialize anything, but also no nuisance for the user, regardless of what initialization pattern they may be using.
+
+Because we are only planning to ship the `field` keyword feature under the Preview LangVersion in .NET 9, we expect to have some ability to change the nullable behavior for the feature in .NET 10. Therefore, we could consider adopting a "lower-cost" solution like this one in the short term, and growing up to one of the more complex solutions in the long term.
+
+#### `field`-targeted nullability attributes
+
+We could introduce the following defaults, achieving a reasonable level of null safety, without involving any interprocedural analysis at all:
+1. The `field` variable always has the same nullable annotation as the property.
+2. Nullability attributes `[field: MaybeNull, AllowNull]` etc. can be used to customize the nullability of the backing field.
+3. field-backed properties are checked for initialization in constructors based on the field's nullable annotation and attributes.
+4. setters in field-backed properties check for initialization of `field` similarly to constructors.
+
+This would mean the "little-l lazy scenario" would look like this instead:
+
+```cs
+class C
+{
+    public C() { } // no need to warn about initializing C.Prop, as the backing field is marked nullable using attributes.
+
+    [field: AllowNull, MaybeNull]
+    public string Prop => field ??= GetPropValue();
+}
+```
+
+One reason we shied away from using nullability attributes here is that the ones we have are really oriented around describing inputs and outputs of signatures. They are cumbersome to use to describe the nullability of long-lived variables.
+- In practice, `[field: MaybeNull, AllowNull]` is required to make the field behave "reasonably" as a nullable variable, which gives maybe-null initial flow state, and allows possible null values to be written to it. This feels cumbersome to ask users to do for relatively common "little-l lazy" scenarios.
+- If we pursued this approach, we would consider adding a warning when `[field: AllowNull]` is used, suggesting to also add `MaybeNull`. This is because AllowNull by itself doesn't do what users need out of a nullable variable: it assumes the field is initially not-null when we never saw anything write to it yet.
+- We could also consider adjusting the behavior of `[field: MaybeNull]` on the `field` keyword, or even fields in general, to allow nulls to also be written to the variable, as if `AllowNull` were implicitly also present.
 
 ## Answered LDM questions
 
