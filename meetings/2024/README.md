@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [ref ternary operator nullability suppressions](https://github.com/dotnet/csharplang/issues/8379) (Jan/Julien)
-
 ## Schedule when convenient
 
 ## Recurring topics
@@ -25,20 +23,26 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Sep 16, 2024
 
+- C# 14
+
 ### Wed Sep 11, 2024
 
 ### Mon Sep 9, 2024
 
+- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien/Mads)
+
 ### Wed Sep 4, 2024
+
+- Triage
 
 ### Wed Aug 28, 2024
 
-- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien/Mads)
+- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
+- [ref ternary operator nullability suppressions](https://github.com/dotnet/csharplang/issues/8379) (Jan/Julien)
 
 ### Mon Aug 26, 2024
 
 - [Open questions in `field`](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions) (Chuck/Cyrus) (more)
-- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
 
 
 ## C# Language Design Notes for 2024
