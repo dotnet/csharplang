@@ -2,7 +2,9 @@
 
 This proposal is intended to resolve a few of the outstanding problems with nullable constructor analysis.
 
-## How it works currently
+This proposal was accepted on [2020-07-27](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-07-27.md#improved-nullable-analysis-in-constructors).
+
+## Problems with the definite-assignment based approach
 
 Nullable analysis of constructors works by essentially running a definite assignment pass and reporting a warning if a constructor does not initialize a non-nullable reference type member (for example: a field, auto-property, or field-like event) in all code paths. The constructor is otherwise treated like an ordinary method for analysis purposes. This approach comes with a few problems.
 
@@ -43,7 +45,7 @@ public class C
 }
 ```
 
-## An alternative approach
+## Proposed approach
 
 We can address this by instead taking an approach similar to `[MemberNotNull]` analysis, where fields are marked maybe-null and a warning is given if we ever exit the method when a field is still in a maybe-null state. We can do this by introducing the following rules:
 
