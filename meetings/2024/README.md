@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- Params collection [updates](https://github.com/dotnet/csharplang/pull/8393) (Fred/Chuck/Aleksey)
+
 ## Schedule when convenient
 
 ## Recurring topics
