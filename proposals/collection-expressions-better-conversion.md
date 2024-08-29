@@ -43,6 +43,15 @@ Conversion comparisons are made using better conversion from expression if `ELáµ
 
 Otherwise, neither collection type is better, and the result is ambiguous.
 
+> [!NOTE]
+> These rules mean that methods that expose overloads that take different element types and without a conversion between the collection types are ambiguous for empty collection expressions. As an example:
+> ```cs
+> public void M(ReadOnlySpan<int> ros) { ... }
+> public void M(Span<int?> span) { ... }
+>
+> M([]); // Ambiguous
+> ```
+
 ### Scenarios:
 
 In plain English, the collection types themselves must be either the same, or unambiguously better (ie, `List<T>` and `List<T>` are the same, `List<T>` is unambiguously better than `IEnumerable<T>`, and `List<T>` and `HashSet<T>` cannot be compared), and
