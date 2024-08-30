@@ -300,7 +300,7 @@ class Program
 }
 ```
 
-Given that we prioritize element type over all else, this seems reasonable; there's nothing to tell the langauge whether the user would prefer `int?`
+Given that we prioritize element type over all else, this seems reasonable; there's nothing to tell the language whether the user would prefer `int?`
 over `int` in this scenario.
 
 ### Dynamic Binding
