@@ -305,12 +305,12 @@ class C
 
     public C()
     {
-        F = "a"; // ok
+        Prop = "a"; // ok
     }
 
     public static void Main()
     {
-        new C().F.ToString(); // NRE at runtime
+        new C().Prop.ToString(); // NRE at runtime
     }
 }
 ```
