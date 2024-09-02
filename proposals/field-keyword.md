@@ -631,16 +631,6 @@ Should the proposed nullability of `field` be accepted? See the [Nullability](#n
 
 General proposal is adopted. Specific behavior still needs more review.
 
-## Open LDM questions
-
-### Feature name
-
-Some options for the name of the feature:
-1. semi-auto properties
-1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
-1. field-backed properties
-1. field keyword
-
 ### `field` in property initializer
 
 Should `field` be a keyword in a property initializer and bind to the backing field?
@@ -743,6 +733,16 @@ When the backing field is considered *read-only*, the field emitted to metadata 
 #### Answer
 
 Recommendation is accepted.
+
+## Open LDM questions
+
+### Feature name
+
+Some options for the name of the feature:
+1. semi-auto properties
+1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
+1. field-backed properties
+1. field keyword
 
 ### Readonly context and `set`
 
