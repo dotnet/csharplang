@@ -702,7 +702,6 @@ partial class C
 
     public partial int Prop2 { get; set; }
     public partial int Prop2 { get; set => field = value; } // what about this? will there be disagreement about which is the "best" style?
-    
 
     public partial int Prop3 { get; }
     public partial int Prop3 { get => field; } // it will only be valid to use at most 1 auto-accessor, when a second accessor is manually implemented.
