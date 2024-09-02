@@ -666,6 +666,10 @@ class B
 
 In the example above, binding to the backing field should result in an error: "initializer cannot reference non-static field".
 
+#### Answer
+
+`field` should not be a keyword in a property initializer. It will continue to bind (or fail to bind) as an identifier.
+
 ### Interaction with partial properties
 
 #### Initializers
@@ -686,6 +690,10 @@ partial class C
 - We think it will be common for generators to use `field` whenever a backing field of the same type is needed in the implementation. This is in part because generators often want to enable their users to use `[field: ...]` targeted attributes on the property definition part. Using the `field` keyword saves the generator implementer the trouble of "forwarding" such attributes to some generated field and suppressing the warnings on the property. Those same generators are likely to also want to allow the user to specify an initial value for the field.
 
 **Recommendation**: Permit an initializer on either part of a partial property when the implementation part uses `field`. Report an error if both parts have an initializer.
+
+#### Answer
+
+Allow `field` in implementing declaration and allow initializer in defining declaration (which compels implementation to be field-backed).
 
 #### Auto-accessors
 
@@ -709,6 +717,10 @@ partial class C
 
 **Recommendation**: Disallow auto-accessors in partial property implementations, because the limitations around when they would be usable are more confusing to follow than the benefit of allowing them.
 
+#### Answer
+
+Allow auto-implemented accessors in partial property implementations.
+
 ### Readonly field
 
 When should the synthesized backing field be considered *read-only*?
@@ -727,6 +739,10 @@ struct S
 When the backing field is considered *read-only*, the field emitted to metadata is marked `initonly`, and an error is reported if `field` is modified other than in an initializer or constructor.
 
 **Recommendation**: The synthesized backing field is *read-only* when the containing type is a `struct` and the property or containing type is declared `readonly`.
+
+#### Answer
+
+Recommendation is accepted.
 
 ### Readonly context and `set`
 
