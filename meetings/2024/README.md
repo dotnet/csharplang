@@ -19,7 +19,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Sep 23, 2024
 
-### Wed Sep 18, 2024
+- *Design review* (no notes)
 
 ### Mon Sep 16, 2024
 
