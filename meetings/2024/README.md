@@ -60,12 +60,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
 - [ref ternary operator nullability suppressions](https://github.com/dotnet/csharplang/issues/8379) (Jan/Julien)
 
+## C# Language Design Notes for 2024
+
 ### Mon Aug 26, 2024
 
-- [Open questions in `field`](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions) (Chuck/Cyrus) (more)
+[C# Language Design Meeting for August 26th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-08-26.md)
 
-
-## C# Language Design Notes for 2024
+- `field` keyword open questions
+    - `field` in property initializers
+    - Interaction with partial properties
+    - `readonly` field
 
 ### Wed Aug 21, 2024
 
