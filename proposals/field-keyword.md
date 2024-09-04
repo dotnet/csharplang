@@ -658,7 +658,7 @@ In the example above, binding to the backing field should result in an error: "i
 
 #### Answer
 
-`field` should not be a keyword in a property initializer. It will continue to bind (or fail to bind) as an identifier.
+We will bind the initializer as in previous versions of C#. We won't put the backing field in scope, nor will we prevent referencing other members named `field`.
 
 ### Interaction with partial properties
 
@@ -683,7 +683,7 @@ partial class C
 
 #### Answer
 
-Allow `field` in implementing declaration and allow initializer in defining declaration (which compels implementation to be field-backed).
+Recommendation accepted. Either declaring or implementing property locations can use an initializer, but not both at the same time.
 
 #### Auto-accessors
 
@@ -709,7 +709,7 @@ partial class C
 
 #### Answer
 
-Allow auto-implemented accessors in partial property implementations.
+At least one implementing accessor must be manually implemented, but the other accessor can be automatically implemented.
 
 ### Readonly field
 
