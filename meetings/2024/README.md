@@ -57,12 +57,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Triage
 
+## C# Language Design Notes for 2024
+
 ### Wed Aug 28, 2024
 
-- Consider [Block-bodied switch expression arms](https://github.com/dotnet/csharplang/issues/3037) (Fred)
-- [ref ternary operator nullability suppressions](https://github.com/dotnet/csharplang/issues/8379) (Jan/Julien)
+[C# Language Design Meeting for August 28th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-08-28.md)
 
-## C# Language Design Notes for 2024
+- Nullable in `ref` ternaries
+- Block-bodied switch expression arms
 
 ### Mon Aug 26, 2024
 
