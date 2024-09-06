@@ -6,6 +6,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [yield in try / catch]: https://github.com/dotnet/csharplang/issues/8414
+
 ## Recurring topics
 
 - *Triage championed features and milestones*
