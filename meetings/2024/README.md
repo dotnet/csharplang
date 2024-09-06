@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - yield in try / catch: https://github.com/dotnet/csharplang/issues/8414
+- Triage (working set)
 
 ## Recurring topics
 
@@ -53,11 +54,24 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien/Mads)
 
+## C# Language Design Notes for 2024
+
 ### Wed Sep 4, 2024
 
-- Triage
+[C# Language Design Meeting for September 6th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-06.md)
 
-## C# Language Design Notes for 2024
+- Triage (no milestone)
+    - Type inference using method group natural type
+    - Collection Expressions Next (C#13 and beyond)
+    - Dictionary expressions
+    - Extending patterns to "as"
+    - `params in` parameters
+- Triage (working set)
+    - Only Allow Lexical Keywords in the Language
+    - Permit variable declarations under disjunctive patterns
+    - CallerCharacterNumberAttribute
+    - `Task<T>` nullability covariance
+    - Nullable analysis of LINQ queries
 
 ### Wed Aug 28, 2024
 
