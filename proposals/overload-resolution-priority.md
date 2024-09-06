@@ -41,12 +41,12 @@ follows (change in **bold**):
 
 > Once the candidate function members and the argument list have been identified, the selection of the best function member is the same in all cases:
 > 
-> - First, the set of candidate function members is reduced to those function members that are applicable with respect to the given argument list ([§12.6.4.2](expressions.md#12642-applicable-function-member)). If this reduced set is empty, a compile-time error occurs.
+> - First, the set of candidate function members is reduced to those function members that are applicable with respect to the given argument list ([§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12642-applicable-function-member)). If this reduced set is empty, a compile-time error occurs.
 > - **Then, the reduced set of candidate members is grouped by declaring type. Within each group:**
 >     - **Candidate function members are ordered by ***overload_resolution_priority***. If the member is an override, the ***overload_resolution_priority*** comes from the least-derived declaration of that member.**
 >     - **All members that have a lower ***overload_resolution_priority*** than the highest found within its declaring type group are removed.**
 > - **The reduced groups are then recombined into the final set of applicable candidate function members.**
-> - Then, the best function member from the set of applicable candidate function members is located. If the set contains only one function member, then that function member is the best function member. Otherwise, the best function member is the one function member that is better than all other function members with respect to the given argument list, provided that each function member is compared to all other function members using the rules in [§12.6.4.3](expressions.md#12643-better-function-member). If there is not exactly one function member that is better than all other function members, then the function member invocation is ambiguous and a binding-time error occurs.
+> - Then, the best function member from the set of applicable candidate function members is located. If the set contains only one function member, then that function member is the best function member. Otherwise, the best function member is the one function member that is better than all other function members with respect to the given argument list, provided that each function member is compared to all other function members using the rules in [§12.6.4.3](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12643-better-function-member). If there is not exactly one function member that is better than all other function members, then the function member invocation is ambiguous and a binding-time error occurs.
 
 As an example, this feature would cause the following code snippet to print "Span", rather than "Array":
 
@@ -353,7 +353,7 @@ as **follows**:
 >
 > The accessibility domain of a predefined type (such as `object`, `int`, or `double`) is unlimited.
 >
-> The accessibility domain of a top-level unbound type `T` ([§8.4.4](types.md#844-bound-and-unbound-types)) that is declared in a program `P` is defined as follows:
+> The accessibility domain of a top-level unbound type `T` ([§8.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/types.md#844-bound-and-unbound-types)) that is declared in a program `P` is defined as follows:
 > 
 > - **If `T` is marked with `BinaryCompatOnlyAttribute`, the accessibility domain of `T` is completely inaccessible to the program text of `P` and any program that references `P`.**
 > - If the declared accessibility of `T` is public, the accessibility domain of `T` is the program text of `P` and any program that references `P`.
