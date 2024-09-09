@@ -84,7 +84,7 @@ This code will output:
 2
 ```
 
-The `catch` block will go through the same rewriting as an `await` inisde of a `catch` block. That will be observable when the `throw;` statement is used to rethrow an exception as it will reset the stack trace vs. perserving it (just as it is for an `async` method).
+The `catch` block will go through the same rewriting as an `await` inside of a `catch` block. That will be observable when the `throw;` statement is used to rethrow an exception as it will reset the stack trace vs. preserving it (just as it is for an `async` method).
 
 The `yield` statement will not be allowed inside a `catch` when there is an associated or nested `finally` block. That would allow `yield` to be executed in the `Dispose` method which is not supported ([more details][catch-finally]).
 
