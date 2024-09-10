@@ -51,6 +51,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Sep 11, 2024
 
 - Params collection [updates](https://github.com/dotnet/csharplang/pull/8393) (Fred/Chuck/Aleksey)
+- First class Span [breaking changes](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#breaking-changes) (Jan)
 
 ## C# Language Design Notes for 2024
 
