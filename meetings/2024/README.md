@@ -44,7 +44,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - *Design review* (no notes)
 
-### Mon Sep 16, 2024
+### Wed Sep 18, 2024
 
 - C# 14
 
