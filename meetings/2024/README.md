@@ -48,12 +48,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - C# 14
 
+## C# Language Design Notes for 2024
+
 ### Wed Sep 11, 2024
 
-- Params collection [updates](https://github.com/dotnet/csharplang/pull/8393) (Fred/Chuck/Aleksey)
-- First class Span [breaking changes](https://github.com/dotnet/csharplang/blob/main/proposals/first-class-span-types.md#breaking-changes) (Jan)
+[C# Language Design Meeting for September 11th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-11.md)
 
-## C# Language Design Notes for 2024
+- Better conversion from collection expression and `params` collections
+- First-class span types
+    - `Reverse`
+    - New ambiguities
+    - Covariant arrays
 
 ### Wed Sep 4, 2024
 
