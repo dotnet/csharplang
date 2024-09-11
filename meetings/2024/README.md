@@ -57,7 +57,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Sep 4, 2024
 
-[C# Language Design Meeting for September 6th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-06.md)
+[C# Language Design Meeting for September 4th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-04.md)
 
 - Triage (no milestone)
     - Type inference using method group natural type
