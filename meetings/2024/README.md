@@ -4,8 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien/Mads)
-- Short and long term solutions for [field keyword nullability](https://github.com/dotnet/csharplang/issues/8425) (Rikki)
+- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien)
+- C# 14 (Mads)
 
 ## Schedule when convenient
 
@@ -47,7 +47,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Sep 18, 2024
 
-- C# 14
+- Short and long term solutions for [field keyword nullability](https://github.com/dotnet/csharplang/issues/8425) (Rikki)
 
 ## C# Language Design Notes for 2024
 
