@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule ASAP
 
 - Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien/Mads)
+- Short and long term solutions for [field keyword nullability](https://github.com/dotnet/csharplang/issues/8425) (Rikki)
 
 ## Schedule when convenient
 
