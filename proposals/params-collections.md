@@ -162,12 +162,12 @@ In case the parameter type sequences `{P₁, P₂, ..., Pᵥ}` and `{Q₁, Q₂,
 - If for at least one parameter `Mᵥ` uses the ***better parameter-passing choice*** ([§12.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/expressions.md#12644-better-parameter-passing-mode)) than the corresponding parameter in `Mₓ` and none of the parameters in `Mₓ` use the better parameter-passing choice than `Mᵥ`, `Mᵥ` is better than `Mₓ`.
 - **Otherwise, if both methods have params collections and are applicable only in their expanded forms then
    `Mᵢ` is better than `Mₑ` if the same set of arguments corresponds to the collection elements for both methods, and one of the following holds
-   (this corresponds to https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution):**
-  - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>`, and params collection of `Mₑ` is `System.Span<Eₑ>`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
+   (this corresponds to https://github.com/dotnet/csharplang/blob/main/proposals/collection-expressions-better-conversion.md):**
+  - **both params collections are not *span_type*s, and an implicit conversion exists from params collection of `Mᵢ` to params collection of `Mₑ`**  
+  - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>`, and params collection of `Mₑ` is `System.Span<Eₑ>`, and an identity conversion exists from `Eᵢ` to `Eₑ`**
   - **params collection of `Mᵢ` is `System.ReadOnlySpan<Eᵢ>` or `System.Span<Eᵢ>`, and params collection of `Mₑ` is
     an *[array_or_array_interface__type](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#overload-resolution)*
-    with *element type* `Eₑ`, and an implicit conversion exists from `Eᵢ` to `Eₑ`**
-  - **both params collections are not *span_type*s, and an implicit conversion exists from params collection of `Mᵢ` to params collection of `Mₑ`**  
+    with *element type* `Eₑ`, and an identity conversion exists from `Eᵢ` to `Eₑ`**
 - Otherwise, no function member is better.
 
 The reason why the new tie-breaking rule is placed at the end of the list is the last sub item
@@ -201,7 +201,7 @@ class Program
 {
     static void Test1()
     {
-        M1(['1', '2', '3']); // Span overload is used
+        M1(['1', '2', '3']); // IEnumerable<char> overload is used because `char` is an exact match
         M1('1', '2', '3');   // IEnumerable<char> overload is used because `char` is an exact match
     }
 
@@ -227,7 +227,7 @@ class Program
 
     static void Test3()
     {
-        M3("3", ["4"]); // Span overload is used, better on the first argument conversion, none is better on the second
+        M3("3", ["4"]); // Ambiguity, better-ness of argument conversions goes in opposite directions.
         M3("3", "4");   // Ambiguity, better-ness of argument conversions goes in opposite directions.
                         // Since parameter types are different ("object, string" vs. "string, object"), tie-breaking rules do not apply
     }
@@ -260,6 +260,48 @@ It doesn't feel reasonable to "compare" collections that are built from differen
 
 >This section was reviewed at [LDM](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-29.md#better-function-member-changes)
 >and was approved.
+
+One effect of these rules is that when `params` of different element types are exposed, these will be ambiguous when called with an empty argument list.
+For example:
+
+```cs
+class Program
+{
+    static void Main()
+    {
+        // Old scenarios
+        C.M1(); // Ambiguous since params arrays were introduced
+        C.M1([]); // Ambiguous since params arrays were introduced
+
+        // New scenarios
+        C.M2(); // Ambiguous in C# 13
+        C.M2([]); // Ambiguous in C# 13
+        C.M3(); // Ambiguous in C# 13
+        C.M3([]); // Ambiguous in C# 13
+    }
+
+    public static void M1(params int[] a) {
+    }
+    
+    public static void M1(params int?[] a) {
+    }
+    
+    public static void M2(params ReadOnlySpan<int> a) {
+    }
+    
+    public static void M2(params Span<int?> a) {
+    }
+    
+    public static void M3(params ReadOnlySpan<int> a) {
+    }
+    
+    public static void M3(params ReadOnlySpan<int?> a) {
+    }
+}
+```
+
+Given that we prioritize element type over all else, this seems reasonable; there's nothing to tell the language whether the user would prefer `int?`
+over `int` in this scenario.
 
 ### Dynamic Binding
 
