@@ -5,7 +5,7 @@ Features Added in C# Language Versions
 - [ESC escape sequence](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/esc-escape-sequence.md): introduces the `\e` escape sequence to represent the ESCAPE/ESC character (U+001B).
 - [Method group natural type improvements](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/method-group-natural-type-improvements.md): look scope-by-scope and prune inapplicable candidates early when determining the natural type of a method group.
 - [`Lock` object](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/lock-object.md): allow performing a `lock` on `System.Threading.Lock` instances.
-- [Implicit indexer access in object initializers](TODO2): allows indexers in object initializers to use implicit Index/Range indexers (`new C { [^1] = 2 }`).
+- Implicit indexer access in object initializers: allows indexers in object initializers to use implicit Index/Range indexers (`new C { [^1] = 2 }`).
 - [`params` collections](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md): extends `params` support to collection types (`void M(params ReadOnlySpan<int> s)`).
 - [`ref`/`unsafe` in iterators/async](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-unsafe-in-iterators-async.md): allows using `ref`/`ref struct` locals and `unsafe` blocks in iterators and async methods between suspension points.
 - [`ref struct` interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md): allows `ref struct` types to implement interfaces and introduces the `allows ref struct` constraint.
