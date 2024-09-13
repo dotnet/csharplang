@@ -35,7 +35,7 @@ Otherwise, neither set of element conversions is better than the other, and they
 Conversion comparisons are made using better conversion from expression if `ELᵢ` is not a spread element. If `ELᵢ` is a spread element, we use better conversion from the element type of the spread collection to `E₁` or `E₂`, respectively.
 
 `C₁` is a ***better collection conversion from expression*** than `C₂` if:
-- Both `T₁` or `T₂` are not *span types*, and `T₁` is implicitly convertible to `T₂`, and `T₂` is not implicitly convertible to `T₁`, or
+- Both `T₁` and `T₂` are not *span types*, and `T₁` is implicitly convertible to `T₂`, and `T₂` is not implicitly convertible to `T₁`, or
 - `E₁` does not have an identity conversion to `E₂`, and the element conversions to `E₁` are ***better than the element conversions*** to `E₂`, or
 - `E₁` has an identity conversion to `E₂`, and one of the following holds:
    - `T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, or
