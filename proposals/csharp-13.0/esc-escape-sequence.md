@@ -2,7 +2,9 @@
 # String/Character escape sequence `\e`
 
 ## Summary
-An addition of the string/character escape sequence `\e` as a shortcut/short-hand replacement for the character code point `0x1b`, commonly known as the `ESCAPE` (or `ESC`) character.  This character is currently accessible using one of the following escape sequences:
+An addition of the string/character escape sequence `\e` as a shortcut/short-hand replacement
+for the character code point `0x1b`, commonly known as the `ESCAPE` (or `ESC`) character.  
+This character is currently accessible using one of the following escape sequences:
 - `\u001b`
 - `\U0000001b`
 - `\x1b` (not recommended, see the picture attached at the bottom.)
@@ -18,7 +20,8 @@ Assert.IsTrue(escape_char == '\x1b', "...");
 ```
 
 ## Detailed design
-I propose the language syntax specification to be changed as follows in section [6.4.5.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md#6455-character-literals):
+The language syntax specification is changed as follows in section 
+[6.4.5.5](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/lexical-structure.md#6455-character-literals):
 
 ```diff
 fragment Simple_Escape_Sequence
@@ -33,7 +36,7 @@ As well as the addition of the **last line** to the following table in the speci
 > | **Escape sequence** | **Character name** | **Unicode code point** |
 > |---------------------|--------------------|--------------------|
 > | `\'`                | Single quote       | U+0027             |
-> | ...                | ...       | ...             |
-> | `\e`                | Escape character       | U+001B             |
+> | ...                 | ...                | ...                |
+> | `\e`                | Escape character   | U+001B             |
 > 
 > The type of a *Character_Literal* is `char`.
