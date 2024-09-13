@@ -11,6 +11,7 @@ Features Added in C# Language Versions
 - [`ref struct` interfaces](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md): allows `ref struct` types to implement interfaces and introduces the `allows ref struct` constraint.
 - [Overload resolution priority](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/overload-resolution-priority.md): allows API authors to adjust the relative priority of overloads within a type using `System.Runtime.CompilerServices.OverloadResolutionPriority`.
 - [Partial properties](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/partial-properties.md): allows splitting a property into multiple parts using the `partial` modifier.
+- [Better conversion from collection expression element](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/collection-expressions-better-conversion.md): improves overload resolution to account for the element type of collection expressions.
 
 # C# 12.0 - .NET 8 and Visual Studio 2022 version 17.8
 
