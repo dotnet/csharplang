@@ -48,6 +48,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Sep 18, 2024
 
 - Short and long term solutions for [field keyword nullability](https://github.com/dotnet/csharplang/issues/8425) (Rikki)
+- [Re-rename to roles and extensions](https://github.com/dotnet/csharplang/issues/8431) (Mads)
 
 ## C# Language Design Notes for 2024
 
