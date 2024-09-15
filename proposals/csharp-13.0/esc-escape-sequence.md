@@ -1,6 +1,8 @@
 
 # String/Character escape sequence `\e`
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 An addition of the string/character escape sequence `\e` as a shortcut/short-hand replacement
 for the character code point `0x1b`, commonly known as the `ESCAPE` (or `ESC`) character.  

@@ -1,6 +1,8 @@
 # Partial properties
 https://github.com/dotnet/csharplang/issues/6420
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ### Grammar
 
 The *property_declaration* grammar [(§14.7.1)](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1471-general) is updated as follows:

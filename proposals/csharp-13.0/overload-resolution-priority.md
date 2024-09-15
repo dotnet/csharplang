@@ -1,5 +1,7 @@
 # Overload Resolution Priority
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 
