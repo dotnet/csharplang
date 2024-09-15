@@ -1,5 +1,6 @@
-
 # String/Character escape sequence `\e`
+
+[!INCLUDE[Specletdisclaimer](speclet-disclaimer.md)]
 
 ## Summary
 An addition of the string/character escape sequence `\e` as a shortcut/short-hand replacement
