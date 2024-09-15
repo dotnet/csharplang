@@ -1,5 +1,7 @@
 # Better conversion from collection expression element
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 
 Updates to the better conversion rules to be more consistent with `params`, and better handle current ambiguity scenarios. For example, `ReadOnlySpan<string>` vs `ReadOnlySpan<object>` can currently

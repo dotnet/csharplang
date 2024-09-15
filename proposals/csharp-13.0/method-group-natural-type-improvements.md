@@ -1,6 +1,6 @@
 # Method group natural type improvements
 
-[!INCLUDE[Specletdisclaimer](speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 ## Summary
 [summary]: #summary

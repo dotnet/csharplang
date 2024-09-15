@@ -1,6 +1,6 @@
 # `params Collections`
 
-[!INCLUDE[Specletdisclaimer](speclet-disclaimer.md)]
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
 ## Summary
 

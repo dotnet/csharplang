@@ -1,5 +1,7 @@
 # Allow ref and unsafe in iterators and async
 
+[!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
 ## Summary
 [summary]: #summary
 
