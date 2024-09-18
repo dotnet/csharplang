@@ -51,8 +51,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 [C# Language Design Meeting for September 18th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-18.md)
 
-- [Nullability in `field`](#nullability-in-field)
-- [Extensions naming](#extensions-naming)
+- Nullability in `field`
+- Extensions naming
 
 ### Wed Sep 11, 2024
 
