@@ -45,12 +45,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - *Design review* (no notes)
 
+## C# Language Design Notes for 2024
+
 ### Wed Sep 18, 2024
 
-- Short and long term solutions for [field keyword nullability](https://github.com/dotnet/csharplang/issues/8425) (Rikki)
-- [Re-rename to roles and extensions](https://github.com/dotnet/csharplang/issues/8431) (Mads)
+[C# Language Design Meeting for September 18th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-18.md)
 
-## C# Language Design Notes for 2024
+- [Nullability in `field`](#nullability-in-field)
+- [Extensions naming](#extensions-naming)
 
 ### Wed Sep 11, 2024
 
