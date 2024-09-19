@@ -4,9 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien)
-- C# 14 (Mads)
-
 ## Schedule when convenient
 
 - yield in try / catch (jared): https://github.com/dotnet/csharplang/issues/8414
@@ -39,7 +36,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Sep 30, 2024
 
+- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien)
+
 ### Wed Sep 25, 2024
+
+- C# 14 (Mads)
 
 ### Mon Sep 23, 2024
 
