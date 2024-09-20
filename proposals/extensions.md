@@ -666,22 +666,44 @@ Maybe the same issue precludes extensions on nullable value types from being con
 
 We update the [Conversions section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10-conversions) as follows:
 TODO2
-The identity conversion rules need to be updated to include extension types.
+
+## 10.2 Implicit conversions
+
+### 10.2.2 Identity conversion
 https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1022-identity-conversion
 
+An identity conversion converts from any type to the same type or a type that is equivalent at runtime.
+One reason this conversion exists is so that a type `T` or an expression of type `T` can be said to be convertible to `T` itself. The following identity conversions exist:
+
+- Between `T` and `T`, for any type `T`.
+- Between `object` and `dynamic`.
+- Between all tuple types with the same arity, and the corresponding constructed `ValueTuple<...>` type, when an identity conversion exists between each pair of corresponding element types.
+- Between types constructed from the same generic type where there exists an identity conversion between each corresponding type argument.
+- TODO2
+
+### 10.2.3 Implicit numeric conversions
+
+TODO2
 The implicit numeric conversion rules need to be updated to include extension types.
 https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1023-implicit-numeric-conversions
 
-The implicit enumeration conversion rules can stay as-is:
+### 10.2.4 Implicit enumeration conversions
+
 https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1024-implicit-enumeration-conversions
 
-The implicit interpolated string rules are TBD:
+An implicit enumeration conversion permits a *constant_expression* with any integer type and the value zero to be converted to any *enum_type* and to any *nullable_value_type* whose underlying type is an *enum_type*. In the latter case the conversion is evaluated by converting to the underlying *enum_type* and wrapping the result ([§8.3.12](types.md#8312-nullable-value-types)).
+
+### 10.2.5 Implicit interpolated string conversions
 https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1025-implicit-interpolated-string-conversions
+TODO2
 
-The null literal conversion rules can stay as-is:
-https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1027-null-literal-conversions
+### 10.2.6 Implicit nullable conversions
 
-### Implicit reference conversions
+See Nullable conversions section.
+
+### 10.2.7 Null literal conversions
+
+### 10.2.8 Implicit reference conversions
 
 The [implicit reference conversion rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1028-implicit-reference-conversions)
 are updated as follows:
@@ -711,7 +733,7 @@ The implicit reference conversions are:
 - ***From an extension_type `E` to a type `T` if the underlying type of `E` has an implicit reference conversion to `T`.***
 - ***From a type `S` to an extension type `E` if `S` has an implicit reference conversion to the underlying type of `E`.***
 
-### Boxing conversions
+### 10.2.9 Boxing conversions
 
 The [boxing conversion rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1029-boxing-conversions) are updated as follows:
 A boxing conversion permits a *value_type* to be implicitly converted to a *reference_type*. The following boxing conversions exist:
@@ -719,8 +741,7 @@ A boxing conversion permits a *value_type* to be implicitly converted to a *refe
 - From any *value_type* to the type `object`.
 - From any *value_type* to the type `System.ValueType`.
 - From any *enum_type* to the type `System.Enum`.
-- From any *non_nullable_value_type* to any *interface_type* implemented by the *non_nullable_value_type*
-  ***or an extension thereof***.
+- From any *non_nullable_value_type* to any *interface_type* implemented by the *non_nullable_value_type*.
 - From any *non_nullable_value_type* to any *interface_type* `I`
   such that there is a boxing conversion from the *non_nullable_value_type* 
   to another *interface_type* `I₀`, and `I₀` has an identity conversion to `I`.
@@ -734,7 +755,7 @@ A boxing conversion permits a *value_type* to be implicitly converted to a *refe
 - ***From an extension_type `E` to a type `T` if the underlying type of `E` has a boxing conversion to `T`.***
 - ***From a type `S` to an extension type `E` if `S` has a boxing conversion to the underlying type of `E`.***
 
-### Implicit dynamic conversions
+### 10.2.10 Implicit dynamic conversions
 
 No changes
 
@@ -780,6 +801,43 @@ as follows:
 
 An implicit conversion exists from a tuple expression `E` to a tuple type `T` ***or extension thereof***
 if `E` has the same arity as `T` and an implicit conversion exists from each element in `E` to the corresponding element type in `T`.
+
+TODO2 do we say that an extension on a tuple type *is* a tuple type?
+
+### 10.2.14 User-defined implicit conversions
+
+TODO2 punted
+
+### 10.2.15 Anonymous function conversions and method group conversions
+
+TODO2 punted
+
+### 10.2.16 Default literal conversions
+
+No changes
+
+### 10.2.17 Implicit throw conversions
+
+No changes
+
+## 10.3 Explicit conversions
+
+TODO2 not done
+
+### 10.6.1 Nullable conversions
+
+For each of the predefined implicit or explicit conversions that convert from a non-nullable value type `S` to a non-nullable value type `T`, the following nullable conversions exist:
+
+- An implicit or explicit conversion from `S?` to `T?`
+- An implicit or explicit conversion from `S` to `T`?
+- An explicit conversion from `S?` to `T`.
+
+
+TODO2 we intend to prevent conversion from E1 to E2 even if they share underlying type or have convertible underlying types. How do we achieve this? Also in the nullable cases?
+
+### Collection expression conversions
+
+TODO2
 
 ## Expressions
 
