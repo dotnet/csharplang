@@ -6,7 +6,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- yield in try / catch (jared): https://github.com/dotnet/csharplang/issues/8414
 - Triage (working set)
 
 ## Recurring topics
@@ -31,6 +30,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Oct 7, 2024
 
 ### Wed Oct 2, 2024
+
+- yield in try / catch (jared): https://github.com/dotnet/csharplang/issues/8414
 
 ### Mon Sep 30, 2024
 
