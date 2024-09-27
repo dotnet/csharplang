@@ -32,6 +32,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Oct 2, 2024
 
 - yield in try / catch (jared): https://github.com/dotnet/csharplang/issues/8414
+- Field-backed properties: [open questions (short?)](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions) (Chuck)
 
 ### Mon Sep 30, 2024
 
