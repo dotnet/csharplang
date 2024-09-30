@@ -773,3 +773,19 @@ class C
 For reference, fields for *primary constructor parameters* are generated in similar cases - see [sharplab.io](https://sharplab.io/#v2:EYLgxg9gTgpgtADwGwBYA+ABADAAgwRgDoARASwEMBzAOwgGcAXUsOgbgFgAoLjAJhwDCACgjAAVjDAMcAM1IwANgBMAlFwDeXHNrwocAWSFrOOnJpOmdxGMACulQgEE6dGFAZC5ipTlJ0c1LYKCiocFtoAvlxR3JyMULZSOADKIuKS0l7KxuamGHqGxqa5ltrWdg7Oru6e8sq+/oHBoVo6MRFAA).
 
 **Recommendation**: The backing field is generated when `field` is used only in omitted calls to *conditional methods*.
+
+### Interface properties and auto-accessors
+
+Is a combination of manually- and auto-implemented accessors recognized for an `interface` property where the auto-implemented accessor refers to a synthesized backing field?
+
+For an instance property, an error will be reported that instance fields are not supported.
+
+```csharp
+interface I
+{
+           object P1 { get; set { } } // error: instance field
+    static object P2 { get; set { } } // ok: equivalent to { get => field; set { } }
+}
+```
+
+**Recommendation**: Auto-accessors are recognized in `interface` properties. For an instance property, an error is reported that instance fields are not supported in interfaces.
