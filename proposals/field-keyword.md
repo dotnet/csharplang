@@ -783,8 +783,11 @@ For an instance property, an error will be reported that instance fields are not
 ```csharp
 interface I
 {
-           object P1 { get; set { } } // error: instance field
-    static object P2 { get; set { } } // ok: equivalent to { get => field; set { } }
+           object P1 { get; set; }                           // ok: not an implementation
+           object P2 { get => field; set { field = value; }} // error: instance field
+
+           object P3 { get; set { } } // error: instance field
+    static object P4 { get; set { } } // ok: equivalent to { get => field; set { } }
 }
 ```
 
