@@ -788,4 +788,4 @@ interface I
 }
 ```
 
-**Recommendation**: Auto-accessors are recognized in `interface` properties, and the auto-accessors refer to a synthesized backing field. For an instance property, an error is reported that instance fields are not supported in interfaces.
+**Recommendation**: Auto-accessors are recognized in `interface` properties, and the auto-accessors refer to a synthesized backing field. For an instance property, an error is reported that instance fields are not supported.
