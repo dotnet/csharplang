@@ -270,6 +270,18 @@ implicit extension E for C<object?>
 }
 ```
 
+Allowing top-level nullability means that some extension members would have to be split across multiple extension types and would have to be moved if the nullability contract is changed/relaxed:
+```
+extension NotNullableExtension for object
+{
+    public void M1() { }
+}
+extension NullableExtension for object?
+{
+    public void M2() { }
+}
+```
+
 ## Open issue: need to specify lookup rules within attributes
 
 Need to spec why extension properties are not found during lookup for attribute properties, or explicitly disallow them  
