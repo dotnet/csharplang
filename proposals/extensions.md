@@ -324,19 +324,7 @@ extension E<T> for T { }
 
 Do we want to allow constructors and `required` properties?  
 Do we want to allow operators?  
-
-## Open issue: need to specify type inference rules
-
-We need to review Method type inference: 7.5.2.9 Lower-bound interfaces, to see whether any updates are needed.  
-
-We want to allow the following and decide the inferred type:
-```csharp
-var c = new C();
-var e = (E)c; // E is an extension type
-M(c, e); // M<C> or M<E>?
-
-void M<T>(T t1, T t2) { }
-```
+There are issues around attribute constructors and `initonly` members too.
 
 ## Open issue: naming convention?
 
@@ -363,12 +351,16 @@ Will need to check with the WG as I don't recall the reasoning for this.
 
 The static+this codegen strategy should work for ref structs and classic extension methods are allowed on ref structs.
 
+## Open issue: shadowing rules
+
+Confirm whether extension members that shadow underlying type members should result in a warning.
+
 ## Summary
 [summary]: #summary
 
-The purpose of "extensions" is to augment or adapt existing types to new scenarios,
+The purpose of "extensions" is to augment existing types to new scenarios,
 when those types are not under your control, or where changing them would
-negatively impact other uses of them. The adaptation can be in the form of
+negatively impact other uses of them. The adaptation is in the form of
 adding new function members.
 
 `extension EnumExtension for Enum { ... }`
@@ -432,7 +424,7 @@ An extension type is a static class.
 
 The *extension_underlying_type* type may not be `dynamic`, a pointer, 
 a ref struct type, a ref type or an extension.  
-The underlying type may not include an *interface_type_list* (this is part of the Interface Phase).  
+The underlying type may not include an *interface_type_list*.  
 The extension type must be static if its underlying type is static.  
 The underlying type must include all the type parameters from the extension type.  
 
@@ -486,8 +478,6 @@ Note those also apply to visibility constraints of file-local types (not yet spe
 The extension type members may not use the `virtual`, `abstract`, `sealed`, `override` modifiers,
 or the `protected` access modifier.  
 Member methods may not use the `readonly` modifier.  
-The `new` modifier is allowed and the compiler will warn that you should
-use `new` when shadowing.  
 
 An extension cannot contain a member declaration with the same name as the extension.
 
@@ -495,21 +485,6 @@ An extension cannot contain a member declaration with the same name as the exten
 
 The existing [rules for signatures](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#76-signatures-and-overloading) apply.  
 Extension types may not appear in signatures.  
-
-Shadowing includes underlying type.  
-
-```
-TODO2
-class U { public void M() { } }
-extension R for U { /*new*/ public void M() { } } // wins when dealing with an R
-```
-
-```
-class U { public void M() { } }
-extension X for U { /*new*/ public void M() { } } // ignored in some cases TODO2
-U u;
-u.M(); // U.M (ignored X.M)
-```
 
 #### Constants
 
