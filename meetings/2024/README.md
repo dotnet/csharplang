@@ -30,7 +30,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Mon Oct 7, 2024
 
 - [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
-- 
+
 ### Wed Oct 2, 2024
 
 - Extensions (Julien/Mads)
