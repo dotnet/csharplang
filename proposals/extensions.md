@@ -253,6 +253,27 @@ public static extension E2<T> for I<T>
 public interface I<out T> { }
 ```
 
+Here's another scenario where our method for finding a compatible substituted extension type differs from type inference:
+```
+I<Derived> i = default;
+i.M();
+i.M2(); // error CS1061: 'I<Derived>' does not contain a definition for 'M2' and no accessible extension method 'M2' accepting a first argument of type 'I<Derived>' could be found
+
+public class C<T> { }
+public class Derived : C<int> { }
+
+public interface I<out T> { }
+
+public static class Extension
+{
+    public static void M<T>(this I<C<T>> i) { }
+}
+public static implicit extension Extension2<T> for I<C<T>>
+{
+   public static void M2() { }
+}
+```
+
 ## Open issue: need to specify nullability analysis rules
 
 Should we allow top-level nullability on underlying type?  
