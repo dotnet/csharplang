@@ -204,17 +204,6 @@ extension E<T> for T
 }
 ```
 
-## Open issue: type erasure
-
-Confirm the format with partner teams.  
-Monitor the volume of metadata with some preview usage.  
-Finalize the format to support tuple names, dynamic, nullability and other erased information.  
-Confirm how the encoding works with local functions.  
-
-## Open issue: consider disallowing pointers to extension types
-
-This question was raised in LDM 2024-07-22 but was not resolved.
-
 ## Open issue: allow variance in extension compatibility
 
 The current rules are pretty strict:
