@@ -219,10 +219,13 @@ Also, we may want to allow for variance (see example below).
 But this would involve considering conversion when evaluating compatibility.  
 ```csharp
 IEnumerable<string>.M();
+ienumerableOfString.M2();
 
-extension E for IEnumerable<object> 
+extension E for IEnumerable<object>
+implicit extension E for IEnumerable<object>
 {
     public static void M() { }
+    public void M2() { M(); }
 }
 ```
 
@@ -271,6 +274,49 @@ public static class Extension
 public static extension Extension2<T> for I<C<T>>
 {
    public static void M2() { }
+}
+```
+
+Proposal:
+We can use a mechanism that follows classic extension method resolution more closely:
+1. find all the candidate members
+2. cook up some expanded signatures:
+  - join the type parameters of the extension type with the type parameters of the method
+  - prepend a `this` parameter for the receiver with the extended type
+3. do type inference using the receiver and the arguments
+4. apply overload resolution (which checks allowed conversions for the `this` parameter)
+
+Note: this approach would allow us to mix classic and new extension methods. We pool them all for a given scope then do overload resolution on the whole set.  
+Note: we probably no longer need a special rule to prefer "more specific extension members".  
+Note: when the receiver is a type, we probably want to go through the same steps, even if the type cannot be instantiated.  
+
+The same kind of process may work for resolution of extension operators:
+1. find all the extension operators in scope
+2. taking each operand/parameter in turn: apply type inference on parameter type and argument to figure out the extension's type parameters
+3. keep the substitutions that work
+4. apply binary overload resolution
+
+Example:
+```
+Derived derived = ...;
+_ = derived + b;
+
+public class C<T> { }
+public class Derived : C<int> { }
+
+public extension E<T> for C<T>
+{
+    public static implicit bool operator +(C<T> c, B b) { } // we require that one of the parameter types be the extended type
+}
+```
+
+```
+IEnumerable<string> i = ...;
+_ = i + b;
+
+public extension E for IEnumerable<object>
+{
+    public static implicit bool operator +(IEnumerable<object> i, B b) { }
 }
 ```
 
