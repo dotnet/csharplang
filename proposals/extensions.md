@@ -268,7 +268,7 @@ public static class Extension
 {
     public static void M<T>(this I<C<T>> i) { }
 }
-public static implicit extension Extension2<T> for I<C<T>>
+public static extension Extension2<T> for I<C<T>>
 {
    public static void M2() { }
 }
