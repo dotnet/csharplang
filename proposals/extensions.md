@@ -237,6 +237,33 @@ implicit extension E for IEnumerable<object>
 }
 ```
 
+## Open issue: align with method type inference
+
+In a generic extension scenario, the extension's type arguments are determined separately from the
+method's type arguments, using only information from the receiver.
+But in a similar scenario with classic extension methods, type inference is applied to the entire signature,
+allowing all arguments to influence the bounds for the type parameters involved in the `this` parameter.
+
+```
+public class C
+{
+    public void M(I<string> i, out object o)
+    {
+        i.M(out o); // infers E.M<object>
+        i.M2(out o); // error CS1503: Argument 1: cannot convert from 'out object' to 'out string'
+    }
+}
+public static class E
+{
+   public static void M<T>(this I<T> i, out T t) { t = default; }
+}
+public static implicit extension E2<T> for I<T>
+{
+   public static void M2(out T t) { t = default; }
+}
+public interface I<out T> { }
+```
+
 ## Open issue: need to specify nullability analysis rules
 
 Should we allow top-level nullability on underlying type?  
