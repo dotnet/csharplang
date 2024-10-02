@@ -305,12 +305,12 @@ class C
 
     public C()
     {
-        F = "a"; // ok
+        Prop = "a"; // ok
     }
 
     public static void Main()
     {
-        new C().F.ToString(); // NRE at runtime
+        new C().Prop.ToString(); // NRE at runtime
     }
 }
 ```
@@ -631,16 +631,6 @@ Should the proposed nullability of `field` be accepted? See the [Nullability](#n
 
 General proposal is adopted. Specific behavior still needs more review.
 
-## Open LDM questions
-
-### Feature name
-
-Some options for the name of the feature:
-1. semi-auto properties
-1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
-1. field-backed properties
-1. field keyword
-
 ### `field` in property initializer
 
 Should `field` be a keyword in a property initializer and bind to the backing field?
@@ -666,6 +656,10 @@ class B
 
 In the example above, binding to the backing field should result in an error: "initializer cannot reference non-static field".
 
+#### Answer
+
+We will bind the initializer as in previous versions of C#. We won't put the backing field in scope, nor will we prevent referencing other members named `field`.
+
 ### Interaction with partial properties
 
 #### Initializers
@@ -687,6 +681,10 @@ partial class C
 
 **Recommendation**: Permit an initializer on either part of a partial property when the implementation part uses `field`. Report an error if both parts have an initializer.
 
+#### Answer
+
+Recommendation accepted. Either declaring or implementing property locations can use an initializer, but not both at the same time.
+
 #### Auto-accessors
 
 As originally designed, partial property implementation must have bodies for all the accessors. However, recent iterations of the `field` keyword feature have included the notion of "auto-accessors". Should partial property implementations be able to use such accessors? If they are used exclusively, it will be indistinguishable from a defining declaration.
@@ -702,13 +700,16 @@ partial class C
 
     public partial int Prop2 { get; set; }
     public partial int Prop2 { get; set => field = value; } // what about this? will there be disagreement about which is the "best" style?
-    
 
     public partial int Prop3 { get; }
     public partial int Prop3 { get => field; } // it will only be valid to use at most 1 auto-accessor, when a second accessor is manually implemented.
 ```
 
 **Recommendation**: Disallow auto-accessors in partial property implementations, because the limitations around when they would be usable are more confusing to follow than the benefit of allowing them.
+
+#### Answer
+
+At least one implementing accessor must be manually implemented, but the other accessor can be automatically implemented.
 
 ### Readonly field
 
@@ -728,6 +729,20 @@ struct S
 When the backing field is considered *read-only*, the field emitted to metadata is marked `initonly`, and an error is reported if `field` is modified other than in an initializer or constructor.
 
 **Recommendation**: The synthesized backing field is *read-only* when the containing type is a `struct` and the property or containing type is declared `readonly`.
+
+#### Answer
+
+Recommendation is accepted.
+
+## Open LDM questions
+
+### Feature name
+
+Some options for the name of the feature:
+1. semi-auto properties
+1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
+1. field-backed properties
+1. field keyword
 
 ### Readonly context and `set`
 

@@ -272,7 +272,7 @@ Regular definite assignment rules are applicable to variables that have an inlin
 
 ### Collection literals
 
-An inline array type is a valid *constructible collection* target type for a [collection literal](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md).
+An inline array type is a valid *constructible collection* target type for a [collection expression](collection-expressions.md).
 
 For example:
 ``` C#
@@ -284,7 +284,7 @@ is known at compile time and it doesn't match the target length, an error is rep
 to be thrown at runtime once the mismatch is encountered. The exact exception type is TBD. Some candidates are:
 System.NotSupportedException, System.InvalidOperationException.
 
-An instance of an inline array type is a valid expression in a [*spread_element*](https://github.com/dotnet/csharplang/blob/main/proposals/collection-literals.md#detailed-design).
+An instance of an inline array type is a valid expression in a [*spread_element*](collection-expressions.md#detailed-design).
 
 ### Validation of the InlineArrayAttribute applications
 

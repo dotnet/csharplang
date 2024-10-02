@@ -31,15 +31,13 @@ static bool IsABC(Span<char> s)
 ## Detailed design
 [design]: #detailed-design
 
-We alter the [spec](../csharp-7.0/pattern-matching.md#constant-pattern) for constant patterns as follows (the proposed addition is shown in bold):
+We alter the [spec](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/patterns.md#1123-constant-pattern) for constant patterns as follows (the proposed addition is shown in bold):
 
-> A constant pattern tests the value of an expression against a constant value. The constant may be any constant expression, such as a literal, the name of a declared `const` variable, or an enumeration constant, or a `typeof` expression etc.
+> Given a pattern input value `e` and a constant pattern `P` with converted value `v`,
 >
-> If both *e* and *c* are of integral types, the pattern is considered matched if the result of the expression `e == c` is `true`.
->
-> **If *e* is of type `System.Span<char>` or `System.ReadOnlySpan<char>`, and *c* is a constant string, and *c* does not have a constant value of `null`, then the pattern is considered matching if `System.MemoryExtensions.SequenceEqual<char>(e, System.MemoryExtensions.AsSpan(c))` returns `true`.**
-> 
-> Otherwise the pattern is considered matching if `object.Equals(e, c)` returns `true`. In this case it is a compile-time error if the static type of *e* is not *pattern compatible* with the type of the constant.
+> - if *e* has integral type or enum type, or a nullable form of one of those, and *v* has integral type, the pattern `P` *matches* the value *e* if result of the expression `e == v` is `true`; otherwise
+> - **If *e* is of type `System.Span<char>` or `System.ReadOnlySpan<char>`, and *c* is a constant string, and *c* does not have a constant value of `null`, then the pattern is considered matching if `System.MemoryExtensions.SequenceEqual<char>(e, System.MemoryExtensions.AsSpan(c))` returns `true`.**
+> - the pattern `P` *matches* the value *e* if `object.Equals(e, v)` returns `true`.
 
 ### Well-known members
 `System.Span<T>` and `System.ReadOnlySpan<T>` are matched by name, must be `ref struct`s, and can be defined outside corlib.
