@@ -27,9 +27,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Oct 9, 2024
 
+- Triage
+- Extensions
+
 ### Mon Oct 7, 2024
 
 - [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
+- Extensions (Julien)
 
 ### Wed Oct 2, 2024
 
