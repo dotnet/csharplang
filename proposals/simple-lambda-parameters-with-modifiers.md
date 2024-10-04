@@ -35,7 +35,7 @@ implicit_anonymous_function_parameter_list
 
 implicit_anonymous_function_parameter
 -   : identifier
-+   : 'scoped'? anonymous_function_parameter_modifier? identifier
++   : attributes 'scoped'? anonymous_function_parameter_modifier? identifier
     ;
 
 explicit_anonymous_function_parameter
@@ -74,6 +74,12 @@ to those that have no out parameters.
 + with modifiers, then the set of compatible delegate types and expression tree types 
 + is restricted to those that have the same modifiers in the same order (§10.7).
 ```
+
+## Open LDM questions
+
+1. Currently (in C# 13 `(scoped x) => ...` means "A lambda with a parameter named 'x' with type 'scoped'".  We would like to change that to be treated as the "scoped modifier" instead.  We can gate this behind a language version change so it only breaks on upgrade.  There is also a suitable user workaround if they truly had this pathological code.  Namely, writing `(@scoped x) => ...`.
+
+2. A prior LDM meeting established that neither attributes nor default parameter values would be supported on simple lambda parameters with modifiers.  I would like to revist the decision about attributes.  Specifically, we already allow attributes on simple lambdas like `([Attr] a) => ...` in the compiler today.  So it would be weird to have that support, but have it break if you changed it to `([Attr] ref a) => ...`.  Note: default parameter values are not supported on simple lambdas.  So we can keep the rule that they continue to not be supported when modifiers are added.
 
 ## Answered LDM questions
 
