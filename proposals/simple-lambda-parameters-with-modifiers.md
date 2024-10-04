@@ -30,23 +30,23 @@ implicit_anonymous_function_signature
     ;
 
 implicit_anonymous_function_parameter_list
--    : implicit_anonymous_function_parameter (',' implicit_anonymous_function_parameter)*
-+    : implicit_anonymous_function_parameter_ex (',' implicit_anonymous_function_parameter_ex)*
+    : implicit_anonymous_function_parameter (',' implicit_anonymous_function_parameter)*
     ;
 
 implicit_anonymous_function_parameter
-    : identifier
+-   : identifier
++   : anonymous_function_parameter_modifier? identifier
     ;
 
-implicit_anonymous_function_parameter_ex
-    : anonymous_function_parameter_modifier? identifier
+explicit_anonymous_function_parameter
+    : anonymous_function_parameter_modifier? type identifier
     ;
 ```
 
 Notes
 
 1. This does not apply to a lambda without a parameter list. `ref x => x.ToString()` would not be legal.
-1. A lambda parameter list cannot mix `implicit_anonymous_function_parameter_ex` and `explicit_anonymous_function_parameter` parameters.
+1. A lambda parameter list still cannot mix `implicit_anonymous_function_parameter` and `explicit_anonymous_function_parameter` parameters.
 
 ### Semantics
 
