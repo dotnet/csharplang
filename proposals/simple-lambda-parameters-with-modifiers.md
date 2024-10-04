@@ -46,9 +46,7 @@ implicit_anonymous_function_parameter_ex
 Notes
 
 1. This does not apply to a lambda without a parameter list. `ref x => x.ToString()` would not be legal.
-2. A lambda parameter list cannot mix `implicit_anonymous_function_parameter_ex` and `explicit_anonymous_function_parameter` parameters.
-3. An implicit lambda with a parameter list cannot have attributes (open question on if we want to allow that though).
-4. An implicit lambda with a parameter list cannot have a default value (open question on if we want to allow that though).
+1. A lambda parameter list cannot mix `implicit_anonymous_function_parameter_ex` and `explicit_anonymous_function_parameter` parameters.
 
 ### Semantics
 
@@ -68,10 +66,9 @@ to those that have no out parameters.
 + is restricted to those that have the same modifiers in the same order (§10.7).
 ```
 
-### Open questions
+## Answered LDM questions
 
-1. Should attributes be allowed as well?
-1. Should default parameter values be allowed?
+### Allowing attributes or default parameter values
 
 Both seem viable, and may be worth it if we're doing the rest of this work.  With this formalization, we would likely instead say that:
 
@@ -103,3 +100,7 @@ We would also update the semantic specification to say:
 + is converted to a compatible delegate type or expression tree type, that type 
 + provides the parameter types (§10.7).
 ```
+
+#### Answer
+
+Neither attributes nor default parameter values will be supported without a fully-typed lambda.
