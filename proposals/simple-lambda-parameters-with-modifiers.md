@@ -1,4 +1,4 @@
-# Declaration of lambda parameters with modifiers without type name
+# Simple lambda parameters with modifiers
 
 ## Summary
 
