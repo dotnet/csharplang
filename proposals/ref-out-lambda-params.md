@@ -2,9 +2,9 @@
 
 ## Summary
 
-Allow lambda parameter declarations with modifiers (`in` / `ref` / `out` / etc.) to be declared without requiring their type names.
+Allow lambda parameters to be declared with modifiers without requiring their type names. For example, `(ref entry) =>` rather than `(ref FileSystemEntry entry) =>`.
 
-For example, given this delegate:
+As another example, given this delegate:
 ```cs
 delegate bool TryParse<T>(string text, out T result);
 ```
