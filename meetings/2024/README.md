@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Triage (working set)
 - Unbound generic types in 'nameof' operator. Cyrus + Joseph. https://github.com/dotnet/roslyn/pull/75368. https://github.com/dotnet/csharplang/issues/8480.
+- Simple lambda parameters with modifiers.  https://github.com/dotnet/csharplang/pull/8487.  https://github.com/dotnet/roslyn/pull/75400.
 
 ## Recurring topics
 
