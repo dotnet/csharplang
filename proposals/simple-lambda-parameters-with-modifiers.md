@@ -41,6 +41,12 @@ implicit_anonymous_function_parameter
 explicit_anonymous_function_parameter
     : 'scoped'? anonymous_function_parameter_modifier? type identifier
     ;
+
+anonymous_function_parameter_modifier
+    : 'in'
+    | 'ref' 'readonly'?
+    | 'out'
+    ;
 ```
 
 Notes
