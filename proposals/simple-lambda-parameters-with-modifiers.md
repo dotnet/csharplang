@@ -35,11 +35,11 @@ implicit_anonymous_function_parameter_list
 
 implicit_anonymous_function_parameter
 -   : identifier
-+   : anonymous_function_parameter_modifier? identifier
++   : 'scoped'? anonymous_function_parameter_modifier? identifier
     ;
 
 explicit_anonymous_function_parameter
-    : anonymous_function_parameter_modifier? type identifier
+    : 'scoped'? anonymous_function_parameter_modifier? type identifier
     ;
 ```
 
