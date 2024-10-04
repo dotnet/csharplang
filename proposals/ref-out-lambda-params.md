@@ -1,6 +1,6 @@
 # Declaration of lambda parameters with modifiers without type name
 
-## Summary  
+## Summary
 
 Allow lambda parameter declarations with modifiers (`in` / `ref` / `out` / etc.) to be declared without requiring their type names.
 
@@ -45,7 +45,7 @@ implicit_anonymous_function_parameter_ex
 
 Notes
 
-1. This does not apply lambda without a parameter list.  e.g. `ref x => x.ToString()` would not be legal.
+1. This does not apply to a lambda without a parameter list. `ref x => x.ToString()` would not be legal.
 2. A lambda parameter list cannot mix `implicit_anonymous_function_parameter_ex` and `explicit_anonymous_function_parameter` parameters.
 3. An implicit lambda with a parameter list cannot have attributes (open question on if we want to allow that though).
 4. An implicit lambda with a parameter list cannot have a default value (open question on if we want to allow that though).
@@ -71,7 +71,7 @@ to those that have no out parameters.
 ### Open questions
 
 1. Should attributes be allowed as well?
-2. Should default parameter values be allowed?
+1. Should default parameter values be allowed?
 
 Both seem viable, and may be worth it if we're doing the rest of this work.  With this formalization, we would likely instead say that:
 
