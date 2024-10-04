@@ -49,10 +49,13 @@ anonymous_function_parameter_modifier
     ;
 ```
 
-Notes
+### Notes
 
 1. This does not apply to a lambda without a parameter list. `ref x => x.ToString()` would not be legal.
 1. A lambda parameter list still cannot mix `implicit_anonymous_function_parameter` and `explicit_anonymous_function_parameter` parameters.
+1. `(ref readonly p) =>`, `(scoped ref p) =>`, and `(scoped ref readonly p) =>` will be allowed, just as they are with explicit parameters, due to:
+   - [Low-level struct improvements](csharp-11.0/low-level-struct-improvements.md#Syntax) in C# 11
+   - [`ref readonly` parameters](csharp-12.0/ref-readonly-parameters.md#parameter-declarations) in C# 12
 
 ### Semantics
 
