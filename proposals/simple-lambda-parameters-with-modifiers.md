@@ -35,7 +35,7 @@ implicit_anonymous_function_parameter_list
 
 implicit_anonymous_function_parameter
 -   : identifier
-+   : 'scoped'? anonymous_function_parameter_modifier? identifier
++   : attributes? 'scoped'? anonymous_function_parameter_modifier? identifier
     ;
 
 explicit_anonymous_function_parameter
