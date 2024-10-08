@@ -194,7 +194,7 @@ List<Extension> e3;             // Not legal.  Extension is not a type.
 var v1 = (Extension)receiver;   // Not legal.  Can't can't have a value of extension type.
 ```
 
-This is exactly the same as the restrictions on static-types *except* with the carve out that you can use the extension in a cast-syntax or new-expression *only* for lookup purposes and nothing else.
+This is exactly the same as the restrictions on static-types *except* with the carve out that you can use the extension in a cast-syntax or new-expression *only* for lookup purposes, or where a static-class could be used, and nothing else.  Usage in places like `nameof(Extension)` or `typeof(Extension)` would still be fine, as those are places where a static type is allowed.
 
 Note 2. If cast syntax is not desirable here (especially if confuses the idea if extensions are types), we can come up with a new syntactic form.  We are not beholden to the above syntax.
 
