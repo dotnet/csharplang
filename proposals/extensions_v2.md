@@ -21,7 +21,7 @@ Note: the strawman is not intended to be final form.  That said, it is useful to
 ```c#
 extension E
 {
-    // Method form, replaces `public static int M<X>(this SomeType<X> t, ...) { } 
+    // Instance method form, replaces `public static int M<X>(this SomeType<X> t, ...) { } 
     public int M<X>(...) for SomeType<X> t { }
 
     // Property form:
