@@ -21,7 +21,7 @@ Note: the syntax is intentionally a strawman to aid in discussion.  It is not in
 ```c#
 extension E
 {
-    // Method form, replaces `public static int M<X>(SomeType<X> t, ...) { } 
+    // Method form, replaces `public static int M<X>(this SomeType<X> t, ...) { } 
     public int M<X>(...) for SomeType<X> t { }
 
     // Property form:
