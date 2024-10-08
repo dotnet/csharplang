@@ -101,7 +101,9 @@ extension E
 
 In other words, all existing extension methods drop `static` from their signature, and move their first parameter to a `for-clause` placed within the method header (currently strawmanned as after the parameter list).  Note: the syntax of a `for-clause` is `for parameter`, allowing things like a parameter name to be specified.  `parameter` is critical in this design to ensure the classic extension method `this` parameter can always cleanly move.
 
-The strawman chooses this location as it already cleanly supports clauses, being where the type parameter constraint clauses already go.  The extension itself (E) will get emitted exactly as a static class would be that contains extension methods (allowing usage from older compilers and other languages without any updates post this mechanical translation).
+The strawman chooses this location as it already cleanly supports clauses, being where the type parameter constraint clauses already go. 
+
+The extension itself (E) will get emitted exactly as a static class would be that contains extension methods (allowing usage from older compilers and other languages without any updates post this mechanical translation).
 
 New extension members (beyond instance members) will need to have their metadata form decided on.  Consumption from older compilers and different languages of these new members will be specified at a later point in time.
 
