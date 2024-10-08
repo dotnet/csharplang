@@ -192,7 +192,7 @@ The above initial strawman solves several major goals for we want for the extens
 
 1. Supporting a much broader set of extension member types.
 2. Having a clean syntax for extension members that matches the regular syntax form (in other words, an extension proeprty still looks like a property).
-3. Ensuring teams can move safely to modern extensions *especially* in environments where source binary compatibility is non-negotiable.
+3. Ensuring teams can move safely to modern extensions *especially* in environments where source *and* binary compatibility is non-negotiable.
 
 However, there are parts of its core design that are not ideal which we would like to ensure we can expand on.  These expansions could be released with extensions if time and other resources permit.  Or they could came later and cleanly sit on top of the feature to improve the experience.
 
