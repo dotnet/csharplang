@@ -77,7 +77,18 @@ extension
 // we are augmenting its syntax to allow type-parameters
 // (if not already allowed) and a for-clause. For example:
 property-declaration
-    | attributes? modifiers identifier type-parameters for-clause property-body;
+    | attributes? modifiers identifier type-parameters for-clause property-body
+    ;
+    
+compilation-unit-member
+    | ...
+    | extension
+    ;
+ 
+namespace-declaration-member
+    | ...
+    | extension
+    ;
 ```
 
 The use of `parameter` means all of the following are legal, with the same semantic extension methods have today:
