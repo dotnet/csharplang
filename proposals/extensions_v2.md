@@ -277,10 +277,14 @@ static class Extensions
 }
 ```
 
-For this reason, the strawman syntax for this `for-clause` is `'for' parameter`, where `parameter` is the familiar:
+For this reason, the strawman syntax is:
 
 ```g4
-parameter
+for-clause
+    | 'for' parameter`
+    ;
+
+parameter (unchanged)
     | attributes? modifiers? type identifier
     | attributes? modifiers? type identifier '=' expression
     ;
