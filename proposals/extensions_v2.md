@@ -218,7 +218,7 @@ The initial extension form considers source and binary compatibility as core req
 1. bifurcation; where some codebases adopt modern extensions and some do not.
 2. internal inconsistency; where some codebases must keep around old extensions and new extensions, with confusion about the semantics of how each interacts with the other.
 
-Because classic extension methods have very few restrictions, modern extension methods need to be flexible enough to support all the scenarios supported there.
+Because classic extension methods have very few restrictions, modern extension methods need to be flexible enough to support all the scenarios which they support.
 
 However, many codebases do not need all the flexibility that classic extension methods afforded.  For example, classic extension methods allow disparate extension methods in a single static class to target multiple different types.  For use cases where that isn't required, we forsee a natural extension (pun intended) where one can translate a modern extension like so:
 
