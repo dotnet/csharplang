@@ -36,9 +36,12 @@ extension E
     // Constructor form:
     public SomeType<X>() for SomeType<X>
 
+    // Event form:
+    // Note: would have to be the add/remove form.  field-backed events would not be possible.
+    public event Action E<X> for SomeType<X> { add { } remove { } }
+
     // *Static* extension method (not possible today).  Called as `Assert.Boo("", "")`
     public static bool Boo(string s1, string s2) for Assert { }
-
 }
 ```
 
