@@ -212,7 +212,7 @@ These areas are:
 
 ## Expansion 1: Syntactic clumsiness and repetition
 
-The initial extension form values source and binary compatibility as core requirements that must be present to ensure easy migration, allowing codebases to avoid both:
+The initial extension form considers source and binary compatibility as core requirements that must be present to ensure easy migration, allowing codebases to avoid both:
 1. bifurcation; where some codebases adopt modern extensions and some do not.
 2. internal inconsistency; where some codebases must keep around old extensions and new extensions, with confusion about the semantics of how each interacts with the other.
 
