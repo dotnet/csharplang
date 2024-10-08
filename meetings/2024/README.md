@@ -30,7 +30,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Oct 9, 2024
 
 - Triage
-- Extensions
+- Extensions - https://github.com/dotnet/csharplang/blob/main/proposals/extensions_v2.md Cyrus/Mads/Dustin/Julien/Joseph
 
 ### Mon Oct 7, 2024
 
