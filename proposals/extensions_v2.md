@@ -69,6 +69,8 @@ property-declaration
 
 Modern extensions continue to not allow adding fields or destructors to a type.
 
+Open question: Support nested types? This seems reasonable and the same as adding any other static extension member.
+
 ## Migration and compatibility
 
 Given an existing static class with extensions, a straightforward *semantically identical* translation to modern extensions is done in the following fashion.
