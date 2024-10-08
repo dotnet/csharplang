@@ -23,8 +23,8 @@ Note: the strawman is not intended to be final form.  That said, it is useful to
 ```c#
 extension E
 {
-    // Instance method form, replaces `public static int M<X>(this SomeType<X> t, ...) { } 
-    public int M<X>(...) for SomeType<X> t { }
+    // Instance method form, replaces `public static int M<X>(this SomeType<X> val, ...) { } 
+    public int M<X>(...) for SomeType<X> val { }
 
     // Property form:
     // Auto-properties, or usage of 'field' not allowed as extensions do not have instance state.
