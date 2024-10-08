@@ -74,11 +74,11 @@ property-declaration
 The use of `parameter` means all of the following are legal, with the same semantic extension methods have today:
 
 ```c#
-for ref Span<T>
-for ref readonly Span<T>
-for in Span<T>
-for scoped ref Span<T>
-for scoped Span<T>
+for ref Span<T> span
+for ref readonly Span<T> span
+for in Span<T> span
+for scoped ref Span<T> span
+for scoped Span<T> span
 ```
 
 Modern extensions continue to not allow adding fields or destructors to a type.
@@ -118,9 +118,9 @@ extension E
 }
 ```
 
-In other words, all existing extension methods drop `static` from their signature, and move their first parameter to a `for-clause` placed within the method header (currently strawmanned as after the parameter list).  Note: the syntax of a `for-clause` is `'for' parameter`, allowing things like a parameter name to be specified.  `parameter` is critical in this design to ensure the classic extension method `this` parameter can always cleanly move.
+In other words, all existing extension methods drop `static` from their signature, and move their first parameter to a `for-clause` placed within the method header (currently strawmanned as after the parameter list).  The strawman chooses this location as it already cleanly supports clauses, being where the type parameter constraint clauses already go.
 
-The strawman chooses this location as it already cleanly supports clauses, being where the type parameter constraint clauses already go. 
+Note: the syntax of a `for-clause` is `'for' parameter`, allowing things like a parameter name to be specified.  `parameter` is critical in this design to ensure the classic extension method `this` parameter can always cleanly move. 
 
 The extension itself (E) will get emitted exactly as a static class would be that contains extension methods (allowing usage from older compilers and other languages without any updates post this mechanical translation).
 
