@@ -18,7 +18,7 @@ Note: this proposal is broken into two parts.  A core kernel needed to initially
 
 A rough strawman of the syntax is as follows.  In all cases, the extended type is shown to be generic, to indicate handling that complex case:
 
-Note: the strawman is not intended to be final form.  That said, it is useful to see any proposed form with all members to ensure that it's generally comprehensible.  A form that is only good for properties, but not for other members, it likely not appropriate.
+Note: the strawman is not intended to be final form.  That said, it is useful to see any proposed form with all members to ensure that it's generally comprehensible.  For example, a form that is only good for properties, but not for other members, it likely not appropriate.
 
 ```c#
 extension E
