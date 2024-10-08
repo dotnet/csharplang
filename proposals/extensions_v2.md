@@ -39,15 +39,19 @@ extension E
     public int this<T>[int index] for SomeType<X> val { get { ... } }
 
     // Operator form:
+    // note: no SomeType<X> val, an operator is static, so it is not passed an instance value.
     public static SomeTypeX<X> operator+ <X>(SomeType<X> s1, SomeType<X> s2) for SomeType<X> { ... }
     
     // Conversion form:
+    // note: no SomeType<X> val, an operator is static, so it is not passed an instance value.
     public static implicit operator SomeTypeX<X>(int i) for SomeType<X> { ... }
 
     // Constructor form:
+    // note: no SomeType<X> val, an operator is static, so it is not passed an instance value.
     public SomeType<X>() for SomeType<X> { }
 
     // *Static* extension method (not possible today).  Called as `Assert.Boo("", "")`
+    // note: no `Assert val`, a static method is not passed an instance value.
     public static bool Boo(string s1, string s2) for Assert { }
 
     // Static extensions properties, indexers and events are all conceptually supportable.
