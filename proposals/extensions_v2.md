@@ -46,6 +46,9 @@ extension E
 
     // *Static* extension method (not possible today).  Called as `Assert.Boo("", "")`
     public static bool Boo(string s1, string s2) for Assert { }
+
+    // Static extensions of properties, events supported.  They are supported in static classes
+    // Nested types supported.  They are supported in static classes.
 }
 ```
 
