@@ -282,6 +282,7 @@ For this reason, the strawman syntax for this `for clause` is `for parameter`, w
 ```g4
 parameter
     | attributes? modifiers? type identifier
+    | attributes? modifiers? type identifier '=' expression
     ;
 ```
 
