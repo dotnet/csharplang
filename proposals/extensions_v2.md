@@ -337,5 +337,13 @@ This approach does fundamentally take expand on the initial extension-members ap
 
 We believe this is very powerful and beneficial.  But there are deep design questions here which may cause this to be scheduled after the core extension members work happens.
 
+## Expansion 4: Extensions as actual types
+
+We are very undecided on if we actually want this.  Currently, our view is that it feels like 'roles' fits this goal much better, especially if roles have the ability to be 'implicit' or 'explicit'.  Extensions exist very much in the space where they are erased and really are just delicious delicious sugar over calling effectively static helpers to augment a type or value.
+
+Roles, on the other hand seem more fitted to the type space where they are truly part of the type system, intending to appear in signatures, generics, and the like, potentially with strong enforcement about values moving into or out of the role.
+
+This warrants deep discussion about the path taken here and the future we are envisioning, to ensure we're happy with any paths this current approach may close off or make more difficult.
+
 ## Detailed design
 [design]: #detailed-design
