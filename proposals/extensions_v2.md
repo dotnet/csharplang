@@ -57,7 +57,7 @@ extension
     | attributes? modifiers? 'extension' identifier { member_declaration* }
     ;
 
-// For method/property/indexer/operator/constructor declarations
+// For method/property/indexer/operator/constructor/event declarations
 // we are augmenting its syntax to allow type-parameters
 // (if not already allowed) and a for-clause. For example:
 property-declaration
