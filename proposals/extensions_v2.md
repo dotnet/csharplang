@@ -227,21 +227,20 @@ extension E
 {
     // All extension members extend the same thing:
 
-    public void M() for SomeType { ... }
-    public int P for SomeType { get { ... } }
-    public static operator+(...) for SomeType { ... }
+    public void M() for SomeType str { ... }
+    public int P for SomeType str { get { ... } }
+    public static operator+(...) for SomeType str { ... }
     // etc
 }
 
 // Can be translated to:
 
-extension E for SomeType
+extension E for SomeType str
 {
     public void M() { ... }
     public int P { get { ... } }
     public static operator+(...) { ... }
 }
-```
 
 TODO: Do an ecosystem check on what percentage of existing extensions could use this simpler form.
 
