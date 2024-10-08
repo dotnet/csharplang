@@ -40,6 +40,9 @@ extension E
 
     // Operator form:
     public static SomeTypeX<X> operator+ <X>(SomeType<X> s1, SomeType<X> s2) for SomeType<X> { ... }
+    
+    // Conversion form:
+    public static implicit operator SomeTypeX<X>(int i) for SomeType<X> { ... }
 
     // Constructor form:
     public SomeType<X>() for SomeType<X> { }
