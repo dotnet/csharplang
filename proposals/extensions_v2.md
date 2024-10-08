@@ -14,7 +14,7 @@ Modern Extensions introduce a new syntax to produce "extension members", greatly
 
 This new form subsumes C# 3's "classic extension methods", allowing migration to the new modern form in a semantically *identical* fashion (both at a source and ABI level).
 
-Note: this proposal is broken into two parts.  A core kernel needed to initially ship with perfect forward and backwards compatibility with existing extensions, and then potential enhancements on top of this to make certain common designs more succinct and pleasant.
+Note: this proposal is broken into two parts.  A core kernel needed to initially ship with perfect forward and backwards compatibility with classic extension methods, and then potential enhancements on top of this to make certain common designs more succinct and pleasant.  This does not preclude the feature shipping with any or all of these enhancements at launch.  It simply allows the design to be broken into separable concerns, with a clearer ordering of dependencies.
 
 A rough strawman of the syntax is as follows.  In all cases, the extended type is shown to be generic, to indicate handling that complex case:
 
