@@ -107,6 +107,8 @@ for scoped Span<T> span
 
 Modern extensions continue to not allow adding fields or destructors to a type.
 
+Not all of these *new* extension member forms need be supported.  For example, we may decide that a `static extension indexer` or `static extension event` is just too esoteric, and can be cut.  The proposal shows them all though to demonstrate completeness of the idea.  All *classic* forms must be supported of course.
+
 
 ## Migration and compatibility
 
