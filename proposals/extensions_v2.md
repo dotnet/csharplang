@@ -95,7 +95,7 @@ namespace-declaration-member
     ;
 ```
 
-The use of `parameter` means all of the following are legal, with the same semantic extension methods have today:
+The use of `parameter` means all of the following are legal, with the same semantics that that classic extension methods have today:
 
 ```c#
 for ref Span<T> span
