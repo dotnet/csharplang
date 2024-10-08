@@ -49,7 +49,8 @@ extension E
 
     // Static extensions properties, indexers and events are all conceptually supportable.
     // Though we can decide which are sensible to have or not.
-    // Nested types supported.  They are supported in static classes.
+    
+    // Nested types must be supported to maintain compatibility with existing static classes with extension members in them.
 }
 ```
 
