@@ -175,6 +175,8 @@ extension Enumerable
 }
 ```
 
+Perfect source and binary compatibility are goals here.  That means any other features that work with static classes and extensions are expected to migrate over to extensions without change.  This includes, but it not limited to other features like 'attributes'.  For example, all attributes that might be present on a `static class` should migrate unchanged to an `extension`.  Other features not mentioned here should not be inferred to not be part of this design.  By default all features should continue being compatible, and only explicitly specified deviations should be allowed.
+
 ## Disambiguation
 
 Classic extension methods today can be disambiguated by falling back to static-invocation syntax.  For example, if `x.Count()` is ambiguous, it is possible to switch to some form of `StaticClass.Count(x)` to call the desired method.  A similar facility is needed for modern extension members.  While the existing method-invocation-translation approach works fine for methods (where the receiver can be remapped to the first argument of the static extension method call), it is ungainly for these other extension forms.
