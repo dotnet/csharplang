@@ -16,7 +16,7 @@ This new form subsumes C# 3's "classic extension methods", allowing migration to
 
 A rough strawman of the syntax is as follows.  In all cases, the extended type is shown to be generic, to indicate handling that complex case:
 
-Note: the syntax is intentionally a strawman to aid in discussion.  It is not intended to be final form.
+Note: the syntax is intentionally a strawman to aid in discussion.  It is not intended to be final form.  That said, it is useful to see any proposed form with all members to ensure that it's generally comprehensible.  A form that is only good for properties, but not for other members, it likely not appropriate.
 
 ```c#
 extension E
