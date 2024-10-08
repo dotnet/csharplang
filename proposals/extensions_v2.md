@@ -75,7 +75,7 @@ Open question: Support nested types? This seems reasonable and the same as addin
 
 ## Migration and compatibility
 
-Given an existing static class with extensions, a straightforward *semantically identical* translation to modern extensions is done in the following fashion.
+Given an existing static class with extensions, a straightforward *semantically identical* (both at the source and binary level) translation to modern extensions is done in the following fashion.
 
 ```c#
 // Existing style
