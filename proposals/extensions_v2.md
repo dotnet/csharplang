@@ -69,6 +69,16 @@ property-declaration
     | attributes? modifiers identifier type-parameters for-clause property-body;
 ```
 
+The use of `parameter` means all of the following are legal, with the same semantic extension methods have today:
+
+```c#
+for ref Span<T>
+for ref readonly Span<T>
+for in Span<T>
+for scoped ref Span<T>
+for scoped Span<T>
+```
+
 Modern extensions continue to not allow adding fields or destructors to a type.
 
 Open question: Support nested types? This seems reasonable and the same as adding any other static extension member.
