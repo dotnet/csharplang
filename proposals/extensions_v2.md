@@ -385,7 +385,7 @@ Conceptually (and trying to keep somewhat in line with classic extension methods
 
 Then, when trying to determine if an extension applies to a receiver, it would be akin to calling that function with the receiver and seeing if inference works.  In the above example that would mean performing type inference on `Infer(ints)` seeing that `T` then bound to `int`, which then gives you back `IListExtensions<int>`.  At that point, lookup would then find and perform overload resolution on `ForEach(Action<int>)` with the lambda parameter.
 
-This approach does fundamentally take expand on the initial extension-members approach as now calling extensions is done in two-phases.  An initial phase to determine and infer extension type parameters based on the receiver, and  a second phase to determine and perform overload resolution on the member.
+This approach does fundamentally expand on the initial extension-members approach, as now, calling extensions is done in two phases.  An initial phase to determine and infer extension type parameters based on the receiver, and a second phase to determine and perform overload resolution on the member.
 
 We believe this is very powerful and beneficial.  But there are deep design questions here which may cause this to be scheduled after the core extension members work happens.
 
