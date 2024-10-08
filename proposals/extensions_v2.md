@@ -248,7 +248,7 @@ TODO: Do an ecosystem check on what percentage of existing extensions could use 
 TODO: It's possible someone might have an extension where almost all extensions extend a single type, and a small handful do something slightly different (perhaps extending by `this ref`).  Would it be beneficial here to *still* allow the extension members to provide a `for-clause` to override that default for that specific member.  For example:
 
 ```c#
-extension StringExtensions for string
+extension StringExtensions for string str
 {
     // Lots of normal extension methods on string ...
 
