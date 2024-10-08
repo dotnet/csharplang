@@ -25,7 +25,13 @@ extension E
     public int M<X>(...) for SomeType<X> t { }
 
     // Property form:
+    // Auto-properties, or usage of 'field' not allowed as extensions do not have instance state.
     public int Count<X> for SomeType<X> { get { ... } }
+
+    // Event form:
+    // Note: would have to be the add/remove form.
+    // field-backed events would not be possible as extensions do not have instance state.
+    public event Action E<X> for SomeType<X> { add { } remove { } }
 
     // Indexer form:
     public int this<T>[int index] for SomeType<X> { get { ... } }
@@ -35,10 +41,6 @@ extension E
 
     // Constructor form:
     public SomeType<X>() for SomeType<X>
-
-    // Event form:
-    // Note: would have to be the add/remove form.  field-backed events would not be possible.
-    public event Action E<X> for SomeType<X> { add { } remove { } }
 
     // *Static* extension method (not possible today).  Called as `Assert.Boo("", "")`
     public static bool Boo(string s1, string s2) for Assert { }
