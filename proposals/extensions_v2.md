@@ -286,7 +286,7 @@ parameter
     ;
 ```
 
-Fortunately, extension methods today don't support a default value for the `this` parameter, so we don't have to support that.
+Fortunately, extension methods today don't support a default value for the `this` parameter, so we don't have to support migrating the second `= value` form forward, and we would consider writing a default value in a `for-clause` to be an error.
 
 However, for many extensions no name is really required.  All extension members (except for extension-constructors and extension-static-methods) are conceptually a way to extend `this` with new functionality.  This is so much so the case that we even designed classic extension methods to use the `this` keyword as their designator.  As such, we forsee potentially making the name optional, allowing one to write an extension like so:
 
