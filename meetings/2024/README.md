@@ -46,15 +46,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien)
 
+## C# Language Design Notes for 2024
+
 ### Wed Sep 25, 2024
 
-- C# 14 (Mads)
+- C# 14 (no notes)
 
 ### Mon Sep 23, 2024
 
 - *Design review* (no notes)
-
-## C# Language Design Notes for 2024
 
 ### Wed Sep 18, 2024
 
