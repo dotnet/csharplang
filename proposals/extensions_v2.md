@@ -206,7 +206,7 @@ The initial extension form values source and binary compatibility as core requir
 
 Because classic extension methods have very few restrictions, modern extension methods need to be flexible enough to support all the scenarios supported there.
 
-However, many codebases do not need all the flexibility that classic extension methods afforded.  For example, classic extension methods allow disparate extension methods in a single static class to target multiple different types.  For use cases where that isn't required, we forsee a natural extension (pun intended) where one can modern translate extensions like so:
+However, many codebases do not need all the flexibility that classic extension methods afforded.  For example, classic extension methods allow disparate extension methods in a single static class to target multiple different types.  For use cases where that isn't required, we forsee a natural extension (pun intended) where one can translate a modern extension like so:
 
 ```c#
 extension E
