@@ -169,7 +169,7 @@ extension Enumerable
 
 ## Disambiguation
 
-Classic extension methods today can be disambiguated by falling back to static-invocation syntax.  For example, if `x.Count()` is ambiguous, it is possible to switch to some form of `StaticClass.Count(x)` to call the desired method.  A similar facility is needed for modern extension methods.  While the existing method-invocation-translation approach works fine for methods (where the receiver can be remapped to the first argument of the static extension method call), it is ungainly for these other extension forms.
+Classic extension methods today can be disambiguated by falling back to static-invocation syntax.  For example, if `x.Count()` is ambiguous, it is possible to switch to some form of `StaticClass.Count(x)` to call the desired method.  A similar facility is needed for modern extension members.  While the existing method-invocation-translation approach works fine for methods (where the receiver can be remapped to the first argument of the static extension method call), it is ungainly for these other extension forms.
 
 As an initial strawman this proposal suggests reusing `cast expression` syntax for disambiguation purposes.  For example:
 
