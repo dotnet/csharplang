@@ -42,11 +42,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Extensions (Julien/Mads)
 - Field-backed properties: [open questions (short?)](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions) (Chuck)
 
+## C# Language Design Notes for 2024
+
 ### Mon Sep 30, 2024
 
-- Extension [conversions](https://github.com/dotnet/csharplang/pull/8340) (Julien)
+[C# Language Design Meeting for September 30th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-30.md)
 
-## C# Language Design Notes for 2024
+- Extensions
 
 ### Wed Sep 25, 2024
 
