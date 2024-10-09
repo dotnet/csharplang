@@ -423,8 +423,8 @@ static class MyExtensions
 
 This has the benefit of not needing two syntaxes for instance method extensions.  And reducing the amount of tweaks an extension member can make.
 
-Pros: It's clear what this is reducing to.  Merging ('partial') with existing static classes is clear.  All the restrictions on static-classes stay the same and don't need to reapply to 'extensions'.
-Cons: Later augmentations like `static class MyExtensions for string` may or may not feel good. 
+Pros: It's clear what this is reducing to.  Merging ('partial') with existing static classes is clear.  All the restrictions on static-classes stay the same and don't need to reapply to 'extensions'.  No need for new syntax for extension-instance-methods.
+Cons: Later augmentations like `static class MyExtensions for string` may or may not feel good.  Extension instance methods and other members would not have a consistent syntactic augmentation.  
 
 ## Variant 2: No generic non-method members.
 
