@@ -399,7 +399,7 @@ This warrants deep discussion about the path taken here and the future we are en
 
 # Alternate strawman syntaxes
 
-The above strawman chooses a big syntactic jump forward for all extension member cases.  That's not at all a requirement, and many options are possible.  A non-exhaustive list of variants are:
+The above strawman chooses a big syntactic jump forward for all extension member cases.  That's not at all a requirement, and many options are possible.  A non-exhaustive list of variants is:
 
 ## Variant 1: Reuse existing syntax when possible
 
