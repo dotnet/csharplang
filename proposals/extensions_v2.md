@@ -397,5 +397,65 @@ Roles, on the other hand, seem more fitted to the type space where they are trul
 
 This warrants deep discussion about the path taken here and the future we are envisioning, to ensure we're happy with any paths this current approach may close off or make more difficult.
 
+# Alternate strawmen syntaxes
+
+The above strawman chooses a big syntactic jump forward for all extension member cases.  That's not at all a requirement, and many options are possible.  A non-exhaustive list of variants are:
+
+## Variant 1: Reuse existing syntax when possible
+
+Instead of introducing `extension` or syntax for an instance-extension-method, we can reuse syntax.  For example:
+
+```c#
+// Continue to use static-class
+static class MyExtensions
+{
+    // Continue using existing syntax for instance extension methods
+    public static void Boo<T>(this T value) { }
+
+    // New instance extensions would be simpler:
+    // Property form:
+    // No more 'val' to name the instance.  You use 'this'.  Same for the other instance members.
+    public int Count<X> for SomeType<X> { get { ... } }
+
+    // Static extension members are the same as above.  They already do not name an 'instance'.
+}
+```
+
+This has the benefit of not needing two syntaxes for instance method extensions.  And reducing the amount of tweaks an extension member can make.
+
+## Variant 2: No generic non-method members.
+
+The original proposal puts generics on all members, beyond just methods.  However, this is not explicitly required, as this only adds capabilities to new extension members (extension methods already support generics).  As such, we could require that any non-method extensions on generic-types themselves stay non-generic, with only the extension being generic.  In other words:
+
+```c#
+
+extension E<T> for SomeType<X>
+{
+    // Property form:
+    // Auto-properties, or usage of 'field' not allowed as extensions do not have instance state.
+    public int Count { get { ... } }
+
+    // Event form:
+    // Note: would have to be the add/remove form.
+    // field-backed events would not be possible as extensions do not have instance state.
+    public event Action E { add { } remove { } }
+
+    // Indexer form:
+    public int this[int index] { get { ... } }
+
+    // Operator form:
+    // note: no SomeType<X> val, an operator is static, so it is not passed an instance value.
+    public static SomeTypeX<X> operator+(SomeType<X> s1, SomeType<X> s2) for SomeType<X> { ... }
+    
+    // Conversion form:
+    // note: no SomeType<X> val, an operator is static, so it is not passed an instance value.
+    public static implicit operator SomeTypeX<T>(int i) { ... }
+
+    // Constructor form:
+    // note: no SomeType<X> val, an operator is static, so it is not passed an instance value.
+    public SomeType() { }
+}
+```
+
 ## Detailed design
 [design]: #detailed-design
