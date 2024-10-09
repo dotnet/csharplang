@@ -462,5 +462,6 @@ extension E<T> for SomeType<X>
 
 Pros: No need to introduce non-method generic instance members.
 Cons: Being able to add non-method instance members to generic types requires solving generic extensions.
+
 ## Detailed design
 [design]: #detailed-design
