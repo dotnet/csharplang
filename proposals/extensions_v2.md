@@ -397,7 +397,7 @@ Roles, on the other hand, seem more fitted to the type space where they are trul
 
 This warrants deep discussion about the path taken here and the future we are envisioning, to ensure we're happy with any paths this current approach may close off or make more difficult.
 
-# Alternate strawmen syntaxes
+# Alternate strawman syntaxes
 
 The above strawman chooses a big syntactic jump forward for all extension member cases.  That's not at all a requirement, and many options are possible.  A non-exhaustive list of variants are:
 
