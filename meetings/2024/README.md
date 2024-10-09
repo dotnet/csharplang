@@ -7,8 +7,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
-- Unbound generic types in 'nameof' operator: https://github.com/dotnet/roslyn/pull/75368, https://github.com/dotnet/csharplang/issues/8480 (Cyrus + Joseph).
-- Simple lambda parameters with modifiers: https://github.com/dotnet/roslyn/pull/75400, https://github.com/dotnet/csharplang/pull/8487 (Cyrus)
 
 ## Recurring topics
 
@@ -23,9 +21,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Oct 21, 2024
 
+- [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
+
 ### Wed Oct 16, 2024
 
+- Unbound generic types in 'nameof' operator: https://github.com/dotnet/roslyn/pull/75368, https://github.com/dotnet/csharplang/issues/8480 (Cyrus + Joseph).
+- Simple lambda parameters with modifiers: https://github.com/dotnet/roslyn/pull/75400, https://github.com/dotnet/csharplang/pull/8487 (Cyrus)
+
 ### Mon Oct 14, 2024
+
+- Extensions - https://github.com/dotnet/csharplang/blob/main/proposals/extensions_v2.md Cyrus/Mads/Dustin/Julien/Joseph
 
 ### Wed Oct 9, 2024
 
@@ -34,7 +39,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Oct 7, 2024
 
-- [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
 - Extensions (Julien)
 
 ## C# Language Design Notes for 2024
