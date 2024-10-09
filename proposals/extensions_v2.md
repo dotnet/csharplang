@@ -423,6 +423,9 @@ static class MyExtensions
 
 This has the benefit of not needing two syntaxes for instance method extensions.  And reducing the amount of tweaks an extension member can make.
 
+Pros: It's clear what this is reducing to.  Merging ('partial') with existing static classes is clear.  All the restrictions on static-classes stay the same and don't need to reapply to 'extensions'.
+Cons: Later augmentations like `static class MyExtensions for string` may or may not feel good. 
+
 ## Variant 2: No generic non-method members.
 
 The original proposal puts generics on all members, beyond just methods.  However, this is not explicitly required, as this only adds capabilities to new extension members (extension methods already support generics).  As such, we could require that any non-method extensions on generic-types themselves stay non-generic, with only the extension being generic.  In other words:
