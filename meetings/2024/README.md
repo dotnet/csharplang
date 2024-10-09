@@ -37,12 +37,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
 - Extensions (Julien)
 
+## C# Language Design Notes for 2024
+
 ### Wed Oct 2, 2024
 
-- Extensions (Julien/Mads)
-- Field-backed properties: [open questions (short?)](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#open-ldm-questions) (Chuck)
+[C# Language Design Meeting for October 2nd, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-02.md)
 
-## C# Language Design Notes for 2024
+- Open questions in field
+    - `readonly` contexts and `set`
+    - `Conditional` code
+    - Interface properties and auto-accessors
+- Extensions
 
 ### Mon Sep 30, 2024
 
