@@ -182,6 +182,9 @@ Note that `MemoryExtensions.AsSpan` is used instead of the equivalent implicit o
 This means the codegen is different between LangVersions (the implicit operator is used in C# 13; the static method `AsSpan` is used in C# 14).
 On the other hand, the conversion can be emitted on .NET Framework (the `AsSpan` method exists there whereas the `string` operator does not).
 
+The explicit array to (ReadOnly)Span conversion first converts explicitly from the source array to an array with the destination element type
+and then to (ReadOnly)Span via the same helper as an implicit conversion would use, i.e., the corresponding `op_Implicit(T[])`.
+
 #### Better conversion from expression
 [betterness-rule]: #better-conversion-from-expression
 
@@ -239,7 +242,7 @@ static class C
 ```
 
 > [!WARNING]
-> Because the betterness rule is gated on `LangVersion >= 14`,
+> Because the betterness rule is defined for the span conversions which only exist in `LangVersion >= 14`,
 > API authors cannot add such new overloads if they want to keep supporting users on `LangVersion <= 13`.
 > For example, if .NET 9 BCL introduces such overloads, users that upgrade to `net9.0` TFM but stay on lower LangVersion
 > will get ambiguity errors for existing code.
