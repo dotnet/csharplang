@@ -1,5 +1,35 @@
 # Extension types
 
+## Open issue: Collection expression conversions
+
+```
+E e = [42]; // either because E is valid collection type or U is valid collection type
+U u = [42]; // implicit extension E makes U behave like a collection type (does this bring some attribute?)
+```
+
+## Open issue: Object creation conversion
+
+```
+E e = new();
+U u = new();
+U u = new U(); // finds E..ctor()?
+```
+
+## Open issue: 10.2.5 Implicit interpolated string conversions
+https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1025-implicit-interpolated-string-conversions
+
+## Open issue: 10.2.14 User-defined implicit conversions
+
+TODO2 punted
+
+E => conversion operators from E and U
+U => do you get conversion operators from implicit extension E too?
+Do we collect all the candidates in one bag or do we do two passes or do we not allow implicit case? (leaning towards allowing and doing two passes)
+
+## 10.2.15 Anonymous function conversions and method group conversions
+
+TODO2 punted
+
 ## Open issue: merging extension methods and extension members
 
 We need to revise the preference of extension types over extension methods (should mix and disambiguate duplicates if needed instead)
@@ -304,12 +334,21 @@ Adjust scoping rules so that type parameters are in scope within the 'for':
 implicit extension E<T> for T { }
 ```
 
-## Open issue: need to specify conversion rules
+## Open issue: need to specify user-defined conversion rules
 
 ```
-explicit extension R for U { } 
-R r = default;
-object o = r; // what conversion is that? if R doesn't have `object` as base type. What about interfaces?
+implicit extension EU for U
+{
+    public static implicit operator EU(int i) => ...;
+}
+implicit extension EInt for int { }
+
+R r = 42;
+U u = 43;
+
+EInt ei = 44;
+R r = ei;
+U u = ei;
 ```
 
 Should allow conversion operators. Extension conversion is useful. 
@@ -636,6 +675,136 @@ TODO Does this restriction on constraints cause issues with structs?
 ## Compat breaks
 
 Types and aliases may not be called "extension".  
+
+## Types
+
+We update the [Types section](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general) as follows:
+
+A reference type is a class type, an interface type, an array type, a delegate type, the dynamic type,
+***or an extension type with an underlying type that is a reference type**.
+
+A value type is either a struct type or an enumeration type,
+***or an extension type with an underlying type that is a value type**.
+
+***An extension type with an underlying type that is an enumeration type is an enumeration type.**
+
+All value types ***except extension types** implicitly inherit from the class System.ValueType
+
+A nullable value type can represent all values of its underlying type plus an additional null value. 
+A nullable value type is written `T?`, where T is the underlying type. 
+This syntax is shorthand for `System.Nullable<T>`, and the two forms can be used interchangeably.
+***An extension type with an underlying type that is a nullable value type is also a nullable value type.**
+
+TODO2 do we need to do the same for "delegate type"?
+
+### 8.3.11 Tuple types
+
+TODO2
+Note: we can't say that an extension on a tuple type *is* a tuple type, because
+tuple types have an arity and an extension type already has an (unrelated) arity.
+Maybe the same issue precludes extensions on nullable value types from being considered nullable value types themselves...
+
+## Conversions
+
+## 10.2 Implicit conversions
+
+### 10.2.2 Identity conversion
+https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1022-identity-conversion
+
+We add permutations with extensions:
+- [...]
+- ***From an extension_type `E` to a type `T` if the underlying type of `E` has an identity conversion to `T`.***
+- ***From a type `S` to an extension type `E` if `S` has an identity conversion to the underlying type of `E`.***
+
+### 10.2.3 Implicit numeric conversions
+
+Add permutations with extensions
+
+### 10.2.4 Implicit enumeration conversions
+
+https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1024-implicit-enumeration-conversions
+
+An implicit enumeration conversion permits a *constant_expression* with any integer type and the value zero to be converted to any *enum_type* and to any *nullable_value_type* whose underlying type is an *enum_type*. In the latter case the conversion is evaluated by converting to the underlying *enum_type* and wrapping the result ([§8.3.12](types.md#8312-nullable-value-types)).
+
+### 10.2.6 Implicit nullable conversions
+
+See Nullable conversions section.
+
+### 10.2.7 Null literal conversions
+
+No change
+
+### 10.2.8 Implicit reference conversions
+
+We add permutations with extensions
+
+### 10.2.9 Boxing conversions
+
+We add permutations with extensions
+
+### 10.2.10 Implicit dynamic conversions
+
+We add permutations with extensions
+
+### 10.2.11 Implicit constant expression conversions
+
+We add permutations with extensions
+
+### 10.2.12 Implicit conversions involving type parameters
+
+TODO2 this is a copy of original spec:
+
+For a *type_parameter* `T` that is known to be a reference type ([§15.2.5](classes.md#1525-type-parameter-constraints)), the following implicit reference conversions ([§10.2.8](conversions.md#1028-implicit-reference-conversions)) exist:
+
+- From `T` to its effective base class `C`, from `T` to any base class of `C`, and from `T` to any interface implemented by `C`.
+- From `T` to an *interface_type* `I` in `T`’s effective interface set and from `T` to any base interface of `I`.
+- From `T` to a type parameter `U` provided that `T` depends on `U` ([§15.2.5](classes.md#1525-type-parameter-constraints)).  
+  > *Note*: Since `T` is known to be a reference type, within the scope of `T`, the run-time type of `U` will always be a reference type, even if `U` is not known to be a reference type at compile-time. *end note*
+- From the null literal ([§6.4.5.7](lexical-structure.md#6457-the-null-literal)) to T.
+
+For a *type_parameter* `T` that is *not* known to be a reference type [§15.2.5](classes.md#1525-type-parameter-constraints), the following conversions involving `T` are considered to be boxing conversions ([§10.2.9](conversions.md#1029-boxing-conversions)) at compile-time. At run-time, if `T` is a value type, the conversion is executed as a boxing conversion. At run-time, if `T` is a reference type, the conversion is executed as an implicit reference conversion or identity conversion.
+
+- From `T` to its effective base class `C`, from `T` to any base class of `C`, and from `T` to any interface implemented by `C`.  
+  > *Note*: `C` will be one of the types `System.Object`, `System.ValueType`, or `System.Enum` (otherwise `T` would be known to be a reference type). *end note*
+- From `T` to an *interface_type* `I` in `T`’s effective interface set and from `T` to any base interface of `I`.
+
+For a *type_parameter* `T` that is *not* known to be a reference type, there is an implicit conversion from `T` to a type parameter `U` provided `T` depends on `U`. At run-time, if `T` is a value type and `U` is a reference type, the conversion is executed as a boxing conversion. At run-time, if both `T` and `U` are value types, then `T` and `U` are necessarily the same type and no conversion is performed. At run-time, if `T` is a reference type, then `U` is necessarily also a reference type and the conversion is executed as an implicit reference conversion or identity conversion ([§15.2.5](classes.md#1525-type-parameter-constraints)).
+
+The following further implicit conversions exist for a given type parameter `T`:
+
+- From `T` to a reference type `S` if it has an implicit conversion to a reference type `S₀` and `S₀` has an identity conversion to `S`. At run-time, the conversion is executed the same way as the conversion to `S₀`.
+- From `T` to an interface type `I` if it has an implicit conversion to an interface type `I₀`, and `I₀` is variance-convertible to `I` ([§18.2.3.3](interfaces.md#18233-variance-conversion)). At run-time, if `T` is a value type, the conversion is executed as a boxing conversion. Otherwise, the conversion is executed as an implicit reference conversion or identity conversion.
+
+### 10.2.13 Implicit tuple conversions
+
+We add permutations with extensions
+
+TODO2 do we say that an extension on a tuple type *is* a tuple type?
+
+### 10.2.16 Default literal conversions
+
+No change
+
+### 10.2.17 Implicit throw conversions
+
+No change
+
+## 10.3 Explicit conversions
+
+TODO2 not done
+
+### 10.6.1 Nullable conversions
+
+We add permutations with extensions
+For each of the predefined implicit or explicit conversions that convert from a non-nullable value type `S` to a non-nullable value type `T`, the following nullable conversions exist:
+
+- An implicit or explicit conversion from `S?` to `T?`
+- An implicit or explicit conversion from `S` to `T`?
+- An explicit conversion from `S?` to `T`.
+
+TODO2 we intend to prevent conversion from E1 to E2 even if they share underlying type or have convertible underlying types. How do we achieve this? Also in the nullable cases?
+
+TODO2 extension E2 for int? { } // disallow System.Nullable<E2> because System.Nullable`1 doesn't satisfy the struct constraint
 
 ## Expressions
 
