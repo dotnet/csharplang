@@ -6,6 +6,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- Meeting of the Meeting - Notetaking updates and open questions (Fred)
 - Triage (working set)
 
 ## Recurring topics
