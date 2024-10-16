@@ -6,6 +6,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
+- [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
 - Meeting of the Meeting - Notetaking updates and open questions (Fred)
 - [typeof string constants](https://github.com/dotnet/csharplang/issues/8505) (Joseph)
 - Triage (working set)
@@ -23,7 +24,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Oct 21, 2024
 
-- [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
+- Extensions (Mads)
 
 ### Wed Oct 16, 2024
 
