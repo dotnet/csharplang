@@ -35,12 +35,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extensions - https://github.com/dotnet/csharplang/blob/main/proposals/extensions_v2.md Cyrus/Mads/Dustin/Julien/Joseph
 
+## C# Language Design Notes for 2024
+
 ### Wed Oct 9, 2024
 
-- Triage
-- Extensions - https://github.com/dotnet/csharplang/blob/main/proposals/extensions_v2.md Cyrus/Mads/Dustin/Julien/Joseph
+[C# Language Design Meeting for October 9th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-09.md)
 
-## C# Language Design Notes for 2024
+- Extensions
 
 ### Mon Oct 7, 2024
 
