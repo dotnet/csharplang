@@ -392,7 +392,7 @@ Therefore for the purpose of capturing in lambdas, async, iterators, stack spill
 ### Metadata representation.
 When `System.Runtime.CompilerServices.IsReadOnlyAttribute` is applied to the return of a byref returning method, it means that the method returns a readonly reference.
 
-In addition, the result signature of such methods (and only those methods) must have `modreq[System.Runtime.CompilerServices.IsReadOnlyAttribute]`.
+In addition, the result signature of such methods (and only those methods) must have `modreq[System.Runtime.CompilerServices.InAttribute]`.
 
 **Motivation**: this is to ensure that existing compilers cannot simply ignore `readonly` when invoking methods with `ref readonly` returns
 
