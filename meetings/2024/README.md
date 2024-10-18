@@ -26,12 +26,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extensions (Mads)
 
+## C# Language Design Notes for 2024
+
 ### Wed Oct 16, 2024
 
-- Unbound generic types in 'nameof' operator: https://github.com/dotnet/roslyn/pull/75368, https://github.com/dotnet/csharplang/issues/8480 (Cyrus + Joseph).
-- Simple lambda parameters with modifiers: https://github.com/dotnet/roslyn/pull/75400, https://github.com/dotnet/csharplang/pull/8487 (Cyrus)
+[C# Language Design Meeting for October 16th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-16.md)
 
-## C# Language Design Notes for 2024
+- Simple lambda parameters
+- Unbound generic types in `nameof`
+- `typeof` string constants
 
 ### Mon Oct 14, 2024
 
