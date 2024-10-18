@@ -10,7 +10,7 @@ static class Extensions
     public static X ToX<Y>(this IEnumerable<Y> values) => ...
 }
 
-implicit extension ImmutableArrayExtensions<Y> for ImmutableArray<Y>
+extension ImmutableArrayExtensions<Y> for ImmutableArray<Y>
 {
     public X ToX() => ...
 }
@@ -22,7 +22,7 @@ static class Extensions
     public static X ToX<Y>(this ImmutableArray<Y> values) => ...
 }
 
-implicit extension IEnumerableExtensions<Y> for IEnumerable<Y>
+extension IEnumerableExtensions<Y> for IEnumerable<Y>
 {
     public X ToX() => ...
 }
@@ -55,7 +55,7 @@ public static class CExt
     public static void M(this C c, IEnumerable<int> e) => ...
 }
 
-public implicit extension E1 for C
+public extension E1 for C
 {
     public Action<ImmutableArray<int>> M => ...
 }
@@ -69,7 +69,7 @@ static class IEnumerableExtensions
     public int Count<T>(this IEnumerable<T> t);
 }
 
-implicit extension MyTableExtensions for TableIDoNotOwn
+extension MyTableExtensions for TableIDoNotOwn
 {
     public int Count { get { ... } }
 }
@@ -112,7 +112,7 @@ public struct S
     public void Increment() { field++; }
 }
 
-public implicit extension E for S
+public extension E for S
 {
     public void M() // readonly modifier is currently disallowed
     {
@@ -130,7 +130,7 @@ new C().M(); // ambiguous once we mix all extensions
 
 class C { }
 
-implicit extension E for C
+extension E for C
 {
     public static void M() { }
 }
@@ -153,7 +153,7 @@ Nested1.M(); // Nested1 should be in scope too (as if it were declared as a stat
 Nested2.M();
 
 class C { }
-implicit extension E for C
+extension E for C
 {
     public class Nested1 { public static void M() { }  }
 }
@@ -166,7 +166,7 @@ using static Extension;
 
 // M and Nested should be in scope
 
-explicit extension Extension for object
+extension Extension for object
 {
     public static void M() { }
     public class Nested { }
@@ -197,25 +197,14 @@ we capture the receiver when the type parameter is a reference type.
 var o = new object();
 o.M(o = null);
 
-implicit extension E<T> for T
+extension E<T> for T
 {
     // emitted as `void M(ref modreq(ExtensionAttribute) T, object)`
     void M(object x) { this.ToString(); }
 }
 ```
 
-## Open issue: type erasure
-
-Confirm the format with partner teams.  
-Monitor the volume of metadata with some preview usage.  
-Finalize the format to support tuple names, dynamic, nullability and other erased information.  
-Confirm how the encoding works with local functions.  
-
-## Open issue: consider disallowing pointers to extension types
-
-This question was raised in LDM 2024-07-22 but was not resolved.
-
-## Open issue: allow variance in implicit extension compatibility
+## Open issue: allow variance in extension compatibility
 
 The current rules are pretty strict:
 > a possible type substitution on the type parameters of `X` yields underlying type `U`, 
@@ -230,10 +219,104 @@ Also, we may want to allow for variance (see example below).
 But this would involve considering conversion when evaluating compatibility.  
 ```csharp
 IEnumerable<string>.M();
+ienumerableOfString.M2();
 
-implicit extension E for IEnumerable<object> 
+extension E for IEnumerable<object>
+implicit extension E for IEnumerable<object>
 {
     public static void M() { }
+    public void M2() { M(); }
+}
+```
+
+## Open issue: align with method type inference
+
+In a generic extension scenario, the extension's type arguments are determined separately from the
+method's type arguments, using only information from the receiver.
+But in a similar scenario with classic extension methods, type inference is applied to the entire signature,
+allowing all arguments to influence the bounds for the type parameters involved in the `this` parameter.
+
+```
+public class C
+{
+    public void M(I<string> i, out object o)
+    {
+        i.M(out o); // infers E.M<object>
+        i.M2(out o); // error CS1503: Argument 1: cannot convert from 'out object' to 'out string'
+    }
+}
+public static class E
+{
+   public static void M<T>(this I<T> i, out T t) { t = default; }
+}
+public static extension E2<T> for I<T>
+{
+   public static void M2(out T t) { t = default; }
+}
+public interface I<out T> { }
+```
+
+Here's another scenario where our method for finding a compatible substituted extension type differs from type inference:
+```
+I<Derived> i = default;
+i.M();
+i.M2(); // error CS1061: 'I<Derived>' does not contain a definition for 'M2' and no accessible extension method 'M2' accepting a first argument of type 'I<Derived>' could be found
+
+public class C<T> { }
+public class Derived : C<int> { }
+
+public interface I<out T> { }
+
+public static class Extension
+{
+    public static void M<T>(this I<C<T>> i) { }
+}
+public static extension Extension2<T> for I<C<T>>
+{
+   public static void M2() { }
+}
+```
+
+Proposal:
+We can use a mechanism that follows classic extension method resolution more closely:
+1. find all the candidate members
+2. cook up some expanded signatures:
+  - join the type parameters of the extension type with the type parameters of the method
+  - prepend a `this` parameter for the receiver with the extended type
+3. do type inference using the receiver and the arguments
+4. apply overload resolution (which checks allowed conversions for the `this` parameter)
+
+Note: this approach would allow us to mix classic and new extension methods. We pool them all for a given scope then do overload resolution on the whole set.  
+Note: we probably no longer need a special rule to prefer "more specific extension members".  
+Note: when the receiver is a type, we probably want to go through the same steps, even if the type cannot be instantiated.  
+
+The same kind of process may work for resolution of extension operators:
+1. find all the extension operators in scope
+2. taking each operand/parameter in turn: apply type inference on parameter type and argument to figure out the extension's type parameters
+3. keep the substitutions that work
+4. apply binary overload resolution
+
+Example:
+```
+Derived derived = ...;
+_ = derived + b;
+
+public class C<T> { }
+public class Derived : C<int> { }
+
+public extension E<T> for C<T>
+{
+    public static implicit bool operator +(C<T> c, B b) { } // we require that one of the parameter types be the extended type
+}
+```
+
+```
+IEnumerable<string> i = ...;
+_ = i + b;
+
+public extension E for IEnumerable<object>
+{
+    public static implicit bool operator +(IEnumerable<object> i, B b) { }
 }
 ```
 
@@ -242,13 +325,13 @@ implicit extension E for IEnumerable<object>
 Should we allow top-level nullability on underlying type?  
 
 ```csharp
-implicit extension E for object? { }
+extension E for object? { }
 ```
 
 What is the nullability of `this` within an extension member?  
 
 ```csharp
-implicit extension E for object
+extension E for object
 {
     public void M()
     {
@@ -264,7 +347,7 @@ x.M(); // is this safe?
 
 ```csharp
 C<object>.M(); // warn?
-implicit extension E for C<object?>
+extension E for C<object?>
 {
     public static void M() { }
 }
@@ -293,7 +376,7 @@ since extensions are emitted as static classes.
 
 ## Open issue: extension member lookup in usings
 
-We don't resolve implicit extension members in usings, due to cycles.  
+We don't resolve extension members in usings, due to cycles.  
 This needs to be investigated further to disentangle whether all cycles are implementation-specific
 or some are inherent to the language feature.
 
@@ -301,44 +384,14 @@ or some are inherent to the language feature.
 
 Adjust scoping rules so that type parameters are in scope within the 'for':
 ```csharp
-implicit extension E<T> for T { }
+extension E<T> for T { }
 ```
-
-## Open issue: need to specify conversion rules
-
-```
-explicit extension R for U { } 
-R r = default;
-object o = r; // what conversion is that? if R doesn't have `object` as base type. What about interfaces?
-```
-
-Should allow conversion operators. Extension conversion is useful. 
-Example: from `int` to `string` (done by `StringExtension`).  
-But we should disallow user-defined conversions from/to underlying type 
-or inherited extensions, because a conversion already exists.  
-Conversion to interface still disallowed.  
-Could we make the conversion to be explicit identity conversion instead
-of implicit?  
-User-defined conversion should be allowed, except where it conflicts with a built-in
-conversion (such as with an underlying type).  
 
 ## Open issue: need to specify constructor and operator members
 
 Do we want to allow constructors and `required` properties?  
 Do we want to allow operators?  
-
-## Open issue: need to specify type inference rules
-
-We need to review Method type inference: 7.5.2.9 Lower-bound interfaces, to see whether any updates are needed.  
-
-We want to allow the following and decide the inferred type:
-```csharp
-var c = new C();
-var e = (E)c; // E is an extension type
-M(c, e); // M<C> or M<E>?
-
-void M<T>(T t1, T t2) { }
-```
+There are issues around attribute constructors and `initonly` members too.
 
 ## Open issue: naming convention?
 
@@ -365,37 +418,24 @@ Will need to check with the WG as I don't recall the reasoning for this.
 
 The static+this codegen strategy should work for ref structs and classic extension methods are allowed on ref structs.
 
+## Open issue: shadowing rules
+
+Confirm whether extension members that shadow underlying type members should result in a warning.
+
 ## Summary
 [summary]: #summary
 
-The purpose of "extensions" is to augment or adapt existing types to new scenarios,
+The purpose of "extensions" is to augment existing types to new scenarios,
 when those types are not under your control, or where changing them would
-negatively impact other uses of them. The adaptation can be in the form of
-adding new function members as well as implementing additional interfaces.
+negatively impact other uses of them. The adaptation is in the form of
+adding new function members.
 
-`explicit extension CustomerExtension for byte[] : PersonExtension { ... }`
-`implicit extension EnumExtension for Enum { ... }`
+`extension EnumExtension for Enum { ... }`
 
 ## Motivation
 [motivation]: #motivation
 
-Explicit extensions address two main classes of scenarios: "augmentation" scenarios
-(fit an existing value with a *new* member) and "adaptation" scenarios
-(fit an existing value to an *existing* interface).
-
-In addition, implicit extensions would provide for additional kinds of extension members
-beyond today's extension methods, and potentially for "extension interfaces" in the future.
-
-### Augmentation scenarios
-
-Augmentation scenarios allow existing values to be seen through the lens of
-a "stronger" type - an extension that provides additional function members on the value.
-
-### Adaptation scenarios
-
-Adaptation scenarios allow existing values to be adapted to existing interfaces,
-where an extension provides details on how the interface members are implemented.  
-Those are not out-of-scope for this document.  
+Extensions provide for additional kinds of extension members beyond today's extension methods.
 
 ## Design
 
@@ -408,7 +448,7 @@ type_declaration
     ;
 
 extension_declaration
-    : extension_modifier* ('implicit' | 'explicit') 'extension' identifier type_parameter_list? ('for' type)? type_parameter_constraints_clause* extension_body
+    : extension_modifier* 'extension' identifier type_parameter_list? ('for' type)? type_parameter_constraints_clause* extension_body
     ;
 
 extension_body
@@ -443,18 +483,17 @@ An extension type (new kind of type) is declared by a *extension_declaration*.
 
 The extension type does not **inherit** members from its underlying type 
 (which may be `sealed` or a struct), but
-the lookup rules are modified to achieve a similar effect (see below).  
+the lookup rules are modified to make those members available within the extension type (see below).  
 
-There is an identity conversion between an extension and its underlying type.
-
-An extension type satisfies the constraints satisfied by its underlying type (see section on constraints). 
+An extension type is a static class.  
 
 ### Underlying type
 
 The *extension_underlying_type* type may not be `dynamic`, a pointer, 
 a ref struct type, a ref type or an extension.  
-The underlying type may not include an *interface_type_list* (this is part of the Interface Phase).  
+The underlying type may not include an *interface_type_list*.  
 The extension type must be static if its underlying type is static.  
+The underlying type must include all the type parameters from the extension type.  
 
 When a partial extension declaration includes an underlying type specification,
 that underlying type specification shall reference the same type as all other parts
@@ -466,9 +505,6 @@ It is a compile-time error if the underlying type differs amongst all the parts
 of an extension declaration.  
 
 ### Modifiers
-
-It is a compile-time error if the `implicit` or `explicit` modifiers differ amongst
-all the parts of an extension declaration.  
 
 The permitted modifiers on an extension type are `partial`, 
 `unsafe`, `static`, `file` and the accessibility modifiers.  
@@ -482,14 +518,6 @@ that specification shall agree with all other parts that include an accessibilit
 If no part of a partial extension includes an accessibility specification, 
 the type is given the appropriate default accessibility (`internal`).
 
-## Implicit extension type
-
-An implicit extension type is an extension whose members can be found on the underlying type
-(or a value of the underlying type) when the extension is "in scope"
-and compatible with the underlying type (see extension member lookup section).
-
-The underlying type must include all the type parameters from the implicit extension type.  
-
 ### Terminology
 
 We'll use "extends" for relationship to underlying/extended type 
@@ -497,7 +525,7 @@ We'll use "extends" for relationship to underlying/extended type
 
 ```csharp
 struct U { }
-explicit extension X for U { }
+extension X for U { }
 ```
 "X has underlying type U"  
 "X extends U"  
@@ -517,31 +545,13 @@ Note those also apply to visibility constraints of file-local types (not yet spe
 The extension type members may not use the `virtual`, `abstract`, `sealed`, `override` modifiers,
 or the `protected` access modifier.  
 Member methods may not use the `readonly` modifier.  
-The `new` modifier is allowed and the compiler will warn that you should
-use `new` when shadowing.  
 
 An extension cannot contain a member declaration with the same name as the extension.
 
 #### Signatures, overloading and hiding
 
 The existing [rules for signatures](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#76-signatures-and-overloading) apply.  
-Two signatures differing by an extension vs. its underlying type are considered to be the *same signature*.
-
-Shadowing includes underlying type.  
-
-```
-class U { public void M() { } }
-explicit extension R for U { /*new*/ public void M() { } } // wins when dealing with an R
-```
-
-```
-class U { public void M() { } }
-implicit extension X for U { /*new*/ public void M() { } } // ignored in some cases
-U u;
-u.M(); // U.M (ignored X.M)
-X x;
-x.M(); // X.M
-```
+Extension types may not appear in signatures.  
 
 #### Constants
 
@@ -585,54 +595,6 @@ class UnderlyingType { }
 UnderlyingType.NestedType x = null; // okay
 ```
 
-## Constraints
-
-TL;DR: An extension satisfies the constraints satisfied by its underlying type. Extensions cannot be used as type constraints.  
-
-We modify the [rules on satisfying constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/types.md#845-satisfying-constraints) as follows:
-
-Whenever a constructed type or generic method is referenced, the supplied type arguments
-are checked against the type parameter constraints declared on the generic type or method.
-For each `where` clause, the type argument `A` that corresponds to the named type parameter
-is checked against each constraint as follows:
-
-- If the constraint is a class type, an interface type, or a type parameter,
-  let `C` represent that constraint with the supplied type arguments substituted 
-  for any type parameters that appear in the constraint. To satisfy the constraint, 
-  it shall be the case that type `A` is convertible to type `C` by one of the following:
-  - An identity conversion
-  - An implicit reference conversion
-  - A boxing conversion, provided that type `A` is a non-nullable value type.
-  - An implicit reference, boxing or type parameter conversion from a type parameter `A` to `C`.
-- If the constraint is the reference type constraint (`class`), the type `A` shall satisfy one of the following:
-  - `A` is an interface type, class type, delegate type, array type or the dynamic type.
-  - `A` is a type parameter that is known to be a reference type.
-  - ***`A` is an extension type with an underlying type that satisfies the reference type constraint.**
-- If the constraint is the value type constraint (`struct`), the type `A` shall satisfy one of the following:
-  - `A` is a `struct` type or `enum` type, but not a nullable value type.
-  - `A` is a type parameter having the value type constraint.
-  - ***`A` is an extension type with an underlying type that satisfies the value type constraint.**
-- If the constraint is the constructor constraint `new()`, 
-  the type `A` shall not be `abstract` and shall have a public parameterless constructor. 
-  This is satisfied if one of the following is true:
-  - `A` is a value type, since all value types have a public default constructor.
-  - `A` is a type parameter having the constructor constraint.
-  - `A` is a type parameter having the value type constraint.
-  - `A` is a `class` that is not abstract and contains an explicitly declared public constructor with no parameters.
-  - `A` is not `abstract` and has a default constructor.
-  - ***`A` is an extension type with an underlying type that satisfies the constructor constraint.**
-
-A compile-time error occurs if one or more of a type parameter’s constraints are not satisfied by the given type arguments.
-
-By the existing [rules on type parameter constraints](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1425-type-parameter-constraints)
-extensions are disallowed in constraints (an extension is neither a class or an interface type).
-
-```
-where T : Extension // error
-```
-
-TODO Does this restriction on constraints cause issues with structs?
-
 ## Compat breaks
 
 Types and aliases may not be called "extension".  
@@ -641,7 +603,7 @@ Types and aliases may not be called "extension".
 
 ### Primary expressions
 
-TL;DR: For certain syntaxes (member access, element access), we'll fall back to an implicit extension member lookup.  
+TL;DR: For certain syntaxes (member access, element access), we'll fall back to an extension member lookup.  
 
 #### Simple names
 
@@ -708,7 +670,7 @@ void M<T>(T t)
     T.MStatic() // disallow
     t.MInstance() // allow
 }
-implicit extension E for U
+extension E for U
 {
     public static void MStatic() { }
     public void MInstance() { }
@@ -740,7 +702,7 @@ static class C
     public static void Method() => throw null;
 }
 
-static explicit extension E for C
+static extension E for C
 {
     public static void Method() { } // picked
 }
@@ -772,7 +734,7 @@ extensions (extension type members or extension methods) will not apply.
 
 This succeeds if we find either:
 - for the `Type` case,
-  an substituted compatible implicit extension type `X` for `Type`
+  an substituted compatible extension type `X` for `Type`
   so that the corresponding invocation can take place:
 ```csharp
 X . «identifier» ( )
@@ -781,7 +743,7 @@ X . «identifier» < «typeargs» > ( )
 X . «identifier» < «typeargs» > ( «args» )
 ```
 - for the `expr` case where the expression has type `Type`,
-  a substituted compatible implicit extension type `X` for `Type`
+  a substituted compatible extension type `X` for `Type`
   so that the corresponding invocation can take place:
 ```csharp
 ((X)expr) . «identifier» ( )
@@ -865,7 +827,7 @@ The preceding rules mean:
 
 #### Indexer access
 
-TL;DR: For non-extension types, we'll fall back to an implicit extension member lookup. For extension types, we include indexers from the underlying type.
+TL;DR: For non-extension types, we'll fall back to an extension member lookup.
 
 We modify the [element access rules](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128111-general) as follows:
 
@@ -901,9 +863,7 @@ of a class, struct, interface, ***or extension** type `T`, and `A` is an *argume
 
 ```csharp
 new C()[42]; // binds to C.this[int] from instance type
-new E()[42]; // binds to C.this[int] from underlying type
 new C()[""]; // binds to C.this[string] from instance type
-new E()[""]; // binds to E.this[string] (extension indexer access)
 
 class C
 {
@@ -911,7 +871,7 @@ class C
     public int this[int i] => throw null;
 }
 
-implicit extension E for C
+extension E for C
 {
     public new int this[string s] => throw null;
 }
@@ -932,7 +892,7 @@ an attempt is made to process the construct as an extension indexer access.
 If «expr» or any of the «args» has compile-time type `dynamic`, extension methods will not apply.
 
 This succeeds if, given that «expr» has underlying type `Type`, we find
-a substituted compatible implicit extension type `X` for `Type`
+a substituted compatible extension type `X` for `Type`
 so that the corresponding element access can take place:
 ```csharp
 ((X)expr) . «identifier» [ ]
@@ -974,10 +934,10 @@ We modify the [this access rules](https://github.com/dotnet/csharpstandard/blob/
 A this_access has one of the following meanings:
 - [...]
 - ***When this is used in a primary_expression within an instance method or instance accessor of an extension with an underlying type known to be a reference type,
-  it is classified as a value. The type of the value is the instance type of the extension within which the usage occurs, 
+  it is classified as a value. The type of the value is the underlying type of the extension within which the usage occurs, 
   and the value is a reference to the object for which the method or accessor was invoked.**
 - ***When this is used in a primary_expression within an instance method or instance accessor of an extension with an underlying type known to be a value type, 
-  it is classified as a variable. The type of the variable is the instance type of the extension within which the usage occurs.
+  it is classified as a variable. The type of the variable is the underlying type of the extension within which the usage occurs.**
   - If the method or accessor is not an iterator or async function, the `this` variable represents the extension for which the method or accessor was invoked.
     - If the value type is a readonly struct, the `this` variable behaves exactly the same as an `in` parameter of the struct type
     - Otherwise the `this` variable behaves exactly the same as a `ref` parameter of the value type
@@ -988,8 +948,6 @@ A this_access has one of the following meanings:
 
 We'll start by disallowing [base access](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#12814-base-access) 
 within extension types.  
-Casting seems an adequate solution to access hidden members: `((R)r2).M()`.  
-In the future, maybe `base.` could refer to underlying value.   
 
 ### Member lookup (reviewed in LDM 2024-02-24)
 
@@ -1015,15 +973,15 @@ Note: this allows method groups that contain members from the extension and the 
 ```csharp
 class U
 {
-    public void M2() { }
+    public static void M2() { }
 }
 
-explicit extension R : U
+extension R : U
 {
-    public void M2(int i) { }
+    public static void M2(int i) { }
     void M()
     {
-        M2(); // find `U.M2()`
+        R.M2(); // find `U.M2()`
     }
 }
 ```
@@ -1032,22 +990,22 @@ Note: this also affects what members are considered shadowed, so that we don't g
 ```csharp
 class U
 {
-    public void M2() { }
+    public static void M2() { }
 }
 
-explicit extension R : U
+extension R : U
 {
-    public void M2() { } // warning: needs `new`
+    public static void M2() { } // warning: needs `new`
     void M()
     {
-        M2(); // find `R.M2()`, no ambiguity
+        R.M2(); // find `R.M2()`, no ambiguity
     }
 }
 ```
 
 #### Compatible substituted extension types
 
-TL;DR: We can determine whether an implicit extension is compatible with a given underlying type
+TL;DR: We can determine whether an extension is compatible with a given underlying type
 and when successful this process yields one or more extension types we can use
 (including required substitutions).  
 
@@ -1062,7 +1020,7 @@ We call the resulting substituted types of `X` the "compatible substituted exten
 
 ```csharp
 #nullable enable
-implicit extension Extension<T> for Underlying<T> where T : class { }
+extension Extension<T> for Underlying<T> where T : class { }
 class Base<T> { }
 class Underlying<T> : Base<T> { }
 
@@ -1073,16 +1031,16 @@ Underlying<string?> u3; // Extensions<string?> is a compatible extension with u3
                        // but its usage will produce a warning
 ```
 
-Note: members from some other implicit extension type can apply to an extension type:
+Note: members from some other extension type can apply to an extension type:
 ```csharp
-explicit extension E1 for C
+extension E1 for C
 {
     void M()
     {
         this.M2(); // ok, E2 is compatible with type E1 since C is a base type of E1 and E2 extends C
     }
 }
-implicit extension E2 for C
+extension E2 for C
 {
     public void M2() { }
 }
@@ -1095,7 +1053,7 @@ _ = C.M; // ambiguous, C<int>.M and C<string>.M are both applicable
 interface I<T> { }
 class C : I<int>, I<string> { }
 
-implicit extension E<T> for I<T>
+extension E<T> for I<T>
 {
     public static string M = null;
 }
@@ -1191,12 +1149,12 @@ class Base { }
 
 class C : Base { }
 
-implicit extension E1 for Base
+extension E1 for Base
 {
     public static int M(int i) => throw null;
 }
 
-implicit extension E2 for C
+extension E2 for C
 {
     public static int M(int i) => i;
 }
@@ -1209,12 +1167,12 @@ class Base { }
 
 class C : Base { }
 
-implicit extension E1 for Base
+extension E1 for Base
 {
     public static int P => throw null;
 }
 
-implicit extension E2 for C
+extension E2 for C
 {
     public static int P => i;
 }
@@ -1236,28 +1194,11 @@ The rules for determining the [natural function type of a method group](https://
 1. For each scope, we construct the set of all candidate methods:
   - for the initial scope, methods on the relevant type with arity matching the provided type arguments and satisfying constraints with the provided type arguments are in the set if they are static and the receiver is a type, or if they are non-static and the receiver is a value
     - extension methods in that scope that can be substituted with the provided type arguments and reduced using the value of the receiver while satisfying constraints are in the set
-    - ***methods from compatible implicit extension types applicable in that scope which can be substituted with the provided type arguments and satisfying constraints with those are in the set**
+    - ***methods from compatible extension types applicable in that scope which can be substituted with the provided type arguments and satisfying constraints with those are in the set**
   1. If we have no candidates in the given scope, proceed to the next scope.
   2. If the signatures of all the candidates do not match, then the method group doesn't have a natural type
   3. Otherwise, resulting signature is used as the natural type
 2. If the scopes are exhausted, then the method group doesn't have a natural type
-
-Note: extension types members and extension methods are considered on par, as illustrated by this example:  
-```
-var x = new C().M; // no natural function type
-
-class C { }
-
-implicit extension E for C
-{
-	public static void M() { }
-}
-
-static class Extensions
-{
-	public static void M(this C c, int i) { }
-}
-```
 
 ### Identical simple names and type names
 
@@ -1285,7 +1226,7 @@ TODO update this section once the rules are spelled out for https://github.com/d
 ```
 1.Property = 42; // Error reporting that 1 (which is a struct) is not a variable
 
-implicit extension E for int
+extension E for int
 {
     public int Property { set => throw null; }
 }
@@ -1296,15 +1237,14 @@ implicit extension E for int
 Extensions are emitted as static class types with an extension marker method.  
 
 The extension marker method encodes the underlying type as parameter.  
-It is public and static, and is called `<ImplicitExtension>$` for implicit extensions and 
-`<ExplicitExtension>$` for explicit extensions.  
+It is public and static, and is called `<Extension>$`.  
 It allows roundtripping of extension symbols through metadata (full and reference assemblies).  
 
-For example: `implicit extension R for UnderlyingType` yields
-`public static void <ImplicitExtension>$(UnderlyingType)`.  
+For example: `extension R for UnderlyingType` yields
+`public static void <Extension>$(UnderlyingType)`.  
 
 Instance method/property/indexer declarations in source are represented as static declarations in metadata:
-  - A new parameter is added at the beginning, it represents `this` with erased extension type.
+  - A new parameter is added at the beginning, it represents `this` with extended type.
   - The parameter's name is unspeakable
   - The type of the parameter is the extended type
   -  A `modreq(System.Runtime.CompilerServices.ExtensionAttribute)` is added to the type.
@@ -1314,7 +1254,7 @@ Instance method/property/indexer declarations in source are represented as stati
 
 A method example:
 ``` C#
-public implicit extension E for C
+public extension E for C
 {
     public void Method()
     {
@@ -1335,7 +1275,7 @@ compiler and previous C# compiler.
 
 A property example: 
 ``` C#
-public implicit extension E for C
+public extension E for C
 {
     public int P1
     {
@@ -1374,7 +1314,7 @@ Including VB compiler and previous C# compiler.
 
 An event example:
 ``` C#
-public implicit extension E for C
+public extension E for C
 {
     public event System.Action E1
     {
@@ -1421,7 +1361,7 @@ with ExtensionAttribute modreq.
 
 However, other tools and compilers (VB, for example) won't be able to disambiguate APIs based on presence of the `modreq`.
 ``` C#
-public implicit extension E for C
+public extension E for C
 {
     public void Method()
     {
@@ -1463,7 +1403,6 @@ End Class
 ```
 
 
-
 When a reference is provided for the special `ref <>4__this` parameter and the type of the parameter could be a reference
 type at runtime, compiler should ensure that a reference to a temporary location with a copy of a value from
 the user specified location is provided instead of the original user specified location. This redirection should happen only when the type
@@ -1483,11 +1422,11 @@ class Program
     void Test() => _f.Method();
 }
 
-public implicit extension E<T> for T
+public extension E<T> for T
 {
     public void Method() {}
 }
-``` 
+```
 
 The emitted body of `Program.Test` will be something like:
 ``` C#
@@ -1501,61 +1440,6 @@ E<C>.Method(ref _f);
 ```
 
 which would allow to change the target instance by changing value stored in `_f` while `Method` is executed.
-
-## Type erasure
-
-The codegen for type references involving extension types has the following requirements:
-- It should be done in a way that allows switching between the extension type and the underlying type without binary break.  
-- It should allow for using type parameters as type arguments: `void M<T>(E<T> e)`.  
-- It should allow for using extension types as type arguments without violating type parameter constraints: `C<E>` with `class C<T> where T : struct, I { }`.  
-- It should allow encoding tuple names, dynamic, nullability and other such information twice: once the erased type and once for the un-erased type.  
-
-This is solved by erasing the extension types and storing all the information needed
-to roundtrip back to the un-erased type in an attribute as a string.
-
-```
-namespace System.Runtime.CompilerServices
-{
-    public class ExtensionErasureAttribute : System.Attribute
-    {
-        public ExtensionErasureAttribute(string encodedType) { }
-        ... tuple names, dynamic, nullability, etc ...
-    }
-}
-```
-
-For example:
-- `void M(E)` would be emitted as `void M([ExtensionErasure("E")] UnderlyingType)`.
-- `void M(C<E>)` would be emitted as `void M([ExtensionErasure("C[E]")] C<UnderlyingType>)`.
-
-The serialization format is based on the one used for `typeof` in attributes.  
-A few examples:  
-- `E, AssemblyE, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null`
-- ```E`1[[System.String, netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51]]```
-- ```Container+NestedE```
-
-Support for type parameters is added using `!N` and `!!N` notation from ECMA-335:  
-
-> II.9 Generics
-> Within a generic type definition, its generic parameters are referred to by their index. Generic
-> parameter zero is referred to as !0, generic parameter one as !1, and so on. Similarly, within the body
-> of a generic method definition, its generic parameters are referred to by their index; generic parameter
-> zero is referred to as !!0, generic parameter one as !!1, and so on.
-
-For example:
-- `class C<T> { void M(E<T> e) { } }` would be emitted as `void M([Attribute("E[!0]")] Underlying)`.
-- `void M<T>(E<T> e) { }` would be emitted as `void M<T>([Attribute("E[!!0]")] Underlying)`.
-
-The attribute also encodes the tuple names, dynamic, native integer and nullability information for the type with extensions un-erased.
-For example: `void M(E<dynamic>)` with `C<(dynamic a, dynamic b)>` as the underlying type for `E<dynamic>` would be emitted as
-`void M([ExtensionErasure("E<object>"", Dynamic = ... }] [... existing attributes for dynamic and tuple names ... ] C<ValueTuple<object, object>>)`.  
-
-The attribute may not be applied in source.  
-
-Note: when an extension type appears as a containing type, it should not be erased. For example: `E.Nested`.  
-
-Note: the `typeof` serialization format does not support function pointers at the moment.
-This support is not planned as part of the extensions work. Tracked by https://github.com/dotnet/roslyn/issues/48765
 
 ### Extension type members
 
