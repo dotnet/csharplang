@@ -94,7 +94,12 @@ for_clause
     ;
 
 extension_container_body
-    : '{' extension_member_declaration* class_member_declaration* '}'
+    : '{' extension-container-member* '}'
+    ;
+
+extension-container-member
+    : extension_member_declaration
+    | class_member_declaration
     ;
 
 extension_member_declaration
