@@ -251,9 +251,9 @@ public partial extensions Extensions
 ```
 
 Like an instance extension method's receiver parameter, it is necessary to state the target type of the static
-extension method before the method name[^8]. This allows the declaration syntax to align with the calling syntax. In
-order to allow an  A downside is that the type must be restated even if an optional _for-clause_ is defined, but this
-seems a small price to allow regular static members alongside static extension methods.
+extension method before the method name[^8]. This allows the declaration syntax to align with the calling syntax. A
+downside is that the type must be restated even if an optional _for-clause_ is defined, but this seems a small price to
+allow regular static members alongside static extension methods.
 
 ### Extension Properties
 
@@ -441,7 +441,7 @@ Instance indexers are straightforward and would likely be useful. Events are pos
 properties, they would require `add` and `remove` accessors to avoid creating state that wouldn't flow with the
 receiver.
 
-Note that operators overloads and user-defined conversions are declared using the same syntax as always,. It is not
+Note that operators overloads and user-defined conversions are declared using the same syntax as always. It is not
 legal to write an operator overload for an extension type, so the syntax is open to be used. However, one of operands
 must match the type in the _for-clause_.
 
@@ -573,7 +573,7 @@ compile-time as `Enumerable.Range(1, 10).Select(x => x * x)`. The `Enumerable.Se
 this rewrite compiles.
 [^2]: Consider the [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger)
 interface, which only has three interface members that need to be implemented. A much larger API surface is available
-for an `ILogger` implementation by the 29 (as of this writing) extension methods defined by [`LoggerExtesnions`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loggerextensions)
+for an `ILogger` implementation by the 29 (as of this writing) extension methods defined by [`LoggerExtensions`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loggerextensions)
 in the same `Microsoft.Extensions.Logging` namespace.
 [^3]: Roslyn's public API uses extension methods to provide separate API sets for C# and Visual Basic across a common
 set of types.
