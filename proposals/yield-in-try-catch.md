@@ -88,8 +88,7 @@ The `yield` inside the `catch` block will go through the same rewriting as an `a
 
 Detailed notes:
 
-- The `yield` statement will be allowed in a `try / catch` block provided that:
-  - The `catch` block does not have a `when` clause.
+- The `yield` statement will be allowed in a `try / catch` block
 - The `yield` statement will be allowed in a `catch` block
 
 ### Dispose and finally in iterators
@@ -282,6 +281,16 @@ catch (Exception ex)
     }
     Console.WriteLine("catch");
 }
+```
+
+The generator will also need to modify any `when` clauses on `catch` blocks to ensure they don't execute during `DisposeAsync`. To do this a prefix will be generated that returns `false` when the state machine is in a disposing state. For example:
+
+```csharp
+// User code
+catch (Exception ex) when (SomeMethod(ex))
+
+// Generated code
+catch (Exception ex) when (<>1__state == /* dispatching state */ ? false : SomeMethod(ex))
 ```
 
 ### Code generation of yield inside catch
@@ -482,11 +491,6 @@ This also brings into question what happens when a `yield` occurs in a `catch` d
   - The `try` block does not have a nested `finally` block.
 
 On the whole it seems simpler to not support `catch` in `Dispose` paths.
-
-## catch and when in iterators
-
-
-
 
 ## Related Issues
 
