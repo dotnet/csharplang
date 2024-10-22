@@ -9,6 +9,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
 - Meeting of the Meeting - Notetaking updates and open questions (Fred)
 - [typeof string constants](https://github.com/dotnet/csharplang/issues/8505) (Joseph)
+- [Increment/decrement operators in conditional access](https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-assignment.md#incrementdecrement-operators) (Rikki)
 - Triage (working set)
 
 ## Recurring topics
