@@ -42,13 +42,13 @@ IEnumerable<int> M2(IEnumerable<e> col)
 }
 ```
 
-These restrictions exist in large part because it presented technical challenges for the native compiler and it wasn't a high enough priority item. The state machine support in Roslyn already supports the type of transforms necessary for this feature.
+These restrictions exist in large part because it presented technical challenges for the native compiler and it wasn't a high enough priority item. That is no longer a blocker as the state machine in Rsolyn supports the types of transforms necessary to support this feature. There are still several semantic challenges to work through and this proposal has been written to address those.
 
 This proposal will allow for the common cases of `yield` within `try` and `catch` without the awkward workarounds that are necessary today to move the `yield` outside the `try`.
 
 ## Detailed Design
 
-### yield in try and catch
+### yield inside try and catch
 
 The `yield` statement will be allowed inside `try` and `catch` blocks. The behavior will be the same as a `yield` statement today:
 
@@ -84,56 +84,55 @@ This code will output:
 2
 ```
 
-The `catch` block will go through the same rewriting as an `await` inside of a `catch` block. That will be observable when the `throw;` statement is used to rethrow an exception as it will reset the stack trace vs. preserving it (just as it is for an `async` method).
-
-The `yield` statement will not be allowed inside a `catch` when there is an associated or nested `finally` block. That would allow `yield` to be executed in the `Dispose` method which is not supported ([more details][catch-finally]).
+The `yield` inside the `catch` block will go through the same rewriting as an `await` inside of a `catch` block. That will be observable when the `throw;` statement is used to rethrow an exception as it will reset the stack trace vs. preserving it (just as it is for an `async` method).
 
 Detailed notes:
 
-- The `yield` statement will be allowed in a `try` block.
-- The `yield` statement will be allowed in a `catch` block provided that:
-  - The `try` block does not contain a `finally` block.
-  - The `try` block does not have a nested `finally` block.
+- The `yield` statement will be allowed in a `try / catch` block provided that:
+  - The `catch` block does not have a `when` clause.
+- The `yield` statement will be allowed in a `catch` block
 
-### Dispose and finally
+### Dispose and finally in iterators
 
-A lesser known detail of iterators is that `finally` blocks can be executed as part of the `IDisposable.Dispose` implementation. The `Dispose` method has the same state machine implementation as the generated `MoveNext` except it only has the parts necessary for executing the `finally` blocks. That allows `Dispose` to _resume_ the method from the last suspend and execute the `finally` that were _active_ at the last suspend point.
+A lesser known detail of iterators is that `finally` blocks can be executed as part of the `IDisposable.Dispose` implementation. The `Dispose` method has the same state machine structure as the generated `MoveNext` except it only has the parts necessary for executing the `finally` blocks. That allows `Dispose` to _resume_ the method from the last suspend and execute the `finally` that were _active_ at the last suspend point.
 
-For example consider this code sample:
+The `Dispose` method _only_ executes the `finally` blocks and ignores all code inbetween them. For example consider this code sample:
 
 ```csharp
-var e = Iterator().GetEnumerator();
+var e = M1().GetEnumerator();
 e.MoveNext();
 e.Dispose();
 
-static T M<T>(T t) => t;
-
-static IEnumerable<int> Iterator()
+IEnumerable<int> M1()
 {
     try
     {
         try
         {
-            yield return M(1);
-            Console.WriteLine("After yield");
+            yield return 13;
         }
         finally
         {
-            Console.WriteLine("Finally Inner");
+            Console.WriteLine("inner finally");
         }
+
+        Console.WriteLine("before yield return 1");
+        yield return 1;
+        Console.WriteLine("after yield return 1");
     }
     finally
     {
-        Console.WriteLine("Finally Outer");
+        Console.WriteLine("outer finally");
     }
 }
+
 ```
 
 This program will output:
 
 ```cmd
-Finally Inner
-Finally Outer
+inner finally
+outer finally
 ```
 
 The code generation for the `Dispose` method is meant to mirror the original `finally` structure as closely as possible. This includes execution of the code in the face of an exception during `Dispose`. This is achieved by refactoring the contents of the `finally` block into a method on the iterator and then having both `MoveNext` and `Dispose` generate the same `try / finally` structure and call into the methods.
@@ -172,9 +171,222 @@ void IDisposable.Dispose()
 
 This behavior is important to understand when considering the code generation for `try / catch` blocks.
 
-### Code generation yield inside try with catch
+### Code generation of yield inside try with catch in iterators
 
-The code generation for iterators that have `yield` inside `try` blocks must preserve the same exception semantics for the `catch` in both `MoveNext` and `Dispose`. To achieve this the compiler will take a similar approach to what it does for `finally` blocks.
+The code generation for iterators that have `yield` inside a `try / catch` will preserve the `catch` semantics in the `Dispose` method. That is _only_ the contents of the `finally` blocks will execute even in the case exceptions come into play. For example:
+
+```csharp
+var e = M1(true).GetEnumerator();
+e.MoveNext();
+e.Dispose();
+
+IEnumerable<int> M1(bool b)
+{
+    try
+    {
+        try
+        {
+            try
+            {
+                yield return 13;
+            }
+            finally
+            {
+                Console.WriteLine("inner finally");
+                if (b)
+                {
+                    throw new Exception();
+                }
+            }
+        }
+        catch
+        {
+            Console.WriteLine("catch");
+        }
+
+        Console.WriteLine("after catch");
+    }
+    finally
+    {
+        Console.WriteLine("outer finally");
+    }
+}
+```
+
+This program will output:
+
+```cmd
+inner finally
+outer finally
+```
+
+The `"after catch"` is not printed beacuse only the `finally` structure is mirrored in the `Dispose` method. The `catch`, like all other statements between `finally` is not included. statements in between the `catch` and `finally` are not executed in `Dispose`. This may seem odd at first glance but is leaning into the specified behavior for iterator `Dispose`.
+
+### Dispose and finally in async iterators
+
+The `DiposeAsync` behavior for async iterators mirrors that of traditional iterators in that it executes the `finally` blocks at the the point the state machine is suspended. However it does this by setting the `state` variable to a value that represents disposing and then calls `MoveNextAsync`. The implementation of `MoveNextAsync` will then execute only the `finally` blocks for the suspend point. The `DisposeAsync` method does not have a mirror copy of the `finally` blocks.
+
+### Code generation of yield inside try / catch in async iterators
+
+The code generation of async iterators will change such that `catch` blocks do not observably execute during `DisposeAsync`. To achieve this all `catch` blocks visible from a `yield` will rethrow exceptions if the state machine is in a disposing state. For example consider the following code::
+
+```csharp
+var e = M(true).GetEnumerator();
+await e.MoveNext();
+await e.DisposeAsync();
+
+async IAsyncEnumerable<int> M(bool b)
+{
+    try
+    {
+        try
+        {
+            yield return 13;
+            await Task.Yield();
+        }
+        finally
+        {
+            Console.WriteLine("inner finally");
+            if (b)
+            {
+                throw new Exception();
+            }
+        }
+    }
+    catch
+    {
+        Console.WriteLine("catch");
+    }
+    finally
+    {
+        Console.WriteLine("outer finally");
+    }
+}
+```
+
+This will output:
+
+```cmd
+inner finally
+outer finally
+```
+
+To achieve this the `catch` will be effectively rewritten as follows:
+
+```csharp
+catch (Exception ex)
+{
+    if (<>1__state == /* dispatching state */)
+    {
+        throw;
+    }
+    Console.WriteLine("catch");
+}
+```
+
+### Code generation of yield inside catch
+
+The restrictions on the feature mean that `yield` inside a `catch` cannot be observed from a `finally` block. That means the code generation does not need to consider the impact on `Dispose` and can focus soley on `MoveNext`.
+
+Given that the code generation for `yield` inside `catch` will have the same structure as `await` inside of `catch`. Essentially the user written contents of the `catch` block will be moved outside the `catch`. The `catch` block will be replaced with saving the `Exception` object into the state machine and updating of the state variable to reflect execution is logically inside the catch block.
+
+For example consider this code sample:
+
+```csharp
+IEnumerable<int> M()
+{
+    try
+    {
+        M();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Catch1");
+        yield return 1;
+        Console.WriteLine("Catch2");
+    }
+    Console.WriteLine("Done");
+}
+```
+
+This would be generated as effectively:
+
+```csharp
+bool MoveNext()
+{
+    switch (<>1__state)
+    {
+    case 0:
+        <>1__state = -1;
+        try
+        {
+            M();
+        }
+        catch (Exception ex)
+        {
+            <>3__ex = ex;
+            <>1__state = 1;
+        }
+
+        int num2 = <>1__state;
+        if (num2 != 1)
+        {
+            goto case 2;
+        }
+
+        Console.WriteLine("Catch1");
+        <>1__state = 1;
+        <>2__current = 1;
+        return true;
+    case 1:
+        <>1__state = -1;
+        Console.WriteLine("Catch2");
+        goto case 2;
+    case 2:
+        Console.WriteLine("Done");
+        return true;
+    default:
+        return false;
+    }
+}
+```
+
+## Considerations
+
+### yield inside finally
+
+Consideration was given to supporting `yield` inside a `finally` block but this creates significant semantic challenges. Consider the following code as an example:
+
+```csharp
+var e = M().GetEnumerator();
+e.MoveNext();
+e.Dispose();
+
+void M()
+{
+    try
+    {
+        yield return 42;
+    }
+    finally
+    {
+        yield return 13;
+    }
+}
+```
+
+The `finally` block would be executed in `Dispose` which means the language has to decide on the behavior of `yield` during `Dispose`. That could be modeled as:
+
+1. Throw an exception when `yield` is encountered in `Dispose`.
+2. Silently ignore the value and continue executing the `finally` block without suspend.
+
+Neither of these seem like desirable outcomes and as such `yield` will not be allowed in `finally` blocks.
+
+## Open Issues
+
+### Preserve catch in Dispose paths
+
+The `Dispose` method could include mirroring both `catch` and `finally` blocks. This would allow the `catch` block to be executed in `Dispose` when `finally` blocks threw an exceptoin. The approach for this would be to do the followng.
 
 For every `catch` block where the `try` has a nested `try / finally` with `yield`:
 
@@ -261,125 +473,20 @@ void IDisposable.Dispose()
 
 The `<>1__ex1 = ex` in the `when` clause is not legal but the IL generated for the `when` will conceptually have this behavior.
 
-### Code generation yield inside try / catch in async iterators
+This would add a bit of complexity the feature and it only produces observable differences when a `finally` block throws an exception on the `Dispose` path. That is likely a rare case. Further it potentially increases the complexity for developers. The `Dispose` method at first glance is likely unintuitive in that it only mirrors `finally` blocks and no other statements but that is also a very simple rule to learn. Preserving `catch` and `finally` and discussing how the code flows between them is potentially more complex.
 
-The code generation for `try / catch` blocks in async iterators will be largely the same as traditional iterators. The difference is that the return type of generated `catch` methods will be `ValueTask` instead of `void`.
+This also brings into question what happens when a `yield` occurs in a `catch` during `Dispose`. That cannot execute correctly as the state machine can't suspend during `Dispose`. To account for this the feature likely needs further restrictions like:
 
-### Code generation yield inside catch
+- The `yield` statement will be allowed in a `catch` block provided that:
+  - The `try` block does not contain a `finally` block.
+  - The `try` block does not have a nested `finally` block.
 
-The restrictions on the feature mean that `yield` inside a `catch` cannot be observed from a `finally` block. That means the code generation does not need to consider the impact on `Dispose` and can focus soley on `MoveNext`.
+On the whole it seems simpler to not support `catch` in `Dispose` paths.
 
-Given that the code generation for `yield` inside `catch` will have the same structure as `await` inside of `catch`. Essentially the user written contents of the `catch` block will be moved outside the `catch`. The `catch` block will be replaced with saving the `Exception` object into the state machine and updating of the state variable to reflect execution is logically inside the catch block.
+## catch and when in iterators
 
-For example consider this code sample:
 
-```csharp
-IEnumerable<int> M()
-{
-    try
-    {
-        M();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("Catch1");
-        yield return 1;
-        Console.WriteLine("Catch2");
-    }
-    Console.WriteLine("Done");
-}
-```
 
-This would be generated as effectively:
-
-```csharp
-bool MoveNext()
-{
-    switch (<>1__state)
-    {
-    case 0:
-        <>1__state = -1;
-        try
-        {
-            M();
-        }
-        catch (Exception ex)
-        {
-            <>3__ex = ex;
-            <>1__state = 1;
-        }
-
-        int num2 = <>1__state;
-        if (num2 != 1)
-        {
-            goto case 2;
-        }
-
-        Console.WriteLine("Catch1");
-        <>1__state = 1;
-        <>2__current = 1;
-        return true;
-    case 1:
-        <>1__state = -1;
-        Console.WriteLine("Catch2");
-        goto case 2;
-    case 2:
-        Console.WriteLine("Done");
-        return true;
-    default:
-        return false;
-    }
-}
-```
-
-## Considerations
-
-### yield inside catch with nested finally
-
-[catch-finally]: #yield-inside-catch-with-nested-finally
-
-The `yield` statement cannot be reasonbly supported inside a `catch` blocks with a nested `finally` due to the behavior of the `Dispose` method. It is possible that a `catch` block will run as part of executing a `finally` in the `Dispose` method.
-
-For example consider the following:
-
-```csharp
-var e = InCatchFinally();
-e.MoveNext();
-e.Dispose();
-
-IEnumerable<int> InCatchFinally()
-{
-    try
-    {
-        try
-        {
-            yield return 1;
-        }
-        finally
-        {
-            throw new Exception();
-        }
-    }
-    catch 
-    {
-        yield return 2;
-    }
-}
-```
-
-This code would cause the statement `yield return 2` to be executed in the `Dispose` method. The state machine is not executing at this point hence it cannot be returned. Ignoring the statement would certainly be surprising the users.
-
-For these reasons this proposal will not support `yield` inside a `catch` block that is observable from a `finally`.
-
-### yield inside finally
-
-The `yield` statement inside a `finally` creates the same type of code generation issues as [catch with finally][catch-finally]. For that reason it was excluded from this proposal.
-
-## Open Issues
-
-### try only
-
-The proposal does allow `yield` inside of `catch` but it comes with a lot of caveats around `finally`. It's possible that this will lead to enoguh customer confusion that we should hold off on this until there is more demand for it.
 
 ## Related Issues
 
