@@ -42,7 +42,7 @@ IEnumerable<int> M2(IEnumerable<e> col)
 }
 ```
 
-These restrictions exist in large part because it presented technical challenges for the native compiler and it wasn't a high enough priority item. That is no longer a blocker as the state machine in Rsolyn supports the types of transforms necessary to support this feature. There are still several semantic challenges to work through and this proposal has been written to address those.
+These restrictions exist in large part because it presented technical challenges for the native compiler and it wasn't a high enough priority item. That is no longer a blocker as the state machine in Roslyn supports the types of transforms necessary to support this feature. There are still several semantic challenges to work through and this proposal has been written to address those.
 
 This proposal will allow for the common cases of `yield` within `try` and `catch` without the awkward workarounds that are necessary today to move the `yield` outside the `try`.
 
@@ -219,7 +219,7 @@ inner finally
 outer finally
 ```
 
-The `"after catch"` is not printed beacuse only the `finally` structure is mirrored in the `Dispose` method. The `catch`, like all other statements between `finally` is not included. statements in between the `catch` and `finally` are not executed in `Dispose`. This may seem odd at first glance but is leaning into the specified behavior for iterator `Dispose`.
+The `"after catch"` is not printed beacuse only the `finally` structure is mirrored in the `Dispose` method. The `catch`, like all other statements between `finally` is not included. Statements in between the `catch` and `finally` are not executed in `Dispose`. This may seem odd at first glance but is leaning into the specified behavior for iterator `Dispose`.
 
 ### Dispose and finally in async iterators
 
@@ -227,7 +227,7 @@ The `DiposeAsync` behavior for async iterators mirrors that of traditional itera
 
 ### Code generation of yield inside try / catch in async iterators
 
-The code generation of async iterators will change such that `catch` blocks do not observably execute during `DisposeAsync`. To achieve this all `catch` blocks visible from a `yield` will rethrow exceptions if the state machine is in a disposing state. For example consider the following code::
+The code generation of async iterators will change such that `catch` blocks do not observably execute during `DisposeAsync`. To achieve this all `catch` blocks visible from a `yield` will rethrow exceptions if the state machine is in a disposing state. For example consider the following code:
 
 ```csharp
 var e = M(true).GetEnumerator();
@@ -275,7 +275,7 @@ To achieve this the `catch` will be effectively rewritten as follows:
 ```csharp
 catch (Exception ex)
 {
-    if (<>1__state == /* dispatching state */)
+    if (<>1__state == /* disposing state */)
     {
         throw;
     }
@@ -290,7 +290,7 @@ The generator will also need to modify any `when` clauses on `catch` blocks to e
 catch (Exception ex) when (SomeMethod(ex))
 
 // Generated code
-catch (Exception ex) when (<>1__state == /* dispatching state */ ? false : SomeMethod(ex))
+catch (Exception ex) when (<>1__state == /* disposing state */ ? false : SomeMethod(ex))
 ```
 
 ### Code generation of yield inside catch
@@ -395,7 +395,7 @@ Neither of these seem like desirable outcomes and as such `yield` will not be al
 
 ### Preserve catch in Dispose paths
 
-The `Dispose` method could include mirroring both `catch` and `finally` blocks. This would allow the `catch` block to be executed in `Dispose` when `finally` blocks threw an exceptoin. The approach for this would be to do the followng.
+The `Dispose` method could include mirroring both `catch` and `finally` blocks. This would allow the `catch` block to be executed in `Dispose` when `finally` blocks threw an exception. The approach for this would be to do the following.
 
 For every `catch` block where the `try` has a nested `try / finally` with `yield`:
 
@@ -482,7 +482,7 @@ void IDisposable.Dispose()
 
 The `<>1__ex1 = ex` in the `when` clause is not legal but the IL generated for the `when` will conceptually have this behavior.
 
-This would add a bit of complexity the feature and it only produces observable differences when a `finally` block throws an exception on the `Dispose` path. That is likely a rare case. Further it potentially increases the complexity for developers. The `Dispose` method at first glance is likely unintuitive in that it only mirrors `finally` blocks and no other statements but that is also a very simple rule to learn. Preserving `catch` and `finally` and discussing how the code flows between them is potentially more complex.
+This would add a bit of complexity to the feature and it only produces observable differences when a `finally` block throws an exception on the `Dispose` path. That is likely a rare case. Further it potentially increases the complexity for developers. The `Dispose` method at first glance is likely unintuitive in that it only mirrors `finally` blocks and no other statements but that is also a very simple rule to learn. Preserving `catch` and `finally` and discussing how the code flows between them is potentially more complex.
 
 This also brings into question what happens when a `yield` occurs in a `catch` during `Dispose`. That cannot execute correctly as the state machine can't suspend during `Dispose`. To account for this the feature likely needs further restrictions like:
 
