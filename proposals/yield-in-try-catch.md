@@ -217,6 +217,7 @@ This program will output:
 ```cmd
 inner finally
 outer finally
+Unhandled exception. System.Exception: Exception of type 'System.Exception' was thrown
 ```
 
 The `"after catch"` is not printed beacuse only the `finally` structure is mirrored in the `Dispose` method. The `catch`, like all other statements between `finally` is not included. Statements in between the `catch` and `finally` are not executed in `Dispose`. This may seem odd at first glance but is leaning into the specified behavior for iterator `Dispose`.
