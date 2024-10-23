@@ -604,7 +604,7 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 <a name="rules-unscoped"></a>
 
 To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` and it will change the *ref-safe-context* to be one level wider than its default. For example:
-- if applied to a `struct` instance method it will become *return only* where previously it was *containing method*.
+- if applied to a `struct` instance method it will become *return only* where previously it was *function-member*.
 - if applied to a `ref` parameter it will become *caller-context* where previously it was *return only*
 
 When applying `[UnscopedRef]` to an instance method of a `struct` it has the impact of modifying the implicit `this` parameter. This means `this` acts as an unannotated `ref` of the same type. 
