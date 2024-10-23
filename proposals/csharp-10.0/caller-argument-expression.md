@@ -55,7 +55,7 @@ In the above examples, including the string `"array != null"` or `"array.Length 
 ```csharp
 public static class Debug
 {
-    public static void Assert(bool condition, [CallerArgumentExpression("condition")] string message = null);
+    public static void Assert(bool condition, [CallerArgumentExpression(nameof(condition))] string message = null);
 }
 ```
 
@@ -78,15 +78,15 @@ For argument validation, the attribute cannot be used directly, but can be made 
 ```csharp
 public static class Verify
 {
-    public static void Argument(bool condition, string message, [CallerArgumentExpression("condition")] string conditionExpression = null)
+    public static void Argument(bool condition, string message, [CallerArgumentExpression(nameof(condition))] string conditionExpression = null)
     {
         if (!condition) throw new ArgumentException(message: message, paramName: conditionExpression);
     }
 
     public static void InRange(int argument, int low, int high,
-        [CallerArgumentExpression("argument")] string argumentExpression = null,
-        [CallerArgumentExpression("low")] string lowExpression = null,
-        [CallerArgumentExpression("high")] string highExpression = null)
+        [CallerArgumentExpression(nameof(argument))] string argumentExpression = null,
+        [CallerArgumentExpression(nameof(low))] string lowExpression = null,
+        [CallerArgumentExpression(nameof(high))] string highExpression = null)
     {
         if (argument < low)
         {
@@ -101,7 +101,7 @@ public static class Verify
         }
     }
 
-    public static void NotNull<T>(T argument, [CallerArgumentExpression("argument")] string argumentExpression = null)
+    public static void NotNull<T>(T argument, [CallerArgumentExpression(nameof(argument))] string argumentExpression = null)
         where T : class
     {
         if (argument == null) throw new ArgumentNullException(paramName: argumentExpression);
@@ -135,7 +135,7 @@ A proposal to add such a helper class to the framework is underway at https://gi
 The `this` parameter in an extension method may be referenced by `CallerArgumentExpression`. For example:
 
 ```csharp
-public static void ShouldBe<T>(this T @this, T expected, [CallerArgumentExpression("this")] string thisExpression = null) {}
+public static void ShouldBe<T>(this T @this, T expected, [CallerArgumentExpression(nameof(this))] string thisExpression = null) {}
 
 contestant.Points.ShouldBe(1337); // thisExpression: "contestant.Points"
 ```
@@ -170,7 +170,7 @@ There should always be an expression corresponding to the `this` parameter. Even
 
 void Foo(string bar); // V1
 void Foo(string bar, string barExpression = "not provided"); // V2
-void Foo(string bar, [CallerArgumentExpression("bar")] string barExpression = "not provided"); // V3
+void Foo(string bar, [CallerArgumentExpression(nameof(bar))] string barExpression = "not provided"); // V3
 
 // Assembly2
 
