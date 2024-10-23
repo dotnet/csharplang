@@ -333,7 +333,7 @@ The design also requires that the introduction of a new safe-context: *return-on
 The details of *return-only* is that it's a context which is greater than *function-member* but smaller than *caller-context*. An expression provided to a `return` statement must be at least *return-only*. As such most existing rules fall out. For example assignment into a `ref` parameter from an expression with a *safe-context* of *return-only* will fail because it's smaller than the `ref` parameter's *safe-context* which is *caller-context*. The need for this new escape context will be discussed [below](#rules-unscoped). 
 
 There are three locations which default to *return-only*:
-- A `ref` or `in` parameter with have a *ref-safe-context* of *return-only*. This is done in part for `ref struct` to prevent [silly cyclic assignment](#cyclic-assignment) issues. It is done uniformly though to simplify the model as well as minimize compat changes.
+- A `ref` or `in` parameter will have a *ref-safe-context* of *return-only*. This is done in part for `ref struct` to prevent [silly cyclic assignment](#cyclic-assignment) issues. It is done uniformly though to simplify the model as well as minimize compat changes.
 - A `out` parameter for a `ref struct` will have *safe-context* of *return-only*. This allows for return and `out` to be equally expressive. This does not have the silly cyclic assignment problem because `out` is implicitly `scoped` so the *ref-safe-context* is still smaller than the *safe-context*.
 - A `this` parameter for a `struct` constructor will have a *safe-context* of *return-only*. This falls out due to being modeled as `out` parameters. 
 
@@ -1401,7 +1401,7 @@ The lifetime annotations in this proposal are limited in that they allow develop
 
 That allows limited lifetime relationships to be understood. For example a value that can't be returned from a method has a smaller lifetime than one that can be returned from a method. There is no way to describe the lifetime relationship between values that can be returned from a method though. Specifically there is no way to say that one value has a larger lifetime than the other once it's established both can be returned from a method. The next step in our lifetime evolution would be allowing such relationships to be described. 
 
-Other methods such as Rust allow this type of relationship to be expressed and hence can implement handle more complex `scoped` style operations. Our language could similarly benefit if such a feature were included. At the moment there is no motivating pressure to do this but if there is in the future our `scoped` model could be expanded to included it in a fairly straight forward fashion. 
+Other methods such as Rust allow this type of relationship to be expressed and hence can implement more complex `scoped` style operations. Our language could similarly benefit if such a feature were included. At the moment there is no motivating pressure to do this but if there is in the future our `scoped` model could be expanded to include it in a fairly straight forward fashion. 
 
 Every `scoped` could be assigned a named lifetime by adding a generic style argument to the syntax. For example `scoped<'a>` is a value that has lifetime `'a`. Constraints like `where` could then be used to describe the relationships between these lifetimes.
 
@@ -1413,7 +1413,7 @@ void M(scoped<'a> ref MyStruct s, scoped<'b> Span<int> span)
 }
 ```
 
-This method defines two lifetimes `'a` and `'b` and there relationship, specifically that `'b` is greater than `'a`. This allows for the callsite to have more granular rules for how values can be safely passed into methods vs. the more coarse grained rules present today.
+This method defines two lifetimes `'a` and `'b` and their relationship, specifically that `'b` is greater than `'a`. This allows for the callsite to have more granular rules for how values can be safely passed into methods vs. the more coarse grained rules present today.
 
 ## Related Information
 
