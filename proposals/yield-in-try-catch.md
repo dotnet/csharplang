@@ -95,7 +95,7 @@ Detailed notes:
 
 A lesser known detail of iterators is that `finally` blocks can be executed as part of the `IDisposable.Dispose` implementation. The `Dispose` method has the same state machine structure as the generated `MoveNext` except it only has the parts necessary for executing the `finally` blocks. That allows `Dispose` to _resume_ the method from the last suspend and execute the `finally` that were _active_ at the last suspend point.
 
-The `Dispose` method _only_ executes the `finally` blocks and ignores all code inbetween them. For example consider this code sample:
+The `Dispose` method _only_ executes the `finally` blocks and ignores all code between them. For example consider this code sample:
 
 ```csharp
 var e = M1().GetEnumerator();
@@ -296,7 +296,7 @@ catch (Exception ex) when (<>1__state == /* disposing state */ ? false : SomeMet
 
 ### Code generation of yield inside catch
 
-The restrictions on the feature mean that `yield` inside a `catch` cannot be observed from a `finally` block. That means the code generation does not need to consider the impact on `Dispose` and can focus soley on `MoveNext`.
+The restrictions on the feature mean that `yield` inside a `catch` cannot be observed from a `finally` block. That means the code generation does not need to consider the impact on `Dispose` and can focus solely on `MoveNext`.
 
 Given that the code generation for `yield` inside `catch` will have the same structure as `await` inside of `catch`. Essentially the user written contents of the `catch` block will be moved outside the `catch`. The `catch` block will be replaced with saving the `Exception` object into the state machine and updating of the state variable to reflect execution is logically inside the catch block.
 
