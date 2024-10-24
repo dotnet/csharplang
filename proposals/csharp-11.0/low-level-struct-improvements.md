@@ -1816,6 +1816,7 @@ Note that `[UnscopedRef]` promotes the *ref-safe-context* of any `ref` to `ref s
 S F()
 {
     S local = new();
+    // Error: self assignment possible inside `S.M`.
     S.M(ref local);
     return local;
 }
