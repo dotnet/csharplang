@@ -224,7 +224,7 @@ The `"after catch"` is not printed beacuse only the `finally` structure is mirro
 
 ### Dispose and finally in async iterators
 
-The `DiposeAsync` behavior for async iterators mirrors that of traditional iterators in that it executes the `finally` blocks at the the point the state machine is suspended. However it does this by setting the `state` variable to a value that represents disposing and then calls `MoveNextAsync`. The implementation of `MoveNextAsync` will then execute only the `finally` blocks for the suspend point. The `DisposeAsync` method does not have a mirror copy of the `finally` blocks.
+The `DiposeAsync` behavior for async iterators mirrors that of traditional iterators in that it executes the `finally` blocks at the the point the state machine is suspended. However it does this by setting the `disposeMode` variable and then calls `MoveNextAsync`. The implementation of `MoveNextAsync` will then execute only the `finally` blocks for the suspend point. The `DisposeAsync` method does not have a mirror copy of the `finally` blocks.
 
 ### Code generation of yield inside try / catch in async iterators
 
