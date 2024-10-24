@@ -1810,47 +1810,26 @@ void Usage()
 
 To make these APIs usable the compiler ensures that the `ref` lifetime for a `ref` parameter is smaller than lifetime of any references in the associated parameter value. This is the rationale for having *ref-safe-context* for `ref` to `ref struct` be *return-only* and `out` be *caller-context*. That prevents cyclic assignment because of the difference in lifetimes.
 
-It is also why `[UnscopedRef]` only promotes the *ref-safe-context* of any `ref` to `ref struct` values to *return-only* and not *caller-context*. Consider that using *caller-context* allows for cyclic assignment and would force a viral use of `[UnscopedRef]` for a `ref struct`:
+Note that `[UnscopedRef]` promotes the *ref-safe-context* of any `ref` to `ref struct` values to *caller-context*:
 
 ```c#
+S F()
+{
+    S local = new();
+    S.M(ref local);
+    return local;
+}
+
 ref struct S
-{
-    byte Field;
-
-    [UnscopedRef]
-    public Span<byte> Data => new Span<byte>(ref Field, 1);
-}
-
-void M(ref S s)
-{
-    // Error: passing a scoped ref to [UnscopedRef] ref 
-    Span<byte> span = s.Data;
-}
-```
-
-This is correctly illegal in that case because the compiler has to consider the pathological case that `S.Data` could cyclic assign via `this`. That forces methods all methods that call `S.Data` to further mark their `ref` parameters as `[UnscopedRef]`. This is viral until the method which creates the value as a local. This is why *return-only* exists as a *safe-context*. It does complicate the spec / implementation but it serves to make the feature significantly more usable.
-
-Note: this cyclic assignment problem does continue to exist for `[UnscopedRef] out` to `ref struct` because that causes the *safe-context* and *ref-safe-context* to be equivalent. 
-
-```c#
-ref struct RS
 {
     int field;
     ref int refField;
-}
 
-void M1(out RS p)
-{
-    // Error: from method arguments must match:
-    // Step 1 would calculate the narrowest escape as *caller-context*
-    // Step 2 would fail the assignment check because p has safe-context of *return-only*
-    M2(out p);
-}
-
-void M2([UnscopedRef] out RS p)
-{
-    // The lifetimes of LHS and RHS are equivalent here and hence this is legal
-    p.refField = ref p.Field;
+    static void M([UnscopedRef] ref S s)
+    {
+        // Allowed: s has both safe-context and ref-safe-context of caller-context
+        s.refField = ref s.field;
+    }
 }
 ```
 
