@@ -444,7 +444,7 @@ The presence of `ref` fields means the rules around method arguments must match 
 >     - *caller-context*
 >     - The *safe-context* of all arguments
 >     - The *ref-safe-context* of all ref arguments whose corresponding parameters have a *ref-safe-context* of *caller-context*
-> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-cpmtext*. This is a case where `ref` does **not** generalize to include `in` and `out`
+> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-context*. This is a case where `ref` does **not** generalize to include `in` and `out`
 
 > For any method invocation `e.M(a1, a2, ... aN)`
 > 1. Calculate the narrowest *safe-context* from:
