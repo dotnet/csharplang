@@ -16,6 +16,28 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
+### Wed Dec 18, 2024
+
+### Mon Dec 16, 2024
+
+### Wed Dec 11, 2024
+
+### Mon Dec 9, 2024
+
+### Wed Dec 4, 2024
+
+### Mon Dec 2, 2024
+
+### Wed Nov 20, 2024
+
+### Wed Nov 13, 2024
+
+### Mon Nov 11, 2024
+
+### Wed Nov 6, 2024
+
+### Mon Nov 4, 2024
+
 ### Wed Oct 30, 2024
 
 - Extensions (Mads and Dustin) [Extensions: An Evolution of Extension Methods](https://github.com/dotnet/csharplang/pull/8525) and [Compromise design for extensions #8519](https://github.com/dotnet/csharplang/issues/8519)
