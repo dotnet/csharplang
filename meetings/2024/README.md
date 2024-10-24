@@ -6,9 +6,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
-- Meeting of the Meeting - Notetaking updates and open questions (Fred)
-- [typeof string constants](https://github.com/dotnet/csharplang/issues/8505) (Joseph)
 - [Increment/decrement operators in conditional access](https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-assignment.md#incrementdecrement-operators) (Rikki)
 - Triage (working set)
 
@@ -21,11 +18,16 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Oct 30, 2024
 
+- Extensions (Mads and Dustin) [Extensions: An Evolution of Extension Methods](https://github.com/dotnet/csharplang/pull/8525) and [Compromise design for extensions #8519](https://github.com/dotnet/csharplang/issues/8519)
+
 ### Mon Oct 28, 2024
+
+- Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
+- [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
 
 ### Mon Oct 21, 2024
 
-- Extensions (Mads and Dustin) [Extensions: An Evolution of Extension Methods](https://github.com/dotnet/csharplang/pull/8525) and [Compromise design for extensions #8519](https://github.com/dotnet/csharplang/issues/8519)
+Canceled
 
 ## C# Language Design Notes for 2024
 
