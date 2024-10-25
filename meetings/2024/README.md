@@ -6,7 +6,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- [Increment/decrement operators in conditional access](https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-assignment.md#incrementdecrement-operators) (Rikki)
+- Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
 - Triage (working set)
 
 ## Recurring topics
@@ -44,7 +44,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Oct 28, 2024
 
-- Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
+- [Increment/decrement operators in conditional access](https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-assignment.md#incrementdecrement-operators) (Rikki)
 - [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
 
 ### Mon Oct 21, 2024
