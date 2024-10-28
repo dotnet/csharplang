@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
 - Triage (working set)
+- [Warn on some `not`/`or` patterns](https://gist.github.com/jcouv/d83cbc33248dbeb8475e4a7688d80a49) (Julien, invite Levi)
 
 ## Recurring topics
 
