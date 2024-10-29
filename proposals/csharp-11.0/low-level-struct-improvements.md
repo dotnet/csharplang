@@ -604,8 +604,12 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 <a name="rules-unscoped"></a>
 
 To fix this the language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` and it will change the *ref-safe-context* to be one level wider than its default. For example:
-- if applied to a `struct` instance method it will become *return only* where previously it was *function-member*.
-- if applied to a `ref` parameter it will become *caller-context* where previously it was *return only*
+
+| UnscopedRef applied to | Original *ref-safe-context* | New *ref-safe-context* |
+| --- | --- | --- |
+| instance member | function-member | return-only |
+| `in` / `ref` parameter | return-only | caller-context |
+| `out` parameter | function-member | return-only |
 
 When applying `[UnscopedRef]` to an instance method of a `struct` it has the impact of modifying the implicit `this` parameter. This means `this` acts as an unannotated `ref` of the same type. 
 
@@ -634,7 +638,7 @@ ref int SneakyOut([UnscopedRef] out int i)
 }
 ```
 
-For the purposes of ref safe cotnext rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. 
+For the purposes of ref safe context rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. 
 
 The `[UnscopedRef]` annotation will be disallowed on `init` members and constructors inside `struct`. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `[UnscopedRef]` would permit such a `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
 
@@ -1810,7 +1814,8 @@ void Usage()
 
 To make these APIs usable the compiler ensures that the `ref` lifetime for a `ref` parameter is smaller than lifetime of any references in the associated parameter value. This is the rationale for having *ref-safe-context* for `ref` to `ref struct` be *return-only* and `out` be *caller-context*. That prevents cyclic assignment because of the difference in lifetimes.
 
-Note that `[UnscopedRef]` promotes the *ref-safe-context* of any `ref` to `ref struct` values to *caller-context*:
+Note that `[UnscopedRef]` [promotes](#rules-unscoped) the *ref-safe-context* of any `ref`/`out` to `ref struct` values to *caller-context*
+and hence it allows for cyclic assignment and forces a viral use of `[UnscopedRef]` for a `ref struct`:
 
 ```c#
 S F()
@@ -1830,6 +1835,32 @@ ref struct S
     {
         // Allowed: s has both safe-context and ref-safe-context of caller-context
         s.refField = ref s.field;
+    }
+}
+```
+
+Promoting `[UnscopedRef] ref` to *caller-context* is useful when the type is *not* a ref struct
+(note that we want to keep the rules simple so they don't distinguish between refs to ref vs non-ref structs):
+
+```c#
+int x = 1;
+F(ref x).RefField = 2;
+Console.WriteLine(x); // prints 2
+
+static S F([UnscopedRef] ref int x)
+{
+    S local = new();
+    local.M(ref x);
+    return local;
+}
+
+ref struct S
+{
+    public ref int RefField;
+
+    public void M([UnscopedRef] ref int data)
+    {
+        RefField = ref data;
     }
 }
 ```
