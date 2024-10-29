@@ -1841,7 +1841,7 @@ ref struct S
 
 Similarly `[UnscopedRef] out` allows a cyclic assignment because the parameter has both *safe-context* and *ref-safe-context* of *return-only*.
 
-Promoting `[UnscopedRef] ref` to *caller-context* is useful when the type is *not* a ref struct
+Promoting `[UnscopedRef] ref` to *caller-context* is useful when the type is *not* a `ref struct`
 (note that we want to keep the rules simple so they don't distinguish between refs to ref vs non-ref structs):
 
 ```c#
