@@ -1814,8 +1814,8 @@ void Usage()
 
 To make these APIs usable the compiler ensures that the `ref` lifetime for a `ref` parameter is smaller than lifetime of any references in the associated parameter value. This is the rationale for having *ref-safe-context* for `ref` to `ref struct` be *return-only* and `out` be *caller-context*. That prevents cyclic assignment because of the difference in lifetimes.
 
-Note that `[UnscopedRef]` [promotes](#rules-unscoped) the *ref-safe-context* of any `ref`/`out` to `ref struct` values to *caller-context*
-and hence it allows for cyclic assignment and forces a viral use of `[UnscopedRef]` for a `ref struct`:
+Note that `[UnscopedRef]` [promotes](#rules-unscoped) the *ref-safe-context* of any `ref` to `ref struct` values to *caller-context*
+and hence it allows for cyclic assignment and forces a viral use of `[UnscopedRef]` up the call chain:
 
 ```c#
 S F()
@@ -1831,13 +1831,15 @@ ref struct S
     int field;
     ref int refField;
 
-    static void M([UnscopedRef] ref S s)
+    public static void M([UnscopedRef] ref S s)
     {
         // Allowed: s has both safe-context and ref-safe-context of caller-context
         s.refField = ref s.field;
     }
 }
 ```
+
+Similarly `[UnscopedRef] out` allows a cyclic assignment because the parameter has both *safe-context* and *ref-safe-context* of *return-only*.
 
 Promoting `[UnscopedRef] ref` to *caller-context* is useful when the type is *not* a ref struct
 (note that we want to keep the rules simple so they don't distinguish between refs to ref vs non-ref structs):
