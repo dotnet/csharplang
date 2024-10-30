@@ -46,16 +46,18 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extensions (Mads and Dustin) [Extensions: An Evolution of Extension Methods](https://github.com/dotnet/csharplang/pull/8525) and [Compromise design for extensions #8519](https://github.com/dotnet/csharplang/issues/8519)
 
+## C# Language Design Notes for 2024
+
 ### Mon Oct 28, 2024
 
-- [Increment/decrement operators in conditional access](https://github.com/dotnet/csharplang/blob/main/proposals/null-conditional-assignment.md#incrementdecrement-operators) (Rikki)
-- [yield in try / catch](https://github.com/dotnet/csharplang/issues/8414) (jared)
+[C# Language Design Meeting for October 28th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-28.md)
+
+- Increment/decrement operators in conditional access
+- yield in try / catch
 
 ### Mon Oct 21, 2024
 
 Canceled
-
-## C# Language Design Notes for 2024
 
 ### Wed Oct 16, 2024
 
