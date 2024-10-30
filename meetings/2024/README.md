@@ -52,8 +52,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 [C# Language Design Meeting for October 28th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-28.md)
 
-- Increment/decrement operators in conditional access
-- yield in try / catch
+- Increment and Decrement Operators in null conditional access
+- `yield` in `try` / `catch`
 
 ### Mon Oct 21, 2024
 
