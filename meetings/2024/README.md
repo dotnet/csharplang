@@ -6,9 +6,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule when convenient
 
-- Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
 - Triage (working set)
-- [Warn on some `not`/`or` patterns](https://gist.github.com/jcouv/d83cbc33248dbeb8475e4a7688d80a49) (Julien, invite Levi)
 
 ## Recurring topics
 
@@ -37,7 +35,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Nov 6, 2024
 
+- Extensions 
+
 ### Mon Nov 4, 2024
+
+- [Warn on some `not`/`or` patterns](https://gist.github.com/jcouv/d83cbc33248dbeb8475e4a7688d80a49) (Julien, invite Levi)
+- Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
 
 ### Wed Oct 30, 2024
 
