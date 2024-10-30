@@ -444,7 +444,7 @@ The presence of `ref` fields means the rules around method arguments must match 
 >     - *caller-context*
 >     - The *safe-context* of all arguments
 >     - The *ref-safe-context* of all ref arguments whose corresponding parameters have a *ref-safe-context* of *caller-context*
-> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-cpmtext*. This is a case where `ref` does **not** generalize to include `in` and `out`
+> 2. All `ref` arguments of `ref struct` types must be assignable by a value with that *safe-context*. This is a case where `ref` does **not** generalize to include `in` and `out`
 
 > For any method invocation `e.M(a1, a2, ... aN)`
 > 1. Calculate the narrowest *safe-context* from:
@@ -603,9 +603,13 @@ The [rationale](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-
 
 <a name="rules-unscoped"></a>
 
-To fix this the  language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` and it will change the *ref-safe-context* to be one level wider than its default. For example:
-- if applied to a `struct` instance method it will become *return only* where previously it was *containing method*.
-- if applied to a `ref` parameter it will become *caller-context* where previously it was *return only*
+To fix this the language will provide the opposite of the `scoped` lifetime annotation by supporting an `UnscopedRefAttribute`. This can be applied to any `ref` and it will change the *ref-safe-context* to be one level wider than its default. For example:
+
+| UnscopedRef applied to | Original *ref-safe-context* | New *ref-safe-context* |
+| --- | --- | --- |
+| instance member | function-member | return-only |
+| `in` / `ref` parameter | return-only | caller-context |
+| `out` parameter | function-member | return-only |
 
 When applying `[UnscopedRef]` to an instance method of a `struct` it has the impact of modifying the implicit `this` parameter. This means `this` acts as an unannotated `ref` of the same type. 
 
@@ -634,7 +638,7 @@ ref int SneakyOut([UnscopedRef] out int i)
 }
 ```
 
-For the purposes of ref safe cotnext rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. 
+For the purposes of ref safe context rules, such an `[UnscopedRef] out` is considered simply a `ref`. Similar to how `in` is considered `ref` for lifetime purposes. 
 
 The `[UnscopedRef]` annotation will be disallowed on `init` members and constructors inside `struct`. Those members are already special with respect to `ref` semantics as they view `readonly` members as mutable. This means taking `ref` to those members appears as a simple `ref`, not `ref readonly`. This is allowed within the boundary of constructors and `init`. Allowing `[UnscopedRef]` would permit such a `ref` to incorrectly escape outside the constructor and permit mutation after `readonly` semantics had taken place.
 
@@ -1810,47 +1814,56 @@ void Usage()
 
 To make these APIs usable the compiler ensures that the `ref` lifetime for a `ref` parameter is smaller than lifetime of any references in the associated parameter value. This is the rationale for having *ref-safe-context* for `ref` to `ref struct` be *return-only* and `out` be *caller-context*. That prevents cyclic assignment because of the difference in lifetimes.
 
-It is also why `[UnscopedRef]` only promotes the *ref-safe-context* of any `ref` to `ref struct` values to *return-only* and not *caller-context*. Consider that using *caller-context* allows for cyclic assignment and would force a viral use of `[UnscopedRef]` for a `ref struct`:
+Note that `[UnscopedRef]` [promotes](#rules-unscoped) the *ref-safe-context* of any `ref` to `ref struct` values to *caller-context*
+and hence it allows for cyclic assignment and forces a viral use of `[UnscopedRef]` up the call chain:
 
 ```c#
+S F()
+{
+    S local = new();
+    // Error: self assignment possible inside `S.M`.
+    S.M(ref local);
+    return local;
+}
+
 ref struct S
-{
-    byte Field;
-
-    [UnscopedRef]
-    public Span<byte> Data => new Span<byte>(ref Field, 1);
-}
-
-void M(ref S s)
-{
-    // Error: passing a scoped ref to [UnscopedRef] ref 
-    Span<byte> span = s.Data;
-}
-```
-
-This is correctly illegal in that case because the compiler has to consider the pathological case that `S.Data` could cyclic assign via `this`. That forces methods all methods that call `S.Data` to further mark their `ref` parameters as `[UnscopedRef]`. This is viral until the method which creates the value as a local. This is why *return-only* exists as a *safe-context*. It does complicate the spec / implementation but it serves to make the feature significantly more usable.
-
-Note: this cyclic assignment problem does continue to exist for `[UnscopedRef] out` to `ref struct` because that causes the *safe-context* and *ref-safe-context* to be equivalent. 
-
-```c#
-ref struct RS
 {
     int field;
     ref int refField;
+
+    public static void M([UnscopedRef] ref S s)
+    {
+        // Allowed: s has both safe-context and ref-safe-context of caller-context
+        s.refField = ref s.field;
+    }
+}
+```
+
+Similarly `[UnscopedRef] out` allows a cyclic assignment because the parameter has both *safe-context* and *ref-safe-context* of *return-only*.
+
+Promoting `[UnscopedRef] ref` to *caller-context* is useful when the type is *not* a `ref struct`
+(note that we want to keep the rules simple so they don't distinguish between refs to ref vs non-ref structs):
+
+```c#
+int x = 1;
+F(ref x).RefField = 2;
+Console.WriteLine(x); // prints 2
+
+static S F([UnscopedRef] ref int x)
+{
+    S local = new();
+    local.M(ref x);
+    return local;
 }
 
-void M1(out RS p)
+ref struct S
 {
-    // Error: from method arguments must match:
-    // Step 1 would calculate the narrowest escape as *caller-context*
-    // Step 2 would fail the assignment check because p has safe-context of *return-only*
-    M2(out p);
-}
+    public ref int RefField;
 
-void M2([UnscopedRef] out RS p)
-{
-    // The lifetimes of LHS and RHS are equivalent here and hence this is legal
-    p.refField = ref p.Field;
+    public void M([UnscopedRef] ref int data)
+    {
+        RefField = ref data;
+    }
 }
 ```
 
