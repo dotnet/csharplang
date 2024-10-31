@@ -31,8 +31,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Nov 13, 2024
 
-### Mon Nov 11, 2024
-
 ### Wed Nov 6, 2024
 
 - Extensions 
