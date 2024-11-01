@@ -1,4 +1,4 @@
-# Collection expressions: inline collections
+# Collection expressions: natural type
 
 ## Summary
 
