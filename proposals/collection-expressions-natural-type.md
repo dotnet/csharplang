@@ -6,7 +6,7 @@ Infer a natural type for collection expressions based on the elements in the col
 
 ## Motivation
 
-Collection expressions with a natural type could be used in implicitly-typed locations.
+Collection expressions with a natural type could be used in implicitly typed locations.
 
 ```csharp
 var a = [x, y];                       // var
@@ -40,17 +40,17 @@ If there is no *best common type*, the collection expression has no type.
 
 ```csharp
 foreach (var i in [1, .. b ? [2, 3] : []]) { } // ok: col<int>
-foreach (var i in []) { }        // error: cannot determine type
-foreach (var i in [1, null]) { } // error: no common type for int, <null>
+foreach (var i in []) { }                      // error: cannot determine type
+foreach (var i in [1, null]) { }               // error: no common type for int, <null>
 ```
 
 The compiler will use the same *collection type* for all collection expressions, although the *element type* `E` depends on the specific collection expression.
 
-The choice of collection type has a number of implications:
+The choice of collection type has a few implications:
 - **Mutability**: Can the collection instance or the elements be modified?
 - **Allocations**: How many allocations are required to create the instance?
-- **`IEnumerable<T>`**: Does the collection type implement `IEnumerable<T>`, or perhaps other collection interfaces?
-- **Non-type arguments**: Does the collection type support elements that are not valid as type arguments, such as pointers and `ref struct`?
+- **`IEnumerable<T>`**: Does the collection type implement `IEnumerable<T>`, and perhaps other collection interfaces?
+- **Non-type arguments**: Does the collection type support elements that are not valid as type arguments, such as pointers or `ref struct`?
 - **Async code**: Can the collection be used in `async` code or an iterator?
 
 The table below includes some possible collection types, and implications for each type.
@@ -97,9 +97,9 @@ Which collection type should we use?
 
 ### Target-type `foreach` collection?
 
-Should the collection expression be target-typed when used in `foreach` with an *explicitly-typed iteration variable*?
+Should the collection expression be target-typed when used in `foreach` with an *explicitly typed iteration variable*?
 
-In short, if the iteration variable type is explicitly-typed as `E`, should we use `col<E>` as the target type of the `foreach` expression?
+In short, if the iteration variable type is explicitly typed as `E`, should we use `col<E>` as the target type of the `foreach` expression?
 
 ```csharp
 foreach (bool? b in [false, true, null]) { } // target type: col<bool?>?
