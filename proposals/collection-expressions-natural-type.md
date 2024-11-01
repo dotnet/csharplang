@@ -51,7 +51,7 @@ The choice of collection type has a number of implications:
 - **Allocations**: How many allocations are required to create the instance?
 - **`IEnumerable<T>`**: Does the collection type implement `IEnumerable<T>`, or perhaps other collection interfaces?
 - **Non-type arguments**: Does the collection type support elements that are not valid as type arguments, such as pointers and `ref struct`?
-- **Async code**: Can the collection be used in `async` code?
+- **Async code**: Can the collection be used in `async` code or an iterator?
 
 The table below includes some possible collection types, and implications for each type.
 
