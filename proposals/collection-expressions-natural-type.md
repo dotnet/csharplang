@@ -49,7 +49,7 @@ The compiler will use the same *collection type* for all collection expressions,
 The choice of collection type has a few implications:
 - **Mutability**: Can the collection instance or the elements be modified?
 - **Allocations**: How many allocations are required to create the instance?
-- **`IEnumerable<T>`**: Does the collection type implement `IEnumerable<T>`, and perhaps other collection interfaces?
+- **`IEnumerable<T>`**: Is the collection instance implicitly convertible to `IEnumerable<T>`, and perhaps other collection interfaces?
 - **Non-type arguments**: Does the collection type support elements that are not valid as type arguments, such as pointers or `ref struct`?
 - **Async code**: Can the collection be used in `async` code or an iterator?
 
