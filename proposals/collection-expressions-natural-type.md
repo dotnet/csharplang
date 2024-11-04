@@ -95,6 +95,24 @@ void Log<T>(IEnumerable<T> items) { ... }
 
 Which collection type should we use?
 
+### Conversions from type?
+
+Is the natural type considered for *conversion from type*?
+
+For instance, can a collection expression with natural type be assigned to `object`?
+
+```csharp
+object obj = [1, 2, 3]; // convert col<int> to object?
+
+[Value([1, 2, 3])]      // convert col<int> to object?
+static void F() { }
+
+class ValueAttribute : Attribute
+{
+    public ValueAttribute(object value) { }
+}
+```
+
 ### Target-type `foreach` collection?
 
 Should the collection expression be target-typed when used in `foreach` with an *explicitly typed iteration variable*?
