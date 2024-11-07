@@ -134,6 +134,8 @@ When an LDT member decides to champion a discussion, they take the following ste
     * If preferred, the LDT member can ask the original proposer to create this issue.
     * Note: it can be easier to create the PR for step 6 first, get that into a ready-to-merge state, and then create the champion issue at that point, depending on the complexity
       of the feature.
+    * The champion issue should have a short summary of the feature, but not the full proposal; there should be enough detail to jog the memory and/or get someone interested in reading the full
+      specification, but should not have detail that will end up needing to edited often as a proposal evolves.
 2. Assign themselves to the champion issue.
 3. Apply the `Proposal Champion` label to the new issue, as well as to the original discussion.
 4. Link to the original discussion from the champion issue.
@@ -192,3 +194,22 @@ Once a feature has been implemented and has or soon will be shipped, take the fo
         * As an example, `[Proposal]: Params Collections` became `[Proposal]: Params Collections (VS 17.10, .NET 9)`
    4. Add the `Implemented Needs ECMA Spec` label to the issue.
 4. Add the feature to the [language version history](Language-Version-History.md) document.
+
+### Publishing notes
+
+When publishing a set of notes, take the following steps:
+
+1. Put the notes in the appropriate `meetings/<year>` folder. Notes should follow the `LDM-<year>-<month>-<date>.md` format.
+   1. Any supplemental documents for the meeting are also included here with the same prefix to ensure good sorting.
+   2. Include an agenda at the top with document-relative links to each topic discussed during LDM.
+2. Update the `meetings/<year>/README.md` to:
+   1. Move the date into the `C# Language Design Notes for <year>` section
+   2. Update the agenda to be the final agenda from the meeting notes. Remove document-relative links.
+   3. Include a link to the notes. This format is usually `[C# Language Design Meeting for <month> <day>, <year>](absolute-note-link)`.
+   4. If a topic was not discussed during LDM, or not fully finished, move the topic line back to `Schedule ASAP`.
+3. Commit the updates. Prefer using spelled out dates (ie, January 1st, 1970), rather than abbreviations, to avoid confusion.
+4. Update the champion issues of discussed topics with a link to the notes. Prefer using an exact link to the heading for that set of notes.
+5. Create a discussion for the new notes. The title format is `LDM Notes for <month> <day>, <year>`. Set the category to `LDM Notes`.
+   1. The discussion should link to the full notes, and copy the agenda from the README.
+6. Post the discussion to various communities to let people know the notes are up; at a minimum, to the C# LDM teams chat. We often post to
+   discord as well, but that is dependent on people being who are on discord not being on vacation.
