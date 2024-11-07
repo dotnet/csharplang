@@ -35,7 +35,7 @@ Language proposals which prevent specific syntax from occurring can be achieved 
 
 ## Proposals
 
-When a member of the C# LDM finds that a proposal merits consideration by the broader team, they can [Champion](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22) it, which means that they will bring it to the C# Language Design Meeting. Proposals are always discussed in linked discussions, not in the champion issue. We didn't always follow this policy, so many champion issues will have discussion on them; we now lock issues to prevent new discussion from occuring on them. Each champion issue will have a discussion link on it.
+When a member of the C# LDM finds that a proposal merits consideration by the broader team, they can [Champion](https://github.com/dotnet/csharplang/issues?q=is%3Aopen+is%3Aissue+label%3A%22Proposal+champion%22) it, which means that they will bring it to the C# Language Design Meeting. Proposals are always discussed in linked discussions, not in the champion issue. We didn't always follow this policy, so many champion issues will have discussion on them; we now lock issues to prevent new discussion from occurring on them. Each champion issue will have a discussion link on it.
 
 ## Design Process
 
