@@ -4,46 +4,18 @@ about: For proposals that have been invited by a team member.
 title: "[Proposal]: [FEATURE_NAME]"
 ---
 <!--
-Hello, and thanks for your interest in contributing to C#! If you haven't been invited by a team member to open an issue, please instead open a discussion marked [draft issue] at https://github.com/dotnet/csharplang/discussions/new and we'll try to give you feedback on how to get to an issue-ready proposal.
+Hello, and thanks for your interest in contributing to C#! If you haven't been invited by a language design team member to open an issue, please instead open a discussion marked [draft issue] at https://github.com/dotnet/csharplang/discussions/new and we'll try to give you feedback on how to get to an issue-ready proposal.
 
-New language feature proposals should fully fill out this template. This should include a complete detailed design, which describes the syntax of the feature, what that syntax means, and how it affects current parts of the spec. Please make sure to point out specific spec sections that need to be updated for this feature.
+This issue should give a very brief description of the feature, with the more complete description and design being contained in the proposal specification. This issue will be used for tracking purposes, and should have enough information to make it obvious what the feature is about for a casual reader.
 -->
 # FEATURE_NAME
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
+* Specification: Link to a filled out [proposal template](../../proposals/proposal-template.md). If not yet available, link to the PR adding the specification.
 
 ## Summary
 [summary]: #summary
 
-<!-- One paragraph explanation of the feature. -->
-
-## Motivation
-[motivation]: #motivation
-
-<!-- Why are we doing this? What use cases does it support? What is the expected outcome? -->
-
-## Detailed design
-[design]: #detailed-design
-
-<!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement, and include examples of how the feature is used. Please include syntax and desired semantics for the change, including linking to the relevant parts of the existing C# spec to describe the changes necessary to implement this feature. An initial proposal does not need to cover all cases, but it should have enough detail to enable a language team member to bring this proposal to design if they so choose. -->
-
-## Drawbacks
-[drawbacks]: #drawbacks
-
-<!-- Why should we *not* do this? -->
-
-## Alternatives
-[alternatives]: #alternatives
-
-<!-- What other designs have been considered? What is the impact of not doing this? -->
-
-## Unresolved questions
-[unresolved]: #unresolved-questions
-
-<!-- What parts of the design are still undecided? -->
+<!-- Short summary of the feature; the full explanation should be in the checked-in specification. -->
 
 ## Design meetings
 
