@@ -10,7 +10,7 @@ This proposal approaches compatibility between classic extension methods and new
 
 The dual purpose of extension types is to allow other member kinds and also raise the level of abstraction. The two are linked: other member kinds are possible - and pleasant - because the declaration syntax is detached from the generated format. We should protect that by not exposing the lowered shape of declarations at the language level.
 
-The basis of this proposal is the [extension proposal](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) resulting from [separating extensions from roles](https://github.com/dotnet/csharplang/issues/8431) and [dropping their ability to act as instance types](https://github.com/dotnet/csharplang/issues/8474).
+The basis of this proposal is the [extension proposal](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md) resulting from [separating extensions from roles](https://github.com/dotnet/csharplang/blob/1e8255a438517bc3ad067c726c28cfa20cb60f1e/meetings/working-groups/extensions/rename-to-roles-and-extensions.md) and [dropping their ability to act as instance types](https://github.com/dotnet/csharplang/blob/1e8255a438517bc3ad067c726c28cfa20cb60f1e/meetings/working-groups/extensions/extensions-as-static-types.md).
 
 We'll address the three goals in turn. At the end is a brief summary of the features proposed throughout.
 

@@ -110,7 +110,7 @@ Both approaches agree on a number of important points, even as the underlying ph
 
 And of course both approaches share the same overarching goal: to be able to facilitate extension members of nearly every member kind, not just instance methods. Either now or in the future this may include instance and static methods, properties, indexers, events, operators, constructors, user-defined conversions, and even static fields. The only exception is members that add instance state, such as instance fields, auto-properties and field-like events.
 
-The similarities make it tempting to search for a middle ground, but we haven't found satisfactory compromise proposals (though [not for lack of trying](https://github.com/dotnet/csharplang/issues/8519)). Most likely this is because the differences are pretty fundamental. So let's look at what divides the two approaches.
+The similarities make it tempting to search for a middle ground, but we haven't found satisfactory compromise proposals (though [not for lack of trying](./compromise-design-for-extensions.md)). Most likely this is because the differences are pretty fundamental. So let's look at what divides the two approaches.
 
 ### Relationship to classic extension methods
 

@@ -42,7 +42,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Oct 30, 2024
 
-- Extensions (Mads and Dustin) [Extensions: An Evolution of Extension Methods](https://github.com/dotnet/csharplang/pull/8525) and [Compromise design for extensions #8519](https://github.com/dotnet/csharplang/issues/8519)
+- Extensions (Mads and Dustin) [Extensions: An Evolution of Extension Methods](https://github.com/dotnet/csharplang/pull/8525) and [Compromise design for extensions #8519](../working-groups/extensions/compromise-design-for-extensions.md)
 
 ## C# Language Design Notes for 2024
 
