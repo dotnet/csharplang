@@ -298,7 +298,6 @@ Note that this is not a proposal for a specific disambiguation syntax; it is onl
 
 ## Drawbacks
 
-
 ## Alternatives
 
 ### Avoiding nesting for simple cases
@@ -361,6 +360,17 @@ public static class Enumerable
 ```
 
 Note that `source` would not be available in member bodies - they still use `this` to refer to the underlying value. The parameter name is purely there to enable - and trigger - generation as a classic extension method into the enclosing static class.
+
+In principle there are some classic extension methods that couldn't be expressed like this: ones where the type parameters used in the underlying type aren't first in the type parameter list:
+
+``` c#
+public static IEnumerable<TResult> WeirdSelect<TResult, TSource>(
+    this IEnumerable<TSource> source,
+    Func<TSource, TResult> selector) 
+{ ... }
+```
+
+I don't think I've ever seen an extension method like that! But any such method would have to stay in the classic syntax.
 
 ## Unresolved questions
 
