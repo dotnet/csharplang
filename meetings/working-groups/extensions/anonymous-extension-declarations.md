@@ -17,7 +17,7 @@ public static class Enumerable
     extension<T>(IEnumerable<T>)
     {
         public IEnumerable<T> Where(Func<T, bool> predicate) { ... }
-        public IEnumerable<TResult> Select(Func<T, TResult> selector) { ... }
+        public IEnumerable<TResult> Select<TResult>(Func<T, TResult> selector) { ... }
         public static IEnumerable<T> operator +(IEnumerable<T> e1, IEnumerable<T> e2) { ... }
     }
     
@@ -111,7 +111,7 @@ public static class Enumerable
     extension<T>(IEnumerable<T>) // extension members for IEnumerable<T>
     {
         public IEnumerable<T> Where(Func<T, bool> predicate) { ... }
-        public IEnumerable<TResult> Select(Func<T, TResult> selector) { ... }
+        public IEnumerable<TResult> Select<TResult>(Func<T, TResult> selector) { ... }
         public static IEnumerable<T> operator +(IEnumerable<T> e1, IEnumerable<T> e2) { ... }
     }
 }
