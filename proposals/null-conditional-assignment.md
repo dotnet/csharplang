@@ -101,6 +101,12 @@ void M(RS a, ref int x)
 (a?.b, c?.d) = (x, y); // error
 ```
 
+- Increment/decrement operators are [not supported](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-28.md#increment-and-decrement-operators-in-null-conditional-access).
+```cs
+a?.b++; // error
+--a?.b; // error
+```
+
 ### Specification
 The *null conditional assignment* grammar is defined as follows:
 
@@ -250,3 +256,4 @@ One possible alternative might be to permit the postfix form, but not the prefix
 * https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-27.md#null-conditional-assignment
 * https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-08-31.md#null-conditional-assignment
 * https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-26.md#null-conditional-assignment
+* https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-28.md#increment-and-decrement-operators-in-null-conditional-access
