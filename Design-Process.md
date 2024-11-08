@@ -26,7 +26,7 @@ in this repository, and take the following steps to make understanding the curre
 ### Proposed feature
 
 New ideas are submitted as [discussions](https://github.com/dotnet/csharplang/discussions). These ideas can be very freeform, though we ask that you search for duplicates
-before opening a new issue, as the most common first comment on new discussions is one or more links to existing discussions that cover the idea. While ideas are welcome,
+before opening a new discussion, as the most common first comment on new discussions is one or more links to existing discussions that cover the idea. While ideas are welcome,
 there is no guarantee that an idea will be adopted into the language; even among things that have been triaged for eventual inclusion in the language, there is more work
 than can be done in a single lifetime. In order to move forward, a member of the language design team (LDT) has to decide to "champion" the idea. This is effectively the
 LDT member deciding to sponsor the idea, and to bring it forward at a future LDM. Most features do not make it out of this stage.
@@ -59,7 +59,7 @@ features currently under development, we can lag behind here.
 
 A triaged feature is a championed issue that has been approved at LDM for inclusion in a future release of C#. We have quite a few issues in this bucket; they are visible
 by looking at any issues labeled `Proposal Champion` that have been assigned to one of the development milestones, `Any Time`, `Backlog`, `Needs More Work`, or `Working Set`.
-[This query](https://github.com/dotnet/csharplang/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Proposal%20champion%22%20milestone%3ABacklog%20OR%20milestone%3A%22Any%20Time%22%20OR%20milestone%3A%22Needs%20More%20Work%22%20OR%20milestone%3A%22Working%20Set%22)
+[This query](https://github.com/dotnet/csharplang/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Proposal%20champion%22%20(milestone%3ABacklog%20OR%20milestone%3A%22Any%20Time%22%20OR%20milestone%3A%22Needs%20More%20Work%22%20OR%20milestone%3A%22Working%20Set%22%20))
 shows these issues. The development milestones mean the following:
 
 * `Working Set` - These are features that are being actively worked on by LDT members in some form; whether that's design work behind the scenes, active LDMs discussing the
@@ -135,7 +135,7 @@ When an LDT member decides to champion a discussion, they take the following ste
     * Note: it can be easier to create the PR for step 6 first, get that into a ready-to-merge state, and then create the champion issue at that point, depending on the complexity
       of the feature.
     * The champion issue should have a short summary of the feature, but not the full proposal; there should be enough detail to jog the memory and/or get someone interested in reading the full
-      specification, but should not have detail that will end up needing to edited often as a proposal evolves.
+      specification, but should not have detail that will end up needing to be edited often as a proposal evolves.
 2. Assign themselves to the champion issue.
 3. Apply the `Proposal Champion` label to the new issue, as well as to the original discussion.
 4. Link to the original discussion from the champion issue.
