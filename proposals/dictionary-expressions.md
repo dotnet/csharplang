@@ -56,7 +56,7 @@ Choices here would have implications regarding potential syntactic ambiguities, 
 
 There are two aspects to the design of dictionary expressions. 
 
-First is the concept of a `dictionary type`. *Dictionary types* are types are similar to existing `collection types` with the additional requirements that they derive from `IEnumerable<KeyValuePair<TKey, TValue>>` *and* have an indexer `TValue this[TKey] { ... }`.  The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type (as its indexer is from `int` to `KeyValuePair<int, string>`).
+First is the concept of a `dictionary type`. *Dictionary types* are types that are similar to the existing `collection type` concept, with the additional requirements that they derive from `IEnumerable<KeyValuePair<TKey, TValue>>` *and* have an indexer `TValue this[TKey] { ... }`.  The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type (as its indexer is from `int` to `KeyValuePair<int, string>`).
 
 Second is that collection expressions containing `KeyValuePair<>`s (coming from `expression_element`s, `spread_element`s, or `key_value_pair_element`s) can now instantiate a normal `collection type` or a `dictionary type`.  
 
