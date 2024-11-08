@@ -134,18 +134,17 @@ subgraph ConditionalAccessExpression
   whole[a?.b = c]
 end
 subgraph  
-  direction LR;
-  subgraph Expression
-    whole-->a;
+  subgraph WhenNotNull
+    whole-->whenNotNull[".b = c"];
+    whenNotNull-->.b;
+    whenNotNull-->eq[=];
+    whenNotNull-->c;
   end
   subgraph OperatorToken
     whole-->?;
   end
-  subgraph WhenNotNull
-    whole-->whenNotNull[.b = c];
-    whenNotNull-->.b;
-    whenNotNull-->=;
-    whenNotNull-->c;
+  subgraph Expression
+    whole-->a;
   end
 end
 ```
