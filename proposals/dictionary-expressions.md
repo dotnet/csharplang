@@ -36,10 +36,10 @@ The following grammar productions are added:
 collection_element
   : expression_element
   | spread_element
-+ | key_value_element  
++ | key_value_pair_element  
   ;
 
-+ key_value_element
++ key_value_pair_element
 +  : expression ':' expression
 +  ;
 ```
