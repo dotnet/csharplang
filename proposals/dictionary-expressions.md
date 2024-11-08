@@ -58,9 +58,15 @@ There are two aspects to the design of dictionary expressions.
 
 First is the concept of a `dictionary type`. *Dictionary types* are types that are similar to the existing `collection type` concept, with the additional requirements that they derive from `IEnumerable<KeyValuePair<TKey, TValue>>` *and* have an indexer `TValue this[TKey] { ... }`.  The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type (as its indexer is from `int` to `KeyValuePair<int, string>`).
 
-Second is that collection expressions containing `KeyValuePair<>`s (coming from `expression_element`s, `spread_element`s, or `key_value_pair_element`s) can now instantiate a normal `collection type` or a `dictionary type`.  
+Second is that collection expressions containing `KeyValuePair<,>`s (coming from `expression_element`s, `spread_element`s, or `key_value_pair_element`s) can now instantiate a normal `collection type` or a `dictionary type`.  
 
-Intuitively, if the target type for a collection expression is a 
+So, if the target type for a collection expression is some collection type (that is *not* a *dictionary type*) with an element of `KeyValuePair<,>` then it can be instantiated like so:
+
+```c#
+List<KeyValuePair<string, int>> nameToAge = ["mads": 21];
+```
+
+This is just a simple augmentation on top of the existing collection expression rules.
 
 *dictionary expressions* work similarly to *collection expressions*, except treating a `k:v` element as a shorthand for creating a `System.Collections.Generic.KeyValuePair<TKey, TValue>`.  Many rules for *dictionary expressions* will correspond to existing rules for *collection expressions*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.
 
