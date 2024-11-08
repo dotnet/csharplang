@@ -29,11 +29,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Nov 20, 2024
 
+- Extensions (Mads)
+- Dictionary expressions (Cyrus)
+  
 ### Wed Nov 13, 2024
 
-### Wed Nov 6, 2024
-
-- Extensions 
+- Extensions (Mads): https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/anonymous-extension-declarations.md
 
 ### Mon Nov 4, 2024
 
