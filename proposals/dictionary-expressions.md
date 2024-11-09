@@ -121,21 +121,14 @@ Dictionary<string, int> nameToAge = ["mads": 21, .. existingListOfKVPS];
 
 ### Open question 3
 
-How far do we want to take this KeyValuePair representation of things? Do we allow *dictionary elements* when producing normal collections? For example, should the following be allowed:
+How far do we want to take this KeyValuePair representation of things? Do we allow *key value pair elements* when producing normal collections? For example, should the following be allowed:
 
 ```c#
 List<KeyValuePair<string, int>> = ["mads": 21];
 ```
 
-Or should the presence of `k:v` element mandate some dictionary type as the receiver.  Note: the above sort of API is not uncommon.  Roslyn itself contains many apis that permissively *receive* an `IEnumerable<KeyValuePair<string, int>>`.
 
-Importantly, we do not believe it wise to *require* the presence of a `k:v` element to produce a dictionary instance.  For example, we believe it very reasonable and desirable that someone be able to write:
-
-```c#
-Dictionary<string, int> everyone = [.. students, .. teachers];
-```
-
-**Resolution:** *Dictionary elements* will be supported in collection expressions for collection types that have a key-value pair element type. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+**Resolution:** *Key value pair elements* will be supported in collection expressions for collection types that have a key-value pair element type. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
 ### Open question 4
 
