@@ -60,13 +60,34 @@ First is the concept of a `dictionary type`. *Dictionary types* are types that a
 
 Second is that collection expressions containing `KeyValuePair<,>`s (coming from `expression_element`s, `spread_element`s, or `key_value_pair_element`s) can now instantiate a normal `collection type` or a `dictionary type`.  
 
-So, if the target type for a collection expression is some collection type (that is *not* a *dictionary type*) with an element of `KeyValuePair<,>` then it can be instantiated like so:
+So, if the target type for a collection expression is some *collection type* (that is *not* a *dictionary type*) with an element of `KeyValuePair<,>` then it can be instantiated like so:
 
 ```c#
 List<KeyValuePair<string, int>> nameToAge = ["mads": 21];
 ```
 
-This is just a simple augmentation on top of the existing collection expression rules.
+This is just a simple augmentation on top of the existing collection expression rules.  In the above example, the code will be emitted as:
+
+```c#
+__result.Add(KeyValuePair.Create("mads", 21));
+```
+
+However, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>`s produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary, and any `key_value_pair_element` will use that indexer directly as well.  For example:
+
+```c#
+Dictionary<string, int> nameToAge = ["mads": 21, existingDict.MaxPair(), .. otherDict];
+
+// would be rewritten similar to:
+
+Dictionary<string, int> __result = new();
+__result["mads"] = 21;
+
+var __t1 = existingDict.MaxPair();
+__result[__t1.Key] = __t1.Value;
+
+foreach (var __t2 in otherDict)
+    __result[__t2.Key] = __t2.Value;
+```
 
 *dictionary expressions* work similarly to *collection expressions*, except treating a `k:v` element as a shorthand for creating a `System.Collections.Generic.KeyValuePair<TKey, TValue>`.  Many rules for *dictionary expressions* will correspond to existing rules for *collection expressions*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.
 
