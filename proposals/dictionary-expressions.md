@@ -117,7 +117,7 @@ Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsen
 Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive];
 ```
 
-The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  In line with the lack of support for customization for normal collection expressions (for example, for setting initial capacity).
+The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  In line with the lack of support for customization for normal collection expressions (like setting initial capacity).
 
 ### Answered question 1
 
