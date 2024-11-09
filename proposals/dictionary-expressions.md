@@ -61,7 +61,7 @@ Choices here would have implications regarding potential syntactic ambiguities, 
 
 ## Design Intuition
 
-There are two aspects to the design of dictionary expressions. 
+There are two core aspects to the design of dictionary expressions. 
 
 First is the concept of a `dictionary type`. *Dictionary types* are types that are similar to the existing `collection type` concept, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>>` *and* have an indexer `TValue this[TKey] { ... }`.  The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type (as its indexer is from `int` to `KeyValuePair<int, string>`).
 
