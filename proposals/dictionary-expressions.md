@@ -402,7 +402,7 @@ X([a, b]); // ambiguous
 
 ### Mutable interface translation
 
-Given the target type `IDictionary<TKey, TValue>`,  the type used will be `Dictionary<TKey, TValue>`.  Using the normal translation mechanics defined already.
+Given the target type `IDictionary<TKey, TValue>`,  the type used will be `Dictionary<TKey, TValue>`.  Using the normal translation mechanics defined already (including handling of a `comparer: expression` comparer).
 
 ### Non-mutable interface translation
 
