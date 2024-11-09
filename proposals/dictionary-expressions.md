@@ -88,10 +88,10 @@ Dictionary<string, int> __result = new();
 __result["mads"] = 21;
 
 var __t1 = existingDict.MaxPair();
-__result[__t1.Key] = __t1.Value;
+__result[(string)__t1.Key] = (int)__t1.Value;
 
 foreach (var __t2 in otherDict)
-    __result[__t2.Key] = __t2.Value;
+    __result[(string)__t2.Key] = (int)__t2.Value;
 ```
 
 Many rules for *dictionary expressions* will correspond to existing rules for *collection expressions*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.
