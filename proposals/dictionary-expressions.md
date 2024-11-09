@@ -121,7 +121,7 @@ Dictionary<string, int> d1 = [existingKvp];
 Dictionary<string, int> d2 = [.. otherDict];
 ```
 
-Yes.  These is legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+Yes.  These are legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
 ### Q&A 2
 
