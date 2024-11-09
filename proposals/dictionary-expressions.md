@@ -145,7 +145,6 @@ How far do we want to take this KeyValuePair representation of things? Do we all
 List<KeyValuePair<string, int>> = ["mads": 21];
 ```
 
-
 **Resolution:** *Key value pair elements* will be supported in collection expressions for collection types that have a key-value pair element type. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
 ### Open question 4
