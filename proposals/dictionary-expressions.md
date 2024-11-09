@@ -440,21 +440,11 @@ Working group recommendation: `IEnumerable<KVP>` is not a dictionary type (as it
 
 ## Random open questions
 
-### Question 1
-
-If a user had a type that could be both initialized with a collection initializer *and* a dictionary initializer, what should happen?
-
-For example:
-
-```c#
-HybridType h = [kvp1, kvp2];
-```
-
-In C# 12 this might have been calling `.Add(kvp)`.  Is it ok to call the indexer now?  If there is an applicable `.Add`, should we defer to this, and only fallback to the indexer? 
-
 ### Question 2
 
-Parsing ambiguity around: `a ? [b] : c`
+Parsing ambiguity around: `[a ? [b] : c]`
+
+Working group recommendation: Use normal parsing here.  So this is would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a key_value_pair_element here they can write: `[(a?[b]) : c]`
 
 ### Question 3
 
