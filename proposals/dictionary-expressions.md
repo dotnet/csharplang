@@ -174,7 +174,7 @@ Which approach should we go with with our dictionary expressions? Options includ
 
 **Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
-### Open question 1
+### Question: Allow deconstructible types?
 
 Should we take a very restrictive view of `KeyValuePair<,>`?  Specifically, should we allow only that exact type?  Or should we allow any types with an implicit conversion to that type?  For example:
 
@@ -200,9 +200,9 @@ Dictionary<int, string> map1 = [pair1, pair2]; // ?
 
 Resolution: TBD.  Working group recommendation: Allow anything deconstructible into two values (which includes `KeyValuePair`s as well as user types).  It is reasonable to have domain specific types that represent pairs, and to want to then make maps from those.  Making this pleasant, without requiring contortions to do the mapping explicitly would enable powerful and succinct code. 
 
-### Open question 2
+### Question: Types that support both collection and dictionary initialization
 
-We will support *dictionary elements* for C#12 collection expression target types. Which approach should we use for initialization for those types?
+We will support *key value pair elements* for C#12 collection expression target types. Which approach should we use for initialization for those types?
 
 For example, consider a type like so:
 
@@ -440,7 +440,7 @@ Working group recommendation: `IEnumerable<KVP>` is not a dictionary type (as it
 
 ## Random open questions
 
-### Question 2
+### Question: Parsing ambiguity
 
 Parsing ambiguity around: `[a ? [b] : c]`
 
