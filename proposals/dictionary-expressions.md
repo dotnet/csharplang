@@ -279,6 +279,7 @@ The new rules above represent a breaking change: For types that are a valid conv
 >      + Or, the method have a single parameter of
 >      + `IEnumerable<KeyValuePair<TKey, TValue>>` and iteration type
 >      + of the collection type is the same `KeyValuePair<,>` type. 
+>   - The method has two parameters, where the first is an `IEqualityComparer<TKey>` and the second follows the rules of the 'single parameter' rule above.  This method will be called if the collection expression includes a `comparer_element` element.
 > ```
 
 This would allow `ImmutableDictionary<TKey, TValue>` to be annotated with `[CollectionBuilder(typeof(ImmutableDictionary), "CreateRange")]` to light up support for creation.
