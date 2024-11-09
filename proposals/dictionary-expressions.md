@@ -310,6 +310,8 @@ mapping = FrozenDictionary.CreateRange(__keys, __values);
 ## Construction
 
 > The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
+>
+> If the collection expression includes a `comparer: expression`, that `expression` will be evaluated before the subsequence elements are evaluated.
 
 > 
 > ```diff
