@@ -142,7 +142,7 @@ When an LDT member decides to champion a discussion, they take the following ste
 3. Apply the `Proposal Champion` label to the new issue, as well as to the original discussion.
 4. Link to the original discussion from the champion issue.
 5. Lock the proposal champion issue for comments to ensure that discussion continues in the discussion area, rather than on the champion issue.
-6. Fill out and check in a [proposal template](proposals/proposal-template.md) for the feature. Exact specese is not required, but there should be enough detail to have a
+6. Fill out and check in a [proposal template](proposals/proposal-template.md) for the feature. Exact spec language is not required, but there should be enough detail to have a
    meaningful triage session.
     * This is also something the LDT member can ask a community member to open a PR for, if they are willing.
     * The filled out proposal should include a link to the champion issue for easy navigation.
