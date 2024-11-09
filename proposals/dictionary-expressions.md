@@ -159,10 +159,19 @@ struct Pair<X, Y>
 
 Dictionary<int, string> map1 = [pair1, pair2]; // ?
 
-
 List<Pair<int, string>> pairs = ...;
 Dictionary<int, string> map2 = [.. pairs]; // ?
 ```
+
+Similarly, instead of `KeyValuePair<,>` we could allow *any* type deconstructible to two values.  for example:
+
+```c#
+record struct Pair<X, Y>(X x, Y y);
+
+Dictionary<int, string> map1 = [pair1, pair2]; // ?
+```
+
+Resolution: TBD.
 
 ### Q&A 5
 
