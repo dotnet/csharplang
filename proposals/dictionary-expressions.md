@@ -315,7 +315,11 @@ mapping = FrozenDictionary.CreateRange(__keys, __values);
 
 > The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 >
-> If the collection expression includes a `comparer: expression`, that `expression` will be evaluated before the subsequence elements are evaluated.
+> If the collection expression includes a `comparer: expression`, that `expression` will be evaluated before the subsequence elements are evaluated, and will be converted to an `IEqualityComparer<TKey>`.  If present:
+>
+> 1. If using a constructor to instantiate the value, the constructor must take an `IEqualityComparer<TKey>` as the sole parameter which the converted expression will be passed to.
+> 2. If using a `create method`, the method must take an `IEqualityComparer<TKey>` as the first parameter which the converted parameter will be passed to.
+> 3. If creating an interface, the converted expression will be used as the equality comparer controlling the behavior of the final type (synthesized or otherwise) instantiated.
 >
 > ```diff
 > + A key_value_pair_element evaluates its interior expressions in order,
