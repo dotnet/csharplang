@@ -119,7 +119,7 @@ Dictionary<string, int> nameToAge = ["mads": 21, .. existingListOfKVPS];
 
 **Resolution:** *Spread elements* of key-value pair collections will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
-### Open question 3
+### Q&A 3
 
 How far do we want to take this KeyValuePair representation of things? Do we allow *key value pair elements* when producing normal collections? For example, should the following be allowed:
 
