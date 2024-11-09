@@ -198,7 +198,7 @@ record struct Pair<X, Y>(X x, Y y);
 Dictionary<int, string> map1 = [pair1, pair2]; // ?
 ```
 
-Resolution: TBD.  Working group recommendation: Allow anything deconstructible into two values (which includes `KeyValuePair`s as well as user types).  It is reasonable to have domain specific types that represent pairs, and to want to then make maps from those.  Making this pleasant, without requiring contortions to do the mapping explicitly would enable powerful and succinct code. 
+Resolution: TBD.  Working group recommendation: Only allow KeyValuePairs for now.  Do not do anythning with tuples and/or other deconstructible types.  This is also something that could be relaxed later if there is sufficient motivation.   
 
 ### Question: Types that support both collection and dictionary initialization
 
