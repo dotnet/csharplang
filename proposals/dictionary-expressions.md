@@ -34,9 +34,9 @@ The following grammar productions are added:
 
 ```diff
 + collection_expression
-  : '[' ']'
+-  : '[' ']'
 - | '[' collection_element ( ',' collection_element )* ']'  
-+ | '[' 'comparer': expression ']'
++ | '[' ( 'comparer' : expression )? ']'
   | '[' ('comparer': expression , )? collection_element ( ',' collection_element )* ']'
   ;
 
