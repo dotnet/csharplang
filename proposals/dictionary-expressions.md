@@ -33,19 +33,20 @@ An inclusive solution is needed for C#. It should meet the vast majority of case
 The following grammar productions are added:
 
 ```diff
++ collection_expression
+  : '[' ']'
+  : '[' 'comparer': expression ']'
+  | '[' ('comparer': expression , )? collection_element ( ',' collection_element )* ']'
+  ;
+
 collection_element
   : expression_element
   | spread_element
 + | key_value_pair_element
-+ | comparer_element 
   ;
 
 + key_value_pair_element
 +  : expression ':' expression
-+  ;
-
-+ comparer_element
-+  : 'comparer': expression
 +  ;
 ```
 
@@ -291,6 +292,9 @@ We could consider not adding this rule, and instead still require the create met
 ## Construction
 
 > The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
+
+> 
+
 > 
 > ```diff
 > + A dictionary_element evaluates its interior expressions in order,
