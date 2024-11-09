@@ -119,7 +119,7 @@ Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsen
 
 The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  In line with the lack of support for customization for normal collection expressions (for example, for setting initial capacity).
 
-### Q&A 1
+### Answered question 1
 
 Can a dictionary type value be created without using a key_value_pair_element?  For example are the following legal:
 
@@ -132,7 +132,7 @@ Note: the element `KeyValuePair<K1,V1>` types need not be identical to the `KeyV
 
 Yes.  These are legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
-### Q&A 2
+### Answered question 2
 
 Can you spread a *non dictionary type* when producing a dictionary type'd value.  For example:
 
@@ -142,7 +142,7 @@ Dictionary<string, int> nameToAge = ["mads": 21, .. existingListOfKVPS];
 
 **Resolution:** *Spread elements* of key-value pair collections will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
-### Q&A 3
+### Answered question 3
 
 How far do we want to take this KeyValuePair representation of things? Do we allow *key value pair elements* when producing normal collections? For example, should the following be allowed:
 
@@ -152,7 +152,7 @@ List<KeyValuePair<string, int>> = ["mads": 21];
 
 **Resolution:** *Key value pair elements* will be supported in collection expressions for collection types that have a key-value pair element type. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
-### Q&A 4
+### Answered question 4
 
 Dictionaries provide two ways of initializing their contents.  A restrictive `.Add`-oriented form that throws when a key is already present in the dictionary, used by collection initializers, and a permissive indexer-oriented form which does not, used by dictionary initializers.  The restrictive form is useful for catching mistakes ("oops, I didn't intend to add the same thing twice!"), but is limiting *especially* in the spread case.  For example:
 
