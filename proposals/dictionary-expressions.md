@@ -121,6 +121,8 @@ Dictionary<string, int> d1 = [existingKvp];
 Dictionary<string, int> d2 = [.. otherDict];
 ```
 
+Note: the element `KeyValuePair<K1,V1>` types need not be identical to the `KeyValuePair<K2,V2>` type of the destination dictionary type.  They simply must be convertible to the `V1 this[K1 key] { ... }` indexer provided by the dictionary.
+
 Yes.  These are legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
 ### Q&A 2
@@ -129,7 +131,7 @@ Can you spread a *non dictionary type* when producing a dictionary type'd value.
 
 ```c#
 Dictionary<string, int> nameToAge = ["mads": 21, .. existingListOfKVPS];
-```
+``` 
 
 **Resolution:** *Spread elements* of key-value pair collections will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
