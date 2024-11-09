@@ -76,7 +76,7 @@ List<KeyValuePair<string, int>> nameToAge = ["mads": 21];
 This is just a simple augmentation on top of the existing collection expression rules.  In the above example, the code will be emitted as:
 
 ```c#
-__result.Add(KeyValuePair.Create("mads", 21));
+__result.Add(new KeyValuePair<string, int>("mads", 21));
 ```
 
 However, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>`s produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary, and any `key_value_pair_element` will use that indexer directly as well.  For example:
