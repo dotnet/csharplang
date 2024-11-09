@@ -35,10 +35,11 @@ In order to move to the next stage, there needs to be enough detail to fill out 
 While we do not need exact spec language at this point, there should be enough information that other LDT members can get a general idea of the feature, what areas of the
 language it will impact, and where the complicated aspects are likely to be. In order to be triaged as part of an LDM, this template will need to be checked into the repo.
 
-#### Lifecycle
+#### Stage Lifecycle
 
 * Starts when a new discussion is opened
 * Moves to [Championed feature](#championed-feature) when an LDT member decides to champion
+    * For LDT members, see [these instructions](#steps-to-move-a-discussion-to-a-champion-feature) for how to move to the next stage.
 
 ### Championed feature
 
@@ -49,7 +50,7 @@ label and no milestone. For these issues, one or more LDT members have indicated
 give an official blessing. We try to triage these every few months, though when we start wrapping up a particular release and design time is needed for active questions on
 features currently under development, we can lag behind here.
 
-#### Lifecycle
+#### Stage Lifecycle
 
 * Starts when an LDT member decides to champion a [proposed feature](#proposed-feature)
 * Moves to [rejected feature](#rejected-feature) if rejected at LDM
@@ -62,8 +63,8 @@ by looking at any issues labeled `Proposal Champion` that have been assigned to 
 [This query](https://github.com/dotnet/csharplang/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Proposal%20champion%22%20(milestone%3ABacklog%20OR%20milestone%3A%22Any%20Time%22%20OR%20milestone%3A%22Needs%20More%20Work%22%20OR%20milestone%3A%22Working%20Set%22%20))
 shows these issues. The development milestones mean the following:
 
-* `Working Set` - These are features that are being actively worked on by LDT members in some form; whether that's design work behind the scenes, active LDMs discussing the
-  topics, or other actions.
+* `Working Set` - These are features that are being actively worked on by LDT and/or Roslyn compiler members in some form; whether that's design work behind the scenes,
+  active LDMs discussing the topics, or other actions.
 * `Backlog` - These are features that have been approved for inclusion in C# at some LDM in the past, but are not currently being actively worked on. These are not open to
   community implementation; they are usually too large or involved to devote LDM time to unless we're willing to make an active effort to get them into the language.
 * `Needs More Work` - These are features that have been approved for inclusion in C# at some LDM in the past, but there are currently design aspects or blocking issues that
@@ -79,10 +80,11 @@ shows these issues. The development milestones mean the following:
 This state is the one that will consume most of an approved feature's lifecycle, on average. It is not uncommon for a feature that is approved in theory to spend years in the
 backlog and/or working set before being implemented.
 
-#### Lifecycle
+#### Stage Lifecycle
 
 * Starts when a [championed feature](#championed-feature) is approved at LDM and assigned to a development milestone
 * Ends when the feature is [implemented](#implemented-feature) as part of a C# release
+    * For LDT members, see [these instructions](#steps-to-move-a-triaged-feature-to-an-implemented-feature) for steps to take when shipping a feature.
 * Ends if the feature is reconsidered at an LDM and then [rejected](#rejected-feature)
 
 ### Implemented feature
@@ -93,7 +95,7 @@ and prior features, did not follow this, and have incomplete or non-existent spe
 not be closed until the ECMA-334 specification is updated with the feature. This can take some time; the ECMA-334 committee is working on catching up as fast as they can, but is
 several years behind the language implementation.
 
-#### Lifecycle
+#### Stage Lifecycle
 
 * Starts when a [triaged feature](#triaged-feature) is shipped as part of a C# release
 * Ends when the feature is fully incorporated into a version of the ECMA-334 specification
@@ -104,7 +106,7 @@ At this point, the feature has been fully incorporated by ECMA-TC49-TG2, the C# 
 [official C# ECMA specification](https://github.com/dotnet/csharpstandard/). When this happens, we close the issue as completed, and all development work on the feature is
 complete.
 
-#### Lifecycle
+#### Stage Lifecycle
 
 * Starts when an [implemented feature](#implemented-feature) is shipped as part of a C# release
 * This is the final state for a feature that is included in C#, no further state changes occur
@@ -115,7 +117,7 @@ When a feature is explicitly considered during an LDM, and the LDT decides as a 
 and set the milestone to `Likely Never`. It's not impossible for an issue to be pulled back out of this state and included in the language in the future, but generally, this state
 means that the feature will never be part of C#.
 
-#### Lifecycle
+#### Stage Lifecycle
 
 * Starts when a [championed feature](#championed-feature) is considered at LDM and rejected
 * While it is possible that some rejected features end up getting reconsidered, this is generally the final state for language features that are explicitly considered and
@@ -157,14 +159,16 @@ As part of the initial design of a feature, a number of different proposals may 
 supplemental materials to an existing design to help drive conversation in LDM. We want to keep these "supplemental" materials in one place, rather than scattered throughout
 the repo as different issues, discussions, and other documents. For such material, they should go in the [working group folder](meetings/working-groups/) for that feature. Not
 all features will have such a folder; indeed, most will not. For these documents, please check them in _before_ bringing them to an LDM. The LDM organizer should be able to
-link to an exact document, not to a PR.
+link to an exact document, not to a PR. In the event the proposer wants to solicit input before LDM, they can leave the PR open until a day or two before LDM; in such a case the
+LDM organizer may decide to link to the PR in the schedule instead of a specific document. However, the PR must be merged before LDM.
 
 #### Specific implementation questions
 
 During the implementation process, we will often come up with specific scenarios that need to be brought to an LDM and discussed. These questions should be placed in the proposal
 specification, in an `Open Questions` section below the main specification text. Each question should have a _linkable_ header, such that the notes that go over the question can
 link to the exact question being asked. For these questions, please check them in _before_ bringing them to an LDM. The LDM organizer should be able to link to a specific heading
-in a specific document, not to a PR.
+in a specific document, not to a PR. In the event the questioner wants to solicit input before LDM, they can leave the PR open until a day or two before LDM; in such a case the
+LDM organizer may decide to link to the PR in the schedule instead of a specific document. However, the PR must be merged before LDM.
 
 Once a question has been answered, the specification should be updated to include any changes required, and the question should be removed. We link to exact commits in the notes
 to ensure that questions can still be found, while keep speclets neat and free of potentially confusing syntax examples that may be rejected at LDM.
