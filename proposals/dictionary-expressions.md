@@ -20,7 +20,7 @@ Currently, all C# programs must use many different and unfortunately verbose app
 1. Collection-initializer types, which require syntax like `new Dictionary<X, Y> { ... }` (lacking inference of possibly verbose TKey and TValue) prior to their values, and which can cause multiple reallocations of memory because they use `N` `.Add` invocations without supplying an initial capacity.
 1. Immutable collections, which require syntax like `ImmutableDictionary.CreateRange(...)`, but which are also unpleasant due to the need to provide values as an `IEnumerable<KeyValuePair>`.  Builders are even more unwieldy.
 1. Read-only dictionaries, which require first making a normal dictionary, then wrapping it.
-1. Concurrent dictionaries, which lack an `.Add` method, and thus cannot be used with normal collection initializers at all.
+1. Concurrent dictionaries, which lack an `.Add` method, and thus cannot easily be used with collection initializers.
 
 Looking at the surrounding ecosystem, we also find examples everywhere of dictionary creation being more convenient and pleasant to use. Swift, TypeScript, Dart, Ruby, Python, and more, opt for a succinct syntax for this purpose, with widespread usage, and to great effect. Cursory investigations have revealed no substantive problems arising in those ecosystems with having these built-in syntax forms.
 
