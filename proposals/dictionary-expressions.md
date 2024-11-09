@@ -87,6 +87,8 @@ Dictionary<string, int> nameToAge = ["mads": 21, existingDict.MaxPair(), .. othe
 Dictionary<string, int> __result = new();
 __result["mads"] = 21;
 
+// Note: the below casts must be legal for the dictionary
+// expression to be legal
 var __t1 = existingDict.MaxPair();
 __result[(string)__t1.Key] = (int)__t1.Value;
 
