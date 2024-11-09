@@ -36,11 +36,16 @@ The following grammar productions are added:
 collection_element
   : expression_element
   | spread_element
-+ | key_value_pair_element  
++ | key_value_pair_element
++ | comparer_element 
   ;
 
 + key_value_pair_element
 +  : expression ':' expression
++  ;
+
++ comparer_element
++  : 'comparer': expression
 +  ;
 ```
 
@@ -99,15 +104,24 @@ Dictionary<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 Dictionary<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
+A dictionary can also have a custom comparer provided through the use of a special `comparer: ...` element provided in the expression.  For example:
+
+```c#
+Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
+```
+
+The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  In line with the lack of support for customization for normal collection expressions (for example, for setting initial capacity).
+
 ### Q&A 1
 
 Can a dictionary type value be created without using a key_value_pair_element?  For example are the following legal:
 
 ```c#
-Dictionary<string, int> nameToAge = [existingKvp];
+Dictionary<string, int> d1 = [existingKvp];
+Dictionary<string, int> d2 = [.. otherDict];
 ```
 
-Yes.  This is legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+Yes.  These is legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
 ### Q&A 2
 
