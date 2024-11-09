@@ -63,9 +63,9 @@ Choices here would have implications regarding potential syntactic ambiguities, 
 
 There are two core aspects to the design of dictionary expressions. 
 
-First is the concept of a `dictionary type`. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`.  The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type (as its indexer is from `int` to `KeyValuePair<int, string>`).
+First is the concept of a `dictionary type`. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`.  The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type (as its indexer is from `int` to `KeyValuePair<int, string>`), while `Dictionary<TKey, TValue>` would of course be.
 
-Second is that collection expressions containing `KeyValuePair<,>`s (coming from `expression_element`s, `spread_element`s, or `key_value_pair_element`s) can now instantiate a normal `collection type` or a `dictionary type`.  
+Second is that collection expressions containing `KeyValuePair<,>`s (coming from `expression_element`s, `spread_element`s, or `key_value_pair_element`s) can now instantiate a normal `collection type` *or* a `dictionary type`.  
 
 So, if the target type for a collection expression is some *collection type* (that is *not* a *dictionary type*) with an element of `KeyValuePair<,>` then it can be instantiated like so:
 
