@@ -241,7 +241,7 @@ An implicit *collection expression conversion* exists from a collection expressi
 * A *dictionary type* with an appropriate *[create method](#create-methods)*.
 * A *struct* or *class* *dictionary type* that implements `System.Collections.IEnumerable` where:
   * The *element type* is determined from a `GetEnumerator` instance method or enumerable interface.
-  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments (*or* a constructor with an `IEqualityComparer<TKey>` parameter), and the constructor is accessible at the location of the collection expression.
   * The *indexer* has a setter that is as accessible as the declaring type.
 * An *interface type*:
   * `System.Collections.Generic.IDictionary<TKey, TValue>`
