@@ -7,7 +7,7 @@
 Several dictionary-like types can created without external BCL support.  These types are:
 
 1. Concrete dictionary-like types, containing an indexer `TValue this[TKey] { get; }`, like `Dictionary<TKey, TValue>`, `ConcurrentDictionary<TKey, TValue>`, `ImmutableDictionary<TKey, TValue>`, and `FrozenDictionary<TKey, TValue>`.
-1. The well-known BCL dictionary interface types: `IDictionary<TKey, TValue>` and `IReadOnlyDictionary<TKey, TValue>`.
+1. The well-known generic BCL dictionary interface types: `IDictionary<TKey, TValue>` and `IReadOnlyDictionary<TKey, TValue>`.
 
 Further support is present for dictionary-like types not covered above through the `CollectionBuilderAttribute` and a similar API pattern to the corresponding *create method* pattern introduced for collection expressions.
 
