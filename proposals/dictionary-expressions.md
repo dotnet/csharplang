@@ -107,7 +107,7 @@ Dictionary<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 Dictionary<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
-A dictionary can also have a custom comparer provided through the use of a special `comparer: ...` element provided in the expression.  For example:
+A dictionary can also have a custom comparer provided through the use of a special `comparer: ...` provided at the start of the expression.  For example:
 
 ```c#
 Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
@@ -280,7 +280,7 @@ The new rules above represent a breaking change: For types that are a valid conv
 >      + Or, the method have a single parameter of
 >      + `IEnumerable<KeyValuePair<TKey, TValue>>` and iteration type
 >      + of the collection type is the same `KeyValuePair<,>` type. 
->   - The method has two parameters, where the first is an `IEqualityComparer<TKey>` and the second follows the rules of the 'single parameter' rule above.  This method will be called if the collection expression includes a `comparer_element` element.
+>   - The method has two parameters, where the first is an `IEqualityComparer<TKey>` and the second follows the rules of the 'single parameter' rule above.  This method will be called if the collection expression includes an initial `comparer: expression`.
 > ```
 
 This would allow `ImmutableDictionary<TKey, TValue>` to be annotated with `[CollectionBuilder(typeof(ImmutableDictionary), "CreateRange")]` to light up support for creation.
