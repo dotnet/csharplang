@@ -436,6 +436,8 @@ When the destination is an IEnumerable, we tend to think we're producing a seque
 
 What should we do here when targeting `IEnumerable<...>` *and* using `k:v` elements? Produce an ordered sequence, with possibly duplicated values?  Or produce an unordered dictionary, with unique keys?
 
+Working group recommendation: `IEnumerable<KVP>` is not a dictionary type (as it lacks an indexer).  As such, it has sequential value semantics (and can include duplicates).  This would happen today anyways if someone did `[.. ldm]` and we do not think the presence of a `k:v` element changes how the semantics should work.
+
 ## Random open questions
 
 ### Question 1
