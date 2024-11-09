@@ -312,8 +312,7 @@ mapping = FrozenDictionary.CreateRange(__keys, __values);
 > The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 >
 > If the collection expression includes a `comparer: expression`, that `expression` will be evaluated before the subsequence elements are evaluated.
-
-> 
+>
 > ```diff
 > + A key_value_pair_element evaluates its interior expressions in order,
 > + left to right.  In other words, the key is evaluated before the value. 
@@ -395,7 +394,7 @@ X([a, b]); // ambiguous
 
 ### Mutable interface translation
 
-Given the target type `IDictionary<TKey, TValue>`,  the type used will be `Dictionary<TKey, TValue>`.
+Given the target type `IDictionary<TKey, TValue>`,  the type used will be `Dictionary<TKey, TValue>`.  Using the normal translation mechanics defined already.
 
 ### Non-mutable interface translation
 
