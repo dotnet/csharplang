@@ -147,7 +147,29 @@ List<KeyValuePair<string, int>> = ["mads": 21];
 
 **Resolution:** *Key value pair elements* will be supported in collection expressions for collection types that have a key-value pair element type. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
-### Open question 4
+### Q&A 4
+
+Dictionaries provide two ways of initializing their contents.  A restrictive `.Add`-oriented form that throws when a key is already present in the dictionary, used by collection initializers, and a permissive indexer-oriented form which does not, used by dictionary initializers.  The restrictive form is useful for catching mistakes ("oops, I didn't intend to add the same thing twice!"), but is limiting *especially* in the spread case.  For example:
+
+```c#
+Dictionary<string, Option> optionMap = [opt1Name: opt1Default, opt2Name: opt2Default, .. userProvidedOptions];
+```
+
+Or, conversely:
+
+```c#
+Dictionary<string, Option> optionMap = [.. Defaults.CoreOptions, feature1Name: feature1Override];
+```
+
+Which approach should we go with with our dictionary expressions? Options include:
+
+1. Purely restrictive.  All elements use `.Add` to be added to the list.  Note: types like `ConcurrentDictionary` would then not work, not without adding support with something like the `CollectionBuilderAttribute`.
+2. Purely permissive.  All elements are added using the indexer.  Perhaps with compiler warnings if the exact same key is given the same constant value twice.
+3. Perhaps a hybrid model.  `.Add` if only using `k:v` and switching to indexers if using spread elements.  There is deep potential for confusion here.
+
+**Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+### Open question 1
 
 Should we take a very restrictive view of `KeyValuePair<,>`?  Specifically, should we allow only that exact type?  Or should we allow any types with an implicit conversion to that type?  For example:
 
@@ -173,31 +195,9 @@ Dictionary<int, string> map1 = [pair1, pair2]; // ?
 
 Resolution: TBD.  Working group recommendation: Allow anything deconstructible into two values (which includes `KeyValuePair`s as well as user types).  It is reasonable to have domain specific types that represent pairs, and to want to then make maps from those.  Making this pleasant, without requiring contortions to do the mapping explicitly would enable powerful and succinct code. 
 
-### Q&A 5
+### Open question 2
 
-Dictionaries provide two ways of initializing their contents.  A restrictive `.Add`-oriented form that throws when a key is already present in the dictionary, used by collection initializers, and a permissive indexer-oriented form which does not, used by dictionary initializers.  The restrictive form is useful for catching mistakes ("oops, I didn't intend to add the same thing twice!"), but is limiting *especially* in the spread case.  For example:
-
-```c#
-Dictionary<string, Option> optionMap = [opt1Name: opt1Default, opt2Name: opt2Default, .. userProvidedOptions];
-```
-
-Or, conversely:
-
-```c#
-Dictionary<string, Option> optionMap = [.. Defaults.CoreOptions, feature1Name: feature1Override];
-```
-
-Which approach should we go with with our dictionary expressions? Options include:
-
-1. Purely restrictive.  All elements use `.Add` to be added to the list.  Note: types like `ConcurrentDictionary` would then not work, not without adding support with something like the `CollectionBuilderAttribute`.
-2. Purely permissive.  All elements are added using the indexer.  Perhaps with compiler warnings if the exact same key is given the same constant value twice.
-3. Perhaps a hybrid model.  `.Add` if only using `k:v` and switching to indexers if using spread elements.  There is deep potential for confusion here.
-
-**Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
-
-### Open question 6
-
-From [Open Question 3](#open-question-3), we will support *dictionary elements* for C#12 collection expression target types. Which approach should we use for initialization for those types?
+We will support *dictionary elements* for C#12 collection expression target types. Which approach should we use for initialization for those types?
 
 For example, consider a type like so:
 
