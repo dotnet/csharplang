@@ -89,9 +89,7 @@ foreach (var __t2 in otherDict)
     __result[__t2.Key] = __t2.Value;
 ```
 
-*dictionary expressions* work similarly to *collection expressions*, except treating a `k:v` element as a shorthand for creating a `System.Collections.Generic.KeyValuePair<TKey, TValue>`.  Many rules for *dictionary expressions* will correspond to existing rules for *collection expressions*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.
-
-
+Many rules for *dictionary expressions* will correspond to existing rules for *collection expressions*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.
 
 With a broad interpretation of these rules, all of the following would be legal:
 
@@ -101,36 +99,22 @@ Dictionary<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 Dictionary<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
-### Open Question 1
+### Q&A 1
 
-Should we allow *expression elements* when producing dictionaries?  Or only *dictionary elements* and *spread elements*?  If we do not allow *expression elements* then the following would not be legal:
-
-```c#
-Dictionary<string, int> nameToAge = ["mads": 21, existingKvp]; // A user would have to write:
-
-Dictionary<string, int> nameToAge = ["mads": 21, existingKvp.Key: existingKvp.Value];
-```
-
-**Resolution:** *Expression elements* of key-value pairs will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
-
-### Open question 2
-
-Having spreads in a *dictionary expression* only be concerned with element types (and not the collection type being spread itself), matches the equivalent case in the collection-expression case:
+Can a dictionary type value be created without using a key_value_pair_element?  For example are the following legal:
 
 ```c#
-List<KeyValuePair<string, int>> nameToAge = [.. someDict]; // supported today in C# 12
+Dictionary<string, int> nameToAge = [existingKvp];
 ```
 
-But we could restrict spreads in a *dictionary expression* to only allow dictionary types themselves.  If we require dictionary types, then the following would not be legal:
+Yes.  This is legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+### Q&A 2
+
+Can you spread a *non dictionary type* when producing a dictionary type'd value.  For example:
 
 ```c#
 Dictionary<string, int> nameToAge = ["mads": 21, .. existingListOfKVPS];
-```
-
-Note: this seems particularly restrictive given that people may commonly use things like linq-expressions to filter and transform dictionaries like so:
-
-```c#
-Dictionary<string, int> nameToAge = ["mads": 21, .. existingDict.Where(kvp => kvp.Value >= 21)];
 ```
 
 **Resolution:** *Spread elements* of key-value pair collections will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
