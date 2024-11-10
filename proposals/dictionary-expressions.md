@@ -33,7 +33,7 @@ An inclusive solution is needed for C#. It should meet the vast majority of case
 The following grammar productions are added:
 
 ```diff
-+ collection_expression
+collection_expression
 -  : '[' ']'
 -  | '[' collection_element ( ',' collection_element )* ']'  
 +  : '[' ( 'comparer' ':' expression )? ']'
