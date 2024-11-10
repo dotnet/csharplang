@@ -63,9 +63,9 @@ Choices here would have implications regarding potential syntactic ambiguities, 
 
 There are two core aspects to the design of dictionary expressions. 
 
-First is the concept of a `dictionary type`. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`.  The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type (as its indexer is from `int` to `KeyValuePair<int, string>`), while `Dictionary<TKey, TValue>` would of course be.
+First is the concept of a `dictionary type`. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`. The former requirement ensures that `List<T>` is not considered a dictionary type, with its `int`-to-`T` indexer. The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type, with its `int`-to-`KeyValuePair<int, string>` indexer. `Dictionary<TKey, TValue>` passes both requirements.
 
-Second is that collection expressions containing `KeyValuePair<,>`s (coming from `expression_element`s, `spread_element`s, or `key_value_pair_element`s) can now instantiate a normal `collection type` *or* a `dictionary type`.  
+Second is that collection expressions containing `KeyValuePair<,>` (coming from `expression_element`, `spread_element`, or `key_value_pair_element`) can now instantiate a normal *collection type* *or* a *dictionary type*.
 
 So, if the target type for a collection expression is some *collection type* (that is *not* a *dictionary type*) with an element of `KeyValuePair<,>` then it can be instantiated like so:
 
@@ -79,7 +79,7 @@ This is just a simple augmentation on top of the existing collection expression 
 __result.Add(new KeyValuePair<string, int>("mads", 21));
 ```
 
-However, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>`s produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary, and any `key_value_pair_element` will use that indexer directly as well.  For example:
+However, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>` produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary, and any `key_value_pair_element` will use that indexer directly as well.  For example:
 
 ```c#
 Dictionary<string, int> nameToAge = ["mads": 21, existingDict.MaxPair(), .. otherDict];
@@ -117,7 +117,7 @@ Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsen
 Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive];
 ```
 
-The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  In line with the lack of support for customization for normal collection expressions (like setting initial capacity).
+The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  This is in line with the lack of support for customization for normal collection expressions (like setting initial capacity).
 
 ### Answered question 1
 
@@ -190,7 +190,7 @@ List<Pair<int, string>> pairs = ...;
 Dictionary<int, string> map2 = [.. pairs]; // ?
 ```
 
-Similarly, instead of `KeyValuePair<,>` we could allow *any* type deconstructible to two values.  for example:
+Similarly, instead of `KeyValuePair<,>` we could allow *any* type deconstructible to two values? For example:
 
 ```c#
 record struct Pair<X, Y>(X x, Y y);
@@ -295,11 +295,12 @@ We could consider not adding this rule, and instead still require the create met
 
 Conclusion: TBD.  Working group recommendation.  We will defer to the BCL here.  They will have to add `[CollectionBuilder]` annotations to light up anyways.  They can either point these at the existing `CreateRange` methods, or they could point at new methods that take spans.
 
-Pointing at the existing method would have the positive that it would add to the BCL surface area.  But it would have the negative of forcing going through interfaces to create an immutable dictionary.
+Pointing at the existing method would force going through interfaces to create an immutable dictionary.
+Pointing at a new method would allow for more efficient, stack-based, initialization, but would increase the BCL surface area.
 
 Pointing at a new method would allow for more efficient, stack-based, initialization.  However, it would also increase the BCL surface area.
 
-BCL might also prefer something like `CreateRange(ReadOnlySpan<TKey> keys, ReadOnlySpan<TValues> values)` such a signature would then allow constant data segments to be pointed at with an dictionary expression like so:
+BCL might also prefer something like `CreateRange(ReadOnlySpan<TKey> keys, ReadOnlySpan<TValues> values)`. Such a signature would allow constant data segments to be used with a dictionary expression like so:
 
 ```c#
 FrozenDictionary<int, int> mapping = [1: 2, 2: 4, 4: 8];
@@ -444,7 +445,7 @@ Working group recommendation: `IEnumerable<KVP>` is not a dictionary type (as it
 
 Parsing ambiguity around: `[a ? [b] : c]`
 
-Working group recommendation: Use normal parsing here.  So this is would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a key_value_pair_element here they can write: `[(a?[b]) : c]`
+Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`
 
 ### Question 3
 
