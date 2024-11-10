@@ -288,7 +288,7 @@ The new rules above represent a breaking change: For types that are a valid conv
 **For the create method:**
 
 1. **The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an identity conversion from E to the iteration type of the collection type, or the method has a single parameter of `IEnumerable<KeyValuePair<TKey, TValue>>` and iteration type of the collection type is the same `KeyValuePair<,>` type.**
-2. **The method has two parameters, where one is convertible to an `IEqualityComparer<TKey>` and the second follows the rules of the 'single parameter' rule above. This method will be called if the collection expression includes an initial `comparer: expression`.**
+2. **The method has two parameters, where one is convertible to an `IEqualityComparer<TKey>` and the other follows the rules of the 'single parameter' rule above. This method will be called if the collection expression includes an initial `comparer: expression`.**
 
 This would allow `ImmutableDictionary<TKey, TValue>` to be annotated with `[CollectionBuilder(typeof(ImmutableDictionary), "CreateRange")]` to light up support for creation.
 
