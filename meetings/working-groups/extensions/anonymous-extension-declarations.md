@@ -143,7 +143,7 @@ public static class Enumerable
 }
 ```
 
-By default, the underlying value is passed to instance extension members by value, but an extension declaration can explicitly specify a different ref kind:
+By default, the underlying value is passed to instance extension members by value, but an extension declaration can explicitly specify a different ref kind, as long as the underlying type is known to be a value type:
 
 ``` c#
 public static class Bits
@@ -171,10 +171,6 @@ public static class NullableExtensions
     {
         public string AsNotNull => this is null ? "" : this;
         [param:NotNullWhen(false)] public bool IsNullOrEmpty => this is null or [];
-    }
-    extension(ref string?)
-    {
-        [param:NotNull] public void MakeNotNull() => this ??= "";
     }
     extension<T> (T) where T : class?
     {
@@ -343,15 +339,18 @@ This ends up looking more like what we've been calling a "member-based" approach
 
 Allowing full compatibility for existing extension methods to be ported to new syntax was an explicit non-goal for this proposal, but in the end it does come quite close to being able to embrace such compatibility. an instance extension method in this syntax has everything it needs to generate an equivalent classic extension method - except a parameter name for the `this` parameter. Why is this necessary? Because existing callers of the extension method as a static method may pass the `this` argument by name! 
 
-But herein lies also an opportunity. We could say that extension declarations are _allowed_ to specify a parameter name, and when they do, any extension methods declared within them are generated as static methods on the enclosing static class:
-
 ``` c#
 public static class Enumerable
 {
-    extension<TSource>(IEnumerable<TSource> source)
+    extension<T>(IEnumerable<T>)
     {
-        // Parameter name means generate as classic extension method
-        public IEnumerable<TSource> Where(Func<TSource, bool> predicate) 
+        [GenerateStaticMethod("source")]
+        public IEnumerable<T> Where(Func<T, bool> predicate) 
+        { 
+            foreach (var e in this){ ... }
+        }
+        [GenerateStaticMethod("source")]
+        public IEnumerable<T> Select<TResult>(Func<T, TResult> selector) 
         { 
             foreach (var e in this){ ... }
         }
@@ -359,9 +358,7 @@ public static class Enumerable
 }
 ```
 
-Note that `source` would not be available in member bodies - they still use `this` to refer to the underlying value. The parameter name is purely there to enable - and trigger - generation as a classic extension method into the enclosing static class.
-
-In principle there are some classic extension methods that couldn't be expressed like this: ones where the type parameters used in the underlying type aren't first in the type parameter list:
+Type parameters from the extension declaration and the method declaration would be concatenated. In principle there are some classic extension methods that couldn't be expressed like this: ones where the type parameters used in the underlying type aren't first in the type parameter list:
 
 ``` c#
 public static IEnumerable<TResult> WeirdSelect<TResult, TSource>(
@@ -372,7 +369,16 @@ public static IEnumerable<TResult> WeirdSelect<TResult, TSource>(
 
 I don't think I've ever seen an extension method like that! But any such method would have to stay in the classic syntax.
 
+### Member-based lowering strategy
+
+The proposed lowering strategy merges extension declarations into anonymous static classes under the hood. This helps reduce the amount of transformation that needs to happen on individual members - properties can stay properties, and so on.
+
+However, it does lead to challenges:
+- How do we generate stable names for these anonymous classes?
+- This would be the first time we generate "unspeakable" public types. How does the ecosystem manage that - other languages, documentation, etc.?
+
+As an alternative, we could generate extension memebers as static methods directly on the enclosing static class. Any member from a generic extension declaration would need to be turned into one or two generic methods with mangled names, and metadata would need to be generated to track how it all belongs together in extension declarations. All in all, members would be much more heavily transformed, but we would avoid the extra layer of anonymous static classes.
+
 ## Unresolved questions
 
-- Should by-ref ref kinds only be allowed when the underlying type is known to be a value type, like today?
 - How stable can we make the generated names of merged static classes, and how much does it matter?
