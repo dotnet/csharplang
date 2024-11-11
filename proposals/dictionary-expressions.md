@@ -113,7 +113,7 @@ Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive, ..
 Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive];
 ```
 
-While this approach does reuse `expression_element` both for specifying individual `KeyValuePair<,>`  as well as a comparer for the dictionary, there is no ambiguity here is no types could satisfy both types.  
+While this approach does reuse `expression_element` both for specifying individual `KeyValuePair<,>` as well as a comparer for the dictionary, there is no ambiguity here as no type could satisfy both types.  
 
 The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  This is in line with the lack of support for customization for normal collection expressions (like setting initial capacity). Other designs were explored which attempted to generalize this concept out (for example, passing arbitrary arguments along).  These designs never landed on a satisfactory syntax.  And the concept of passing an arbitrary argument along doesn't supply a satisfactory answer on how that would control instantiating an `IDictionary<,>` or `IReadOnlyDictionary<,>`. 
 
