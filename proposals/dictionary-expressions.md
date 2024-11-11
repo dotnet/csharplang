@@ -275,9 +275,8 @@ The new rules above represent a breaking change: For types that are a valid conv
 > A *create method* is indicated with a `[CollectionBuilder(...)]` attribute on the *collection type*.
 > The attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
 
-> ```diff
-> + A create method will commonly use the name `CreateRange` in the dictionary domain.
-> ```
+> **A create method will commonly use the name `CreateRange` in the dictionary domain.**
+>
 > For the create method:
 >   - The method must have a single parameter of type System.ReadOnlySpan<E>, passed by value, and there is an identity conversion from E to the iteration type of the collection type.
 > +   - The method has two parameters, where one is convertible to an `IEqualityComparer<TKey>` and the other follows the rules of the 'single parameter' rule above. This method will be
