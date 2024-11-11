@@ -108,7 +108,7 @@ A dictionary expression can also provide a custom `IEqualityComparer<TKey>` comp
 Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
 
 // Or even:
-Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive];
+Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive];
 ```
 
 The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  This is in line with the lack of support for customization for normal collection expressions (like setting initial capacity).
