@@ -317,38 +317,25 @@ mapping = FrozenDictionary.CreateRange(__keys, __values);
 
 ## Construction
 
-> The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
->
-> If the collection expression includes a `comparer: expression`, that `expression` will be evaluated before the subsequence elements are evaluated, and will be converted to an `IEqualityComparer<TKey>`.  If present:
->
-> 1. If using a constructor to instantiate the value, the constructor must take an `IEqualityComparer<TKey>` as the sole parameter which the converted expression will be passed to.
-> 2. If using a `create method`, the method must take an `IEqualityComparer<TKey>` as the first parameter which the converted parameter will be passed to.
-> 3. If creating an interface, the converted expression will be used as the equality comparer controlling the behavior of the final type (synthesized or otherwise) instantiated.
->
-> ```diff
-> + A key_value_pair_element evaluates its interior expressions in order,
-> + left to right.  In other words, the key is evaluated before the value. 
-> ```
->
-> For each element in order:
->
-> - If the element is an expression element, the applicable Add instance or extension method is invoked with the element expression as the argument. (Unlike classic collection initializer behavior, element evaluation and Add calls are not necessarily interleaved.)
-> 
-> - ```diff
->   + If the target is a dictionary type, then the element must be a
->   + `KeyValuePair<,>`.  The applicable indexer is invoked with the
->   + `.Key` and `.Value` members of that pair.
->   ```
->
-> - If the element is a spread element then one of the following is used:
->   - An applicable GetEnumerator instance or extension method is invoked on the spread element expression and for each item from the enumerator the applicable Add instance or extension method is invoked on the collection instance with the item as the argument. If the enumerator implements IDisposable, then Dispose will be called after enumeration, regardless of exceptions.
-> 
->    - ```diff
->      + If the target is a dictionary-type, the enumerator's element
->      + type must be some `KeyValuePair<,>`, and for each of those
->      + elements the applicable indexer is invoked on the collection
->      + instance with the `.Key` and `.Value` members of that pair.
->      ```
+The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
+
+If the collection expression includes a `comparer: expression`, that `expression` will be evaluated before the subsequence elements are evaluated.  If present:
+
+1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is convertible to `IEqualityComparer<TKey>`.  The `comparer:` expression will be converted to this type.
+2. If using a `create method`, the method must have a parameter whose type is convertible to `IEqualityComparer<TKey>` as one of its parameters. The `comparer:` expression will be converted to this type.
+3. If creating an interface, the `comperer:` expression must be convertible to `IEqualityComparer<TKey>`.  This comparer will be used as the equality comparer controlling the behavior of the final type (synthesized or otherwise) instantiated.
+
+**A key_value_pair_element evaluates its interior expressions in order, left to right. In other words, the key is evaluated before the value.**
+
+**For each element in order:**
+
+- **If the element is an expression element, the applicable Add instance or extension method is invoked with the element expression as the argument. (Unlike classic collection initializer behavior, element evaluation and Add calls are not necessarily interleaved.)**
+
+- **If the target is a dictionary type, then the element must be a `KeyValuePair<,>`. The applicable indexer is invoked with the `.Key` and `.Value` members of that pair.**
+
+- **If the element is a spread element then one of the following is used:**
+    - **An applicable GetEnumerator instance or extension method is invoked on the spread element expression and for each item from the enumerator the applicable Add instance or extension method is invoked on the collection instance with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
+    - **If the target is a dictionary-type, the enumerator's element type must be some `KeyValuePair<,>`, and for each of those elements the applicable indexer is invoked on the collection instance with the `.Key` and `.Value` members of that pair.**
 
 ## Type inference
 
