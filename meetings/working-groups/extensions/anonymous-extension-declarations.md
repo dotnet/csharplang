@@ -377,7 +377,7 @@ However, it does lead to challenges:
 - How do we generate stable names for these anonymous classes?
 - This would be the first time we generate "unspeakable" public types. How does the ecosystem manage that - other languages, documentation, etc.?
 
-As an alternative, we could generate extension memebers as static methods directly on the enclosing static class. Any member from a generic extension declaration would need to be turned into one or two generic methods with mangled names, and metadata would need to be generated to track how it all belongs together in extension declarations. All in all, members would be much more heavily transformed, but we would avoid the extra layer of anonymous static classes.
+As an alternative, we could generate extension members as static methods directly on the enclosing static class. Any member from a generic extension declaration would need to be turned into one or two generic methods with mangled names, and metadata would need to be generated to track how it all belongs together in extension declarations. All in all, members would be much more heavily transformed, but we would avoid the extra layer of anonymous static classes.
 
 ## Unresolved questions
 
