@@ -200,7 +200,7 @@ Resolution: TBD.  Working group recommendation: Only allow `KeyValuePair<,>` for
 
 ### Question: Types that support both collection and dictionary initialization
 
-We will support *key value pair elements* for C#12 collection expression target types. Which approach should we use for initialization for those types?
+C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
 
 For example, consider a type like so:
 
