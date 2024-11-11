@@ -94,6 +94,8 @@ foreach (var __t2 in otherDict)
 
 Many rules for *dictionary expressions* will correspond to existing rules for *collection expressions*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.
 
+Note: Many rules in this spec will refer to types needing to be the same `KeyValuePair<,>` type.  This is an informal way of saying the types must have an identity conversion between them.  As such, `KeyValuePair<(int X, int Y), object>` would be considered the same type a `KeyValuePair<(int, int), object?>` for the purpose of these rules.
+
 With a broad interpretation of these rules, all of the following would be legal:
 
 ```c#
