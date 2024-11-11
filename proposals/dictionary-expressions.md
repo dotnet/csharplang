@@ -296,7 +296,6 @@ The runtime has committed to supplying these new CollectionBuilder methods that 
 
 The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 
-If the collection expression includes a `comparer: expression`, that `expression` will be evaluated before the subsequence elements are evaluated.  If present:
 
 1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is convertible to `IEqualityComparer<TKey>`.  The `comparer:` expression will be converted to this type.
 2. If using a `create method`, the method must have a parameter whose type is convertible to `IEqualityComparer<TKey>` as one of its parameters. The `comparer:` expression will be converted to this type.
