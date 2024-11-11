@@ -287,33 +287,12 @@ The new rules above represent a breaking change: For types that are a valid conv
 
 **For the create method:**
 
-1. **The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an identity conversion from E to the iteration type of the collection type, or the method has a single parameter of `IEnumerable<KeyValuePair<TKey, TValue>>` and iteration type of the collection type is the same `KeyValuePair<,>` type.**
+1. **The method must have a single parameter of type `System.ReadOnlySpan<E>`, passed by value, and there is an identity conversion from E to the iteration type of the collection type.**
 2. **The method has two parameters, where one is convertible to an `IEqualityComparer<TKey>` and the other follows the rules of the 'single parameter' rule above. This method will be called if the collection expression includes an initial `comparer: expression`.**
 
 This would allow `ImmutableDictionary<TKey, TValue>` to be annotated with `[CollectionBuilder(typeof(ImmutableDictionary), "CreateRange")]` to light up support for creation.
 
-### Question: Efficient 'Create' methods
-
-We could consider not adding this rule, and instead still require the create method to take a `ReadOnlySpan<E>`.  However, that would require the BCL to then add such a method to `ImmutableDictionary` as the existing `CreateRange` methods take an `IEnumerable`.
-
-Conclusion: TBD.  Working group recommendation.  We will defer to the BCL here.  They will have to add `[CollectionBuilder]` annotations to light up anyways.  They can either point these at the existing `CreateRange` methods, or they could point at new methods that take spans.
-
-Pointing at the existing method would force going through interfaces to create an immutable dictionary.
-Pointing at a new method would allow for more efficient, stack-based, initialization, but would increase the BCL surface area.
-
-Pointing at a new method would allow for more efficient, stack-based, initialization.  However, it would also increase the BCL surface area.
-
-BCL might also prefer something like `CreateRange(ReadOnlySpan<TKey> keys, ReadOnlySpan<TValues> values)`. Such a signature would allow constant data segments to be used with a dictionary expression like so:
-
-```c#
-FrozenDictionary<int, int> mapping = [1: 2, 2: 4, 4: 8];
-
-// maps to:
-// No stack allocs at all!
-private static ReadOnlySpan<int> __keys => [1, 2, 4];
-private static ReadOnlySpan<int> __values => [2, 4, 8];
-mapping = FrozenDictionary.CreateRange(__keys, __values);
-```
+The runtime has committed to supplying these new CollectionBuilder methods that take `ReadOnlySpan<>` for their immutable collections.
 
 ## Construction
 
