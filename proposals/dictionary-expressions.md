@@ -272,7 +272,7 @@ The new rules above represent a breaking change: For types that are a valid conv
 
 ## Create methods
 
-~~A create method is indicated with a [CollectionBuilder(...)] attribute on the collection type. The attribute specifies the builder type and method name of a method to be invoked to construct an instance of the collection type.~~
+A create method is indicated with a [CollectionBuilder(...)] attribute on the collection type. The attribute specifies the builder type and method name of a method to be invoked to construct an instance of the collection type.
 
 ~~A create method will commonly use the name `CreateRange` in the dictionary domain.~~
 
