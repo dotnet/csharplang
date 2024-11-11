@@ -295,7 +295,7 @@ If the target is a dictionary type, and collection expression's first element is
 2. If using a `create method`, the method must have a parameter whose type is convertible to `IEqualityComparer<TKey>` as one of its parameters. The first `element_expression` value will be passed to this parameter.
 3. If creating an interface, this comparer will be used as the equality comparer controlling the behavior of the final type (synthesized or otherwise) instantiated.
 
-**A key_value_pair_element evaluates its interior expressions in order, left to right. In other words, the key is evaluated before the value.**
+**A `key_value_pair_element` evaluates its interior expressions in order, left to right. In other words, the key is evaluated before the value.**
 
 **For each element in order:**
 
