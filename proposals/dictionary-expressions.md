@@ -105,7 +105,7 @@ Dictionary<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 A dictionary expression can also provide a custom `IEqualityComparer<TKey>` comparer to control its behavior just by including such a value is the first `expression_element` in the expression. For example:
 
 ```c#
-Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
+Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive, .. existingMap];
 
 // Or even:
 Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive];
