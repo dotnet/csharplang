@@ -553,6 +553,39 @@ and perhaps break out of the spec violation at least for these new span conversi
 i.e., change Roslyn to actually report a compile-time error if these conversions are defined
 (likely except those already defined by the BCL).
 
+### Prefer converting from `T[]` to `ReadOnlySpan<T>` over `Span<T>` in overload resolution
+
+To avoid `ArrayTypeMismatchException`s during implicit conversions of [covariant arrays](#covariant-arrays),
+it would be good to extend [the betterness rule](#better-conversion-from-expression)
+so that overload resolution prefers a `ReadOnlySpan<T>` overload over a `Span<T>` overload (those `T`s don't have to be identical).
+
+Specifically, given two implicit span conversions, one from array to ReadOnlySpan, the other from array to Span,
+overload resolution would mark the former one as "better conversion from expression".
+
+The full change to the spec of "better conversion from expression" would be:
+
+> Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`,
+> and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`,
+> `C₁` is a *better conversion* than `C₂` if one of the following holds:
+>
+> - `E` is a *collection expression* and one of the following holds:
+>   - `T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, and an implicit conversion exists from `E₁` to `E₂`.
+>   - `T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *element type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`.
+>   - `T₁` is not a *span_type*, and `T₂` is not a *span_type*, and an implicit conversion exists from `T₁` to `T₂`.
+> - `E` is not a *collection expression* and one of the following holds:
+>   - `E` exactly matches `T₁` and `E` does not exactly match `T₂`
+>   - **`E` exactly matches neither of `T₁` and `T₂`,
+>     and `C₁` is an implicit span conversion and `C₂` is not an implicit span conversion**
+>   - **`E` exactly matches both or neither of `T₁` and `T₂`,
+>     and both of `C₁` and `C₂` are an implicit span conversion
+>     and `C₁` is from array to ReadOnlySpan and `C₂` is from array to Span,**
+>   - `E` exactly matches both or neither of `T₁` and `T₂`,
+>     **both or neither of `C₁` and `C₂` are an implicit span conversion**,
+>     and `T₁` is a better conversion target than `T₂`
+> - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
+
+Alternatively, the BCL *and third parties* would need to add ORPA to many overloads like https://github.com/dotnet/runtime/issues/109549.
+
 ## Alternatives
 
 Keep things as they are.
