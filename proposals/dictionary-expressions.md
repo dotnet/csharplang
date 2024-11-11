@@ -297,9 +297,11 @@ The runtime has committed to supplying these new CollectionBuilder methods that 
 The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 
 
-1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is convertible to `IEqualityComparer<TKey>`.  The `comparer:` expression will be converted to this type.
-2. If using a `create method`, the method must have a parameter whose type is convertible to `IEqualityComparer<TKey>` as one of its parameters. The `comparer:` expression will be converted to this type.
-3. If creating an interface, the `comperer:` expression must be convertible to `IEqualityComparer<TKey>`.  This comparer will be used as the equality comparer controlling the behavior of the final type (synthesized or otherwise) instantiated.
+If the collection expression's first element is an `expression_element`, and the type of that element is convertible to some `IEqualityComparer<TKey>`.  Then:
+
+1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is convertible to `IEqualityComparer<TKey>`.  The first `element_expression` value will be passed to this parameter.
+2. If using a `create method`, the method must have a parameter whose type is convertible to `IEqualityComparer<TKey>` as one of its parameters. The first `element_expression` value will be passed to this parameter.
+3. If creating an interface, this comparer will be used as the equality comparer controlling the behavior of the final type (synthesized or otherwise) instantiated.
 
 **A key_value_pair_element evaluates its interior expressions in order, left to right. In other words, the key is evaluated before the value.**
 
