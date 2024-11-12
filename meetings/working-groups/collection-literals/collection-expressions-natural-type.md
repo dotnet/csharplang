@@ -1,12 +1,21 @@
-# Collection expressions: natural type
+# Collection expressions: inferred type
 
 ## Summary
 
-Infer a natural type for collection expressions based on the elements in the collection to allow using collection expressions in non-target-typed locations.
+Inferring an element type for collection expressions based on the elements in the collection, and choosing a containing collection type, would allow using collection expressions in locations that are implicitly-typed.
 
 ## Motivation
 
-Collection expressions with a natural type could be used in implicitly typed locations.
+Inferring an element type would allow collection expressions to be used in `foreach` and in spread elements.
+In these cases, the inferred *element type* is observable, but the containing *collection type* is not observable.
+
+```csharp
+foreach (var i in [x, y, z]) { }
+
+int[] items = [x, y, .. b ? [z] : []];
+```
+
+If the compiler chooses a specific containing *collection type*, collection expressions could be used in other implicitly-typed locations where the collection type is observable.
 
 ```csharp
 var a = [x, y];                       // var
@@ -14,37 +23,25 @@ var b = [x, y].Where(e => e != null); // extension methods
 var c = Identity([x, y]);             // type inference: T Identity<T>(T)
 ```
 
-Collection expressions could be used in spreads with `? :` to add elements conditionally to the containing collection.
+## Inferred element type
 
-```csharp
-int[] items = [x, y, .. b ? [z] : []];
-```
-
-Collection expressions could be used in `foreach`.
-
-```csharp
-foreach (var i in [1, 2, 3]) { }
-```
-
-With spreads and `foreach`, the *collection type* of the collection expression is not directly observable, only the *element type* is observable.
-
-## Natural type
-
-The collection type to use for collection expressions is an open question. For now, we'll call that type *`col<E>`* where `E` is the *element type*.
-
-The *element type* `E` is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of the elements `Eᵢ`:
+The *element type* `E` inferred for a collection expressions is the [*best common type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116315-finding-the-best-common-type-of-a-set-of-expressions) of the elements, where for each element `Eᵢ`:
 * If `Eᵢ` is an *expression element*, the contribution is the *type* of `Eᵢ`. If `Eᵢ` does not have a type, there is no contribution.
 * If `Eᵢ` is a *spread element* `..Sᵢ`, the contribution is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of `Sᵢ`. If `Sᵢ` does not have a type, there is no contribution.
 
 If there is no *best common type*, the collection expression has no type.
 
+Inferring the element type is sufficient for scenarios such as `foreach` and spreads where the *collection type* is *not observable*. For those cases, the compiler may use any conforming representation for the collection, including eliding the collection instance altogether.
+
 ```csharp
-foreach (var i in [1, .. b ? [2, 3] : []]) { } // ok: col<int>
-foreach (var i in []) { }                      // error: cannot determine type
+foreach (var i in [1, .. b ? [2, 3] : []]) { } // ok: collection of int
+foreach (var i in []) { }                      // error: cannot determine element type
 foreach (var i in [1, null]) { }               // error: no common type for int, <null>
 ```
 
-The compiler will use the same *collection type* for all collection expressions, although the *element type* `E` depends on the specific collection expression.
+## Natural collection type
+
+For implicitly-typed scenarios where the *collection type* is observable, the compiler needs to choose a specific collection type in addition to inferring the element type.
 
 The choice of collection type has a few implications:
 - **Mutability**: Can the collection instance or the elements be modified?
@@ -63,8 +60,6 @@ The table below includes some possible collection types, and implications for ea
 |`ReadOnlyMemory<T>`|No|1|Yes|No|Yes|heap allocated buffer|
 |`IEnumerable<T>`|No|1+|Yes|No|Yes|context-dependent implementation|
 |*Anonymous type*|?|1+|Yes|Yes|Yes|compiler-generated type|
-
-If the collection type of a collection expression is *not observable*, the compiler may use any conforming representation for the collection, including eliding the collection instance altogether.
 
 ## Breaking changes
 
@@ -91,9 +86,15 @@ void Log<T>(IEnumerable<T> items) { ... }
 
 ## Open questions
 
+### Support `foreach` and spread over typeless collection expressions?
+
+Should we support collection expressions in `foreach` expressions and in spread elements, even if we decide not to support a natural *collection type* in general?
+
+What are the set of locations where the collection type is not observable that should be supported?
+
 ### Collection type?
 
-Which collection type should we use?
+If we do support a natural *collection type*, which collection type should we use? See the table above for some considerations.
 
 ### Conversions from type?
 
@@ -134,7 +135,3 @@ In short, if the containing collection expression has a target type with *elemen
 int[] x = [1, ..[]];           // spread target type: col<int>?
 object[] y = [2, ..[default]]; // spread target type: col<object>?
 ```
-
-### Limit natural type to `foreach` and conditional expressions only?
-
-Should we defer the decision on *collection type* and only support natural type scenarios where the collection expression type is not observable?
