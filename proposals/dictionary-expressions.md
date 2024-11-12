@@ -299,12 +299,12 @@ If the target is a dictionary type, and collection expression's first element is
 
 **For each element in order:**
 
-- **If the element is an expression element, the applicable Add instance or extension method is invoked with the element expression as the argument. (Unlike classic collection initializer behavior, element evaluation and Add calls are not necessarily interleaved.)**
+- If **the target is a collection type, and** the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element expression as the argument. (Unlike classic collection initializer behavior, element evaluation and `Add` calls are not necessarily interleaved.)
 
 - **If the target is a dictionary type, then the element must be a `KeyValuePair<,>`. The applicable indexer is invoked with the `.Key` and `.Value` members of that pair.**
 
 - If the element is a *spread element* then one of the following is used:
-    - **An applicable GetEnumerator instance or extension method is invoked on the spread element expression and for each item from the enumerator the applicable Add instance or extension method is invoked on the collection instance with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.**
+    - **If the target is a collection type,** an applicable GetEnumerator instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable Add instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
     - **If the target is a dictionary-type, the enumerator's element type must be some `KeyValuePair<,>`, and for each of those elements the applicable indexer is invoked on the collection instance with the `.Key` and `.Value` members of that pair.**
 
 ## Type inference
