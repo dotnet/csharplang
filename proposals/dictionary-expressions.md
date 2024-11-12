@@ -104,18 +104,6 @@ Dictionary<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 Dictionary<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
-A dictionary expression can also provide a custom `IEqualityComparer<TKey>` comparer to control its behavior just by including such a value is the first `expression_element` in the expression. For example:
-
-```c#
-Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive, .. existingMap];
-
-// Or even:
-Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive];
-```
-
-While this approach does reuse `expression_element` both for specifying individual `KeyValuePair<,>` as well as a comparer for the dictionary, there is no ambiguity here as no type could satisfy both types.  
-
-The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  This is in line with the lack of support for customization for normal collection expressions (like setting initial capacity). Other designs were explored which attempted to generalize this concept out (for example, passing arbitrary arguments along).  These designs never landed on a satisfactory syntax.  And the concept of passing an arbitrary argument along doesn't supply a satisfactory answer on how that would control instantiating an `IDictionary<,>` or `IReadOnlyDictionary<,>`. 
 
 ### Answered question 1
 
@@ -235,6 +223,39 @@ A type is considered a *dictionary type* if the following hold:
   * The getter is as accessible as the declaring type.
 
 \* *Identity conversions are used rather than exact matches to allow type differences in the signature that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
+
+
+
+## Key comparer support
+
+A dictionary expression can also provide a custom `IEqualityComparer<TKey>` comparer to control its behavior just by including such a value is the first `expression_element` in the expression. For example:
+
+```c#
+Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive, .. existingMap];
+
+// Or even:
+Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive];
+```
+
+While this approach does reuse `expression_element` both for specifying individual `KeyValuePair<,>` as well as a comparer for the dictionary, there is no ambiguity here as no type could satisfy both types.  
+
+The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  This is in line with the lack of support for customization for normal collection expressions (like setting initial capacity). Other designs were explored which attempted to generalize this concept out (for example, passing arbitrary arguments along).  These designs never landed on a satisfactory syntax.  And the concept of passing an arbitrary argument along doesn't supply a satisfactory answer on how that would control instantiating an `IDictionary<,>` or `IReadOnlyDictionary<,>`. 
+
+### Question: Comparers for *collection types*
+
+Should support for the key comparer be available for normal *collection types*, not just *dictionary types*.  This would be useful for set-like types like `HashSet<>`.  For example:
+
+```c#
+HashSet<string> values = [StringComparer.CaseInsensitive, .. names];
+```
+
+### Question: Specialized comparer syntax.
+
+Should there be more distinctive syntax for the comparer?  Simply starting with a comparer could be difficult to tease out.  Having a syntax like so could make things clearner:
+
+```c#
+Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
+```
 
 ## Conversions
 
