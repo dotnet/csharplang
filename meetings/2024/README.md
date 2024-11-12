@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
+- [First-class Span: preferring ReadOnlySpan over Span](../../proposals/first-class-span-types.md#prefer-converting-from-t-to-readonlyspant-over-spant-in-overload-resolution)
 
 ## Recurring topics
 
