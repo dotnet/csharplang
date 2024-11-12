@@ -224,8 +224,6 @@ A type is considered a *dictionary type* if the following hold:
 
 \* *Identity conversions are used rather than exact matches to allow type differences in the signature that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
 
-
-
 ## Key comparer support
 
 A dictionary expression can also provide a custom `IEqualityComparer<TKey>` comparer to control its behavior just by including such a value is the first `expression_element` in the expression. For example:
