@@ -576,15 +576,13 @@ The full change to the spec of "better conversion from expression" would be:
 >   - `E` exactly matches `T₁` and `E` does not exactly match `T₂`
 >   - **`E` exactly matches neither of `T₁` and `T₂`,
 >     and `C₁` is an implicit span conversion and `C₂` is not an implicit span conversion**
->   - **`E` exactly matches both or neither of `T₁` and `T₂`,
->     and both of `C₁` and `C₂` are an implicit span conversion
->     and `C₁` is from array to ReadOnlySpan and `C₂` is from array to Span,**
+>   - **`E` has an *array type* `T[]`, and `C₁` is an implicit span conversion from `T[]` to `System.ReadOnlySpan<E₁>`, and `C₂` is an implicit span conversion from `T[]` to `System.Span<E₂>`,**
 >   - `E` exactly matches both or neither of `T₁` and `T₂`,
 >     **both or neither of `C₁` and `C₂` are an implicit span conversion**,
 >     and `T₁` is a better conversion target than `T₂`
 > - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
 
-Alternatively, the BCL *and third parties* would need to add ORPA to many overloads like https://github.com/dotnet/runtime/issues/109549.
+Alternatively, the BCL *and third parties* would need to add `[OverloadResolutionPriorty]` attributes to many overloads like https://github.com/dotnet/runtime/issues/109549.
 
 ## Alternatives
 
