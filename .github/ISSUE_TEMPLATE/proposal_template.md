@@ -11,6 +11,7 @@ This issue should give a very brief description of the feature, with the more co
 # FEATURE_NAME
 
 * Specification: Link to a filled out [proposal template](../../proposals/proposal-template.md). If not yet available, link to the PR adding the specification.
+* Discussion: Link to the discussion topic for this feature.
 
 ## Summary
 [summary]: #summary
