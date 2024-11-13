@@ -54,7 +54,7 @@ features currently under development, we can lag behind here.
 
 * Starts when an LDT member decides to champion a [proposed feature](#proposed-feature)
 * Moves to [rejected feature](#rejected-feature) if rejected at LDM
-* Moves to [triaged feature](#implemented-feature) if approved at LDM and assigned to a development milestone
+* Moves to [triaged feature](#triaged-feature) if approved at LDM and assigned to a development milestone
 
 ### Triaged feature
 
