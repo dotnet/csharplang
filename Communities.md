@@ -2,10 +2,6 @@
 
 **Channels:**
 
-- [Gitter](https://gitter.im/dotnet/csharplang) - Any discussion related to the C# language but mostly design discussions.
-
-    [![Join the chat at https://gitter.im/dotnet/csharplang](https://badges.gitter.im/dotnet/csharplang.svg)](https://gitter.im/dotnet/csharplang?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 - [Dotnet Discord](https://aka.ms/dotnet-discord-csharp) - github.com/dotnet discord for discussing dotnet repositories (including csharplang).
 
     [![Chat on Discord](https://discordapp.com/api/guilds/143867839282020352/widget.png)](https://aka.ms/dotnet-discord-csharp)

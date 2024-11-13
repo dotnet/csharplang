@@ -1,9 +1,6 @@
 # FEATURE_NAME
 
-* [x] Proposed
-* [ ] Prototype: [Complete](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
-* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/BRANCH_NAME)
-* [ ] Specification: [Not Started](pr/1)
+Champion issue: <link to the champion issue>
 
 ## Summary
 [summary]: #summary
@@ -30,13 +27,8 @@ Why should we *not* do this?
 
 What other designs have been considered? What is the impact of not doing this?
 
-## Unresolved questions
-[unresolved]: #unresolved-questions
+## Open questions
+[open]: #open-questions
 
 What parts of the design are still undecided?
-
-## Design meetings
-
-Link to design notes that affect this proposal, and describe in one sentence for each what changes they led to.
-
 
