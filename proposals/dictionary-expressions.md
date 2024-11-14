@@ -255,6 +255,10 @@ Should there be more distinctive syntax for the comparer?  Simply starting with 
 Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
 ```
 
+### Question: Other types of comparers.
+
+`IEqualityComparer<T>` is not the only comparer type used in collections.  `SortedDictionary<,>` and `SortedSet<,>` both use an `IComparer<T>` instead (as they have ordering, not hashing semantics).  It seems unfortunate to leave out `SortedDictionary<,>` if we are supporting the rest.  As such, perhaps the rules should just be that the special value in the collection be typed as some `IComparer<T>` or some `IEqualityComparer<T>`.  
+
 ## Conversions
 
 *Collection expression conversions* are updated to include conversions to *dictionary types*.
