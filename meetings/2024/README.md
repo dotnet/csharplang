@@ -42,11 +42,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [Warn on some `not`/`or` patterns](https://gist.github.com/jcouv/d83cbc33248dbeb8475e4a7688d80a49) (Julien, invite Levi)
 - Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
 
+## C# Language Design Notes for 2024
+
 ### Wed Oct 30, 2024
 
-- Extensions (Mads and Dustin) [Extensions: An Evolution of Extension Methods](https://github.com/dotnet/csharplang/pull/8525) and [Compromise design for extensions #8519](../working-groups/extensions/compromise-design-for-extensions.md)
+[C# Language Design Meeting for October 30th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-30.md)
 
-## C# Language Design Notes for 2024
+- Extensions
 
 ### Mon Oct 28, 2024
 
