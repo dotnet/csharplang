@@ -33,11 +33,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Extensions (Mads)
 - Dictionary expressions (Cyrus)
   
+## C# Language Design Notes for 2024
+
 ### Wed Nov 13, 2024
 
-- Extensions (Mads): https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/anonymous-extension-declarations.md
+[C# Language Design Meeting for November 13th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-11-13.md)
 
-## C# Language Design Notes for 2024
+- Extensions
 
 ### Mon Nov 4, 2024
 
