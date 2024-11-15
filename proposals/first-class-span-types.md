@@ -582,6 +582,19 @@ The full change to the spec of "better conversion from expression" would be:
 >     and `T₁` is a better conversion target than `T₂`
 > - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
 
+Note that adding a betterness rule can lead to more ambiguities when two betterness rules have an effect in opposite directions on a given set of overloads:
+
+```cs
+var x = new int[0];
+C.M(x, x); // 2 previously, ambiguous now
+
+static class C
+{
+    public static void M(IEnumerable<int> a, ReadOnlySpan<int> b) => Console.Write(1);
+    public static void M(Span<int> a, Span<int> b) => Console.Write(2);
+}
+```
+
 Alternatively, the BCL *and third parties* would need to add `[OverloadResolutionPriorty]` attributes to many overloads like https://github.com/dotnet/runtime/issues/109549.
 
 ## Alternatives
