@@ -11,7 +11,7 @@ This is a small feature that removes a common frustration: "why do I have to pic
 the choice has no effect on the evaluation of the expression?" It's very odd to require something to be specified
 within an operand when it has no impact on the result. Notably, `typeof` does not suffer from this limitation.
 
-It's not just about code that better expresses itself. Once some arbitrary type argument has been chosen in a
+This is also not simply about brevity and simplicity. Once some arbitrary type argument has been chosen in a
 `nameof` expression, such as `object?`, changing a constraint on a type parameter can break uses of `nameof`
 unnecessarily. Insult becomes added to injury in this scenario. Satisfying the type parameter can sometimes
 require declaring a dummy class to implement an interface which is constraining the type parameter. Now there's
@@ -22,10 +22,7 @@ In some rarer cases, with a generic class constraint, it's not even _possible_ t
 possible to inherit from a base class which is used as a generic constraint, due to the base class having an
 internal constructor or internal abstract member.
 
-There's a lot of bang for the buck in fixing this one. When you hit this, it feels like a paper cut. It's gotten
-steady attention from the community, including an initial proposal by Jon Skeet. Implementation complexity is very
-low. A language design member and a community member have each implemented this feature in the compiler for purposes
-of investigation.
+A simple tweak allows this to fall out in the language, with minimal implementation complexity in the compiler.
 
 ## Description
 
@@ -73,7 +70,7 @@ class A<TItem, TCollection> where TCollection : IReadOnlyCollection<TItem>
 
    - `typeof()` has the same restrictions.
 
-3. Support is not included for partially unbound types, such as `Dictionary<int,>`. Similarly, such expressions
+2. Support is not included for partially unbound types, such as `Dictionary<int,>`. Similarly, such expressions
    have no precedent in the language, and there is not sufficient motivation. That form provides no benefits over
    `Dictionary<,>`, and accessing members of `T`-returning members can be written more directly without wrapping
    in a partially unbound type.
@@ -128,6 +125,15 @@ var v = SomeType<>.StaticMember;
 var v = typeof(List<>[]);
 var v = typeof(List<>*);
 var v = typeof((List<> a, int b));
+```
+
+Note: The above rules effectively serve to make it so that `generic_dimension_specifier` cannot show up within
+another type.  However, at the top level, where the specifier is allowed, it is fine to mix and match with normal
+`type_argument_list`s.  For example, the following are legal:
+
+```c#
+var v = (nameof(X<>.Y<int>));
+var v = (nameof(X<int>.Y<>));
 ```
 
 Member lookup on an unbound type expression within a `nameof` will be performed the same way as for a `this`
