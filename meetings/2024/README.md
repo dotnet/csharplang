@@ -37,12 +37,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Extensions (Mads): https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/anonymous-extension-declarations.md
 
+## C# Language Design Notes for 2024
+
 ### Mon Nov 4, 2024
 
-- [Warn on some `not`/`or` patterns](https://gist.github.com/jcouv/d83cbc33248dbeb8475e4a7688d80a49) (Julien, invite Levi)
-- Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
+[C# Language Design Meeting for November 4th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-11-04.md)
 
-## C# Language Design Notes for 2024
+- `not` and `or` patterns
+- Notes on notes
 
 ### Wed Oct 30, 2024
 
