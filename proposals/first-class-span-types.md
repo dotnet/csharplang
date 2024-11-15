@@ -597,6 +597,20 @@ static class C
 
 Alternatively, the BCL *and third parties* would need to add `[OverloadResolutionPriorty]` attributes to many overloads like https://github.com/dotnet/runtime/issues/109549.
 
+### Ignore span conversions in expression trees
+
+This feature breaks some libraries based on expression trees like LINQ-to-DB (https://github.com/dotnet/runtime/issues/109757)
+because some extension method invocations now bind to `MemoryExtensions` instead of `Enumerable`.
+
+We could mitigate this by saying the span conversions don't exist inside expression trees.
+(Alternatively, we could say they don't exist when inside expression trees *and* binding an extension method receiver.)
+Span conversions are inherently problematic inside expression trees because they use "restricted types"
+which should be disallowed in expression trees (but in roslyn they are not: https://github.com/dotnet/roslyn/issues/74143).
+
+On the other hand, similar issues have come up before for expression trees and
+we preferred to keep the binding inside expression trees consistent with normal binding,
+and tell customers they need to update (e.g., https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#params-span-breaks).
+
 ## Alternatives
 
 Keep things as they are.

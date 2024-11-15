@@ -7,7 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
-- [First-class Span: preferring ReadOnlySpan over Span](../../proposals/first-class-span-types.md#prefer-converting-from-t-to-readonlyspant-over-spant-in-overload-resolution)
+- First-class Span open questions: [preferring ReadOnlySpan over Span](../../proposals/first-class-span-types.md#prefer-converting-from-t-to-readonlyspant-over-spant-in-overload-resolution) and [expression trees](../../proposals/first-class-span-types.md#ignore-span-conversions-in-expression-trees)
 
 ## Recurring topics
 
