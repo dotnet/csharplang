@@ -73,7 +73,7 @@ There are three core aspects to the design of dictionary expressions.
 
 2. Introduction of the *dictionary type*. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`. The former requirement ensures that `List<T>` is not considered a dictionary type, as its element type is `T` not `KeyValuePair<,>`. The latter requirement ensures that `List<KeyValuePair<int, string>>` is also not considered a dictionary type, with its `int`-to-`KeyValuePair<int, string>` indexer (instead of an `int`-to-`string` indexer). `Dictionary<TKey, TValue>` passes both requirements.
 
-    As such, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>` produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary. Any `key_value_pair_element` will use that indexer directly as well.  For example:
+    As such, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>` produced by `expression_element` or `spread_element` elements will be changed to use the indexer\* to assign into the resultant dictionary. Any `key_value_pair_element` will use that indexer\* directly as well.  For example:
 
     ```c#
     Dictionary<string, int> nameToAge = ["mads": 21, existingDict.MaxPair(), .. otherDict];
@@ -92,6 +92,8 @@ There are three core aspects to the design of dictionary expressions.
         __result[(string)__t2.Key] = (int)__t2.Value;
     ```
 
+    \* The above holds for types with an available `set` accessor in their indexer. Similar semantics are provided for dictionary types without a writable indexer (like immutable dictionary types, or `IReadOnlyDictionary<,>`), and are explained later in the spec.
+
 3. Alignment of the rules for assigning to *dictionary types* with the rules for assigning to *collection types*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.  *However*, with the rules extended such that that `KeyValuePair<,>` type itself is relatively transparent, and instead the rule is updated to work on the underlying `TKey` and `TValue` types.
 
     This view allows for very natural processing of what would otherwise be thought of as disparate `KeyValuePair<,>` types.  For example:
@@ -102,7 +104,6 @@ There are three core aspects to the design of dictionary expressions.
     // Assignment possible, even though KeyValuePair<string, int>` is not itself assignable to KeyValuePair<object, long>
     Dictionary<object, long> d2 = [.. d1]; 
     ```
-
 
 Note: Many rules in this spec will refer to types needing to be the same `KeyValuePair<,>` type.  This is an informal way of saying the types must have an identity conversion between them.  As such, `KeyValuePair<(int X, int Y), object>` would be considered the same type a `KeyValuePair<(int, int), object?>` for the purpose of these rules.
 
@@ -124,11 +125,11 @@ List<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 
 A type is considered a *dictionary type* if the following hold:
 * The *element type* is `KeyValuePair<TKey, TValue>`.
-* The *type* has an instance *indexer* where:
+* The *type* has an instance *indexer*, with a `get` accessor where:
   * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.\*
   * There is an identity conversion from the indexer type to `TValue`.\*
-  * The getter returns by value.
-  * The getter is as accessible as the declaring type.
+  * The `get` accessor returns by value.
+  * The `get` accessor is as accessible as the declaring type.
 
 \* *Identity conversions are used rather than exact matches to allow type differences in the signature that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
 
@@ -181,16 +182,17 @@ Dictionary<string, int> caseInsensitiveMap = [comparer : StringComparer.CaseInse
 
 An implicit *collection expression conversion* exists from a *collection expression* to the following *dictionary types*:
 * A *dictionary type* with an appropriate *[create method](#create-methods)*.
+
 * A *struct* or *class* *dictionary type* that implements `System.Collections.IEnumerable` where:
   * The *element type* is determined from a `GetEnumerator` instance method or enumerable interface.
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments (*or* a constructor with a single [*comparer*](#Comparer-support) parameter), and the constructor is accessible at the location of the collection expression.
-  * The *indexer* has a setter that is as accessible as the declaring type.
+  * The *indexer* has a `set` accessor that is as accessible as the declaring type.
+
 * An *interface type*:
   * `System.Collections.Generic.IDictionary<TKey, TValue>`
   * `System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`
 
-*Collection expression conversions* require implicit conversions for each element.
-The element conversion rules are now differentiated based on whether the *element type* of the target type is `KeyValuePair<,>`.
+*Collection expression conversions* require implicit conversions for each element. The element conversion rules are now differentiated based on whether the *element type* of the target type is `KeyValuePair<,>`.
 
 If the *element type* is a type *other than* `KeyValuePair<,>`, the rules are *unchanged* from *language version 12* other than **clarifications**:
 
@@ -218,9 +220,10 @@ The new rules above represent a breaking change: For types that are a valid conv
 >
 > For the create method:
 >   - The method must have a single parameter of type System.ReadOnlySpan<E>, passed by value, and there is an identity conversion from E to the *iteration type* of the collection type. 
+>
 >    - **The method has two parameters, where the first is a [*comparer*](#Comparer-support) and the other follows the rules of the *single parameter* rule above. This method will be called if the collection expression's first element is an [*comparer*](#Comparer-support) that is convertible to that parameter type.**
 
-Dictionary type authors who use `CollectionBuilderAttribute` should have the method that is pointed to have `overwrite` not `throw` semantics when encountering the same `.Key` multiple times in the span of `KeyValuePair<,>` they are processing.
+*Dictionary type* authors who use `CollectionBuilderAttribute` should have the method that is pointed to have `overwrite` not `throw` semantics when encountering the same `.Key` multiple times in the span of `KeyValuePair<,>` they are processing.
 
 The runtime has committed to supplying these new CollectionBuilder methods that take `ReadOnlySpan<>` for their immutable collections.
 
@@ -228,7 +231,7 @@ The runtime has committed to supplying these new CollectionBuilder methods that 
 
 The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 
-If the target is a dictionary type, and collection expression's first element is an `expression_element`, and the type of that element is convertible to some [*comparer*](#Comparer-support), then:
+If the target is a *dictionary type*, and collection expression's first element is an `expression_element`, and the type of that element is some [*comparer*](#Comparer-support), then:
 
 1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is some [*comparer*](#Comparer-support) type.  The first `element_expression` value will be passed to this parameter.
 2. If using a `create method`, the method's first parameter's type is some [*comparer*](#Comparer-support) type. The first `element_expression` value will be passed to this parameter.
@@ -271,7 +274,7 @@ No changes here.  Like with collection expressions, dictionary expressions do no
 
 ## Overload resolution
 
-No changes currently.  Existing *collection expression* rules already apply.  For example, given:
+No changes here.  Existing *collection expression* rules already apply and appear appropriate for dictionary expressions.  For example, given:
 
 ```c#
 void X(IDictionary<A, B> dict);
@@ -396,7 +399,7 @@ When the destination is an IEnumerable, we tend to think we're producing a seque
 
 What should we do here when targeting `IEnumerable<...>` *and* using `k:v` elements? Produce an ordered sequence, with possibly duplicated values?  Or produce an unordered dictionary, with unique keys?
 
-Decision: `IEnumerable<KVP>` is not a dictionary type (as it lacks an indexer).  As such, it has sequential value semantics (and can include duplicates).  This would happen today anyways if someone did `[.. ldm]` and we do not think the presence of a `k:v` element changes how the semantics should work.
+Resolution: `IEnumerable<KVP>` is not a dictionary type (as it lacks an indexer).  As such, it has sequential value semantics (and can include duplicates).  This would happen today anyways if someone did `[.. ldm]` and we do not think the presence of a `k:v` element changes how the semantics should work.
 
 This is also similar to how passing to an `IEnumerable<T>` would differ from passing to some *set* type with normal collection expressions.  The target type *intentionally* affects semantics, and there is no expectation that across very different target types that one would receive the same resultant values with the same behaviors.  We do not view *dictionary types* or *key value pair elements* as changing the calculus here.
 
@@ -458,7 +461,7 @@ Options include:
 2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
 3. Use C#12 initialization always.
 
-Resolution TBD.  Working group recommendation: Use applicable instance indexer only.  This ensures that everything dictionary-like is initialized in a consistent fashion.  This would be a break in behavior when recompiling.  The view is that these types would be rare.  And if they exist, it would be nonsensical for them to behave differently using the indexer versus the .Add (outside of potentially throwing behavior).
+Resolution: TBD.  Working group recommendation: Use applicable instance indexer only.  This ensures that everything dictionary-like is initialized in a consistent fashion.  This would be a break in behavior when recompiling.  The view is that these types would be rare.  And if they exist, it would be nonsensical for them to behave differently using the indexer versus the .Add (outside of potentially throwing behavior).
 
 ### Question: Parsing ambiguity
 
