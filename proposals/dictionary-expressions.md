@@ -376,7 +376,6 @@ Which approach should we go with with our dictionary expressions? Options includ
 
 **Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
 
-
 ## Retracted Designs/Questions
 
 ### Question: Should `k:v` elements force dictionary semantics?
@@ -427,6 +426,12 @@ Dictionary<int, string> map1 = [pair1, pair2]; // ?
 
 Resolution: While cute, these capabilities are not needed for core scenarios to work.  They also raise concerns about where to draw the line wrt to what is the dictionary space and what is not.  As such, we will only allow `KeyValuePair<,>` for now.  And we will not do anything with tuples and/or other deconstructible types.  This is also something that could be relaxed in the future if there is sufficient feedback and motivation to warrant it.  This design space is withdrawn from dictionary expressions.
 
+### Question: Semantics when a type implements the *dictionary type* shape in multiple ways.
+
+What are the rules when types have multiple indexers and multiple impls of `IEnumerable<KVP<,>>`?  
+
+This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along wih the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used a a *dictionary type*.  If these don't hold, it cannot be.
+
 ## Open Questions
 
 ### Question: Types that support both collection and dictionary initialization
@@ -460,11 +465,3 @@ Resolution TBD.  Working group recommendation: Use applicable instance indexer o
 Parsing ambiguity around: `[a ? [b] : c]`
 
 Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`
-
-### Question: Semantics when a type implements the *dictionary type* shape in multiple ways.
-
-What are the rules when types have multiple indexers and multiple impls of `IEnumerable<KVP<,>>`
-
-It would likely make sense to align with whatever comes out if you `foreach`ed the collection.
-
-TODO: Working group recomendation: Look at what happens with existing *collection expressions* and *collection types* with similar cases.  Follow that.  
