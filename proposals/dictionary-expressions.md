@@ -6,10 +6,10 @@
 
 Several dictionary-like types can created without external BCL support.  These types are:
 
-1. Concrete dictionary-like types, containing an indexer `TValue this[TKey] { get; }`, like `Dictionary<TKey, TValue>`, `ConcurrentDictionary<TKey, TValue>`, `ImmutableDictionary<TKey, TValue>`, and `FrozenDictionary<TKey, TValue>`.
+1. Concrete dictionary-like types, containing an indexer `TValue this[TKey] { get; }`, like `Dictionary<TKey, TValue>` and `ConcurrentDictionary<TKey, TValue>`.
 1. The well-known generic BCL dictionary interface types: `IDictionary<TKey, TValue>` and `IReadOnlyDictionary<TKey, TValue>`.
 
-Further support is present for dictionary-like types not covered above through the `CollectionBuilderAttribute` and a similar API pattern to the corresponding *create method* pattern introduced for collection expressions.
+Further support is present for dictionary-like types not covered above through the `CollectionBuilderAttribute` and a similar API pattern to the corresponding *create method* pattern introduced for collection expressions.  For example `ImmutableDictionary<TKey, TValue>` and `FrozenDictionary<TKey, TValue>`.
 
 ## Motivation
 
@@ -24,7 +24,7 @@ Currently, all C# programs must use many different and unfortunately verbose app
 
 Looking at the surrounding ecosystem, we also find examples everywhere of dictionary creation being more convenient and pleasant to use. Swift, TypeScript, Dart, Ruby, Python, and more, opt for a succinct syntax for this purpose, with widespread usage, and to great effect. Cursory investigations have revealed no substantive problems arising in those ecosystems with having these built-in syntax forms.
 
-Unlike with *collection expressions*, C# does not have an existing pattern serving as the corresponding deconstruction form.  Designs here should be made with a consideration for being complementary with deconstruction work. 
+Unlike with *collection expressions*, C# does not have an existing pattern serving as the corresponding deconstruction form.  Designs here should be made with a consideration for being complementary with future deconstruction work. 
 
 An inclusive solution is needed for C#. It should meet the vast majority of case for customers in terms of the dictionary-like types and values they already have. It should also feel pleasant in the language, complement the work done with collection expressions, and naturally extend to pattern matching in the future.
 
@@ -59,7 +59,7 @@ There are two core aspects to the design of dictionary expressions.
 
 First is the concept of a *dictionary type*. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`. The former requirement ensures that `List<T>` is not considered a dictionary type, with its `int`-to-`T` indexer. The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type, with its `int`-to-`KeyValuePair<int, string>` indexer. `Dictionary<TKey, TValue>` passes both requirements.
 
-Second is that collection expressions containing `KeyValuePair<,>` (coming from `expression_element`, `spread_element`, or `key_value_pair_element`) can now instantiate a normal *collection type* *or* a *dictionary type*.
+Second is that collection expressions containing `KeyValuePair<,>` (coming from `expression_element`, `spread_element`, or `key_value_pair_element` elements) can now instantiate a normal *collection type* *or* a *dictionary type*.
 
 So, if the target type for a collection expression is some *collection type* (that is *not* a *dictionary type*) with an element of `KeyValuePair<,>` then it can be instantiated like so:
 
@@ -73,7 +73,7 @@ This is just a simple augmentation on top of the existing collection expression 
 __result.Add(new KeyValuePair<string, int>("mads", 21));
 ```
 
-However, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>` produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary, and any `key_value_pair_element` will use that indexer directly as well.  For example:
+However, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>` produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary. Any `key_value_pair_element` will use that indexer directly as well.  For example:
 
 ```c#
 Dictionary<string, int> nameToAge = ["mads": 21, existingDict.MaxPair(), .. otherDict];
@@ -99,92 +99,10 @@ Note: Many rules in this spec will refer to types needing to be the same `KeyVal
 With a broad interpretation of these rules, all of the following would be legal:
 
 ```c#
-Dictionary<string, int> nameToAge1 = ["mads": 21, existingKvp]; // as would
+Dictionary<string, int> nameToAge1 = ["mads": 21, existingKvp];     // as would
 Dictionary<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 Dictionary<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
-
-
-### Answered question 1
-
-Can a dictionary type value be created without using a key_value_pair_element?  For example are the following legal:
-
-```c#
-Dictionary<string, int> d1 = [existingKvp];
-Dictionary<string, int> d2 = [.. otherDict];
-```
-
-Note: the element `KeyValuePair<K1,V1>` types need not be identical to the `KeyValuePair<K2,V2>` type of the destination dictionary type.  They simply must be convertible to the `V1 this[K1 key] { ... }` indexer provided by the dictionary.
-
-Yes.  These are legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
-
-### Answered question 2
-
-Can you spread a *non dictionary type* when producing a dictionary type'd value.  For example:
-
-```c#
-Dictionary<string, int> nameToAge = ["mads": 21, .. existingListOfKVPS];
-``` 
-
-**Resolution:** *Spread elements* of key-value pair collections will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
-
-### Answered question 3
-
-How far do we want to take this KeyValuePair representation of things? Do we allow *key value pair elements* when producing normal collections? For example, should the following be allowed:
-
-```c#
-List<KeyValuePair<string, int>> = ["mads": 21];
-```
-
-**Resolution:** *Key value pair elements* will be supported in collection expressions for collection types that have a key-value pair element type. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
-
-### Answered question 4
-
-Dictionaries provide two ways of initializing their contents.  A restrictive `.Add`-oriented form that throws when a key is already present in the dictionary, and a permissive indexer-oriented form which does not.  The restrictive form is useful for catching mistakes ("oops, I didn't intend to add the same thing twice!"), but is limiting *especially* in the spread case.  For example:
-
-```c#
-Dictionary<string, Option> optionMap = [opt1Name: opt1Default, opt2Name: opt2Default, .. userProvidedOptions];
-```
-
-Or, conversely:
-
-```c#
-Dictionary<string, Option> optionMap = [.. Defaults.CoreOptions, feature1Name: feature1Override];
-```
-
-Which approach should we go with with our dictionary expressions? Options include:
-
-1. Purely restrictive.  All elements use `.Add` to be added to the list.  Note: types like `ConcurrentDictionary` would then not work, not without adding support with something like the `CollectionBuilderAttribute`.
-2. Purely permissive.  All elements are added using the indexer.  Perhaps with compiler warnings if the exact same key is given the same constant value twice.
-3. Perhaps a hybrid model.  `.Add` if only using `k:v` and switching to indexers if using spread elements.  There is deep potential for confusion here.
-
-**Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
-
-### Question: Allow deconstructible types?
-
-Should we take a very restrictive view of `KeyValuePair<,>`?  Specifically, should we allow only that exact type?  Or should we allow any types with an implicit conversion to that type?  For example:
-
-```c#
-struct Pair<X, Y>
-{
-  public static implicit operator KeyValuePair<X, Y>(Pair<X, Y> pair) => ...;
-}
-
-Dictionary<int, string> map1 = [pair1, pair2]; // ?
-
-List<Pair<int, string>> pairs = ...;
-Dictionary<int, string> map2 = [.. pairs]; // ?
-```
-
-Similarly, instead of `KeyValuePair<,>` we could allow *any* type deconstructible to two values? For example:
-
-```c#
-record struct Pair<X, Y>(X x, Y y);
-
-Dictionary<int, string> map1 = [pair1, pair2]; // ?
-```
-
-Resolution: TBD.  Working group recommendation: Only allow `KeyValuePair<,>` for now.  Do not do anything with tuples and/or other deconstructible types.  This is also something that could be relaxed later if there is sufficient motivation.
 
 ### Question: Types that support both collection and dictionary initialization
 
@@ -435,3 +353,88 @@ Working group recommendation: Use normal parsing here.  So this would be the sam
 What are the rules when types have multiple indexers and multiple impls of `IEnumerable<KVP<,>>`
 
 It would likely make sense to align with whatever comes out if you `foreach`ed the collection.
+
+## Answered Questions
+
+### Answered question 1
+
+Can a dictionary type value be created without using a key_value_pair_element?  For example are the following legal:
+
+```c#
+Dictionary<string, int> d1 = [existingKvp];
+Dictionary<string, int> d2 = [.. otherDict];
+```
+
+Note: the element `KeyValuePair<K1,V1>` types need not be identical to the `KeyValuePair<K2,V2>` type of the destination dictionary type.  They simply must be convertible to the `V1 this[K1 key] { ... }` indexer provided by the dictionary.
+
+Yes.  These are legal: [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+### Answered question 2
+
+Can you spread a *non dictionary type* when producing a dictionary type'd value.  For example:
+
+```c#
+Dictionary<string, int> nameToAge = ["mads": 21, .. existingListOfKVPS];
+``` 
+
+**Resolution:** *Spread elements* of key-value pair collections will be supported in dictionary expressions. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+### Answered question 3
+
+How far do we want to take this KeyValuePair representation of things? Do we allow *key value pair elements* when producing normal collections? For example, should the following be allowed:
+
+```c#
+List<KeyValuePair<string, int>> = ["mads": 21];
+```
+
+**Resolution:** *Key value pair elements* will be supported in collection expressions for collection types that have a key-value pair element type. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+### Answered question 4
+
+Dictionaries provide two ways of initializing their contents.  A restrictive `.Add`-oriented form that throws when a key is already present in the dictionary, and a permissive indexer-oriented form which does not.  The restrictive form is useful for catching mistakes ("oops, I didn't intend to add the same thing twice!"), but is limiting *especially* in the spread case.  For example:
+
+```c#
+Dictionary<string, Option> optionMap = [opt1Name: opt1Default, opt2Name: opt2Default, .. userProvidedOptions];
+```
+
+Or, conversely:
+
+```c#
+Dictionary<string, Option> optionMap = [.. Defaults.CoreOptions, feature1Name: feature1Override];
+```
+
+Which approach should we go with with our dictionary expressions? Options include:
+
+1. Purely restrictive.  All elements use `.Add` to be added to the list.  Note: types like `ConcurrentDictionary` would then not work, not without adding support with something like the `CollectionBuilderAttribute`.
+2. Purely permissive.  All elements are added using the indexer.  Perhaps with compiler warnings if the exact same key is given the same constant value twice.
+3. Perhaps a hybrid model.  `.Add` if only using `k:v` and switching to indexers if using spread elements.  There is deep potential for confusion here.
+
+**Resolution:** Use *indexer* as the lowering form. [LDM-2024-03-11](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md#conclusions)
+
+## Retracted Designs/Questions
+
+### Question: Allow deconstructible types?
+
+Should we take a very restrictive view of `KeyValuePair<,>`?  Specifically, should we allow only that exact type?  Or should we allow any types with an implicit conversion to that type?  For example:
+
+```c#
+struct Pair<X, Y>
+{
+  public static implicit operator KeyValuePair<X, Y>(Pair<X, Y> pair) => ...;
+}
+
+Dictionary<int, string> map1 = [pair1, pair2]; // ?
+
+List<Pair<int, string>> pairs = ...;
+Dictionary<int, string> map2 = [.. pairs]; // ?
+```
+
+Similarly, instead of `KeyValuePair<,>` we could allow *any* type deconstructible to two values? For example:
+
+```c#
+record struct Pair<X, Y>(X x, Y y);
+
+Dictionary<int, string> map1 = [pair1, pair2]; // ?
+```
+
+Resolution: While cute, these capabilities are not needed for core scenarios to work.  They also raise concerns about where to draw the line wrt to what is the dictionary space and what is not.  As such, we will only allow `KeyValuePair<,>` for now.  And we will not do anything with tuples and/or other deconstructible types.  This is also something that could be relaxed in the future if there is sufficient feedback and motivation to warrant it.
