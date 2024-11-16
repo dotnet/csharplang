@@ -55,44 +55,54 @@ Choices here would have implications regarding potential syntactic ambiguities, 
 
 ## Design Intuition
 
-There are two core aspects to the design of dictionary expressions. 
+There are three core aspects to the design of dictionary expressions. 
 
-First is the concept of a *dictionary type*. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`. The former requirement ensures that `List<T>` is not considered a dictionary type, with its `int`-to-`T` indexer. The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type, with its `int`-to-`KeyValuePair<int, string>` indexer. `Dictionary<TKey, TValue>` passes both requirements.
+1. Collection expressions containing `KeyValuePair<,>` (coming from `expression_element`, `spread_element`, or `key_value_pair_element` elements) can now instantiate a normal *collection type* *or* a *dictionary type*.
 
-Second is that collection expressions containing `KeyValuePair<,>` (coming from `expression_element`, `spread_element`, or `key_value_pair_element` elements) can now instantiate a normal *collection type* *or* a *dictionary type*.
+    So, if the target type for a collection expression is some *collection type* (that is *not* a *dictionary type*) with an element of `KeyValuePair<,>` then it can be instantiated like so:
 
-So, if the target type for a collection expression is some *collection type* (that is *not* a *dictionary type*) with an element of `KeyValuePair<,>` then it can be instantiated like so:
+    ```c#
+    List<KeyValuePair<string, int>> nameToAge = ["mads": 21];
+    ```
 
-```c#
-List<KeyValuePair<string, int>> nameToAge = ["mads": 21];
-```
+    This is just a simple augmentation on top of the existing collection expression rules.  In the above example, the code will be emitted as:
 
-This is just a simple augmentation on top of the existing collection expression rules.  In the above example, the code will be emitted as:
+    ```c#
+    __result.Add(new KeyValuePair<string, int>("mads", 21));
+    ```
 
-```c#
-__result.Add(new KeyValuePair<string, int>("mads", 21));
-```
+2. Introduction of the *dictionary type*. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`. The former requirement ensures that `List<T>` is not considered a dictionary type, with its `int`-to-`T` indexer. The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type, with its `int`-to-`KeyValuePair<int, string>` indexer. `Dictionary<TKey, TValue>` passes both requirements.
 
-However, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>` produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary. Any `key_value_pair_element` will use that indexer directly as well.  For example:
+    As such, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>` produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary. Any `key_value_pair_element` will use that indexer directly as well.  For example:
 
-```c#
-Dictionary<string, int> nameToAge = ["mads": 21, existingDict.MaxPair(), .. otherDict];
+    ```c#
+    Dictionary<string, int> nameToAge = ["mads": 21, existingDict.MaxPair(), .. otherDict];
 
-// would be rewritten similar to:
+    // would be rewritten similar to:
 
-Dictionary<string, int> __result = new();
-__result["mads"] = 21;
+    Dictionary<string, int> __result = new();
+    __result["mads"] = 21;
 
-// Note: the below casts must be legal for the dictionary
-// expression to be legal
-var __t1 = existingDict.MaxPair();
-__result[(string)__t1.Key] = (int)__t1.Value;
+    // Note: the below casts must be legal for the dictionary
+    // expression to be legal
+    var __t1 = existingDict.MaxPair();
+    __result[(string)__t1.Key] = (int)__t1.Value;
 
-foreach (var __t2 in otherDict)
-    __result[(string)__t2.Key] = (int)__t2.Value;
-```
+    foreach (var __t2 in otherDict)
+        __result[(string)__t2.Key] = (int)__t2.Value;
+    ```
 
-Many rules for *dictionary expressions* will correspond to existing rules for *collection expressions*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.
+3. Alignment of the rules for assigning to *dictionary types* with the rules for assigning to *collection types*, just requiring aspects such as *element* and *iteration types* to be some `KeyValuePair<,>`.  *However*, with the rules extended such that that `KeyValuePair<,>` type itself is relatively transparent, and instead the rule is updated to work on the underlying `TKey` and `TValue` types.
+
+    This view allows for very natural processing of what would otherwise be thought of as disparate `KeyValuePair<,>` types.  For example:
+
+    ```c#
+    Dictionary<string, int> d1 = ...;
+
+    // Assignment possible, even though KeyValuePair<string, int>` is not itself assignable to KeyValuePair<object, long>
+    Dictionary<object, long> d2 = [.. d1]; 
+    ```
+
 
 Note: Many rules in this spec will refer to types needing to be the same `KeyValuePair<,>` type.  This is an informal way of saying the types must have an identity conversion between them.  As such, `KeyValuePair<(int X, int Y), object>` would be considered the same type a `KeyValuePair<(int, int), object?>` for the purpose of these rules.
 
