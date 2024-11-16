@@ -241,13 +241,13 @@ If the target is a *dictionary type*, and collection expression's first element 
 
 For each element in order:
 
-- If **the target is a collection type, and** the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element expression as the argument. (Unlike classic collection initializer behavior, element evaluation and `Add` calls are not necessarily interleaved.)
+- **If the target is a *dictionary type*, then the element must be a `KeyValuePair<,>`. The applicable indexer is invoked with the `.Key` and `.Value` members of that pair.**
 
-- **If the target is a dictionary type, then the element must be a `KeyValuePair<,>`. The applicable indexer is invoked with the `.Key` and `.Value` members of that pair.**
+- If **the target is a *collection type*, and** the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element expression as the argument. (Unlike classic collection initializer behavior, element evaluation and `Add` calls are not necessarily interleaved.)
 
 - If the element is a *spread element* then one of the following is used:
-    - **If the target is a collection type,** an applicable GetEnumerator instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable Add instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
-    - **If the target is a dictionary-type, the enumerator's element type must be some `KeyValuePair<,>`, and for each of those elements the applicable indexer is invoked on the collection instance with the `.Key` and `.Value` members of that pair.**
+    - **If the target is a *dictionary type*, the enumerator's element type must be some `KeyValuePair<,>`, and for each of those elements the applicable indexer is invoked on the collection instance with the `.Key` and `.Value` members of that pair.**
+    - **If the target is a *collection type*,** an applicable GetEnumerator instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable Add instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
 
 ## Type inference
 
@@ -290,7 +290,7 @@ No changes here.  Like with collection expressions, dictionary expressions do no
 
 ## Overload resolution
 
-No changes here.  Existing *collection expression* rules already apply and appear appropriate for dictionary expressions.  For example, given:
+For example, given:
 
 ```c#
 void X(IDictionary<A, B> dict);
@@ -314,6 +314,24 @@ void X(ImmutableDictionary<A, B> dict);
 
 X([a, b]); // ambiguous
 ```
+
+[*Better collection conversion from expression*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/collection-expressions-better-conversion.md) is updated as follows.
+
+> If there is an identity conversion from `E₁` to `E₂`, then the element conversions are as good as each other. Otherwise, the element conversions to `E₁` are ***better than the element conversions*** to `E₂` if:
+> - For every `ELᵢ`, `CE₁ᵢ` is at least as good as `CE₂ᵢ`, and
+> - There is at least one i where `CE₁ᵢ` is better than `CE₂ᵢ`
+> Otherwise, neither set of element conversions is better than the other, and they are also not as good as each other.
+>
+> **Conversion comparisons are made as follows:**
+> - **If the target is a *dictionary type* with *element type* `KeyValuePair<Kₑ, Vₑ>`:**
+>   - **If `ELᵢ` is an *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
+>   - **If `ELᵢ` is an *expression element* with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+>   - **If `ELᵢ` is an *spread element* with an expression with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
+> - **If the target is a *collection type*:**
+>   - If `ELᵢ` is an *expression element*, conversion comparison uses better conversion from expression.
+>   - If `ELᵢ` is a *spread element*, conversion conversion uses better conversion from the spread collection *element type*.
+
+*What if one target type is a *dictionary type* and the other is a *collection type*?*
 
 ## Interface translation
 
