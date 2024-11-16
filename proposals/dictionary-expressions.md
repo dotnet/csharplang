@@ -322,7 +322,7 @@ X([a, b]); // ambiguous
 > - There is at least one i where `CE₁ᵢ` is better than `CE₂ᵢ`
 > Otherwise, neither set of element conversions is better than the other, and they are also not as good as each other.
 >
-> **Conversion comparisons are made as follows:**
+> Conversion comparisons are made as follows:
 > - **If the target is a *dictionary type* with *element type* `KeyValuePair<Kₑ, Vₑ>`:**
 >   - **If `ELᵢ` is an *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
 >   - **If `ELᵢ` is an *expression element* with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
