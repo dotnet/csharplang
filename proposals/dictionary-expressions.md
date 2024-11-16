@@ -220,7 +220,7 @@ The new rules above represent a breaking change: For types that are a valid conv
 >   - The method must have a single parameter of type System.ReadOnlySpan<E>, passed by value, and there is an identity conversion from E to the *iteration type* of the collection type. 
 >    - **The method has two parameters, where the first is a [*comparer*](#Comparer-support) and the other follows the rules of the *single parameter* rule above. This method will be called if the collection expression's first element is an [*comparer*](#Comparer-support) that is convertible to that parameter type.**
 
-This would allow `ImmutableDictionary<TKey, TValue>` to be annotated with `[CollectionBuilder(typeof(ImmutableDictionary), "CreateRange")]` to light up support for creation.
+Dictionary type authors who use `CollectionBuilderAttribute` should have the method that is pointed to have `overwrite` not `throw` semantics when encountering the same `.Key` multiple times in the span of `KeyValuePair<,>` they are processing.
 
 The runtime has committed to supplying these new CollectionBuilder methods that take `ReadOnlySpan<>` for their immutable collections.
 
