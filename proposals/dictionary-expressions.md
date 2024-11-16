@@ -430,7 +430,7 @@ Resolution: While cute, these capabilities are not needed for core scenarios to 
 
 What are the rules when types have multiple indexers and multiple impls of `IEnumerable<KVP<,>>`?  
 
-This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along wih the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used a a *dictionary type*.  If these don't hold, it cannot be.
+This concern already exists with *collection types*.  For those types, the rule is that we must have an *element type* as per the existing language rules.  This follows for *dictionary types*, along with the rule that there must be a corresponding indexer for this *element type*.  If those hold, the type can be used as a *dictionary type*.  If these don't hold, it cannot be.
 
 ## Open Questions
 
