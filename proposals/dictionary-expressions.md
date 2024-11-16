@@ -110,39 +110,13 @@ List<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 List<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
-### Question: Types that support both collection and dictionary initialization
-
-C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
-
-For example, consider a type like so:
-
-```c#
-public class Hybrid<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
-{
-    public void Add(KeyValuePair<TKey, TValue> pair);
-    public TValue this[TKey key] { ... }
-}
-
-// This would compile in C# 12:
-// Translating to calls to .Add.
-Hybrid<string, int> nameToAge = [someKvp];
-```
-
-Options include:
-
-1. Use applicable instance indexer if available; otherwise use C#12 initialization.
-2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
-3. Use C#12 initialization always.
-
-Resolution TBD.  Working group recommendation: Use applicable instance indexer only.  This ensures that everything dictionary-like is initialized in a consistent fashion.  This would be a break in behavior when recompiling.  The view is that these types would be rare.  And if they exist, it would be nonsensical for them to behave differently using the indexer versus the .Add (outside of potentially throwing behavior).
-
 ## Dictionary types
 
 A type is considered a *dictionary type* if the following hold:
 * The *element type* is `KeyValuePair<TKey, TValue>`.
 * The *type* has an instance *indexer* where:
   * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.\*
-  * There is an identity conversion from the indexer type to `TValue`.\*
+  * There is an identity conversion from the indexer return type to `TValue`.\*
   * The getter returns by value.
   * The getter is as accessible as the declaring type.
 
@@ -150,7 +124,7 @@ A type is considered a *dictionary type* if the following hold:
 
 ## Key comparer support
 
-A dictionary expression can also provide a custom `IEqualityComparer<TKey>` comparer to control its behavior just by including such a value is the first `expression_element` in the expression. For example:
+A dictionary expression can also provide a custom *comparer* to control its behavior just by including such a value as the first `expression_element` in the expression. For example:
 
 ```c#
 Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive, .. existingMap];
@@ -173,15 +147,24 @@ HashSet<string> values = [StringComparer.CaseInsensitive, .. names];
 
 ### Question: Specialized comparer syntax.
 
-Should there be more distinctive syntax for the comparer?  Simply starting with a comparer could be difficult to tease out.  Having a syntax like so could make things clearner:
+Should there be more distinctive syntax for the comparer?  Simply starting with a comparer could be difficult to tease out.  Having a syntax like so could make things clearer:
 
 ```c#
+// `comparer: ...` to indicate the purpose of this value
 Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
+
+// Semicolon to more clearly dilineate the comparer
+Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive; .. existingMap];
+
+// Both?
+Dictionary<string, int> caseInsensitiveMap = [comparer : StringComparer.CaseInsensitive; .. existingMap];
 ```
 
-### Question: Other types of comparers.
+### Question: Types of comparers supported.
 
 `IEqualityComparer<T>` is not the only comparer type used in collections.  `SortedDictionary<,>` and `SortedSet<,>` both use an `IComparer<T>` instead (as they have ordering, not hashing semantics).  It seems unfortunate to leave out `SortedDictionary<,>` if we are supporting the rest.  As such, perhaps the rules should just be that the special value in the collection be typed as some `IComparer<T>` or some `IEqualityComparer<T>`.  
+
+
 
 ## Conversions
 
@@ -346,19 +329,6 @@ What should we do here when targeting `IEnumerable<...>` *and* using `k:v` eleme
 
 Working group recommendation: `IEnumerable<KVP>` is not a dictionary type (as it lacks an indexer).  As such, it has sequential value semantics (and can include duplicates).  This would happen today anyways if someone did `[.. ldm]` and we do not think the presence of a `k:v` element changes how the semantics should work.
 
-## Random open questions
-
-### Question: Parsing ambiguity
-
-Parsing ambiguity around: `[a ? [b] : c]`
-
-Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`
-
-### Question 3
-
-What are the rules when types have multiple indexers and multiple impls of `IEnumerable<KVP<,>>`
-
-It would likely make sense to align with whatever comes out if you `foreach`ed the collection.
 
 ## Answered Questions
 
@@ -443,4 +413,46 @@ record struct Pair<X, Y>(X x, Y y);
 Dictionary<int, string> map1 = [pair1, pair2]; // ?
 ```
 
-Resolution: While cute, these capabilities are not needed for core scenarios to work.  They also raise concerns about where to draw the line wrt to what is the dictionary space and what is not.  As such, we will only allow `KeyValuePair<,>` for now.  And we will not do anything with tuples and/or other deconstructible types.  This is also something that could be relaxed in the future if there is sufficient feedback and motivation to warrant it.
+Resolution: While cute, these capabilities are not needed for core scenarios to work.  They also raise concerns about where to draw the line wrt to what is the dictionary space and what is not.  As such, we will only allow `KeyValuePair<,>` for now.  And we will not do anything with tuples and/or other deconstructible types.  This is also something that could be relaxed in the future if there is sufficient feedback and motivation to warrant it.  This design space is withdrawn from dictionary expressions.
+
+## Open Questions
+
+### Question: Types that support both collection and dictionary initialization
+
+C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
+
+For example, consider a type like so:
+
+```c#
+public class Hybrid<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+{
+    public void Add(KeyValuePair<TKey, TValue> pair);
+    public TValue this[TKey key] { ... }
+}
+
+// This would compile in C# 12:
+// Translating to calls to .Add.
+Hybrid<string, int> nameToAge = [someKvp];
+```
+
+Options include:
+
+1. Use applicable instance indexer if available; otherwise use C#12 initialization.
+2. Use applicable instance indexer if available; otherwise report an error during construction (or conversion?).
+3. Use C#12 initialization always.
+
+Resolution TBD.  Working group recommendation: Use applicable instance indexer only.  This ensures that everything dictionary-like is initialized in a consistent fashion.  This would be a break in behavior when recompiling.  The view is that these types would be rare.  And if they exist, it would be nonsensical for them to behave differently using the indexer versus the .Add (outside of potentially throwing behavior).
+
+### Question: Parsing ambiguity
+
+Parsing ambiguity around: `[a ? [b] : c]`
+
+Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`
+
+### Question 3
+
+What are the rules when types have multiple indexers and multiple impls of `IEnumerable<KVP<,>>`
+
+It would likely make sense to align with whatever comes out if you `foreach`ed the collection.
+
+TODO: Working group recomendation: Look at what happens with existing *collection expressions* and *collection types* with similar cases.  Follow that.  
