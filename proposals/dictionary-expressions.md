@@ -126,7 +126,7 @@ A type is considered a *dictionary type* if the following hold:
 * The *element type* is `KeyValuePair<TKey, TValue>`.
 * The *type* has an instance *indexer* where:
   * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.\*
-  * There is an identity conversion from the indexer return type to `TValue`.\*
+  * There is an identity conversion from the indexer type to `TValue`.\*
   * The getter returns by value.
   * The getter is as accessible as the declaring type.
 
