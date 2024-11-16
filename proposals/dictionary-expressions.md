@@ -231,7 +231,7 @@ The elements of a collection expression are evaluated in order, left to right. E
 If the target is a dictionary type, and collection expression's first element is an `expression_element`, and the type of that element is convertible to some [*comparer*](#Comparer-support), then:
 
 1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is some [*comparer*](#Comparer-support) type.  The first `element_expression` value will be passed to this parameter.
-2. If using a `create method`, the method must have a parameter whose type is some [*comparer*](#Comparer-support) as one of its parameters. The first `element_expression` value will be passed to this parameter.
+2. If using a `create method`, the method's first parameter's type is some [*comparer*](#Comparer-support) type. The first `element_expression` value will be passed to this parameter.
 3. If creating an interface, this [*comparer*](#Comparer-support) must be some `IEqualityComparer<TKey>` type. That comparer will be used to  control the behavior of the final type (synthesized or otherwise).  This means that instantiating interfaces only supports hashing semantics, not ordered semantics. 
 
 **A `key_value_pair_element` evaluates its interior expressions in order, left to right. In other words, the key is evaluated before the value.**
