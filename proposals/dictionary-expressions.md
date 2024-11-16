@@ -163,7 +163,7 @@ Should there be more distinctive syntax for the comparer?  Simply starting with 
 // `comparer: ...` to indicate the purpose of this value
 Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
 
-// Semicolon to more clearly dilineate the comparer
+// Semicolon to more clearly delineate the comparer
 Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive; .. existingMap];
 
 // Both?
