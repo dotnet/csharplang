@@ -183,7 +183,7 @@ An implicit *collection expression conversion* exists from a *collection express
 * A *dictionary type* with an appropriate *[create method](#create-methods)*.
 * A *struct* or *class* *dictionary type* that implements `System.Collections.IEnumerable` where:
   * The *element type* is determined from a `GetEnumerator` instance method or enumerable interface.
-  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments (*or* a constructor with a single [*comparer*](Comparer-support) parameter), and the constructor is accessible at the location of the collection expression.
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments (*or* a constructor with a single [*comparer*](#Comparer-support) parameter), and the constructor is accessible at the location of the collection expression.
   * The *indexer* has a setter that is as accessible as the declaring type.
 * An *interface type*:
   * `System.Collections.Generic.IDictionary<TKey, TValue>`
@@ -218,7 +218,7 @@ The new rules above represent a breaking change: For types that are a valid conv
 >
 > For the create method:
 >   - The method must have a single parameter of type System.ReadOnlySpan<E>, passed by value, and there is an identity conversion from E to the *iteration type* of the collection type. 
->    - **The method can be called with two parameters, where one is a [*comparer*](Comparer-support) and the other follows the rules of the *single parameter* rule above. This method will be called if the collection expression's first element is an [*comparer*](Comparer-support) that is convertible to that parameter type.**
+>    - **The method can be called with two parameters, where one is a [*comparer*](#Comparer-support) and the other follows the rules of the *single parameter* rule above. This method will be called if the collection expression's first element is an [*comparer*](#Comparer-support) that is convertible to that parameter type.**
 
 This would allow `ImmutableDictionary<TKey, TValue>` to be annotated with `[CollectionBuilder(typeof(ImmutableDictionary), "CreateRange")]` to light up support for creation.
 
@@ -228,11 +228,11 @@ The runtime has committed to supplying these new CollectionBuilder methods that 
 
 The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 
-If the target is a dictionary type, and collection expression's first element is an `expression_element`, and the type of that element is convertible to some [*comparer*](Comparer-support), then:
+If the target is a dictionary type, and collection expression's first element is an `expression_element`, and the type of that element is convertible to some [*comparer*](#Comparer-support), then:
 
-1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is some [*comparer*](Comparer-support) type.  The first `element_expression` value will be passed to this parameter.
-2. If using a `create method`, the method must have a parameter whose type is some [*comparer*](Comparer-support) as one of its parameters. The first `element_expression` value will be passed to this parameter.
-3. If creating an interface, this [*comparer*](Comparer-support) must be some `IEqualityComparer<TKey>` type. That comparer will be used to  control the behavior of the final type (synthesized or otherwise).  This means that instantiating interfaces only supports hashing semantics, not ordered semantics. 
+1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is some [*comparer*](#Comparer-support) type.  The first `element_expression` value will be passed to this parameter.
+2. If using a `create method`, the method must have a parameter whose type is some [*comparer*](#Comparer-support) as one of its parameters. The first `element_expression` value will be passed to this parameter.
+3. If creating an interface, this [*comparer*](#Comparer-support) must be some `IEqualityComparer<TKey>` type. That comparer will be used to  control the behavior of the final type (synthesized or otherwise).  This means that instantiating interfaces only supports hashing semantics, not ordered semantics. 
 
 **A `key_value_pair_element` evaluates its interior expressions in order, left to right. In other words, the key is evaluated before the value.**
 
@@ -300,7 +300,7 @@ X([a, b]); // ambiguous
 
 ### Mutable interface translation
 
-Given the target type `IDictionary<TKey, TValue>`, the type used will be `Dictionary<TKey, TValue>`.  Using the normal translation mechanics defined already (including handling of an initially provided [*comparer*](Comparer-support)). This follows the originating intuition around `IList<T>` and `List<T>` in *collection expressions*. 
+Given the target type `IDictionary<TKey, TValue>`, the type used will be `Dictionary<TKey, TValue>`.  Using the normal translation mechanics defined already (including handling of an initially provided [*comparer*](#Comparer-support)). This follows the originating intuition around `IList<T>` and `List<T>` in *collection expressions*. 
 
 ### Non-mutable interface translation
 
