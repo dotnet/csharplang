@@ -99,9 +99,15 @@ Note: Many rules in this spec will refer to types needing to be the same `KeyVal
 With a broad interpretation of these rules, all of the following would be legal:
 
 ```c#
+// Assigning to dictionary types:
 Dictionary<string, int> nameToAge1 = ["mads": 21, existingKvp];     // as would
 Dictionary<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 Dictionary<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
+
+// Assigning to collection types:
+List<string, int> nameToAge1 = ["mads": 21, existingKvp];     // as would
+List<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
+List<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
 ### Question: Types that support both collection and dictionary initialization
