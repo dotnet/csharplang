@@ -71,7 +71,7 @@ There are three core aspects to the design of dictionary expressions.
     __result.Add(new KeyValuePair<string, int>("mads", 21));
     ```
 
-2. Introduction of the *dictionary type*. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`. The former requirement ensures that `List<T>` is not considered a dictionary type, with its `int`-to-`T` indexer. The latter requirement ensures that `List<KeyValuePair<int, string>>` is not considered a dictionary type, with its `int`-to-`KeyValuePair<int, string>` indexer. `Dictionary<TKey, TValue>` passes both requirements.
+2. Introduction of the *dictionary type*. *Dictionary types* are types that are similar to the existing *collection types*, with the additional requirements that they have an *element type* of some `KeyValuePair<TKey, TValue>` *and* have an indexer `TValue this[TKey] { ... }`. The former requirement ensures that `List<T>` is not considered a dictionary type, as its element type is `T` not `KeyValuePair<,>`. The latter requirement ensures that `List<KeyValuePair<int, string>>` is also not considered a dictionary type, with its `int`-to-`KeyValuePair<int, string>` indexer (instead of an `int`-to-`string` indexer). `Dictionary<TKey, TValue>` passes both requirements.
 
     As such, if the target type for the collection expression *is* a *dictionary* type, then all `KeyValuePair<,>` produced by `expression_element` or `spread_element` elements will be changed to use the indexer to assign into the resultant dictionary. Any `key_value_pair_element` will use that indexer directly as well.  For example:
 
