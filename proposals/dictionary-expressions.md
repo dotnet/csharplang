@@ -237,9 +237,9 @@ If the target is a *dictionary type*, and collection expression's first element 
 - If creating an interface, this [*comparer*](#Comparer-support) must be some `IEqualityComparer<TKey>` type. That comparer will be used to control the behavior of the final type (synthesized or otherwise).  This means that instantiating interfaces only supports hashing semantics, not ordered semantics.
 
 For each element `Eᵢ` in order:
-- If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then `Kᵢ` is evaluated, then `Vᵢ` is evaluated, and the applicable indexer is invoked on the dictionary instance with the converted values of `Kᵢ` and `Vᵢ`.
+- If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, first `Kᵢ` is evaluated, then `Vᵢ` is evaluated, and the applicable indexer is invoked on the dictionary instance with the converted values of `Kᵢ` and `Vᵢ`.
 - If `Eᵢ` is an *expression element* of type `KeyValuePair<Kᵢ:Vᵢ>`, then `Eᵢ` is evaluated, and the applicable indexer is invoked on the dictionary instance with the converted values of `.Key` and `.Value` from the value of `Eᵢ`.
-- If `Eᵢ` is an *spread element* `..Sᵢ` where `Sᵢ` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then `Sᵢ` is evaluated and an applicable `GetEnumerator` instance or extension method is invoked on the value of `Sᵢ`, and for each item `Sₑ` from the enumerator the applicable indexer is invoked on the dictionary instance with the converted values of `.Key` and `.Value` from the value of `Sₑ`. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+- If `Eᵢ` is an *spread element* `..Sᵢ` where `Sᵢ` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then `Sᵢ` is evaluated and an applicable `GetEnumerator` instance or extension method is invoked on the value of `Sᵢ`, and for each item `Sₑ` from the enumerator, the applicable indexer is invoked on the dictionary instance with the converted values of `.Key` and `.Value` from the value of `Sₑ`. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
 
 ## Type inference
 
