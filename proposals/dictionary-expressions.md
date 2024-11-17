@@ -175,7 +175,6 @@ Dictionary<string, int> caseInsensitiveMap = [comparer : StringComparer.CaseInse
 
 `IEqualityComparer<T>` is not the only comparer type used in collections.  `SortedDictionary<,>` and `SortedSet<,>` both use an `IComparer<T>` instead (as they have ordering, not hashing semantics).  It seems unfortunate to leave out `SortedDictionary<,>` if we are supporting the rest.  As such, perhaps the rules should just be that the special value in the collection be typed as some `IComparer<T>` or some `IEqualityComparer<T>`.  
 
-
 ## Conversions
 
 *Collection expression conversions* are updated to include conversions to *dictionary types*.
@@ -233,21 +232,14 @@ The elements of a collection expression are evaluated in order, left to right. E
 
 If the target is a *dictionary type*, and collection expression's first element is an `expression_element`, and the type of that element is some [*comparer*](#Comparer-support), then:
 
-1. If using a constructor to instantiate the value, the constructor must take a single parameter whose type is some [*comparer*](#Comparer-support) type.  The first `element_expression` value will be passed to this parameter.
-2. If using a `create method`, the method's first parameter's type is some [*comparer*](#Comparer-support) type. The first `element_expression` value will be passed to this parameter.
-3. If creating an interface, this [*comparer*](#Comparer-support) must be some `IEqualityComparer<TKey>` type. That comparer will be used to control the behavior of the final type (synthesized or otherwise).  This means that instantiating interfaces only supports hashing semantics, not ordered semantics.
+- If using a constructor to instantiate the value, the constructor must take a single parameter whose type is some [*comparer*](#Comparer-support) type.  The first `element_expression` value will be passed to this parameter.
+- If using a *[create method](#create-methods)*, the method's first parameter's type is some [*comparer*](#Comparer-support) type. The first `element_expression` value will be passed to this parameter.
+- If creating an interface, this [*comparer*](#Comparer-support) must be some `IEqualityComparer<TKey>` type. That comparer will be used to control the behavior of the final type (synthesized or otherwise).  This means that instantiating interfaces only supports hashing semantics, not ordered semantics.
 
-**A `key_value_pair_element` evaluates its interior expressions in order, left to right. In other words, the key is evaluated before the value.**
-
-For each element in order:
-
-- **If the target is a *dictionary type*, then the element must be a `KeyValuePair<,>`. The applicable indexer is invoked with the `.Key` and `.Value` members of that pair.**
-
-- If **the target is a *collection type*, and** the element is an *expression element*, the applicable `Add` instance or extension method is invoked with the element expression as the argument. (Unlike classic collection initializer behavior, element evaluation and `Add` calls are not necessarily interleaved.)
-
-- If the element is a *spread element* then one of the following is used:
-    - **If the target is a *dictionary type*, the enumerator's element type must be some `KeyValuePair<,>`, and for each of those elements the applicable indexer is invoked on the collection instance with the `.Key` and `.Value` members of that pair.**
-    - **If the target is a *collection type*,** an applicable GetEnumerator instance or extension method is invoked on the *spread element expression* and for each item from the enumerator the applicable Add instance or extension method is invoked on the *collection instance* with the item as the argument. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
+For each element `Eᵢ` in order:
+- If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then `Kᵢ` is evaluated, then `Vᵢ` is evaluated, and the applicable indexer is invoked on the dictionary instance with the converted values of `Kᵢ` and `Vᵢ`.
+- If `Eᵢ` is an *expression element* of type `KeyValuePair<Kᵢ:Vᵢ>`, then `Eᵢ` is evaluated, and the applicable indexer is invoked on the dictionary instance with the converted values of `.Key` and `.Value` from the value of `Eᵢ`.
+- If `Eᵢ` is an *spread element* `..Sᵢ` where `Sᵢ` has an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `KeyValuePair<Kᵢ, Vᵢ>`, then `Sᵢ` is evaluated and an applicable `GetEnumerator` instance or extension method is invoked on the value of `Sᵢ`, and for each item `Sₑ` from the enumerator the applicable indexer is invoked on the dictionary instance with the converted values of `.Key` and `.Value` from the value of `Sₑ`. If the enumerator implements `IDisposable`, then `Dispose` will be called after enumeration, regardless of exceptions.
 
 ## Type inference
 
