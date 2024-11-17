@@ -282,7 +282,19 @@ The [*type inference*](https://github.com/dotnet/csharplang/blob/main/proposals/
 >     * If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
 
-*Are there corresponding changes for [*output type inferences*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#type-inference)?*
+> 11.6.3.7 Output type inferences
+>
+> An *output type inference* is made *from* an expression `E` *to* a type `T` in the following way:
+>
+> * If `E` is a *collection expression* with elements `Eᵢ`:
+>   * **If `T` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `KeyValuePair<Kₑ, Vₑ>`, then for each `Eᵢ`**:
+>     * **If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, then an *output type inference* is made *from* `Kᵢ` *to* `Kₑ` and an *output type inference* is made *from* `Vᵢ` *to* `Vₑ`.**
+>     * **If `Eᵢ` is an *expression element*, no inference is made from `Eᵢ`.**
+>     * **If `Eᵢ` is a *spread element*, no inference is made from `Eᵢ`.**
+>   * If `T` has an *element type* `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `Tₑ`, then for each `Eᵢ`:
+>     * If `Eᵢ` is an *expression element*, then an *output type inference* is made *from* `Eᵢ` *to* `Tₑ`.
+>     * If `Eᵢ` is a *spread element*, no inference is made from `Eᵢ`.
+> * *[existing rules from output type inferences]* ...
 
 ## Extension methods
 
