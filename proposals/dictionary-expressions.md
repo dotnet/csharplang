@@ -323,15 +323,23 @@ X([a, b]); // ambiguous
 > Otherwise, neither set of element conversions is better than the other, and they are also not as good as each other.
 >
 > Conversion comparisons are made as follows:
-> - **If the target is a *dictionary type* with *element type* `KeyValuePair<Kₑ, Vₑ>`:**
->   - **If `ELᵢ` is an *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
+> - **If the target is a type with an *element type* `KeyValuePair<Kₑ, Vₑ>`:**
+>   - **If `ELᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, conversion comparison uses better conversion from expression from `Kᵢ` to `Kₑ` and better conversion from expression from `Vᵢ` to `Vₑ`.**
 >   - **If `ELᵢ` is an *expression element* with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
 >   - **If `ELᵢ` is an *spread element* with an expression with *element type* `KeyValuePair<Kᵢ, Vᵢ>`, conversion comparison uses better conversion from type `Kᵢ` to `Kₑ` and better conversion from type `Vᵢ` to `Vₑ`.**
-> - **If the target is a *collection type*:**
+> - **If the target is a type with an *element type* other than `KeyValuePair<,>`:**
+>   - **If `ELᵢ` is a *key value pair element*, there is no conversion to the *element type*.**
 >   - If `ELᵢ` is an *expression element*, conversion comparison uses better conversion from expression.
 >   - If `ELᵢ` is a *spread element*, conversion conversion uses better conversion from the spread collection *element type*.
-
-*What if one target type is a *dictionary type* and the other is a *collection type*?*
+>
+> `C₁` is a ***better collection conversion from expression*** than `C₂` if:
+> - Both `T₁` and `T₂` are not *span types*, and `T₁` is implicitly convertible to `T₂`, and `T₂` is not implicitly convertible to `T₁`, or
+> - **Both or neither of `T₁` and `T₂` have *element type* `KeyValuePair<,>`, and** `E₁` does not have an identity conversion to `E₂`, and both  and the element conversions to `E₁` are ***better than the element conversions*** to `E₂`, or
+> - `E₁` has an identity conversion to `E₂`, and one of the following holds:
+>    - `T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, or
+>    - `T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *element type* `E₂`
+>
+> Otherwise, neither collection type is better, and the result is ambiguous.
 
 ## Interface translation
 
