@@ -288,6 +288,16 @@ The [*type inference*](https://github.com/dotnet/csharplang/blob/main/proposals/
 >     * If `Eᵢ` is a *spread element*, no inference is made from `Eᵢ`.
 > * *[existing rules from output type inferences]* ...
 
+The *input type inference* change is necessary to infer `T` in `InputType<T>()` in the following; the *output type inference* change is necessary to infer `T` in `OutputType<T>()`.
+
+```csharp
+static void InputType<T>(Dictionary<string, T> d);
+static void OutputType<T>(Dictionary<string, Func<T>> d);
+
+InputType(["a":1]);
+OutputType(["b":() => 2)]);
+```
+
 ## Extension methods
 
 No changes here.  Like with collection expressions, dictionary expressions do not have a natural type, so the existing conversions from type are not applicable. As a result, a dictionary expression cannot be used directly as the first parameter for an extension method invocation. 
