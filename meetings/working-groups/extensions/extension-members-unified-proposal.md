@@ -4,23 +4,21 @@
 
 This proposal is an update on [Anonymous extension declarations](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/anonymous-extension-declarations.md) in the following ways:
 
-- It leans into a parameter-style syntax for the underlying value.
-- It clarifies the goals of lowering, while leaving more details to implementation.
+- It leans into a parameter-style syntax for specifying the receiver.
 - It includes syntax for generating compatible extension methods.
+- It clarifies the goals of lowering, while leaving more details to implementation.
 
-### Underlying value: `this` vs parameter
+### Receiver specification: `this` vs parameter
 
  The strongest sentiment I've heard is that whichever approach we take should be done *consistently*. Of the two there's a lean towards the parameter approach. This proposal leans into the parameter-based approach as strongly as it can.
-
-### Lowering
-
-The proposal takes the stance that the declarations generated from lowering - static methods and/or types - should be hidden from the language level, making extension members a "real" abstraction. There has been curiosity about exposing these directly to users somehow, but there is no concrete proposal on the table.
-
-This frees up the implementation strategy considerably, but it still needs to establish metadata and rules that can be followed and consumed by other compilers, and that ensure stability and compatibility for consuming code as APIs evolve.
 
 ### Compatibility with classic extension methods
 
 There is a clear desire to be able to move classic extension methods forward into new syntax without breaking existing callers. This proposal lets extension methods be marked for compatibility, which will cause them to generate visible static methods in the pattern of classic extension methods.
+
+### Lowering
+
+The proposal takes the stance that the declarations generated from lowering - static methods and/or types - should be hidden from the language level, making extension members a "real" abstraction. The implementation strategy needs to establish metadata and rules that can be followed and consumed by other compilers, and that ensure stability and compatibility for consuming code as APIs evolve.
 
 ## Declaration
 
@@ -68,14 +66,14 @@ public static class Enumerable
 
 ### Extension members
 
-Extension member declarations are syntactically identical to corresponding instance and static members in class and struct declarations (with one exception: constructors). Instance members refer to the receiver with the parameter name given in the extension declaration's receiver specification:
+Extension member declarations are syntactically identical to corresponding instance and static members in class and struct declarations (with the exception of constructors). Instance members refer to the receiver with the parameter name given in the extension declaration's receiver specification:
 
 ``` c#
 public static class Enumerable
 {
     extension(IEnumerable source)
     {
-        // 'source' refers to underlying value
+        // 'source' refers to receiver
         public bool IsEmpty => !source.GetEnumerator().MoveNext();
     }
 }
@@ -97,7 +95,7 @@ public static class Enumerable
 
 By default the receiver is passed to instance extension members by value, just like other parameters. However, an extension declaration receiver in parameter form can specify `ref`, `ref readonly` and `in`, as long as the receiver type is known to be a value type. 
 
-If `ref` is specified, an instance member or one of its accessors can be declared `readonly`, which prevents it from mutating the receiver:
+If `ref` is specified, an instance member or its accessors can be declared `readonly`, which prevents it from mutating the receiver:
 
 ``` c#
 public static class Bits
