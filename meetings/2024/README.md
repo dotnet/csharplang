@@ -30,7 +30,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Nov 20, 2024
 
-- Extensions (Mads)
+- Extensions (Mads): https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/extension-members-unified-proposal.md
 - Dictionary expressions (Cyrus)
   
 ## C# Language Design Notes for 2024
