@@ -185,10 +185,10 @@ of the values about to be spread into it"
 
 ## Option 3: `new(...arguments...) [...elements...]`
 
-The design here would play off of how `new(...) { Prop ... }` can already instantiate a target type.  The arguments
-in the `new(...)` clause would be passed to the constructor if creating a new instance, or as the initial arguments
-if calling a *create method*.  We would allow a single *comparer* argument if creating a new `IDictionary<,>` or
-`IReadOnlyDictionary<,>`.
+The design here would play off of how `new(...) { v1, v2, ... }` can already instantiate a target collection type and
+supply initial collection values.  The arguments in the `new(...)` clause would be passed to the constructor if
+creating a new instance, or as the initial arguments if calling a *create method*.  We would allow a single *comparer*
+argument if creating a new `IDictionary<,>` or `IReadOnlyDictionary<,>`.
 
 There are several downsides to this idea, as enumerated in the initial *weaknesses* section.  First, there is a
 general concern around syntax appearing outside of the `[...]` section.  We want the `[...]` to be instantly 
