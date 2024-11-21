@@ -67,7 +67,7 @@ passed to that constructor, which is definitely is not.
 Based on all of the above, a small handful of options have come up that are felt to solve the needs of passing
 arguments, without stepping out of bounds of the goals of collection expressions.
 
-## Option 1: `[with(...)]`
+## Option 1: `[with(...arguments...)]`
 
 The design of this form would be as follows:
 
@@ -146,7 +146,7 @@ a constructor, or to the appropriate 'create method' if we are calling such a me
 single argument inheriting from the BCL *comparer* types to be provided when instantiating one of the destination
 dictionary interface types to control its behavior.
 
-## Option 2: `[args(...)]`
+## Option 2: `[args(...arguments...)]`
 
 This form is effectively identical to the `with(...)` form, just using a slightly different identifier.  The
 benefit here would primarily be around clearer identification of what is in the `(...)` section.  They are
@@ -182,3 +182,18 @@ These forms seem to "read" reasonable well.  In all those cases, the code is "cr
 with the following 'args' to pass along to control the final instance, and then the subsequent elements used to
 populate it.  For example, the first line "creates a list of strings with a capacity 'arg' of two times the count
 of the values about to be spread into it"
+
+## Option 3: `new(...arguments...) [...elements...]`
+
+The design here would play off of how `new(...) { v1, v2, ... }` can already instantiate a target collection type
+and supply initial collection values.  The arguments in the `new(...)` clause would be passed to the constructor if
+creating a new instance, or as the initial arguments if calling a *create method*.  We would allow a single *comparer*
+argument if creating a new `IDictionary<,>` or `IReadOnlyDictionary<,>`.
+
+There are several downsides to this idea, as enumerated in the initial *weaknesses* section.  First, there is a
+general concern around syntax appearing outside of the `[...]` section.  We want the `[...]` to be instantly 
+recognizable, which is not the case if there is a `new(...)` appearing first.  Second, seeing the `new(...)` 
+strongly triggers the view that this is simply an implicit-object-creation.  And, while somewhat true for the
+case where a constructor *is* actually called (like for `Dictionary<,>`) it is misleading when calling a *create
+method*, or creating an interface.  Finally, there is general apprehension around using `new` at all as there
+is a feeling of redundancy around both the `new` indicating a new instance, *and* `[...]` indicating a new instance.
