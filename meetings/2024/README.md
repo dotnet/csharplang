@@ -27,13 +27,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Dec 4, 2024
 
 ### Mon Dec 2, 2024
+  
+## C# Language Design Notes for 2024
 
 ### Wed Nov 20, 2024
 
-- Extensions (Mads): https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/extension-members-unified-proposal.md
-- Dictionary expressions (Cyrus)
-  
-## C# Language Design Notes for 2024
+[C# Language Design Meeting for November 20th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-11-20.md)
+
+- Extensions
+- Dictionary Expressions
 
 ### Wed Nov 13, 2024
 

@@ -1,5 +1,7 @@
 # Dictionary Expressions
 
+Champion issue: https://github.com/dotnet/csharplang/issues/8659
+
 ## Summary
 
 *Dictionary Expressions* are a continuation of the C# 12 *Collection Expressions* feature.  They extend that system with a new terse syntax, `["mads": 21, "dustin": 22]`, for creating common dictionary values.  Like with collection expressions, merging other dictionaries into these values is possible using the existing spread operator `..` like so: `[.. currentStudents, "mads": 21, "dustin": 22]`
