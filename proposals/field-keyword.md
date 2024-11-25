@@ -734,16 +734,6 @@ When the backing field is considered *read-only*, the field emitted to metadata 
 
 Recommendation is accepted.
 
-## Open LDM questions
-
-### Feature name
-
-Some options for the name of the feature:
-1. semi-auto properties
-1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
-1. field-backed properties
-1. field keyword
-
 ### Readonly context and `set`
 
 Should a `set` accessor be allowed in a `readonly` context for a property that uses `field`?
@@ -765,6 +755,10 @@ struct S2
     readonly object P3 { get => field; set { } } // ok?
 }
  ```
+
+#### Answer
+
+There could be scenarios for this where you're implementing a `set` accessor on a `readonly` struct and either passing it through, or throwing. We will allow this.
 
 ### `[Conditional]` code
 
@@ -789,6 +783,10 @@ For reference, fields for *primary constructor parameters* are generated in simi
 
 **Recommendation**: The backing field is generated when `field` is used only in omitted calls to *conditional methods*.
 
+#### Answer
+
+`Conditional` code can have effects on non-conditional code, such as `Debug.Assert` changing nullability. It would be strange if `field` didn't have similar impacts. It is also unlikely to come up in most code, so we'll do the simple thing and accept the recommendation.
+
 ### Interface properties and auto-accessors
 
 Is a combination of manually- and auto-implemented accessors recognized for an `interface` property where the auto-implemented accessor refers to a synthesized backing field?
@@ -807,3 +805,17 @@ interface I
 ```
 
 **Recommendation**: Auto-accessors are recognized in `interface` properties, and the auto-accessors refer to a synthesized backing field. For an instance property, an error is reported that instance fields are not supported.
+
+#### Answer
+
+Standardizing around the instance field itself being the cause of the error is consistent with partial properties in classes, and we like that outcome. The recommendation is accepted.
+
+## Open LDM questions
+
+### Feature name
+
+Some options for the name of the feature:
+1. semi-auto properties
+1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
+1. field-backed properties
+1. field keyword
