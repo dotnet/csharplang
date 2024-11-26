@@ -3,6 +3,7 @@
 All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
 
 ## Schedule ASAP
+- Approve [breaking change](https://github.com/dotnet/roslyn/pull/76090) for iterators (Julien)
 
 ## Schedule when convenient
 
