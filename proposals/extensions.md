@@ -26,7 +26,7 @@ class_member_declaration
     ;
 
 extension_container // add
-    : 'extension' type_parameter_list? '(' receiver_parameter')' extension_body
+    : 'extension' type_parameter_list? '(' receiver_parameter ')' type_parameter_constraints_clause* extension_body
     ;
 
 extension_body // add
@@ -42,7 +42,7 @@ extension_member_declaration // add
     ;
 
 receiver_parameter // add
-    : attributes? parameter_modifier? type identifier?
+    : attributes? parameter_modifiers? type identifier?
     ;
 ```
 
@@ -314,10 +314,6 @@ However, beyond implementing the language semantics it must satisfy certain requ
 These requirements need more refinement as implementation progresses, and may need to be compromised in corner cases in order to allow for a reasonable implementation approach.
 
 ## Open issues
-
-### Confirm syntax model
-
-Do we want to allow an optional semi-colon at the end of extension_body?  
 
 ### Add support for more member kinds
 
