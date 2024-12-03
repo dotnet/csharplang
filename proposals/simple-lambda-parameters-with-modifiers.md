@@ -26,20 +26,20 @@ TryParse<int> parse2 = (string text, out int result) => Int32.TryParse(text, out
 No changes.  The [latest lambda grammar](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/lambda-method-group-defaults.md#detailed-design) is:
 
 ```g4
- lambda_expression
-   : modifier* identifier '=>' (block | expression)
-   | attribute_list* modifier* type? lambda_parameter_list '=>' (block | expression)
-   ;
+lambda_expression
+  : modifier* identifier '=>' (block | expression)
+  | attribute_list* modifier* type? lambda_parameter_list '=>' (block | expression)
+  ;
 
 lambda_parameter_list
   : lambda_parameters (',' parameter_array)?
   | parameter_array
   ;
 
- lambda_parameter
-   : identifier
+lambda_parameter
+  : identifier
   | attribute_list* modifier* type? identifier default_argument?
-   ;
+  ;
 ```
 
 This grammar already considers `modifiers* identifier` to be syntactically legal.
