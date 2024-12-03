@@ -3,12 +3,10 @@
 All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
 
 ## Schedule ASAP
-- Approve [breaking change](https://github.com/dotnet/roslyn/pull/76090) for iterators (Julien)
 
 ## Schedule when convenient
 
 - Triage (working set)
-- First-class Span open questions: [preferring ReadOnlySpan over Span](../../proposals/first-class-span-types.md#prefer-converting-from-t-to-readonlyspant-over-spant-in-overload-resolution) and [expression trees](../../proposals/first-class-span-types.md#ignore-span-conversions-in-expression-trees)
 
 ## Recurring topics
 
@@ -27,7 +25,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Dec 4, 2024
 
-### Mon Dec 2, 2024
+- First-class Span open questions: [preferring ReadOnlySpan over Span](../../proposals/first-class-span-types.md#prefer-converting-from-t-to-readonlyspant-over-spant-in-overload-resolution) and [expression trees](../../proposals/first-class-span-types.md#ignore-span-conversions-in-expression-trees) (Jan)
   
 ## C# Language Design Notes for 2024
 
