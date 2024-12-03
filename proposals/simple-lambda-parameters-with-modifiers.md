@@ -67,10 +67,8 @@ can have an `attribute_list`.
 
 The following change is required to [anonymous function conversions](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/lambda-method-group-defaults.md#detailed-design):
 
-```diff
 [...]
 - If F has an explicitly typed parameter list, each parameter in D has the same type and
 - modifiers as the corresponding parameter in F ignoring params modifiers and default values.
 > If F has an explicitly **or implicitly typed parameter list**, each parameter in D has the same type and
 > modifiers as the corresponding parameter in F ignoring params modifiers and default values.
-```
