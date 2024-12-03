@@ -56,7 +56,6 @@ This grammar already considers `modifiers* identifier` to be syntactically legal
 
 https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12192-anonymous-function-signatures is updated as follows:
 
-```diff
 In a `lambda_parameter_list` all `lambda_parameter` elements must either have a `type`
 present or not have a `type` present.  The former is an "explicitly
 typed parameter list", while the latter is an "implicitly typed
