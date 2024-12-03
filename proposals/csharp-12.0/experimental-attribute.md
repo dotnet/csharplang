@@ -28,6 +28,7 @@ namespace System.Diagnostics.CodeAnalysis
 
         public string DiagnosticId { get; }
         public string? UrlFormat { get; set; }
+        public string? Message { get; set; }
     }
 }
 ```
@@ -50,9 +51,15 @@ the diagnostic can be suppressed with `#pragma warning disable DiagID`.
 
 An error is produced if the diagnostic ID given to the experimental attribute is not a [valid C# identifier](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/lexical-structure.md#643-identifiers).  
 
-The diagnostic message is a specific message, where `'{0}'` is the fully-qualified type or member name.
+If value for `Message` property is not provided, the diagnostic message is a specific message, where `'{0}'` is the fully-qualified type or member name.
 ```
 '{0}' is for evaluation purposes only and is subject to change or removal in future updates.
+```
+
+If value for `Message` property is provided, the diagnostic message is a specific message, where `'{0}'` is the fully-qualified type or member name
+and `'{1}'` is the `Message`.
+```
+'{0}' is for evaluation purposes only and is subject to change or removal in future updates: '{1}'.
 ```
 
 The attribute is not inherited from base types or overridden members.
