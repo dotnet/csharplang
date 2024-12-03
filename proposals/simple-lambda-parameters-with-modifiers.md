@@ -58,8 +58,8 @@ https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-spec
 
 ```diff
 In a `lambda_parameter_list` all `lambda_parameter` elements must either have a `type`
-present or not have a `type` present.  The former is considered to be an "explicitly
-typed parameter list", while the latter is considered to be an "implicitly typed
+present or not have a `type` present.  The former is an "explicitly
+typed parameter list", while the latter is an "implicitly typed
 parameter list".
 
 Parameters in an implicitly typed parameter list cannot have a `default_argument`.  They
