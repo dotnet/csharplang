@@ -48,24 +48,25 @@ interface I1
 struct S1
 {
     [UnscopedRef]
-    ref int P1 { get; }
-    ref int P2 { get; }
+    internal ref int P1 { get {...} }
+
+    internal ref int P2 { get {...} }
 }
 
-int M<T>(T t, S1 s)
-    where T : allows ref struct, I1
+ref int M<T>(T t, S1 s)
+    where T : I1, allows ref struct
 {
     // Error: may return ref to t
-    return t.P1;
+    return ref t.P1;
 
     // Error: may return ref to t
-    return s.P1;
+    return ref s.P1;
 
     // Okay
-    return t.P2;
+    return ref t.P2;
 
     // Okay
-    return s.p2;
+    return ref s.P2;
 }
 ```
 
@@ -79,32 +80,32 @@ interface I1
     ref int P2 { get; }
 }
 
-struct S1 : I1
+struct S1
 {
-    ref int P1 { get; }
-    ref int P2 { get; }
+    internal ref int P1 { get {...} }
+    internal ref int P2 { get {...} }
 }
 
-struct S2 : I1
+struct S2
 {
     [UnscopedRef]
-    ref int P1 { get; }
-    ref int P2 { get; }
+    internal ref int P1 { get {...} }
+    internal ref int P2 { get {...} }
 }
 
 struct S3 : I1
 {
-    ref int P1 { get; }
+    internal ref int P1 { get {...} }
     // Error: P2 is marked with [UnscopedRef] and cannot implement I1.P2 as is not marked 
     // with [UnscopedRef]
     [UnscopedRef]
-    ref int P2 { get; }
+    internal ref int P2 { get {...} }
 }
 
 class C1 : I1
 {
-    ref int P1 { get; }
-    ref int P2 { get; }
+    internal ref int P1 { get; }
+    internal ref int P2 { get; }
 }
 ```
 
@@ -115,13 +116,14 @@ interface I1
 {
     void M()
     {
-        // Error: both of these box if I1 is implemented by a ref struct
+        // Danger: both of these box if I1 is implemented by a ref struct
         I1 local1 = this;
         object local2 = this;
     }
 }
 
-ref struct S = I1 { }
+// Error: I1.M cannot implement interface member I1.M() for ref struct S
+ref struct S : I1 { }
 ```
 
 To handle this a `ref struct` will be forced to implement all members of an interface, even if they have default implementations.
@@ -233,33 +235,25 @@ Examples of these rules in action:
 ```csharp
 interface I1 { }
 I1 M1<T>(T p)
-    where T : allows ref struct, I1
+    where T : I1, allows ref struct
 {
     // Error: cannot box potential ref struct
     return p;
 }
 
-T M2<T>(T p)
+ref T M2<T>(ref T p)
     where T : allows ref struct
 {
-    Span<int> span = stackalloc int[42];
 
     // The safe-to-escape of the return is current method because one of the inputs is
     // current method
-    T t = M3<T>(span);
+    T t = M3<T>(default);
 
     // Error: the safe-to-escape is current method.
-    return t;
+    return ref t;
 
     // Okay
-    return default;
-    return p;
-}
-
-T M3<T>(Span<T> span)
-    where T : allows ref struct
-{
-    return default;
+    return ref p;
 }
 ```
 
