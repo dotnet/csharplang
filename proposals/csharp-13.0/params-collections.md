@@ -600,8 +600,8 @@ class Program
     }
 
     // Proposal: An error is reported for the parameter indicating that the constructor that is required
-    // to be available doesn't initialize required members? In other words, should one be able
-    // to declare such a parameter under the specified conditions?
+    // to be available doesn't initialize required members. In other words, one is able
+    // to declare such a parameter under the specified conditions.
     static void Test(params MyCollection1 a)
     {
     }
