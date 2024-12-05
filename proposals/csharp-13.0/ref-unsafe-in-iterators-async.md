@@ -260,7 +260,7 @@ class C
         await Task.Yield();
         using (new R()) { } // allowed under this proposal
         foreach (var x in new C()) { } // allowed under this proposal
-        foreach (ref int x in new int[0]) { } // allowed under this proposal, but not implemented in C# 13
+        foreach (ref int x in new C()) { } // allowed under this proposal
         lock (new System.Threading.Lock()) { } // allowed under this proposal
         await Task.Yield();
     }

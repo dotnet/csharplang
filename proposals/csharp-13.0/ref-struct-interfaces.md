@@ -104,8 +104,8 @@ struct S3 : I1
 
 class C1 : I1
 {
-    internal ref int P1 { get; }
-    internal ref int P2 { get; }
+    internal ref int P1 { get {...} }
+    internal ref int P2 { get {...} }
 }
 ```
 
@@ -241,19 +241,27 @@ I1 M1<T>(T p)
     return p;
 }
 
-ref T M2<T>(ref T p)
+T M2<T>(T p)
     where T : allows ref struct
 {
+    Span<int> span = stackalloc int[42];
 
     // The safe-to-escape of the return is current method because one of the inputs is
     // current method
-    T t = M3<T>(default);
+    T t = M3<int, T>(span);
 
     // Error: the safe-to-escape is current method.
-    return ref t;
+    return t;
 
     // Okay
-    return ref p;
+    return default;
+    return p;
+}
+
+R M3<T, R>(Span<T> span)
+    where R : allows ref struct
+{
+    return default;
 }
 ```
 
