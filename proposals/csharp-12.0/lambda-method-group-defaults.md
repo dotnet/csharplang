@@ -22,7 +22,7 @@ Similarly, we will allow the same kind of behavior for method groups:
 ```csharp
 var addWithDefault = AddWithDefaultMethod;
 addWithDefault(); // 3
-addWithDefault(5) // 6
+addWithDefault(5); // 6
 
 var counter = CountMethod;
 counter(); // 0
@@ -39,7 +39,7 @@ int CountMethod(params int[] xs) {
 ## Relevant background
 [Lambda Improvements in C# 10](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/lambda-improvements.md)
 
-[Method group conversion specification §10.8](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/conversions.md#108-method-group-conversions)
+[Method group conversion specification §10.8](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#108-method-group-conversions)
 
 ## Motivation
 
@@ -82,8 +82,8 @@ Result TodoHandler(TodoService todoService, int id, string task = "foo") {
 app.MapPost("/todos/{id}", TodoHandler);
 ```
 
-## Current behavior
-Currently, when a user implements a lambda with an optional or `params` parameter, the compiler raises an error.
+## Previous behavior
+Before C# 12, when a user implements a lambda with an optional or `params` parameter, the compiler raises an error.
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1; // error CS1065: Default values are not valid in this context.
@@ -103,7 +103,7 @@ m2(); // error CS7036: There is no argument given that corresponds to the requir
 
 ## New behavior
 
-Following this proposal, default values and `params` can be applied to lambda parameters with the following behavior:
+Following this proposal (part of C# 12), default values and `params` can be applied to lambda parameters with the following behavior:
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1;
@@ -135,7 +135,7 @@ counter1(1, 2, 3); // ok, `params` will be used
 
 ## Breaking change
 
-Currently, the inferred type of a method group is `Action` or `Func` so the following code compiles:
+Before C# 12, the inferred type of a method group is `Action` or `Func` so the following code compiles:
 ```csharp
 void WriteInt(int i = 0) {
   Console.Write(i);
@@ -158,7 +158,7 @@ int DoFunction(Func<int[], int> f, int p) {
   return f(new[] { p });
 }
 ```
-Following this change, code of this nature would cease to compile in .NET SDK 7.0.200 or later.
+Following this change (part of C# 12), code of this nature ceases to compile in .NET SDK 7.0.200 or later.
 
 ```csharp
 void WriteInt(int i = 0) {
@@ -212,7 +212,7 @@ This enhancement requires the following changes to the grammar for lambda expres
 
 Note that this allows default parameter values and `params` arrays only for lambdas, not for anonymous methods declared with `delegate { }` syntax.
 
-Same rules as for method parameters ([§14.6.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1462-method-parameters)) apply for lambda parameters:
+Same rules as for method parameters ([§15.6.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1562-method-parameters)) apply for lambda parameters:
 - A parameter with a `ref`, `out` or `this` modifier cannot have a *default_argument*.
 - A *parameter_array* may occur after an optional parameter, but cannot have a default value – the omission of arguments for a *parameter_array* would instead result in the creation of an empty array.
 
@@ -254,7 +254,7 @@ var printString = (string toPrint = "defaultString") => Console.WriteLine(toPrin
 var counter = (params int[] xs) => xs.Length;
 // internal delegate int c'(params int[] arg);
 string PathJoin(string s1, string s2, string sep = "/") { return $"{s1}{sep}{s2}"; }
-var joinFunc = pathJoin;
+var joinFunc = PathJoin;
 // internal delegate string d'(string arg1, string arg2, string arg3 = " ");
 ```
 
@@ -298,7 +298,7 @@ e = f; // Not Allowed
 b = f; // Allowed
 e = g; // Allowed
 
-d = (int c = 10) => 2; // Error: default parameter value is different between new lambda
+d = (int c = 10) => 2; // Warning: default parameter value is different between new lambda
                        // and synthesized delegate b'. We won't do implicit conversion
 ```
 
@@ -328,8 +328,8 @@ a = c; // Allowed
 b = c; // Not allowed
 b = d; // Allowed
 
-c = (params int[] xs) => xs.Length; // Error: different delegate types; no implicit conversion
-d = (int[] xs) => xs.Length; // Error: different delegate types; no implicit conversion
+c = (params int[] xs) => xs.Length; // Warning: different delegate types; no implicit conversion
+d = (int[] xs) => xs.Length; // OK. `d` is `delegate int (params int[] arg)`
 ```
 
 Similarly, there is of course compatibility with named delegates that already support optional and `params` parameters.
@@ -340,6 +340,7 @@ If the source is a method group, it can be called on its own, hence no warning w
 ```csharp
 delegate int DelegateNoDefault(int x);
 delegate int DelegateWithDefault(int x = 1);
+
 int MethodNoDefault(int x) => x;
 int MethodWithDefault(int x = 2) => x;
 DelegateNoDefault d1 = MethodWithDefault; // no warning: source is a method group
@@ -351,6 +352,7 @@ DelegateWithDefault d6 = (int x) => x; // no warning: source missing, target pre
 
 delegate int DelegateNoParams(int[] xs);
 delegate int DelegateWithParams(params int[] xs);
+
 int MethodNoParams(int[] xs) => xs.Length;
 int MethodWithParams(params int[] xs) => xs.Length;
 DelegateNoParams d7 = MethodWithParams; // no warning: source is a method group
@@ -370,17 +372,20 @@ In code, users can introspect the `DefaultValue` in the `ParameterInfo` associat
 
 ```csharp
 var addWithDefault = (int addTo = 2) => addTo + 1;
-void AddWithDefaultMethod(int addTo = 2) {
-  return addTo + 1;
+int AddWithDefaultMethod(int addTo = 2)
+{
+    return addTo + 1;
 }
 
-addWithDefault.Method.GetParameters()[0].DefaultValue; // 2
+var defaultParm = addWithDefault.Method.GetParameters()[0].DefaultValue; // 2
 
 var add1 = AddWithDefaultMethod;
-add1.Method.GetParameters()[0].DefaultValue; // 2
+defaultParm = add1.Method.GetParameters()[0].DefaultValue; // 2
 ```
 
 ## Open questions
+
+Neither of these have been implemented. They remain open proposals.
 
 **Open question:** how does this interact with the existing `DefaultParameterValue` attribute?
 

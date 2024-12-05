@@ -18,6 +18,8 @@ The ability of a class or struct in C# to have more than one constructor provide
 Primary constructors put the parameters of one constructor in scope for the whole class or struct to be used for initialization or directly as object state. The trade-off is that any other constructors must call through the primary constructor.
 
 ``` c#
+public class B(bool b) { } // base class
+
 public class C(bool b, int i, string s) : B(b) // b passed to base constructor
 {
     public int I { get; set; } = i; // i used for initialization
@@ -101,15 +103,15 @@ A class or struct with a `parameter_list` has an implicit public constructor who
 
 ### Lookup
 
-The [lookup of simple names](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1174-simple-names) is augmented to handle primary constructor parameters. The changes are highlighted in **bold** in the following excerpt:
+The [lookup of simple names](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1284-simple-names) is augmented to handle primary constructor parameters. The changes are highlighted in **bold** in the following excerpt:
 
-> - Otherwise, for each instance type `T` ([§14.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1432-the-instance-type)), starting with the instance type of the immediately enclosing type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):
+> - Otherwise, for each instance type `T` ([§15.3.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1532-the-instance-type)), starting with the instance type of the immediately enclosing type declaration and continuing with the instance type of each enclosing class or struct declaration (if any):
 >   - **If the declaration of `T` includes a primary constructor parameter `I` and the reference occurs within the `argument_list` of `T`'s `class_base` or within an initializer of a field, property or event of `T`, the result is the primary constructor parameter `I`**
 >   - **Otherwise,** if `e` is zero and the declaration of `T` includes a type parameter with name `I`, then the *simple_name* refers to that type parameter.
->   - Otherwise, if a member lookup ([§11.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup)) of `I` in `T` with `e` type arguments produces a match:
->     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method ([§11.7.8.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11782-method-invocations)).
->     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor ([§11.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1121-general)), the result is the same as a member access ([§11.7.6](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access)) of the form `this.I`. This can only happen when `e` is zero.
->     - Otherwise, the result is the same as a member access ([§11.7.6](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1176-member-access)) of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
+>   - Otherwise, if a member lookup ([§12.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#125-member-lookup)) of `I` in `T` with `e` type arguments produces a match:
+>     - If `T` is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of `this`. If a type argument list was specified, it is used in calling a generic method ([§12.8.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128102-method-invocations)).
+>     - Otherwise, if `T` is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the *block* of an instance constructor, an instance method, or an instance accessor ([§12.2.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1221-general)), the result is the same as a member access ([§12.8.7](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1287-member-access)) of the form `this.I`. This can only happen when `e` is zero.
+>     - Otherwise, the result is the same as a member access ([§12.8.7](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1287-member-access)) of the form `T.I` or `T.I<A₁, ..., Aₑ>`.
 >   - **Otherwise, if the declaration of `T` includes a primary constructor parameter `I`, the result is the primary constructor parameter `I`.**
 
 The first addition corresponds to the change incurred by [primary constructors on records](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-9.0/records.md#primary-constructor), and ensures that primary constructor parameters are found before any corresponding fields within initializers and base class arguments. It extends this rule to static initializers as well. However, since records always have an instance member with the same name as the parameter, the extension can only lead to a change in an error message. Illegal access to a parameter vs. illegal access to an instance member.  
@@ -178,7 +180,7 @@ public class C(bool b, int i, string s) : B(b) // b passed to base constructor
     public string S // s used directly in function members
     {
         get => s;
-        set => s = value ?? throw new NullArgumentException(nameof(X));
+        set => s = value ?? throw new ArgumentNullException(nameof(value));
     }
     public C(string s) : this(true, 0, s) { } // must call this(...)
 }
@@ -193,7 +195,7 @@ public class C : B
     public string S
     {
         get => __s;
-        set => __s = value ?? throw new NullArgumentException(nameof(X));
+        set => __s = value ?? throw new ArgumentNullException(nameof(value));
     }
     public C(string s) : this(0, s) { ... } // must call this(...)
     
@@ -217,9 +219,9 @@ Records produce a warning if a primary constructor parameter isn't read within t
 
 ### Identical simple names and type names
 
-There is a special language rule for scenarios often referred to as "Color Color" scenarios - [Identical simple names and type names](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#11762-identical-simple-names-and-type-names). 
+There is a special language rule for scenarios often referred to as "Color Color" scenarios - [Identical simple names and type names](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12872-identical-simple-names-and-type-names). 
 
->In a member access of the form `E.I`, if `E` is a single identifier, and if the meaning of `E` as a *simple_name* ([§11.7.4](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1174-simple-names)) is a constant, field, property, local variable, or parameter with the same type as the meaning of `E` as a *type_name* ([§7.8.1](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#781-general)), then both possible meanings of `E` are permitted. The member lookup of `E.I` is never ambiguous, since `I` shall necessarily be a member of the type `E` in both cases. In other words, the rule simply permits access to the static members and nested types of `E` where a compile-time error would otherwise have occurred.
+>In a member access of the form `E.I`, if `E` is a single identifier, and if the meaning of `E` as a *simple_name* ([§12.8.4](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1274-simple-names)) is a constant, field, property, local variable, or parameter with the same type as the meaning of `E` as a *type_name* ([§7.8.1](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/basic-concepts.md#781-general)), then both possible meanings of `E` are permitted. The member lookup of `E.I` is never ambiguous, since `I` shall necessarily be a member of the type `E` in both cases. In other words, the rule simply permits access to the static members and nested types of `E` where a compile-time error would otherwise have occurred.
 
 With respect to primary constructors, the rule affects whether an identifier within an instance member should be treated as a type reference, or as a primary constructor parameter reference, which, in turn, captures the parameter into the the state of the enclosing type. Even though "the member lookup of `E.I` is never ambiguous", when lookup yields a member group, in some cases it is impossible to determine whether a member access refers to a static member or an instance member without fully resolving (binding) the member access. At the same time, capturing a primary constructor parameter changes properties of enclosing type in a way that affects semantic analysis. For example, the type might become unmanaged and fail certain constraints because of that. 
 There are even scenarios for which binding can succeed either way, depending on whether the parameter is considered captured or not. For example:
@@ -228,7 +230,7 @@ struct S1(Color Color)
 {
     public void Test()
     {
-        Color.M1(this);
+        Color.M1(this); // Error: ambiguity between parameter and typename
     }
 }
 
@@ -269,7 +271,7 @@ For example:
 ``` c#
 public class Person(string name)
 {
-    public string Name { get; set; } = name;   // initialization
+    public string Name { get; set; } = name;   // warning: initialization
     public override string ToString() => name; // capture
 }
 ```
@@ -333,8 +335,8 @@ A much simpler version of the feature would prohibit primary constructor paramet
 ``` c#
 public class C(string s)
 {
-    public S1 => s; // Nope!
-    public S2 { get; } = s; // Still allowed
+    public string S1 => s; // Nope!
+    public string S2 { get; } = s; // Still allowed
 }
 ```
 
@@ -404,7 +406,7 @@ public class C(bool b, int i, string s) : B(b)
     public string S // s used directly in function members
     {
         get => s;
-        set => s = value ?? throw new NullArgumentException(nameof(X));
+        set => s = value ?? throw new ArgumentNullException(nameof(value));
     }
     public C(string s2) : base(true) // cannot use `string s` because it would shadow
     { 
