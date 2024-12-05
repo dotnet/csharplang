@@ -248,7 +248,7 @@ using System.Threading.Tasks;
 
 ref struct R
 {
-    public int Current => 0;
+    public ref int Current { get { ... }};
     public bool MoveNext() => false;
     public void Dispose() { }
 }
