@@ -16,7 +16,7 @@ convenience when calling APIs that take other collection types. For example, an 
 plain `IEnumerable`. Especially in cases when compiler is able to avoid an implicit array allocation for the purpose of
 creating the collection (`ImmutableArray<T>`, `ReadOnlySpan<T>`, etc).
 
-Today, in situations when an API takes a collection type, developers usually add `params` overload that takes an array,
+Today, in situations when an API takes a collection type, developers usually add a `params` overload that takes an array,
 construct the target collection and call the original overload with that collection, thus consumers of the API have to
 trade an extra array allocation for convenience.
 
@@ -366,7 +366,7 @@ The order of evaluation is the following:
 3. `GetA` is called
 4. `Test` is called
 
-Note, in params array case, the array is created right before the target methos is invoked, after all
+Note, in params array case, the array is created right before the target method is invoked, after all
 arguments are evaluated in their lexical order.
 
 #### Compound assignment
@@ -548,7 +548,7 @@ Params parameters are implicitly scoped - https://github.com/dotnet/csharplang/b
 
 ### [Resolved] Consider enforcing `scoped` or `params` across overrides
 
-We've previously stated that `params` parameters should be `scoped` by default. However, this introduces odd behavior in overridding, due
+We've previously stated that `params` parameters should be `scoped` by default. However, this introduces odd behavior in overriding, due
 to our existing rules around restating `params`:
 
 ```cs
@@ -560,7 +560,7 @@ class Base
 class Derived : Base
 {
     internal override Span<int> M1(Span<int> s1, // Error, missing `scoped` on override
-                                   Span<int> s2  // No error: parameter is implicitly params, and therefore implicitly scoped
+                                   Span<int> s2  // Proposal: Error: parameter must include either `params` or `scoped`
                                   ) => throw null!;
 }
 ```
@@ -599,7 +599,7 @@ class Program
         Test(2, 3); // error CS9035: Required member 'MyCollection1.F' must be set in the object initializer or attribute constructor.
     }
 
-    // Should an error be reported for the parameter indicating that the constructor that is required
+    // Proposal: An error is reported for the parameter indicating that the constructor that is required
     // to be available doesn't initialize required members? In other words, should one be able
     // to declare such a parameter under the specified conditions?
     static void Test(params MyCollection1 a)

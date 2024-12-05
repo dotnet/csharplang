@@ -121,7 +121,7 @@ It is an error to apply `OverloadResolutionPriorityAttribute` to the following l
 * Conversion operators
 * Lambdas
 * Local functions
-* Destructors
+* Finalizers
 * Static constructors
 
 Attributes encountered on these locations in metadata are ignored by C#.
