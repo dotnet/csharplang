@@ -203,6 +203,9 @@ This is based on [collection expressions overload resolution changes][ce-or].
 >     and `T₁` is a *better conversion target* than `T₂`
 > - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
 
+#### Better conversion target
+[better-conversion-target]: #better-conversion-target
+
 *Better conversion target* ([§12.6.4.7][better-conversion-target]) is updated to prefer `ReadOnlySpan<T>` over `Span<T>`.
 
 > Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** than `T₂` if one of the following holds:
