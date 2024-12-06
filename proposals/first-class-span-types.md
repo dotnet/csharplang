@@ -204,7 +204,7 @@ This is based on [collection expressions overload resolution changes][ce-or].
 > - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
 
 #### Better conversion target
-[better-conversion-target]: #better-conversion-target
+[betterness-target]: #better-conversion-target
 
 *Better conversion target* ([§12.6.4.7][better-conversion-target]) is updated to prefer `ReadOnlySpan<T>` over `Span<T>`.
 
@@ -214,7 +214,7 @@ This is based on [collection expressions overload resolution changes][ce-or].
 > - An implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
 > - ...
 
-This rule should ensure that whenever an overload becomes applicable due to the new span conversions,
+The *better conversion from expression* rule should ensure that whenever an overload becomes applicable due to the new span conversions,
 any potential ambiguity with another overload is avoided because the newly-applicable overload is preferred.
 
 Without this rule, the following code that successfully compiled in C# 13 would result in an ambiguity error in C# 14
