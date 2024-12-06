@@ -81,14 +81,14 @@ Collection literals are [target-typed](https://github.com/dotnet/csharplang/blob
   * Literals with no `spread_element` in them.
   * Literals with arbitrary ordering of any element type.
 
-* The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement).
+* The *iteration type* of `..s_n` is the type of the *iteration variable* determined as if `s_n` were used as the expression being iterated over in a [`foreach_statement`](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement).
 * Variables starting with `__name` are used to represent the results of the evaluation of `name`, stored in a location so that it is only evaluated once.  For example `__e1` is the evaluation of `e1`.
 * `List<T>`, `IEnumerable<T>`, etc. refer to the respective types in the `System.Collections.Generic` namespace.
-* The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11173-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
+* The specification defines a [translation](#collection-literal-translation) of the literal to existing C# constructs.  Similar to the [*query expression translation*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12203-query-expression-translation), the literal is itself only legal if the translation would result in legal code.  The purpose of this rule is to avoid having to repeat other rules of the language that are implied (for example, about convertibility of expressions when assigned to storage locations).
 * An implementation is not required to translate literals exactly as specified below.  Any translation is legal if the same result is produced and there are no observable differences in the production of the result.
   * For example, an implementation could translate literals like `[1, 2, 3]` directly to a `new int[] { 1, 2, 3 }` expression that itself bakes the raw data into the assembly, eliding the need for `__index` or a sequence of instructions to assign each value. Importantly, this does mean if any step of the translation might cause an exception at runtime that the program state is still left in the state indicated by the translation.
 
-* References to 'stack allocation' refer to any strategy to allocate on the stack and not the heap.  Importantly, it does not imply or require that that strategy be through the actual `stackalloc` mechanism.  For example, the use of [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) is also an allowed and desirable approach to accomplish stack allocation where available. 
+* References to 'stack allocation' refer to any strategy to allocate on the stack and not the heap.  Importantly, it does not imply or require that that strategy be through the actual `stackalloc` mechanism.  For example, the use of [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md) is also an allowed and desirable approach to accomplish stack allocation where available. Note that in C# 12, inline arrays can't be initialized with a collection expression. That remains an open proposal.
 
 * Collections are assumed to be well-behaved.  For example:
 
@@ -116,7 +116,7 @@ An implicit *collection expression conversion* exists from a collection expressi
     * If the method is generic, the type arguments can be inferred from the collection and argument.
     * The method is accessible at the location of the collection expression.
 
-    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) of the *type*.
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type*.
 * An *interface type*:
   * `System.Collections.Generic.IEnumerable<T>`
   * `System.Collections.Generic.IReadOnlyCollection<T>`
@@ -182,7 +182,7 @@ Methods declared on base types or interfaces are ignored and not part of the `CM
 
 If the `CM` set is empty, then the *collection type* doesn't have an *element type* and doesn't have a *create method*. None of the following steps apply.
 
-If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*.
+If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*.
 
 An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
 
@@ -377,9 +377,9 @@ static T[] AsArray<T>(T[] arg) => arg;
 static List<T[]> AsListOfArray<T>(List<T[]> arg) => arg;
 ```
 
-The [*type inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1163-type-inference) rules are updated as follows.
+The [*type inference*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1263-type-inference) rules are updated as follows.
 
-The existing rules for the [*first phase*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11632-the-first-phase) are extracted to a new *input type inference* section, and a  rule is added to *input type inference* and *output type inference* for collection expression expressions.
+The existing rules for the [*first phase*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12632-the-first-phase) are extracted to a new *input type inference* section, and a  rule is added to *input type inference* and *output type inference* for collection expression expressions.
 
 > 11.6.3.2 The first phase
 >
@@ -391,7 +391,7 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 >
 > * If `E` is a *collection expression* with elements `Eᵢ`, and `T` is a type with an *element type* `Tₑ` or `T` is a *nullable value type* `T0?` and `T0` has an *element type* `Tₑ`, then for each `Eᵢ`:
 >   * If `Eᵢ` is an *expression element*, then an *input type inference* is made *from* `Eᵢ` *to* `Tₑ`.
->   * If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#116310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
+>   * If `Eᵢ` is a *spread element* with an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) `Sᵢ`, then a [*lower-bound inference*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#126310-lower-bound-inferences) is made *from* `Sᵢ` *to* `Tₑ`.
 > * *[existing rules from first phase]* ...
 
 > 11.6.3.7 Output type inferences
@@ -405,9 +405,9 @@ The existing rules for the [*first phase*](https://github.com/dotnet/csharpstand
 
 ## Extension methods
 
-No changes to [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11783-extension-method-invocations) rules. 
+No changes to [*extension method invocation*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#128103-extension-method-invocations) rules. 
 
-> 11.7.8.3 Extension method invocations
+> 12.8.10.3 Extension method invocations
 >
 > An extension method `Cᵢ.Mₑ` is *eligible* if:
 >
@@ -430,7 +430,7 @@ var z = Extensions.AsImmutableArray([3]); // ok
 ## Overload resolution
 [overload-resolution]: #overload-resolution
 
-[*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11644-better-conversion-from-expression) is updated to prefer certain target types in collection expression conversions.
+[*Better conversion from expression*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12645-better-conversion-from-expression) is updated to prefer certain target types in collection expression conversions.
 
 In the updated rules:
 * A *span_type* is one of:
@@ -507,7 +507,7 @@ foreach (var x in y)
 }
 ```
 
-The compiler can also [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md), if available, when choosing to allocate on the stack.
+The compiler can also use [inline arrays](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/inline-arrays.md), if available, when choosing to allocate on the stack. Note that in C# 12, inline arrays can't be initialized with a collection expression. That feature is an open proposal.
 
 If the compiler decides to allocate on the heap, the translation for `Span<T>` is simply:
 
@@ -896,10 +896,10 @@ class Collection : IEnumerable<int>, IEnumerable<string>
 
 ### Specification of a [*constructible*](#conversions) collection type utilizing a [*create method*](#create-methods) is sensitive to the context at which conversion is classified
 
-An existence of the conversion in this case depends on the notion of an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement)
+An existence of the conversion in this case depends on the notion of an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement)
 of the *collection type*. If there is a *create method* that takes a `ReadOnlySpan<T>` where `T` is the *iteration type*, the conversion exists. Otherwise, it doesn't.
 
-However, an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement)
+However, an [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement)
 is sensitive to the context at which `foreach` is performed. For the same *collection type* it can be different based on what extension methods
 are in scope, and it can also be undefined.
 

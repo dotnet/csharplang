@@ -13,7 +13,7 @@ Provide a general-purpose and safe mechanism for declaring inline arrays within 
 
 ## Motivation
 
-This proposal plans to address the many limitations of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
+This proposal plans to address the many limitations of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#238-fixed-size-buffers.
 Specifically it aims to allow:
 - accessing elements of struct types utilizing [InlineArrayAttribute](https://github.com/dotnet/runtime/issues/61135) feature;
 - the declaration of inline arrays for managed and unmanaged types in a `struct`, `class`, or `interface`.
@@ -34,9 +34,9 @@ public struct Buffer
 }
 ```
 
-Runtime provides a special type layout for the ```Buffer``` type:
-- The size of the type is extended to fit 10 (the number comes from the InlineArray attribute) elements of ```object```
-  type (the type comes from the type of the only instance field in the struct, ```_element0``` in this example).
+Runtime provides a special type layout for the `Buffer` type:
+- The size of the type is extended to fit 10 (the number comes from the InlineArray attribute) elements of `object`
+  type (the type comes from the type of the only instance field in the struct, `_element0` in this example).
 - The first element is aligned with the instance field and with the beginning of the struct
 - The elements are laid out sequentially in memory as though they are elements of an array.
 
@@ -55,14 +55,14 @@ For example, a pointer type cannot be used as an element type. Other examples th
 ### Obtaining instances of span types for an inline array type
 
 Since there is a guarantee that the first element in an inline array type is aligned at the beginning of the type (no gap), compiler will use the
-following code to get a ```Span``` value:
+following code to get a `Span` value:
 ``` C#
-MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TElement>(ref buffer), size)
+MemoryMarshal.CreateSpan(ref Unsafe.As<TBuffer, TElement>(ref buffer), size);
 ```
 
-And the following code to get a ```ReadOnlySpan``` value:
+And the following code to get a `ReadOnlySpan` value:
 ``` C#
-MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<TBuffer, TElement>(ref Unsafe.AsRef(in buffer)), size)
+MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<TBuffer, TElement>(ref Unsafe.AsRef(in buffer)), size);
 ```
 
 In order to reduce IL size at use sites compiler should be able to add two generic reusable helpers into private implementation detail type and
@@ -82,7 +82,7 @@ public static System.ReadOnlySpan<TElement> InlineArrayAsReadOnlySpan<TBuffer, T
 
 ### Element access
 
-The [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12811-element-access) will be extended
+The [Element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12821-element-access) will be extended
 to support inline array element access.
 
 An *element_access* consists of a *primary_no_array_creation_expression*, followed by a “`[`” token, followed by an *argument_list*, followed by a “`]`” token. The *argument_list* consists of one or more *argument*s, separated by commas.
@@ -95,44 +95,44 @@ element_access
 
 The *argument_list* of an *element_access* is not allowed to contain `ref` or `out` arguments.
 
-An *element_access* is dynamically bound ([§11.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1233-dynamic-binding)) if at least one of the following holds:
+An *element_access* is dynamically bound ([§11.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1233-dynamic-binding)) if at least one of the following holds:
 
 - The *primary_no_array_creation_expression* has compile-time type `dynamic`.
 - At least one expression of the *argument_list* has compile-time type `dynamic` and the *primary_no_array_creation_expression* does not have an array type,
   **and the *primary_no_array_creation_expression* does not have an inline array type or there is more than one item in the argument list**.
 
-In this case, the compiler classifies the *element_access* as a value of type `dynamic`. The rules below to determine the meaning of the *element_access* are then applied at run-time, using the run-time type instead of the compile-time type of those of the *primary_no_array_creation_expression* and *argument_list* expressions which have the compile-time type `dynamic`. If the *primary_no_array_creation_expression* does not have compile-time type `dynamic`, then the element access undergoes a limited compile-time check as described in [§11.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
+In this case, the compiler classifies the *element_access* as a value of type `dynamic`. The rules below to determine the meaning of the *element_access* are then applied at run-time, using the run-time type instead of the compile-time type of those of the *primary_no_array_creation_expression* and *argument_list* expressions which have the compile-time type `dynamic`. If the *primary_no_array_creation_expression* does not have compile-time type `dynamic`, then the element access undergoes a limited compile-time check as described in [§11.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1265-compile-time-checking-of-dynamic-member-invocation).
 
-If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access ([§11.7.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128112-array-access)). **If the *primary_no_array_creation_expression* of an *element_access* is a variable or value of an inline array type and the *argument_list* consists of a single argument, the *element_access* is an inline array element access.** Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type that has one or more indexer members, in which case the *element_access* is an indexer access ([§11.7.10.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#128113-indexer-access)).
+If the *primary_no_array_creation_expression* of an *element_access* is a value of an *array_type*, the *element_access* is an array access ([§12.8.12.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128122-array-access)). **If the *primary_no_array_creation_expression* of an *element_access* is a variable or value of an inline array type and the *argument_list* consists of a single argument, the *element_access* is an inline array element access.** Otherwise, the *primary_no_array_creation_expression* shall be a variable or value of a class, struct, or interface type that has one or more indexer members, in which case the *element_access* is an indexer access ([§12.8.12.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128123-indexer-access)).
 
 #### Inline array element access
 
 For an inline array element access, the *primary_no_array_creation_expression* of the *element_access* must be a variable or value of an inline array type. Furthermore, the *argument_list* of an inline array element access is not allowed to contain named arguments. The *argument_list* must contain a single expression, and the expression must be 
 - of type `int`, or
 - implicitly convertible to `int`, or
-- implicitly convertible to ```System.Index```, or 
-- implicitly convertible to ```System.Range```. 
+- implicitly convertible to `System.Index`, or 
+- implicitly convertible to `System.Range`. 
 
 ##### When the expression type is int
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a writable variable
 equivalent to invoking [`public ref T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.span-1.item) with
-that integer value on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context*
-of the access are equivalent to the same for an invocation of a method with the signature ```static ref T GetItem(ref InlineArrayType array)```.
+that integer value on an instance of `System.Span<T>` returned by `System.Span<T> InlineArrayAsSpan` method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context*
+of the access are equivalent to the same for an invocation of a method with the signature `static ref T GetItem(ref InlineArrayType array)`.
 The resulting variable is considered movable if and only if *primary_no_array_creation_expression* is movable.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a readonly variable
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.item) with
-that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
+that integer value on an instance of `System.ReadOnlySpan<T>` returned by `System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan`
 method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context*
-of the access are equivalent to the same for an invocation of a method with the signature ```static ref readonly T GetItem(in InlineArrayType array)```.
+of the access are equivalent to the same for an invocation of a method with the signature `static ref readonly T GetItem(in InlineArrayType array)`.
 The resulting variable is considered movable if and only if *primary_no_array_creation_expression* is movable.
 
 If *primary_no_array_creation_expression* is a value, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public ref readonly T this[int index] { get; }`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.item) with
-that integer value on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
+that integer value on an instance of `System.ReadOnlySpan<T>` returned by `System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan`
 method on *primary_no_array_creation_expression*. For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context*
-of the access are equivalent to the same for an invocation of a method with the signature ```static T GetItem(InlineArrayType array)```. 
+of the access are equivalent to the same for an invocation of a method with the signature `static T GetItem(InlineArrayType array)`. 
 
 For example:
 ``` C#
@@ -169,35 +169,35 @@ Indexing into an inline array with a constant expression outside of the declared
 
 The expression is converted to int and then the element access is interpreted as described in **When the expression type is int** section.
 
-##### When the expression implicitly convertible to ```System.Index```
+##### When the expression implicitly convertible to `System.Index`
 
-The expression is converted to ```System.Index```, which is then transformed to an int-based index value as described at https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-index-support, assuming that the
+The expression is converted to `System.Index`, which is then transformed to an int-based index value as described at https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-index-support, assuming that the
 length of the collection is known at compile time and is equal to the amount of elements in the inline array type of
 the *primary_no_array_creation_expression*. Then the element access is interpreted as described in
 **When the expression type is int** section.
 
-##### When the expression implicitly convertible to ```System.Range```
+##### When the expression implicitly convertible to `System.Range`
 
 If *primary_no_array_creation_expression* is a writable variable, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public Span<T> Slice (int start, int length)`](https://learn.microsoft.com/dotnet/api/system.span-1.slice)
-on an instance of ```System.Span<T>``` returned by ```System.Span<T> InlineArrayAsSpan``` method on *primary_no_array_creation_expression*.
+on an instance of `System.Span<T>` returned by `System.Span<T> InlineArrayAsSpan` method on *primary_no_array_creation_expression*.
 For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context* of the access are equivalent to the same
-for an invocation of a method with the signature ```static System.Span<T> GetSlice(ref InlineArrayType array)```.
+for an invocation of a method with the signature `static System.Span<T> GetSlice(ref InlineArrayType array)`.
 
 If *primary_no_array_creation_expression* is a readonly variable, the result of evaluating an inline array element access is a value
 equivalent to invoking [`public ReadOnlySpan<T> Slice (int start, int length)`](https://learn.microsoft.com/dotnet/api/system.readonlyspan-1.slice)
-on an instance of ```System.ReadOnlySpan<T>``` returned by ```System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan```
+on an instance of `System.ReadOnlySpan<T>` returned by `System.ReadOnlySpan<T> InlineArrayAsReadOnlySpan`
 method on *primary_no_array_creation_expression*.
 For the purpose of ref-safety analysis the *ref-safe-context*/*safe-context* of the access are equivalent to the same
-for an invocation of a method with the signature ```static System.ReadOnlySpan<T> GetSlice(in InlineArrayType array)```.
+for an invocation of a method with the signature `static System.ReadOnlySpan<T> GetSlice(in InlineArrayType array)`.
 
 If *primary_no_array_creation_expression* is a value, an error is reported. 
 
-The arguments for the ```Slice``` method invocation are calculated from the index expression converted to```System.Range``` as described at
+The arguments for the `Slice` method invocation are calculated from the index expression converted to `System.Range` as described at
 https://github.com/dotnet/csharplang/blob/main/proposals/csharp-8.0/ranges.md#implicit-range-support, assuming that the length of the collection
 is known at compile time and is equal to the amount of elements in the inline array type of the *primary_no_array_creation_expression*.
 
-Compiler can omit the ```Slice``` call if it is known at compile time that `start` is 0 and `length` is less or equal to the amount of elements in the
+Compiler can omit the `Slice` call if it is known at compile time that `start` is 0 and `length` is less or equal to the amount of elements in the
 inline array type. Compiler can also report an error if it is known at compile time that slicing goes out of inline array bounds.
 
 For example:
@@ -228,10 +228,10 @@ A new conversion, an inline array conversion, from expression will be added. The
 a [standard conversion](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#104-standard-conversions).
 
 There is an implicit conversion from expression of an inline array type to the following types:
-- ```System.Span<T>```
-- ```System.ReadOnlySpan<T>```
+- `System.Span<T>`
+- `System.ReadOnlySpan<T>`
 
-However, converting a readonly variable to ```System.Span<T>``` or converting a value to either type is an error.
+However, converting a readonly variable to `System.Span<T>` or converting a value to either type is an error.
 
 For example:
 ``` C#
@@ -257,8 +257,8 @@ void M3()
 ```
 
 For the purpose of ref-safety analysis the *safe-context* of the conversion is equivalent to *safe-context*
-for an invocation of a method with the signature ```static System.Span<T> Convert(ref InlineArrayType array)```, or
-```static System.ReadOnlySpan<T> Convert(in InlineArrayType array)```.
+for an invocation of a method with the signature `static System.Span<T> Convert(ref InlineArrayType array)`, or
+`static System.ReadOnlySpan<T> Convert(in InlineArrayType array)`.
 
 
 ### List patterns
@@ -272,8 +272,13 @@ Regular definite assignment rules are applicable to variables that have an inlin
 
 ### Collection literals
 
-An inline array type is a valid *constructible collection* target type for a [collection expression](collection-expressions.md).
+An instance of an inline array type is a valid expression in a [*spread_element*](collection-expressions.md#detailed-design).
 
+The following feature did not ship in C# 12. It remains an open proposal. The code in this example generates **CS9174**:
+
+<details>
+
+An inline array type is a valid *constructible collection* target type for a [collection expression](collection-expressions.md).
 For example:
 ``` C#
 Buffer10<int> b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // initializes user-defined inline array
@@ -283,8 +288,7 @@ The length of the collection literal must match the length of the target inline 
 is known at compile time and it doesn't match the target length, an error is reported. Otherwise, an exception is going
 to be thrown at runtime once the mismatch is encountered. The exact exception type is TBD. Some candidates are:
 System.NotSupportedException, System.InvalidOperationException.
-
-An instance of an inline array type is a valid expression in a [*spread_element*](collection-expressions.md#detailed-design).
+</details>
 
 ### Validation of the InlineArrayAttribute applications
 
@@ -296,8 +300,8 @@ Compiler will validate the following aspects of the InlineArrayAttribute applica
 
 ### Inline Array elements in an object initializer
 
-By default, element initialization will not be supported via *initializer_target* of form ```'[' argument_list ']'```
-(see https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128163-object-initializers):  
+By default, element initialization will not be supported via *initializer_target* of form `'[' argument_list ']'`
+(see https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128173-object-initializers):  
 ``` C#
 static C M2() => new C() { F = {[0] = 111} }; // error CS1913: Member '[0]' cannot be initialized. It is not a field or property.
 
@@ -332,7 +336,7 @@ public struct Buffer10<T>
 
 ### The foreach statement
 
-[The foreach statement](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1295-the-foreach-statement) will be adjusted
+[The foreach statement](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) will be adjusted
 to allow usage of an inline array type as a collection in a foreach statement.
 
 For example:
@@ -398,7 +402,7 @@ rank_specifier
 
 The type of the *constant_expression* must be implicitly convertible to type `int`, and the value must be a non-zero positive integer.
 
-The relevant part of the https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#1621-general section will be adjusted as follows.
+The relevant part of the https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#1721-general section will be adjusted as follows.
 
 The grammar productions for array types are provided in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#821-general.
 
@@ -424,7 +428,7 @@ In effect, the *rank_specifier*s are read from left to right *before* the final 
 
 At run-time, a value of a regular array type can be `null` or a reference to an instance of that array type.
 
-> *Note*: Following the rules of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#166-array-covariance,
+> *Note*: Following the rules of https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#176-array-covariance,
 > the value may also be a reference to a covariant array type. *end note*
 
 An anonymous inline array type is a compiler synthesized inline array type with internal accessibility. The element type must be a 
@@ -437,7 +441,7 @@ by using a required custom modifier (exact type TBD) applied to an anonymous inl
 
 #### Array creation expressions
 
-[Array creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128165-array-creation-expressions)
+[Array creation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128175-array-creation-expressions)
 
 ```ANTLR
 array_creation_expression
@@ -465,7 +469,11 @@ new [] {default(int[5]), default(int[5])};
 
 #### Array initializers
 
-The [Array initializers](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#167-array-initializers) section
+Array initializers were not implemented in C# 12. This section remains an active proposal. 
+
+<details>
+
+The [Array initializers](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/arrays.md#177-array-initializers) section
 will be adjusted to allow use of *array_initializer* to initialize inline array types (no changes to the grammar necessary).
 
 ```ANTLR
@@ -494,15 +502,17 @@ var c = new int[][] {{11, 12}, {21, 22}, {31, 32}}; // An error for the nested a
 var d = new int[][2] {{11, 12}, {21, 22}, {31, 32}}; // An error for the nested array initializer
 ```
 
+</details>
+
 ### Detailed Design (Option 2)
 
-Note, that for the purpose of this proposal a term "fixed-size buffer" refers to a the proposed "safe fixed-size buffer" feature rather than to a buffer described at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#228-fixed-size-buffers.
+Note, that for the purpose of this proposal a term "fixed-size buffer" refers to a the proposed "safe fixed-size buffer" feature rather than to a buffer described at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#238-fixed-size-buffers.
 
 In this design, fixed-size buffer types do not get general special treatment by the language.
 There is a special syntax to declare members that represent fixed-size buffers and new rules around consuming those members.
 They are not fields from the language point of view.
 
-The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#145-fields
+The grammar for *variable_declarator* in https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#155-fields
 will be extended to allow specifying the size of the buffer:
 
 ``` diff antlr
@@ -569,8 +579,8 @@ In a member access of the form `E.I`, if `E` is of a struct type and a member lo
 then `E.I` is evaluated and classified as follows:
 
 - If `E` is classified as a value, then `E.I` can be used only as a *primary_no_array_creation_expression* of
-  an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12811-element-access)
-  with index of ```System.Index``` type, or of a type implicitly convertible to int. Result of the element access is
+  an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12812-element-access)
+  with index of `System.Index` type, or of a type implicitly convertible to int. Result of the element access is
   a fixed-size member's element at the specified position, classified as a value.   
 - Otherwise, if `E` is classified as a readonly variable and the result of the expression is classified as a value of type `System.ReadOnlySpan<S>`,
   where S is the element type of `I`. The value can be used to access member's elements.
@@ -599,8 +609,8 @@ This is achieved by the following.
 A member access for a readonly fixed-size buffer is evaluated and classified as follows:
 
 - In a member access of the form `E.I`, if `E` is of a struct type and `E` is classified as a value, then `E.I` can be used only as a
-  *primary_no_array_creation_expression* of an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12811-element-access)
-  with index of ```System.Index``` type, or of a type implicitly convertible to int. Result of the element access is a fixed-size member's element at the specified
+  *primary_no_array_creation_expression* of an [element access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12812-element-access)
+  with index of `System.Index` type, or of a type implicitly convertible to int. Result of the element access is a fixed-size member's element at the specified
   position, classified as a value.
 - If access occurs in a context where direct assignments to an element of readonly fixed-size buffer are permitted, the result of the expression
   is classified as a value of type `System.Span<S>`, where S is the element type of the fixed-size buffer. The value can be used to access member's elements.
@@ -617,10 +627,11 @@ When a fixed-size buffer member is static or the outermost containing struct var
 
 ##### Metadata emit and code generation
 
-For metadata encoding compiler will rely on recently added [```System.Runtime.CompilerServices.InlineArrayAttribute```](https://github.com/dotnet/runtime/issues/61135). 
+For metadata encoding compiler will rely on recently added [`System.Runtime.CompilerServices.InlineArrayAttribute`](https://github.com/dotnet/runtime/issues/61135). 
 
-Fixed-size buffers like:
+Fixed-size buffers like the following pseudocode:
 ``` C#
+// Not valid C#
 public partial class C
 {
     public int buffer1[10];
@@ -697,10 +708,10 @@ public partial class C
 ##### Metadata import
 
 When compiler imports a field declaration of type *T* and the following conditions are all met:
-- *T* is a struct type decorated with the ```InlineArray``` attribute, and
+- *T* is a struct type decorated with the `InlineArray` attribute, and
 - The first instance field declared within *T* has type *F*, and
-- There is a ```public System.Span<F> AsSpan()``` within *T*, and 
-- There is a ```public readonly System.ReadOnlySpan<T> AsReadOnlySpan()``` or ```public System.ReadOnlySpan<T> AsReadOnlySpan()``` within *T*. 
+- There is a `public System.Span<F> AsSpan()` within *T*, and 
+- There is a `public readonly System.ReadOnlySpan<T> AsReadOnlySpan()` or `public System.ReadOnlySpan<T> AsReadOnlySpan()` within *T*. 
 
 the field will be treated as C# fixed-size buffer with element type *F*. Otherwise, the field will be treated as a regular field of type *T*.
 
@@ -712,9 +723,9 @@ but can be made into one if necessary. Here’s how that would work:
 - Safe fixed-size buffer accesses have their own classification (just like e.g. method groups and lambdas)
 - They can be indexed directly as a language operation (not via span types) to produce a variable (which is readonly
   if the buffer is in a readonly context, just the same as fields of a struct)
-- They have implicit conversions-from-expression to ```Span<T>``` and ```ReadOnlySpan<T>```, but use of the former is an error if
+- They have implicit conversions-from-expression to `Span<T>` and `ReadOnlySpan<T>`, but use of the former is an error if
   they are in a readonly context
-- Their natural type is ```ReadOnlySpan<T>```, so that’s what they contribute if they participate in type inference (e.g., var, best-common-type or generic)
+- Their natural type is `ReadOnlySpan<T>`, so that’s what they contribute if they participate in type inference (e.g., var, best-common-type or generic)
 
 ### C/C++ fixed-size buffers
 

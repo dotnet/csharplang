@@ -244,6 +244,8 @@ Also, `in` has been redefined as `ref readonly` + convenience features, hence th
 ### Pending LDM review
 [to-review]: #pending-ldm-review
 
+None of the following options were implemented in C# 12. They remains potential proposals.
+
 #### [Parameter declarations][declarations]
 
 Inverse ordering of modifiers (`readonly ref` instead of `ref readonly`) could be allowed.
@@ -376,7 +378,7 @@ class C
     void Run()
     {
         D1 m1 = this.M;
-        D2 m2 = this.M;
+        D2 m2 = this.M; // currently ambiguous
 
         var i = 5;
         m1(null, in i);
