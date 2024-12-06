@@ -1,5 +1,7 @@
 # First-class Span Types
 
+Champion issue: https://github.com/dotnet/csharplang/issues/8714
+
 ## Summary
 
 We introduce first-class support for `Span<T>` and `ReadOnlySpan<T>` in the language, including new implicit conversion types and consider them in more places,
