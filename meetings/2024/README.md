@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Better conversion: prefer `ReadOnlySpan<T>` over `Span<T>`](https://github.com/dotnet/csharplang/pull/8779) (Chuck, Jan)
+
 ## Schedule when convenient
 
 - Triage (working set)
