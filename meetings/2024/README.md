@@ -23,6 +23,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Dec 9, 2024
 
+- Passing arguments to collection expressions. cyrusn + cston. https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md
+
 ## C# Language Design Notes for 2024
 
 ### Wed Dec 4, 2024
