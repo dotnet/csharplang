@@ -17,9 +17,9 @@ Dictionary<string, int> nameToAge = [with(comparer), .. d1, .. d2, .. d3];
 1. When translating to a `new CollectionType(...)` call, these `...arguments...` are used to determine the appropriate
 constructor and are passed along accordingly.
 2. When translating to a `CollectionFactory.Create` call, these 
-`...arguments...``` are passed before with the `ReadOnlySpan<ElementType>` elements argument, all of which are 
+`...arguments...` are passed before with the `ReadOnlySpan<ElementType>` elements argument, all of which are 
 used to determine the appropriate `Create` overload, and are passed along accordingly.
-3. When translating to an interface (like `IDictionary<,>`) only a single argument is allowed.  It implement one of
+3. When translating to an interface (like `IDictionary<,>`) only a single argument is allowed.  It implements one of
    the well-known BCL comparer interfaces, and will be used to control the key comparing semantics of the final instance.
 
 This syntax was chosen as it:
@@ -30,23 +30,25 @@ This syntax was chosen as it:
 4. Is both not subtle, while also not being excessively verbose.  For example, using `;` instead of `,` to indicate
    arguments is a very easy piece of syntax to miss.  `with()` only adds 6 characters, and will easily stand out,
    especially with syntax coloring of the `with` keyword.
-6. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements".
-7. Solves the need for compareres for both dictionaries and sets.
+6. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
+7. Solves the need for comparers for both dictionaries and sets.
 8. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled. 
 
-A minor questions exists if the preferred form would be `args(...)` instead of `with(...)`.  But the forms are otherwise identical.
+A minor question exists if the preferred form would be `args(...)` instead of `with(...)`.  But the forms are otherwise identical.
 
 Open question: Should any support for passing a comparer be provided at all?  Yes/No.
-Working group recomendation: Yes.  Comparers are critical for proper behaving of collections, and examination of many packages
+
+Working group recommendation: Yes.  Comparers are critical for proper behaving of collections, and examination of many packages
 indicates usage of them to customize collection behavior.
 
 Open question: If support for comparers is desired, should it be through a feature specific to *only* comparers?  Or should it
 handle arbitrary arguments?
+
 Working group recommendation: Support arbitrary arguments.  This solves both the 'comparer' issue, while nipping all present and
 future argument concerns in the bud.  For example, users who need to customize performance-oriented arguments (like 'capacity')
 now have a solution beyond waiting for the compiler to support the patterns they are using with the codegen they desire.
 
-## Design Philosphy
+## Design Philosophy
 
 The below section covers prior design philosophy discussions.  Including why certain forms were rejected. 
 
