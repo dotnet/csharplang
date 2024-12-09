@@ -69,3 +69,32 @@ The following change is required to [anonymous function conversions](https://git
 [...]
 > If F has an explicitly **or implicitly typed parameter list**, each parameter in D has the same type and
 > modifiers as the corresponding parameter in F ignoring params modifiers and default values.
+
+### Open Questions
+
+1. Should `scoped` *always* be a modifier in a lambda in C# 14?  This matters for a case like:
+
+   ```C#
+   M((scoped s = default) => { });
+   ```
+
+   In this case, this is does *not* fall under the 'simple lambda parameter' spec, as a 'simple lambda'
+   cannot contain a initializer (`= default`).  As such, `scoped` here is treated as a `type` (like it was
+   in C# 13).  Do we want to maintain this?  Or would it just be simpler to have a more blanket rule that
+   `scoped` is always modifier, and thus would still be a modifier here on an invalid simple parameter?
+
+   Recomendation: Make this a modifier.  We already dissuade people from types that are all lowercase,
+   *AND* we've made it illegal to make a type called `scoped` in C# as well.  So this could only be some
+   sort of case of referencing a type from another library.  The workaround is trivial if you did somehow
+   hit this.  Just use `@scoped` to make this a type name instead of a modifier.
+
+2. Allow `params` in a simple lambda parameter? Prior lambda work already added support for `params T[] values`
+   in a lambda.  This modifier is optional, and the lambda and the original delegate are allowed to have a
+   mismatch on this modifier (though we warn if the delegate does not have the modifier and the lambda does).
+   Should we continue allowing this with a simple lambda parameter.  e.g. `M((params values) => { ... })`
+
+   Recomendation: Yes.  Allow this.  The purpose of this spec is to allow just dropping the 'type' from a
+   lambda parameter, while keeping the modifiers.  This is just another case of that.  This also just falls
+   out from the impl (as did supporting attributes on these parameters), so it's more work to try to block
+   this.
+   
