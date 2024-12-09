@@ -16,7 +16,7 @@ Per CLR spec local variables that do not contain references are not initialized 
 
 There are two ways to "assign" a local variable: 
 - by storing a value or 
-- by specifying `localsinit` flag which forces everything that is allocated form the local memory pool to be zero-initialized
+- by specifying `localsinit` flag which forces everything that is allocated from the local memory pool to be zero-initialized
 NOTE: this includes both local variables and `stackalloc` data.    
 
 Use of uninitialized data is discouraged and is not allowed in verifiable code. While it might be possible to prove that by the means of flow analysis, it is permitted for the verification algorithm to be conservative and simply require that `localsinit` is set.
