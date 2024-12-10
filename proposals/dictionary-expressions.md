@@ -193,24 +193,42 @@ An implicit *collection expression conversion* exists from a *collection express
   * `System.Collections.Generic.IDictionary<TKey, TValue>`
   * `System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`
 
-*Collection expression conversions* require implicit conversions for each element. The element conversion rules are now differentiated based on whether the *element type* of the target type is `KeyValuePair<,>`.
+*Collection expression conversions* require implicit conversions for each element.
+The element conversion rules are updated as follows.
 
-If the *element type* is a type *other than* `KeyValuePair<,>`, the rules are *unchanged* from *language version 12* other than **clarifications**:
-
-> An implicit *collection expression conversion* exists from a collection expression to a *type* with *element type* `T` **where `T` is not `KeyValuePair<,>` and** where for each *element* `Eᵢ` in the collection expression:
+> The implicit conversion exists if the type has an *element type* `T` where for each *element* `Eᵢ` in the collection expression:
 > * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
-> * **Otherwise there is *no implicit conversion* from the collection expression to the target type.**
+> * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ` and `T` is a type `KeyValuePair<K, V>`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
+> * **Otherwise there is *no conversion* from the collection expression to the target type.**
 
-If the *element type* is `KeyValuePair<,>`, the rules are *modified* for *language version 13* (this applies to any type with an *element type* of `KeyValuePair<,>`, not only *dictionary types*):
+### Key-value pair conversions
 
-> An implicit *collection expression conversion* exists from a collection expression to a *type* with *element type* `KeyValuePair<K, V>` where for each *element* `Eᵢ` in the collection expression:
-> * If `Eᵢ` is an *expression element*, then the type of `Eᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
-> * If `Eᵢ` is a *key value pair element* `Kᵢ:Vᵢ`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
-> * If `Eᵢ` is a *spread element* `..Sᵢ`, then the *iteration type* of `Sᵢ` is `KeyValuePair<Kᵢ:Vᵢ>` and there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.
-> * Otherwise there is *no implicit conversion* from the collection expression to the target type.
+A *key-value pair conversion* is introduced.
 
-The new rules above represent a breaking change: For types that are a valid conversion target in *language version 12* and have an *element type* of `KeyValuePair<,>`, the element conversion rules change between language versions 12 and 13.
+An implicit *key-value pair conversion* exists from an expression of type `KeyValuePair<T1, T2>` to a type `KeyValuePair<U1, U2>`
+if there is an implicit conversion from `T1` to `U1` and an implicit conversion from `T2` to `U2`.
+
+An explicit *key-value pair conversion* exists from an expression of type `KeyValuePair<T1, T2>` to a type `KeyValuePair<U1, U2>`
+if there is an implicit or explicit conversion from `T1` to `U1` and an implicit or explicit conversion from `T2` to `U2`.
+
+Implicit key-value pair conversions are useful for *expression elements* and *spread elements* where the key or value types do not match exactly.
+Despite the name, key-value pair conversions *do not* apply to *key-value elements*.
+
+```csharp
+Dictionary<int, string>  x = ...;
+Dictionary<long, object> y = [..x]; // implicit conversion from KVP<int, string> to KVP<long, object>
+```
+
+Key-value pair conversions are similar to *tuple conversions* that allow converting between distinct tuple types.
+That said, a tuple conversion is [*defined*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10213-implicit-tuple-conversions) as a conversion from a *tuple expression* rather than a tuple type, despite being allowed in conversions like `b = a` below, so perhaps conversions between `KeyValuePair<,>` *types* should not be supported.
+
+```csharp
+(int, string)  a = ...;
+(long, object) b = a; // implicit conversion from (int, string) to (long, object)
+```
+
+*Should *key-value pair conversions* apply to expressions of `KeyValuePair<,>` type in any context, or only for collection expression elements? Are there other conversions that have limited contexts where they apply?*
 
 ## Create methods
 
