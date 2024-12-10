@@ -211,7 +211,7 @@ This is based on [collection expressions overload resolution changes][ce-or].
 > Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** than `T₂` if one of the following holds:
 >
 > - **`T₁` is `System.ReadOnlySpan<E₁>`, `T₂` is `System.Span<E₂>`, and an identity conversion from `E₁` to `E₂` exists**
-> - **At least one of `T₁` or `T₂` is not a *span type*, and** an implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
+> - **`T₁` is `System.ReadOnlySpan<E₁>` and `T₂` is `System.ReadOnlySpan<E₂>`, or at least one of `T₁` or `T₂` is not a *span type*, and** an implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
 > - ...
 
 The *better conversion from expression* rule should ensure that whenever an overload becomes applicable due to the new span conversions,
