@@ -195,20 +195,28 @@ This is based on [collection expressions overload resolution changes][ce-or].
 
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a *better conversion* than `C₂` if one of the following holds:
 >
-> - `E` is a *collection expression* and one of the following holds:
->   - `T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, and an implicit conversion exists from `E₁` to `E₂`.
->   - `T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *element type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`.
->   - `T₁` is not a *span_type*, and `T₂` is not a *span_type*, and an implicit conversion exists from `T₁` to `T₂`.
+> - `E` is a *collection expression*, and `C₁` is a [*better collection conversion from expression*][better-collection-conversion-from-expression] than `C₂`
 > - `E` is not a *collection expression* and one of the following holds:
 >   - `E` exactly matches `T₁` and `E` does not exactly match `T₂`
 >   - **`E` exactly matches neither of `T₁` and `T₂`,
 >     and `C₁` is an implicit span conversion and `C₂` is not an implicit span conversion**
 >   - `E` exactly matches both or neither of `T₁` and `T₂`,
 >     **both or neither of `C₁` and `C₂` are an implicit span conversion**,
->     and `T₁` is a better conversion target than `T₂`
+>     and `T₁` is a *better conversion target* than `T₂`
 > - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
 
-This rule should ensure that whenever an overload becomes applicable due to the new span conversions,
+#### Better conversion target
+[betterness-target]: #better-conversion-target
+
+*Better conversion target* ([§12.6.4.7][better-conversion-target]) is updated to prefer `ReadOnlySpan<T>` over `Span<T>`.
+
+> Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** than `T₂` if one of the following holds:
+>
+> - **`T₁` is `System.ReadOnlySpan<E₁>`, `T₂` is `System.Span<E₂>`, and an identity conversion from `E₁` to `E₂` exists**
+> - **`T₁` is `System.ReadOnlySpan<E₁>` and `T₂` is `System.ReadOnlySpan<E₂>`, or at least one of `T₁` or `T₂` is not a *span type*, and** an implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
+> - ...
+
+The *better conversion from expression* rule should ensure that whenever an overload becomes applicable due to the new span conversions,
 any potential ambiguity with another overload is avoided because the newly-applicable overload is preferred.
 
 Without this rule, the following code that successfully compiled in C# 13 would result in an ambiguity error in C# 14
@@ -625,3 +633,4 @@ Keep things as they are.
 
 [ce-or]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/csharp-12.0/collection-expressions.md#overload-resolution
 [overload-resolution-priority]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/overload-resolution-priority.md
+[better-collection-conversion-from-expression]: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/collection-expressions-better-conversion.md#detailed-design
