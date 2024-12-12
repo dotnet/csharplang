@@ -8,19 +8,20 @@ Related discussion: https://github.com/dotnet/csharplang/discussions/8704
 
 <!-- One paragraph explanation of the feature. -->
 
-Allow assigning the backing field of a property in a constructor, without having to run the setter.
-- Limited to use on properties of the containing type within an applicable constructor.
-- Limited to only the LHS of an assignment.
+Allow assigning the backing field of a property in a constructor, without having to call the setter. Only permitted when used to assign a member of `this` in a constructor.
 
 ```cs
 class C
 {
-    public C(string value)
+    public C(DataStore store)
     {
-        fieldof(Prop) = value; // avoids an unwanted 'OnPropertyChanged()' call
+        this.store = store;
+        fieldof(this.Prop) = store.ReadPropFromDisk(); // allows giving an initial value for 'this.Pro' without calling 'Store.WritePropToDisk()' thru the setter
 
-        M(fieldof(Prop)); // error: only assignment is permitted
+        M(fieldof(this.Prop)); // error: only assignment is permitted
     }
+
+    private DataStore store;
 
     public string Prop
     {
@@ -30,7 +31,7 @@ class C
             if (value != field)
             {
                 field = value;
-                OnPropertyChanged();
+                store.WritePropToDisk(value);
             }
         }
     }
@@ -42,7 +43,7 @@ class C
 
 <!-- Why are we doing this? What use cases does it support? What is the expected outcome? -->
 
-We are seeing prominent source generators such as [MVVM Toolkit](TODO) and [ComputeSharp](TODO) making heavy use of *partial field-backed properties*. Using a backing field for a partial property implementation comes with a number of experience improvements, including:
+We are seeing prominent source generators such as [MVVM Toolkit](https://github.com/CommunityToolkit/dotnet) and [ComputeSharp](https://github.com/Sergio0694/ComputeSharp) making heavy use of *partial field-backed properties*. Using a backing field for a partial property implementation comes with a number of experience improvements, including:
 1. avoiding the need for either generator or user to introduce an additional member with a distinct name (and in practice, usually the generator needs to introduce it, which is bad for discoverability).
 2. avoiding the need for the generator to "wire up" the relationship between the field and property, in order to make it clear to user and compiler (e.g. for nullable constructor analysis).
 3. allowing user to put `[field: Attr]` on the definition part of the property, and have the attributes just go where they're supposed to, without any hacky workarounds from the generator itself.
@@ -126,34 +127,30 @@ The grammar is updated as follows:
 ```
 
 A `fieldof_expression` of the form `fieldof(P)` is evaluated and classified as follows:
-- If `P` is not a `simple_name` or `member_access`, a compile-time error occurs.
 - If the containing member of the expression is not a constructor, a compile-time error occurs.
 - If the `fieldof` expression is not the target of an assignment of the form `fieldof_expression '=' expression`, a compile-time error occurs.
-- A member lookup on `P` is performed, along with the following checks:
-    - If the member lookup on `P` does not result in a [field-backed property](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#glossary), a compile-time error occurs.
-    - If property `P` is static and the containing constructor is not static, or vice-versa, a compile-time error occurs.
-    - If property `P` is not a member of the containing type, a compile-time error occurs.
-    - Otherwise, `fieldof(P)` denotes the backing field of `P`, and `fieldof(P) = E` is evaluated and classified equivalently to an `assignment_operator`.
+- If `P` is not classified as a property access of a [field-backed property](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#glossary), a compile-time error occurs.
+- If `P` is classified as a property access of a field-backed property, then `fieldof(P)` is classified as a variable, specifically the backing field of `P`.
+- If `P` is static and the containing constructor is not static, or vice-versa, a compile-time error occurs.
+- If `P` is not a member of the containing type, a compile-time error occurs.
+- Otherwise, `fieldof(P)` denotes the backing field of `P`.
 
-### Remarks
+A `fieldof_expression` is subject to limitations on the receiver of its property access, similar to an assignment to a `readonly` field. Specifically, the receiver must be the instance being initialized by the containing constructor, i.e. explicit or implicit `this`. Otherwise, a compile-time error occurs.
 
-- This proposal reserves `fieldof(P)` in all containing member kinds, rather than reserving it only in constructors. Existing code containing calls like `fieldof(P)` would need to be changed to `@fieldof(P)` in order to avoid breaks.
-- This proposal doesn't restrict the receiver of the property access. Essentially, if the property has the right containing type, you could have a constructor like:
-    - TODO2: this is bad. You shouldn't be able to just grab random instances of the same type through various means and assign the backing fields. We should probably impose similar restrictions here as 'readonly' modifier for ordinary fields.
-```cs
-public C(C other)
-{
-    fieldof(other.Prop) = ...;
-    fieldof(GetC().Prop) = ...;
-}
-```
+### Compat
+
+This design makes no concession to preserving existing `fieldof(P)` behavior when a symbol `fieldof` is already in scope. This is a divergence from existing `nameof` behavior.
+
+This proposal also reserves `fieldof(P)` in expression contexts generally, rather than reserving it only in constructors. Existing code containing calls like `fieldof(P)` would need to be changed to `@fieldof(P)` in order to avoid breaks.
+
+Depending on feedback, we could adjust the design so that `fieldof` works more like `nameof`, and simply becomes unavailable when a symbol `fieldof` is in scope.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
 
 <!-- Why should we *not* do this? -->
 
-The motivating scenarios may not rise to the level of justifying a new contextual keyword or specialized syntax form in the language.
+The motivating scenarios may not rise to the level of justifying a new contextual keyword or specialized syntax form in the language, particularly when the new keyword is so circumscribed in its permitted usage.
 
 ## Alternatives
 [alternatives]: #alternatives
@@ -234,5 +231,6 @@ We think this is not a palatable solution compared to simply being able to set t
 ## Open questions
 [open]: #open-questions
 
-What parts of the design are still undecided?
+<!-- What parts of the design are still undecided? -->
 
+See [Compat](#compat).
