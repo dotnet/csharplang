@@ -220,8 +220,7 @@ Dictionary<int, string>  x = ...;
 Dictionary<long, object> y = [..x]; // implicit conversion from KVP<int, string> to KVP<long, object>
 ```
 
-Key-value pair conversions are similar to *tuple conversions* that allow converting between distinct tuple types.
-That said, a tuple conversion is [*defined*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10213-implicit-tuple-conversions) as a conversion from a *tuple expression* rather than a tuple type, despite being allowed in conversions like `b = a` below, so perhaps conversions between `KeyValuePair<,>` *types* should not be supported.
+Key-value pair conversions are similar to [*tuple conversions*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10213-implicit-tuple-conversions) that allow converting between distinct tuple types.
 
 ```csharp
 (int, string)  a = ...;
