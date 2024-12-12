@@ -16,9 +16,13 @@ class C
     public C(DataStore store)
     {
         this.store = store;
-        fieldof(this.Prop) = store.ReadPropFromDisk(); // allows giving an initial value for 'this.Pro' without calling 'Store.WritePropToDisk()' thru the setter
 
-        M(fieldof(this.Prop)); // error: only assignment is permitted
+        // allows giving an initial value for 'this.Prop'
+        // without calling 'Store.WritePropToDisk()' thru the setter
+        fieldof(this.Prop) = store.ReadPropFromDisk(); 
+
+        // error: 'fieldof' can only be used as a target of an assignment
+        M(fieldof(this.Prop));
     }
 
     private DataStore store;
@@ -79,6 +83,35 @@ public class C3
 
     public partial string Prop1 { get; set; }
     public partial string Prop2 { get; set; }
+}
+```
+
+See also [field-keyword.md#property-initializers](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#property-initializers). It's fairly easy to imagine the `bool IsActive` property, which is shown in order to motivate the property initializer behavior we have today, where the initial value doesn't simply come from a constant or a static, but needs to be passed in through a constructor.
+
+```cs
+class SomeViewModel
+{
+    public SomeViewModel(bool isActive)
+    {
+        // without a way to assign the field directly,
+        // 'HasPendingChanges' is set to true, only when 'isActive' is true.
+        // But all we're trying to do is rehydrate state from a previous session/user setting/etc..
+        IsActive = isActive;
+    }
+
+    public bool HasPendingChanges { get; private set; }
+
+    public bool IsActive { get; set => Set(ref field, value); }
+
+    private bool Set<T>(ref T location, T value)
+    {
+        if (RuntimeHelpers.Equals(location, value))
+            return false;
+
+        location = value;
+        HasPendingChanges = true;
+        return true;
+    }
 }
 ```
 
