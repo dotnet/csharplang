@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [Better conversion: prefer `ReadOnlySpan<T>` over `Span<T>`](https://github.com/dotnet/csharplang/pull/8779) (Chuck, Jan)
-
 ## Schedule when convenient
 
 - Triage (working set)
@@ -17,14 +15,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule
 
-### Wed Dec 18, 2024
-
-### Mon Dec 16, 2024
-
-### Wed Dec 11, 2024
-
 ### Mon Dec 9, 2024
 
+- [Better conversion: prefer `ReadOnlySpan<T>` over `Span<T>`](https://github.com/dotnet/csharplang/pull/8779) (Chuck, Jan)
 - Simple lambda parameter open questions. cyrusn. https://github.com/dotnet/csharplang/blob/main/proposals/simple-lambda-parameters-with-modifiers.md
 - Passing arguments to collection expressions. cyrusn + cston. https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md
 
