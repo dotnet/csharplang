@@ -413,6 +413,8 @@ Note: multiple extension containers defining static members with the same signat
 
 - Should we emit implementation methods with speakable names instead, as a disambiguation strategy and also to allow
   usage from other languages?
+- The metadata format currently doesn't include any modreqs to block other compilers. But the spec does mention we
+  would block those scenarios. Let's either remove this requirement or update the metadata format.  
 
 ### Add support for more member kinds
 
