@@ -39,11 +39,11 @@ Our primary motivation is from source generators. Source generators work by addi
 [design]: #detailed-design
 
 - We add the `file` modifier to the following modifier sets:
-  - [class](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1422-class-modifiers)
-  - [struct](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1522-struct-modifiers)
-  - [interface](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/interfaces.md#1722-interface-modifiers)
-  - [enum](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/enums.md#183-enum-modifiers)
-  - [delegate](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/delegates.md#192-delegate-declarations)
+  - [class](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1536-class-modifiers)
+  - [struct](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#1622-struct-modifiers)
+  - [interface](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#1822-interface-modifiers)
+  - [enum](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/enums.md#193-enum-modifiers)
+  - [delegate](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/delegates.md#202-delegate-declarations)
   - record
   - record struct.
 - The `file` modifier can only be used on a top-level type.
@@ -51,7 +51,7 @@ Our primary motivation is from source generators. Source generators work by addi
 When a type has the `file` modifier, it is said to be a *file-local* type.
 
 ### Accessibility
-No accessibility modifiers can be used in combination with `file` on a type. `file` is treated as an independent concept from accessibility. Since file-local types can't be nested, only the default accessibility `internal` is usable with `file` types.
+The `file` modifier is not classified as an accessibility modifier. No accessibility modifiers can be used in combination with `file` on a type. `file` is treated as an independent concept from accessibility. Since file-local types can't be nested, only the default accessibility `internal` is usable with `file` types.
 
 ```cs
 public file class C1 { } // error
@@ -63,9 +63,9 @@ file class C3 { } // ok
 The implementation guarantees that file-local types in different files with the same name will be distinct to the runtime. The type's accessibility and name in metadata is implementation-defined. The intention is to permit the compiler to adopt any future access-limitation features in the runtime which are suited to the feature. It's expected that in the initial implementation, an `internal` accessibility would be used and an unspeakable generated name will be used which depends on the file the type is declared in.
 
 ### Lookup
-We amend the [member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#115-member-lookup) section as follows (new text in **bold**):
+We amend the [member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#125-member-lookup) section as follows (new text in **bold**):
 
-> - Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process ([§11.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1163-type-inference)) might be able to infer the type arguments.
+> - Next, if `K` is zero, all nested types whose declarations include type parameters are removed. If `K` is not zero, all members with a different number of type parameters are removed. When `K` is zero, methods having type parameters are not removed, since the type inference process ([§11.6.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1263-type-inference)) might be able to infer the type arguments.
 > - **Next, let *F* be the compilation unit which contains the expression where member lookup is occurring. All members which are file-local types and are not declared in *F* are removed from the set.**
 > - **Next, if the set of accessible members contains file-local types, all members which are not file-local types are removed from the set.**
 
@@ -97,7 +97,7 @@ class Program
 }
 ```
 
-Note that we don't update the [scopes](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/basic-concepts.md#77-scopes) section of the spec. This is because, as the spec states:
+Note that we don't update the [scopes](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/basic-concepts.md#77-scopes) section of the spec. This is because, as the spec states:
 
 > The ***scope*** of a name is the region of program text within which it is possible to refer to the entity declared by the name without qualification of the name.
 
@@ -180,7 +180,7 @@ public class Derived : FileBase // error
 
 file class FileDerived : FileBase // ok
 {
-    private FileBase M2() => new FileBase() // ok
+    private FileBase M2() => new FileBase(); // ok
 }
 ```
 

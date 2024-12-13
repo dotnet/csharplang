@@ -109,6 +109,8 @@ None
 
     _Recommendation: No implicit runtime type test for constant pattern. (`IsABC<T>()` example is allowed because the type test is explicit.)_
 
+    **This recommendation was not implemented. All of the preceding samples produce a compiler error.**
+
 4. Should subsumption consider constant string patterns, list patterns, and `Length` property pattern?
     ```csharp
     static int ToNum(ReadOnlySpan<char> s)

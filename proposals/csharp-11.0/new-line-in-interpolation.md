@@ -9,7 +9,7 @@
 ## Summary
 [summary]: #summary
 
-The language today non-verbatim and verbatim interpolated strings (`$""` and `$@""` respectively).  The primary *sensible* difference for these is that a non-verbatim interpolated string works like a normal string and cannot contain newlines in its text segments, and must instead use escapes (like `\r\n`).  Conversely, a verbatim interpolated string can contain newlines in its text segments (like a verbatim string), and doesn't escape newlines or other character (except for `""` to escape a quote itself).
+The language today treats non-verbatim and verbatim interpolated strings (`$""` and `$@""` respectively) differently.  The primary *sensible* difference for these is that a non-verbatim interpolated string works like a normal string and cannot contain newlines in its text segments, and must instead use escapes (like `\r\n`).  Conversely, a verbatim interpolated string can contain newlines in its text segments (like a verbatim string), and doesn't escape newlines or other character (except for `""` to escape a quote itself).
 
 This is all reasonable and will not change with this proposal.
 
