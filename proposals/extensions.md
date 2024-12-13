@@ -315,7 +315,10 @@ These requirements need more refinement as implementation progresses, and may ne
 
 ### Metadata for declarations
 
-Each extension container is emitted as a nested public static class with a marker method.  
+Each extension container is emitted as a nested private static class with a marker method and skeleton members.  
+Each skeleton member is accompanied by a top-level static implementation method with a modified signature.  
+
+#### Skeletons
 
 Its name is unspeakable and determined based on the lexical order in the program. 
 The name is not guaranteed to remain stable across re-compilation. 
@@ -324,6 +327,10 @@ Below we use `<Extension>ee_` followed by an index. For example: `<Extension>ee_
 Method/property/indexer declarations in an extension container in source are represented as skeleton declarations in metadata.  
 The signatures of the original methods are maintained, but their bodies are replaced with `throw null`.  
 Those should not be referenced in IL.  
+
+The nested types declarations in an extension container in source are represented as skeleton nested types in metadata.  
+The name, accessibility and type parameters of the original nested type are maintained, but the members are emitted as
+skeleton declarations in metadata.  
 
 Note: This is similar to ref assemblies. The reason for using `throw null` bodies (as opposed to no bodies) 
 is so that IL verification could run and pass (thus validating the completeness of the metadata).
@@ -334,17 +341,25 @@ The extension marker method encodes the receiver parameter.
 
 Note: This allows roundtripping of extension container symbols through metadata (full and reference assemblies).  
 
+#### Implementations
+
 The method bodies for method/property/indexer declarations in an extension container in source are emitted 
 as static implementation methods in the top-level static class.  
-- The name of an implementation method prepends `<Extension>` to the name of the original method.  
+- An implementation method is named by prepending `<Extension>` to the name of the original method.  
   For example: `set_Property` => `<Extension>set_Property`.
-- An implementation method has type parameters derived from the extension container prepended to the type parameters of the original method.  
-- An implementation method has the same accessibility as the original method.  
-- The implementation method corresponding to a static method has the same parameters and return type as the original method. 
-- The implementation method corresponding to an instance method adds a prepended parameter to the signature of the original method. 
+- It has type parameters derived from the extension container prepended to the type parameters of the original method.  
+- It has the same accessibility as the original method.  
+- If it implements a static method, it has the same parameters and return type. 
+- It if implements an instance method, it has a prepended parameter to the signature of the original method. 
   This parameter's refness, type, and name are derived from the receiver parameter declared in the relevant extension container.
-- The parameters in implementation methods refer to their own type parameters, instead of those of an extension container.  
+- The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension container.  
 
+A nested type in an extension container in source is emitted as a similar nested type in the top-level static class.  
+- An implementation nested type is named by prepending `<Extension>` to the name of the original type.  
+- It has the same arity as the original type.  
+- It has the same accessibility as the original nested type.  
+- It has implementation methods which follow the same rules described above.  
+ 
 For example:
 ```
 static class IEnumerableExtensions
@@ -362,7 +377,7 @@ static class IEnumerableExtensions
 
     extension(IAsyncEnumerable<int> values)
     {
-        public async Task<int> Sum() { ... }
+        public async Task<int> SumAsync() { ... }
     }
 
     public void Method() { ... }
@@ -372,7 +387,7 @@ is emitted as
 ```
 static class IEnumerableExtensions
 {
-    public static class <Extension>ee_1<T>
+    private static class <Extension>ee_1<T>
     {
         public static <Extension>$(IEnumerable<T> source) => throw null;
         public void Method() => throw null;
@@ -398,19 +413,19 @@ static class IEnumerableExtensions
     internal static void <Extension>set_Property<T>(IEnumerable<T> source, int value) { ... }
 
     // Implementation for NestedType
-    public class NestedType<V>
+    public class <Extension>NestedType<V>
     {
         public (T, U) NestedMethod<T, U>(IEnumerable<T> source, V v) { ... }
     }
 
     // Implementation for SumAsync
-    public static int SumAsync(IAsyncEnumerable<int> values) { ... }
+    public static int <Extension>SumAsync(IAsyncEnumerable<int> values) { ... }
 }
 ```
 
 Whenever extension members are used in source, we will emit those as reference to implementation methods.  
 For example: an invocation of `enumerableOfInt.Method()` would be emitted as a static call 
-to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.  
+to `IEnumerableExtensions.<Extension>Method<int>(enumerableOfInt)`.  
 
 ## Open issues
 
@@ -421,6 +436,7 @@ to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.
 - Where should attributes on the receiver parameter go?
 - Should we emit implementation methods with speakable names instead, as a disambiguation strategy and also to allow
   usage from other languages?
+- Do we care about the accessibility of skeleton members? Likely not
 
 ### Add support for more member kinds
 
