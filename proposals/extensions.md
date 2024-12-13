@@ -331,11 +331,13 @@ is so that IL verification could run and pass (thus validating the completeness 
 The extension marker method encodes the receiver parameter.  
 - It is public and static, and is called `<Extension>$`.  
 - If the receiver parameter doesn't specify a name, then the parameter name is unspeakable.  
+
 Note: This allows roundtripping of extension container symbols through metadata (full and reference assemblies).  
 
 The method bodies for method/property/indexer declarations in an extension container in source are emitted 
 as static implementation methods in the top-level static class.  
-- The name of an implementation method prepends `<Extension>` to the name of the original method. For example: `set_Property` => `<Extension>set_Property`.
+- The name of an implementation method prepends `<Extension>` to the name of the original method.  
+  For example: `set_Property` => `<Extension>set_Property`.
 - An implementation method has type parameters derived from the extension container prepended to the type parameters of the original method.  
 - An implementation method has the same accessibility as the original method.  
 - The implementation method corresponding to a static method has the same parameters and return type as the original method. 
@@ -406,7 +408,7 @@ static class IEnumerableExtensions
 }
 ```
 
-Whenever extension members are used in source, we will emit those as reference to implementation methods.
+Whenever extension members are used in source, we will emit those as reference to implementation methods.  
 For example: an invocation of `enumerableOfInt.Method()` would be emitted as a static call 
 to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.  
 
@@ -417,6 +419,8 @@ to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.
 - How do we associate signatures and implementations? Attribute+number? Naming convention? Using the prepended parameter name?
 - Should we flag some methods with special name?
 - Where should attributes on the receiver parameter go?
+- Should we emit implementation methods with speakable names instead, as a disambiguation strategy and also to allow
+  usage from other languages?
 
 ### Add support for more member kinds
 
