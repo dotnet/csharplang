@@ -415,6 +415,8 @@ Note: multiple extension containers defining static members with the same signat
   usage from other languages?
 - The metadata format currently doesn't include any modreqs to block other compilers. But the spec does mention we
   would block those scenarios. Let's either remove this requirement or update the metadata format.  
+- We should follow-up on "factory scenario" where multiple extension containers have static factory methods 
+  with same parameter types but different return types.
 
 ### Add support for more member kinds
 
@@ -442,6 +444,16 @@ extension_member_declaration // add
     | type_declaration
     ;
 ```
+
+#### Nested types
+
+If we do choose to move forward with extension nested types, here are some notes from previous discussions:
+- There would be a conflict if two extension containers declared nested extension types with same names and arity.
+  We do not have a solution for representing this in metadata.  
+- The rough approach we discussed for metadata:
+  1. we would emit a skeleton nested type with original type parameters and no members
+  2. we would emit an implementation nested type with prepended type parameters from the extension container and 
+     all the member implementations as they appear in source (modulo references to type parameters)
 
 #### Constructors
 
