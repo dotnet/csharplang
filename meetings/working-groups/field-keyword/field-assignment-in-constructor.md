@@ -3,6 +3,11 @@
 Champion issue for `field` keyword: https://github.com/dotnet/csharplang/issues/8635  
 Related discussion: https://github.com/dotnet/csharplang/discussions/8704
 
+## TODOs
+
+- Allow `fieldof()` general use as a field in initialization context (including 'init' accessor)
+- Add argument for why to not simply declare field explicitly
+
 ## Summary
 [summary]: #summary
 
