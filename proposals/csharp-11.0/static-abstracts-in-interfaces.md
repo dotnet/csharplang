@@ -25,7 +25,7 @@ interface IAddable<T> where T : IAddable<T>
 // Classes and structs (including built-ins) can implement interface
 struct Int32 : …, IAddable<Int32>
 {
-    static Int32 I.operator +(Int32 x, Int32 y) => x + y; // Explicit
+    static Int32 IAddable<Int32>.operator +(Int32 x, Int32 y) => x + y; // Explicit
     public static int Zero => 0;                          // Implicit
 }
 
