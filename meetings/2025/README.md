@@ -29,7 +29,10 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jan 13, 2025
 
+- Discriminated Union updates
+
 ### Mon Jan 6, 2025
 
+- Disambiguation syntax for extensions
 
 ## C# Language Design Notes for 2025
