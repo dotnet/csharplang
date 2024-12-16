@@ -9,7 +9,6 @@ This proposal is an aggregation of several different proposals for `struct` perf
 
 Not all the features outlined in this document have been implemented in C# 11. C# 11 includes:
 
-
 1. `ref` fields and `scoped`
 1. `[UnscopedRef]`
 
