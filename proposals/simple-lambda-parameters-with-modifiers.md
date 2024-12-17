@@ -1,5 +1,7 @@
 # Simple lambda parameters with modifiers
 
+Champion issue: https://github.com/dotnet/csharplang/issues/8637
+
 ## Summary
 
 Allow lambda parameters to be declared with modifiers without requiring their type names. For example, `(ref entry) =>` rather than `(ref FileSystemEntry entry) =>`.
