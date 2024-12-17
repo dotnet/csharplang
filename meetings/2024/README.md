@@ -1,19 +1,4 @@
-# Upcoming meetings for 2024
-
-All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
-
-## Schedule ASAP
-
-## Schedule when convenient
-
-- Triage (working set)
-
-## Recurring topics
-
-- *Triage championed features and milestones*
-- *Design review*
-
-## Schedule
+# C# Language Design Notes for 2024
 
 ### Mon Dec 9, 2024
 
