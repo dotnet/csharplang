@@ -163,20 +163,20 @@ done to help ensure that there are predictable and useful errors and that runtim
 
 #### Applicable function member adjustments
 
-We adjust the wording of the applicable function member algorithm ([§11.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11642-applicable-function-member))
+We adjust the wording of the applicable function member algorithm ([§12.6.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12642-applicable-function-member))
 as follows (a new sub-bullet is added to each section, in bold):
 
 A function member is said to be an ***applicable function member*** with respect to an argument list `A` when all of the following are true:
-*  Each argument in `A` corresponds to a parameter in the function member declaration as described in Corresponding parameters ([§11.6.2.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11622-corresponding-parameters)), and any parameter to which no argument corresponds is an optional parameter.
+*  Each argument in `A` corresponds to a parameter in the function member declaration as described in Corresponding parameters ([§12.6.2.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12622-corresponding-parameters)), and any parameter to which no argument corresponds is an optional parameter.
 *  For each argument in `A`, the parameter passing mode of the argument (i.e., value, `ref`, or `out`) is identical to the parameter passing mode of the corresponding parameter, and
-   *  for a value parameter or a parameter array, an implicit conversion ([§10.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#102-implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
+   *  for a value parameter or a parameter array, an implicit conversion ([§10.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#102-implicit-conversions)) exists from the argument to the type of the corresponding parameter, or
    *  **for a `ref` parameter whose type is a struct type, an implicit _interpolated\_string\_handler\_conversion_ exists from the argument to the type of the corresponding parameter, or**
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter. After all, a `ref` or `out` parameter is an alias for the argument passed.
 
 For a function member that includes a parameter array, if the function member is applicable by the above rules, it is said to be applicable in its ***normal form***. If a function member that includes a parameter array is not applicable in its normal form, the function member may instead be applicable in its ***expanded form***:
 *  The expanded form is constructed by replacing the parameter array in the function member declaration with zero or more value parameters of the element type of the parameter array such that the number of arguments in the argument list `A` matches the total number of parameters. If `A` has fewer arguments than the number of fixed parameters in the function member declaration, the expanded form of the function member cannot be constructed and is thus not applicable.
 *  Otherwise, the expanded form is applicable if for each argument in `A` the parameter passing mode of the argument is identical to the parameter passing mode of the corresponding parameter, and
-   *  for a fixed value parameter or a value parameter created by the expansion, an implicit conversion ([§10.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#102-implicit-conversions)) exists from the type of the argument to the type of the corresponding parameter, or
+   *  for a fixed value parameter or a value parameter created by the expansion, an implicit conversion ([§10.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#102-implicit-conversions)) exists from the type of the argument to the type of the corresponding parameter, or
    *  **for a `ref` parameter whose type is a struct type, an implicit _interpolated\_string\_handler\_conversion_ exists from the argument to the type of the corresponding parameter, or**
    *  for a `ref` or `out` parameter, the type of the argument is identical to the type of the corresponding parameter.
 
@@ -187,14 +187,14 @@ algorithm to resolve this if we so choose, but this scenario unlikely to occur a
 
 #### Better conversion from expression adjustments
 
-We change the better conversion from expression ([§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression)) section to the
+We change the better conversion from expression ([§12.6.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12645-better-conversion-from-expression)) section to the
 following:
 
 Given an implicit conversion `C1` that converts from an expression `E` to a type `T1`, and an implicit conversion `C2` that converts from an expression `E` to a type `T2`, `C1` is a ***better conversion*** than `C2` if:
 1. `E` is a non-constant _interpolated\_string\_expression_, `C1` is an _implicit\_string\_handler\_conversion_, `T1` is an _applicable\_interpolated\_string\_handler\_type_, and `C2` is not an _implicit\_string\_handler\_conversion_, or
 2. `E` does not exactly match `T2` and at least one of the following holds:
-    * `E` exactly matches `T1` ([§11.6.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11644-better-conversion-from-expression))
-    * `T1` is a better conversion target than `T2` ([§11.6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11646-better-conversion-target))
+    * `E` exactly matches `T1` ([§12.6.4.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12645-better-conversion-from-expression))
+    * `T1` is a better conversion target than `T2` ([§12.6.4.6](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12647-better-conversion-target))
 
 This does mean that there are some potentially non-obvious overload resolution rules, depending on whether the interpolated string in question is a constant-expression or not. For example:
 
@@ -242,7 +242,7 @@ namespace System.Runtime.CompilerServices
 }
 ```
 
-We make a slight change to the rules for the meaning of an _interpolated\_string\_expression_ ([§11.7.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1173-interpolated-string-expressions)):
+We make a slight change to the rules for the meaning of an _interpolated\_string\_expression_ ([§12.8.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1283-interpolated-string-expressions)):
 
 **If the type of an interpolated string is `string` and the type `System.Runtime.CompilerServices.DefaultInterpolatedStringHandler` exists, and the current context supports using that type, the string**
 **is lowered using the handler pattern. The final `string` value is then obtained by calling `ToStringAndClear()` on the handler type.**
@@ -268,7 +268,7 @@ _Answer_: No.
 
 ### Handler pattern codegen
 
-In this section, method invocation resolution refers to the steps listed in [§11.7.8.2](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11782-method-invocations).
+In this section, method invocation resolution refers to the steps listed in [§12.8.10.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128102-method-invocations).
 
 #### Constructor resolution
 
@@ -607,7 +607,7 @@ is specified after the interpolated string literal, an error is produced.
 
 ### `await` usage in interpolation holes
 
-Because `$"{await A()}"` is a valid expression today, we need to rationalize how interpolation holes with await. We could solve this with a few rules:
+Because `$"{await A()}"` is a valid expression today, we need to rationalize interpolation holes with await. We could solve this with a few rules:
 
 1. If an interpolated string used as a `string`, `IFormattable`, or `FormattableString` has an `await` in an interpolation hole, fall back to old-style formatter.
 2. If an interpolated string is subject to an _implicit\_string\_handler\_conversion_ and _applicable\_interpolated\_string\_handler\_type_ is a `ref struct`, `await` is not allowed to be used
