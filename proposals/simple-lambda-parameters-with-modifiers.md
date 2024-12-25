@@ -94,6 +94,7 @@ class C
     void M<T>() where T : allows ref struct
     {
         // error CS0121: The call is ambiguous between the following methods or properties: 'C.M1<T>(D<T>)' and 'C.M1<T>(E<T>)'
+        // despite the presence of the `scoped` keyword.
         M1<T>((scoped T t) => { });
     }
 
