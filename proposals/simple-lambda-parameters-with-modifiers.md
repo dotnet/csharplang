@@ -72,6 +72,65 @@ The following change is required to [anonymous function conversions](https://git
 > If F has an explicitly **or implicitly typed parameter list**, each parameter in D has the same type and
 > modifiers as the corresponding parameter in F ignoring params modifiers and default values.
 
+### Notes/Clarifications
+
+`scoped` and `params` are allowed as explicit modifiers in a lambda without an explicit type present. Semantics
+remain the same for both.  Specifically, both are not part of the determination made
+[in](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12192-anonymous-function-signatures):
+
+> If an anonymous function has an explicit_anonymous_function_signature, then the set of compatible delegate
+> types and expression tree types is restricted to those that have the same parameter types and modifiers in
+> the same order.
+
+The only modifiers that restrict compatible delegate types are `ref`, `out`, `in` and `ref readonly`. 
+For example, in an explicitly typed lambda, the following is currently ambiguous:
+
+```c#
+delegate void D<T>(scoped T t) where T : allows ref struct;
+delegate void E<T>(T t) where T : allows ref struct;
+
+class C
+{
+    void M<T>() where T : allows ref struct
+    {
+        // error CS0121: The call is ambiguous between the following methods or properties: 'C.M1<T>(D<T>)' and 'C.M1<T>(E<T>)'
+        M1<T>((scoped T t) => { });
+    }
+
+    void M1<T>(D<T> d) where T : allows ref struct
+    {
+    }
+
+    void M1<T>(E<T> d) where T : allows ref struct
+    {
+    }
+}
+```
+
+This remains the case when using implicitly typed lambdas:
+
+```c#
+delegate void D<T>(scoped T t) where T : allows ref struct;
+delegate void E<T>(T t) where T : allows ref struct;
+
+class C
+{
+    void M<T>() where T : allows ref struct
+    {
+        // This will remain ambiguous.  'scoped' will not be used to restrict the set of delegates.
+        M1<T>((scoped t) => { });
+    }
+
+    void M1<T>(D<T> d) where T : allows ref struct
+    {
+    }
+
+    void M1<T>(E<T> d) where T : allows ref struct
+    {
+    }
+}
+```
+
 ### Open Questions
 
 1. Should `scoped` *always* be a modifier in a lambda in C# 14?  This matters for a case like:
