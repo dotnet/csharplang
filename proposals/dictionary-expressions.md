@@ -206,28 +206,32 @@ The element conversion rules are updated as follows.
 
 A *key-value pair conversion* is introduced.
 
-An implicit *key-value pair conversion* exists from an expression of type `KeyValuePair<T1, T2>` to a type `KeyValuePair<U1, U2>`
-if there is an implicit conversion from `T1` to `U1` and an implicit conversion from `T2` to `U2`.
+An implicit *key-value pair conversion* exists from an *expression element* to the *element type* of the containing *collection expression* if all of the following hold:
+- the expression element has *type* `KeyValuePair<Kᵢ, Vᵢ>`
+- the collection expression has *element type* `KeyValuePair<K, V>`
+- there is an implicit conversion from `Kᵢ` to `K`
+- there is an implicit conversion from `Vᵢ` to `V`
 
-An explicit *key-value pair conversion* exists from an expression of type `KeyValuePair<T1, T2>` to a type `KeyValuePair<U1, U2>`
-if there is an implicit or explicit conversion from `T1` to `U1` and an implicit or explicit conversion from `T2` to `U2`.
+An implicit *key-value pair conversion* exists from the *iteration type* of a *spread element* to the *element type* of the containing *collection expression* if all of the following hold:
+- the spread element has *iteration type* `KeyValuePair<Kᵢ, Vᵢ>`
+- the collection expression has *element type* `KeyValuePair<K, V>`
+- there is an implicit conversion from `Kᵢ` to `K`
+- there is an implicit conversion from `Vᵢ` to `V`
 
-Implicit key-value pair conversions are useful for *expression elements* and *spread elements* where the key or value types do not match exactly.
+Key-value pair conversions are useful for *expression elements* and *spread elements* where the key or value types do not match the collection element type exactly.
 Despite the name, key-value pair conversions *do not* apply to *key-value elements*.
 
 ```csharp
 Dictionary<int, string>  x = ...;
-Dictionary<long, object> y = [..x]; // implicit conversion from KVP<int, string> to KVP<long, object>
+Dictionary<long, object> y = [..x]; // key-value pair conversion from KVP<int, string> to KVP<long, object>
 ```
 
-Key-value pair conversions are similar to [*tuple conversions*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10213-implicit-tuple-conversions) that allow converting between distinct tuple types.
+Implicit key-value pair conversions are similar to [*implicit tuple conversions*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10213-implicit-tuple-conversions) that allow converting between distinct tuple types.
 
 ```csharp
-(int, string)  a = ...;
-(long, object) b = a; // implicit conversion from (int, string) to (long, object)
+List<(int, string)>  x = ...;
+List<(long, object)> y = [..x]; // tuple conversion from (int, string) to (long, object)
 ```
-
-*Should *key-value pair conversions* apply to expressions of `KeyValuePair<,>` type in any context, or only for collection expression elements? Are there other conversions that have limited contexts where they apply?*
 
 ## Create methods
 
