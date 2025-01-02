@@ -75,7 +75,7 @@ The following change is required to [anonymous function conversions](https://git
 ### Notes/Clarifications
 
 `scoped` and `params` are allowed as explicit modifiers in a lambda without an explicit type present. Semantics
-remain the same for both.  Specifically, both are not part of the determination made
+remain the same for both.  Specifically, neither is part of the determination made
 [in](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12192-anonymous-function-signatures):
 
 > If an anonymous function has an explicit_anonymous_function_signature, then the set of compatible delegate
