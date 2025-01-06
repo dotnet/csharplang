@@ -30,6 +30,7 @@ Shown here with extension property and extension operator examples.
 - **Invocation syntax**: `MyExtensions(e).Prop`, `MyExtensions(e1) + e2`. Existing syntax, but less likely to break. May clash with proposed feature of implicit `new` in object construction. May be a confusing syntax overload. But very short and can have high precedence (primary expression) minimizing extraneous parentheses.
 - **At-operator**: `(e at MyExtensions).Prop`, `(e1 at MyExtensions) + e2`. New syntax, analogous to `as`. Possibly slightly breaking in corner cases.
 - **@-operator**: `(e @ MyExtensions).Prop`, `(e1 @ MyExtensions) + e2`. New syntax, glyph version of `at`. Possibly slightly breaking in corner cases.
+- **In-operator**: `(e in MyExtensions).Prop`, `(e1 in MyExtensions) + e2`. New syntax, Existing token. Possibly slightly breaking in corner cases.
 - ...
 
 Let's get more proposals on the table and discuss pros and cons.
