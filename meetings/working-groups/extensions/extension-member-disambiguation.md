@@ -31,6 +31,6 @@ Shown here with extension property and extension operator examples.
 - **At-operator**: `(e at MyExtensions).Prop`, `(e1 at MyExtensions) + e2`. New syntax, analogous to `as`. Possibly slightly breaking in corner cases.
 - **@-operator**: `(e @ MyExtensions).Prop`, `(e1 @ MyExtensions) + e2`. New syntax, glyph version of `at`. Possibly slightly breaking in corner cases.
 - **In-operator**: `(e in MyExtensions).Prop`, `(e1 in MyExtensions) + e2`. New syntax, Existing token. Possibly slightly breaking in corner cases.
-- ...
+- **Qualified member**: `e.(MyExtensions.Prop)`, `e1 (MyExtensions.+) e2`.
 
 Let's get more proposals on the table and discuss pros and cons.
