@@ -33,7 +33,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jan 6, 2025
 
-- Overload resolution breaking changes in Expression trees with span types: *`params` spans* (https://github.com/dotnet/runtime/issues/110592); *first-class spans* (https://github.com/dotnet/runtime/issues/109757) - cston, jjonescz
-- Disambiguation syntax for extensions
+- Overload resolution breaking changes in Expression trees with span types: [Ignore overloads with ref struct parameters within Expression lambdas](https://github.com/dotnet/csharplang/discussions/8959) - cston, jjonescz
+- Disambiguation syntax for extensions: [Create extension-member-disambiguation.md](https://github.com/dotnet/csharplang/pull/8964) - Mads
 
 ## C# Language Design Notes for 2025
