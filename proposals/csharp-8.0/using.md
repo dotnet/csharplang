@@ -53,7 +53,8 @@ The lifetime of a `using` local will extend to the end of the scope in which it 
 ```csharp
 { 
     using var f1 = new FileStream("...");
-    using var f2 = new FileStream("..."), f3 = new FileStream("...");
+    using var f2 = new FileStream("...");
+    using var f3 = new FileStream("...");
     ...
     // Dispose f3
     // Dispose f2 
