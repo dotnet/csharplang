@@ -25,6 +25,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jan 22, 2025
 
+- Disambiguation syntax (Mads)
+
 ### Wed Jan 15, 2025
 
 ### Mon Jan 13, 2025
