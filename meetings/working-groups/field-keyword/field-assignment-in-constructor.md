@@ -3,17 +3,12 @@
 Champion issue for `field` keyword: https://github.com/dotnet/csharplang/issues/8635  
 Related discussion: https://github.com/dotnet/csharplang/discussions/8704
 
-## TODOs
-
-- Allow `fieldof()` general use as a field in initialization context (including 'init' accessor)
-- Add argument for why to not simply declare field explicitly
-
 ## Summary
 [summary]: #summary
 
 <!-- One paragraph explanation of the feature. -->
 
-Allow assigning the backing field of a property in a constructor, without having to call the setter. Only permitted when used to assign a member of `this` in a constructor.
+Allow assigning the backing field of a property during construction, without having to invoke the setter.
 
 ```cs
 class C
@@ -24,10 +19,16 @@ class C
 
         // allows giving an initial value for 'this.Prop'
         // without calling 'Store.WritePropToDisk()' thru the setter
-        fieldof(this.Prop) = store.ReadPropFromDisk(); 
+        fieldof(this.Prop) = store.ReadPropFromDisk();
 
-        // error: 'fieldof' can only be used as a target of an assignment
-        M(fieldof(this.Prop));
+        // 'fieldof()' allows general usage of the field from an initialization context, a la writability of 'readonly' fields.
+        M(ref fieldof(this.Prop));
+    }
+
+    void Method()
+    {
+        // error: 'fieldof' can only be used during initialization
+        fieldof(this.Prop) = "a";
     }
 
     private DataStore store;
@@ -53,7 +54,7 @@ class C
 <!-- Why are we doing this? What use cases does it support? What is the expected outcome? -->
 
 We are seeing prominent source generators such as [MVVM Toolkit](https://github.com/CommunityToolkit/dotnet) and [ComputeSharp](https://github.com/Sergio0694/ComputeSharp) making heavy use of *partial field-backed properties*. Using a backing field for a partial property implementation comes with a number of experience improvements, including:
-1. avoiding the need for either generator or user to introduce an additional member with a distinct name (and in practice, usually the generator needs to introduce it, which is bad for discoverability).
+1. avoiding the need for either generator or user to introduce an additional member with a distinct name (and in practice, often the generator needs to introduce it, which is bad for discoverability).
 2. avoiding the need for the generator to "wire up" the relationship between the field and property, in order to make it clear to user and compiler (e.g. for nullable constructor analysis).
 3. allowing user to put `[field: Attr]` on the definition part of the property, and have the attributes just go where they're supposed to, without any hacky workarounds from the generator itself.
 4. allowing user to put a property initializer on the definition part, letting the user initialize the field during construction without invoking the setter logic.
@@ -91,7 +92,7 @@ public class C3
 }
 ```
 
-See also [field-keyword.md#property-initializers](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#property-initializers). It's fairly easy to imagine the `bool IsActive` property, which is shown in order to motivate the property initializer behavior we have today, where the initial value doesn't simply come from a constant or a static, but needs to be passed in through a constructor.
+See also [field-keyword.md#property-initializers](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#property-initializers). It's fairly easy to imagine the `bool IsActive` example from that proposal, which motivated the property initializer behavior we have today, where the initial value doesn't simply come from a constant or a static, but needs to be passed in through a constructor.
 
 ```cs
 class SomeViewModel
@@ -120,18 +121,22 @@ class SomeViewModel
 }
 ```
 
+### Why not just declare the field explicitly?
+
+We believe that solutions involving explicitly declaring the backing field will significantly degrade the end user experience in source generator scenarios. Essentially, hand-rolled substitutes for the benefits outlined in [Motivation](#motivation) are unlikely to be uniform and fully correct across various generators. Users would have to get oriented with different solutions across different generators for associating the field and property, locating the related declarations in user code and generated code, applying attributes independently to the field and property, and applying field initializers. See also [Alternate generator patterns](#alternate-generator-patterns).
+
 ### What about encapsulation?
 
 One purported benefit of the `field` keyword feature is that it is *only* usable from within the property accessors. It may seem questionable that this proposal is to seemingly change that, and allow the `field` to *also* be used in constructors.
 
-However, this encapsulation has never been as complete as the above statement implies. Today, a type's constructors need to be concerned with which properties are *field-backed*, because it is directly related to nullable constructor analysis--forgetting to assign or check a field-backed property results in a warning, while doing the same on a non-field-backed property does not.
+However, this encapsulation has never been as complete as the above statement implies. Today, a type's constructors need to be concerned with which properties are *field-backed*, because it is directly related to nullable constructor analysis--forgetting to assign or check a field-backed property can result in a warning, while doing the same on a non-field-backed property will not.
 
 ```cs
 class C
 {
     public string Prop1 { get => ValueStore.Get(); set => ValueStore.Set(value); }
     public string Prop2 { get => field; set => field = value; }
-    
+
     // warning for Prop2, but not for Prop1
     public C() { }
 }
@@ -142,7 +147,7 @@ The fact that a property initializer is permitted to "bypass" the setter logic i
 ## Detailed design
 [design]: #detailed-design
 
-<!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement,  and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented. -->
+<!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement, and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented. -->
 
 The grammar is updated as follows:
 
@@ -153,7 +158,7 @@ The grammar is updated as follows:
      | simple_name
      | parenthesized_expression
  (...)
-     | nameof_expression    
+     | nameof_expression
 +    | fieldof_expression
  (...)
      ;
@@ -165,8 +170,7 @@ The grammar is updated as follows:
 ```
 
 A `fieldof_expression` of the form `fieldof(P)` is evaluated and classified as follows:
-- If the containing member of the expression is not a constructor, a compile-time error occurs.
-- If the `fieldof` expression is not the target of an assignment of the form `fieldof_expression '=' expression`, a compile-time error occurs.
+- If the containing member of the expression is not a constructor or `init` accessor, a compile-time error occurs.
 - If `P` is not classified as a property access of a [field-backed property](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#glossary), a compile-time error occurs.
 - If `P` is classified as a property access of a field-backed property, then `fieldof(P)` is classified as a variable, specifically the backing field of `P`.
 - If `P` is static and the containing constructor is not static, or vice-versa, a compile-time error occurs.
@@ -188,7 +192,7 @@ Depending on feedback, we could adjust the design so that `fieldof` works more l
 
 <!-- Why should we *not* do this? -->
 
-The motivating scenarios may not rise to the level of justifying a new contextual keyword or specialized syntax form in the language, particularly when the new keyword is so circumscribed in its permitted usage.
+The motivating scenarios may not rise to the level of justifying a new contextual keyword or specialized syntax form in the language.
 
 ## Alternatives
 [alternatives]: #alternatives
@@ -224,7 +228,7 @@ class C
 
 ### Alternate generator patterns
 
-Generator authors could come up with a pattern where the field is explicitly declared (most likely by the user) and wired up to the property by some attribute. Then, user can simply refer to the explicit field in a constructor.
+Generator authors could come up with a pattern where the field is explicitly declared by either generator or user, and associated to the property in a way that generator and compiler can understand (e.g., nullability attributes, naming conventions, and/or generator-specific attributes to associate members by name). Then, user can simply refer to the explicit field in a constructor.
 
 We think this is a bad solution, because it requires generator authors to solve all the bullet points mentioned in [Motivation](#motivation), and necessarily results in a compromised end user experience.
 
