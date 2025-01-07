@@ -37,30 +37,30 @@ This is a specification for [covariant return types](https://github.com/dotnet/c
 
 ### Class Method Override
 
-The existing constraint on class override ([§14.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1465-override-methods)) methods
+The existing constraint on class override ([§15.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1565-override-methods)) methods
 
 > - The override method and the overridden base method have the same return type.
 
 is modified to
 
-> - The override method must have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion to the return type of the overridden base method.
+> - The override method must have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md) see [§13.1.0.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#13105-the-return-statement) implicit reference conversion to the return type of the overridden base method.
 
 And the following additional requirements are appended to that list:
 
-> - The override method must have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion to the return type of every override of the overridden base method that is declared in a (direct or indirect) base type of the override method.
-> - The override method's return type must be at least as accessible as the override method  (Accessibility domains - [§7.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#753-accessibility-domains)).
+> - The override method must have a return type that is convertible by an identity conversion or (if the method has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md), [§13.1.0.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#13105-the-return-statement)) implicit reference conversion to the return type of every override of the overridden base method that is declared in a (direct or indirect) base type of the override method.
+> - The override method's return type must be at least as accessible as the override method  (Accessibility domains - [§7.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/basic-concepts.md#753-accessibility-domains)).
 
 This constraint permits an override method in a `private` class to have a `private` return type.  However it requires a `public` override method in a `public` type to have a `public` return type.
 
 ### Class Property and Indexer Override
 
-The existing constraint on class override ([§14.7.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1476-virtual-sealed-override-and-abstract-accessors)) properties
+The existing constraint on class override ([§15.7.6](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1576-virtual-sealed-override-and-abstract-accessors)) properties
 
 > An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion ~~between the type of the overriding and the inherited property~~. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors.
 
 is modified to
 
-> An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion **or (if the inherited property is read-only and has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md)) implicit reference conversion from the type of the overriding property to the type of the inherited property**. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors. **The overriding property's type must be at least as accessible as the overriding property (Accessibility domains - [§7.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#753-accessibility-domains)).**
+> An overriding property declaration shall specify the exact same accessibility modifiers and name as the inherited property, and there shall be an identity conversion **or (if the inherited property is read-only and has a value return - not a [ref return](https://github.com/dotnet/csharplang/blob/master/proposals/csharp-7.0/ref-locals-returns.md) [§13.1.0.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#13105-the-return-statement)) implicit reference conversion from the type of the overriding property to the type of the inherited property**. If the inherited property has only a single accessor (i.e., if the inherited property is read-only or write-only), the overriding property shall include only that accessor. If the inherited property includes both accessors (i.e., if the inherited property is read-write), the overriding property can include either a single accessor or both accessors. **The overriding property's type must be at least as accessible as the overriding property (Accessibility domains - [§7.5.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/basic-concepts.md#753-accessibility-domains)).**
 
 -----------------
 
@@ -78,11 +78,11 @@ is given the corresponding specification for interfaces:
 
 > The method overridden by an override declaration is known as the ***overridden base method***. For an override method `M` declared in an interface `I`, the overridden base method is determined by examining each direct or indirect base interface of `I`, collecting the set of interfaces declaring an accessible method which has the same signature as `M` after substitution of type arguments.  If this set of interfaces has a *most derived type*, to which there is an identity or implicit reference conversion from every type in this set, and that type contains a unique such method declaration, then that is the *overridden base method*.
 
-We similarly permit `override` properties and indexers in interfaces as specified for classes in *15.7.6 Virtual, sealed, override, and abstract accessors*.
+We similarly permit `override` properties and indexers in interfaces as specified for classes in [§15.7.6 Virtual, sealed, override, and abstract accessors](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1576-virtual-sealed-override-and-abstract-accessors).
 
 ### Name Lookup
 
-Name lookup in the presence of class `override` declarations currently modify the result of name lookup by imposing on the found member details from the most derived `override` declaration in the class hierarchy starting from the type of the identifier's qualifier (or `this` when there is no qualifier).  For example, in *12.6.2.2 Corresponding parameters* we have
+Name lookup in the presence of class `override` declarations currently modify the result of name lookup by imposing on the found member details from the most derived `override` declaration in the class hierarchy starting from the type of the identifier's qualifier (or `this` when there is no qualifier).  For example, in [§12.6.2.2 Corresponding parameters](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12622-corresponding-parameters) we have
 
 > For virtual methods and indexers defined in classes, the parameter list is picked from the first  declaration or override of the function member found when starting with the static type of the receiver, and searching through its base classes.
 
@@ -92,21 +92,21 @@ to this we add
 
 For the result type of a property or indexer access, the existing text
 
-> - If I identifies an instance property, then the result is a property access with an associated instance expression of E and an associated type that is the type of the property. If T is a class type, the associated type is picked from the first declaration or override of the property found when starting with T, and searching through its base classes.
+> - If `I` identifies an instance property, then the result is a property access with an associated instance expression of `E` and an associated type that is the type of the property. If `T` is a class type, the associated type is picked from the first declaration or override of the property found when starting with `T`, and searching through its base classes.
 
 is augmented with
 
-> If T is an interface type, the associated type is picked from the declaration or override of the property found in the most derived of T or its direct or indirect base interfaces.  It is a compile-time error if no unique such type exists.
+> If `T` is an interface type, the associated type is picked from the declaration or override of the property found in the most derived of `T` or its direct or indirect base interfaces.  It is a compile-time error if no unique such type exists.
 
-A similar change should be made in *12.7.7.3 Indexer access*
+A similar change should be made in [§12.8.12.3 Indexer access](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128123-indexer-access)
 
-In *12.7.6 Invocation expressions* we augment the existing text
+In [§12.8.10 Invocation expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12810-invocation-expressions) we augment the existing text
 
-> - Otherwise, the result is a value, with an associated type of the return type of the method or delegate. If the invocation is of an instance method, and the receiver is of a class type T, the associated type is picked from the first declaration or override of the method found when starting with T and searching through its base classes.
+> - Otherwise, the result is a value, with an associated type of the return type of the method or delegate. If the invocation is of an instance method, and the receiver is of a class type `T`, the associated type is picked from the first declaration or override of the method found when starting with `T` and searching through its base classes.
 
 with
 
-> If the invocation is of an instance method, and the receiver is of an interface type T, the associated type is picked from the declaration or override of the method found in the most derived interface from among T and its direct and indirect base interfaces.  It is a compile-time error if no unique such type exists.
+> If the invocation is of an instance method, and the receiver is of an interface type `T`, the associated type is picked from the declaration or override of the method found in the most derived interface from among `T` and its direct and indirect base interfaces.  It is a compile-time error if no unique such type exists.
 
 ### Implicit Interface Implementations
 
@@ -198,6 +198,7 @@ I suggest that we permit implementing either `I1.M` or `I2.M` (but not both), an
 We could relax the language rules slightly to allow, in source,
 
 ```csharp
+// Possible alternative. This was not implemented.
 abstract class Cloneable
 {
     public abstract Cloneable Clone();
