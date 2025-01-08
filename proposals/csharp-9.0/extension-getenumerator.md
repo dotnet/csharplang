@@ -5,22 +5,22 @@
 ## Summary
 [summary]: #summary
 
-Allow foreach loops to recognize an extension method GetEnumerator method that otherwise satisfies the foreach pattern, and loop over the expression when it would otherwise be an error.
+Allow `foreach` loops to recognize an extension method `GetEnumerator` method that otherwise satisfies the foreach pattern, and loop over the expression when it would otherwise be an error.
 
 ## Motivation
 [motivation]: #motivation
 
-This will bring foreach inline with how other features in C# are implemented, including async and pattern-based deconstruction.
+This will bring `foreach` inline with how other features in C# are implemented, including async and pattern-based deconstruction.
 
 ## Detailed design
 [design]: #detailed-design
 
-The spec change is relatively straightforward. We modify `The foreach statement` section to this text:
+The spec change is relatively straightforward. We modify `The foreach statement` [§13.9.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) section to this text:
 
 >The compile-time processing of a foreach statement first determines the ***collection type***, ***enumerator type*** and ***element type*** of the expression. This determination proceeds as follows:
 >
 >*  If the type `X` of *expression* is an array type then there is an implicit reference conversion from `X` to the `IEnumerable` interface (since `System.Array` implements this interface). The ***collection type*** is the `IEnumerable` interface, the ***enumerator type*** is the `IEnumerator` interface and the ***element type*** is the element type of the array type `X`.
->*  If the type `X` of *expression* is `dynamic` then there is an implicit conversion from *expression* to the `IEnumerable` interface ([§10.2.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#10210-implicit-dynamic-conversions)). The ***collection type*** is the `IEnumerable` interface and the ***enumerator type*** is the `IEnumerator` interface. If the `var` identifier is given as the *local_variable_type* then the ***element type*** is `dynamic`, otherwise it is `object`.
+>*  If the type `X` of *expression* is `dynamic` then there is an implicit conversion from *expression* to the `IEnumerable` interface ([§10.2.10](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#10210-implicit-dynamic-conversions)). The ***collection type*** is the `IEnumerable` interface and the ***enumerator type*** is the `IEnumerator` interface. If the `var` identifier is given as the *local_variable_type* then the ***element type*** is `dynamic`, otherwise it is `object`.
 >*  Otherwise, determine whether the type `X` has an appropriate `GetEnumerator` method:
 >    * Perform member lookup on the type `X` with identifier `GetEnumerator` and no type arguments. If the member lookup does not produce a match, or it produces an ambiguity, or produces a match that is not a method group, check for an enumerable interface as described below. It is recommended that a warning be issued if member lookup produces anything except a method group or no match.
 >    * Perform overload resolution using the resulting method group and an empty argument list. If overload resolution results in no applicable methods, results in an ambiguity, or results in a single best method but that method is either static or not public, check for an enumerable interface as described below. It is recommended that a warning be issued if overload resolution produces anything except an unambiguous public instance method or no applicable methods.

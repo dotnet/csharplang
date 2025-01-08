@@ -8,7 +8,7 @@ methods in C#. The goal being to expand the set of scenarios in which these
 methods can work with source generators as well as being a more general 
 declaration form for C# methods.
 
-See also the original partial methods specification ([§14.6.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/classes.md#1469-partial-methods)).
+See also the original partial methods specification ([§15.6.9](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1569-partial-methods)).
 
 ## Motivation
 C# has limited support for developers splitting methods into declarations and 
@@ -75,7 +75,7 @@ restrictions also serve to limit the set of scenarios in which `partial` methods
 can be applied.
 
 The proposal here is to remove all of the existing restrictions around `partial`
-methods. Essentially let them have `out`, non-void return types or any 
+methods. Essentially let them have `out` parameters, non-void return types or any 
 type of accessibility. Such `partial` declarations would then have the added
 requirement that a definition must exist. That means the language does not
 have to consider the impact of erasing the call sites. 
@@ -116,7 +116,7 @@ explicit accessibility modifier. This means they can be labeled as `private`,
 `public`, etc ... 
 
 When a `partial` method has an explicit accessibility modifier 
-though the language will require that the declaration has a matching
+the language will require that the declaration has a matching
 definition even when the accessibility is `private`:
 
 ```cs
@@ -152,7 +152,7 @@ partial class D
 
 partial class D
 {
-    internal partial bool TryParse(string s, out int i) { }
+    internal partial bool TryParse(string s, out int i) { ... }
 }
 ```
 
@@ -203,7 +203,8 @@ unnecessary feature creep. Want to solve the immediate problem of expanding
 the feature to work with modern source generators. 
 
 Extending `partial` to support other members will be considered for the C# 10
-release. Seems likely that we will consider this extension.
+release. Seems likely that we will consider this extension. This remains an
+active proposal, but it has not yet been implemented.
 
 ### Use abstract instead of partial
 The crux of this proposal is essentially ensuring that a declaration has a

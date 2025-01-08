@@ -217,8 +217,7 @@ The sole presence of a copy constructor, whether explicit or implicit, doesn't p
 addition of a default instance constructor.
 
 If a virtual "clone" method is present in the base record, the synthesized "clone" method overrides it and
-the return type of the method is the current containing type if the "covariant returns" feature is supported
-and the override return type otherwise. An error is produced if the base record clone method is sealed.
+the return type of the method is the current containing type. An error is produced if the base record clone method is sealed.
 If a virtual "clone" method is not present in the base record, the return type of the clone method
 is the containing type and the method is virtual, unless the record is sealed or abstract.
 If the containing record is abstract, the synthesized clone method is also abstract.
@@ -288,7 +287,7 @@ class R1 : IEquatable<R1>
     {
         builder.Append(nameof(P1));
         builder.Append(" = ");
-        builder.Append(this.P1); // or builder.Append(this.P1.ToString()); if P1 has a value type
+        builder.Append(this.P1); // or builder.Append(this.P1.ToString()); if T1 is a value type
         
         return true;
     }
@@ -319,13 +318,13 @@ class R2 : R1, IEquatable<R2>
             
         builder.Append(nameof(P2));
         builder.Append(" = ");
-        builder.Append(this.P2); // or builder.Append(this.P2); if P2 has a value type
+        builder.Append(this.P2); // or builder.Append(this.P2); if T2 is a value type
         
         builder.Append(", ");
         
         builder.Append(nameof(P3));
         builder.Append(" = ");
-        builder.Append(this.P3); // or builder.Append(this.P3); if P3 has a value type
+        builder.Append(this.P3); // or builder.Append(this.P3); if T3 is a value type
         
         return true;
     }
@@ -397,8 +396,8 @@ For a record:
 
 A positional record with at least one parameter synthesizes a public void-returning instance method called Deconstruct with an out
 parameter declaration for each parameter of the primary constructor declaration. Each parameter
-of the Deconstruct method has the same type as the corresponding parameter of the primary
-constructor declaration. The body of the method assigns to each parameter of the Deconstruct method, 
+of the `Deconstruct` method has the same type as the corresponding parameter of the primary
+constructor declaration. The body of the method assigns to each parameter of the `Deconstruct` method, 
 the value of the instance property of the same name.
 The method can be declared explicitly. It is an error if the explicit declaration does not match
 the expected signature or accessibility, or is static.

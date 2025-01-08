@@ -137,7 +137,7 @@ class Complex
 {
     readonly int Field1;
     int Field2;
-    int Prop1 { get; init ; }
+    int Prop1 { get; init; }
     int Prop2
     {
         get => 42;
@@ -536,7 +536,7 @@ class Name
 ### IL verification
 When .NET Core decides to re-implement IL verification, the rules will need to be 
 adjusted to account for `init` members. This will need to be included in the 
-rule changes for non-mutating acess to `readonly` data.
+rule changes for non-mutating access to `readonly` data.
 
 The IL verification rules will need to be broken into two parts: 
 
@@ -567,7 +567,7 @@ var student = new Student()
 };
 ```
 
-Here the result of `new Student()` will be hoised into a state machine as a 
+Here the result of `new Student()` will be hoisted into a state machine as a 
 field before the set of `Name` occurs. The compiler will need to mark such
 hoisted fields in a way that the IL verifier understands they're not user 
 accessible and hence doesn't violate the intended semantics of `init`.
@@ -575,10 +575,10 @@ accessible and hence doesn't violate the intended semantics of `init`.
 ### init members
 The `init` modifier could be extended to apply to all instance members. This 
 would generalize the concept of `init` during object construction and allow
-types to declare helper methods that could partipate in the construction 
+types to declare helper methods that could participate in the construction 
 process to initialize `init` fields and properties.
 
-Such members would have all the restricions that an `init` accessor does
+Such members would have all the restrictions that an `init` accessor does
 in this design. The need is questionable though and this can be safely added
 in a future version of the language in a compatible manner.
 
