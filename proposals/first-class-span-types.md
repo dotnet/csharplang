@@ -328,6 +328,7 @@ void M(int[] a)
 
 See also:
 - https://developercommunity.visualstudio.com/t/Extension-method-SystemLinqEnumerable/10790323
+- https://developercommunity.visualstudio.com/t/Compilation-Error-When-Calling-Reverse/10818048
 
 #### Ambiguities
 
