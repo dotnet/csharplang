@@ -7,7 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
-- [`fieldof()`](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/field-keyword/fieldof.md) (Rikki)
+- [`fieldof()`](../../proposals/fieldof.md) (Rikki)
 
 ## Recurring topics
 
