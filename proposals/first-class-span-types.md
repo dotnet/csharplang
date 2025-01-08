@@ -326,6 +326,9 @@ void M(int[] a)
 }
 ```
 
+See also:
+- https://developercommunity.visualstudio.com/t/Extension-method-SystemLinqEnumerable/10790323
+
 #### Ambiguities
 
 The following examples previously failed type inference for the Span overload,
