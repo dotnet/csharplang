@@ -174,18 +174,32 @@ A `fieldof_expression` of the form `fieldof(P)` is evaluated and classified as f
 - If `P` is not classified as a property access of a [field-backed property](https://github.com/dotnet/csharplang/blob/main/proposals/field-keyword.md#glossary), a compile-time error occurs.
 - If `P` is classified as a property access of a field-backed property, then `fieldof(P)` is classified as a variable, specifically the backing field of `P`.
 - If `P` is static and the containing constructor is not static, or vice-versa, a compile-time error occurs.
-- If `P` is not a member of the containing type, a compile-time error occurs.
+- If `P` is not declared in the containing type, a compile-time error occurs. (`fieldof()` does not work with a property declared on a base type.)
 - Otherwise, `fieldof(P)` denotes the backing field of `P`.
 
 A `fieldof_expression` is subject to limitations on the receiver of its property access, similar to an assignment to a `readonly` field. Specifically, the receiver must be the instance being initialized by the containing constructor, i.e. explicit or implicit `this`. Otherwise, a compile-time error occurs.
 
+### Ref safety
+
+The *ref-safe-context* ([§9.7.2.4](https://github.com/dotnet/csharpstandard/blob/81d9d57826f289fbf772e10dfec776227fab1006/standard/variables.md#9724-field-ref-safe-context)) for an expression of the form `fieldof(e.P)` is determined as follows:
+- If `e` is of a value type, then the *ref-safe-context* of `fieldof(e.P)` is the same as the *ref-safe-context* of `e`.
+- Otherwise, its *ref-safe-context* is *caller-context*.
+
+The *safe-context* ([§16.4.12.4](https://github.com/dotnet/csharpstandard/blob/81d9d57826f289fbf772e10dfec776227fab1006/standard/structs.md#164124-field-safe-context)) for an expression of the form `fieldof(e.P)` is determined as follows:
+- If `e.P` is of ref struct type, then the *safe-context* of `fieldof(e.P)` is the same as the *safe-context* of `e`.
+- Otherwise, its *safe-context* is *caller-context*.
+
+The above ref safety rules are strongly analogous to the existing, linked rules which apply to ordinary field accesses.
+
 ### Compat
 
-This design makes no concession to preserving existing `fieldof(P)` behavior when a symbol `fieldof` is already in scope. This is a divergence from existing `nameof` behavior.
+This design makes no concession to preserving existing `fieldof(P)` behavior when a symbol `fieldof` is already in scope. This is a divergence from existing `nameof` behavior, but aligns with the existing breaking change design of the `field` keyword itself.
 
-This proposal also reserves `fieldof(P)` in expression contexts generally, rather than reserving it only in constructors. Existing code containing calls like `fieldof(P)` would need to be changed to `@fieldof(P)` in order to avoid breaks.
+This proposal also reserves `fieldof(P)` in expression contexts generally, rather than reserving it only in constructors and `init` accessors. Existing code containing calls like `fieldof(P)` would need to be changed to `@fieldof(P)` in order to avoid breaks. We could consider instead limiting the break to only apply within constructors and `init` accessors.
 
-Depending on feedback, we could adjust the design so that `fieldof` works more like `nameof`, and simply becomes unavailable when a symbol `fieldof` is in scope.
+Depending on feedback, we could also adjust the design so that `fieldof` works more like `nameof`, and simply becomes unavailable when a symbol `fieldof` is in scope.
+
+To give a sense of relative risk of the break with `field`, versus `fieldof`, there are about ~86k results for `field` in C# source and comments on GitHub, and about 5 of the same for `fieldof`, at time of writing.
 
 ## Drawbacks
 [drawbacks]: #drawbacks
