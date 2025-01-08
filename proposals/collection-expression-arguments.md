@@ -1,5 +1,9 @@
 # Collection expression arguments
 
+Champion issue: https://github.com/dotnet/csharplang/issues/8887
+
+## Motivation
+
 The [*dictionary expression*](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md)
 feature has identified a need for collection expressions to pass along user-specified data in order to configure
 the behavior of the final collection.  Specifically, dictionaries allow users to customize how their keys compare,

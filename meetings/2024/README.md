@@ -1,34 +1,12 @@
-# Upcoming meetings for 2024
-
-All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
-
-## Schedule ASAP
-
-- [Better conversion: prefer `ReadOnlySpan<T>` over `Span<T>`](https://github.com/dotnet/csharplang/pull/8779) (Chuck, Jan)
-
-## Schedule when convenient
-
-- Triage (working set)
-
-## Recurring topics
-
-- *Triage championed features and milestones*
-- *Design review*
-
-## Schedule
-
-### Wed Dec 18, 2024
-
-### Mon Dec 16, 2024
-
-### Wed Dec 11, 2024
+# C# Language Design Notes for 2024
 
 ### Mon Dec 9, 2024
 
-- Simple lambda parameter open questions. cyrusn. https://github.com/dotnet/csharplang/blob/main/proposals/simple-lambda-parameters-with-modifiers.md
-- Passing arguments to collection expressions. cyrusn + cston. https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md
+[C# Language Design Meeting for December 9th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-12-09.md)
 
-## C# Language Design Notes for 2024
+- First-class span open questions
+- Simple Lambda Parameters
+- Collection expression arguments
 
 ### Wed Dec 4, 2024
 

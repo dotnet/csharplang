@@ -108,7 +108,7 @@ public static class Verify
     }
 }
 
-T Single<T>(this T[] array)
+static T Single<T>(this T[] array)
 {
     Verify.NotNull(array); // paramName: "array"
     Verify.Argument(array.Length == 1, "Array must contain a single element."); // paramName: "array.Length == 1"
@@ -116,7 +116,7 @@ T Single<T>(this T[] array)
     return array[0];
 }
 
-T ElementAt(this T[] array, int index)
+static T ElementAt<T>(this T[] array, int index)
 {
     Verify.NotNull(array); // paramName: "array"
     // paramName: "index"

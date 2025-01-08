@@ -102,7 +102,7 @@ The explicit enumeration conversions are:
 - From any *enum_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, or `decimal`.
 - From any *enum_type* to any other *enum_type*.
 
-#### 11.6.4.6 Better conversion target
+#### 12.6.4.7 Better conversion target
 
 Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** than `T₂` if one of the following holds:
 
@@ -110,11 +110,11 @@ Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** th
 - `T₁` is `Task<S₁>`, `T₂` is `Task<S₂>`, and `S₁` is a better conversion target than `S₂`
 - `T₁` is `S₁` or `S₁?` where `S₁` is a signed integral type, and `T₂` is `S₂` or `S₂?` where `S₂` is an unsigned integral type. Specifically: \[...]
 
-### 11.7.10 Element access
+### 12.8.12 Element access
 
 \[...] The number of expressions in the *argument_list* shall be the same as the rank of the *array_type*, and each expression shall be of type `int`, `uint`, **`nint`, `nuint`**, `long`, or `ulong,` or shall be implicitly convertible to one or more of these types.
 
-#### 11.7.10.2 Array access
+#### 11.8.12.2 Array access
 
 \[...] The number of expressions in the *argument_list* shall be the same as the rank of the *array_type*, and each expression shall be of type `int`, `uint`, **`nint`, `nuint`**, `long`, or `ulong,` or shall be implicitly convertible to one or more of these types.
 
@@ -122,11 +122,11 @@ Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** th
 \[...]
 - The index expressions of the *argument_list* are evaluated in order, from left to right. Following evaluation of each index expression, an implicit conversion to one of the following types is performed: `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`. The first type in this list for which an implicit conversion exists is chosen. \[...]
 
-### 11.7.14 Postfix increment and decrement operators
+### 12.8.16 Postfix increment and decrement operators
 
 Unary operator overload resolution is applied to select a specific operator implementation. Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`,** `long`, `ulong`, `char`, `float`, `double`, `decimal`, and any enum type.
 
-### 11.8.2 Unary plus operator
+### 12.9.2 Unary plus operator
 
 The predefined unary plus operators are:
 
@@ -136,7 +136,7 @@ nint operator +(nint x);
 nuint operator +(nuint x);
 ```
 
-### 11.8.3 Unary minus operator
+### 12.9.3 Unary minus operator
 
 The predefined unary minus operators are:
 
@@ -147,7 +147,7 @@ The predefined unary minus operators are:
   nint operator –(nint x);
   ```  
 
-### 11.7.14 Postfix increment and decrement operators
+### 12.8.16 Postfix increment and decrement operators
 
 Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, and any enum type.
 
@@ -155,7 +155,7 @@ Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte
 
 In addition, a *default_value_expression* is a constant expression if the type is one of the following value types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool,` or any enumeration type.
 
-### 11.8.5 Bitwise complement operator
+### 12.9.5 Bitwise complement operator
 
 The predefined bitwise complement operators are:
 
@@ -165,13 +165,13 @@ nint operator ~(nint x);
 nuint operator ~(nuint x);
 ```
 
-### 11.8.6 Prefix increment and decrement operators
+### 12.9.6 Prefix increment and decrement operators
 
 Predefined `++` and `--` operators exist for the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, and any enum type.
 
-## 11.9 Arithmetic operators
+## 12.10 Arithmetic operators
 
-### 11.9.2 Multiplication operator
+### 12.10.2 Multiplication operator
 
 The predefined multiplication operators are listed below. The operators all compute the product of `x` and `y`.
 
@@ -183,7 +183,7 @@ The predefined multiplication operators are listed below. The operators all comp
   nuint operator *(nuint x, nuint y);
   ```
 
-### 11.9.3 Division operator
+### 12.10.3 Division operator
 
 The predefined division operators are listed below. The operators all compute the quotient of `x` and `y`.
 
@@ -195,7 +195,7 @@ The predefined division operators are listed below. The operators all compute th
   nuint operator /(nuint x, nuint y);
   ```
 
-### 11.9.4 Remainder operator
+### 12.10.4 Remainder operator
 
 The predefined remainder operators are listed below. The operators all compute the remainder of the division between `x` and `y`.
 
@@ -207,7 +207,7 @@ The predefined remainder operators are listed below. The operators all compute t
   nuint operator %(nuint x, nuint y);
   ```
 
-### 11.9.5 Addition operator
+### 12.10.5 Addition operator
 
 - Integer addition:
 
@@ -217,7 +217,7 @@ The predefined remainder operators are listed below. The operators all compute t
   nuint operator +(nuint x, nuint y);
   ```
 
-### 11.9.6 Subtraction operator
+### 12.10.6 Subtraction operator
 
 - Integer subtraction:
 
@@ -227,7 +227,7 @@ The predefined remainder operators are listed below. The operators all compute t
   nuint operator –(nuint x, nuint y);
   ```
 
-## 11.10 Shift operators
+## 12.11 Shift operators
 
 The predefined shift operators are listed below.
 
@@ -266,9 +266,9 @@ For the predefined operators, the number of bits to shift is computed as follows
 - When the type of `x` is `nint` or `nuint`, the shift count is given by the low-order five bits of `count` on a 32 bit platform, or the lower-order six bits of `count` on a 64 bit platform.  
 
 
-## 11.11 Relational and type-testing operators
+## 12.12 Relational and type-testing operators
 
-### 11.11.2 Integer comparison operators
+### 12.12.2 Integer comparison operators
 
 The predefined integer comparison operators are:
 
@@ -293,9 +293,9 @@ bool operator >=(nint x, nint y);
 bool operator >=(nuint x, nuint y);
 ```
 
-## 11.12 Logical operators
+## 12.12 Logical operators
 
-### 11.12.2 Integer logical operators
+### 12.12.2 Integer logical operators
 
 The predefined integer logical operators are:
 
@@ -311,7 +311,7 @@ nint operator ^(nint x, nint y);
 nuint operator ^(nuint x, nuint y);
 ```
 
-## 11.20 Constant expressions
+## 12.22 Constant expressions
 
 A constant expression may be either a value type or a reference type. If a constant expression is a value type, it must be one of the following types: `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`**, `long`, `ulong`, `char`, `float`, `double`, `decimal`, `bool,` or any enumeration type.
 
@@ -319,13 +319,13 @@ A constant expression may be either a value type or a reference type. If a const
 
 An implicit constant expression conversion permits a constant expression of type `int` to be converted to `sbyte`, `byte`, `short`, `ushort`, `uint`, **`nint`, `nuint`,** or `ulong`, provided the value of the constant expression is within the range of the destination type.
 
-## 16.4 Array element access
+## 17.4 Array element access
 
 Array elements are accessed using *element_access* expressions of the form `A[I₁, I₂, ..., Iₓ]`, where `A` is an expression of an array type and each `Iₑ` is an expression of type `int`, `uint`, **`nint`, `nuint`,** `long`, `ulong`, or can be implicitly converted to one or more of these types. The result of an array element access is a variable, namely the array element selected by the indices.
 
-## 22.5 Pointer conversions
+## 23.5 Pointer conversions
 
-### 22.5.1 General
+### 23.5.1 General
 
 \[...]
 
@@ -335,12 +335,12 @@ Additionally, in an unsafe context, the set of available explicit conversions is
 - From `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong` to any *pointer_type*.
 - From any *pointer_type* to `sbyte`, `byte`, `short`, `ushort`, `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong`.
 
-### 22.6.4 Pointer element access
+### 23.6.4 Pointer element access
 
 \[...]
 In a pointer element access of the form `P[E]`, `P` shall be an expression of a pointer type other than `void*`, and `E` shall be an expression that can be implicitly converted to `int`, `uint`, **`nint`, `nuint`,** `long`, or `ulong`.
 
-### 22.6.7 Pointer arithmetic
+### 23.6.7 Pointer arithmetic
 
 In an unsafe context, the `+` operator and `–` operator can be applied to values of all pointer types except `void*`. Thus, for every pointer type `T*`, the following operators are implicitly defined:
 
