@@ -1,4 +1,4 @@
-# Allow directly assigning backing field in constructors
+# Allow direct use of backing field during construction
 
 Champion issue for `field` keyword: https://github.com/dotnet/csharplang/issues/8635  
 Related discussion: https://github.com/dotnet/csharplang/discussions/8704
@@ -8,7 +8,7 @@ Related discussion: https://github.com/dotnet/csharplang/discussions/8704
 
 <!-- One paragraph explanation of the feature. -->
 
-Allow assigning the backing field of a property during construction, without having to invoke the setter.
+Allow direct assignment and use of a property's backing field during construction, without having to invoke the setter.
 
 ```cs
 class C
