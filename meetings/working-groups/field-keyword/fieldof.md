@@ -8,7 +8,7 @@ Related discussion: https://github.com/dotnet/csharplang/discussions/8704
 
 <!-- One paragraph explanation of the feature. -->
 
-Allow direct assignment and use of a property's backing field during construction, without having to invoke the setter.
+Allow direct assignment and use of a property's backing field during construction, without having to invoke the setter, via a new `fieldof(Prop)` expression.
 
 ```cs
 class C
