@@ -203,7 +203,8 @@ unnecessary feature creep. Want to solve the immediate problem of expanding
 the feature to work with modern source generators. 
 
 Extending `partial` to support other members will be considered for the C# 10
-release. Seems likely that we will consider this extension. This remains an active proposal, but it has not yet been implemented.
+release. Seems likely that we will consider this extension. This remains an
+active proposal, but it has not yet been implemented.
 
 ### Use abstract instead of partial
 The crux of this proposal is essentially ensuring that a declaration has a
