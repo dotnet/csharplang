@@ -7,6 +7,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
+- Left/Right Join clauses. https://github.com/dotnet/csharplang/blob/main/proposals/left-right-join-in-query-expressions.md, https://github.com/dotnet/csharplang/issues/8947.  CyrusNajmabadi, roji, eiriktsarpalis
 
 ## Recurring topics
 
