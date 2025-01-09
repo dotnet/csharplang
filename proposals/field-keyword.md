@@ -813,13 +813,3 @@ interface I
 #### Answer
 
 Standardizing around the instance field itself being the cause of the error is consistent with partial properties in classes, and we like that outcome. The recommendation is accepted.
-
-## Open LDM questions
-
-### Feature name
-
-Some options for the name of the feature:
-1. semi-auto properties
-1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
-1. field-backed properties
-1. field keyword
