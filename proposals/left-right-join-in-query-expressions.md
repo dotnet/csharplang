@@ -79,7 +79,7 @@ public static IEnumerable<TResult> RightJoin<TOuter, TInner, TKey, TResult>(
     Func<TOuter?, TInner, TResult> resultSelector);
 
 // Usage examples:
-0
+
 // Existing (inner) join operator: students are only returned if correlated departments are found
 var query = students.Join(
     departments,
