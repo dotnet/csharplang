@@ -66,9 +66,8 @@ Proposed grammar change ([§11.7.1](https://github.com/dotnet/csharpstandard/blo
 
 ```diff
 join_clause
--    : 'join' type? identifier 'in' expression 'on' expression
-+    : ('left' | 'right')? 'join' type? identifier 'in' expression 'on' expression
-      'equals' expression
+-    : 'join' type? identifier 'in' expression 'on' expression 'equals' expression
++    : ('left' | 'right')? 'join' type? identifier 'in' expression 'on' expression 'equals' expression
     ;
 ```
 
