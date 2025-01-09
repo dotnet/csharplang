@@ -1,11 +1,11 @@
-# `left join` and `right join` query expression clauses
+# Introduce `left` and `right` modifiers to the `join` query expression clauses
 
 Champion issue: https://github.com/dotnet/csharplang/issues/8947
 
 ## Summary
 [summary]: #summary
 
-Introduce `left join` and `right join` clauses into LINQ query expression syntax, e.g.:
+Introduce `left` and `right` modifiers to the LINQ query expression syntax `join` clause, e.g.:
 
 ```c#
 from student in students
@@ -53,16 +53,43 @@ Although functionality sufficient for expressing a left join operation, this com
 - It's complicated, requiring combining multiple different LINQ operators in a specific way to form a complex construct, and is easy to accidentally get wrong. Many EF users have complained about the complexity of this construct for expressing a simple SQL LEFT JOIN.
 - It is inefficient - the combination of operators adds significant overhead compared to a single operator using an internal lookup table (or "hash join", as Join is implemented).
 
-https://github.com/dotnet/runtime/issues/110292 is an approved API proposal for introducing LeftJoin and RightJoin operators into the System.Linq for .NET 10; see that proposal for additional performance information and benchmarks. Aside from allowing users to more easily express SQL LEFT/RIGHT JOIN when using a LINQ provider (such as EF Core), it would also allow both easier and more efficient in-memory left/right joins, exactly in the way that inner joins are already supported.
+In .NET 10, new `LeftJoin()` and `RightJoin()` methods have been introduced into System.LINQ; see https://github.com/dotnet/runtime/issues/110292 for the API proposal, discussion, and performance information and benchmarks. The new API is as follows:
 
-Along with the introduction of the operators into System.Linq, the C# query expression syntax can be extended with new `left join` and `right join` clauses which would translate to these new operators, allowing for simpler and more efficient code where C# query syntax is used.
+```c#
+// Existing (inner) join operator: students are only returned if correlated departments are found
+var query = students.Join(
+	departments,
+	student => s.DepartmentID,
+	department => department.ID,
+	(student, department) => new { student.FirstName, student.LastName, Department = department.Name });
+
+// New left (outer) join operator: all students are returned, even those without any correlated department
+// Departments without a correlated student are not returned.
+var query = students.LeftJoin(
+	departments,
+	student => s.DepartmentID,
+	department => department.ID,
+	(student, department) => new { student.FirstName, student.LastName, Department = department?.Name });
+
+// New right (outer) join operator: all departments are returned, even those without any correlated student.
+// Students without a correlated department are not returned.
+var query = students.RightJoin(
+	departments,
+	student => s.DepartmentID,
+	department => department.ID,
+	(student, department) => new { student?.FirstName, student?.LastName, Department = department.Name });
+```
+
+Aside from allowing users to more easily express SQL LEFT/RIGHT JOIN when using a LINQ provider (such as EF Core), the new APIs also allow both easier and more efficient in-memory left/right joins, exactly in the way that inner joins are already supported.
+
+Along with the introduction of the operators into System.Linq, the C# query expression syntax can be extended with new `left` and `right` modifiers for the `join` clauses, which would translate to these new methods, allowing for simpler and more efficient code where C# query syntax is used.
 
 ## Detailed design
 [design]: #detailed-design
 
-Proposed grammar change ([§11.7.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1117-query-expressions)):
-
 ### Grammar
+
+Proposed grammar change ([§11.7.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1117-query-expressions)):
 
 ```diff
 join_clause
@@ -71,7 +98,7 @@ join_clause
     ;
 ```
 
-As per the grammar proposal, the syntax for the proposed `left join` and `right join` expression clauses would be identical to the existing `join` clause. For example:
+The `join` clause is thus extended via new, optional `left` and `right` modifiers; the clause stays otherwise the same, with the modifiers only changing which LINQ method is translated to (see below):
 
 ```c#
 from student in students
@@ -79,111 +106,196 @@ left join department in departments on student.DepartmentID equals department.ID
 select new { student.Name, department?.Name }
 ```
 
-### Left join translation
+### `join` clause specification
 
-A `left join` clause immediately followed by a `select` clause
+This proposes removing the `join` clause from the [From, let, where, join and orderby clauses (§11.7.1)](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1117-query-expressions), and adding the following dedicated section for the `join` clause, including the new proposed modifiers.
+
+<details>
+<summary>Removal of `join` clause specs from [§11.7.1](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#1117-query-expressions)</summary>
+
+A `join` clause immediately followed by a `select` clause
 
 ```csharp
 from «x1» in «e1»  
-left join «x2» in «e2» on «k1» equals «k2»  
+join «x2» in «e2» on «k1» equals «k2»  
 select «v»
 ```
 
 is translated into
 
 ```csharp
-( «e1» ) . LeftJoin( «e2» , «x1» => «k1» , «x2» => «k2» , ( «x1» , «x2» ) => «v» )
+( «e1» ) . Join( «e2» , «x1» => «k1» , «x2» => «k2» , ( «x1» , «x2» ) => «v» )
 ```
 
 > *Example*: The example
 >
 > ```csharp
 > from c in customersh
-> left join o in orders on c.CustomerID equals o.CustomerID
-> select new { c.Name, o?.OrderDate, o?.Total }
+> join o in orders on c.CustomerID equals o.CustomerID
+> select new { c.Name, o.OrderDate, o.Total }
 > ```
 >
 > is translated into
 >
 > ```csharp
-> (customers).LeftJoin(
+> (customers).Join(
 >    orders,
 >    c => c.CustomerID, o => o.CustomerID,
->    (c, o) => new { c.Name, o?.OrderDate, o?.Total })
+>    (c, o) => new { c.Name, o.OrderDate, o.Total })
 > ```
 >
 > *end example*
 
-A `left join` clause followed by a query body clause:
+A `join` clause followed by a query body clause:
 
 ```csharp
 from «x1» in «e1»  
-left join «x2» in «e2» on «k1» equals «k2»  
+join «x2» in «e2» on «k1» equals «k2»  
 ...
 ```
 
 is translated into
 
 ```csharp
-from * in ( «e1» ) . LeftJoin(  
+from * in ( «e1» ) . Join(  
 «e2» , «x1» => «k1» , «x2» => «k2» ,
 ( «x1» , «x2» ) => new { «x1» , «x2» })  
 ...
 ```
 
-### Right join translation
-
-A `right join` clause immediately followed by a `select` clause
+A `join`-`into` clause immediately followed by a `select` clause
 
 ```csharp
 from «x1» in «e1»  
-right join «x2» in «e2» on «k1» equals «k2»  
+join «x2» in «e2» on «k1» equals «k2» into «g»  
 select «v»
 ```
 
 is translated into
 
 ```csharp
-( «e1» ) . RightJoin( «e2» , «x1» => «k1» , «x2» => «k2» , ( «x1» , «x2» ) => «v» )
+( «e1» ) . GroupJoin( «e2» , «x1» => «k1» , «x2» => «k2» ,
+                     ( «x1» , «g» ) => «v» )
 ```
 
-> *Example*: The example
->
-> ```csharp
-> from o in orders
-> right join c in customersh on o.CustomerID equals c.CustomerID
-> select new { o?.OrderDate, o?.Total, c.Name }
-> ```
->
-> is translated into
->
-> ```csharp
-> (orders).RightJoin(
->    customers,
->    o => o.CustomerID, c => c.CustomerID,
->    (c, o) => new { o?.OrderDate, o?.Total, c.Name })
-> ```
->
-> *end example*
-
-A `right join` clause followed by a query body clause:
+A `join into` clause followed by a query body clause
 
 ```csharp
 from «x1» in «e1»  
-right join «x2» in «e2» on «k1» equals «k2»  
+join «x2» in «e2» on «k1» equals «k2» into *g»  
 ...
 ```
 
 is translated into
 
 ```csharp
-from * in ( «e1» ) . RightJoin(  
+from * in ( «e1» ) . GroupJoin(  
+   «e2» , «x1» => «k1» , «x2» => «k2» , ( «x1» , «g» ) => new { «x1» , «g» })
+...
+```
+
+> *Example*: The example
+>
+> ```csharp
+> from c in customers
+> join o in orders on c.CustomerID equals o.CustomerID into co
+> let n = co.Count()
+> where n >= 10
+> select new { c.Name, OrderCount = n }
+> ```
+>
+> is translated into
+>
+> ```csharp
+> from * in (customers).GroupJoin(
+>     orders,
+>     c => c.CustomerID,
+>     o => o.CustomerID,
+>     (c, co) => new { c, co })
+> let n = co.Count()
+> where n >= 10
+> select new { c.Name, OrderCount = n }
+> ```
+>
+> the final translation of which is
+>
+> ```csharp
+> customers
+>     .GroupJoin(
+>         orders,
+>         c => c.CustomerID,
+>         o => o.CustomerID,
+>         (c, co) => new { c, co })
+>     .Select(x => new { x, n = x.co.Count() })
+>     .Where(y => y.n >= 10)
+>     .Select(y => new { y.x.c.Name, OrderCount = y.n })
+> ```
+>
+> where `x` and `y` are compiler generated identifiers that are otherwise invisible and inaccessible.
+>
+> *end example*
+
+</details>
+
+Following is the new proposed dedicated section for the `join` clauses. This section would be numbered as 11.17.3.6 (pushing down the existing sections), or appended at the end. Note that although the `join into` clause is moved into the new section, it is otherwise completely unaffected by this proposal; `join into` translates to `GroupJoin()`, which already performs a conceptual left join (where an outer element has no correlated inner element, it is returned with an empty inner group).
+
+#### 11.17.3.6 Join clauses
+
+##### 11.17.3.6.1 Join clause
+
+A `join` clause immediately followed by a `select` clause
+
+```csharp
+from «x1» in «e1»  
+join «x2» in «e2» on «k1» equals «k2»  
+select «v»
+```
+
+is translated into
+
+```csharp
+( «e1» ) . Join( «e2» , «x1» => «k1» , «x2» => «k2» , ( «x1» , «x2» ) => «v» )
+```
+
+> *Example*: The example
+>
+> ```csharp
+> from c in customersh
+> join o in orders on c.CustomerID equals o.CustomerID
+> select new { c.Name, o.OrderDate, o.Total }
+> ```
+>
+> is translated into
+>
+> ```csharp
+> (customers).Join(
+>    orders,
+>    c => c.CustomerID, o => o.CustomerID,
+>    (c, o) => new { c.Name, o.OrderDate, o.Total })
+> ```
+>
+> *end example*
+
+A `join` clause followed by a query body clause:
+
+```csharp
+from «x1» in «e1»  
+join «x2» in «e2» on «k1» equals «k2»  
+...
+```
+
+is translated into
+
+```csharp
+from * in ( «e1» ) . Join(  
 «e2» , «x1» => «k1» , «x2» => «k2» ,
 ( «x1» , «x2» ) => new { «x1» , «x2» })  
 ...
 ```
 
-### Nullability of range variables
+The `left` and `right` modifiers of the `join` clause change the translation to the `LeftJoin()` and `RightJoin()` methods respectively, instead of `Join()`. Every other aspect of the translation remains the same.
+
+##### 11.17.3.6.2 Join range variable nullability
 
 A regular (inner) join introduces a range variable whose nullability follows from its source sequence. In other words, given the following code:
 
@@ -215,10 +327,91 @@ select new { o?.OrderDate, o?.Total, c.Name }
 
 In other words, if `o` was non-nullable before the `right join` operation (since `orders` is a sequence of non-nullable elements), the `right join` operation makes it nullable.
 
+##### 11.17.3.6.3 Join into clause
+
+<details>
+<summary>Moved `join into` section, as-is</summary>
+
+A `join`-`into` clause immediately followed by a `select` clause
+
+```csharp
+from «x1» in «e1»  
+join «x2» in «e2» on «k1» equals «k2» into «g»  
+select «v»
+```
+
+is translated into
+
+```csharp
+( «e1» ) . GroupJoin( «e2» , «x1» => «k1» , «x2» => «k2» ,
+                     ( «x1» , «g» ) => «v» )
+```
+
+A `join into` clause followed by a query body clause
+
+```csharp
+from «x1» in «e1»  
+join «x2» in «e2» on «k1» equals «k2» into *g»  
+...
+```
+
+is translated into
+
+```csharp
+from * in ( «e1» ) . GroupJoin(  
+   «e2» , «x1» => «k1» , «x2» => «k2» , ( «x1» , «g» ) => new { «x1» , «g» })
+...
+```
+
+> *Example*: The example
+>
+> ```csharp
+> from c in customers
+> join o in orders on c.CustomerID equals o.CustomerID into co
+> let n = co.Count()
+> where n >= 10
+> select new { c.Name, OrderCount = n }
+> ```
+>
+> is translated into
+>
+> ```csharp
+> from * in (customers).GroupJoin(
+>     orders,
+>     c => c.CustomerID,
+>     o => o.CustomerID,
+>     (c, co) => new { c, co })
+> let n = co.Count()
+> where n >= 10
+> select new { c.Name, OrderCount = n }
+> ```
+>
+> the final translation of which is
+>
+> ```csharp
+> customers
+>     .GroupJoin(
+>         orders,
+>         c => c.CustomerID,
+>         o => o.CustomerID,
+>         (c, co) => new { c, co })
+>     .Select(x => new { x, n = x.co.Count() })
+>     .Where(y => y.n >= 10)
+>     .Select(y => new { y.x.c.Name, OrderCount = y.n })
+> ```
+>
+> where `x` and `y` are compiler generated identifiers that are otherwise invisible and inaccessible.
+>
+> *end example*
+
+</details>
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 
 There are no specific drawbacks to introduce `left join`/`right join` AFAICT. It's worth noting that C# query expression support for LINQ hasn't evolved in a long time - this would be the first change in quite a while. At the same time, AFAIK there hasn't been any formal deprecation/archiving of this area of the language.
+
+Note that the proposed `join` modifiers do not require any LINQ expression tree changes, as they're represented via existing MethodCallExpression's which reference the new `LeftJoin()` and `RightJoin()` methods. There is thus nothing blocking supporting them from LINQ providers (such as EF Core).
 
 ## Alternatives
 [alternatives]: #alternatives
