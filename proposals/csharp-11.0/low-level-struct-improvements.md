@@ -485,7 +485,10 @@ The compiler will report a diagnostic for _unsafe scoped mismatches_ across over
   - The method returns a `ref struct` or returns a `ref` or `ref readonly`, or the method has a `ref` or `out` parameter of `ref struct` type.
   - The method has at least one additional `ref`, `in`, or `out` parameter, or a parameter of `ref struct` type.
 
-The rules above ignore `this` parameters because `ref struct` instance methods cannot be used for overrides, interface implementations, or delegate conversions.
+The diagnostic is not reported in other cases because
+- the methods with such signatures cannot capture the refs passed in, so any scoped mismatch is not dangerous,
+- these include very common and simple scenarios (e.g., plain old `out` parameters which are used in `TryParse` method signatures)
+  and reporting scoped mismatches just because they are used across LangVersion 11 (and hence the `out` parameter is differently scoped) would be confusing.
 
 The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safe context rules; otherwise, the diagnostic is a _warning_.
 
