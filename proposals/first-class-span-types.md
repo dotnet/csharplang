@@ -1,5 +1,7 @@
 # First-class Span Types
 
+Champion issue: https://github.com/dotnet/csharplang/issues/8714
+
 ## Summary
 
 We introduce first-class support for `Span<T>` and `ReadOnlySpan<T>` in the language, including new implicit conversion types and consider them in more places,
@@ -312,7 +314,9 @@ Calling `x.Reverse()` where `x` is an instance of type `T[]`
 would previously bind to `IEnumerable<T> Enumerable.Reverse<T>(this IEnumerable<T>)`,
 whereas now it binds to `void MemoryExtensions.Reverse<T>(this Span<T>)`.
 Unfortunately these APIs are incompatible (the latter does the reversal in-place and returns `void`).
-The best solution would be if the BCL introduced an array-specific overload like `IEnumerable<T> Reverse<T>(this T[])`.
+
+.NET 10 mitigates this by adding an array-specific overload `IEnumerable<T> Reverse<T>(this T[])`,
+see https://github.com/dotnet/runtime/issues/107723.
 
 ```cs
 void M(int[] a)
@@ -321,6 +325,10 @@ void M(int[] a)
     foreach (var x in Enumerable.Reverse(a)) { } // workaround
 }
 ```
+
+See also:
+- https://developercommunity.visualstudio.com/t/Extension-method-SystemLinqEnumerable/10790323
+- https://developercommunity.visualstudio.com/t/Compilation-Error-When-Calling-Reverse/10818048
 
 #### Ambiguities
 
@@ -341,13 +349,16 @@ Assert.Equal(x, s); // previously Assert.Equal<T>(T, T), now ambiguous with Asse
 Assert.Equal(x.AsSpan(), s); // workaround
 ```
 
+xUnit is adding more overloads to mitigate this: https://github.com/xunit/xunit/discussions/3021.
+
 #### Covariant arrays
 
 Overloads taking `IEnumerable<T>` worked on covariant arrays,
 but overloads taking `Span<T>` (which we now prefer) don't,
 because the span conversion throws an `ArrayTypeMismatchException` for covariant arrays.
 Arguably, the `Span<T>` overload should not exist, it should take `ReadOnlySpan<T>` instead.
-To work around this, users can use `.AsEnumerable()` or API authors can use `OverloadResolutionPriorityAttribute`.
+To work around this, users can use `.AsEnumerable()`, or API authors can use `OverloadResolutionPriorityAttribute`
+or add `ReadOnlySpan<T>` overload which is preferred due to [the betterness rule](#better-conversion-target).
 
 ```cs
 string[] s = new[] { "a" };
@@ -361,10 +372,51 @@ static class C
     public static void R<T>(IEnumerable<T> e) => Console.Write(1);
     public static void R<T>(Span<T> s) => Console.Write(2);
     // another workaround:
-    [OverloadResolutionPriority(1)]
     public static void R<T>(ReadOnlySpan<T> s) => Console.Write(3);
 }
 ```
+
+#### Preferring ReadOnlySpan over Span
+
+The [betterness rule](#better-conversion-target) causes preference of ReadOnlySpan overloads over Span overloads
+to avoid `ArrayTypeMismatchException`s in [covariant array scenarios](#covariant-arrays).
+That can lead to compilation breaks in some scenarios, for example when the overloads differ by their return type:
+
+```cs
+double[] x = new double[0];
+Span<ulong> y = MemoryMarshal.Cast<double, ulong>(x); // previously worked, now a compilation error (returns ReadOnlySpan, not Span)
+Span<ulong> z = MemoryMarshal.Cast<double, ulong>(x.AsSpan()); // workaround
+
+static class MemoryMarshal
+{
+    public static ReadOnlySpan<TTo> Cast<TFrom, TTo>(ReadOnlySpan<TFrom> span) => default;
+    public static Span<TTo> Cast<TFrom, TTo>(Span<TFrom> span) => default;
+}
+```
+
+See https://github.com/dotnet/roslyn/issues/76443.
+
+#### Expression trees
+
+Overloads taking spans like `MemoryExtensions.Contains` are preferred over classic overloads like `Enumerable.Contains`,
+even inside expression trees - but ref structs are not supported by the interpreter engine:
+
+```cs
+Expression<Func<int[], int, bool>> exp = (array, num) => array.Contains(num);
+exp.Compile(preferInterpretation: true); // fails at runtime in C# 14
+
+Expression<Func<int[], int, bool>> exp2 = (array, num) => Enumerable.Contains(array, num); // workaround
+exp2.Compile(preferInterpretation: true); // ok
+```
+
+Similarly, translation engines like LINQ-to-SQL need to react to this
+if their tree visitors expect `Enumerable.Contains` because they will encounter `MemoryExtensions.Contains` instead.
+
+See also:
+- https://github.com/dotnet/runtime/issues/109757
+- https://github.com/dotnet/docs/issues/43952
+- https://github.com/dotnet/efcore/issues/35100
+- https://github.com/dotnet/csharplang/discussions/8959
 
 #### User-defined conversions through inheritance
 

@@ -38,7 +38,6 @@ extension_member_declaration // add
     | property_declaration
     | indexer_declaration
     | operator_declaration
-    | type_declaration
     ;
 
 receiver_parameter // add
@@ -313,7 +312,111 @@ However, beyond implementing the language semantics it must satisfy certain requ
 
 These requirements need more refinement as implementation progresses, and may need to be compromised in corner cases in order to allow for a reasonable implementation approach.
 
+### Metadata for declarations
+
+Each extension container is emitted as a nested private static class with a marker method and skeleton members.  
+Each skeleton member is accompanied by a top-level static implementation method with a modified signature.  
+
+#### Skeletons
+
+Each extension container in source is emitted as an extension container in metadata.  
+- Its name is unspeakable and determined based on the lexical order in the program.  
+  The name is not guaranteed to remain stable across re-compilation. 
+  Below we use `<Extension>ee_` followed by an index. For example: `<Extension>ee_2`.  
+- Its type parameters are those declared in source (including attributes).  
+
+Method/property/indexer declarations in an extension container in source are represented as skeleton declarations in metadata.  
+The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw null`.  
+Those should not be referenced in IL.  
+
+Note: This is similar to ref assemblies. The reason for using `throw null` bodies (as opposed to no bodies) 
+is so that IL verification could run and pass (thus validating the completeness of the metadata).
+
+The extension marker method encodes the receiver parameter.  
+- It is public and static, and is called `<Extension>$`.  
+- It has the attributes, refness, type and name from the receiver parameter on the extension container.  
+- If the receiver parameter doesn't specify a name, then the parameter name is empty.  
+
+Note: This allows roundtripping of extension container symbols through metadata (full and reference assemblies).  
+
+Note: we may choose to only emit one extension container in metadata when duplicate extension containers are found in source.  
+
+#### Implementations
+
+The method bodies for method/property/indexer declarations in an extension container in source are emitted 
+as static implementation methods in the top-level static class.  
+- An implementation method is named by prepending `<Extension>` for instance case or `<StaticExtension>` for static case to the name of the original method.  
+  For example: `set_Property` => `<Extension>set_Property`.
+- It has type parameters derived from the extension container prepended to the type parameters of the original method (including attributes).  
+- It has the same accessibility and attributes as the original method.  
+- If it implements a static method, it has the same parameters and return type. 
+- It if implements an instance method, it has a prepended parameter to the signature of the original method. 
+  This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension container.
+- The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension container.  
+
+For example:
+```
+static class IEnumerableExtensions
+{
+    extension<T>(IEnumerable<T> source)
+    {
+        public void Method() { ... }
+        internal static int Property { get => ...; set => ...; }
+    }
+
+    extension(IAsyncEnumerable<int> values)
+    {
+        public async Task<int> SumAsync() { ... }
+    }
+
+    public void Method() { ... }
+}
+```
+is emitted as
+```
+static class IEnumerableExtensions
+{
+    private static class <Extension>ee_1<T>
+    {
+        public static <Extension>$(IEnumerable<T> source) => throw null;
+        public void Method() => throw null;
+        public static int Property { get => throw null; set => throw null; }
+    }
+
+    public static class <Extension>ee_2
+    {
+        public static <Extension>$(IAsyncEnumerable<int> values) => throw null;
+        public Task<int> SumAsync() => throw null;
+    }
+
+    // Implementation for Method
+    public static void <Extension>Method<T>(IEnumerable<T> source) { ... }
+
+    // Implementation for Property
+    internal static int <StaticExtension>get_Property<T>(IEnumerable<T> source) { ... }
+    internal static void <StaticExtension>set_Property<T>(IEnumerable<T> source, int value) { ... }
+
+    // Implementation for SumAsync
+    public static int <Extension>SumAsync(IAsyncEnumerable<int> values) { ... }
+}
+```
+
+Whenever extension members are used in source, we will emit those as reference to implementation methods.  
+For example: an invocation of `enumerableOfInt.Method()` would be emitted as a static call 
+to `IEnumerableExtensions.<Extension>Method<int>(enumerableOfInt)`.  
+
+Note: multiple extension containers defining static members with the same signature cannot be represented in metadata.  
+
 ## Open issues
+
+### Metadata
+
+- Should we emit implementation methods with speakable names instead, as a disambiguation strategy and also to allow
+  usage from other languages?
+- The metadata format currently doesn't include any modreqs to block other compilers. But the spec does mention we
+  would block those scenarios. Let's either remove this requirement or update the metadata format.  
+- We should follow-up on "factory scenario" where multiple extension containers have static factory methods 
+  with same parameter types but different return types.
 
 ### Add support for more member kinds
 
@@ -341,6 +444,16 @@ extension_member_declaration // add
     | type_declaration
     ;
 ```
+
+#### Nested types
+
+If we do choose to move forward with extension nested types, here are some notes from previous discussions:
+- There would be a conflict if two extension containers declared nested extension types with same names and arity.
+  We do not have a solution for representing this in metadata.  
+- The rough approach we discussed for metadata:
+  1. we would emit a skeleton nested type with original type parameters and no members
+  2. we would emit an implementation nested type with prepended type parameters from the extension container and 
+     all the member implementations as they appear in source (modulo references to type parameters)
 
 #### Constructors
 

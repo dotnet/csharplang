@@ -1,11 +1,60 @@
 # Collection expression arguments
 
+Champion issue: https://github.com/dotnet/csharplang/issues/8887
+
+## Motivation
+
 The [*dictionary expression*](https://github.com/dotnet/csharplang/blob/main/proposals/dictionary-expressions.md)
- feature has identified a need for collection expressions to pass along user-specified data in order to configure
-  the behavior of the final collection.  Specifically, dictionaries allow users to customize how their keys compare,
-   using them to define equality between keys, and sorting or hashing (in the case of sorted or hashed collections
-    respectively).  This need applies when creating any sort of dictionary type (like `D d = new D(...)`,
-     `D d = D.CreateRange(...)` and even `IDictionary<...> d = <synthesized dict>`)
+feature has identified a need for collection expressions to pass along user-specified data in order to configure
+the behavior of the final collection.  Specifically, dictionaries allow users to customize how their keys compare,
+using them to define equality between keys, and sorting or hashing (in the case of sorted or hashed collections
+respectively).  This need applies when creating any sort of dictionary type (like `D d = new D(...)`,
+`D d = D.CreateRange(...)` and even `IDictionary<...> d = <synthesized dict>`)
+
+To support this, a new `with(...arguments...)` element is proposed as the first element of a collection expression
+like so:
+
+```c#
+Dictionary<string, int> nameToAge = [with(comparer), .. d1, .. d2, .. d3];
+```
+
+1. When translating to a `new CollectionType(...)` call, these `...arguments...` are used to determine the appropriate
+constructor and are passed along accordingly.
+2. When translating to a `CollectionFactory.Create` call, these 
+`...arguments...` are passed before with the `ReadOnlySpan<ElementType>` elements argument, all of which are 
+used to determine the appropriate `Create` overload, and are passed along accordingly.
+3. When translating to an interface (like `IDictionary<,>`) only a single argument is allowed.  It implements one of
+   the well-known BCL comparer interfaces, and will be used to control the key comparing semantics of the final instance.
+
+This syntax was chosen as it:
+
+1. Keeps all information within the `[...]` syntax.  Ensuring that the code still clearly indicates a collection being created.
+2. Does not imply calling a `new` constructor (when that isn't how all collections are created).
+3. Does not imply creating/copying the values of the collection multiple times (like a postfix `with { ... }` might.
+4. Is both not subtle, while also not being excessively verbose.  For example, using `;` instead of `,` to indicate
+   arguments is a very easy piece of syntax to miss.  `with()` only adds 6 characters, and will easily stand out,
+   especially with syntax coloring of the `with` keyword.
+6. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
+7. Solves the need for comparers for both dictionaries and sets.
+8. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled. 
+
+A minor question exists if the preferred form would be `args(...)` instead of `with(...)`.  But the forms are otherwise identical.
+
+Open question: Should any support for passing a comparer be provided at all?  Yes/No.
+
+Working group recommendation: Yes.  Comparers are critical for proper behaving of collections, and examination of many packages
+indicates usage of them to customize collection behavior.
+
+Open question: If support for comparers is desired, should it be through a feature specific to *only* comparers?  Or should it
+handle arbitrary arguments?
+
+Working group recommendation: Support arbitrary arguments.  This solves both the 'comparer' issue, while nipping all present and
+future argument concerns in the bud.  For example, users who need to customize performance-oriented arguments (like 'capacity')
+now have a solution beyond waiting for the compiler to support the patterns they are using with the codegen they desire.
+
+## Design Philosophy
+
+The below section covers prior design philosophy discussions.  Including why certain forms were rejected. 
 
 There are two main directions we can go in to supply this user-defined data.  The first is to special case *only*
  values in the *comparer* space (which we define as types inheriting from the BCL's `IComparer<T>` or

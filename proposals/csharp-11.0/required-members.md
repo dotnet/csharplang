@@ -61,7 +61,7 @@ As a workaround to avoid this duplication, we have long seen consumers embracing
 major downsides:
 
 1. The object hierarchy has to be fully mutable, with `set` accessors on every property.
-2. There is no way to ensure that every instantation of an object from the graph sets every member.
+2. There is no way to ensure that every instantiation of an object from the graph sets every member.
 
 C# 9 again addressed the first issue here, by introducing the `init` accessor: with it, these properties can be set on object creation/initialization, but not subsequently. However,
 we again still have the second issue: properties in C# have been optional since C# 1.0. Nullable reference types, introduced in C# 8.0, addressed part of this issue: if a constructor
@@ -346,7 +346,11 @@ _ = new Range { Start = new Location { Column = 0, Line = 0 }, End = new Locatio
 
 ### Level of enforcement for `init` clauses
 
-Do we strictly enforce that members specified in a `init` clause without an initializer must initialize all members? It seems likely that we do, otherwise we create an
+The `init` clause feature wasn't implemented in C# 11. It remains an active proposal.
+
+<details>
+
+Do we strictly enforce that members specified in an `init` clause without an initializer must initialize all members? It seems likely that we do, otherwise we create an
 easy pit-of-failure. However, we also run the risk of reintroducing the same problems we solved with `MemberNotNull` in C# 9. If we want to strictly enforce this, we
 will likely need a way for a helper method to indicate that it sets a member. Some possible syntaxes we've discussed for this:
 
@@ -362,6 +366,8 @@ to the init clause to indicate the compiler should not check for initialization.
 around init methods and annotating every method as setting members X or Y. `!` was chosen because we already use it for suppressing nullable warnings, and using it to
 tell the compiler "I'm smarter than you" in another place is a natural extension of the syntax form.
 
+</details>
+
 ### Required interface members
 
 This proposal does not allow interfaces to mark members as required. This protects us from having to figure out complex scenarios around `new()` and interface
@@ -370,6 +376,10 @@ forbid `required` in interfaces, and forbid types with _required\_member\_lists_
 take a broader look at generic construction scenarios with factories, we can revisit this issue.
 
 ### Syntax questions
+
+The `init` clause feature wasn't implemented in C# 11. It remains an active proposal.
+
+<details>
 
 * Is `init` the right word? `init` as a postfix modifier on the constructor might interfere if we ever want to reuse it for factories and also enable `init`
 methods with a prefix modifier. Other possibilities:
@@ -390,7 +400,13 @@ methods with a prefix modifier. Other possibilities:
 
 **Conclusion**: We have removed the `init` constructor clause for now, and are proceeding with `required` as the property modifier.
 
+</details>
+
 ### Init clause restrictions
+
+The `init` clause feature wasn't implemented in C# 11. It remains an active proposal.
+
+<details>
 
 Should we allow access to `this` in the init clause? If we want the assignment in `init` to be a shorthand for assigning the member in the constructor itself, it seems
 like we should.
@@ -400,7 +416,13 @@ functions, which the init clause may want to access, or for name shadowing, if a
 
 **Conclusion**: `init` clause has been removed.
 
+</details>
+
 ### Accessibility requirements and `init`
+
+The `init` clause feature wasn't implemented in C# 11. It remains an active proposal.
+
+<details>
 
 In versions of this proposal with the `init` clause, we talked about being able to have the following scenario:
 
@@ -433,6 +455,8 @@ only ever created via static `Create` methods or similar builders, but the utili
 previously.
 
 **Conclusion**: Option 1, all required members must be at least as visible as their containing type.
+
+</details>
 
 ### Override rules
 

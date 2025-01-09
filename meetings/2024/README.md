@@ -1,33 +1,20 @@
-# Upcoming meetings for 2024
-
-All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
-
-## Schedule ASAP
-
-## Schedule when convenient
-
-- Triage (working set)
-
-## Recurring topics
-
-- *Triage championed features and milestones*
-- *Design review*
-
-## Schedule
-
-### Wed Dec 18, 2024
-
-### Mon Dec 16, 2024
-
-### Wed Dec 11, 2024
+# C# Language Design Notes for 2024
 
 ### Mon Dec 9, 2024
 
+[C# Language Design Meeting for December 9th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-12-09.md)
+
+- First-class span open questions
+- Simple Lambda Parameters
+- Collection expression arguments
+
 ### Wed Dec 4, 2024
 
-- First-class Span open questions: [preferring ReadOnlySpan over Span](../../proposals/first-class-span-types.md#prefer-converting-from-t-to-readonlyspant-over-spant-in-overload-resolution) and [expression trees](../../proposals/first-class-span-types.md#ignore-span-conversions-in-expression-trees) (Jan)
-  
-## C# Language Design Notes for 2024
+[C# Language Design Meeting for December 4th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-12-04.md)
+
+- First-class span open questions
+    - Preferring `ReadOnlySpan<T>` over `Span<T>` conversions
+    - Conversions in expression trees
 
 ### Wed Nov 20, 2024
 

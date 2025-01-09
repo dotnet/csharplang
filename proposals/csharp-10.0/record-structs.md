@@ -23,7 +23,7 @@ definite assignment for `this` in constructor, destructors, ...).
 Record structs will also follow the same rules as structs for parameterless instance constructors and field initializers,
 but this document assumes that we will lift those restrictions for structs generally.
 
-See [§15.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/structs.md#1549-constructors)
+See [§16.4.9](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#1649-constructors)
 See [parameterless struct constructors](./parameterless-struct-constructors.md) spec.
 
 Record structs cannot use `ref` modifier.
@@ -40,7 +40,7 @@ Members are synthesized unless a member with a "matching" signature is declared 
 an accessible concrete non-virtual member with a "matching" signature is inherited.
 Two members are considered matching if they have the same
 signature or would be considered "hiding" in an inheritance scenario.
-See Signatures and overloading [§7.6](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/basic-concepts.md#76-signatures-and-overloading).
+See Signatures and overloading [§7.6](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/basic-concepts.md#76-signatures-and-overloading).
 It is an error for a member of a record struct to be named "Clone".
 
 It is an error for an instance field of a record struct to have an unsafe type.

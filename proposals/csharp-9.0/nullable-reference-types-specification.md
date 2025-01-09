@@ -2,7 +2,18 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
-***This is a work in progress - several parts are missing or incomplete.***
+> ***The portions of this feature that were part of C# 8 have been incorporated into the standard. See:***
+>
+> - [§6.5.9 Nullable directive](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/lexical-structure.md#659-nullable-directive)
+> - [§8.4.5 Satisfying constraints](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#845-satisfying-constraints)
+> - [§8.9 Reference Types and nullability](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/types.md#89-reference-types-and-nullability)
+> - [§10.2.6 Implicit nullable conversions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1026-implicit-nullable-conversions)
+> - [§10.3.4 Explicit nullable conversions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1034-explicit-nullable-conversions)
+> - [§12.8.9 Null-forgiving expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1289-null-forgiving-expressions)
+> - [§15.2.5 Type parameter constraints](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1525-type-parameter-constraints)
+> - [§22.5.7 Code analysis attributes](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/attributes.md#2257-code-analysis-attributes)
+>
+> Those areas include the majority of this feature. The notable exception is the [`default` constraint](#default-constraint). This document contains much more detail on the implementation of nullable analysis provided by the roslyn compiler.
 
 This feature adds two new kinds of nullable types (nullable reference types and nullable generic types) to the existing nullable value types, and introduces a static flow analysis for purpose of null-safety.
 
