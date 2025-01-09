@@ -7,7 +7,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
-- [`fieldof()`](../../proposals/fieldof.md) (Rikki)
 
 ## Recurring topics
 
@@ -29,6 +28,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Disambiguation syntax (Mads)
 
 ### Wed Jan 15, 2025
+
+- [`fieldof()`](../../proposals/fieldof.md) (Rikki)
+- Triage
 
 ### Mon Jan 13, 2025
 
