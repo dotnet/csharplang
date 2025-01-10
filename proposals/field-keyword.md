@@ -102,7 +102,7 @@ Since `field` is a keyword and not an identifier, it can only be "shadowed" by a
 
 If a variable named `field` is declared in a property accessor, an error is reported.
 
-If an expression `field` would bind to a symbol with language version 13 or earlier, a warning may be reported.
+If an expression `field` would bind to an existing symbol with language version 13 or earlier, a warning is reported.
 
 ### Field-targeted attributes
 
