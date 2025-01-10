@@ -124,15 +124,15 @@ The design of this form would be as follows:
 
 ```diff
 collection_element
-  | expression_element
-  | spread_element
-  | key_value_pair_element
-  | with_element
-  ;
+   : expression_element
+   | spread_element
+   | key_value_pair_element
++  | with_element
+   ;
 
-with_element
-  | 'with' argument_list
-  ;
++with_element
++  : 'with' argument_list
++  ;
 ```
 
 Examples of how this would look are:
@@ -268,3 +268,44 @@ strongly triggers the view that this is simply an implicit-object-creation.  And
 case where a constructor *is* actually called (like for `Dictionary<,>`) it is misleading when calling a *create
 method*, or creating an interface.  Finally, there is general apprehension around using `new` at all as there
 is a feeling of redundancy around both the `new` indicating a new instance, *and* `[...]` indicating a new instance.
+
+## Conversions
+
+Collection arguments are *not* considered when determining *collection expression* conversions.
+
+## Construction
+
+Construction is updated as follows.
+
+The elements of a collection expression are evaluated in order, left to right.
+Within *collection arguments*, the arguments are evaluated in order, left to right.
+Each element or argument is evaluated exactly once, and any further references refer to the results of this initial evaluation.
+
+If *collection_arguments* is not the first element in the collection expression, an error is reported.
+
+If the target type is an *array*, *span*, *array interface*, or *generic parameter type*, and the *argument list* is not empty, a binding error is reported.
+
+If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, then:
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
+  * If the *argument list* contains any values with *dynamic* type, the best instance constructor is determined at runtime.
+* If a best instance constructor is found, the constructor is invoked with the *argument list*.
+  * If the constructor has a `params` parameter, the invocation may be in expanded form.
+* Otherwise, a binding error is reported.
+
+If the target type is a type with a *create method*, then:
+* The *argument list* is a concatenation of *some `ReadOnlySpan<T>` value (TBD)* and any explicit *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list*.
+  * If the *argument list* contains any values with *dynamic* type, the best factory method is determined at runtime.
+* If a best factory method is found, the method is invoked with the *argument list*.
+  * If the constructor has a `params` parameter, the invocation may be in expanded form.
+* Otherwise, a binding error is reported.
+
+If the target type is a *dictionary interface* with type arguments `K` and `V`, and the *argument list* is not empty, then:
+* If the *argument list* is a single value, implicitly convertible to `IEqualityComparer<K>`, and optionally with name `comparer`, a dictionary instance is constructed with that key comparer value.
+* Otherwise, a binding error is reported.
+
+*Describe breaking changes resulting from using overload resolution with collection builders vs. C#12.*
+
+## Open questions
+
+1. Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
