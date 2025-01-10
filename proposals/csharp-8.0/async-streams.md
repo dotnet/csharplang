@@ -30,12 +30,12 @@ namespace System
     }
 }
 ```
-As with `Dispose`, invoking `DisposeAsync` multiple times is acceptable, and subsequent invocations after the first should be treated as nops, returning a synchronously completed successful task (`DisposeAsync` need not be thread-safe, though, and need not support concurrent invocation).  Further, types may implement both `IDisposable` and `IAsyncDisposable`, and if they do, it's similarly acceptable to invoke `Dispose` and then `DisposeAsync` or vice versa, but only the first should be meaningful and subsequent invocations of either should be a nop.  As such, if a type does implement both, consumers are encouraged to call once and only once the more relevant method based on the context, `Dispose` in synchronous contexts and `DisposeAsync` in asynchronous ones.
+As with `Dispose`, invoking `DisposeAsync` multiple times is acceptable, and subsequent invocations after the first should be treated as no-ops, returning a synchronously completed successful task (`DisposeAsync` need not be thread-safe, though, and need not support concurrent invocation).  Further, types may implement both `IDisposable` and `IAsyncDisposable`, and if they do, it's similarly acceptable to invoke `Dispose` and then `DisposeAsync` or vice versa, but only the first should be meaningful and subsequent invocations of either should be a nop.  As such, if a type does implement both, consumers are encouraged to call once and only once the more relevant method based on the context, `Dispose` in synchronous contexts and `DisposeAsync` in asynchronous ones.
 
-(I'm leaving discussion of how `IAsyncDisposable` interacts with `using` to a separate discussion.  And coverage of how it interacts with `foreach` is handled later in this proposal.)
+(How `IAsyncDisposable` interacts with `using` is a separate discussion.  And coverage of how it interacts with `foreach` is handled later in this proposal.)
 
 Alternatives considered:
-- _`DisposeAsync` accepting a `CancellationToken`_: while in theory it makes sense that anything async can be canceled, disposal is about cleanup, closing things out, free'ing resources, etc., which is generally not something that should be canceled; cleanup is still important for work that's canceled.  The same `CancellationToken` that caused the actual work to be canceled would typically be the same token passed to `DisposeAsync`, making `DisposeAsync` worthless because cancellation of the work would cause `DisposeAsync` to be a nop.  If someone wants to avoid being blocked waiting for disposal, they can avoid waiting on the resulting `ValueTask`, or wait on it only for some period of time.
+- _`DisposeAsync` accepting a `CancellationToken`_: while in theory it makes sense that anything async can be canceled, disposal is about cleanup, closing things out, free'ing resources, etc., which is generally not something that should be canceled; cleanup is still important for work that's canceled.  The same `CancellationToken` that caused the actual work to be canceled would typically be the same token passed to `DisposeAsync`, making `DisposeAsync` worthless because cancellation of the work would cause `DisposeAsync` to be a no-op.  If someone wants to avoid being blocked waiting for disposal, they can avoid waiting on the resulting `ValueTask`, or wait on it only for some period of time.
 - _`DisposeAsync` returning a `Task`_: Now that a non-generic `ValueTask` exists and can be constructed from an `IValueTaskSource`, returning `ValueTask` from `DisposeAsync` allows an existing object to be reused as the promise representing the eventual async completion of `DisposeAsync`, saving a `Task` allocation in the case where `DisposeAsync` completes asynchronously.
 - _Configuring `DisposeAsync` with a `bool continueOnCapturedContext` (`ConfigureAwait`)_: While there may be issues related to how such a concept is exposed to `using`, `foreach`, and other language constructs that consume this, from an interface perspective it's not actually doing any `await`'ing and there's nothing to configure... consumers of the `ValueTask` can consume it however they wish.
 - _`IAsyncDisposable` inheriting `IDisposable`_:  Since only one or the other should be used, it doesn't make sense to force types to implement both.
@@ -86,6 +86,10 @@ Discarded options considered:
 - _`IAsyncEnumerator<T>` not implementing `IAsyncDisposable`_: We could choose to separate these.  However, doing so complicates certain other areas of the proposal, as code must then be able to deal with the possibility that an enumerator doesn't provide disposal, which makes it difficult to write pattern-based helpers.  Further, it will be common for enumerators to have a need for disposal (e.g. any C# async iterator that has a finally block, most things enumerating data from a network connection, etc.), and if one doesn't, it is simple to implement the method purely as `public ValueTask DisposeAsync() => default(ValueTask);` with minimal additional overhead.
 - _ `IAsyncEnumerator<T> GetAsyncEnumerator()`: No cancellation token parameter.
 
+The following subsection discuss alternatives that weren't chosen.
+
+<details>
+
 #### Viable alternative:
 
 ```csharp
@@ -131,6 +135,8 @@ However, there are non-trivial downsides, including significantly increased comp
 
 Discarded options considered:
 - `ValueTask<bool> WaitForNextAsync(); bool TryGetNext(out T result);`: `out` parameters can't be covariant.  There's also a small impact here (an issue with the try pattern in general) that this likely incurs a runtime write barrier for reference type results.
+
+</details>
 
 #### Cancellation
 
@@ -191,7 +197,7 @@ No syntax would be provided that would support using either the async or the syn
 
 ### Semantics
 
-The compile-time processing of an `await foreach` statement first determines the ***collection type***, ***enumerator type*** and ***iteration type*** of the expression (very similar to https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/statements.md#1295-the-foreach-statement). This determination proceeds as follows:
+The compile-time processing of an `await foreach` statement first determines the ***collection type***, ***enumerator type*** and ***iteration type*** of the expression (very similar to https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement). This determination proceeds as follows:
 
 - If the type `X` of *expression* is `dynamic` or an array type, then an error is produced and no further steps are taken.
 - Otherwise, determine whether the type `X` has an appropriate `GetAsyncEnumerator` method:
@@ -303,7 +309,7 @@ namespace System.Threading.Tasks
                 private readonly IAsyncEnumerator<T> _enumerator;
                 private readonly bool _continueOnCapturedContext;
 
-                internal Enumerator(IAsyncEnumerator<T> enumerator, bool continueOnCapturedContext)
+                internal ConfiguredAsyncEnumerator(IAsyncEnumerator<T> enumerator, bool continueOnCapturedContext)
                 {
                     _enumerator = enumerator;
                     _continueOnCapturedContext = continueOnCapturedContext;
