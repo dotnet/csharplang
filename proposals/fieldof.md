@@ -230,7 +230,7 @@ The "encapsulation" behavior, as it currently exists in absence of `fieldof()`, 
 
 If we think that there are justified construction-specific cases for using the backing field directly, then perhaps there are also valid post-construction cases as well, that we may not know about yet, and it's not justified to put in a *cliff*, saying: sorry, only during initialization or in the accessors. Instead, we could simply see what the user is trying to do, and get out of their way.
 
-At the same time, `field` was thought to be a stepping stone toward a more general "property scoped fields" feature--where it seems much harder to justify accessing the fields outside of the property.
+At the same time, `field` was thought to be a stepping stone toward a more general "property scoped fields" feature--where it seems much harder to justify accessing the fields outside of the property. The *just get out of the user's way* line of reasoning also seems to lead to letting people specify any accessibility for the backing field, which somehow seems a little too far.
 
 Ultimately what is happening here is that the `field` feature is providing both *encapsulation* and *association* benefits. The question is whether to allow users to drop the *encapsulation* part, if they wish, and keep the *association* part.
 
