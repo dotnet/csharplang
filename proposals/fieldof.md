@@ -18,17 +18,13 @@ class C
     {
         this.store = store;
 
-        // allows giving an initial value for 'this.Prop'
-        // without calling 'Store.WritePropToDisk()' thru the setter
         fieldof(this.Prop) = store.ReadPropFromDisk();
-
-        // 'fieldof()' allows general usage of the field from an initialization context, a la writability of 'readonly' fields.
         M(ref fieldof(this.Prop));
     }
 
     void Method()
     {
-        // error: 'fieldof' can only be used during initialization
+        // error: 'fieldof' can only be used during initialization (see also Alternatives)
         fieldof(this.Prop) = "a";
     }
 
@@ -143,7 +139,7 @@ class C
 }
 ```
 
-The fact that a property initializer is permitted to "bypass" the setter logic is necessary and useful. We think that allowing such "bypass" to occur in constructors of the same type is useful for the same reasons. Because the capability remains limited to construction-time, we believe it preserves and reinforces the benefits of using the `field` keyword.
+The fact that a property initializer (and by extension, a primary constructor) is permitted to "bypass" the setter logic is necessary and useful. We think that allowing such "bypass" to occur in ordinary constructors of the same type is useful for the same reasons. Because the capability remains limited to construction-time, we believe it preserves and reinforces the benefits of using the `field` keyword.
 
 ## Detailed design
 [design]: #detailed-design
@@ -212,7 +208,31 @@ The motivating scenarios may not rise to the level of justifying a new contextua
 ## Alternatives
 [alternatives]: #alternatives
 
-<!-- What other designs have been considered? What is the impact of not doing this? -->
+### Permit anywhere in the same type
+
+Except for encapsulation, there isn't a specific reason we *need* to limit use of `fieldof()` to initialization. We could instead allow it anywhere in the same type if we wanted, which would effectively make `field` itself just a shorthand for `fieldof()` for the current property.
+
+```cs
+class C
+{
+    string P { get => fieldof(P); set => field = value; }
+
+    void M0()
+    {
+        M1(ref fieldof(P));
+    }
+
+    void M1(ref string s) { }
+}
+```
+
+The "encapsulation" behavior, as it currently exists in absence of `fieldof()`, seems appealing, as it seems to prevent misuse of the field outside the policy of the associated property. However, since `fieldof()` is always a more nested expression than a property access, it seems like users will tend to use the property *anyway* unless they have a specific reason for needing to use the field.
+
+If we think that there are justified construction-specific cases for using the backing field directly, then perhaps there are also valid post-construction cases as well, that we may not know about yet, and it's not justified to put in a *cliff*, saying: sorry, only during initialization or in the accessors. Instead, we could simply see what the user is trying to do, and get out of their way.
+
+At the same time, `field` was thought to be a stepping stone toward a more general "property scoped fields" feature--where it seems much harder to justify accessing the fields outside of the property.
+
+Ultimately what is happening here is that the `field` feature is providing both *encapsulation* and *association* benefits. The question is whether to allow users to drop the *encapsulation* part, if they wish, and keep the *association* part.
 
 ### Alternate syntaxes
 
