@@ -233,6 +233,10 @@ public struct S
 }
 ```
 
+### Ref-returning properties
+
+Like with auto properties, the `field` keyword will not be available for use in ref-returning properties. Ref-returning properties cannot have set accessors, and without a set accessor, the get accessor and the property initializer would be the only things able to access the backing field. Absent use cases for this, now is not the time for ref-returning properties to start to be able to be written as auto properties.
+
 ### Nullability
 
 A principle of the the Nullable Reference Types feature was to understand existing idiomatic coding patterns in C# and to require as little ceremony as possible around those patterns. The `field` keyword proposal enables simple, idiomatic patterns to address widely asked-for scenarios, such as lazily initialized properties. It's important for the Nullable Reference Types to mesh well with these new coding patterns.
@@ -809,13 +813,3 @@ interface I
 #### Answer
 
 Standardizing around the instance field itself being the cause of the error is consistent with partial properties in classes, and we like that outcome. The recommendation is accepted.
-
-## Open LDM questions
-
-### Feature name
-
-Some options for the name of the feature:
-1. semi-auto properties
-1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
-1. field-backed properties
-1. field keyword
