@@ -226,7 +226,7 @@ class C
 }
 ```
 
-The "encapsulation" behavior, as it currently exists in absence of `fieldof()`, seems appealing, as it seems to prevent misuse of the field outside the policy of the associated property. However, since `fieldof()` is always a more nested expression than a property access, it seems like users will tend to use the property *anyway* unless they have a specific reason for needing to use the field.
+The "encapsulation" behavior, as it currently exists in absence of `fieldof()`, seems appealing, as prevents misuse of the field outside the policy of the associated property. However, since `fieldof()` is always a more nested expression than a property access, it seems like users will tend to use the property *anyway* unless they have a specific reason for needing to use the field.
 
 If we think that there are justified construction-specific cases for using the backing field directly, then perhaps there are also valid post-construction cases as well, that we may not know about yet, and it's not justified to put in a *cliff*, saying: sorry, only during initialization or in the accessors. Instead, we could simply see what the user is trying to do, and get out of their way.
 
