@@ -96,9 +96,13 @@ Set-only properties may also use `field`:
 
 ### Breaking changes
 
-The existence of the `field` contextual keyword within property accessor bodies is a potentially breaking change, proposed as part of a larger [Breaking Changes](https://github.com/dotnet/csharplang/issues/7964) feature.
+The existence of the `field` contextual keyword within property accessor bodies is a potentially breaking change.
 
-Since `field` is a keyword and not an identifier, it can only be "shadowed" by an identifier using the normal keyword-escaping route: `@field`. All identifiers named `field` declared within property accessor bodies can safeguard against breaks when upgrading from C# versions prior to 13 by adding the initial `@`.
+Since `field` is a keyword and not an identifier, it can only be "shadowed" by an identifier using the normal keyword-escaping route: `@field`. All identifiers named `field` declared within property accessor bodies can safeguard against breaks when upgrading from C# versions prior to 14 by adding the initial `@`.
+
+If a variable named `field` is declared in a property accessor, an error is reported.
+
+In language version 14 or later, a warning is reported if a *primary expression* `field` refers to the backing field, but would have referred to a different symbol in an earlier language version.
 
 ### Field-targeted attributes
 
@@ -372,7 +376,7 @@ When the `field` keyword is used in an accessor, the compiler's existing analysi
 
 ### Syntax
 
-When compiling with language version 13 or higher, `field` is considered a keyword when used as a *primary expression* ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-15.md)) in the following locations ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#field-and-value-as-contextual-keywords)):
+When compiling with language version 14 or higher, `field` is considered a keyword when used as a *primary expression* ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-15.md)) in the following locations ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#field-and-value-as-contextual-keywords)):
 - In method bodies of `get`, `set`, and `init` accessors in properties *but not* indexers
 - In attributes applied to those accessors
 - In nested lambda expressions and local functions, and in LINQ expressions in those accessors
