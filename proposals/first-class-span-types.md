@@ -212,7 +212,7 @@ This is based on [collection expressions overload resolution changes][ce-or].
 >
 > - **`T₁` is `System.ReadOnlySpan<E₁>`, `T₂` is `System.Span<E₂>`, and an identity conversion from `E₁` to `E₂` exists**
 > - **`T₁` is `System.ReadOnlySpan<E₁>`, `T₂` is `System.ReadOnlySpan<E₂>`, and an implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists**
-> - **At least one of `T₁` or `T₂` is neither `System.ReadOnlySpan<Eᵢ>` or `System.Span<Eᵢ>`, and** an implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
+> - **At least one of `T₁` or `T₂` is not `System.ReadOnlySpan<Eᵢ>` and is not `System.Span<Eᵢ>`, and** an implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
 > - ...
 
 The *better conversion from expression* rule should ensure that whenever an overload becomes applicable due to the new span conversions,
