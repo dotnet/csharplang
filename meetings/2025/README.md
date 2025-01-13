@@ -35,7 +35,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Jan 13, 2025
 
-- Discriminated Union updates
+- Discriminated Union updates (Mads and others)
+    - https://github.com/dotnet/csharplang/blob/main/proposals/TypeUnions.md
+    - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md
 
 ## C# Language Design Notes for 2025
 
