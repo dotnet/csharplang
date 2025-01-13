@@ -207,7 +207,7 @@ Because interfaces may now contain executable code, it is useful to abstract com
 
 > ***Open issue***: should we permit interface methods to be `protected` or `internal` or other access? If so, what are the semantics? Are they `virtual` by default? If so, is there a way to make them non-virtual?
 
-> ***Open issue***: If we support static methods, should we support (static) operators? **Decision: NO**
+> ***Closed issue***: If we support static methods, should we support (static) operators? **Decision: YES**
 
 ### Base interface invocations
 
@@ -748,17 +748,11 @@ but `C` is not recompiled. What happens when the program is run? An invocation o
 
 ### Permit `partial` in interface? (closed)
 
-This was not implemented in C# 8.
-
-<details>
-
 Given that interfaces may be used in ways analogous to the way abstract classes are used, it may be useful to declare them `partial`. This would be particularly useful in the face of generators.
 
 > ***Proposal:*** Remove the language restriction that interfaces and members of interfaces may not be declared `partial`.
 
 ***Decision***: Yes. See <https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#permit-partial-in-interface>.
-
-</details>
 
 ### `Main` in an interface? (closed)
 
@@ -788,7 +782,7 @@ There are a few ways to observe whether an override declaration introduces a new
 ```csharp
 interface IA
 {
-void M(int x) { }
+    void M(int x) { }
 }
 interface IB : IA
 {
