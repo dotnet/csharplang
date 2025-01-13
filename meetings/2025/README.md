@@ -33,13 +33,11 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - [`fieldof()`](../../proposals/fieldof.md) (Rikki)
 - Triage
 
-### Mon Jan 13, 2025
-
-- Discriminated Union updates (Mads and others)
-    - https://github.com/dotnet/csharplang/blob/main/proposals/TypeUnions.md
-    - https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/discriminated-unions/Union%20implementation%20challenges.md
-
 ## C# Language Design Notes for 2025
+
+[C# Language Design Meeting for January 13th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-13.md)
+
+- Discriminated Unions
 
 ### Mon Jan 6, 2025
 
