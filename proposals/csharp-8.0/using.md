@@ -121,7 +121,7 @@ using (var r = new Resource())
 }
 ```
 
-This will allow developers to leverage `using` for `ref struct` types. These types can't implement interfaces today and hence can't participate in `using`
+This will allow developers to leverage `using` for `ref struct` types. These types can't implement interfaces in C# 8 and hence can't participate in `using`
 statements.
 
 The same restrictions from a traditional `using` statement apply here as well: local variables 
@@ -146,6 +146,10 @@ a `void` return type. It cannot be an extension method.
 
 ## Considerations
 
+Neither of these considerations were implemented in C# 8
+
+<details>
+
 ### case labels without blocks
 
 A `using declaration` is illegal directly inside a `case` label due to complications around its 
@@ -160,3 +164,5 @@ ease of the work around (just add a block to the `case` label) didn't justify ta
 A `fixed` statement has all of the properties of `using` statements that motivated the ability
 to have `using` locals. Consideration should be given to extending this feature to `fixed` locals
 as well. The lifetime and ordering rules should apply equally well for `using` and `fixed` here.
+
+</details>

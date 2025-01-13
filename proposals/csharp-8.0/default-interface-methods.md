@@ -80,8 +80,6 @@ Within an instance member of an interface, `this` has the type of the enclosing 
 
 The syntax for an interface is relaxed to permit modifiers on its members. The following are permitted: `private`, `protected`, `internal`, `public`, `virtual`, `abstract`, `sealed`, `static`, `extern`, and `partial`.
 
-> ***TODO***: check what other modifiers exist.
-
 An interface member whose declaration includes a body is a `virtual` member unless the `sealed` or `private` modifier is used. The `virtual` modifier may be used on a function member that would otherwise be implicitly `virtual`. Similarly, although `abstract` is the default on interface members without bodies, that modifier may be given explicitly. A non-virtual member may be declared using the `sealed` keyword.
 
 It is an error for a `private` or `sealed` function member of an interface to have no body. A `private` function member may not have the modifier `sealed`.
@@ -143,8 +141,6 @@ The `abstract` modifier is required in the declaration of `IB.M`, to indicate th
 
 This is useful in derived interfaces where the default implementation of a method is inappropriate and a more appropriate implementation should be provided by implementing classes.
 
-> ***Open Issue:*** Should reabstraction be permitted?
-
 ### The most specific implementation rule
 
 We require that every interface and class have a *most specific implementation* for every virtual member among the implementations appearing in the type or its direct and indirect interfaces. The *most specific implementation* is a unique implementation that is more specific than every other implementation. If there is no implementation, the member itself is considered the most specific implementation.
@@ -169,13 +165,13 @@ interface IC : IA
 {
     void IA.M() { WriteLine("IC.M"); }
 }
-interface ID : IB, IC { } // error: no most specific implementation for 'IA.M'
+interface ID : IB, IC { } // compiles, but error when a class implements 'ID'
 abstract class C : IB, IC { } // error: no most specific implementation for 'IA.M'
 abstract class D : IA, IB, IC // ok
 {
     public abstract void M();
 }
-
+public class E : ID { } // Error. No most specific implementation for 'IA.M'
 ```
 
 The most specific implementation rule ensures that a conflict (i.e. an ambiguity arising from diamond inheritance) is resolved explicitly by the programmer at the point where the conflict arises.
@@ -189,7 +185,7 @@ abstract class E : IA, IB, IC // ok
 }
 ```
 
-> ***Open issue***: should we support explicit interface abstract implementations in classes?
+> ***Closed issue***: should we support explicit interface abstract implementations in classes? **Decision: NO**
 
 In addition, it is an error if in a class declaration the most specific implementation of some interface method is an abstract implementation that was declared in an interface. This is an existing rule restated using the new terminology.
 
@@ -201,7 +197,7 @@ interface IF
 abstract class F : IF { } // error: 'F' does not implement 'IF.M'
 ```
 
-It is possible for a virtual property declared in an interface to have a most specific implementation for its `get` accessor in one interface and a most specific implementation for its `set` accessor in a different interface. This is considered a violation of the *most specific implementation* rule.
+It is possible for a virtual property declared in an interface to have a most specific implementation for its `get` accessor in one interface and a most specific implementation for its `set` accessor in a different interface. This is considered a violation of the *most specific implementation* rule, and generates a compiler error.
 
 ### `static` and `private` methods
 
@@ -211,9 +207,13 @@ Because interfaces may now contain executable code, it is useful to abstract com
 
 > ***Open issue***: should we permit interface methods to be `protected` or `internal` or other access? If so, what are the semantics? Are they `virtual` by default? If so, is there a way to make them non-virtual?
 
-> ***Open issue***: If we support static methods, should we support (static) operators?
+> ***Closed issue***: If we support static methods, should we support (static) operators? **Decision: YES**
 
 ### Base interface invocations
+
+The syntax in this section hasn't been implemented. It remains an active proposal.
+
+<details>
 
 Code in a type that derives from an interface with a default method can explicitly invoke that interface's "base" implementation.
 
@@ -235,7 +235,6 @@ interface I3 : I1, I2
    // an explicit override that invoke's a base interface's default method
    void I0.M() { I2.base.M(); }
 }
-
 ```
 
 An instance (nonstatic) method is permitted to invoke the implementation of an accessible instance method in a direct base interface nonvirtually by naming it using the syntax `base(Type).M`. This is useful when an override that is required to be provided due to diamond inheritance is resolved by delegating to one particular base implementation.
@@ -261,6 +260,8 @@ class D : IA, IB, IC
 ```
 
 When a `virtual` or `abstract` member is accessed using the syntax `base(Type).M`, it is required that `Type` contains a unique *most specific override* for `M`.
+
+</details>
 
 ### Binding base clauses
 
@@ -555,7 +556,7 @@ The previous question implicitly assumes that the `sealed` modifier can be appli
 
 > ***Closed Issue:*** Should we permit sealing an override?
 
-***Decision:*** (2017-04-18) Let's not allowed `sealed` on overrides in interfaces. The only use of `sealed` on interface members is to make them non-virtual in their initial declaration.
+***Decision:*** (2017-04-18) Let's not allow `sealed` on overrides in interfaces. The only use of `sealed` on interface members is to make them non-virtual in their initial declaration.
 
 ### Diamond inheritance and classes (closed)
 
@@ -655,6 +656,10 @@ Console.WriteLine(t.P); // prints 0
 
 ### Base interface invocations (closed)
 
+This decision was not implemented in C# 8. The `base(Interface).M()` syntax is not implemented.
+
+<details>
+
 The draft spec suggests a syntax for base interface invocations inspired by Java: `Interface.base.M()`. We need to select a syntax, at least for the initial prototype. My favorite is `base<Interface>.M()`.
 
 > ***Closed Issue:*** What is the syntax for a base member invocation?
@@ -664,6 +669,8 @@ The draft spec suggests a syntax for base interface invocations inspired by Java
 > ***Open Issue:*** Should base interface invocations be permitted in class members?
 
 ***Decision***: Yes. <https://github.com/dotnet/csharplang/blob/master/meetings/2017/LDM-2017-04-19.md#base-invocation>
+
+</details>
 
 ### Overriding non-public interface members (closed)
 
@@ -687,7 +694,7 @@ interface IA
 }
 class C : IA
 {
-    // are these implementations?
+    // are these implementations?  Decision: NO
     internal void MI() {}
     protected void MP() {}
 }
@@ -779,15 +786,15 @@ interface IA
 }
 interface IB : IA
 {
-    override void M(int y) { }
+    override void M(int y) { } // 'override' not permitted
 }
 interface IC : IB
 {
     static void M2()
     {
-        M(y: 3); // permitted?
+        M(y: 3); // permitted? Decision: No.
     }
-    override void IB.M(int z) { } // permitted? What does it override?
+    override void IB.M(int z) { } // permitted? What does it override? Decision: No.
 }
 ```
 
@@ -809,7 +816,7 @@ interface IA
     public virtual int P
     {
         get => 3;
-        private set => { }
+        private set { }
     }
 }
 ```
@@ -835,7 +842,7 @@ class C : IA
     int IA.P
     {
         get => 4;
-        set { }
+        set { } // Decision: Not valid
     }
 }
 ```
@@ -843,6 +850,10 @@ class C : IA
 ***Decision***: The first example looks valid, while the last does not. This is resolved analogously to how it already works in C#. <https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-10-17.md#properties-with-a-private-accessor>
 
 ### Base Interface Invocations, round 2 (closed)
+
+This was not implemented in C# 8.
+
+<details>
 
 Our previous "resolution" to how to handle base invocations doesn't actually provide sufficient expressiveness. It turns out that in C# and the CLR, unlike Java, you need to specify both the interface containing the method declaration and the location of the implementation you want to invoke.
 
@@ -918,6 +929,8 @@ interface I5 : I3
 ```
 
 ***Decision***: Decided on `base(N.I1<T>).M(s)`, conceding that if we have an invocation binding there may be problem here later on. <https://github.com/dotnet/csharplang/blob/master/meetings/2018/LDM-2018-11-14.md#default-interface-implementations>
+
+<details>
 
 ### Warning for struct not implementing default method? (closed)
 
