@@ -171,7 +171,7 @@ abstract class D : IA, IB, IC // ok
 {
     public abstract void M();
 }
-public class E : ID { }// Error. No most specific implementation for 'IA.M'
+public class E : ID { } // Error. No most specific implementation for 'IA.M'
 ```
 
 The most specific implementation rule ensures that a conflict (i.e. an ambiguity arising from diamond inheritance) is resolved explicitly by the programmer at the point where the conflict arises.
