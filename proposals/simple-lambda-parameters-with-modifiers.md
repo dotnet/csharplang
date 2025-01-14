@@ -162,4 +162,56 @@ class C
    lambda parameter, while keeping the modifiers.  This is just another case of that.  This also just falls
    out from the impl (as did supporting attributes on these parameters), so it's more work to try to block
    this.
-   
+
+3. Does 'scoped' influence overload resolution?  For example, if there were multiple overloads of a delegate
+   and one had a 'scoped' parameter, while the other did not, would the presense of 'scoped' influencce
+   overload resolution.
+
+   Recomendation: No.  Do not have 'scoped' influence overload resolution.  That is *already* how things
+   work with normal *explicitly typed* lambdas.  For example:
+
+   ```c#
+   delegate void D<T>(scoped T t) where T : allows ref struct;
+   delegate void E<T>(T t) where T : allows ref struct;
+
+   class C
+   {
+       void M<T>() where T : allows ref struct
+       {
+           M1<T>((scoped T t) => { });
+       }
+
+       void M1<T>(D<T> d) where T : allows ref struct
+       {
+       }
+
+       void M1<T>(E<T> d) where T : allows ref struct
+       {
+       }
+   }
+   ```
+
+   This is ambiguous today.  Despite having 'scoped' on `D<T>` and 'scoped' in the lambda parameter, we
+   do not resolve this.  We do not believe this should change with implicitly typed lambdas.
+
+4. Allow '(scoped x) => ...' lambdas?
+
+   Recommendation: Yes.  If we do not allow this then we can end up in scenarios where a user can write
+   the full explicitly typed lambda, but not the implicitly typed version.  For example:
+
+   ```c#
+   delegate ReadOnlySpan<int> D(scoped ReadOnlySpan<int> x);
+
+   class C
+   {
+       static void Main(string[] args)
+       {
+           D d = (scoped ReadOnlySpan<int> x) => throw null!;
+           D d = (ReadOnlySpan<int> x) => throw null!; // error! 'scoped' is required
+       }
+   }
+   ```
+
+   Removing 'scoped' here would cause an error (the language requires the correspondance in this case between
+   the lambda and delegate.  As we want the user to be able to write lambdas like this, without specifying
+   the type explicitly, that then means that `(scoped x) => ...` needs to be allowed. 
