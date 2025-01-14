@@ -53,6 +53,9 @@ This grammar already considers `modifiers* identifier` to be syntactically legal
 1. `(ref readonly p) =>`, `(scoped ref p) =>`, and `(scoped ref readonly p) =>` will be allowed, just as they are with explicit parameters, due to:
    - [Low-level struct improvements](csharp-11.0/low-level-struct-improvements.md#Syntax) in C# 11
    - [`ref readonly` parameters](csharp-12.0/ref-readonly-parameters.md#parameter-declarations) in C# 12
+1. The presence/absence of a type has no impact on whether a modifier is required or optional.  In other words, if a modifier was required
+   with a type present, it is still required with the type absent.  Similarly, if a modifier was optional with a type present, it is 
+   optional with the type absent.
 
 ### Semantics
 
