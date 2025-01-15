@@ -163,6 +163,10 @@ class C
    out from the impl (as did supporting attributes on these parameters), so it's more work to try to block
    this.
 
+   Conclusion 1/15/2025: No. This will always be an error. There do not appear to be any useful cases for this
+   and no one is asking for this.  It is easier and safer to restrict this non-sensical case from the start.
+   If relevant use cases are presented, we can reconsider.
+
 3. Does 'scoped' influence overload resolution?  For example, if there were multiple overloads of a delegate
    and one had a 'scoped' parameter, while the other did not, would the presense of 'scoped' influencce
    overload resolution.
@@ -193,8 +197,11 @@ class C
 
    This is ambiguous today.  Despite having 'scoped' on `D<T>` and 'scoped' in the lambda parameter, we
    do not resolve this.  We do not believe this should change with implicitly typed lambdas.
+   
+   Conclusion 1/15/2025: The above will hold true for 'simple lambas' as well.  'scoped' will not influence
+   overload resolution (while `ref` and `out` will continue to do so).
 
-4. Allow '(scoped x) => ...' lambdas?
+5. Allow '(scoped x) => ...' lambdas?
 
    Recommendation: Yes.  If we do not allow this then we can end up in scenarios where a user can write
    the full explicitly typed lambda, but not the implicitly typed version.  For example:
@@ -215,3 +222,5 @@ class C
    Removing 'scoped' here would cause an error (the language requires the correspondance in this case between
    the lambda and delegate.  As we want the user to be able to write lambdas like this, without specifying
    the type explicitly, that then means that `(scoped x) => ...` needs to be allowed. 
+
+   Conclusion 1/15/2025: We will allow `(scoped x) => ...` lambdas.
