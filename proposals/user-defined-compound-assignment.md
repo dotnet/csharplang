@@ -50,7 +50,84 @@ and copy.
 ## Detailed design
 [design]: #detailed-design
 
-This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement,  and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented.
+### Syntax
+
+Grammar at https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#15101-general is adjusted as follows.
+
+Operators are declared using *operator_declaration*s:
+```diff
+operator_declaration
+    : attributes? operator_modifier+ operator_declarator operator_body
+    ;
+
+operator_modifier
+    : 'public'
+    | 'static'
+    | 'extern'
+    | unsafe_modifier   // unsafe code support
+    ;
+
+operator_declarator
+    : unary_operator_declarator
+    | binary_operator_declarator
+    | conversion_operator_declarator
++   | increment_operator_declarator
++   | compound_assignment_operator_declarator
+    ;
+
+unary_operator_declarator
+    : type 'operator' overloadable_unary_operator '(' fixed_parameter ')'
+    ;
+
+logical_negation_operator
+    : '!'
+    ;
+
+overloadable_unary_operator
+-   : '+' | '-' | logical_negation_operator | '~' | '++' | '--' | 'true' | 'false'
++   : '+' | '-' | logical_negation_operator | '~' | 'true' | 'false'
+    ;
+
+binary_operator_declarator
+    : type 'operator' overloadable_binary_operator
+        '(' fixed_parameter ',' fixed_parameter ')'
+    ;
+
+overloadable_binary_operator
+    : '+'  | '-'  | '*'  | '/'  | '%'  | '&' | '|' | '^'  | '<<' 
+    | right_shift | '==' | '!=' | '>' | '<' | '>=' | '<='
+    ;
+
+conversion_operator_declarator
+    : 'implicit' 'operator' type '(' fixed_parameter ')'
+    | 'explicit' 'operator' type '(' fixed_parameter ')'
+    ;
+
++increment_operator_declarator
++   : type 'operator' overloadable_increment_operator '(' fixed_parameter? ')'
++   ;
+
++overloadable_increment_operator
++   : '++' | '--'
++    ;
+
++compound_assignment_operator_declarator
++   : type 'operator' overloadable_compound_assignment_operator
++       '(' fixed_parameter ')'
++   ;
+
++overloadable_compound_assignment_operator
++   : '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
++   | right_shift_assignment
++   | unsigned_right_shift_assignment
++   ;
+
+operator_body
+    : block
+    | '=>' expression ';'
+    | ';'
+    ;
+```
 
 ## Drawbacks
 [drawbacks]: #drawbacks
