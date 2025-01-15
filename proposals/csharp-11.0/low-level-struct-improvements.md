@@ -478,7 +478,19 @@ The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped
 
 Any other difference with respect to `scoped` or `[UnscopedRef]` is considered a mismatch.
 
-The mismatch is reported as an _error_ if the mismatched signatures are both using C#11 ref safe context rules; otherwise, the diagnostic is a _warning_.
+The compiler will report a diagnostic for _unsafe scoped mismatches_ across overrides, interface implementations, and delegate conversions when:
+- The method has a `ref` or `out` parameter of `ref struct` type with a mismatch of adding `[UnscopedRef]` (not removing `scoped`).
+  (In this case, a [silly cyclic assignment](#cyclic-assignment) is possible, hence no other parameters are necessary.)
+- Or both of these are true:
+  - The method returns a `ref struct` or returns a `ref` or `ref readonly`, or the method has a `ref` or `out` parameter of `ref struct` type.
+  - The method has at least one additional `ref`, `in`, or `out` parameter, or a parameter of `ref struct` type.
+
+The diagnostic is not reported in other cases because:
+- The methods with such signatures cannot capture the refs passed in, so any scoped mismatch is not dangerous.
+- These include very common and simple scenarios (e.g., plain old `out` parameters which are used in `TryParse` method signatures)
+  and reporting scoped mismatches just because they are used across language version 11 (and hence the `out` parameter is differently scoped) would be confusing.
+
+The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safe context rules; otherwise, the diagnostic is a _warning_.
 
 The scoped mismatch warning may be reported on a module compiled with C#7.2 ref safe context rules where `scoped` is not available. In some such cases, it may be necessary to suppress the warning if the other mismatched signature cannot be modified.
 
