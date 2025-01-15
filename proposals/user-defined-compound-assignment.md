@@ -255,7 +255,7 @@ an `override` modifier can be used for this purpose.
 ## Open questions
 [open]: #open-questions
 
-### Should `readonly` modifier be allowed in strauctures?
+### Should `readonly` modifier be allowed in structures?
 
 It feels like there would be no benefit in allowing to mark a method with `readonly` when the whole
 purpose of the method is to modify the instance.
