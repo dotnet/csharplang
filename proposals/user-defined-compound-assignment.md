@@ -65,6 +65,10 @@ operator_modifier
     | 'static'
     | 'extern'
     | unsafe_modifier   // unsafe code support
+    | 'abstract'
+    | 'virtual'
++   | 'override'
++   | 'new'
     ;
 
 operator_declarator
@@ -132,14 +136,44 @@ operator_body
 There are five categories of overloadable operators: [unary operators](#unary-operators), [binary operators](#binary-operators),
 [conversion operators](#conversion-operators), [increment operators](#increment-operators), [compound assignment operators](#compound-assignment-operators).
 
+>The following rules apply to all operator declarations:
+>
+>- An operator declaration shall include ~~both~~ a `public` ~~and a `static`~~ modifier.
+
+Compound assignment and instance increment operators can hide operators declared in a base class. Therefore,
+the following paragraph is no longer accurate and should either be adjusted accordingly, or it can be removed: 
+>Because operator declarations always require the class or struct in which the operator is declared to participate in the signature of the operator,
+it is not possible for an operator declared in a derived class to hide an operator declared in a base class. Thus, the `new` modifier is never
+required, and therefore never permitted, in an operator declaration.
+
 ### Unary operators
 [unary-operators]: #unary-operators
+
+See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#15102-unary-operators.
+
+An operator declaration shall include a `static` modifier and shall not include an `override` modifier.
+
+The following bullet point is removed:
+>- A unary `++` or `--` operator shall take a single parameter of type `T` or `T?` and shall return that same type or a type derived from it.
+
+The following paragraph is adjusted to no longer mention `++` and `--` operator tokens:
+> The signature of a unary operator consists of the operator token (`+`, `-`, `!`, `~`, `++`, `--`, `true`, or `false`) and the type of the single parameter. The return type is not part of a unary operator’s signature, nor is the name of the parameter.
+
+An example in the section should be adjusted to not use a user defined increment operator. 
 
 ### Binary operators
 [binary-operators]: #binary-operators
 
+See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#15103-binary-operators.
+
+An operator declaration shall include a `static` modifier and shall not include an `override` modifier.
+
 ### Conversion operators
 [conversion-operators]: #conversion-operators
+
+See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#15104-conversion-operators.
+
+An operator declaration shall include a `static` modifier and shall not include an `override` modifier.
 
 ### Increment operators
 [increment-operators]: #increment-operators
