@@ -38,7 +38,12 @@ instance of `C1` instead would work as good (it is not used after the assignment
 avoiding an extra allocation. 
 
 When a program utilizes a compound assignment operation, the most common effect is that the original value is
-"lost" and is no longer available to the program. Therefore, it may be beneficial for C# to allow user types to
+"lost" and is no longer available to the program. With types which have large data (such as BigInteger, Tensors, etc.)
+the cost of producing a net new destination, iterating, and copying the memory tends to be fairly expensive.
+An in-place mutation would allow skipping this expense in many cases, which can provide significant improvements
+to such scenarios.
+
+Therefore, it may be beneficial for C# to allow user types to
 customize behavior of compound assignment operators and optimize scenarios that would otherwise need to allocate
 and copy.
 
