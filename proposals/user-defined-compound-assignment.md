@@ -129,6 +129,25 @@ operator_body
     ;
 ```
 
+There are five categories of overloadable operators: [unary operators](#unary-operators), [binary operators](#binary-operators),
+[conversion operators](#conversion-operators), [increment operators](#increment-operators), [compound assignment operators](#compound-assignment-operators).
+
+### Unary operators
+[unary-operators]: #unary-operators
+
+### Binary operators
+[binary-operators]: #binary-operators
+
+### Conversion operators
+[conversion-operators]: #conversion-operators
+
+### Increment operators
+[increment-operators]: #increment-operators
+
+### Compound assignment operators
+[compound-assignment-operators]: #compound-assignment-operators
+
+
 ## Drawbacks
 [drawbacks]: #drawbacks
 
