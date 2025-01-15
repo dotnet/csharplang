@@ -36,9 +36,11 @@ This syntax was chosen as it:
    especially with syntax coloring of the `with` keyword.
 6. Reads nicely.  "This is a collection expression 'with' these arguments, consisting of these elements."
 7. Solves the need for comparers for both dictionaries and sets.
-8. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled. 
+8. Ensures any user need for passing arguments, or any needs we ourselves have beyond comparers in the future are already handled.
+9. Does not conflict with any existing code (using https://grep.app/ to search).
 
-A minor question exists if the preferred form would be `args(...)` instead of `with(...)`.  But the forms are otherwise identical.
+A minor question exists if the preferred form would be `args(...)` or `init(...)` instead of `with(...)`.  But the forms are
+otherwise identical.
 
 Open question: Should any support for passing a comparer be provided at all?  Yes/No.
 
@@ -232,7 +234,27 @@ with the following 'args' to pass along to control the final instance, and then 
 populate it.  For example, the first line "creates a list of strings with a capacity 'arg' of two times the count
 of the values about to be spread into it"
 
-## Option 3: `new(...arguments...) [...elements...]`
+## Option3: `[init(...arguments...)]`
+
+Same as option 2, just with 'init' as the keyword chosen:
+
+```c#
+// With an existing type:
+
+// Initialize to twice the capacity since we'll have to add
+// more values later.
+List<string> names = [init(capacity: values.Count * 2), .. values];
+
+// With the dictionary types.
+Dictionary<string, int> nameToAge1 = [init(comparer)];
+Dictionary<string, int> nameToAge2 = [init(comparer), kvp1, kvp2, kvp3];
+Dictionary<string, int> nameToAge3 = [init(comparer), k1:v1, k2:v2, k3:v4];
+Dictionary<string, int> nameToAge4 = [init(comparer), .. d1, .. d2, .. d3];
+
+Dictionary<string, int> nameToAge = [init(comparer), kvp1, k1: v2, .. d1];
+```
+
+## Option 4: `new(...arguments...) [...elements...]`
 
 The design here would play off of how `new(...) { v1, v2, ... }` can already instantiate a target collection type
 and supply initial collection values.  The arguments in the `new(...)` clause would be passed to the constructor if
