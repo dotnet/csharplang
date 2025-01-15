@@ -488,7 +488,7 @@ The compiler will report a diagnostic for _unsafe scoped mismatches_ across over
 The diagnostic is not reported in other cases because:
 - The methods with such signatures cannot capture the refs passed in, so any scoped mismatch is not dangerous.
 - These include very common and simple scenarios (e.g., plain old `out` parameters which are used in `TryParse` method signatures)
-  and reporting scoped mismatches just because they are used across LangVersion 11 (and hence the `out` parameter is differently scoped) would be confusing.
+  and reporting scoped mismatches just because they are used across language version 11 (and hence the `out` parameter is differently scoped) would be confusing.
 
 The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safe context rules; otherwise, the diagnostic is a _warning_.
 
