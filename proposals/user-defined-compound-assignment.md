@@ -179,6 +179,46 @@ An operator declaration shall include a `static` modifier and shall not include 
 ### Increment operators
 [increment-operators]: #increment-operators
 
+The following rules apply to static increment operator declarations, where `T` denotes the instance type of the class or struct that contains the operator declaration:
+
+- An operator declaration shall include a `static` modifier and shall not include an `override` modifier.
+- An operator shall take a single parameter of type `T` or `T?` and shall return that same type or a type derived from it.
+
+The signature of a static increment operator consists of the operator token (`++`, `--`) and the type of the single parameter.
+The return type is not part of a static increment operator’s signature, nor is the name of the parameter.
+
+Static increment operators are very similar to [unary operators](#unary-operators).
+
+The following rules apply to instance increment operator declarations:
+- An operator declaration shall not include a `static` modifier.
+- An operator shall take no parameters.
+- An operator shall have `void` return any type.
+
+Effectively, an instance increment operator is a void returning instance method that has no parameters and
+has a special name in metadata.
+
+The signature of an instance increment operator consists of the operator token ('++' | '--').
+
+The purpose of the method is to adjust the value of the instance to result of the requested increment operation,
+whatever that means in context of the declaring type.
+
+Example:
+``` C#
+class C1
+{
+    public int Value;
+
+    public void operator ++()
+    {
+        Value++;
+    }
+}
+```
+
+An instance increment operator can override an operator with the same signature declared in a base class,
+an `override` modifier can be used for this purpose.
+
+
 ### Compound assignment operators
 [compound-assignment-operators]: #compound-assignment-operators
 
@@ -187,13 +227,30 @@ The following rules apply to compound assignment operator declarations:
 - An operator shall take one parameter.
 - An operator shall have `void` return any type.
 
-Effectively, a compound assignment operator is a void returning instance method that takes one parameter
+Effectively, a compound assignment operator is a void returning instance method that takes one parameter and
+has a special name in metadata.
 
 The signature of a compound assignment operator consists of the operator token
 ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<=', right_shift_assignment, unsigned_right_shift_assignment) and
 the type of the single parameter. The name of the parameter is not part of a compound assignment operator’s signature.
 
 The purpose of the method is to adjust the value of the instance to result of ```<instance> <binary operator token> parameter```.
+
+Example:
+``` C#
+class C1
+{
+    public int Value;
+
+    public void operator +=(int x)
+    {
+        Value+=x;
+    }
+}
+```
+
+A compound assignment operator can override an operator with the same signature declared in a base class,
+an `override` modifier can be used for this purpose.
   
 ## Open questions
 [open]: #open-questions
@@ -203,3 +260,7 @@ The purpose of the method is to adjust the value of the instance to result of ``
 It feels like there would be no benefit in allowing to mark a method with `readonly` when the whole
 purpose of the method is to modify the instance.
 
+### Should shadowing be allowed?
+
+If a derived class declares a 'compund assignment'/'instance increment' operator with the same signature as one in base,
+should we require an `override` modifier?
