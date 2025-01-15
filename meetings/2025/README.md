@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Triage (working set)
 - Left/Right Join clauses. https://github.com/dotnet/csharplang/blob/main/proposals/left-right-join-in-query-expressions.md, https://github.com/dotnet/csharplang/issues/8947.  CyrusNajmabadi, roji, eiriktsarpalis
+- Interpolated string handler method names. https://github.com/dotnet/csharplang/blob/a970d01597886d84d7498e1b6a9d8e8e8ebf02c1/proposals/interpolated-string-handler-method-names.md 333fred, stephentoub
 
 ## Recurring topics
 
@@ -29,13 +30,17 @@ All schedule items must have a public issue or checked-in proposal that can be l
 - Disambiguation syntax (Mads)
 - Collection Expression Arguments (CyrusNajmabad): https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md
 
+## C# Language Design Notes for 2025
+
 ### Wed Jan 15, 2025
 
-- [`fieldof()`](../../proposals/fieldof.md) (Rikki)
-- [Simple lambda open questions](https://github.com/dotnet/csharplang/blob/main/proposals/simple-lambda-parameters-with-modifiers.md#open-questions) CyrusNajmabadi
-- Triage
+[C# Language Design Meeting for January 15th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-15.md)
 
-## C# Language Design Notes for 2025
+- `fieldof`
+- Simple lambda parameters
+- Interpolated string handler method names
+
+### Mon Jan 13th, 2025
 
 [C# Language Design Meeting for January 13th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-13.md)
 
