@@ -108,7 +108,8 @@ conversion_operator_declarator
     ;
 
 +increment_operator_declarator
-+   : type 'operator' overloadable_increment_operator '(' fixed_parameter? ')'
++   : type 'operator' overloadable_increment_operator '(' fixed_parameter ')'
++   | 'void' 'operator' overloadable_increment_operator '(' ')'
 +   ;
 
 +overloadable_increment_operator
@@ -116,7 +117,7 @@ conversion_operator_declarator
 +    ;
 
 +compound_assignment_operator_declarator
-+   : type 'operator' overloadable_compound_assignment_operator
++   : 'void' 'operator' overloadable_compound_assignment_operator
 +       '(' fixed_parameter ')'
 +   ;
 
@@ -181,19 +182,24 @@ An operator declaration shall include a `static` modifier and shall not include 
 ### Compound assignment operators
 [compound-assignment-operators]: #compound-assignment-operators
 
+The following rules apply to compound assignment operator declarations:
+- An operator declaration shall not include a `static` modifier.
+- An operator shall take one parameter.
+- An operator shall have `void` return any type.
 
-## Drawbacks
-[drawbacks]: #drawbacks
+Effectively, a compound assignment operator is a void returning instance method that takes one parameter
 
-Why should we *not* do this?
+The signature of a compound assignment operator consists of the operator token
+('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<=', right_shift_assignment, unsigned_right_shift_assignment) and
+the type of the single parameter. The name of the parameter is not part of a compound assignment operator’s signature.
 
-## Alternatives
-[alternatives]: #alternatives
-
-What other designs have been considered? What is the impact of not doing this?
-
+The purpose of the method is to adjust the value of the instance to result of ```<instance> <binary operator token> parameter```.
+  
 ## Open questions
 [open]: #open-questions
 
-What parts of the design are still undecided?
+### Should `readonly` modifier be allowed in strauctures?
+
+It feels like there would be no benefit in allowing to mark a method with `readonly` when the whole
+purpose of the method is to modify the instance.
 
