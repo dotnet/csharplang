@@ -31,6 +31,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Jan 15, 2025
 
 - [`fieldof()`](../../proposals/fieldof.md) (Rikki)
+- [Simple lambda open questions](https://github.com/dotnet/csharplang/blob/main/proposals/simple-lambda-parameters-with-modifiers.md#open-questions) CyrusNajmabadi
 - Triage
 
 ## C# Language Design Notes for 2025
