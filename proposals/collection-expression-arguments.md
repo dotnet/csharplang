@@ -291,8 +291,8 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 * Otherwise, a binding error is reported.
 
 If the target type is a type with a *create method*, then:
-* The *argument list* is a concatenation of *some `ReadOnlySpan<T>` value (TBD)* and any explicit *argument list*.
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list*.
+* The *argument list* is the *collection expression* containing the elements only (no arguments), followed by the *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
   * If the *argument list* contains any values with *dynamic* type, the best factory method is determined at runtime.
 * If a best factory method is found, the method is invoked with the *argument list*.
   * If the constructor has a `params` parameter, the invocation may be in expanded form.
@@ -319,7 +319,32 @@ If the target type is an *interface type*, then:
 
 If the target type is any other type, and the *argument list* is not empty, a binding error is reported.
 
-*Describe breaking changes resulting from using overload resolution with collection builders vs. C#12.*
+### Create method candidates
+
+For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create method candidates* for overload resolution are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
+
+> A `[CollectionBuilder(...)]` attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
+> 
+> The *builder type* must be a non-generic `class` or `struct`.
+> 
+> First, the set of applicable *create methods* `CM` is determined.
+> It consists of methods that meet the following requirements:
+> 
+> * The method must have the name specified in the `[CollectionBuilder(...)]` attribute.
+> * The method must be defined on the *builder type* directly.
+> * The method must be `static`.
+> * The method must be accessible where the collection expression is used.
+> * The *arity* of the method must match the *arity* of the collection type.
+> * The method must have a **first** parameter of type `System.ReadOnlySpan<E>`, passed by value.
+> * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
+> 
+> Methods declared on base types or interfaces are ignored and not part of the `CM` set.
+
+> For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
+
+The key differences from the earlier algorithm are:
+* Candidate methods may have additional parameters following the `ReadOnlySpan<E>` parameter.
+* Multiple candidate methods are supported.
 
 ## Open questions
 
