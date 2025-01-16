@@ -218,6 +218,15 @@ class C1
 An instance increment operator can override an operator with the same signature declared in a base class,
 an `override` modifier can be used for this purpose.
 
+ECMA-335 already "reserved" the following special names for user defined increment operators:
+| Name | Operator |
+| -----| -------- |
+|op_Decrement|`--`|
+|op_Increment|`++`|
+
+However it states that CLS compliance requires the operator methods to be non-void static methods with a single parameter,
+i.e. matches what static increment operators are. We should consider relaxing the CLS compliance requirements
+to allow the opeators to be void returning parameter-less instance methods.
 
 ### Compound assignment operators
 [compound-assignment-operators]: #compound-assignment-operators
@@ -231,7 +240,7 @@ Effectively, a compound assignment operator is a void returning instance method 
 has a special name in metadata.
 
 The signature of a compound assignment operator consists of the operator token
-('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<=', right_shift_assignment, unsigned_right_shift_assignment) and
+('+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '<<=', right_shift_assignment, unsigned_right_shift_assignment) and
 the type of the single parameter. The name of the parameter is not part of a compound assignment operator’s signature.
 
 The purpose of the method is to adjust the value of the instance to result of ```<instance> <binary operator token> parameter```.
@@ -251,6 +260,25 @@ class C1
 
 A compound assignment operator can override an operator with the same signature declared in a base class,
 an `override` modifier can be used for this purpose.
+
+ECMA-335 already "reserved" the following special names for user defined increment operators:
+| Name | Operator |
+| -----| -------- |
+|op_AdditionAssignment|'+=' |
+|op_SubtractionAssignment|'-=' |
+|op_MultiplicationAssignment|'*=' |
+|op_DivisionAssignment|'/=' |
+|op_ModulusAssignment|'%=' |
+|op_BitwiseAndAssignment|'&=' |
+|op_BitwiseOrAssignment|'&#124;=' |
+|op_ExclusiveOrAssignment|'^=' |
+|op_LeftShiftAssignment|'<<='|
+|op_RightShiftAssignment| right_shift_assignment|
+|op_UnsignedRightShiftAssignment|unsigned_right_shift_assignment|
+
+However it states that CLS compliance requires the operator methods to be non-void static methods with two parameters,
+i.e. matches what C# binary operators are. We should consider relaxing the CLS compliance requirements
+to allow the opeators to be void returning instance methods with a single parameter.
   
 ## Open questions
 [open]: #open-questions
