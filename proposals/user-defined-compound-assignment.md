@@ -280,6 +280,47 @@ However it states that CLS compliance requires the operator methods to be non-vo
 i.e. matches what C# binary operators are. We should consider relaxing the CLS compliance requirements
 to allow the opeators to be void returning instance methods with a single parameter.
 
+### Prefix increment and decrement operators
+
+See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1296-prefix-increment-and-decrement-operators
+
+TODO:
+
+### Postfix increment and decrement operators
+
+See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
+
+TODO:
+
+### Instance increment operator overload resolution
+[instance-increment-operator-overload-resolution]: #instance-increment-operator-overload-resolution
+
+An operation of the form `«op» x` or `x «op»`, where «op» is an overloadable instance increment operator,
+and `x` is an expression of type `X`, is processed as follows:
+
+- The set of candidate user-defined operators provided by `X` for the operation `operator «op»(x)` is determined
+  using the rules of [candidate instance increment operators](#candidate-instance-increment-operators).
+- If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation.
+  Otherwise, the overload resolution yields no result.
+- The [overload resolution rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1264-overload-resolution)
+  are applied to the set of candidate operators to select the best operator,
+  and this operator becomes the result of the overload resolution process. If overload resolution fails to select a single best operator,
+  a binding-time error occurs.
+
+### Candidate instance increment operators
+[candidate-instance-increment-operators]: #candidate-instance-increment-operators
+
+Given a type `T` and an operation `operator «op»()`, where `«op»` is an overloadable instance increment operator,
+the set of candidate user-defined operators provided by `T` for operator `«op»()` is determined as follows:
+
+- If there is a non-override instance `operator «op»` declarations in `T`,
+  then the set of candidate operators consists of that operator. 
+- Otherwise, if `T` is `object`, the set of candidate operators is empty.
+- Otherwise, the set of candidate operators provided by `T` is the set of candidate operators provided by the direct base class of `T`,
+  or the effective base class of `T` if `T` is a type parameter.
+
+TODO: Specify lookup rules in effective interfaces of a type parameter.
+
 ### Compound assignment
 
 See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12214-compound-assignment
