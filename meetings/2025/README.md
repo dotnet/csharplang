@@ -27,7 +27,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jan 22, 2025
 
-- Disambiguation syntax (Mads)
+- Disambiguation syntax for extension types (Mads)
 - Collection Expression Arguments (CyrusNajmabad): https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md
 
 ## C# Language Design Notes for 2025
