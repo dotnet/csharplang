@@ -281,11 +281,9 @@ The elements of a collection expression are evaluated in order, left to right.
 Within *collection arguments*, the arguments are evaluated in order, left to right.
 Each element or argument is evaluated exactly once, and any further references refer to the results of this initial evaluation.
 
-If *collection_arguments* is not the first element in the collection expression, an error is reported.
+If *collection_arguments* is not the first element in the collection expression, a compile-time error is reported.
 
-If the target type is an *array*, *span*, *array interface*, or *generic parameter type*, and the *argument list* is not empty, a binding error is reported.
-
-If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, then:
+If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
   * If the *argument list* contains any values with *dynamic* type, the best instance constructor is determined at runtime.
 * If a best instance constructor is found, the constructor is invoked with the *argument list*.
@@ -300,9 +298,26 @@ If the target type is a type with a *create method*, then:
   * If the constructor has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
 
-If the target type is a *dictionary interface* with type arguments `K` and `V`, and the *argument list* is not empty, then:
-* If the *argument list* is a single value, implicitly convertible to `IEqualityComparer<K>`, and optionally with name `comparer`, a dictionary instance is constructed with that key comparer value.
+If the target type is an *interface type*, then:
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list* from the following candidate signatures:
+  * If the target type is `IEnumerable<E>`, `ICollection<E>`, or `IList<E>`, the candidates are:
+    * `new()`
+    * `new(int capacity)`
+  * If the target type is `IReadOnlyCollection<E>`, or `IReadOnlyList<E>`, the candidates are:
+    * `new()`
+  * If the target type is `IDictionary<K, V>`, the candidates are:
+    * `new()`
+    * `new(int capacity)`
+    * `new(IEqualityComparer<K, V> comparer)`
+    * `new(int capacity, IEqualityComparer<K, V> comparer)`
+  * If the target type is `IReadOnlyDictionary<K, V>`, the candidates are:
+    * `new()`
+    * `new(IEqualityComparer<K, V> comparer)`
+  * If the *argument list* contains any values with *dynamic* type, the best instance constructor is determined at runtime.
+* If a best factory method is found, the method is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
+
+If the target type is any other type, and the *argument list* is not empty, a binding error is reported.
 
 *Describe breaking changes resulting from using overload resolution with collection builders vs. C#12.*
 
