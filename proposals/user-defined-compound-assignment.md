@@ -315,7 +315,7 @@ class C
     public static C P1 { get; } = new C();
     public static S P2 { get; set; } = new C();
 
-    public static C operator ++(C x) => ...; // Never used by C#
+    public static C operator ++(C x) => ...; // Never used by C# for prefix increment
     public void operator ++() => ...;
 }
 ```
@@ -346,7 +346,7 @@ struct S
     public static S P1 { get; } = new S();
     public static S P2 { get; set; } = new S();
 
-    public static S operator ++(S x) => ...; // Never used by C#
+    public static S operator ++(S x) => ...; // Never used by C# for prefix increment
     public void operator ++() => ...;
 }
 ```
