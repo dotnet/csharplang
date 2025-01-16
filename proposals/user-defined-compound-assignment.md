@@ -279,7 +279,116 @@ ECMA-335 already "reserved" the following special names for user defined increme
 However it states that CLS compliance requires the operator methods to be non-void static methods with two parameters,
 i.e. matches what C# binary operators are. We should consider relaxing the CLS compliance requirements
 to allow the opeators to be void returning instance methods with a single parameter.
+
+### Compound assignment
+
+See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12214-compound-assignment
+
+The paragraph at the beginning that deals with `dynamic` is still applicable as is.
+
+Otherwise, the priority is given to [compound assignment operators](#compound-assignment-operators)
+as follows.
+
+First an attempt is made to process an operation of the form `x «op»= y` by applying
+[compound assignment operator overload resolution](#compound-assignment-operator-overload-resolution).
+If the process produces no result and no error, then the operation is processed
+by applying binary operator overload resolution as
+https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12214-compound-assignment
+currently specifies.
+
+Otherwise, the operation is evaluated as follows.
+
+If type of `x` is known to be a reference type, the only requirement for `x` is that it must be an expression
+classified as a value (i.e. it doesn't have to be classified as a variable, or be an access of a property with a set,
+or be an access of an indexer with a set). The `x` is evaluated to get an instance `x₀`, the operator method is
+invoked on that instance with `y` as the argument, and `x₀` is returned as result of the compound assignment.
+
+For example:
+``` C#
+var a = (new C())+=10; // var temp = new C(); temp.op_AdditionAssignment(10); a = temp;
+var b = a += 100; // a.op_AdditionAssignment(100); b = a; 
+var c = b + 1000; // c = C.op_Addition(b, 1000)
+c += 5; // c.op_AdditionAssignment(5);
+var d = C.P1 += 11; // var temp = C.get_P1(); temp.op_AdditionAssignment(11); d = temp;
+var e = C.P2 += 12; // var temp = C.get_P2(); temp.op_AdditionAssignment(12); e = temp;
+
+class C
+{
+    public static C P1 { get; } = new C();
+    public static S P2 { get; set; } = new S();
+
+    // op_Addition
+    public static C operator +(C x, int y) => ...;
+
+    // op_AdditionAssignment
+    public void operator +=(int y) => ...;
+}
+```
+
+If type of `x` is not known to be a reference type:
+- If `x` is an expression classified as a variable,
+   - If result of compound assignment is used, the `x` is evaluated to get an instance `x₀`, the operator method is
+     invoked on that instance with `y` as the argument, `x₀` is assigned to `x` and `x₀` is returned as result of
+     the compound assignment.
+   - Otherwise, the operator method is invoked on `x` with `y` as the argument.
+- If it is a property access or indexer access, the property or indexer shall have both a get accessor
+  and a set accessor. If this is not the case, a binding-time error occurs. The property/indexer getter
+  is evaluated to get an instance `x₀`, the operator method is invoked on that instance with `y` as the argument,
+  the property/indexer setter is invoked with `x₀` as the value parameter, `x₀` is returned as result of the compound assignment.
   
+Note that `x` is evaluated only once in the process.
+
+For example:
+``` C#
+var a = (new S())+=10; // error: not a variable
+var b = S.P2 += 100; // var temp = S.get_P2(); temp.op_AdditionAssignment(100); S.set_P2(temp); b = temp; 
+var c = b + 1000; // c = S.op_Addition(b, 1000)
+c += 5; // c.op_AdditionAssignment(5); 
+var d = C.P1 += 11; // error: set is missing
+var e = c += 12; // var temp = c; temp.op_AdditionAssignment(12); e = (c = temp); 
+
+struct S
+{
+    public static S P1 { get; } = new S();
+    public static S P2 { get; set; } = new S();
+
+    // op_Addition
+    public static S operator +(S x, int y) => ...;
+
+    // op_AdditionAssignment
+    public void operator +=(int y) => ...;
+}
+```
+
+
+### Compound assignment operator overload resolution
+[compound-assignment-operator-overload-resolution]: #compound-assignment-operator-overload-resolution
+
+An operation of the form `x «op»= y`, where `«op»=` is an overloadable compound assignment operator, `x` is an expression of type `X` is processed as follows:
+
+- The set of candidate user-defined operators provided by `X` for the operation `operator «op»=(y)` is determined
+  using the rules of [candidate compound assignment operators](#candidate-compound-assignment-operators).
+- If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation.
+  Otherwise, the overload resolution yields no result.
+- The [overload resolution rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1264-overload-resolution)
+  are applied to the set of candidate operators to select the best operator with respect to the argument list `(y)`,
+  and this operator becomes the result of the overload resolution process. If overload resolution fails to select a single best operator,
+  a binding-time error occurs.
+
+### Candidate compound assignment operators
+[candidate-compound-assignment-operators]: #candidate-compound-assignment-operators
+
+Given a type `T` and an operation `operator «op»=(A)`, where `«op»=` is an overloadable compound assignment operator and `A` is an argument list,
+the set of candidate user-defined operators provided by `T` for operator `«op»=(A)` is determined as follows:
+
+- For all non-override `operator «op»=` declarations in `T`, if at least one operator is applicable with respect to the argument list `A`,
+  then the set of candidate operators consists of all such applicable operators in `T`. 
+- Otherwise, if `T` is `object`, the set of candidate operators is empty.
+- Otherwise, the set of candidate operators provided by `T` is the set of candidate operators provided by the direct base class of `T`,
+  or the effective base class of `T` if `T` is a type parameter.
+
+TODO: Specify lookup rules in effective interfaces of a type parameter.
+
 ## Open questions
 [open]: #open-questions
 
