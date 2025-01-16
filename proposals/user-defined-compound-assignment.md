@@ -302,6 +302,8 @@ If type of `x` is known to be a reference type, the only requirement for `x` is 
 classified as a value (i.e. it doesn't have to be classified as a variable, or be an access of a property with a set,
 or be an access of an indexer with a set). The `x` is evaluated to get an instance `x₀`, the operator method is
 invoked on that instance with `y` as the argument, and `x₀` is returned as result of the compound assignment.
+If `x₀` is `null`, the operator method invocation will throw a NullReferenceException.
+
 
 For example:
 ``` C#
