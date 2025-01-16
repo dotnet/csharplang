@@ -300,10 +300,10 @@ If the target type is a type with a *create method*, then:
 
 If the target type is an *interface type*, then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list* from the following candidate signatures:
-  * If the target type is `IEnumerable<E>`, `ICollection<E>`, or `IList<E>`, the candidates are:
+  * If the target type is `ICollection<E>`, or `IList<E>`, the candidates are:
     * `new()`
     * `new(int capacity)`
-  * If the target type is `IReadOnlyCollection<E>`, or `IReadOnlyList<E>`, the candidates are:
+  * If the target type is `IEnumerable<E>`, `IReadOnlyCollection<E>`, or `IReadOnlyList<E>`, the candidates are:
     * `new()`
   * If the target type is `IDictionary<K, V>`, the candidates are:
     * `new()`
