@@ -406,6 +406,20 @@ For example: an invocation of `enumerableOfInt.Method()` would be emitted as a s
 to `IEnumerableExtensions.<Extension>Method<int>(enumerableOfInt)`.  
 
 Note: multiple extension containers defining static members with the same signature cannot be represented in metadata.  
+However, differences in return types can be represented, allowing for factory methods extending different types. For example:
+```csharp
+static class CollectionExtensions
+{
+    extension<T>(List<T>)
+    {
+        public static List<T> Create() { ... }
+    }
+    extension<T>(HashSet<T>)
+    {
+        public static HashSet<T> Create() { ... }
+    }
+}
+```
 
 ## Open issues
 
