@@ -27,6 +27,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Jan 22, 2025
 
+- (5 min only heads up) [Partial events and constructors](https://github.com/dotnet/csharplang/issues/9058) (Jared)
 - Disambiguation syntax for extension types (Mads)
 - Collection Expression Arguments (CyrusNajmabad): https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md
 
