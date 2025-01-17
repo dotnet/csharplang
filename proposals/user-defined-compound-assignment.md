@@ -284,9 +284,10 @@ to allow the opeators to be void returning instance methods with a single parame
 
 See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1296-prefix-increment-and-decrement-operators
 
-The priority is given to [instance increment operators](#increment-operators) as follows.
+If `x` in `«op» x` is classified as a variable, then the priority is given to
+[instance increment operators](#increment-operators) as follows.
 
-First an attempt is made to process the operation by applying
+First, an attempt is made to process the operation by applying
 [instance increment operator overload resolution](#instance-increment-operator-overload-resolution).
 If the process produces no result and no error, then the operation is processed
 by applying unary operator overload resolution as
@@ -295,50 +296,47 @@ currently specifies.
 
 Otherwise, an operation `«op»x` is evaluated as follows.
 
-If type of `x` is known to be a reference type, the only requirement for `x` is that it must be an expression
-classified as a value (i.e. it doesn't have to be classified as a variable, or be an access of a property with a set,
-or be an access of an indexer with a set). The `x` is evaluated to get an instance `x₀`, the operator method is
+If type of `x` is known to be a reference type, the `x` is evaluated to get an instance `x₀`, the operator method is
 invoked on that instance, and `x₀` is returned as result of the operation.
 If `x₀` is `null`, the operator method invocation will throw a NullReferenceException.
 
 
 For example:
 ``` C#
-var a = ++(new C()); // var temp = new C(); temp.op_Increment(); a = temp;
+var a = ++(new C()); // error: not a variable
 var b = ++a; // var temp = a; temp.op_Increment(); b = temp; 
 ++b; // b.op_Increment();
-var d = ++C.P1; // var temp = C.get_P1(); temp.op_Increment(); d = temp;
-var e = ++C.P2; // var temp = C.get_P2(); temp.op_Increment(); e = temp;
+var d = ++C.P1; // error: setter is missing
+++C.P1; // error: setter is missing
+var e = ++C.P2; // var temp = C.op_Increment(C.get_P2()); C.set_P2(temp); e = temp;
+++C.P2; // var temp = C.op_Increment(C.get_P2()); C.set_P2(temp);
 
 class C
 {
     public static C P1 { get; } = new C();
     public static S P2 { get; set; } = new C();
 
-    public static C operator ++(C x) => ...; // Never used by C# for prefix increment
+    public static C operator ++(C x) => ...;
     public void operator ++() => ...;
 }
 ```
 
 If type of `x` is not known to be a reference type:
-- If `x` is an expression classified as a variable,
-   - If result of increment is used, the `x` is evaluated to get an instance `x₀`, the operator method is
-     invoked on that instance, `x₀` is assigned to `x` and `x₀` is returned as result of
-     the compound assignment.
-   - Otherwise, the operator method is invoked on `x`.
-- If it is a property access or indexer access, the property or indexer shall have both a get accessor
-  and a set accessor. If this is not the case, a binding-time error occurs. The property/indexer getter
-  is evaluated to get an instance `x₀`, the operator method is invoked on that instance,
-  the property/indexer setter is invoked with `x₀` as the value parameter, `x₀` is returned as result of the operation.
+- If result of increment is used, the `x` is evaluated to get an instance `x₀`, the operator method is
+  invoked on that instance, `x₀` is assigned to `x` and `x₀` is returned as result of
+  the compound assignment.
+- Otherwise, the operator method is invoked on `x`.
   
 Note that side effects in `x` are evaluated only once in the process.
 
 For example:
 ``` C#
 var a = ++(new S()); // error: not a variable
-var b = ++S.P2; // var temp = S.get_P2(); temp.op_Increment(); S.set_P2(temp); b = temp; 
+var b = ++S.P2; // var temp = S.op_Increment(S.get_P2()); S.set_P2(temp); b = temp;
+++S.P2; // var temp = S.op_Increment(S.get_P2()); S.set_P2(temp);
 ++b; // b.op_Increment(); 
 var d = ++S.P1; // error: set is missing
+++S.P1; // error: set is missing
 var e = ++b; // var temp = b; temp.op_Increment(); e = (b = temp); 
 
 struct S
@@ -346,7 +344,7 @@ struct S
     public static S P1 { get; } = new S();
     public static S P2 { get; set; } = new S();
 
-    public static S operator ++(S x) => ...; // Never used by C# for prefix increment
+    public static S operator ++(S x) => ...;
     public void operator ++() => ...;
 }
 ```
@@ -356,15 +354,17 @@ struct S
 
 See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
 
-If result of the operation is used, the operation is processedb by applying unary operator overload resolution as
+If result of the operation is used or `x` in `x «op»` is not classified as a variable,
+the operation is processedb by applying unary operator overload resolution as
 https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
-currently specifies. The reason why we are not even trying instance increment operators, is the fact that,
+currently specifies. 
+The reason why we are not even trying instance increment operators when result is used, is the fact that,
 if we are dealing with a reference type, it is not possible to produce value of `x` before the operation if it is mutated in-place.
 If we are dealing with a value type, we will have to make copies anyway, etc.
 
 Otherwise, the priority is given to [instance increment operators](#increment-operators) as follows.
 
-First an attempt is made to process the operation by applying
+First, an attempt is made to process the operation by applying
 [instance increment operator overload resolution](#instance-increment-operator-overload-resolution).
 If the process produces no result and no error, then the operation is processed
 by applying unary operator overload resolution as
@@ -373,11 +373,8 @@ currently specifies.
 
 Otherwise, an operation `x«op»` is evaluated as follows.
 
-If type of `x` is known to be a reference type, the only requirement for `x` is that it must be an expression
-classified as a value (i.e. it doesn't have to be classified as a variable, or be an access of a property with a set,
-or be an access of an indexer with a set). The `x` is evaluated to get an instance `x₀`, the operator method is
-invoked on that instance.
-If `x₀` is `null`, the operator method invocation will throw a NullReferenceException.
+If type of `x` is known to be a reference type, the operator method is invoked on `x`.
+If `x` is `null`, the operator method invocation will throw a NullReferenceException.
 
 
 For example:
@@ -387,8 +384,9 @@ var b = new C();
 var c = b++; // var temp = b; b = C.op_Increment(temp); c = temp; 
 b++; // b.op_Increment();
 var d = C.P1++; // error: missing setter
-C.P1++; // C.get_P1().op_Increment();
+C.P1++; // error: missing setter
 var e = C.P2++; // var temp = C.get_P2(); C.set_P2(C.op_Increment(temp)); e = temp;
+C.P2++; // var temp = C.get_P2(); C.set_P2(C.op_Increment(temp));
 
 class C
 {
@@ -400,24 +398,17 @@ class C
 }
 ```
 
-If type of `x` is not known to be a reference type:
-- If `x` is an expression classified as a variable, the operator method is invoked on `x`.
-- If it is a property access or indexer access, the property or indexer shall have both a get accessor
-  and a set accessor. If this is not the case, a binding-time error occurs. The property/indexer getter
-  is evaluated to get an instance `x₀`, the operator method is invoked on that instance,
-  the property/indexer setter is invoked with `x₀` as the value parameter, `x₀` is returned as result of the operation.
-  
-Note that side effects in `x` are evaluated only once in the process.
+If type of `x` is not known to be a reference type, the operator method is invoked on `x`.
 
 For example:
 ``` C#
 var a = ++(new S()); // error: not a variable
 var b = ++S.P2; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp)); b = temp;
-++S.P2; // var temp = S.get_P2(); temp.op_Increment(); S.set_P2(temp); b = temp; 
+++S.P2; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp));
 ++b; // b.op_Increment(); 
 var d = ++S.P1; // error: set is missing
-S.P1++; // C.get_P1().op_Increment();
-var e = ++b; // var temp = b; temp.op_Increment(); e = (b = temp); 
+S.P1++; // error: missing setter
+var e = ++b; // var temp = b; b = S.op_Increment(temp); e = temp; 
 
 struct S
 {
@@ -464,10 +455,10 @@ See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.
 
 The paragraph at the beginning that deals with `dynamic` is still applicable as is.
 
-Otherwise, the priority is given to [compound assignment operators](#compound-assignment-operators)
-as follows.
+Otherwise, if `x` in `x «op»= y` is classified as a variable, then the priority is given to
+[compound assignment operators](#compound-assignment-operators) as follows.
 
-First an attempt is made to process an operation of the form `x «op»= y` by applying
+First, an attempt is made to process an operation of the form `x «op»= y` by applying
 [compound assignment operator overload resolution](#compound-assignment-operator-overload-resolution).
 If the process produces no result and no error, then the operation is processed
 by applying binary operator overload resolution as
@@ -476,21 +467,19 @@ currently specifies.
 
 Otherwise, the operation is evaluated as follows.
 
-If type of `x` is known to be a reference type, the only requirement for `x` is that it must be an expression
-classified as a value (i.e. it doesn't have to be classified as a variable, or be an access of a property with a set,
-or be an access of an indexer with a set). The `x` is evaluated to get an instance `x₀`, the operator method is
+If type of `x` is known to be a reference type, the `x` is evaluated to get an instance `x₀`, the operator method is
 invoked on that instance with `y` as the argument, and `x₀` is returned as result of the compound assignment.
 If `x₀` is `null`, the operator method invocation will throw a NullReferenceException.
 
-
 For example:
 ``` C#
-var a = (new C())+=10; // var temp = new C(); temp.op_AdditionAssignment(10); a = temp;
+var a = (new C())+=10; // error: not a variable
 var b = a += 100; // var temp = a; temp.op_AdditionAssignment(100); b = temp; 
 var c = b + 1000; // c = C.op_Addition(b, 1000)
 c += 5; // c.op_AdditionAssignment(5);
-var d = C.P1 += 11; // var temp = C.get_P1(); temp.op_AdditionAssignment(11); d = temp;
-var e = C.P2 += 12; // var temp = C.get_P2(); temp.op_AdditionAssignment(12); e = temp;
+var d = C.P1 += 11; // error: setter is missing
+var e = C.P2 += 12; // var temp = C.op_Addition(C.get_P2(), 12); C.set_P2(temp); e = temp;
+C.P2 += 13; // var temp = C.op_Addition(C.get_P2(), 13); C.set_P2(temp);
 
 class C
 {
@@ -506,25 +495,21 @@ class C
 ```
 
 If type of `x` is not known to be a reference type:
-- If `x` is an expression classified as a variable,
-   - If result of compound assignment is used, the `x` is evaluated to get an instance `x₀`, the operator method is
-     invoked on that instance with `y` as the argument, `x₀` is assigned to `x` and `x₀` is returned as result of
-     the compound assignment.
-   - Otherwise, the operator method is invoked on `x` with `y` as the argument.
-- If it is a property access or indexer access, the property or indexer shall have both a get accessor
-  and a set accessor. If this is not the case, a binding-time error occurs. The property/indexer getter
-  is evaluated to get an instance `x₀`, the operator method is invoked on that instance with `y` as the argument,
-  the property/indexer setter is invoked with `x₀` as the value parameter, `x₀` is returned as result of the compound assignment.
+- If result of compound assignment is used, the `x` is evaluated to get an instance `x₀`, the operator method is
+  invoked on that instance with `y` as the argument, `x₀` is assigned to `x` and `x₀` is returned as result of
+  the compound assignment.
+- Otherwise, the operator method is invoked on `x` with `y` as the argument.
   
 Note that side effects in `x` are evaluated only once in the process.
 
 For example:
 ``` C#
 var a = (new S())+=10; // error: not a variable
-var b = S.P2 += 100; // var temp = S.get_P2(); temp.op_AdditionAssignment(100); S.set_P2(temp); b = temp; 
+var b = S.P2 += 100; // var temp = S.op_Addition(S.get_P2(), 100); S.set_P2(temp); b = temp;
+S.P2 += 100; // var temp = S.op_Addition(S.get_P2(), 100); S.set_P2(temp);
 var c = b + 1000; // c = S.op_Addition(b, 1000)
 c += 5; // c.op_AdditionAssignment(5); 
-var d = C.P1 += 11; // error: set is missing
+var d = S.P1 += 11; // error: setter is missing
 var e = c += 12; // var temp = c; temp.op_AdditionAssignment(12); e = (c = temp); 
 
 struct S
