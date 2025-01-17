@@ -32,7 +32,7 @@ class C1
 ```
 
 with the current language rules, compound assignment operator `c1 += 1` invokes user defined `+` operator
-and then assigns its return value to the local variable `c1`. Note that operator implementation has to allocate
+and then assigns its return value to the local variable `c1`. Note that operator implementation must allocate
 and return a new instance of `C1`, while, from the consumer's perspective, an in-place change to the original
 instance of `C1` instead would work as good (it is not used after the assignment), with an additional benefit of
 avoiding an extra allocation. 
@@ -224,9 +224,9 @@ ECMA-335 already "reserved" the following special names for user defined increme
 |op_Decrement|`--`|
 |op_Increment|`++`|
 
-However it states that CLS compliance requires the operator methods to be non-void static methods with a single parameter,
+However, it states that CLS compliance requires the operator methods to be non-void static methods with a single parameter,
 i.e. matches what static increment operators are. We should consider relaxing the CLS compliance requirements
-to allow the opeators to be void returning parameter-less instance methods.
+to allow the operators to be void returning parameter-less instance methods.
 
 ### Compound assignment operators
 [compound-assignment-operators]: #compound-assignment-operators
@@ -276,9 +276,9 @@ ECMA-335 already "reserved" the following special names for user defined increme
 |op_RightShiftAssignment| right_shift_assignment|
 |op_UnsignedRightShiftAssignment|unsigned_right_shift_assignment|
 
-However it states that CLS compliance requires the operator methods to be non-void static methods with two parameters,
+However, it states that CLS compliance requires the operator methods to be non-void static methods with two parameters,
 i.e. matches what C# binary operators are. We should consider relaxing the CLS compliance requirements
-to allow the opeators to be void returning instance methods with a single parameter.
+to allow the operators to be void returning instance methods with a single parameter.
 
 ### Prefix increment and decrement operators
 
@@ -355,7 +355,7 @@ struct S
 See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
 
 If result of the operation is used or `x` in `x «op»` is not classified as a variable,
-the operation is processedb by applying unary operator overload resolution as
+the operation is processed by applying unary operator overload resolution as
 https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
 currently specifies. 
 The reason why we are not even trying instance increment operators when result is used, is the fact that,
@@ -564,5 +564,5 @@ purpose of the method is to modify the instance.
 
 ### Should shadowing be allowed?
 
-If a derived class declares a 'compund assignment'/'instance increment' operator with the same signature as one in base,
+If a derived class declares a 'compound assignment'/'instance increment' operator with the same signature as one in base,
 should we require an `override` modifier?
