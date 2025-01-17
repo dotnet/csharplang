@@ -281,7 +281,7 @@ The elements of a collection expression are evaluated in order, left to right.
 Within *collection arguments*, the arguments are evaluated in order, left to right.
 Each element or argument is evaluated exactly once, and any further references refer to the results of this initial evaluation.
 
-If *collection_arguments* is not the first element in the collection expression, a compile-time error is reported.
+If *collection_arguments* is included and is not the first element in the collection expression, a compile-time error is reported.
 
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
@@ -295,7 +295,7 @@ If the target type is a type with a *create method*, then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
   * If the *argument list* contains any values with *dynamic* type, the best factory method is determined at runtime.
 * If a best factory method is found, the method is invoked with the *argument list*.
-  * If the constructor has a `params` parameter, the invocation may be in expanded form.
+  * If the factory method has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
 
 If the target type is an *interface type*, then:
