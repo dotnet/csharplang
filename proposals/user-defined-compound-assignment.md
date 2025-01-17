@@ -192,7 +192,7 @@ Static increment operators are very similar to [unary operators](#unary-operator
 The following rules apply to instance increment operator declarations:
 - An operator declaration shall not include a `static` modifier.
 - An operator shall take no parameters.
-- An operator shall have `void` return any type.
+- An operator shall have `void` return type.
 
 Effectively, an instance increment operator is a void returning instance method that has no parameters and
 has a special name in metadata.
@@ -234,7 +234,7 @@ to allow the operators to be void returning parameter-less instance methods.
 The following rules apply to compound assignment operator declarations:
 - An operator declaration shall not include a `static` modifier.
 - An operator shall take one parameter.
-- An operator shall have `void` return any type.
+- An operator shall have `void` return type.
 
 Effectively, a compound assignment operator is a void returning instance method that takes one parameter and
 has a special name in metadata.
@@ -314,7 +314,7 @@ var e = ++C.P2; // var temp = C.op_Increment(C.get_P2()); C.set_P2(temp); e = te
 class C
 {
     public static C P1 { get; } = new C();
-    public static S P2 { get; set; } = new C();
+    public static C P2 { get; set; } = new C();
 
     public static C operator ++(C x) => ...;
     public void operator ++() => ...;
@@ -391,7 +391,7 @@ C.P2++; // var temp = C.get_P2(); C.set_P2(C.op_Increment(temp));
 class C
 {
     public static C P1 { get; } = new C();
-    public static S P2 { get; set; } = new C();
+    public static C P2 { get; set; } = new C();
 
     public static C operator ++(C x) => ...; 
     public void operator ++() => ...;
@@ -484,7 +484,7 @@ C.P2 += 13; // var temp = C.op_Addition(C.get_P2(), 13); C.set_P2(temp);
 class C
 {
     public static C P1 { get; } = new C();
-    public static S P2 { get; set; } = new C();
+    public static C P2 { get; set; } = new C();
 
     // op_Addition
     public static C operator +(C x, int y) => ...;
