@@ -4,8 +4,6 @@ Champion issue: https://github.com/dotnet/csharplang/issues/9058
 
 ## Summary
 
-<!-- One paragraph explanation of the feature. -->
-
 Allow the `partial` modifier on events and constructors to separate declaration and implementation parts,
 similar to [partial methods][partial-methods-ext] and [partial properties/indexers][partial-props].
 
@@ -28,8 +26,6 @@ partial class C
 ```
 
 ## Motivation
-
-<!-- Why are we doing this? What use cases does it support? What is the expected outcome? -->
 
 C# already supports partial methods, properties, and indexers.
 Partial events and constructors are missing.
@@ -110,8 +106,6 @@ partial class AVAudioCompressedBuffer : AVAudioBuffer
 ```
 
 ## Detailed design
-
-<!-- This is the bulk of the proposal. Explain the design in enough detail for somebody familiar with the language to understand, and for somebody familiar with the compiler to implement, and include examples of how the feature is used. This section can start out light before the prototyping phase but should get into specifics and corner-cases as the feature is iteratively designed and implemented. -->
 
 ### General
 
@@ -237,15 +231,9 @@ It is recommended to ensure that parameter names match across the declarations o
 
 <!-- ## Drawbacks -->
 
-<!-- Why should we *not* do this? -->
-
 <!-- ## Alternatives -->
 
-<!-- What other designs have been considered? What is the impact of not doing this? -->
-
 ## Open questions
-
-<!-- What parts of the design are still undecided? -->
 
 ### Member kinds
 
