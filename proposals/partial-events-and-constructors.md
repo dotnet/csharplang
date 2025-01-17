@@ -30,7 +30,7 @@ partial class C
 C# already supports partial methods, properties, and indexers.
 Partial events and constructors are missing.
 
-Partial events would be useful for weak event libraries, where the user could write definitions:
+Partial events would be useful for [weak event][weak-events] libraries, where the user could write definitions:
 
 ```cs
 partial class C
@@ -254,6 +254,7 @@ e.g., permitting the user to have the same parameter list on multiple partial ty
 [partial-events-discussion]: https://github.com/dotnet/csharplang/discussions/8064
 [partial-ordering]: https://github.com/dotnet/csharplang/issues/8966
 [xamarin]: https://github.com/xamarin/xamarin-macios/issues/21308#issuecomment-2447535524
+[weak-events]: https://learn.microsoft.com/en-us/dotNet/api/system.windows.weakeventmanager
 [event-syntax]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1581-general
 [event-field-like]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1582-field-like-events
 [ctor-syntax]: https://github.com/dotnet/csharpstandard/blob/f3c66477dc2d0a76d5c278e457a63c1695ddae08/standard/classes.md#1511-instance-constructors
