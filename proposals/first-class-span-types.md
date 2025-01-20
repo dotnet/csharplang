@@ -347,6 +347,7 @@ void M(int[] a)
 See also:
 - https://developercommunity.visualstudio.com/t/Extension-method-SystemLinqEnumerable/10790323
 - https://developercommunity.visualstudio.com/t/Compilation-Error-When-Calling-Reverse/10818048
+- https://github.com/dotnet/runtime/issues/111532
 
 Design meeting: https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-11.md#reverse
 
