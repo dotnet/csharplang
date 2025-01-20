@@ -33,6 +33,7 @@ interpolation handlers for `ILogger`. Some examples of this:
 * [fedavorich/ISLE][isle] uses T4 to get around the bloat, by generating handlers for every log level.
 * [This BCL proposal][ilogger-proposal] was immediately abandoned after it was realized that there would need to be a handler type
   for every log level.
+* [dotnet/razor][razor-handlers] defines 7 different handler types for different log levels.
 
 ## Detailed design
 [design]: #detailed-design
@@ -122,6 +123,15 @@ constructor; for example, it could be considered a bit of a hack that we use the
 need more BCL changes, and we don't know of any scenarios that actually need anything more than a string representing the method
 name. Given this, we've opted for the simpler approach of just passing the method name.
 
+Another option is to add a second attribute that can be put on a handler's constructor, a la `CallerMemberName`, except that it
+gives the name of the method that the handler is being passed to, rather than the name of the method that is creating the handler.
+While this could work, it's an entirely new attribute and set of semantics to discuss. We would have to design what the behavior of
+this attribute would be when a handler is constructed without being passed to a method, or when not using the interpolated string
+handler pattern at all. We also have an existing attribute for specifying arguments to the handler constructor, in order, with a
+pre-existing magic string for the receiver. While it might be nice to not have to specify the `Method Name` in every `LogX` overload,
+the handlers will still need the `InterpolatedStringHandlerArgumentAttribute` to get the receiver, so the additional verbosity is
+minimal, leaving this alternative more complicated with very little in the way of benefit for that complexity.
+
 ## Open questions
 [open]: #open-questions
 
@@ -130,4 +140,5 @@ None
 [interpolated-string-spec]: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-interpolated-strings.md
 [isle]: https://github.com/fedarovich/isle/blob/main/src/Isle/Isle.Extensions.Logging/LoggerExtensions.tt
 [ilogger-proposal]: https://github.com/dotnet/runtime/issues/111283
+[razor-handlers]: https://github.com/dotnet/razor/tree/9b1e979b6c3fe7cfbe30f595b9b0994d20bd482c/src/Razor/src/Microsoft.CodeAnalysis.Razor.Workspaces/Logging/Handlers
 [constructor-resolution]: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/improved-interpolated-strings.md#constructor-resolution
