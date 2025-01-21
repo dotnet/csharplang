@@ -67,6 +67,7 @@ operator_modifier
     | unsafe_modifier   // unsafe code support
     | 'abstract'
     | 'virtual'
+    | 'sealed'
 +   | 'override'
 +   | 'new'
     ;
