@@ -348,4 +348,12 @@ The key differences from the earlier algorithm are:
 
 ## Open questions
 
-1. Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
+### Arguments with earlier language version
+
+Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
+
+### Construction overloads for interface types
+
+Are the construction method overloads for mutable interface types taken from the corresponding accessible `List<T>` and `Dictionary<TKey, TValue>` constructors, or are the overloads a fixed set?
+
+If the former, what about `IReadOnlyDictionary<TKey, TValue>` which may be implemented by a synthesized type?
