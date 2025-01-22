@@ -296,7 +296,7 @@ If the target type is a *struct* or *class type* that implements `System.Collect
 //   List<T>(IEnumerable<T> collection)
 //   List<T>(int capacity)
 List<int> l;
-l = [with(capacity: 3), 1, 2]; // new List<int>(capacity: 4)
+l = [with(capacity: 3), 1, 2]; // new List<int>(capacity: 3)
 l = [with([1, 2]), 3];         // new List<int>(IEnumerable<int> collection)
 l = [with(default)];           // error: ambiguous constructor
 ```
@@ -310,8 +310,10 @@ If the target type is a type with a *create method*, then:
 * Otherwise, a binding error is reported.
 
 ```csharp
-MyCollection<string> c =
-    [with(StringComparer.Ordinal), "1", "2"]; // MyBuilder.Create(["1", "2"], StringComparer.Ordinal);
+MyCollection<string> c = [with(GetComparer()), "1", "2"];
+// IEqualityComparer<string> _tmp1 = GetComparer();
+// ReadOnlySpan<string> _tmp2 = ["1", "2"];
+// c = MyBuilder.Create<string>(_tmp2, _tmp1);
 
 [CollectionBuilder(typeof(MyBuilder), "Create")]
 class MyCollection<T> { ... }
