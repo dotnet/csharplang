@@ -310,8 +310,8 @@ If the target type is a type with a *create method*, then:
 * Otherwise, a binding error is reported.
 
 ```csharp
-MyCollection<string> c = [with(StringComparer.Ordinal)];
-// MyBuilder.Create<string>(elements: default, comparer: StringComparer.Ordinal);
+MyCollection<string> c =
+    [with(StringComparer.Ordinal), "1", "2"]; // MyBuilder.Create(["1", "2"], StringComparer.Ordinal);
 
 [CollectionBuilder(typeof(MyBuilder), "Create")]
 class MyCollection<T> { ... }
