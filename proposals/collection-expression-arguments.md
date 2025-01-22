@@ -290,6 +290,17 @@ If the target type is a *struct* or *class type* that implements `System.Collect
   * If the constructor has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
 
+```csharp
+// List<T> candidates:
+//   List<T>()
+//   List<T>(IEnumerable<T> collection)
+//   List<T>(int capacity)
+List<int> l;
+l = [with(capacity: 3), 1, 2]; // new List<int>(capacity: 4)
+l = [with([1, 2]), 3];         // new List<int>(IEnumerable<int> collection)
+l = [with(default)];           // error: ambiguous constructor
+```
+
 If the target type is a type with a *create method*, then:
 * The *argument list* is the *collection expression* containing the elements only (no arguments), followed by the *argument list*.
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
@@ -297,6 +308,20 @@ If the target type is a type with a *create method*, then:
 * If a best factory method is found, the method is invoked with the *argument list*.
   * If the factory method has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
+
+```csharp
+MyCollection<string> c = [with(StringComparer.Ordinal)];
+// MyBuilder.Create<string>(elements: default, comparer: StringComparer.Ordinal);
+
+[CollectionBuilder(typeof(MyBuilder), "Create")]
+class MyCollection<T> { ... }
+
+class MyBuilder
+{
+    public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements);
+    public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements, IEqualityComparer<T> comparer);
+}
+```
 
 If the target type is an *interface type*, then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list* from the following candidate signatures:
@@ -317,7 +342,23 @@ If the target type is an *interface type*, then:
 * If a best factory method is found, the method is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
 
+```csharp
+IDictionary<string, int> d;
+IReadOnlyDictionary<string, int> r;
+
+d = [with(StringComparer.Ordinal)]; // new Dictionary<string, int>(StringComparer.Ordinal)
+r = [with(StringComparer.Ordinal)]; // new $PrivateImpl<string, int>(StringComparer.Ordinal)
+
+d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
+r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
+```
+
 If the target type is any other type, and the *argument list* is not empty, a binding error is reported.
+
+```csharp
+Span<int> a = [with(), 1, 2, 3]; // ok
+Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
+```
 
 ### Create method candidates
 
