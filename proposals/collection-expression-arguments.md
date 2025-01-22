@@ -389,12 +389,26 @@ The key differences from the earlier algorithm are:
 
 ## Open questions
 
+### Construction overloads for *interface types*
+
+Should the constructor candidates for `ICollection<T>` and `IList<T>` be the accessible constructors from `List<T>`, or specific signatures independent from `List<T>`, say `new()` and `new(int capacity)`?
+
+Similarly, should the constructor candidates for `IDictionary<TKey, TValue>` be the accessible constructors from `Dictionary<TKey, TValue>`, or specific signatures, say `new()`, `new(int capacity)`, `new(IEqualityComparer<K> comparer)`, and `new(int capacity, IEqualityComparer<K> comparer)`?
+
+What about `IReadOnlyDictionary<TKey, TValue>` which may be implemented by a synthesized type?
+
+### Construction overloads for *collection builder* types
+
+Should the candidate methods for collection builder types include all overloads on the builder type with the required name, or should the candidates be limited as described [above](#create-method-candidates), for instance by requiring the first parameter is `ReadOnlySpan<T>`?
+
+### `dynamic` arguments
+
+Should arguments with `dynamic` type be allowed? That might require using the runtime binder for overload resolution, which would make it difficult to limit the set of candidates, for instance for [collection builder cases](#construction-overloads-for-collection-builder-types).
+
+### Allow empty argument list for any target type
+
+For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
+
 ### Arguments with earlier language version
 
 Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
-
-### Construction overloads for interface types
-
-Are the construction method overloads for mutable interface types taken from the corresponding accessible `List<T>` and `Dictionary<TKey, TValue>` constructors, or are the overloads a fixed set?
-
-If the former, what about `IReadOnlyDictionary<TKey, TValue>` which may be implemented by a synthesized type?
