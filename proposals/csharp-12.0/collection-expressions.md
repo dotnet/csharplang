@@ -1279,11 +1279,39 @@ Approved with modifications [LDM-2024-01-10](https://github.com/dotnet/csharplan
 ## Design meetings
 [design-meetings]: #design-meetings
 
-https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-11-01.md#collection-literals
-https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-09.md#ambiguity-of--in-collection-expressions
-https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-28.md#collection-literals
-https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md
-https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md
+- [Nov 1, 2021](https://github.com/dotnet/csharplang/blob/main/meetings/2021/LDM-2021-11-01.md#collection-literals): First look
+- [Feb 9, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-02-09.md#collection-literals): Triage
+- [Mar 9, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-09.md#ambiguity-of--in-collection-expressions): Ambiguity of `..`
+- [Sep 28, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-09-28.md#collection-literals): Triage
+- [Apr 3, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-03.md#collection-literals): Spreads and compiler optimizations
+- [Apr 26, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-04-26.md#collection-literals): Review, targeting `IEnumerable<T>`, and dictionary elements
+- [May 3, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-03.md#collection-literal-natural-type): Natural type
+- [May 31, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-05-31.md): Review, construction strategies
+- [Jun 19, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-06-19.md#collection-literals): Type inference
+- [Jul 12, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-12.md#collection-literals): Create methods, extension methods
+- [Jul 17, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md): Compiler check-in
+- [Aug 9, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-08-09.md#target-typing-of-collection-expressions-to-core-interfaces): Targeting interfaces, loosening Create return type requirements
+- [Aug 14, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-08-14.md): Span betterness, type inference, targeting interfaces or `Memory<T>` or inline arrays
+- [Aug 16, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-08-16.md#ref-safety-scope-for-collection-expressions): Ref-safety scope
+- [Sep 18, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-18.md): Capacity optimization, buffering when length is known
+- [Sep 20, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-20.md): Spread type inference, overload resolution
+- [Sep 25, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-25.md#defining-well-defined-behavior-for-collection-expression-types): Well-defined behavior
+- [Sep 27, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-09-27.md): Allowed optimizations
+- [Oct 2, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-02.md): Conversions requiring Add, non-generic interfaces, strings
+- [Oct 11, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-11.md#collection-expressions): Preferring ReadOnlySpan over Span
+- [Nov 15, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-11-15.md#nullability-analysis-of-collection-expressions): Nullability analysis
+- [Jan 8, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-08.md): Determining iteration type
+- [Jan 10, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-10.md): Requiring construction APIs for convertibility
+- [Jan 31, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-01-31.md#relax-enumerable-requirement-for-collection-expressions): Relax enumerable requirement
+- [Feb 5, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-05.md#collection-expressions-inline-collections): Inline collections
+- [Feb 26, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-02-26.md#collection-expressions): Collections with iteration type of object with more specific Add
+- [Apr 15, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-15.md): Non-enumerable collections, relax Add requirement
+- [Apr 17, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-04-17.md#relax-add-requirement-for-collection-expression-conversions-to-types-implementing-ienumerable): Relax Add requirement
+
+See also:
+
+- [Design meetings for **Better Conversion from Collection Expression Element**](../csharp-13.0/collection-expressions-better-conversion.md#design-meetings)
+- [Design meetings for **Dictionary Expressions**](../dictionary-expressions.md#design-meetings)
 
 ## Working group meetings
 [working-group-meetings]: #working-group-meetings

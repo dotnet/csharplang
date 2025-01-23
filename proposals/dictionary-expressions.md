@@ -554,3 +554,9 @@ Resolution: TBD.  Working group recommendation: Use applicable instance indexer 
 Parsing ambiguity around: `[a ? [b] : c]`
 
 Working group recommendation: Use normal parsing here.  So this would be the same as `[a ? ([b]) : (c)]` (a collection expression containing a conditional expression).  If the user wants a `key_value_pair_element` here, they can write: `[(a?[b]) : c]`
+
+## Design meetings
+
+- [Jun 5, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-06-05.md): Syntax, add vs overwrite
+- [Mar 11, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-03-11.md): KeyValuePair elements, add vs overwrite
+- [May 15, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#dictionary-expressions): KeyValuePair elements

@@ -116,3 +116,11 @@ class MyList<T> : List<T> {}
 
 How far do we want to go here? The `List<T>` variant seems reasonable, and subtypes of `List<T>` exist aplenty. But the `HashSet` version has very different semantics, how sure are we that it's actually "worse"
 than `ReadOnlySpan` in this API?
+
+## Design meetings
+
+- [Jul 17, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-17.md#better-conversion-from-collection-expression-with-readonlyspant-overloads): Ambiguity between `ReadOnlySpan<T>` overloads
+- [ Jul 24, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-24.md#better-conversion-from-collection-expression-with-readonlyspant-overloads): Narrow fix versus recursive approach
+- [Aug 19, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-08-19.md): Preferring element type
+- [Aug 21, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-08-21.md#better-conversion-from-collection-expression): Review, prefering span types
+- [Sep 11, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-11.md#better-conversion-from-collection-expression-and-params-collections): Review
