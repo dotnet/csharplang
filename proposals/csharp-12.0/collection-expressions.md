@@ -1316,16 +1316,19 @@ See also:
 ## Working group meetings
 [working-group-meetings]: #working-group-meetings
 
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-06.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-14.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-21.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-05.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-28.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-05-26.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-12.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-26.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-03.md
-https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-10.md
+- [Oct 6, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-06.md): Initial goals, dictionaries
+- [Oct 14, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-14.md): Dictionaries, efficiency
+- [Oct 21, 2022](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2022-10-21.md): Spans and stack allocation, review
+- [Apr 5, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-05.md): Efficient construction for array-backed collections
+- [Apr 28, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-04-28.md): Natural type, spread type inference, dictionary add vs overwrite
+- [May 26, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-05-26.md): Construction API calls, dictionary sigils, C# 12 cut line
+- [Jun 12, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-12.md): API shape for BCL collections to participate
+- [Jun 26, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-06-26.md): Lifetimes, BCL APIs, breaking changes, extension methods, syntax disambiguation
+- [Jul 26, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-07-26.md): Create methods with derived type, extension GetEnumerator, synthesized inline arrays
+- [Aug 3, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-03.md): Escape scope, blittable data
+- [Aug 10, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-10.md): Behavior on runtimes without inline arrays
+- [Aug 11, 2023](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2023-08-11.md): Concrete types used when targeting interface types
+- [Jan 23, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/collection-literals/CL-2024-01-23.md): Design restart
 
 ## Upcoming agenda items
 
