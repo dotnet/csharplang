@@ -406,13 +406,27 @@ For example: an invocation of `enumerableOfInt.Method()` would be emitted as a s
 to `IEnumerableExtensions.<Extension>Method<int>(enumerableOfInt)`.  
 
 Note: multiple extension containers defining static members with the same signature cannot be represented in metadata.  
+However, differences in return types can be represented, allowing for factory methods extending different types. For example:
+```csharp
+static class CollectionExtensions
+{
+    extension<T>(List<T>)
+    {
+        public static List<T> Create() { ... }
+    }
+    extension<T>(HashSet<T>)
+    {
+        public static HashSet<T> Create() { ... }
+    }
+}
+```
 
 ## Open issues
 
 ### Metadata
 
 - Should we emit implementation methods with speakable names instead, as a disambiguation strategy and also to allow
-  usage from other languages?
+  usage from other languages? We could add an attribute to handle compile-time conflicts in factory scenario (`[ExtensionName("CreateList")]`).
 - The metadata format currently doesn't include any modreqs to block other compilers. But the spec does mention we
   would block those scenarios. Let's either remove this requirement or update the metadata format.  
 - We should follow-up on "factory scenario" where multiple extension containers have static factory methods 
