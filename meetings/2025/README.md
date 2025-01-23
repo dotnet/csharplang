@@ -4,6 +4,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Partial constructors open question](../../proposals/partial-events-and-constructors.md#break-in-top-level-contexts) (Jan)
+
 ## Schedule when convenient
 
 - Triage (working set)
