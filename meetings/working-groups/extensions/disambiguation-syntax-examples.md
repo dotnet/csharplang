@@ -6,8 +6,7 @@ public static class MyExtensions
     extension<T>(IEnumerable<T> source)
     {
         public bool IsEmpty => !source.Any();
-        public IEnumerable<T> Where(Func<T, bool> predicate) 
-            => new (source.Where(predicate));
+        public IEnumerable<T> Where(Func<T, bool> predicate) => ...;
         public T this[int index] => source.ElementAt(index);
 
         public static IEnumerable<T> Empty => [];
