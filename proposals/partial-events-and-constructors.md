@@ -243,6 +243,19 @@ We propose the first two member kinds, but any other subset could be considered.
 Partial *primary* constructors could be also considered,
 e.g., permitting the user to have the same parameter list on multiple partial type declarations.
 
+### Break in top-level contexts
+
+Constructors cannot be defined in top-level statements or scripts, i.e., the following is legal today:
+
+```cs
+System.Console.Write(F().GetType().Name); // prints "partial"
+partial F() => new();
+class @partial;
+```
+
+Do we want to keep this behavior or can we break here and simplify the parser?
+If we break, the workaround for users is to use `@partial` for the return type of the method as well.
+
 <!--------
 ## Links
 --------->
