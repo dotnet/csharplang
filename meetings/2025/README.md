@@ -27,13 +27,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 12, 2025
 
+## C# Language Design Notes for 2025
+
 ### Wed Jan 22, 2025
 
-- (5 min only heads up) [Partial events and constructors](https://github.com/dotnet/csharplang/issues/9058) (Jared)
-- Disambiguation syntax for extension types (Mads)
-- Collection Expression Arguments (CyrusNajmabad): https://github.com/dotnet/csharplang/blob/main/proposals/collection-expression-arguments.md
+[C# Language Design Meeting for January 22nd, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md)
 
-## C# Language Design Notes for 2025
+- Partial events and constructors
+- Collection expression arguments
+- Extensions disambiguation syntax
 
 ### Wed Jan 15, 2025
 
