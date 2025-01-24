@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/36>
+
 The goal of this feature is to:
 
 * Allow developers to express whether a variable, parameter or result of a reference type is intended to be null or not.

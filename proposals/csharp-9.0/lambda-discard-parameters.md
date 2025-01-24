@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/111>
+
 ## Summary
 
 Allow discards (`_`) to be used as parameters of lambdas and anonymous methods.

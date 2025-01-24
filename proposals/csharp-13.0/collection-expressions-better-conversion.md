@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8374>
+
 ## Summary
 
 Updates to the better conversion rules to be more consistent with `params`, and better handle current ambiguity scenarios. For example, `ReadOnlySpan<string>` vs `ReadOnlySpan<object>` can currently

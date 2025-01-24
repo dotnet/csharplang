@@ -1,9 +1,6 @@
 # Fixed Sized Buffers
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
+Champion issue: <https://github.com/dotnet/csharplang/issues/1314>
 
 ## Summary
 [summary]: #summary

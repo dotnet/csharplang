@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/373>
+
 ## Summary
 
 Allow `nameof(parameter)` inside an attribute on a method or parameter.

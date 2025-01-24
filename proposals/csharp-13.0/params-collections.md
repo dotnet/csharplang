@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/7700>
+
 ## Summary
 
 In C# 12 language added support for creating instances of collection types beyond just arrays.

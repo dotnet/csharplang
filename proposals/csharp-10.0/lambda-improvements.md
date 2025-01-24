@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/4934>
+
 ## Summary
 Proposed changes:
 1. Allow lambdas with attributes

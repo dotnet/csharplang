@@ -2,7 +2,7 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
-https://github.com/dotnet/csharplang/issues/5737
+Champion issue: <https://github.com/dotnet/csharplang/issues/5737>
 
 ## Summary
 

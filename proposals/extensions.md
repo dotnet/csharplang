@@ -1,5 +1,7 @@
 # Extension members
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8697>
+
 ## Declaration
 
 ### Syntax

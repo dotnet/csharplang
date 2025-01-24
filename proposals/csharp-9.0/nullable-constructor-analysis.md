@@ -1,5 +1,7 @@
 # Nullable constructor analysis
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/3297>
+
 This proposal is intended to resolve a few of the outstanding problems with nullable constructor analysis.
 
 This proposal was accepted on [2020-07-27](https://github.com/dotnet/csharplang/blob/main/meetings/2020/LDM-2020-07-27.md#improved-nullable-analysis-in-constructors).

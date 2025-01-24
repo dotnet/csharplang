@@ -1,5 +1,7 @@
 # Enhanced switch statements
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8611>
+
 ## Summary
 [summary]: #summary
 

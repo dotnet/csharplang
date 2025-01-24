@@ -1,5 +1,6 @@
-
 # Discriminated unions / `enum class`
+
+Champion issue: <https://github.com/dotnet/csharplang/issues/8928>
 
 `enum class`es are a new kind of type declaration, sometimes referred to as discriminated unions,
 where each every possible instance the type is listed, and each instance is non-overlapping.

@@ -1,9 +1,6 @@
 # Nullable-Enhanced Common Type
 
-* [x] Proposed
-* [ ] Prototype: None
-* [ ] Implementation: None
-* [ ] Specification: See below
+Champion issue: <https://github.com/dotnet/csharplang/issues/33>
 
 ## Summary
 [summary]: #summary

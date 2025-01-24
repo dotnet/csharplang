@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/3428>
+
 Syntax for a using directive is extended with an optional `global` keyword that can precede the `using` keyword:
 ```antlr
 compilation_unit

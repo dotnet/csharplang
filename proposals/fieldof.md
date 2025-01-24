@@ -1,6 +1,6 @@
 # Allow direct use of backing field during construction
 
-Champion issue: https://github.com/dotnet/csharplang/issues/9031  
+Champion issue: <https://github.com/dotnet/csharplang/issues/9031  >
 Champion issue for `field` keyword: https://github.com/dotnet/csharplang/issues/8635  
 Related discussion: https://github.com/dotnet/csharplang/discussions/8704
 

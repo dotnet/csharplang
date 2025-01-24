@@ -1,5 +1,7 @@
 # Auto-Implemented Property Field-Targeted Attributes
 
+Champion issu: https://github.com/dotnet/csharplang/issues/42
+
 ## Summary
 [summary]: #summary
 

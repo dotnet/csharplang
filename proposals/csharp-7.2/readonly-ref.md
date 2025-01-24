@@ -1,5 +1,7 @@
 # Readonly references
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/38>
+
 ## Summary
 [summary]: #summary
 

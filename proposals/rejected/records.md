@@ -1,9 +1,6 @@
 # records
 
-* [x] Proposed
-* [ ] Prototype: [Complete](https://github.com/PROTOTYPE_OWNER/roslyn/BRANCH_NAME)
-* [ ] Implementation: [In Progress](https://github.com/dotnet/roslyn/BRANCH_NAME)
-* [ ] Specification: Draft specification enclosed
+Champion issue: <https://github.com/dotnet/csharplang/issues/39>
 
 ## Summary
 [summary]: #summary

@@ -1,5 +1,7 @@
 # `field` keyword in properties
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8635>
+
 ## Summary
 
 Extend all properties to allow them to reference an automatically generated backing field using the new contextual keyword `field`. Properties may now also contain an accessor _without_ a body alongside an accessor _with_ a body.

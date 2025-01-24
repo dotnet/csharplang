@@ -1,9 +1,6 @@
 # null-conditional await
 
-* [x] Proposed
-* [ ] Prototype: None
-* [ ] Implementation: None
-* [ ] Specification: Started, below
+Champion issue: <https://github.com/dotnet/csharplang/issues/8631>
 
 ## Summary
 [summary]: #summary

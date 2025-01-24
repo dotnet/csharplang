@@ -1,5 +1,7 @@
 # List patterns on enumerables
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/9005>
+
 ## Summary
 
 Lets you to match an enumerable with a sequence of patterns e.g. `enumerable is { 1, 2, 3 }` will match a sequence of the length three with 1, 2, 3 as its elements.

@@ -1,5 +1,7 @@
 # Repeated Attributes in Partial Members
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8673>
+
 ## Summary
 
 Allow each declaration of a partial member to independently apply an attribute not marked with `[AttributeUsage(AllowMultiple = true)]`, as long as the attribute arguments are identical in all applications.

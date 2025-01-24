@@ -1,9 +1,6 @@
 # Static Delegates (superseded by [../csharp-9.0/function-pointers.md](../csharp-9.0/function-pointers.md))
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
+Champion issue: <https://github.com/dotnet/csharplang/issues/302>
 
 ## Summary
 [summary]: #summary

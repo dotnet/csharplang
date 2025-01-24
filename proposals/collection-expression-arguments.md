@@ -1,6 +1,6 @@
 # Collection expression arguments
 
-Champion issue: https://github.com/dotnet/csharplang/issues/8887
+Champion issue: <https://github.com/dotnet/csharplang/issues/8887>
 
 ## Motivation
 
