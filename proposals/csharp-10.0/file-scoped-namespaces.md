@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/137>
+
 ## Summary
 
 File scoped namespaces use a less verbose format for the typical case of files containing only one namespace.  The file scoped namespace format is `namespace X.Y.Z;` (note the semicolon and lack of braces).  This allows for files like the following:

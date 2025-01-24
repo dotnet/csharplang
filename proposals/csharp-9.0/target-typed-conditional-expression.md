@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/2460>
+
 ## Conditional Expression Conversion
 
 For a conditional expression `c ? e1 : e2`, when

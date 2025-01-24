@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/1528>
+
 * [x] Proposed
 * [x] Implementation: https://github.com/dotnet/roslyn/pull/56853
 * [x] Specification: this file.

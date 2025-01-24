@@ -1,5 +1,7 @@
 # Block-bodied switch expression arms
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8610>
+
 ## Summary
 [summary]: #summary
 

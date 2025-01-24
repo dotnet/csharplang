@@ -1,5 +1,7 @@
 # Unbound generic types in `nameof`
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8662>
+
 ## Summary
 
 Allows unbound generic types to be used with `nameof`, as in `nameof(List<>)` to obtain the string `"List"`,

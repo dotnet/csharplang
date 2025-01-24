@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/99>
+
 ## Summary
 Support parameterless constructors and instance field initializers for struct types.
 

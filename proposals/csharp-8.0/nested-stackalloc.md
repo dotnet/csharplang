@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/1412>
+
 ## Stack allocation
 
 We modify the section *Stack allocation* ([§12.8.22 Stack allocation](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12822-stack-allocation)) of the C# language specification to relax the places when a `stackalloc` expression may appear. We delete

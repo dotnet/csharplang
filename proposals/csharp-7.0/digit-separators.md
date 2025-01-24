@@ -1,5 +1,7 @@
 # Digit separators
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/55>
+
 Being able to group digits in large numeric literals would have great readability impact and no significant downside. 
 
 Adding binary literals (#215) would increase the likelihood of numeric literals being long, so the two features enhance each other. 

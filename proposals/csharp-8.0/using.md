@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/114>
+
 ## Summary
 
 The language will add two new capabilities around the `using` statement in order to make resource

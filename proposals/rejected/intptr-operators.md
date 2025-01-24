@@ -1,9 +1,6 @@
 # Operators should be exposed for `System.IntPtr` and `System.UIntPtr`
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
+Champion issue: <https://github.com/dotnet/csharplang/issues/48>
 
 ## Summary
 [summary]: #summary

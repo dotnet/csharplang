@@ -1,6 +1,6 @@
 # Type Unions for C#
 
-Champion issue: https://github.com/dotnet/csharplang/issues/8928
+Champion issue: <https://github.com/dotnet/csharplang/issues/8928>
 
 ## Summary
 [summary]: #summary

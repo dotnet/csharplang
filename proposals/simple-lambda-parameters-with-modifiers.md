@@ -1,6 +1,6 @@
 # Simple lambda parameters with modifiers
 
-Champion issue: https://github.com/dotnet/csharplang/issues/8637
+Champion issue: <https://github.com/dotnet/csharplang/issues/8637>
 
 ## Summary
 

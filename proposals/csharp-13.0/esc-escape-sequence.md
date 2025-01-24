@@ -3,6 +3,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8657>
+
 ## Summary
 An addition of the string/character escape sequence `\e` as a shortcut/short-hand replacement
 for the character code point `0x1b`, commonly known as the `ESCAPE` (or `ESC`) character.  

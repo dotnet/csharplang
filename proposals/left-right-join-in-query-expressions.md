@@ -1,6 +1,6 @@
 # Introduce `left` and `right` modifiers to the `join` query expression clauses
 
-Champion issue: https://github.com/dotnet/csharplang/issues/8947
+Champion issue: <https://github.com/dotnet/csharplang/issues/8947>
 
 ## Summary
 [summary]: #summary

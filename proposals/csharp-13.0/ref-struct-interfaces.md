@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/7608>
+
 ## Summary
 
 This proposal will expand the capabilities of `ref struct` such that they can implement interfaces and participate as generic type arguments.

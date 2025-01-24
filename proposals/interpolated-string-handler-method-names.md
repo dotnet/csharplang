@@ -1,6 +1,6 @@
 # Interpolated string handler method names
 
-Champion issue: https://github.com/dotnet/csharplang/issues/9046
+Champion issue: <https://github.com/dotnet/csharplang/issues/9046>
 
 ## Summary
 [summary]: #summary

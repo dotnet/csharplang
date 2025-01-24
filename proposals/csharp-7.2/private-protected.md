@@ -1,5 +1,7 @@
 # private protected
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/37>
+
 ## Summary
 [summary]: #summary
 

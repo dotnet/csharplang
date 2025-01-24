@@ -3,6 +3,8 @@ Inline Arrays
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/7431>
+
 ## Summary
 
 Provide a general-purpose and safe mechanism for consuming struct types utilizing

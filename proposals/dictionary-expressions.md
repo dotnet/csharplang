@@ -1,6 +1,6 @@
 # Dictionary Expressions
 
-Champion issue: https://github.com/dotnet/csharplang/issues/8659
+Champion issue: <https://github.com/dotnet/csharplang/issues/8659>
 
 ## Summary
 

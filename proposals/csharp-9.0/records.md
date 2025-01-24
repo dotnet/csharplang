@@ -1,7 +1,8 @@
-
 # Records
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
+
+Champion issue: <https://github.com/dotnet/csharplang/issues/39>
 
 This proposal tracks the specification for the C# 9 records feature, as agreed to by the C#
 language design team.

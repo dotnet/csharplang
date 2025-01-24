@@ -1,9 +1,6 @@
 # Self constraint for generic type parameters
 
-* [x] Proposed
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
+Champion issue: <https://github.com/dotnet/csharplang/issues/5413>
 
 ## Summary
 [summary]: #summary

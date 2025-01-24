@@ -1,5 +1,7 @@
 ﻿# Variance Safety for static interface members
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/3275>
+
 ## Summary
 
 Allow static, non-virtual members in interfaces to treat type parameters in their declarations as invariant, regardless of their declared variance.

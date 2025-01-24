@@ -1,6 +1,6 @@
 # Partial Events and Constructors
 
-Champion issue: https://github.com/dotnet/csharplang/issues/9058
+Champion issue: <https://github.com/dotnet/csharplang/issues/9058>
 
 ## Summary
 

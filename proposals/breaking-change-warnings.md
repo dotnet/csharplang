@@ -1,6 +1,6 @@
 # Breaking change warnings
 
-Champion issue: https://github.com/dotnet/csharplang/issues/8865
+Champion issue: <https://github.com/dotnet/csharplang/issues/8865>
 
 ## Summary
 [summary]: #summary

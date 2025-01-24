@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/1888>
+
 ## Attributes
 
 Local function declarations are now permitted to have attributes ([§22](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/attributes.md#22-attributes)). Parameters and type parameters on local functions are also allowed to have attributes.

@@ -1,6 +1,6 @@
 # First-class Span Types
 
-Champion issue: https://github.com/dotnet/csharplang/issues/8714
+Champion issue: <https://github.com/dotnet/csharplang/issues/8714>
 
 ## Summary
 

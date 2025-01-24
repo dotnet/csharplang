@@ -1,5 +1,7 @@
 # Local functions
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/56>
+
 We extend C# to support the declaration of functions in block scope. Local functions may use (capture) variables from the enclosing scope.
 
 The compiler uses flow analysis to detect which variables a local function uses before assigning it a value. Every call of the function requires such variables to be definitely assigned. Similarly the compiler determines which variables are definitely assigned on return. Such variables are considered definitely assigned after the local function is invoked.

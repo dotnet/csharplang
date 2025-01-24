@@ -1,5 +1,7 @@
 # Async Task Types in C# #
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/61>
+
 Extend `async` to support _task types_ that match a specific pattern, in addition to the well known types
 `System.Threading.Tasks.Task` and `System.Threading.Tasks.Task<T>`.
 

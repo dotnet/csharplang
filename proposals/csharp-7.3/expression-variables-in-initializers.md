@@ -1,5 +1,7 @@
 # Expression variables in initializers
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/32>
+
 ## Summary
 [summary]: #summary
 
