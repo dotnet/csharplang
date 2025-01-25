@@ -128,6 +128,8 @@ public static class Enumerable
 }
 ```
 
+It is an error to specify the `partial` modifier on a member of an extension declaration.
+
 ### Refness
 
 By default the receiver is passed to instance extension members by value, just like other parameters. 
