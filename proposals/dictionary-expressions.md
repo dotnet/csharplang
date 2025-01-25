@@ -35,15 +35,19 @@ An inclusive solution is needed for C#. It should meet the vast majority of case
 The following grammar productions are added:
 
 ```diff
-
 collection_element
   : expression_element
   | spread_element
 + | key_value_pair_element
++ | with_element
   ;
 
 + key_value_pair_element
 +  : expression ':' expression
++  ;
+
++with_element
++  : 'with' argument_list
 +  ;
 ```
 
@@ -224,22 +228,36 @@ Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
 
 ## Conversions
 
-*Collection expression conversions* are updated to include conversions to *dictionary types*.
+[*Collection expression conversions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions) is updated as follows to include conversions to *dictionary types*.
 
-An implicit *collection expression conversion* exists from a *collection expression* to the following *dictionary types*:
-* A *dictionary type* with an appropriate *[create method](#create-methods)*.
+An implicit *collection expression conversion* exists from a collection expression to the following types:
+* A single dimensional *array type* `T[]`, in which case the *element type* is `T`
+* A *span type*:
+  * `System.Span<T>`
+  * `System.ReadOnlySpan<T>`  
+  In which case the *element type* is `T`
+* A *type* with an appropriate *[create method](#create-methods)*, in which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
+* A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments ***or* a constructor with a single [*comparer*](#Comparer-support) parameter**, and the constructor is accessible at the location of the collection expression.
+  * **One of the following holds:**
+    * If the collection expression has any elements, the *type* has an instance or extension method `Add` where:
+      * The method can be invoked with a single value argument.
+      * If the method is generic, the type arguments can be inferred from the collection and argument.
+      * The method is accessible at the location of the collection expression.
+    * **The *type* is a *dictionary type* and the *indexer* has a `set` accessor that is as accessible as the declaring type.**
 
-* A *struct* or *class* *dictionary type* that implements `System.Collections.IEnumerable` where:
-  * The *element type* is determined from a `GetEnumerator` instance method or enumerable interface.
-  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments (*or* a constructor with a single [*comparer*](#Comparer-support) parameter), and the constructor is accessible at the location of the collection expression.
-  * The *indexer* has a `set` accessor that is as accessible as the declaring type.
-
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type*.
 * An *interface type*:
-  * `System.Collections.Generic.IDictionary<TKey, TValue>`
-  * `System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`
-
-*Collection expression conversions* require implicit conversions for each element.
-The element conversion rules are updated as follows.
+  * `System.Collections.Generic.IEnumerable<T>`
+  * `System.Collections.Generic.IReadOnlyCollection<T>`
+  * `System.Collections.Generic.IReadOnlyList<T>`
+  * `System.Collections.Generic.ICollection<T>`
+  * `System.Collections.Generic.IList<T>`  
+    In which case the *element type* is `T`
+* **An *interface type*:**
+  * **`System.Collections.Generic.IDictionary<TKey, TValue>`**
+  * **`System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`**  
+  **In which case the *element type* is `KeyValuePair<TKey, TValue>`**
 
 > The implicit conversion exists if the type has an *element type* `T` where for each *element* `Eᵢ` in the collection expression:
 > * If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
@@ -282,7 +300,7 @@ List<(long, object)> y = [..x]; // tuple conversion from (int, string) to (long,
 
 ## Create methods
 
-For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create method candidates* for overload resolution are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
+For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, [*create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods) is **updated** to allow additional parameters following the `ReadOnlySpan<E>` parameter, and to allow multiple applicable methods.
 
 > A `[CollectionBuilder(...)]` attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
 > 
@@ -296,16 +314,18 @@ For a collection expression where the target type *definition* has a `[Collectio
 > * The method must be `static`.
 > * The method must be accessible where the collection expression is used.
 > * The *arity* of the method must match the *arity* of the collection type.
-> * The method must have a **first** parameter of type `System.ReadOnlySpan<E>`, passed by value.
+> * The method must have a **first parameter** of type `System.ReadOnlySpan<E>`, passed by value.
 > * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
 > 
 > Methods declared on base types or interfaces are ignored and not part of the `CM` set.
-
+> 
+> If the `CM` set is empty, then the *collection type* doesn't have an *element type* and doesn't have a *create method*. None of the following steps apply.
+> 
+> ~~If only one method among those in the `CM` set has an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1022-identity-conversion) from `E` to the *element type* of the *collection type*, that is the *create method* for the *collection type*. Otherwise, the *collection type* doesn't have a *create method*.~~
+> 
+> An error is reported if the `[CollectionBuilder]` attribute does not refer to an invokable method with the expected signature.
+> 
 > For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
-
-The key differences from the earlier algorithm are:
-* Candidate methods may have additional parameters following the `ReadOnlySpan<E>` parameter.
-* Multiple candidate methods are supported.
 
 *Dictionary type* authors who use `CollectionBuilderAttribute` should have the method that is pointed to have `overwrite` not `throw` semantics when encountering the same `.Key` multiple times in the span of `KeyValuePair<,>` they are processing.
 
