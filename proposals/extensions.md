@@ -32,7 +32,7 @@ extension_container // add
     ;
 
 extension_body // add
-    : '{' extension_member_declaration* '}'
+    : '{' extension_member_declaration* '}' ';'?
     ;
 
 extension_member_declaration // add
