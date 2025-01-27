@@ -145,7 +145,7 @@ when it specifies the `event_accessor_declarations` or it has the `extern` modif
 Otherwise, it is a *defining declaration*.
 
 A partial constructor declaration is said to be a *defining declaration*
-when it has the semicolon body and it lacks the `extern` modifier.
+when it has a semicolon body and it lacks the `extern` modifier.
 Otherwise, it is an *implementing declaration*.
 
 ```cs
@@ -167,7 +167,7 @@ partial class C
 Only the defining declaration of a partial member participates in lookup
 and is considered at use sites and for emitting the metadata.
 (Except for documentation comments as detailed [below](#documentation-comments).)
-The implementing declaration signature is used when nullable-analyzing the associated bodies.
+The implementing declaration signature is used for nullable analysis of the associated bodies.
 
 A partial event or constructor:
 - May only be declared as a member of a partial type.
@@ -185,9 +185,9 @@ A defining partial constructor declaration cannot have a constructor initializer
 ### Attributes
 
 The attributes of the resulting event or constructor are the combined attributes of the partial declarations.
-The attributes of each of the resulting event's accessor
-are the combined attributes of the corresponding partial declaration accessors.
-The attributes of each of the resulting constructor's parameter
+The attributes of each of the resulting event accessors
+are the combined attributes of the corresponding partial implementing declaration accessors.
+The attributes of each of the resulting constructor parameters
 are the combined attributes of the corresponding partial declaration parameters.
 The combined attributes are concatenated in an unspecified order and duplicates are not removed.
 
