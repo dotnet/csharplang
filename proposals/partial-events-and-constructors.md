@@ -186,7 +186,7 @@ A defining partial constructor declaration cannot have a constructor initializer
 
 The attributes of the resulting event or constructor are the combined attributes of the partial declarations.
 The attributes of each of the resulting event accessors
-are the combined attributes of the corresponding partial implementing declaration accessors.
+are the attributes of the corresponding partial implementing declaration accessor.
 The attributes of each of the resulting constructor parameters
 are the combined attributes of the corresponding partial declaration parameters.
 The combined attributes are concatenated in an unspecified order and duplicates are not removed.
