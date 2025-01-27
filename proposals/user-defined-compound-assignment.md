@@ -567,3 +567,16 @@ purpose of the method is to modify the instance.
 
 If a derived class declares a 'compound assignment'/'instance increment' operator with the same signature as one in base,
 should we require an `override` modifier?
+
+## Alternatives
+[alternatives]: #alternatives
+
+### Keep using static methods
+
+We could consider using static operator methods where the instance to be mutated
+is passed as the first parameter. In case of a value type, that parameter must be a `ref` parameter.
+Otherwise, the method won't be able to mutate the target variable. At the same time, in case of a class
+type, that parameter should not be a `ref` parameter. Because in case of a class, the passed in instance
+must be mutated, not the location where the instance is stored. However, when an operator is declared
+in an interface, it is often not known whether the interface will be implemented only by classes,
+or only by structures. Therefore, it is not clear whether the first parameter should be a `ref` parameter.
