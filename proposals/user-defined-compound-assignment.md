@@ -307,7 +307,7 @@ The following names should be added to support checked versions of the operators
 
 See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1296-prefix-increment-and-decrement-operators
 
-If `x` in `«op» x` is classified as a variable, then the priority is given to
+If `x` in `«op» x` is classified as a variable and a new language version is targeted, then the priority is given to
 [instance increment operators](#increment-operators) as follows.
 
 First, an attempt is made to process the operation by applying
@@ -377,8 +377,8 @@ struct S
 
 See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
 
-If result of the operation is used or `x` in `x «op»` is not classified as a variable,
-the operation is processed by applying unary operator overload resolution as
+If result of the operation is used or `x` in `x «op»` is not classified as a variable
+or an old language version is targeted, the operation is processed by applying unary operator overload resolution as
 https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
 currently specifies. 
 The reason why we are not even trying instance increment operators when result is used, is the fact that,
@@ -478,8 +478,8 @@ See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.
 
 The paragraph at the beginning that deals with `dynamic` is still applicable as is.
 
-Otherwise, if `x` in `x «op»= y` is classified as a variable, then the priority is given to
-[compound assignment operators](#compound-assignment-operators) as follows.
+Otherwise, if `x` in `x «op»= y` is classified as a variable and a new language version is targeted,
+then the priority is given to [compound assignment operators](#compound-assignment-operators) as follows.
 
 First, an attempt is made to process an operation of the form `x «op»= y` by applying
 [compound assignment operator overload resolution](#compound-assignment-operator-overload-resolution).
