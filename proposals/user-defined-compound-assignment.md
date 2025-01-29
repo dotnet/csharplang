@@ -91,8 +91,8 @@ logical_negation_operator
     ;
 
 overloadable_unary_operator
--   : '+' | '-' | logical_negation_operator | '~' | '++' | '--' | 'true' | 'false'
-+   : '+' | '-' | logical_negation_operator | '~' | 'true' | 'false'
+-   : '+' | 'checked'? '-' | logical_negation_operator | '~' | 'checked'? '++' | 'checked'? '--' | 'true' | 'false'
++   : '+' | 'checked'? '-' | logical_negation_operator | '~' | 'true' | 'false'
     ;
 
 binary_operator_declarator
@@ -101,7 +101,7 @@ binary_operator_declarator
     ;
 
 overloadable_binary_operator
-    : '+'  | '-'  | '*'  | '/'  | '%'  | '&' | '|' | '^'  | '<<' 
+    : 'checked'? '+'  | 'checked'? '-'  | 'checked'? '*'  | 'checked'? '/'  | '%'  | '&' | '|' | '^'  | '<<'
     | right_shift | '==' | '!=' | '>' | '<' | '>=' | '<='
     ;
 
@@ -116,7 +116,7 @@ conversion_operator_declarator
 +   ;
 
 +overloadable_increment_operator
-+   : '++' | '--'
++   : 'checked'? '++' | 'checked'? '--'
 +    ;
 
 +compound_assignment_operator_declarator
@@ -125,7 +125,7 @@ conversion_operator_declarator
 +   ;
 
 +overloadable_compound_assignment_operator
-+   : '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
++   : 'checked'? '+=' | 'checked'? '-=' | 'checked'? '*=' | 'checked'? '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
 +   | right_shift_assignment
 +   | unsigned_right_shift_assignment
 +   ;
@@ -187,7 +187,7 @@ The following rules apply to static increment operator declarations, where `T` d
 - An operator declaration shall include a `static` modifier and shall not include an `override` modifier.
 - An operator shall take a single parameter of type `T` or `T?` and shall return that same type or a type derived from it.
 
-The signature of a static increment operator consists of the operator token (`++`, `--`) and the type of the single parameter.
+The signature of a static increment operator consists of the operator tokens ('checked'? `++`, 'checked'? `--`) and the type of the single parameter.
 The return type is not part of a static increment operator’s signature, nor is the name of the parameter.
 
 Static increment operators are very similar to [unary operators](#unary-operators).
@@ -200,7 +200,10 @@ The following rules apply to instance increment operator declarations:
 Effectively, an instance increment operator is a void returning instance method that has no parameters and
 has a special name in metadata.
 
-The signature of an instance increment operator consists of the operator token ('++' | '--').
+The signature of an instance increment operator consists of the operator tokens ('checked'? '++' | 'checked'? '--').
+
+A `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise. 
+See also https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md#semantics.
 
 The purpose of the method is to adjust the value of the instance to result of the requested increment operation,
 whatever that means in context of the declaring type.
@@ -231,6 +234,12 @@ However, it states that CLS compliance requires the operator methods to be non-v
 i.e. matches what static increment operators are. We should consider relaxing the CLS compliance requirements
 to allow the operators to be void returning parameter-less instance methods.
 
+The following names should be added to support checked versions of the operators:
+| Name | Operator |
+| -----| -------- |
+|op_CheckedDecrement| checked `--` |
+|op_CheckedIncrement| checked `++` |
+
 ### Compound assignment operators
 [compound-assignment-operators]: #compound-assignment-operators
 
@@ -242,9 +251,12 @@ The following rules apply to compound assignment operator declarations:
 Effectively, a compound assignment operator is a void returning instance method that takes one parameter and
 has a special name in metadata.
 
-The signature of a compound assignment operator consists of the operator token
-('+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '<<=', right_shift_assignment, unsigned_right_shift_assignment) and
+The signature of a compound assignment operator consists of the operator tokens
+('checked'? '+=', 'checked'? '-=', 'checked'? '*=', 'checked'? '/=', '%=', '&=', '|=', '^=', '<<=', right_shift_assignment, unsigned_right_shift_assignment) and
 the type of the single parameter. The name of the parameter is not part of a compound assignment operator’s signature.
+
+A `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise.
+See also https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md#semantics.
 
 The purpose of the method is to adjust the value of the instance to result of ```<instance> <binary operator token> parameter```.
 
@@ -282,6 +294,14 @@ ECMA-335 already "reserved" the following special names for user defined increme
 However, it states that CLS compliance requires the operator methods to be non-void static methods with two parameters,
 i.e. matches what C# binary operators are. We should consider relaxing the CLS compliance requirements
 to allow the operators to be void returning instance methods with a single parameter.
+
+The following names should be added to support checked versions of the operators:
+| Name | Operator |
+| -----| -------- |
+|op_CheckedAdditionAssignment| checked '+=' |
+|op_CheckedSubtractionAssignment| checked '-=' |
+|op_CheckedMultiplicationAssignment| checked '*=' |
+|op_CheckedDivisionAssignment| checked '/=' |
 
 ### Prefix increment and decrement operators
 
