@@ -182,6 +182,25 @@ A partial event is not field-like ([§15.8.2][event-field-like]), i.e.:
 A defining partial constructor declaration cannot have a constructor initializer
 (`: this()` or `: base()`; [§15.11.2][ctor-init]).
 
+### Parsing break
+
+Allowing the `partial` modifier in more contexts is a breaking change:
+
+```cs
+class C
+{
+    partial F() => new partial(); // previously a method, now a constructor
+    @partial F() => new partial(); // workaround to keep it a method
+}
+
+class partial { }
+```
+
+To simplify the language parser,
+the `partial` modifier is accepted at any method-like declaration
+(i.e., local functions and top-level script methods, as well),
+even though we do not specify the grammar changes explicitly above.
+
 ### Attributes
 
 The attributes of the resulting event or constructor are the combined attributes of the partial declarations.
@@ -242,19 +261,6 @@ We propose the first two member kinds, but any other subset could be considered.
 
 Partial *primary* constructors could be also considered,
 e.g., permitting the user to have the same parameter list on multiple partial type declarations.
-
-### Break in top-level contexts
-
-Constructors cannot be defined in top-level statements or scripts, i.e., the following is legal today:
-
-```cs
-System.Console.Write(F().GetType().Name); // prints "partial"
-partial F() => new();
-class @partial;
-```
-
-Do we want to keep this behavior or can we break here and simplify the parser?
-If we break, the workaround for users is to use `@partial` for the return type of the method as well.
 
 <!--------
 ## Links
