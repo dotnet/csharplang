@@ -461,16 +461,16 @@ and `x` is an expression of type `X`, is processed as follows:
 ### Candidate instance increment operators
 [candidate-instance-increment-operators]: #candidate-instance-increment-operators
 
-Given a type `T` and an operation `operator «op»()`, where `«op»` is an overloadable instance increment operator,
-the set of candidate user-defined operators provided by `T` for operator `«op»()` is determined as follows:
-
-- If there is a non-override instance `operator «op»` declarations in `T`,
-  then the set of candidate operators consists of that operator. 
-- Otherwise, if `T` is `object`, the set of candidate operators is empty.
-- Otherwise, the set of candidate operators provided by `T` is the set of candidate operators provided by the direct base class of `T`,
-  or the effective base class of `T` if `T` is a type parameter.
-
-TODO: Specify lookup rules in effective interfaces of a type parameter.
+Given a type `T` and an operation `«op»`, where `«op»` is an overloadable instance increment operator,
+the set of candidate user-defined operators provided by `T` is determined as follows:
+- In `unchecked` evaluation context, it is a group of operators that would be produced
+  by [Member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1251-general)
+  process when only instance `operator «op»()` operators were considered matching the target name `N`.
+- In `checked` evaluation context, it is a group of operators that would be produced
+  by [Member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1251-general)
+  process when only instance `operator «op»()` and instance `operator checked «op»()` operators were considered
+  matching the target name `N`. The `operator «op»()` operators that have pair-wise matching `operator checked «op»()`
+  declarations are excluded from the group.
 
 ### Compound assignment
 
@@ -556,8 +556,8 @@ An operation of the form `x «op»= y`, where `«op»=` is an overloadable compo
 
 - The set of candidate user-defined operators provided by `X` for the operation `operator «op»=(y)` is determined
   using the rules of [candidate compound assignment operators](#candidate-compound-assignment-operators).
-- If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation.
-  Otherwise, the overload resolution yields no result.
+- If at least one candidate user-defined operator in the set is applicable to the argument list `(y)`,
+  then this becomes the set of candidate operators for the operation. Otherwise, the overload resolution yields no result.
 - The [overload resolution rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1264-overload-resolution)
   are applied to the set of candidate operators to select the best operator with respect to the argument list `(y)`,
   and this operator becomes the result of the overload resolution process. If overload resolution fails to select a single best operator,
@@ -566,16 +566,16 @@ An operation of the form `x «op»= y`, where `«op»=` is an overloadable compo
 ### Candidate compound assignment operators
 [candidate-compound-assignment-operators]: #candidate-compound-assignment-operators
 
-Given a type `T` and an operation `operator «op»=(A)`, where `«op»=` is an overloadable compound assignment operator and `A` is an argument list,
-the set of candidate user-defined operators provided by `T` for operator `«op»=(A)` is determined as follows:
-
-- For all non-override `operator «op»=` declarations in `T`, if at least one operator is applicable with respect to the argument list `A`,
-  then the set of candidate operators consists of all such applicable operators in `T`. 
-- Otherwise, if `T` is `object`, the set of candidate operators is empty.
-- Otherwise, the set of candidate operators provided by `T` is the set of candidate operators provided by the direct base class of `T`,
-  or the effective base class of `T` if `T` is a type parameter.
-
-TODO: Specify lookup rules in effective interfaces of a type parameter.
+Given a type `T` and an operation `«op»=`, where `«op»=` is an overloadable compound assignment operator,
+the set of candidate user-defined operators provided by `T` is determined as follows:
+- In `unchecked` evaluation context, it is a group of operators that would be produced
+  by [Member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1251-general)
+  process when only instance `operator «op»=(Y)` operators were considered matching the target name `N`.
+- In `checked` evaluation context, it is a group of operators that would be produced
+  by [Member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1251-general)
+  process when only instance `operator «op»=(Y)` and instance `operator checked «op»=(Y)` operators were considered
+  matching the target name `N`. The `operator «op»=(Y)` operators that have pair-wise matching `operator checked «op»=(Y)`
+  declarations are excluded from the group.
 
 ## Open questions
 [open]: #open-questions
