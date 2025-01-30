@@ -98,6 +98,9 @@ public static class Enumerable
 The type in the receiver specification is referred to as the _receiver type_ and the parameter name,
 if present, is referred to as the _receiver parameter_.
 
+If the _receiver parameter_ has an identifier, the _receiver type_ may not be static.  
+The _receiver parameter_ is only allowed to have the refness modifiers listed below and `scoped`.  
+
 ### Extension members
 
 Extension member declarations are syntactically identical to corresponding instance and static members
