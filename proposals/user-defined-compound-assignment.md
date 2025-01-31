@@ -91,8 +91,8 @@ logical_negation_operator
     ;
 
 overloadable_unary_operator
--   : '+' | '-' | logical_negation_operator | '~' | '++' | '--' | 'true' | 'false'
-+   : '+' | '-' | logical_negation_operator | '~' | 'true' | 'false'
+-   : '+' | 'checked'? '-' | logical_negation_operator | '~' | 'checked'? '++' | 'checked'? '--' | 'true' | 'false'
++   : '+' | 'checked'? '-' | logical_negation_operator | '~' | 'true' | 'false'
     ;
 
 binary_operator_declarator
@@ -101,7 +101,7 @@ binary_operator_declarator
     ;
 
 overloadable_binary_operator
-    : '+'  | '-'  | '*'  | '/'  | '%'  | '&' | '|' | '^'  | '<<' 
+    : 'checked'? '+'  | 'checked'? '-'  | 'checked'? '*'  | 'checked'? '/'  | '%'  | '&' | '|' | '^'  | '<<'
     | right_shift | '==' | '!=' | '>' | '<' | '>=' | '<='
     ;
 
@@ -116,7 +116,7 @@ conversion_operator_declarator
 +   ;
 
 +overloadable_increment_operator
-+   : '++' | '--'
++   : 'checked'? '++' | 'checked'? '--'
 +    ;
 
 +compound_assignment_operator_declarator
@@ -125,7 +125,7 @@ conversion_operator_declarator
 +   ;
 
 +overloadable_compound_assignment_operator
-+   : '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
++   : 'checked'? '+=' | 'checked'? '-=' | 'checked'? '*=' | 'checked'? '/=' | '%=' | '&=' | '|=' | '^=' | '<<='
 +   | right_shift_assignment
 +   | unsigned_right_shift_assignment
 +   ;
@@ -187,7 +187,7 @@ The following rules apply to static increment operator declarations, where `T` d
 - An operator declaration shall include a `static` modifier and shall not include an `override` modifier.
 - An operator shall take a single parameter of type `T` or `T?` and shall return that same type or a type derived from it.
 
-The signature of a static increment operator consists of the operator token (`++`, `--`) and the type of the single parameter.
+The signature of a static increment operator consists of the operator tokens ('checked'? `++`, 'checked'? `--`) and the type of the single parameter.
 The return type is not part of a static increment operator’s signature, nor is the name of the parameter.
 
 Static increment operators are very similar to [unary operators](#unary-operators).
@@ -200,7 +200,10 @@ The following rules apply to instance increment operator declarations:
 Effectively, an instance increment operator is a void returning instance method that has no parameters and
 has a special name in metadata.
 
-The signature of an instance increment operator consists of the operator token ('++' | '--').
+The signature of an instance increment operator consists of the operator tokens ('checked'? '++' | 'checked'? '--').
+
+A `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise. 
+See also https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md#semantics.
 
 The purpose of the method is to adjust the value of the instance to result of the requested increment operation,
 whatever that means in context of the declaring type.
@@ -231,6 +234,12 @@ However, it states that CLS compliance requires the operator methods to be non-v
 i.e. matches what static increment operators are. We should consider relaxing the CLS compliance requirements
 to allow the operators to be void returning parameter-less instance methods.
 
+The following names should be added to support checked versions of the operators:
+| Name | Operator |
+| -----| -------- |
+|op_CheckedDecrement| checked `--` |
+|op_CheckedIncrement| checked `++` |
+
 ### Compound assignment operators
 [compound-assignment-operators]: #compound-assignment-operators
 
@@ -242,9 +251,12 @@ The following rules apply to compound assignment operator declarations:
 Effectively, a compound assignment operator is a void returning instance method that takes one parameter and
 has a special name in metadata.
 
-The signature of a compound assignment operator consists of the operator token
-('+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '<<=', right_shift_assignment, unsigned_right_shift_assignment) and
+The signature of a compound assignment operator consists of the operator tokens
+('checked'? '+=', 'checked'? '-=', 'checked'? '*=', 'checked'? '/=', '%=', '&=', '|=', '^=', '<<=', right_shift_assignment, unsigned_right_shift_assignment) and
 the type of the single parameter. The name of the parameter is not part of a compound assignment operator’s signature.
+
+A `checked operator` declaration requires a pair-wise declaration of a `regular operator`. A compile-time error occurs otherwise.
+See also https://github.com/dotnet/csharplang/blob/main/proposals/csharp-11.0/checked-user-defined-operators.md#semantics.
 
 The purpose of the method is to adjust the value of the instance to result of ```<instance> <binary operator token> parameter```.
 
@@ -283,11 +295,19 @@ However, it states that CLS compliance requires the operator methods to be non-v
 i.e. matches what C# binary operators are. We should consider relaxing the CLS compliance requirements
 to allow the operators to be void returning instance methods with a single parameter.
 
+The following names should be added to support checked versions of the operators:
+| Name | Operator |
+| -----| -------- |
+|op_CheckedAdditionAssignment| checked '+=' |
+|op_CheckedSubtractionAssignment| checked '-=' |
+|op_CheckedMultiplicationAssignment| checked '*=' |
+|op_CheckedDivisionAssignment| checked '/=' |
+
 ### Prefix increment and decrement operators
 
 See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1296-prefix-increment-and-decrement-operators
 
-If `x` in `«op» x` is classified as a variable, then the priority is given to
+If `x` in `«op» x` is classified as a variable and a new language version is targeted, then the priority is given to
 [instance increment operators](#increment-operators) as follows.
 
 First, an attempt is made to process the operation by applying
@@ -357,8 +377,8 @@ struct S
 
 See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
 
-If result of the operation is used or `x` in `x «op»` is not classified as a variable,
-the operation is processed by applying unary operator overload resolution as
+If result of the operation is used or `x` in `x «op»` is not classified as a variable
+or an old language version is targeted, the operation is processed by applying unary operator overload resolution as
 https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12816-postfix-increment-and-decrement-operators
 currently specifies. 
 The reason why we are not even trying instance increment operators when result is used, is the fact that,
@@ -441,16 +461,16 @@ and `x` is an expression of type `X`, is processed as follows:
 ### Candidate instance increment operators
 [candidate-instance-increment-operators]: #candidate-instance-increment-operators
 
-Given a type `T` and an operation `operator «op»()`, where `«op»` is an overloadable instance increment operator,
-the set of candidate user-defined operators provided by `T` for operator `«op»()` is determined as follows:
-
-- If there is a non-override instance `operator «op»` declarations in `T`,
-  then the set of candidate operators consists of that operator. 
-- Otherwise, if `T` is `object`, the set of candidate operators is empty.
-- Otherwise, the set of candidate operators provided by `T` is the set of candidate operators provided by the direct base class of `T`,
-  or the effective base class of `T` if `T` is a type parameter.
-
-TODO: Specify lookup rules in effective interfaces of a type parameter.
+Given a type `T` and an operation `«op»`, where `«op»` is an overloadable instance increment operator,
+the set of candidate user-defined operators provided by `T` is determined as follows:
+- In `unchecked` evaluation context, it is a group of operators that would be produced
+  by [Member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1251-general)
+  process when only instance `operator «op»()` operators were considered matching the target name `N`.
+- In `checked` evaluation context, it is a group of operators that would be produced
+  by [Member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1251-general)
+  process when only instance `operator «op»()` and instance `operator checked «op»()` operators were considered
+  matching the target name `N`. The `operator «op»()` operators that have pair-wise matching `operator checked «op»()`
+  declarations are excluded from the group.
 
 ### Compound assignment
 
@@ -458,8 +478,8 @@ See https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.
 
 The paragraph at the beginning that deals with `dynamic` is still applicable as is.
 
-Otherwise, if `x` in `x «op»= y` is classified as a variable, then the priority is given to
-[compound assignment operators](#compound-assignment-operators) as follows.
+Otherwise, if `x` in `x «op»= y` is classified as a variable and a new language version is targeted,
+then the priority is given to [compound assignment operators](#compound-assignment-operators) as follows.
 
 First, an attempt is made to process an operation of the form `x «op»= y` by applying
 [compound assignment operator overload resolution](#compound-assignment-operator-overload-resolution).
@@ -536,8 +556,8 @@ An operation of the form `x «op»= y`, where `«op»=` is an overloadable compo
 
 - The set of candidate user-defined operators provided by `X` for the operation `operator «op»=(y)` is determined
   using the rules of [candidate compound assignment operators](#candidate-compound-assignment-operators).
-- If the set of candidate user-defined operators is not empty, then this becomes the set of candidate operators for the operation.
-  Otherwise, the overload resolution yields no result.
+- If at least one candidate user-defined operator in the set is applicable to the argument list `(y)`,
+  then this becomes the set of candidate operators for the operation. Otherwise, the overload resolution yields no result.
 - The [overload resolution rules](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1264-overload-resolution)
   are applied to the set of candidate operators to select the best operator with respect to the argument list `(y)`,
   and this operator becomes the result of the overload resolution process. If overload resolution fails to select a single best operator,
@@ -546,16 +566,16 @@ An operation of the form `x «op»= y`, where `«op»=` is an overloadable compo
 ### Candidate compound assignment operators
 [candidate-compound-assignment-operators]: #candidate-compound-assignment-operators
 
-Given a type `T` and an operation `operator «op»=(A)`, where `«op»=` is an overloadable compound assignment operator and `A` is an argument list,
-the set of candidate user-defined operators provided by `T` for operator `«op»=(A)` is determined as follows:
-
-- For all non-override `operator «op»=` declarations in `T`, if at least one operator is applicable with respect to the argument list `A`,
-  then the set of candidate operators consists of all such applicable operators in `T`. 
-- Otherwise, if `T` is `object`, the set of candidate operators is empty.
-- Otherwise, the set of candidate operators provided by `T` is the set of candidate operators provided by the direct base class of `T`,
-  or the effective base class of `T` if `T` is a type parameter.
-
-TODO: Specify lookup rules in effective interfaces of a type parameter.
+Given a type `T` and an operation `«op»=`, where `«op»=` is an overloadable compound assignment operator,
+the set of candidate user-defined operators provided by `T` is determined as follows:
+- In `unchecked` evaluation context, it is a group of operators that would be produced
+  by [Member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1251-general)
+  process when only instance `operator «op»=(Y)` operators were considered matching the target name `N`.
+- In `checked` evaluation context, it is a group of operators that would be produced
+  by [Member lookup](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1251-general)
+  process when only instance `operator «op»=(Y)` and instance `operator checked «op»=(Y)` operators were considered
+  matching the target name `N`. The `operator «op»=(Y)` operators that have pair-wise matching `operator checked «op»=(Y)`
+  declarations are excluded from the group.
 
 ## Open questions
 [open]: #open-questions
