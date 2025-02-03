@@ -35,14 +35,14 @@ will have the same effect as declaring the variable in a `using` statement at th
 ```csharp
 if (...) 
 { 
-   using FileStream f = new FileStream(@"C:\users\jaredpar\using.md");
+   using FileStream f = new FileStream(@"C:\source\using.md");
    // statements
 }
 
 // Equivalent to 
 if (...) 
 { 
-   using (FileStream f = new FileStream(@"C:\users\jaredpar\using.md")) 
+   using (FileStream f = new FileStream(@"C:\source\using.md")) 
    {
     // statements
    }
