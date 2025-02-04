@@ -283,9 +283,10 @@ Each element or argument is evaluated exactly once, and any further references r
 
 If *collection_arguments* is included and is not the first element in the collection expression, a compile-time error is reported.
 
+If the *argument list* contains any values with *dynamic* type, a compile-time error is reported ([LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)).
+
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
-  * If the *argument list* contains any values with *dynamic* type, the best instance constructor is determined at runtime.
 * If a best instance constructor is found, the constructor is invoked with the *argument list*.
   * If the constructor has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
@@ -304,7 +305,6 @@ l = [with(default)];           // error: ambiguous constructor
 If the target type is a type with a *create method*, then:
 * The *argument list* is the *collection expression* containing the elements only (no arguments), followed by the *argument list*.
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
-  * If the *argument list* contains any values with *dynamic* type, the best factory method is determined at runtime.
 * If a best factory method is found, the method is invoked with the *argument list*.
   * If the factory method has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
@@ -340,7 +340,6 @@ If the target type is an *interface type*, then:
     * `new(int capacity)`
     * `new(IEqualityComparer<K> comparer)`
     * `new(int capacity, IEqualityComparer<K> comparer)`
-  * If the *argument list* contains any values with *dynamic* type, the best instance constructor is determined at runtime.
 * If a best factory method is found, the method is invoked with the *argument list*.
 * Otherwise, a binding error is reported.
 
@@ -389,7 +388,49 @@ The key differences from the earlier algorithm are:
 * Candidate methods may have additional parameters following the `ReadOnlySpan<E>` parameter.
 * Multiple candidate methods are supported.
 
+## Answered questions
+
+### `dynamic` arguments
+
+Should arguments with `dynamic` type be allowed? That might require using the runtime binder for overload resolution, which would make it difficult to limit the set of candidates, for instance for [collection builder cases](#construction-overloads-for-collection-builder-types).
+
+**Resolution:** Disallowed. [LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)
+
 ## Open questions
+
+### Target types where arguments are *required*
+
+Should collection expression conversions be supported to target types where arguments must be supplied because all of the constructors or factory methods require at least one argument?
+Such types could be used with collection expressions that include explicit `with()` arguments but the types could not be used for `params` parameters.
+
+A collection type where the constructor is called directly:
+```csharp
+class MyCollection<T> : IEnumerable<T>
+{
+    public MyCollection(int capacity) { ... }
+    public void Add(T t) { ... }
+    // ...
+}
+```
+
+A collection type constructed with a builder method:
+```csharp
+[CollectionBuilder(typeof(MyBuilder), "Create")]
+class MyCollection<T> : IEnumerable<T> { ... }
+
+class MyBuilder
+{
+    public static MyCollection<T> Create<T>(ReadOnlySpan<T> items, int capacity) { ... }
+}
+```
+
+For either of those cases, arguments are required:
+```csharp
+MyCollection<object> x;
+x = [];                  // error: no arguments
+x = [with()];            // error: no 'capacity'
+x = [with(capacity: 1)]; // ok
+```
 
 ### Construction overloads for *interface types*
 
@@ -403,10 +444,6 @@ What about `IReadOnlyDictionary<TKey, TValue>` which may be implemented by a syn
 
 Should the candidate methods for collection builder types include all overloads on the builder type with the required name, or should the candidates be limited as described [above](#create-method-candidates), for instance by requiring the first parameter is `ReadOnlySpan<T>`?
 
-### `dynamic` arguments
-
-Should arguments with `dynamic` type be allowed? That might require using the runtime binder for overload resolution, which would make it difficult to limit the set of candidates, for instance for [collection builder cases](#construction-overloads-for-collection-builder-types).
-
 ### Allow empty argument list for any target type
 
 For target types such as *arrays* and *span types* that do not allow arguments, should an explicit empty argument list, `with()`, be allowed?
@@ -414,3 +451,19 @@ For target types such as *arrays* and *span types* that do not allow arguments, 
 ### Arguments with earlier language version
 
 Is an error reported for `with()` when compiling with an earlier language version, or does `with` bind to another symbol in scope?
+
+### `__arglist`
+
+Should `__arglist` be supported in `with()` elements?
+
+```csharp
+class MyCollection : IEnumerable
+{
+    public MyCollection(__arglist) { ... }
+    public void Add(object o) { }
+}
+
+MyCollection c;
+c = [with(__arglist())];    // ok
+c = [with(__arglist(x, y)]; // ok
+```
