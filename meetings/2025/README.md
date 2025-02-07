@@ -9,7 +9,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - Triage (working set)
-- Left/Right Join clauses. https://github.com/dotnet/csharplang/blob/main/proposals/left-right-join-in-query-expressions.md, https://github.com/dotnet/csharplang/issues/8947.  CyrusNajmabadi, roji, eiriktsarpalis
 - Interpolated string handler method names. https://github.com/dotnet/csharplang/blob/a970d01597886d84d7498e1b6a9d8e8e8ebf02c1/proposals/interpolated-string-handler-method-names.md 333fred, stephentoub
 
 ## Recurring topics
@@ -26,6 +25,9 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Feb 19, 2025
 
 ### Wed Feb 12, 2025
+
+- [User Defined Compound Assignment Operators](https://github.com/dotnet/csharplang/blob/main/proposals/user-defined-compound-assignment.md) (Aleksey)
+- [Left/Right Join clauses](https://github.com/dotnet/csharplang/blob/main/proposals/left-right-join-in-query-expressions.md) and also [this issue](https://github.com/dotnet/csharplang/issues/8947).  CyrusNajmabadi, roji, eiriktsarpalis
 
 ## C# Language Design Notes for 2025
 
