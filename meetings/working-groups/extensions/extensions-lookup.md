@@ -5,7 +5,8 @@ There are two parts to this proposal:
 # Finding a compatible substituted extension container
 
 The proposal here is to look at `extension<extensionTypeParameters>(receiverParameter)` like a method signature, 
-and apply current type inference and applicability rules to it, given the type of a receiver.
+and apply current [type inference](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1263-type-inference) 
+and [receiver applicability](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128103-extension-method-invocations) rules to it, given the type of a receiver.
 
 The type inference step infers the extension type parameters (if possible).  
 The applicability step tells us whether the extension works with the given receiver, 
