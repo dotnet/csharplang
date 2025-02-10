@@ -383,9 +383,9 @@ is emitted as
 ```
 static class IEnumerableExtensions
 {
-    private static class <>E__1<T>
+    public static class <>E__1<T>
     {
-        public static <Extension>$(IEnumerable<T> source) => throw null;
+        public static <Extension>$(IEnumerable<T>) => throw null;
         public void Method() => throw null;
         public static int Property { get => throw null; set => throw null; }
     }
@@ -400,8 +400,8 @@ static class IEnumerableExtensions
     public static void <Extension>Method<T>(IEnumerable<T> source) { ... }
 
     // Implementation for Property
-    internal static int <StaticExtension>get_Property<T>(IEnumerable<T> source) { ... }
-    internal static void <StaticExtension>set_Property<T>(IEnumerable<T> source, int value) { ... }
+    internal static int <StaticExtension>get_Property<T>() { ... }
+    internal static void <StaticExtension>set_Property<T>(int value) { ... }
 
     // Implementation for SumAsync
     public static int <Extension>SumAsync(IAsyncEnumerable<int> values) { ... }
