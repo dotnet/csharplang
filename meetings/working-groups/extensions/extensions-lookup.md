@@ -59,7 +59,7 @@ public interface I<out T> { }
 ```
 
 My proposal is that the implementation continue to diverge from the spec: instead of doing 2-phase lookup 
-(as described in the section above, where we figure find compatible substituted extension containers, then find the candidate members in those)
+(as described in the section above, where we find compatible substituted extension containers, then find the candidate members in those)
 we could do a 1-phase lookup. We would only do this in invocation scenarios (ie. when arguments are provided).
 
 For such invocation scenarios:
