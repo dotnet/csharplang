@@ -60,7 +60,7 @@ public interface I<out T> { }
 
 My proposal is that the implementation continue to diverge from the spec: instead of doing 2-phase lookup 
 (as described in the section above, where we find compatible substituted extension containers, then find the candidate members in those)
-we could do a 1-phase lookup. We would only do this in invocation scenarios (ie. when arguments are provided).
+we could do a 1-phase lookup. We would only do this in invocation scenarios.
 
 For such invocation scenarios:
 1. we collect all the candidate methods (both classic extension methods and new ones, without excluding any extension containers)
