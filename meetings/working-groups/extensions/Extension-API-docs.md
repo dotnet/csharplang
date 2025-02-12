@@ -2,7 +2,7 @@
 
 Extensions introduce new requirements for our API reference pipeline. The addition of new extension member types, and the representation of extension containers require changes to the pipeline for a good customer experience:
 
-- The docs term is "Extension Methods". That term currently means "extension methods with an instance receiver". Now, extensions can be properties, indexers, or operators.
+- The docs term is "Extension Methods". That term currently means "extension methods with an instance receiver". Now, extensions can be properties, indexers, or operators. These extension members can be accessed as either an instance member on the extended type, or as a static member on the extended type.
 - Readers need to know if the receiver is an instance of a type, or the type itself.
 - Readers occasionally need to know the class name of holding the extension, typically for disambiguation.
 - The extension container becomes an unspeakable name, and it should be elided in documentation.
@@ -125,7 +125,7 @@ There should be a new style for extension members. This should be modeled after 
 - The receiver parameter should have its own block. It should precede the other parameter block.
 - The prototype for the member should follow the format shown [above](#extension-member-prototypes).
 
-The emphasis on the receiver parameter reinforces the new syntax, and is necessary for disambiguation when multiple extensions declare methods with similar signatures.
+The emphasis on the receiver parameter reinforces the new syntax, and is necessary for readers to see the extended type on the new extension member.
 
 ### Unspeakable extension type
 
