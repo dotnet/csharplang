@@ -331,6 +331,7 @@ Each extension container in source is emitted as an extension container in metad
   The name is not guaranteed to remain stable across re-compilation. 
   Below we use `<>E__` followed by an index. For example: `<>E__2`.  
 - Its type parameters are those declared in source (including attributes).  
+- Its accessibility is public.  
 
 Method/property/indexer declarations in an extension container in source are represented as skeleton declarations in metadata.  
 The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw null`.  
@@ -383,14 +384,14 @@ is emitted as
 ```
 static class IEnumerableExtensions
 {
-    public static class <>E__1<T>
+    public class <>E__1<T>
     {
-        public static <Extension>$(IEnumerable<T>) => throw null;
+        public static <Extension>$(IEnumerable<T> source) => throw null;
         public void Method() => throw null;
         public static int Property { get => throw null; set => throw null; }
     }
 
-    public static class <>E__2
+    public class <>E__2
     {
         public static <Extension>$(IAsyncEnumerable<int> values) => throw null;
         public Task<int> SumAsync() => throw null;
