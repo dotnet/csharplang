@@ -4,8 +4,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
-- [User Defined Compound Assignment Operators](https://github.com/dotnet/csharplang/blob/main/proposals/user-defined-compound-assignment.md) (Aleksey)
-
 ## Schedule when convenient
 
 - Triage (working set)
