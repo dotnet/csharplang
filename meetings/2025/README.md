@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - Triage (working set)
 - Interpolated string handler method names. https://github.com/dotnet/csharplang/blob/a970d01597886d84d7498e1b6a9d8e8e8ebf02c1/proposals/interpolated-string-handler-method-names.md 333fred, stephentoub
+- Extension member lookup. https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/extensions-lookup.md (Julien, Mads)
 
 ## Recurring topics
 
