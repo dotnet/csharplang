@@ -49,7 +49,7 @@ The presentation and navigation elements used for the docs site help users find 
   - The signatures indicate if the method is a specialization (`Sum(this IEnumerable<int>)`) or generic (`Where<T>(this IEnumerable<T> source, Func<T, bool> predicate)`).
   - The section lists all extensions, from all extending types. They are grouped by type, then sorted alphabetically. **We would like this to change, and have the extension methods sorted alphabetically, without regard to the containing class.**
   - The signature does not show any indication of the extending type.
-  - This section is generated from the `///` comments on the extension methods themselves. The extended type doesn't need `///` comments that list all the known extension methods.
+  - The docs pipeline generates this section on the extended type from the descriptions of the extension methods. The `///` comments on the extended type (for example, `System.Collections.Generic.IEnumerable<T>`) doesn't need to include all extension methods in the entire library.
 
 In source, the existing `///` elements on the extending type and the extension method declarations enable this presentation.
 
@@ -84,6 +84,8 @@ extension<T>(IEnumerable<T>)
 }
 ```
 
+The *receiver parameter* includes a parameter name when the receiver is an instance. The *receiver parameter* doesn't include a parameter name when the receiver is a type.
+
 This presentation enables the following:
 
 - Readers see the new extension syntax when consuming new extensions, driving awareness and adoption.
@@ -111,9 +113,9 @@ The API docs build system generates the section on the type page for the extende
 
 ### Extension class page
 
-The page for the class containing extensions will need only minimal updates in how extension members are displayed.
+The page for the class containing extensions will need only minimal updates in how extension members are displayed. The `static` classes that contain extension methods are classes, and could already define static properties, indexers, and operators. The additional work involves understanding the [unspeakable extension type](#unspeakable-extension-type) that contains new extension members.
 
-- The TOC node for the class will have additional nodes for **Properties** (including indexers), and **operators**. Classes already support this, so it should already work. Note that the node for methods displays *method groups*, not *individual overloads*. That should remain.
+- The TOC node for the class will typically have additional nodes for **Properties** (including indexers), and **operators**. Classes already support this, so it should already work. Note that the node for methods displays *method groups*, not *individual overloads*. That should remain.
 - The page should also have sections for **Properties**, and **operators**.
 - The prototypes for extensions should be displayed as shown [above](#extension-member-prototypes).
 
@@ -123,7 +125,7 @@ There should be a new style for extension members. This should be modeled after 
 
 - The receiver type should be shown in the title and the header block.
 - The receiver parameter should have its own block. It should precede the other parameter block.
-- The prototype for the member should follow the format shown [above](#extension-member-prototypes).
+- The prototype for the member should follow the format shown [above](#extension-member-prototypes). The receiver parameter is named for extensions whose receiver is an instance. The name is not included for extensions where the receiver is a type.
 
 The emphasis on the receiver parameter reinforces the new syntax, and is necessary for readers to see the extended type on the new extension member.
 
