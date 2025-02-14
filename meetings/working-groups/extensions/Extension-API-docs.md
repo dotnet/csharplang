@@ -92,7 +92,7 @@ This presentation enables the following:
 - The parameter on the `extension` node indicates the type extended, and provides a key to know if the member is intended to extend an instance or extend the type.
 - The prototype only includes the `static` modifier if it would be present in source, as in an operator declaration:
   ```csharp
-  extension<T>(IEnumerable<T> source)
+  extension<T>(IEnumerable<T>)
   {
       public static IEnumerable<T> operator + (IEnumerable<T> left, IEnumerable<T> right);
   }
@@ -105,7 +105,7 @@ The API docs build system generates the section on the type page for the extende
 - The prototypes are displayed as described in the previous section.
 - Otherwise, the format is consistent with the current format:
   - Each overload has a separate entry in the section.
-  - The signatures indicate if the method is a specialization (`Sum(this IEnumerable<int>)`) or generic (`Where<T>(this IEnumerable<T> source, Func<T, bool> predicate)`).
+  - The signatures indicate if the method is a specialization (`extension(IEnumerable<int> source) { ... }`) or generic (`extension<T>(IEnumerable<T> source) { ... }`).
   - The section lists all extensions, from all extending types. They are sorted alphabetically, as proposed for current extension methods.
   - The signature does not show any indication of the extending type.
 
