@@ -145,7 +145,7 @@ class SomeViewModel
 
     private bool Set<T>(ref T location, T value)
     {
-        if (RuntimeHelpers.Equals(location, value))
+        if (EqualityComparer<T>.Default.Equals(location, value))
             return false;
 
         location = value;
