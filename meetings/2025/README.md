@@ -7,8 +7,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - [Target-typed static member lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md) (jnm2)
-- Triage (working set)
 - [#9133](https://github.com/dotnet/csharplang/pull/9133) - Specify how [extensions](../../proposals/extensions.md) are displayed in API reference (@billwagner, @gewarren).
+- Triage (working set)
 
 ## Recurring topics
 
