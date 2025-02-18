@@ -14,8 +14,8 @@ using the applicability rules of `this` parameters.
 
 This can be applied both when the receiver is an instance or when it is a type.
 
-Re-using the existing type inference algorithm solves the variance problem we'd discussed in LDM.  
-It makes this scenario work as desired, because type inference is smarter than the implemented algorithm for extensions:
+Re-using the existing type inference and conversion algorithm solves the variance problem we'd discussed in LDM.  
+It makes this scenario work as desired:
 ```cs
 IEnumerable<string>.M();
 
@@ -28,12 +28,15 @@ static class E
 }
 ```
 
+Note: this change was made in the new extensions feature branch.
+
 # Aligning with implementation of classic extension methods
 
 The above should bring the behavior of new extensions very close to classic extensions.  
 But there is still a small gap with the current implementation of classic extension methods, 
 when arguments beyond the receiver are required for type inference of the type parameters
 on the extension container.  
+
 The spec for classic extension methods specifies 2 phases (find candidates compatible with the receiver, then complete the overload resolution), 
 but the implementation only has 1 phase (find all candidates and do overload resolution with all the arguments including one for the receiver value).
 
@@ -58,16 +61,23 @@ public static class E
 public interface I<out T> { }
 ```
 
-My proposal is that the implementation continue to diverge from the spec: instead of doing 2-phase lookup 
-(as described in the section above, where we find compatible substituted extension containers, then find the candidate members in those)
-we could do a 1-phase lookup. We would only do this in invocation scenarios.
+We have a few options:
+1. Bend the implementation of new extension member lookup to work the same way as classic extensions (1-phase for invocation scenarios, 2-phases for others)
+   We can either update the spec for classic extension methods, or document a spec deviation for both classic and new extension methods. 
+2. Introduce a subtle difference in behavior between new and old extension methods (and figure out how we then resolve when both kinds are candidates)
+   This means that migrating from a classic extension method to a new extension method is not quite 100% compatible.
+3. Make new and old extension methods both work the new way, thus breaking existing uses of existing extension methods
 
-For such invocation scenarios:
+Note: depending on this choice, still need to solve how to mix classic and new extension methods in invocation and function type scenarios.
+
+## Details on option 1 (1 phase design to match implementation of classic extension methods)
+
+If we choose to do 1-phase lookup for invocation scenarios, we would:
 1. we collect all the candidate methods (both classic extension methods and new ones, without excluding any extension containers)
 2. we combine all the type parameters and the parameters into a single signature
 3. we apply overload resolution to the resulting set
 
-The transformation at step2 would take a method like the following:
+The transformation at step 2 would take a method like the following:
 ```cs
 static class E
 {
@@ -84,16 +94,5 @@ static void M<extensionTypeParameters, methodTypeParameters>(this receiverParame
 
 Note: for static scenarios, we would play the same trick as in the above section, where we take a type/static receiver and use it as an argument.
 
-# Recap
-
-If we accepted both parts of the proposal:
-- `instance.Method(...)` would behave exactly the same whether `Method` is a classic or new extension method 
-(from an implementation perspective)
-- `Type.Method(...)` would behave exactly like the instance scenario
-- other scenarios all use the new resolution method where we figure out the compatible substituted extension containers, then collect candidates
-- `instance.Property` and `Type.Property` 
-- `instance[...]`
-(we first figure out the compatible substituted extension container, then do overload resolution with the candidate indexers)
-- const, nested type, operators, ...
-
+Note: This approach solve the mixing question.
 
