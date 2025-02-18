@@ -432,12 +432,20 @@ static class CollectionExtensions
 
 ### Metadata
 
+- Is a gesture from users required to emit methods in 100% compatible way with classic extension methods? (ie. speakable name and `[Extension]` attribute)
 - Should we emit implementation methods with speakable names instead, as a disambiguation strategy and also to allow
   usage from other languages? We could add an attribute to handle compile-time conflicts in factory scenario (`[ExtensionName("CreateList")]`).
 - The metadata format currently doesn't include any modreqs to block other compilers. But the spec does mention we
   would block those scenarios. Let's either remove this requirement or update the metadata format.  
 - We should follow-up on "factory scenario" where multiple extension declarations have static factory methods 
   with same parameter types but different return types.
+
+### Lookup
+
+- How do we resolve the small gap between classic and new extension methods in invocation?
+- How do we mix classic and new extension methods in invocation?
+- How do we prefer more specific extension methods?
+- Scoping and shadowing rules for extension parameter and type parameters?
 
 ### Add support for more member kinds
 
