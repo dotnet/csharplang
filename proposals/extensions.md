@@ -24,10 +24,10 @@ class_member_declaration
     | finalizer_declaration
     | static_constructor_declaration
     | type_declaration
-    | extension_container // add
+    | extension_declaration // add
     ;
 
-extension_container // add
+extension_declaration // add
     : 'extension' type_parameter_list? '(' receiver_parameter ')' type_parameter_constraints_clause* extension_body
     ;
 
@@ -47,7 +47,7 @@ receiver_parameter // add
     ;
 ```
 
-Extension containers shall only be declared in non-generic, non-nested static classes.  
+Extension declarations shall only be declared in non-generic, non-nested static classes.  
 It is an error for a type to be named `extension`.  
 
 ### Static classes as extension containers
@@ -321,19 +321,19 @@ These requirements need more refinement as implementation progresses, and may ne
 
 ### Metadata for declarations
 
-Each extension container is emitted as a nested private static class with a marker method and skeleton members.  
+Each extension declaration is emitted as a nested private static class with a marker method and skeleton members.  
 Each skeleton member is accompanied by a top-level static implementation method with a modified signature.  
 
 #### Skeletons
 
-Each extension container in source is emitted as an extension container in metadata.  
+Each extension declaration in source is emitted as an extension declaration in metadata.  
 - Its name is unspeakable and determined based on the lexical order in the program.  
   The name is not guaranteed to remain stable across re-compilation. 
   Below we use `<>E__` followed by an index. For example: `<>E__2`.  
 - Its type parameters are those declared in source (including attributes).  
 - Its accessibility is public.  
 
-Method/property/indexer declarations in an extension container in source are represented as skeleton declarations in metadata.  
+Method/property/indexer declarations in an extension declaration in source are represented as skeleton members in metadata.  
 The signatures of the original methods are maintained (including attributes), but their bodies are replaced with `throw null`.  
 Those should not be referenced in IL.  
 
@@ -342,25 +342,25 @@ is so that IL verification could run and pass (thus validating the completeness 
 
 The extension marker method encodes the receiver parameter.  
 - It is public and static, and is called `<Extension>$`.  
-- It has the attributes, refness, type and name from the receiver parameter on the extension container.  
+- It has the attributes, refness, type and name from the receiver parameter on the extension declaration.  
 - If the receiver parameter doesn't specify a name, then the parameter name is empty.  
 
-Note: This allows roundtripping of extension container symbols through metadata (full and reference assemblies).  
+Note: This allows roundtripping of extension declaration symbols through metadata (full and reference assemblies).  
 
-Note: we may choose to only emit one extension container in metadata when duplicate extension containers are found in source.  
+Note: we may choose to only emit one extension skeleton type in metadata when duplicate extension declarations are found in source.  
 
 #### Implementations
 
-The method bodies for method/property/indexer declarations in an extension container in source are emitted 
+The method bodies for method/property/indexer declarations in an extension declaration in source are emitted 
 as static implementation methods in the top-level static class.  
 - An implementation method is named by prepending `<Extension>` for instance case or `<StaticExtension>` for static case to the name of the original method.  
   For example: `set_Property` => `<Extension>set_Property`.
-- It has type parameters derived from the extension container prepended to the type parameters of the original method (including attributes).  
+- It has type parameters derived from the extension declaration prepended to the type parameters of the original method (including attributes).  
 - It has the same accessibility and attributes as the original method.  
 - If it implements a static method, it has the same parameters and return type. 
 - It if implements an instance method, it has a prepended parameter to the signature of the original method. 
-  This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension container.
-- The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension container.  
+  This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension declaration.
+- The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension declaration.  
 
 For example:
 ```
@@ -413,7 +413,7 @@ Whenever extension members are used in source, we will emit those as reference t
 For example: an invocation of `enumerableOfInt.Method()` would be emitted as a static call 
 to `IEnumerableExtensions.<Extension>Method<int>(enumerableOfInt)`.  
 
-Note: multiple extension containers defining static members with the same signature cannot be represented in metadata.  
+Note: multiple extension declarations defining static members with the same signature cannot be represented in metadata.  
 However, differences in return types can be represented, allowing for factory methods extending different types. For example:
 ```csharp
 static class CollectionExtensions
@@ -433,12 +433,20 @@ static class CollectionExtensions
 
 ### Metadata
 
+- Is a gesture from users required to emit methods in 100% compatible way with classic extension methods? (ie. speakable name and `[Extension]` attribute)
 - Should we emit implementation methods with speakable names instead, as a disambiguation strategy and also to allow
   usage from other languages? We could add an attribute to handle compile-time conflicts in factory scenario (`[ExtensionName("CreateList")]`).
 - The metadata format currently doesn't include any modreqs to block other compilers. But the spec does mention we
   would block those scenarios. Let's either remove this requirement or update the metadata format.  
-- We should follow-up on "factory scenario" where multiple extension containers have static factory methods 
+- We should follow-up on "factory scenario" where multiple extension declarations have static factory methods 
   with same parameter types but different return types.
+
+### Lookup
+
+- How do we resolve the small gap between classic and new extension methods in invocation?
+- How do we mix classic and new extension methods in invocation?
+- Should we just prefer more specific extension members or use a form of "better member" selection?
+- Scoping and shadowing rules for extension parameter and type parameters?
 
 ### Add support for more member kinds
 
@@ -470,11 +478,11 @@ extension_member_declaration // add
 #### Nested types
 
 If we do choose to move forward with extension nested types, here are some notes from previous discussions:
-- There would be a conflict if two extension containers declared nested extension types with same names and arity.
+- There would be a conflict if two extension declarations declared nested extension types with same names and arity.
   We do not have a solution for representing this in metadata.  
 - The rough approach we discussed for metadata:
   1. we would emit a skeleton nested type with original type parameters and no members
-  2. we would emit an implementation nested type with prepended type parameters from the extension container and 
+  2. we would emit an implementation nested type with prepended type parameters from the extension declaration and 
      all the member implementations as they appear in source (modulo references to type parameters)
 
 #### Constructors
