@@ -444,7 +444,7 @@ static class CollectionExtensions
 
 - How do we resolve the small gap between classic and new extension methods in invocation?
 - How do we mix classic and new extension methods in invocation?
-- How do we prefer more specific extension methods?
+- Should we just prefer more specific extension members or use a form of "better member" selection?
 - Scoping and shadowing rules for extension parameter and type parameters?
 
 ### Add support for more member kinds
