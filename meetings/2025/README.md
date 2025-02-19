@@ -7,8 +7,6 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule when convenient
 
 - [Target-typed static member lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md) (jnm2) (March 3rd or later)
-- [#9133](https://github.com/dotnet/csharplang/pull/9133) - Specify how [extensions](../../proposals/extensions.md) are displayed in API reference (@billwagner, @gewarren).
-- [Extensions: More metadata and lookup open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 - Triage (working set)
 
 ## Recurring topics
@@ -36,11 +34,15 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Feb 26, 2025
 
+- [Extensions: More metadata and lookup open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
 ### Mon Feb 24, 2025
+
+- [#9133](https://github.com/dotnet/csharplang/pull/9133) - Specify how [extensions](../../proposals/extensions.md) are displayed in API reference (@billwagner, @gewarren).
+- [Interpolated string handler method names.](https://github.com/dotnet/csharplang/blob/a970d01597886d84d7498e1b6a9d8e8e8ebf02c1/proposals/interpolated-string-handler-method-names.md) (333fred, stephentoub)
 
 ### Wed Feb 19, 2025
 
-- [Interpolated string handler method names.](https://github.com/dotnet/csharplang/blob/a970d01597886d84d7498e1b6a9d8e8e8ebf02c1/proposals/interpolated-string-handler-method-names.md) (333fred, stephentoub)
 - [Extension member lookup.](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/extensions-lookup.md) (Julien, Mads)
 
 ### Wed Feb 12, 2025
