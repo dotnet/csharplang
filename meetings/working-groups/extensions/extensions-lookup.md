@@ -96,3 +96,71 @@ Note: for static scenarios, we would play the same trick as in the above section
 
 Note: This approach solve the mixing question.
 
+# Lookup: more specific vs. better function member
+
+We previously concluded that we should prefer more specific extensions members.  
+But we could also leverage something like [better function member](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member) to resolve more ambiguous non-method scenarios. 
+
+```
+_ = "".P;
+
+public static class E
+{
+    extension(object o)
+    {
+        public int P => throw null; 
+    }
+    extension(string s) // more specific parameter type
+    {
+        public int P { get { System.Console.Write("ran"); return 42; } }
+    }
+}
+```
+
+```
+_ = 42.P;
+
+public static class E
+{
+    extension(int? i)
+    {
+        public int P => throw null; 
+    }
+    extension(int i) // better conversion from expression
+    {
+        public int P { get { System.Console.Write("ran"); return 42; } }
+    }
+}
+```
+
+```
+_ = 42.P;
+
+public static class E
+{
+    extension<T>(T t)
+    {
+        public int P => throw null; 
+    }
+    extension(int i) // non-generic, so better function member
+    {
+        public int P { get { System.Console.Write("ran"); return 42; } }
+    }
+}
+```
+
+```
+_ = 42.P;
+
+public static class E
+{
+    extension(in int i)
+    {
+        public int P => throw null; 
+    }
+    extension(int i) // better parameter-passing mode
+    {
+        public int P { get { System.Console.Write("ran"); return 42; } }
+    }
+}
+```
