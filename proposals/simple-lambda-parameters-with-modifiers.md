@@ -51,7 +51,7 @@ This grammar already considers `modifiers* identifier` to be syntactically legal
 1. This does not apply to a lambda without a parameter list. `ref x => x.ToString()` would not be legal.
 1. A lambda parameter list still cannot mix `implicit_anonymous_function_parameter` and `explicit_anonymous_function_parameter` parameters.
 1. `(ref readonly p) =>`, `(scoped ref p) =>`, and `(scoped ref readonly p) =>` will be allowed, just as they are with explicit parameters, due to:
-   - [Low-level struct improvements](csharp-11.0/low-level-struct-improvements.md#Syntax) in C# 11
+   - [Low-level struct improvements](csharp-11.0/low-level-struct-improvements.md#syntax) in C# 11
    - [`ref readonly` parameters](csharp-12.0/ref-readonly-parameters.md#parameter-declarations) in C# 12
 1. The presence/absence of a type has no impact on whether a modifier is required or optional.  In other words, if a modifier was required
    with a type present, it is still required with the type absent.  Similarly, if a modifier was optional with a type present, it is 
@@ -59,7 +59,7 @@ This grammar already considers `modifiers* identifier` to be syntactically legal
 
 ### Semantics
 
-https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12192-anonymous-function-signatures is updated as follows:
+https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/expressions#12192-anonymous-function-signatures is updated as follows:
 
 In a `lambda_parameter_list` all `lambda_parameter` elements must either have a `type`
 present or not have a `type` present.  The former is an "explicitly
@@ -79,7 +79,7 @@ The following change is required to [anonymous function conversions](https://git
 
 `scoped` and `params` are allowed as explicit modifiers in a lambda without an explicit type present. Semantics
 remain the same for both.  Specifically, neither is part of the determination made
-[in](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12192-anonymous-function-signatures):
+[in](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/expressions#12192-anonymous-function-signatures):
 
 > If an anonymous function has an explicit_anonymous_function_signature, then the set of compatible delegate
 > types and expression tree types is restricted to those that have the same parameter types and modifiers in
