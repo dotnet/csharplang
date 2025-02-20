@@ -135,47 +135,92 @@ A type is considered a *dictionary type* if the following hold:
 
 \* *Identity conversions are used rather than exact matches to allow type differences in the signature that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
 
-## Comparer support
+## Collection arguments
 
-A dictionary expression can also provide a custom *comparer* to control its behavior just by including such a value as the first `expression_element` in the expression. For example:
+*Collection arguments* can be provided in a `with()` element.
 
-```c#
-Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive, .. existingMap];
+Within *collection arguments*, the arguments are evaluated in order, left to right.
+Each argument is evaluated exactly once, and any further references refer to the results of this initial evaluation.
 
-// Or even:
-Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive];
+If *collection_arguments* is included and is not the first element in the collection expression, a compile-time error is reported.
+
+If the *argument list* contains any values with *dynamic* type, a compile-time error is reported ([LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)).
+
+If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
+* If a best instance constructor is found, the constructor is invoked with the *argument list*.
+  * If the constructor has a `params` parameter, the invocation may be in expanded form.
+* Otherwise, a binding error is reported.
+
+```csharp
+// List<T> candidates:
+//   List<T>()
+//   List<T>(IEnumerable<T> collection)
+//   List<T>(int capacity)
+List<int> l;
+l = [with(capacity: 3), 1, 2]; // new List<int>(capacity: 3)
+l = [with([1, 2]), 3];         // new List<int>(IEnumerable<int> collection)
+l = [with(default)];           // error: ambiguous constructor
 ```
 
-While this approach does reuse `expression_element` both for specifying individual `KeyValuePair<,>` as well as a comparer for the dictionary, there is no ambiguity here as no type could satisfy both types.  
+If the target type is a type with a *create method*, then:
+* The *argument list* is the *collection expression* containing the elements only (no arguments), followed by the *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
+* If a best factory method is found, the method is invoked with the *argument list*.
+  * If the factory method has a `params` parameter, the invocation may be in expanded form.
+* Otherwise, a binding error is reported.
 
-The motivation for this is due to the high number of cases of dictionaries found in real world code with custom comparers.  Support for any further customization is not provided.  This is in line with the lack of support for customization for normal collection expressions (like setting initial capacity). Other designs were explored which attempted to generalize this concept (for example, passing arbitrary arguments along).  These designs never landed on a satisfactory syntax.  And the concept of passing an arbitrary argument along doesn't supply a satisfactory answer on how that would control instantiating an `IDictionary<,>` or `IReadOnlyDictionary<,>`.
+```csharp
+MyCollection<string> c = [with(GetComparer()), "1", "2"];
+// IEqualityComparer<string> _tmp1 = GetComparer();
+// ReadOnlySpan<string> _tmp2 = ["1", "2"];
+// c = MyBuilder.Create<string>(_tmp2, _tmp1);
 
-### Question: Comparers for *collection types*
+[CollectionBuilder(typeof(MyBuilder), "Create")]
+class MyCollection<T> { ... }
 
-Should support for the key comparer be available for normal *collection types*, not just *dictionary types*.  This would be useful for set-like types like `HashSet<>`.  For example:
-
-```c#
-HashSet<string> values = [StringComparer.CaseInsensitive, .. names];
+class MyBuilder
+{
+    public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements);
+    public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements, IEqualityComparer<T> comparer);
+}
 ```
 
-### Question: Specialized comparer syntax.
+If the target type is an *interface type*, then:
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list* from the following candidate signatures:
+  * If the target type is `IEnumerable<E>`, `IReadOnlyCollection<E>`, or `IReadOnlyList<E>`, the candidates are:
+    * `new()`
+  * If the target type is `ICollection<E>`, or `IList<E>`, the candidates are:
+    * `new()`
+    * `new(int capacity)`
+  * If the target type is `IReadOnlyDictionary<K, V>`, the candidates are:
+    * `new()`
+    * `new(IEqualityComparer<K> comparer)`
+  * If the target type is `IDictionary<K, V>`, the candidates are:
+    * `new()`
+    * `new(int capacity)`
+    * `new(IEqualityComparer<K> comparer)`
+    * `new(int capacity, IEqualityComparer<K> comparer)`
+* If a best factory method is found, the method is invoked with the *argument list*.
+* Otherwise, a binding error is reported.
 
-Should there be more distinctive syntax for the comparer?  Simply starting with a comparer could be difficult to tease out.  Having a syntax like so could make things clearer:
+```csharp
+IDictionary<string, int> d;
+IReadOnlyDictionary<string, int> r;
 
-```c#
-// `comparer: ...` to indicate the purpose of this value
-Dictionary<string, int> caseInsensitiveMap = [comparer: StringComparer.CaseInsensitive, .. existingMap];
+d = [with(StringComparer.Ordinal)]; // new Dictionary<string, int>(StringComparer.Ordinal)
+r = [with(StringComparer.Ordinal)]; // new $PrivateImpl<string, int>(StringComparer.Ordinal)
 
-// Semicolon to more clearly delineate the comparer
-Dictionary<string, int> caseInsensitiveMap = [StringComparer.CaseInsensitive; .. existingMap];
-
-// Both?
-Dictionary<string, int> caseInsensitiveMap = [comparer : StringComparer.CaseInsensitive; .. existingMap];
+d = [with(capacity: 2)]; // new Dictionary<string, int>(capacity: 2)
+r = [with(capacity: 2)]; // error: 'capacity' parameter not recognized
 ```
 
-### Question: Types of comparers supported.
+If the target type is any other type, and the *argument list* is not empty, a binding error is reported.
 
-`IEqualityComparer<T>` is not the only comparer type used in collections.  `SortedDictionary<,>` and `SortedSet<,>` both use an `IComparer<T>` instead (as they have ordering, not hashing semantics).  It seems unfortunate to leave out `SortedDictionary<,>` if we are supporting the rest.  As such, perhaps the rules should just be that the special value in the collection be typed as some `IComparer<T>` or some `IEqualityComparer<T>`.  
+```csharp
+Span<int> a = [with(), 1, 2, 3]; // ok
+Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
+```
 
 ## Conversions
 
@@ -201,6 +246,8 @@ The element conversion rules are updated as follows.
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
 > * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ` and `T` is a type `KeyValuePair<K, V>`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 > * **Otherwise there is *no conversion* from the collection expression to the target type.**
+
+Collection arguments are *not* considered when determining *collection expression* conversions.
 
 ### Key-value pair conversions
 
@@ -235,15 +282,30 @@ List<(long, object)> y = [..x]; // tuple conversion from (int, string) to (long,
 
 ## Create methods
 
-> A *create method* is indicated with a `[CollectionBuilder(...)]` attribute on the *collection type*.
-> The attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
+For a collection expression where the target type *definition* has a `[CollectionBuilder]` attribute, the *create method candidates* for overload resolution are the following, **updated** from [*collection expressions: create methods*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#create-methods).
 
-> **A create method need not be called `Create`.  Instead, it may commonly use the name `CreateRange` in the dictionary domain.**
->
-> For the create method:
->   - The method must have a single parameter of type System.ReadOnlySpan<E>, passed by value, and there is an identity conversion from E to the *iteration type* of the collection type. 
->
->    - **The method has two parameters, where the first is a [*comparer*](#Comparer-support) and the other follows the rules of the *single parameter* rule above. This method will be called if the collection expression's first element is an [*comparer*](#Comparer-support) that is convertible to that parameter type.**
+> A `[CollectionBuilder(...)]` attribute specifies the *builder type* and *method name* of a method to be invoked to construct an instance of the collection type.
+> 
+> The *builder type* must be a non-generic `class` or `struct`.
+> 
+> First, the set of applicable *create methods* `CM` is determined.
+> It consists of methods that meet the following requirements:
+> 
+> * The method must have the name specified in the `[CollectionBuilder(...)]` attribute.
+> * The method must be defined on the *builder type* directly.
+> * The method must be `static`.
+> * The method must be accessible where the collection expression is used.
+> * The *arity* of the method must match the *arity* of the collection type.
+> * The method must have a **first** parameter of type `System.ReadOnlySpan<E>`, passed by value.
+> * There is an [*identity conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1022-identity-conversion), [*implicit reference conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1028-implicit-reference-conversions), or [*boxing conversion*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/conversions.md#1029-boxing-conversions) from the method return type to the *collection type*.
+> 
+> Methods declared on base types or interfaces are ignored and not part of the `CM` set.
+
+> For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
+
+The key differences from the earlier algorithm are:
+* Candidate methods may have additional parameters following the `ReadOnlySpan<E>` parameter.
+* Multiple candidate methods are supported.
 
 *Dictionary type* authors who use `CollectionBuilderAttribute` should have the method that is pointed to have `overwrite` not `throw` semantics when encountering the same `.Key` multiple times in the span of `KeyValuePair<,>` they are processing.
 
