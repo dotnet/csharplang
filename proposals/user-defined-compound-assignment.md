@@ -425,13 +425,13 @@ If type of `x` is not known to be a reference type, the operator method is invok
 
 For example:
 ``` C#
-var a = ++(new S()); // error: not a variable
-var b = ++S.P2; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp)); b = temp;
-++S.P2; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp));
-++b; // b.op_Increment(); 
-var d = ++S.P1; // error: set is missing
+var a = (new S())++; // error: not a variable
+var b = S.P2++; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp)); b = temp;
+S.P2++; // var temp = S.get_P2(); S.set_P2(S.op_Increment(temp));
+b++; // b.op_Increment(); 
+var d = S.P1++; // error: set is missing
 S.P1++; // error: missing setter
-var e = ++b; // var temp = b; b = S.op_Increment(temp); e = temp; 
+var e = b++; // var temp = b; b = S.op_Increment(temp); e = temp; 
 
 struct S
 {
