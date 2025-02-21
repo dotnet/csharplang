@@ -101,6 +101,11 @@ Note: This approach solve the mixing question.
 We previously concluded that we should prefer more specific extensions members.  
 But we could also leverage something like [better function member](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member) to resolve more ambiguous non-method scenarios. 
 
+We have competing goals:
+1. we want to align extension methods with classic extension methods, and other extension members (properties) with extension methods
+2. we want to align instance and static scenarios
+3. we want to type-like behaviors as opposed to parameter-like behaviors
+
 ```
 _ = "".P;
 
@@ -118,20 +123,22 @@ public static class E
 ```
 
 ```
-_ = 42.P;
+// Better conversion target
+_ = IEnumerable<string>.P; // should prefer IEnumerable<string>
 
 public static class E
 {
-    extension(int? i)
+    extension(IEnumerable<string>)
     {
-        public int P => throw null; 
+      static int P => 0;
     }
-    extension(int i) // better conversion from expression
+    extension(IEnumerable<object>)
     {
-        public int P { get { System.Console.Write("ran"); return 42; } }
+      static int P => 0;
     }
 }
 ```
+
 
 ```
 _ = 42.P;
@@ -164,3 +171,43 @@ public static class E
     }
 }
 ```
+
+Those betterness rules don't necessarily feel right when it comes to static extension methods:
+```
+1.M();
+
+public static class E1
+{
+    extension(in int i)
+    {
+       void M() { }
+    }
+}
+
+int.M2();
+public static class E2
+{
+    extension(int)
+    {
+        public static void M() { }
+    }
+}
+```
+
+```
+_ = "".M(""); // we want to prefer the `extension(string)`
+
+public static class E
+{
+    extension(object o)
+    {
+        public int M(string s) { }
+    }
+    extension(string s)
+    {
+        public int M(object o) { }
+    }
+}
+```
+
+TODO2 write a proposal that removes less specific members, and also filters based on better conversion for receiver
