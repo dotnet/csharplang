@@ -61,7 +61,6 @@ The presentation for C# 14 extensions needs to account for several new types of 
 - Extension properties (instance or static)
 - Extension indexers.
 - Extension operators.
-- Extension members whose receiver is a *type* rather than an *instance of a type*. In other words, extension members that are meant to accessed as though they are static members of the extended type. These can include methods, properties, and indexers.
 
 The current format for extension methods should be extended as follows:
 
