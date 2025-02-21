@@ -57,7 +57,8 @@ In source, the existing `///` elements on the extending type and the extension m
 
 The presentation for C# 14 extensions needs to account for several new types of extension members:
 
-- Extension properties.
+- Extension methods (new, instance or static)
+- Extension properties (instance or static)
 - Extension indexers.
 - Extension operators.
 - Extension members whose receiver is a *type* rather than an *instance of a type*. In other words, extension members that are meant to accessed as though they are static members of the extended type. These can include methods, properties, and indexers.
