@@ -10,7 +10,7 @@ The pattern will be evaluated without multiple enumeration. The slice pattern `.
 
 ## Motivation
 
-[LDM 2023-20-09](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-09.md#list-patterns-on-enumerables) set the following direction:
+[LDM 2023-10-09](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-10-09.md#list-patterns-on-enumerables) set the following direction:
 
 > This is follow-up work from C# 11 that we did not have time in C# 12 to invest in. We intend to continue the work here now; collection expressions supporting more than just indexable and countable types show where our list pattern support falls short.
 
