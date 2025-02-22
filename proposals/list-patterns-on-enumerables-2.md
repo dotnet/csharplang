@@ -74,7 +74,7 @@ If the patterns following the slice pattern consist only of patterns which can m
 
 ### Allowing patterns after slices
 
-Should we allow `enumerable is [1, 2, .., 3]`?
+Should we allow patterns following the slice pattern, such as `enumerable is [1, 2, .., 3]`?
 
 #### Answer
 
