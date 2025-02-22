@@ -14,7 +14,7 @@ The pattern will be evaluated without multiple enumeration. The slice pattern `.
 
 > This is follow-up work from C# 11 that we did not have time in C# 12 to invest in. We intend to continue the work here now; collection expressions supporting more than just indexable and countable types show where our list pattern support falls short.
 
-One example of where gap is noticed is when using LINQ methods. `.Where(...)` is the type of thing which is common to insert after a collection, but when you insert in `items is [var item]` or similar, this puts you in an awkward spot where a lot of rewriting is necessary. There's no built-in helper that recovers the behavior of `is [var item]`. With more complex list patterns, it only gets worse from there.
+One example of where gap is noticed is when using LINQ methods. `.Where(...)` is the type of thing which is common to insert after a collection, but when you insert this in `items is [var item]` or similar, the list pattern is no longer permitted. This puts you in an awkward spot where a lot of rewriting is necessary. There's no built-in helper that recovers the behavior of `is [var item]`. With more complex list patterns, it only gets worse from there.
 
 ## Detailed design
 
