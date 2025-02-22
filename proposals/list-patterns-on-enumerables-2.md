@@ -58,7 +58,7 @@ The pattern will be evaluated using the enumerator. The enumerator will be obtai
   - `MoveNext()` is called. Evaluation ends, and the list pattern is matched if `MoveNext()` returned `false` and is not matched if it returned `true`.
 - Otherwise, there is a discarding slice pattern (`..`). If there are no more element patterns following the slice pattern, evaluation ends and the list pattern is matched.
 - Otherwise, there are patterns to match at the end of the enumerable:
-  - A buffer is allocated, such as an array or inline array at the discretion of the implementation, with a size equal to the number of patterns following the slice pattern.
+  - A buffer is obtained, such as an array or inline array at the discretion of the implementation, with a size equal to the number of patterns following the slice pattern.
   - An attempt is made to fill the buffer. For each pattern following the slice pattern:
     - `MoveNext()` is called. If it returns false, evaluation ends, and the list pattern is not matched.
     - `Current` is accessed and its value is stored in the first available unwritten position in the buffer.
