@@ -151,7 +151,7 @@ If *collection_arguments* is included and is not the first element in the collec
 If the *argument list* contains any values with *dynamic* type, a compile-time error is reported ([LDM-2025-01-22](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-22.md#conclusion-1)).
 
 If the target type is a *struct* or *class type* that implements `System.Collections.IEnumerable`, and the target type does not have a *create method*, and the target type is not a *generic parameter type* then:
-* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*.
+* [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best instance constructor from the *argument list*. The arguments have the optional parameter names and ref kind from the *argument list*.
 * If a best instance constructor is found, the constructor is invoked with the *argument list*.
   * If the constructor has a `params` parameter, the invocation may be in expanded form.
 * Otherwise, a binding error is reported.
@@ -168,7 +168,7 @@ l = [with(default)];           // error: ambiguous constructor
 ```
 
 If the target type is a type with a *create method*, then:
-* The *argument list* is the *collection expression* containing the elements only (no arguments), followed by the *argument list*.
+* The *argument list* is a `ReadOnlySpan<E>` for the elements only (no arguments), where `E` is the *element type* of the target, followed by the *argument list*. The first argument does not have an explicit parameter name or ref kind; the following arguments have the optional parameter names and ref kind from the *argument list*.
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
 * If a best factory method is found, the method is invoked with the *argument list*.
   * If the factory method has a `params` parameter, the invocation may be in expanded form.
@@ -229,6 +229,10 @@ Span<int> b = [with([1, 2]), 3]; // error: arguments not supported
 ## Conversions
 
 [*Collection expression conversions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions) is updated as follows to include conversions to *dictionary types*.
+
+*Need to indent this section with \>.*
+
+*Does the non-create method types case allow an `abstract` type with an accessible constructor?*
 
 An implicit *collection expression conversion* exists from a collection expression to the following types:
 * A single dimensional *array type* `T[]`, in which case the *element type* is `T`
@@ -327,11 +331,33 @@ For a collection expression where the target type *definition* has a `[Collectio
 > 
 > For a *collection expression* with a target type <code>C&lt;S<sub>0</sub>, S<sub>1</sub>, &mldr;&gt;</code> where the *type declaration* <code>C&lt;T<sub>0</sub>, T<sub>1</sub>, &mldr;&gt;</code> has an associated *builder method* <code>B.M&lt;U<sub>0</sub>, U<sub>1</sub>, &mldr;&gt;()</code>, the *generic type arguments* from the target type are applied in order &mdash; and from outermost containing type to innermost &mdash; to the *builder method*.
 
+The updated definition of applicable methods applies to both *collection expressions* and [*params collections*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/params-collections.md).
+
+For example:
+```csharp
+Print(1, 2, 3); // Print<int>(MyBuilder.Create<int>([1, 2, 3], arg: 0))
+
+static void Print<T>(params MyCollection<T> c) where T : struct { ... }
+
+[CollectionBuilder(typeof(MyBuilder), "Create")]
+class MyCollection<T> : IEnumerable<T> { ... }
+
+class MyBuilder
+{
+    public static MyCollection<T> Create<T>(ReadOnlySpan<T> items)
+        where T : class { ... }
+    public static MyCollection<T> Create<T>(ReadOnlySpan<T> items, T arg = default)
+        where T : struct { ... }
+}
+```
+
 *Dictionary type* authors who use `CollectionBuilderAttribute` should have the method that is pointed to have `overwrite` not `throw` semantics when encountering the same `.Key` multiple times in the span of `KeyValuePair<,>` they are processing.
 
 The runtime has committed to supplying these new CollectionBuilder methods that take `ReadOnlySpan<>` for their immutable collections.
 
 ## Construction
+
+*This section should be an update of [*collection expression construction*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#construction), and any references to \#Comparer-support should be removed.*
 
 The elements of a collection expression are evaluated in order, left to right. Each element is evaluated exactly once, and any further references to the elements refer to the results of this initial evaluation.
 
@@ -470,6 +496,8 @@ X([a, b]); // ambiguous
 ## Interface translation
 
 ### Mutable interface translation
+
+*Need LDM decision on whether to guarantee `Dictionary<K, V>` for `IDictionary<K, V>`, and whether to continue guaranteeing `List<T>` for mutable array interfaces.*
 
 Given the target type `IDictionary<TKey, TValue>`, the type used will be `Dictionary<TKey, TValue>`.  Using the normal translation mechanics defined already (including handling of an initially provided [*comparer*](#Comparer-support)). This follows the originating intuition around `IList<T>` and `List<T>` in *collection expressions*. 
 
