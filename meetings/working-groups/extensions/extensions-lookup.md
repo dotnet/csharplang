@@ -96,7 +96,7 @@ Note: for static scenarios, we would play the same trick as in the above section
 
 Note: This approach solve the mixing question.
 
-# Lookup: more specific vs. better function member
+# Overload resolution for extension methods
 
 We previously concluded that we should prefer more specific extensions members.  
 But classic extension methods don't follow that.
@@ -144,7 +144,57 @@ public static class E
 
 [sharplab](https://sharplab.io/#v2:C4LglgNgPgRDB0BZAFHAlAbgAQHodYEMBbAIzAHMBXAe0oGcBYAKGYAEBmLVgRgDYuATFgCiWZgG9mWaV049+rACxYUwABZg6WaiQBWAUwDGwbQBou3AAxY6aLOKwBfKTI4WFy1Rq09rdczoGxtp2Ds5M4UA)
 
-Which should we do for new extension methods or properties?
+Which should we do for new extension methods?
+
+We have competing goals:
+1. we want to align extension methods with classic extension methods (portability/compat, parameter-like behaviors) and with instance methods (type-like behaviors)
+2. we want to align other extension members (properties) with extension methods
+3. we want to align instance and static scenarios
+
+Options for methods:
+1. maximum compatibility with classic extension methods
+2. maximum alignment with instance methods
+
+## Regular overload resolution
+
+Gather candidates
+
+Member type inference  
+Member applicability  
+Remove less specific applicable candidates  
+Remove static-instance mismatches  
+RemoveConstraintViolations  
+RemoveDelegateConversionsWithWrongReturnType  
+Remove less priority members (ORPA)  
+RemoveCallingConventionMismatches (for function pointer resolution)  
+RemoveMethodsNotDeclaredStatic (for function pointer resolution)  
+Remove worse members (better function member)  
+
+Note: as a result we don't prefer more specific classic extension methods
+
+## Extension methods
+
+Gather candidates
+- receiver type inference
+- receiver applicability
+- if method group, then proceed to overload resolution below
+
+Member type inference  
+Member applicability  
+Remove less specific applicable candidates (we can choose what to do about new extension methods)  
+Remove static-instance mismatches (apply to new extension methods)  
+RemoveConstraintViolations (apply to new extension methods)  
+RemoveDelegateConversionsWithWrongReturnType (apply to new extension methods)  
+Remove less priority members (ORPA, apply to new extension methods)  
+RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
+RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
+Remove worse members (better function member) (I'm assuming we include the receiver parameter)  
+
+# Lookup for properties
+
+We have similar questions for extension properties.
+We'd previously agree that we want to prefer more specific members.
+But should they benfit from some additional pruning/preferences (like betterness)?
 
 ```
 _ = "".P; // should pick E(string).P
@@ -250,13 +300,19 @@ public static class E
 }
 ```
 
-We have competing goals:
-1. we want to align extension methods with classic extension methods (portability/compat, parameter-like behaviors) and with instance methods (type-like behaviors)
-2. we want to align other extension members (properties) with extension methods
-3. we want to align instance and static scenarios
+## Extension properties
 
-Options for methods:
-1. maximum compatibility with classic extension methods
+Gather candidates
+- receiver type inference
+- receiver applicability
+- if property, then prune candidates with the following rules:  
+Remove less specific applicable candidates  
+Remove static-instance mismatches?  
+RemoveDelegateConversionsWithWrongReturnType (TBD)  
+Remove less priority members (TBD)  
+RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
+RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
+Remove worse members (just looking at receiver and receiver parameter)?  
 
 
-TODO2 write a proposal that removes less specific members, and also filters based on better conversion for receiver
+
