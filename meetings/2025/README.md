@@ -8,6 +8,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Target-typed static member lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md) jnm2 (March 3rd or later)
 - Collection expression arguments [open questions](https://github.com/dotnet/csharplang/pull/9158) cston (March 3rd or later)
+- [List patterns on enumerables](https://github.com/dotnet/csharplang/blob/main/proposals/list-patterns-on-enumerables-2.md) jnm2
 - Triage (working set)
 
 ## Recurring topics
