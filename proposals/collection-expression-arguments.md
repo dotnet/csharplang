@@ -398,13 +398,56 @@ Should arguments with `dynamic` type be allowed? That might require using the ru
 
 ## Open questions
 
-### Target types where arguments are *required*
+### Conversions
+
+Should collection arguments and the applicable methods affect convertibility of the collection expression?
+
+```csharp
+Print([with(comparer: null), 1, 2, 3]); // ambiguous or Print<int>(HashSet<int>)?
+
+static void Print<T>(List<T> list) { ... }
+static void Print<T>(HashSet<T> set) { ... }
+```
+
+### Type inference
+
+Should collection arguments affect type inference of the collection expression?
+
+For example, consider the following type where the constructor is called directly:
+```csharp
+UseMyCollection([with(default)]); // error: cannot infer T
+UseMyCollection([with(1)]);       // ok: UseMyCollection<int>()?
+
+static void UseMyCollection<T>(MyCollection<T> c) { ... }
+
+class MyCollection<T> : IEnumerable<T>
+{
+    public MyCollection(T arg = default) { ... }
+    public void Add(T t) { ... }
+    // ...
+}
+```
+
+The same question applies if the type is constructed from a builder method, or even `List<T>`:
+```csharp
+UseList([with(collection: [])]);  // error: cannot infer T
+UseList([with(collection: [1])]); // ok: UseList<int>()?
+
+static void UseList<T>(List<T> list) { ... }
+```
+
+### Support target types where arguments are *required*?
 
 Should collection expression conversions be supported to target types where arguments must be supplied because all of the constructors or factory methods require at least one argument?
 Such types could be used with collection expressions that include explicit `with()` arguments but the types could not be used for `params` parameters.
 
-A collection type where the constructor is called directly:
+For example, consider the following type where the constructor is called directly:
 ```csharp
+MyCollection<object> c;
+c = [];                  // error: no arguments
+c = [with()];            // error: no 'capacity'
+c = [with(capacity: 1)]; // ok
+
 class MyCollection<T> : IEnumerable<T>
 {
     public MyCollection(int capacity) { ... }
@@ -413,23 +456,36 @@ class MyCollection<T> : IEnumerable<T>
 }
 ```
 
-A collection type constructed with a builder method:
+The same question applies if the type is constructed from a builder method such as:
 ```csharp
-[CollectionBuilder(typeof(MyBuilder), "Create")]
-class MyCollection<T> : IEnumerable<T> { ... }
-
 class MyBuilder
 {
     public static MyCollection<T> Create<T>(ReadOnlySpan<T> items, int capacity) { ... }
 }
 ```
 
-For either of those cases, arguments are required:
+### Collection builder parameter order
+
+For *collection builder* methods, should the elements parameter be before or after any parameters for collection arguments?
+
+Elements first allows arguments to be optional.
 ```csharp
-MyCollection<object> x;
-x = [];                  // error: no arguments
-x = [with()];            // error: no 'capacity'
-x = [with(capacity: 1)]; // ok
+class MyDictionaryBuilder
+{
+    public static MyDictionary<K, V> Create<K, V>(
+      ReadOnlySpan<KeyValuePair<K, V>> items,
+      IEqualityComparer<K> comparer = null) { ... }
+}
+```
+
+Arguments first allows elements to be a `params` parameter, to support calling directly.
+```csharp
+class MyDictionaryBuilder
+{
+    public static MyDictionary<K, V> Create<K, V>(
+      IEqualityComparer<K> comparer,
+      params ReadOnlySpan<KeyValuePair<K, V>> items) { ... }
+}
 ```
 
 ### Construction overloads for *interface types*
