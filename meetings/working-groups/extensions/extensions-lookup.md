@@ -99,15 +99,55 @@ Note: This approach solve the mixing question.
 # Lookup: more specific vs. better function member
 
 We previously concluded that we should prefer more specific extensions members.  
-But we could also leverage something like [better function member](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member) to resolve more ambiguous non-method scenarios. 
+But classic extension methods don't follow that.
+Instead they use betterness rules ([better function member](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member)).
 
-We have competing goals:
-1. we want to align extension methods with classic extension methods, and other extension members (properties) with extension methods
-2. we want to align instance and static scenarios
-3. we want to type-like behaviors as opposed to parameter-like behaviors
+
+
+We remove less specific applicable candidates of instance methods (type-like behavior)
+```
+new Derived().M(new Derived()); // Derived.M
+
+public class Base 
+{
+    public void M(Derived d) { }
+}
+
+public class Derived : Base 
+{
+    public void M(Base b) { }
+}
+```
+[sharplab](https://sharplab.io/#v2:C4LglgNgPgdgpgdwAQBE4CcwDc4BMAUAlAHQCy+8yamOBhhA3EgPTOobZ5kCwAUHwAEAzEgEAmJACEAhgGc4SPgG8+SNaJECALEnLVOuJLkJIlSAL59L/XsNET9tJCClyFy1ervbd+GfKQAIxMza3MgA)
+
+But we rely on betterness for classic extension methods (parameter-like behavior)
+```
+"".M(); // E.M(string)
+
+public static class E 
+{
+    public static void M(this object o) { }
+    public static void M(this string s) { }
+}
+```
+[sharplab](https://sharplab.io/#v2:C4LglgNgPgRDB0BZAFASgNwAID03MFElkABARgAZUBYAKFuIGZMyA2ZgJgM1oG9bMBzJq2YAWTCmAALMAGdMAewBGAKwCmAY2CLUmHpgC+/QY2ak2xcZJnyy5TLN36jNA0A=)
 
 ```
-_ = "".P;
+"".M(""); // ambiguous
+
+public static class E 
+{
+    public static void M(this object o, string s) { }
+    public static void M(this string s, object o) { }
+}
+```
+
+[sharplab](https://sharplab.io/#v2:C4LglgNgPgRDB0BZAFHAlAbgAQHodYEMBbAIzAHMBXAe0oGcBYAKGYAEBmLVgRgDYuATFgCiWZgG9mWaV049+rACxYUwABZg6WaiQBWAUwDGwbQBou3AAxY6aLOKwBfKTI4WFy1Rq09rdczoGxtp2Ds5M4UA)
+
+Which should we do for new extension methods or properties?
+
+```
+_ = "".P; // should pick E(string).P
 
 public static class E
 {
@@ -117,14 +157,13 @@ public static class E
     }
     extension(string s) // more specific parameter type
     {
-        public int P { get { System.Console.Write("ran"); return 42; } }
+        public int P => 0;
     }
 }
 ```
 
 ```
-// Better conversion target
-_ = IEnumerable<string>.P; // should prefer IEnumerable<string>
+_ = IEnumerable<string>.P; // should we prefer IEnumerable<string> because it is a better conversion? (parameter-like behavior)
 
 public static class E
 {
@@ -134,12 +173,13 @@ public static class E
     }
     extension(IEnumerable<object>)
     {
-      static int P => 0;
+      static int P => throw null;
     }
 }
 ```
+[classic extension analog](https://sharplab.io/#v2:C4LglgNgPgAgDAAhgRgCwG4CwAoFBmAHhTgD4EwEBeBAOwFcIItscwA6AWQAoBKdBAPQCEAUU5d8RZKR44cMPEmQA2JACZROAN44EepIpSqYqBN2AALMAGclhYmQAePBFoQBfXfoVLjp81a2kgD2AEYAVgCmAMbATi5unizY7kA=)
 
-
+If we follow the parameter-like behavior of classic extension methods, then we'd probably want more better member rules:
 ```
 _ = 42.P;
 
@@ -151,7 +191,7 @@ public static class E
     }
     extension(int i) // non-generic, so better function member
     {
-        public int P { get { System.Console.Write("ran"); return 42; } }
+        public int P => 0;
     }
 }
 ```
@@ -167,12 +207,12 @@ public static class E
     }
     extension(int i) // better parameter-passing mode
     {
-        public int P { get { System.Console.Write("ran"); return 42; } }
+        public int P => 0;
     }
 }
 ```
 
-Those betterness rules don't necessarily feel right when it comes to static extension methods:
+But those betterness rules don't necessarily feel right when it comes to static extension methods:
 ```
 1.M();
 
@@ -195,7 +235,7 @@ public static class E2
 ```
 
 ```
-_ = "".M(""); // we want to prefer the `extension(string)`
+_ = "".M(""); // if type-like behavior, we'd want to prefer the `extension(string)`, but if parameter-like behavior we'd want an ambiguity
 
 public static class E
 {
@@ -209,5 +249,14 @@ public static class E
     }
 }
 ```
+
+We have competing goals:
+1. we want to align extension methods with classic extension methods (portability/compat, parameter-like behaviors) and with instance methods (type-like behaviors)
+2. we want to align other extension members (properties) with extension methods
+3. we want to align instance and static scenarios
+
+Options for methods:
+1. maximum compatibility with classic extension methods
+
 
 TODO2 write a proposal that removes less specific members, and also filters based on better conversion for receiver
