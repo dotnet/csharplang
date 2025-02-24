@@ -18,7 +18,7 @@ One example of where gap is noticed is when using LINQ methods. `.Where(...)` is
 
 ## Detailed design
 
-Any list pattern will be supported for an enumerable type (a type supported by `foreach`) if the same pattern would be supported by a type that is countable and indexable, but not sliceable. Thus, for the enumerable types gaining support through this proposal, it will be an error for a slice pattern to contain a subpattern. It is an existing requirement that the type additionally be sliceable in order for the slice pattern to have a subpattern; that requirement is not changing in this proposal.
+Any list pattern will be supported for an enumerable type (a type supported by `foreach`) if the same pattern would be supported by a type that is countable and indexable, but not sliceable (even if the enumerable is sliceable). Thus, for the enumerable types gaining support through this proposal, it will be an error for a slice pattern to contain a subpattern.
 
 The type being matched against for each element pattern inside the list pattern will be determined the same way the iteration variable type is inferred with the `foreach` statement. For the slice pattern `..` without a subpattern, the type that it is matching against is unspecified.
 
