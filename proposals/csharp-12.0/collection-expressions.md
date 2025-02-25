@@ -109,7 +109,7 @@ An implicit *collection expression conversion* exists from a collection expressi
 * A *span type*:
   * `System.Span<T>`
   * `System.ReadOnlySpan<T>`  
-  in which cases the *element type* is `T`
+  In which case the *element type* is `T`
 * A *type* with an appropriate *[create method](#create-methods)*, in which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
@@ -125,11 +125,11 @@ An implicit *collection expression conversion* exists from a collection expressi
   * `System.Collections.Generic.IReadOnlyList<T>`
   * `System.Collections.Generic.ICollection<T>`
   * `System.Collections.Generic.IList<T>`  
-  in which cases the *element type* is `T`
+  In which case the *element type* is `T`
 
-The implicit conversion exists if the type has an *element type* `U` where for each *element* `Eᵢ` in the collection expression:
-* If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `U`.
-* If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `U`.
+The implicit conversion exists if the type has an *element type* `T` where for each *element* `Eᵢ` in the collection expression:
+* If `Eᵢ` is an *expression element*, there is an implicit conversion from `Eᵢ` to `T`.
+* If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
 
 There is no *collection expression conversion* from a collection expression to a multi dimensional *array type*.
 
