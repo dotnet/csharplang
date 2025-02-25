@@ -23,9 +23,14 @@ having the language more directly recognize these types and conversions.
 For example, the BCL can add only one overload of any `MemoryExtensions` helper like:
 
 ```cs
+int[] arr = [1, 2, 3];
+Console.WriteLine(
+    arr.StartsWith(1) // CS8773 today, permitted with this proposal
+    );
+
 public static class MemoryExtensions
 {
-    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T>;
+    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T> => EqualityComparer<T>.Default.Equals(span[0], value);
 }
 ```
 
