@@ -168,7 +168,27 @@ l = [with(default)];           // error: ambiguous constructor
 ```
 
 If the target type is a type with a *create method*, then:
-* The *argument list* is a `ReadOnlySpan<E>` for the elements only (no arguments), where `E` is the *element type* of the target, followed by the *argument list*. The first argument does not have an explicit parameter name or ref kind; the following arguments have the optional parameter names and ref kind from the *argument list*.
+* The *argument list* is a `ReadOnlySpan<E>` for the elements only (no arguments), where `E` is the *element type* of the target, followed by the *argument list*. The first argument is passed by value and is treated as having an *implicit parameter name* that matches the first parameter of each overload; the following arguments have the optional parameter names and ref kind from the *argument list*.
+
+  > The implicit parameter name for the first implicit argument to the *create method* ensures that the subsequent explicit arguments are not treated as part of the `ReadOnlySpan<T>` parameter when it is marked `params`.
+  > ```csharp
+  > MyItem x, y = ...;
+  > MyCollection<MyItem> c = [with(x), y]; // error: no 'Create' overload takes 2 arguments
+  > 
+  > [CollectionBuilder(typeof(MyBuilder), "Create")]
+  > class MyCollection<T> { ... }
+  > 
+  > class MyBuilder
+  > {
+  >     public static MyCollection<T> Create<T>(params ReadOnlySpan<T> elements) { ... }
+  > }
+  > 
+  > class MyItem
+  > {
+  >     public static implicit operator MyItem(ReadOnlySpan<MyItem> items) { ... }
+  > }
+  > ```
+
 * [*Overload resolution*](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1264-overload-resolution) is used to determine the best factory method from the *argument list* from the [*create method candidates*](#create-method-candidates):
 * If a best factory method is found, the method is invoked with the *argument list*.
   * If the factory method has a `params` parameter, the invocation may be in expanded form.
@@ -185,8 +205,9 @@ class MyCollection<T> { ... }
 
 class MyBuilder
 {
-    public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements);
-    public static MyCollection<T> Create<T>(ReadOnlySpan<T> elements, IEqualityComparer<T> comparer);
+    public static MyCollection<T> Create<T>(
+        ReadOnlySpan<T> elements,
+        IEqualityComparer<T> comparer = null) { ... }
 }
 ```
 
