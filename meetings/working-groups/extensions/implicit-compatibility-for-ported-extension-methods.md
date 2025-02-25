@@ -131,7 +131,7 @@ public static class E
    {
       public void M2(out T t) { ... }
    }
-   extension<T>(this I<T> i) // Compat mode
+   extension<T>(I<T> i)
    {
       public void M3(out T t) { ... }
    }
