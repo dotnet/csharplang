@@ -25,7 +25,7 @@ For example, the BCL can add only one overload of any `MemoryExtensions` helper 
 ```cs
 int[] arr = [1, 2, 3];
 Console.WriteLine(
-    arr.StartsWith(1) // CS8773 today, permitted with this proposal
+    arr.StartsWith(1) // CS8773 in C# 13, permitted with this proposal
     );
 
 public static class MemoryExtensions
