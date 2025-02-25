@@ -120,8 +120,7 @@ If we _do_ choose to address it, we would continue to use classic inference for 
 void M(I<string> i, out object o)
 {
     i.M1(out o); // infers E.M1<object>
-    i.M2(out o); // error CS1503: Argument 1: cannot convert from 'out object' to 'out string'
-    i.M3(out o); // infers E.M3<object>
+    i.M2(out o); // infers E.M2<object>
 }
 
 public static class E
@@ -130,10 +129,6 @@ public static class E
    extension<T>(I<T> i)
    {
       public void M2(out T t) { ... }
-   }
-   extension<T>(I<T> i)
-   {
-      public void M3(out T t) { ... }
    }
 }
 public interface I<out T> { }
