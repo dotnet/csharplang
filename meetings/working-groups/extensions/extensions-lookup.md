@@ -326,38 +326,20 @@ public static class E
 
 But those betterness rules don't necessarily feel right when it comes to static extension methods:
 ```
-1.M();
-
+int.M2();
 public static class E1
 {
     extension(in int i)
     {
-       void M() { }
+       public static void M() { }
     }
 }
 
-int.M2();
 public static class E2
 {
     extension(int)
     {
         public static void M() { }
-    }
-}
-```
-
-```
-_ = "".M(""); // if type-like behavior, we'd want to prefer the `extension(string)`, but if parameter-like behavior we'd want an ambiguity
-
-public static class E
-{
-    extension(object o)
-    {
-        public int M(string s) { }
-    }
-    extension(string s)
-    {
-        public int M(object o) { }
     }
 }
 ```
