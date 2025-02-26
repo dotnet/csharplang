@@ -212,12 +212,12 @@ public static class E
 ## Variance
 
 ```
-IEnumerable<string> iEnumerableOfString = null;
-_ = iEnumerableOfString.P; // should we prefer IEnumerable<string> because it is a better conversion? (parameter-like behavior)
+IEnumerable<C2> iEnumerableOfC2 = null;
+_ = iEnumerableOfC2.P; // should we prefer IEnumerable<C1> because it is a better conversion? (parameter-like behavior)
 
 public static class E
 {
-    extension(IEnumerable<string> i)
+    extension(IEnumerable<C1> i)
     {
        int P => 0;
     }
@@ -226,13 +226,15 @@ public static class E
        int P => throw null;
     }
 }
+public class C1 { }
+public class C2 : C1 { }
 ```
 ```
-_ = IEnumerable<string>.P; // should we prefer IEnumerable<string> because it is a better conversion? (parameter-like behavior)
+_ = IEnumerable<C2>.P; // should we prefer IEnumerable<C1> because it is a better conversion? (parameter-like behavior)
 
 public static class E
 {
-    extension(IEnumerable<string>)
+    extension(IEnumerable<C1>)
     {
       static int P => 0;
     }
@@ -242,7 +244,7 @@ public static class E
     }
 }
 ```
-[classic extension analog](https://sharplab.io/#v2:C4LglgNgPgAgDAAhgRgCwG4CwAoFBmAHhTgD4EwEBeBAOwFcIItscwA6AWQAoBKdBAPQCEAUU5d8RZKR44cMPEmQA2JACZROAN44EepIpSqYqBN2AALMAGclhYmQAePBFoQBfXfoVLjp81a2kgD2AEYAVgCmAMbATi5unizY7kA=)
+[classic extension analog](https://sharplab.io/#v2:C4LglgNgPgAgDAAhgRgCwG4CwAoFBmAHgGEAmAPgTAQF4EA7AVwgi2xzADoBZACgEp0CAPRCEAUW498xZGT44cMPEmQA2JCXE4A3jgT6kylOpioEvYAAswAZxWEishAA8+CbQgC+eg0pUmzC2s7aQB7ACMAKwBTAGNgCld3LxxvXCNNR2S0vxhMzRAELI9PIA===)
 
 Should both extensions be applicable both when the receiver is an instance or a type?  
 If yes, should we have some preference between those two?  
