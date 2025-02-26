@@ -47,12 +47,14 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 - [Extension member lookup.](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/extensions-lookup.md) (Julien, Mads)
 
+## C# Language Design Notes for 2025
+
 ### Wed Feb 12, 2025
 
-- [User Defined Compound Assignment Operators](https://github.com/dotnet/csharplang/blob/main/proposals/user-defined-compound-assignment.md) (Aleksey)
-- [Left/Right Join clauses](https://github.com/dotnet/csharplang/blob/main/proposals/left-right-join-in-query-expressions.md) and also [this issue](https://github.com/dotnet/csharplang/issues/8947).  CyrusNajmabadi, roji, eiriktsarpalis
+[C# Language Design Meeting for February 12th, 2025](https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-02-12.md)
 
-## C# Language Design Notes for 2025
+- User-defined instance-based operators
+- Left-right join in query expressions
 
 ### Wed Jan 22, 2025
 
