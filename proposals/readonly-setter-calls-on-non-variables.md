@@ -11,17 +11,22 @@ var c = new C();
 // Remove the current CS1612 error, because ArraySegment<T>.this is readonly:
 c.ArraySegmentProp[10] = new object();
 
-// The same restriction has *already* been lifted for invocation expressions:
+// Invocation expressions already omit the CS1612 error when the setter is readonly:
 c.ArraySegmentMethod()[10] = new object();
+
+// In limited cases, ref-returning indexers can be used to work around this:
+c.RefReturningIndexerWorkaround[10] = new object();
 
 class C
 {
     public ArraySegment<object> ArraySegmentProp { get; set; }
     public ArraySegment<object> ArraySegmentMethod() => ArraySegmentProp;
+
+    public Span<object> RefReturningIndexerWorkaround => ArraySegmentProp.AsSpan();
 }
 ```
 
-Currently, the code above gives the error CS1612 "Cannot modify the return value of 'C.ArraySegmentProp' because it is not a variable." This restriction is meaningless when the setter is readonly. The restriction is there to remind you to assign the modified struct value back to the property. But there is no modification to the struct value when the setter is readonly, so there is no reason to assign back to the property.
+Currently, the code above gives the error CS1612 "Cannot modify the return value of 'C.ArraySegmentProp' because it is not a variable." This restriction is unnecessary when the setter is readonly. The restriction is there to remind you to assign the modified struct value back to the property. But there is no supported modification to the struct value when the setter is readonly, so there is no reason to assign back to the property.
 
 ```cs
 // Requested by the current CS1612 error:
@@ -66,7 +71,7 @@ c.SetXyz("key", c.GetXyz("key") + 1);
 c.Xyz["key"]++;
 ```
 
-The only thing that is blocking these use cases is a misappplied error that has not been fully updated with an understanding of readonly structs or readonly members.
+These use cases would no longer be blocked if CS1612 is fully updated with an understanding of readonly structs and readonly members.
 
 ## Detailed design
 
@@ -124,4 +129,19 @@ class C
 }
 ```
 
-This error is inappropriate when the properties being initialized have readonly `set`/`init` accessors. The error could be made more granular, placed on each property initializer which calls a _non-readonly_ setter.
+For the same reasons as above, this error is unnecessary when the properties being initialized have readonly `set`/`init` accessors. The error could be made more granular, placed on each property initializer which calls a _non-readonly_ setter.
+
+Even in the limited cases where a ref-returning indexer is applicable, it does not help with CS1918, where it still unnecessarily broad:
+
+```cs
+// ❌ CS1918 Members of property 'C.StructWithRefReturningIndexer' of type 'Span<object>' cannot be assigned with an object
+// initializer because it is of a value type
+_ = new C { StructWithRefReturningIndexer = { [42] = new object() } };
+//          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class C
+{
+    public ArraySegment<object> ArraySegmentProp { get; set; }
+    public Span<object> StructWithRefReturningIndexer => ArraySegmentProp.AsSpan();
+}
+```
