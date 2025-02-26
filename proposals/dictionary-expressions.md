@@ -654,7 +654,31 @@ This concern already exists with *collection types*.  For those types, the rule 
 
 ## Open Questions
 
-### Question: Types that support both collection and dictionary initialization
+### Binding to indexer
+
+For concrete dictionary types that do not use `CollectionBuilderAttribute`, where the compiler constructs the resulting instance using a constructor and repeated calls to an indexer, how should the compiler bind to the appropriate indexer?
+
+Options include:
+1. Use implementation of `IDictionary<K, V>.this[K] { get; set; }`. *What about pattern-based implementations?*
+2. Use accessible `V this[K] { get; set; }`.
+3. Use overload resolution for *better member*.
+
+### Key-value pair conversions
+
+Should the compiler support a new implicit *key-value pair conversion* within collection expressions to implicitly convert from an expression of type `KeyValuePair<K1, V1>` to a type `KeyValuePair<K2, V2>`?
+
+### Concrete type for `IDictionary<K, V>`
+
+What concrete type should be used for a dictionary expression with target type `IDictionary<K, V>`?
+
+Options include:
+1. Use `Dictionary<K, V>` explicitly.
+2. Use `Dictionary<K, V>` for now, but spec that there is no guarantee.
+3. Synthesize an internal type and use that.
+
+*Include discussion of `IReadOnlyDictionary<K, V>`.*
+
+### Types that support both collection and dictionary initialization
 
 C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
 
@@ -680,7 +704,7 @@ Options include:
 
 Resolution: TBD.  Working group recommendation: Use applicable instance indexer only.  This ensures that everything dictionary-like is initialized in a consistent fashion.  This would be a break in behavior when recompiling.  The view is that these types would be rare.  And if they exist, it would be nonsensical for them to behave differently using the indexer versus the `.Add` (outside of potentially throwing behavior).
 
-### Question: Parsing ambiguity
+### Parsing ambiguity
 
 Parsing ambiguity around: `[a ? [b] : c]`
 

@@ -285,6 +285,8 @@ Should arguments be considered when determining the convertibility to the target
 
 This is important because we need to decide whether to keep the requirement that custom types that do not have a *create method* must have a constructor callable with no arguments to be used as a collection expression target type. If we remove that restriction, but do not consider arguments in convertibility, we will have more types (such as `abstract` types) that are valid target types. If we don't remove that restriction, it feels odd that we require a constructor that may not be needed.
 
+If arguments are included in the conversion, arguments would also need to be considered in type inference.
+
 ### Target types where arguments are *required*
 
 Should collection expression conversions be supported to target types where arguments must be supplied because all of the constructors or factory methods require at least one argument?
