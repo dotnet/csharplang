@@ -30,7 +30,7 @@ Console.WriteLine(
 
 public static class MemoryExtensions
 {
-    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T> => EqualityComparer<T>.Default.Equals(span[0], value);
+    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T> => span.Length != 0 && EqualityComparer<T>.Default.Equals(span[0], value);
 }
 ```
 
