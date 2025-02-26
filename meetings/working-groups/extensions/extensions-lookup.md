@@ -102,8 +102,6 @@ We previously concluded that we should prefer more specific extensions members.
 But classic extension methods don't follow that.
 Instead they use betterness rules ([better function member](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member)).
 
-
-
 We remove less specific applicable candidates of instance methods (type-like behavior)
 ```
 new Derived().M(new Derived()); // Derived.M
@@ -172,7 +170,7 @@ Remove worse members (better function member)
 
 Note: as a result we don't prefer more specific classic extension methods
 
-## Extension methods
+## Extension methods proposal
 
 Gather candidates
 - receiver type inference
@@ -183,9 +181,8 @@ Member type inference
 Member applicability  
 Remove less specific applicable candidates (we can choose what to do about new extension methods)  
 Remove static-instance mismatches (apply to new extension methods)  
-RemoveConstraintViolations (apply to new extension methods)  
-RemoveDelegateConversionsWithWrongReturnType (apply to new extension methods)  
-Remove less priority members (ORPA, apply to new extension methods)  
+RemoveConstraintViolations (TBD)  
+Remove lower priority members (ORPA, apply to new extension methods)  
 RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
 RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
 Remove worse members (better function member) (I'm assuming we include the receiver parameter)  
@@ -212,6 +209,24 @@ public static class E
 }
 ```
 
+## Variance
+
+```
+IEnumerable<string> iEnumerableOfString = null;
+_ = iEnumerableOfString.P; // should we prefer IEnumerable<string> because it is a better conversion? (parameter-like behavior)
+
+public static class E
+{
+    extension(IEnumerable<string> i)
+    {
+       int P => 0;
+    }
+    extension(IEnumerable<object> i)
+    {
+       int P => throw null;
+    }
+}
+```
 ```
 _ = IEnumerable<string>.P; // should we prefer IEnumerable<string> because it is a better conversion? (parameter-like behavior)
 
@@ -228,6 +243,51 @@ public static class E
 }
 ```
 [classic extension analog](https://sharplab.io/#v2:C4LglgNgPgAgDAAhgRgCwG4CwAoFBmAHhTgD4EwEBeBAOwFcIItscwA6AWQAoBKdBAPQCEAUU5d8RZKR44cMPEmQA2JACZROAN44EepIpSqYqBN2AALMAGclhYmQAePBFoQBfXfoVLjp81a2kgD2AEYAVgCmAMbATi5unizY7kA=)
+
+Should both extensions be applicable both when the receiver is an instance or a type?  
+If yes, should we have some preference between those two?  
+
+## Static/instance mismatch
+
+If we try to follow the behavior of regular instance or static mehotds, then the resolution of extension properties should prune based on static/instance mismatch:
+```
+_ = 42.P;
+
+static class E1
+{
+    extension(int i)
+    {
+        public int P => 0;
+    }
+}
+static class E2
+{
+    extension(int)
+    {
+        public static int P => throw null;
+    }
+}
+```
+```
+_ = int.P;
+
+static class E1
+{
+    extension(int i)
+    {
+        public int P => throw null;
+    }
+}
+static class E2
+{
+    extension(int)
+    {
+        public static int P => 0;
+    }
+}
+```
+
+## Other possible betterness rules
 
 If we follow the parameter-like behavior of classic extension methods, then we'd probably want more better member rules:
 ```
@@ -300,19 +360,17 @@ public static class E
 }
 ```
 
-## Extension properties
+## Extension properties proposal
 
 Gather candidates
 - receiver type inference
 - receiver applicability
 - if property, then prune candidates with the following rules:  
-Remove less specific applicable candidates  
-Remove static-instance mismatches?  
-RemoveDelegateConversionsWithWrongReturnType (TBD)  
-Remove less priority members (TBD)  
+Remove less specific applicable candidates (LDM expressed desire)  
+Remove static-instance mismatches (seems desirable, open issue above)  
 RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
 RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
-Remove worse members (just looking at receiver and receiver parameter)?  
+Remove worse members? (unsure, open issues above with variance and betterness)  
 
-
+Note: I don't think there's a scenario for removing lower priority members based on ORPA here. 
 
