@@ -348,6 +348,7 @@ See also:
 - https://developercommunity.visualstudio.com/t/Extension-method-SystemLinqEnumerable/10790323
 - https://developercommunity.visualstudio.com/t/Compilation-Error-When-Calling-Reverse/10818048
 - https://developercommunity.visualstudio.com/t/Version-17131-has-an-obvious-defect-th/10858254
+- https://developercommunity.visualstudio.com/t/Visual-Studio-2022-update-breaks-build-w/10856758
 - https://github.com/dotnet/runtime/issues/111532
 
 Design meeting: https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-11.md#reverse
