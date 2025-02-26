@@ -153,39 +153,20 @@ Options for methods:
 1. maximum compatibility with classic extension methods
 2. maximum alignment with instance methods
 
-## Regular overload resolution
-
-Gather candidates
-
-Member type inference  
-Member applicability  
-Remove less specific applicable candidates  
-Remove static-instance mismatches  
-RemoveConstraintViolations  
-RemoveDelegateConversionsWithWrongReturnType  
-Remove less priority members (ORPA)  
-RemoveCallingConventionMismatches (for function pointer resolution)  
-RemoveMethodsNotDeclaredStatic (for function pointer resolution)  
-Remove worse members (better function member)  
-
-Note: as a result we don't prefer more specific classic extension methods
-
 ## Extension methods proposal
 
-Gather candidates
-- receiver type inference
-- receiver applicability
+Gather candidates (no applicability involved)
 - if method group, then proceed to overload resolution below
 
-Member type inference  
-Member applicability  
-Remove less specific applicable candidates (we can choose what to do about new extension methods)  
+Member type inference (including the type parameters on the extension declaration)  
+Member applicability (including the extension parameter)  
+Remove less specific applicable candidates (doesn't apply)
 Remove static-instance mismatches (apply to new extension methods)  
 RemoveConstraintViolations (TBD)  
 Remove lower priority members (ORPA, apply to new extension methods)  
 RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
 RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
-Remove worse members (better function member) (I'm assuming we include the receiver parameter)  
+Remove worse members (better function member) (including the receiver parameter)  
 
 # Lookup for properties
 
@@ -346,10 +327,8 @@ public static class E2
 
 ## Extension properties proposal
 
-Gather candidates
-- receiver type inference
-- receiver applicability
-- if property, then prune candidates with the following rules:  
+Gather candidates (no applicability involved)
+- if property candidates found, then prune candidates with the following rules:  
 Remove less specific applicable candidates (LDM expressed desire)  
 Remove static-instance mismatches (seems desirable, open issue above)  
 RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
