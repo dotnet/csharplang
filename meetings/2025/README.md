@@ -3,13 +3,11 @@
 All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
 
 ## Schedule ASAP
-- [Extensions: More metadata and lookup open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
 
 ## Schedule when convenient
 
 - [Readonly setter calls on non-variables](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) jnm2
-- [Target-typed static member lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md) jnm2 (March 3rd or later)
-- Collection expression arguments [open questions](https://github.com/dotnet/csharplang/pull/9158) cston (March 3rd or later)
 - Triage (working set)
 
 ## Recurring topics
@@ -33,9 +31,12 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Mar 5, 2025
 
+- Collection expression arguments [open questions](https://github.com/dotnet/csharplang/pull/9158) cston
+- [Target-typed static member lookup](https://github.com/dotnet/csharplang/blob/main/proposals/target-typed-static-member-lookup.md) jnm2
+
 ### Mon Mar 3, 2025
 
-- Extensions (Julien) (2hrs)
+- [Extensions: More metadata and lookup open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien) (2hrs)
 
 ### Wed Feb 26, 2025
 
