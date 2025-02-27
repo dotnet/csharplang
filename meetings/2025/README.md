@@ -35,6 +35,8 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 3, 2025
 
+- Extensions (Julien) (2hrs)
+
 ### Wed Feb 26, 2025
 
 - [Extensions: How to weigh behavior and compat](https://github.com/dotnet/csharplang/blob/main/meetings/working-groups/extensions/implicit-compatibility-for-ported-extension-methods.md) (Mads)
