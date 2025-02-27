@@ -523,6 +523,37 @@ This concern already exists with *collection types*.  For those types, the rule 
 
 ## Open Questions
 
+### Binding to indexer
+
+For concrete dictionary types that do not use `CollectionBuilderAttribute`, where the compiler constructs the resulting instance using a constructor and repeated calls to an indexer, how should the compiler resolve the appropriate indexer for each element?
+
+Options include:
+1. For each element individually, use normal lookup rules and overload resolution to determine the resulting indexer based on the element expression (for an expression element) or type (for a spread or key-value pair element). *This corresponds to the binding behavior for `Add()` methods for non-dictionary collection expressions.*
+2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
+3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
+
+### Key-value pair conversions
+
+Should the compiler support a new [*key-value pair conversion*](#key-value-pair-conversions) within collection expressions to allow implicit conversions from an expression element of type `KeyValuePair<K1, V1>`, or a spread element with an iteration type of `KeyValuePair<K1, V1>` to the collection expression iteration type `KeyValuePair<K2, V2>`?
+
+### Concrete type for `I{ReadOnly}Dictionary<K, V>`
+
+What concrete type should be used for a dictionary expression with target type `IDictionary<K, V>`?
+
+Options include:
+1. Use `Dictionary<K, V>`, and state that as a requirement.
+2. Use `Dictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
+3. Synthesize an internal type and use that.
+
+What concrete type should be used for `IReadOnlyDictionary<K, V>`?
+
+Options include:
+1. Use a BCL type such as `ReadOnlyDictionary<K, V>`, and state that as a requirement.
+2. Use a BCL type such as `ReadOnlyDictionary<K, V>` for now, and state the compiler is free to use any conforming implementation.
+3. Synthesize an internal type and use that.
+
+We should consider aligning the decisions with the concrete types provided for collection expressions targeting mutable and immutable non-dictionary interfaces.
+
 ### Question: Types that support both collection and dictionary initialization
 
 C# 12 supports collection types where the element type is some `KeyValuePair<,>`, where the type has an applicable `Add()` method that takes a single argument. Which approach should we use for initialization if the type also includes an indexer?
