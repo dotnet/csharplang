@@ -433,20 +433,24 @@ static class CollectionExtensions
 
 ### Metadata
 
-- Is a gesture from users required to emit methods in 100% compatible way with classic extension methods? (ie. speakable name and `[Extension]` attribute)
-- Should we emit implementation methods with speakable names instead, as a disambiguation strategy and also to allow
+- Should we emit all implementation methods with speakable names instead, as a disambiguation strategy and also to allow
   usage from other languages? We could add an attribute to handle compile-time conflicts in factory scenario (`[ExtensionName("CreateList")]`).
 - The metadata format currently doesn't include any modreqs to block other compilers. But the spec does mention we
   would block those scenarios. Let's either remove this requirement or update the metadata format.  
 - We should follow-up on "factory scenario" where multiple extension declarations have static factory methods 
   with same parameter types but different return types.
+- Should the extension marker or unspeakable implementation methods be marked with special name?
 
 ### Lookup
 
-- How do we resolve the small gap between classic and new extension methods in invocation?
-- How do we mix classic and new extension methods in invocation?
-- Should we just prefer more specific extension members or use a form of "better member" selection?
+- How to resolve invocations in static/type scenario? I assume we follow the same model as for instance methods. This will also work for Color Color scenarios.
+- How to resolve properties?
 - Scoping and shadowing rules for extension parameter and type parameters?
+- How should ORPA apply to new extension methods?
+
+### Accessibility
+
+- What is the meaning of `private` within an extension declaration? ([thread](https://github.com/dotnet/roslyn/pull/77358#discussion_r1974061527))
 
 ### Add support for more member kinds
 
