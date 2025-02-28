@@ -452,6 +452,11 @@ static class CollectionExtensions
 
 - What is the meaning of `private` within an extension declaration? ([thread](https://github.com/dotnet/roslyn/pull/77358#discussion_r1974061527))
 
+### Extension declaration validation
+
+- Should we relax the type parameter validation (all the type parameters must appear in the type of the extension parameter) where there are only methods? This would allow porting 100% of classic extension methods.  
+If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.
+
 ### Add support for more member kinds
 
 We do not need to implement all of this design at once, but can approach it one or a few member kinds at a time. 
