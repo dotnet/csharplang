@@ -1,5 +1,7 @@
 # First-class Span Types
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8714>
+
 ## Summary
 
 We introduce first-class support for `Span<T>` and `ReadOnlySpan<T>` in the language, including new implicit conversion types and consider them in more places,
@@ -21,9 +23,14 @@ having the language more directly recognize these types and conversions.
 For example, the BCL can add only one overload of any `MemoryExtensions` helper like:
 
 ```cs
+int[] arr = [1, 2, 3];
+Console.WriteLine(
+    arr.StartsWith(1) // CS8773 in C# 13, permitted with this proposal
+    );
+
 public static class MemoryExtensions
 {
-    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T>;
+    public static bool StartsWith<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T> => span.Length != 0 && EqualityComparer<T>.Default.Equals(span[0], value);
 }
 ```
 
@@ -50,7 +57,8 @@ An implicit span conversion permits `array_types`, `System.Span<T>`, `System.Rea
 
 ------
 
-Any Span/ReadOnlySpan types are considered applicable for the conversion if they are `ref struct`s and they match by their fully-qualified name.
+Any Span/ReadOnlySpan types are considered applicable for the conversion if they are `ref struct`s and they match by their fully-qualified name
+([LDM 2024-06-24](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-24.md#first-class-spans)).
 
 We also add _implicit span conversion_ to the list of standard implicit conversions
 ([§10.4.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#1042-standard-implicit-conversions)). This allows overload resolution to consider
@@ -90,6 +98,7 @@ We also add _implicit span conversion_ to the list of acceptable implicit conver
 >   **Span conversion is not considered when overload resolution is performed for a method group conversion.**
 
 Note that implicit span conversion is not considered for extension receiver in method group conversions
+([LDM 2024-07-15](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-15.md#first-class-spans-open-question))
 which makes the following code continue working as opposed to resulting in a compile-time error
 `CS1113: Extension method 'E.M<int>(Span<int>, int)' defined on value type 'Span<int>' cannot be used to create delegates`:
 
@@ -113,7 +122,7 @@ and instead implement changes so the scenario like the one above would end up su
 #### Variance
 
 The goal of the variance section in _implicit span conversion_ is to replicate some amount of covariance for `System.ReadOnlySpan<T>`. Runtime changes would be required to fully
-implement variance through generics here (see https://github.com/dotnet/csharplang/blob/main/proposals/ref-struct-interfaces.md for using `ref struct` types in generics), but we can
+implement variance through generics here (see https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/ref-struct-interfaces.md for using `ref struct` types in generics), but we can
 allow a limited amount of covariance through use of a proposed .NET 9 API: https://github.com/dotnet/runtime/issues/96952. This will allow the language to treat `System.ReadOnlySpan<T>`
 as if the `T` was declared as `out T` in some scenarios. We do not, however, plumb this variant conversion through _all_ variance scenarios, and do not add it to the definition of
 variance-convertible in [§18.2.3.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/interfaces.md#18233-variance-conversion). If in the future, we change the runtime
@@ -165,7 +174,8 @@ void M2<T>(T t) where T : allows ref struct
 
 #### Code generation
 
-The conversions will always exist, regardless of whether any runtime helpers used to implement them are present.
+The conversions will always exist, regardless of whether any runtime helpers used to implement them are present
+([LDM 2024-05-13](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-13.md#variant-conversion-existence)).
 If the helpers are not present, attempting to use the conversion will result in a compile-time error that a compiler-required member is missing.
 
 The compiler expects to use the following helpers or equivalents to implement the conversions:
@@ -193,20 +203,35 @@ This is based on [collection expressions overload resolution changes][ce-or].
 
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a *better conversion* than `C₂` if one of the following holds:
 >
-> - `E` is a *collection expression* and one of the following holds:
->   - `T₁` is `System.ReadOnlySpan<E₁>`, and `T₂` is `System.Span<E₂>`, and an implicit conversion exists from `E₁` to `E₂`.
->   - `T₁` is `System.ReadOnlySpan<E₁>` or `System.Span<E₁>`, and `T₂` is an *array_or_array_interface* with *element type* `E₂`, and an implicit conversion exists from `E₁` to `E₂`.
->   - `T₁` is not a *span_type*, and `T₂` is not a *span_type*, and an implicit conversion exists from `T₁` to `T₂`.
+> - `E` is a *collection expression*, and `C₁` is a [*better collection conversion from expression*][better-collection-conversion-from-expression] than `C₂`
 > - `E` is not a *collection expression* and one of the following holds:
 >   - `E` exactly matches `T₁` and `E` does not exactly match `T₂`
 >   - **`E` exactly matches neither of `T₁` and `T₂`,
 >     and `C₁` is an implicit span conversion and `C₂` is not an implicit span conversion**
 >   - `E` exactly matches both or neither of `T₁` and `T₂`,
 >     **both or neither of `C₁` and `C₂` are an implicit span conversion**,
->     and `T₁` is a better conversion target than `T₂`
+>     and `T₁` is a *better conversion target* than `T₂`
 > - `E` is a method group, `T₁` is compatible with the single best method from the method group for conversion `C₁`, and `T₂` is not compatible with the single best method from the method group for conversion `C₂`
 
-This rule should ensure that whenever an overload becomes applicable due to the new span conversions,
+#### Better conversion target
+[betterness-target]: #better-conversion-target
+
+*Better conversion target* ([§12.6.4.7][better-conversion-target]) is updated to prefer `ReadOnlySpan<T>` over `Span<T>`.
+
+> Given two types `T₁` and `T₂`, `T₁` is a ***better conversion target*** than `T₂` if one of the following holds:
+>
+> - **`T₁` is `System.ReadOnlySpan<E₁>`, `T₂` is `System.Span<E₂>`, and an identity conversion from `E₁` to `E₂` exists**
+> - **`T₁` is `System.ReadOnlySpan<E₁>`, `T₂` is `System.ReadOnlySpan<E₂>`, and an implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists**
+> - **At least one of `T₁` or `T₂` is not `System.ReadOnlySpan<Eᵢ>` and is not `System.Span<Eᵢ>`, and** an implicit conversion from `T₁` to `T₂` exists and no implicit conversion from `T₂` to `T₁` exists
+> - ...
+
+Design meetings:
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-12-04.md#preferring-readonlyspant-over-spant-conversions
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-12-09.md#first-class-span-open-questions
+
+#### Betterness remarks
+
+The *better conversion from expression* rule should ensure that whenever an overload becomes applicable due to the new span conversions,
 any potential ambiguity with another overload is avoided because the newly-applicable overload is preferred.
 
 Without this rule, the following code that successfully compiled in C# 13 would result in an ambiguity error in C# 14
@@ -312,7 +337,9 @@ Calling `x.Reverse()` where `x` is an instance of type `T[]`
 would previously bind to `IEnumerable<T> Enumerable.Reverse<T>(this IEnumerable<T>)`,
 whereas now it binds to `void MemoryExtensions.Reverse<T>(this Span<T>)`.
 Unfortunately these APIs are incompatible (the latter does the reversal in-place and returns `void`).
-The best solution would be if the BCL introduced an array-specific overload like `IEnumerable<T> Reverse<T>(this T[])`.
+
+.NET 10 mitigates this by adding an array-specific overload `IEnumerable<T> Reverse<T>(this T[])`,
+see https://github.com/dotnet/runtime/issues/107723.
 
 ```cs
 void M(int[] a)
@@ -321,6 +348,15 @@ void M(int[] a)
     foreach (var x in Enumerable.Reverse(a)) { } // workaround
 }
 ```
+
+See also:
+- https://developercommunity.visualstudio.com/t/Extension-method-SystemLinqEnumerable/10790323
+- https://developercommunity.visualstudio.com/t/Compilation-Error-When-Calling-Reverse/10818048
+- https://developercommunity.visualstudio.com/t/Version-17131-has-an-obvious-defect-th/10858254
+- https://developercommunity.visualstudio.com/t/Visual-Studio-2022-update-breaks-build-w/10856758
+- https://github.com/dotnet/runtime/issues/111532
+
+Design meeting: https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-11.md#reverse
 
 #### Ambiguities
 
@@ -341,13 +377,18 @@ Assert.Equal(x, s); // previously Assert.Equal<T>(T, T), now ambiguous with Asse
 Assert.Equal(x.AsSpan(), s); // workaround
 ```
 
+xUnit is adding more overloads to mitigate this: https://github.com/xunit/xunit/discussions/3021.
+
+Design meeting: https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-11.md#new-ambiguities
+
 #### Covariant arrays
 
 Overloads taking `IEnumerable<T>` worked on covariant arrays,
 but overloads taking `Span<T>` (which we now prefer) don't,
 because the span conversion throws an `ArrayTypeMismatchException` for covariant arrays.
 Arguably, the `Span<T>` overload should not exist, it should take `ReadOnlySpan<T>` instead.
-To work around this, users can use `.AsEnumerable()` or API authors can use `OverloadResolutionPriorityAttribute`.
+To work around this, users can use `.AsEnumerable()`, or API authors can use `OverloadResolutionPriorityAttribute`
+or add `ReadOnlySpan<T>` overload which is preferred due to [the betterness rule](#better-conversion-target).
 
 ```cs
 string[] s = new[] { "a" };
@@ -361,10 +402,57 @@ static class C
     public static void R<T>(IEnumerable<T> e) => Console.Write(1);
     public static void R<T>(Span<T> s) => Console.Write(2);
     // another workaround:
-    [OverloadResolutionPriority(1)]
     public static void R<T>(ReadOnlySpan<T> s) => Console.Write(3);
 }
 ```
+
+Design meeting: https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-09-11.md#covariant-arrays
+
+#### Preferring ReadOnlySpan over Span
+
+The [betterness rule](#better-conversion-target) causes preference of ReadOnlySpan overloads over Span overloads
+to avoid `ArrayTypeMismatchException`s in [covariant array scenarios](#covariant-arrays).
+That can lead to compilation breaks in some scenarios, for example when the overloads differ by their return type:
+
+```cs
+double[] x = new double[0];
+Span<ulong> y = MemoryMarshal.Cast<double, ulong>(x); // previously worked, now a compilation error (returns ReadOnlySpan, not Span)
+Span<ulong> z = MemoryMarshal.Cast<double, ulong>(x.AsSpan()); // workaround
+
+static class MemoryMarshal
+{
+    public static ReadOnlySpan<TTo> Cast<TFrom, TTo>(ReadOnlySpan<TFrom> span) => default;
+    public static Span<TTo> Cast<TFrom, TTo>(Span<TFrom> span) => default;
+}
+```
+
+See https://github.com/dotnet/roslyn/issues/76443.
+
+#### Expression trees
+
+Overloads taking spans like `MemoryExtensions.Contains` are preferred over classic overloads like `Enumerable.Contains`,
+even inside expression trees - but ref structs are not supported by the interpreter engine:
+
+```cs
+Expression<Func<int[], int, bool>> exp = (array, num) => array.Contains(num);
+exp.Compile(preferInterpretation: true); // fails at runtime in C# 14
+
+Expression<Func<int[], int, bool>> exp2 = (array, num) => Enumerable.Contains(array, num); // workaround
+exp2.Compile(preferInterpretation: true); // ok
+```
+
+Similarly, translation engines like LINQ-to-SQL need to react to this
+if their tree visitors expect `Enumerable.Contains` because they will encounter `MemoryExtensions.Contains` instead.
+
+See also:
+- https://github.com/dotnet/runtime/issues/109757
+- https://github.com/dotnet/docs/issues/43952
+- https://github.com/dotnet/efcore/issues/35100
+- https://github.com/dotnet/csharplang/discussions/8959
+
+Design meetings:
+- https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-12-04.md#conversions-in-expression-trees
+- https://github.com/dotnet/csharplang/blob/main/meetings/2025/LDM-2025-01-06.md#ignoring-ref-structs-in-expressions
 
 #### User-defined conversions through inheritance
 
@@ -444,41 +532,6 @@ namespace N2
 
 ## Open questions
 
-### Delegate signature matching (answered)
-
-Should we allow variance conversion in delegate signature matching? For example:
-
-```cs
-using System;
-
-Span<string> M1() => throw null!;
-void M2(ReadOnlySpan<object> r) {}
-
-delegate ReadOnlySpan<string> D1();
-delegate void D2(ReadOnlySpan<string> r);
-
-// Should these work?
-D1 d1 = M1; // Convert Span<string>() to ReadOnlySpan<string>()
-D2 d2 = M2; // Convert void(ReadOnlySpan<object>) to void(ReadOnlySpan<string>)
-
-// These work today
-string[] M3() => throw null!;
-void M4(object[] a) {}
-
-delegate object[] D3();
-delegate void D4(string[] a);
-
-D3 d3 = M3; // Convert string[]() to object[]()
-D4 d4 = M4; // Convert void(object[]) to void(string[])
-```
-
-These conversions may not be possible to do without creating a wrapper lambda without runtime changes; the existing variant delegate conversions are possible to emit
-without needing to create wrappers. We don't have precedent in the language for silent wrappers like this, and generally require users to create such wrapper lambdas themselves.
-
-#### Answer
-
-We will not allow variance in delegate conversions here. `D1 d1 = M1;` and `D2 d2 = M2;` will not compile. We could reconsider at a later point if use cases are discovered.
-
 ### Unrestricted betterness rule
 
 Should we make [the betterness rule][betterness-rule] unconditional on LangVersion?
@@ -491,29 +544,6 @@ However, that would mean users could get different behavior after updating the t
 Note that [`OverloadResolutionPriorityAttribute`][overload-resolution-priority] cannot fully solve this
 because it's also ignored on older LangVersions.
 However, it should be possible to use it to avoid ambiguities from VB where the attribute should be recognized.
-
-### Delegate extension receiver break (answered)
-
-Should we break existing code like the following? (It's a sample of real code found in runtime.)
-Currently, this speclet has a mitigation for this break in [the extension receiver section](#extension-receiver).
-Allowing this break might mean the BCL will be adding more overloads to mitigate it which would defy the purpose of this feature.
-On the other hand, LDM recently allowed breaks related to new Span overloads (https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-06-17.md#params-span-breaks),
-albeit limited to expression trees.
-
-```cs
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-var list = new List<int> { 1, 2, 3, 4 };
-var toRemove = new int[] { 2, 3 };
-list.RemoveAll(toRemove.Contains); // error CS1113: Extension method 'MemoryExtensions.Contains<int>(Span<int>, int)'
-                                   // defined on value type 'Span<int>' cannot be used to create delegates
-```
-
-#### Answer
-
-The break will be mitigated by not considering span conversions for extension receiver in method group conversions.
 
 ### Ignoring more user-defined conversions
 
@@ -565,3 +595,4 @@ Keep things as they are.
 
 [ce-or]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/csharp-12.0/collection-expressions.md#overload-resolution
 [overload-resolution-priority]: https://github.com/dotnet/csharplang/blob/566a4812682ccece4ae4483d640a489287fa9c76/proposals/overload-resolution-priority.md
+[better-collection-conversion-from-expression]: https://github.com/dotnet/csharplang/blob/main/proposals/csharp-13.0/collection-expressions-better-conversion.md#detailed-design

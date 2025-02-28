@@ -2,8 +2,10 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/4465>
+
 ## Summary
-Definite assignment [§9.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94-definite-assignment) as specified has a few gaps which have caused users inconvenience. In particular, scenarios involving comparison to boolean constants, conditional-access, and null coalescing.
+Definite assignment [§9.4](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#94-definite-assignment) as specified has a few gaps which have caused users inconvenience. In particular, scenarios involving comparison to boolean constants, conditional-access, and null coalescing.
 
 ## Related discussions and issues
 csharplang discussion of this proposal: https://github.com/dotnet/csharplang/discussions/4240
@@ -99,11 +101,11 @@ if (c != null ? c.M(out object obj4) : false)
 ## Specification
 
 ### ?. (null-conditional operator) expressions
-We introduce a new section **?. (null-conditional operator) expressions**. See the null-conditional operator specification ([§11.7.7](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1177-null-conditional-member-access))and Precise rules for determining definite assignment [§9.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#944-precise-rules-for-determining-definite-assignment) for context.
+We introduce a new section **?. (null-conditional operator) expressions**. See the null-conditional operator specification ([§12.8.8](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1288-null-conditional-member-access))and Precise rules for determining definite assignment [§9.4.4](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#944-precise-rules-for-determining-definite-assignment) for context.
 
 As in the definite assignment rules linked above, we refer to a given initially unassigned variable as *v*.
 
-We introduce the concept of "directly contains". An expression *E* is said to "directly contain" a subexpression *E<sub>1</sub>* if it is not subject to a user-defined conversion [§10.5](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/conversions.md#105-user-defined-conversions) whose parameter is not of a non-nullable value type, and one of the following conditions holds:
+We introduce the concept of "directly contains". An expression *E* is said to "directly contain" a subexpression *E<sub>1</sub>* if it is not subject to a user-defined conversion [§10.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/conversions.md#105-user-defined-conversions) whose parameter is not of a non-nullable value type, and one of the following conditions holds:
 - *E* is *E<sub>1</sub>*. For example, `a?.b()` directly contains the expression `a?.b()`.
 - If *E* is a parenthesized expression `(E2)`, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
 - If *E* is a null-forgiving operator expression `E2!`, and *E<sub>2</sub>* directly contains *E<sub>1</sub>*.
@@ -141,7 +143,7 @@ public struct S1
 }
 public struct S2
 {
-    public static implicit operator S2(S1 s1) => null;
+    public static implicit operator S2(S1 s1) => default;
 }
 ```
 
@@ -164,7 +166,7 @@ We assume that if an expression has a constant value bool `false`, for example, 
 It's also worth noting that we never expect to be in a conditional state *before* visiting a constant expression. That's why we do not account for scenarios such as "*expr* is a constant expression with value *true*, and the state of *v* before *expr* is "definitely assigned when true".
 
 ### ?? (null-coalescing expressions) augment
-We augment section [§9.4.4.29](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94429--expressions) as follows:
+We augment section [§9.4.4.29](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#94429--expressions) as follows:
 
 For an expression *expr* of the form `expr_first ?? expr_second`:
 - ...
@@ -182,7 +184,7 @@ The more general formulation also allows us to handle some more unusual scenario
 - `if (x?.M(out y) ?? z?.M(out y) ?? false) y.ToString();`
 
 ### ?: (conditional) expressions
-We augment section [§9.4.4.30](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94430--expressions) as follows:
+We augment section [§9.4.4.30](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#94430--expressions) as follows:
 
 For an expression *expr* of the form `expr_cond ? expr_true : expr_false`:
 - ...
@@ -212,15 +214,15 @@ This is an admittedly niche scenario, that compiles without error in the native 
 ### ==/!= (relational equality operator) expressions
 We introduce a new section **==/!= (relational equality operator) expressions**.
 
-The general rules for expressions with embedded expressions [§9.4.4.23](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/variables.md#94423-general-rules-for-expressions-with-embedded-expressions) apply, except for the scenarios described below.
+The general rules for expressions with embedded expressions [§9.4.4.23](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#94423-general-rules-for-expressions-with-embedded-expressions) apply, except for the scenarios described below.
 
-For an expression *expr* of the form `expr_first == expr_second`, where `==` is a[predefined comparison operator ([§11.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1111-relational-and-type-testing-operators)) or a lifted operator ([§11.4.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1148-lifted-operators)), the definite assignment state of *v* after *expr* is determined by:
+For an expression *expr* of the form `expr_first == expr_second`, where `==` is a predefined comparison operator ([§12.12](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1212-relational-and-type-testing-operators)) or a lifted operator ([§12.4.8](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1248-lifted-operators)), the definite assignment state of *v* after *expr* is determined by:
   - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is a constant expression with value *null*, and the state of *v* after the non-conditional counterpart *E<sub>0</sub>* is "definitely assigned", then the state of *v* after *expr* is "definitely assigned when false".
   - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is an expression of a non-nullable value type, or a constant expression with a non-null value, and the state of *v* after the non-conditional counterpart *E<sub>0</sub>* is "definitely assigned", then the state of *v* after *expr* is "definitely assigned when true".
   - If *expr_first* is of type *boolean*, and *expr_second* is a constant expression with value *true*, then the definite assignment state after *expr* is the same as the definite assignment state after *expr_first*.
   - If *expr_first* is of type *boolean*, and *expr_second* is a constant expression with value *false*, then the definite assignment state after *expr* is the same as the definite assignment state of *v* after the logical negation expression `!expr_first`.
 
-For an expression *expr* of the form `expr_first != expr_second`, where `!=` is a predefined comparison operator ([§11.11](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1111-relational-and-type-testing-operators)) or a lifted operator (([§11.4.8](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1148-lifted-operators))), the definite assignment state of *v* after *expr* is determined by:
+For an expression *expr* of the form `expr_first != expr_second`, where `!=` is a predefined comparison operator ([§12.12](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1212-relational-and-type-testing-operators)) or a lifted operator (([§12.4.8](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1248-lifted-operators))), the definite assignment state of *v* after *expr* is determined by:
   - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is a constant expression with value *null*, and the state of *v* after the non-conditional counterpart *E<sub>0</sub>* is "definitely assigned", then the state of *v* after *expr* is "definitely assigned when true".
   - If *expr_first* directly contains a null-conditional expression *E* and *expr_second* is an expression of a non-nullable value type, or a constant expression with a non-null value, and the state of *v* after the non-conditional counterpart *E<sub>0</sub>* is "definitely assigned", then the state of *v* after *expr* is "definitely assigned when false".
   - If *expr_first* is of type *boolean*, and *expr_second* is a constant expression with value *true*, then the definite assignment state after *expr* is the same as the definite assignment state of *v* after the logical negation expression `!expr_first`.

@@ -1,5 +1,7 @@
 # `field` keyword in properties
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8635>
+
 ## Summary
 
 Extend all properties to allow them to reference an automatically generated backing field using the new contextual keyword `field`. Properties may now also contain an accessor _without_ a body alongside an accessor _with_ a body.
@@ -96,9 +98,13 @@ Set-only properties may also use `field`:
 
 ### Breaking changes
 
-The existence of the `field` contextual keyword within property accessor bodies is a potentially breaking change, proposed as part of a larger [Breaking Changes](https://github.com/dotnet/csharplang/issues/7964) feature.
+The existence of the `field` contextual keyword within property accessor bodies is a potentially breaking change.
 
-Since `field` is a keyword and not an identifier, it can only be "shadowed" by an identifier using the normal keyword-escaping route: `@field`. All identifiers named `field` declared within property accessor bodies can safeguard against breaks when upgrading from C# versions prior to 13 by adding the initial `@`.
+Since `field` is a keyword and not an identifier, it can only be "shadowed" by an identifier using the normal keyword-escaping route: `@field`. All identifiers named `field` declared within property accessor bodies can safeguard against breaks when upgrading from C# versions prior to 14 by adding the initial `@`.
+
+If a variable named `field` is declared in a property accessor, an error is reported.
+
+In language version 14 or later, a warning is reported if a *primary expression* `field` refers to the backing field, but would have referred to a different symbol in an earlier language version.
 
 ### Field-targeted attributes
 
@@ -139,7 +145,7 @@ class SomeViewModel
 
     private bool Set<T>(ref T location, T value)
     {
-        if (RuntimeHelpers.Equals(location, value))
+        if (EqualityComparer<T>.Default.Equals(location, value))
             return false;
 
         location = value;
@@ -232,6 +238,10 @@ public struct S
     public int P2 { get => field; set => field = value; }
 }
 ```
+
+### Ref-returning properties
+
+Like with auto properties, the `field` keyword will not be available for use in ref-returning properties. Ref-returning properties cannot have set accessors, and without a set accessor, the get accessor and the property initializer would be the only things able to access the backing field. Absent use cases for this, now is not the time for ref-returning properties to start to be able to be written as auto properties.
 
 ### Nullability
 
@@ -368,7 +378,7 @@ When the `field` keyword is used in an accessor, the compiler's existing analysi
 
 ### Syntax
 
-When compiling with language version 13 or higher, `field` is considered a keyword when used as a *primary expression* ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-15.md)) in the following locations ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#field-and-value-as-contextual-keywords)):
+When compiling with language version 14 or higher, `field` is considered a keyword when used as a *primary expression* ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-07-15.md)) in the following locations ([LDM decision](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-05-15.md#field-and-value-as-contextual-keywords)):
 - In method bodies of `get`, `set`, and `init` accessors in properties *but not* indexers
 - In attributes applied to those accessors
 - In nested lambda expressions and local functions, and in LINQ expressions in those accessors
@@ -734,16 +744,6 @@ When the backing field is considered *read-only*, the field emitted to metadata 
 
 Recommendation is accepted.
 
-## Open LDM questions
-
-### Feature name
-
-Some options for the name of the feature:
-1. semi-auto properties
-1. field access for auto properties [LDM-2023-07-17](https://github.com/dotnet/csharplang/blob/main/meetings/2023/LDM-2023-07-17.md#compiler-check-in)
-1. field-backed properties
-1. field keyword
-
 ### Readonly context and `set`
 
 Should a `set` accessor be allowed in a `readonly` context for a property that uses `field`?
@@ -765,6 +765,10 @@ struct S2
     readonly object P3 { get => field; set { } } // ok?
 }
  ```
+
+#### Answer
+
+There could be scenarios for this where you're implementing a `set` accessor on a `readonly` struct and either passing it through, or throwing. We will allow this.
 
 ### `[Conditional]` code
 
@@ -789,6 +793,10 @@ For reference, fields for *primary constructor parameters* are generated in simi
 
 **Recommendation**: The backing field is generated when `field` is used only in omitted calls to *conditional methods*.
 
+#### Answer
+
+`Conditional` code can have effects on non-conditional code, such as `Debug.Assert` changing nullability. It would be strange if `field` didn't have similar impacts. It is also unlikely to come up in most code, so we'll do the simple thing and accept the recommendation.
+
 ### Interface properties and auto-accessors
 
 Is a combination of manually- and auto-implemented accessors recognized for an `interface` property where the auto-implemented accessor refers to a synthesized backing field?
@@ -807,3 +815,7 @@ interface I
 ```
 
 **Recommendation**: Auto-accessors are recognized in `interface` properties, and the auto-accessors refer to a synthesized backing field. For an instance property, an error is reported that instance fields are not supported.
+
+#### Answer
+
+Standardizing around the instance field itself being the cause of the error is consistent with partial properties in classes, and we like that outcome. The recommendation is accepted.

@@ -1,50 +1,46 @@
-# Upcoming meetings for 2024
-
-All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
-
-## Schedule ASAP
-
-## Schedule when convenient
-
-- Triage (working set)
-
-## Recurring topics
-
-- *Triage championed features and milestones*
-- *Design review*
-
-## Schedule
-
-### Wed Dec 18, 2024
-
-### Mon Dec 16, 2024
-
-### Wed Dec 11, 2024
+# C# Language Design Notes for 2024
 
 ### Mon Dec 9, 2024
 
+[C# Language Design Meeting for December 9th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-12-09.md)
+
+- First-class span open questions
+- Simple Lambda Parameters
+- Collection expression arguments
+
 ### Wed Dec 4, 2024
 
-### Mon Dec 2, 2024
+[C# Language Design Meeting for December 4th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-12-04.md)
+
+- First-class span open questions
+    - Preferring `ReadOnlySpan<T>` over `Span<T>` conversions
+    - Conversions in expression trees
 
 ### Wed Nov 20, 2024
 
+[C# Language Design Meeting for November 20th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-11-20.md)
+
+- Extensions
+- Dictionary Expressions
+
 ### Wed Nov 13, 2024
 
-### Wed Nov 6, 2024
+[C# Language Design Meeting for November 13th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-11-13.md)
 
-- Extensions 
+- Extensions
 
 ### Mon Nov 4, 2024
 
-- [Warn on some `not`/`or` patterns](https://gist.github.com/jcouv/d83cbc33248dbeb8475e4a7688d80a49) (Julien, invite Levi)
-- Meeting of the Meeting - Notetaking updates and open questions (Fred) (members)
+[C# Language Design Meeting for November 4th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-11-04.md)
+
+- `not` and `or` patterns
+- Notes on notes
 
 ### Wed Oct 30, 2024
 
-- Extensions (Mads and Dustin) [Extensions: An Evolution of Extension Methods](https://github.com/dotnet/csharplang/pull/8525) and [Compromise design for extensions #8519](https://github.com/dotnet/csharplang/issues/8519)
+[C# Language Design Meeting for October 30th, 2024](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-30.md)
 
-## C# Language Design Notes for 2024
+- Extensions
 
 ### Mon Oct 28, 2024
 

@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/435>
+
 ## Summary
 [summary]: #summary
 
@@ -16,7 +18,6 @@ The identifiers `nint` and `nuint` are new contextual keywords that represent na
 The identifiers are only treated as keywords when name lookup does not find a viable result at that program location.
 ```C#
 nint x = 3;
-string y = nameof(nuint);
 _ = nint.Equals(x, 3);
 ```
 
@@ -214,7 +215,7 @@ Compound assignment operations `x op= y` where `x` or `y` are native ints follow
 Specifically the expression is bound as `x = (T)(x op y)` where `T` is the type of `x` and where `x` is only evaluated once.
 
 The shift operators should mask the number of bits to shift - to 5 bits if `sizeof(nint)` is 4, and to 6 bits if `sizeof(nint)` is 8.
-(see [§11.10](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#1110-shift-operators)) in C# spec).
+(see [§12.11](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1211-shift-operators)) in C# spec).
 
 The C#9 compiler will report errors binding to predefined native integer operators when compiling with an earlier language version,
 but will allow use of predefined conversions to and from native integers.
@@ -252,7 +253,7 @@ static T* SubRightU(T* x, nuint y) => x - y; // T* operator -(T* left, ulong rig
 ```
 
 ### Binary numeric promotions
-The _binary numeric promotions_ informative text (see [§11.4.7.3](https://github.com/dotnet/csharpstandard/blob/draft-v6/standard/expressions.md#11473-binary-numeric-promotions)) in C# spec) is updated as follows:
+The _binary numeric promotions_ informative text (see [§12.4.7.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12473-binary-numeric-promotions)) in C# spec) is updated as follows:
 
 > -   …
 > -   Otherwise, if either operand is of type `ulong`, the other operand is converted to type `ulong`, or a binding-time error occurs if the other operand is of type `sbyte`, `short`, `int`, **`nint`**, or `long`.

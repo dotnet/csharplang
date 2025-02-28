@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/7706>
+
 ## Summary
 [summary]: #summary
 
@@ -121,7 +123,7 @@ It is an error to apply `OverloadResolutionPriorityAttribute` to the following l
 * Conversion operators
 * Lambdas
 * Local functions
-* Destructors
+* Finalizers
 * Static constructors
 
 Attributes encountered on these locations in metadata are ignored by C#.
@@ -155,7 +157,7 @@ class C3
 
     public void M3(string s) {}
     [OverloadResolutionPriority(1)]
-    public void M2(object o) {}
+    public void M3(object o) {}
 }
 ```
 
@@ -278,7 +280,7 @@ There are a few more locations like [this](#application-error-or-warning-on-over
 * Lambdas - Similarly, lambdas are never subject to overload resolution, so the implementation blocks them. Should that be confirmed?
 * Destructors - again, currently blocked.
 * Static constructors - again, currently blocked.
-* Local functions - These are not currently blocked, because they _do_ undergo overload resolution, you just can't overload them. This is simlar to how we don't
+* Local functions - These are not currently blocked, because they _do_ undergo overload resolution, you just can't overload them. This is similar to how we don't
   error when the attribute is applied to a member of a type that is not overloaded. Should this behavior be confirmed?
 
 #### Answer

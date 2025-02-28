@@ -1,5 +1,7 @@
 # `params ReadOnlySpan<T>`
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/1757>
+
 ## Summary
 Avoid heap allocation of implicitly allocated `params` arrays.
 

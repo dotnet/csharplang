@@ -1,9 +1,6 @@
 # readonly locals and parameters
 
-* [x] Proposed
-* [ ] Prototype
-* [ ] Implementation
-* [ ] Specification
+Champion issue: <https://github.com/dotnet/csharplang/issues/188>
 
 ## Summary
 [summary]: #summary

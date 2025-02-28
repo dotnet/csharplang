@@ -1,9 +1,6 @@
 # Type Unions for C#
 
-* [x] Proposed
-* [ ] Prototype: [Not Started](pr/1)
-* [ ] Implementation: [Not Started](pr/1)
-* [ ] Specification: [Not Started](pr/1)
+Champion issue: <https://github.com/dotnet/csharplang/issues/8928>
 
 ## Summary
 [summary]: #summary

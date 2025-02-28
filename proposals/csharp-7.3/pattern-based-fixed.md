@@ -1,5 +1,7 @@
 # Pattern-based `fixed` statement
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/1287>
+
 ## Summary
 [summary]: #summary
 

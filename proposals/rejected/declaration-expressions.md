@@ -1,5 +1,7 @@
 # Declaration expressions
 
+Discussion: https://github.com/dotnet/csharplang/discussions/8935
+
 Support declaration assignments as expressions.
 
 ## Motivation

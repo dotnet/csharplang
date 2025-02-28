@@ -1,5 +1,7 @@
 # Variable declarations under disjunctive patterns
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8622>
+
 ## Summary  
 
 - Allow variable declarations under `or` and `not` patterns and across `case` labels in a `switch` section to share code.

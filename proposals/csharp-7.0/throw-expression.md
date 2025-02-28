@@ -1,5 +1,7 @@
 # Throw expression
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/62>
+
 We extend the set of expression forms to include
 
 ```antlr

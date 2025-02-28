@@ -2,10 +2,22 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issues: <https://github.com/dotnet/csharplang/issues/1147>, <https://github.com/dotnet/csharplang/issues/6476>
+
 ## Summary
 This proposal is an aggregation of several different proposals for `struct` performance improvements: `ref` fields and the ability to override lifetime defaults. The goal being a design which takes into account the various proposals to create a single overarching feature set for low level `struct` improvements.
 
 > Note: Previous versions of this spec used the terms "ref-safe-to-escape" and "safe-to-escape", which were introduced in the [Span safety](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md) feature specification. The [ECMA standard committee](https://www.ecma-international.org/task-groups/tc49-tg2/) changed the names to ["ref-safe-context"](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/variables#972-ref-safe-contexts) and ["safe-context"](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/structs#16412-safe-context-constraint), respectively. The values of the safe context have been refined to use "declaration-block", "function-member", and "caller-context" consistently. The speclets had used different phrasing for these terms, and also used "safe-to-return" as a synonym for "caller-context". This speclet has been updated to use the terms in the C# 7.3 standard.
+
+Not all the features outlined in this document have been implemented in C# 11. C# 11 includes:
+
+1. `ref` fields and `scoped`
+1. `[UnscopedRef]`
+
+These features remain open proposals for a future version of C#:
+
+1. `ref` fields to `ref struct`
+1. Sunset restricted types
 
 ## Motivation
 Earlier versions of C# added a number of low level performance features to the language: `ref` returns, `ref struct`, function pointers, etc. ... These enabled .NET developers to write highly performant code while continuing to leverage the C# language rules for type and memory safety.  It also allowed the creation of fundamental performance types in the .NET libraries like `Span<T>`.
@@ -310,7 +322,7 @@ Together these changes mean the argument to an `out` parameter does not contribu
 The *safe-context* of a declaration variable from an `out` argument (`M(x, out var y)`) or deconstruction (`(var x, var y) = M()`) is the *narrowest* of the following:
 * caller-context
 * if out variable is marked `scoped`, then *declaration-block* (i.e. function-member or narrower).
-* if out variable's type is ref struct, consider all arguments to the containing invocation, including the receiver:
+* if out variable's type is `ref struct`, consider all arguments to the containing invocation, including the receiver:
   * *safe-context* of any argument where its corresponding parameter is not `out` and has *safe-context* of *return-only* or wider
   * *ref-safe-context* of any argument where its corresponding parameter has *ref-safe-context* of *return-only* or wider
     
@@ -429,7 +441,7 @@ var x = new S(ref heapSpan)
 }
 
 // Can be modeled as 
-var x = new S(ref heapSpan, stackSpan)
+var x = new S(ref heapSpan, stackSpan);
 ```
 
 This modeling is important because it demonstrates that our [MAMM](#rules-method-arguments-must-match) need to account specially for member initializers. Consider that this particular case needs to be illegal as it allows for a value with a narrower *safe-context* to be assigned to a higher one.
@@ -469,10 +481,16 @@ The `scoped` modifier and `[UnscopedRef]` attribute (see [below](#rules-unscoped
 Any other difference with respect to `scoped` or `[UnscopedRef]` is considered a mismatch.
 
 The compiler will report a diagnostic for _unsafe scoped mismatches_ across overrides, interface implementations, and delegate conversions when:
-- The method returns a `ref struct` or returns a `ref` or `ref readonly`, or the method has a `ref` or `out` parameter of `ref struct` type, and
-- The method has at least one additional `ref`, `in`, or `out` parameter, or a parameter of `ref struct` type.
+- The method has a `ref` or `out` parameter of `ref struct` type with a mismatch of adding `[UnscopedRef]` (not removing `scoped`).
+  (In this case, a [silly cyclic assignment](#cyclic-assignment) is possible, hence no other parameters are necessary.)
+- Or both of these are true:
+  - The method returns a `ref struct` or returns a `ref` or `ref readonly`, or the method has a `ref` or `out` parameter of `ref struct` type.
+  - The method has at least one additional `ref`, `in`, or `out` parameter, or a parameter of `ref struct` type.
 
-The rules above ignore `this` parameters because `ref struct` instance methods cannot be used for overrides, interface implementations, or delegate conversions.
+The diagnostic is not reported in other cases because:
+- The methods with such signatures cannot capture the refs passed in, so any scoped mismatch is not dangerous.
+- These include very common and simple scenarios (e.g., plain old `out` parameters which are used in `TryParse` method signatures)
+  and reporting scoped mismatches just because they are used across language version 11 (and hence the `out` parameter is differently scoped) would be confusing.
 
 The diagnostic is reported as an _error_ if the mismatched signatures are both using C#11 ref safe context rules; otherwise, the diagnostic is a _warning_.
 
@@ -500,7 +518,7 @@ Detailed Notes:
     - The `langversion` value is 11 or higher
 
 ### Syntax
-[12.6.2 Local variable declarations](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1262-local-variable-declarations): added `'scoped'?`.
+[13.6.2 Local variable declarations](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1362-local-variable-declarations): added `'scoped'?`.
 ```antlr
 local_variable_declaration
     : 'scoped'? local_variable_mode_modifier? local_variable_type local_variable_declarators
@@ -511,9 +529,9 @@ local_variable_mode_modifier
     ;
 ```
 
-[12.9.4 The `for` statement](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1294-the-for-statement): added `'scoped'?` _indirectly_ from `local_variable_declaration`.
+[13.9.4 The `for` statement](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1394-the-for-statement): added `'scoped'?` _indirectly_ from `local_variable_declaration`.
 
-[12.9.5 The `foreach` statement](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/statements.md#1295-the-foreach-statement): added `'scoped'?`.
+[13.9.5 The `foreach` statement](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement): added `'scoped'?`.
 ```antlr
 foreach_statement
     : 'foreach' '(' 'scoped'? local_variable_type identifier 'in' expression ')'
@@ -521,7 +539,7 @@ foreach_statement
     ;
 ```
 
-[11.6.2 Argument lists](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1162-argument-lists): added `'scoped'?` for `out` declaration variable.
+[12.6.2 Argument lists](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1262-argument-lists): added `'scoped'?` for `out` declaration variable.
 ```antlr
 argument_value
     : expression
@@ -531,12 +549,12 @@ argument_value
     ;
 ```
 
-[--.-.- Deconstruction expressions](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md):
+[12.7 Deconstruction expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#127-deconstruction):
 ```antlr
 [TBD]
 ```
 
-[14.6.2 Method parameters](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/classes.md#1462-method-parameters): added `'scoped'?` to `parameter_modifier`.
+[15.6.2 Method parameters](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/classes.md#1562-method-parameters): added `'scoped'?` to `parameter_modifier`.
 ```antlr
 fixed_parameter
     : attributes? parameter_modifier? type identifier default_argument?
@@ -555,9 +573,9 @@ parameter_mode_modifier
     ;
 ```
 
-[19.2 Delegate declarations](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/delegates.md#192-delegate-declarations): added `'scoped'?` _indirectly_ from `fixed_parameter`.
+[20.2 Delegate declarations](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/delegates.md#202-delegate-declarations): added `'scoped'?` _indirectly_ from `fixed_parameter`.
 
-[11.16 Anonymous function expressions](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#1116-anonymous-function-expressions): added `'scoped'?`.
+[12.19 Anonymous function expressions](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#1219-anonymous-function-expressions): added `'scoped'?`.
 ```antlr
 explicit_anonymous_function_parameter
     : 'scoped'? anonymous_function_parameter_modifier? type identifier
@@ -731,6 +749,8 @@ namespace System.Runtime.CompilerServices
 
 Safe fixed size buffers was not delivered in C# 11. This feature may be implemented in a future version of C#.
 
+<details>
+
 The language will relax the restrictions on fixed sized arrays such that they can be declared in safe code and the element type can be managed or unmanaged.  This will make types like the following legal:
 
 ```c#
@@ -764,9 +784,11 @@ This also has the added benefit that it will make `fixed` buffers easier to cons
 
 The backing storage for the buffer will be generated using the `[InlineArray]` attribute. This is a mechanism discussed in [issue 12320](https://github.com/dotnet/runtime/issues/12320) which allows specifically for the case of efficiently declaring sequence of fields of the same type. This particular issue is still under active discussion and the expectation is that the implementation of this feature will follow however that discussion goes.
 
+</details>
+
 ### Initializers with `ref` values in `new` and `with` expressions
 
-In section [11.7.15.3 Object initializers](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/expressions.md#117153-object-initializers), we update the grammar to:
+In section [12.8.17.3 Object initializers](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#128173-object-initializers), we update the grammar to:
 
 ```antlr
 initializer_value
@@ -803,14 +825,14 @@ For a `new` expression with initializers, the initializer expressions count as a
 
 ## Changes in unsafe context
 
-Pointer types ([section 22.3](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/unsafe-code.md#223-pointer-types)) are extended to allow managed types as referent type.
+Pointer types ([section 23.3](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#233-pointer-types)) are extended to allow managed types as referent type.
 Such pointer types are written as a managed type followed by a `*` token. They produce a warning.
 
-The address-of operator ([section 22.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/unsafe-code.md#2265-the-address-of-operator)) is relaxed to accept a variable with a managed type as its operand.
+The address-of operator ([section 23.6.5](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#2365-the-address-of-operator)) is relaxed to accept a variable with a managed type as its operand.
 
-The `fixed` statement ([section 22.7](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/unsafe-code.md#227-the-fixed-statement)) is relaxed to accept _fixed_pointer_initializer_ that is the address of a variable of managed type `T` or that is an expression of an _array_type_ with elements of a managed type `T`.
+The `fixed` statement ([section 23.7](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/unsafe-code.md#237-the-fixed-statement)) is relaxed to accept _fixed_pointer_initializer_ that is the address of a variable of managed type `T` or that is an expression of an _array_type_ with elements of a managed type `T`.
 
-The stack allocation initializer ([section 22.9](https://github.com/dotnet/csharpstandard/blob/draft-v7/standard/unsafe-code.md#229-stack-allocation)) is similarly relaxed.
+The stack allocation initializer ([section 12.8.22](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12822-stack-allocation)) is similarly relaxed.
 
 ## Considerations
 There are considerations other parts of the development stack should consider when evaluating this feature.
@@ -818,7 +840,7 @@ There are considerations other parts of the development stack should consider wh
 ### Compat Considerations
 <a name="compat-considerations">
 
-The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md), or [§9.7.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#972-ref-safe-contexts). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The ref safe cpmtext rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor), or [§16.4.12.8](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#164128-constructor-invocations) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
+The challenge in this proposal is the compatibility implications this design has to our existing [span safety rules](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md), or [§9.7.2](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/variables.md#972-ref-safe-contexts). While those rules fully support the concept of a `ref struct` having `ref` fields they do not allow for APIs, other than `stackalloc`, to capture `ref` state that refers to the stack. The ref safe context rules have a [hard assumption](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-7.2/span-safety.md#span-constructor), or [§16.4.12.8](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/structs.md#164128-constructor-invocations) that a constructor of the form `Span(ref T value)` does not exist. That means the safety rules do not account for a `ref` parameter being able to escape as a `ref` field hence it allows for code like the following.
 
 ```c#
 Span<int> CreateSpanOfInt()
@@ -1276,7 +1298,7 @@ ref struct Sneaky
 
     public void SelfAssign()
     {
-        // This pattern of ref reassign to fields on this inside instance methods is now
+        // This pattern of ref reassign to fields on this inside instance methods would now
         // completely legal.
         RefField = ref Field;
     }
@@ -1321,7 +1343,7 @@ Some thought was given to the idea of having `this` have different defaults base
 
  This minimizes compat breaks and maximizes flexibility but at the cost of complicating the story for customers. It also doesn't fully solve the problem because future features, like safe `fixed` buffers, require that a mutable `ref struct` have `ref` returns for fields which don't work by this design alone as it would fall into the `scoped ref` category. 
 
-**Decision** Keep `this` as `scoped ref`
+**Decision** Keep `this` as `scoped ref`. That means the preceding sneaky examples produce compiler errors.
 
 ### ref fields to ref struct
 This feature opens up a new set of ref safe context rules because it allows for a `ref` field to refer to a `ref struct`. This generic nature of `ByReference<T>` meant that up until now the runtime could not have such a construct. As a result all of our rules are written under the assumption this is not possible. The `ref` field feature is largely not about making new rules but codifying the existing rules in our system. Allowing `ref` fields to `ref struct` requires us to codify new rules because there are several new scenarios to consider.
@@ -1383,7 +1405,7 @@ Third the rules for ref reassignment need to be updated to ensure that we don't 
 
 These problems are very solvable. The compiler team has sketched out a few versions of these rules and they largely fall out from our existing analysis. The problem is there is no consuming code for such rules that helps prove out there correctness and usability. This makes us very hesitant to add support because of the fear we'll pick wrong defaults and back the runtime into usability corner when it does take advantage of this. This concern is particularly strong because .NET 8 likely pushes us in this direction with `allow T: ref struct` and `Span<Span<T>>`. The rules would be better written if it's done in conjunction with consumption code.
 
-**Decision** Delay allowing `ref` field to `ref struct` until .NET 8 where we have scenarios that will help drive the rules around these scenarios.
+**Decision** Delay allowing `ref` field to `ref struct` until .NET 8 where we have scenarios that will help drive the rules around these scenarios. This has not been implemented as of .NET 9
 
 ### What will make C# 11.0?
 The features outlined in this document don't need to be implemented in a single pass. Instead they can be implemented in phases across several language releases in the following buckets:
@@ -1585,6 +1607,7 @@ void Example(ref Span<int> p)
     Span<int> local = stackalloc int[42];
     ref Span<int> refLocal = ref local;
 
+    // Error:
     // The safe-context of refLocal is narrower than p. For a non-ref reassignment 
     // this would be allowed as its safe to assign wider lifetimes to narrower ones.
     // In the case of ref reassignment though this rule prevents it as the 
@@ -1758,6 +1781,7 @@ readonly ref struct S
     public S()
     {
         i = 0;
+        // Error: `i` has a narrower scope than `r`
         r = ref i;
     }
 
@@ -1765,6 +1789,7 @@ readonly ref struct S
     {
         r++;
     }
+}
 ```
 
 The proposal prevents this though because it violates the ref safe context rules. Consider the following:
@@ -1788,6 +1813,7 @@ ref struct S
 
     static void SelfAssign(ref S s)
     {
+        // Error: s.field can only escape the current method through a return statement
         s.refField = ref s.field;
     }
 }
@@ -1929,7 +1955,7 @@ One subtle design question is: How are constructors bodies modeled for ref safet
 ```c#
 ref struct S
 {
-    int field;
+    ref int field;
 
     public S(ref int f)
     {

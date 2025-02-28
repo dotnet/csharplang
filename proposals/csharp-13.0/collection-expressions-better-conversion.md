@@ -2,6 +2,8 @@
 
 [!INCLUDE[Specletdisclaimer](../speclet-disclaimer.md)]
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8374>
+
 ## Summary
 
 Updates to the better conversion rules to be more consistent with `params`, and better handle current ambiguity scenarios. For example, `ReadOnlySpan<string>` vs `ReadOnlySpan<object>` can currently
@@ -14,7 +16,7 @@ The following are the better conversion from expression rules. These replace the
 These rules are:
 
 > Given an implicit conversion `C₁` that converts from an expression `E` to a type `T₁`, and an implicit conversion `C₂` that converts from an expression `E` to a type `T₂`, `C₁` is a ***better conversion*** than `C₂` if one of the following holds:
-> **`E` is a *collection expression*, and `C₁` is a ***better collection conversion from expression***, or**
+> * **`E` is a *collection expression*, and `C₁` is a ***better collection conversion from expression*** than `C₂`**
 > * **`E` is not a *collection expression* and one of the following holds:**
 >   * `E` exactly matches `T₁` and `E` does not exactly match `T₂`
 >   * `E` exactly matches both or neither of `T₁` and `T₂`, and `T₁` is a [*better conversion target*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11646-better-conversion-target) than `T₂`

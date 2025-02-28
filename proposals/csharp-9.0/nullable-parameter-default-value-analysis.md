@@ -1,5 +1,7 @@
 # Nullable Parameter Default Value Analysis
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/3297>
+
 ## Analysis of declarations
 
 In a method declaration it's desirable for the compiler to give warnings for parameter default values which are incompatible with the parameter's type.

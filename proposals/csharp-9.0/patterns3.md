@@ -139,9 +139,9 @@ primary_pattern
     ;
 ```
 
-## Change to 7.5.4.2 Grammar Ambiguities
+## Change to 6.2.5 Grammar Ambiguities
 
-Due to the introduction of the *type pattern*, it is possible for a generic type to appear before the token `=>`.  We therefore add `=>` to the set of tokens listed in *7.5.4.2 Grammar Ambiguities* to permit disambiguation of the `<` that begins the type argument list.  See also https://github.com/dotnet/roslyn/issues/47614.
+Due to the introduction of the *type pattern*, it is possible for a generic type to appear before the token `=>`.  We therefore add `=>` to the set of tokens listed in [§6.2.5 Grammar ambiguities](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/lexical-structure.md#625-grammar-ambiguities) to permit disambiguation of the `<` that begins the type argument list.  See also https://github.com/dotnet/roslyn/issues/47614.
 
 ## Open Issues with Proposed Changes
 
@@ -172,6 +172,8 @@ bool IsValidPercentage(object x) => x is
     >= 0D and <= 100D;    // double tests
 ```
 
+Result: The relational does include an implicit type test to the type of the constant on the right-hand-side of the relational.
+
 ### Flowing type information from the left to the right of `and`
 
 It has been suggested that when you write an `and` combinator, type information learned on the left about the top-level type could flow to the right.  For example
@@ -190,6 +192,8 @@ Here, the *input type* to the second pattern is narrowed by the *type narrowing*
 7. If `P` is an `or` pattern, the *narrowed type* is the common type of the *narrowed type* of the subpatterns if such a common type exists. For this purpose, the common type algorithm considers only identity, boxing, and implicit reference conversions, and it considers all subpatterns of a sequence of `or` patterns (ignoring parenthesized patterns).
 8. If `P` is an `and` pattern, the *narrowed type* is the *narrowed type* of the right pattern. Moreover, the *narrowed type* of the left pattern is the *input type* of the right pattern.
 9. Otherwise the *narrowed type* of `P` is `P`'s input type.
+
+Result: The above narrowing semantics have been implemented.
 
 ### Variable definitions and definite assignment
 
@@ -240,6 +244,8 @@ Should we elect to defer such work until later (which I advise), we could say in
 - beneath a `not` or `or`, pattern variables may not be declared.
 
 Then, we would have time to develop some experience that would provide insight into the possible value of relaxing that later.
+
+Result: Pattern variables can't be declared beneath a `not` or `or` pattern.
 
 ### Diagnostics, subsumption, and exhaustiveness
 

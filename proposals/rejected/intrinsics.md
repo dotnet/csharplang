@@ -1,5 +1,7 @@
 # Compiler Intrinsics
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/191>
+
 ## Summary
 
 This proposal provides language constructs that expose low level IL opcodes that cannot currently

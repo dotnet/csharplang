@@ -1,5 +1,7 @@
 # Null-conditional assignment
 
+Champion issue: <https://github.com/dotnet/csharplang/issues/8677>
+
 ## Summary
 [summary]: #summary
 
@@ -101,6 +103,12 @@ void M(RS a, ref int x)
 (a?.b, c?.d) = (x, y); // error
 ```
 
+- Increment/decrement operators are [not supported](https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-28.md#increment-and-decrement-operators-in-null-conditional-access).
+```cs
+a?.b++; // error
+--a?.b; // error
+```
+
 ### Specification
 The *null conditional assignment* grammar is defined as follows:
 
@@ -128,18 +136,17 @@ subgraph ConditionalAccessExpression
   whole[a?.b = c]
 end
 subgraph  
-  direction LR;
-  subgraph Expression
-    whole-->a;
+  subgraph WhenNotNull
+    whole-->whenNotNull[".b = c"];
+    whenNotNull-->.b;
+    whenNotNull-->eq[=];
+    whenNotNull-->c;
   end
   subgraph OperatorToken
     whole-->?;
   end
-  subgraph WhenNotNull
-    whole-->whenNotNull[.b = c];
-    whenNotNull-->.b;
-    whenNotNull-->=;
-    whenNotNull-->c;
+  subgraph Expression
+    whole-->a;
   end
 end
 ```
@@ -218,35 +225,9 @@ We could instead make the `?.` syntactically a child of the `=`. This makes it s
 ## Unresolved questions
 [unresolved]: #unresolved-questions
 
-### Increment/decrement operators
-
-Should we permit increment/decrement operators to be used within a conditional access? e.g.
-
-```cs
-class C
-{
-    int F;
-
-    void M(C? c)
-    {
-        c?.F++;
-        c?.F--;
-        ++c?.F;
-        --c?.F;
-
-        // workaround:
-        c?.F += 1;
-        c?.F -= 1;
-    }
-}
-```
-
-**Recommendation:** No. While postfix increment operators would not be difficult to support, representing prefix increment in would require making undesirable tradeoffs in the syntax design. Specifically, we would have to start parsing `a?.b = c` as `(a?.b) = (c)`, which would make the feature much more work to implement in downstream phases. Invariants in the Roslyn syntax design would make it impossible for `++` in `++a?.B` to parse as `(a) ? (++.B)`.
-
-One possible alternative might be to permit the postfix form, but not the prefix form. It is more likely that a user would be using the postfix form anyway. However, the inconsistency may be more confusing than completely disallowing would be.
-
 ## Design meetings
 
 * https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-04-27.md#null-conditional-assignment
 * https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-08-31.md#null-conditional-assignment
 * https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-10-26.md#null-conditional-assignment
+* https://github.com/dotnet/csharplang/blob/main/meetings/2024/LDM-2024-10-28.md#increment-and-decrement-operators-in-null-conditional-access
