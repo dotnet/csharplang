@@ -440,6 +440,8 @@ static class CollectionExtensions
 - We should follow-up on "factory scenario" where multiple extension declarations have static factory methods 
   with same parameter types but different return types.
 - Should the extension marker or unspeakable implementation methods be marked with special name?
+- Should skeleton methods throw `NotSupportedException` or some other standard exception (right now we do `throw null;`)?
+- Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
 
 ### Lookup
 
@@ -456,6 +458,15 @@ static class CollectionExtensions
 
 - Should we relax the type parameter validation (all the type parameters must appear in the type of the extension parameter) where there are only methods? This would allow porting 100% of classic extension methods.  
 If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.
+- Confirm whether init-only accessors should be allowed in extensions
+- Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?
+- Should we complain about a conflict like this `extension(object receiver) { public int P1 => 1; }`   `extension(object receiver) { public int P1 {set{}} }`?
+
+### XML docs
+
+- Is `paramref` to receiver parameter supported on extension members? Even on static? How is it encoded in the output? Probably standard way `<paramref name="..."/>` would work for a human,  but there is a risk that some existing tools won't be happy to not find it among the parameters on the API.
+- Are we supposed to copy doc comments to the implementation methods with speakable names?
+- Should `<param>` element corresponding to receiver parameter be copied from extension container for instance methods? Anything else should be copied from container to implementation methods (`<typeparam>` etc.) ?
 
 ### Add support for more member kinds
 
