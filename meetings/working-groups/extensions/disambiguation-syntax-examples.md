@@ -49,7 +49,7 @@ var repetition = new IEnumerable<int>(first, 10);
 // Static extension members
 var range = IEnumerable<int>.(MyExtensions.Range)(0, 10);
 var empty = IEnumerable<int>.(MyExtensions.Empty);
-range (MyExtensions.+=) 5;
+range (MyExtensions.+=) 5; /* or */ (MyExtensions.+)(range, 5);
 ReadOnlySpan<int> span = (MyExtensions.implicit)(range);
 
 // Instance extension members
@@ -201,3 +201,133 @@ var isEmpty = (query using MyExtensions).IsEmpty;
 var first = (query using MyExtensions)[0];
 var repetition = new (IEnumerable<int> using MyExtensions)(first, 10);
 ```
+
+## Speakable lowering
+
+``` c#
+// Static extension members
+var range = MyExtensions.Range(0, 10);
+var empty = MyExtensions.Empty;
+range = MyExtensions.op_addition(range, 5);
+ReadOnlySpan<int> span = MyExtensions.op_implicit(range); // Need target typing?
+
+// Instance extension members
+var query = MyExtensions.Where(range, i => i < 10);
+var isEmpty = MyExtensions.get_IsEmpty(query);
+var first = MyExtensions.get_Item(query, 0);
+var repetition = MyExtensions.__ctor_IEnumerable<int>(first, 10);
+```
+
+## Using clauses as statements
+
+``` c#
+using static MyExtensions 
+{
+    // Static extension members
+    var range = IEnumerable<int>.Range(0, 10);
+    var empty = IEnumerable<int>.Empty;
+    range += 5;
+    ReadOnlySpan<int> span = range;
+
+    // Instance extension members
+    var query = range.Where(i => i < 10);
+    var isEmpty = query.IsEmpty;
+    var first = query[0];
+    var repetition = new IEnumerable<int>(first, 10);
+}
+```
+
+- Doesn't address bypassing instance member
+
+
+``` c#
+// Static extension members
+var range = MyExtensions.(IEnumerable<int>).Range(0, 10);
+var empty = MyExtensions.(IEnumerable<int>).Empty;
+MyExtensions.(range) += 5;
+ReadOnlySpan<int> span = MyExtensions.(range);
+
+// Instance extension members
+var query = MyExtensions.(range).Where(i => i < 10);
+var isEmpty = MyExtensions.(query).IsEmpty;
+var first = MyExtensions.(query)[0];
+var repetition = new MyExtensions.(IEnumerable<int>)(first, 10);
+```
+
+
+``` c#
+// Static extension members
+var range = IEnumerable<int>.(MyExtensions).Range(0, 10);
+var empty = IEnumerable<int>.(MyExtensions).Empty;
+range.(MyExtensions) += 5;
+ReadOnlySpan<int> span = range.(MyExtensions);
+
+// Instance extension members
+var query = range.(MyExtensions).Where(i => i < 10);
+var isEmpty = query.(MyExtensions).IsEmpty;
+var first = query.(MyExtensions)[0];
+var repetition = new IEnumerable<int>.(MyExtensions)(first, 10);
+```
+
+
+``` c#
+// Static extension members
+var range = IEnumerable<int>.as(MyExtensions).Range(0, 10);
+var empty = IEnumerable<int>.as(MyExtensions).Empty;
+range.as(MyExtensions) += 5;
+ReadOnlySpan<int> span = range.as(MyExtensions);
+
+// Instance extension members
+var query = range.as(MyExtensions).Where(i => i < 10);
+var isEmpty = query.as(MyExtensions).IsEmpty;
+var first = query.as(MyExtensions)[0];
+var repetition = new IEnumerable<int>.as(MyExtensions)(first, 10);
+```
+
+
+``` c#
+// Static extension members
+var range = IEnumerable<int>.MyExtensions.Range(0, 10);
+var empty = IEnumerable<int>.MyExtensions.Empty;
+range.MyExtensions += 5;
+ReadOnlySpan<int> span = range.MyExtensions;
+
+// Instance extension members
+var query = range.MyExtensions.Where(i => i < 10);
+var isEmpty = query.MyExtensions.IsEmpty;
+var first = query.MyExtensions[0];
+var repetition = new IEnumerable<int>.MyExtensions(first, 10);
+```
+- Doesn't allow giving the full name of `MyExtensions`
+
+
+``` c#
+// Static extension members
+var range = IEnumerable<int>.in(MyExtensions).Range(0, 10);
+var empty = IEnumerable<int>.in(MyExtensions).Empty;
+range.in(MyExtensions) += 5;
+ReadOnlySpan<int> span = range.in(MyExtensions);
+
+// Instance extension members
+var query = range.in(MyExtensions).Where(i => i < 10);
+var isEmpty = query.in(MyExtensions).IsEmpty;
+var first = query.in(MyExtensions)[0];
+var repetition = new IEnumerable<int>.in(MyExtensions)(first, 10);
+```
+
+
+
+``` c#
+// Static extension members
+var range = IEnumerable<int>.at(MyExtensions).Range(0, 10);
+var empty = IEnumerable<int>.at(MyExtensions).Empty;
+range.at(MyExtensions) += 5;
+ReadOnlySpan<int> span = range.at(MyExtensions);
+
+// Instance extension members
+var query = range.at(MyExtensions).Where(i => i < 10);
+var isEmpty = query.at(MyExtensions).IsEmpty;
+var first = query.at(MyExtensions)[0];
+var repetition = new IEnumerable<int>.at(MyExtensions)(first, 10);
+```
+
