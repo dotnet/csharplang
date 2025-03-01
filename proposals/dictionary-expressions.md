@@ -532,6 +532,29 @@ Options include:
 2. Use the target type implementation of `IDictionary<K, V>.this[K] { get; set; }`.
 3. Use the accessible indexer that matches the signature `V this[K] { get; set; }`.
 
+### `dynamic` elements
+
+Related to the previous question, how should the compiler bind to the indexer when the element expression has `dynamic` type, or when either the key or value is `dynamic`?
+
+For reference, with non-dictionary targets, an element with `dynamic` type, the compiler binds to the applicable `Add(value)` method at runtime.
+
+For dictionary targets, the situtation is more complicated because we have key-value pairs to consider. ...
+
+There is a related question of *key-value pair conversions* (see below). If we allow dynamic conversion of key or value independently, then we're essentially supporting key-value pair conversions at runtime. If that's the case, we'll probably want to key-value pair conversions at compile-time for non-`dynamic` cases.
+```csharp
+KeyValuePair<int, string> x     = new(1, "one");
+KeyValuePair<dynamic, string> y = new(2, "two");
+
+Dictionary<long, string> d;
+d = [x]; // compile-time key-value pair conversion from int to long?
+d = [y]; // runtime conversion from dynamic to long?
+```
+
+Options include:
+1. No support for dynamic conversion of the element expression, or of key or value.
+2. Rewrite dynamic conversion from element expressions as explicit conversion to element typee.
+3. Allow dynamic conversion of element expression, and of key or value.
+
 ### Key-value pair conversions
 
 Should the compiler support a new [*key-value pair conversion*](#key-value-pair-conversions) within collection expressions to allow implicit conversions from an expression element of type `KeyValuePair<K1, V1>`, or a spread element with an iteration type of `KeyValuePair<K1, V1>` to the collection expression iteration type `KeyValuePair<K2, V2>`?
