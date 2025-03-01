@@ -50,6 +50,47 @@ receiver_parameter // add
 Extension declarations shall only be declared in non-generic, non-nested static classes.  
 It is an error for a type to be named `extension`.  
 
+### Declaration spaces
+
+Section [7.3 Declarations](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/basic-concepts.md#73-declarations) in the C# Standard is updated as follows (additions in **bold non-italic**):
+
+> ...
+> 
+> There are several different types of declaration spaces, as described in the following.
+> 
+> ...
+> 
+> - Each **extension declaration, [primary constructor parameter list]**, method declaration, property declaration, property accessor declaration, indexer declaration, indexer accessor declaration, operator declaration, instance constructor declaration, anonymous function, and local function creates a new declaration space called a ***local variable declaration space***. Names are introduced into this declaration space through formal parameters (*fixed_parameter*s and *parameter_array*s) and *type_parameter*s. The set accessor for a property or an indexer introduces the name `value` as a formal parameter.
+> - Additional local variable declaration spaces may occur within **extension declarations [and primary constructor parameter lists]. Names are introduced into these declaration spaces through member declarations.** Additional local variable declaration spaces may **also** occur within member declarations, anonymous functions and local functions. Names are introduced into these declaration spaces through *pattern*s, *declaration_expression*s,  *declaration_statement*s and *exception_specifier*s. Local variable declaration spaces may be nested, but it is an error for a local variable declaration space and a nested local variable declaration space to contain elements with the same name. Thus, within a nested declaration space it is not possible to declare a local variable, local function or constant with the same name as a parameter, type parameter, local variable, local function or constant in an enclosing declaration space. It is possible for two declaration spaces to contain elements with the same name as long as neither declaration space contains the other. Local declaration spaces are created by the following constructs:
+>
+> ...
+
+Additions in **[square brackets]** are about the unrelated primary constructor feature, which is already in C# but not yet in the Standard. Extension declarations should behave the same way in terms of scoping.
+
+There is an existing need to specify (maybe in Section[12.8.4 Simple Names](https://github.com/dotnet/csharpstandard/blob/standard-v7/standard/expressions.md#1284-simple-names)) something along the lines of the following:
+
+> If a local variable directly occurring in a given declaration space is accessed from within a static member or static lambda expression that is itself nested within that declaration space, a compile-time error is given.
+
+Thus, for receiver parameters as well as any other local variable, a reference from within a static context still resolves to that variable, but leads to an error.
+
+``` c#
+public static class E
+{
+    extension(string s) // *1*
+    {
+        public int M(int i) // *2*
+        {
+            return s.Length + i;
+        }
+        public static string P => s; // Error: Cannot use s from static context
+    }
+}
+```
+
+In the example, `*1*` and `*2*` denote local variable declaration spaces, where `*2*` is nested within `*1*` and thus prohibited from introducing the same local variable names as `*1*`.
+
+The receiver parameter `s` shall not be accessed from a static context; thus the body of the static property `P` yields a compile-time error.
+
 ### Static classes as extension containers
 
 Extensions are declared inside top-level non-generic static classes, just like extension methods today, 
