@@ -175,11 +175,15 @@ Note: the other pruning steps in overload resolution not sdon't apply to extensi
 
 # Resolution for static methods
 
+Decision: match what we do for instance methods
+
 Do we want the same semantics for static extension methods (ie. we pretend like we have a receiver/value of the given type) or do we want some new semantics?  
 I assume that we want the old semantics.  
 This also makes it clear what to expect in a "Color Color" scenario, where we don't know whether the receiver is an instance or static.
 
 # Resolution for properties
+
+Decision: match what we do for instance/static methods as long as it makes sense. In particular, the "prefer more specific" step won't apply to properties either. We'll want to revisit the details of betterness we want for properties. We're okay keeping the betterness step after the member kind determination, for now.
 
 We have similar questions for extension properties.  
 We're going to cover three questions:
