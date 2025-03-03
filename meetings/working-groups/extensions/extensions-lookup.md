@@ -160,22 +160,19 @@ Options for methods:
 ## Extension methods proposal
 
 Gather candidates (no applicability involved)
-Member type inference (including the type parameters on the extension declaration)  
-Member applicability (including the extension parameter)  
 Pruning more candidates:
-1. Remove based on inaccessible type arguments (apply, see RemoveInaccessibleTypeArguments)
-2. Remove less specific or hidden applicable candidates (doesn't apply, RemoveLessDerivedMembers and RemoveHiddenMembers)
-3. Remove static-instance mismatches (apply)  
-4. Remove candidates with constraints violations (apply)  
-5. RemoveDelegateConversionsWithWrongReturnType (TBD)
-6. RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
-7. RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
+1. by type inference (including the type parameters on the extension declaration)  
+2. by applicability to arguments (including the extension parameter)  
+3. Remove based on inaccessible type arguments (apply, see RemoveInaccessibleTypeArguments)
+4. Remove less specific or hidden applicable candidates (doesn't apply, RemoveLessDerivedMembers and RemoveHiddenMembers)
+5. Remove static-instance mismatches (apply)  
+6. Remove candidates with constraints violations (apply)  
+7. RemoveDelegateConversionsWithWrongReturnType (TBD)
+8. RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
+9. RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
 Figure out best candidate: 
-8. Remove lower priority/ORPA members (apply)  
-9. Remove worse members (better function member) (including the receiver parameter)  
-
-Note: the determination of function types starts with the applicable candidates, with candidates pruned by steps 1 and 2 above.  
-Separately from extensions, we should consider also using all the pruning steps that apply individual to members.
+1. Remove lower priority/ORPA members (apply)  
+2. Remove worse members (better function member) (including the receiver parameter)  
 
 # Resolution for static methods
 
@@ -197,7 +194,7 @@ We're going to cover three questions:
 
 Yes, we'd previously agree that we want to prefer more specific members.
 
-```
+```csharp
 _ = "".P; // should pick E(string).P
 
 public static class E
@@ -216,7 +213,7 @@ public static class E
 ### Static/instance mismatch
 
 If we try to follow the behavior of regular instance or static methods, then the resolution of extension properties should prune based on static/instance mismatch:
-```
+```csharp
 _ = 42.P;
 
 static class E1
@@ -234,7 +231,7 @@ static class E2
     }
 }
 ```
-```
+```csharp
 _ = int.P;
 
 static class E1
@@ -257,7 +254,7 @@ static class E2
 
 ### Variance
 
-```
+```csharp
 IEnumerable<C2> iEnumerableOfC2 = null;
 _ = iEnumerableOfC2.P; // should we prefer IEnumerable<C1> because it is a better conversion? (parameter-like behavior)
 
@@ -275,7 +272,7 @@ public static class E
 public class C1 { }
 public class C2 : C1 { }
 ```
-```
+```csharp
 _ = IEnumerable<C2>.P; // should we prefer IEnumerable<C1> because it is a better conversion? (parameter-like behavior)
 
 public static class E
@@ -298,7 +295,7 @@ If yes, should we have some preference between those two?
 ### Prefer non-generic over generic
 
 If we follow the parameter-like behavior of classic extension methods, then we'd probably want more better member rules:
-```
+```csharp
 _ = 42.P;
 
 public static class E
@@ -316,7 +313,7 @@ public static class E
 
 ### Prefer by-value parameter
 
-```
+```csharp
 _ = 42.P;
 
 public static class E
@@ -335,7 +332,7 @@ public static class E
 ### Issue with betterness in static scenarios
 
 But those betterness rules don't necessarily feel right when it comes to static extension methods:
-```
+```csharp
 int.M2();
 public static class E1
 {
@@ -377,7 +374,7 @@ Note: I don't think there's a scenario for removing lower priority members based
 
 The following example illustrates the relevance of step 3 above, when we have a method and a property, but one has a static/instance mismatch.
 
-```
+```csharp
 object.M();
 
 static class E1
@@ -400,7 +397,7 @@ static class E2
 ### Prefer more specific
 
 The following example illustrates the relevance of step 3 above, when we have a method and a property, but one is more specific.
-```
+```csharp
 string.M();
 
 static class E1
@@ -416,6 +413,29 @@ static class E2
     extension(object)
     {
         public static System.Action M => throw null;
+    }
+}
+```
+
+
+## Function types
+
+Note: the determination of function types starts with the applicable candidates, with candidates pruned (by steps 1 through 4 above).  
+I will bring a more expanded proposal, but I assume that we'll want to also apply the other pruning steps that make sense, such as removing static/instance mismatches.
+
+```csharp
+var x = C.M;
+
+public class C { }
+public static class E1
+{
+    extension(object)
+    {
+        public static void M() { }
+    }
+    extension(object o)
+    {
+        public void M(int i) { }
     }
 }
 ```
