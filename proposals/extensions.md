@@ -178,11 +178,9 @@ public static class NullableExtensions
 }
 ```
 
-### Compatible extension methods
+### Compatibility with classic extension methods
 
-By default, extension members are lowered in such a way that the generated artifacts are not visible at the language level.
-However, if the receiver specification is in the form of a parameter and specifies the `this` modifier, 
-then any extension instance methods in that extension declaration will generate visible classic extension methods.
+Instance extension methods are lowered in such a way that the generated artifacts match those produced by classic extension methods.
 
 Specifically the generated static method has the attributes, modifiers and name of the declared extension method, 
 as well as type parameter list, parameter list and constraints list concatenated from the extension declaration and the method declaration in that order:
@@ -190,7 +188,7 @@ as well as type parameter list, parameter list and constraints list concatenated
 ``` c#
 public static class Enumerable
 {
-    extension<TSource>(this IEnumerable<TSource> source) // Generate compatible extension methods
+    extension<TSource>(IEnumerable<TSource> source) // Generate compatible extension methods
     {
         public IEnumerable<TSource> Where(Func<TSource, bool> predicate) { ... }
         public IEnumerable<TSource> Select<TResult>(Func<TSource, TResult> selector)  { ... }
@@ -203,13 +201,13 @@ Generates:
 ``` c#
 public static class Enumerable
 {
+    [Extension]
     public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) { ... }
+
+    [Extension]
     public static IEnumerable<TSource> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)  { ... }
 }
 ```
-
-This does not change anything else about how the declared extension method works. 
-However, adding the `this` modifier may lead to a binary break for consumers because the generated artifact may change.
 
 ### Operators
 
@@ -444,6 +442,7 @@ static class CollectionExtensions
 - How to resolve properties? (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
 - Scoping and shadowing rules for extension parameter and type parameters?
 - How should ORPA apply to new extension methods?
+- How to retcon the classic extension resolution rules?
 
 ### Accessibility
 
