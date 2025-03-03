@@ -32,6 +32,8 @@ Note: this change was made in the new extensions feature branch.
 
 # Aligning with implementation of classic extension methods
 
+Decision: we're resolving new instance extension members exactly like classic extension methods.
+
 The above should bring the behavior of new extensions very close to classic extensions.  
 But there is still a small gap with the current implementation of classic extension methods, 
 when arguments beyond the receiver are required for type inference of the type parameters
@@ -98,6 +100,8 @@ Note: This approach solve the mixing question.
 
 # Overload resolution for extension methods
 
+Decision: we're going for maximum compatibility between new instance extension methods and classic extension methods.
+
 We previously concluded that we should prefer more specific extensions members.  
 But classic extension methods don't follow that.
 Instead they use betterness rules ([better function member](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member)).
@@ -160,13 +164,14 @@ Gather candidates (no applicability involved)
 
 Member type inference (including the type parameters on the extension declaration)  
 Member applicability (including the extension parameter)  
-Remove less specific applicable candidates (doesn't apply)
-Remove static-instance mismatches (apply to new extension methods)  
-RemoveConstraintViolations (TBD)  
-Remove lower priority members (ORPA, apply to new extension methods)  
-RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
-RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
-Remove worse members (better function member) (including the receiver parameter)  
+Remove more candidates individually:
+- Remove less specific applicable candidates (doesn't apply)
+- Remove static-instance mismatches (apply to new extension methods)  
+- RemoveConstraintViolations (TBD)  
+- Remove lower priority members (ORPA, apply to new extension methods)  
+- RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
+- RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
+Figure out best candidate as a group: Remove worse members (better function member) (including the receiver parameter)  
 
 # Lookup for properties
 
@@ -186,6 +191,27 @@ public static class E
     extension(string s) // more specific parameter type
     {
         public int P => 0;
+    }
+}
+```
+
+What about the situation where we have both an applicable method and an applicable proeprty, but one is more specific?
+```
+string.M();
+
+static class E1
+{
+    extension(string)
+    {
+        public static string M() => throw null;
+    }
+}
+
+static class E2
+{
+    extension(object)
+    {
+        public static System.Action M => throw null;
     }
 }
 ```
