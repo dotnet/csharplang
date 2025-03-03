@@ -273,8 +273,9 @@ See [Glossary](#glossary) for definitions of new terms.
 The *backing field* has the same type as the property. However, its nullable annotation may differ from the property. To determine this nullable annotation, we introduce the concept of *null-resilience*. *Null-resilience* intuitively means that the property's `get` accessor preserves null-safety even when the field contains the `default` value for its type.
 
 A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its `get` accessor.
-- For the purposes of this analysis, `field` is temporarily assumed to have *annotated* nullability, e.g. `string?`. This causes `field` to have *maybe-null* or *maybe-default* initial state in the `get` accessor, depending on its type.
-- Then, if nullable analysis of the getter yields no nullable warnings, the property is *null-resilient*. Otherwise, it is not *null-resilient*.
+- Two separate nullable analysis passes are performed: one where the field is assumed to have *annotated* nullability, and one where the field is assumed to have *not-annotated* nullability. The nullable diagnostics resulting from each analysis are recorded.
+- If there is a nullable diagnostic in the pass where the field was *annotated*, which was not present in the pass where the field is *not-annotated*, then the property is not null-resilient. Otherwise, it is null-resilient.
+    - The implementation can optimize by first performing the pass where the field was *annotated*. If this results in no diagnostics at all, then the property is null-resilient and the *not-annotated* pass can be skipped.
 - If the property does not have a get accessor, it is (vacuously) null-resilient.
 - If the get accessor is auto-implemented, the property is not null-resilient.
 
@@ -282,8 +283,8 @@ The nullability of the backing field is determined as follows:
 - If the field has nullability attributes such as `[field: MaybeNull]`, `AllowNull`, `NotNull`, or `DisallowNull`, then the field's nullable annotation is the same as the property's nullable annotation.
     - This is because when the user starts applying nullability attributes to the field, we no longer want to infer anything, we just want the nullability to be *what the user said*.
 - If the containing property has ***oblivious*** or ***annotated*** nullability, then the backing field has the same nullability as the property.
-- If the containing property has *not-annotated* nullability (e.g. `string` or `T`) or has the `[NotNull]` attribute, and the property is ***null-resilient***, then the backing field has ***annotated*** nullability.
-- If the containing property has *not-annotated* nullability (e.g. `string` or `T`) or has the `[NotNull]` attribute, and the property is ***not null-resilient***, then the backing field has ***not-annotated*** nullability.
+- If the containing property has *not-annotated* nullability (e.g. `string` or `T`), and the property is ***null-resilient***, then the backing field has ***annotated*** nullability.
+- If the containing property has *not-annotated* nullability (e.g. `string` or `T`), and the property is ***not null-resilient***, then the backing field has ***not-annotated*** nullability.
 
 #### Constructor analysis
 
