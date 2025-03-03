@@ -167,12 +167,11 @@ Pruning more candidates:
 4. Remove less specific or hidden applicable candidates (doesn't apply, see RemoveLessDerivedMembers and RemoveHiddenMembers)
 5. Remove static-instance mismatches (apply)  
 6. Remove candidates with constraints violations (apply)  
-7. RemoveDelegateConversionsWithWrongReturnType (doesn't apply to the extension parameter)
-8. RemoveCallingConventionMismatches (for function pointer resolution, doesn't apply to the extension parameter)  
-9. RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
 Figure out best candidate: 
 1. Remove lower priority/ORPA members (apply)  
 2. Remove worse members (better function member) (including the receiver parameter)  
+
+Note: the other pruning steps in overload resolution not sdon't apply to extension receiver parameter scenarios (RemoveDelegateConversionsWithWrongReturnType, RemoveCallingConventionMismatches, RemoveMethodsNotDeclaredStatic)
 
 # Resolution for static methods
 
@@ -396,7 +395,9 @@ static class E2
 
 ### Prefer more specific
 
-The following example illustrates the relevance of step 3 above, when we have a method and a property, but one is more specific.
+The following example illustrates the relevance of step 3 above, when we have a method and a property, but one is more specific.  
+The problem is that we've decided not to apply the "more specific" pruning step to extension methods, for compatibility with classic extension methods.  
+
 ```csharp
 string.M();
 
