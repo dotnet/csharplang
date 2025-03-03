@@ -32,6 +32,8 @@ Note: this change was made in the new extensions feature branch.
 
 # Aligning with implementation of classic extension methods
 
+Decision: we're resolving new instance extension members exactly like classic extension methods.
+
 The above should bring the behavior of new extensions very close to classic extensions.  
 But there is still a small gap with the current implementation of classic extension methods, 
 when arguments beyond the receiver are required for type inference of the type parameters
@@ -98,6 +100,8 @@ Note: This approach solve the mixing question.
 
 # Overload resolution for extension methods
 
+Decision: we're going for maximum compatibility between new instance extension methods and classic extension methods.
+
 We previously concluded that we should prefer more specific extensions members.  
 But classic extension methods don't follow that.
 Instead they use betterness rules ([better function member](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/expressions.md#12643-better-function-member)).
@@ -153,47 +157,43 @@ Options for methods:
 1. maximum compatibility with classic extension methods
 2. maximum alignment with instance methods
 
-## Regular overload resolution
-
-Gather candidates
-
-Member type inference  
-Member applicability  
-Remove less specific applicable candidates  
-Remove static-instance mismatches  
-RemoveConstraintViolations  
-RemoveDelegateConversionsWithWrongReturnType  
-Remove less priority members (ORPA)  
-RemoveCallingConventionMismatches (for function pointer resolution)  
-RemoveMethodsNotDeclaredStatic (for function pointer resolution)  
-Remove worse members (better function member)  
-
-Note: as a result we don't prefer more specific classic extension methods
-
 ## Extension methods proposal
 
-Gather candidates
-- receiver type inference
-- receiver applicability
-- if method group, then proceed to overload resolution below
+Gather candidates (no applicability involved)
+Pruning more candidates:
+1. by type inference (including the type parameters on the extension declaration)  
+2. by applicability to arguments (including the extension parameter)  
+3. Remove based on inaccessible type arguments (apply, see RemoveInaccessibleTypeArguments)
+4. Remove less specific or hidden applicable candidates (doesn't apply, see RemoveLessDerivedMembers and RemoveHiddenMembers)
+5. Remove static-instance mismatches (apply)  
+6. Remove candidates with constraints violations (apply)  
+Figure out best candidate: 
+1. Remove lower priority/ORPA members (apply)  
+2. Remove worse members (better function member) (including the receiver parameter)  
 
-Member type inference  
-Member applicability  
-Remove less specific applicable candidates (we can choose what to do about new extension methods)  
-Remove static-instance mismatches (apply to new extension methods)  
-RemoveConstraintViolations (TBD)  
-Remove lower priority members (ORPA, apply to new extension methods)  
-RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
-RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
-Remove worse members (better function member) (I'm assuming we include the receiver parameter)  
+Note: the other pruning steps in overload resolution not sdon't apply to extension receiver parameter scenarios (RemoveDelegateConversionsWithWrongReturnType, RemoveCallingConventionMismatches, RemoveMethodsNotDeclaredStatic)
 
-# Lookup for properties
+# Resolution for static methods
 
-We have similar questions for extension properties.
-We'd previously agree that we want to prefer more specific members.
-But should they benfit from some additional pruning/preferences (like betterness)?
+Do we want the same semantics for static extension methods (ie. we pretend like we have a receiver/value of the given type) or do we want some new semantics?  
+I assume that we want the old semantics.  
+This also makes it clear what to expect in a "Color Color" scenario, where we don't know whether the receiver is an instance or static.
 
-```
+# Resolution for properties
+
+We have similar questions for extension properties.  
+We're going to cover three questions:
+- what kind of pruning should be applied?
+- what kind of betterness should be applied?
+- how should properties be resolved together with methods?
+
+## Pruning candidates
+
+### Prefer more specific
+
+Yes, we'd previously agree that we want to prefer more specific members.
+
+```csharp
 _ = "".P; // should pick E(string).P
 
 public static class E
@@ -209,9 +209,51 @@ public static class E
 }
 ```
 
-## Variance
+### Static/instance mismatch
 
+If we try to follow the behavior of regular instance or static methods, then the resolution of extension properties should prune based on static/instance mismatch:
+```csharp
+_ = 42.P;
+
+static class E1
+{
+    extension(int i)
+    {
+        public int P => 0;
+    }
+}
+static class E2
+{
+    extension(int)
+    {
+        public static int P => throw null;
+    }
+}
 ```
+```csharp
+_ = int.P;
+
+static class E1
+{
+    extension(int i)
+    {
+        public int P => throw null;
+    }
+}
+static class E2
+{
+    extension(int)
+    {
+        public static int P => 0;
+    }
+}
+```
+
+## Betterness
+
+### Better conversion from expression
+
+```csharp
 IEnumerable<C2> iEnumerableOfC2 = null;
 _ = iEnumerableOfC2.P; // should we prefer IEnumerable<C1> because it is a better conversion? (parameter-like behavior)
 
@@ -229,7 +271,7 @@ public static class E
 public class C1 { }
 public class C2 : C1 { }
 ```
-```
+```csharp
 _ = IEnumerable<C2>.P; // should we prefer IEnumerable<C1> because it is a better conversion? (parameter-like behavior)
 
 public static class E
@@ -249,50 +291,10 @@ public static class E
 Should both extensions be applicable both when the receiver is an instance or a type?  
 If yes, should we have some preference between those two?  
 
-## Static/instance mismatch
-
-If we try to follow the behavior of regular instance or static mehotds, then the resolution of extension properties should prune based on static/instance mismatch:
-```
-_ = 42.P;
-
-static class E1
-{
-    extension(int i)
-    {
-        public int P => 0;
-    }
-}
-static class E2
-{
-    extension(int)
-    {
-        public static int P => throw null;
-    }
-}
-```
-```
-_ = int.P;
-
-static class E1
-{
-    extension(int i)
-    {
-        public int P => throw null;
-    }
-}
-static class E2
-{
-    extension(int)
-    {
-        public static int P => 0;
-    }
-}
-```
-
-## Other possible betterness rules
+### Prefer non-generic over generic
 
 If we follow the parameter-like behavior of classic extension methods, then we'd probably want more better member rules:
-```
+```csharp
 _ = 42.P;
 
 public static class E
@@ -308,7 +310,9 @@ public static class E
 }
 ```
 
-```
+### Prefer by-value parameter
+
+```csharp
 _ = 42.P;
 
 public static class E
@@ -324,8 +328,10 @@ public static class E
 }
 ```
 
+### Issue with betterness in static scenarios
+
 But those betterness rules don't necessarily feel right when it comes to static extension methods:
-```
+```csharp
 int.M2();
 public static class E1
 {
@@ -344,17 +350,93 @@ public static class E2
 }
 ```
 
-## Extension properties proposal
+## Resolving properties and methods together
 
-Gather candidates
-- receiver type inference
-- receiver applicability
-- if property, then prune candidates with the following rules:  
-Remove less specific applicable candidates (LDM expressed desire)  
-Remove static-instance mismatches (seems desirable, open issue above)  
-RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
-RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
-Remove worse members? (unsure, open issues above with variance and betterness)  
+Following last LDM's decision to use old semantics for new extension methods, we have to find a new way to resolve properties and methods together.  
+
+Previously, we would only gather candidates from compatible extensions, then we would decide the winning member kind and proceed with resolving (either overload resolution for methods, or picking the single property).  
+Now that we're gathering all candidates (without regards to compatibility of extensions), we're thinking to delay the determination of the member kind.
+
+The process that we've brainstormed:
+1. gather candidates
+2. prune candidates by type inference and applicability to arguments
+3. prune candidates by other rules (static/instance mismatch, prefer more specific, ...)
+4. determine member kind
+
+If all the remaining candidates are methods, the member kind is method and we resolve to the best method.  
+If the only remaining candidate is a property, the member kind is property and we resolve to that property.  
+Otherwise we have an ambiguity.  
 
 Note: I don't think there's a scenario for removing lower priority members based on ORPA here. 
 
+### Remove static/instance mismatches
+
+The following example illustrates the relevance of step 3 above, when we have a method and a property, but one has a static/instance mismatch.
+
+```csharp
+object.M();
+
+static class E1
+{
+    extension(object)
+    {
+        public static string M() => throw null;
+    }
+}
+
+static class E2
+{
+    extension(object o)
+    {
+        public string M() => throw null;
+    }
+}
+```
+
+### Prefer more specific
+
+The following example illustrates the relevance of step 3 above, when we have a method and a property, but one is more specific.  
+The problem is that we've decided not to apply the "more specific" pruning step to extension methods, for compatibility with classic extension methods.  
+
+```csharp
+string.M();
+
+static class E1
+{
+    extension(string)
+    {
+        public static string M() => throw null;
+    }
+}
+
+static class E2
+{
+    extension(object)
+    {
+        public static System.Action M => throw null;
+    }
+}
+```
+
+
+## Function types
+
+Note: the determination of function types starts with the applicable candidates, with candidates pruned, but some of the pruning rules weren't applicable (static/instance mismatch).  
+I assume we'll want all possible applicable pruning steps to apply:
+
+```csharp
+var x = C.M; // binds to static method
+
+public class C { }
+public static class E1
+{
+    extension(object)
+    {
+        public static void M() { }
+    }
+    extension(object o)
+    {
+        public void M(int i) { }
+    }
+}
+```
