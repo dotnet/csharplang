@@ -164,7 +164,7 @@ Pruning more candidates:
 1. by type inference (including the type parameters on the extension declaration)  
 2. by applicability to arguments (including the extension parameter)  
 3. Remove based on inaccessible type arguments (apply, see RemoveInaccessibleTypeArguments)
-4. Remove less specific or hidden applicable candidates (doesn't apply, RemoveLessDerivedMembers and RemoveHiddenMembers)
+4. Remove less specific or hidden applicable candidates (doesn't apply, see RemoveLessDerivedMembers and RemoveHiddenMembers)
 5. Remove static-instance mismatches (apply)  
 6. Remove candidates with constraints violations (apply)  
 7. RemoveDelegateConversionsWithWrongReturnType (TBD)
@@ -361,7 +361,7 @@ Now that we're gathering all candidates (without regards to compatibility of ext
 The process that we've brainstormed:
 1. gather candidates
 2. prune candidates by type inference and applicability to arguments
-3. prune candidates by other rules (statice/instance mismatch, prefer more specific, ...)
+3. prune candidates by other rules (static/instance mismatch, prefer more specific, ...)
 4. determine member kind
 
 If all the remaining candidates are methods, the member kind is method and we resolve to the best method.  
@@ -420,11 +420,11 @@ static class E2
 
 ## Function types
 
-Note: the determination of function types starts with the applicable candidates, with candidates pruned (by steps 1 through 4 above).  
-I will bring a more expanded proposal, but I assume that we'll want to also apply the other pruning steps that make sense, such as removing static/instance mismatches.
+Note: the determination of function types starts with the applicable candidates, with candidates pruned, but some of the pruning rules weren't applicable (static/instance mismatch).  
+I assume we'll want all possible applicable pruning steps to apply:
 
 ```csharp
-var x = C.M;
+var x = C.M; // binds to static method
 
 public class C { }
 public static class E1
