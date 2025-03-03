@@ -167,8 +167,8 @@ Pruning more candidates:
 4. Remove less specific or hidden applicable candidates (doesn't apply, see RemoveLessDerivedMembers and RemoveHiddenMembers)
 5. Remove static-instance mismatches (apply)  
 6. Remove candidates with constraints violations (apply)  
-7. RemoveDelegateConversionsWithWrongReturnType (TBD)
-8. RemoveCallingConventionMismatches (for function pointer resolution, TBD)  
+7. RemoveDelegateConversionsWithWrongReturnType (doesn't apply to the extension parameter)
+8. RemoveCallingConventionMismatches (for function pointer resolution, doesn't apply to the extension parameter)  
 9. RemoveMethodsNotDeclaredStatic (for function pointer resolution, TBD)  
 Figure out best candidate: 
 1. Remove lower priority/ORPA members (apply)  
@@ -252,7 +252,7 @@ static class E2
 
 ## Betterness
 
-### Variance
+### Better conversion from expression
 
 ```csharp
 IEnumerable<C2> iEnumerableOfC2 = null;
