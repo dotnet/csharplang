@@ -326,6 +326,7 @@ static class E2
 ```
 
 Static extension methods will be resolved like instance extension methods (we will consider an extra argument of the receiver type).  
+Extension properties will be resolved like extension methods, with a single parameter (the receiver parameter) and a single argument (the actual receiver value).  
 
 ## Lowering
 
@@ -378,8 +379,7 @@ as static implementation methods in the top-level static class.
 - It if implements an instance method, it has a prepended parameter to the signature of the original method. 
   This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension declaration.
 - The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension declaration.  
-- If the original member is an instance method, the implementation method is marked with an `[Extension]` attribute.
-- If the original member is static, the return type of the implementation method is marked with `modopt` to the parameter type of the containing extension declaration, unless the parameter type is a type parameter.
+- If the original member is an instance method, the implementation method and the containing static class are marked with an `[Extension]` attribute.
 
 For example:
 ```
@@ -401,6 +401,7 @@ static class IEnumerableExtensions
 ```
 is emitted as
 ```
+[Extension]
 static class IEnumerableExtensions
 {
     public class <>E__1<T>
@@ -421,8 +422,8 @@ static class IEnumerableExtensions
     public static void Method<T>(IEnumerable<T> source) { ... }
 
     // Implementation for Property
-    internal static modopt(IEnumerable<T>) int get_Property<T>() { ... }
-    internal static modopt(IEnumerable<T>) void set_Property<T>(int value) { ... }
+    internal static int get_Property<T>() { ... }
+    internal static void set_Property<T>(int value) { ... }
 
     // Implementation for SumAsync
     [Extension]
@@ -436,7 +437,7 @@ Whenever extension members are used in source, we will emit those as reference t
 For example: an invocation of `enumerableOfInt.Method()` would be emitted as a static call 
 to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.  
 
-Note: the metadata representation supports static extension methods that differ in receiver type and return type.
+Note: the metadata representation supports static extension methods that differ in return type.
 For example:
 ```csharp
 static class CollectionExtensions
@@ -451,6 +452,20 @@ static class CollectionExtensions
     }
 }
 ```
+But if the return types match too, the signatures will conflict.
+```csharp
+static class CollectionExtensions
+{
+    extension<T>(List<T>)
+    {
+        public static int[] Create() { ... }
+    }
+    extension<T>(HashSet<T>)
+    {
+        public static int[] Create() { ... }
+    }
+}
+```
 
 ## Open issues
 
@@ -461,6 +476,12 @@ static class CollectionExtensions
 - Should skeleton methods throw `NotSupportedException` or some other standard exception (right now we do `throw null;`)?
 - Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
 - Should the extension marker or speakable implementation methods be marked with special name?
+- Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?
+
+#### static factory scenario
+
+We talked about emitting a modopt on return type for implementation methods corresponding to static extension members.
+But that has some limitations, as roslyn only allows named type symbols (so no type parameters or array types).
 
 ### Lookup
 
