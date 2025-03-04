@@ -123,18 +123,6 @@ List<string, int> nameToAge2 = ["mads": 21, .. existingDict]; // as would
 List<string, int> nameToAge3 = ["mads": 21, .. existingListOfKVPS];
 ```
 
-## Dictionary types
-
-A type is considered a *dictionary type* if the following hold:
-* The *element type* is `KeyValuePair<TKey, TValue>`.
-* The *type* has an instance *indexer*, with a `get` accessor where:
-  * The indexer has a single parameter with an identity conversion from the parameter type to `TKey`.\*
-  * There is an identity conversion from the indexer type to `TValue`.\*
-  * The `get` accessor returns by value.
-  * The `get` accessor is as accessible as the declaring type.
-
-\* *Identity conversions are used rather than exact matches to allow type differences in the signature that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
-
 ## Comparer support
 
 A dictionary expression can also provide a custom *comparer* to control its behavior just by including such a value as the first `expression_element` in the expression. For example:
@@ -179,19 +167,40 @@ Dictionary<string, int> caseInsensitiveMap = [comparer : StringComparer.CaseInse
 
 ## Conversions
 
-*Collection expression conversions* are updated to include conversions to *dictionary types*.
+[*Collection expression conversions*](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-12.0/collection-expressions.md#conversions) are **updated** to include conversions to *dictionary types*.
 
-An implicit *collection expression conversion* exists from a *collection expression* to the following *dictionary types*:
-* A *dictionary type* with an appropriate *[create method](#create-methods)*.
+An implicit *collection expression conversion* exists from a collection expression to the following types:
+* A single dimensional *array type* `T[]`, in which case the *element type* is `T`
+* A *span type*:
+  * `System.Span<T>`
+  * `System.ReadOnlySpan<T>`  
+  In which case the *element type* is `T`
+* A *type* with an appropriate *[create method](#create-methods)*, in which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/statements.md#1295-the-foreach-statement) determined from a `GetEnumerator` instance method or enumerable interface, not from an extension method
+* A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
+  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
+  * **One of the following holds:**
+    * **The [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type* is `KeyValuePair<TKey, TValue>`, and the *type* has an instance *indexer*, with a `get` accessor where:**
+      * **The indexer has a single parameter.**
+      * **There is an identity conversion from the parameter type to `TKey` and an identity conversion from the indexer type to `TValue`.** *Identity conversions rather than exact matches allow type differences that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
+      * **The `get` accessor returns by value.**
+      * **The `get` and `set` accessors are as accessible as the declaring type.**  
+    * If the collection expression has any elements, the *type* has an instance or extension method `Add` where:
+      * The method can be invoked with a single value argument.
+      * If the method is generic, the type arguments can be inferred from the collection and argument.
+      * The method is accessible at the location of the collection expression.
 
-* A *struct* or *class* *dictionary type* that implements `System.Collections.IEnumerable` where:
-  * The *element type* is determined from a `GetEnumerator` instance method or enumerable interface.
-  * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments (*or* a constructor with a single [*comparer*](#Comparer-support) parameter), and the constructor is accessible at the location of the collection expression.
-  * The *indexer* has a `set` accessor that is as accessible as the declaring type.
-
+    In which case the *element type* is the [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type*.
 * An *interface type*:
-  * `System.Collections.Generic.IDictionary<TKey, TValue>`
-  * `System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`
+  * `System.Collections.Generic.IEnumerable<T>`
+  * `System.Collections.Generic.IReadOnlyCollection<T>`
+  * `System.Collections.Generic.IReadOnlyList<T>`
+  * `System.Collections.Generic.ICollection<T>`
+  * `System.Collections.Generic.IList<T>`  
+    In which case the *element type* is `T`
+* **An *interface type*:**
+  * **`System.Collections.Generic.IDictionary<TKey, TValue>`**
+  * **`System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>`**  
+  **In which case the *element type* is `KeyValuePair<TKey, TValue>`**
 
 *Collection expression conversions* require implicit conversions for each element.
 The element conversion rules are updated as follows.
@@ -201,6 +210,8 @@ The element conversion rules are updated as follows.
 > * If `Eᵢ` is a *spread element* `..Sᵢ`, there is an implicit conversion from the *iteration type* of `Sᵢ` to `T`.
 > * **If `Eᵢ` is a *key-value pair element* `Kᵢ:Vᵢ` and `T` is a type `KeyValuePair<K, V>`, there is an implicit conversion from `Kᵢ` to `K` and an implicit conversion from `Vᵢ` to `V`.**
 > * **Otherwise there is *no conversion* from the collection expression to the target type.**
+
+Collection arguments are *not* considered when determining *collection expression* conversions.
 
 ### Key-value pair conversions
 
