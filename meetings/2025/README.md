@@ -5,6 +5,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ## Schedule ASAP
 
 - Support optional and named arguments in Expression trees [#9190](https://github.com/dotnet/csharplang/discussions/9190) (cston, roji)
+- [Ignored directives](https://github.com/dotnet/csharplang/pull/9192) (jjonescz, DamianEdwards)
 
 ## Schedule when convenient
 
