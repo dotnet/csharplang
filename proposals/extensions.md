@@ -180,7 +180,7 @@ public static class NullableExtensions
 
 ### Compatibility with classic extension methods
 
-Instance extension methods are lowered in such a way that the generated artifacts match those produced by classic extension methods.
+Instance extension methods generate artifacts that match those produced by classic extension methods.
 
 Specifically the generated static method has the attributes, modifiers and name of the declared extension method, 
 as well as type parameter list, parameter list and constraints list concatenated from the extension declaration and the method declaration in that order:
@@ -274,17 +274,15 @@ public static class Enumerable
 ## Consumption
 
 When an extension member lookup is attempted, all extension declarations within static classes that are `using`-imported contribute their members as candidates,
-regardless of receiver type. Only as part of resolution are candidates with incompatible receiver types discarded.
-A full generic type inference is attempted between the type of the arguments (including the actual receiver) and any type parameters (combining those in the declared receiver type and the extension member).
-
-Similarly to classic extension methods, the emitted implementation methods can be invoked statically.  
-This allows passing all the type arguments explicitly, and allows the compiler to disambiguate between extension members with the same name and arity.  
+regardless of receiver type. Only as part of resolution are candidates with incompatible receiver types discarded.  
+A full generic type inference is attempted between the type of the arguments (including the actual receiver) and any type parameters (combining those in the extension declaration and in the extension member declaration).  
+When explicit type arguments are provided, they are used to substitute the type parameters of the extension declaration and the extension member declaration.
 
 ``` c#
 string[] strings = ...;
 
-var query = string.Select(s => s.Length); // extension invocation
-var query2 = string.Select<string, int>(s => s.Length); // ... with explicit full set of type arguments
+var query = strings.Select(s => s.Length); // extension invocation
+var query2 = strings.Select<string, int>(s => s.Length); // ... with explicit full set of type arguments
 
 var query3 = Enumerable.Select(strings, s => s.Length); // static method invocation
 var query4 = Enumerable.Where<string, int>(strings, s => s.Length); // ... with explicit full set of type arguments
@@ -294,6 +292,35 @@ public static class Enumerable
     extension<TSource>(IEnumerable<TSource> source)
     {
         public IEnumerable<TResult> Select<TResult>(Func<T, TResult> predicate) { ... }
+    }
+}
+```
+
+Similarly to classic extension methods, the emitted implementation methods can be invoked statically.  
+This allows the compiler to disambiguate between extension members with the same name and arity.  
+
+```csharp
+object.M(); // ambiguous
+E1.M();
+
+new object().M2(); // ambiguous
+E1.M2(new object());
+
+static class E1
+{
+    extension(object)
+    {
+        public static void M() { }
+        public void M2() { }
+    }
+}
+
+static class E2
+{
+    extension(object)
+    {
+        public static void M() { }
+        public void M2() { }
     }
 }
 ```
@@ -352,7 +379,7 @@ as static implementation methods in the top-level static class.
   This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension declaration.
 - The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension declaration.  
 - If the original member is an instance method, the implementation method is marked with an `[Extension]` attribute.
-- If the original member is static, the return type of the implementation method is marked with `modopt` to the parameter type of the containing extension declaration.
+- If the original member is static, the return type of the implementation method is marked with `modopt` to the parameter type of the containing extension declaration, unless the parameter type is a type parameter.
 
 For example:
 ```
@@ -369,7 +396,7 @@ static class IEnumerableExtensions
         public async Task<int> SumAsync() { ... }
     }
 
-    public void Method2() { ... }
+    public static void Method2() { ... }
 }
 ```
 is emitted as
@@ -398,9 +425,10 @@ static class IEnumerableExtensions
     internal static modopt(IEnumerable<T>) void set_Property<T>(int value) { ... }
 
     // Implementation for SumAsync
+    [Extension]
     public static int SumAsync(IAsyncEnumerable<int> values) { ... }
 
-    public void Method2() { ... }
+    public static void Method2() { ... }
 }
 ```
 
@@ -408,8 +436,7 @@ Whenever extension members are used in source, we will emit those as reference t
 For example: an invocation of `enumerableOfInt.Method()` would be emitted as a static call 
 to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.  
 
-Note: the metadata representation supports static extension methods that differ in receiver type and return type, but
-  this will be disallowed in the language.
+Note: the metadata representation supports static extension methods that differ in receiver type and return type.
 For example:
 ```csharp
 static class CollectionExtensions
@@ -420,7 +447,7 @@ static class CollectionExtensions
     }
     extension<T>(HashSet<T>)
     {
-        public static HashSet<T> Create() { ... } // error
+        public static HashSet<T> Create() { ... }
     }
 }
 ```
@@ -433,6 +460,7 @@ static class CollectionExtensions
 
 - Should skeleton methods throw `NotSupportedException` or some other standard exception (right now we do `throw null;`)?
 - Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
+- Should the extension marker or speakable implementation methods be marked with special name?
 
 ### Lookup
 
@@ -442,7 +470,10 @@ static class CollectionExtensions
 - How to resolve properties? (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
 - Scoping and shadowing rules for extension parameter and type parameters?
 - How should ORPA apply to new extension methods?
-- How to retcon the classic extension resolution rules?
+- How to retcon the classic extension resolution rules? Do we 
+  1. update the standard for classic extension methods, and use that to also describe new extension methods,
+  2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
+  3. keep the existing language for classic extension methods, but use different language for new extension methods, and only have a known spec deviation for classic extension methods?
 
 ### Accessibility
 
