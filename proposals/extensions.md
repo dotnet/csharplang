@@ -307,12 +307,16 @@ E1.M();
 new object().M2(); // ambiguous
 E1.M2(new object());
 
+_ = _new object().P; // ambiguous
+_ = E1.get_P(new object());
+
 static class E1
 {
     extension(object)
     {
         public static void M() { }
         public void M2() { }
+        public int P => 42;
     }
 }
 
@@ -322,6 +326,7 @@ static class E2
     {
         public static void M() { }
         public void M2() { }
+        public int P => 42;
     }
 }
 ```
@@ -459,11 +464,11 @@ static class CollectionExtensions
 {
     extension<T>(List<T>)
     {
-        public static int[] Create() { ... }
+        public static T[] Create() { ... }
     }
     extension<T>(HashSet<T>)
     {
-        public static int[] Create() { ... }
+        public static T[] Create() { ... }
     }
 }
 ```
