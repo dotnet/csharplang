@@ -199,13 +199,14 @@ public static class Enumerable
 Generates:
 
 ``` c#
+[Extension]
 public static class Enumerable
 {
     [Extension]
-    public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) { ... }
+    public static IEnumerable<TSource> Where<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate) { ... }
 
     [Extension]
-    public static IEnumerable<TSource> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)  { ... }
+    public static IEnumerable<TSource> Select<TSource, TResult>(IEnumerable<TSource> source, Func<TSource, TResult> selector)  { ... }
 }
 ```
 
