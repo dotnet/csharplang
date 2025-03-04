@@ -32,7 +32,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Mon Mar 10, 2025
 
-- Extensions (Julien) (2hrs)
+- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien) (2hrs)
 
 ### Wed Mar 5, 2025
 
