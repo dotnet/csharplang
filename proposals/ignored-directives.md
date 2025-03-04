@@ -84,11 +84,24 @@ The `#!` directive will not have these limitations, it can be placed on any file
 
 Other syntax forms could be used except for shebang which shells recognize only by `#!`.
 
-We could reuse `#pragma` directive although that's originally meant for compiler options not SDK (project-wide) options.
+Reusing an existing syntax form or introducing just a single new ignored prefix
+would allow tooling to introduce new directives without needing to change the language spec.
+However, we do not anticipate needing to add many directives.
+- For `dotnet run file.cs` specifically, we aim to add only as few directives as possible,
+  and for anything more advanced, project-based programs should be used instead
+  (we don't want to have two ways to configure everything).
+- In any case, it seems good if new directives are discussed and approved by the language design team
+  since they are part of the overall C# language experience.
+
+#### Pragma
+
+We could reuse `#pragma` directive although that's originally meant for compiler options, not SDK (project-wide) options.
 
 ```cs
 #pragma package Microsoft.CodeAnalysis 4.14.0
 ```
+
+#### Single directive
 
 We could introduce only a single new directive for everything (packages, sdks, and possibly more in the future).
 For example, `#r` is already supported by C# scripting and other existing tooling.
@@ -97,6 +110,19 @@ However, the naming of the directive is less clear.
 ```cs
 #r "nuget: Microsoft.CodeAnalysis, 4.14.0"
 ```
+
+#### Sigil
+
+We could reserve one sigil prefix (e.g., `#!`/`#@`/`#$`) for any directives that should be ignored by the language.
+Note that `#!` would be interpreted as shebang by shells if it is at the first line of the file.
+
+```cs
+#!/usr/bin/dotnet run
+##package Microsoft.CodeAnalysis 4.14.0
+##anything // compiler should still error on unrecognized directives to "reserve" them for future use by the official .NET tooling
+```
+
+#### Comments
 
 We could use comments instead of introducing new directives.
 Reusing normal comments with `//#` might be confused with directives that have been commented out unless we use some other syntax like `//!` but both of these could be breaking.
