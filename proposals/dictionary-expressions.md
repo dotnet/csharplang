@@ -179,7 +179,7 @@ An implicit *collection expression conversion* exists from a collection expressi
 * A *struct* or *class type* that implements `System.Collections.IEnumerable` where:
   * The *type* has an *[applicable](https://github.com/dotnet/csharpstandard/blob/standard-v6/standard/expressions.md#11642-applicable-function-member)* constructor that can be invoked with no arguments, and the constructor is accessible at the location of the collection expression.
   * **One of the following holds:**
-    * **The [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type* is `KeyValuePair<TKey, TValue>`, and the *type* has an instance *indexer*, with a `get` accessor where:**
+    * **The [*iteration type*](https://github.com/dotnet/csharpstandard/blob/draft-v8/standard/statements.md#1395-the-foreach-statement) of the *type* is `KeyValuePair<TKey, TValue>`, and the *type* has an instance *indexer*, with `get` and `set` accessors where:**
       * **The indexer has a single parameter.**
       * **There is an identity conversion from the parameter type to `TKey` and an identity conversion from the indexer type to `TValue`.** *Identity conversions rather than exact matches allow type differences that are ignored by the runtime: `object` vs. `dynamic`; tuple element names; nullable reference types; etc.*
       * **The `get` accessor returns by value.**
