@@ -66,13 +66,11 @@ Furthermore, the compiler should report a warning if the `#!` directive is not p
 (not even a BOM marker can be in front of it), because otherwise shells won't recognize it.
 
 Compilers are also free to report errors if these directives are used in unsupported scenarios,
-e.g., Roslyn will report an error if these directives are present in
-- a file compiled as part of "project-based programs" as opposed to "file-based programs"
-  (and tooling will remove these directives when migrating file-based programs to project-based programs), or
-- a file without an entry point in case of executable projects, or
-- more than one file in case of library projects.
+e.g., Roslyn will report an error if these directives are present in a file compiled as part of "project-based programs" as opposed to "file-based programs"
+(and tooling will remove these directives when migrating file-based programs to project-based programs).
 
-The `#!` directive will not have these limitations, it can be placed on any file because it might invoke some other tool than `dotnet run`.
+The `#!` directive will not have these limitations (except the already-mentioned warning),
+it can be placed on any file because it might invoke some other tool than `dotnet run`.
 
 <!--
 ## Drawbacks
