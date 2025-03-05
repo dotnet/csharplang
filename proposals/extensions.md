@@ -496,7 +496,7 @@ But that has some limitations, as roslyn only allows named type symbols (so no t
 - Should betterness be adjusted for resolution of static extension methods?
 - How to resolve properties? (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
 - Scoping and shadowing rules for extension parameter and type parameters?
-- How should ORPA apply to new extension methods and properties?
+- How should ORPA apply to new extension methods?
 - How to retcon the classic extension resolution rules? Do we 
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
   2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
