@@ -178,11 +178,9 @@ public static class NullableExtensions
 }
 ```
 
-### Compatible extension methods
+### Compatibility with classic extension methods
 
-By default, extension members are lowered in such a way that the generated artifacts are not visible at the language level.
-However, if the receiver specification is in the form of a parameter and specifies the `this` modifier, 
-then any extension instance methods in that extension declaration will generate visible classic extension methods.
+Instance extension methods generate artifacts that match those produced by classic extension methods.
 
 Specifically the generated static method has the attributes, modifiers and name of the declared extension method, 
 as well as type parameter list, parameter list and constraints list concatenated from the extension declaration and the method declaration in that order:
@@ -190,7 +188,7 @@ as well as type parameter list, parameter list and constraints list concatenated
 ``` c#
 public static class Enumerable
 {
-    extension<TSource>(this IEnumerable<TSource> source) // Generate compatible extension methods
+    extension<TSource>(IEnumerable<TSource> source) // Generate compatible extension methods
     {
         public IEnumerable<TSource> Where(Func<TSource, bool> predicate) { ... }
         public IEnumerable<TSource> Select<TResult>(Func<TSource, TResult> selector)  { ... }
@@ -201,15 +199,16 @@ public static class Enumerable
 Generates:
 
 ``` c#
+[Extension]
 public static class Enumerable
 {
-    public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) { ... }
-    public static IEnumerable<TSource> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)  { ... }
+    [Extension]
+    public static IEnumerable<TSource> Where<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate) { ... }
+
+    [Extension]
+    public static IEnumerable<TSource> Select<TSource, TResult>(IEnumerable<TSource> source, Func<TSource, TResult> selector)  { ... }
 }
 ```
-
-This does not change anything else about how the declared extension method works. 
-However, adding the `this` modifier may lead to a binary break for consumers because the generated artifact may change.
 
 ### Operators
 
@@ -276,37 +275,64 @@ public static class Enumerable
 ## Consumption
 
 When an extension member lookup is attempted, all extension declarations within static classes that are `using`-imported contribute their members as candidates,
-regardless of receiver type. Only as part of resolution are candidates with incompatible receiver types discarded.
-A full generic type inference is attempted between the type of the actual receiver and any type parameters in the declared receiver type.
-
-The inferrability and uniqueness rules mean that the name of the enclosing static type is sufficient to disambiguate 
-between extension members on a given receiver type. 
-As a strawman, consider `E @ T` as a disambiguation syntax meaning on a given expression `E` begin member lookup for an immediately enclosing expression in type `T`. For instance:
+regardless of receiver type. Only as part of resolution are candidates with incompatible receiver types discarded.  
+A full generic type inference is attempted between the type of the arguments (including the actual receiver) and any type parameters (combining those in the extension declaration and in the extension member declaration).  
+When explicit type arguments are provided, they are used to substitute the type parameters of the extension declaration and the extension member declaration.
 
 ``` c#
 string[] strings = ...;
-var query  = (strings @ Enumerable).Where(s => s.Length > 10);
+
+var query = strings.Select(s => s.Length); // extension invocation
+var query2 = strings.Select<string, int>(s => s.Length); // ... with explicit full set of type arguments
+
+var query3 = Enumerable.Select(strings, s => s.Length); // static method invocation
+var query4 = Enumerable.Where<string, int>(strings, s => s.Length); // ... with explicit full set of type arguments
  
 public static class Enumerable
 {
-    extension<T>(IEnumerable<T>)
+    extension<TSource>(IEnumerable<TSource> source)
     {
-        public IEnumerable<T> Where(Func<T, bool> predicate) { ... }
+        public IEnumerable<TResult> Select<TResult>(Func<T, TResult> predicate) { ... }
     }
 }
 ```
 
-Means lookup `Where` in the type `Enumerable` with `strings` as its receiver.
-A type argument `string` can now be inferred for `T` from the type of `strings` using standard generic type inference.
+Similarly to classic extension methods, the emitted implementation methods can be invoked statically.  
+This allows the compiler to disambiguate between extension members with the same name and arity.  
 
-A similar approach also works for types: `T1 @ T2` means on a given type `T1`
-begin static member lookup for an immediately enclosing expression in type `T2`.
+```csharp
+object.M(); // ambiguous
+E1.M();
 
-This disambiguation approach should work not only for new extension members but also for classic extension methods.
+new object().M2(); // ambiguous
+E1.M2(new object());
 
-Note that this is not a proposal for a specific disambiguation syntax;
-it is only meant to illustrate how the inferrability and uniqueness rules enable disambiguation
-without having to explicitly specify type arguments for an extension declaration's type parameters.
+_ = _new object().P; // ambiguous
+_ = E1.get_P(new object());
+
+static class E1
+{
+    extension(object)
+    {
+        public static void M() { }
+        public void M2() { }
+        public int P => 42;
+    }
+}
+
+static class E2
+{
+    extension(object)
+    {
+        public static void M() { }
+        public void M2() { }
+        public int P => 42;
+    }
+}
+```
+
+Static extension methods will be resolved like instance extension methods (we will consider an extra argument of the receiver type).  
+Extension properties will be resolved like extension methods, with a single parameter (the receiver parameter) and a single argument (the actual receiver value).  
 
 ## Lowering
 
@@ -314,7 +340,6 @@ The lowering strategy for extension declarations is not a language level decisio
 However, beyond implementing the language semantics it must satisfy certain requirements:
 
 - The format of generated types, members and metadata should be clearly specified in all cases so that other compilers can consume and generate it.
-- The generated artifacts should be hidden from the language level not just of the new C# compiler but of any existing compiler that respects CLI rules (e.g. modreq's).
 - The generated artifacts should be stable, in the sense that reasonable later modifications should not break consumers who compiled against earlier versions.
 
 These requirements need more refinement as implementation progresses, and may need to be compromised in corner cases in order to allow for a reasonable implementation approach.
@@ -353,14 +378,14 @@ Note: we may choose to only emit one extension skeleton type in metadata when du
 
 The method bodies for method/property/indexer declarations in an extension declaration in source are emitted 
 as static implementation methods in the top-level static class.  
-- An implementation method is named by prepending `<Extension>` for instance case or `<StaticExtension>` for static case to the name of the original method.  
-  For example: `set_Property` => `<Extension>set_Property`.
+- An implementation method has the same name as the original method.  
 - It has type parameters derived from the extension declaration prepended to the type parameters of the original method (including attributes).  
 - It has the same accessibility and attributes as the original method.  
 - If it implements a static method, it has the same parameters and return type. 
 - It if implements an instance method, it has a prepended parameter to the signature of the original method. 
   This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension declaration.
 - The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension declaration.  
+- If the original member is an instance method, the implementation method and the containing static class are marked with an `[Extension]` attribute.
 
 For example:
 ```
@@ -377,11 +402,12 @@ static class IEnumerableExtensions
         public async Task<int> SumAsync() { ... }
     }
 
-    public void Method() { ... }
+    public static void Method2() { ... }
 }
 ```
 is emitted as
 ```
+[Extension]
 static class IEnumerableExtensions
 {
     public class <>E__1<T>
@@ -398,23 +424,27 @@ static class IEnumerableExtensions
     }
 
     // Implementation for Method
-    public static void <Extension>Method<T>(IEnumerable<T> source) { ... }
+    [Extension]
+    public static void Method<T>(IEnumerable<T> source) { ... }
 
     // Implementation for Property
-    internal static int <StaticExtension>get_Property<T>() { ... }
-    internal static void <StaticExtension>set_Property<T>(int value) { ... }
+    internal static int get_Property<T>() { ... }
+    internal static void set_Property<T>(int value) { ... }
 
     // Implementation for SumAsync
-    public static int <Extension>SumAsync(IAsyncEnumerable<int> values) { ... }
+    [Extension]
+    public static int SumAsync(IAsyncEnumerable<int> values) { ... }
+
+    public static void Method2() { ... }
 }
 ```
 
 Whenever extension members are used in source, we will emit those as reference to implementation methods.  
 For example: an invocation of `enumerableOfInt.Method()` would be emitted as a static call 
-to `IEnumerableExtensions.<Extension>Method<int>(enumerableOfInt)`.  
+to `IEnumerableExtensions.Method<int>(enumerableOfInt)`.  
 
-Note: multiple extension declarations defining static members with the same signature cannot be represented in metadata.  
-However, differences in return types can be represented, allowing for factory methods extending different types. For example:
+Note: the metadata representation supports static extension methods that differ in return type.
+For example:
 ```csharp
 static class CollectionExtensions
 {
@@ -428,27 +458,49 @@ static class CollectionExtensions
     }
 }
 ```
+But if the return types match too, the signatures will conflict.
+```csharp
+static class CollectionExtensions
+{
+    extension<T>(List<T>)
+    {
+        public static T[] Create() { ... }
+    }
+    extension<T>(HashSet<T>)
+    {
+        public static T[] Create() { ... }
+    }
+}
+```
 
 ## Open issues
 
+- Confirm `extension` vs. `extensions` as the keyword
+
 ### Metadata
 
-- Should we emit all implementation methods with speakable names instead, as a disambiguation strategy and also to allow
-  usage from other languages? We could add an attribute to handle compile-time conflicts in factory scenario (`[ExtensionName("CreateList")]`).
-- The metadata format currently doesn't include any modreqs to block other compilers. But the spec does mention we
-  would block those scenarios. Let's either remove this requirement or update the metadata format.  
-- We should follow-up on "factory scenario" where multiple extension declarations have static factory methods 
-  with same parameter types but different return types.
-- Should the extension marker or unspeakable implementation methods be marked with special name?
 - Should skeleton methods throw `NotSupportedException` or some other standard exception (right now we do `throw null;`)?
 - Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
+- Should the extension marker or speakable implementation methods be marked with special name?
+- Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?
+
+#### static factory scenario
+
+We talked about emitting a modopt on return type for implementation methods corresponding to static extension members.
+But that has some limitations, as roslyn only allows named type symbols (so no type parameters or array types).
 
 ### Lookup
 
-- How to resolve invocations in static/type scenario? I assume we follow the same model as for instance methods. This will also work for Color Color scenarios.
-- How to resolve properties?
+- How to resolve instance method invocations now that we have speakable implementation names? We need to avoid ambiguity by understanding that those are the same method.
+- How to resolve static extension methods? (answer: just like instance extension methods, LDM 2025-03-03)
+- Should betterness be adjusted for resolution of static extension methods?
+- How to resolve properties? (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
 - Scoping and shadowing rules for extension parameter and type parameters?
 - How should ORPA apply to new extension methods?
+- How to retcon the classic extension resolution rules? Do we 
+  1. update the standard for classic extension methods, and use that to also describe new extension methods,
+  2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
+  3. keep the existing language for classic extension methods, but use different language for new extension methods, and only have a known spec deviation for classic extension methods?
 
 ### Accessibility
 
@@ -456,7 +508,7 @@ static class CollectionExtensions
 
 ### Extension declaration validation
 
-- Should we relax the type parameter validation (all the type parameters must appear in the type of the extension parameter) where there are only methods? This would allow porting 100% of classic extension methods.  
+- Should we relax the type parameter validation (inferrability: all the type parameters must appear in the type of the extension parameter) where there are only methods? This would allow porting 100% of classic extension methods.  
 If you have `TResult M<TResult, TSource>(this TSource source)`, you could port it as `extension<TResult, TSource>(TSource source) { TResult M() ... }`.
 - Confirm whether init-only accessors should be allowed in extensions
 - Should the only difference in receiver ref-ness be allowed `extension(int receiver) { public void M2() {} }`    `extension(ref int receiver) { public void M2() {} }`?
@@ -533,12 +585,6 @@ Allows:
 ```
 var range = new IEnumerable<int>(1, 100);
 ```
-
-### Disambiguation
-
-We still need to settle on a disambiguation syntax. Per the above it needs to be able to take a receiver expression or type, as well as the name of a static class from which to begin member lookup. However, the feature does not have to be extension-specific. There are several cases in C# where it's awkward to get to the right member of a given receiver. Casting often works, but can lead to boxing that may be too expensive or lead to mutations being lost.
-
-It would probably be unfortunate to ship extension members without a disambiguation syntax, so this has high priority.
 
 ### Shorter forms
 
