@@ -515,6 +515,25 @@ static class E
     }
 }
 ```
+- Confirm that we want betterness rules to apply even when the receiver is a type
+```csharp
+int.M();
+
+static class E1
+{
+    extension(int)
+    {
+        public static void M() { }
+    }
+}
+static class E2
+{
+    extension(in int i)
+    {
+        public static void M() => throw null;
+    }
+}
+```
 - Confirm that we don't want some betterness across all members before we determine the winning member kind:
 ```
 string s = null;
