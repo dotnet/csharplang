@@ -501,7 +501,37 @@ But that has some limitations, as roslyn only allows named type symbols (so no t
 - How to retcon the classic extension resolution rules? Do we 
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
   2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
-  3. keep the existing language for classic extension methods, but use different language for new extension methods, and only have a known spec deviation for classic extension methods?
+  3. keep the existing language for classAic extension methods, but use different language for new extension methods, and only have a known spec deviation for classic extension methods?
+- Confirm that we want to disallow explicit type arguments on a property access:
+```csharp
+string s = "ran";
+_ = s.P<object>; // error
+
+static class E
+{
+    extension<T>(T t)
+    {
+        public int P => 0;
+    }
+}
+```
+- Confirm that we don't want some betterness across all members before we determine the winning member kind:
+```
+string s = null;
+s.M(); // error
+
+static class E
+{
+    extension(string s)
+    {
+        public System.Action M => throw null;
+    }
+    extension(object o)
+    {
+        public string M() => throw null;
+    }
+}
+```
 
 ### Accessibility
 
