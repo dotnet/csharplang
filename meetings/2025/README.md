@@ -4,6 +4,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ## Schedule ASAP
 
+- [Consider collection expression arguments for convertibility?](https://github.com/dotnet/csharplang/blob/0d5e1f2c0864e65c6163e4a06405720493ba018a/proposals/collection-expression-arguments.md#should-arguments-affect-collection-expression-conversion) (cston)
 
 ## Schedule when convenient
 
@@ -28,6 +29,7 @@ All schedule items must have a public issue or checked-in proposal that can be l
 ### Wed Mar 12, 2025
 
 - Support optional and named arguments in Expression trees [#9190](https://github.com/dotnet/csharplang/discussions/9190) (cston, roji)
+- [Collection builder method parameter order](https://github.com/dotnet/csharplang/blob/0d5e1f2c0864e65c6163e4a06405720493ba018a/proposals/collection-expression-arguments.md#collection-builder-method-parameter-order) (cston) (Time-boxed to 1st hour)
 - [Ignored directives](https://github.com/dotnet/csharplang/pull/9192) (jjonescz, DamianEdwards)
 
 ### Mon Mar 10, 2025
