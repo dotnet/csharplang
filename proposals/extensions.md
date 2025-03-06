@@ -483,6 +483,7 @@ static class CollectionExtensions
 - Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
 - Should the extension marker or speakable implementation methods be marked with special name?
 - Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?
+- Confirm we should add `[Extension]` attribute to implementation getters and setters too.
 
 #### static factory scenario
 
