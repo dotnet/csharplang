@@ -2,6 +2,8 @@
 
 Champion issue: <https://github.com/dotnet/csharplang/issues/9138>
 
+Thanks to those who provided insight and input into this proposal, especially @CyrusNajmabadi!
+
 ## Summary
 
 This feature enables a type name to be omitted from static member access when it is the same as the target type.
