@@ -270,20 +270,30 @@ The following nullability rules will apply not just to properties that use the `
 
 See [Glossary](#glossary) for definitions of new terms.
 
-The *backing field* has the same type as the property. However, its nullable annotation may differ from the property. To determine this nullable annotation, we introduce the concept of *null-resilience*. *Null-resilience* intuitively means that the property's `get` accessor preserves null-safety even when the field contains the `default` value for its type.
+The *backing field* has the same type as the property. However, its nullable annotation is always *annotated*, similar to how `var` is always *annotated*. This means nullable analysis will not warn about a possible null value being written to the field, for example. However, when the property's nullable annotation is *not-annotated*, there may still be a need for constructors to initialize the field with a non-null value. We introduce the concept of *null-resilience* to determine this. *Null-resilience* intuitively means that the property's `get` accessor preserves null-safety even when the field contains the `default` value for its type.
 
-A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its `get` accessor.
-- Two separate nullable analysis passes are performed: one where the field is assumed to have *annotated* nullability, and one where the field is assumed to have *not-annotated* nullability. The nullable diagnostics resulting from each analysis are recorded.
-- If there is a nullable diagnostic in the pass where the field was *annotated*, which was not present in the pass where the field is *not-annotated*, then the property is not null-resilient. Otherwise, it is null-resilient.
-    - The implementation can optimize by first performing the pass where the field was *annotated*. If this results in no diagnostics at all, then the property is null-resilient and the *not-annotated* pass can be skipped.
+A *field-backed property* is determined to be *null-resilient* or not by performing a special nullable analysis of its `get` accessor. Note that this analysis is **only** performed when the property may be of reference type and it is *not-annotated*.
+- Two separate nullable analysis passes are performed: one with an *initialized* flow state and one with an *uninitialized* flow state. The nullable diagnostics resulting from each analysis are recorded.
+    - The *initialized* flow state is the same as the flow state given by reading the property itself from the getter. For example, *not-null* when the property is known to be reference type, and *maybe-null* for unconstrained `T`.
+    - The *uninitialized* flow state is the same as the flow state of `default(PropertyType)`. For example, *maybe-null* for known reference types, and *maybe-default* for unconstrained `T`.
+- If there is a nullable diagnostic in the *uninitialized* pass, which was not present in the *initialized* pass, then the property is not null-resilient. Otherwise, it is null-resilient.
+    - The implementation can optimize by first performing the *uninitialized* pass. If this results in no diagnostics at all, then the property is null-resilient and the *initialized* pass can be skipped.
 - If the property does not have a get accessor, it is (vacuously) null-resilient.
 - If the get accessor is auto-implemented, the property is not null-resilient.
 
 Null-forgiving (`!`) operators, directives like `#nullable disable` and `#pragma disable warning`, and conventional project-level settings like `<NoWarn>`, are all respected when deciding if a nullable analysis has diagnostics. [DiagnosticSuppressors](https://github.com/dotnet/roslyn/blob/a91d7700db4a8b5da626d272d371477c6975f10e/docs/analyzers/DiagnosticSuppressorDesign.md) are not respected when deciding if a nullable analysis has diagnostics.
 
+The initial flow state of a *backing field* in its associated `get` accessor is determined as follows:
+- If the associated property's nullable annotation is *annotated* or *oblivious*, then the initial flow state is the same as the initial flow state of the associated property.
+- If the associated property's nullable annotation is *not-annotated*, then:
+    - If the property is *null-resilient*, the initial flow state is the *uninitialized* flow state (e.g. maybe-null, or maybe-default for unconstrained `T`).
+    - If the property is not *null-resilient*, the initial flow state is the *initialized* flow state (e.g. not-null, or maybe-null for unconstrained `T`).
+
 The nullability of the backing field is determined as follows:
 - If the field has nullability attributes such as `[field: MaybeNull]`, `AllowNull`, `NotNull`, or `DisallowNull`, then the field's nullable annotation is the same as the property's nullable annotation.
     - This is because when the user starts applying nullability attributes to the field, we no longer want to infer anything, we just want the nullability to be *what the user said*.
+    - TODO2: this is changing to always nullable. Nullable attributes have an effect but no flipping of defaults. Perhaps they will short circuit determination of the initial flow state etc. Revise accordingly.
+        - Keep in mind that using attributes to control this will be very rare so try not to over-design it
 - If the containing property has ***oblivious*** or ***annotated*** nullability, then the backing field has the same nullability as the property.
 - If the containing property has *not-annotated* nullability (e.g. `string` or `T`), and the property is ***null-resilient***, then the backing field has ***annotated*** nullability.
 - If the containing property has *not-annotated* nullability (e.g. `string` or `T`), and the property is ***not null-resilient***, then the backing field has ***not-annotated*** nullability.
@@ -294,6 +304,7 @@ Currently, an auto property is treated very similarly to an ordinary field in [n
 
 We update the following spec language from the previous [proposed approach](nullable-constructor-analysis.md#proposed-approach) to accomplish this:
 
+TODO2: field is always nullable now. We need to use a combination of property annotation and null-resilience here.
 > At each explicit or implicit 'return' in a constructor, we give a warning for each member whose flow state is incompatible with its annotations and nullability attributes. **If the member is a field-backed property, the nullable annotation of the backing field is used for this check. Otherwise, the nullable annotation of the member itself is used.** A reasonable proxy for this is: if assigning the member to itself at the return point would produce a nullability warning, then a nullability warning will be produced at the return point.
 
 Note that this is essentially a constrained interprocedural analysis. We anticipate that in order to analyze a constructor, it will be necessary to do binding and "null-resilience" analysis on all applicable get accessors in the same type, which use the `field` contextual keyword and have *not-annotated* nullability. We speculate that this is not prohibitively expensive because getter bodies are usually not very complex, and that the "null-resilience" analysis only needs to be performed once regardless of how many constructors are in the type.
