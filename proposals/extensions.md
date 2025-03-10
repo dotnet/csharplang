@@ -347,7 +347,8 @@ These requirements need more refinement as implementation progresses, and may ne
 ### Metadata for declarations
 
 Each extension declaration is emitted as a nested private static class with a marker method and skeleton members.  
-Each skeleton member is accompanied by a top-level static implementation method with a modified signature.  
+Each skeleton member is accompanied by a top-level static implementation method with a modified signature.    
+The containing static class for an extension declaration is marked with an `[Extension]` attribute.  
 
 #### Skeletons
 
@@ -385,7 +386,7 @@ as static implementation methods in the top-level static class.
 - It if implements an instance method, it has a prepended parameter to the signature of the original method. 
   This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension declaration.
 - The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension declaration.  
-- If the original member is an instance method, the implementation method and the containing static class are marked with an `[Extension]` attribute.
+- If the original member is an instance ordinary method, the implementation method is marked with an `[Extension]` attribute.
 
 For example:
 ```
@@ -415,6 +416,7 @@ static class IEnumerableExtensions
         public static <Extension>$(IEnumerable<T> source) => throw null;
         public void Method() => throw null;
         public static int Property { get => throw null; set => throw null; }
+        public static int Property2 { get => throw null; set => throw null; }
     }
 
     public class <>E__2
@@ -430,6 +432,10 @@ static class IEnumerableExtensions
     // Implementation for Property
     internal static int get_Property<T>() { ... }
     internal static void set_Property<T>(int value) { ... }
+
+    // Implementation for Property2
+    internal int get_Property2<T>() { ... }
+    internal void set_Property2<T>(int value) { ... }
 
     // Implementation for SumAsync
     [Extension]
