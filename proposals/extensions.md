@@ -483,6 +483,7 @@ static class CollectionExtensions
 - Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
 - Should the extension marker or speakable implementation methods be marked with special name?
 - Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?
+- Confirm we should add `[Extension]` attribute to implementation getters and setters too.
 
 #### static factory scenario
 
@@ -501,6 +502,55 @@ But that has some limitations, as roslyn only allows named type symbols (so no t
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
   2. keep the existing language for classic extension methods, use that to also describe new extension methods, but have a known spec deviation for both,
   3. keep the existing language for classic extension methods, but use different language for new extension methods, and only have a known spec deviation for classic extension methods?
+- Confirm that we want to disallow explicit type arguments on a property access:
+```csharp
+string s = "ran";
+_ = s.P<object>; // error
+
+static class E
+{
+    extension<T>(T t)
+    {
+        public int P => 0;
+    }
+}
+```
+- Confirm that we want betterness rules to apply even when the receiver is a type
+```csharp
+int.M();
+
+static class E1
+{
+    extension(int)
+    {
+        public static void M() { }
+    }
+}
+static class E2
+{
+    extension(in int i)
+    {
+        public static void M() => throw null;
+    }
+}
+```
+- Confirm that we don't want some betterness across all members before we determine the winning member kind:
+```
+string s = null;
+s.M(); // error
+
+static class E
+{
+    extension(string s)
+    {
+        public System.Action M => throw null;
+    }
+    extension(object o)
+    {
+        public string M() => throw null;
+    }
+}
+```
 
 ### Accessibility
 
