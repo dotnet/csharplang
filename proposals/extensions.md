@@ -396,6 +396,7 @@ static class IEnumerableExtensions
     {
         public void Method() { ... }
         internal static int Property { get => ...; set => ...; }
+        public int Property2 { get => ...; set => ...; }
     }
 
     extension(IAsyncEnumerable<int> values)
@@ -415,8 +416,8 @@ static class IEnumerableExtensions
     {
         public static <Extension>$(IEnumerable<T> source) => throw null;
         public void Method() => throw null;
-        public static int Property { get => throw null; set => throw null; }
-        public static int Property2 { get => throw null; set => throw null; }
+        internal static int Property { get => throw null; set => throw null; }
+        public int Property2 { get => throw null; set => throw null; }
     }
 
     public class <>E__2
@@ -434,8 +435,8 @@ static class IEnumerableExtensions
     internal static void set_Property<T>(int value) { ... }
 
     // Implementation for Property2
-    internal int get_Property2<T>() { ... }
-    internal void set_Property2<T>(int value) { ... }
+    public static int get_Property2<T>(IEnumerable<T> source) { ... }
+    public static void set_Property2<T>(IEnumerable<T> source, int value) { ... }
 
     // Implementation for SumAsync
     [Extension]
