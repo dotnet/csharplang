@@ -488,8 +488,8 @@ static class CollectionExtensions
 - Should skeleton methods throw `NotSupportedException` or some other standard exception (right now we do `throw null;`)?
 - Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
 - Should the extension marker or speakable implementation methods be marked with special name?
-- Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?
-- Confirm we should add `[Extension]` attribute to implementation getters and setters too.
+- Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside? (answer: yes, LDM 2025-03-10)
+- Confirm we should add `[Extension]` attribute to implementation getters and setters too. (answer: no, LDM 2025-03-10)
 
 #### static factory scenario
 
@@ -502,7 +502,7 @@ But that has some limitations, as roslyn only allows named type symbols (so no t
 - How to resolve static extension methods? (answer: just like instance extension methods, LDM 2025-03-03)
 - Should betterness be adjusted for resolution of static extension methods?
 - How to resolve properties? (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
-- Scoping and shadowing rules for extension parameter and type parameters?
+- Scoping and shadowing rules for extension parameter and type parameters (answer: in scope of extension block, shadowing disallowed, LDM 2025-03-10)
 - How should ORPA apply to new extension methods?
 - How to retcon the classic extension resolution rules? Do we 
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
