@@ -347,7 +347,8 @@ These requirements need more refinement as implementation progresses, and may ne
 ### Metadata for declarations
 
 Each extension declaration is emitted as a nested private static class with a marker method and skeleton members.  
-Each skeleton member is accompanied by a top-level static implementation method with a modified signature.  
+Each skeleton member is accompanied by a top-level static implementation method with a modified signature.    
+The containing static class for an extension declaration is marked with an `[Extension]` attribute.  
 
 #### Skeletons
 
@@ -385,7 +386,7 @@ as static implementation methods in the top-level static class.
 - It if implements an instance method, it has a prepended parameter to the signature of the original method. 
   This parameter's attributes, refness, type, and name are derived from the receiver parameter declared in the relevant extension declaration.
 - The parameters in implementation methods refer to type parameters owned by implementation method, instead of those of an extension declaration.  
-- If the original member is an instance method, the implementation method and the containing static class are marked with an `[Extension]` attribute.
+- If the original member is an instance ordinary method, the implementation method is marked with an `[Extension]` attribute.
 
 For example:
 ```
@@ -395,6 +396,7 @@ static class IEnumerableExtensions
     {
         public void Method() { ... }
         internal static int Property { get => ...; set => ...; }
+        public int Property2 { get => ...; set => ...; }
     }
 
     extension(IAsyncEnumerable<int> values)
@@ -414,7 +416,8 @@ static class IEnumerableExtensions
     {
         public static <Extension>$(IEnumerable<T> source) => throw null;
         public void Method() => throw null;
-        public static int Property { get => throw null; set => throw null; }
+        internal static int Property { get => throw null; set => throw null; }
+        public int Property2 { get => throw null; set => throw null; }
     }
 
     public class <>E__2
@@ -430,6 +433,10 @@ static class IEnumerableExtensions
     // Implementation for Property
     internal static int get_Property<T>() { ... }
     internal static void set_Property<T>(int value) { ... }
+
+    // Implementation for Property2
+    public static int get_Property2<T>(IEnumerable<T> source) { ... }
+    public static void set_Property2<T>(IEnumerable<T> source, int value) { ... }
 
     // Implementation for SumAsync
     [Extension]
@@ -482,8 +489,8 @@ static class CollectionExtensions
 - Should skeleton methods throw `NotSupportedException` or some other standard exception (right now we do `throw null;`)?
 - Should we accept more than one parameter in marker method in metadata (in case new versions add more info)?
 - Should the extension marker or speakable implementation methods be marked with special name?
-- Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside?
-- Confirm we should add `[Extension]` attribute to implementation getters and setters too.
+- Should we add `[Extension]` attribute on the static class even when there is no instance extension method inside? (answer: yes, LDM 2025-03-10)
+- Confirm we should add `[Extension]` attribute to implementation getters and setters too. (answer: no, LDM 2025-03-10)
 
 #### static factory scenario
 
@@ -496,7 +503,7 @@ But that has some limitations, as roslyn only allows named type symbols (so no t
 - How to resolve static extension methods? (answer: just like instance extension methods, LDM 2025-03-03)
 - Should betterness be adjusted for resolution of static extension methods?
 - How to resolve properties? (answered in broad strokes LDM 2025-03-03, but needs follow-up for betterness)
-- Scoping and shadowing rules for extension parameter and type parameters?
+- Scoping and shadowing rules for extension parameter and type parameters (answer: in scope of extension block, shadowing disallowed, LDM 2025-03-10)
 - How should ORPA apply to new extension methods?
 - How to retcon the classic extension resolution rules? Do we 
   1. update the standard for classic extension methods, and use that to also describe new extension methods,
