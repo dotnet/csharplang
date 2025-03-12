@@ -59,8 +59,8 @@ PP_IgnoredToken
 ### Restrictions
 
 Ignored directives must occur before the first token ([§6.4][tokens]) in the compilation unit, just like `#define`/`#undef` directives.
-This improves readability (all package references and other configuration is in one place), tooling performance (no need to scan long files in full),
-and simplifies the design (no need to figure out what would be the meaning of ignored directives inside `#if false`).
+This improves readability (all package references and other configuration is in one place), tooling performance (no need to scan long files in full).
+Ignored directives must also occur before any `#if` directives because the tooling might not know the full set of conditional compilation symbols while parsing ignored directives.
 
 Furthermore, the compiler should report a warning if the `#!` directive is not placed at the first line and the first character in the file
 (not even a BOM marker can be in front of it), because otherwise shells won't recognize it.
@@ -68,9 +68,7 @@ Furthermore, the compiler should report a warning if the `#!` directive is not p
 Compilers are also free to report errors if these directives are used in unsupported scenarios,
 e.g., Roslyn will report an error if these directives are present in a file compiled as part of "project-based programs" as opposed to "file-based programs"
 (and tooling will remove these directives when migrating file-based programs to project-based programs).
-
-The `#!` directive will not have these limitations (except the already-mentioned warning),
-it can be placed on any file because it might invoke some other tool than `dotnet run`.
+That error should not be reported for the `#!` directive, it can be placed on any file because it might invoke some other tool than `dotnet run`.
 
 <!--
 ## Drawbacks
@@ -111,13 +109,13 @@ However, the naming of the directive is less clear.
 
 #### Sigil
 
-We could reserve one sigil prefix (e.g., `#!`/`#@`/`#$`) for any directives that should be ignored by the language.
+We could reserve one sigil prefix (e.g., `#!`/`#@`/`#$`/`#:`) for any directives that should be ignored by the language.
 Note that `#!` would be interpreted as shebang by shells if it is at the first line of the file.
 
 ```cs
 #!/usr/bin/dotnet run
 ##package Microsoft.CodeAnalysis 4.14.0
-##anything // compiler should still error on unrecognized directives to "reserve" them for future use by the official .NET tooling
+##anything // compiler or SDK might still error on unrecognized directives to "reserve" them for future use by the official .NET tooling
 ```
 
 #### Comments
