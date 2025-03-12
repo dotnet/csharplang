@@ -76,9 +76,7 @@ That error should not be reported for the `#!` directive, it can be placed on an
 
 ## Alternatives
 
-### Other syntax forms
-
-Other syntax forms could be used except for shebang which shells recognize only by `#!`.
+### One ignored prefix
 
 Reusing an existing syntax form or introducing just a single new ignored prefix
 would allow tooling to introduce new directives without needing to change the language spec.
@@ -88,6 +86,24 @@ However, we do not anticipate needing to add many directives.
   (we don't want to have two ways to configure everything).
 - In any case, it seems good if new directives are discussed and approved by the language design team
   since they are part of the overall C# language experience.
+
+On the other hand, with one ignored prefix, we could allow file-based programs to specify any project metadata:
+
+```cs
+#!/usr/bin/dotnet run
+#:sdk      Microsoft.NET.Sdk.Web
+#:property TargetFramework/net11.0
+#:property LangVersion/preview
+#:package  System.CommandLine/2.0.0-*
+
+Console.WriteLine("Hello, World!");
+```
+
+The compiler or SDK should still error/warn on unrecognized directives to "reserve" them for future use by the official .NET tooling.
+
+### Other syntax forms
+
+Other syntax forms could be used except for shebang which shells recognize only by `#!`.
 
 #### Pragma
 
@@ -115,19 +131,6 @@ Note that `#!` would be interpreted as shebang by shells if it is at the first l
 ```cs
 #!/usr/bin/dotnet run
 ##package Microsoft.CodeAnalysis 4.14.0
-##anything // compiler or SDK might still error on unrecognized directives to "reserve" them for future use by the official .NET tooling
-```
-
-With that we could also allow file-based programs to specify any project metadata:
-
-```cs
-#!/usr/bin/dotnet run
-#:sdk      Microsoft.NET.Sdk.Web
-#:property TargetFramework/net11.0
-#:property LangVersion/preview
-#:package  System.CommandLine/2.0.0-*
-
-Console.WriteLine("Hello, World!");
 ```
 
 #### Comments
