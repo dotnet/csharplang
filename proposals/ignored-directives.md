@@ -118,6 +118,18 @@ Note that `#!` would be interpreted as shebang by shells if it is at the first l
 ##anything // compiler or SDK might still error on unrecognized directives to "reserve" them for future use by the official .NET tooling
 ```
 
+With that we could also allow file-based programs to specify any project metadata:
+
+```cs
+#!/usr/bin/dotnet run
+#:sdk      Microsoft.NET.Sdk.Web
+#:property TargetFramework/net11.0
+#:property LangVersion/preview
+#:package  System.CommandLine/2.0.0-*
+
+Console.WriteLine("Hello, World!");
+```
+
 #### Comments
 
 We could use comments instead of introducing new directives.
