@@ -3,12 +3,9 @@
 All schedule items must have a public issue or checked-in proposal that can be linked from the notes.
 
 ## Schedule ASAP
-
-- [Consider collection expression arguments for convertibility?](https://github.com/dotnet/csharplang/blob/0d5e1f2c0864e65c6163e4a06405720493ba018a/proposals/collection-expression-arguments.md#should-arguments-affect-collection-expression-conversion) (cston)
-
+ 
 ## Schedule when convenient
 
-- [Readonly setter calls on non-variables](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) jnm2
 - Triage (working set)
 
 ## Recurring topics
@@ -24,7 +21,13 @@ All schedule items must have a public issue or checked-in proposal that can be l
 
 ### Wed Mar 19, 2025
 
+- Dictionary expressions / collection arguments [open questions](https://github.com/dotnet/csharplang/pull/9158) (cston)
+- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
+
 ### Mon Mar 17, 2025
+
+- [Readonly setter calls on non-variables](https://github.com/dotnet/csharplang/blob/main/proposals/readonly-setter-calls-on-non-variables.md) (jnm2)
+- [Extension open issues](https://github.com/dotnet/csharplang/blob/main/proposals/extensions.md#open-issues) (Julien)
 
 ### Wed Mar 12, 2025
 
