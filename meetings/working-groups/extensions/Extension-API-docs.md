@@ -96,7 +96,7 @@ extension<T>(IEnumerable<T>)
 > }
 > ```
 >
-> It could save screen space to collect members by receiver declaration and remove the duplication. That would only apply on pages where multiple prototypes are shown together. Another negative is that it could conflict with the current lists in the TOC that have all overloads collected together.
+> It could save screen space to collect members by receiver declaration and remove the duplication. That would only apply on pages where multiple prototypes are shown together. Another negative is that it could conflict with the current lists in the TOC that have all overloads collected together. We should specify the URL for the docs page for a single `extension` declaration.
 
 The *receiver parameter* includes a parameter name when the receiver is an instance. The *receiver parameter* doesn't include a parameter name when the receiver is a type.
 
